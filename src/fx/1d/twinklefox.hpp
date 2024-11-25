@@ -109,13 +109,13 @@ namespace fl {
 
 FASTLED_SMART_PTR(TwinkleFox);
 
-class TwinkleFox : public FxStrip {
+class TwinkleFox : public Fx1d {
   public:
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
     TwinkleFox(uint16_t num_leds)
-        : FxStrip(num_leds), backgroundColor(CRGB::Black),
+        : Fx1d(num_leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
           autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {

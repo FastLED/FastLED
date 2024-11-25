@@ -9,9 +9,9 @@
 namespace fl {
 
 // Abstract base class for 1D effects that use a strip of LEDs.
-class FxStrip : public Fx {
+class Fx1d : public Fx {
   public:
-    FxStrip(uint16_t numLeds): Fx(numLeds), mXMap(numLeds, false) {}
+    Fx1d(uint16_t numLeds): Fx(numLeds), mXMap(numLeds, false) {}
     void setXmap(const XMap& xMap) {
       mXMap = xMap;
     }

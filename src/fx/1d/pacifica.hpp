@@ -12,9 +12,9 @@ namespace fl {
 
 FASTLED_SMART_PTR(Pacifica);
 
-class Pacifica : public FxStrip {
+class Pacifica : public Fx1d {
   public:
-    Pacifica(uint16_t num_leds) : FxStrip(num_leds) {}
+    Pacifica(uint16_t num_leds) : Fx1d(num_leds) {}
 
     void draw(DrawContext context) override;
     fl::Str fxName() const override { return "Pacifica"; }

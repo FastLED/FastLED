@@ -10,13 +10,13 @@ namespace fl {
 
 FASTLED_SMART_PTR(RedSquare);
 
-class RedSquare : public FxGrid {
+class RedSquare : public Fx2d {
   public:
     struct Math {
         template <typename T> static T min(T a, T b) { return a < b ? a : b; }
     };
 
-    RedSquare(XYMap xymap) : FxGrid(xymap) {}
+    RedSquare(XYMap xymap) : Fx2d(xymap) {}
 
     void draw(DrawContext context) override {
         uint16_t width = getWidth();

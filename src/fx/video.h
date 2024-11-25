@@ -64,8 +64,8 @@ private:
 };
 
 
-// FxStrip because the video could be non rectangular or a strip.
-class VideoFx : public FxStrip {
+// Fx1d because the video could be non rectangular or a strip.
+class VideoFx : public Fx1d {
   public:
     VideoFx(Video video);
     void draw(DrawContext context) override;

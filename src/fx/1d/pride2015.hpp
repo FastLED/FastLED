@@ -18,9 +18,9 @@ namespace fl {
 
 FASTLED_SMART_PTR(Pride2015);
 
-class Pride2015 : public FxStrip {
+class Pride2015 : public Fx1d {
   public:
-    Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
+    Pride2015(uint16_t num_leds) : Fx1d(num_leds) {}
 
     void draw(Fx::DrawContext context) override;
     fl::Str fxName() const override { return "Pride2015"; }

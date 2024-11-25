@@ -81,9 +81,9 @@ enum AnimartrixAnim {
 
 
 class FastLEDANIMartRIX;
-class Animartrix : public FxGrid {
+class Animartrix : public Fx2d {
   public:
-    Animartrix(XYMap xyMap, AnimartrixAnim which_animation) : FxGrid(xyMap) {
+    Animartrix(XYMap xyMap, AnimartrixAnim which_animation) : Fx2d(xyMap) {
         // Note: Swapping out height and width.
         this->current_animation = which_animation;
         mXyMap.convertToLookUpTable();

@@ -9,14 +9,14 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(FxGrid);
+FASTLED_SMART_PTR(Fx2d);
 
 // Abstract base class for 2D effects that use a grid, which is defined
 // by an XYMap.
-class FxGrid : public Fx {
+class Fx2d : public Fx {
   public:
     // XYMap holds either a function or a look up table to map x, y coordinates to a 1D index.
-    FxGrid(const XYMap& xyMap): Fx(xyMap.getTotal()), mXyMap(xyMap) {}
+    Fx2d(const XYMap& xyMap): Fx(xyMap.getTotal()), mXyMap(xyMap) {}
     uint16_t xyMap(uint16_t x, uint16_t y) const {
         return mXyMap.mapToIndex(x, y);
     }

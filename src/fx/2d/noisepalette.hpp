@@ -18,10 +18,10 @@ namespace fl {
 
 FASTLED_SMART_PTR(NoisePalette);
 
-class NoisePalette : public FxGrid {
+class NoisePalette : public Fx2d {
   public:
     NoisePalette(XYMap xyMap)
-        : FxGrid(xyMap), speed(0), scale(0), colorLoop(1) {
+        : Fx2d(xyMap), speed(0), scale(0), colorLoop(1) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 

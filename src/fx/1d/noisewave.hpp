@@ -9,10 +9,10 @@ namespace fl {
 
 FASTLED_SMART_PTR(NoiseWave);
 
-class NoiseWave : public FxStrip {
+class NoiseWave : public Fx1d {
   public:
     NoiseWave(uint16_t num_leds)
-        : FxStrip(num_leds), noiseGeneratorRed(500, 14),
+        : Fx1d(num_leds), noiseGeneratorRed(500, 14),
           noiseGeneratorBlue(500, 10) {}
 
     void draw(DrawContext context) override {

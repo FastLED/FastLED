@@ -19,9 +19,9 @@ namespace fl {
 
 FASTLED_SMART_PTR(DemoReel100);
 
-class DemoReel100 : public FxStrip {
+class DemoReel100 : public Fx1d {
   public:
-    DemoReel100(uint16_t num_leds) : FxStrip(num_leds) {}
+    DemoReel100(uint16_t num_leds) : Fx1d(num_leds) {}
 
     void draw(DrawContext context) override {
         CRGB *leds = context.leds;

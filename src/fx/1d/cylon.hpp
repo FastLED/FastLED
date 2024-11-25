@@ -10,11 +10,11 @@ FASTLED_SMART_PTR(Cylon);
 
 /// @brief   An animation that moves a single LED back and forth (Larson Scanner
 /// effect)
-class Cylon : public FxStrip {
+class Cylon : public Fx1d {
   public:
     uint8_t delay_ms;
     Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10)
-        : FxStrip(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
+        : Fx1d(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
 
 
     void draw(DrawContext context) override {

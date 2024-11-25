@@ -133,7 +133,7 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-VideoFx::VideoFx(Video video): FxStrip(video.pixelsPerFrame()), mVideo(video) {}
+VideoFx::VideoFx(Video video): Fx1d(video.pixelsPerFrame()), mVideo(video) {}
 
 void VideoFx::draw(DrawContext context) {
     mVideo.draw(context.now, context.leds);
