@@ -49,12 +49,12 @@ XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
 void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
-    int toggle = (millis() / 500) % 2;
+    bool toggle = (millis() / 500) % 2 == 0;
     FASTLED_DBG("Writing frame data, toggle = " << toggle);
     for (uint32_t i = 0; i < NUM_LEDS; ++i) {
-        CRGB color = (i % 2 == toggle) ? CRGB::Black : CRGB::Red;
-        size_t bytes_written = memoryStream->write(color.raw, 3);
-        if (bytes_written != 3) {
+        CRGB color = (toggle ^ i%2) ? CRGB::Black : CRGB::Red;
+        size_t bytes_written = memoryStream->writeCRGB(&color, 1);
+        if (bytes_written != 1) {
             FASTLED_DBG("Failed to write frame data, wrote " << bytes_written << " bytes");
             break;
         }
@@ -70,30 +70,22 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE*3);
-    write_one_frame(memoryStream);  // Write initial frame data
-    Video video(memoryStream, NUM_LEDS, 30.0f, 0);
+    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE*sizeof(CRGB));
+    Video video(memoryStream, NUM_LEDS, 2.0f, 0);
     // Add the video effect to the FxEngine
     fxEngine.addVideo(video, xymap);
 }
 
 void loop() {
-    // Reset the memory stream position before reading
-    //memoryStream->seek(0);
-
-    FASTLED_DBG("Byte stream size: " << memoryStream->available(BUFFER_SIZE));
-
-    write_one_frame(memoryStream);  // Write next frame data
-
-    FASTLED_DBG("Byte stream size: " << memoryStream->available(BUFFER_SIZE));
-
+    EVERY_N_MILLISECONDS(500) {
+        write_one_frame(memoryStream);  // Write next frame data
+    }
+    // write_one_frame(memoryStream);  // Write next frame data
     // Draw the frame
     fxEngine.draw(millis(), leds);
-
     // Show the LEDs
     FastLED.show();
-
-    delay(1000); // Adjust this delay to control frame rate
+    delay(20); // Adjust this delay to control frame rate
 }
 #else
 void setup() {}

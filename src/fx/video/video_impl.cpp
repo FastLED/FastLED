@@ -103,7 +103,6 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         return false;
     }
     if (mStream->atEnd()) {
-        FASTLED_DBG("atEnd");
         return false;
     }
 
@@ -128,12 +127,9 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         frame_numbers.push_back(nextFrameNumber);
     }
 
-    FASTLED_DBG("getting " << frame_numbers.size() << " frames");
-
     for (size_t i = 0; i < frame_numbers.size(); ++i) {
         FramePtr recycled_frame;
         if (mFrameInterpolator->full()) {
-            FASTLED_DBG("full, erasing frame");
             uint32_t frame_to_erase = 0;
             bool ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
             if (!ok) {
@@ -148,12 +144,9 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         }
         uint32_t frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
-            FASTLED_DBG("recycled_frame is null, creating new frame");
             // Happens when we are not full and we need to allocate a new frame.
             recycled_frame = FramePtr::New(mPixelsPerFrame, false);
         }
-
-        FASTLED_DBG("attempting to read frame from stream");
 
         if (!mStream->readFrame(recycled_frame.get())) {
             if (mStream->atEnd()) {
@@ -171,8 +164,6 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
                 DBG("We failed for some other reason");
                 return false;
             }
-        } else {
-            DBG("could not read frame");
         }
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
