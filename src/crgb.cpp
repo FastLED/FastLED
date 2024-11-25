@@ -7,6 +7,18 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+fl::Str CRGB::toString() const {
+    fl::Str out;
+    out.append("CRGB(");
+    out.append(int(r));
+    out.append(", ");
+    out.append(int(g));
+    out.append(", ");
+    out.append(int(b));
+    out.append(")");
+    return out;
+}
+
 CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
     #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
             return CRGB(scale,scale,scale);

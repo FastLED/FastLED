@@ -11,6 +11,10 @@
 #include "fl/template_magic.h"
 
 
+namespace fl {
+class Str;
+}
+
 FASTLED_NAMESPACE_BEGIN
 
 // Whether to allow HD_COLOR_MIXING
@@ -351,6 +355,8 @@ struct CRGB {
         return ret;
     }
 #endif
+
+    fl::Str toString() const;
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).

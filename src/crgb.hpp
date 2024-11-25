@@ -7,6 +7,7 @@
 #include "lib8tion.h"
 #include "namespace.h"
 #include "force_inline.h"
+#include "fl/str.h"
 
 #if FASTLED_IS_USING_NAMESPACE
 #define FUNCTION_SCALE8(a,b) FASTLED_NAMESPACE::scale8(a,b)

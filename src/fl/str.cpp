@@ -7,41 +7,6 @@
 namespace fl {
 
 namespace string_functions {
-// Yet, another good itoa implementation
-// returns: the length of the number string
-int itoa(int value, char *sp, int radix) {
-    char tmp[16]; // be careful with the length of the buffer
-    char *tp = tmp;
-    int i;
-    unsigned v;
-
-    int sign = (radix == 10 && value < 0);
-    if (sign)
-        v = -value;
-    else
-        v = (unsigned)value;
-
-    while (v || tp == tmp) {
-        i = v % radix;
-        v = radix ? v / radix : 0;
-        if (i < 10)
-            *tp++ = i + '0';
-        else
-            *tp++ = i + 'a' - 10;
-    }
-
-    int len = tp - tmp;
-
-    if (sign) {
-        *sp++ = '-';
-        len++;
-    }
-
-    while (tp > tmp)
-        *sp++ = *--tp;
-
-    return len;
-}
 
 float atoff(const char *str, size_t len) {
     float result = 0.0f;    // The resulting number
@@ -98,8 +63,8 @@ float atoff(const char *str, size_t len) {
 } // namespace string_functions
 
 void StringFormatter::append(int val, StrN<64> *dst) {
-    char buf[63];
-    string_functions::itoa(val, buf, 63);
+    char buf[63] = {0};
+    itoa(val, buf, 10);
     dst->write(buf, strlen(buf));
 }
 

@@ -6,11 +6,12 @@
 #include "doctest.h"
 #include "fl/str.h"
 #include "fl/vector.h"
+#include "crgb.h"
 #include <sstream>
 
 #include "namespace.h"
-FASTLED_USING_NAMESPACE
-using fl::Str;
+
+using namespace fl;
 
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
@@ -52,6 +53,12 @@ TEST_CASE("Str basic operations") {
         s.append(" world");
         CHECK(s.size() == 11);
         CHECK(strcmp(s.c_str(), "hello world") == 0);
+    }
+
+    SUBCASE("CRGB to Str") {
+        CRGB c(255, 0, 0);
+        Str s = c.toString();
+        CHECK_EQ(s, "CRGB(255, 0, 0)");
     }
 
     SUBCASE("Copy-on-write behavior") {

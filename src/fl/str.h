@@ -348,6 +348,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     Str& append(char c) { write(&c, 1); return *this; }
+    Str& append(int n) { write(n); return *this; }
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 
 
