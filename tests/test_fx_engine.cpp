@@ -34,7 +34,7 @@ private:
 
 TEST_CASE("test_fx_engine") {
     constexpr uint16_t NUM_LEDS = 10;
-    FxEngine engine(NUM_LEDS);
+    FxEngine engine(NUM_LEDS, false);
     CRGB leds[NUM_LEDS];
 
     Ptr<MockFx> redFx = MockFxPtr::New(NUM_LEDS, CRGB::Red);
@@ -52,7 +52,13 @@ TEST_CASE("test_fx_engine") {
         const bool ok = engine.draw(0, leds);
         CHECK(ok);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            CHECK(leds[i] == CRGB::Red);
+            // CHECK(leds[i] == CRGB::Red);
+            bool is_red = leds[i] == CRGB::Red;
+            if (!is_red) {
+                Str err = leds[i].toString();
+                printf("leds[%d] is not red, was instead: %s\n", i, err.c_str());
+                CHECK(is_red);
+            }
         }
     }
 

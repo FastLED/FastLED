@@ -3,6 +3,7 @@
 #include "namespace.h"
 
 #include "fl/dbg.h"
+#include "fl/warn.h"
 
 #define DBG FASTLED_DBG
 
@@ -21,6 +22,24 @@ void TimeScale::setScale(float timeScale) {
 
 float TimeScale::scale() const {
     return mTimeScale;
+}
+
+void TimeScale::pause(uint32_t now) {
+    if (mPauseTime) {
+        FASTLED_WARN("TimeScale::pause: already paused");
+        return;
+    }
+    mPauseTime = now;
+}
+void TimeScale::resume(uint32_t now) {
+    if (mLastRealTime == 0) {
+        reset(now);
+        return;
+    }
+    uint32_t diff = now - mPauseTime;
+    mStartTime += diff;
+    mLastRealTime += diff;
+    mPauseTime = 0;
 }
 
 uint32_t TimeScale::update(uint32_t timeNow) {

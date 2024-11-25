@@ -34,22 +34,22 @@ class FxLayer : public fl::Referent {
         if (!running) {
             // Clear the frame
             memset(frame->rgb(), 0, frame->size() * sizeof(CRGB));
-            fx->resume();
+            fx->resume(now);
             running = true;
         }
         Fx::DrawContext context = {now, frame->rgb()};
         fx->draw(context);
     }
 
-    void pause() {
+    void pause(uint32_t now) {
         if (fx && running) {
-            fx->pause();
+            fx->pause(now);
             running = false;
         }
     }
 
     void release() {
-        pause();
+        pause(0);
         fx.reset();
     }
 

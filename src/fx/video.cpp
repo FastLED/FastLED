@@ -34,6 +34,18 @@ Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count) {
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
 
+void Video::pause(uint32_t now) {
+    if (mImpl) {
+        mImpl->pause(now);
+    }
+}
+
+void Video::resume(uint32_t now) {
+    if (mImpl) {
+        mImpl->resume(now);
+    }
+}
+
 Video::~Video() = default;
 Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;
@@ -143,5 +155,16 @@ fl::Str VideoFx::fxName() const {
     return "VideoFx";
 }
 
+void VideoFx::pause(uint32_t now) {
+    if (mVideo) {
+        mVideo.pause(now);
+    }
+}
+
+void VideoFx::resume(uint32_t now) {
+    if (mVideo) {
+        mVideo.resume(now);
+    }
+}
 
 }  // namespace fl

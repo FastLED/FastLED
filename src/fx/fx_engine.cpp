@@ -3,15 +3,22 @@
 namespace fl {
 
 
-FxEngine::FxEngine(uint16_t numLeds):
+FxEngine::FxEngine(uint16_t numLeds, bool interpolate):
       mTimeFunction(0), 
       mCompositor(numLeds), 
-      mCurrId(0) {
+      mCurrId(0),
+      mInterpolate(interpolate) {
 }
 
 FxEngine::~FxEngine() {}
 
 int FxEngine::addFx(FxPtr effect) {
+    // float fps = 0;
+    // if (effect->hasFixedFrameRate(&fps)) {
+    //     effect->hasFixedFrameRate(&fps);
+    //     Video video(effect->getNumLeds(), fps, mInterpolate ? 2 : 1);
+    //     effect = VideoFxPtr::New(video);
+    // }
     bool auto_set = mEffects.empty();
     bool ok = mEffects.insert(mCounter, effect);
     if (!ok) {

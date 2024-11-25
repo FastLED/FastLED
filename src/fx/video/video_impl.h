@@ -42,6 +42,8 @@ class VideoImpl : public fl::Referent {
     void setTimeScale(float timeScale);
     float timeScale() const { return mTimeScale ? mTimeScale->scale() : 1.0f; }
     size_t pixelsPerFrame() const { return mPixelsPerFrame; }
+    void pause(uint32_t now);
+    void resume(uint32_t now);
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);

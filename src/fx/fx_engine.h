@@ -42,7 +42,7 @@ class FxEngine {
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.
      */
-    FxEngine(uint16_t numLeds);
+    FxEngine(uint16_t numLeds, bool interpolate=true);
 
     /**
      * @brief Destructor for FxEngine.
@@ -130,6 +130,7 @@ class FxEngine {
     int mCurrId; ///< Id of the current effect
     uint16_t mDuration = 0; ///< Duration of the current transition
     bool mDurationSet = false; ///< Flag indicating if a new transition has been set
+    bool mInterpolate = true;
 };
 
 }  // namespace fl

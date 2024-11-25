@@ -54,6 +54,8 @@ public:
     fl::Str error() const;
     void setError(const fl::Str& error) { mError = error; }
     size_t pixelsPerFrame() const;
+    void pause(uint32_t now);
+    void resume(uint32_t now);
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
@@ -70,10 +72,13 @@ class VideoFx : public Fx1d {
     VideoFx(Video video);
     void draw(DrawContext context) override;
     fl::Str fxName() const override;
+    void pause(uint32_t now) override;
+    void resume(uint32_t now) override;
 
   private:
     Video mVideo;
 };
+
 
 }  // namespace fl
 

@@ -32,12 +32,15 @@ class TimeScale: public TimeFunction {
     uint32_t update(uint32_t timeNow) override;
     uint32_t time() const override;
     void reset(uint32_t realTimeNow) override;
+    void pause(uint32_t now);
+    void resume(uint32_t now);
   private:
     void applyExact(uint32_t timeNow);
     uint32_t mLastRealTime = 0;
     uint32_t mStartTime = 0;
     uint32_t mRelativeTime = 0;
     float mTimeScale = 1.0f;
+    uint32_t mPauseTime = 0;
 };
 
 }  // namespace fl

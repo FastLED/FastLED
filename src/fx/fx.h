@@ -35,8 +35,8 @@ class Fx : public fl::Referent {
     virtual fl::Str fxName() const = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
-    virtual void pause() {} 
-    virtual void resume() {} // Called when the fx is resumed after a pause,
+    virtual void pause(uint32_t now) {} 
+    virtual void resume(uint32_t now) {} // Called when the fx is resumed after a pause,
                              // usually when a transition has started.
 
     uint16_t getNumLeds() const { return mNumLeds; }
