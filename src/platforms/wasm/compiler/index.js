@@ -11,6 +11,7 @@ globalThis.loadFastLED = async function () {
 const urlParams = new URLSearchParams(window.location.search);
 const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
 const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
+const MAX_STDOUT_LINES = 50;
 
 // Will be overridden during initialization.
 var print = function () { };
@@ -1077,11 +1078,12 @@ class UiManager {
             }
             return arg;
         });
+
         const output = document.getElementById(outputId);
         const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
         // split into lines, and if there are more than 100 lines, remove one.
         const lines = allText.split('\n');
-        while (lines.length > 100) {
+        while (lines.length > MAX_STDOUT_LINES) {
             lines.shift();
         }
         output.textContent = lines.join('\n');
