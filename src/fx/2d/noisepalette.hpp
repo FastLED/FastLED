@@ -38,8 +38,6 @@ class NoisePalette : public FxGrid {
 
     // No need for a destructor, scoped_ptr will handle memory deallocation
 
-    void lazyInit() override {}
-
     void draw(DrawContext context) override {
         fillnoise8();
         mapNoiseToLEDsUsingPalette(context.leds);

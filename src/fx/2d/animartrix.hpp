@@ -86,18 +86,18 @@ class Animartrix : public FxGrid {
     Animartrix(XYMap xyMap, AnimartrixAnim which_animation) : FxGrid(xyMap) {
         // Note: Swapping out height and width.
         this->current_animation = which_animation;
+        mXyMap.convertToLookUpTable();
     }
 
     Animartrix(const Animartrix &) = delete;
-    void lazyInit() override { this->mXyMap.convertToLookUpTable(); }
     void draw(DrawContext context) override;
-    int fxNum() const override { return NUM_ANIMATIONS; }
-    void fxSet(int fx) override;
-    int fxGet() const override { return static_cast<int>(current_animation); }
+    int fxNum() const { return NUM_ANIMATIONS; }
+    void fxSet(int fx);
+    int fxGet() const { return static_cast<int>(current_animation); }
     const char *fxName(int which) const override {
         return getAnimationName(which != -1 ? static_cast<AnimartrixAnim>(which) : current_animation);
     }
-    void fxNext(int fx = 1) override { fxSet(fxGet() + fx); }
+    void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
 
   private:
     friend void AnimartrixLoop(Animartrix &self, uint32_t now);

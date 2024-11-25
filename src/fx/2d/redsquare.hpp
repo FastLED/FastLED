@@ -18,8 +18,6 @@ class RedSquare : public FxGrid {
 
     RedSquare(XYMap xymap) : FxGrid(xymap) {}
 
-    void lazyInit() override {}
-
     void draw(DrawContext context) override {
         uint16_t width = getWidth();
         uint16_t height = getHeight();

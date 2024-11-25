@@ -118,10 +118,8 @@ class TwinkleFox : public FxStrip {
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
           autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
-        lazyInit();
+        chooseNextColorPalette(targetPalette);
     }
-
-    void lazyInit() override { chooseNextColorPalette(targetPalette); }
 
     void draw(DrawContext context) override {
         EVERY_N_MILLISECONDS(10) {

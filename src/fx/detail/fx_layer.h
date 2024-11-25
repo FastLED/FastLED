@@ -34,16 +34,10 @@ class FxLayer : public fl::Referent {
         if (!running) {
             // Clear the frame
             memset(frame->rgb(), 0, frame->size() * sizeof(CRGB));
-            if (fx->hasAlphaChannel()) {
-                FASTLED_WARN("Alpha channel not supported in FxLayer yet.");
-            }
             fx->resume();
             running = true;
         }
         Fx::DrawContext context = {now, frame->rgb()};
-        if (fx->hasAlphaChannel()) {
-            FASTLED_WARN("Alpha channel not supported in FxLayer yet.");
-        }
         fx->draw(context);
     }
 

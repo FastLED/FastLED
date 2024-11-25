@@ -17,11 +17,6 @@ class Cylon : public FxStrip {
         : FxStrip(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
 
 
-
-    void lazyInit() override {
-        // No initialization needed for Cylon
-    }
-
     void draw(DrawContext context) override {
         if (context.leds == nullptr || mNumLeds == 0) {
             return;

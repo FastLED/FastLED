@@ -22,7 +22,6 @@ class Pride2015 : public FxStrip {
   public:
     Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
 
-    void lazyInit() override {}
     void draw(Fx::DrawContext context) override;
     const char *fxName(int) const override { return "Pride2015"; }
 

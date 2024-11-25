@@ -23,12 +23,13 @@ class DemoReel100 : public FxStrip {
   public:
     DemoReel100(uint16_t num_leds) : FxStrip(num_leds) {}
 
-    void lazyInit() override { start_time = millis(); }
-
     void draw(DrawContext context) override {
         CRGB *leds = context.leds;
         if (leds == nullptr || mNumLeds == 0) {
             return;
+        }
+        if (start_time == 0) {
+            start_time = millis();
         }
 
         // Call the current pattern function once, updating the 'leds' array

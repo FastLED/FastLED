@@ -16,7 +16,6 @@ class Pacifica : public FxStrip {
   public:
     Pacifica(uint16_t num_leds) : FxStrip(num_leds) {}
 
-    void lazyInit() override {}
     void draw(DrawContext context) override;
     const char *fxName(int) const override { return "Pacifica"; }
 

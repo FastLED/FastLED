@@ -15,11 +15,12 @@ class NoiseWave : public FxStrip {
         : FxStrip(num_leds), noiseGeneratorRed(500, 14),
           noiseGeneratorBlue(500, 10) {}
 
-    void lazyInit() override { start_time = millis(); }
-
     void draw(DrawContext context) override {
         if (context.leds == nullptr || mNumLeds == 0) {
             return;
+        }
+        if (start_time == 0) {
+            start_time = context.now;
         }
 
         unsigned long time_now = millis() - start_time;
@@ -37,7 +38,7 @@ class NoiseWave : public FxStrip {
   private:
     NoiseGenerator noiseGeneratorRed;
     NoiseGenerator noiseGeneratorBlue;
-    unsigned long start_time = 0;
+    uint32_t start_time = 0;
 };
 
 FASTLED_NAMESPACE_END

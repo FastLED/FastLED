@@ -48,7 +48,6 @@ class ScaleUp : public FxGrid {
         // still be performed.
         mDelegate->getXYMap().setRectangularGrid();
     }
-    void lazyInit() override {}
     void draw(DrawContext context) override {
         if (!mSurface) {
             mSurface.reset(new CRGB[mDelegate->getNumLeds()]);
