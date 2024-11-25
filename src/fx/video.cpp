@@ -25,6 +25,11 @@ FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(Frame);
 
 
+Video::Video() {
+    setError("Video must be constructed with a pixel count and fps.");
+}
+
+
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count) {
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
@@ -90,16 +95,29 @@ void Video::end() {
 }
 
 void Video::setTimeScale(float timeScale) {
+    if (!mImpl) {
+        return;
+    }
     mImpl->setTimeScale(timeScale);
 }
 
-float Video::timeScale() const { return mImpl->timeScale(); }
+float Video::timeScale() const {
+    if (!mImpl) {
+        return 1.0f;
+    }
+    return mImpl->timeScale();
+}
 
 fl::Str Video::error() const {
     return mError;
 }
 
-size_t Video::pixelsPerFrame() const { return mImpl->pixelsPerFrame(); }
+size_t Video::pixelsPerFrame() const {
+    if (!mImpl) {
+        return 0;
+    }
+    return mImpl->pixelsPerFrame();
+}
 
 bool Video::finished() {
     if (!mImpl) {

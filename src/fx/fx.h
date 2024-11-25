@@ -31,8 +31,7 @@ class Fx : public fl::Referent {
     // set to the frame rate.
     virtual bool hasFixedFrameRate(float *fps) const { *fps = 30; return true; }
 
-    // Get the name of the current fx. This is the class name if there is only one.
-    // -1 means to get the current fx name if there are multiple fx.
+    // Get the name of the current fx.
     virtual fl::Str fxName() const = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
