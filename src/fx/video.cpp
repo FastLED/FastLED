@@ -9,7 +9,8 @@
 #include "fl/warn.h"
 #include "fl/math_macros.h"
 #include "fx/video/video_impl.h"
-
+#include "fx/video/pixel_stream.h"
+#include "fl/bytestreammemory.h"
 
 #define DBG FASTLED_DBG
 
@@ -175,6 +176,8 @@ VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     mVideo = VideoImplPtr::New(fx->getNumLeds(), mFps, 2);
     mByteStream = ByteStreamMemoryPtr::New(fx->getNumLeds() * sizeof(CRGB));
 }
+
+VideoFxWrapper::~VideoFxWrapper() = default;
 
 Str VideoFxWrapper::fxName() const {
     Str out = "video_fx_wrapper: ";

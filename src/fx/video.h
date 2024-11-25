@@ -7,8 +7,7 @@
 #include "fx/fx1d.h"
 #include "fx/time.h"
 #include "fl/str.h"
-#include "fx/video/pixel_stream.h"
-#include "fl/bytestreammemory.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -22,6 +21,8 @@ FASTLED_SMART_PTR(ByteStream);
 FASTLED_SMART_PTR(VideoFx);
 FASTLED_SMART_PTR(Frame);
 FASTLED_SMART_PTR(VideoImpl);
+FASTLED_SMART_PTR(VideoFxWrapper);
+FASTLED_SMART_PTR(ByteStreamMemory);
 
 
 // Video represents a video file that can be played back on a LED strip.
@@ -81,9 +82,12 @@ class VideoFx : public Fx1d {
     Video mVideo;
 };
 
+// Wraps an Fx and stores a history of video frames. This allows
+// interpolation between frames.
 class VideoFxWrapper : public Fx1d {
   public:
     VideoFxWrapper(FxPtr fx);
+    ~VideoFxWrapper() override;
     void draw(DrawContext context) override;
     Str fxName() const override;
 

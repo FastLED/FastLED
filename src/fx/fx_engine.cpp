@@ -1,4 +1,5 @@
 #include "fx_engine.h"
+#include "video.h"
 
 namespace fl {
 
@@ -13,12 +14,12 @@ FxEngine::FxEngine(uint16_t numLeds, bool interpolate):
 FxEngine::~FxEngine() {}
 
 int FxEngine::addFx(FxPtr effect) {
-    // float fps = 0;
-    // if (effect->hasFixedFrameRate(&fps)) {
-    //     effect->hasFixedFrameRate(&fps);
-    //     Video video(effect->getNumLeds(), fps, mInterpolate ? 2 : 1);
-    //     effect = VideoFxPtr::New(video);
-    // }
+    float fps = 0;
+    if (mInterpolate && effect->hasFixedFrameRate(&fps)) {
+        // Wrap the effect in a VideoFxWrapper so that we can get
+        // interpolation.
+        effect = VideoFxWrapperPtr::New(effect);
+    }
     bool auto_set = mEffects.empty();
     bool ok = mEffects.insert(mCounter, effect);
     if (!ok) {
