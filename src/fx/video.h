@@ -33,7 +33,7 @@ public:
         #ifdef __AVR__
         return 1;
         #else
-        return 2;
+        return 2;  // Allow interpolation by default.
         #endif
     }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
