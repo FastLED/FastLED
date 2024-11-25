@@ -29,17 +29,24 @@ struct CRGB;
 // a file handle or a byte stream to read the video data.
 class Video {
 public:
+    static size_t DefaultFrameHistoryCount() {
+        #ifdef __AVR__
+        return 1;
+        #else
+        return 2;
+        #endif
+    }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
     Video();  // Please use FileSytem to construct a Video.
-    Video(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
-    Video(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    Video(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());
+    Video(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());
     ~Video();
     Video(const Video&);
     Video& operator=(const Video&);
     // Api
-    void begin(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
-    void beginStream(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    void begin(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 2);
+    void beginStream(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 2);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     bool draw(uint32_t now, Frame* frame);
     void end();

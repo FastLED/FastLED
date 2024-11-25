@@ -86,7 +86,7 @@ TEST_CASE("video with memory stream") {
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
     CHECK_EQ(pixels_written, LEDS_PER_FRAME);
-    video.beginStream(memoryStream, LEDS_PER_FRAME, FPS);
+    video.beginStream(memoryStream, LEDS_PER_FRAME, FPS, 1);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME+1, leds);
     CHECK(ok);
@@ -96,9 +96,43 @@ TEST_CASE("video with memory stream") {
     ok = video.draw(2*FRAME_TIME + 1, leds);
     CHECK(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
-        CHECK_EQ(leds[i], testData[i]);
+        // CHECK_EQ(leds[i], testData[i]);
+        REQUIRE_EQ(leds[i].r, testData[i].r);
+        REQUIRE_EQ(leds[i].g, testData[i].g);
+        REQUIRE_EQ(leds[i].b, testData[i].b);
     }    
 }
+
+TEST_CASE("video with memory stream, interpolated") {
+    // Video video(LEDS_PER_FRAME, FPS);
+    Video video;
+    ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * sizeof(CRGB)*2);
+    CRGB testData[LEDS_PER_FRAME] = {};
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        testData[i] = CRGB::Red;
+    }
+    size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
+    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        testData[i] = CRGB::Black;
+    }
+    pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
+    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
+    video.beginStream(memoryStream, LEDS_PER_FRAME, 1);  // One frame per second.
+    CRGB leds[LEDS_PER_FRAME];
+    bool ok = video.draw(0, leds);  // First frame starts time 0.
+    ok = video.draw(500, leds); // Half a frame.
+    CHECK(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        int r = leds[i].r;
+        int g = leds[i].g;
+        int b = leds[i].b;
+        REQUIRE_EQ(128, r);  // We expect the color to be interpolated to 128.
+        REQUIRE_EQ(0, g);
+        REQUIRE_EQ(0, b);
+    } 
+}
+
 
 TEST_CASE("video with file handle") {
     // Video video(LEDS_PER_FRAME, FPS);

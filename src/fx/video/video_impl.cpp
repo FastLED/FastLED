@@ -110,7 +110,6 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
     uint32_t nextFrameNumber = 0;
     bool needs_frame = mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber);
     if (!needs_frame) {
-        FASTLED_DBG("no need for frame");
         return true;
     }
 
@@ -119,11 +118,15 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         return false;
     }
 
+    const bool has_current_frame = mFrameInterpolator->has(currFrameNumber);
+    const bool has_next_frame = mFrameInterpolator->has(nextFrameNumber);
+
     fl::FixedVector<uint32_t, 2> frame_numbers;
-    if (!mFrameInterpolator->has(currFrameNumber)) {
+    if (!has_current_frame) {
         frame_numbers.push_back(currFrameNumber);
     }
-    if (mFrameInterpolator->capacity() > 1 && !mFrameInterpolator->has(nextFrameNumber)) {
+    size_t capacity = mFrameInterpolator->capacity();
+    if (capacity > 1 && !has_next_frame) {
         frame_numbers.push_back(nextFrameNumber);
     }
 
