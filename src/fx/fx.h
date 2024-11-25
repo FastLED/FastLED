@@ -7,6 +7,7 @@
 #include "fl/ptr.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
+#include "fl/str.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -32,7 +33,7 @@ class Fx : public fl::Referent {
 
     // Get the name of the current fx. This is the class name if there is only one.
     // -1 means to get the current fx name if there are multiple fx.
-    virtual const char * fxName(int which = -1) const = 0;
+    virtual fl::Str fxName() const = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
     virtual void pause() {} 

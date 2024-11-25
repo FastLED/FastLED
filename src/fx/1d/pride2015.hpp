@@ -23,7 +23,7 @@ class Pride2015 : public FxStrip {
     Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
 
     void draw(Fx::DrawContext context) override;
-    const char *fxName(int) const override { return "Pride2015"; }
+    fl::Str fxName() const override { return "Pride2015"; }
 
   private:
     uint16_t mPseudotime = 0;

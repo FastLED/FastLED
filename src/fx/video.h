@@ -71,7 +71,7 @@ class VideoFx : public FxGrid {
   public:
     VideoFx(Video video, XYMap xymap);
     void draw(DrawContext context) override;
-    const char *fxName(int) const override;
+    fl::Str fxName() const override;
 
   private:
     Video mVideo;

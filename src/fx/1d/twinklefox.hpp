@@ -2,6 +2,7 @@
 
 #include "FastLED.h"
 #include "fx/fx1d.h"
+#include "fl/str.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -129,7 +130,7 @@ class TwinkleFox : public FxStrip {
     }
 
     void chooseNextColorPalette(CRGBPalette16 &pal);
-    const char *fxName(int) const override { return "TwinkleFox"; }
+    fl::Str fxName() const override { return "TwinkleFox"; }
 
   private:
     CRGB backgroundColor;

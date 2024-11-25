@@ -40,7 +40,7 @@ class RedSquare : public FxGrid {
         }
     }
 
-    const char *fxName(int) const override { return "red_square"; }
+    fl::Str fxName() const override { return "red_square"; }
 };
 
 FASTLED_NAMESPACE_END

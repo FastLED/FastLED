@@ -94,8 +94,8 @@ class Animartrix : public FxGrid {
     int fxNum() const { return NUM_ANIMATIONS; }
     void fxSet(int fx);
     int fxGet() const { return static_cast<int>(current_animation); }
-    const char *fxName(int which) const override {
-        return getAnimationName(which != -1 ? static_cast<AnimartrixAnim>(which) : current_animation);
+    Str fxName() const override {
+        return "Animartrix:";
     }
     void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
 

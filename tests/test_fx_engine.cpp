@@ -25,7 +25,7 @@ public:
         }
     }
 
-    const char* fxName(int) const override { return "MockFx"; }
+    Str fxName() const override { return "MockFx"; }
 
 private:
     CRGB mColor;
@@ -63,7 +63,7 @@ TEST_CASE("test_fx_engine") {
             auto& effects = engine._getEffects();
             for (auto it = effects.begin(); it != effects.end(); ++it) {
                 auto& fx = it->second;
-                printf("fx: %s\n", fx->fxName(0));
+                printf("fx: %s\n", fx->fxName().c_str());
             }
             FAIL("Failed to transition to next effect");
         }

@@ -137,6 +137,6 @@ void VideoFx::draw(DrawContext context) {
     }
 }
 
-const char * VideoFx::fxName(int) const { return "video"; }
+fl::Str VideoFx::fxName() const { return "video"; }
 
 FASTLED_NAMESPACE_END

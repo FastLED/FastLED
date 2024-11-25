@@ -42,7 +42,7 @@ class DemoReel100 : public FxStrip {
         EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
     }
 
-    const char *fxName(int) const override { return "DemoReel100"; }
+    fl::Str fxName() const override { return "DemoReel100"; }
 
   private:
     uint8_t current_pattern_number = 0;

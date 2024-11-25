@@ -43,7 +43,7 @@ class NoisePalette : public FxGrid {
         mapNoiseToLEDsUsingPalette(context.leds);
     }
 
-    const char *fxName(int which) const override { return "NoisePalette"; }
+    Str fxName() const override { return "NoisePalette"; }
 
     void mapNoiseToLEDsUsingPalette(CRGB *leds);
 

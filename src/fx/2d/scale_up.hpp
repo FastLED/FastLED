@@ -82,7 +82,7 @@ class ScaleUp : public FxGrid {
 #endif
     }
 
-    const char *fxName(int) const override { return "scale_up"; }
+    fl::Str fxName() const override { return "scale_up"; }
 
   private:
     // No expansion needed. Also useful for debugging.
