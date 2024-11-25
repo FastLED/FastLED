@@ -33,7 +33,7 @@ class VideoImpl : public fl::Referent {
     // Api
     void begin(fl::FileHandlePtr h);
     void beginStream(fl::ByteStreamPtr s);
-    bool draw(uint32_t now, CRGB *leds, uint8_t *alpha = nullptr);
+    bool draw(uint32_t now, CRGB *leds);
     void end();
     bool rewind();
     // internal use
@@ -44,6 +44,7 @@ class VideoImpl : public fl::Referent {
     size_t pixelsPerFrame() const { return mPixelsPerFrame; }
     void pause(uint32_t now);
     void resume(uint32_t now);
+    bool needsFrame(uint32_t now) const;
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);

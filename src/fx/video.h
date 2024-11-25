@@ -7,6 +7,8 @@
 #include "fx/fx1d.h"
 #include "fx/time.h"
 #include "fl/str.h"
+#include "fx/video/pixel_stream.h"
+#include "fl/bytestreammemory.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -44,7 +46,7 @@ public:
     // Api
     bool begin(fl::FileHandlePtr h);
     bool beginStream(fl::ByteStreamPtr s);
-    bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
+    bool draw(uint32_t now, CRGB* leds);
     bool draw(uint32_t now, Frame* frame);
     void end();
     bool finished();
@@ -77,6 +79,20 @@ class VideoFx : public Fx1d {
 
   private:
     Video mVideo;
+};
+
+class VideoFxWrapper : public Fx1d {
+  public:
+    VideoFxWrapper(FxPtr fx);
+    void draw(DrawContext context) override;
+    Str fxName() const override;
+
+  private:
+    FxPtr mFx;
+    VideoImplPtr mVideo;
+    ByteStreamMemoryPtr mByteStream;
+    bool mInitialized = false;
+    float mFps = 30.0f;
 };
 
 

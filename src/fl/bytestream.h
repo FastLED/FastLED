@@ -12,8 +12,7 @@ namespace fl {
 
 FASTLED_SMART_PTR(ByteStream);
 
-// An abstract class that represents a file handle.
-// Devices like the SD card will return one of these.
+// An abstract class that represents a stream of bytes.
 class ByteStream : public fl::Referent {
   public:
     virtual ~ByteStream() {}
@@ -21,10 +20,10 @@ class ByteStream : public fl::Referent {
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
     virtual const char *path() const = 0;
     virtual void close() {}  // default is do nothing on close.
-
     // convenience functions
     size_t readCRGB(CRGB *dst, size_t n) { return read((uint8_t *)dst, n * 3); }
-
 };
+
+
 
 }  // namespace fl

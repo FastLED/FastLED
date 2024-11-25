@@ -41,6 +41,10 @@ void VideoImpl::setTimeScale(float timeScale) {
     mTimeScale->setScale(timeScale);
 }
 
+bool VideoImpl::needsFrame(uint32_t now) const {
+    uint32_t f1, f2;
+    return mFrameInterpolator->needsFrame(now, &f1, &f2);
+}
 
 VideoImpl::~VideoImpl() { end(); }
 
@@ -83,7 +87,7 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     return ok;
 }
 
-bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+bool VideoImpl::draw(uint32_t now, CRGB *leds) {
     //DBG("draw with now = " << now);
     if (!mTimeScale) {
         mTimeScale = TimeScalePtr::New(now);

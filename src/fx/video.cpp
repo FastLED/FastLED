@@ -80,12 +80,12 @@ bool Video::beginStream(ByteStreamPtr bs) {
     return true;
 }
 
-bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+bool Video::draw(uint32_t now, CRGB *leds) {
     if (!mImpl) {
         FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return false;
     }
-    bool ok = mImpl->draw(now, leds, alpha);
+    bool ok = mImpl->draw(now, leds);
     if (!ok) {
         // Interpret not being able to draw as a finished signal.
         mFinished = true;
@@ -166,5 +166,32 @@ void VideoFx::resume(uint32_t now) {
         mVideo.resume(now);
     }
 }
+
+VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
+    if (!mFx->hasFixedFrameRate(&mFps)) {
+        FASTLED_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, assuming 30fps.");
+        mFps = 30.0f;
+    }
+    mVideo = VideoImplPtr::New(fx->getNumLeds(), mFps, 2);
+    mByteStream = ByteStreamMemoryPtr::New(fx->getNumLeds() * sizeof(CRGB));
+}
+
+Str VideoFxWrapper::fxName() const {
+    Str out = "video_fx_wrapper: ";
+    out.append(mFx->fxName());
+    return out;
+}
+
+void VideoFxWrapper::draw(DrawContext context) {
+    if (mVideo->needsFrame(context.now)) {
+        mFx->draw(context);  // use the leds in the context as a tmp buffer.
+        mByteStream->writeCRGB(context.leds, mFx->getNumLeds());  // now write the leds to the byte stream.
+    }
+    bool ok = mVideo->draw(context.now, context.leds);
+    if (!ok) {
+        FASTLED_WARN("VideoFxWrapper: draw failed.");
+    }
+}
+
 
 }  // namespace fl
