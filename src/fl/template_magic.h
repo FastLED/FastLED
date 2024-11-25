@@ -114,53 +114,6 @@ using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 } // namespace fl
 
 
-// Convienence macro to define an output operator for a class to make it compatible
-// with std::ostream. This is useful for debugging and logging. The operator will
-// be defined as "os" and the right hand object will be named "obj".
-//
-// Example:
-//  FASTLED_DEFINE_OUTPUT_OPERATOR(CRGB) {
-//      os <<("CRGB(");
-//      os <<(static_cast<int>(obj.r));
-//      os <<(", ");
-//      os <<(static_cast<int>(obj.g));
-//      os <<(", ");
-//      os <<(static_cast<int>(obj.b));
-//      os <<(")");
-//      return os;
-//  }
-//
-// This is needed because in C++ there is two phase lookup, in which ONLY the first
-// parameter will be considered if matched, even if the second argument is a non match.
-//
-// This macro get's around this issue.
-//
-// Consider the following templated operator definition:
-// template<typename OutputStream>
-// OutputStream &operator<<(OutputStream &os, const Str &str) {
-//    os << str.c_str();
-//    return os;
-// }
-//
-// You would think this would only match if the left hand side is an ostream and the
-// second parameter is "Str", but you would be wrong, because of two phase lookup
-// this function will be considered for any type of ostream and ANY type of second
-// parameter, even "float" or "int".
-//
-// This means that normally, this template will match std::stream << float
-// then fail because of ambiguity, even though the second template is not
-// a match. Therefore we use the enable_if which will generate a type if
-// and only if the the second condition is a match.
-//
-// This essentially forces two phase lookup in one pass. Making the compiler skip
-// the definition if the second parameter doesn't match.
-#define FASTLED_DEFINE_OUTPUT_OPERATOR(CLASS)                  \
-template <typename T>                                          \
-typename fl::enable_if<                                        \
-     !fl::is_same<T, CLASS>::value &&                          \
-     !fl::is_pod<T>::value, T&>::type                          \
-operator<<(T& os, const CLASS& obj)
-
 
 
 

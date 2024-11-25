@@ -100,7 +100,7 @@ float atoff(const char *str, size_t len) {
 void StringFormatter::append(int val, StrN<64> *dst) {
     char buf[63];
     string_functions::itoa(val, buf, 63);
-    dst->append(buf);
+    dst->write(buf, strlen(buf));
 }
 
 StringHolder::StringHolder(const char *str) {

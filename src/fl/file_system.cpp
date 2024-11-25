@@ -96,7 +96,7 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
     Video video(pixelsPerFrame, fps, nFrameHistory);
     FileHandlePtr file = openRead(path);
     if (!file) {
-        video.setError(fl::Str("Could not open file: ") << path);
+        video.setError(fl::Str("Could not open file: ").append(path));
         return video;
     }
     video.begin(file);

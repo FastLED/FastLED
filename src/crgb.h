@@ -728,19 +728,6 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d);
 FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
 
-
-// Make compatible with std::ostream and other ostream-like objects
-FASTLED_DEFINE_OUTPUT_OPERATOR(CRGB) {
-    os <<("CRGB(");
-    os <<(static_cast<int>(obj.r));
-    os <<(", ");
-    os <<(static_cast<int>(obj.g));
-    os <<(", ");
-    os <<(static_cast<int>(obj.b));
-    os <<(")");
-    return os;
-}
-
 FASTLED_NAMESPACE_END
 
 

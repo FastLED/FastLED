@@ -63,24 +63,6 @@ TEST_CASE("Str basic operations") {
     }
 }
 
-TEST_CASE("Str with <<") {
-    Str s1("hello");
-    Str s2 = s1 << " world";
-    CHECK(s2.size() == 11);
-    CHECK(strcmp(s2.c_str(), "hello world") == 0);
-
-    Str s3 = s2 << "!";
-    CHECK(s3.size() == 12);
-    CHECK(strcmp(s3.c_str(), "hello world!") == 0);
-}
-
-
-TEST_CASE("outpustream << Str") {
-    Str s1("hello");
-    std::stringstream ss;
-    ss << s1;
-    CHECK_EQ(ss.str(), "hello");
-}
 
 TEST_CASE("Str::reserve") {
     Str s;
@@ -95,7 +77,8 @@ TEST_CASE("Str::reserve") {
     s.reserve(500);
     CHECK(s.size() == 0);
     CHECK(s.capacity() >= 500);
-    s << "hello";
+    // s << "hello";
+    s.append("hello");
     CHECK(s.size() == 5);
     CHECK_EQ(s, "hello");
 }

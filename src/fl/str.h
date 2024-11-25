@@ -239,10 +239,7 @@ template <size_t SIZE = 64> class StrN {
     bool empty() const { return mLength == 0; }
 
     // Append method
-    void append(const char *str) { write(str, strlen(str)); }
-    void append(const char *str, size_t len) { write(str, len); }
-    void append(char c) { write(&c, 1); }
-    void append(const StrN &str) { write(str.c_str(), str.size()); }
+
 
     bool operator<(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
@@ -348,28 +345,14 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    Str& operator<<(int val) {
-        write(val);
-        return *this;
-    }
+    Str& append(const char *str) { write(str, strlen(str)); return *this; }
+    Str& append(const char *str, size_t len) { write(str, len); return *this; }
+    Str& append(char c) { write(&c, 1); return *this; }
+    Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 
-    Str& operator<<(const char* str) {
-        append(str);
-        return *this;
-    }
 
-    Str& operator<<(const StrN& str) {
-        append(str.c_str(), str.size());
-        return *this;
-    }
 };
 
 
 
 } // namespace fl
-
-// Make compatible with std::ostream and other ostream-like objects
-FASTLED_DEFINE_OUTPUT_OPERATOR(fl::Str) {
-    os << obj.c_str();
-    return os;
-}

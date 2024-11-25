@@ -15,7 +15,7 @@ namespace {
     if (count == 0) {
       return Str("PIR");
     }
-    return Str("Pir ") << g_counter++;
+    return Str("Pir ").append(g_counter++);
   }
 }
 
