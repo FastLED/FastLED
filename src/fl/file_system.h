@@ -14,28 +14,25 @@
 namespace fl {
 
 FASTLED_SMART_PTR(FsImpl);
-
 // PLATFORM INTERFACE
 // You need to define this for your platform.
 // Otherwise a null filesystem will be used that will do nothing but spew warnings, but otherwise
 // won't crash the system.
 FsImplPtr make_sdcard_filesystem(int cs_pin);
-
 }
-
-
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
-class Video;
 FASTLED_NAMESPACE_END
-
 
 namespace fl {
 
-FASTLED_SMART_PTR(FsImpl);
+
 FASTLED_SMART_PTR(FileSystem);
 FASTLED_SMART_PTR(FileHandle);
+class Video;
+
+
 
 class JsonDocument;
 
