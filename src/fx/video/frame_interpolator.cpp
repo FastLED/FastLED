@@ -20,14 +20,14 @@ FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
     // DBG("FrameInterpolator::draw");
-    bool ok = draw(now, dst->rgb(), dst->alpha());
+    bool ok = draw(now, dst->rgb());
     if (ok) {
         // dst->setTimestamp(now);
     }
     return ok;
 }
 
-bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
+bool FrameInterpolator::draw(uint32_t now, CRGB* leds) {
     uint32_t frameNumber, nextFrameNumber;
     uint8_t amountOfNextFrame;
     // DBG("now: " << now);
@@ -39,14 +39,14 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     if (has(frameNumber) && !has(nextFrameNumber)) {
         // just paint the current frame
         Frame* frame = get(frameNumber).get();
-        frame->draw(leds, alpha);
+        frame->draw(leds);
         return true;
     }
 
     Frame* frame1 = get(frameNumber).get();
     Frame* frame2 = get(nextFrameNumber).get();
 
-    Frame::interpolate(*frame1, *frame2, amountOfNextFrame, leds, alpha);
+    Frame::interpolate(*frame1, *frame2, amountOfNextFrame, leds);
     // DBG("Interpolated frame " << frameNumber << " and " << nextFrameNumber);
     return true;
 }

@@ -25,26 +25,18 @@ public:
     CRGB* rgb() { return mRgb.get(); }
     const CRGB* rgb() const { return mRgb.get(); }
     size_t size() const { return mPixelsCount; }
-    uint8_t* alpha() { return mAlpha.get(); }
-    const uint8_t* alpha() const { return mAlpha.get(); }
     void copy(const Frame& other);
     void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountOfFrame2);
-    static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels, uint8_t* alpha);
-    void draw(CRGB* leds, uint8_t* alpha) const;
+    static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels);
+    void draw(CRGB* leds) const;
 private:
     const size_t mPixelsCount;
     fl::scoped_array<CRGB> mRgb;
-    fl::scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
 };
 
 
 inline void Frame::copy(const Frame& other) {
     memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
-    if (other.mAlpha) {
-        // mAlpha.reset(new uint8_t[mPixelsCount]);
-        mAlpha.reset(LargeBlockAllocator<uint8_t>::Alloc(mPixelsCount));
-        memcpy(mAlpha.get(), other.mAlpha.get(), mPixelsCount);
-    }
 }
 
 FASTLED_NAMESPACE_END

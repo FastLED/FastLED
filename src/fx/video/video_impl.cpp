@@ -85,14 +85,9 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     mPrevNow = now;
     if (!ok) {
         DBG("updateBufferIfNecessary failed");
-        // paint black
-        memset(leds, 0, mPixelsPerFrame * sizeof(CRGB));
-        if (alpha) {
-            memset(alpha, 0, mPixelsPerFrame);
-        }
         return false;
     }
-    mFrameInterpolator->draw(now, leds, alpha);
+    mFrameInterpolator->draw(now, leds);
     return true;
 }
 

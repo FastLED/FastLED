@@ -29,8 +29,8 @@ class FrameInterpolator : public fl::Referent {
     // selected. Returns true if the interpolation was successful, false
     // otherwise. If false then the destination frame will not be modified. Note
     // that this adjustable_time is allowed to go pause or go backward in time.
-    bool draw(uint32_t adjustable_time, Frame *dst); // Frame has alpha.
-    bool draw(uint32_t adjustable_time, CRGB *leds, uint8_t *alpha = nullptr);
+    bool draw(uint32_t adjustable_time, Frame *dst);
+    bool draw(uint32_t adjustable_time, CRGB *leds);
     bool insert(uint32_t frameNumber, FramePtr frame) {
         return mFrames.insert(frameNumber, frame);
     }

@@ -9,6 +9,7 @@
 #include "namespace.h"
 #include "fl/ptr.h"
 #include "fx/frame.h"
+#include "fl/warn.h"
 
 //#include <assert.h>
 
@@ -34,14 +35,14 @@ class FxLayer : public fl::Referent {
             // Clear the frame
             memset(frame->rgb(), 0, frame->size() * sizeof(CRGB));
             if (fx->hasAlphaChannel()) {
-                memset(frame->alpha(), 0, frame->size());
+                FASTLED_WARN("Alpha channel not supported in FxLayer yet.");
             }
             fx->resume();
             running = true;
         }
         Fx::DrawContext context = {now, frame->rgb()};
         if (fx->hasAlphaChannel()) {
-            context.alpha_channel = frame->alpha();
+            FASTLED_WARN("Alpha channel not supported in FxLayer yet.");
         }
         fx->draw(context);
     }
@@ -61,9 +62,6 @@ class FxLayer : public fl::Referent {
     fl::Ptr<Fx> getFx() { return fx; }
 
     CRGB *getSurface() { return frame->rgb(); }
-    uint8_t *getSurfaceAlpha() {
-        return fx->hasAlphaChannel() ? frame->alpha() : nullptr;
-    }
 
   private:
     fl::Ptr<Frame> frame;

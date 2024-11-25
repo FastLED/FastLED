@@ -30,7 +30,7 @@ TEST_CASE("test frame custom allocator") {
     SetLargeBlockAllocator(custom_malloc, custom_free);
     
     FramePtr frame = FramePtr::New(100, true);  // 100 pixels with alpha channel
-    CHECK(allocation_count == 2);  // One for RGB, one for alpha
+    CHECK(allocation_count == 1);  // One for RGB.
     frame.reset();
 
     // Frame should be destroyed here
