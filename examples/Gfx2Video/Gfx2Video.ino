@@ -1,4 +1,4 @@
-/// @file    Frame2Video.ino
+/// @file    Gfx2Video.ino
 /// @brief   Demonstrates drawing to a frame buffer, which is used as source video for the memory player.
 ///          The render pattern is alternating black/red pixels as a checkerboard.
 /// @example VideoTest.ino
