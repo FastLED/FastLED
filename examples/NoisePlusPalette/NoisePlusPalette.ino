@@ -81,7 +81,6 @@ void setup() {
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
-    noisePalette.lazyInit();
     noisePalette.setSpeed(SPEED);
     noisePalette.setScale(SCALE);
 }

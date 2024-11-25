@@ -14,6 +14,13 @@ CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS          96
 #define FRAMES_PER_SECOND  120
+#define USES_RGBW 0
+
+#if USES_RGBW
+Rgbw rgbwMode = RgbwDefault();
+#else
+Rgbw rgbwMode = RgbwInvalid();  // No RGBW mode, just use RGB.
+#endif
 
 DemoReel100Ptr demoReel = DemoReel100Ptr::New(NUM_LEDS);
 
@@ -21,14 +28,12 @@ void setup() {
   delay(3000); // 3 second delay for recovery
   
   // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip).setRgbw();
-  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
+    .setCorrection(TypicalLEDStrip)
+    .setRgbw(rgbwMode);
 
   // set master brightness control
   FastLED.setBrightness(BRIGHTNESS);
-
-  // Initialize the DemoReel100 instance
-  demoReel->lazyInit();
 }
 
 void loop()
