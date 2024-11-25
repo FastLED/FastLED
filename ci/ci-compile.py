@@ -89,7 +89,7 @@ DEFAULT_EXAMPLES = [
     "RGBWEmulated",
     "TwinkleFox",
     "XYMatrix",
-    "Video/Gfx2Video",
+    "Gfx2Video",
     "SdCard",
 ]
 
