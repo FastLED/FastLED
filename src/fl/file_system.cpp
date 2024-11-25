@@ -93,13 +93,13 @@ void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
 
 FileHandlePtr FileSystem::openRead(const char *path) { return mFs->openRead(path); }
 Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, size_t nFrameHistory) {
-    Video video;
+    Video video(pixelsPerFrame, fps, nFrameHistory);
     FileHandlePtr file = openRead(path);
     if (!file) {
         video.setError(fl::Str("Could not open file: ") << path);
         return video;
     }
-    video.begin(file, pixelsPerFrame, fps, nFrameHistory);
+    video.begin(file);
     return video;
 }
 

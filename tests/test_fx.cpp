@@ -16,7 +16,7 @@
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/scale_up.hpp"
 #include "fx/2d/redsquare.hpp"
-#include "fx/2d/video.hpp"
+#include "fx/video.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE

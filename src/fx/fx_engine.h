@@ -14,6 +14,7 @@
 #include "ui.h"
 #include "fx/time.h"
 #include "fx/video.h"
+#include "xymap.h"
 
 
 // Forward declaration
@@ -153,11 +154,13 @@ inline int FxEngine::addFx(FxPtr effect) {
     return mCounter++;
 }
 
+#if 0
 int FxEngine::addVideo(Video video, XYMap xymap) {
     auto vidfx = VideoFxPtr::New(video, xymap);
     int id = addFx(vidfx);
     return id;
 }
+#endif
 
 inline bool FxEngine::nextFx(uint16_t duration) {
     bool ok = mEffects.next(mCurrId, &mCurrId, true);

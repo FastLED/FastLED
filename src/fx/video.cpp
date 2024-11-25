@@ -25,33 +25,42 @@ FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(Frame);
 
 
-Video::Video() = default;
-Video::Video(FileHandlePtr h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
-    begin(h, pixelsPerFrame, fps, frameHistoryCount);
+Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count) {
+    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
-Video::Video(ByteStreamPtr s, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
-    beginStream(s, pixelsPerFrame, fps, frameHistoryCount);
-}
+
 Video::~Video() = default;
 Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;
 
-void Video::begin(FileHandlePtr h, size_t pixelsPerFrame, float fps,
-                  size_t frameHistoryCount) {
+bool Video::begin(FileHandlePtr handle) {
+    if (!handle) {
+        mError = "FileHandle is null";
+        FASTLED_DBG(mError);
+        return false;
+    }
+    if (mError.size()) {
+        FASTLED_DBG(mError);
+        return false;
+    }
     mError.clear();
-    mImpl.reset();
-    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frameHistoryCount);
-    mImpl->begin(h);
+    mImpl->begin(handle);
+    return true;
 }
 
-
-
-void Video::beginStream(ByteStreamPtr bs, size_t pixelsPerFrame, float fps,
-                        size_t frameHistoryCount) {
+bool Video::beginStream(ByteStreamPtr bs) {
+    if (!bs) {
+        mError = "FileHandle is null";
+        FASTLED_DBG(mError);
+        return false;
+    }
+    if (mError.size()) {
+        FASTLED_DBG(mError);
+        return false;
+    }
     mError.clear();
-    mImpl.reset();
-    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->beginStream(bs);
+    return true;
 }
 
 bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
@@ -106,7 +115,9 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-VideoFx::VideoFx(Video video, XYMap xymap) : FxGrid(xymap), mVideo(video) {}
+#if 0
+
+VideoFx::VideoFx(Video video) : FxStrip(video.), mVideo(video) {}
 
 void VideoFx::draw(DrawContext context) {
     if (!mFrame) {
@@ -138,5 +149,6 @@ void VideoFx::draw(DrawContext context) {
 }
 
 fl::Str VideoFx::fxName() const { return "video"; }
+#endif
 
 FASTLED_NAMESPACE_END

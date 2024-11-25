@@ -4,7 +4,7 @@
 
 #include "namespace.h"
 #include "fl/ptr.h"
-#include "fx/fx2d.h"
+#include "fx/fx1d.h"
 #include "fx/time.h"
 #include "fl/str.h"
 
@@ -38,15 +38,13 @@ public:
     }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
-    Video();  // Please use FileSytem to construct a Video.
-    Video(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());
-    Video(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());
+    Video(size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());  // Please use FileSytem to construct a Video.
     ~Video();
     Video(const Video&);
     Video& operator=(const Video&);
     // Api
-    void begin(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 2);
-    void beginStream(fl::ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 2);
+    bool begin(fl::FileHandlePtr h);
+    bool beginStream(fl::ByteStreamPtr s);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     bool draw(uint32_t now, Frame* frame);
     void end();
@@ -67,9 +65,10 @@ private:
 };
 
 
-class VideoFx : public FxGrid {
+// FxStrip because the video could be non rectangular or a strip.
+class VideoFx : public FxStrip {
   public:
-    VideoFx(Video video, XYMap xymap);
+    VideoFx(Video video);
     void draw(DrawContext context) override;
     fl::Str fxName() const override;
 

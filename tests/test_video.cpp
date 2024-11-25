@@ -16,10 +16,6 @@
 
 #include "namespace.h"
 
-#if 1
-
-
-
 #define FPS 30
 #define FRAME_TIME 1000 / FPS
 #define VIDEO_WIDTH 10
@@ -78,7 +74,7 @@ class FakeFileHandle: public FileHandle {
 
 TEST_CASE("video with memory stream") {
     // Video video(LEDS_PER_FRAME, FPS);
-    Video video;
+    Video video(LEDS_PER_FRAME, FPS, 1);
     ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * 3);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -86,7 +82,7 @@ TEST_CASE("video with memory stream") {
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
     CHECK_EQ(pixels_written, LEDS_PER_FRAME);
-    video.beginStream(memoryStream, LEDS_PER_FRAME, FPS, 1);
+    video.beginStream(memoryStream);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME+1, leds);
     CHECK(ok);
@@ -105,7 +101,7 @@ TEST_CASE("video with memory stream") {
 
 TEST_CASE("video with memory stream, interpolated") {
     // Video video(LEDS_PER_FRAME, FPS);
-    Video video;
+    Video video(LEDS_PER_FRAME, 1);
     ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * sizeof(CRGB)*2);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -118,7 +114,7 @@ TEST_CASE("video with memory stream, interpolated") {
     }
     pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
     CHECK_EQ(pixels_written, LEDS_PER_FRAME);
-    video.beginStream(memoryStream, LEDS_PER_FRAME, 1);  // One frame per second.
+    video.beginStream(memoryStream);  // One frame per second.
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(0, leds);  // First frame starts time 0.
     ok = video.draw(500, leds); // Half a frame.
@@ -136,7 +132,7 @@ TEST_CASE("video with memory stream, interpolated") {
 
 TEST_CASE("video with file handle") {
     // Video video(LEDS_PER_FRAME, FPS);
-    Video video;
+    Video video(LEDS_PER_FRAME, FPS);
     FakeFileHandlePtr fileHandle = FakeFileHandlePtr::New();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black
@@ -146,7 +142,7 @@ TEST_CASE("video with file handle") {
     // now write the data
     size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
     CHECK_EQ(leds_written, LEDS_PER_FRAME);
-    video.begin(fileHandle, LEDS_PER_FRAME, FPS);
+    video.begin(fileHandle);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME+1, leds);
     CHECK(ok);
@@ -159,6 +155,3 @@ TEST_CASE("video with file handle") {
         CHECK_EQ(leds[i], led_frame[i]);
     }
 }
-
-
-#endif
