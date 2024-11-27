@@ -75,7 +75,9 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-parameter
     -Werror=unused-variable
     -Werror=unused-value
-    -Werror=infinite-recursion
+
+    # Not supported in gcc.
+    # -Werror=infinite-recursion
 )
 
 set(UNIT_TEST_COMPILE_FLAGS
