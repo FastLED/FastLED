@@ -11,5 +11,9 @@
 #endif
 
 #ifndef FASTLED_DBG_IF
+#ifdef FASTLED_HAS_DBG
 #define FASTLED_DBG_IF(COND, MSG) if (COND) FASTLED_DBG(MSG)
-#endif
+#else
+#define FASTLED_DBG_IF(COND, MSG)
+#endif  // FASTLED_HAS_DBG
+#endif  // FASTLED_DBG_IF
