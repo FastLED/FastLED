@@ -20,8 +20,9 @@ FASTLED_SMART_PTR(NoisePalette);
 
 class NoisePalette : public Fx2d {
   public:
-    NoisePalette(XYMap xyMap)
-        : Fx2d(xyMap), speed(0), scale(0), colorLoop(1) {
+    // Fps is used by the fx_engine to maintain a fixed frame rate, ignored otherwise.
+    NoisePalette(XYMap xyMap, float fps = 60.f)
+        : Fx2d(xyMap), speed(0), scale(0), colorLoop(1), mFps(fps) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 
@@ -36,6 +37,11 @@ class NoisePalette : public Fx2d {
         noise = fl::scoped_ptr<uint8_t>(new uint8_t[width * height]);
     }
 
+    bool hasFixedFrameRate(float *fps) const override {
+        *fps = mFps;
+        return true;
+    }
+
     // No need for a destructor, scoped_ptr will handle memory deallocation
 
     void draw(DrawContext context) override {
@@ -44,7 +50,6 @@ class NoisePalette : public Fx2d {
     }
 
     Str fxName() const override { return "NoisePalette"; }
-
     void mapNoiseToLEDsUsingPalette(CRGB *leds);
 
     uint8_t changeToRandomPalette();
@@ -73,6 +78,7 @@ class NoisePalette : public Fx2d {
     CRGBPalette16 currentPalette = PartyColors_p;
     bool colorLoop = 0;
     int currentPaletteIndex = 0;
+    float mFps = 60.f;
 
     void fillnoise8();
 
