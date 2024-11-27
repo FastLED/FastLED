@@ -15,4 +15,10 @@ namespace doctest {
             return out.c_str();
         }
     };
+
+    template<> struct StringMaker<Str> {
+        static String convert(const Str& value) {
+            return value.c_str();
+        }
+    };
 }
