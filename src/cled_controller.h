@@ -65,6 +65,9 @@ public:
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
+    #ifndef __AVR__
+    virtual ~CLEDController() {}
+    #endif
     Rgbw getRgbw() const { return mRgbMode; }
 
     /// Create an led controller object, add it to the chain of controllers

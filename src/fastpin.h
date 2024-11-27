@@ -32,6 +32,9 @@ FASTLED_NAMESPACE_BEGIN
 /// Abstract class for "selectable" things
 class Selectable {
 public:
+	#ifndef __AVR__
+	virtual ~Selectable() {}
+	#endif
 	virtual void select() = 0;      ///< Select this object
 	virtual void release() = 0;     ///< Release this object
 	virtual bool isSelected() = 0;  ///< Check if this object is currently selected
@@ -178,9 +181,9 @@ public:
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 
-	virtual void select() { hi(); }
-	virtual void release() { lo(); }
-	virtual bool isSelected() { return (*mPort & mPinMask) == mPinMask; }
+	virtual void select() override { hi(); }
+	virtual void release() override { lo(); }
+	virtual bool isSelected() override { return (*mPort & mPinMask) == mPinMask; }
 };
 
 class OutputPin : public Pin {

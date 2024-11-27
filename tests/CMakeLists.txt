@@ -45,12 +45,37 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Define common compiler flags and definitions
 set(COMMON_COMPILE_FLAGS
     -Wall
+    #-Wextra 
+    #-Wpedantic
     -funwind-tables
     -g3
     -ggdb
     -fno-omit-frame-pointer
     -O0
     -fno-inline
+    -Werror=suggest-override
+    -Werror=return-type
+    #-Werror=missing-declarations
+    #-Werror=redundant-decls
+    #-Werror=init-self
+    #-Werror=missing-field-initializers  
+    #-Werror=pointer-arith
+    #-Werror=write-strings
+    #-Werror=format=2
+    #-Werror=implicit-fallthrough
+    #-Werror=missing-include-dirs
+    #-Werror=date-time
+    -Werror=non-virtual-dtor
+    #-Werror=reorder
+    #-Werror=sign-compare
+    #-Werror=float-equal
+    #-Werror=conversion
+    #-Werror=switch-enum
+    #-Werror=switch-default
+    #-Werror=unused-parameter
+    #-Werror=unused-variable
+    #-Werror=unused-value
+    -Werror=infinite-recursion
 )
 
 set(COMMON_COMPILE_DEFINITIONS

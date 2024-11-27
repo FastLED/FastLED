@@ -31,7 +31,7 @@ protected:
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void showColor(const CRGB& data, int nLeds, uint8_t brightness) {
+    virtual void showColor(const CRGB& data, int nLeds, uint8_t brightness) override {
         // CRGB premixed, color_correction;
         // getAdjustmentData(brightness, &premixed, &color_correction);
         // ColorAdjustment color_adjustment = {premixed, color_correction, brightness};
@@ -44,7 +44,7 @@ protected:
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
+    virtual void show(const struct CRGB *data, int nLeds, uint8_t brightness) override {
         ColorAdjustment color_adjustment = getAdjustmentData(brightness);
         PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, color_adjustment, getDither());
         if(nLeds < 0) {
@@ -66,7 +66,7 @@ public:
 
     /// Get the number of lanes of the Controller
     /// @returns LANES from template
-    int lanes() { return LANES; }
+    int lanes() override { return LANES; }
 };
 
 

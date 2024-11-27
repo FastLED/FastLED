@@ -377,13 +377,13 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 public:
 	APA102Controller() {}
 
-	virtual void init() {
+	virtual void init() override {
 		mSPI.init();
 	}
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) override {
 		PixelIterator iterator = pixels.as_iterator(this->getRgbw());
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {

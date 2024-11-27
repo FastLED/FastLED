@@ -81,6 +81,7 @@ class FileHandle: public Referent {
 class FsImpl : public Referent {
   public:
     struct Visitor {
+      virtual ~Visitor() {}
       virtual void accept(const char* path) = 0;
     };
     FsImpl() = default;
