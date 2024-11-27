@@ -65,7 +65,10 @@ public:
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
-    #ifndef __AVR__
+    #ifdef FASTLED_TESTING
+    // Silences the warning about the destructor not being virtual during testing.
+    // Testing shows that this adds a tremendous amount of size to the binary, about 1k on the teensy41
+    // library. This is kind of mind boggling.
     virtual ~CLEDController() {}
     #endif
     Rgbw getRgbw() const { return mRgbMode; }
