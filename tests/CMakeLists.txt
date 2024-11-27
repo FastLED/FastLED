@@ -59,8 +59,8 @@ set(COMMON_COMPILE_FLAGS
     #-Werror=redundant-decls
     -Werror=init-self
     #-Werror=missing-field-initializers  
-    #-Werror=pointer-arith
-    #-Werror=write-strings
+    -Werror=pointer-arith
+    -Werror=write-strings
     -Werror=format=2
     -Werror=implicit-fallthrough
     -Werror=missing-include-dirs
