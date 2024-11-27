@@ -1,6 +1,6 @@
 // g++ --std=c++11 test_fixed_map.cpp -I../src
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "test.h"
 #include "test.h"
 #include "fl/set.h"
 
