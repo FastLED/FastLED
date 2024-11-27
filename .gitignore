@@ -19,7 +19,6 @@ Thumbs.db
 .pioenvs/
 .piolibdeps/
 .platformio/
-.vscode/extensions.json
 .vscode/c_cpp_properties.json
 .aider*
 !.aider.conf.yml
