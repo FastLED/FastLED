@@ -20,7 +20,7 @@ using std::min;
 
 namespace fl {
 class Str;
-static long map(long x, long in_min, long in_max, long out_min, long out_max) {
+inline long map(long x, long in_min, long in_max, long out_min, long out_max) {
     const long run = in_max - in_min;
     if (run == 0) {
         return 0; // AVR returns -1, SAM returns 0

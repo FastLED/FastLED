@@ -70,7 +70,7 @@ set(COMMON_COMPILE_FLAGS
     #-Werror=sign-compare
     #-Werror=float-equal
     #-Werror=conversion
-    #-Werror=switch-enum
+    -Werror=switch-enum
     #-Werror=switch-default
     #-Werror=unused-parameter
     #-Werror=unused-variable
