@@ -165,7 +165,13 @@ public:
     /// Increment every pixel value in this set
     inline CPixelView & operator++() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
     /// Increment every pixel value in this set
-    inline CPixelView & operator++(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
+    inline CPixelView & operator++(int DUMMY_ARG) {
+        FASTLED_UNUSED(DUMMY_ARG);
+        for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) {
+            (*pixel)++;
+        }
+        return *this;
+    }
 
     /// Decrement every pixel value in this set
     inline CPixelView & operator--() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }

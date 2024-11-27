@@ -350,6 +350,7 @@ public:
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
 	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;
 

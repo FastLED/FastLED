@@ -2,6 +2,7 @@
 
 #include "namespace.h"
 #include "eorder.h"
+#include "fl/unused.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -13,7 +14,9 @@ public:
 	virtual void init() { }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) { }
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		FASTLED_UNUSED(pixels);
+	}
 };
 
 FASTLED_NAMESPACE_END

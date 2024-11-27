@@ -5,6 +5,7 @@
 
 #include "led_sysdefs.h"
 #include <stddef.h>
+#include "fl/unused.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
@@ -307,14 +308,23 @@ public:
 	inline static void toggle() __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::hi(FASTLED_REGISTER port_ptr_t)
-	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
+	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {
+		FASTLED_UNUSED(port);
+	}
 	/// @copydoc Pin::lo(FASTLED_REGISTER port_ptr_t)
-	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
+	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) {
+		FASTLED_UNUSED(port);
+	}
 	/// @copydoc Pin::set(FASTLED_REGISTER port_t)
-	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { }
+	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) {
+		FASTLED_UNUSED(val);
+	}
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { }
+	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) {
+		FASTLED_UNUSED(port);
+		FASTLED_UNUSED(val);
+	}
 
 	/// @copydoc Pin::hival()
 	static port_t hival() __attribute__ ((always_inline)) { return 0; }
