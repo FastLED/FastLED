@@ -45,7 +45,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # Define common compiler flags and definitions
 set(COMMON_COMPILE_FLAGS
     -Wall
-    #-Wextra 
+    -Wextra 
     #-Wpedantic
     -funwind-tables
     -g3
