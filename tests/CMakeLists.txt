@@ -86,6 +86,7 @@ file(GLOB_RECURSE FASTLED_SOURCES
     "${FASTLED_SOURCE_DIR}/src/platforms/*.cpp"
     "${FASTLED_SOURCE_DIR}/src/lib8tion/*.cpp"
     "${FASTLED_SOURCE_DIR}/src/fl/*.cpp"
+    "${FASTLED_SOURCE_DIR}/src/sensors/*.cpp"
 )
 
 #message(STATUS "Found FastLED sources: ${FASTLED_SOURCES}")
@@ -95,6 +96,7 @@ set(FX_SOURCES "")
 set(PLATFORMS_SOURCES "")
 set(LIB8TION_SOURCES "")
 set(FL_SOURCES "")
+set(SENSORS_SOURCES "")
 set(OTHER_SOURCES "")
 
 # Categorize each source file
@@ -107,6 +109,8 @@ foreach(SOURCE ${FASTLED_SOURCES})
         list(APPEND LIB8TION_SOURCES ${SOURCE})
     elseif(SOURCE MATCHES "/fl/")
         list(APPEND FL_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/sensors/")
+        list(APPEND SENSORS_SOURCES ${SOURCE})
     else()
         list(APPEND OTHER_SOURCES ${SOURCE})
     endif()
@@ -176,6 +180,17 @@ if(FL_SOURCES)
     target_compile_definitions(FastLED_fl PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
+if(SENSORS_SOURCES)
+    add_library(FastLED_sensors OBJECT ${SENSORS_SOURCES})
+    set_target_properties(FastLED_sensors PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_sensors PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_sensors PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
 # Create the main FastLED static library that includes all components
 add_library(FastLED STATIC 
     $<TARGET_OBJECTS:FastLED_core>
@@ -183,6 +198,7 @@ add_library(FastLED STATIC
     $<$<TARGET_EXISTS:FastLED_platforms>:$<TARGET_OBJECTS:FastLED_platforms>>
     $<$<TARGET_EXISTS:FastLED_lib8tion>:$<TARGET_OBJECTS:FastLED_lib8tion>>
     $<$<TARGET_EXISTS:FastLED_fl>:$<TARGET_OBJECTS:FastLED_fl>>
+    $<$<TARGET_EXISTS:FastLED_sensors>:$<TARGET_OBJECTS:FastLED_sensors>>
 )
 
 # Set properties for the main library
