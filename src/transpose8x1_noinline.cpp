@@ -1,6 +1,8 @@
 
 #include <stdint.h>
 
+#include "transpose8x1_noinline.h"
+
 void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
     uint32_t x, y, t;
 

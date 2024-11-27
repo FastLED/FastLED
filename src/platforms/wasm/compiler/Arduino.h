@@ -20,7 +20,7 @@ using std::min;
 
 namespace fl {
 class Str;
-long map(long x, long in_min, long in_max, long out_min, long out_max) {
+static long map(long x, long in_min, long in_max, long out_min, long out_max) {
     const long run = in_max - in_min;
     if (run == 0) {
         return 0; // AVR returns -1, SAM returns 0
@@ -115,11 +115,12 @@ struct SerialEmulation {
 #define LED_BUILTIN 13
 #define HIGH 1
 #define LOW 0
-void digitalWrite(int, int) {}
-void analogWrite(int, int) {}
-int digitalRead(int) { return LOW; }
 
-void pinMode(int, int) {}
+
+inline void digitalWrite(int, int) {}
+inline void analogWrite(int, int) {}
+inline int digitalRead(int) { return LOW; }
+inline void pinMode(int, int) {}
 
 // avr flash memory macro is disabled.
 #ifdef F

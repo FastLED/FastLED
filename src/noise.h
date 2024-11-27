@@ -144,6 +144,23 @@ void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, 
 /// @param width the width of the 2D buffer
 /// @param height the height of the 2D buffer
 /// @param octaves the number of octaves to use for noise. More octaves = more noise.
+/// @param freq44 starting octave frequency
+/// @param amplitude noise amplitude
+/// @param skip how many noise maps to skip over, incremented recursively per octave
+/// @param x x-axis coordinate on noise map (1D)
+/// @param scalex the scale (distance) between x points when filling in noise
+/// @param y y-axis coordinate on noise map (2D)
+/// @param scaley the scale (distance) between y points when filling in noise
+/// @param time the time position for the noise field
+void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time);
+void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time);
+
+
+/// Fill a 2D 8-bit buffer with noise, using inoise8() 
+/// @param pData the array of data to fill with noise values
+/// @param width the width of the 2D buffer
+/// @param height the height of the 2D buffer
+/// @param octaves the number of octaves to use for noise. More octaves = more noise.
 /// @param x x-axis coordinate on noise map (1D)
 /// @param scalex the scale (distance) between x points when filling in noise
 /// @param y y-axis coordinate on noise map (2D)

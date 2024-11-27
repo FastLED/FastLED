@@ -88,8 +88,9 @@ using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
-
-
+// Backdoor to get the size of the CLedController object. The one place
+// that includes this just uses extern to declare the function.
+uint16_t cled_contoller_size();
 
 /// LED chipsets with SPI interface
 enum ESPIChipsets {

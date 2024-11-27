@@ -23,6 +23,13 @@
 volatile uint32_t fuckit;
 #endif
 
+/// Has to be declared outside of any namespaces.
+/// Called at program exit when run in a desktop environment. 
+/// Extra C definition that some environments may need. 
+/// @returns 0 to indicate success
+extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
+extern "C"  __attribute__((weak)) void yield(void) { }
+
 FASTLED_NAMESPACE_BEGIN
 
 uint16_t cled_contoller_size() {
@@ -304,11 +311,7 @@ uint8_t get_brightness() {
 	return FastLED.getBrightness();
 }
 
-/// Called at program exit when run in a desktop environment. 
-/// Extra C definition that some environments may need. 
-/// @returns 0 to indicate success
-extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
-extern "C"  __attribute__((weak)) void yield(void) { }
+
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

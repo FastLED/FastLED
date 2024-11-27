@@ -8,7 +8,7 @@ namespace fl {
 
 namespace string_functions {
 
-int itoa(int value, char *sp, int radix) {
+static int itoa(int value, char *sp, int radix) {
     char tmp[16]; // be careful with the length of the buffer
     char *tp = tmp;
     int i;
@@ -42,7 +42,7 @@ int itoa(int value, char *sp, int radix) {
     return len;
 }
 
-float atoff(const char *str, size_t len) {
+static float atoff(const char *str, size_t len) {
     float result = 0.0f;    // The resulting number
     float sign = 1.0f;      // Positive or negative
     float fraction = 0.0f;  // Fractional part

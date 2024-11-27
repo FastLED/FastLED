@@ -14,7 +14,7 @@ bool parseJson(const char* json, fl::JsonDocument* doc, Str* _error) {
     return true;
 }
 
-void toJson(const FLArduinoJson::JsonDocument& doc, Str* jsonBuffer) {
+void toJson(const fl::JsonDocument& doc, Str* jsonBuffer) {
     serializeJson(doc, *jsonBuffer);
 }
 

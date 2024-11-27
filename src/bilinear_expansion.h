@@ -55,4 +55,11 @@ void bilinearExpandFloat(const CRGB *input, CRGB *output,
                                  uint8_t inputWidth, uint8_t inputHeight,
                                  XYMap xyMap);
 
+void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
+                                  uint16_t inputWidth, uint16_t inputHeight,
+                                  XYMap xyMap);
+
+uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
+                                 uint8_t v11, float dx, float dy);
+
 FASTLED_NAMESPACE_END

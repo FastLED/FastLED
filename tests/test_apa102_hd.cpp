@@ -40,23 +40,18 @@ struct Power {
   uint8_t power_5bit_u8;
 };
 
-float power_diff(Power power) {
+static float power_diff(Power power) {
   return abs(power.power - power.power_5bit);
 }
 
-uint16_t mymap(uint32_t x, uint32_t in_min, uint32_t in_max, uint32_t out_min, uint32_t out_max) {
-  return static_cast<uint16_t>(
-     (x - in_min) * (out_max - out_min) / static_cast<double>(in_max - in_min) + out_min
-  );
-}
 
-float power_rgb(CRGB color, uint8_t brightness) {
+static float power_rgb(CRGB color, uint8_t brightness) {
   color *= brightness;
   float out = color.r / 255.f + color.g / 255.f + color.b / 255.f;
   return out / 3.0f;
 }
 
-float compute_power_5bit(CRGB color, uint8_t power_5bit, uint8_t brightness) {
+static float compute_power_5bit(CRGB color, uint8_t power_5bit, uint8_t brightness) {
   assert(power_5bit <= 31);
   float rgb_pow = power_rgb(color, brightness);
   float brightness_pow = (power_5bit) / 31.0f;
@@ -66,7 +61,7 @@ float compute_power_5bit(CRGB color, uint8_t power_5bit, uint8_t brightness) {
 }
 
 
-float compute_power_apa102(CRGB color, uint8_t brightness, uint8_t* power_5bit) {
+static float compute_power_apa102(CRGB color, uint8_t brightness, uint8_t* power_5bit) {
   uint16_t r16 = map8_to_16(color.r);
   uint16_t g16 = map8_to_16(color.g);
   uint16_t b16 = map8_to_16(color.b);
@@ -78,19 +73,19 @@ float compute_power_apa102(CRGB color, uint8_t brightness, uint8_t* power_5bit) 
 }
 
 
-float compute_power_ws2812(CRGB color, uint8_t brightness) {
+static float compute_power_ws2812(CRGB color, uint8_t brightness) {
   float power = power_rgb(color, brightness);
   return power;
 }
 
-Power compute_power(uint8_t brightness8, CRGB color) {
+static Power compute_power(uint8_t brightness8, CRGB color) {
   uint8_t power_5bit_u8;
   float power_5bit = compute_power_apa102(color, brightness8, &power_5bit_u8);
   float power_rgb = compute_power_ws2812(color, brightness8);
   return {power_rgb, power_5bit, power_5bit_u8};
 }
 
-void make_random(CRGB* color, uint8_t* brightness) {
+static void make_random(CRGB* color, uint8_t* brightness) {
   color->r = rand() % 256;
   color->g = rand() % 256;
   color->b = rand() % 256;
@@ -101,23 +96,6 @@ struct Data {
   CRGB color;
   uint8_t brightness;
 };
-
-
-
-
-void problematic_test(CRGB color, uint8_t brightness) {
-    Power p = compute_power(brightness, color);
-    std::ostringstream oss;
-
-    // print out the power
-    oss << std::endl;
-    oss << "power: " << p.power << " power_5bit: " << p.power_5bit << " power_5bit_u8: " << int(p.power_5bit_u8) << std::endl;
-    oss << "brightness: " << int(brightness) << " color: R: " << int(color.r) << " G: " << int(color.g) << " B: " << int(color.b) << std::endl;
-    oss << "compute_power_5bit: " << compute_power_5bit(color, p.power_5bit_u8, brightness) << std::endl;
-    oss << "Power RGB: " << power_rgb(color, brightness) << std::endl;
-    oss << "Diff: " << power_diff(p) << std::endl;
-    std::cout << oss.str() << std::endl;
-}
 
 
 TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
