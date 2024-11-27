@@ -232,7 +232,7 @@ If you want to make changes to FastLED then please
 
   * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
   * Open up the folder with VSCode.
-    * Make sure VSCode had the platformio extension.
+    * Make sure VSCode has the platformio extension.
   * Once FastLED is loading with platformio, give it some time to download the dependencies (esp32-s3 (default) has a 1+GB download!)
   * Click the platformio compile
     * Then upload to your device
