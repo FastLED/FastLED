@@ -18,7 +18,6 @@ namespace fl {
 // Forward declare classes
 FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
-FASTLED_SMART_PTR(VideoFx);
 FASTLED_SMART_PTR(Frame);
 FASTLED_SMART_PTR(VideoImpl);
 FASTLED_SMART_PTR(VideoFxWrapper);
@@ -28,7 +27,7 @@ FASTLED_SMART_PTR(ByteStreamMemory);
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. You can either use
 // a file handle or a byte stream to read the video data.
-class Video {
+class Video : public Fx1d {
 public:
     static size_t DefaultFrameHistoryCount() {
         #ifdef __AVR__
@@ -39,11 +38,15 @@ public:
     }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
-    Video();
     Video(size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());  // Please use FileSytem to construct a Video.
     ~Video();
     Video(const Video&);
     Video& operator=(const Video&);
+
+    // Fx Api
+    void draw(DrawContext context) override;
+    Str fxName() const override;
+
     // Api
     bool begin(fl::FileHandlePtr h);
     bool beginStream(fl::ByteStreamPtr s);
@@ -54,8 +57,8 @@ public:
     bool rewind();
     void setTimeScale(float timeScale);
     float timeScale() const;
-    fl::Str error() const;
-    void setError(const fl::Str& error) { mError = error; }
+    Str error() const;
+    void setError(const Str& error) { mError = error; }
     size_t pixelsPerFrame() const;
     void pause(uint32_t now);
     void resume(uint32_t now);
@@ -65,22 +68,11 @@ public:
 private:
     bool mFinished = false;
     VideoImplPtr mImpl;
-    fl::Str mError;
+    Str mError;
+    Str mName;
 };
 
 
-// Fx1d because the video could be non rectangular or a strip.
-class VideoFx : public Fx1d {
-  public:
-    VideoFx(Video video);
-    void draw(DrawContext context) override;
-    fl::Str fxName() const override;
-    void pause(uint32_t now) override;
-    void resume(uint32_t now) override;
-
-  private:
-    Video mVideo;
-};
 
 // Wraps an Fx and stores a history of video frames. This allows
 // interpolation between frames.

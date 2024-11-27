@@ -74,7 +74,7 @@ void setup() {
 
     video.beginStream(memoryStream);
     // Add the video effect to the FxEngine
-    fxEngine.addVideo(video);
+    fxEngine.addFx(video);
 }
 
 void loop() {

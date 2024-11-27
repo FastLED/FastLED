@@ -47,6 +47,7 @@ using namespace fl;
 
 #define MATRIX_WIDTH 32
 #define MATRIX_HEIGHT 32
+#define NUM_VIDEO_FRAMES 2  // enables interpolation with > 1 frame.
 
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
@@ -61,7 +62,7 @@ CRGB leds[NUM_LEDS];
 ScreenMap screenMap;
 
 FileSystem filesystem;
-Video video;
+Video video(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
 
 Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.1f);
 

@@ -58,13 +58,6 @@ class FxEngine {
 
 
     /**
-     * @brief Adds a new video effect to the engine.
-     * @param video The video to be added.
-     * @return The index of the added effect, or -1 if the effect couldn't be added.
-     */
-    int addVideo(Video video);
-
-    /**
      * @brief Adds a new effect to the engine. Allocate from static memory.
      *        This is not reference tracked and an object passed in must never be
      *        deleted, as the engine will use a non tracking Ptr which may outlive

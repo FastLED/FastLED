@@ -32,12 +32,6 @@ int FxEngine::addFx(FxPtr effect) {
     return mCounter++;
 }
 
-int FxEngine::addVideo(Video video) {
-    auto vidfx = VideoFxPtr::New(video);
-    int id = addFx(vidfx);
-    return id;
-}
-
 bool FxEngine::nextFx(uint16_t duration) {
     bool ok = mEffects.next(mCurrId, &mCurrId, true);
     if (!ok) {

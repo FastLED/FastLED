@@ -26,12 +26,7 @@ FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(Frame);
 
 
-Video::Video() {
-    setError("Video must be constructed with a pixel count and fps.");
-}
-
-
-Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count) {
+Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count): Fx1d(pixelsPerFrame) {
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
 
@@ -94,6 +89,18 @@ bool Video::draw(uint32_t now, CRGB *leds) {
     return ok;
 }
 
+void Video::draw(DrawContext context) {
+    if (!mImpl) {
+        FASTLED_WARN_IF(!mError.empty(), mError.c_str());
+        return;
+    }
+    mImpl->draw(context.now, context.leds);
+}
+
+Str Video::fxName() const {
+    return "Video";
+}
+
 bool Video::draw(uint32_t now, Frame *frame) {
     if (!mImpl) {
         return false;
@@ -121,7 +128,7 @@ float Video::timeScale() const {
     return mImpl->timeScale();
 }
 
-fl::Str Video::error() const {
+Str Video::error() const {
     return mError;
 }
 
@@ -146,27 +153,6 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-VideoFx::VideoFx(Video video): Fx1d(video.pixelsPerFrame()), mVideo(video) {}
-
-void VideoFx::draw(DrawContext context) {
-    mVideo.draw(context.now, context.leds);
-}
-
-fl::Str VideoFx::fxName() const {
-    return "VideoFx";
-}
-
-void VideoFx::pause(uint32_t now) {
-    if (mVideo) {
-        mVideo.pause(now);
-    }
-}
-
-void VideoFx::resume(uint32_t now) {
-    if (mVideo) {
-        mVideo.resume(now);
-    }
-}
 
 VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     if (!mFx->hasFixedFrameRate(&mFps)) {
