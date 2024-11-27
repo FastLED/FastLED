@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-#include "doctest.h"
+#include "test.h"
 #include "fx/1d/cylon.hpp"
 #include "fx/1d/demoreel100.hpp"
 #include "fx/1d/noisewave.hpp"

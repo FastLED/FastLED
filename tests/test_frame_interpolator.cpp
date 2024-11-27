@@ -4,7 +4,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-#include "doctest.h"
+#include "test.h"
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
 #include "namespace.h"

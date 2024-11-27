@@ -3,7 +3,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-#include "doctest.h"
+#include "test.h"
 #include "platforms/wasm/compiler/Arduino.h"
 
 #include "namespace.h"

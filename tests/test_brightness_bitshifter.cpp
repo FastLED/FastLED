@@ -3,7 +3,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-#include "doctest.h"
+#include "test.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/brightness_bitshifter.h"
 #include <iostream>

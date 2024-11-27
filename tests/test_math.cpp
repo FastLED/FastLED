@@ -3,7 +3,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-#include "doctest.h"
+#include "test.h"
 #include "FastLED.h"
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"

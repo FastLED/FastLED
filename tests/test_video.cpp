@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "doctest.h"
+#include "test.h"
 #include "lib8tion/intmap.h"
 #include "fx/video/pixel_stream.h"
 #include "fl/bytestreammemory.h"

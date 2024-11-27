@@ -3,7 +3,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-#include "doctest.h"
+#include "test.h"
 #include "FastLED.h"
 #include "five_bit_hd_gamma.h"
 #include "assert.h"
