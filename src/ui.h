@@ -6,6 +6,7 @@
 #include "namespace.h"
 #include "fl/math_macros.h"
 #include "fl/template_magic.h"
+#include "fl/unused.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER
 #define FASTLED_HAS_UI_SLIDER 0
@@ -42,7 +43,12 @@ class Slider {
   public:
     // If step is -1, it will be calculated as (max - min) / 100
     Slider(const char *name, float value = 128.0f, float min = 1, float max = 255, float step = -1.f)
-      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {}
+      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
+        FASTLED_UNUSED(name);
+        FASTLED_UNUSED(step);
+        if (value < min) { mValue = min; }
+        if (value > max) { mValue = max; }
+    }
     ~Slider() {}
     float value() const { return mValue; }
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
@@ -71,7 +77,9 @@ class Slider {
 
 class Button {
   public:
-    Button(const char *name) {}
+    Button(const char *name) {
+      FASTLED_UNUSED(name);
+    }
     ~Button() {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
@@ -84,7 +92,9 @@ class Button {
 
 class Checkbox {
   public:
-    Checkbox(const char *name, bool value = false) : mValue(value) {}
+    Checkbox(const char *name, bool value = false) : mValue(value) {
+      FASTLED_UNUSED(name);
+    }
     ~Checkbox() {}
     operator bool() const { return mValue; }
     operator int() const { return mValue ? 1 : 0; }
@@ -102,7 +112,9 @@ class Checkbox {
 class NumberField {
   public:
     NumberField(const char *name, double value, double min = 0, double max = 100)
-      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {}
+      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
+        FASTLED_UNUSED(name);
+    }
     ~NumberField() {}
     double value() const { return mValue; }
     void setValue(double value) { mValue = MAX(mMin, MIN(mMax, value)); }
@@ -123,7 +135,9 @@ class NumberField {
 
 class Title {
   public:
-    Title(const char *name) {}
+    Title(const char *name) {
+      FASTLED_UNUSED(name);
+    }
     ~Title() {}
 };
 
@@ -133,7 +147,9 @@ class Title {
 
 class Description {
   public:
-    Description(const char *name) {}
+    Description(const char *name) {
+      FASTLED_UNUSED(name);
+    }
     ~Description() {}
 };
 

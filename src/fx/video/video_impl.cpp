@@ -160,7 +160,7 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         uint32_t frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
             // Happens when we are not full and we need to allocate a new frame.
-            recycled_frame = FramePtr::New(mPixelsPerFrame, false);
+            recycled_frame = FramePtr::New(mPixelsPerFrame);
         }
 
         if (!mStream->readFrame(recycled_frame.get())) {
@@ -241,7 +241,7 @@ bool VideoImpl::updateBufferFromFile(uint32_t now, bool forward) {
         uint32_t frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
             // Happens when we are not full and we need to allocate a new frame.
-            recycled_frame = FramePtr::New(mPixelsPerFrame, false);
+            recycled_frame = FramePtr::New(mPixelsPerFrame);
         }
 
        do {  // only to use break

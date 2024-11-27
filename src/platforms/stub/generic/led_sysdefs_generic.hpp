@@ -2,6 +2,7 @@
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "platforms/stub/led_sysdefs_stub.h"
+#include "fl/unused.h"
 
 #include <chrono>
 #include <thread>
@@ -10,6 +11,8 @@ static const auto start_time = std::chrono::system_clock::now();
 
 void pinMode(uint8_t pin, uint8_t mode) {
     // Empty stub as we don't actually ever write anything
+    FASTLED_UNUSED(pin);
+    FASTLED_UNUSED(mode);
 }
 
 uint32_t millis() {

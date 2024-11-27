@@ -1,5 +1,6 @@
 #include "fl/file_system.h"
 #include "fl/warn.h"
+#include "fl/unused.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -11,6 +12,7 @@
 
 #include "namespace.h"
 #include "fl/json.h"
+#include "fl/unused.h"
 
 
 namespace fl {
@@ -22,10 +24,19 @@ class NullFileHandle : public FileHandle {
 
     bool available() const override { return false; }
     size_t size() const override { return 0; }
-    size_t read(uint8_t *dst, size_t bytesToRead) override { return 0; }
+    size_t read(uint8_t *dst, size_t bytesToRead) override {
+        FASTLED_UNUSED(dst);
+        FASTLED_UNUSED(bytesToRead);
+        return 0;
+    }
     size_t pos() const override { return 0; }
-    const char *path() const override { return "NULL FILE HANDLE"; }
-    bool seek(size_t pos) override { return false; }
+    const char *path() const override {
+        return "NULL FILE HANDLE";
+    }
+    bool seek(size_t pos) override {
+        FASTLED_UNUSED(pos);
+        return false;
+    }
     void close() override {}
     bool valid() const override {
         FASTLED_WARN("NullFileHandle is not valid");
@@ -45,10 +56,12 @@ class NullFileSystem : public FsImpl {
 
     void close(FileHandlePtr file) override {
         // No need to do anything for in-memory files
+        FASTLED_UNUSED(file);
         FASTLED_WARN("NullFileSystem::close");
     }
 
     FileHandlePtr openRead(const char *_path) override {
+        FASTLED_UNUSED(_path);
         FileHandlePtr out = FileHandlePtr::TakeOwnership(new NullFileHandle());
         return out;
     }
@@ -86,7 +99,14 @@ void FileSystem::end() {
 }
 
 bool FileSystem::readJson(const char *path, JsonDocument* doc, fl::Str* error) {
-    return false;
+    Str text;
+    if (!readText(path, &text)) {
+        if (error) {
+            error->append("Failed to read file: ").append(path);
+        }
+        return false;
+    }
+    return parseJson(text.c_str(), doc, error);
 }
 
 void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
@@ -125,6 +145,7 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
 
 namespace fl {
 __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
+    FASTLED_UNUSED(cs_pin);
     FsImplPtr out = FsImplPtr::TakeOwnership(new NullFileSystem());
     return out;
 }

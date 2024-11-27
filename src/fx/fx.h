@@ -8,6 +8,7 @@
 #include "detail/draw_context.h"
 #include "detail/transition.h"
 #include "fl/str.h"
+#include "fl/unused.h"
 
 namespace fl {
 
@@ -29,14 +30,17 @@ class Fx : public fl::Referent {
 
     // If true then this fx has a fixed frame rate and the fps parameter will be
     // set to the frame rate.
-    virtual bool hasFixedFrameRate(float *fps) const { *fps = 30; return true; }
+    virtual bool hasFixedFrameRate(float *fps) const {
+      FASTLED_UNUSED(fps);
+      return false;
+    }
 
     // Get the name of the current fx.
     virtual fl::Str fxName() const = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
-    virtual void pause(uint32_t now) {} 
-    virtual void resume(uint32_t now) {} // Called when the fx is resumed after a pause,
+    virtual void pause(uint32_t now) { FASTLED_UNUSED(now); } 
+    virtual void resume(uint32_t now) { FASTLED_UNUSED(now); } // Called when the fx is resumed after a pause,
                              // usually when a transition has started.
 
     uint16_t getNumLeds() const { return mNumLeds; }

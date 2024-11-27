@@ -29,7 +29,7 @@ TEST_CASE("test frame custom allocator") {
     // Set our custom allocator
     SetLargeBlockAllocator(custom_malloc, custom_free);
     
-    FramePtr frame = FramePtr::New(100, true);  // 100 pixels with alpha channel
+    FramePtr frame = FramePtr::New(100);  // 100 pixels.
     CHECK(allocation_count == 1);  // One for RGB.
     frame.reset();
 

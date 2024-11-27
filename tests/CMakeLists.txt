@@ -72,7 +72,7 @@ set(COMMON_COMPILE_FLAGS
     #-Werror=conversion
     -Werror=switch-enum
     #-Werror=switch-default
-    #-Werror=unused-parameter
+    -Werror=unused-parameter
     #-Werror=unused-variable
     #-Werror=unused-value
     -Werror=infinite-recursion

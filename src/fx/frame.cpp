@@ -12,7 +12,7 @@
 namespace fl {
 
 
-Frame::Frame(int pixels_count, bool has_alpha)
+Frame::Frame(int pixels_count)
     : mPixelsCount(pixels_count), mRgb() {
     mRgb.reset(reinterpret_cast<CRGB *>(LargeBlockAllocate(pixels_count * sizeof(CRGB))));
     memset(mRgb.get(), 0, pixels_count * sizeof(CRGB));

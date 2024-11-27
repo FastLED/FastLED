@@ -20,7 +20,7 @@ public:
     // Frames take up a lot of memory. On some devices like ESP32 there is
     // PSRAM available. You should see allocator.h -> SetLargeBlockAllocator(...)
     // on setting a custom allocator for these large blocks.
-    explicit Frame(int pixels_per_frame, bool has_alpha = false);
+    explicit Frame(int pixels_per_frame);
     ~Frame() override;
     CRGB* rgb() { return mRgb.get(); }
     const CRGB* rgb() const { return mRgb.get(); }
