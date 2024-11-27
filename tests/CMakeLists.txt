@@ -61,9 +61,9 @@ set(COMMON_COMPILE_FLAGS
     #-Werror=missing-field-initializers  
     #-Werror=pointer-arith
     #-Werror=write-strings
-    #-Werror=format=2
-    #-Werror=implicit-fallthrough
-    #-Werror=missing-include-dirs
+    -Werror=format=2
+    -Werror=implicit-fallthrough
+    -Werror=missing-include-dirs
     -Werror=date-time
     -Werror=non-virtual-dtor
     #-Werror=reorder
