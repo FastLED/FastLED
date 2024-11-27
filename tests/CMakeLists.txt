@@ -64,7 +64,42 @@ set(COMMON_COMPILE_FLAGS
     #-Werror=format=2
     #-Werror=implicit-fallthrough
     #-Werror=missing-include-dirs
-    #-Werror=date-time
+    -Werror=date-time
+    -Werror=non-virtual-dtor
+    #-Werror=reorder
+    #-Werror=sign-compare
+    -Werror=float-equal
+    #-Werror=conversion
+    -Werror=switch-enum
+    #-Werror=switch-default
+    #-Werror=unused-parameter
+    #-Werror=unused-variable
+    #-Werror=unused-value
+    -Werror=infinite-recursion
+)
+
+set(UNIT_TEST_COMPILE_FLAGS
+    -Wall
+    #-Wextra 
+    #-Wpedantic
+    -funwind-tables
+    -g3
+    -ggdb
+    -fno-omit-frame-pointer
+    -O0
+    -fno-inline
+    -Werror=suggest-override
+    -Werror=return-type
+    -Werror=missing-declarations
+    #-Werror=redundant-decls
+    -Werror=init-self
+    #-Werror=missing-field-initializers  
+    #-Werror=pointer-arith
+    #-Werror=write-strings
+    #-Werror=format=2
+    #-Werror=implicit-fallthrough
+    #-Werror=missing-include-dirs
+    -Werror=date-time
     -Werror=non-virtual-dtor
     #-Werror=reorder
     #-Werror=sign-compare
@@ -232,7 +267,7 @@ set_target_properties(FastLED PROPERTIES
     CXX_STANDARD_REQUIRED ON
     POSITION_INDEPENDENT_CODE ON
 )
-target_compile_options(FastLED PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_options(FastLED PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 if(NOT APPLE)
     target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
@@ -303,7 +338,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     if(NOT APPLE)
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
-    target_compile_options(${TEST_NAME} PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
     target_compile_definitions(${TEST_NAME} PRIVATE 
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
