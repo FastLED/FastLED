@@ -236,7 +236,7 @@ void FastLEDANIMartRIX::loop() {
         }
     }
     // (this->*ANIMATION_TABLE[index].func)();
-    FASTLED_DBG("Animation not found for " << index);
+    FASTLED_DBG("Animation not found for " << int(data->current_animation));
 }
 
 const char* Animartrix::getAnimationName(AnimartrixAnim animation) {
@@ -245,7 +245,7 @@ const char* Animartrix::getAnimationName(AnimartrixAnim animation) {
             return entry.name;
         }
     }
-    FASTLED_DBG("Animation not found for " << index);
+    FASTLED_DBG("Animation not found for " << int(animation));
     return "UNKNOWN";
 }
 
