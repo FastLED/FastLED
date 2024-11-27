@@ -14,10 +14,10 @@ class FailedTest:
     name: str
     return_code: int
     stdout: str
-    stderr: str
 
 
-def run_command(command, use_gdb=False) -> tuple[int, str, str]:
+def run_command(command, use_gdb=False) -> tuple[int, str]:
+    captured_lines = []
     if use_gdb:
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as gdb_script:
             gdb_script.write("set pagination off\n")
@@ -34,23 +34,45 @@ def run_command(command, use_gdb=False) -> tuple[int, str, str]:
         process = subprocess.Popen(
             gdb_command,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout
             shell=True,
             text=True,
+            bufsize=1,  # Line buffered
         )
-        stdout, stderr = process.communicate()
+        assert process.stdout is not None
+        # Stream and capture output
+        while True:
+            line = process.stdout.readline()
+            if not line and process.poll() is not None:
+                break
+            if line:
+                captured_lines.append(line.rstrip())
+                print(line, end="")  # Print in real-time
+
         os.unlink(gdb_script.name)
-        return process.returncode, stdout, stderr
+        output = "\n".join(captured_lines)
+        return process.returncode, output
     else:
         process = subprocess.Popen(
             command,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Merge stderr into stdout
             shell=True,
             text=True,
+            bufsize=1,  # Line buffered
         )
-        stdout, stderr = process.communicate()
-        return process.returncode, stdout, stderr
+        assert process.stdout is not None
+        # Stream and capture output
+        while True:
+            line = process.stdout.readline()
+            if not line and process.poll() is not None:
+                break
+            if line:
+                captured_lines.append(line.rstrip())
+                print(line, end="")  # Print in real-time
+
+        output = "\n".join(captured_lines)
+        return process.returncode, output
 
 
 def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
@@ -60,14 +82,10 @@ def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
     if clean:
         command.append("--clean")
     command.extend(unknown_args)
-    return_code, stdout, stderr = run_command(" ".join(command))
+    return_code, _ = run_command(" ".join(command))
     if return_code != 0:
         print("Compilation failed:")
-        print(stdout)
-        print(stderr)
         sys.exit(1)
-    print(stdout)
-    print(stderr)
     print("Compilation successful.")
 
 
@@ -96,18 +114,17 @@ def run_tests(specific_test: str | None = None) -> None:
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
             print(f"Running test: {test_file}")
-            return_code, stdout, stderr = run_command(test_path)
+            return_code, stdout = run_command(test_path)
 
-            output = stdout + stderr
+            output = stdout
             failure_pattern = re.compile(r"Test .+ failed with return code (\d+)")
             failure_match = failure_pattern.search(output)
             is_crash = failure_match is not None
 
             if is_crash:
                 print("Test crashed. Re-running with GDB to get stack trace...")
-                _, gdb_stdout, gdb_stderr = run_command(test_path, use_gdb=True)
+                _, gdb_stdout = run_command(test_path, use_gdb=True)
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
-                stderr += "\n--- GDB Errors ---\n" + gdb_stderr
 
                 # Extract crash information
                 crash_info = extract_crash_info(gdb_stdout)
@@ -117,10 +134,6 @@ def run_tests(specific_test: str | None = None) -> None:
 
             print("Test output:")
             print(stdout)
-            if stderr:
-                print("Test errors:")
-                print(stderr)
-
             if return_code == 0:
                 print("Test passed")
             elif is_crash:
@@ -133,7 +146,7 @@ def run_tests(specific_test: str | None = None) -> None:
 
             print("-" * 40)
             if return_code != 0:
-                failed_tests.append(FailedTest(test_file, return_code, stdout, stderr))
+                failed_tests.append(FailedTest(test_file, return_code, stdout))
     if failed_tests:
         for failed_test in failed_tests:
             print(
