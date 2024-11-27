@@ -2,6 +2,7 @@
 
 #include "FastLED.h"
 #include "force_inline.h"
+#include "fl/unused.h"
 
 #if FASTLED_IS_USING_NAMESPACE
 #define FUNCTION_FILL_RAINBOW(a,b,c,d) FASTLED_NAMESPACE::fill_rainbow(a,b,c,d)
@@ -176,7 +177,13 @@ public:
     /// Decrement every pixel value in this set
     inline CPixelView & operator--() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
     /// Decrement every pixel value in this set
-    inline CPixelView & operator--(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
+    inline CPixelView & operator--(int DUMMY_ARG) {
+        FASTLED_UNUSED(DUMMY_ARG);
+        for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) {
+            (*pixel)--;
+        }
+        return *this;
+    }
 
     /// Divide every LED by the given value
     inline CPixelView & operator/=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) /= d; } return *this; }
@@ -304,6 +311,7 @@ public:
     /// @param directionCode the direction to travel around the color wheel
     /// @see ::fill_gradient_RGB(CRGB*, uint16_t, const CRGB&, const CRGB&)
     inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
+        FASTLED_UNUSED(directionCode); // TODO: why is this not used?
         if(dir >= 0) {
             FUNCTION_FILL_GRADIENT_RGB(leds,len,startcolor, endcolor);
         } else {
