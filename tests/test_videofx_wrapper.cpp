@@ -1,25 +1,13 @@
 
 
+#include "test.h"
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-
-#include "doctest.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
 #include "fx/video.h"
 #include "fl/vector.h"
 #include "FastLED.h"
 
-using namespace fl;
-
-namespace doctest {
-    template<> struct StringMaker<CRGB> {
-        static String convert(const CRGB& value) {
-            fl::Str out = value.toString();
-            return out.c_str();
-        }
-    };
-}
 
 FASTLED_SMART_PTR(Fake2d);
 
