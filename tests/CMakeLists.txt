@@ -67,7 +67,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=date-time
     -Werror=non-virtual-dtor
     #-Werror=reorder
-    #-Werror=sign-compare
+    -Werror=sign-compare
     -Werror=float-equal
     #-Werror=conversion
     -Werror=switch-enum
