@@ -56,9 +56,9 @@ set(COMMON_COMPILE_FLAGS
     -Werror=suggest-override
     -Werror=return-type
     -Werror=missing-declarations
-    #-Werror=redundant-decls
+    -Werror=redundant-decls
     -Werror=init-self
-    #-Werror=missing-field-initializers  
+    -Werror=missing-field-initializers  
     -Werror=pointer-arith
     -Werror=write-strings
     -Werror=format=2
