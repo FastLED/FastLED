@@ -43,7 +43,8 @@ void VideoImpl::setTimeScale(float timeScale) {
 
 bool VideoImpl::needsFrame(uint32_t now) const {
     uint32_t f1, f2;
-    return mFrameInterpolator->needsFrame(now, &f1, &f2);
+    bool out = mFrameInterpolator->needsFrame(now, &f1, &f2);
+    return out;
 }
 
 VideoImpl::~VideoImpl() { end(); }

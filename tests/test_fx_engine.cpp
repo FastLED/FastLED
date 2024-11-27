@@ -7,10 +7,22 @@
 #include "doctest.h"
 #include "fx/fx.h"
 #include "fx/fx_engine.h"
+#include "fx/fx2d.h"
+#include "fl/vector.h"
 #include "FastLED.h"
 
-#include "namespace.h"
-FASTLED_USING_NAMESPACE
+using namespace fl;
+
+namespace doctest {
+    template<> struct StringMaker<CRGB> {
+        static String convert(const CRGB& value) {
+            Str out = value.toString();
+            return out.c_str();
+        }
+    };
+}
+
+
 
 FASTLED_SMART_PTR(MockFx);
 
@@ -164,4 +176,45 @@ TEST_CASE("test_transition") {
         CHECK(transition.getProgress(100) == 255);
         CHECK(transition.getProgress(101) == 255);
     }
+}
+
+
+// Simple Fx2d object which writes a single red pixel to the first LED
+// with the red component being the intensity of the frame counter.
+class Fake2d : public Fx2d {
+  public:
+    Fake2d() : Fx2d(XYMap::constructRectangularGrid(1,1)) {}
+
+    void draw(DrawContext context) override {
+        CRGB c = mColors[mFrameCounter % mColors.size()];
+        context.leds[0] = c;
+        mFrameCounter++;
+    }
+
+    bool hasFixedFrameRate(float *fps) const override {
+        *fps = 1;
+        return true;
+    }
+
+    Str fxName() const override { return "Fake2d"; }
+    uint8_t mFrameCounter = 0;
+    FixedVector<CRGB, 5> mColors;
+};
+
+TEST_CASE("test_fixed_fps") {
+    Fake2d fake;
+    fake.mColors.push_back(CRGB(0, 0, 0));
+    fake.mColors.push_back(CRGB(255, 0, 0));
+
+    CRGB leds[1];
+    bool interpolate = true;
+    FxEngine engine(1, interpolate);
+    int id = engine.addFx(fake);
+    CHECK_EQ(0, id);
+    engine.draw(0, &leds[0]);
+    CHECK_EQ(1, fake.mFrameCounter);
+    CHECK_EQ(leds[0], CRGB(0, 0, 0));
+    engine.draw(500, &leds[0]);
+    CHECK_EQ(2, fake.mFrameCounter);
+    CHECK_EQ(leds[0], CRGB(127, 0, 0));
 }

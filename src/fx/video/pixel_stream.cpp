@@ -72,18 +72,19 @@ bool PixelStream::atEnd() const {
 }
 
 bool PixelStream::readFrame(Frame* frame) {
-    // returns true if a frame was read.
-    if (!framesRemaining() || !frame) {
-        DBG("failed to read frame, framesRemaining: " << framesRemaining() << ", frame: " << frame);
+    if (!frame) {
         return false;
     }
-    if (mUsingByteStream) {
-        mByteStream->readCRGB(frame->rgb(), mbytesPerFrame / 3);
-    } else {
-        mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3);
+    if (!mUsingByteStream) {
+        if (!framesRemaining()) {
+            return false;
+        }
+        size_t n = mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3);
         DBG("pos: " << mFileHandle->pos());
+        return n*3 == size_t(mbytesPerFrame);
     }
-    return true;
+    size_t n = mByteStream->readCRGB(frame->rgb(), mbytesPerFrame / 3);
+    return n*3 == size_t(mbytesPerFrame);
 }
 
 bool PixelStream::hasFrame(uint32_t frameNumber) {

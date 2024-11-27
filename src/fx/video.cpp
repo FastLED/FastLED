@@ -161,6 +161,7 @@ VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
     }
     mVideo = VideoImplPtr::New(fx->getNumLeds(), mFps, 2);
     mByteStream = ByteStreamMemoryPtr::New(fx->getNumLeds() * sizeof(CRGB));
+    mVideo->beginStream(mByteStream);
 }
 
 VideoFxWrapper::~VideoFxWrapper() = default;
