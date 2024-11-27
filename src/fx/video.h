@@ -60,8 +60,8 @@ public:
     Str error() const;
     void setError(const Str& error) { mError = error; }
     size_t pixelsPerFrame() const;
-    void pause(uint32_t now);
-    void resume(uint32_t now);
+    void pause(uint32_t now) override;
+    void resume(uint32_t now) override;
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
