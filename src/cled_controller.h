@@ -67,10 +67,19 @@ public:
     }
 
     CLEDController();
-    #ifdef FASTLED_TESTING
+    #if defined(FASTLED_TESTING)
     // Silences the warning about the destructor not being virtual during testing.
-    // Testing shows that this adds a tremendous amount of size to the binary, about 1k on the teensy41
-    // library. This is kind of mind boggling.
+    // Testing shows that this virtual destructor adds a 600 bytes to the binary on
+    // attiny85 and about 1k for the teensy 4.X series.
+    // Attiny85:
+    //   With CLEDController destructor virtual: 11018 bytes to binary.
+    //   Without CLEDController destructor virtual: 10666 bytes to binary.
+    // Looking at the ELF/Map file, it appears that adding a virtual destructor to this
+    // base class not only adds vtables to the subclasses, but also pulls in malloc & free,
+    // which are by far the largest functions in binary size.
+    // Since we don't control how this library is compiled, the only thing we can do is
+    // carefully enable this virtual destructor for testing only and in the future, for boards
+    // that have enough space to handle the extra binary size.
     virtual ~CLEDController();
     #else
     ~CLEDController();
