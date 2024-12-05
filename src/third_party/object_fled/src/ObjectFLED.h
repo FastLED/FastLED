@@ -31,29 +31,20 @@
 */
 
 #ifndef __IMXRT1062__
-#error "Sorry, ObjectFLED only works on Teensy 4.x boards."
+// Do nothing for other platforms.
 #endif
 #if TEENSYDUINO < 121
 #error "Teensyduino version 1.21 or later is required to compile this library."
 #endif
 #ifndef ObjectFLED_h
 #define ObjectFLED_h
-// #include <Arduino.h>
+#include <WProgram.h>
 #include "DMAChannel.h"
-#include "core_pins.h"
 
-// for DMAMEM
-#include "pgmspace.h"
-
-// for NUM_DIGITAL_PINS and NUM_DIGITAL_PINS
-#include "pins_arduino.h"
-
-#if !defined(NUM_DIGITAL_PINS) && !defined(USING_ARDUINO_FOR_TEENSY)
-#define USING_ARDUINO_FOR_TEENSY 0
-#else
-#define USING_ARDUINO_FOR_TEENSY 1
-#endif
-
+//Experimentally found DSE=3, SPEED=0 gave best LED overclocking
+//boot defaults DSE=6, SPEED=2.
+#define OUTPUT_PAD_DSE		3		//Legal values 0-7
+#define OUTPUT_PAD_SPEED	0		//Legal values 0-3
 
 // Ordinary RGB data is converted to GPIO bitmasks on-the-fly using
 // a transmit buffer sized for 2 DMA transfers.  The larger this setting,
@@ -100,8 +91,8 @@
 class ObjectFLED {
 public:
 	//Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
-	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t config, uint8_t numPins, const uint8_t* pinList, \
-				uint8_t serpentine = 0);
+	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t color_order, uint8_t numPins, const uint8_t* pinList, \
+			   uint8_t serpentine = 0);
 
 	~ObjectFLED() { delete frameBuffer; }
 
@@ -162,8 +153,8 @@ private:
 	uint8_t serpNumber;
 	float OC_FACTOR = 1.0;					//used to reduce period of LED output
 	uint16_t TH_TL = 1250;					//nS- period of LED output
-	uint16_t T0H = TH_TL / 3.0;				//nS- duration of T0H
-	uint16_t T1H = TH_TL * 2.0 / 3.0;		//nS- duration of T1H
+	uint16_t T0H = TH_TL / 3;				//nS- duration of T0H
+	uint16_t T1H = TH_TL * 2 / 3;			//nS- duration of T1H
 	uint16_t LATCH_DELAY = 75;				//uS time to hold output low for LED latch.
 
 	//for show context switch

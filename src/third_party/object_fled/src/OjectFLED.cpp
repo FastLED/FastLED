@@ -1,10 +1,3 @@
-#ifdef __IMXRT1062__  // Teensy only
-
-#include <string.h>
-
-#include "ObjectFLED.h"
-#include "fl/math_macros.h"
-
 /*  ObjectFLED - Teensy 4.x DMA to all pins for independent control of large and 
 	multiple LED display objects
 
@@ -61,7 +54,18 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 * Added support for per-object setting of OC factor, TH+TL, T0H, T1H, and LATCH_DELAY in begin function
 */
 
+#ifndef __IMXRT1062__
+// Do nothing for other platforms.
+#else
+#include "ObjectFLED.h"
 
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
 
 volatile uint32_t framebuffer_index = 0;		//isr()
 uint8_t* ObjectFLED::frameBuffer;				//isr()
@@ -79,11 +83,11 @@ DMAChannel ObjectFLED::dma3;
 volatile bool dma_first;
 
 
-ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t numPins, \
+ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t color_order, uint8_t numPins, \
 					const uint8_t *pinList, uint8_t serpentine) {
 	serpNumber = serpentine;
 	drawBuffer = drawBuf;
-	params = config;
+	params = color_order;
 	if (numPins > NUM_DIGITAL_PINS) numPins = NUM_DIGITAL_PINS;
 	numpins = numPins;			//static/isr
 	stripLen = numLEDs / numpins;
@@ -150,6 +154,10 @@ void ObjectFLED::begin(void) {
 		pin_offset[i] = offset;		//static/isr
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
 		bitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
+		//bit7:6 SPEED; bit 5:3 DSE; bit0 SRE  (default SPEED = 0b10; def. DSE = 0b110)
+		*portControlRegister(pin) &= ~0xF9;		//clear SPEED, DSE, SRE
+		*portControlRegister(pin) |= ((OUTPUT_PAD_SPEED & 0x3) << 6) | \
+			((OUTPUT_PAD_DSE & 0x7) << 3);	//DSE = 0b011 for LED overclock
 		//clear pin bit in IOMUX_GPR26 to map GPIO6-9 to GPIO1-4 for DMA 
 		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;		
 		*standard_gpio_addr(portModeRegister(pin)) |= mask;		//GDIR? bit flag set output mode
