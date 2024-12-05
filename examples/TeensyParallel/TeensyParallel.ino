@@ -39,6 +39,7 @@ void blink(CRGB color, int times) {
 }
 
 void loop() {
+    Serial.println("Blinking...");
     blink(CRGB::Red, 1);
     blink(CRGB::Green, 2);
     blink(CRGB::Blue, 3);
