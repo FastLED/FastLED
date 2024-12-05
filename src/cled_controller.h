@@ -39,6 +39,7 @@ protected:
     CRGB m_ColorCorrection;    ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
     CRGB m_ColorTemperature;   ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
     EDitherMode m_DitherMode;  ///< the current dither mode of the controller
+    bool m_enabled = true;
     int m_nLeds;               ///< the number of LEDs in the LED data array
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
@@ -65,6 +66,8 @@ public:
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
+
+    void setEnabled(bool enabled) { m_enabled = enabled; }
 
     CLEDController();
     #if defined(FASTLED_TESTING)
@@ -107,7 +110,9 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
     void showInternal(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds,brightness);
+        if (m_enabled) {
+           show(data, nLeds,brightness);
+        }
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -118,14 +123,18 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColorInternal(const struct CRGB &data, int nLeds, uint8_t brightness) {
-        showColor(data, nLeds, brightness);
+        if (m_enabled) {
+            showColor(data, nLeds, brightness);
+        }
     }
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
     void showLedsInternal(uint8_t brightness) {
-        show(m_Data, m_nLeds, brightness);
+        if (m_enabled) {
+            show(m_Data, m_nLeds, brightness);
+        }
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -134,7 +143,9 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColorInternal(const struct CRGB & data, uint8_t brightness) {
-        showColor(data, m_nLeds, brightness);
+        if (m_enabled) {
+            showColor(data, m_nLeds, brightness);
+        }
     }
 
     /// Get the first LED controller in the linked list of controllers
