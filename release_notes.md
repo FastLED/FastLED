@@ -4,6 +4,7 @@ FastLED 3.9.5
 * Much of the new code has been moved into a namespace. This is now located in the fl/ directory.
 * Namespaces are now compiled in test to ensure they work correctly.
 * Many strict compiler warnings are now treated as errors during unit test. Fixes have been applied.
+* CLEDController::setEnabled(bool) now allows controllers to be selectively disabled/enabled. This is useful if you want to have multiple controller types mapped to the same pin and select which ones are active during runtime.
 
 FastLED 3.9.4
 =============
