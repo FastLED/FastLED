@@ -174,6 +174,11 @@ MAPLE_MINI = Board(
     platform="ststm32",
 )
 
+ATTINY88 = Board(
+    board_name="attiny88",
+    platform="atmelavr",
+)
+
 # ATtiny1604
 ATTINY1616 = Board(
     board_name="ATtiny1616",

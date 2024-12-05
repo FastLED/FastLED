@@ -7,8 +7,8 @@
 
 #include <FastLED.h>
 
-#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtinyxy4__)
-// too large for ATtiny85, so skip this.
+#if defined(__AVR__)
+// too large for ATtiny85, attiny88, etc.. Just disable it for all avr boards.
 void setup() {};
 void loop() {};
 #else
