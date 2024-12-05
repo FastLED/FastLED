@@ -65,21 +65,19 @@ public:
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
+
+    CLEDController();
     #ifdef FASTLED_TESTING
     // Silences the warning about the destructor not being virtual during testing.
     // Testing shows that this adds a tremendous amount of size to the binary, about 1k on the teensy41
     // library. This is kind of mind boggling.
-    virtual ~CLEDController() {}
+    virtual ~CLEDController();
+    #else
+    ~CLEDController();
     #endif
     Rgbw getRgbw() const { return mRgbMode; }
 
-    /// Create an led controller object, add it to the chain of controllers
-    CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
-        m_pNext = NULL;
-        if(m_pHead==NULL) { m_pHead = this; }
-        if(m_pTail != NULL) { m_pTail->m_pNext = this; }
-        m_pTail = this;
-    }
+
 
     /// Initialize the LED controller
     virtual void init() = 0;
@@ -90,18 +88,7 @@ public:
         clearLedDataInternal(nLeds);
     }
 
-    inline ColorAdjustment getAdjustmentData(uint8_t brightness) {
-        // *premixed = getAdjustment(brightness);
-        // if (color_correction) {
-        //     *color_correction = getAdjustment(255);
-        // }
-        #if FASTLED_HD_COLOR_MIXING
-        ColorAdjustment out = {getAdjustment(brightness), getAdjustment(255), brightness};
-        #else
-        ColorAdjustment out = {getAdjustment(brightness)};
-        #endif
-        return out;
-    }
+    ColorAdjustment getAdjustmentData(uint8_t brightness);
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
     ///
@@ -159,13 +146,7 @@ public:
     }
 
     /// Zero out the LED data managed by this controller
-    void clearLedDataInternal(int nLeds = -1) {
-        if(m_Data) {
-            nLeds = (nLeds < 0) ? m_nLeds : nLeds;
-            nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
-            memset((void*)m_Data, 0, sizeof(struct CRGB) * nLeds);
-        }
-    }
+    void clearLedDataInternal(int nLeds = -1);
 
     /// How many LEDs does this controller manage?
     /// @returns CLEDController::m_nLeds
