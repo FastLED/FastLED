@@ -90,7 +90,21 @@
 //Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 class ObjectFLED {
 public:
-	//Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
+	// Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
+	// Example:
+    // byte pinList[NUM_CHANNELS] = {1, 8, 14, 17, 24, 29, 20, 0, 15, 16, 18, 19, 21, 22, 23, 25};
+    // byte pinListBlank[7] = {1, 8, 14, 17, 24, 29, 20};
+    // CRGB testCube[NUM_PLANES][NUM_ROWS][PIX_PER_ROW];
+    // CRGB blankLeds[7][8][8];
+    // ObjectFLED leds(PIX_PER_ROW * NUM_ROWS * NUM_PLANES, testCube, CORDER_RGB, NUM_CHANNELS, pinList);
+	// void setup() {
+	//    leds.begin(1.6, 72);    //1.6 ocervlock factor, 72uS LED latch delay
+	//    leds.setBrightness(64);
+	// }
+	// void loop() {
+	//    leds.show();
+	//    delay(100);
+	// }
 	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t color_order, uint8_t numPins, const uint8_t* pinList, \
 			   uint8_t serpentine = 0);
 
