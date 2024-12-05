@@ -5,6 +5,7 @@ FastLED 3.9.5
 * Namespaces are now compiled in test to ensure they work correctly.
 * Many strict compiler warnings are now treated as errors during unit test. Fixes have been applied.
 * CLEDController::setEnabled(bool) now allows controllers to be selectively disabled/enabled. This is useful if you want to have multiple controller types mapped to the same pin and select which ones are active during runtime.
+* Attiny88 now under test.
 
 FastLED 3.9.4
 =============
