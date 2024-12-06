@@ -91,8 +91,18 @@ DEFINE_PRINT_HELPER(int64_t, "%ld");
 DEFINE_PRINT_HELPER(int32_t, "%d");
 DEFINE_PRINT_HELPER(int16_t, "%d");
 DEFINE_PRINT_HELPER(int8_t, "%d");
+DEFINE_PRINT_HELPER(bool, "%d");
+DEFINE_PRINT_HELPER(unsigned long, "%lu");
 DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
 DEFINE_PRINT_HELPER_EXT(fl::Str, "%s", val.c_str());
+
+#define A0 0
+#define A1 1
+#define A2 2
+#define A3 3
+#define A4 4
+#define A5 5
+
 
 // gcc pop options
 #pragma GCC diagnostic pop
@@ -115,6 +125,9 @@ struct SerialEmulation {
 #define LED_BUILTIN 13
 #define HIGH 1
 #define LOW 0
+#define INPUT 0
+#define OUTPUT 1
+#define INPUT_PULLUP 2
 
 
 inline void digitalWrite(int, int) {}
