@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 #include "fl/ui.h"
+#include "fl/dbg.h"
+
+using namespace fl;
 
 // Done by hand. Old school.
 class ToggleButton {
@@ -103,8 +106,16 @@ class CountingButton {
   }
   
   void Update(uint32_t time_now) {
+    bool clicked = mButton.clicked();
+    FASTLED_DBG("clicked: " << clicked);
     bool val = Read() || mButton.clicked();
     bool changed = val != on_;
+
+    if (clicked) {
+      ++curr_val_;
+      debounce_timestamp_ = time_now;
+      return;
+    }
 
     if (val != on_) {  // Has the toggle switch changed?
       on_ = val;       // Set the new toggle switch value.
