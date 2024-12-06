@@ -246,6 +246,12 @@ private:
         }
     }
 
+    void reserve(size_t n) {
+        if (n > mCapacity) {
+            ensure_size(n);
+        }
+    }
+
     // Array access operators
     T& operator[](size_t index) {
         return mArray[index];
