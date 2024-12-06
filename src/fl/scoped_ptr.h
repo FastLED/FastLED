@@ -138,6 +138,10 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
         arr_ = arr;
     }
 
+    void clear() {
+        reset();
+    }
+
     T* release() {
         T* tmp = arr_;
         arr_ = nullptr;

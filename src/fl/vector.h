@@ -222,9 +222,28 @@ private:
         mArray.reset(new T[mCapacity]);
     }
 
+    HeapVector() : HeapVector(16) {}
+
     // Destructor
     ~HeapVector() {
         clear();
+    }
+
+    void ensure_size(size_t n) {
+        if (n > mCapacity) {
+            size_t new_capacity = (3*mCapacity) / 2;
+            if (new_capacity < n) {
+                new_capacity = n;
+            }
+            fl::scoped_array<T> new_array(new T[new_capacity]);
+            for (size_t i = 0; i < mSize; ++i) {
+                new_array[i] = mArray[i];
+            }
+            // mArray = std::move(new_array);
+            mArray.reset();
+            mArray.reset(new_array.release());
+            mCapacity = new_capacity;
+        }
     }
 
     // Array access operators
@@ -251,6 +270,7 @@ private:
 
     // Element addition/removal
     void push_back(const T& value) {
+        ensure_size(mSize + 1);
         if (mSize < mCapacity) {
             mArray[mSize] = value;
             ++mSize;

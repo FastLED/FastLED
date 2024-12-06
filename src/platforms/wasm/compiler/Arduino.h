@@ -156,3 +156,4 @@ extern SerialEmulation Serial1;
 extern SerialEmulation Serial2;
 extern SerialEmulation Serial3;
 typedef SerialEmulation HardwareSerial;
+typedef SerialEmulation SoftwareSerial;
