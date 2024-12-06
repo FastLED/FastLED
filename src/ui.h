@@ -143,6 +143,9 @@ class Title {
 
 #endif
 
+
+
+
 #if !FASTLED_HAS_UI_DESCRIPTION
 
 class Description {
@@ -169,5 +172,7 @@ FASTLED_UI_DEFINE_OPERATORS(NumberField);
 FASTLED_UI_DEFINE_OPERATORS(Checkbox);
 FASTLED_UI_DEFINE_OPERATORS(Button);
 
+#define FASTLED_TITLE(text) Title g_title(text)
+#define FASTLED_DESCRIPTION(text) Description g_description(text)
 
 FASTLED_NAMESPACE_END

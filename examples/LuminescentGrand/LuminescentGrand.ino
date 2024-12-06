@@ -46,9 +46,8 @@
 MIDI_CREATE_INSTANCE(SoftwareSerial, Serial, MIDI);
 
 
-Title title("Luminescent Grand");
-Description description("A MIDI keyboard visualizer.");
-
+FASTLED_TITLE("Luminescent Grand");
+FASTLED_DESCRIPTION("A MIDI keyboard visualizer.");
 
 
 /////////////////////////////////////////////////////////
