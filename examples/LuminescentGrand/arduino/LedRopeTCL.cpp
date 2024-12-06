@@ -13,6 +13,7 @@
 
 #include "FastLED.h"
 #include "fl/dbg.h"
+#include "ui.h"
 
 
 #define CHIPSET WS2812
@@ -20,6 +21,7 @@
 
 namespace {
 
+Button buttonAllWhite("All white");
 
 ScreenMap init_screenmap() {
   LedColumns cols = LedLayoutArray();
@@ -28,7 +30,7 @@ ScreenMap init_screenmap() {
   for (int i = 0; i < length; ++i) {
     sum += cols.array[i];
   }
-  ScreenMap screen_map(sum, 0.7f);
+  ScreenMap screen_map(sum, 0.3f);
   int curr_idx = 0;
   for (int i = 0; i < length; ++i) {
     int n = cols.array[i];
@@ -79,6 +81,11 @@ void LedRopeTCL::RawDrawPixel(const Color3i& c) {
 void LedRopeTCL::RawDrawPixel(byte r, byte g, byte b) {
   if (led_buffer_.size() >= mScreenMap.getLength()) {
     return;
+  }
+  if (buttonAllWhite.isPressed()) {
+    r = 0xff;
+    g = 0xff;
+    b = 0xff;
   }
   CRGB c(r, g, b);
   size_t idx = led_buffer_.size();
