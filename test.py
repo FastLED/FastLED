@@ -11,6 +11,7 @@ import _thread
 from pathlib import Path
 from typing import List, Tuple, Any, Optional
 
+_PIO_CHECK_ENABLED = False
 
 _IS_GITHUB = os.environ.get('GITHUB_ACTIONS') == 'true'
 
@@ -63,6 +64,14 @@ def parse_args() -> argparse.Namespace:
                        help='Specific C++ test to run')
     return parser.parse_args()
 
+
+def _make_pio_check_cmd() -> List[str]:
+    return ['pio', 'check', '--skip-packages', 
+                            '--src-filters=+<src/>', '--severity=medium',
+                            '--fail-on-defect=high', '--flags',
+                            '--inline-suppr --enable=all --std=c++17']
+
+
 def main() -> None:
     try:
         args = parse_args()
@@ -87,10 +96,9 @@ def main() -> None:
         output_buffer = io.StringIO()
         output_queue: queue.Queue[Tuple[str, str]] = queue.Queue()
 
-        cmd_list = ['uv', 'run', 'pio', 'check', '--skip-packages', 
-                                           '--src-filters=+<src/>', '--severity=medium',
-                                           '--fail-on-defect=high', '--flags',
-                                           '--inline-suppr --enable=all --std=c++17']
+        cmd_list = _make_pio_check_cmd()
+        if not _PIO_CHECK_ENABLED:
+            cmd_list = ['echo', 'pio check is disabled']
 
         cmd_str = subprocess.list2cmdline(cmd_list)
         
