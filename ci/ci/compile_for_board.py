@@ -48,9 +48,13 @@ def compile_for_board_and_example(
     # Copy all files from the example directory to the "src" directory
     for src_file in example.rglob("*"):
         if src_file.is_file():
-            locked_print(f"Copying {src_file} to {srcdir / src_file.name}")
+            src_dir = src_file.parent
+            path = src_dir.relative_to(example)
+            dst_dir = srcdir / path
+            os.makedirs(dst_dir, exist_ok=True)
+            locked_print(f"Copying {src_file} to {dst_dir / src_file.name}")
             os.makedirs(srcdir, exist_ok=True)
-            shutil.copy(src_file, srcdir / src_file.name)
+            shutil.copy(src_file, dst_dir / src_file.name)
     # libs = ["src", "ci"]
     if use_pio_run:
         # we have to copy a few folders of pio ci in order to get this to work.
