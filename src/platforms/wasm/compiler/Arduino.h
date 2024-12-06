@@ -120,6 +120,7 @@ struct SerialEmulation {
     void write(const char *s, size_t n) { fwrite(s, 1, n, stdout); }
     void flush() {}
     void end() {}
+    uint8_t peek() { return 0; }
 };
 
 #define LED_BUILTIN 13
@@ -150,7 +151,8 @@ inline void pinMode(int, int) {}
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
 
-SerialEmulation Serial;
-SerialEmulation Serial1;
-SerialEmulation Serial2;
-SerialEmulation Serial3;
+extern SerialEmulation Serial;
+extern SerialEmulation Serial1;
+extern SerialEmulation Serial2;
+extern SerialEmulation Serial3;
+typedef SerialEmulation HardwareSerial;
