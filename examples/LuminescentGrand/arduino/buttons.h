@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "ui.h"
 
 // Done by hand. Old school.
 class ToggleButton {
@@ -102,7 +103,7 @@ class CountingButton {
   }
   
   void Update(uint32_t time_now) {
-    int val = Read();
+    bool val = Read() || mButton.clicked();
     bool changed = val != on_;
 
     if (val != on_) {  // Has the toggle switch changed?
@@ -121,7 +122,7 @@ class CountingButton {
   int curr_val() const { return curr_val_; }
   
  private:
-  int Read() {
+  bool Read() {
   	return button_.Read();
   }
  
@@ -131,6 +132,7 @@ class CountingButton {
  public:
   DigitalButton button_;
   unsigned long debounce_timestamp_;
+  Button mButton = Button("Counting Button");
 };
 
 class ColorSelector {

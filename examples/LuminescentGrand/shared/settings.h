@@ -12,7 +12,7 @@ enum {
 
   // Led Curtain is a mode that we used on the bus. When this is
   // zero it's assume that we are using the TCL led lighting.
-  kUseLedCurtin = 1,
+  kUseLedCurtin = 0,
   
   kShowFps = 0,  // If true then the fps is printed to the console.
   

@@ -9,6 +9,7 @@
 #include "../shared/framebuffer.h"
 #include "../shared/settings.h"
 #include "./LedRopeTCL.h"
+#include "../shared/led_layout_array.h"
 
 #include "FastLED.h"
 #include "fl/dbg.h"
@@ -16,6 +17,33 @@
 
 #define CHIPSET WS2812
 #define PIN_LEDS 0
+
+namespace {
+
+
+ScreenMap init_screenmap() {
+  LedColumns cols = LedLayoutArray();
+  const int length = cols.length;
+  int sum = 0;
+  for (int i = 0; i < length; ++i) {
+    sum += cols.array[i];
+  }
+  ScreenMap screen_map(sum, 0.7f);
+  int curr_idx = 0;
+  for (int i = 0; i < length; ++i) {
+    int n = cols.array[i];
+    //int stagger = i % 2;
+    for (int j = 0; j < n; ++j) {
+      fl::pair_xy_float xy(i*2, j*8);
+      screen_map.set(curr_idx++, xy);
+    }
+  }
+
+  return screen_map;
+}
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::PreDrawSetup() {
@@ -49,6 +77,9 @@ void LedRopeTCL::RawDrawPixel(const Color3i& c) {
 
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::RawDrawPixel(byte r, byte g, byte b) {
+  if (led_buffer_.size() >= mScreenMap.getLength()) {
+    return;
+  }
   CRGB c(r, g, b);
   size_t idx = led_buffer_.size();
   // FASTLED_DBG("[" << idx << "] RawDrawPixels: " << c.toString().c_str());
@@ -76,7 +107,7 @@ void LedRopeTCL::RawCommitDraw() {
     CRGB* leds = led_buffer_.data();
     size_t n_leds = led_buffer_.size();
     //FastLED.addLeds<TCL, 0, 0>(0, 0);
-    FastLED.addLeds<WS2812, PIN_LEDS>(leds, n_leds);
+    FastLED.addLeds<WS2812, PIN_LEDS>(leds, n_leds).setScreenMap(mScreenMap);
   }
   FastLED.show();
   //FASTLED_DBG("led_buffer after clear: " << led_buffer_.size());
@@ -85,6 +116,8 @@ void LedRopeTCL::RawCommitDraw() {
 ///////////////////////////////////////////////////////////////////////////////
 LedRopeTCL::LedRopeTCL(int n_pixels)
 	: frame_buffer_(n_pixels), draw_offset_(0), lazy_initialized_(false) {
+  mScreenMap = init_screenmap();
+  led_buffer_.reserve(mScreenMap.getLength());
   if (kUseLedCurtin) {
     //tcl_.setNewLedChipset(true);
   }

@@ -29,6 +29,7 @@
 #include "shared/dprint.h"
 #include "FastLED.h"
 #include "fl/dbg.h"
+#include "ui.h"
 
 // Spoof the midi library so it thinks it's running on an arduino.
 //#ifndef ARDUINO
@@ -44,6 +45,9 @@
 
 MIDI_CREATE_INSTANCE(SoftwareSerial, Serial, MIDI);
 
+
+Title title("Luminescent Grand");
+Description description("A MIDI keyboard visualizer.");
 
 
 
@@ -100,6 +104,7 @@ void HandleAfterTouchChannel(byte channel, byte pressure) {
   }
   #endif
 }
+
 
 
 /////////////////////////////////////////////////////////
