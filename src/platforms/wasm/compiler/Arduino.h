@@ -92,9 +92,12 @@ DEFINE_PRINT_HELPER(int32_t, "%d");
 DEFINE_PRINT_HELPER(int16_t, "%d");
 DEFINE_PRINT_HELPER(int8_t, "%d");
 DEFINE_PRINT_HELPER(bool, "%d");
-DEFINE_PRINT_HELPER(unsigned long, "%lu");
 DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
 DEFINE_PRINT_HELPER_EXT(fl::Str, "%s", val.c_str());
+
+#ifdef __EMSCRIPTEN__
+DEFINE_PRINT_HELPER(unsigned long, "%lu");  // Not sure why this is needed in emscripten
+#endif
 
 #define A0 0
 #define A1 1
