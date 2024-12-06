@@ -116,9 +116,11 @@ RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
 #COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
 #RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
 
+RUN pip install uv==0.5.6
+
 # Get the compiler requirements and install them.
 COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
-RUN pip install -r /install/requirements.txt
+RUN uv pip install --system -r /install/requirements.txt
 
 RUN pio settings set check_platformio_interval 9999
 RUN pio settings set enable_telemetry 0
