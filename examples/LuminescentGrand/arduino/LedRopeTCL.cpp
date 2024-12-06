@@ -30,13 +30,13 @@ ScreenMap init_screenmap() {
   for (int i = 0; i < length; ++i) {
     sum += cols.array[i];
   }
-  ScreenMap screen_map(sum, 0.3f);
+  ScreenMap screen_map(sum, 0.8f);
   int curr_idx = 0;
   for (int i = 0; i < length; ++i) {
     int n = cols.array[i];
-    //int stagger = i % 2;
+    int stagger = i % 2 ? 4 : 0;
     for (int j = 0; j < n; ++j) {
-      fl::pair_xy_float xy(i*2, j*8);
+      fl::pair_xy_float xy(i*4, j*8 + stagger);
       screen_map.set(curr_idx++, xy);
     }
   }
