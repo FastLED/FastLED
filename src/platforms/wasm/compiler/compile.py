@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import List
 
 
-
 @dataclass
 class DateLine:
     dt: datetime
@@ -50,6 +49,7 @@ class SyntaxCheckResult:
     file_path: Path
     is_valid: bool
     message: str
+
 
 _CHECK_SYNTAX = False
 _COMPILER_PATH = "em++"
@@ -79,7 +79,7 @@ INDEX_JS_SRC = FASTLED_COMPILER_DIR / "index.js"
 
 WASM_COMPILER_SETTTINGS = JS_DIR / "wasm_compiler_flags.py"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
-HEADERS_TO_INSERT = ['#include <Arduino.h>', '#include "platforms/wasm/js.h"']
+HEADERS_TO_INSERT = ["#include <Arduino.h>", '#include "platforms/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 1  # Occasionally the compiler fails for unknown reasons, but disabled because it increases the build time on failure.
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
@@ -247,7 +247,7 @@ def check_syntax_with_gcc(file_path, gcc_path="gcc"):
             "/js/fastled/src/",  # Add /js/fastled/src/ to the include path
             "-I",
             "/emsdk/upstream/emscripten/system/include",
-            file_path
+            file_path,
         ]
         cmd_str = subprocess.list2cmdline(cmd_list)
         print(f"Running command: {cmd_str}")
@@ -468,18 +468,17 @@ def main() -> int:
             if args.only_copy:
                 return 0
 
-
-
         if do_insert_header:
             process_ino_files(JS_SRC)
             if args.only_insert_header:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
-            
 
         if _CHECK_SYNTAX:
             print("Performing syntax check...")
-            syntax_results = check_syntax(directory_path=JS_SRC, gcc_path=_COMPILER_PATH)
+            syntax_results = check_syntax(
+                directory_path=JS_SRC, gcc_path=_COMPILER_PATH
+            )
             failed_checks = [r for r in syntax_results if not r.is_valid]
             if failed_checks:
                 print("\nSyntax check failed!")
