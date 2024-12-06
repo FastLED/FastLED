@@ -64,6 +64,9 @@ sketch_flags = [
     #-Wbad-function-cast -Wcast-function
     "-Werror=bad-function-cast",
     "-Werror=cast-function-type",
+    # add /js/src/ to the include path
+    "-I",
+    "src",
 ]
 
 if QUICK_BUILD:
