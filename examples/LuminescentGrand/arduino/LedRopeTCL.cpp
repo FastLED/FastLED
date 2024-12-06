@@ -53,14 +53,7 @@ void LedRopeTCL::PreDrawSetup() {
 
     lazy_initialized_ = false;
     int num_leds = frame_buffer_.length();
-    Serial.print("Initializing LEDs, num_leds: "); Serial.println(num_leds);
-    //tcl_.begin();
-    //tcl_.sendEmptyFrame();
-    // Clears upto 100,000 lights.
-    //for (int i = 0; i < 100000; ++i) {
-    //  RawDrawPixel(0, 0, 0);
-    //}
-    //tcl_.sendEmptyFrame();
+
     lazy_initialized_ = true;
   }
 }
@@ -68,7 +61,6 @@ void LedRopeTCL::PreDrawSetup() {
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::RawBeginDraw() {
   PreDrawSetup();
-  //tcl_.sendEmptyFrame();
   led_buffer_.clear();
 }
 
@@ -89,7 +81,6 @@ void LedRopeTCL::RawDrawPixel(byte r, byte g, byte b) {
   }
   CRGB c(r, g, b);
   size_t idx = led_buffer_.size();
-  // FASTLED_DBG("[" << idx << "] RawDrawPixels: " << c.toString().c_str());
   led_buffer_.push_back(CRGB(r, g, b));
 }
 
@@ -108,16 +99,13 @@ void LedRopeTCL::set_draw_offset(int val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::RawCommitDraw() {
-  //tcl_.sendEmptyFrame();
   if (!controller_added_) {
     controller_added_ = true;
     CRGB* leds = led_buffer_.data();
     size_t n_leds = led_buffer_.size();
-    //FastLED.addLeds<TCL, 0, 0>(0, 0);
     FastLED.addLeds<WS2812, PIN_LEDS>(leds, n_leds).setScreenMap(mScreenMap);
   }
   FastLED.show();
-  //FASTLED_DBG("led_buffer after clear: " << led_buffer_.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,9 +113,6 @@ LedRopeTCL::LedRopeTCL(int n_pixels)
 	: frame_buffer_(n_pixels), draw_offset_(0), lazy_initialized_(false) {
   mScreenMap = init_screenmap();
   led_buffer_.reserve(mScreenMap.getLength());
-  if (kUseLedCurtin) {
-    //tcl_.setNewLedChipset(true);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
