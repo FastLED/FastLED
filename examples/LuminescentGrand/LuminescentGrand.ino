@@ -29,7 +29,7 @@
 #include "shared/dprint.h"
 #include "FastLED.h"
 #include "fl/dbg.h"
-#include "ui.h"
+#include "fl/ui.h"
 
 // Spoof the midi library so it thinks it's running on an arduino.
 //#ifndef ARDUINO

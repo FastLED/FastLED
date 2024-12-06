@@ -32,7 +32,7 @@
 #define FASTLED_HAS_UI_DESCRIPTION 0
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 // If the platform is missing ui components, provide stubs.
@@ -175,4 +175,4 @@ FASTLED_UI_DEFINE_OPERATORS(Button);
 #define FASTLED_TITLE(text) Title g_title(text)
 #define FASTLED_DESCRIPTION(text) Description g_description(text)
 
-FASTLED_NAMESPACE_END
+}  // end namespace fl

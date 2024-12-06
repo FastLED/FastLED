@@ -19,7 +19,7 @@
 #include "noisegen.h"
 #include "screenmap.h"
 #include "fl/slice.h"
-#include "ui.h"
+#include "fl/ui.h"
 #include "FastLED.h"
 #include "sensors/pir.h"
 #include "timer.h"
