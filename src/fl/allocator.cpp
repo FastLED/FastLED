@@ -1,7 +1,7 @@
 
 #include <stdlib.h>
 
-#include "allocator.h"
+#include "fl/allocator.h"
 #include "namespace.h"
 
 
@@ -10,7 +10,7 @@
 #include "esp_system.h"
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 namespace {
 
@@ -51,4 +51,5 @@ void LargeBlockDeallocate(void* ptr) {
     Free(ptr);
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
+

@@ -46,7 +46,7 @@
 
 #include "crgb.h"
 #include "namespace.h"
-#include "allocator.h"
+#include "fl/allocator.h"
 #include "fl/warn.h"
 
 #include "fl/slice.h"

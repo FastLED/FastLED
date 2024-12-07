@@ -8,7 +8,7 @@
 #include "fl/singleton.h"
 #include "pixelset.h"
 #include "fl/scoped_ptr.h"
-#include "allocator.h"
+#include "fl/allocator.h"
 #include "fl/slice.h"
 
 FASTLED_NAMESPACE_BEGIN

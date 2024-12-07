@@ -4,10 +4,9 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "namespace.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 void SetLargeBlockAllocator(void *(*alloc)(size_t), void (*free)(void *));
 void* LargeBlockAllocate(size_t size, bool zero = true);
@@ -29,4 +28,4 @@ public:
     }
 };
 
-FASTLED_NAMESPACE_END
+} // namespace fl

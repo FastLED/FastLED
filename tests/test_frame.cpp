@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fx/frame.h"
 #include <cstdlib>
-#include "allocator.h"
+#include "fl/allocator.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
