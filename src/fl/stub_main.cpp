@@ -6,6 +6,8 @@
  * auto-generated.
 */
 
+// This can't be in the namespace fl. It needs to be in the global namespace.
+
 
 #if defined(FASTLED_STUB_MAIN) || defined(FASTLED_STUB_MAIN_INCLUDE_INO)
 
