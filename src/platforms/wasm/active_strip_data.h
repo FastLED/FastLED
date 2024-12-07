@@ -29,11 +29,11 @@ public:
 
     static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
     typedef fl::FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
-    typedef fl::FixedMap<int, ScreenMap, MAX_STRIPS> ScreenMapMap;
+    typedef fl::FixedMap<int, fl::ScreenMap, MAX_STRIPS> ScreenMapMap;
 
     static ActiveStripData& Instance();
     void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);
-    void updateScreenMap(int id, const ScreenMap& screenmap);
+    void updateScreenMap(int id, const fl::ScreenMap& screenmap);
     emscripten::val getPixelData_Uint8(int stripIndex);
     fl::Str infoJsonString();
 
@@ -50,7 +50,7 @@ public:
         mStripMap.clear();
     }
     
-    void onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) override {
+    void onCanvasUiSet(CLEDController *strip, const fl::ScreenMap& screenmap) override {
         int id = StripIdMap::addOrGetId(strip);
         updateScreenMap(id, screenmap);
     }
