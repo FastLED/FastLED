@@ -4,7 +4,7 @@
 #include "test.h"
 
 #include "test.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE

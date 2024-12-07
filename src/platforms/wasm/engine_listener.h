@@ -5,12 +5,14 @@
 #include "fl/engine_events.h"
 #include "namespace.h"
 
-
+namespace fl {
+class ScreenMap;
+}
 
 FASTLED_NAMESPACE_BEGIN
 
 class CLEDController;
-class ScreenMap;
+
 
 class EngineListener: public fl::EngineEvents::Listener {
 public:
@@ -20,7 +22,7 @@ public:
 private:
     void onEndFrame() override;
     void onStripAdded(CLEDController* strip, uint32_t num_leds) override;
-    void onCanvasUiSet(CLEDController* strip, const ScreenMap& screenmap) override;
+    void onCanvasUiSet(CLEDController* strip, const fl::ScreenMap& screenmap) override;
     EngineListener();
     ~EngineListener();
 };

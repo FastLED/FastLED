@@ -10,9 +10,14 @@
 #include "crgb.h"
 #include "namespace.h"
 
+namespace fl {
+class ScreenMap;
+}  // namespace fl
+
+
 FASTLED_NAMESPACE_BEGIN
 
-class ScreenMap;
+
 
 
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
@@ -73,7 +78,7 @@ class XYMap {
 
     XYMap(const XYMap &other) = default;
 
-    ScreenMap toScreenMap() const;
+    fl::ScreenMap toScreenMap() const;
 
     void mapPixels(const CRGB* input, CRGB* output) const {
         uint16_t pos = 0;

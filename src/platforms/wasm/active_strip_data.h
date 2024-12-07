@@ -15,7 +15,7 @@
 #include "namespace.h"
 #include "fl/engine_events.h"
 #include "fl/map.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 #include "strip_id_map.h"
 
 FASTLED_NAMESPACE_BEGIN

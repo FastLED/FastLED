@@ -4,7 +4,7 @@
  * the Chromancer project to FastLED Web.
  */
 
-#include "screenmap.h"
+#include "fl/screenmap.h"
 
 #include "fl/str.h"
 #include "fl/map.h"

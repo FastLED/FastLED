@@ -23,12 +23,11 @@ FsImplPtr make_sdcard_filesystem(int cs_pin);
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
-class ScreenMap;
 FASTLED_NAMESPACE_END
 
 namespace fl {
 
-
+class ScreenMap;
 FASTLED_SMART_PTR(FileSystem);
 FASTLED_SMART_PTR(FileHandle);
 class Video;

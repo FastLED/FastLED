@@ -15,7 +15,7 @@
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "fl/engine_events.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -192,12 +192,12 @@ public:
 
     CLEDController& setScreenMap(const XYMap& map) {
         // EngineEvents::onCanvasUiSet(this, map);
-        ScreenMap screenmap = map.toScreenMap();
+        fl::ScreenMap screenmap = map.toScreenMap();
         fl::EngineEvents::onCanvasUiSet(this, screenmap);
         return *this;
     }
 
-    CLEDController& setScreenMap(const ScreenMap& map) {
+    CLEDController& setScreenMap(const fl::ScreenMap& map) {
         fl::EngineEvents::onCanvasUiSet(this, map);
         return *this;
     }

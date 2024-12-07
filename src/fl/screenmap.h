@@ -18,10 +18,9 @@
  */
 
 namespace fl {
-    class Str;
-}
 
-FASTLED_NAMESPACE_BEGIN
+class Str;
+
 
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
@@ -142,5 +141,4 @@ class ScreenMap {
     fl::LUTXYFLOATPtr mLookUpTable;
 };
 
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

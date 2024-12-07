@@ -18,7 +18,7 @@
 #include "js.h"
 #include "fl/str.h"
 #include "namespace.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 #include "fl/map.h"
 #include "engine_listener.h"
 

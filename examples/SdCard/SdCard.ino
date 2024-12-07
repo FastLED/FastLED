@@ -28,11 +28,9 @@ void loop() {
 #include "fx/video.h"
 #include "fl/file_system.h"
 #include "fl/ui.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 #include "fl/file_system.h"
 
-
-#include "screenmap.json.h"  // const char JSON_SCREEN_MAP[] = { ... }
 
 using namespace fl;
 
