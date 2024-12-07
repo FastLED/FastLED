@@ -23,6 +23,7 @@ FsImplPtr make_sdcard_filesystem(int cs_pin);
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
+class ScreenMap;
 FASTLED_NAMESPACE_END
 
 namespace fl {
@@ -31,6 +32,8 @@ namespace fl {
 FASTLED_SMART_PTR(FileSystem);
 FASTLED_SMART_PTR(FileHandle);
 class Video;
+template<typename Key, typename Value, size_t N> class FixedMap;
+
 
 
 
@@ -47,7 +50,9 @@ class FileSystem {
     FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
     Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
     bool readText(const char *path, Str* out);
-    bool readJson(const char *path, JsonDocument* doc, Str* error = nullptr);
+    bool readJson(const char *path, JsonDocument* doc);
+    bool readScreenMaps(const char *path, FixedMap<Str, ScreenMap, 16>* out, Str* error = nullptr);
+    bool readScreenMap(const char *path, const char* name, ScreenMap* out, Str* error = nullptr);
     void close(FileHandlePtr file);
     
   private:

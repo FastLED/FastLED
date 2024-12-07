@@ -13,6 +13,8 @@
 #include "namespace.h"
 #include "fl/json.h"
 #include "fl/unused.h"
+#include "screenmap.h"
+
 
 
 namespace fl {
@@ -43,6 +45,8 @@ class NullFileHandle : public FileHandle {
         return false;
     }
 };
+
+using namespace fl;
 
 class NullFileSystem : public FsImpl {
   public:
@@ -98,15 +102,52 @@ void FileSystem::end() {
     }
 }
 
-bool FileSystem::readJson(const char *path, JsonDocument* doc, fl::Str* error) {
+bool FileSystem::readJson(const char *path, JsonDocument* doc) {
     Str text;
     if (!readText(path, &text)) {
+        return false;
+    }
+    return parseJson(text.c_str(), doc);
+}
+
+bool FileSystem::readScreenMaps(const char *path, FixedMap<Str, ScreenMap, 16>* out, Str* error) {
+    Str text;
+    if (!readText(path, &text)) {
+        FASTLED_WARN("Failed to read file: " << path);
         if (error) {
-            error->append("Failed to read file: ").append(path);
+            *error = "Failed to read file: ";
+            error->append(path);
         }
         return false;
     }
-    return parseJson(text.c_str(), doc, error);
+    Str err;
+    bool ok = ScreenMap::ParseJson(text.c_str(), out, &err);
+    if (!ok) {
+        FASTLED_WARN("Failed to parse screen map: " << err.c_str());
+        *error = err;
+        return false;
+    }
+    return true;
+}
+
+bool FileSystem::readScreenMap(const char *path, const char* name, ScreenMap* out, Str* error) {
+    Str text;
+    if (!readText(path, &text)) {
+        FASTLED_WARN("Failed to read file: " << path);
+        if (error) {
+            *error = "Failed to read file: ";
+            error->append(path);
+        }
+        return false;
+    }
+    Str err;
+    bool ok = ScreenMap::ParseJson(text.c_str(), name, out, &err);
+    if (!ok) {
+        FASTLED_WARN("Failed to parse screen map: " << err.c_str());
+        *error = err;
+        return false;
+    }
+    return true;
 }
 
 void FileSystem::close(FileHandlePtr file) { mFs->close(file); }

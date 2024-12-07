@@ -73,10 +73,6 @@ void setup() {
     if (!filesystem.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
-    // JSON_SCREEN_MAP
-    fl::FixedMap<Str, ScreenMap, 16> screenMaps;
-    ScreenMap::ParseJson(JSON_SCREEN_MAP, &screenMaps);
-    ScreenMap screenMap = screenMaps["strip1"];
 
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
@@ -90,6 +86,13 @@ void setup() {
     video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS, 2);
     if (!video) {
       Serial.println("Failed to instantiate video");
+      return;
+    }
+    ScreenMap screenMap;
+    bool ok = filesystem.readScreenMap("data/screenmap.json", "strip1", &screenMap);
+    if (!ok) {
+      Serial.println("Failed to read screen map");
+      return;
     }
 }
 

@@ -61,6 +61,11 @@ class FileData : public fl::Referent {
         return bytesToActuallyRead;
     }
 
+    bool ready(size_t pos) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return mData.size() == mCapacity || pos < mData.size();
+    }
+
     size_t bytesRead() const {
         std::lock_guard<std::mutex> lock(mMutex);
         return mData.size();
@@ -115,6 +120,9 @@ class WasmFileHandle : public fl::FileHandle {
     size_t size() const override { return mData->capacity(); }
 
     size_t read(uint8_t *dst, size_t bytesToRead) override {
+        while (!mData->ready(mPos)) {
+            emscripten_sleep(1);
+        }
         size_t bytesRead = mData->read(mPos, dst, bytesToRead);
         mPos += bytesRead;
         return bytesRead;
@@ -156,15 +164,18 @@ class FsImplWasm : public fl::FsImpl {
     fl::FileHandlePtr openRead(const char *_path) override {
         printf("Opening file %s\n", _path);
         Str path(_path);
-        std::lock_guard<std::mutex> lock(gFileMapMutex);
-        auto it = gFileMap.find(path);
-        if (it != gFileMap.end()) {
-            auto &data = it->second;
-            WasmFileHandlePtr out =
-                WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(path, data));
-            return out;
+        FileHandlePtr out;
+        {
+            std::lock_guard<std::mutex> lock(gFileMapMutex);
+            auto it = gFileMap.find(path);
+            if (it != gFileMap.end()) {
+                auto &data = it->second;
+                out =
+                    WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(path, data));
+            }
+            out = fl::FileHandlePtr::Null();
         }
-        return fl::FileHandlePtr::Null();
+        return out;
     }
 };
 

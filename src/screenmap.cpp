@@ -74,6 +74,31 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     return true;
 }
 
+bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
+                          const char* screenMapName,
+                          ScreenMap *screenmap,
+                          fl::Str *err) {
+    fl::FixedMap<fl::Str, ScreenMap, 16> segmentMaps;
+    bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
+    if (!ok) {
+        return false;
+    }
+    if (segmentMaps.size() == 0) {
+        return false;
+    }
+    if (segmentMaps.has(screenMapName)) {
+        *screenmap = segmentMaps[screenMapName];
+        return true;
+    }
+    fl::Str _err = "ScreenMap not found: ";
+    _err.append(screenMapName);
+    if (err) {
+        *err = _err;
+    }
+    FASTLED_WARN(_err.c_str());
+    return false;
+}
+
 void ScreenMap::toJson(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduinoJson::JsonDocument* _doc) {
     auto& doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();

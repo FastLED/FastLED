@@ -124,6 +124,11 @@ class ScreenMap {
                           fl::FixedMap<fl::Str, ScreenMap, 16> *segmentMaps,
                           fl::Str *err = nullptr);
 
+    static bool ParseJson(const char *jsonStrScreenMap,
+                          const char* screenMapName,
+                          ScreenMap *screenmap,
+                          fl::Str *err = nullptr);
+
     static void toJsonStr(const fl::FixedMap<fl::Str, ScreenMap, 16>&, fl::Str* jsonBuffer);
     static void toJson(const fl::FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
 
