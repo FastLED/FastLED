@@ -17,7 +17,7 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "noisegen.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 #include "fl/slice.h"
 #include "fl/ui.h"
 #include "FastLED.h"
