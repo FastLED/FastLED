@@ -1224,23 +1224,61 @@ class UiManager {
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
 
-        const trimmedFilesJson = filesJson.map(file => {
-            return {
-                path: file.path,
-                size: file.size,
+        function getFileManifestJson() {
+            const trimmedFilesJson = filesJson.map(file => {
+                return {
+                    path: file.path,
+                    size: file.size,
+                };
+            });
+            const options = {
+                files: trimmedFilesJson,
+                frameRate: frame_rate,
             };
-        });
-        const options = {
-            files: trimmedFilesJson,
-            frameRate: frame_rate,
-        };
-        const jsonStr = JSON.stringify(options);
-        moduleInstance._fastled_declare_files(jsonStr);
+            const jsonStr = JSON.stringify(options);
+            return jsonStr;
+        }
+
+        function getFilesJson() {
+            const trimmedFilesJson = filesJson.map(file => {
+                const suffix = ".json";
+                if (file.path.endsWith(suffix)) {
+                    return {
+                        path: file.path,
+                        size: file.size,
+                    };
+                }
+            });
+            return trimmedFilesJson;
+        }
+
+        const fileManifest = getFileManifestJson();
+
+        moduleInstance._fastled_declare_files(fileManifest);
+
+        // For all json files, these need to be loaded immediatly.
+        //const filesJson = getFilesJson();
+        console.log("Files JSON:", filesJson);
+
+        // const fetchAllJsonFilesImmediatlly = (filesJson) => {
+        //     filesJson.forEach(file => {
+        //         fetch(file.path)
+        //             .then(response => response.json())
+        //             .then(data => {
+        //                 console.log("Loaded JSON file:", file.path, data);
+        //             })
+        //             .catch(error => {
+        //                 console.error("Error loading JSON file:", file.path, error);
+        //             });
+        //     });
+        // }
+
+        console.log("jsonFiles:", filesJson);
+
         extern_setup();
 
         const fetchAllFiles = (filesJson, onComplete) => {
             let filesRemaining = filesJson.length;
-
             const processFile = (file) => {
                 fetch(file.path)
                     .then(response => response.body.getReader())
