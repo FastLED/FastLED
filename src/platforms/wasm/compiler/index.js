@@ -1271,12 +1271,24 @@ class UiManager {
         console.log("Files JSON:", filesJson);
 
 
-        function jsAppendFile(path, data, len) {
+        function jsAppendFile(path_cstr, data_cbytes, len_int) {
             // Stream this chunk
-            moduleInstance.ccall('jsAppendFile', 'number',
-                ['number', 'number', 'number'],
-                [path, data, len]
+            moduleInstance.ccall('jsAppendFile',
+                'number',  // return value
+                ['number', 'number', 'number'], // argument types, not sure why numbers works.
+                [path_cstr, data_cbytes, len_int]
             );
+        }
+
+        function jsAppendFileUint8(path, blob) {
+            const n = moduleInstance.lengthBytesUTF8(path) + 1;
+            const path_cstr = moduleInstance._malloc(n);
+            moduleInstance.stringToUTF8(path, path_cstr, n);
+            const ptr = moduleInstance._malloc(blob.length);
+            moduleInstance.HEAPU8.set(blob, ptr);
+            jsAppendFile(path_cstr, ptr, blob.length);
+            moduleInstance._free(ptr);
+            moduleInstance._free(path_cstr);
         }
 
 
@@ -1287,25 +1299,15 @@ class UiManager {
                 .then(async (reader) => {
                     console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
-                    // Allocate name buffer once
-                    const n = moduleInstance.lengthBytesUTF8(file.path) + 1;
-                    const ptrName = moduleInstance._malloc(n);
 
-                    moduleInstance.stringToUTF8(file.path, ptrName, n);
 
                     while (true) {
                         const { value, done } = await reader.read();
                         if (done) break;
 
                         // Allocate and copy chunk data
-                        const ptr = moduleInstance._malloc(value.length);
-                        moduleInstance.HEAPU8.set(value, ptr);
-                        jsAppendFile(ptrName, ptr, value.length);
-
-                        moduleInstance._free(ptr);
+                        jsAppendFileUint8(file.path, value);
                     }
-
-                    moduleInstance._free(ptrName);
 
                     filesRemaining--;
                     if (filesRemaining === 0) {
@@ -1314,7 +1316,7 @@ class UiManager {
                     }
                 })
                 .catch(error => {
-                    console.error(`Error processing file ${file.path}:`, error);
+                    console.error(`Error processing file ${error}:`);
                     filesRemaining--;
                     if (filesRemaining === 0) {
                         console.log("All files processed");
