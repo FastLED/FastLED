@@ -38,7 +38,7 @@ using namespace fl;
 #define LED_PIN 2
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define FPS 120
+#define FPS 60
 #define CHIP_SELECT_PIN 5
 
 
@@ -61,9 +61,9 @@ ScreenMap screenMap;
 
 FileSystem filesystem;
 Video video(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
-Video video2(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
+Video video2(NUM_LEDS, 2, NUM_VIDEO_FRAMES);
 
-Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.1f);
+Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.01f);
 NumberField whichVideo("Which Video", 0, 0, 1);
 
 
