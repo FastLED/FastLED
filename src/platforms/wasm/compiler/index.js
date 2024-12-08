@@ -1221,7 +1221,7 @@ class UiManager {
     };
 
     // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
+    async function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
 
         function getFileManifestJson() {
@@ -1245,21 +1245,13 @@ class UiManager {
             filesJson.map(file => {
                 for (const ext of immediateExtensions) {
                     if (file.path.endsWith(ext)) {
-                        const im = {
-                            path: file.path,
-                            size: file.size,
-                        };
-                        immediateFiles.push(im);
+                        immediateFiles.push(file);
                         return;
                     }
                 }
-                const stream = {
-                    path: file.path,
-                    size: file.size,
-                };
-                streamingFiles.push(stream);
+                streamingFiles.push(file);
             });
-            return immediateFiles, streamingFiles;
+            return [immediateFiles, streamingFiles];
         }
 
 
@@ -1292,45 +1284,38 @@ class UiManager {
         }
 
 
-        let filesRemaining = filesJson.length
-        const processFile = (file, onComplete) => {
-            fetch(file.path)
-                .then(response => response.body.getReader())
-                .then(async (reader) => {
-                    console.log(`File fetched: ${file.path}, size: ${file.size}`);
-
-
-
-                    while (true) {
-                        const { value, done } = await reader.read();
-                        if (done) break;
-
-                        // Allocate and copy chunk data
-                        jsAppendFileUint8(file.path, value);
-                    }
-
-                    filesRemaining--;
-                    if (filesRemaining === 0) {
-                        console.log("All files processed");
-                        onComplete && onComplete();
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error processing file ${error}:`);
-                    filesRemaining--;
-                    if (filesRemaining === 0) {
-                        console.log("All files processed");
-                        onComplete && onComplete();
-                    }
-                });
-        };
-
-
-        const fetchAllFiles = (filesJson, onComplete) => {
-            const lambda = (file) => {
-                processFile(file, onComplete);
+        const processFile = async (file) => {
+            try {
+                const response = await fetch(file.path);
+                const reader = response.body.getReader();
+        
+                console.log(`File fetched: ${file.path}, size: ${file.size}`);
+        
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+        
+                    // Allocate and copy chunk data
+                    jsAppendFileUint8(file.path, value);
+                }
+            } catch (error) {
+                console.error(`Error processing file ${file.path}:`, error);
             }
-            filesJson.forEach(lambda);
+        };
+        
+
+
+        const fetchAllFiles = async (filesJson, onComplete) => {
+            let numFiles = filesJson.length;
+        
+            for (const file of filesJson) {
+                await processFile(file);
+                numFiles--;
+        
+                if (onComplete) {
+                    onComplete();
+                }
+            }
         };
 
 
@@ -1351,13 +1336,19 @@ class UiManager {
             requestAnimationFrame(runLoop);
         }
 
-        fetchAllFiles(filesJson, onComplete_SetupFastLEDAndLoop);
+
         // Come back to this later - we want to partition the files into immediate and streaming files
         // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
-        // const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
-        // console.log("All files:", filesJson);
-        // console.log("Immediate files:", immediateFiles);
-        // console.log("Streaming files:", streamingFiles);
+        const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
+        console.log("All files:", filesJson);
+        console.log("Immediate files:", immediateFiles);
+        console.log("Streaming files:", streamingFiles);
+
+
+        fetchAllFiles(immediateFiles, onComplete_SetupFastLEDAndLoop);
+        fetchAllFiles(streamingFiles, () => {
+            console.log("All streaming files processed");
+        });
     }
 
 
@@ -1405,9 +1396,7 @@ class UiManager {
                 return;
             }
 
-            let out = runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
-            //globalThis.hijackOutputOnce();
-            return out;
+            runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
         }
         // Start fetch now in parallel
         const fetchFilePromise = async (fetchFilePath) => {
