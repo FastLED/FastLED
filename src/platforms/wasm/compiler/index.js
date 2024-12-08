@@ -1235,116 +1235,125 @@ class UiManager {
                 files: trimmedFilesJson,
                 frameRate: frame_rate,
             };
-            const jsonStr = JSON.stringify(options);
-            return jsonStr;
+            return options;
+
         }
 
-        function getFilesJson() {
+        function partition(filesJson, immediateExtensions) {
+            const immediateFiles = [];
+            const streamingFiles = [];
             const trimmedFilesJson = filesJson.map(file => {
-                const suffix = ".json";
-                if (file.path.endsWith(suffix)) {
-                    return {
-                        path: file.path,
-                        size: file.size,
-                    };
+                for (const ext of immediateExtensions) {
+                    if (file.path.endsWith(ext)) {
+                        const im = {
+                            path: file.path,
+                            size: file.size,
+                        };
+                        immediateFiles.push(im);
+                        return;
+                    }
                 }
+                const stream = {
+                    path: file.path,
+                    size: file.size,
+                };
+                streamingFiles.push(stream);
             });
-            return trimmedFilesJson;
+            return immediateFiles, streamingFiles;
         }
+
+
 
         const fileManifest = getFileManifestJson();
+        moduleInstance._fastled_declare_files(JSON.stringify(fileManifest));
 
-        moduleInstance._fastled_declare_files(fileManifest);
 
-        // For all json files, these need to be loaded immediatly.
-        //const filesJson = getFilesJson();
         console.log("Files JSON:", filesJson);
 
-        // const fetchAllJsonFilesImmediatlly = (filesJson) => {
-        //     filesJson.forEach(file => {
-        //         fetch(file.path)
-        //             .then(response => response.json())
-        //             .then(data => {
-        //                 console.log("Loaded JSON file:", file.path, data);
-        //             })
-        //             .catch(error => {
-        //                 console.error("Error loading JSON file:", file.path, error);
-        //             });
-        //     });
-        // }
 
-        console.log("jsonFiles:", filesJson);
 
-        extern_setup();
 
-        const fetchAllFiles = (filesJson, onComplete) => {
-            let filesRemaining = filesJson.length;
-            const processFile = (file) => {
-                fetch(file.path)
-                    .then(response => response.body.getReader())
-                    .then(async (reader) => {
-                        console.log(`File fetched: ${file.path}, size: ${file.size}`);
-                        
-                        // Allocate name buffer once
-                        const n = moduleInstance.lengthBytesUTF8(file.path) + 1;
-                        const ptrName = moduleInstance._malloc(n);
-             
-                        moduleInstance.stringToUTF8(file.path, ptrName, n);
 
-                        while (true) {
-                            const { value, done } = await reader.read();
-                            if (done) break;
+        let filesRemaining = filesJson.length
+        const processFile = (file, onComplete) => {
+            fetch(file.path)
+                .then(response => response.body.getReader())
+                .then(async (reader) => {
+                    console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
-                            // Allocate and copy chunk data
-                            const ptr = moduleInstance._malloc(value.length);
-                            moduleInstance.HEAPU8.set(value, ptr);
-                            
-                            // Stream this chunk
-                            moduleInstance.ccall('jsAppendFile', 'number', 
-                                ['number', 'number', 'number'], 
-                                [ptrName, ptr, value.length]
-                            );
+                    // Allocate name buffer once
+                    const n = moduleInstance.lengthBytesUTF8(file.path) + 1;
+                    const ptrName = moduleInstance._malloc(n);
 
-                            moduleInstance._free(ptr);
-                        }
+                    moduleInstance.stringToUTF8(file.path, ptrName, n);
 
-                        moduleInstance._free(ptrName);
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
 
-                        filesRemaining--;
-                        if (filesRemaining === 0) {
-                            console.log("All files processed");
-                            onComplete && onComplete();
-                        }
-                    })
-                    .catch(error => {
-                        console.error(`Error processing file ${file.path}:`, error);
-                        filesRemaining--;
-                        if (filesRemaining === 0) {
-                            console.log("All files processed");
-                            onComplete && onComplete();
-                        }
-                    });
-            };
+                        // Allocate and copy chunk data
+                        const ptr = moduleInstance._malloc(value.length);
+                        moduleInstance.HEAPU8.set(value, ptr);
 
-            filesJson.forEach(processFile);
+                        // Stream this chunk
+                        moduleInstance.ccall('jsAppendFile', 'number',
+                            ['number', 'number', 'number'],
+                            [ptrName, ptr, value.length]
+                        );
+
+                        moduleInstance._free(ptr);
+                    }
+
+                    moduleInstance._free(ptrName);
+
+                    filesRemaining--;
+                    if (filesRemaining === 0) {
+                        console.log("All files processed");
+                        onComplete && onComplete();
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error processing file ${file.path}:`, error);
+                    filesRemaining--;
+                    if (filesRemaining === 0) {
+                        console.log("All files processed");
+                        onComplete && onComplete();
+                    }
+                });
         };
 
-        fetchAllFiles(filesJson);
+
+        const fetchAllFiles = (filesJson, onComplete) => {
+            const lambda = (file) => {
+                processFile(file, onComplete);
+            }
+            filesJson.forEach(lambda);
+        };
 
 
-        console.log("Starting loop...");
-        const frameInterval = 1000 / frame_rate;
-        let lastFrameTime = 0;
+        function onCompleteSetupFastLEDAndLoop() {
+            extern_setup();
 
-        // Executes every frame but only runs the loop function at the specified frame rate
-        function runLoop(currentTime) {
-            if (currentTime - lastFrameTime >= frameInterval) {
-                extern_loop();
-                lastFrameTime = currentTime;
+            console.log("Starting loop...");
+            const frameInterval = 1000 / frame_rate;
+            let lastFrameTime = 0;
+            // Executes every frame but only runs the loop function at the specified frame rate
+            function runLoop(currentTime) {
+                if (currentTime - lastFrameTime >= frameInterval) {
+                    extern_loop();
+                    lastFrameTime = currentTime;
+                }
+                requestAnimationFrame(runLoop);
             }
             requestAnimationFrame(runLoop);
         }
-        requestAnimationFrame(runLoop);
+
+        fetchAllFiles(filesJson, onCompleteSetupFastLEDAndLoop);
+
+        const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
+        console.log("All files:", filesJson);
+        console.log("Immediate files:", immediateFiles);
+        console.log("Streaming files:", streamingFiles);
     }
 
 
