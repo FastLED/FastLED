@@ -1242,7 +1242,7 @@ class UiManager {
         function partition(filesJson, immediateExtensions) {
             const immediateFiles = [];
             const streamingFiles = [];
-            const trimmedFilesJson = filesJson.map(file => {
+            filesJson.map(file => {
                 for (const ext of immediateExtensions) {
                     if (file.path.endsWith(ext)) {
                         const im = {
@@ -1331,7 +1331,7 @@ class UiManager {
         };
 
 
-        function onCompleteSetupFastLEDAndLoop() {
+        function onComplete_SetupFastLEDAndLoop() {
             extern_setup();
 
             console.log("Starting loop...");
@@ -1348,12 +1348,13 @@ class UiManager {
             requestAnimationFrame(runLoop);
         }
 
-        fetchAllFiles(filesJson, onCompleteSetupFastLEDAndLoop);
-
-        const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
-        console.log("All files:", filesJson);
-        console.log("Immediate files:", immediateFiles);
-        console.log("Streaming files:", streamingFiles);
+        fetchAllFiles(filesJson, onComplete_SetupFastLEDAndLoop);
+        // Come back to this later - we want to partition the files into immediate and streaming files
+        // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
+        // const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
+        // console.log("All files:", filesJson);
+        // console.log("Immediate files:", immediateFiles);
+        // console.log("Streaming files:", streamingFiles);
     }
 
 
