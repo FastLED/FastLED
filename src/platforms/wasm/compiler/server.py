@@ -438,6 +438,29 @@ async def compiler_in_use() -> dict:
     return {"in_use": COMPILE_LOCK.locked()}
 
 
+@app.get("/project/init")
+def project_init() -> FileResponse:
+    """Archive /js/fastled/examples/wasm into a zip file and return it."""
+    examples_dir = Path("/js/fastled/examples/wasm")
+    if not examples_dir.exists():
+        raise HTTPException(status_code=500, detail="Examples directory not found.")
+    output_zip_path = OUTPUT_DIR / "fastled_examples.zip"
+    with zipfile.ZipFile(
+        output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+    ) as zip_out:
+        for file_path in examples_dir.rglob("*"):
+            if file_path.is_file():
+                if "fastled_js" in file_path.parts:
+                    continue
+                arc_path = file_path.relative_to(examples_dir)
+                zip_out.write(file_path, arc_path)
+    return FileResponse(
+        path=output_zip_path,
+        media_type="application/zip",
+        filename="fastled_examples.zip",
+    )
+
+
 # THIS MUST NOT BE ASYNC!!!!
 @app.post("/compile/wasm")
 def compile_wasm(
