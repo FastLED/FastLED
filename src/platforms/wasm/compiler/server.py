@@ -8,6 +8,7 @@ import time
 import warnings
 import zipfile
 import zlib
+from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Timer
@@ -16,11 +17,10 @@ from typing import Callable
 from disklru import DiskLRUCache  # type: ignore
 from fastapi import Header  # type: ignore
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
+from fastapi.responses import FileResponse, RedirectResponse, Response  # type: ignore
 from sketch_hasher import generate_hash_of_project_files
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import Response
 
 _VOLUME_MAPPED_SRC = Path("/host/fastled/src")
 _RSYNC_DEST = Path("/js/fastled/src")
@@ -439,14 +439,15 @@ async def compiler_in_use() -> dict:
 
 
 @app.get("/project/init")
-def project_init() -> FileResponse:
+def project_init() -> Response:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     examples_dir = Path("/js/fastled/examples/wasm")
     if not examples_dir.exists():
         raise HTTPException(status_code=500, detail="Examples directory not found.")
-    output_zip_path = OUTPUT_DIR / "fastled_examples.zip"
+
+    zip_buffer = BytesIO()
     with zipfile.ZipFile(
-        output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+        zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
     ) as zip_out:
         for file_path in examples_dir.rglob("*"):
             if file_path.is_file():
@@ -454,10 +455,11 @@ def project_init() -> FileResponse:
                     continue
                 arc_path = file_path.relative_to(examples_dir)
                 zip_out.write(file_path, arc_path)
-    return FileResponse(
-        path=output_zip_path,
+
+    return Response(
+        content=zip_buffer.getvalue(),
         media_type="application/zip",
-        filename="fastled_examples.zip",
+        headers={"Content-Disposition": "attachment; filename=fastled_examples.zip"},
     )
 
 
