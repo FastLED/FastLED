@@ -528,6 +528,8 @@ def main() -> int:
             shutil.copy2(INDEX_CSS_SRC, fastled_js_dir / "index.css")
             print("Copying index.js to output directory")
             shutil.copy2(INDEX_JS_SRC, fastled_js_dir / "index.js")
+            print("Copying ui_manager.js to output directory")
+            shutil.copy2(FASTLED_COMPILER_DIR / "ui_manager.js", fastled_js_dir / "ui_manager.js")
             fastled_js_mem = build_dir / "fastled.js.mem"
             fastled_wasm_map = build_dir / "fastled.wasm.map"
             fastled_js_symbols = build_dir / "fastled.js.symbols"
