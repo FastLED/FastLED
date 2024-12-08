@@ -438,13 +438,10 @@ async def compiler_in_use() -> dict:
     return {"in_use": COMPILE_LOCK.locked()}
 
 
-@app.get("/project/init")
-def project_init() -> FileResponse:
-    """Archive /js/fastled/examples/wasm into a zip file and return it."""
-    examples_dir = Path("/js/fastled/examples/wasm")
+def get_zip_bytes(example: str) -> bytes:
+    examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
         raise HTTPException(status_code=500, detail="Examples directory not found.")
-
     zip_buffer = BytesIO()
     with zipfile.ZipFile(
         zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
@@ -455,9 +452,26 @@ def project_init() -> FileResponse:
                     continue
                 arc_path = file_path.relative_to(examples_dir)
                 zip_out.write(file_path, arc_path)
+    return zip_buffer.getvalue()
 
+
+@app.get("/project/init")
+def project_init() -> FileResponse:
+    """Archive /js/fastled/examples/wasm into a zip file and return it."""
+    zip_bytes = get_zip_bytes("wasm")
     return FileResponse(
-        content=zip_buffer.getvalue(),
+        content=zip_bytes,
+        media_type="application/zip",
+        filename="fastled_example.zip",
+    )
+
+
+@app.get("/project/init/{example}")
+def project_init_example(example: str) -> FileResponse:
+    """Archive /js/fastled/examples/{example} into a zip file and return it."""
+    zip_bytes = get_zip_bytes(example)
+    return FileResponse(
+        content=zip_bytes,
         media_type="application/zip",
         filename="fastled_example.zip",
     )
