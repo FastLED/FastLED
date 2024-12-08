@@ -119,7 +119,6 @@ ESP32_S2_DEVKITM_1 = Board(
     real_board_name="esp32dev",
     board_build_mcu="esp32s2",
     platform=ESP32_IDF_5_1_PIOARDUINO,
-
 )
 
 ESP32_H2_DEVKITM_1 = Board(
