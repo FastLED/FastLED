@@ -64,6 +64,7 @@ Video video(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
 
 Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.1f);
 
+bool gError = false;
 
 void setup() {
     Serial.begin(115200);
@@ -72,10 +73,6 @@ void setup() {
         Serial.println("Failed to initialize file system.");
     }
 
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip)
-        .setScreenMap(screenMap);
-    FastLED.setBrightness(96);
     // Note that data/ is a special directory used by our wasm compiler. Any data
     // is placed in it will be included in the files.json file which the browser will
     // use to stream the file asynchroniously in during the runtime. For a real sd card
@@ -83,18 +80,31 @@ void setup() {
     // behavior.
     video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS, 2);
     if (!video) {
-      Serial.println("Failed to instantiate video");
+      FASTLED_WARN("Failed to instantiate video");
+      gError = true;
       return;
     }
     ScreenMap screenMap;
     bool ok = filesystem.readScreenMap("data/screenmap.json", "strip1", &screenMap);
     if (!ok) {
       Serial.println("Failed to read screen map");
+      gError = true;
       return;
     }
+
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+        .setCorrection(TypicalLEDStrip)
+        .setScreenMap(screenMap);
+    FastLED.setBrightness(96);
 }
 
 void loop() {
+    if (gError) {
+      EVERY_N_SECONDS(1) {
+        FASTLED_WARN("No loop because an error occured.");
+      }
+      return;
+    }
     video.setTimeScale(videoSpeed);
     uint32_t now = millis();
     video.draw(now, leds);

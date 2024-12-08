@@ -167,6 +167,7 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
 bool FileSystem::readText(const char *path, fl::Str* out) {
     FileHandlePtr file = openRead(path);
     if (!file) {
+        FASTLED_WARN("Failed to open file: " << path);
         return false;
     }
     size_t size = file->size();
@@ -180,6 +181,7 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
         wrote = true;
     }
     file->close();
+    FASTLED_DBG_IF(!wrote, "Failed to write any data to the output string.");
     return wrote;
 }
 }  // namespace fl

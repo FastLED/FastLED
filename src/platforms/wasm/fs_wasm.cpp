@@ -22,6 +22,8 @@
 #include "fl/str.h"
 #include "fl/json.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
+#include "platforms/wasm/js.h"
 
 using namespace fl;
 
@@ -106,10 +108,11 @@ class WasmFileHandle : public fl::FileHandle {
         if (mPos >= mData->capacity()) {
             return false;
         }
-        if (mData->bytesRead() > mPos) {
-            return true;
+        if (!mData->ready(mPos)) {
+            FASTLED_WARN("File is not ready yet. This is a major error because FastLED-wasm does not support async yet, the file will fail to read.");
+            return false;
         }
-        return false;
+        return true;
     }
     size_t bytesLeft() const override {
         if (!available()) {
@@ -119,10 +122,22 @@ class WasmFileHandle : public fl::FileHandle {
     }
     size_t size() const override { return mData->capacity(); }
 
+
     size_t read(uint8_t *dst, size_t bytesToRead) override {
-        while (!mData->ready(mPos)) {
-            emscripten_sleep(1);
+        if (mPos >= mData->capacity()) {
+            return 0;
         }
+        if (mPos + bytesToRead > mData->capacity()) {
+            bytesToRead = mData->capacity() - mPos;
+        }
+        if (!mData->ready(mPos)) {
+            FASTLED_WARN("File is not ready yet. This is a major error because FastLED-wasmdoes not support async yet, the file will fail to read.");
+            return 0;
+        }
+        // We do not have async so a delay will actually block the entire wasm main thread.
+        // while (!mData->ready(mPos)) {
+        //     delay(1);
+        // }
         size_t bytesRead = mData->read(mPos, dst, bytesToRead);
         mPos += bytesRead;
         return bytesRead;
@@ -162,7 +177,7 @@ class FsImplWasm : public fl::FsImpl {
     }
 
     fl::FileHandlePtr openRead(const char *_path) override {
-        printf("Opening file %s\n", _path);
+        //FASTLED_DBG("Opening file: " << _path);
         Str path(_path);
         FileHandlePtr out;
         {
@@ -172,8 +187,12 @@ class FsImplWasm : public fl::FsImpl {
                 auto &data = it->second;
                 out =
                     WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(path, data));
+                //FASTLED_DBG("Opened file: " << _path);
+            } else {
+                out = fl::FileHandlePtr::Null();
+                FASTLED_DBG("File not found: " << _path);
             }
-            out = fl::FileHandlePtr::Null();
+
         }
         return out;
     }
