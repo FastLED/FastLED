@@ -1,5 +1,18 @@
 
 import { UiManager } from "./ui_manager.js";
+import * as THREE from 'https://threejs.org/build/three.module.js';
+
+//import Stats from 'https://threejs.org/examples/jsm/addons/libs/stats.module.js';
+//import { GUI } from 'https://threejs.org/examples/jsm/addons/libs/lil-gui.module.min.js';
+
+//import { OrbitControls } from 'https://threejs.org/examples/jsm/addons/controls/OrbitControls.js';
+//import { GLTFLoader } from 'https://threejs.org/examples/jsm/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'https://threejs.org/examples/jsm/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/UnrealBloomPass.js';
+//import { OutputPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/OutputPass.js';
+
+
 
 console.log("index.js loaded");
 console.log("FastLED loader function:", typeof _loadFastLED);
@@ -365,9 +378,8 @@ class GraphicsManager {
 
 class GraphicsManagerThreeJS {
     constructor(graphicsArgs) {
-        const { canvasId, threeJsModules } = graphicsArgs;
+        const { canvasId } = graphicsArgs;
         this.canvasId = canvasId;
-        this.threeJsModules = threeJsModules;
         this.SEGMENTS = 16;
         this.LED_SCALE = 1.0;
         this.leds = [];
@@ -433,7 +445,6 @@ class GraphicsManagerThreeJS {
         const RESOLUTION_BOOST = 2;  // 2x resolution for higher quality
         const MAX_WIDTH = 640;  // Max pixels width on browser.
 
-        const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         const screenMap = frameData.screenMap;
         const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
@@ -499,7 +510,6 @@ class GraphicsManagerThreeJS {
     }
 
     createGrid(frameData) {
-        const { THREE } = this.threeJsModules;
         const screenMap = frameData.screenMap;
 
         // Clear existing LEDs
@@ -706,7 +716,6 @@ class GraphicsManagerThreeJS {
 
     let uiManager;
     let uiCanvasChanged = false;
-    let threeJsModules = {};  // For graphics.
     let graphicsManager;
     let containerId;  // for ThreeJS
     let graphicsArgs = {};
@@ -1090,16 +1099,11 @@ class GraphicsManagerThreeJS {
             console.log("Loading FastLED with options:", options);
             frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
             uiManager = new UiManager(uiControlsId);
-            let threeJs = options.threeJs;
-            console.log("ThreeJS:", threeJs);
             const fastLedLoader = options.fastled;
-            threeJsModules = threeJs.modules;
             containerId = threeJs.containerId;
-            console.log("ThreeJS modules:", threeJsModules);
             console.log("Container ID:", containerId);
             graphicsArgs = {
                 canvasId: canvasId,
-                threeJsModules: threeJsModules
             }
             let out = await onModuleLoaded(fastLedLoader);
             console.log("Module loaded:", out);

@@ -33,22 +33,6 @@
 
 </body>
 
-<script type="module">
-    import * as THREE from 'https://threejs.org/build/three.module.js';
-
-    import Stats from 'https://threejs.org/examples/jsm/addons/libs/stats.module.js';
-    import { GUI } from 'https://threejs.org/examples/jsm/addons/libs/lil-gui.module.min.js';
-
-    import { OrbitControls } from 'https://threejs.org/examples/jsm/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'https://threejs.org/examples/jsm/addons/loaders/GLTFLoader.js';
-    import { EffectComposer } from 'https://threejs.org/examples/jsm/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/UnrealBloomPass.js';
-    import { OutputPass } from 'https://threejs.org/examples/jsm/addons/postprocessing/OutputPass.js';
-
-
-    window.threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
-</script>
 
 
 <!-- Include the FastLED script -->
@@ -149,7 +133,6 @@
             printId: "output",
             frameRate: 60,
             fastled: fastled,
-            threeJs: threeJs,
         }
         await loadFastLED(options);
         
