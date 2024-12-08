@@ -61,8 +61,11 @@ ScreenMap screenMap;
 
 FileSystem filesystem;
 Video video(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
+Video video2(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
 
 Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.1f);
+NumberField whichVideo("Which Video", 0, 0, 1);
+
 
 bool gError = false;
 
@@ -81,6 +84,12 @@ void setup() {
     video = filesystem.openVideo("data/video.rgb", NUM_LEDS, FPS, 2);
     if (!video) {
       FASTLED_WARN("Failed to instantiate video");
+      gError = true;
+      return;
+    }
+    video2 = filesystem.openVideo("data/color_line_bubbles.rgb", NUM_LEDS, FPS, 2);
+    if (!video2) {
+      FASTLED_WARN("Failed to instantiate video2");
       gError = true;
       return;
     }
@@ -105,9 +114,10 @@ void loop() {
       }
       return;
     }
-    video.setTimeScale(videoSpeed);
+    Video& vid = !bool(whichVideo.value()) ? video : video2;
+    vid.setTimeScale(videoSpeed);
     uint32_t now = millis();
-    video.draw(now, leds);
+    vid.draw(now, leds);
     FastLED.show();
 }
 

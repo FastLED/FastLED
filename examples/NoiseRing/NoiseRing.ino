@@ -30,7 +30,7 @@
 #define NUM_LEDS 250
 #define PIN_PIR 0
 
-#define PIR_LATCH_MS 15000  // how long to keep the PIR sensor active after a trigger
+#define PIR_LATCH_MS 60000  // how long to keep the PIR sensor active after a trigger
 #define PIR_RISING_TIME 1000  // how long to fade in the PIR sensor
 #define PIR_FALLING_TIME 1000  // how long to fade out the PIR sensor
 
