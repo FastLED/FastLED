@@ -459,10 +459,17 @@ def get_zip_bytes(example: str) -> bytes:
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     zip_bytes = get_zip_bytes("wasm")
+
+    # Create temporary file
+    tmp_file = NamedTemporaryFile(delete=False)
+    tmp_file.write(zip_bytes)
+    tmp_file.close()
+
     return FileResponse(
-        content=zip_bytes,
+        path=tmp_file.name,
         media_type="application/zip",
         filename="fastled_example.zip",
+        background=BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name)),
     )
 
 
@@ -470,10 +477,17 @@ def project_init() -> FileResponse:
 def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     zip_bytes = get_zip_bytes(example)
+
+    # Create temporary file
+    tmp_file = NamedTemporaryFile(delete=False)
+    tmp_file.write(zip_bytes)
+    tmp_file.close()
+
     return FileResponse(
-        content=zip_bytes,
+        path=tmp_file.name,
         media_type="application/zip",
         filename="fastled_example.zip",
+        background=BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name)),
     )
 
 
