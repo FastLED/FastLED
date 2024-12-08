@@ -1271,7 +1271,13 @@ class UiManager {
         console.log("Files JSON:", filesJson);
 
 
-
+        function jsAppendFile(path, data, len) {
+            // Stream this chunk
+            moduleInstance.ccall('jsAppendFile', 'number',
+                ['number', 'number', 'number'],
+                [path, data, len]
+            );
+        }
 
 
         let filesRemaining = filesJson.length
@@ -1294,12 +1300,7 @@ class UiManager {
                         // Allocate and copy chunk data
                         const ptr = moduleInstance._malloc(value.length);
                         moduleInstance.HEAPU8.set(value, ptr);
-
-                        // Stream this chunk
-                        moduleInstance.ccall('jsAppendFile', 'number',
-                            ['number', 'number', 'number'],
-                            [ptrName, ptr, value.length]
-                        );
+                        jsAppendFile(ptrName, ptr, value.length);
 
                         moduleInstance._free(ptr);
                     }
