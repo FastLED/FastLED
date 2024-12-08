@@ -1244,7 +1244,8 @@ class UiManager {
             const streamingFiles = [];
             filesJson.map(file => {
                 for (const ext of immediateExtensions) {
-                    if (file.path.endsWith(ext)) {
+                    const pathLower = file.path.toLowerCase();
+                    if (pathLower.endsWith(ext.toLowerCase())) {
                         immediateFiles.push(file);
                         return;
                     }
@@ -1306,15 +1307,12 @@ class UiManager {
 
 
         const fetchAllFiles = async (filesJson, onComplete) => {
-            let numFiles = filesJson.length;
-        
-            for (const file of filesJson) {
+            const promises = filesJson.map(async (file) => {
                 await processFile(file);
-                numFiles--;
-        
-                if (onComplete) {
-                    onComplete();
-                }
+            });
+            await Promise.all(promises);
+            if (onComplete) {
+                onComplete();
             }
         };
 
@@ -1339,11 +1337,10 @@ class UiManager {
 
         // Come back to this later - we want to partition the files into immediate and streaming files
         // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
-        const [immediateFiles, streamingFiles] = partition(filesJson, [".json"]);
+        const [immediateFiles, streamingFiles] = partition(filesJson, [".json", ".csv", ".txt", ".cfg"]);
         console.log("All files:", filesJson);
         console.log("Immediate files:", immediateFiles);
         console.log("Streaming files:", streamingFiles);
-
 
         fetchAllFiles(immediateFiles, onComplete_SetupFastLEDAndLoop);
         fetchAllFiles(streamingFiles, () => {
