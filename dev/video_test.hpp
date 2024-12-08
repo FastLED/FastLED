@@ -3,7 +3,7 @@
 /// @example VideoTest.ino
 
 #include <FastLED.h>
-#include "fx/storage/bytestreammemory.h"
+#include "fl/bytestreammemory.h"
 #include "fx/2d/video.hpp"
 #include "fx/fx_engine.h"
 #include "ref.h"

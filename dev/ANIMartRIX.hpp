@@ -24,7 +24,7 @@
 CRGB leds[NUM_LED];               // framebuffer
 
 XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
-AnimartrixRef fxAnimator = AnimartrixRef::New(xyMap, POLAR_WAVES);
+AnimartrixPtr fxAnimator = AnimartrixPtr::New(xyMap, POLAR_WAVES);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -33,7 +33,6 @@ void setup() {
   // fill_rainbow(leds, NUM_LED, 0);
   fill_solid(leds, NUM_LED, CRGB::Black);
   FastLED.show();
-  fxAnimator->lazyInit();  // test look up table construction.
 }
 
 void loop() {
