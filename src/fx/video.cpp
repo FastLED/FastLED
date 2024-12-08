@@ -25,6 +25,8 @@ FASTLED_SMART_PTR(PixelStream);
 FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(Frame);
 
+Video::Video(): Fx1d(0) {
+}
 
 Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count): Fx1d(pixelsPerFrame) {
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
@@ -47,6 +49,10 @@ Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;
 
 bool Video::begin(FileHandlePtr handle) {
+    if (!mImpl) {
+        FASTLED_WARN("Video::begin: mImpl is null, manually constructed videos must include full parameters.");
+        return false;
+    }
     if (!handle) {
         mError = "FileHandle is null";
         FASTLED_DBG(mError.c_str());

@@ -60,8 +60,8 @@ CRGB leds[NUM_LEDS];
 ScreenMap screenMap;
 
 FileSystem filesystem;
-Video video(NUM_LEDS, FPS, NUM_VIDEO_FRAMES);
-Video video2(NUM_LEDS, 2, NUM_VIDEO_FRAMES);
+Video video;
+Video video2;
 
 Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.01f);
 NumberField whichVideo("Which Video", 0, 0, 1);

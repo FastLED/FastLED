@@ -38,6 +38,7 @@ public:
     }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
+    Video();
     Video(size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());  // Please use FileSytem to construct a Video.
     ~Video();
     Video(const Video&);
