@@ -439,7 +439,7 @@ async def compiler_in_use() -> dict:
 
 
 @app.get("/project/init")
-def project_init() -> Response:
+def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     examples_dir = Path("/js/fastled/examples/wasm")
     if not examples_dir.exists():
@@ -456,10 +456,10 @@ def project_init() -> Response:
                 arc_path = file_path.relative_to(examples_dir)
                 zip_out.write(file_path, arc_path)
 
-    return Response(
+    return FileResponse(
         content=zip_buffer.getvalue(),
         media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=fastled_examples.zip"},
+        filename="fastled_example.zip",
     )
 
 
