@@ -218,6 +218,11 @@ def sync_live_git_to_target() -> None:
     sync_src_to_target(
         _LIVE_GIT_FASTLED_DIR / "src", _RSYNC_DEST, callback=on_files_changed
     )
+    sync_src_to_target(
+        _LIVE_GIT_FASTLED_DIR / "examples",
+        _RSYNC_DEST.parent / "examples",
+        callback=on_files_changed,
+    )
     # Basically a setTimeout() in JS.
     Timer(
         _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
