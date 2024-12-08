@@ -30,6 +30,7 @@ class Board:
     )
     platform_packages: str | None = None
     framework: str | None = None
+    board_build_mcu: str | None = None
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
     defines: list[str] | None = None
@@ -52,6 +53,8 @@ class Board:
             options.append(f"framework={self.framework}")
         if self.board_build_core:
             options.append(f"board_build.core={self.board_build_core}")
+        if self.board_build_mcu:
+            options.append(f"board_build.mcu={self.board_build_mcu}")
         if self.board_build_filesystem_size:
             options.append(
                 f"board_build.filesystem_size={self.board_build_filesystem_size}"
@@ -109,6 +112,14 @@ ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_1_PIOARDUINO,
+)
+
+ESP32_S2_DEVKITM_1 = Board(
+    board_name="esp32s2",
+    real_board_name="esp32dev",
+    board_build_mcu="esp32s2",
+    platform=ESP32_IDF_5_1_PIOARDUINO,
+
 )
 
 ESP32_H2_DEVKITM_1 = Board(
@@ -221,6 +232,7 @@ ALL: list[Board] = [
     ESP32_C2_DEVKITM_1,
     ESP32_C3_DEVKITM_1,
     ESP32_C6_DEVKITC_1,
+    ESP32_S2_DEVKITM_1,
     ESP32_S3_DEVKITC_1,
     ESP32_H2_DEVKITM_1,
     ADA_FEATHER_NRF52840_SENSE,

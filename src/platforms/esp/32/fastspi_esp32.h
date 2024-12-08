@@ -63,7 +63,11 @@ FASTLED_NAMESPACE_BEGIN
 #include<SPI.h>
 
 // Conditional compilation for ESP32-S3 to utilize its flexible SPI capabilities
-#if CONFIG_IDF_TARGET_ESP32S3
+#if CONFIG_IDF_TARGET_ESP32S2
+    // https://github.com/FastLED/FastLED/issues/1782
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#elif CONFIG_IDF_TARGET_ESP32S3
 	#pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
