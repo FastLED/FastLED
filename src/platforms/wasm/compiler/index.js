@@ -1338,13 +1338,16 @@ class UiManager {
         // Come back to this later - we want to partition the files into immediate and streaming files
         // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
         const [immediateFiles, streamingFiles] = partition(filesJson, [".json", ".csv", ".txt", ".cfg"]);
-        console.log("All files:", filesJson);
-        console.log("Immediate files:", immediateFiles);
-        console.log("Streaming files:", streamingFiles);
+        console.log("The following files will be immediatly available and can be read during setup():", immediateFiles);
+        console.log("The following files will be streamed in during loop():", streamingFiles);
 
-        fetchAllFiles(immediateFiles, onComplete_SetupFastLEDAndLoop);
+        fetchAllFiles(immediateFiles, () => {
+            onComplete_SetupFastLEDAndLoop();
+        });
         fetchAllFiles(streamingFiles, () => {
-            console.log("All streaming files processed");
+            if (streamingFiles.length !== 0) {
+                console.log("All streaming files processed");
+            }
         });
     }
 
