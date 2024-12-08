@@ -49,9 +49,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update the apt-get package list. This takes a long time, so we do it first to maximize cache hits.
 # Also install apt-fast first
-RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:apt-fast/stable -y && \
+RUN apt-get update
+
+RUN apt-get install -y software-properties-common
+
+RUN add-apt-repository ppa:apt-fast/stable -y && \
     apt-get update && \
     apt-get -y install apt-fast
 
