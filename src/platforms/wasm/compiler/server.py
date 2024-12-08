@@ -450,7 +450,7 @@ def get_zip_bytes(example: str) -> bytes:
             if file_path.is_file():
                 if "fastled_js" in file_path.parts:
                     continue
-                arc_path = file_path.relative_to(examples_dir)
+                arc_path = file_path.relative_to(examples_dir.parent)
                 zip_out.write(file_path, arc_path)
     return zip_buffer.getvalue()
 
