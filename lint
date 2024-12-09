@@ -30,6 +30,14 @@ uv run mypy ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run mypy src/platforms/wasm/compiler/compile.py
 uv run mypy src/platforms/wasm/compiler/server.py
 
+# if eslint is found
+if command -v eslint &> /dev/null; then
+    # Linting the javascript code.
+    echo "Running eslint"
+    eslint src/platforms/wasm/compiler/*.js
+    eslint src/platforms/wasm/compiler/modules/*.js
+fi
+
 
 # Linting the C++ code.
 folders=(
