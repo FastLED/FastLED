@@ -141,7 +141,7 @@ target_link_options(fastled PRIVATE
 # message(STATUS "FastLED_core: ${FastLED_core}")
 
 # Create core library with essential components
-file(GLOB CORE_SOURCES "${FASTLED_SOURCES}/*.cpp")
+file(GLOB CORE_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
 
 message(STATUS "Core Sources: ${CORE_SOURCES}")
 # ${CMAKE_CURRENT_SOURCE_DIR}
@@ -252,78 +252,8 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 
 
-# Create FastLEDTest with OTHER_SOURCES
-add_library(FastLEDTest OBJECT ${OTHER_SOURCES})
 
-# Set C++ standard and shared library properties for FastLEDTest
-set_target_properties(FastLEDTest PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    POSITION_INDEPENDENT_CODE ON
-)
 
-# Add custom build flags for FastLEDTest
-target_compile_options(FastLEDTest PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(FastLEDTest PRIVATE ${COMMON_COMPILE_DEFINITIONS})
-
-# Add FastLEDTest objects to main FastLED library
-target_sources(FastLED PRIVATE $<TARGET_OBJECTS:FastLEDTest>)
-
-if(USE_LIBUNWIND)
-    target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
-endif()
-
-# Enable testing
-enable_testing()
-
-# Find all test source files
-file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
-
-# Find test executables (only actual test executables, not libraries)
-file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
-
-# Process source files
-foreach(TEST_SOURCE ${TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} FastLED)
-    if(USE_LIBUNWIND)
-        target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
-    endif()
-    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    set_target_properties(${TEST_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-    )
-    # Add static linking flags and debug flags for test executables
-    if(NOT APPLE)
-        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
-    endif()
-    target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-    target_compile_definitions(${TEST_NAME} PRIVATE 
-        ${COMMON_COMPILE_DEFINITIONS}
-        $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
-    )
-    
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-endforeach()
-
-# Process remaining binaries (those without corresponding source files)
-option(CLEAN_ORPHANED_BINARIES "Remove orphaned test binaries" ON)
-if(CLEAN_ORPHANED_BINARIES)
-    foreach(ORPHANED_BINARY ${TEST_BINARIES})
-        get_filename_component(BINARY_NAME ${ORPHANED_BINARY} NAME_WE)
-        get_filename_component(BINARY_DIR ${ORPHANED_BINARY} DIRECTORY)
-        get_filename_component(PARENT_DIR ${BINARY_DIR} DIRECTORY)
-        get_filename_component(GRANDPARENT_DIR ${PARENT_DIR} DIRECTORY)
-        set(CORRESPONDING_SOURCE "${GRANDPARENT_DIR}/${BINARY_NAME}.cpp")
-        if(NOT EXISTS "${CORRESPONDING_SOURCE}")
-            message(STATUS "Found orphaned binary without source: ${ORPHANED_BINARY}")
-            file(REMOVE "${ORPHANED_BINARY}")
-            message(STATUS "Deleted orphaned binary: ${ORPHANED_BINARY}")
-        endif()
-    endforeach()
-endif()
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
