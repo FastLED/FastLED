@@ -93,14 +93,18 @@ Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
+    Serial.begin(115200);
+    Serial.println("Sketch setup");
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(xyMap);
+    Serial.println("FastLED setup done");
     FastLED.setBrightness(brightness);
     //noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
     fxEngine.addFx(animartrix);
     fxEngine.addFx(noisePalette);
+    Serial.println("Sketch setup done");
 }
 
 void loop() {
