@@ -74,7 +74,73 @@ console.warn = warn;
 console.error = _prev_error;
 
 
+function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
+    // Stream this chunk
+    moduleInstance.ccall('jsAppendFile',
+        'number',  // return value
+        ['number', 'number', 'number'], // argument types, not sure why numbers works.
+        [path_cstr, data_cbytes, len_int]
+    );
+}
 
+function jsAppendFileUint8(moduleInstance, path, blob) {
+    const n = moduleInstance.lengthBytesUTF8(path) + 1;
+    const path_cstr = moduleInstance._malloc(n);
+    moduleInstance.stringToUTF8(path, path_cstr, n);
+    const ptr = moduleInstance._malloc(blob.length);
+    moduleInstance.HEAPU8.set(blob, ptr);
+    jsAppendFileRaw(moduleInstance, path_cstr, ptr, blob.length);
+    moduleInstance._free(ptr);
+    moduleInstance._free(path_cstr);
+}
+
+function minMax(array_xy) {
+    const x_array = array_xy["x"];
+    const y_array = array_xy["y"]; 
+    let min_x = x_array[0];
+    let min_y = y_array[0];
+    let max_x = x_array[0];
+    let max_y = y_array[0];
+    for (let i = 1; i < x_array.length; i++) {
+        min_x = Math.min(min_x, x_array[i]);
+        min_y = Math.min(min_y, y_array[i]);
+        max_x = Math.max(max_x, x_array[i]);
+        max_y = Math.max(max_y, y_array[i]);
+    }
+    return [[min_x, min_y], [max_x, max_y]];
+}
+
+function partition(filesJson, immediateExtensions) {
+    const immediateFiles = [];
+    const streamingFiles = [];
+    filesJson.map(file => {
+        for (const ext of immediateExtensions) {
+            const pathLower = file.path.toLowerCase();
+            if (pathLower.endsWith(ext.toLowerCase())) {
+                immediateFiles.push(file);
+                return;
+            }
+        }
+        streamingFiles.push(file);
+    });
+    return [immediateFiles, streamingFiles];
+}
+
+
+function getFileManifestJson(filesJson, frame_rate) {
+    const trimmedFilesJson = filesJson.map(file => {
+        return {
+            path: file.path,
+            size: file.size,
+        };
+    });
+    const options = {
+        files: trimmedFilesJson,
+        frameRate: frame_rate,
+    };
+    return options;
+
+}
 
 (function () {
     const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
@@ -125,22 +191,6 @@ console.error = _prev_error;
         output.textContent = lines.join('\n');
     }
 
-
-    function minMax(array_xy) {
-        const x_array = array_xy["x"];
-        const y_array = array_xy["y"]; 
-        let min_x = x_array[0];
-        let min_y = y_array[0];
-        let max_x = x_array[0];
-        let max_y = y_array[0];
-        for (let i = 1; i < x_array.length; i++) {
-            min_x = Math.min(min_x, x_array[i]);
-            min_y = Math.min(min_y, y_array[i]);
-            max_x = Math.max(max_x, x_array[i]);
-            max_y = Math.max(max_y, y_array[i]);
-        }
-        return [[min_x, min_y], [max_x, max_y]];
-    }
 
     globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("Received strip update:", jsonData);
@@ -231,24 +281,17 @@ console.error = _prev_error;
         }
     };
 
-
-
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById(outputId);
-
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
 
-
-
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
-
         uiManager.processUiChanges(uiUpdateCallback);
         if (frameData.length === 0) {
             console.warn("Received empty frame data, skipping update");
             return;
         }
-
         updateCanvas(frameData);
     };
 
@@ -260,66 +303,9 @@ console.error = _prev_error;
     async function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
 
-        function getFileManifestJson() {
-            const trimmedFilesJson = filesJson.map(file => {
-                return {
-                    path: file.path,
-                    size: file.size,
-                };
-            });
-            const options = {
-                files: trimmedFilesJson,
-                frameRate: frame_rate,
-            };
-            return options;
-
-        }
-
-        function partition(filesJson, immediateExtensions) {
-            const immediateFiles = [];
-            const streamingFiles = [];
-            filesJson.map(file => {
-                for (const ext of immediateExtensions) {
-                    const pathLower = file.path.toLowerCase();
-                    if (pathLower.endsWith(ext.toLowerCase())) {
-                        immediateFiles.push(file);
-                        return;
-                    }
-                }
-                streamingFiles.push(file);
-            });
-            return [immediateFiles, streamingFiles];
-        }
-
-
-
-        const fileManifest = getFileManifestJson();
+        const fileManifest = getFileManifestJson(filesJson, frame_rate);
         moduleInstance._fastled_declare_files(JSON.stringify(fileManifest));
-
-
         console.log("Files JSON:", filesJson);
-
-
-        function jsAppendFile(path_cstr, data_cbytes, len_int) {
-            // Stream this chunk
-            moduleInstance.ccall('jsAppendFile',
-                'number',  // return value
-                ['number', 'number', 'number'], // argument types, not sure why numbers works.
-                [path_cstr, data_cbytes, len_int]
-            );
-        }
-
-        function jsAppendFileUint8(path, blob) {
-            const n = moduleInstance.lengthBytesUTF8(path) + 1;
-            const path_cstr = moduleInstance._malloc(n);
-            moduleInstance.stringToUTF8(path, path_cstr, n);
-            const ptr = moduleInstance._malloc(blob.length);
-            moduleInstance.HEAPU8.set(blob, ptr);
-            jsAppendFile(path_cstr, ptr, blob.length);
-            moduleInstance._free(ptr);
-            moduleInstance._free(path_cstr);
-        }
-
 
         const processFile = async (file) => {
             try {
@@ -333,15 +319,13 @@ console.error = _prev_error;
                     if (done) break;
         
                     // Allocate and copy chunk data
-                    jsAppendFileUint8(file.path, value);
+                    jsAppendFileUint8(moduleInstance, file.path, value);
                 }
             } catch (error) {
                 console.error(`Error processing file ${file.path}:`, error);
             }
         };
         
-
-
         const fetchAllFiles = async (filesJson, onComplete) => {
             const promises = filesJson.map(async (file) => {
                 await processFile(file);
@@ -386,8 +370,6 @@ console.error = _prev_error;
             }
         });
     }
-
-
 
 
     function updateCanvas(frameData) {
