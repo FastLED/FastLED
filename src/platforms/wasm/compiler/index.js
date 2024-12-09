@@ -9,6 +9,28 @@ const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
 const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
 const MAX_STDOUT_LINES = 50;
 
+const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
+let frameRate = DEFAULT_FRAME_RATE_60FPS;
+let receivedCanvas = false;
+// screenMap contains data mapping a strip id to a screen map,
+// transforming led strip data pixel with an index
+// to a screen pixel with xy.
+let screenMap = {
+    strips: {},
+    absMin: [0, 0],
+    absMax: [0, 0]
+};
+let canvasId;
+let uiControlsId;
+let outputId;
+
+let uiManager;
+let uiCanvasChanged = false;
+let threeJsModules = {};  // For graphics.
+let graphicsManager;
+let containerId;  // for ThreeJS
+let graphicsArgs = {};
+
 console.log("index.js loaded");
 console.log("FastLED loader function:", typeof _loadFastLED);
 
@@ -159,28 +181,6 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
 
 
 
-const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
-let frameRate = DEFAULT_FRAME_RATE_60FPS;
-let receivedCanvas = false;
-// screenMap contains data mapping a strip id to a screen map,
-// transforming led strip data pixel with an index
-// to a screen pixel with xy.
-let screenMap = {
-    strips: {},
-    absMin: [0, 0],
-    absMax: [0, 0]
-};
-let canvasId;
-let uiControlsId;
-let outputId;
-
-let uiManager;
-let uiCanvasChanged = false;
-let threeJsModules = {};  // For graphics.
-let graphicsManager;
-let containerId;  // for ThreeJS
-let graphicsArgs = {};
-
 function customPrintFunction(...args) {
     if (containerId === undefined) {
         return;  // Not ready yet.
@@ -209,6 +209,7 @@ function customPrintFunction(...args) {
 
 
 function FastLED_onStripUpdate(jsonData) {
+    // uses global variables.
     console.log("Received strip update:", jsonData);
 
     const event = jsonData.event;
@@ -293,20 +294,24 @@ function FastLED_onStripUpdate(jsonData) {
 };
 
 function FastLED_onStripAdded(stripId, stripLength) {
+    // uses global variables.
     const output = document.getElementById(outputId);
     output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
 };
 
 function FastLED_onFrame(frameData, uiUpdateCallback) {
+    // uses global variables.
     uiManager.processUiChanges(uiUpdateCallback);
     if (frameData.length === 0) {
         console.warn("Received empty frame data, skipping update");
         return;
     }
+    frameData.screenMap = screenMap;
     updateCanvas(frameData);
 };
 
 function FastLED_onUiElementsAdded(jsonData) {
+    // uses global variables.
     uiManager.addUiElements(jsonData);
 };
 
@@ -382,7 +387,10 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 
 function updateCanvas(frameData) {
     // we are going to add the screenMap to the graphicsManager
-    frameData.screenMap = screenMap;
+    if (frameData.screenMap === undefined) {
+        console.warn("Screen map not found in frame data, skipping canvas update");
+        return;
+    }
     if (!graphicsManager) {
         const isDenseMap = isDenseGrid(frameData);
         if (FORCE_THREEJS_RENDERER) {
