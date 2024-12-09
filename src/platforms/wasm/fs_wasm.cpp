@@ -39,7 +39,10 @@ FASTLED_SMART_PTR(FileData);
 class FileData : public fl::Referent {
   public:
 
-    FileData(size_t capacity) : mCapacity(capacity) {}
+    FileData(size_t capacity) : mCapacity(capacity) 
+    {
+        mData.reserve(capacity);
+    }
     FileData(const std::vector<uint8_t> &data, size_t len)
         : mData(data), mCapacity(len) {}
     FileData() = default;
