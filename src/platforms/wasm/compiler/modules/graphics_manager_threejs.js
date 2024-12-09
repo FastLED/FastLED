@@ -1,3 +1,11 @@
+/* eslint-disable no-console */
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable max-len */
+/* eslint-disable guard-for-in */
+/* eslint-disable camelcase */
+/* eslint-disable no-underscore-dangle */
+
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
@@ -93,11 +101,12 @@ export class GraphicsManagerThreeJS {
     const __screenHeight = this.SCREEN_HEIGHT;
 
     function calcXPosition(x) {
-      return (x - screenMap.absMin[0]) / width * __screenWidth - __screenWidth / 2;
+      return (((x - screenMap.absMin[0]) / width) * __screenWidth) - (__screenWidth / 2);
     }
 
     function calcYPosition(y) {
-      return -((y - screenMap.absMin[1]) / height * __screenHeight - __screenHeight / 2);
+      const negY = (((y - screenMap.absMin[1]) / height) * __screenHeight) - (__screenHeight / 2);
+      return -negY;
     }
     return { calcXPosition, calcYPosition };
   }

@@ -1,3 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable max-len */
+/* eslint-disable guard-for-in */
+/* eslint-disable camelcase */
+
 export class GraphicsManager {
   constructor(graphicsArgs) {
     const { canvasId } = graphicsArgs;
