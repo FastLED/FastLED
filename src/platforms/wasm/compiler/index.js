@@ -22,7 +22,7 @@ async function _loadFastLED(options) {
 
 
 export async function loadFastLED(options) {
-    return await _loadFastLED(options);
+    return await _loadFastLED(options); // This will be overridden by through the initialization.
 };
 
 
