@@ -158,330 +158,334 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
 }
 
 
-(function () {
-    const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
-    let frameRate = DEFAULT_FRAME_RATE_60FPS;
-    let receivedCanvas = false;
-    // screenMap contains data mapping a strip id to a screen map,
-    // transforming led strip data pixel with an index
-    // to a screen pixel with xy.
-    let screenMap = {
-        strips: {},
-        absMin: [0, 0],
-        absMax: [0, 0]
-    };
-    let canvasId;
-    let uiControlsId;
-    let outputId;
 
-    let uiManager;
-    let uiCanvasChanged = false;
-    let threeJsModules = {};  // For graphics.
-    let graphicsManager;
-    let containerId;  // for ThreeJS
-    let graphicsArgs = {};
+const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
+let frameRate = DEFAULT_FRAME_RATE_60FPS;
+let receivedCanvas = false;
+// screenMap contains data mapping a strip id to a screen map,
+// transforming led strip data pixel with an index
+// to a screen pixel with xy.
+let screenMap = {
+    strips: {},
+    absMin: [0, 0],
+    absMax: [0, 0]
+};
+let canvasId;
+let uiControlsId;
+let outputId;
 
-    function customPrintFunction(...args) {
-        if (containerId === undefined) {
-            return;  // Not ready yet.
-        }
-        // take the args and stringify them, then add them to the output element
-        let cleanedArgs = args.map(arg => {
-            if (typeof arg === 'object') {
-                try {
-                    return JSON.stringify(arg).slice(0, 100);
-                } catch (e) {
-                    return "" + arg;
-                }
-            }
-            return arg;
-        });
+let uiManager;
+let uiCanvasChanged = false;
+let threeJsModules = {};  // For graphics.
+let graphicsManager;
+let containerId;  // for ThreeJS
+let graphicsArgs = {};
 
-        const output = document.getElementById(outputId);
-        const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
-        // split into lines, and if there are more than 100 lines, remove one.
-        const lines = allText.split('\n');
-        while (lines.length > MAX_STDOUT_LINES) {
-            lines.shift();
-        }
-        output.textContent = lines.join('\n');
+function customPrintFunction(...args) {
+    if (containerId === undefined) {
+        return;  // Not ready yet.
     }
-
-
-    globalThis.FastLED_onStripUpdate = function (jsonData) {
-        console.log("Received strip update:", jsonData);
-
-        const event = jsonData.event;
-        let width = 0;
-        let height = 0;
-        let eventHandled = false;
-        if (event === "set_canvas_map") {
-            eventHandled = true;
-            // Work in progress.
-            const map = jsonData.map;
-            console.log("Received map:", jsonData);
-            const [min, max] = minMax(map["x"], map["y"]);
-            console.log("min", min, "max", max);
-
-            const stripId = jsonData.strip_id;
-            const isUndefined = (value) => typeof value === 'undefined';
-            if (isUndefined(stripId)) {
-                throw new Error("strip_id is required for set_canvas_map event");
+    // take the args and stringify them, then add them to the output element
+    let cleanedArgs = args.map(arg => {
+        if (typeof arg === 'object') {
+            try {
+                return JSON.stringify(arg).slice(0, 100);
+            } catch (e) {
+                return "" + arg;
             }
-            screenMap.strips[stripId] = {
-                map: map,
-                min: min,
-                max: max,
-                diameter: jsonData.diameter
-            };
-            console.log("Screen map updated:", screenMap);
-            // iterate through all the screenMaps and get the absolute min and max
-            let absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
-            let absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
-            let setAtLeastOnce = false;
-            for (const stripId in screenMap.strips) {
-                console.log("Processing strip ID", stripId);
-                const id = Number.parseInt(stripId, 10);
-                const stripData = screenMap.strips[id];
-                absMin[0] = Math.min(absMin[0], stripData.min[0]);
-                absMin[1] = Math.min(absMin[1], stripData.min[1]);
-                absMax[0] = Math.max(absMax[0], stripData.max[0]);
-                absMax[1] = Math.max(absMax[1], stripData.max[1]);
-                setAtLeastOnce = true;
-            }
-            if (!setAtLeastOnce) {
-                error("No screen map data found, skipping canvas size update");
-                return;
-            }
-            screenMap.absMin = absMin;
-            screenMap.absMax = absMax;
-            width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
-            height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
-            console.log("canvas updated with width and height", width, height);
-            // now update the canvas size.
-            const canvas = document.getElementById(canvasId);
-            canvas.width = width;
-            canvas.height = height;
-            uiCanvasChanged = true;
-            console.log("Screen map updated:", screenMap);
         }
+        return arg;
+    });
 
-        if (!eventHandled) {
-            console.warn(`We do not support event ${event} yet.`);
+    const output = document.getElementById(outputId);
+    const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
+    // split into lines, and if there are more than 100 lines, remove one.
+    const lines = allText.split('\n');
+    while (lines.length > MAX_STDOUT_LINES) {
+        lines.shift();
+    }
+    output.textContent = lines.join('\n');
+}
+
+
+function FastLED_onStripUpdate(jsonData) {
+    console.log("Received strip update:", jsonData);
+
+    const event = jsonData.event;
+    let width = 0;
+    let height = 0;
+    let eventHandled = false;
+    if (event === "set_canvas_map") {
+        eventHandled = true;
+        // Work in progress.
+        const map = jsonData.map;
+        console.log("Received map:", jsonData);
+        const [min, max] = minMax(map["x"], map["y"]);
+        console.log("min", min, "max", max);
+
+        const stripId = jsonData.strip_id;
+        const isUndefined = (value) => typeof value === 'undefined';
+        if (isUndefined(stripId)) {
+            throw new Error("strip_id is required for set_canvas_map event");
+        }
+        screenMap.strips[stripId] = {
+            map: map,
+            min: min,
+            max: max,
+            diameter: jsonData.diameter
+        };
+        console.log("Screen map updated:", screenMap);
+        // iterate through all the screenMaps and get the absolute min and max
+        let absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+        let absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+        let setAtLeastOnce = false;
+        for (const stripId in screenMap.strips) {
+            console.log("Processing strip ID", stripId);
+            const id = Number.parseInt(stripId, 10);
+            const stripData = screenMap.strips[id];
+            absMin[0] = Math.min(absMin[0], stripData.min[0]);
+            absMin[1] = Math.min(absMin[1], stripData.min[1]);
+            absMax[0] = Math.max(absMax[0], stripData.max[0]);
+            absMax[1] = Math.max(absMax[1], stripData.max[1]);
+            setAtLeastOnce = true;
+        }
+        if (!setAtLeastOnce) {
+            error("No screen map data found, skipping canvas size update");
             return;
         }
-        if (receivedCanvas) {
-            console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
-        }
+        screenMap.absMin = absMin;
+        screenMap.absMax = absMax;
+        width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
+        height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
+        console.log("canvas updated with width and height", width, height);
+        // now update the canvas size.
         const canvas = document.getElementById(canvasId);
         canvas.width = width;
         canvas.height = height;
+        uiCanvasChanged = true;
+        console.log("Screen map updated:", screenMap);
+    }
 
-        // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
-        const displayWidth = 640;
-        const displayHeight = Math.round((height / width) * displayWidth);
+    if (!eventHandled) {
+        console.warn(`We do not support event ${event} yet.`);
+        return;
+    }
+    if (receivedCanvas) {
+        console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
+    }
+    const canvas = document.getElementById(canvasId);
+    canvas.width = width;
+    canvas.height = height;
 
-        // Set CSS display size while maintaining aspect ratio
-        canvas.style.width = displayWidth + 'px';
-        canvas.style.height = displayHeight + 'px';
-        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
-        // unconditionally delete the graphicsManager
-        if (graphicsManager) {
-            graphicsManager.reset();
-            graphicsManager = null;
+    // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
+    const displayWidth = 640;
+    const displayHeight = Math.round((height / width) * displayWidth);
+
+    // Set CSS display size while maintaining aspect ratio
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
+    // unconditionally delete the graphicsManager
+    if (graphicsManager) {
+        graphicsManager.reset();
+        graphicsManager = null;
+    }
+};
+
+function FastLED_onStripAdded(stripId, stripLength) {
+    const output = document.getElementById(outputId);
+    output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
+};
+
+function FastLED_onFrame(frameData, uiUpdateCallback) {
+    uiManager.processUiChanges(uiUpdateCallback);
+    if (frameData.length === 0) {
+        console.warn("Received empty frame data, skipping update");
+        return;
+    }
+    updateCanvas(frameData);
+};
+
+function FastLED_onUiElementsAdded(jsonData) {
+    uiManager.addUiElements(jsonData);
+};
+
+
+// Function to call the setup and loop functions
+async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
+    console.log("Calling setup function...");
+
+    const fileManifest = getFileManifestJson(filesJson, frame_rate);
+    moduleInstance._fastled_declare_files(JSON.stringify(fileManifest));
+    console.log("Files JSON:", filesJson);
+
+    const processFile = async (file) => {
+        try {
+            const response = await fetch(file.path);
+            const reader = response.body.getReader();
+
+            console.log(`File fetched: ${file.path}, size: ${file.size}`);
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                // Allocate and copy chunk data
+                jsAppendFileUint8(moduleInstance, file.path, value);
+            }
+        } catch (error) {
+            console.error(`Error processing file ${file.path}:`, error);
         }
     };
 
-    globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
-        const output = document.getElementById(outputId);
-        output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
+    const fetchAllFiles = async (filesJson, onComplete) => {
+        const promises = filesJson.map(async (file) => {
+            await processFile(file);
+        });
+        await Promise.all(promises);
+        if (onComplete) {
+            onComplete();
+        }
     };
 
-    globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
-        uiManager.processUiChanges(uiUpdateCallback);
-        if (frameData.length === 0) {
-            console.warn("Received empty frame data, skipping update");
+    // Bind the functions to the global scope.
+    globalThis.FastLED_onUiElementsAdded = FastLED_onUiElementsAdded;
+    globalThis.FastLED_onFrame = FastLED_onFrame;
+    globalThis.FastLED_onStripAdded = FastLED_onStripAdded;
+    globalThis.FastLED_onStripUpdate = FastLED_onStripUpdate;
+
+    // Come back to this later - we want to partition the files into immediate and streaming files
+    // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
+    const [immediateFiles, streamingFiles] = partition(filesJson, [".json", ".csv", ".txt", ".cfg"]);
+    console.log("The following files will be immediatly available and can be read during setup():", immediateFiles);
+    console.log("The following files will be streamed in during loop():", streamingFiles);
+
+    const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
+        if (immediateFiles.length !== 0) {
+            console.log("All immediate files downloaded to FastLED.");
+        }
+    });
+    await promiseImmediateFiles;
+    if (streamingFiles.length > 0) {
+        const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
+            console.log("All streaming files downloaded to FastLED.");
+        });
+        const delay = new Promise(r => setTimeout(r, 250));
+        // Wait for either the time delay or the streaming files to be processed, whichever
+        // happens first.
+        await Promise.any([delay, streamingFilesPromise]);
+    }
+
+    console.log("Starting fastled");
+    FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
+}
+
+
+function updateCanvas(frameData) {
+    // we are going to add the screenMap to the graphicsManager
+    frameData.screenMap = screenMap;
+    if (!graphicsManager) {
+        const isDenseMap = isDenseGrid(frameData);
+        if (FORCE_THREEJS_RENDERER) {
+            console.log("Creating Beautiful GraphicsManager with canvas ID (forced)", canvasId);
+            graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+        } else if (FORCE_FAST_RENDERER) {
+            console.log("Creating Fast GraphicsManager with canvas ID (forced)", canvasId);
+            graphicsManager = new GraphicsManager(graphicsArgs);
+        } else if (isDenseMap) {
+            console.log("Creating Fast GraphicsManager with canvas ID", canvasId);
+            graphicsManager = new GraphicsManager(graphicsArgs);
+        } else {
+            console.log("Creating Beautiful GraphicsManager with canvas ID", canvasId);
+            graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+        }
+        uiCanvasChanged = false;
+    }
+
+    if (uiCanvasChanged) {
+        uiCanvasChanged = false;
+        graphicsManager.reset();
+    }
+
+
+    graphicsManager.updateCanvas(frameData);
+}
+
+
+// Ensure we wait for the module to load
+async function onModuleLoaded(fastLedLoader) {
+    // Unpack the module functions and send them to the fastledLoadSetupLoop function
+
+    function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
+        const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
+        if (!exports_exist) {
+            console.error("FastLED setup or loop functions are not available.");
             return;
         }
-        updateCanvas(frameData);
+
+        fastledLoadSetupLoop(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
+    }
+    // Start fetch now in parallel
+    const fetchJson = async (fetchFilePath) => {
+        const response = await fetch(fetchFilePath);
+        const data = await response.json();
+        return data;
     };
-
-    globalThis.FastLED_onUiElementsAdded = function (jsonData) {
-        uiManager.addUiElements(jsonData);
-    };
-
-    // Function to call the setup and loop functions
-    async function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
-        console.log("Calling setup function...");
-
-        const fileManifest = getFileManifestJson(filesJson, frame_rate);
-        moduleInstance._fastled_declare_files(JSON.stringify(fileManifest));
-        console.log("Files JSON:", filesJson);
-
-        const processFile = async (file) => {
-            try {
-                const response = await fetch(file.path);
-                const reader = response.body.getReader();
-        
-                console.log(`File fetched: ${file.path}, size: ${file.size}`);
-        
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    // Allocate and copy chunk data
-                    jsAppendFileUint8(moduleInstance, file.path, value);
+    const filesJsonPromise = fetchJson("files.json");
+    try {
+        if (typeof fastLedLoader === 'function') {
+            // Load the module
+            fastLedLoader().then(async (instance) => {
+                console.log("Module loaded, running FastLED...");
+                // Wait for the files.json to load.
+                let filesJson = null;
+                try {
+                    filesJson = await filesJsonPromise;
+                    console.log("Files JSON:", filesJson);
+                } catch (error) {
+                    console.error("Error fetching files.json:", error);
+                    filesJson = {};
                 }
-            } catch (error) {
-                console.error(`Error processing file ${file.path}:`, error);
-            }
-        };
-        
-        const fetchAllFiles = async (filesJson, onComplete) => {
-            const promises = filesJson.map(async (file) => {
-                await processFile(file);
+                __fastledLoadSetupLoop(instance, frameRate, filesJson);
+            }).catch(err => {
+                console.error("Error loading fastled as a module:", err);
             });
-            await Promise.all(promises);
-            if (onComplete) {
-                onComplete();
-            }
-        };
-
-
-
-
-        // Come back to this later - we want to partition the files into immediate and streaming files
-        // so that large projects don't try to download ALL the large files BEFORE setup/loop is called.
-        const [immediateFiles, streamingFiles] = partition(filesJson, [".json", ".csv", ".txt", ".cfg"]);
-        console.log("The following files will be immediatly available and can be read during setup():", immediateFiles);
-        console.log("The following files will be streamed in during loop():", streamingFiles);
-
-        const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
-            if (immediateFiles.length !== 0) {
-                console.log("All immediate files downloaded to FastLED.");
-            }
-        });
-        await promiseImmediateFiles;
-        if (streamingFiles.length > 0) {
-            const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
-                console.log("All streaming files downloaded to FastLED.");
-            });
-            const delay = new Promise(r => setTimeout(r, 250));
-            // Wait for either the time delay or the streaming files to be processed, whichever
-            // happens first.
-            await Promise.any([delay, streamingFilesPromise]);
+        } else {
+            console.log("Could not detect a valid module loading for FastLED, expected function but got", typeof fastledLoader);
         }
-
-        console.log("Starting fastled");
-        FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
+    } catch (error) {
+        console.error("Failed to load FastLED:", error);
     }
+};
 
 
-    function updateCanvas(frameData) {
-        // we are going to add the screenMap to the graphicsManager
-        frameData.screenMap = screenMap;
-        if (!graphicsManager) {
-            const isDenseMap = isDenseGrid(frameData);
-            if (FORCE_THREEJS_RENDERER) {
-                console.log("Creating Beautiful GraphicsManager with canvas ID (forced)", canvasId);
-                graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
-            } else if (FORCE_FAST_RENDERER) {
-                console.log("Creating Fast GraphicsManager with canvas ID (forced)", canvasId);
-                graphicsManager = new GraphicsManager(graphicsArgs);
-            } else if (isDenseMap) {
-                console.log("Creating Fast GraphicsManager with canvas ID", canvasId);
-                graphicsManager = new GraphicsManager(graphicsArgs);
-            } else {
-                console.log("Creating Beautiful GraphicsManager with canvas ID", canvasId);
-                graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
-            }
-            uiCanvasChanged = false;
+
+async function localLoadFastLed(options) {
+    try {
+        console.log("Loading FastLED with options:", options);
+        canvasId = options.canvasId;
+        uiControlsId = options.uiControlsId;
+        outputId = options.printId;
+        print = customPrintFunction;
+        console.log("Loading FastLED with options:", options);
+        frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
+        uiManager = new UiManager(uiControlsId);
+        let threeJs = options.threeJs;
+        console.log("ThreeJS:", threeJs);
+        const fastLedLoader = options.fastled;
+        threeJsModules = threeJs.modules;
+        containerId = threeJs.containerId;
+        console.log("ThreeJS modules:", threeJsModules);
+        console.log("Container ID:", containerId);
+        graphicsArgs = {
+            canvasId: canvasId,
+            threeJsModules: threeJsModules
         }
-
-        if (uiCanvasChanged) {
-            uiCanvasChanged = false;
-            graphicsManager.reset();
-        }
-
-
-        graphicsManager.updateCanvas(frameData);
+        let out = await onModuleLoaded(fastLedLoader);
+        console.log("Module loaded:", out);
+    } catch (error) {
+        console.error("Error loading FastLED:", error);
+        debugger;
     }
+}
+_loadFastLED = localLoadFastLed;
 
-
-    // Ensure we wait for the module to load
-    const onModuleLoaded = async (fastLedLoader) => {
-        // Unpack the module functions and send them to the runFastLED function
-
-        function __runFastLED(moduleInstance, frameRate, filesJson) {
-            const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
-            if (!exports_exist) {
-                console.error("FastLED setup or loop functions are not available.");
-                return;
-            }
-
-            runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
-        }
-        // Start fetch now in parallel
-        const fetchFilePromise = async (fetchFilePath) => {
-            const response = await fetch(fetchFilePath);
-            const data = await response.json();
-            return data;
-        };
-        const filesJsonPromise = fetchFilePromise("files.json");
-        try {
-            if (typeof fastLedLoader === 'function') {
-                // Load the module
-                fastLedLoader().then(async (instance) => {
-                    console.log("Module loaded, running FastLED...");
-                    // Wait for the files.json to load.
-                    let filesJson = null;
-                    try {
-                        filesJson = await filesJsonPromise;
-                        console.log("Files JSON:", filesJson);
-                    } catch (error) {
-                        console.error("Error fetching files.json:", error);
-                        filesJson = {};
-                    }
-                    __runFastLED(instance, frameRate, filesJson);
-                }).catch(err => {
-                    console.error("Error loading fastled as a module:", err);
-                });
-            } else {
-                console.log("Could not detect a valid module loading for FastLED, expected function but got", typeof fastledLoader);
-            }
-        } catch (error) {
-            console.error("Failed to load FastLED:", error);
-        }
-    };
-
-
-
-    async function localLoadFastLed(options) {
-        try {
-            console.log("Loading FastLED with options:", options);
-            canvasId = options.canvasId;
-            uiControlsId = options.uiControlsId;
-            outputId = options.printId;
-            print = customPrintFunction;
-            console.log("Loading FastLED with options:", options);
-            frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
-            uiManager = new UiManager(uiControlsId);
-            let threeJs = options.threeJs;
-            console.log("ThreeJS:", threeJs);
-            const fastLedLoader = options.fastled;
-            threeJsModules = threeJs.modules;
-            containerId = threeJs.containerId;
-            console.log("ThreeJS modules:", threeJsModules);
-            console.log("Container ID:", containerId);
-            graphicsArgs = {
-                canvasId: canvasId,
-                threeJsModules: threeJsModules
-            }
-            let out = await onModuleLoaded(fastLedLoader);
-            console.log("Module loaded:", out);
-        } catch (error) {
-            console.error("Error loading FastLED:", error);
-            debugger;
-        }
-    }
-    _loadFastLED = localLoadFastLed;
-})();

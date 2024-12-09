@@ -64,12 +64,6 @@
 <script src="fastled.js"></script>
 <script type="module">
     import { loadFastLED } from './index.js';
-    console.log("Module script loaded", loadFastLED);
-    
-    // Make fastled available to modules
-    // window.fastled = fastled;
-    // Add console logs for debugging
-    console.log("Module script loaded");
     
     document.getElementById('myCanvas').addEventListener('click', function() {
         const output = document.getElementById('output');
