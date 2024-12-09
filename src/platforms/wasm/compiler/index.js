@@ -3,11 +3,14 @@ import { UiManager } from "./modules/ui_manager.js";
 import { GraphicsManager } from "./modules/graphics_manager.js";
 import { GraphicsManagerThreeJS } from "./modules/graphics_manager_threejs.js";
 
+
+const urlParams = new URLSearchParams(window.location.search);
+const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
+const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
+const MAX_STDOUT_LINES = 50;
+
 console.log("index.js loaded");
 console.log("FastLED loader function:", typeof _loadFastLED);
-
-// Selective bloom demo:
-// https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
 
 
@@ -22,10 +25,7 @@ export async function loadFastLED(options) {
     return await _loadFastLED(options);
 };
 
-const urlParams = new URLSearchParams(window.location.search);
-const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
-const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
-const MAX_STDOUT_LINES = 50;
+
 
 // Will be overridden during initialization.
 var print = function () { };

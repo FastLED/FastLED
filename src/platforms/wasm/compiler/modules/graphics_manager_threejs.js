@@ -1,4 +1,10 @@
 
+
+// Selective bloom demo:
+// https://discourse.threejs.org/t/totentanz-selective-bloom/8329
+
+
+
 export class GraphicsManagerThreeJS {
     constructor(graphicsArgs) {
         const { canvasId, threeJsModules } = graphicsArgs;
