@@ -51,8 +51,8 @@ set(COMMON_LINK_FLAGS
     -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
     -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
     --no-entry
-    -s MODULARIZE=1
-    -s EXPORT_NAME='fastled'
+    -sMODULARIZE=1
+    -sEXPORT_NAME=fastled
     -o fastled.js
 )
 
