@@ -5,6 +5,8 @@
 /* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
 /* eslint-disable no-underscore-dangle */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
 
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
@@ -143,7 +145,7 @@ export class GraphicsManagerThreeJS {
     canvas.style.maxWidth = `${targetWidth}px`;
     canvas.style.maxHeight = `${targetHeight}px`;
     const circleRadius = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * 0.5;
-    const cameraZ = circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * margin;
+    const cameraZ = (circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2))) * margin;
 
     this.scene = new THREE.Scene();
 
@@ -233,7 +235,6 @@ export class GraphicsManagerThreeJS {
     const normalizedScale = this.SCREEN_WIDTH / width;
 
     // Create LEDs at mapped positions
-    let ledIndex = 0;
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
       if (stripId in screenMap.strips) {
@@ -263,7 +264,6 @@ export class GraphicsManagerThreeJS {
           led.position.set(x, y, 500);
           this.scene.add(led);
           this.leds.push(led);
-          ledIndex++;
         }
       }
     });

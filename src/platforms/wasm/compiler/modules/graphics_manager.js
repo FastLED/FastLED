@@ -4,6 +4,44 @@
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 /* eslint-disable camelcase */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
+
+function createShaders() {
+  const fragmentShaderId = 'fastled_FragmentShader';
+  const vertexShaderId = 'fastled_vertexShader';
+  if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
+    return;
+  }
+  const vertexShaderStr = `
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_Position = vec4(a_position, 0, 1);
+            v_texCoord = a_texCoord;
+        }
+        `;
+
+  const fragmentShaderStr = `
+        precision mediump float;
+        uniform sampler2D u_image;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_FragColor = texture2D(u_image, v_texCoord);
+        }
+        `;
+  const fragmentShader = document.createElement('script');
+  const vertexShader = document.createElement('script');
+  fragmentShader.id = fragmentShaderId;
+  vertexShader.id = vertexShaderId;
+  fragmentShader.type = 'x-shader/x-fragment';
+  vertexShader.type = 'x-shader/x-vertex';
+  fragmentShader.text = fragmentShaderStr;
+  vertexShader.text = vertexShaderStr;
+  document.head.appendChild(fragmentShader);
+  document.head.appendChild(vertexShader);
+}
 
 export class GraphicsManager {
   constructor(graphicsArgs) {
@@ -19,42 +57,6 @@ export class GraphicsManager {
     this.texData = null;
   }
 
-  createShaders() {
-    const fragmentShaderId = 'fastled_FragmentShader';
-    const vertexShaderId = 'fastled_vertexShader';
-    if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
-      return;
-    }
-    const vertexShaderStr = `
-        attribute vec2 a_position;
-        attribute vec2 a_texCoord;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_Position = vec4(a_position, 0, 1);
-            v_texCoord = a_texCoord;
-        }
-        `;
-
-    const fragmentShaderStr = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_FragColor = texture2D(u_image, v_texCoord);
-        }
-        `;
-    const fragmentShader = document.createElement('script');
-    const vertexShader = document.createElement('script');
-    fragmentShader.id = fragmentShaderId;
-    vertexShader.id = vertexShaderId;
-    fragmentShader.type = 'x-shader/x-fragment';
-    vertexShader.type = 'x-shader/x-vertex';
-    fragmentShader.text = fragmentShaderStr;
-    vertexShader.text = vertexShaderStr;
-    document.head.appendChild(fragmentShader);
-    document.head.appendChild(vertexShader);
-  }
-
   reset() {
     if (this.gl) {
       this.gl.deleteBuffer(this.positionBuffer);
@@ -68,11 +70,11 @@ export class GraphicsManager {
   }
 
   initWebGL() {
-    this.createShaders();
+    createShaders();
     const canvas = document.getElementById(this.canvasId);
     this.gl = canvas.getContext('webgl');
     if (!this.gl) {
-      error('WebGL not supported');
+      console.error('WebGL not supported');
       return;
     }
 
@@ -106,7 +108,7 @@ export class GraphicsManager {
     this.gl.shaderSource(shader, source);
     this.gl.compileShader(shader);
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+      console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
       this.gl.deleteShader(shader);
       return null;
     }
@@ -119,7 +121,7 @@ export class GraphicsManager {
     this.gl.attachShader(program, fragmentShader);
     this.gl.linkProgram(program);
     if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      error('Program link error:', this.gl.getProgramInfoLog(program));
+      console.error('Program link error:', this.gl.getProgramInfoLog(program));
       return null;
     }
     return program;
