@@ -21,41 +21,53 @@ else() # RELEASE
     set(OPT_LEVEL "-Oz")
 endif()
 
-# Common compiler flags from wasm_compiler_flags.py
+# Common compiler flags
 set(COMMON_COMPILE_FLAGS
     -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
     -DFASTLED_FORCE_NAMESPACE=1
     -DFASTLED_USE_PROGMEM=0
     -DDISABLE_EXCEPTION_CATCHING=1
-    -sALLOW_MEMORY_GROWTH=0
     -fno-exceptions
     -fno-rtti
     -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
-    -sDISABLE_EXCEPTION_CATCHING=1
-    -sDISABLE_EXCEPTION_THROWING=0
     ${OPT_LEVEL}
-    --bind
-    -DUSE_OFFSET_CONVERTER=0
-    -sINITIAL_MEMORY=134217728
     -std=gnu++17
     -fpermissive
     -Wno-constant-logical-operand
     -Wnon-c-typedef-for-linkage
-    -fuse-ld=lld
     -Werror=bad-function-cast
     -Werror=cast-function-type
+)
+
+# Linker flags
+set(COMMON_LINK_FLAGS
+    -sALLOW_MEMORY_GROWTH=0
+    -sDISABLE_EXCEPTION_CATCHING=1
+    -sDISABLE_EXCEPTION_THROWING=0
+    --bind
+    -DUSE_OFFSET_CONVERTER=0
+    -sINITIAL_MEMORY=134217728
+    -fuse-ld=lld
+    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+    --no-entry
+    -s MODULARIZE=1
+    -s EXPORT_NAME='fastled'
+    -o fastled.js
 )
 
 # Debug-specific flags
 if(BUILD_MODE STREQUAL "DEBUG")
     list(APPEND COMMON_COMPILE_FLAGS
         -g3
+        -fsanitize=address
+        -fsanitize=undefined
+    )
+    list(APPEND COMMON_LINK_FLAGS
         -gsource-map
         --emit-symbol-map
         -sSTACK_OVERFLOW_CHECK=2
         -ASSERTIONS=1
-        -fsanitize=address
-        -fsanitize=undefined
     )
 endif()
 
@@ -116,19 +128,10 @@ add_executable(fastled ${FASTLED_SOURCES})
 
 # Set properties and flags
 target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
+target_link_options(fastled PRIVATE ${COMMON_LINK_FLAGS})
 set_target_properties(fastled PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
-)
-
-# Add linker flags
-target_link_options(fastled PRIVATE
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
-    --no-entry
-    -s MODULARIZE=1
-    -s EXPORT_NAME='fastled'
-    -o fastled.js
 )
 
 # Debug output for source categorization
