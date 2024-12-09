@@ -250,9 +250,9 @@ export class GraphicsManagerThreeJS {
         for (let i = 0; i < x_array.length; i++) {
           let geometry;
           if (isDenseScreenMap) {
-            const width = stripDiameter * this.LED_SCALE;
-            const height = stripDiameter * this.LED_SCALE;
-            geometry = new THREE.PlaneGeometry(width, height);
+            const w = stripDiameter * this.LED_SCALE;
+            const h = stripDiameter * this.LED_SCALE;
+            geometry = new THREE.PlaneGeometry(w, h);
           } else {
             geometry = new THREE.CircleGeometry(stripDiameter * this.LED_SCALE, this.SEGMENTS);
           }
@@ -316,9 +316,9 @@ export class GraphicsManagerThreeJS {
         const y = y_array[j];
         const posKey = `${x},${y}`;
         const srcIndex = j * 3;
-        const r = (data[srcIndex] & 0xFF) / 255;
-        const g = (data[srcIndex + 1] & 0xFF) / 255;
-        const b = (data[srcIndex + 2] & 0xFF) / 255;
+        const r = (data[srcIndex] & 0xFF) / 255;  // eslint-disable-line
+        const g = (data[srcIndex + 1] & 0xFF) / 255;  // eslint-disable-line
+        const b = (data[srcIndex + 2] & 0xFF) / 255;  // eslint-disable-line
         const brightness = (r + g + b) / 3;
 
         // Only update if this LED is brighter than any existing LED at this position
@@ -343,7 +343,7 @@ export class GraphicsManagerThreeJS {
 
     // Second pass: update LED positions and colors
     let ledIndex = 0;
-    for (const [_, ledData] of positionMap) {
+    for (const [_, ledData] of positionMap) {  // eslint-disable-line
       if (ledIndex >= this.leds.length) break;
 
       const led = this.leds[ledIndex];

@@ -186,7 +186,7 @@ export class GraphicsManager {
       const y_array = map.y;
       const len = Math.min(x_array.length, y_array.length);
       // log("Writing data to canvas");
-      for (let i = 0; i < pixelCount; i++) {
+      for (let i = 0; i < pixelCount; i++) {  // eslint-disable-line
         if (i >= len) {
           console.warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`);
           continue;
@@ -221,9 +221,9 @@ export class GraphicsManager {
               const srcIndex = i * 3;
               const destIndex = (py * this.texWidth + px) * 3;
               // Pixel data is already in 0-255 range, use directly
-              const r = data[srcIndex] & 0xFF;
-              const g = data[srcIndex + 1] & 0xFF;
-              const b = data[srcIndex + 2] & 0xFF;
+              const r = data[srcIndex] & 0xFF;  // eslint-disable-line
+              const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
+              const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
               this.texData[destIndex] = r;
               this.texData[destIndex + 1] = g;
               this.texData[destIndex + 2] = b;
