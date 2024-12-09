@@ -91,6 +91,17 @@ def main() -> None:
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
             return
         
+        python_test_cmds = [
+            ['uv', 'run', 'ci/cpp_test_compile.py'],
+            ['uv', 'run', 'ci/cpp_test_run.py'],
+            ['uv', 'run', 'ci/ci-compile-native.py'],
+            ['uv', 'run', 'pytest', 'ci/tests']
+        ]
+        python_test_procs: List[subprocess.Popen] = []
+        for cmd in python_test_cmds:
+            proc = subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            python_test_procs.append(proc)
+        
         # Run all tests
         # Start pio check in background and capture output
         output_buffer = io.StringIO()
@@ -139,11 +150,11 @@ def main() -> None:
                 output_buffer.write(line)
 
         try:
-            # Run other tests while pio check runs
-            run_command(['uv', 'run', 'ci/cpp_test_compile.py'])
-            run_command(['uv', 'run', 'ci/cpp_test_run.py'])
-            run_command(['uv', 'run', 'ci/ci-compile-native.py'])
-            run_command(['uv', 'run', 'pytest', 'ci/tests'])
+            # for cmd, proc in zip(cmds, procs):
+            for proc in python_test_procs:
+                stdout, _ = proc.communicate()
+                # print(f"Command: {cmd}")
+                print(f"stdout: {stdout}")
 
             print("Waiting on pio check to complete...")
 
