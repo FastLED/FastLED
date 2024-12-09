@@ -94,9 +94,7 @@ function jsAppendFileUint8(moduleInstance, path, blob) {
     moduleInstance._free(path_cstr);
 }
 
-function minMax(array_xy) {
-    const x_array = array_xy["x"];
-    const y_array = array_xy["y"]; 
+function minMax(x_array, y_array) {
     let min_x = x_array[0];
     let min_y = y_array[0];
     let max_x = x_array[0];
@@ -221,10 +219,8 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
             eventHandled = true;
             // Work in progress.
             const map = jsonData.map;
-
             console.log("Received map:", jsonData);
-
-            const [min, max] = minMax(map);
+            const [min, max] = minMax(map["x"], map["y"]);
             console.log("min", min, "max", max);
 
             const stripId = jsonData.strip_id;
@@ -232,15 +228,12 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
             if (isUndefined(stripId)) {
                 throw new Error("strip_id is required for set_canvas_map event");
             }
-
             screenMap.strips[stripId] = {
                 map: map,
                 min: min,
                 max: max,
                 diameter: jsonData.diameter
             };
-
-
             console.log("Screen map updated:", screenMap);
             // iterate through all the screenMaps and get the absolute min and max
             let absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
