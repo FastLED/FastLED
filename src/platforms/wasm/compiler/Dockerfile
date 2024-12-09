@@ -157,6 +157,8 @@ RUN python /js/init_runtime.py || true
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs
 
+RUN echo "asadasdas"
+
 # Do not cause the build to fail because the cached pre-warm failed.
 RUN /js/prewarm.sh --force > /logs/prewarm.log.1 || true
 
