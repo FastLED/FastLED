@@ -21,12 +21,14 @@
 #include "fl/screenmap.h"
 #include "fl/map.h"
 #include "engine_listener.h"
+#include "fl/dbg.h"
 
 using namespace fl;
 
 
 
 EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
+    FASTLED_DBG("jsSetCanvasSize1");
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
@@ -38,10 +40,7 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSiz
 }
 
 EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
-    // TODO: ScreenMap::toJson() should be used here. Right now we just send
-    // the screen map updates one at a time. While the ScreenMap::toJson() allows
-    // bulk conversion and is tested. This is an ad-hoc json format for the FastLED Web
-    // and it should be normalized to the way the ScreenMap::toJson() does it.
+    FASTLED_DBG("Begin jsSetCanvasSize json serialization");
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
@@ -56,8 +55,10 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap 
     if (diameter > 0.0f) {
         doc["diameter"] = diameter;
     }
+    FASTLED_DBG("Finished json dict building.");
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
+    FASTLED_DBG("End jsSetCanvasSize json serialization");
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
