@@ -1,0 +1,329 @@
+cmake_minimum_required(VERSION 3.10)
+project(FastLED_WASM)
+
+# Set Emscripten as the compiler
+set(CMAKE_C_COMPILER emcc)
+set(CMAKE_CXX_COMPILER em++)
+
+# Get build mode from environment, default to QUICK
+if(NOT DEFINED ENV{BUILD_MODE})
+    set(BUILD_MODE "QUICK")
+else()
+    set(BUILD_MODE $ENV{BUILD_MODE})
+endif()
+
+# Set optimization level based on build mode
+if(BUILD_MODE STREQUAL "QUICK")
+    set(OPT_LEVEL "-O1")
+elseif(BUILD_MODE STREQUAL "DEBUG")
+    set(OPT_LEVEL "-O0")
+else() # RELEASE
+    set(OPT_LEVEL "-Oz")
+endif()
+
+# Common compiler flags from wasm_compiler_flags.py
+set(COMMON_COMPILE_FLAGS
+    -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
+    -DFASTLED_FORCE_NAMESPACE=1
+    -DFASTLED_USE_PROGMEM=0
+    -DDISABLE_EXCEPTION_CATCHING=1
+    -sALLOW_MEMORY_GROWTH=0
+    -fno-exceptions
+    -fno-rtti
+    -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
+    -sDISABLE_EXCEPTION_CATCHING=1
+    -sDISABLE_EXCEPTION_THROWING=0
+    ${OPT_LEVEL}
+    --bind
+    -DUSE_OFFSET_CONVERTER=0
+    -sINITIAL_MEMORY=134217728
+    -std=gnu++17
+    -fpermissive
+    -Wno-constant-logical-operand
+    -Wnon-c-typedef-for-linkage
+    -fuse-ld=lld
+    -Werror=bad-function-cast
+    -Werror=cast-function-type
+)
+
+# Debug-specific flags
+if(BUILD_MODE STREQUAL "DEBUG")
+    list(APPEND COMMON_COMPILE_FLAGS
+        -g3
+        -gsource-map
+        --emit-symbol-map
+        -sSTACK_OVERFLOW_CHECK=2
+        -ASSERTIONS=1
+        -fsanitize=address
+        -fsanitize=undefined
+    )
+endif()
+
+set(UNIT_TEST_COMPILE_FLAGS
+    -Wall
+    #-Wextra 
+    #-Wpedantic
+    -funwind-tables
+    -g3
+    -ggdb
+    -fno-omit-frame-pointer
+    -O0
+    -fno-inline
+    -Werror=suggest-override
+    -Werror=return-type
+    -Werror=missing-declarations
+    #-Werror=redundant-decls
+    -Werror=init-self
+    #-Werror=missing-field-initializers  
+    #-Werror=pointer-arith
+    #-Werror=write-strings
+    #-Werror=format=2
+    #-Werror=implicit-fallthrough
+    #-Werror=missing-include-dirs
+    -Werror=date-time
+    -Werror=non-virtual-dtor
+    #-Werror=reorder
+    #-Werror=sign-compare
+    #-Werror=float-equal
+    #-Werror=conversion
+    -Werror=switch-enum
+    #-Werror=switch-default
+    #-Werror=unused-parameter
+    #-Werror=unused-variable
+    #-Werror=unused-value
+
+    # Not supported in gcc.
+    #-Werror=infinite-recursion
+)
+
+# Set FastLED source directory
+set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
+
+message(STATUS "FastLED source directory: ${FASTLED_SOURCE_DIR}")
+
+# Include directories
+include_directories(${FASTLED_SOURCE_DIR})
+
+# Find all FastLED source files
+file(GLOB_RECURSE FASTLED_SOURCES 
+    "${FASTLED_SOURCE_DIR}/*.cpp"
+)
+
+message(STATUS "FastLED sources: ${FASTLED_SOURCES}")
+
+# Create the WASM library
+add_executable(fastled ${FASTLED_SOURCES})
+
+# Set properties and flags
+target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
+set_target_properties(fastled PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
+# Add linker flags
+target_link_options(fastled PRIVATE
+    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+    --no-entry
+    -s MODULARIZE=1
+    -s EXPORT_NAME='fastled'
+    -o fastled.js
+)
+
+# Debug output for source categorization
+#message(STATUS "FX Sources: ${FX_SOURCES}")
+#message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
+#message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
+#message(STATUS "FL Sources: ${FL_SOURCES}")
+#message(STATUS "Other Sources: ${OTHER_SOURCES}")
+
+# message(STATUS "FastLED_core: ${FastLED_core}")
+
+# Create core library with essential components
+file(GLOB CORE_SOURCES "${FASTLED_SOURCES}/*.cpp")
+
+message(STATUS "Core Sources: ${CORE_SOURCES}")
+# ${CMAKE_CURRENT_SOURCE_DIR}
+message(STATUS "Current Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_library(FastLED_core OBJECT ${CORE_SOURCES})
+set_target_properties(FastLED_core PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLED_core PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+
+# Create component libraries as OBJECT libraries
+if(FX_SOURCES)
+    add_library(FastLED_fx OBJECT ${FX_SOURCES})
+    set_target_properties(FastLED_fx PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_fx PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_fx PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(PLATFORMS_SOURCES)
+    add_library(FastLED_platforms OBJECT ${PLATFORMS_SOURCES})
+    set_target_properties(FastLED_platforms PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_platforms PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_platforms PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(LIB8TION_SOURCES)
+    add_library(FastLED_lib8tion OBJECT ${LIB8TION_SOURCES})
+    set_target_properties(FastLED_lib8tion PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(FL_SOURCES)
+    add_library(FastLED_fl OBJECT ${FL_SOURCES})
+    set_target_properties(FastLED_fl PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_fl PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_fl PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(SENSORS_SOURCES)
+    add_library(FastLED_sensors OBJECT ${SENSORS_SOURCES})
+    set_target_properties(FastLED_sensors PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_sensors PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_sensors PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+# Create the main FastLED static library that includes all components
+add_library(FastLED STATIC 
+    $<TARGET_OBJECTS:FastLED_core>
+    $<$<TARGET_EXISTS:FastLED_fx>:$<TARGET_OBJECTS:FastLED_fx>>
+    $<$<TARGET_EXISTS:FastLED_platforms>:$<TARGET_OBJECTS:FastLED_platforms>>
+    $<$<TARGET_EXISTS:FastLED_lib8tion>:$<TARGET_OBJECTS:FastLED_lib8tion>>
+    $<$<TARGET_EXISTS:FastLED_fl>:$<TARGET_OBJECTS:FastLED_fl>>
+    $<$<TARGET_EXISTS:FastLED_sensors>:$<TARGET_OBJECTS:FastLED_sensors>>
+)
+
+# Set properties for the main library
+set_target_properties(FastLED PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_options(FastLED PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+if(NOT APPLE)
+    target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
+# Try to find libunwind, but make it optional
+find_package(LibUnwind QUIET)
+
+# Define a variable to check if we should use libunwind
+set(USE_LIBUNWIND ${LibUnwind_FOUND})
+
+if(USE_LIBUNWIND)
+    message(STATUS "LibUnwind found. Using it for better stack traces.")
+else()
+    message(STATUS "LibUnwind not found. Falling back to basic stack traces.")
+endif()
+
+# Remove platform-specific files that might cause issues
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
+
+
+# Create FastLEDTest with OTHER_SOURCES
+add_library(FastLEDTest OBJECT ${OTHER_SOURCES})
+
+# Set C++ standard and shared library properties for FastLEDTest
+set_target_properties(FastLEDTest PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+
+# Add custom build flags for FastLEDTest
+target_compile_options(FastLEDTest PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLEDTest PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+
+# Add FastLEDTest objects to main FastLED library
+target_sources(FastLED PRIVATE $<TARGET_OBJECTS:FastLEDTest>)
+
+if(USE_LIBUNWIND)
+    target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
+endif()
+
+# Enable testing
+enable_testing()
+
+# Find all test source files
+file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
+
+# Find test executables (only actual test executables, not libraries)
+file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
+
+# Process source files
+foreach(TEST_SOURCE ${TEST_SOURCES})
+    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} FastLED)
+    if(USE_LIBUNWIND)
+        target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+    endif()
+    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    set_target_properties(${TEST_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
+    # Add static linking flags and debug flags for test executables
+    if(NOT APPLE)
+        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
+    target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+    target_compile_definitions(${TEST_NAME} PRIVATE 
+        ${COMMON_COMPILE_DEFINITIONS}
+        $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
+    )
+    
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
+
+# Process remaining binaries (those without corresponding source files)
+option(CLEAN_ORPHANED_BINARIES "Remove orphaned test binaries" ON)
+if(CLEAN_ORPHANED_BINARIES)
+    foreach(ORPHANED_BINARY ${TEST_BINARIES})
+        get_filename_component(BINARY_NAME ${ORPHANED_BINARY} NAME_WE)
+        get_filename_component(BINARY_DIR ${ORPHANED_BINARY} DIRECTORY)
+        get_filename_component(PARENT_DIR ${BINARY_DIR} DIRECTORY)
+        get_filename_component(GRANDPARENT_DIR ${PARENT_DIR} DIRECTORY)
+        set(CORRESPONDING_SOURCE "${GRANDPARENT_DIR}/${BINARY_NAME}.cpp")
+        if(NOT EXISTS "${CORRESPONDING_SOURCE}")
+            message(STATUS "Found orphaned binary without source: ${ORPHANED_BINARY}")
+            file(REMOVE "${ORPHANED_BINARY}")
+            message(STATUS "Deleted orphaned binary: ${ORPHANED_BINARY}")
+        endif()
+    endforeach()
+endif()
+
+# Add verbose output for tests
+set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
