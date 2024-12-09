@@ -1,3 +1,14 @@
+/* eslint-disable no-console */
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable max-len */
+/* eslint-disable guard-for-in */
+/* eslint-disable camelcase */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-continue */
+/* eslint-disable import/extensions */
+
 import { UiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS, isDenseGrid } from './modules/graphics_manager_threejs.js';
@@ -29,17 +40,15 @@ let graphicsManager;
 let containerId; // for ThreeJS
 let graphicsArgs = {};
 
-console.log('index.js loaded');
-console.log('FastLED loader function:', typeof _loadFastLED);
-
-async function _loadFastLED(options) {
+async function _loadFastLED(options) { // eslint-disable-line no-unused-vars
   // Stub to let the user/dev know that something went wrong.
-  log('FastLED loader function was not set.');
+  console.log('FastLED loader function was not set.');
   return null;
 }
 
 export async function loadFastLED(options) {
-  return await _loadFastLED(options); // This will be overridden by through the initialization.
+  // This will be overridden by through the initialization.
+  return await _loadFastLED(options); // eslint-disable-line no-return-await
 }
 
 const EPOCH = new Date().getTime();
@@ -50,7 +59,7 @@ function getTimeSinceEpoc() {
   return outSec.toFixed(1);
 }
 // Will be overridden during initialization.
-let print = function () { };
+let print = function () { }; // eslint-disable-line func-names
 
 const prev_console = console;
 
@@ -110,7 +119,7 @@ function customPrintFunction(...args) {
 // to always go to the console. If we hijack it then startup errors become
 // extremely difficult to debug.
 
-console = {};
+console = {}; // eslint-disable-line no-global-assign
 console.log = log;
 console.warn = warn;
 console.error = _prev_error;
@@ -153,7 +162,7 @@ function minMax(x_array, y_array) {
 function partition(filesJson, immediateExtensions) {
   const immediateFiles = [];
   const streamingFiles = [];
-  filesJson.map((file) => {
+  filesJson.map((file) => { // eslint-disable-line array-callback-return
     for (const ext of immediateExtensions) {
       const pathLower = file.path.toLowerCase();
       if (pathLower.endsWith(ext.toLowerCase())) {
@@ -176,6 +185,38 @@ function getFileManifestJson(filesJson, frame_rate) {
     frameRate: frame_rate,
   };
   return options;
+}
+
+function updateCanvas(frameData) {
+  // we are going to add the screenMap to the graphicsManager
+  if (frameData.screenMap === undefined) {
+    console.warn('Screen map not found in frame data, skipping canvas update');
+    return;
+  }
+  if (!graphicsManager) {
+    const isDenseMap = isDenseGrid(frameData);
+    if (FORCE_THREEJS_RENDERER) {
+      console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
+      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+    } else if (FORCE_FAST_RENDERER) {
+      console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
+      graphicsManager = new GraphicsManager(graphicsArgs);
+    } else if (isDenseMap) {
+      console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
+      graphicsManager = new GraphicsManager(graphicsArgs);
+    } else {
+      console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
+      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+    }
+    uiCanvasChanged = false;
+  }
+
+  if (uiCanvasChanged) {
+    uiCanvasChanged = false;
+    graphicsManager.reset();
+  }
+
+  graphicsManager.updateCanvas(frameData);
 }
 
 function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
@@ -226,7 +267,7 @@ function FastLED_onStripUpdate(jsonData) {
     const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let setAtLeastOnce = false;
-    for (const stripId in screenMap.strips) {
+    for (const stripId in screenMap.strips) { // eslint-disable-line no-shadow
       console.log('Processing strip ID', stripId);
       const id = Number.parseInt(stripId, 10);
       const stripData = screenMap.strips[id];
@@ -237,7 +278,7 @@ function FastLED_onStripUpdate(jsonData) {
       setAtLeastOnce = true;
     }
     if (!setAtLeastOnce) {
-      error('No screen map data found, skipping canvas size update');
+      console.error('No screen map data found, skipping canvas size update');
       return;
     }
     screenMap.absMin = absMin;
@@ -298,7 +339,7 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
     console.warn('Received empty frame data, skipping update');
     return;
   }
-  frameData.screenMap = screenMap;
+  frameData.screenMap = screenMap; // eslint-disable-line no-param-reassign
   updateCanvas(frameData);
 }
 
@@ -322,8 +363,8 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
-      while (true) {
-        const { value, done } = await reader.read();
+      while (true) { // eslint-disable-line no-constant-condition
+        const { value, done } = await reader.read(); // eslint-disable-line no-await-in-loop
         if (done) break;
         // Allocate and copy chunk data
         jsAppendFileUint8(moduleInstance, file.path, value);
@@ -333,7 +374,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     }
   };
 
-  const fetchAllFiles = async (filesJson, onComplete) => {
+  const fetchAllFiles = async (filesJson, onComplete) => { // eslint-disable-line no-shadow
     const promises = filesJson.map(async (file) => {
       await processFile(file);
     });
@@ -365,7 +406,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
       console.log('All streaming files downloaded to FastLED.');
     });
-    const delay = new Promise((r) => setTimeout(r, 250));
+    const delay = new Promise((r) => setTimeout(r, 250)); // eslint-disable-line no-promise-executor-return
     // Wait for either the time delay or the streaming files to be processed, whichever
     // happens first.
     await Promise.any([delay, streamingFilesPromise]);
@@ -375,43 +416,11 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
   FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
 }
 
-function updateCanvas(frameData) {
-  // we are going to add the screenMap to the graphicsManager
-  if (frameData.screenMap === undefined) {
-    console.warn('Screen map not found in frame data, skipping canvas update');
-    return;
-  }
-  if (!graphicsManager) {
-    const isDenseMap = isDenseGrid(frameData);
-    if (FORCE_THREEJS_RENDERER) {
-      console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
-    } else if (FORCE_FAST_RENDERER) {
-      console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManager(graphicsArgs);
-    } else if (isDenseMap) {
-      console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManager(graphicsArgs);
-    } else {
-      console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
-    }
-    uiCanvasChanged = false;
-  }
-
-  if (uiCanvasChanged) {
-    uiCanvasChanged = false;
-    graphicsManager.reset();
-  }
-
-  graphicsManager.updateCanvas(frameData);
-}
-
 // Ensure we wait for the module to load
 async function onModuleLoaded(fastLedLoader) {
   // Unpack the module functions and send them to the fastledLoadSetupLoop function
 
-  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {
+  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) { // eslint-disable-line no-shadow
     const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
     if (!exports_exist) {
       console.error('FastLED setup or loop functions are not available.');
@@ -477,7 +486,7 @@ async function localLoadFastLed(options) {
     await onModuleLoaded(fastLedLoader);
   } catch (error) {
     console.error('Error loading FastLED:', error);
-    debugger;
+    debugger; // eslint-disable-line no-debugger
   }
 }
-_loadFastLED = localLoadFastLed;
+_loadFastLED = localLoadFastLed; // eslint-disable-line no-func-assign
