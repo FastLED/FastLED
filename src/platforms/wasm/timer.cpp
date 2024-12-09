@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <emscripten.h>
+#include <emscripten/html5.h>
 
 namespace {
     // We are just going to get the time since the app started. Getting the
@@ -14,7 +15,7 @@ namespace {
     // 50 days. We will need to think about this more in the future to make multiple
     // devices sync up to just one clock. Otherwise this may just be something the user
     // has to do themselves.
-    double gStartTime = emscripten_get_now();
+    double gStartTime = emscripten_performance_now();
     double get_time_since_epoch() {
         return emscripten_get_now() - gStartTime;
     }
