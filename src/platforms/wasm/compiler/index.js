@@ -139,8 +139,26 @@ function getFileManifestJson(filesJson, frame_rate) {
         frameRate: frame_rate,
     };
     return options;
-
 }
+
+
+
+function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
+    extern_setup();
+    console.log("Starting loop...");
+    const frameInterval = 1000 / frame_rate;
+    let lastFrameTime = 0;
+    // Executes every frame but only runs the loop function at the specified frame rate
+    function runLoop(currentTime) {
+        if (currentTime - lastFrameTime >= frameInterval) {
+            extern_loop();
+            lastFrameTime = currentTime;
+        }
+        requestAnimationFrame(runLoop);
+    }
+    requestAnimationFrame(runLoop);
+}
+
 
 (function () {
     const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
@@ -317,7 +335,6 @@ function getFileManifestJson(filesJson, frame_rate) {
                 while (true) {
                     const { value, done } = await reader.read();
                     if (done) break;
-        
                     // Allocate and copy chunk data
                     jsAppendFileUint8(moduleInstance, file.path, value);
                 }
@@ -337,22 +354,6 @@ function getFileManifestJson(filesJson, frame_rate) {
         };
 
 
-        function onComplete_SetupFastLEDAndLoop() {
-            extern_setup();
-
-            console.log("Starting loop...");
-            const frameInterval = 1000 / frame_rate;
-            let lastFrameTime = 0;
-            // Executes every frame but only runs the loop function at the specified frame rate
-            function runLoop(currentTime) {
-                if (currentTime - lastFrameTime >= frameInterval) {
-                    extern_loop();
-                    lastFrameTime = currentTime;
-                }
-                requestAnimationFrame(runLoop);
-            }
-            requestAnimationFrame(runLoop);
-        }
 
 
         // Come back to this later - we want to partition the files into immediate and streaming files
@@ -361,14 +362,24 @@ function getFileManifestJson(filesJson, frame_rate) {
         console.log("The following files will be immediatly available and can be read during setup():", immediateFiles);
         console.log("The following files will be streamed in during loop():", streamingFiles);
 
-        fetchAllFiles(immediateFiles, () => {
-            onComplete_SetupFastLEDAndLoop();
-        });
-        fetchAllFiles(streamingFiles, () => {
-            if (streamingFiles.length !== 0) {
-                console.log("All streaming files processed");
+        const promiseImmediateFiles = fetchAllFiles(immediateFiles, () => {
+            if (immediateFiles.length !== 0) {
+                console.log("All immediate files downloaded to FastLED.");
             }
         });
+        await promiseImmediateFiles;
+        if (streamingFiles.length > 0) {
+            const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
+                console.log("All streaming files downloaded to FastLED.");
+            });
+            const delay = new Promise(r => setTimeout(r, 250));
+            // Wait for either the time delay or the streaming files to be processed, whichever
+            // happens first.
+            await Promise.any([delay, streamingFilesPromise]);
+        }
+
+        console.log("Starting fastled");
+        FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate);
     }
 
 
