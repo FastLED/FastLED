@@ -6,8 +6,9 @@ export class UiManager {
         this.uiControlsId = uiControlsId;
     }
 
-    processUiChanges(uiUpdateCallback) {
-        const changes = {};
+    // Returns a Json object if there are changes, otherwise null.
+    processUiChanges() {
+        const changes = {};  // Json object to store changes.
         let hasChanges = false;
         for (const id in this.uiElements) {
             const element = this.uiElements[id];
@@ -28,18 +29,13 @@ export class UiManager {
                 this.previousUiState[id] = currentValue;
             }
         }
-        if (hasChanges) {
-            const data = JSON.stringify(changes);
-            uiUpdateCallback(data);
-        }
+  
+        return hasChanges? changes : null;
     }
 
     addUiElements(jsonData) {
         console.log("UI elements added:", jsonData);
-
-
         const uiControlsContainer = document.getElementById(this.uiControlsId) || this.createUiControlsContainer();
-
         let foundUi = false;
         jsonData.forEach(data => {
             console.log("data:", data);

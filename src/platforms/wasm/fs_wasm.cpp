@@ -258,7 +258,6 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
                                        size_t len) {
-    printf("Appending file %s with %lu bytes\n", path, len);
     auto entry = _findIfExists(Str(path));
     if (!entry) {
         FASTLED_WARN("File must be declared before it can be appended.");

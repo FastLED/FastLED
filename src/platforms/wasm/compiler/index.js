@@ -299,9 +299,15 @@ function FastLED_onStripAdded(stripId, stripLength) {
     output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
 };
 
+// uiUpdateCallback is a function from FastLED that will parse a json string
+// representing the changes to the UI that FastLED will need to respond to.
 function FastLED_onFrame(frameData, uiUpdateCallback) {
     // uses global variables.
-    uiManager.processUiChanges(uiUpdateCallback);
+    const changesJson = uiManager.processUiChanges();
+    if (changesJson !== null) {
+        const changesJsonStr = JSON.stringify(changesJson);
+        uiUpdateCallback(changesJsonStr);
+    }
     if (frameData.length === 0) {
         console.warn("Received empty frame data, skipping update");
         return;
@@ -488,8 +494,7 @@ async function localLoadFastLed(options) {
             canvasId: canvasId,
             threeJsModules: threeJsModules
         }
-        let out = await onModuleLoaded(fastLedLoader);
-        console.log("Module loaded:", out);
+        await onModuleLoaded(fastLedLoader);
     } catch (error) {
         console.error("Error loading FastLED:", error);
         debugger;

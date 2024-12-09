@@ -71,7 +71,7 @@ bool gError = false;
 
 void setup() {
     Serial.begin(115200);
-    delay(1000); // sanity delay
+    Serial.println("Sketch setup");
     if (!filesystem.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
@@ -105,9 +105,15 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMap);
     FastLED.setBrightness(96);
+    Serial.println("FastLED setup done");
 }
 
 void loop() {
+    static bool s_first = true;
+    if (s_first) {
+      s_first = false;
+      Serial.println("First loop.");
+    }
     if (gError) {
       EVERY_N_SECONDS(1) {
         FASTLED_WARN("No loop because an error occured.");
