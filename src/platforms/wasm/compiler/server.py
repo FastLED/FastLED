@@ -56,6 +56,10 @@ if _NO_SKETCH_CACHE:
 UPLOAD_DIR = Path("/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 COMPILE_LOCK = threading.Lock()
+COMPILE_COUNT = 0
+COMPILE_FAILURES = 0
+COMPILE_SUCCESSES = 0
+START_TIME = time.time()
 
 OUTPUT_DIR = Path("/output")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -238,6 +242,10 @@ def compile_source(
     hash_value: str | None = None,
 ) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
+    global COMPILE_COUNT
+    global COMPILE_FAILURES
+    global COMPILE_SUCCESSES
+    COMPILE_COUNT += 1
     temp_zip_dir = None
     try:
         # Find the first directory in temp_src_dir
@@ -283,11 +291,13 @@ def compile_source(
         proc.stdout.close()
         return_code = proc.wait()
         if return_code != 0:
+            COMPILE_FAILURES += 1
             print(f"Compilation failed with return code {return_code}:\n{stdout}")
             return HTTPException(
                 status_code=400,
                 detail=f"Compilation failed with return code {return_code}:\n{stdout}",
             )
+        COMPILE_SUCCESSES += 1
     compile_time = time.time() - COMPILE_LOCK_end
     COMPILE_LOCK_time = COMPILE_LOCK_end - COMPILE_LOCK_start
 
@@ -476,6 +486,26 @@ def project_init() -> FileResponse:
         filename="fastled_example.zip",
         background=BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name)),
     )
+
+
+@app.get("/info")
+def info_examples() -> dict:
+    """Get a list of examples."""
+    examples_dir = Path("/js/fastled/examples")
+    examples = []
+    for example in examples_dir.iterdir():
+        if example.is_dir():
+            examples.append(example.name)
+    uptime = time.time() - START_TIME
+    uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
+    out = {
+        "examples": examples,
+        "compile_count": COMPILE_COUNT,
+        "compile_failures": COMPILE_FAILURES,
+        "compile_successes": COMPILE_SUCCESSES,
+        "uptime": uptime_fmtd,
+    }
+    return out
 
 
 @app.get("/project/init/{example}")
