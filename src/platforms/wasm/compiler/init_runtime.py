@@ -10,7 +10,7 @@ _COMPILER_DIR = Path("/js/fastled/src/platforms/wasm/compiler")
 
 def make_links() -> None:
     # Define file patterns to include
-    patterns = ['*.h', '*.py', '*.css', '*.js', '*.sh', "*.ino", "*.hpp", "*.cpp", "*.ini"]
+    patterns = ['*.h', '*.py', '*.css', '*.sh', "*.ino", "*.hpp", "*.cpp", "*.ini"]
     
     # Get all matching files in compiler directory
     files = []

@@ -26,7 +26,13 @@ export async function loadFastLED(options) {
 };
 
 
-
+const EPOCH = new Date().getTime();
+function getTimeSinceEpoc() {
+    const outMS = new Date().getTime() - EPOCH;
+    const outSec = outMS / 1000;
+    // one decimal place
+    return outSec.toFixed(1);
+}
 // Will be overridden during initialization.
 var print = function () { };
 
@@ -37,16 +43,24 @@ const _prev_log = prev_console.log;
 const _prev_warn = prev_console.warn;
 const _prev_error = prev_console.error;
 
+function toStringWithTimeStamp(...args) {
+    const time = `${getTimeSinceEpoc()}s`;
+    return [time, ...args]; // Return array with time prepended, don't join
+}
+
 function log(...args) {
-    _prev_log(...args);
-    try { print(...args); } catch (e) {
-        __prev_log("Error in log", e);
+    const argsWithTime = toStringWithTimeStamp(...args);
+    _prev_log(...argsWithTime); // Spread the array when calling original logger
+    try { print(...argsWithTime); } catch (e) {
+        _prev_log("Error in log", e);
     }
 }
+
 function warn(...args) {
-    _prev_warn(...args);
-    try { print(...args); } catch (e) {
-        __prev_warn("Error in warn", e);
+    const argsWithTime = toStringWithTimeStamp(...args);
+    _prev_warn(...argsWithTime);
+    try { print(...argsWithTime); } catch (e) {
+        _prev_warn("Error in warn", e);
     }
 }
 
@@ -493,6 +507,7 @@ function isDenseGrid(frameData) {
 
     async function localLoadFastLed(options) {
         try {
+            console.log("Loading FastLED with options:", options);
             canvasId = options.canvasId;
             uiControlsId = options.uiControlsId;
             outputId = options.printId;

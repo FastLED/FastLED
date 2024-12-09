@@ -520,35 +520,39 @@ def main() -> int:
             fastled_js_dir.mkdir(parents=True, exist_ok=True)
 
             for file in ["fastled.js", "fastled.wasm"]:
-                print(f"Copying {file} to output directory")
-                shutil.copy2(build_dir / file, fastled_js_dir / file)
+                _src = build_dir / file
+                _dst = fastled_js_dir / file
+                print(f"Copying {_src} to {_dst}")
+                shutil.copy2(_src, _dst)
 
-            print("Copying index.html to output directory")
+            print(f"Copying {INDEX_HTML_SRC} to output directory")
             shutil.copy2(INDEX_HTML_SRC, fastled_js_dir / "index.html")
-            print("Copying index.css to output directory")
+            print(f"Copying {INDEX_CSS_SRC} to output directory")
             shutil.copy2(INDEX_CSS_SRC, fastled_js_dir / "index.css")
 
             # copy all js files in FASTLED_COMPILER_DIR to output directory
             Path(fastled_js_dir / "modules").mkdir(parents=True, exist_ok=True)
             for _file in FASTLED_MODULES_DIR.iterdir():
                 if _file.suffix == ".js":
-                    print(f"Copying {_file.name} to output directory")
+                    print(f"Copying {_file} to output directory")
                     shutil.copy2(_file, fastled_js_dir / "modules" / _file.name)
 
             fastled_js_mem = build_dir / "fastled.js.mem"
             fastled_wasm_map = build_dir / "fastled.wasm.map"
             fastled_js_symbols = build_dir / "fastled.js.symbols"
             if fastled_js_mem.exists():
-                print(f"Copying {fastled_js_mem.name} to output directory")
+                print(f"Copying {fastled_js_mem} to output directory")
                 shutil.copy2(fastled_js_mem, fastled_js_dir / fastled_js_mem.name)
             if fastled_wasm_map.exists():
-                print(f"Copying {fastled_wasm_map.name} to output directory")
+                print(f"Copying {fastled_wasm_map} to output directory")
                 shutil.copy2(fastled_wasm_map, fastled_js_dir / fastled_wasm_map.name)
             if fastled_js_symbols.exists():
-                print(f"Copying {fastled_js_symbols.name} to output directory")
+                print(f"Copying {fastled_js_symbols} to output directory")
                 shutil.copy2(
                     fastled_js_symbols, fastled_js_dir / fastled_js_symbols.name
                 )
+            print("Copying index.js to output directory")
+            shutil.copy2(INDEX_JS_SRC, fastled_js_dir / "index.js")
             optional_input_data_dir = src_dir / "data"
             output_data_dir = fastled_js_dir / optional_input_data_dir.name
 
