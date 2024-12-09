@@ -1,7 +1,7 @@
 
-import { UiManager } from "./ui_manager.js";
-import { GraphicsManager } from "./graphics_manager.js";
-import { GraphicsManagerThreeJS } from "./graphics_manager_threejs.js";
+import { UiManager } from "./modules/ui_manager.js";
+import { GraphicsManager } from "./modules/graphics_manager.js";
+import { GraphicsManagerThreeJS } from "./modules/graphics_manager_threejs.js";
 
 console.log("index.js loaded");
 console.log("FastLED loader function:", typeof _loadFastLED);
@@ -12,7 +12,7 @@ console.log("FastLED loader function:", typeof _loadFastLED);
 
 
 async function _loadFastLED(options) {
-    // Load the FastLED library
+    // Stub to let the user/dev know that something went wrong.
     log("FastLED loader function was not set.");
     return null;
 }
@@ -257,12 +257,14 @@ function isDenseGrid(frameData) {
 
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById(outputId);
+
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
 
 
 
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
+
         uiManager.processUiChanges(uiUpdateCallback);
         if (frameData.length === 0) {
             console.warn("Received empty frame data, skipping update");

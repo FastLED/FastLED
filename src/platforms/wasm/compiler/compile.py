@@ -69,6 +69,7 @@ FASTLED_SRC_DIR = FASTLED_DIR / "src"
 FASTLED_PLATFORMS_DIR = FASTLED_SRC_DIR / "platforms"
 FASTLED_WASM_DIR = FASTLED_PLATFORMS_DIR / "wasm"
 FASTLED_COMPILER_DIR = FASTLED_WASM_DIR / "compiler"
+FASTLED_MODULES_DIR = FASTLED_COMPILER_DIR / "modules"
 
 PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
@@ -528,10 +529,11 @@ def main() -> int:
             shutil.copy2(INDEX_CSS_SRC, fastled_js_dir / "index.css")
 
             # copy all js files in FASTLED_COMPILER_DIR to output directory
-            for _file in FASTLED_COMPILER_DIR.iterdir():
+            Path(fastled_js_dir / "modules").mkdir(parents=True, exist_ok=True)
+            for _file in FASTLED_MODULES_DIR.iterdir():
                 if _file.suffix == ".js":
                     print(f"Copying {_file.name} to output directory")
-                    shutil.copy2(_file, fastled_js_dir / _file.name)
+                    shutil.copy2(_file, fastled_js_dir / "modules" / _file.name)
 
             fastled_js_mem = build_dir / "fastled.js.mem"
             fastled_wasm_map = build_dir / "fastled.wasm.map"
