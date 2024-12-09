@@ -220,8 +220,6 @@ class jsDescription {
 };
 
 
-void jsSetCanvasSize(const char* jsonString, size_t jsonSize);
-void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height);
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap& screenmap);
 void jsOnFrame(ActiveStripData& active_strips);
 void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);

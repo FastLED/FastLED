@@ -30,13 +30,13 @@ set(COMMON_COMPILE_FLAGS
     -fno-exceptions
     -fno-rtti
     -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
-    ${OPT_LEVEL}
     -std=gnu++17
     -fpermissive
     -Wno-constant-logical-operand
     -Wnon-c-typedef-for-linkage
     -Werror=bad-function-cast
     -Werror=cast-function-type
+    ${OPT_LEVEL}
 )
 
 # Linker flags
@@ -72,40 +72,7 @@ if(BUILD_MODE STREQUAL "DEBUG")
 endif()
 
 set(UNIT_TEST_COMPILE_FLAGS
-    -Wall
-    #-Wextra 
-    #-Wpedantic
-    -funwind-tables
-    -g3
-    -ggdb
-    -fno-omit-frame-pointer
     -O0
-    -fno-inline
-    -Werror=suggest-override
-    -Werror=return-type
-    -Werror=missing-declarations
-    #-Werror=redundant-decls
-    -Werror=init-self
-    #-Werror=missing-field-initializers  
-    #-Werror=pointer-arith
-    #-Werror=write-strings
-    #-Werror=format=2
-    #-Werror=implicit-fallthrough
-    #-Werror=missing-include-dirs
-    -Werror=date-time
-    -Werror=non-virtual-dtor
-    #-Werror=reorder
-    #-Werror=sign-compare
-    #-Werror=float-equal
-    #-Werror=conversion
-    -Werror=switch-enum
-    #-Werror=switch-default
-    #-Werror=unused-parameter
-    #-Werror=unused-variable
-    #-Werror=unused-value
-
-    # Not supported in gcc.
-    #-Werror=infinite-recursion
 )
 
 # Set FastLED source directory

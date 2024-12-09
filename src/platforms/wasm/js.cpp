@@ -25,9 +25,7 @@
 
 using namespace fl;
 
-
-
-EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
+static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
     FASTLED_DBG("jsSetCanvasSize1");
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
@@ -39,7 +37,7 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSiz
     }, jsonString, jsonSize);
 }
 
-EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
+static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     FASTLED_DBG("Begin jsSetCanvasSize json serialization");
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
@@ -61,7 +59,14 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap 
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
     FASTLED_DBG("End jsSetCanvasSize json serialization");
-    jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
+    jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size());
+}
+
+
+
+
+void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
+    _jsSetCanvasSize(cledcontoller_id, screenmap);
 }
 
 EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
@@ -99,7 +104,7 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
                 active_strips.updateScreenMap(stripIndex, screenmap);
                 // Fire off the event to the JavaScript side that we now have
                 // a screenmap for this strip.
-                jsSetCanvasSize(stripIndex, screenmap);
+                _jsSetCanvasSize(stripIndex, screenmap);
             } else {
                 printf("Creating linear screenmap for %d\n", pixel_count);
                 ScreenMap screenmap(pixel_count);
@@ -109,7 +114,7 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
                 active_strips.updateScreenMap(stripIndex, screenmap);
                 // Fire off the event to the JavaScript side that we now have
                 // a screenmap for this strip.
-                jsSetCanvasSize(stripIndex, screenmap);
+                _jsSetCanvasSize(stripIndex, screenmap);
             }
         }
     }
