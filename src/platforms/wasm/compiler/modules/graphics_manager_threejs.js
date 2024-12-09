@@ -3,7 +3,42 @@
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
+// Note that this is shared with index.js
+export function isDenseGrid(frameData) {
+    const screenMap = frameData.screenMap;
 
+    // Check if all pixel densities are undefined
+    let allPixelDensitiesUndefined = true;
+    for (const stripId in screenMap.strips) {
+        const strip = screenMap.strips[stripId];
+        allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
+        if (!allPixelDensitiesUndefined) {
+            break;
+        }
+    }
+
+    if (!allPixelDensitiesUndefined) {
+        return false;
+    }
+
+    // Calculate total pixels and screen area
+    let totalPixels = 0;
+    for (const strip of frameData) {
+        if (strip.strip_id in screenMap.strips) {
+            const stripMap = screenMap.strips[strip.strip_id];
+            const len = Math.min(stripMap.map.x.length, stripMap.map.y.length);
+            totalPixels += len;
+        }
+    }
+
+    const width = 1 + (screenMap.absMax[0] - screenMap.absMin[0]);
+    const height = 1 + (screenMap.absMax[1] - screenMap.absMin[1]);
+    const screenArea = width * height;
+    const pixelDensity = totalPixels / screenArea;
+
+    // Return true if density is close to 1 (indicating a grid)
+    return pixelDensity > 0.9 && pixelDensity < 1.1;
+}
 
 export class GraphicsManagerThreeJS {
     constructor(graphicsArgs) {
@@ -158,9 +193,11 @@ export class GraphicsManagerThreeJS {
             const stripId = strip.strip_id;
             if (stripId in screenMap.strips) {
                 const stripMap = screenMap.strips[stripId];
-                stripMap.map.forEach(pos => {
-                    ledPositions.push(pos);
-                });
+                const x_array = stripMap.map.x;
+                const y_array = stripMap.map.y;
+                for (let i = 0; i < x_array.length; i++) {
+                    ledPositions.push([x_array[i], y_array[i]]);
+                }
             }
         });
         const width = screenMap.absMax[0] - screenMap.absMin[0];
@@ -199,7 +236,9 @@ export class GraphicsManagerThreeJS {
                 } else {
                     stripDiameter = defaultDotSize;
                 }
-                stripData.map.forEach(pos => {
+                const x_array = stripData.map.x;
+                const y_array = stripData.map.y;
+                for (let i = 0; i < x_array.length; i++) {
                     let geometry;
                     if (isDenseScreenMap) {
                         const width = stripDiameter * this.LED_SCALE;
@@ -211,16 +250,14 @@ export class GraphicsManagerThreeJS {
                     }
                     const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
                     const led = new THREE.Mesh(geometry, material);
-
                     // Position LED according to map, normalized to screen coordinates
-                    const x = calcXPosition(pos[0]);
-                    const y = calcYPosition(pos[1]);
+                    const x = calcXPosition(x_array[i]);
+                    const y = calcYPosition(y_array[i]);
                     led.position.set(x, y, 500);
-
                     this.scene.add(led);
                     this.leds.push(led);
                     ledIndex++;
-                });
+                }
             }
         });
         return { isDenseScreenMap }
@@ -260,14 +297,17 @@ export class GraphicsManagerThreeJS {
             const map = stripData.map;
             const data = strip.pixel_data;
             const pixelCount = data.length / 3;
+            const x_array = stripData.map.x;
+            const y_array = stripData.map.y;
+            const length = Math.min(x_array.length, y_array.length);
 
             for (let j = 0; j < pixelCount; j++) {
-                if (j >= map.length) {
+                if (j >= length) {
                     console.warn(`Strip ${strip_id}: Pixel ${j} is outside the screen map ${map.length}, skipping update`);
                     continue;
                 }
-
-                const [x, y] = map[j];
+                const x = x_array[j];
+                const y = y_array[j];
                 const posKey = `${x},${y}`;
                 const srcIndex = j * 3;
                 const r = (data[srcIndex] & 0xFF) / 255;

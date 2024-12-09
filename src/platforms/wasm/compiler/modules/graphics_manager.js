@@ -175,13 +175,18 @@ export class GraphicsManager {
             const map = stripData.map;
             const min_x = screenMap.absMin[0];
             const min_y = screenMap.absMin[1];
+            const x_array = map.x;
+            const y_array = map.y;
+            const len = Math.min(x_array.length, y_array.length);
             //log("Writing data to canvas");
             for (let i = 0; i < pixelCount; i++) {
-                if (i >= map.length) {
+                if (i >= len) {
                     console.warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`);
                     continue;
                 }
-                let [x, y] = map[i];
+                // let [x, y] = map[i];
+                let x = x_array[i];
+                let y = y_array[i];
                 x -= min_x;
                 y -= min_y;
 

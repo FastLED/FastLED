@@ -1,7 +1,7 @@
 
 import { UiManager } from "./modules/ui_manager.js";
 import { GraphicsManager } from "./modules/graphics_manager.js";
-import { GraphicsManagerThreeJS } from "./modules/graphics_manager_threejs.js";
+import { GraphicsManagerThreeJS, isDenseGrid } from "./modules/graphics_manager_threejs.js";
 
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -74,40 +74,6 @@ console.warn = warn;
 console.error = _prev_error;
 
 
-function isDenseGrid(frameData) {
-    const screenMap = frameData.screenMap;
-
-    // Check if all pixel densities are undefined
-    let allPixelDensitiesUndefined = true;
-    for (const stripId in screenMap.strips) {
-        const strip = screenMap.strips[stripId];
-        allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
-        if (!allPixelDensitiesUndefined) {
-            break;
-        }
-    }
-
-    if (!allPixelDensitiesUndefined) {
-        return false;
-    }
-
-    // Calculate total pixels and screen area
-    let totalPixels = 0;
-    for (const strip of frameData) {
-        if (strip.strip_id in screenMap.strips) {
-            const stripMap = screenMap.strips[strip.strip_id];
-            totalPixels += stripMap.map.length;
-        }
-    }
-
-    const width = 1 + (screenMap.absMax[0] - screenMap.absMin[0]);
-    const height = 1 + (screenMap.absMax[1] - screenMap.absMin[1]);
-    const screenArea = width * height;
-    const pixelDensity = totalPixels / screenArea;
-
-    // Return true if density is close to 1 (indicating a grid)
-    return pixelDensity > 0.9 && pixelDensity < 1.1;
-}
 
 
 (function () {
@@ -161,17 +127,17 @@ function isDenseGrid(frameData) {
 
 
     function minMax(array_xy) {
-        // array_xy is a an array of an array of x and y values
-        // returns the lower left and upper right
-        let min_x = array_xy[0][0];
-        let min_y = array_xy[0][1];
-        let max_x = array_xy[0][0];
-        let max_y = array_xy[0][1];
-        for (let i = 1; i < array_xy.length; i++) {
-            min_x = Math.min(min_x, array_xy[i][0]);
-            min_y = Math.min(min_y, array_xy[i][1]);
-            max_x = Math.max(max_x, array_xy[i][0]);
-            max_y = Math.max(max_y, array_xy[i][1]);
+        const x_array = array_xy["x"];
+        const y_array = array_xy["y"]; 
+        let min_x = x_array[0];
+        let min_y = y_array[0];
+        let max_x = x_array[0];
+        let max_y = y_array[0];
+        for (let i = 1; i < x_array.length; i++) {
+            min_x = Math.min(min_x, x_array[i]);
+            min_y = Math.min(min_y, y_array[i]);
+            max_x = Math.max(max_x, x_array[i]);
+            max_y = Math.max(max_y, y_array[i]);
         }
         return [[min_x, min_y], [max_x, max_y]];
     }
@@ -189,8 +155,6 @@ function isDenseGrid(frameData) {
             const map = jsonData.map;
 
             console.log("Received map:", jsonData);
-
-
 
             const [min, max] = minMax(map);
             console.log("min", min, "max", max);

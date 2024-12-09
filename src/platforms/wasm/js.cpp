@@ -44,11 +44,13 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap 
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
-    auto array = doc["map"].to<FLArduinoJson::JsonArray>();
+    auto map = doc["map"].to<FLArduinoJson::JsonObject>();
+    doc["length"] = screenmap.getLength();
+    auto x = map["x"].to<FLArduinoJson::JsonArray>();
+    auto y = map["y"].to<FLArduinoJson::JsonArray>();
     for (uint32_t i = 0; i < screenmap.getLength(); i++) {
-        auto entry = array[i].to<FLArduinoJson::JsonArray>();
-        entry.add(screenmap[i].x);
-        entry.add(screenmap[i].y);
+        x.add(screenmap[i].x);
+        y.add(screenmap[i].y);
     }
     // add diameter.
     float diameter = screenmap.getDiameter();
