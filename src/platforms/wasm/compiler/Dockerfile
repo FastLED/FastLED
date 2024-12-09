@@ -157,7 +157,10 @@ RUN python /js/init_runtime.py || true
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs
 
-RUN echo "asadasdas"
+# Force a build if the compiler flags change.
+COPY src/platforms/wasm/compiler/wasm_compiler_flags.py /trash/wasm_compiler_flags.py
+COPY src/platforms/wasm/compiler/CMakeLists.txt /trash/CMakeLists.txt
+RUN rm -rf /trash
 
 # Do not cause the build to fail because the cached pre-warm failed.
 RUN /js/prewarm.sh --force > /logs/prewarm.log.1 || true
