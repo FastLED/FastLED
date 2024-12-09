@@ -192,6 +192,9 @@ add_library(FastLED STATIC
     $<$<TARGET_EXISTS:FastLED_sensors>:$<TARGET_OBJECTS:FastLED_sensors>>
 )
 
+# Add whole archive linking for FastLED
+target_link_options(fastled PRIVATE "-Wl,--whole-archive" $<TARGET_FILE:FastLED> "-Wl,--no-whole-archive")
+
 # Set properties for the main library
 set_target_properties(FastLED PROPERTIES
     CXX_STANDARD 17
