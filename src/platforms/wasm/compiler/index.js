@@ -86,6 +86,33 @@ function warn(...args) {
     }
 }
 
+function customPrintFunction(...args) {
+    if (containerId === undefined) {
+        return;  // Not ready yet.
+    }
+    // take the args and stringify them, then add them to the output element
+    let cleanedArgs = args.map(arg => {
+        if (typeof arg === 'object') {
+            try {
+                return JSON.stringify(arg).slice(0, 100);
+            } catch (e) {
+                return "" + arg;
+            }
+        }
+        return arg;
+    });
+
+    const output = document.getElementById(outputId);
+    const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
+    // split into lines, and if there are more than 100 lines, remove one.
+    const lines = allText.split('\n');
+    while (lines.length > MAX_STDOUT_LINES) {
+        lines.shift();
+    }
+    output.textContent = lines.join('\n');
+}
+
+
 // DO NOT OVERRIDE ERROR! When something goes really wrong we want it
 // to always go to the console. If we hijack it then startup errors become
 // extremely difficult to debug.
@@ -180,32 +207,6 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
 }
 
 
-
-function customPrintFunction(...args) {
-    if (containerId === undefined) {
-        return;  // Not ready yet.
-    }
-    // take the args and stringify them, then add them to the output element
-    let cleanedArgs = args.map(arg => {
-        if (typeof arg === 'object') {
-            try {
-                return JSON.stringify(arg).slice(0, 100);
-            } catch (e) {
-                return "" + arg;
-            }
-        }
-        return arg;
-    });
-
-    const output = document.getElementById(outputId);
-    const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
-    // split into lines, and if there are more than 100 lines, remove one.
-    const lines = allText.split('\n');
-    while (lines.length > MAX_STDOUT_LINES) {
-        lines.shift();
-    }
-    output.textContent = lines.join('\n');
-}
 
 
 function FastLED_onStripUpdate(jsonData) {
