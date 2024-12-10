@@ -14,7 +14,7 @@
 #include "fl/ptr.h"
 #include "fl/scoped_ptr.h"
 #include "fl/dbg.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
