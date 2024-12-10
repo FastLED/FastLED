@@ -12,7 +12,7 @@
 #include "lib8tion/random8.h"
 #include "noise.h"
 #include "fl/ptr.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 namespace fl {
 
