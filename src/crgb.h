@@ -7,7 +7,7 @@
 #include "namespace.h"
 #include "color.h"
 #include "lib8tion/types.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fl/template_magic.h"
 
 

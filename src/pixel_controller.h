@@ -14,7 +14,7 @@
 #include "FastLED.h"
 #include "rgbw.h"
 #include "five_bit_hd_gamma.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "namespace.h"
 #include "eorder.h"
 #include "dither_mode.h"

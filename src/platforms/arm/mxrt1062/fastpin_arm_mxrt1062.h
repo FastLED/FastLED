@@ -1,7 +1,7 @@
 #ifndef __FASTPIN_ARM_MXRT1062_H
 #define __FASTPIN_ARM_MXRT1062_H
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 

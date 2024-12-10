@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fl/ptr.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
 #include "fl/lut.h"

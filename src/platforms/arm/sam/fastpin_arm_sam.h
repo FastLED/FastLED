@@ -1,7 +1,7 @@
 #ifndef __INC_FASTPIN_ARM_SAM_H
 #define __INC_FASTPIN_ARM_SAM_H
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 

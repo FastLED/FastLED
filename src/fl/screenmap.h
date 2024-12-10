@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fl/lut.h"
 #include "fl/ptr.h"
 

@@ -1,7 +1,7 @@
 #ifndef __LED_SYSDEFS_ARM_NRF52
 #define __LED_SYSDEFS_ARM_NRF52
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 
 #define FASTLED_ARM
 

@@ -3,7 +3,7 @@
 
 #include "FastLED.h"
 #include "fl/types.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles

@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "fl/ptr.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fl/lut.h"
 
 #include "namespace.h"

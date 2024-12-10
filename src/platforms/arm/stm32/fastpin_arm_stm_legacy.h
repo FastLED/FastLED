@@ -1,7 +1,7 @@
 #ifndef __FASTPIN_ARM_STM32_H
 #define __FASTPIN_ARM_STM32_H
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "namespace.h"
 #include "armpin.h"
 

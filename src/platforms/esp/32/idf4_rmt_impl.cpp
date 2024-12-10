@@ -12,7 +12,7 @@
 #define INLINE_RMT_SET_TX_INTR_DISABLE 0
 
 #include "FastLED.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "idf4_rmt.h"
 #include "idf4_rmt_impl.h"
 #include "clock_cycles.h"

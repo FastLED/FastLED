@@ -4,7 +4,7 @@
 #include "FastLED.h"
 #include "pixeltypes.h"
 #include "five_bit_hd_gamma.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"

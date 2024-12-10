@@ -52,7 +52,7 @@
 
 
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "cpp_compat.h"
 
 #include "fastled_config.h"

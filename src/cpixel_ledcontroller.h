@@ -11,7 +11,7 @@
 #include "color.h"
 #include "eorder.h"
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "pixel_controller.h"
 #include "cled_controller.h"
 

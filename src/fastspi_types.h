@@ -5,7 +5,7 @@
 #define __INC_FASTSPI_TYPES_H
 
 #include "FastLED.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "namespace.h"
 #include "fl/unused.h"
 

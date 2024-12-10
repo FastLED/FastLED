@@ -7,7 +7,7 @@
 #include "FastLED.h"
 
 #include "fastled_delay.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 

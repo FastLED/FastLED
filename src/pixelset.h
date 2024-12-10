@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FastLED.h"
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "fl/unused.h"
 
 #if FASTLED_IS_USING_NAMESPACE

@@ -10,7 +10,7 @@
 #include "pixeltypes.h"
 #include "color.h"
 
-#include "force_inline.h"
+#include "fl/force_inline.h"
 #include "pixel_controller.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
