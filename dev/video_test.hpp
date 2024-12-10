@@ -9,6 +9,8 @@
 #include "ref.h"
 #include <iostream>
 
+using namespace fl;
+
 #define LED_PIN 2
 #define BRIGHTNESS 96
 #define LED_TYPE WS2811
@@ -27,6 +29,8 @@ const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 ByteStreamMemoryRef memoryStream;
 VideoRef videoFx;
 FxEngine fxEngine(NUM_LEDS);
+
+using namespace fl;
 
 
 void write_one_frame(ByteStreamMemoryRef memoryStream) {

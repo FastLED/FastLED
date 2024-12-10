@@ -190,7 +190,7 @@ public:
     /// @returns a reference to the controller
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
 
-    CLEDController& setScreenMap(const XYMap& map) {
+    CLEDController& setScreenMap(const fl::XYMap& map) {
         // EngineEvents::onCanvasUiSet(this, map);
         fl::ScreenMap screenmap = map.toScreenMap();
         fl::EngineEvents::onCanvasUiSet(this, screenmap);
@@ -203,7 +203,7 @@ public:
     }
 
     CLEDController& setScreenMap(uint16_t width, uint16_t height) {
-        return setScreenMap(XYMap::constructRectangularGrid(width, height));
+        return setScreenMap(fl::XYMap::constructRectangularGrid(width, height));
     }
 
     /// Get the dithering option currently set for this controller

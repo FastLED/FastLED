@@ -34,6 +34,8 @@
 #define PIR_RISING_TIME 1000  // how long to fade in the PIR sensor
 #define PIR_FALLING_TIME 1000  // how long to fade out the PIR sensor
 
+using namespace fl;
+
 CRGB leds[NUM_LEDS];
 
 Slider brightness("Brightness", 1, 0, 1);

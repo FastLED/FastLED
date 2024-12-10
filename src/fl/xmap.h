@@ -9,7 +9,7 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
     (void)length;
@@ -142,4 +142,4 @@ private:
     uint16_t mOffset = 0;  // offset to be added to the output
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

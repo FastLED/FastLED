@@ -25,7 +25,7 @@ FASTLED_NAMESPACE_BEGIN
 /// pixel is mapped outside of the range then it is clipped.
 void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
                              uint16_t inputWidth, uint16_t inputHeight,
-                             XYMap xyMap);
+                             fl::XYMap xyMap);
 
 /// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
@@ -34,11 +34,11 @@ void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
 /// @param outputHeight The height of the output grid.
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
-void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth, uint8_t inputHeight, XYMap xyMap);
+void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth, uint8_t inputHeight, fl::XYMap xyMap);
 
 // 
 inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
-                           uint16_t inputHeight, XYMap xyMap) {
+                           uint16_t inputHeight, fl::XYMap xyMap) {
     uint16_t outputWidth = xyMap.getWidth();
     uint16_t outputHeight = xyMap.getHeight();
     const bool wontFit = (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight());
@@ -53,11 +53,11 @@ inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
 
 void bilinearExpandFloat(const CRGB *input, CRGB *output,
                                  uint8_t inputWidth, uint8_t inputHeight,
-                                 XYMap xyMap);
+                                 fl::XYMap xyMap);
 
 void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
                                   uint16_t inputWidth, uint16_t inputHeight,
-                                  XYMap xyMap);
+                                  fl::XYMap xyMap);
 
 uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
                                  uint8_t v11, float dx, float dy);

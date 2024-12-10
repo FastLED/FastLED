@@ -11,6 +11,8 @@
 #include "FastLED.h"
 #include "fl/xymap.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 

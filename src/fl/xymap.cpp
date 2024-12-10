@@ -9,7 +9,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 ScreenMap XYMap::toScreenMap() const {
@@ -28,4 +28,5 @@ ScreenMap XYMap::toScreenMap() const {
     return out;
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl
+
