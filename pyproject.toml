@@ -21,7 +21,8 @@ dependencies = [
     "ziglang",
     "ninja",
     "cmake",
-    "download"
+    "download",
+    "fastled"
 ]
 
 [build-system]
