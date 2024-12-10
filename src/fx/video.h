@@ -27,7 +27,7 @@ FASTLED_SMART_PTR(ByteStreamMemory);
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. You can either use
 // a file handle or a byte stream to read the video data.
-class Video : public Fx1d {
+class Video : public Fx1d {  // Fx1d because video can be irregular.
 public:
     static size_t DefaultFrameHistoryCount() {
         #ifdef __AVR__
@@ -37,7 +37,10 @@ public:
         #endif
     }
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
-    // allows for time based effects like syncing video speed to audio triggers.
+    // allows for time based effects like syncing video speed to audio triggers. If you are
+    // using a filehandle for you video then you can just leave this as the default. For streaming
+    // byte streams you may want to increase this number to allow momentary re-wind. If you'd
+    // like to use a Video as a buffer for an fx effect then please see VideoFxWrapper.
     Video();
     Video(size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = DefaultFrameHistoryCount());  // Please use FileSytem to construct a Video.
     ~Video();
@@ -76,7 +79,10 @@ private:
 
 
 // Wraps an Fx and stores a history of video frames. This allows
-// interpolation between frames.
+// interpolation between frames for FX for smoother effects.
+// It also allows re-wind on fx that gnore time and always generate
+// the next frame based on the previous frame and internal speed,
+// for example NoisePalette.
 class VideoFxWrapper : public Fx1d {
   public:
     VideoFxWrapper(FxPtr fx);
