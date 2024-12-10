@@ -9,7 +9,7 @@
 
 
 #include "FastLED.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 FASTLED_NAMESPACE_BEGIN
 

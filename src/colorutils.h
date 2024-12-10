@@ -7,7 +7,7 @@
 #include "FastLED.h"
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 #if !defined(FASTLED_USE_32_BIT_GRADIENT_FILL)
   #if defined(__AVR__)

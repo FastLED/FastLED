@@ -4,7 +4,7 @@
 
 #include "force_inline.h"
 #include "namespace.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 #include "fl/screenmap.h"
 
 using namespace fl;

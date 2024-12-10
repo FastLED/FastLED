@@ -5,7 +5,7 @@
 
 #include "force_inline.h"
 #include "fl/ptr.h"
-#include "xmap.h" // Include xmap.h for LUT16
+#include "fl/xmap.h" // Include xmap.h for LUT16
 #include "fl/lut.h"
 #include "crgb.h"
 #include "namespace.h"

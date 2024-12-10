@@ -14,7 +14,7 @@
 #include "fl/ui.h"
 #include "fx/time.h"
 #include "fx/video.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 
 // Forward declaration
