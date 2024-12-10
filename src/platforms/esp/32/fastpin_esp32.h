@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "register.h"
+#include "fl/register.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
