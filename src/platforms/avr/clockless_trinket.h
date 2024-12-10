@@ -4,7 +4,7 @@
 #include "../../controller.h"
 #include "../../lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
-#include "../../force_inline.h"
+#include "../../fl/force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 

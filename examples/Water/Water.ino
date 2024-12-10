@@ -4,7 +4,7 @@
 
 #include <FastLED.h>
 #include "Arduino.h"
-#include "xymap.h"
+#include "fl/xymap.h"
 
 #define WIDTH 32
 #define HEIGHT 32
