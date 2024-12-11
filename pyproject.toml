@@ -22,7 +22,7 @@ dependencies = [
     "ninja",
     "cmake",
     "download",
-    "fastled"
+    "fastled>=1.1.37"
 ]
 
 [build-system]

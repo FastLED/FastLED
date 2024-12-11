@@ -19,7 +19,7 @@ jobs:
       run: pip install uv
 
     - name: Build Image
-      run: uv run ci/wasm_compile.py -b --just-compile examples/wasm
+      run: uv run ci/run_test_wasm_local_compile.py
 
     - name: Build WASM Compiler
       run: ./wasm -b
