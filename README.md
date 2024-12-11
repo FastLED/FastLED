@@ -188,6 +188,7 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 
 [![wasm](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml)
 
+[![wasm_compile_test](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm_compilers.yml)
 
 ## Compiled Library Size Check
 
