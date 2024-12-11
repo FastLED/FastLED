@@ -18,4 +18,4 @@ void on_startup() {
 
 using namespace fl;
 
-#include "noisering.hpp"
+#include "NoiseRing.hpp"
