@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
 uv venv --python 3.11
-uv pip install ci
+uv pip install ci --no-cache
+uv pip install .  --no-cache
