@@ -18,12 +18,9 @@ jobs:
     - name: Install UV
       run: pip install uv
 
-    - name: Build Image
+    - name: uv run ci/run_test_wasm_local_compile.py
       run: uv run ci/run_test_wasm_local_compile.py
 
-    - name: Build WASM Compiler
-      run: ./wasm -b
-      shell: bash
 
     - name: Generate timestamp and random hex
       id: generate_id
