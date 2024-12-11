@@ -1,4 +1,4 @@
-name: wasm compilers
+name: wasm_compile_test
 
 on:
     push:
