@@ -1,13 +1,11 @@
 #include <string.h>
 
 #include "fl/bytestreammemory.h"
-
 #include "fl/math_macros.h"
-
 #include "namespace.h"
-#include "fl/dbg.h"
+#include "fl/warn.h"
 
-#define DBG FASTLED_DBG
+
 
 namespace fl {
 
@@ -22,7 +20,7 @@ bool ByteStreamMemory::available(size_t n) const {
 
 size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
     if (!available(bytesToRead) || dst == nullptr) {
-        DBG("ByteStreamMemory::read: !available(bytesToRead): " << bytesToRead << " mReadBuffer.size(): " << mReadBuffer.size());
+        FASTLED_WARN("ByteStreamMemory::read: !available(bytesToRead): " << bytesToRead << " mReadBuffer.size(): " << mReadBuffer.size());
         return 0;
     }
 
@@ -36,7 +34,7 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
     }
 
     if (bytesRead == 0) {
-        DBG("ByteStreamMemory::read: bytesRead == 0");
+        FASTLED_WARN("ByteStreamMemory::read: bytesRead == 0");
     }
 
     return bytesRead;
@@ -44,15 +42,15 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
 
 size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
     if (src == nullptr || mReadBuffer.capacity() == 0) {
-        FASTLED_DBG_IF(src == nullptr, "ByteStreamMemory::write: src == nullptr");
-        FASTLED_DBG_IF(mReadBuffer.capacity() == 0, "ByteStreamMemory::write: mReadBuffer.capacity() == 0");
+        FASTLED_WARN_IF(src == nullptr, "ByteStreamMemory::write: src == nullptr");
+        FASTLED_WARN_IF(mReadBuffer.capacity() == 0, "ByteStreamMemory::write: mReadBuffer.capacity() == 0");
         return 0;
     }
 
     size_t written = 0;
     for (size_t i = 0; i < n; ++i) {
         if (mReadBuffer.full()) {
-            FASTLED_DBG("ByteStreamMemory::write: mReadBuffer.full(): " << mReadBuffer.size());
+            FASTLED_WARN("ByteStreamMemory::write: mReadBuffer.full(): " << mReadBuffer.size());
             break;
         }
         mReadBuffer.push_back(src[i]);
