@@ -36,7 +36,7 @@ CRGBPalette16 currentPalette;
 TBlendType    currentBlending;
 
 extern CRGBPalette16 myRedWhiteBluePalette;
-extern const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM;
+extern const TProgmemPalette16 myRedWhiteBluePalette_p FL_PROGMEM;
 
 
 void setup() {
@@ -145,7 +145,7 @@ void SetupPurpleAndGreenPalette()
 // which is stored in PROGMEM (flash), which is almost always more
 // plentiful than RAM.  A static PROGMEM palette like this
 // takes up 64 bytes of flash.
-const TProgmemPalette16 myRedWhiteBluePalette_p PROGMEM =
+const TProgmemPalette16 myRedWhiteBluePalette_p FL_PROGMEM =
 {
     CRGB::Red,
     CRGB::Gray, // 'white' is too bright compared to red and blue
