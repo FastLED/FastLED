@@ -22,7 +22,8 @@ dependencies = [
     "ninja",
     "cmake",
     "download",
-    "fastled>=1.1.37"
+    "fastled>=1.1.37",
+    "playwright"
 ]
 
 [build-system]
