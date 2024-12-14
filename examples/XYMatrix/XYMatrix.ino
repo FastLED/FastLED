@@ -178,22 +178,6 @@ uint16_t XYsafe( uint8_t x, uint8_t y)
 }
 
 
-// Demo that USES "XY" follows code below
-
-void loop()
-{
-    uint32_t ms = millis();
-    int32_t yHueDelta32 = ((int32_t)cos16( ms * (27/1) ) * (350 / kMatrixWidth));
-    int32_t xHueDelta32 = ((int32_t)cos16( ms * (39/1) ) * (310 / kMatrixHeight));
-    DrawOneFrame( ms / 65536, yHueDelta32 / 32768, xHueDelta32 / 32768);
-    if( ms < 5000 ) {
-      FastLED.setBrightness( scale8( BRIGHTNESS, (ms * 256) / 5000));
-    } else {
-      FastLED.setBrightness(BRIGHTNESS);
-    }
-    FastLED.show();
-}
-
 void DrawOneFrame( uint8_t startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
 {
   uint8_t lineStartHue = startHue8;
@@ -212,3 +196,22 @@ void setup() {
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   FastLED.setBrightness( BRIGHTNESS );
 }
+
+
+// Demo that USES "XY" follows code below
+
+void loop()
+{
+    uint32_t ms = millis();
+    int32_t yHueDelta32 = ((int32_t)cos16( ms * (27/1) ) * (350 / kMatrixWidth));
+    int32_t xHueDelta32 = ((int32_t)cos16( ms * (39/1) ) * (310 / kMatrixHeight));
+    DrawOneFrame( ms / 65536, yHueDelta32 / 32768, xHueDelta32 / 32768);
+    if( ms < 5000 ) {
+      FastLED.setBrightness( scale8( BRIGHTNESS, (ms * 256) / 5000));
+    } else {
+      FastLED.setBrightness(BRIGHTNESS);
+    }
+    FastLED.show();
+}
+
+
