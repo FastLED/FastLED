@@ -4,11 +4,11 @@ import os
 import shutil
 import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import Tuple
 
 from ci.paths import PROJECT_ROOT
+from ci.running_process import RunningProcess
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
@@ -117,32 +117,12 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     return CC_PATH, CXX_PATH, AR_PATH
 
 
-def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str]:
-    process = subprocess.run(
-        command,
-        shell=True,
-        cwd=cwd,
-        capture_output=capture,
-    )
-
-    if capture:
-        stdout = process.stdout.decode("utf-8")
-        stderr = process.stderr.decode("utf-8")
-    else:
-        stdout = stderr = ""
-
+def run_command(command: str, cwd: Path | None = None) -> None:
+    process = RunningProcess(command, cwd=cwd)
+    process.wait()
     if process.returncode != 0:
-        print(f"Error executing command: {command}")
-        if capture:
-            print("STDOUT:")
-            print(stdout)
-            print("STDERR:")
-            print(stderr)
-        print(f"Return code: {process.returncode}")
-        time.sleep(1)
-        exit(1)
-
-    return stdout, stderr
+        print(f"{Path(__file__).name}: Error executing command: {command}")
+        sys.exit(1)
 
 
 def compile_fastled_library(specific_test: str | None = None) -> None:
