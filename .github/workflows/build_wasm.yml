@@ -63,6 +63,6 @@ jobs:
 
       - name: Install Playwright and verify FastLED_onFrame
         run: |
-          uv run ci/playwright_test.py
+          uv run ci/wasm_test.py
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
 
