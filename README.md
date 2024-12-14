@@ -36,6 +36,7 @@ We have multiple goals with this library:
 * Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
 * High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
 
+
 ## Example
 
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
