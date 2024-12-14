@@ -3,6 +3,13 @@ from pathlib import Path
 
 
 class RunningProcess:
+    """
+    A class to manage and stream output from a running subprocess.
+
+    This class provides functionality to execute shell commands, stream their output
+    in real-time, and control the subprocess execution.
+    """
+
     def __init__(
         self,
         command: str,
@@ -12,11 +19,14 @@ class RunningProcess:
         echo: bool = True,
     ):
         """
-        Initialize the RunningProcess instance.
+        Initialize the RunningProcess instance. Note that stderr is merged into stdout!!
 
         Args:
             command (str): The command to execute.
             cwd (Path | None): The working directory to execute the command in.
+            check (bool): If True, raise an exception if the command returns a non-zero exit code.
+            auto_run (bool): If True, automatically run the command when the instance is created.
+            echo (bool): If True, print the output of the command to the console in real-time.
         """
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
@@ -74,6 +84,9 @@ class RunningProcess:
     def wait(self) -> None:
         """
         Wait for the process to complete.
+
+        Raises:
+            ValueError: If the process hasn't been started.
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
@@ -81,7 +94,10 @@ class RunningProcess:
 
     def kill(self) -> None:
         """
-        Terminate the process.
+        Immediately terminate the process with SIGKILL.
+
+        Raises:
+            ValueError: If the process hasn't been started.
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
@@ -89,18 +105,28 @@ class RunningProcess:
 
     def terminate(self) -> None:
         """
-        Terminate the process.
+        Gracefully terminate the process with SIGTERM.
+
+        Raises:
+            ValueError: If the process hasn't been started.
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
         self.proc.terminate()
 
     @property
-    def returncode(self) -> int:
+    def returncode(self) -> int | None:
         if self.proc is None:
-            raise ValueError("Process is not running.")
+            return None
         return self.proc.returncode
 
     @property
     def stdout(self) -> str:
-        return "\n".join(self.buffer) if self.returncode is not None else None
+        """
+        Get the complete stdout output of the process.
+
+        Returns:
+            str: The complete stdout output as a string, or None if process hasn't completed.
+        """
+        self.wait()
+        return "\n".join(self.buffer)
