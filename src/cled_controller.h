@@ -16,6 +16,7 @@
 #include "pixel_iterator.h"
 #include "fl/engine_events.h"
 #include "fl/screenmap.h"
+#include "fl/virtual_if_not_avr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -96,12 +97,13 @@ public:
 
     /// Clear out/zero out the given number of LEDs.
     /// @param nLeds the number of LEDs to clear
-    virtual void clearLeds(int nLeds = -1) {
+    VIRTUAL_IF_NOT_AVR void clearLeds(int nLeds = -1) {
         clearLedDataInternal(nLeds);
+        showLeds(0);
     }
 
     // Compatibility with the 3.8.x codebase.
-    inline void showLeds(uint8_t brightness) {
+    VIRTUAL_IF_NOT_AVR void showLeds(uint8_t brightness) {
         void* data = beginShowLeds();
         showLedsInternal(brightness);
         endShowLeds(data);

@@ -25,6 +25,7 @@ void CLEDController::clearLedDataInternal(int nLeds) {
         nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
         memset((void*)m_Data, 0, sizeof(struct CRGB) * nLeds);
     }
+
 }
 
 ColorAdjustment CLEDController::getAdjustmentData(uint8_t brightness) {
