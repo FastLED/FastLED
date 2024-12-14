@@ -7,6 +7,7 @@ FastLED 3.9.5
 * CLEDController::setEnabled(bool) now allows controllers to be selectively disabled/enabled. This is useful if you want to have multiple controller types mapped to the same pin and select which ones are active during runtime.
 * Attiny88 now under test.
 * CLEDController::clearLeds() restores showLeds(0)
+* Completely remove Json build for avr.
 
 FastLED 3.9.4
 =============
