@@ -95,7 +95,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
-                       FLArduinoJson::JsonDocument *_doc) {
+                       JsonDocument *_doc) {
     auto &doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
     for (auto kv : segmentMaps) {
@@ -119,7 +119,7 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
 
 void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
                           Str *jsonBuffer) {
-    FLArduinoJson::JsonDocument doc;
+    JsonDocument doc;
     toJson(segmentMaps, &doc);
     FLArduinoJson::serializeJson(doc, *jsonBuffer);
 }

@@ -6,7 +6,7 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"
 
-#include "fl/json.h"
+
 #include "fl/map.h"
 #include "fl/str.h"
 #include "namespace.h"
@@ -20,6 +20,7 @@
 namespace fl {
 
 class Str;
+class JsonDocument;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
@@ -73,7 +74,7 @@ class ScreenMap {
     static void toJsonStr(const FixedMap<Str, ScreenMap, 16> &,
                           Str *jsonBuffer);
     static void toJson(const FixedMap<Str, ScreenMap, 16> &,
-                       FLArduinoJson::JsonDocument *doc);
+                       JsonDocument *doc);
 
   private:
     static const pair_xy_float &empty();
