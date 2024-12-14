@@ -15,7 +15,7 @@
 #include "fx/2d/animartrix.hpp"
 #include "fx/2d/noisepalette.h"
 #include "fx/2d/scale_up.h"
-#include "fx/2d/redsquare.hpp"
+#include "fx/2d/redsquare.h"
 #include "fx/video.h"
 
 #include "namespace.h"
