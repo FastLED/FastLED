@@ -22,7 +22,7 @@ void loop() {
 #include "FastLED.h"
 #include "Arduino.h"
 
-#include "fx/2d/noisepalette.hpp"
+#include "fx/2d/noisepalette.h"
 // #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
 #include "fx/video.h"

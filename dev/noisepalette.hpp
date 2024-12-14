@@ -2,7 +2,7 @@
 /// @brief   Demonstrates how to use noise generation on a 2D LED matrix
 /// @example Noise.ino
 
-#include "fx/2d/noisepalette.hpp"
+#include "fx/2d/noisepalette.h"
 #include <FastLED.h>
 
 #define LED_PIN 2
