@@ -12,7 +12,7 @@
 #include "fl/xymap.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
@@ -62,4 +62,4 @@ void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
 uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
                                  uint8_t v11, float dx, float dy);
 
-FASTLED_NAMESPACE_END
+} // namespace fl

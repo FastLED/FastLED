@@ -10,9 +10,7 @@
 #include "namespace.h"
 #include "fl/xymap.h"
 
-using namespace fl;
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01,
@@ -280,4 +278,4 @@ void bilinearExpandFloat(const CRGB *input, CRGB *output,
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
