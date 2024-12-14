@@ -6,22 +6,20 @@
 
 #include "fl/screenmap.h"
 
-#include "fl/str.h"
-#include "fl/map.h"
 #include "fl/json.h"
-#include "namespace.h"
+#include "fl/map.h"
+#include "fl/math_macros.h"
+#include "fl/screenmap.h"
+#include "fl/str.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/math_macros.h"
-#include "math.h"
+#include "namespace.h"
+#include <math.h>
 
-using namespace fl;
+namespace fl {
 
-
-
-FASTLED_NAMESPACE_BEGIN
-
-ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_diameter) {
+ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
+                            float cm_led_diameter) {
     ScreenMap screenMap = ScreenMap(numLeds);
     float circumference = numLeds * cm_between_leds;
     float radius = circumference / (2 * PI);
@@ -36,17 +34,15 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_dia
     return screenMap;
 }
 
-
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          fl::FixedMap<Str, ScreenMap, 16> *segmentMaps,
-                          fl::Str *err) {
-    fl::JsonDocument doc;
-    fl::Str _err;
+                          FixedMap<Str, ScreenMap, 16> *segmentMaps, Str *err) {
+    JsonDocument doc;
+    Str _err;
     if (!err) {
         err = &_err;
     }
 
-    bool ok = fl::parseJson(jsonStrScreenMap, &doc, err);
+    bool ok = parseJson(jsonStrScreenMap, &doc, err);
     if (!ok) {
         FASTLED_WARN("Failed to parse json: " << err->c_str());
         return false;
@@ -75,10 +71,9 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          const char* screenMapName,
-                          ScreenMap *screenmap,
-                          fl::Str *err) {
-    fl::FixedMap<fl::Str, ScreenMap, 16> segmentMaps;
+                          const char *screenMapName, ScreenMap *screenmap,
+                          Str *err) {
+    FixedMap<Str, ScreenMap, 16> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
     if (!ok) {
         return false;
@@ -90,7 +85,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         *screenmap = segmentMaps[screenMapName];
         return true;
     }
-    fl::Str _err = "ScreenMap not found: ";
+    Str _err = "ScreenMap not found: ";
     _err.append(screenMapName);
     if (err) {
         *err = _err;
@@ -99,15 +94,16 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     return false;
 }
 
-void ScreenMap::toJson(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduinoJson::JsonDocument* _doc) {
-    auto& doc = *_doc;
+void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
+                       FLArduinoJson::JsonDocument *_doc) {
+    auto &doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
     for (auto kv : segmentMaps) {
         auto segment = map[kv.first].to<FLArduinoJson::JsonObject>();
         auto x_array = segment["x"].to<FLArduinoJson::JsonArray>();
         auto y_array = segment["y"].to<FLArduinoJson::JsonArray>();
         for (uint16_t i = 0; i < kv.second.getLength(); i++) {
-            const pair_xy_float& xy = kv.second[i];
+            const pair_xy_float &xy = kv.second[i];
             x_array.add(xy.x);
             y_array.add(xy.y);
         }
@@ -121,12 +117,91 @@ void ScreenMap::toJson(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, FLAr
     }
 }
 
-void ScreenMap::toJsonStr(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
+void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
+                          Str *jsonBuffer) {
     FLArduinoJson::JsonDocument doc;
     toJson(segmentMaps, &doc);
     FLArduinoJson::serializeJson(doc, *jsonBuffer);
 }
 
+ScreenMap::ScreenMap(uint32_t length, float mDiameter)
+    : length(length), mDiameter(mDiameter) {
+    mLookUpTable = LUTXYFLOATPtr::New(length);
+    LUTXYFLOAT &lut = *mLookUpTable.get();
+    pair_xy_float *data = lut.getData();
+    for (uint32_t x = 0; x < length; x++) {
+        data[x] = {0, 0};
+    }
+}
 
+ScreenMap::ScreenMap(const pair_xy_float *lut, uint32_t length, float diameter)
+    : length(length), mDiameter(diameter) {
+    mLookUpTable = LUTXYFLOATPtr::New(length);
+    LUTXYFLOAT &lut16xy = *mLookUpTable.get();
+    pair_xy_float *data = lut16xy.getData();
+    for (uint32_t x = 0; x < length; x++) {
+        data[x] = lut[x];
+    }
+}
 
-FASTLED_NAMESPACE_END
+ScreenMap::ScreenMap(const ScreenMap &other) {
+    mDiameter = other.mDiameter;
+    length = other.length;
+    mLookUpTable = other.mLookUpTable;
+}
+
+void ScreenMap::set(uint16_t index, const pair_xy_float &p) {
+    if (mLookUpTable) {
+        LUTXYFLOAT &lut = *mLookUpTable.get();
+        auto *data = lut.getData();
+        data[index] = p;
+    }
+}
+
+void ScreenMap::setDiameter(float diameter) { mDiameter = diameter; }
+
+pair_xy_float ScreenMap::mapToIndex(uint32_t x) const {
+    if (x >= length || !mLookUpTable) {
+        return {0, 0};
+    }
+    LUTXYFLOAT &lut = *mLookUpTable.get();
+    pair_xy_float screen_coords = lut[x];
+    return screen_coords;
+}
+
+uint32_t ScreenMap::getLength() const { return length; }
+
+float ScreenMap::getDiameter() const { return mDiameter; }
+
+const pair_xy_float &ScreenMap::empty() {
+    static const pair_xy_float s_empty = pair_xy_float(0, 0);
+    return s_empty;
+}
+
+const pair_xy_float &ScreenMap::operator[](uint32_t x) const {
+    if (x >= length || !mLookUpTable) {
+        return empty(); // better than crashing.
+    }
+    LUTXYFLOAT &lut = *mLookUpTable.get();
+    return lut[x];
+}
+
+pair_xy_float &ScreenMap::operator[](uint32_t x) {
+    if (x >= length || !mLookUpTable) {
+        return const_cast<pair_xy_float &>(empty()); // better than crashing.
+    }
+    LUTXYFLOAT &lut = *mLookUpTable.get();
+    auto *data = lut.getData();
+    return data[x];
+}
+
+ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
+    if (this != &other) {
+        mDiameter = other.mDiameter;
+        length = other.length;
+        mLookUpTable = other.mLookUpTable;
+    }
+    return *this;
+}
+
+} // namespace fl
