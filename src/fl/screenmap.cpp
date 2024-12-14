@@ -36,6 +36,12 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps, Str *err) {
+#if !FASTLED_ENABLE_JSON
+    if (err) {
+        *err = "JSON not enabled";
+    }
+    return false;
+#else
     JsonDocument doc;
     Str _err;
     if (!err) {
@@ -68,11 +74,18 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         segmentMaps->insert(kv.key().c_str(), segment_map);
     }
     return true;
+#endif
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
                           Str *err) {
+#if !FASTLED_ENABLE_JSON
+    if (err) {
+        *err = "JSON not enabled";
+    }
+    return false;
+#else
     FixedMap<Str, ScreenMap, 16> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
     if (!ok) {
@@ -92,10 +105,15 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     }
     FASTLED_WARN(_err.c_str());
     return false;
+#endif    
 }
 
 void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
                        JsonDocument *_doc) {
+
+#if !FASTLED_ENABLE_JSON
+    return;
+#else
     auto &doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
     for (auto kv : segmentMaps) {
@@ -115,13 +133,18 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
             segment["diameter"] = diameter;
         }
     }
+#endif
 }
 
 void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
                           Str *jsonBuffer) {
+#if !FASTLED_ENABLE_JSON
+    return;
+#else
     JsonDocument doc;
     toJson(segmentMaps, &doc);
-    FLArduinoJson::serializeJson(doc, *jsonBuffer);
+    fl::toJson(doc, jsonBuffer);
+#endif
 }
 
 ScreenMap::ScreenMap(uint32_t length, float mDiameter)
