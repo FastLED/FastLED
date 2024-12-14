@@ -8,7 +8,7 @@
 #include "fx/2d/noisepalette.hpp"
 #include "fx/fx_engine.h"
 #include "fx/2d/animartrix.hpp"
-#include "fx/2d/scale_up.hpp"
+#include "fx/2d/scale_up.h"
 #include "fx/fx_engine.h"
 
 #define LED_PIN 2

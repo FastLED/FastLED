@@ -13,8 +13,8 @@
 #include "fx/1d/pride2015.hpp" // needs XY defined or linker error.
 #include "fx/1d/twinklefox.hpp"
 #include "fx/2d/animartrix.hpp"
-#include "fx/2d/noisepalette.hpp"
-#include "fx/2d/scale_up.hpp"
+#include "fx/2d/noisepalette.h"
+#include "fx/2d/scale_up.h"
 #include "fx/2d/redsquare.hpp"
 #include "fx/video.h"
 

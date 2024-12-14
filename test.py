@@ -114,9 +114,6 @@ def main() -> None:
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]
 
         for test in tests:
-            print("############################################")
-            print(f"Running command: {test.command}")
-            print("############################################")
             sys.stdout.flush()
             if not test.auto_run:
                 test.run()
