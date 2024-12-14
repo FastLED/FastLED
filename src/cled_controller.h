@@ -100,6 +100,13 @@ public:
         clearLedDataInternal(nLeds);
     }
 
+    // Compatibility with the 3.8.x codebase.
+    inline void showLeds(uint8_t brightness) {
+        void* data = beginShowLeds();
+        showLedsInternal(brightness);
+        endShowLeds(data);
+    }
+
     ColorAdjustment getAdjustmentData(uint8_t brightness);
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
