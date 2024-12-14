@@ -86,12 +86,14 @@ def main() -> None:
             if args.test:
                 # Run specific C++ test
                 proc = RunningProcess('uv run ci/cpp_test_run.py --test ' + args.test)
+                proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
             else:
                 # Run all C++ tests
                 proc = RunningProcess('uv run ci/cpp_test_run.py')
+                proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
