@@ -20,7 +20,7 @@ class RunningProcess:
         """
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
-        self.buffer = []
+        self.buffer: list[str] = []
         self.proc: subprocess.Popen | None = None
         self.check = check
         self.auto_run = auto_run
@@ -50,6 +50,7 @@ class RunningProcess:
 
         try:
             # Stream output line by line
+            assert self.proc.stdout is not None
             for line in iter(self.proc.stdout.readline, ""):
                 line = line.rstrip()
                 if self.echo:
