@@ -1,7 +1,6 @@
 /// @file    bilinear_expansion.cpp
 /// @brief   Demonstrates how to mix noise generation with color palettes on a
 /// 2D LED matrix
-/// @example NoisePlusPalette.hpp
 
 #include <stdint.h>
 
