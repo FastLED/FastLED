@@ -382,8 +382,7 @@ I hope this explanation clarifies the enhancements and the rationale behind thes
 
 ### Porting FastLED to a new platform
 
-Information on porting FastLED can be found in the file
-[PORTING.md](./PORTING.md).
+Information on porting FastLED can be found in the file [PORTING.md](PORTING.md).
 
 ## What about that name?
 
