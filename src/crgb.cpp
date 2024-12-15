@@ -1,3 +1,5 @@
+/// @file crgb.cpp
+/// Utility functions for the red, green, and blue (RGB) pixel struct
 
 #include "FastLED.h"
 #include "crgb.h"
