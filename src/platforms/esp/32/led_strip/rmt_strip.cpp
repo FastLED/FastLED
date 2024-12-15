@@ -5,7 +5,7 @@
 #if FASTLED_RMT5
 
 #ifndef FASTLED_RMT5_NO_RECYCLE
-#define FASTLED_RMT5_NO_RECYCLE 0
+#define FASTLED_RMT5_NO_RECYCLE 1
 #endif
 
 #include "rmt_strip.h"
