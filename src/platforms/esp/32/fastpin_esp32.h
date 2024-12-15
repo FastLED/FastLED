@@ -114,7 +114,7 @@ public:
 #elif CONFIG_IDF_TARGET_ESP32C6
 
 // GPIO 20-22, 24-26 used by default for SPI flash.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL |  _FL_BIT(20) | _FL_BIT(21) | _FL_BIT(22) | _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26))
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL |  _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
 
 #elif CONFIG_IDF_TARGET_ESP32H2
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
