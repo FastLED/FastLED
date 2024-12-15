@@ -1,3 +1,5 @@
+/// @file pixel_iterator.h
+/// Non-templated low level pixel data writing class
 
 #pragma once
 
