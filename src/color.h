@@ -94,5 +94,7 @@ typedef enum {
     UncorrectedTemperature=0xFFFFFF /* 255, 255, 255 */
 } ColorTemperature;
 
+/// @} ColorEnums
+
 FASTLED_NAMESPACE_END
 
