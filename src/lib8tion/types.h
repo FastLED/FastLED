@@ -8,6 +8,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+/// @addtogroup lib8tion
+/// @{
+
 ///////////////////////////////////////////////////////////////////////
 ///
 /// @defgroup FractionalTypes Fixed-Point Fractional Types. 
@@ -84,5 +87,6 @@ typedef union {
 } IEEE754binary32_t;
 
 /// @} FractionalTypes
+/// @} lib8tion
 
 FASTLED_NAMESPACE_END

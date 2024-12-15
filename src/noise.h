@@ -102,11 +102,11 @@ extern int8_t inoise8_raw(uint16_t x, uint16_t y);
 extern int8_t inoise8_raw(uint16_t x);
 
 /// @} 8-Bit Raw Noise Functions
-/// @} NoiseGeneration
 
 
-/// @name 32 bit simplex noise functions
-///@{
+/// @name 32-Bit Simplex Noise Functions
+/// @{
+
 /// 32 bit, fixed point implementation of simplex noise functions.
 /// The inputs are 20.12 fixed-point value. The result covers the full
 /// range of a uint16_t averaging around 32768.
@@ -114,7 +114,9 @@ uint16_t snoise16(uint32_t x);
 uint16_t snoise16(uint32_t x, uint32_t y);
 uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z);
 uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t w);
-///@}
+
+/// @} 32-Bit Simplex Noise Functions
+/// @} NoiseGeneration
 
 
 

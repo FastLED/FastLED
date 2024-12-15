@@ -5,7 +5,11 @@
 
 #include <stdint.h>
 
+/// @addtogroup lib8tion
+/// @{
 
+/// @addtogroup Dimming
+/// @{
 
 inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightness_dst, uint8_t max_shifts) {
     uint8_t src = *brightness_src;
@@ -70,4 +74,5 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
     return shifts;
 }
 
-
+/// @} Dimming
+/// @} lib8tion
