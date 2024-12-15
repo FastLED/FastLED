@@ -1,3 +1,5 @@
+/// @file rgbw.cpp
+/// Functions for red, green, blue, white (RGBW) output
 
 #include <stdint.h>
 
