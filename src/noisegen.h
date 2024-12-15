@@ -1,3 +1,6 @@
+/// @file noisegen.h
+/// Noise generation classes
+
 #pragma once
 
 #include <stdint.h>
