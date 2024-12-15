@@ -25,6 +25,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Easter Egg! 🐇🥚
+        run: |
+          echo "Hi if you are reading this then you are probably a cut above the rest."
+          echo "Therefore you are invited to test out our beta release of the Fastled Compiler!"
+          echo "Now you can compile FastLED sketch so that it runs... in the BROWSER!"
+          echo "Why would we do such a thing? BECAUSE COMPILE TIMES ARE INSANELY FAST!!!!"
+          echo "The install is just one line of code: `pip install fastled`"
+          echo "Then run it on your favorite sketch: `fastled mysketch`""
+          echo "Almost all of the FastLED sketches are already supported!"
+          echo "To find out more, visit the project github: github.com/zackees/fastled-wasm"
+          echo "Or check the demo: https://zackees.github.io/fastled-wasm/"
+          echo "Happy coding! - Zach Vorhies"
+
       - name: Install UV for python
         run: pip install uv
 
