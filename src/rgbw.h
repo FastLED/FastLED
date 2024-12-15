@@ -121,11 +121,10 @@ void rgb_2_rgbw_user_function(uint16_t w_color_temperature, uint8_t r,
 
 void set_rgb_2_rgbw_function(rgb_2_rgbw_function func);
 
-/// @brief Converts RGB to RGBW using one of the functions.
+/// @brief   Converts RGB to RGBW using one of the functions.
+/// @details Dynamic version of the rgb_w_rgbw function with less chance for
+///          the compiler to optimize.
 FASTLED_FORCE_INLINE void rgb_2_rgbw(
-    /// @brief Dynamic version of the rgb_w_rgbw function with less chance for
-    /// the compiler to optimize.
-    /// @param out_w
     RGBW_MODE mode, uint16_t w_color_temperature, uint8_t r, uint8_t g,
     uint8_t b, uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
     uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, uint8_t *out_w) {
