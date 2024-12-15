@@ -1,3 +1,5 @@
+/// @file crgb.hpp
+/// Defines utility functions for the red, green, and blue (RGB) pixel struct
 
 #pragma once
 
