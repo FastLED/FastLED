@@ -1,3 +1,6 @@
+/// @file rgbw.h
+/// Functions for red, green, blue, white (RGBW) output
+
 #pragma once
 
 #include <stdint.h>
