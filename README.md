@@ -1,4 +1,4 @@
-FastLED
+FastLED Library
 ===========
 [![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
 [![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml)
@@ -62,7 +62,7 @@ For more examples see this [link](examples).
 
 
 ## Supported Platforms
-#### Arduino
+### Arduino
 
 [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml)
 
@@ -97,7 +97,7 @@ For more examples see this [link](examples).
 [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml)
 
 
-#### Teensy
+### Teensy
 [![teensy30](https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml)
 
 
@@ -116,7 +116,7 @@ For more examples see this [link](examples).
 
 [![teensy_octoWS2811](https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml)
 
-#### NRF
+### NRF
 
 [![nrf52840_sense](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_feather_nrf52840_sense.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_feather_nrf52840_sense.yml)
 
@@ -127,7 +127,7 @@ For more examples see this [link](examples).
 [![nrf52_xiaoblesense](https://github.com/FastLED/FastLED/actions/workflows/build_nrf52_xiaoblesense.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nrf52_xiaoblesense.yml)
 (This board has mbed engine but doesn't compile against Arduino.h right now for some unknown reason.)
 
-#### STM
+### STM
 
 [![bluepill](https://github.com/FastLED/FastLED/actions/workflows/build_bluepill.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_bluepill.yml)
 
@@ -136,7 +136,7 @@ For more examples see this [link](examples).
 [![stm103tb](https://github.com/FastLED/FastLED/actions/workflows/build_stm103tb.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_stm103tb.yml)
 (PlatformIO doesn't support this board yet and we don't know what the build info is to support this is yet)
 
-#### Raspberry Pi
+### Raspberry Pi
 
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml)
 
@@ -144,7 +144,7 @@ For more examples see this [link](examples).
 [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml)
 
 
-#### Esp
+### Esp
 
 [![esp32-8266](https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml)
 
@@ -378,10 +378,9 @@ Although APA102HD mode offers the highest dynamic range, the standard APA102 mod
 
 I hope this explanation clarifies the enhancements and the rationale behind these implementation choices. If you have any questions or require further clarification, please do not hesitate to ask.
 
-### Porting FastLED to a new platform
+## Porting FastLED to a new platform
 
-Information on porting FastLED can be found in the file
-[PORTING.md](./PORTING.md).
+Information on porting FastLED can be found in the file [PORTING.md](PORTING.md).
 
 ## What about that name?
 
