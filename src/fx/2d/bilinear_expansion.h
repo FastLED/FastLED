@@ -19,8 +19,6 @@ namespace fl {
 /// @param input The input grid to read from.
 /// @param inputWidth The width of the input grid.
 /// @param inputHeight The height of the input grid.
-/// @param outputWidth The width of the output grid.
-/// @param outputHeight The height of the output grid.
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
 void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
@@ -30,8 +28,8 @@ void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
 /// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
 /// @param input The input grid to read from.
-/// @param outputWidth The width of the output grid.
-/// @param outputHeight The height of the output grid.
+/// @param inputWidth The width of the input grid.
+/// @param inputHeight The height of the input grid.
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
 void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth, uint8_t inputHeight, fl::XYMap xyMap);
