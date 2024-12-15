@@ -157,6 +157,7 @@ class jsButton {
         bool clickedHappened = mPressed && (mPressed != mPressedLast);
         return mClickedHappened;
     }
+    int clickedCount() const { return mClickedCount; }
     operator bool() const { return clicked(); }
     const fl::Str& groupName() const { return mGroup; }
 
@@ -170,6 +171,9 @@ class jsButton {
         void onPlatformPreLoop2() override {
             mOwner->mClickedHappened = mOwner->mPressed && (mOwner->mPressed != mOwner->mPressedLast);
             mOwner->mPressedLast = mOwner->mPressed;
+            if (mOwner->mClickedHappened) {
+                mOwner->mClickedCount++;
+            }
         }
         jsButton *mOwner = nullptr;
     };
@@ -182,6 +186,7 @@ class jsButton {
     bool mPressed = false;
     bool mPressedLast = false;
     bool mClickedHappened = false;
+    int mClickedCount = 0;
     fl::Str mGroup;
 };
 

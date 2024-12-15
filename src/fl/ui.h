@@ -83,6 +83,7 @@ class Button {
     ~Button() {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
+    int clickedCount() const { return 0; }
     operator bool() const { return false; }
 };
 
