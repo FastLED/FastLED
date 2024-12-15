@@ -1,3 +1,6 @@
+/// @file eorder.h
+/// Defines color channel ordering enumerations
+
 #pragma once
 #include "namespace.h"
 
