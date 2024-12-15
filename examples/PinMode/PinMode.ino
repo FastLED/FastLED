@@ -7,21 +7,20 @@
 #define PIN 1
 
 void setup() {
-	delay(1000);
-    Serial.begin(9600);
+  delay(1000);
+  Serial.begin(9600);
 }
 
 void loop() {
-
-    pinMode(PIN, OUTPUT);
-    digitalWrite(PIN, HIGH);
-    delay(100);
-    digitalWrite(PIN, LOW);
-    pinMode(PIN, INPUT);
-    bool on = digitalRead(PIN) ? Serial.println("HIGH") : Serial.println("LOW");
-    Serial.print("Pin: ");
-    Serial.print(PIN);
-    Serial.print(" is ");
-    Serial.println(on ? "HIGH" : "LOW");
-    delay(1000);
+  pinMode(PIN, OUTPUT);
+  digitalWrite(PIN, HIGH);
+  delay(100);
+  digitalWrite(PIN, LOW);
+  pinMode(PIN, INPUT);
+  bool on = digitalRead(PIN);
+  Serial.print("Pin: ");
+  Serial.print(PIN);
+  Serial.print(" is ");
+  Serial.println(on ? "HIGH" : "LOW");
+  delay(1000);
 }
