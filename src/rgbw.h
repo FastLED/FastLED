@@ -86,8 +86,11 @@ typedef void (*rgb_2_rgbw_function)(uint16_t w_color_temperature, uint8_t r,
 /// the pixel will never achieve full brightness since the white channel is
 /// 3x more efficient than the color channels mixed together, so in this mode
 /// the max brightness of a given pixel is reduced.
-/// @example RGB(255, 255, 255) -> RGBW(0, 0, 0, 85)
-/// @example RGB(255, 0, 0) -> RGBW(255, 0, 0, 0)
+///
+/// ```
+/// RGB(255, 255, 255) -> RGBW(0, 0, 0, 85)
+/// RGB(255, 0, 0) -> RGBW(255, 0, 0, 0)
+/// ```
 void rgb_2_rgbw_exact(uint16_t w_color_temperature, uint8_t r, uint8_t g,
                       uint8_t b, uint8_t r_scale, uint8_t g_scale,
                       uint8_t b_scale, uint8_t *out_r, uint8_t *out_g,
@@ -96,15 +99,21 @@ void rgb_2_rgbw_exact(uint16_t w_color_temperature, uint8_t r, uint8_t g,
 /// The minimum brigthness of the RGB channels is used to set the W channel.
 /// This will allow the max brightness of the led chipset to be used. However
 /// the leds will appear over-desaturated in this mode.
-/// @example RGB(255, 255, 255) -> RGBW(255, 255, 255, 255)
-/// @example RGB(1, 0, 0) -> RGBW(1, 0, 0, 1)
+///
+/// ```
+/// RGB(255, 255, 255) -> RGBW(255, 255, 255, 255)
+/// RGB(1, 0, 0) -> RGBW(1, 0, 0, 1)
+/// ```
 void rgb_2_rgbw_max_brightness(uint16_t w_color_temperature, uint8_t r,
                                uint8_t g, uint8_t b, uint8_t r_scale,
                                uint8_t g_scale, uint8_t b_scale, uint8_t *out_r,
                                uint8_t *out_g, uint8_t *out_b, uint8_t *out_w);
 
 /// @brief Converts RGB to RGBW with the W channel set to black, always.
-/// @example RGB(255, 255, 255) -> RGBW(255, 255, 255, 0)
+///
+/// ```
+/// RGB(255, 255, 255) -> RGBW(255, 255, 255, 0)
+/// ```
 void rgb_2_rgbw_null_white_pixel(uint16_t w_color_temperature, uint8_t r,
                                  uint8_t g, uint8_t b, uint8_t r_scale,
                                  uint8_t g_scale, uint8_t b_scale,
