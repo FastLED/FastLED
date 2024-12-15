@@ -4,7 +4,7 @@
 
 #define FASTLED_W2812_OVERCLOCK 1.1 // Overclocks by 10%, I've seen 25% work fine.
 
-#include "fx/2d/noisepalette.hpp"
+#include "fx/2d/noisepalette.h"
 #include "fx/fx.h"
 #include <FastLED.h>
 
