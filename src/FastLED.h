@@ -854,3 +854,8 @@ using fl::Slider;
 #define FASTLED_DESCRIPTION(text) fl::Description g_description(text)
 #endif // FASTLED_UI
 
+
+#ifndef FASTLED_NO_AUTO_NAMESPACE
+using namespace fl;
+#endif
+
