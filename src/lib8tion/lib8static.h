@@ -1,3 +1,6 @@
+/// @file lib8static.h
+/// Defines static inlining macros for lib8tion functions
+
 #pragma once
 
 /// Define a LIB8TION member function as static inline with an "unused" attribute

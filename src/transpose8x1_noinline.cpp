@@ -1,3 +1,5 @@
+/// @file transpose8x1_noinline.cpp
+/// Defines the 8x1 transposition function
 
 #include <stdint.h>
 

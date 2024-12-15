@@ -1,3 +1,5 @@
+/// @file crgb.h
+/// Defines the red, green, and blue (RGB) pixel struct
 
 #pragma once
 

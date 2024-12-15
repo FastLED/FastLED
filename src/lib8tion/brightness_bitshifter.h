@@ -1,3 +1,6 @@
+/// @file brightness_bitshifter.h
+/// Defines brightness bitshifting functions
+
 #pragma once
 
 #include <stdint.h>

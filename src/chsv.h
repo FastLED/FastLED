@@ -1,3 +1,5 @@
+/// @file chsv.h
+/// Defines the hue, saturation, and value (HSV) pixel struct
 
 #pragma once
 

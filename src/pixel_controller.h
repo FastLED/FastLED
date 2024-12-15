@@ -1,7 +1,7 @@
 #pragma once
 
-/// @file controller.h
-/// base definitions used by led controllers for writing out led data
+/// @file pixel_controller.h
+/// Low level pixel data writing class
 
 // Note that new code should use the PixelIterator concrete object to write out
 // led data.

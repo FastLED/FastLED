@@ -1,3 +1,5 @@
+/// @file intmap.h
+/// Defines integer mapping functions
 
 #pragma once
 

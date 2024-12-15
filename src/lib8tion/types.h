@@ -1,3 +1,6 @@
+/// @file types.h
+/// Defines fractional types used for lib8tion functions
+
 #pragma once
 
 #include <stdint.h>
