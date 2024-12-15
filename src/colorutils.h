@@ -693,21 +693,21 @@ typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPaletteRef;  ///< Al
 /// @param srcpal16 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette256& destpal256);
-/// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette256&)
+/// @copydoc UpscalePalette(const class CRGBPalette16&, class CRGBPalette256&)
 void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette256& destpal256);
 
 /// Convert a 16-entry palette to a 32-entry palette
 /// @param srcpal16 the source palette to upscale
 /// @param destpal32 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette32& destpal32);
-/// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette32&)
+/// @copydoc UpscalePalette(const class CRGBPalette16&, class CRGBPalette32&)
 void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette32& destpal32);
 
 /// Convert a 32-entry palette to a 256-entry palette
 /// @param srcpal32 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette32& srcpal32, class CRGBPalette256& destpal256);
-/// @copydoc UpscalePalette(const struct CRGBPalette32&, class CRGBPalette256&)
+/// @copydoc UpscalePalette(const class CRGBPalette32&, class CRGBPalette256&)
 void UpscalePalette(const class CHSVPalette32& srcpal32, class CHSVPalette256& destpal256);
 
 /// @} PaletteUpscale
