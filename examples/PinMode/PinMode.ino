@@ -7,7 +7,7 @@
 #define PIN 1
 
 void setup() {
-	delay(1000);
+  delay(1000);
   Serial.begin(9600);
 }
 
