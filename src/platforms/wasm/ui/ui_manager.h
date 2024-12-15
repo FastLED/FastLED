@@ -59,7 +59,7 @@ class jsUiManager : fl::EngineEvents::Listener {
             toJson(jarray);
             fl::Str buff;
             FLArduinoJson::serializeJson(doc, buff);
-            updateJs(buff.c_str());
+            fl::updateJs(buff.c_str());
             mItemsAdded = false;
         }
     }

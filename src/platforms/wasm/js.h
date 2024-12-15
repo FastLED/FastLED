@@ -44,7 +44,7 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 class jsSlider {
@@ -247,4 +247,4 @@ typedef jsTitle Title;
 typedef jsDescription Description;
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

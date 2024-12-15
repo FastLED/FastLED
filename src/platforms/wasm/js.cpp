@@ -23,7 +23,11 @@
 #include "engine_listener.h"
 #include "fl/dbg.h"
 
-using namespace fl;
+// extern setup and loop which will be supplied by the sketch.
+extern void setup();
+extern void loop();
+
+namespace fl {
 
 static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
     FASTLED_DBG("jsSetCanvasSize1");
@@ -61,8 +65,6 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
     FASTLED_DBG("End jsSetCanvasSize json serialization");
     jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size());
 }
-
-
 
 
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
@@ -193,9 +195,7 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
 }
 
 
-// extern setup and loop
-extern void setup();
-extern void loop();
+
 
 
 inline void setup_once() {
@@ -225,5 +225,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     return 0;
 }
 
+}  // namespace fl
 
 #endif  // __EMSCRIPTEN__

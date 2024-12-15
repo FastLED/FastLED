@@ -16,6 +16,9 @@
 
 #define MIDI_SERIAL_PORT Serial1
 
+#define FASTLED_UI  // Brings in the UI components.
+#include "FastLED.h"
+
 // H
 #include <Arduino.h>
 #include "shared/Keyboard.h"
@@ -27,7 +30,6 @@
 #include "arduino/LedRopeTCL.h"
 #include "arduino/ui_state.h"
 #include "shared/dprint.h"
-#include "FastLED.h"
 #include "fl/dbg.h"
 #include "fl/ui.h"
 
