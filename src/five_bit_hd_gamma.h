@@ -1,3 +1,6 @@
+/// @file five_bit_hd_gamma.h
+/// Declares functions for five-bit gamma correction
+
 #pragma once
 
 #include <stdint.h>
