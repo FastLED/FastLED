@@ -1,14 +1,22 @@
-/// @file    Noise.ino
-/// @brief   Demonstrates how to use noise generation on a 2D LED matrix
-/// @example Noise.ino
+/// @file    FxEngine.ino
+/// @brief   Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix.
+///          This example is compatible with the new FastLED wasm compiler. Install it by running
+///          `pip install fastled` then running `fastled` in this sketch directory.
+/// @example FxEngine.ino
 
 
 #include <FastLED.h>
 
+#ifdef __AVR__
+// Not powerful enough for the FxEngine, so skipping this example
+void setup() {}
+void loop() {}
+
+#else
+
 #include "fx/2d/noisepalette.h"
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
-#include "fx/storage/sd.h"
 #include "fl/ui.h"
 
 #define LED_PIN 2
@@ -44,7 +52,6 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(MATRIX_WIDTH, MATRIX_HEIGHT);
     FastLED.setBrightness(96);
-    noisePalette.lazyInit();
     noisePalette.setPalettePreset(2);
     fxEngine.addFx(noisePalette);
     fxEngine.addFx(animartrix);
@@ -61,3 +68,5 @@ void loop() {
     fxEngine.draw(millis(), leds);
     FastLED.show();
 }
+
+#endif  // __AVR__

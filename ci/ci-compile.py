@@ -86,6 +86,8 @@ DEFAULT_EXAMPLES = [
     "RGBCalibrate",
     "RGBSetDemo",
     "RGBW",
+    "FxEngine",
+    "Overclock",
     "RGBWEmulated",
     "TwinkleFox",
     "XYMatrix",
