@@ -1,3 +1,6 @@
+/// @file dither_mode.h
+/// Declares dithering options and types
+
 #pragma once
 
 #include <stdint.h>
