@@ -742,6 +742,8 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d);
 /// Scale using CRGB::nscale8_video()
 FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
+/// @} PixelTypes
+
 
 FASTLED_NAMESPACE_END
 
