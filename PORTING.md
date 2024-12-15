@@ -1,4 +1,4 @@
-New platform porting guide
+Platform Porting Guide
 ==========================
 
 # Fast porting for a new board on existing hardware
