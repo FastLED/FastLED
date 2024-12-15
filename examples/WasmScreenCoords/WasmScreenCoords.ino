@@ -16,7 +16,7 @@
 #include <FastLED.h>
 #include "fl/json.h"
 #include "fl/slice.h"
-#include "screenmap.h"
+#include "fl/screenmap.h"
 #include "fl/math_macros.h"
 
 
