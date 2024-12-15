@@ -105,18 +105,18 @@ function createButton(element) {
   button.setAttribute('data-pressed', 'false');
 
   button.addEventListener('mousedown', () => {
-    this.setAttribute('data-pressed', 'true');
-    this.classList.add('active');
+    button.setAttribute('data-pressed', 'true');
+    button.classList.add('active');
   });
 
   button.addEventListener('mouseup', () => {
-    this.setAttribute('data-pressed', 'false');
-    this.classList.remove('active');
+    button.setAttribute('data-pressed', 'false');
+    button.classList.remove('active');
   });
 
   button.addEventListener('mouseleave', () => {
-    this.setAttribute('data-pressed', 'false');
-    this.classList.remove('active');
+    button.setAttribute('data-pressed', 'false');
+    button.classList.remove('active');
   });
   controlDiv.appendChild(button);
   return controlDiv;
