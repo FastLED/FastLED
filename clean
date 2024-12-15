@@ -11,4 +11,4 @@ rm -rf tests/.build
 
 # remove any CMakeCache.txt files
 find . -name "CMakeCache.txt" -type f -delete
-uv cache prune
+rm uv.lock
