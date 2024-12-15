@@ -34,7 +34,7 @@ jobs:
           echo "The install is just one line of code: 'pip install fastled'"
           echo "Then run it on your favorite sketch: 'fastled mysketch'"
           echo "Almost all of the FastLED sketches are already supported!"
-          echo "To find out more, visit the project github: github.com/zackees/fastled-wasm"
+          echo "To find out more, visit the project github: https://github.com/zackees/fastled-wasm"
           echo "Or check the demo: https://zackees.github.io/fastled-wasm/"
           echo "Happy coding! - Zach Vorhies"
 
