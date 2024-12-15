@@ -2004,9 +2004,9 @@ CRGB ColorFromPalette( const CRGBPalette16& pal,
 
 /// @brief Same as ColorFromPalette, but with uint16_t `index` to give greater precision.
 /// @author https://github.com/generalelectrix
-/// @source https://github.com/FastLED/FastLED/pull/202
-/// @example https://wokwi.com/projects/285170662915441160
-/// @example https://wokwi.com/projects/407831886158110721
+/// @see https://github.com/FastLED/FastLED/pull/202
+/// @see https://wokwi.com/projects/285170662915441160
+/// @see https://wokwi.com/projects/407831886158110721
 CRGB ColorFromPaletteExtended(
     const CRGBPalette16& pal,
     uint16_t index,
@@ -2016,8 +2016,8 @@ CRGB ColorFromPaletteExtended(
 /// @brief Same as ColorFromPalette, but higher precision. Will eventually
 ///        become the default.
 /// @author https://github.com/generalelectrix
-/// @source https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
-/// @example https://wokwi.com/projects/285170662915441160
+/// @see https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
+/// @see https://wokwi.com/projects/285170662915441160
 CRGB ColorFromPaletteExtended(
     const CRGBPalette32& pal,
     uint16_t index,
