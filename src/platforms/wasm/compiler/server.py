@@ -495,7 +495,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
                 if file_path.is_file():
                     if "fastled_js" in file_path.parts:
                         continue
-                    arc_path = file_path.relative_to(examples_dir.parent)
+                    arc_path = file_path.relative_to(Path("/js/fastled/examples"))
                     zip_out.write(file_path, arc_path)
         print(f"Zip file created at: {dst_zip_file}")
     except Exception as e:
@@ -518,7 +518,7 @@ def project_init() -> FileResponse:
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     # tmp_zip_path = Path(tmp_zip_file.name)
 
-    tmp_zip_path = _TEMP_DIR / f"{make_random_path_string(64)}.zip"
+    tmp_zip_path = _TEMP_DIR / f"wasm-{make_random_path_string(16)}.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
     # assert tmp_zip_path.exists()
@@ -547,7 +547,8 @@ def project_init() -> FileResponse:
 def project_init_example(example: str = Body(...)) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/example with example: {example}")
-    tmp_file_path = _TEMP_DIR / f"{make_random_path_string(64)}.zip"
+    name = Path("example").name
+    tmp_file_path = _TEMP_DIR / f"{name}-{make_random_path_string(16)}.zip"
     zip_example_to_file(example, Path(tmp_file_path))
 
     if not tmp_file_path.exists():
