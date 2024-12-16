@@ -51,7 +51,7 @@ _LIVE_GIT_UPDATES_INTERVAL = int(
 )  # Update every 24 hours
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
-_LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
+_LIVE_GIT_FASTLED_DIR = Path("/git/fastled")
 
 # TODO - cleanup
 _NO_AUTO_UPDATE = (
@@ -121,7 +121,7 @@ def update_live_git_repo() -> None:
                     "git",
                     "clone",
                     "https://github.com/fastled/fastled.git",
-                    "/git/fastled2",
+                    str(_LIVE_GIT_FASTLED_DIR),
                     "--depth=1",
                 ],
                 check=True,

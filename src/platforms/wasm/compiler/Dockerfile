@@ -131,19 +131,26 @@ RUN pio settings set enable_telemetry 0
 # This is by far the most expensive part of the build, because platformio needs to download initial tools. This
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
-RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
-    mkdir -p /js/fastled && rm -rf /git/fastled/.git && \
-    rsync -a /git/fastled/ /js/fastled/ && rm -rf /git/fastled
+# RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
+#     mkdir -p /js/fastled# && \
+#     rsync -a /git/fastled/src /js/fastled/src &&
+#     rsync -a /git/fastled/examples /js/fastled/examples
 
-# Set up the entrypoint script
-RUN echo '#!/bin/bash' > /entrypoint.sh && \
-    echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
-    echo 'python /js/init_runtime.py' >> /entrypoint.sh && \
-    echo 'exec "$@"' >> /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+
+RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
+    mkdir -p /js/fastled && \
+    rsync -a /git/fastled /js/fastled/ --exclude='.git'
+
+# # Set up the entrypoint script
+# RUN echo '#!/bin/bash' > /entrypoint.sh && \
+#     echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
+#     echo 'python /js/init_runtime.py' >> /entrypoint.sh && \
+#     echo 'exec "$@"' >> /entrypoint.sh && \
+#     chmod +x /entrypoint.sh
     
 # Create symlinks for wasm platform files.
 COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
+COPY src/platforms/wasm/compiler/prewarm.sh /js/prewarm.sh
 
 
 
@@ -153,6 +160,7 @@ ARG NO_PREWARM=0
 ENV NO_PREWARM=${NO_PREWARM}
 
 RUN python /js/init_runtime.py || true
+
 
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs
@@ -187,6 +195,8 @@ RUN rsync -av --delete /host/fastled/src/ /js/fastled/src/ && rm -rf /host/fastl
 # be much quicker than the first pre-warm cycle.
 RUN /js/prewarm.sh  > /logs/prewarm.log.2
 
+COPY src/platforms/wasm/compiler/entrypoint.sh /js/entrypoint.sh
+RUN chmod +x /js/entrypoint.sh && dos2unix /js/entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/js/entrypoint.sh"]
 CMD ["python", "/js/run.py", "server"]
