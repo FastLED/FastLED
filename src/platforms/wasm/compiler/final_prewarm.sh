@@ -1,6 +1,5 @@
 #!/bin/bash
 
-env: RENDER=true
 if [ "$RENDER" != "true" ]; then
   echo "Skipping finalprewarm..."
   exit 0

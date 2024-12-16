@@ -134,7 +134,7 @@ RUN pio settings set enable_telemetry 0
 
 RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
     mkdir -p /js/fastled && \
-    rsync -a /git/fastled /js/fastled/ --exclude='.git'
+    rsync -a /git/fastled/ /js/fastled/ --exclude='.git'
 
 # Create symlinks for wasm platform files.
 COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
@@ -159,13 +159,13 @@ RUN rm -rf /trash
 # Do not cause the build to fail because the cached pre-warm failed.
 RUN /js/prewarm.sh --force > /logs/prewarm.log.1 || true
 
-COPY *.json /host/fastled/
 
 # Copy the fastled repo from the host machine and prepare for pre-warm
 # Make sure and delete files that have been removed so that we don't get
 # duplicate symbols from stale files.
 COPY *.json /host/fastled/
 COPY src/*.* /host/fastled/src/
+COPY examples /host/fastled/examples
 COPY src/fx /host/fastled/src/fx
 COPY src/fl /host/fastled/src/fl
 COPY src/lib8tion /host/fastled/src/lib8tion
