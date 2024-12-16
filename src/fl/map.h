@@ -129,25 +129,28 @@ public:
         return Value();
     }
 
-    bool insert(const Key& key, const Value& value, InsertResult* result = nullptr) {
+    Pair<bool, iterator> insert(const Key& key, const Value& value, InsertResult* result = nullptr) {
         iterator it = find(key);
         if (it != end()) {
             if (result) {
                 *result = InsertResult::kExists;
             }
-            return false;
+            // return false;
+            return {false, it};
         }
         if (data.size() < N) {
             data.push_back(PairKV(key, value));
             if (result) {
                 *result = InsertResult::kInserted;
             }
-            return true;
+            // return true;
+            return {true, data.end() - 1};
         }
         if (result) {
             *result = InsertResult::kMaxSize;
         }
-        return false;
+        //return false;
+        return {false, end()};
     }
 
     bool update(const Key& key, const Value& value, bool insert_if_missing = true) {
@@ -156,7 +159,7 @@ public:
             it->second = value;
             return true;
         } else if (insert_if_missing) {
-            return insert(key, value);
+            return insert(key, value).first;
         }
         return false;
     }

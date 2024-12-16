@@ -21,7 +21,7 @@ int FxEngine::addFx(FxPtr effect) {
         effect = VideoFxWrapperPtr::New(effect);
     }
     bool auto_set = mEffects.empty();
-    bool ok = mEffects.insert(mCounter, effect);
+    bool ok = mEffects.insert(mCounter, effect).first;
     if (!ok) {
         return -1;
     }

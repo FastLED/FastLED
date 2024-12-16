@@ -12,9 +12,9 @@ TEST_CASE("fl::FixedMap operations") {
     fl::FixedMap<int, int, 5> map;
 
     SUBCASE("Insert and find") {
-        CHECK(map.insert(1, 10));
-        CHECK(map.insert(2, 20));
-        CHECK(map.insert(3, 30));
+        CHECK(map.insert(1, 10).first);
+        CHECK(map.insert(2, 20).first);
+        CHECK(map.insert(3, 30).first);
 
         int value;
         CHECK(map.get(1, &value));
@@ -27,7 +27,7 @@ TEST_CASE("fl::FixedMap operations") {
     }
 
     SUBCASE("Update") {
-        CHECK(map.insert(1, 10));
+        CHECK(map.insert(1, 10).first);
         CHECK(map.update(1, 15));
         int value;
         CHECK(map.get(1, &value));
@@ -42,9 +42,9 @@ TEST_CASE("fl::FixedMap operations") {
     }
 
     SUBCASE("Next and prev") {
-        CHECK(map.insert(1, 10));
-        CHECK(map.insert(2, 20));
-        CHECK(map.insert(3, 30));
+        CHECK(map.insert(1, 10).first);
+        CHECK(map.insert(2, 20).first);
+        CHECK(map.insert(3, 30).first);
 
         int next_key;
         CHECK(map.next(1, &next_key));
@@ -74,8 +74,8 @@ TEST_CASE("fl::FixedMap operations") {
         CHECK(map.capacity() == 5);
         CHECK(map.empty());
 
-        CHECK(map.insert(1, 10));
-        CHECK(map.insert(2, 20));
+        CHECK(map.insert(1, 10).first);
+        CHECK(map.insert(2, 20).first);
         CHECK(map.size() == 2);
         CHECK_FALSE(map.empty());
 
@@ -85,9 +85,9 @@ TEST_CASE("fl::FixedMap operations") {
     }
 
     SUBCASE("Iterators") {
-        CHECK(map.insert(1, 10));
-        CHECK(map.insert(2, 20));
-        CHECK(map.insert(3, 30));
+        CHECK(map.insert(1, 10).first);
+        CHECK(map.insert(2, 20).first);
+        CHECK(map.insert(3, 30).first);
 
         int sum = 0;
         for (const auto& pair : map) {
