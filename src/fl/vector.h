@@ -218,11 +218,24 @@ private:
     typedef const T* const_iterator;
 
     // Constructor
-    HeapVector(size_t capacity) : mCapacity(capacity) {
+    HeapVector(size_t size, const T& value = T()) : mCapacity(size) {
         mArray.reset(new T[mCapacity]);
+        for (size_t i = 0; i < size; ++i) {
+            mArray[i] = value;
+        }
+        mSize = size;
     }
 
     HeapVector() : HeapVector(16) {}
+    HeapVector(const HeapVector<T>& other) : HeapVector(other.size()) {
+        assign(other.begin(), other.end());
+    }
+    HeapVector& operator=(const HeapVector<T>& other) {
+        if (this != &other) {
+            assign(other.begin(), other.end());
+        }
+        return *this;
+    }
 
     // Destructor
     ~HeapVector() {
@@ -249,6 +262,22 @@ private:
     void reserve(size_t n) {
         if (n > mCapacity) {
             ensure_size(n);
+        }
+    }
+
+    void resize(size_t n) {
+        HeapVector<T> temp(n);
+        for (size_t i = 0; i < n && i < mSize; ++i) {
+            temp.mArray[i] = mArray[i];
+        }
+        swap(temp);
+    }
+
+    void resize(size_t n, const T& value) {
+        mArray.reset();
+        mArray.reset(new T[n]);
+        for (size_t i = 0; i < n; ++i) {
+            mArray[i] = value;
         }
     }
 
@@ -375,6 +404,13 @@ private:
         }
     }
 
+    void swap(HeapVector<T>& other) {
+        T* temp = mArray.release();
+        T* temp2 = other.mArray.release();
+        mArray.reset(temp2);
+        other.mArray.reset(temp);
+    }
+
     void swap(iterator a, iterator b) {
         T temp = *a;
         *a = *b;
@@ -403,6 +439,14 @@ private:
         clear();
         for (size_t i = 0; i < count && i < mCapacity; ++i) {
             push_back(values[i]);
+        }
+    }
+
+    void assign(const_iterator begin, const_iterator end) {
+        clear();
+        resize(end - begin);
+        for (const_iterator it = begin; it != end; ++it) {
+            push_back(*it);
         }
     }
 
