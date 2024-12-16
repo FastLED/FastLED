@@ -172,8 +172,9 @@ COPY src/lib8tion /host/fastled/src/lib8tion
 COPY src/third_party /host/fastled/src/third_party
 COPY src/sensors /host/fastled/src/sensors
 COPY src/platforms /host/fastled/src/platforms
-COPY src/platforms/wasm/compiler/entrypoint.sh /js/entrypoint.sh
-RUN chmod +x /js/entrypoint.sh && dos2unix /js/entrypoint.sh
+
+COPY src/platforms/wasm/compiler/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && dos2unix /entrypoint.sh
 
 # now sync local to the source directory.
 RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
@@ -184,5 +185,5 @@ RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
 RUN /js/prewarm.sh  > /logs/prewarm.log.2
 
 
-ENTRYPOINT ["/js/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/run.py", "server"]

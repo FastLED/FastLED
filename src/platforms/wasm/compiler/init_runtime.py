@@ -19,6 +19,8 @@ def make_links() -> None:
     
     for src in files:
         src = Path(src)
+        if "entrypoint.sh" in str(src):
+            continue
         link_dst = Path("/js") / src.name
         
         # Handle shell scripts
