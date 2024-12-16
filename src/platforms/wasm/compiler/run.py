@@ -35,6 +35,9 @@ HERE = Path(__file__).parent
 # rsync -av --info=NAME --delete "$git_path/" "$fastled_path/"  --exclude ".git"
 
 def _update_fastled() -> None:
+    # NOT ENABLED YET
+    if True:
+        return
     is_render = os.environ.get("RENDER", "false") == "true"
     if not is_render:
         print("Skipping finalprewarm...")

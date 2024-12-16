@@ -478,6 +478,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
         raise HTTPException(status_code=404, detail=f"Example {example} not found.")
 
     try:
+        print(f"Creating zip file at: {dst_zip_file}")
         with zipfile.ZipFile(dst_zip_file.name, "w", zipfile.ZIP_DEFLATED) as zip_out:
             for file_path in examples_dir.rglob("*"):
                 if file_path.is_file():
@@ -485,6 +486,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
                         continue
                     arc_path = file_path.relative_to(examples_dir.parent)
                     zip_out.write(file_path, arc_path)
+        print(f"Zip file created at: {dst_zip_file}")
     except Exception as e:
         warnings.warn(f"Error: {e}")
         raise
