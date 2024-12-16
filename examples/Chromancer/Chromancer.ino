@@ -165,7 +165,7 @@ void setup() {
 
     printf("Parsed %d segment maps\n", int(segmentMaps.size()));
     for (auto kv : segmentMaps) {
-        Serial.print(kv.first);
+        Serial.print(kv.first.c_str());
         Serial.print(" ");
         Serial.println(kv.second.getLength());
     } 
