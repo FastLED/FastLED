@@ -471,7 +471,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
         raise HTTPException(status_code=404, detail=f"Example {example} not found.")
-    with zipfile.ZipFile(dst_zip_file, "w", zipfile.ZIP_DEFLATED) as zip_out:
+    with zipfile.ZipFile(dst_zip_file.name, "w", zipfile.ZIP_DEFLATED) as zip_out:
         for file_path in examples_dir.rglob("*"):
             if file_path.is_file():
                 if "fastled_js" in file_path.parts:
@@ -484,10 +484,9 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     tmp_zip_file = NamedTemporaryFile(delete=False)
-    zip_example_to_file("wasm", Path(tmp_zip_file.name))
-    after_response_task = BackgroundTasks().add_task(
-        lambda: os.unlink(tmp_zip_file.name)
-    )
+    tmp_zip_path = Path(tmp_zip_file.name)
+    zip_example_to_file("wasm", tmp_zip_path)
+    after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_path))
     return FileResponse(
         path=tmp_zip_file,
         media_type="application/zip",
