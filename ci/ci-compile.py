@@ -119,6 +119,9 @@ def parse_args():
         "--examples", type=str, help="Comma-separated list of examples to compile"
     )
     parser.add_argument(
+        "--exclude-examples", type=str, help="Examples that should be excluded"
+    )
+    parser.add_argument(
         "--skip-init", action="store_true", help="Skip the initialization step"
     )
     parser.add_argument(
@@ -238,6 +241,16 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
             extra_examples[b] = resolved_examples
     examples = args.examples.split(",") if args.examples else DEFAULT_EXAMPLES
     examples_paths = [resolve_example_path(example) for example in examples]
+    # now process example exclusions.
+    if args.exclude_examples:
+        exclude_examples = args.exclude_examples.split(",")
+        examples_paths = [
+            example
+            for example in examples_paths
+            if example.name not in exclude_examples
+        ]
+        for exclude in exclude_examples:
+            examples.remove(exclude)
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
