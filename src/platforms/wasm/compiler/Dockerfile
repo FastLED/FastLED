@@ -172,6 +172,8 @@ COPY src/lib8tion /host/fastled/src/lib8tion
 COPY src/third_party /host/fastled/src/third_party
 COPY src/sensors /host/fastled/src/sensors
 COPY src/platforms /host/fastled/src/platforms
+COPY src/platforms/wasm/compiler/entrypoint.sh /js/entrypoint.sh
+RUN chmod +x /js/entrypoint.sh && dos2unix /js/entrypoint.sh
 
 # now sync local to the source directory.
 RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
