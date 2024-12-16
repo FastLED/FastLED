@@ -20,15 +20,6 @@ def install_playwright_browsers():
         sys.exit(1)
 
 
-# Function to find an available port
-def find_available_port():
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
-        return s.getsockname()[1]
-
-
 # Start an HTTP server on the dynamic port
 def start_http_server(port, directory):
     os.chdir(directory)
@@ -45,7 +36,7 @@ def start_http_server(port, directory):
 async def main():
     install_playwright_browsers()
     # Find an available port
-    port = find_available_port()
+    port = 8888
     print(f"Using port: {port}")
 
     # Start the HTTP server
