@@ -6,7 +6,7 @@ from typing import Tuple
 import warnings
 from pathlib import Path
 
-_PORT = 80
+_PORT = os.environ.get("PORT", 80)
 
 _CHOICES = [
     "compile",
