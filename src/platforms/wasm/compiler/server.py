@@ -504,6 +504,13 @@ def project_init() -> FileResponse:
     tmp_zip_path = _TEMP_DIR / "wasm.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
+    # assert tmp_zip_path.exists()
+    if not tmp_zip_path.exists():
+        warnings.warn("Failed to create zip file for wasm example.")
+        raise HTTPException(
+            status_code=500, detail="Failed to create zip file for wasm example."
+        )
+
     def cleanup() -> None:
         try:
             os.unlink(tmp_zip_path)
@@ -526,6 +533,12 @@ def project_init_example(example: str) -> FileResponse:
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     tmp_file_path = _TEMP_DIR / f"{example}.zip"
     zip_example_to_file(example, Path(tmp_file_path.name))
+
+    if not tmp_file_path.exists():
+        warnings.warn(f"Failed to create zip file for {example} example.")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create zip file for {example} example."
+        )
 
     def cleanup() -> None:
         try:
