@@ -4,6 +4,12 @@
 
 #include <FastLED.h>
 
+#ifdef __AVR__
+// Don't compile this for avr because they typically don't have enough memory.
+void setup() {}
+void loop() {}
+#else
+
 #define LED_PIN     3
 #define BRIGHTNESS  96
 #define LED_TYPE    WS2811
@@ -278,3 +284,5 @@ uint16_t XY( uint8_t x, uint8_t y)
   return i;
 }
 
+
+#endif
