@@ -2,6 +2,16 @@
 /// @brief   Demonstrates how to overclock a FastLED setup
 
 
+#ifdef __AVR__
+// To effectively test the overclock feature we need
+// a large enough dataset to test against. Unfortunately
+// the avr platforms don't have enough memory so this example
+// is disabled for these platforms
+void setup() {}
+void loop() {}
+#else
+
+
 #define FASTLED_W2812_OVERCLOCK 1.1 // Overclocks by 10%, I've seen 25% work fine.
 
 #include "fx/2d/noisepalette.h"
@@ -75,3 +85,5 @@ void loop() {
     noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
 }
+
+#endif
