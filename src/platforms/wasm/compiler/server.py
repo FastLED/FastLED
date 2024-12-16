@@ -22,6 +22,21 @@ from sketch_hasher import generate_hash_of_project_files
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
+_EXAMPLES: list[str] = [
+    "Chromancer",
+    "LuminescentGrand",
+    "wasm",
+    "fx/Animartrix",
+    "fx/Cylon",
+    "fx/DemoReel100",
+    "fx/Fire2012",
+    "fx/FxEngine",
+    "fx/Gfx2Video",
+    "fx/NoisePlusPalette",
+    "fx/NoiseRing",
+    "fx/SdCard",
+    "fx/Water",
+]
 _VOLUME_MAPPED_SRC = Path("/host/fastled/src")
 _RSYNC_DEST = Path("/js/fastled/src")
 
@@ -491,19 +506,10 @@ def project_init() -> FileResponse:
 @app.get("/info")
 def info_examples() -> dict:
     """Get a list of examples."""
-    examples_dir = Path("/js/fastled/examples")
-    examples = []
-    for example in examples_dir.iterdir():
-        if example.is_dir() and example.name != "fx":
-            examples.append(example.name)
-
-    for example in (examples_dir / "fx").iterdir():
-        if example.is_dir():
-            examples.append(f"fx/{example}")
     uptime = time.time() - START_TIME
     uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
     out = {
-        "examples": examples,
+        "examples": _EXAMPLES,
         "compile_count": COMPILE_COUNT,
         "compile_failures": COMPILE_FAILURES,
         "compile_successes": COMPILE_SUCCESSES,
@@ -516,17 +522,16 @@ def info_examples() -> dict:
 def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     zip_bytes = get_zip_bytes(example)
-
     # Create temporary file
     tmp_file = NamedTemporaryFile(delete=False)
     tmp_file.write(zip_bytes)
     tmp_file.close()
-
+    on_complete_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name))
     return FileResponse(
         path=tmp_file.name,
         media_type="application/zip",
         filename="fastled_example.zip",
-        background=BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name)),
+        background=on_complete_task,
     )
 
 
