@@ -476,33 +476,39 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
         raise HTTPException(status_code=404, detail=f"Example {example} not found.")
-    with zipfile.ZipFile(dst_zip_file.name, "w", zipfile.ZIP_DEFLATED) as zip_out:
-        for file_path in examples_dir.rglob("*"):
-            if file_path.is_file():
-                if "fastled_js" in file_path.parts:
-                    continue
-                arc_path = file_path.relative_to(examples_dir.parent)
-                zip_out.write(file_path, arc_path)
+
+    try:
+        with zipfile.ZipFile(dst_zip_file.name, "w", zipfile.ZIP_DEFLATED) as zip_out:
+            for file_path in examples_dir.rglob("*"):
+                if file_path.is_file():
+                    if "fastled_js" in file_path.parts:
+                        continue
+                    arc_path = file_path.relative_to(examples_dir.parent)
+                    zip_out.write(file_path, arc_path)
+    except Exception as e:
+        warnings.warn(f"Error: {e}")
+        raise
 
 
 @app.get("/project/init")
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     print("Endpoint accessed: /project/init")
-    tmp_zip_file = NamedTemporaryFile(delete=False)
-    tmp_zip_path = Path(tmp_zip_file.name)
+    # tmp_zip_file = NamedTemporaryFile(delete=False)
+    # tmp_zip_path = Path(tmp_zip_file.name)
+    tmp_dir = tempfile.TemporaryDirectory()
+    tmp_zip_path = Path(tmp_dir.name) / "wasm.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
     def cleanup() -> None:
         try:
-            os.unlink(tmp_zip_path.name)
+            shutil.rmtree(tmp_dir.name)
         except Exception as e:
             warnings.warn(f"Error cleaning up: {e}")
-            raise
 
     after_response_task = BackgroundTasks().add_task(cleanup)
     return FileResponse(
-        path=tmp_zip_file,
+        path=tmp_zip_path,
         media_type="application/zip",
         filename="fastled_example.zip",
         background=after_response_task,
@@ -513,19 +519,21 @@ def project_init() -> FileResponse:
 def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/{example}")
-    tmp_zip_file = NamedTemporaryFile(delete=False)
-    zip_example_to_file(example, Path(tmp_zip_file.name))
+    # tmp_zip_file = NamedTemporaryFile(delete=False)
+    tmp_dir = tempfile.TemporaryDirectory()
+    tmp_file_path = Path(tmp_dir.name) / f"{example}.zip"
+    zip_example_to_file(example, Path(tmp_file_path.name))
 
     def cleanup() -> None:
         try:
-            os.unlink(tmp_zip_file.name)
+            shutil.rmtree(tmp_dir.name)
         except Exception as e:
             warnings.warn(f"Error cleaning up: {e}")
             raise
 
     after_response_task = BackgroundTasks().add_task(cleanup)
     return FileResponse(
-        path=tmp_zip_file,
+        path=tmp_file_path,
         media_type="application/zip",
         filename="fastled_example.zip",
         background=after_response_task,
