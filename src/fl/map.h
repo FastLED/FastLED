@@ -6,6 +6,7 @@
 #include "namespace.h"
 #include "fl/vector.h"
 #include "fl/template_magic.h"
+#include "fl/insert_result.h"
 
 namespace fl {
 
@@ -131,13 +132,23 @@ public:
         return Value();
     }
 
-    bool insert(const Key& key, const Value& value) {
+    bool insert(const Key& key, const Value& value, InsertResult* result = nullptr) {
         iterator it = find(key);
-        if (it == end()) {
-            if (data.size() < N) {
-                data.push_back(Pair(key, value));
-                return true;
+        if (it != end()) {
+            if (result) {
+                *result = InsertResult::kExists;
             }
+            return false;
+        }
+        if (data.size() < N) {
+            data.push_back(Pair(key, value));
+            if (result) {
+                *result = InsertResult::kInserted;
+            }
+            return true;
+        }
+        if (result) {
+            *result = InsertResult::kMaxSize;
         }
         return false;
     }
@@ -249,8 +260,6 @@ private:
     SortedHeapVector<Pair, PairLess> data;
 
 public:
-
-    using InsertResult = typename SortedHeapVector<Pair, PairLess>::InsertResult;
 
     typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
     typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;

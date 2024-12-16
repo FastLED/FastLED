@@ -6,6 +6,7 @@
 #include "inplacenew.h"
 #include "namespace.h"
 #include "fl/scoped_ptr.h"
+#include "fl/insert_result.h"
 
 namespace fl {
 
@@ -469,12 +470,6 @@ private:
 public:
     typedef typename HeapVector<T>::iterator iterator;
     typedef typename HeapVector<T>::const_iterator const_iterator;
-
-    enum InsertResult {
-        kInserted = 0,
-        kExists = 1,
-        kMaxSize = 2,
-    };
 
     SortedHeapVector(LessThan less=LessThan()): mLess(less) {}
 

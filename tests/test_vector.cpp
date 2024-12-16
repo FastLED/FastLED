@@ -350,10 +350,10 @@ TEST_CASE("SortedVector") {
         vec.insert(4);
         vec.insert(5);  // Max size is 5
 
-        SortedHeapVector<int, Less>::InsertResult result;
+        InsertResult result;
         vec.insert(6, &result);  // Try to insert into full vector
         
-        CHECK_EQ(SortedHeapVector<int, Less>::InsertResult::kMaxSize, result);  // Should return false
+        CHECK_EQ(InsertResult::kMaxSize, result);  // Should return false
         CHECK(vec.size() == 5);  // Size shouldn't change
         CHECK(vec[4] == 5);  // Last element should still be 5
     }
