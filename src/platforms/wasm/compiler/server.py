@@ -425,12 +425,14 @@ def startup_event():
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
+    print("Endpoint accessed: / (root redirect to docs)")
     return RedirectResponse(url="/docs")
 
 
 @app.get("/healthz")
 async def healthz() -> dict:
     """Health check endpoint."""
+    print("Endpoint accessed: /healthz")
     return {"status": "ok"}
 
 
@@ -439,6 +441,7 @@ if _ALLOW_SHUTDOWN:
     @app.get("/shutdown")
     async def shutdown() -> dict:
         """Shutdown the server."""
+        print("Endpoint accessed: /shutdown")
         print("Shutting down server...")
         SKETCH_CACHE.close()
         os._exit(0)
@@ -448,6 +451,7 @@ if _ALLOW_SHUTDOWN:
 @app.get("/settings")
 async def settings() -> dict:
     """Get the current settings."""
+    print("Endpoint accessed: /settings")
     settings = {
         "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
         "NO_AUTO_UPDATE": os.environ.get("NO_AUTO_UPDATE", "0"),
@@ -464,6 +468,7 @@ async def settings() -> dict:
 @app.get("/compile/wasm/inuse")
 async def compiler_in_use() -> dict:
     """Check if the compiler is in use."""
+    print("Endpoint accessed: /compile/wasm/inuse")
     return {"in_use": COMPILE_LOCK.locked()}
 
 
@@ -483,6 +488,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
 @app.get("/project/init")
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
+    print("Endpoint accessed: /project/init")
     tmp_zip_file = NamedTemporaryFile(delete=False)
     tmp_zip_path = Path(tmp_zip_file.name)
     zip_example_to_file("wasm", tmp_zip_path)
@@ -506,6 +512,7 @@ def project_init() -> FileResponse:
 @app.get("/project/init/{example}")
 def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
+    print(f"Endpoint accessed: /project/init/{example}")
     tmp_zip_file = NamedTemporaryFile(delete=False)
     zip_example_to_file(example, Path(tmp_zip_file.name))
 
@@ -528,6 +535,7 @@ def project_init_example(example: str) -> FileResponse:
 @app.get("/info")
 def info_examples() -> dict:
     """Get a list of examples."""
+    print("Endpoint accessed: /info")
     uptime = time.time() - START_TIME
     uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
     out = {
@@ -550,6 +558,7 @@ def compile_wasm(
     background_tasks: BackgroundTasks = BackgroundTasks(),
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
+    print(f"Endpoint accessed: /compile/wasm with file: {file.filename}")
     if build is not None:
         build = build.lower()
 
