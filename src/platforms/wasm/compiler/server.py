@@ -456,7 +456,7 @@ async def compiler_in_use() -> dict:
 def get_zip_bytes(example: str) -> bytes:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
-        raise HTTPException(status_code=500, detail="Examples directory not found.")
+        raise HTTPException(status_code=404, detail="Examples directory not found.")
     zip_buffer = BytesIO()
     with zipfile.ZipFile(
         zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
