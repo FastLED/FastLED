@@ -39,6 +39,8 @@ _EXAMPLES: list[str] = [
 _VOLUME_MAPPED_SRC = Path("/host/fastled/src")
 _RSYNC_DEST = Path("/js/fastled/src")
 
+_TEMP_DIR = Path("/tmp")
+
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Protect the endpoints from random bots.
@@ -498,13 +500,13 @@ def project_init() -> FileResponse:
     print("Endpoint accessed: /project/init")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     # tmp_zip_path = Path(tmp_zip_file.name)
-    tmp_dir = tempfile.TemporaryDirectory()
-    tmp_zip_path = Path(tmp_dir.name) / "wasm.zip"
+
+    tmp_zip_path = _TEMP_DIR / "wasm.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
     def cleanup() -> None:
         try:
-            shutil.rmtree(tmp_dir.name)
+            os.unlink(tmp_zip_path)
         except Exception as e:
             warnings.warn(f"Error cleaning up: {e}")
 
@@ -522,13 +524,12 @@ def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/{example}")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
-    tmp_dir = tempfile.TemporaryDirectory()
-    tmp_file_path = Path(tmp_dir.name) / f"{example}.zip"
+    tmp_file_path = _TEMP_DIR / f"{example}.zip"
     zip_example_to_file(example, Path(tmp_file_path.name))
 
     def cleanup() -> None:
         try:
-            shutil.rmtree(tmp_dir.name)
+            os.unlink(tmp_file_path)
         except Exception as e:
             warnings.warn(f"Error cleaning up: {e}")
             raise
