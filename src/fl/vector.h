@@ -500,19 +500,31 @@ public:
     }
 
     // Insert while maintaining sort order
-    InsertResult insert(const T& value) {
+    bool insert(const T& value, InsertResult* result = nullptr) {
         // Find insertion point using binary search
         iterator pos = lower_bound(value);
         if (pos != end() && !mLess(value, *pos) && !mLess(*pos, value)) {
             // return false; // Already inserted.
-            return kExists;
+            if (result) {
+                // *result = kExists;
+                *result = InsertResult::kExists;
+            }
+            
+            return false;
         }
         if (mArray.size() >= mMaxSize) {
             // return false;  // Too full
-            return kMaxSize;
+            if (result) {
+                *result = InsertResult::kMaxSize;
+            }
+            return false;
         }
         mArray.insert(pos, value);
-        return kInserted;
+        if (result) {
+            *result = kInserted;
+        }
+
+        return true;
     }
 
     // Find the first position where we should insert value to maintain sort order

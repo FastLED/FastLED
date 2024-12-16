@@ -267,8 +267,8 @@ public:
         data.reserve(n);
     }
 
-    InsertResult insert(const Key& key, const Value& value) {
-        return data.insert(Pair(key, value));
+    bool insert(const Key& key, const Value& value, InsertResult* result = nullptr) {
+        return data.insert(Pair(key, value), result);
     }
 
     bool has(const Key& key) const {

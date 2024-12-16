@@ -7,14 +7,8 @@
 
 #include <FastLED.h>
 
-#if  defined(__AVR__) || defined(STM32F1) defined(ARDUINO_TEENSYLC)
-// NOTE: This demo uses Animartrix and Animartrix uses an insa
+#if  defined(__AVR__)
 // __AVR__:  Not enough memory enough for the FxEngine, so skipping this example
-// STM32F1:  Also not big enough to hold the FxEngine, and fill fail at the linking error.
-//           If you are on PlatformIO then you have the ability to pass in --specs=nano.specs
-//           to the linker in order to resolve this. As such, this example is disable for the
-//           common platform, which is assumed to be Arduino.
-// TeensyLC: Similar - linker error about overflowing Flash
 void setup() {}
 void loop() {}
 
