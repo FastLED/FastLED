@@ -14,8 +14,15 @@ from threading import Timer
 from typing import Callable
 
 from disklru import DiskLRUCache  # type: ignore
-from fastapi import Header  # type: ignore
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi import (  # type: ignore
+    BackgroundTasks,
+    Body,
+    FastAPI,
+    File,
+    Header,
+    HTTPException,
+    UploadFile,
+)
 from fastapi.responses import FileResponse, RedirectResponse, Response  # type: ignore
 from sketch_hasher import generate_hash_of_project_files
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -477,7 +484,9 @@ async def compiler_in_use() -> dict:
 def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
-        raise HTTPException(status_code=404, detail=f"Example {example} not found at {examples_dir}")
+        raise HTTPException(
+            status_code=404, detail=f"Example {example} not found at {examples_dir}"
+        )
 
     try:
         print(f"Creating zip file at: {dst_zip_file}")
@@ -509,7 +518,7 @@ def project_init() -> FileResponse:
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     # tmp_zip_path = Path(tmp_zip_file.name)
 
-    tmp_zip_path = _TEMP_DIR / f"wasm-{make_random_path_string(64)}.zip"
+    tmp_zip_path = _TEMP_DIR / f"{make_random_path_string(64)}.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
     # assert tmp_zip_path.exists()
@@ -534,12 +543,11 @@ def project_init() -> FileResponse:
     )
 
 
-@app.get("/project/init/{example}")
-def project_init_example(example: str) -> FileResponse:
+@app.post("/project/init")
+def project_init_example(example: str = Body(...)) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
-    print(f"Endpoint accessed: /project/init/{example}")
-    # tmp_zip_file = NamedTemporaryFile(delete=False)
-    tmp_file_path = _TEMP_DIR / f"{example}-{make_random_path_string(64)}.zip"
+    print(f"Endpoint accessed: /project/init/example with example: {example}")
+    tmp_file_path = _TEMP_DIR / f"{make_random_path_string(64)}.zip"
     zip_example_to_file(example, Path(tmp_file_path))
 
     if not tmp_file_path.exists():
