@@ -8,7 +8,6 @@ import time
 import warnings
 import zipfile
 import zlib
-from io import BytesIO
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Timer
@@ -468,13 +467,22 @@ async def compiler_in_use() -> dict:
     return {"in_use": COMPILE_LOCK.locked()}
 
 
-def get_zip_bytes(example: str) -> bytes:
+def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
         raise HTTPException(status_code=404, detail=f"Example {example} not found.")
-    zip_buffer = BytesIO()
+    # with zipfile.ZipFile(
+    #     zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+    # ) as zip_out:
+    #     for file_path in examples_dir.rglob("*"):
+    #         if file_path.is_file():
+    #             if "fastled_js" in file_path.parts:
+    #                 continue
+    #             arc_path = file_path.relative_to(examples_dir.parent)
+    #             zip_out.write(file_path, arc_path)
+    # return zip_buffer.getvalue()
     with zipfile.ZipFile(
-        zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+        dst_zip_file, "w", zipfile.ZIP_DEFLATED, compresslevel=9
     ) as zip_out:
         for file_path in examples_dir.rglob("*"):
             if file_path.is_file():
@@ -482,24 +490,33 @@ def get_zip_bytes(example: str) -> bytes:
                     continue
                 arc_path = file_path.relative_to(examples_dir.parent)
                 zip_out.write(file_path, arc_path)
-    return zip_buffer.getvalue()
 
 
 @app.get("/project/init")
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
-    zip_bytes = get_zip_bytes("wasm")
-
-    # Create temporary file
-    tmp_file = NamedTemporaryFile(delete=False)
-    tmp_file.write(zip_bytes)
-    tmp_file.close()
-
+    tmp_zip_file = NamedTemporaryFile(delete=False)
+    zip_example_to_file("wasm", Path(tmp_zip_file))
+    after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_file))
     return FileResponse(
-        path=tmp_file.name,
+        path=tmp_zip_file,
         media_type="application/zip",
         filename="fastled_example.zip",
-        background=BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name)),
+        background=after_response_task,
+    )
+
+
+@app.get("/project/init/{example}")
+def project_init_example(example: str) -> FileResponse:
+    """Archive /js/fastled/examples/{example} into a zip file and return it."""
+    tmp_zip_file = NamedTemporaryFile(delete=False)
+    zip_example_to_file(example, Path(tmp_zip_file))
+    after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_file))
+    return FileResponse(
+        path=tmp_zip_file,
+        media_type="application/zip",
+        filename="fastled_example.zip",
+        background=after_response_task,
     )
 
 
@@ -516,23 +533,6 @@ def info_examples() -> dict:
         "uptime": uptime_fmtd,
     }
     return out
-
-
-@app.get("/project/init/{example}")
-def project_init_example(example: str) -> FileResponse:
-    """Archive /js/fastled/examples/{example} into a zip file and return it."""
-    zip_bytes = get_zip_bytes(example)
-    # Create temporary file
-    tmp_file = NamedTemporaryFile(delete=False)
-    tmp_file.write(zip_bytes)
-    tmp_file.close()
-    on_complete_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_file.name))
-    return FileResponse(
-        path=tmp_file.name,
-        media_type="application/zip",
-        filename="fastled_example.zip",
-        background=on_complete_task,
-    )
 
 
 # THIS MUST NOT BE ASYNC!!!!
