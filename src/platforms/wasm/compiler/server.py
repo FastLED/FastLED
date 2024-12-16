@@ -486,7 +486,15 @@ def project_init() -> FileResponse:
     tmp_zip_file = NamedTemporaryFile(delete=False)
     tmp_zip_path = Path(tmp_zip_file.name)
     zip_example_to_file("wasm", tmp_zip_path)
-    after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_path))
+
+    def cleanup() -> None:
+        try:
+            os.unlink(tmp_zip_path.name)
+        except Exception as e:
+            warnings.warn(f"Error cleaning up: {e}")
+            raise
+
+    after_response_task = BackgroundTasks().add_task(cleanup)
     return FileResponse(
         path=tmp_zip_file,
         media_type="application/zip",
@@ -500,9 +508,15 @@ def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     tmp_zip_file = NamedTemporaryFile(delete=False)
     zip_example_to_file(example, Path(tmp_zip_file.name))
-    after_response_task = BackgroundTasks().add_task(
-        lambda: os.unlink(tmp_zip_file.name)
-    )
+
+    def cleanup() -> None:
+        try:
+            os.unlink(tmp_zip_file.name)
+        except Exception as e:
+            warnings.warn(f"Error cleaning up: {e}")
+            raise
+
+    after_response_task = BackgroundTasks().add_task(cleanup)
     return FileResponse(
         path=tmp_zip_file,
         media_type="application/zip",
