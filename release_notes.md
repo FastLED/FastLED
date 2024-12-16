@@ -1,13 +1,56 @@
 
 FastLED 3.9.5
 =============
-* Much of the new code has been moved into a namespace. This is now located in the fl/ directory.
-* Namespaces are now compiled in test to ensure they work correctly.
-* Many strict compiler warnings are now treated as errors during unit test. Fixes have been applied.
-* CLEDController::setEnabled(bool) now allows controllers to be selectively disabled/enabled. This is useful if you want to have multiple controller types mapped to the same pin and select which ones are active during runtime.
-* Attiny88 now under test.
-* CLEDController::clearLeds() restores showLeds(0)
-* Completely remove Json build for avr, fixes compiler error for ancient avr-gcc versions.
+
+* Esp32:
+  * There's a bug in the firmware of some ESP32's where the first LED is green/blue/red, though we haven't be able to reproduce it.
+  * This may be manifesting because of our RMT recycling. We offer a new RMT5 variant that may fix this.
+    * Here's how you enable it: use `#define FASTLED_RMT5_RECYCLE=0` before you `#include "FastLED.h"`
+    * If this works then please let us know either on reddit or responding to our bug entries:
+      * https://github.com/FastLED/FastLED/issues/1786
+      * https://github.com/FastLED/FastLED/issues/1761
+      * https://github.com/FastLED/FastLED/issues/1774
+* ESP32C6
+  * This new board had some pins marked as invalid. This has been fixed.
+* ESP32S2
+  * The correct SPI chipset (FSPI, was VSPI) is now used when `FASTLED_ALL_PINS_HARDWARE_SPI` is active.
+* The previous headers that were in src/ now have a stub that will issue a deprecation warning and instructions to fix, please migrated before 4.0 as the deprecated headers will go away.
+* Many many strict compiler warnings are now treated as errors during unit test. Fixes have been applied.
+* CLEDController::setEnabled(bool) now allows controllers to be selectively disabled/enabled. This is useful if you want to have multiple controller types mapped to the same pin and select which ones are active during runtime, or to shut them off for whatever reason.
+* Attiny88 is now under test.
+* CLEDController::clearLeds() again calls showLeds(0)
+* Completely remove Json build artifacts for avr, fixes compiler error for ancient avr-gcc versions.
+* Namespaces:
+  * `fl` - the new FastLED namespace
+  * Much of the new code in 3.9.X has been moved into the `fl` namespace. This is now located in the fl/ directory. These files have mandatory namespaces but most casual users won't care because because all the files in the fl/ directory are for internal core use.
+  * Namespaces are now compiled in test to ensure they work correctly. If you are on a build system that supports build-level defines
+    (i.e. every build system except ArduinoIDE) then use `-DFASTLED_NAMESPACE=1`, this will force it on for the entire FastLED core.
+  * We are doing this because we keep getting conflicts with our files and classes conflict with power users who have lots of code.The arduino build system likes to put all the headers into the global space so the chance of collisions goes up dramatically with the number of dependencies one has and we are tired of playing wack a mole.
+    * Example: https://github.com/FastLED/FastLED/issues/1775
+* Stl-like Containers:
+  * `fl::Str`: a copy on write String with inlined memory, which overflows to the heap after 64 characters. Lightning fast to copy around and keep your characters on the stack and prevent heap allocation. Check it out in `fl/str.h`
+  * `fl/vector.h`:
+    * `fl::FixedVector`: Inlined vector which won't ever overflow.
+    * `fl::HeapVector`: Do you need overflow in your vector or a drop in replacement for `std::vector`? Use this.
+    * `fl::SortedHeapVector`: If you want to have your items sorted, use this. Inserts are O(n) always right now, however with deferred sorting, it could be much faster. Use `fl::SortedHeapVector::setMaxSize(int)` to keep it from growing.
+  * `fl/map.h`
+    * `fl::SortedHeapMap`: Almost a drop in replacement for `std::map`. It differs from the `fl::SortedHeapVector` because this version works on key/value pairs. Like `std::map` this takes a comparator which only applies to the keys.
+    * `fl::FixedMap`: Constant size version of `fl::SortedHeapMap` but keeps all the elements inlined and never overflows to the heap.
+* Blur effects no longer link to the int XY(int x, int y) function which is assumed to exist globally. This has been the bane of existance for those that encounter it. Now all functions that linked to XY() now take in a `fl::XYMap` which is the class
+  form of this. This also means that you can apply blur effects with multiple led panels, where XY assumed you just had only one array of leds.
+* Sensors
+  * PIR (passife infrared) sensors are one of the stables of LED effects. They are extremely good at picking up movement anywhere and cheap. They are also extremely easy to use with only one pin, besides the power rails. I've used them countless times for all my LED effects. Therefore I've added two PIR sensors for you to play around with.
+    * `fl/pir.h`
+      * `fl::Pir`: This is a basic PIR that will tell you if the sensor is curently triggered. It doesn't do much else.
+      * `fl::AdvancedPir`: An extended version of `fl::Pir` which gives transition effects as it turns on and off. Here is what the
+        the constructor looks like: `PirAdvanced(int pin, uint32_t latchMs = 5000, uint32_t risingTime = 1000, uint32_t fallingTime = 1000)`.
+        You will give it the pin, an optional latch time (how long it stays on for), the rising time (how long to go from off to on) and the falling
+        time which is how long it takes to go from on to off. By default it will ramp on for one second, stay on for 5 seconds at full brightness, then
+        start turning off for one second. All you have to do is give it the current `millis()` value.
+      * To see it in action check out `examples/fx/NoiseRing`
+* AVR
+  * The Atmega family and 32u now has a maximum of 16 controllers that can be active, up from 8, due to these models having more memory. Someone actually needed this, suprisingly.
+* The 4.0 release is getting closer. We have some exciting stuff on the horizon. Happy Coding! ~Zach
 
 FastLED 3.9.4
 =============

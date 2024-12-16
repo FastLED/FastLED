@@ -39,7 +39,7 @@ class Pir {
 
 class PirAdvanced {
   public:
-    PirAdvanced(int pin, uint32_t latchMs = 0, uint32_t risingTime = 0, uint32_t fallingTime = 0);
+    PirAdvanced(int pin, uint32_t latchMs = 5000, uint32_t risingTime = 1000, uint32_t fallingTime = 1000);
     bool detect(uint32_t now);  // Just detects on and off.
     // When off this will be 0.
     // When on this will be a value between 0 and 255, defined by the transition params

@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include "led_strip/rmt_strip.h"
 
-#ifndef FASTLED_RMT5_RECYLE
-#define FASTLED_RMT5_RECYLE 1
+#ifndef FASTLED_RMT5_RECYCLE
+#define FASTLED_RMT5_RECYCLE 1
 #endif
 
 
@@ -24,7 +24,7 @@ public:
     RmtController5(
         int DATA_PIN,
         int T1, int T2, int T3,  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
-        bool recycle=FASTLED_RMT5_RECYLE);  
+        bool recycle=FASTLED_RMT5_RECYCLE);  
 
     ~RmtController5();
 
