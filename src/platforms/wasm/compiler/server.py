@@ -494,6 +494,14 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
         raise
 
 
+def make_random_path_string(digits: int) -> str:
+    """Generate a random number."""
+    import random
+    import string
+
+    return "".join(random.choices(string.ascii_lowercase + string.digits, k=digits))
+
+
 @app.get("/project/init")
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
@@ -501,7 +509,7 @@ def project_init() -> FileResponse:
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     # tmp_zip_path = Path(tmp_zip_file.name)
 
-    tmp_zip_path = _TEMP_DIR / "wasm.zip"
+    tmp_zip_path = _TEMP_DIR / f"wasm-{make_random_path_string(64)}.zip"
     zip_example_to_file("wasm", tmp_zip_path)
 
     # assert tmp_zip_path.exists()
@@ -531,7 +539,7 @@ def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/{example}")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
-    tmp_file_path = _TEMP_DIR / f"{example}.zip"
+    tmp_file_path = _TEMP_DIR / f"{example}-{make_random_path_string(64)}.zip"
     zip_example_to_file(example, Path(tmp_file_path))
 
     if not tmp_file_path.exists():
