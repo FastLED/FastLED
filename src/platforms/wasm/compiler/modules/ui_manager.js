@@ -60,7 +60,7 @@ function createSlider(element) {
   }, 0);
 
   slider.addEventListener('input', () => {
-    valueDisplay.textContent = this.value;
+    valueDisplay.textContent = slider.value;
   });
 
   controlDiv.appendChild(labelValueContainer);
