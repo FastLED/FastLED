@@ -495,7 +495,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
 
 
 @app.get("/project/init")
-async def project_init() -> FileResponse:
+def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     print("Endpoint accessed: /project/init")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
@@ -527,12 +527,12 @@ async def project_init() -> FileResponse:
 
 
 @app.get("/project/init/{example}")
-async def project_init_example(example: str) -> FileResponse:
+def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/{example}")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
     tmp_file_path = _TEMP_DIR / f"{example}.zip"
-    zip_example_to_file(example, Path(tmp_file_path.name))
+    zip_example_to_file(example, Path(tmp_file_path))
 
     if not tmp_file_path.exists():
         warnings.warn(f"Failed to create zip file for {example} example.")
