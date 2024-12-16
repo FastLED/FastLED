@@ -184,6 +184,8 @@ RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
 # be much quicker than the first pre-warm cycle.
 RUN /js/prewarm.sh  > /logs/prewarm.log.2
 
+# Now timestamp the image and store it at the end of the build.
+RUN date > /image_timestamp.txt
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/run.py", "server"]

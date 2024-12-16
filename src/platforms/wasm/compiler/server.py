@@ -579,12 +579,14 @@ def info_examples() -> dict:
     print("Endpoint accessed: /info")
     uptime = time.time() - START_TIME
     uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
+    build_timestamp = Path("/image_timestamp.txt").read_text(encoding="utf-8").strip()
     out = {
         "examples": _EXAMPLES,
         "compile_count": COMPILE_COUNT,
         "compile_failures": COMPILE_FAILURES,
         "compile_successes": COMPILE_SUCCESSES,
         "uptime": uptime_fmtd,
+        "build_timestamp": build_timestamp,
     }
     return out
 
