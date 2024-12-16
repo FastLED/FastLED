@@ -7,6 +7,7 @@
 #include "fl/vector.h"
 #include "fl/template_magic.h"
 #include "fl/insert_result.h"
+#include "fl/pair.h"
 
 namespace fl {
 
@@ -18,13 +19,9 @@ namespace fl {
 template<typename Key, typename Value, size_t N>
 class FixedMap {
 public:
-    struct Pair {
-        Key first = Key();
-        Value second = Value();
-        Pair(const Key& k, const Value& v) : first(k), second(v) {}
-    };
+    using PairKV = fl::Pair<Key, Value>;
 
-    typedef FixedVector<Pair, N> VectorType;
+    typedef FixedVector<PairKV, N> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
 
@@ -63,8 +60,8 @@ public:
         return end();
     }
 
-    template<typename LessThan>
-    iterator lowest(LessThan less_than = LessThan()) {
+    template<typename Less>
+    iterator lowest(Less less_than = Less()) {
         iterator lowest = end();
         for (iterator it = begin(); it != end(); ++it) {
             if (lowest == end() || less_than(it->first, lowest->first)) {
@@ -74,8 +71,8 @@ public:
         return lowest;
     }
 
-    template<typename LessThan>
-    const_iterator lowest(LessThan less_than = LessThan()) const {
+    template<typename Less>
+    const_iterator lowest(Less less_than = Less()) const {
         const_iterator lowest = end();
         for (const_iterator it = begin(); it != end(); ++it) {
             if (lowest == end() || less_than(it->first, lowest->first)) {
@@ -85,8 +82,8 @@ public:
         return lowest;
     }
 
-    template<typename LessThan>
-    iterator highest(LessThan less_than = LessThan()) {
+    template<typename Less>
+    iterator highest(Less less_than = Less()) {
         iterator highest = end();
         for (iterator it = begin(); it != end(); ++it) {
             if (highest == end() || less_than(highest->first, it->first)) {
@@ -96,8 +93,8 @@ public:
         return highest;
     }
 
-    template<typename LessThan>
-    const_iterator highest(LessThan less_than = LessThan()) const {
+    template<typename Less>
+    const_iterator highest(Less less_than = Less()) const {
         const_iterator highest = end();
         for (const_iterator it = begin(); it != end(); ++it) {
             if (highest == end() || less_than(highest->first, it->first)) {
@@ -141,7 +138,7 @@ public:
             return false;
         }
         if (data.size() < N) {
-            data.push_back(Pair(key, value));
+            data.push_back(PairKV(key, value));
             if (result) {
                 *result = InsertResult::kInserted;
             }
@@ -169,7 +166,7 @@ public:
         if (it != end()) {
             return it->second;
         }
-        data.push_back(Pair(key, Value()));
+        data.push_back(PairKV(key, Value()));
         return data.back().second;
     }
 
@@ -239,7 +236,7 @@ private:
     VectorType data;
 };
 
-template <typename Key, typename Value, typename LessThan>
+template <typename Key, typename Value, typename Less>
 class SortedHeapMap {
 private:
     struct Pair {
@@ -251,7 +248,7 @@ private:
     };
 
     struct PairLess {
-        LessThan less;
+        Less less;
         bool operator()(const Pair& a, const Pair& b) const {
             return less(a.first, b.first);
         }
@@ -264,7 +261,7 @@ public:
     typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
     typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;
 
-    SortedHeapMap(LessThan less = LessThan()) 
+    SortedHeapMap(Less less = Less()) 
         : data(PairLess{less}) {
     }
 
