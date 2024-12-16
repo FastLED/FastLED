@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# env: RENDER=true
-# if [ "$RENDER" != "true" ]; then
-#   echo "Skipping finalprewarm..."
-#   exit 0
-# fi
+env: RENDER=true
+if [ "$RENDER" != "true" ]; then
+  echo "Skipping finalprewarm..."
+  exit 0
+fi
 
 git_path=/git/fastled
 fastled_path=/js/fastled
