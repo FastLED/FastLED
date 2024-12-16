@@ -477,7 +477,7 @@ async def compiler_in_use() -> dict:
 def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
-        raise HTTPException(status_code=404, detail=f"Example {example} not found.")
+        raise HTTPException(status_code=404, detail=f"Example {example} not found at {examples_dir}")
 
     try:
         print(f"Creating zip file at: {dst_zip_file}")
