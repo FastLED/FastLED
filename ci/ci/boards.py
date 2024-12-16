@@ -8,6 +8,9 @@ from dataclasses import dataclass
 
 # Set to a specific release, we may want to update this in the future.
 ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
+
+# TODO: Upgrade toolkit to 5.3
+ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10/platform-espressif32.zip"
 ESP32_IDF_5_1_PIOARDUINO_LATEST = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
