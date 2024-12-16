@@ -3,7 +3,7 @@ platformio==6.1.16
 
 fastapi==0.114.2
 uvicorn[standard]==0.30.6
-python-multipart==0.0.18
+python-multipart==0.0.19
 disklru==2.0.0
 
 
