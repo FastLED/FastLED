@@ -495,7 +495,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
 
 
 @app.get("/project/init")
-def project_init() -> FileResponse:
+async def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     print("Endpoint accessed: /project/init")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
@@ -527,7 +527,7 @@ def project_init() -> FileResponse:
 
 
 @app.get("/project/init/{example}")
-def project_init_example(example: str) -> FileResponse:
+async def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/{example}")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
