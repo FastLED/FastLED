@@ -13,6 +13,7 @@
 #include "noise.h"
 #include "fl/ptr.h"
 #include "fl/xymap.h"
+#include "fx/time.h"
 
 namespace fl {
 
@@ -36,6 +37,7 @@ class NoisePalette : public Fx2d {
         // Allocate memory for the noise array using scoped_ptr
         noise = fl::scoped_ptr<uint8_t>(new uint8_t[width * height]);
     }
+
 
     bool hasFixedFrameRate(float *fps) const override {
         *fps = mFps;

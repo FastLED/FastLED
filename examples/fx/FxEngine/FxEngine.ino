@@ -8,6 +8,7 @@
 #include <FastLED.h>
 
 #if  defined(__AVR__) || defined(STM32F1) defined(ARDUINO_TEENSYLC)
+// NOTE: This demo uses Animartrix and Animartrix uses an insa
 // __AVR__:  Not enough memory enough for the FxEngine, so skipping this example
 // STM32F1:  Also not big enough to hold the FxEngine, and fill fail at the linking error.
 //           If you are on PlatformIO then you have the ability to pass in --specs=nano.specs
@@ -46,8 +47,8 @@ Slider SPEED("SPEED", 30, 20, 100);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
-NoisePalette noisePalette(xyMap);
-Animartrix animartrix(xyMap, POLAR_WAVES);
+NoisePalette noisePalette1(xyMap);
+NoisePalette noisePalette2(xyMap);
 FxEngine fxEngine(NUM_LEDS);
 Checkbox switchFx("Switch Fx", true);
 
@@ -57,14 +58,17 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(MATRIX_WIDTH, MATRIX_HEIGHT);
     FastLED.setBrightness(96);
-    noisePalette.setPalettePreset(2);
-    fxEngine.addFx(noisePalette);
-    fxEngine.addFx(animartrix);
+    noisePalette1.setPalettePreset(2);
+    noisePalette2.setPalettePreset(4);
+    fxEngine.addFx(noisePalette1);
+    fxEngine.addFx(noisePalette2);
 }
 
 void loop() {
-    noisePalette.setSpeed(SPEED);
-    noisePalette.setScale(SCALE);
+    noisePalette1.setSpeed(SPEED);
+    noisePalette1.setScale(SCALE);
+    noisePalette2.setSpeed(SPEED);
+    noisePalette2.setScale(int(SCALE) * 3 / 2);  //  Make the different.
     EVERY_N_SECONDS(1) {
         if (switchFx) {
             fxEngine.nextFx(500);
