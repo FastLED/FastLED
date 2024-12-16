@@ -471,16 +471,6 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
     examples_dir = Path(f"/js/fastled/examples/{example}")
     if not examples_dir.exists():
         raise HTTPException(status_code=404, detail=f"Example {example} not found.")
-    # with zipfile.ZipFile(
-    #     zip_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9
-    # ) as zip_out:
-    #     for file_path in examples_dir.rglob("*"):
-    #         if file_path.is_file():
-    #             if "fastled_js" in file_path.parts:
-    #                 continue
-    #             arc_path = file_path.relative_to(examples_dir.parent)
-    #             zip_out.write(file_path, arc_path)
-    # return zip_buffer.getvalue()
     with zipfile.ZipFile(
         dst_zip_file, "w", zipfile.ZIP_DEFLATED, compresslevel=9
     ) as zip_out:
