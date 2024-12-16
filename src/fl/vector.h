@@ -226,7 +226,7 @@ private:
         }
         mSize = size;
     }
-    HeapVector(const HeapVector<T>& other) : HeapVector(other.size()) {
+    HeapVector(const HeapVector<T>& other): mSize(other.size()) {
         assign(other.begin(), other.end());
     }
     HeapVector& operator=(const HeapVector<T>& other) {
@@ -436,15 +436,12 @@ private:
     }
 
     void assign(const T* values, size_t count) {
-        clear();
-        for (size_t i = 0; i < count && i < mCapacity; ++i) {
-            push_back(values[i]);
-        }
+        assign(values, values + count);
     }
 
     void assign(const_iterator begin, const_iterator end) {
         clear();
-        resize(end - begin);
+        reserve(end - begin);
         for (const_iterator it = begin; it != end; ++it) {
             push_back(*it);
         }
