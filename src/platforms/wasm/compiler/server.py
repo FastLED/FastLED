@@ -494,8 +494,12 @@ def info_examples() -> dict:
     examples_dir = Path("/js/fastled/examples")
     examples = []
     for example in examples_dir.iterdir():
-        if example.is_dir():
+        if example.is_dir() and example.name != "fx":
             examples.append(example.name)
+
+    for example in (examples_dir / "fx").iterdir():
+        if example.is_dir():
+            examples.append(f"fx/{example}")
     uptime = time.time() - START_TIME
     uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
     out = {
