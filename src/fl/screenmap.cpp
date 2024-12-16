@@ -13,7 +13,7 @@
 #include "fl/str.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include <math.h>
 
 namespace fl {

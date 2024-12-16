@@ -53,7 +53,7 @@ License CC BY-NC 3.0
 
 #include "fl/force_inline.h"
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 // Setting this to 1 means you agree to the licensing terms of the ANIMartRIX library for non commercial use only.
 #if defined(FASTLED_ANIMARTRIX_LICENSING_AGREEMENT) || (FASTLED_ANIMARTRIX_LICENSING_AGREEMENT != 0)

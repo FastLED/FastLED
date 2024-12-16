@@ -4,7 +4,7 @@
 #include "fl/singleton.h"
 #include "fl/xymap.h"
 #include "fl/screenmap.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 
 

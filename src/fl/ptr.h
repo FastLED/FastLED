@@ -6,7 +6,7 @@
 // FastLED smart pointer. This was originally called Ptr<T> but that conflicts with
 // ArduinoJson::Ptr<T> so it was renamed to Ptr<T>.
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/template_magic.h"
 

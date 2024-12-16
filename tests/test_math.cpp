@@ -9,7 +9,7 @@
 #include "lib8tion/intmap.h"
 #include <math.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 

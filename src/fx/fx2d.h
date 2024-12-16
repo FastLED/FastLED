@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "fl/xymap.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fx/fx.h"
 #include "fl/ptr.h"
 

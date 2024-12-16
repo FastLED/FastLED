@@ -3,7 +3,7 @@
 
 #include "frame.h"
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/dbg.h"
 #include "fl/allocator.h"

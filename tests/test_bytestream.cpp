@@ -6,7 +6,7 @@
 #include "fl/bytestreammemory.h"
 #include "fx/video/pixel_stream.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 using namespace fl;
 

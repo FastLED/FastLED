@@ -5,7 +5,7 @@
 
 #include "test.h"
 #include "lib8tion/intmap.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 TEST_CASE("map8_to_16") {

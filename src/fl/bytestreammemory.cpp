@@ -2,7 +2,7 @@
 
 #include "fl/bytestreammemory.h"
 #include "fl/math_macros.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/warn.h"
 
 

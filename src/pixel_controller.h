@@ -15,7 +15,7 @@
 #include "rgbw.h"
 #include "five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "eorder.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"

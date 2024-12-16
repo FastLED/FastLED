@@ -4,7 +4,7 @@
 #include "noise.h"
 
 #include "fl/math_macros.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

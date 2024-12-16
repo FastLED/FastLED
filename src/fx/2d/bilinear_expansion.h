@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/xymap.h"
 
 

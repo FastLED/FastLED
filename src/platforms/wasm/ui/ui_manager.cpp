@@ -10,14 +10,14 @@
 #include "ui_manager.h"
 #include "fl/map.h"
 #include "fl/json.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 
 #include <emscripten.h>
 #include <sstream>
 #include <vector>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 using namespace fl;
 

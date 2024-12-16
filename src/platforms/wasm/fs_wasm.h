@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "fl/file_system.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/slice.h"
 

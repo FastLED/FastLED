@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "fl/str.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 
 namespace fl {

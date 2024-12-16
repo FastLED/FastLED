@@ -6,7 +6,7 @@
 #include "fx/video/frame_interpolator.h"
 #include "fl/file_system.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 FASTLED_SMART_PTR(FileHandle);

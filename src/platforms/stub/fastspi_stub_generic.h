@@ -5,7 +5,7 @@
 #endif
 
 #include <stdint.h>
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/unused.h"
 
 // Signal to the engine that all pins are hardware SPI

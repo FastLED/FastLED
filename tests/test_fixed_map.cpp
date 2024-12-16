@@ -5,7 +5,7 @@
 #include "fl/map.h"
 #include <string>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 TEST_CASE("fl::FixedMap operations") {

@@ -2,7 +2,7 @@
 #define __INC_CLOCKLESS_ARM_D21
 
 #include "../common/m0clockless.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "eorder.h"
 
 FASTLED_NAMESPACE_BEGIN

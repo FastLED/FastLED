@@ -2,7 +2,7 @@
 #ifdef __EMSCRIPTEN__
 
 #include <string.h>
-#include "namespace.h"
+#include "fl/namespace.h"
 
 #include "platforms/wasm/js.h"
 #include "fl/json.h"

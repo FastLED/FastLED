@@ -5,7 +5,7 @@
 #include "FastLED.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_USING_NAMESPACE
 

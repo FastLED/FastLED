@@ -21,7 +21,7 @@
 #include "fl/map.h"
 #include "js.h"
 #include "fl/str.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 using namespace fl;
 

@@ -106,7 +106,7 @@
 
 #include "eorder.h"
 #include "i2s.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -6,7 +6,7 @@ Provides eanble_if and is_derived for compilers before C++14.
 
 #include <stdint.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {  // mandatory namespace to prevent name collision with std::enable_if.
 

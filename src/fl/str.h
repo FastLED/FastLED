@@ -6,7 +6,7 @@
 #include "fl/ptr.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64

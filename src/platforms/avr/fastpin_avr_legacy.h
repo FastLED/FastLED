@@ -10,7 +10,7 @@
 // This god-header is too big and AI will stumble trying to generate the correct
 // edits.
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "avr_pin.h"
 
 FASTLED_NAMESPACE_BEGIN

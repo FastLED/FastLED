@@ -6,7 +6,7 @@
 #include "test.h"
 #include "platforms/wasm/compiler/Arduino.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 TEST_CASE("arduino_wasm") {

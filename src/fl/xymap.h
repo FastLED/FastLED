@@ -8,7 +8,7 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 class ScreenMap;

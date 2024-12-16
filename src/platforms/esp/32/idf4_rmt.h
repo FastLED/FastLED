@@ -110,7 +110,7 @@
 #endif
 #define CONFIG_RMT_SUPPRESS_DEPRECATE_WARN 1
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "eorder.h"
 #include "rgbw.h"
 #include "pixel_iterator.h"

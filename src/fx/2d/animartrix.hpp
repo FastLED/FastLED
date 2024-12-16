@@ -10,7 +10,7 @@
 
 #include "crgb.h"
 #include "fx/fx2d.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/scoped_ptr.h"
 #include "fl/dbg.h"

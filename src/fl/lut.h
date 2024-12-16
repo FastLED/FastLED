@@ -9,7 +9,7 @@ LUT - Look up table implementation for various types.
 #include "fl/force_inline.h"
 #include "fl/allocator.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

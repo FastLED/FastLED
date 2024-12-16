@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "lib8tion/qfx.h"
 
 /// @file noise.h

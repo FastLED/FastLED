@@ -2,7 +2,7 @@
 
 #include <stddef.h>   // For size_t
 #include <stdint.h>   // For standard integer types
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"      // Assuming this provides `scoped_array` or similar
 #include "fl/math_macros.h"
 

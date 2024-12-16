@@ -16,7 +16,7 @@
 #include <sstream>
 
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)

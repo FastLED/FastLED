@@ -17,7 +17,7 @@
 
 #include "fl/file_system.h"
 #include "fl/math_macros.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/str.h"
 #include "fl/json.h"

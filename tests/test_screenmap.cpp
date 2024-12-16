@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fl/screenmap.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 using fl::Str;

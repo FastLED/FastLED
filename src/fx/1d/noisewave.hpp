@@ -2,7 +2,7 @@
 
 #include "FastLED.h"
 #include "fx/fx1d.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "noisegen.h"
 
 namespace fl {

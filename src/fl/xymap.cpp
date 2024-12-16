@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "fl/force_inline.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/xymap.h"
 #include "fl/screenmap.h"
 

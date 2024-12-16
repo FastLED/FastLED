@@ -4,7 +4,7 @@
 #include "test.h"
 #include "fl/set.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 

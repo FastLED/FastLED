@@ -2,7 +2,7 @@
 
 #include "lib8static.h"
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

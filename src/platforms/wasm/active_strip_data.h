@@ -12,7 +12,7 @@
 
 #include "fl/slice.h"
 #include "fl/singleton.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/engine_events.h"
 #include "fl/map.h"
 #include "fl/screenmap.h"

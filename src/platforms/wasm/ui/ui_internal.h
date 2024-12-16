@@ -6,7 +6,7 @@
 #include <mutex>
 #include <stdio.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/callback.h"
 #include "fl/json.h"
 #include "fl/ptr.h"

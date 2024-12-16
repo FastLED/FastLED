@@ -1,7 +1,7 @@
 #pragma once
 #pragma message "ESP32 Hardware SPI support added"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "crgb.h"
 
 // When enabled, use the bulk transfer mode to speed up SPI writes and avoid

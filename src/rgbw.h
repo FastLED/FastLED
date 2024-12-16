@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "fl/force_inline.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "eorder.h"
 
 FASTLED_NAMESPACE_BEGIN

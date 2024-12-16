@@ -7,9 +7,9 @@
 #include "test.h"
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 

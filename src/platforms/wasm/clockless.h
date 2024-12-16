@@ -5,7 +5,7 @@
 
 #include "pixel_controller.h"
 #include "pixel_iterator.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "eorder.h"
 #include "crgb.h"
 #include "fl/singleton.h"

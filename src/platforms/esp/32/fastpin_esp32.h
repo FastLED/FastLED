@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "fl/register.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

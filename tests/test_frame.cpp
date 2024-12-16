@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include "fl/allocator.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 namespace {

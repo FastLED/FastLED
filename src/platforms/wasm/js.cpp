@@ -17,7 +17,7 @@
 #include "active_strip_data.h"
 #include "js.h"
 #include "fl/str.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/map.h"
 #include "engine_listener.h"

@@ -6,7 +6,7 @@
 #include <application.h>
 #include <stdint.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 #ifndef FASTLED_NAMESPACE_BEGIN
 #define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {

@@ -5,7 +5,7 @@
 
 #include "test.h"
 #include "fl/template_magic.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include <type_traits>
 
 class Base {};

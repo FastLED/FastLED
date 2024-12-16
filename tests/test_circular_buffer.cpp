@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fl/circular_buffer.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 using namespace fl;
 

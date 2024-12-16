@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/json.h"
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"

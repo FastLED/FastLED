@@ -3,7 +3,7 @@
 #include "crgb.h"
 #include "lib8tion/math8.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

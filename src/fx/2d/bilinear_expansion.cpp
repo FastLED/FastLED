@@ -7,7 +7,7 @@
 
 #include "bilinear_expansion.h"
 #include "crgb.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/xymap.h"
 
 namespace fl {

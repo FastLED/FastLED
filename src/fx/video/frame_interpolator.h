@@ -4,7 +4,7 @@
 #include "fx/video/pixel_stream.h"
 #include "fx/frame.h"
 #include "fx/video/frame_tracker.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

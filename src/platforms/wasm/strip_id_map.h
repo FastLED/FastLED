@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #include "fl/singleton.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/map.h"
 
 // Define a reasonable maximum number of strips

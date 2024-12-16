@@ -9,7 +9,7 @@
 
 #include "fl/map.h"
 #include "fl/str.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D grid. Note that the strip can have arbitrary

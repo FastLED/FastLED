@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "chsv.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "color.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"

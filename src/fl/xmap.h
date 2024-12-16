@@ -7,7 +7,7 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

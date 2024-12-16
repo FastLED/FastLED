@@ -4,7 +4,7 @@
 
 #include <stddef.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

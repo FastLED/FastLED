@@ -2,7 +2,7 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include <stdint.h>
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/register.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"

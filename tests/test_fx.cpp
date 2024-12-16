@@ -18,7 +18,7 @@
 #include "fx/2d/redsquare.h"
 #include "fx/video.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.

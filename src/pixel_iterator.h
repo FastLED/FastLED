@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "rgbw.h"
 
 #include "crgb.h"

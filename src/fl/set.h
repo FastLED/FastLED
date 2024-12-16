@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/vector.h"
 
 namespace fl {

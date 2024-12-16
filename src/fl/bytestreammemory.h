@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 
 #include "fl/bytestream.h"

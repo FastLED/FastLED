@@ -1,7 +1,7 @@
 #ifdef FASTLED_ESP32_I2S
 
 #include "i2s.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include <stdint.h>
 #include <string.h> // for memset
 

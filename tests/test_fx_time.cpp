@@ -6,7 +6,7 @@
 #include "test.h"
 #include "fx/time.h"
 
-#include "namespace.h"
+#include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
 TEST_CASE("TimeScale basic functionality") {

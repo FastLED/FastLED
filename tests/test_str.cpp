@@ -9,7 +9,7 @@
 #include "crgb.h"
 #include <sstream>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 using namespace fl;
 

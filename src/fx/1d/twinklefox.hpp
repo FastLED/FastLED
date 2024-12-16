@@ -3,7 +3,7 @@
 #include "FastLED.h"
 #include "fx/fx1d.h"
 #include "fl/str.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

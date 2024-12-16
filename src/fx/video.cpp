@@ -17,7 +17,7 @@
 using fl::FileHandlePtr;
 using fl::ByteStreamPtr;
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 namespace fl {
 

@@ -3,7 +3,7 @@
 #include "scale8.h"
 #include "lib8tion/lib8static.h"
 #include "intmap.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

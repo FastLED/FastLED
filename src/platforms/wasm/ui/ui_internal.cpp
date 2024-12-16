@@ -1,6 +1,6 @@
 #ifdef __EMSCRIPTEN__
 
-#include "namespace.h"
+#include "fl/namespace.h"
 
 #include "ui_internal.h"
 

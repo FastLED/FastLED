@@ -2,7 +2,7 @@
 #include "fl/circular_buffer.h"
 #include "fx/video/pixel_stream.h"
 #include "fl/math_macros.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 
 #include "fl/dbg.h"
 

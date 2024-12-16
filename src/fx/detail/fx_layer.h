@@ -6,7 +6,7 @@
 #include "crgb.h"
 #include "fl/vector.h"
 #include "fx/fx.h"
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fx/frame.h"
 #include "fl/warn.h"

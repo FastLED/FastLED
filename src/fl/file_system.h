@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "namespace.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fx/video.h"
 #include "fl/str.h"
