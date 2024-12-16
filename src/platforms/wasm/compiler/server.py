@@ -484,7 +484,7 @@ def zip_example_to_file(example: str, dst_zip_file: Path) -> None:
 def project_init() -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     tmp_zip_file = NamedTemporaryFile(delete=False)
-    zip_example_to_file("wasm", Path(tmp_zip_file))
+    zip_example_to_file("wasm", Path(tmp_zip_file.name))
     after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_file))
     return FileResponse(
         path=tmp_zip_file,
@@ -498,7 +498,7 @@ def project_init() -> FileResponse:
 def project_init_example(example: str) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     tmp_zip_file = NamedTemporaryFile(delete=False)
-    zip_example_to_file(example, Path(tmp_zip_file))
+    zip_example_to_file(example, Path(tmp_zip_file.name))
     after_response_task = BackgroundTasks().add_task(lambda: os.unlink(tmp_zip_file))
     return FileResponse(
         path=tmp_zip_file,
