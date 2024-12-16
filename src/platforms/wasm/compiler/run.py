@@ -15,6 +15,39 @@ _CHOICES = [
 
 HERE = Path(__file__).parent
 
+# if [ "$RENDER" != "true" ]; then
+#   echo "Skipping finalprewarm..."
+#   exit 0
+# fi
+
+# git_path=/git/fastled
+# fastled_path=/js/fastled
+
+# # update the fastled git repo
+# cd $git_path
+
+# git fetch origin
+# git reset --hard origin/master
+# #  ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
+
+# cd /js
+
+# rsync -av --info=NAME --delete "$git_path/" "$fastled_path/"  --exclude ".git"
+
+def _update_fastled() -> None:
+    is_render = os.environ.get("RENDER", "false") == "true"
+    if not is_render:
+        print("Skipping finalprewarm...")
+        return
+    git_path = "/git/fastled"
+    fastled_path = "/js/fastled"
+    subprocess.run(["git", "fetch", "origin"], cwd=git_path)
+    subprocess.run(["git", "reset", "--hard", "origin/master"], cwd=git_path)
+    subprocess.run(["rsync", "-av", "--info=NAME", "--delete", f"{git_path}/", f"{fastled_path}/", "--exclude", ".git"], cwd="/js")
+
+
+
+
 def _parse_args() -> Tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser(description="Run compile.py with additional arguments")
     parser.add_argument("mode", help="Which mode does this script run in", choices=_CHOICES)
@@ -66,6 +99,7 @@ def _run_compile(unknown_args: list[str]) -> int:
 
 def main() -> int:
     args, unknown_args = _parse_args()
+    _update_fastled()
 
     try:
         if args.mode == "compile":
