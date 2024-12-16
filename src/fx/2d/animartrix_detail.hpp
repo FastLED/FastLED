@@ -26,7 +26,7 @@ License CC BY-NC 3.0
 
 */
 
-#include <vector>  // ok include
+#include "fl/vector.h"
 #include <math.h>  // ok include
 #include <stdint.h>
 
@@ -161,9 +161,9 @@ class ANIMartRIX {
     modulators move; // all oscillator based movers and shifters at one place
     rgb pixel;
 
-    std::vector<std::vector<float>>
+    fl::HeapVector<fl::HeapVector<float>>
         polar_theta; // look-up table for polar angles
-    std::vector<std::vector<float>>
+    fl::HeapVector<fl::HeapVector<float>>
         distance; // look-up table for polar distances
 
     unsigned long a, b, c; // for time measurements
@@ -383,9 +383,8 @@ class ANIMartRIX {
     // the polar coordinates
 
     void render_polar_lookup_table(float cx, float cy) {
-
-        polar_theta.resize(num_x, std::vector<float>(num_y, 0.0f));
-        distance.resize(num_x, std::vector<float>(num_y, 0.0f));
+        polar_theta.resize(num_x, fl::HeapVector<float>(num_y, 0.0f));
+        distance.resize(num_x, fl::HeapVector<float>(num_y, 0.0f));
 
         for (int xx = 0; xx < num_x; xx++) {
             for (int yy = 0; yy < num_y; yy++) {

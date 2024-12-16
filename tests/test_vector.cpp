@@ -301,7 +301,6 @@ TEST_CASE("Fixed vector with custom type") {
     }
 }
 
-
 TEST_CASE("SortedVector") {    
     struct Less {
         bool operator()(int a, int b) const { return a < b; }
@@ -310,7 +309,7 @@ TEST_CASE("SortedVector") {
 
 
     SUBCASE("Insert maintains order") {
-        SortedHeapVector<int, Less> vec(5);
+        SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -324,7 +323,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Erase removes element") {
-        SortedHeapVector<int, Less> vec(5);
+        SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -342,23 +341,24 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Insert when full") {
-        SortedHeapVector<int, Less> vec(5);
+        SortedHeapVector<int, Less> vec;
+        vec.setMaxSize(5);
         // Fill the vector to capacity
         vec.insert(1);
         vec.insert(2);
         vec.insert(3);
         vec.insert(4);
-        vec.insert(5);  // Capacity is 5
+        vec.insert(5);  // Max size is 5
+
+        SortedHeapVector<int, Less>::InsertResult result = vec.insert(6);  // Try to insert into full vector
         
-        bool result = vec.insert(6);  // Try to insert into full vector
-        
-        CHECK_FALSE(result);  // Should return false
+        CHECK_EQ(SortedHeapVector<int, Less>::InsertResult::kMaxSize, result);  // Should return false
         CHECK(vec.size() == 5);  // Size shouldn't change
         CHECK(vec[4] == 5);  // Last element should still be 5
     }
 
     SUBCASE("Erase from empty") {
-        SortedHeapVector<int, Less> vec(5);
+        SortedHeapVector<int, Less> vec;
         bool ok = vec.erase(1);  // Try to erase from empty vector
         CHECK(!ok);  // Should return false
         CHECK(vec.size() == 0);  // Should still be empty

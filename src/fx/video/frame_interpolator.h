@@ -32,7 +32,8 @@ class FrameInterpolator : public fl::Referent {
     bool draw(uint32_t adjustable_time, Frame *dst);
     bool draw(uint32_t adjustable_time, CRGB *leds);
     bool insert(uint32_t frameNumber, FramePtr frame) {
-        return mFrames.insert(frameNumber, frame);
+        FrameBuffer::InsertResult result = mFrames.insert(frameNumber, frame);
+        return result != FrameBuffer::InsertResult::kMaxSize;
     }
 
     // Clear all frames

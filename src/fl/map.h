@@ -250,13 +250,24 @@ private:
 
 public:
 
+    using InsertResult = typename SortedHeapVector<Pair, PairLess>::InsertResult;
+
     typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
     typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;
 
-    SortedHeapMap(size_t capacity, LessThan less = LessThan()) 
-        : data(capacity, PairLess{less}) {}
+    SortedHeapMap(LessThan less = LessThan()) 
+        : data(PairLess{less}) {
+    }
 
-    bool insert(const Key& key, const Value& value) {
+    void setMaxSize(size_t n) {
+        data.setMaxSize(n);
+    }
+
+    void reserve(size_t n) {
+        data.reserve(n);
+    }
+
+    InsertResult insert(const Key& key, const Value& value) {
         return data.insert(Pair(key, value));
     }
 

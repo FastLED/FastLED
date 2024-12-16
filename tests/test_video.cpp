@@ -81,16 +81,16 @@ TEST_CASE("video with memory stream") {
         testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
     }
     size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
-    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
+    REQUIRE_EQ(pixels_written, LEDS_PER_FRAME);
     video.beginStream(memoryStream);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME+1, leds);
-    CHECK(ok);
+    REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         CHECK_EQ(leds[i], testData[i]);
     }
     ok = video.draw(2*FRAME_TIME + 1, leds);
-    CHECK(ok);
+    REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         // CHECK_EQ(leds[i], testData[i]);
         REQUIRE_EQ(leds[i].r, testData[i].r);
@@ -145,7 +145,7 @@ TEST_CASE("video with file handle") {
     video.begin(fileHandle);
     CRGB leds[LEDS_PER_FRAME];
     bool ok = video.draw(FRAME_TIME+1, leds);
-    CHECK(ok);
+    REQUIRE(ok);
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         CHECK_EQ(leds[i], led_frame[i]);
     }

@@ -218,15 +218,13 @@ private:
     typedef const T* const_iterator;
 
     // Constructor
-    HeapVector(size_t size, const T& value = T()) : mCapacity(size) {
+    HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) {
         mArray.reset(new T[mCapacity]);
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
         }
         mSize = size;
     }
-
-    HeapVector() : HeapVector(16) {}
     HeapVector(const HeapVector<T>& other) : HeapVector(other.size()) {
         assign(other.begin(), other.end());
     }
@@ -279,6 +277,7 @@ private:
         for (size_t i = 0; i < n; ++i) {
             mArray[i] = value;
         }
+        mCapacity = n;
     }
 
     // Array access operators
@@ -418,19 +417,19 @@ private:
     }
 
     bool full() const {
-        return mSize == mCapacity;
+        return mSize >= mCapacity;
     }
 
     bool insert(iterator pos, const T& value) {
-        if (full()) {
-            return false;
-        }
+        // TODO: Introduce mMaxSize (and move it from SortedVector to here)
         // push back and swap into place.
+        size_t target_idx = pos - begin();
         push_back(value);
-        auto curr = end() - 1;
-        while (curr != pos) {
-            swap(curr, (curr - 1));
-            --curr;
+        auto last = end() - 1;
+        for (size_t curr_idx = last - begin(); curr_idx > target_idx; --curr_idx) {
+            auto first = begin() + curr_idx - 1;
+            auto second = begin() + curr_idx;
+            swap(first, second);
         }
         return true;
     }
@@ -465,26 +464,55 @@ class SortedHeapVector {
 private:
     HeapVector<T> mArray;
     LessThan mLess;
+    size_t mMaxSize = size_t(-1);
 
 public:
     typedef typename HeapVector<T>::iterator iterator;
     typedef typename HeapVector<T>::const_iterator const_iterator;
 
-    SortedHeapVector(size_t capacity, LessThan less=LessThan()) : mArray(capacity), mLess(less) {}
+    enum InsertResult {
+        kInserted = 0,
+        kExists = 1,
+        kMaxSize = 2,
+    };
+
+    SortedHeapVector(LessThan less=LessThan()): mLess(less) {}
+
+    void setMaxSize(size_t n) {
+        if (mMaxSize == n) {
+            return;
+        }
+        mMaxSize = n;
+        const bool needs_adjustment = mArray.size() > mMaxSize;
+        if (needs_adjustment) {
+            mArray.resize(n);
+        } else {
+            mArray.reserve(n);
+        }
+    }
 
     ~SortedHeapVector() {
         mArray.clear();
     }
 
-    // Insert while maintaining sort order
-    bool insert(const T& value) {
-        if (mArray.size() >= mArray.capacity()) {
-            return false;
-        }
+    void reserve(size_t n) {
+        mArray.reserve(n);
+    }
 
+    // Insert while maintaining sort order
+    InsertResult insert(const T& value) {
         // Find insertion point using binary search
         iterator pos = lower_bound(value);
-        return mArray.insert(pos, value);
+        if (pos != end() && !mLess(value, *pos) && !mLess(*pos, value)) {
+            // return false; // Already inserted.
+            return kExists;
+        }
+        if (mArray.size() >= mMaxSize) {
+            // return false;  // Too full
+            return kMaxSize;
+        }
+        mArray.insert(pos, value);
+        return kInserted;
     }
 
     // Find the first position where we should insert value to maintain sort order
@@ -543,7 +571,12 @@ public:
     bool empty() const { return mArray.empty(); }
     size_t capacity() const { return mArray.capacity(); }
     void clear() { mArray.clear(); }
-    bool full() const { return mArray.full(); }
+    bool full() const {
+        if (mArray.size() >= mMaxSize) {
+            return true;
+        }
+        return mArray.full();
+    }
 
     // Element access
     T& operator[](size_t index) { return mArray[index]; }
