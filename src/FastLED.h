@@ -84,8 +84,6 @@
 #include "chipsets.h"
 #include "fl/engine_events.h"
 
-using namespace fl;
-
 FASTLED_NAMESPACE_BEGIN
 
 // Backdoor to get the size of the CLedController object. The one place
