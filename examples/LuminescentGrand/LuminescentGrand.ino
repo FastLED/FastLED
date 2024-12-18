@@ -6,7 +6,7 @@
 /// Then go to your sketch directory and run
 /// > fastled
 
-#include "defs.h"
+#include "shared/defs.h"
 
 #if !ENABLE_SKETCH
 // avr can't compile this, neither can the esp8266.

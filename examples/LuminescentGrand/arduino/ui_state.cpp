@@ -1,6 +1,6 @@
 
 
-#include "../defs.h"
+#include "../shared/defs.h"
 
 
 #if ENABLE_SKETCH
