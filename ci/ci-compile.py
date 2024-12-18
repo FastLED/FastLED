@@ -70,7 +70,6 @@ DEFAULT_EXAMPLES = [
     "Apa102HDOverride",
     "Blink",
     "Blur",
-    "Chromancer",
     "ColorPalette",
     "ColorTemperature",
     "Cylon",
