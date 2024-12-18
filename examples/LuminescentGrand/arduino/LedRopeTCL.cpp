@@ -15,6 +15,8 @@
 #include "fl/dbg.h"
 #include "fl/ui.h"
 
+using namespace fl;
+
 
 #define CHIPSET WS2812
 #define PIN_LEDS 0

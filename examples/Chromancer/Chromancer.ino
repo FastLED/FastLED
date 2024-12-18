@@ -24,6 +24,8 @@
 #include "screenmap.json.h"
 #include "fl/str.h"
 
+using namespace fl;
+
 enum {
     BlackStrip = 0,
     GreenStrip = 1,

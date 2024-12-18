@@ -3,6 +3,9 @@ FastLED 3.9.6
 =============
 * Bug fix for FastLED 3.9.5
   * Fixes using namespace fl in `FastLED.h` in the last release (oops!)
+* Fixes for Arduino Cloud compiler and their ancient version of esp-idf for older chips.
+  * Handle missing `IRAM_ATTR`
+  * inplace new operator now is smarter about when to be defined by us.
 
 FastLED 3.9.5
 =============
