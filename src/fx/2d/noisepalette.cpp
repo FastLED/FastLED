@@ -14,6 +14,26 @@
 
 namespace fl {
 
+NoisePalette::NoisePalette(XYMap xyMap, float fps)
+    : Fx2d(xyMap), speed(0), scale(0), colorLoop(1), mFps(fps) {
+    // currentPalette = PartyColors_p;
+    static_assert(sizeof(currentPalette) == sizeof(CRGBPalette16),
+                  "Palette size mismatch");
+    memcpy(&currentPalette, PartyColors_p, sizeof(CRGBPalette16));
+    width = xyMap.getWidth();
+    height = xyMap.getHeight();
+
+    // Initialize our coordinates to some random values
+    mX = random16();
+    mY = random16();
+    mZ = random16();
+
+    setPalettePreset(0);
+
+    // Allocate memory for the noise array using scoped_ptr
+    noise = scoped_ptr<uint8_t>(new uint8_t[width * height]);
+}
+
 void NoisePalette::setPalettePreset(int paletteIndex) {
     currentPaletteIndex = paletteIndex % 12; // Ensure the index wraps around
     switch (currentPaletteIndex) {
@@ -168,5 +188,9 @@ uint8_t NoisePalette::changeToRandomPalette() {
         return currentPaletteIndex;
     }
 }
+
+
+
+
 
 }  // namespace fl
