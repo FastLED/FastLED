@@ -10,25 +10,17 @@
 #define UI_V2  // Based on a new midi shield with buttons. https://learn.sparkfun.com/tutorials/midi-shield-hookup-guide
 #define UI_DBG
 
-
-#if defined(UI_V1)
-#define PIN_VIS_SELECT 31
-#define PIN_COLOR_SELECT A3
-#elif defined(UI_V2)
-#define PIN_VIS_SELECT 2
-#define PIN_COLOR_SELECT 4
+#ifdef __STM32F1__
+// Missing A-type pins, just use digital pins mapped to analog.
+#define PIN_POT_COLOR_SENSOR D3
+#define PIN_POT_VEL_SENSOR D4
 #else
-#error not defined for this platform
+#define PIN_POT_COLOR_SENSOR A3
+#define PIN_POT_VEL_SENSOR A4
 #endif
 
-
-
-
-
-
-
-#define PIN_POT_VEL_SENSOR A3
-#define PIN_POT_COLOR_SENSOR A0
+#define PIN_VIS_SELECT 2
+#define PIN_COLOR_SELECT 4
 
 Potentiometer velocity_pot(PIN_POT_VEL_SENSOR);
 Potentiometer color_pot(PIN_POT_COLOR_SENSOR);
