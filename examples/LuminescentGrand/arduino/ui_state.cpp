@@ -1,5 +1,11 @@
 
 
+#include "../def.h"
+
+
+#if ENABLE_SKETCH
+
+
 #include "./ui_state.h"
 #include "shared/Painter.h"
 #include "fl/dbg.h"
@@ -74,3 +80,5 @@ ui_state ui_update(uint32_t now_ms, uint32_t delta_ms) {
   return out;
 }
 
+
+#endif  // ENABLE_SKETCH
