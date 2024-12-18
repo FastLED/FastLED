@@ -127,7 +127,9 @@ void ColorHSV::FromRGB(const Color3i& rgb) {
 ///////////////////////////////////////////////////////////////////////////////
 Color3i ColorHSV::ToRGB() const {
   typedef double FloatT;
-  FloatT r, g, b;
+  FloatT r = 0;
+  FloatT g = 0;
+  FloatT b = 0;
 
   int i = int(h_ * 6);
   FloatT f = h_ * 6.0 - static_cast<FloatT>(i);

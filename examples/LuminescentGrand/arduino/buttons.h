@@ -137,11 +137,9 @@ class CountingButton {
   	return button_.Read();
   }
  
+  DigitalButton button_;
   bool on_;
   int curr_val_;
-
- public:
-  DigitalButton button_;
   unsigned long debounce_timestamp_;
   Button mButton = Button("Counting Button");
 };

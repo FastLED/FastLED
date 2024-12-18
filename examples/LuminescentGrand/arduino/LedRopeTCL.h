@@ -68,10 +68,10 @@ class LedRopeTCL : public LedRopeInterface {
 
  protected:
   void PreDrawSetup();
-  int draw_offset_;
+  int draw_offset_ = 0;
   bool lazy_initialized_;
-  bool controller_added_ = false;
   FrameBuffer frame_buffer_;
+  bool controller_added_ = false;
   fl::HeapVector<CRGB> led_buffer_;
   fl::ScreenMap mScreenMap;
 };

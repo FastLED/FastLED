@@ -38,6 +38,7 @@ void loop() {}
 #include "shared/dprint.h"
 #include "fl/dbg.h"
 #include "fl/ui.h"
+#include "fl/unused.h"
 
 // Spoof the midi library so it thinks it's running on an arduino.
 //#ifndef ARDUINO
@@ -51,11 +52,11 @@ void loop() {}
 
 #include "arduino/MIDI.h"
 
-MIDI_CREATE_INSTANCE(Serial, Serial, MIDI);
+MIDI_CREATE_INSTANCE(HardwareSerial, Serial0, MY_MIDI);
 
 
 FASTLED_TITLE("Luminescent Grand");
-FASTLED_DESCRIPTION("A MIDI keyboard visualizer.");
+FASTLED_DESCRIPTION("A MY_MIDI keyboard visualizer.");
 
 
 /////////////////////////////////////////////////////////
@@ -122,14 +123,14 @@ void setup() {
   Serial.begin(57600);
   //start serial with midi baudrate 31250
   // Initiate MIDI communications, listen to all channels
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+  MY_MIDI.begin(MIDI_CHANNEL_OMNI);
   
   // Connect the HandleNoteOn function to the library, so it is called upon reception of a NoteOn.
-  MIDI.setHandleNoteOn(HandleNoteOn);
-  MIDI.setHandleNoteOff(HandleNoteOff);
-  MIDI.setHandleAfterTouchPoly(HandleAfterTouchPoly);
-  MIDI.setHandleAfterTouchChannel(HandleAfterTouchChannel);
-  MIDI.setHandleControlChange(HandleControlChange);
+  MY_MIDI.setHandleNoteOn(HandleNoteOn);
+  MY_MIDI.setHandleNoteOff(HandleNoteOff);
+  MY_MIDI.setHandleAfterTouchPoly(HandleAfterTouchPoly);
+  MY_MIDI.setHandleAfterTouchChannel(HandleAfterTouchChannel);
+  MY_MIDI.setHandleControlChange(HandleControlChange);
 
   ui_init();
 }
@@ -174,6 +175,7 @@ void loop() {
   // Calculate dt.
   static uint32_t s_prev_time = 0;
   uint32_t prev_time = 0;
+  FASTLED_UNUSED(prev_time);  // actually used in perf tests.
   uint32_t now_ms = millis();
   uint32_t delta_ms = now_ms - s_prev_time;
   s_prev_time = now_ms;
@@ -193,7 +195,7 @@ void loop() {
   // Each frame we call the midi processor 100 times to make sure that all notes
   // are processed.
   for (int i = 0; i < 100; ++i) {
-    MIDI.read();
+    MY_MIDI.read();
   }
  
   const unsigned long midi_time = millis() - start_time;
@@ -218,6 +220,7 @@ void loop() {
   // app. If the app ever runs slow then set kShowFps to 1
   // in the settings.h file.
   const unsigned long start_painting = millis();
+  FASTLED_UNUSED(start_painting);
 
 
   // Paints the keyboard using the led_rope.

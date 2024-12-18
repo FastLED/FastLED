@@ -52,10 +52,7 @@ ScreenMap init_screenmap() {
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::PreDrawSetup() {
   if (!lazy_initialized_) {
-
-    lazy_initialized_ = false;
-    int num_leds = frame_buffer_.length();
-
+    // This used to do something, now it does nothing.
     lazy_initialized_ = true;
   }
 }
@@ -82,7 +79,6 @@ void LedRopeTCL::RawDrawPixel(byte r, byte g, byte b) {
     b = 0xff;
   }
   CRGB c(r, g, b);
-  size_t idx = led_buffer_.size();
   led_buffer_.push_back(CRGB(r, g, b));
 }
 
@@ -112,7 +108,7 @@ void LedRopeTCL::RawCommitDraw() {
 
 ///////////////////////////////////////////////////////////////////////////////
 LedRopeTCL::LedRopeTCL(int n_pixels)
-	: frame_buffer_(n_pixels), draw_offset_(0), lazy_initialized_(false) {
+	: draw_offset_(0), lazy_initialized_(false), frame_buffer_(n_pixels) {
   mScreenMap = init_screenmap();
   led_buffer_.reserve(mScreenMap.getLength());
 }

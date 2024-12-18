@@ -43,6 +43,7 @@ BEGIN_MIDI_NAMESPACE
 #define MIDI_LIBRARY_VERSION_MINOR  0
 #define MIDI_LIBRARY_VERSION_PATCH  0
 
+
 /*! \brief The main class for MIDI handling.
 It is templated over the type of serial port to provide abstraction from
 the hardware interface, meaning you can use HardwareSerial, SoftwareSerial
