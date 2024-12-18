@@ -45,6 +45,11 @@ extern "C"
 }
 #endif
 
+#ifndef IRAM_ATTR  // Fix for Arduino Cloud Compiler
+#warning "IRAM_ATTR not defined, are you in the Arduino Cloud compiler?, disbaling IRAM_ATTR."
+#define IRAM_ATTR
+#endif
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
