@@ -23,6 +23,7 @@
 #include "FastLED.h"
 #include "sensors/pir.h"
 #include "timer.h"
+#include <iostream>
 
 #define LED_PIN 1
 #define BRIGHTNESS 96
@@ -49,6 +50,7 @@ float current_brightness = 0;
 
 
 void setup() {
+    Serial.begin(115200);
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
@@ -58,6 +60,10 @@ void setup() {
 }
 
 void loop() {
+    EVERY_N_SECONDS(1) {
+        // printf("FPS: %d\n", FastLED.getFPS());
+        std::cout << "loop" << std::endl;
+    }
     uint8_t bri = pir.transition(millis());
     FastLED.setBrightness(bri * brightness.as<float>());
     uint32_t now = millis();
