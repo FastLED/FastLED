@@ -6,6 +6,12 @@
 /// Then go to your sketch directory and run
 /// > fastled
 
+#ifdef __AVR__
+// missing software serial in default build.
+void setup() {}
+void loop() {}
+#else
+
 
 //#define DEBUG_PAINTER
 //#define DEBUG_KEYBOARD 1
@@ -234,3 +240,6 @@ void loop() {
   }
 
 }
+
+
+#endif  // __AVR__
