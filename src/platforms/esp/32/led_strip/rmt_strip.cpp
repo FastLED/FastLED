@@ -91,7 +91,8 @@ public:
                 // wait for one of the strips to complete and then try again.
                 // TODO: This doesn't make any sense for strips that don't recycle.
                 // This will probably manifest as a bug for someone that is using all the strips they can.
-                // I'll have to come back to this and fix.
+                // I'll have to come back to this and fix this by selectively enabling recycling when
+                // the number of strips is more than the number of channels.
                 RmtActiveStripGroup::instance().wait_for_any_strip_to_release();
                 continue;
             }
