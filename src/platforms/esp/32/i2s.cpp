@@ -1,5 +1,9 @@
 #ifdef FASTLED_ESP32_I2S
 
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
 #include "i2s.h"
 #include "fl/namespace.h"
 #include <stdint.h>
@@ -62,7 +66,11 @@ DMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
+#if tskKERNEL_VERSION_MAJOR >= 7
+static SemaphoreHandle_t gTX_sem = NULL;
+#else
 static xSemaphoreHandle gTX_sem = NULL;
+#endif
 
 // -- One-time I2S initialization
 static bool gInitialized = false;

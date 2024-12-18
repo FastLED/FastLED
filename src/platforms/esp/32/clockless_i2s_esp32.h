@@ -165,18 +165,17 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 
   public:
     void init() {
-        if (i2s_is_initialized())
-            return;
-
         // -- Allocate space to save the pixel controller
         //    during parallel output
         mPixels = (PixelController<RGB_ORDER> *)malloc(
             sizeof(PixelController<RGB_ORDER>));
 
         // -- Construct the bit patterns for ones and zeros
-        i2s_define_bit_patterns(T1, T2, T3);
-        i2s_init(I2S_DEVICE);
-        i2s_set_fill_buffer_callback(fillBuffer);
+        if (!i2s_is_initialized()) {
+            i2s_define_bit_patterns(T1, T2, T3);
+            i2s_init(I2S_DEVICE);
+            i2s_set_fill_buffer_callback(fillBuffer);
+        }
 
         gControllers[gNumControllers] = this;
         int my_index = gNumControllers;
