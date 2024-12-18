@@ -1,9 +1,15 @@
+/// @file types.h
+/// Defines fractional types used for lib8tion functions
+
 #pragma once
 
 #include <stdint.h>
 #include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
+
+/// @addtogroup lib8tion
+/// @{
 
 ///////////////////////////////////////////////////////////////////////
 ///
@@ -81,5 +87,6 @@ typedef union {
 } IEEE754binary32_t;
 
 /// @} FractionalTypes
+/// @} lib8tion
 
 FASTLED_NAMESPACE_END

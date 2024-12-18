@@ -1,3 +1,5 @@
+/// @file intmap.h
+/// Defines integer mapping functions
 
 #pragma once
 
@@ -6,6 +8,19 @@
 #include <stdint.h>
 
 FASTLED_NAMESPACE_BEGIN
+
+/// @addtogroup lib8tion
+/// @{
+
+/// @defgroup intmap Integer Mapping Functions
+/// Maps a scalar from one integer size to another.
+///
+/// For example, a value representing 40% as an 8-bit unsigned integer would be
+/// `102 / 255`. Using `map8_to_16(uint8_t)` to convert that to a 16-bit
+/// unsigned integer would give you `26,214 / 65,535`, exactly 40% through the
+/// larger range.
+///
+/// @{
 
 LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
     return uint16_t(x) * 0x101;
@@ -28,5 +43,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
     return uint32_t(x) * 0x1010101;
 }
+
+/// @} intmap
+/// @} lib8tion
 
 FASTLED_NAMESPACE_END

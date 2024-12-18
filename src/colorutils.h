@@ -693,21 +693,21 @@ typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPaletteRef;  ///< Al
 /// @param srcpal16 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette256& destpal256);
-/// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette256&)
+/// @copydoc UpscalePalette(const class CRGBPalette16&, class CRGBPalette256&)
 void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette256& destpal256);
 
 /// Convert a 16-entry palette to a 32-entry palette
 /// @param srcpal16 the source palette to upscale
 /// @param destpal32 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette32& destpal32);
-/// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette32&)
+/// @copydoc UpscalePalette(const class CRGBPalette16&, class CRGBPalette32&)
 void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette32& destpal32);
 
 /// Convert a 32-entry palette to a 256-entry palette
 /// @param srcpal32 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
 void UpscalePalette(const class CRGBPalette32& srcpal32, class CRGBPalette256& destpal256);
-/// @copydoc UpscalePalette(const struct CRGBPalette32&, class CRGBPalette256&)
+/// @copydoc UpscalePalette(const class CRGBPalette32&, class CRGBPalette256&)
 void UpscalePalette(const class CHSVPalette32& srcpal32, class CHSVPalette256& destpal256);
 
 /// @} PaletteUpscale
@@ -2004,9 +2004,9 @@ CRGB ColorFromPalette( const CRGBPalette16& pal,
 
 /// @brief Same as ColorFromPalette, but with uint16_t `index` to give greater precision.
 /// @author https://github.com/generalelectrix
-/// @source https://github.com/FastLED/FastLED/pull/202
-/// @example https://wokwi.com/projects/285170662915441160
-/// @example https://wokwi.com/projects/407831886158110721
+/// @see https://github.com/FastLED/FastLED/pull/202
+/// @see https://wokwi.com/projects/285170662915441160
+/// @see https://wokwi.com/projects/407831886158110721
 CRGB ColorFromPaletteExtended(
     const CRGBPalette16& pal,
     uint16_t index,
@@ -2016,8 +2016,8 @@ CRGB ColorFromPaletteExtended(
 /// @brief Same as ColorFromPalette, but higher precision. Will eventually
 ///        become the default.
 /// @author https://github.com/generalelectrix
-/// @source https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
-/// @example https://wokwi.com/projects/285170662915441160
+/// @see https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
+/// @see https://wokwi.com/projects/285170662915441160
 CRGB ColorFromPaletteExtended(
     const CRGBPalette32& pal,
     uint16_t index,

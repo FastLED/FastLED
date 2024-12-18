@@ -1,3 +1,6 @@
+/// @file simplex.cpp
+/// Implements simplex noise functions
+
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 

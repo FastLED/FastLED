@@ -1,3 +1,5 @@
+/// @file chsv.h
+/// Defines the hue, saturation, and value (HSV) pixel struct
 
 #pragma once
 
@@ -6,6 +8,9 @@
 #include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
+
+/// @addtogroup PixelTypes Pixel Data Types (CRGB/CHSV)
+/// @{
 
 /// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
 struct CHSV {
@@ -99,5 +104,7 @@ typedef enum {
     HUE_PURPLE = 192,  ///< Purple (270°)
     HUE_PINK = 224     ///< Pink (315°)
 } HSVHue;
+
+/// @} PixelTypes
 
 FASTLED_NAMESPACE_END

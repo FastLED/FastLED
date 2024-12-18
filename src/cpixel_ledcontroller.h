@@ -1,7 +1,7 @@
 #pragma once
 
-/// @file controller.h
-/// base definitions used by led controllers for writing out led data
+/// @file cpixel_ledcontroller.h
+/// defines the templated version of the CLEDController class
 
 #include <stddef.h>
 

@@ -1,7 +1,6 @@
-/// @file    NoisePlusPalette.hpp
+/// @file    noisepalette.h
 /// @brief   Demonstrates how to mix noise generation with color palettes on a
 /// 2D LED matrix
-/// @example NoisePlusPalette.hpp
 
 #pragma once
 

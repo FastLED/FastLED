@@ -1,4 +1,4 @@
-/// @file    expander.hpp
+/// @file    scale_up.h
 /// @brief   Expands a grid using bilinear interpolation and scaling up. This is
 /// useful for
 ///          under powered devices that can't handle the full resolution of the

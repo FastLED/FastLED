@@ -1,4 +1,5 @@
-
+/// @file five_bit_hd_gamma.cpp
+/// Defines functions for five-bit gamma correction
 
 #define FASTLED_INTERNAL 1
 #include "five_bit_hd_gamma.h"

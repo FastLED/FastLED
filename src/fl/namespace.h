@@ -1,3 +1,6 @@
+/// @file namespace.h
+/// Implements the FastLED namespace macros
+
 #pragma once
 
 #if defined(FASTLED_FORCE_NAMESPACE) && !defined(FASTLED_IS_USING_NAMESPACE) && !defined(FASTLED_NAMESPACE)
