@@ -147,7 +147,7 @@ void NoisePalette::fillnoise8() {
 
     for (uint16_t i = 0; i < width; i++) {
         int ioffset = scale * i;
-        for (int j = 0; j < height; j++) {
+        for (uint16_t j = 0; j < height; j++) {
             int joffset = scale * j;
 
             uint8_t data = inoise8(mX + ioffset, mY + joffset, mZ);
