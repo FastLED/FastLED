@@ -61,6 +61,10 @@ struct ColorHSV {
   explicit ColorHSV(const Color3i& color) {
     FromRGB(color);
   }
+  ColorHSV& operator=(const Color3i& color) {
+    FromRGB(color);
+    return *this;
+  }
   ColorHSV(const ColorHSV& other) {
     Set(other);
   }
