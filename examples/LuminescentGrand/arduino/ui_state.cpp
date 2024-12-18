@@ -13,7 +13,7 @@
 
 #if defined(UI_V1)
 #define PIN_VIS_SELECT 31
-#define PIN_COLOR_SELECT A0
+#define PIN_COLOR_SELECT A3
 #elif defined(UI_V2)
 #define PIN_VIS_SELECT 2
 #define PIN_COLOR_SELECT 4
@@ -27,7 +27,7 @@
 
 
 
-#define PIN_POT_VEL_SENSOR A1
+#define PIN_POT_VEL_SENSOR A3
 #define PIN_POT_COLOR_SENSOR A0
 
 Potentiometer velocity_pot(PIN_POT_VEL_SENSOR);
