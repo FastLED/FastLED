@@ -1,6 +1,11 @@
 
 FastLED 3.9.6
 =============
+* ESP32:
+  * Sticky first green LED on the chain has been fixed. It turned out to be aggressive RMT recycling. We've disabled this for now and filed a bug:
+      * https://github.com/FastLED/FastLED/issues/1786
+      * https://github.com/FastLED/FastLED/issues/1761
+      * https://github.com/FastLED/FastLED/issues/1774
 * Bug fix for FastLED 3.9.5
   * Fixes using namespace fl in `FastLED.h` in the last release (oops!)
 * Fixes for Arduino Cloud compiler and their ancient version of esp-idf for older chips.
