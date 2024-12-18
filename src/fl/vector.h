@@ -219,7 +219,7 @@ private:
     typedef const T* const_iterator;
 
     // Constructor
-    HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) {
+    HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
         mArray.reset(new T[mCapacity]);
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
@@ -229,7 +229,7 @@ private:
     HeapVector(const HeapVector<T>& other): mSize(other.size()) {
         assign(other.begin(), other.end());
     }
-    HeapVector& operator=(const HeapVector<T>& other) {
+    HeapVector& operator=(const HeapVector<T>& other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             assign(other.begin(), other.end());
         }
