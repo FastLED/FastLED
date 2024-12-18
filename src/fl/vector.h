@@ -230,6 +230,7 @@ private:
         assign(other.begin(), other.end());
     }
     HeapVector& operator=(const HeapVector<T>& other) {
+        mSize = mSize; // shut up the compiler warning.
         if (this != &other) {
             assign(other.begin(), other.end());
         }
