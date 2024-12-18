@@ -1,4 +1,9 @@
 
+FastLED 3.9.6
+=============
+* Bug fix for FastLED 3.9.5
+  * Fixes using namespace fl in `FastLED.h` in the last release (oops!)
+
 FastLED 3.9.5
 =============
 
