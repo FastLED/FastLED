@@ -6,7 +6,7 @@
 /// Then go to your sketch directory and run
 /// > fastled
 
-#if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) 
+#if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_RP2040)
 // avr can't compile this, neither can the esp8266.
 void setup() {}
 void loop() {}
