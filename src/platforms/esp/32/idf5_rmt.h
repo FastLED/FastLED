@@ -8,8 +8,12 @@
 #include <stdint.h>
 #include "led_strip/rmt_strip.h"
 
+// It turns out that RMT5 recycling causes a lot of problems with
+// the first led. A bug has been filed with Espressif about this.
+// Therefore we use the alternative implementation that does not
+// reycle. To get the old behavior, set FASTLED_RMT5_RECYCLE to 1.
 #ifndef FASTLED_RMT5_RECYCLE
-#define FASTLED_RMT5_RECYCLE 1
+#define FASTLED_RMT5_RECYCLE 0
 #endif
 
 
