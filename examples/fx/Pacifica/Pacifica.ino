@@ -14,7 +14,7 @@
 #include <FastLED.h>
 #include "fx/1d/pacifica.hpp"
 
-#using namespace fl;
+using namespace fl;
 
 #define DATA_PIN            3
 #define NUM_LEDS            60
