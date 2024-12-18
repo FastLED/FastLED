@@ -6,6 +6,8 @@
 #include "Arduino.h"
 #include "fl/xymap.h"
 
+using namespace fl;
+
 #define WIDTH 32
 #define HEIGHT 32
 #define NUM_LEDS ((WIDTH) * (HEIGHT))

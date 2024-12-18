@@ -4,8 +4,8 @@
 ///          `pip install fastled` then running `fastled` in this sketch directory.
 /// @example FxEngine.ino
 
-
 #include <FastLED.h>
+using namespace fl;
 
 #if  defined(__AVR__)
 // __AVR__:  Not enough memory enough for the FxEngine, so skipping this example

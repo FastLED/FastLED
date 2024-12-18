@@ -39,6 +39,8 @@
 #include <FastLED.h>
 #include "fx/1d/fire2012.hpp"
 
+using namespace fl;
+
 #define LED_PIN     5
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2811

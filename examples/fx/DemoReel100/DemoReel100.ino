@@ -5,6 +5,8 @@
 #include <FastLED.h>
 #include "fx/1d/demoreel100.hpp"
 
+using namespace fl;
+
 #define DATA_PIN    3
 //#define CLK_PIN   4
 #define LED_TYPE    WS2811

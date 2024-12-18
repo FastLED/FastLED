@@ -18,6 +18,8 @@
 #include "fx/2d/noisepalette.h"
 #include "fl/ui.h"
 
+using namespace fl;
+
 #define LED_PIN 3
 #define BRIGHTNESS 96
 #define LED_TYPE WS2811

@@ -1,6 +1,8 @@
 #include "FastLED.h"
 #include "fx/1d/twinklefox.hpp"
 
+using namespace fl;
+
 #define NUM_LEDS      100
 #define LED_TYPE   WS2811
 #define COLOR_ORDER   GRB
