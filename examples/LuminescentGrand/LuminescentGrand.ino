@@ -51,7 +51,7 @@ void loop() {}
 
 #include "arduino/MIDI.h"
 
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial, MIDI);
+MIDI_CREATE_INSTANCE(Serial, Serial, MIDI);
 
 
 FASTLED_TITLE("Luminescent Grand");

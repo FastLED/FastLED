@@ -69,7 +69,7 @@ byte ledColors[40][14][3]; // LED buffer - each ripple writes to this, then we
 //float decay = 0.97; // Multiply all LED's by this amount each tick to create
                     // fancy fading tails
 
-Slider decay("decay", .97f, .8, 1.0, .01);
+Slider sliderDecay("decay", .97f, .8, 1.0, .01);
 
 // These ripples are endlessly reused so we don't need to do any memory
 // management
@@ -217,7 +217,7 @@ void loop() {
     for (int strip = 0; strip < 40; strip++) {
         for (int led = 0; led < 14; led++) {
             for (int i = 0; i < 3; i++) {
-                ledColors[strip][led][i] *= decay.value();
+                ledColors[strip][led][i] *= sliderDecay.value();
             }
         }
     }
