@@ -57,7 +57,7 @@ MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MY_MIDI);
 
 
 FASTLED_TITLE("Luminescent Grand");
-FASTLED_DESCRIPTION("A MY_MIDI keyboard visualizer.");
+FASTLED_DESCRIPTION("A midi keyboard visualizer.");
 
 
 /////////////////////////////////////////////////////////

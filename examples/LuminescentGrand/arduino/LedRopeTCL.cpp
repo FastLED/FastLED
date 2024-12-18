@@ -19,7 +19,8 @@ using namespace fl;
 
 
 #define CHIPSET WS2812
-#define PIN_LEDS 0
+#define PIN_DATA 1
+#define PIN_CLOCK 2
 
 namespace {
 
@@ -101,7 +102,7 @@ void LedRopeTCL::RawCommitDraw() {
     controller_added_ = true;
     CRGB* leds = led_buffer_.data();
     size_t n_leds = led_buffer_.size();
-    FastLED.addLeds<WS2812, PIN_LEDS>(leds, n_leds).setScreenMap(mScreenMap);
+    FastLED.addLeds<APA102, PIN_DATA, PIN_CLOCK>(leds, n_leds).setScreenMap(mScreenMap);
   }
   FastLED.show();
 }
