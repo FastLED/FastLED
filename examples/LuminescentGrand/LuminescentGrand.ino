@@ -6,8 +6,8 @@
 /// Then go to your sketch directory and run
 /// > fastled
 
-#ifdef __AVR__
-// missing software serial in default build.
+#if defined(__AVR__) || defined(ARDUINO_ARCH_ESP8266) 
+// avr can't compile this, neither can the esp8266.
 void setup() {}
 void loop() {}
 #else

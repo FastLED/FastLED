@@ -1,0 +1,89 @@
+Changing to directory C:\Users\niteris\dev\fastled
+*** Initializing environment for nanorp2040connect ***
+
+
+Running command:
+  pio project init --project-dir .build/nanorp2040connect --board nanorp2040connect --project-option=build_flags=-Wl,-Map,firmware.map --project-option=build_flags=-fopt-info-all=optimization_report.txt --project-option=extra_scripts=C:\Users\niteris\dev\fastled\pre:lib\ci\ci-flags.py
+The following files/directories have been created in C:\Users\niteris\dev\fastled\.build\nanorp2040connect
+include - Put project header files here
+lib - Put project specific (private) libraries here
+src - Put project source files here
+platformio.ini - Project Configuration File
+Resolving nanorp2040connect dependencies...
+Already up-to-date.
+Project has been successfully initialized!
+*** Finished initializing environment for board nanorp2040connect ***
+*** Initializing environment for nanorp2040connect ***
+
+
+Running command:
+  pio project init --project-dir .build/nanorp2040connect --board nanorp2040connect --project-option=build_flags=-Wl,-Map,firmware.map --project-option=build_flags=-fopt-info-all=optimization_report.txt --project-option=extra_scripts=C:\Users\niteris\dev\fastled\pre:lib\ci\ci-flags.py
+The following files/directories have been created in C:\Users\niteris\dev\fastled\.build\nanorp2040connect
+include - Put project header files here
+lib - Put project specific (private) libraries here
+src - Put project source files here
+platformio.ini - Project Configuration File
+Resolving nanorp2040connect dependencies...
+Already up-to-date.
+Project has been successfully initialized!
+*** Finished initializing environment for board nanorp2040connect ***
+Finished initializing build_dir for board nanorp2040connect
+
+All build directories initialized in 0.16 minutes.
+
+*** Building examples\LuminescentGrand for board nanorp2040connect ***
+*** Building for first example examples\LuminescentGrand board nanorp2040connect ***
+*** Building example examples\LuminescentGrand for board nanorp2040connect ***
+Copying examples\LuminescentGrand\LuminescentGrand.ino to .build\nanorp2040connect\src\LuminescentGrand.ino
+Copying examples\LuminescentGrand\arduino\buttons.h to .build\nanorp2040connect\src\arduino\buttons.h
+Copying examples\LuminescentGrand\arduino\LedRopeTCL.cpp to .build\nanorp2040connect\src\arduino\LedRopeTCL.cpp
+Copying examples\LuminescentGrand\arduino\LedRopeTCL.h to .build\nanorp2040connect\src\arduino\LedRopeTCL.h
+Copying examples\LuminescentGrand\arduino\MIDI.cpp to .build\nanorp2040connect\src\arduino\MIDI.cpp
+Copying examples\LuminescentGrand\arduino\MIDI.h to .build\nanorp2040connect\src\arduino\MIDI.h
+Copying examples\LuminescentGrand\arduino\MIDI.hpp to .build\nanorp2040connect\src\arduino\MIDI.hpp
+Copying examples\LuminescentGrand\arduino\midi_Defs.h to .build\nanorp2040connect\src\arduino\midi_Defs.h
+Copying examples\LuminescentGrand\arduino\midi_Message.h to .build\nanorp2040connect\src\arduino\midi_Message.h
+Copying examples\LuminescentGrand\arduino\midi_Namespace.h to .build\nanorp2040connect\src\arduino\midi_Namespace.h
+Copying examples\LuminescentGrand\arduino\midi_Platform.h to .build\nanorp2040connect\src\arduino\midi_Platform.h
+Copying examples\LuminescentGrand\arduino\midi_Settings.h to .build\nanorp2040connect\src\arduino\midi_Settings.h
+Copying examples\LuminescentGrand\arduino\serialMIDI.h to .build\nanorp2040connect\src\arduino\serialMIDI.h
+Copying examples\LuminescentGrand\arduino\ui_state.cpp to .build\nanorp2040connect\src\arduino\ui_state.cpp
+Copying examples\LuminescentGrand\arduino\ui_state.h to .build\nanorp2040connect\src\arduino\ui_state.h
+Copying examples\LuminescentGrand\fastled_js\fastled.js to .build\nanorp2040connect\src\fastled_js\fastled.js
+Copying examples\LuminescentGrand\fastled_js\fastled.wasm to .build\nanorp2040connect\src\fastled_js\fastled.wasm
+Copying examples\LuminescentGrand\fastled_js\files.json to .build\nanorp2040connect\src\fastled_js\files.json
+Copying examples\LuminescentGrand\fastled_js\hash.txt to .build\nanorp2040connect\src\fastled_js\hash.txt
+Copying examples\LuminescentGrand\fastled_js\index.css to .build\nanorp2040connect\src\fastled_js\index.css
+Copying examples\LuminescentGrand\fastled_js\index.html to .build\nanorp2040connect\src\fastled_js\index.html
+Copying examples\LuminescentGrand\fastled_js\index.js to .build\nanorp2040connect\src\fastled_js\index.js
+Copying examples\LuminescentGrand\fastled_js\out.txt to .build\nanorp2040connect\src\fastled_js\out.txt
+Copying examples\LuminescentGrand\fastled_js\perf.txt to .build\nanorp2040connect\src\fastled_js\perf.txt
+Copying examples\LuminescentGrand\fastled_js\modules\graphics_manager.js to .build\nanorp2040connect\src\fastled_js\modules\graphics_manager.js
+Copying examples\LuminescentGrand\fastled_js\modules\graphics_manager_threejs.js to .build\nanorp2040connect\src\fastled_js\modules\graphics_manager_threejs.js
+Copying examples\LuminescentGrand\fastled_js\modules\ui_manager.js to .build\nanorp2040connect\src\fastled_js\modules\ui_manager.js
+Copying examples\LuminescentGrand\shared\.DS_Store to .build\nanorp2040connect\src\shared\.DS_Store
+Copying examples\LuminescentGrand\shared\ApproximatingFunction.h to .build\nanorp2040connect\src\shared\ApproximatingFunction.h
+Copying examples\LuminescentGrand\shared\color.cpp to .build\nanorp2040connect\src\shared\color.cpp
+Copying examples\LuminescentGrand\shared\color.h to .build\nanorp2040connect\src\shared\color.h
+Copying examples\LuminescentGrand\shared\color_mapper.cpp to .build\nanorp2040connect\src\shared\color_mapper.cpp
+Copying examples\LuminescentGrand\shared\color_mapper.h to .build\nanorp2040connect\src\shared\color_mapper.h
+Copying examples\LuminescentGrand\shared\dprint.cpp to .build\nanorp2040connect\src\shared\dprint.cpp
+Copying examples\LuminescentGrand\shared\dprint.h to .build\nanorp2040connect\src\shared\dprint.h
+Copying examples\LuminescentGrand\shared\framebuffer.cpp to .build\nanorp2040connect\src\shared\framebuffer.cpp
+Copying examples\LuminescentGrand\shared\framebuffer.h to .build\nanorp2040connect\src\shared\framebuffer.h
+Copying examples\LuminescentGrand\shared\Keyboard.cpp to .build\nanorp2040connect\src\shared\Keyboard.cpp
+Copying examples\LuminescentGrand\shared\Keyboard.h to .build\nanorp2040connect\src\shared\Keyboard.h
+Copying examples\LuminescentGrand\shared\led_layout_array.cpp to .build\nanorp2040connect\src\shared\led_layout_array.cpp
+Copying examples\LuminescentGrand\shared\led_layout_array.h to .build\nanorp2040connect\src\shared\led_layout_array.h
+Copying examples\LuminescentGrand\shared\led_rope_interface.h to .build\nanorp2040connect\src\shared\led_rope_interface.h
+Copying examples\LuminescentGrand\shared\Painter.cpp to .build\nanorp2040connect\src\shared\Painter.cpp
+Copying examples\LuminescentGrand\shared\Painter.h to .build\nanorp2040connect\src\shared\Painter.h
+Copying examples\LuminescentGrand\shared\settings.h to .build\nanorp2040connect\src\shared\settings.h
+Copying examples\LuminescentGrand\shared\util.cpp to .build\nanorp2040connect\src\shared\util.cpp
+Copying examples\LuminescentGrand\shared\util.h to .build\nanorp2040connect\src\shared\util.h
+
+
+******************************
+* Running command in cwd: C:\Users\niteris\dev\fastled
+*     pio ci --board nanorp2040connect --lib=src --lib=ci --keep-build-dir --build-dir=.build/nanorp2040connect examples/LuminescentGrand/*ino
+******************************
