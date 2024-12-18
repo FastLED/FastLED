@@ -8,7 +8,7 @@
 
 #include "defs.h"
 
-#if ENABLE_SKETCH
+#if !ENABLE_SKETCH
 // avr can't compile this, neither can the esp8266.
 void setup() {}
 void loop() {}
