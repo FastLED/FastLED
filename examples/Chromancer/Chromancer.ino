@@ -10,6 +10,12 @@
    (C) Voidstar Lab 2021
 */
 
+#ifdef __AVR__
+// Not powerful enough to run this sketch, so don't even try.
+void setup() {}
+void loop() {}
+#else
+
 #include "mapping.h"
 #include "net.h"
 #include "ripple.h"
@@ -555,3 +561,5 @@ void loop() {
     //  Serial.print("Benchmark: ");
     //  Serial.println(millis() - benchmark);
 }
+
+#endif  // __AVR__
