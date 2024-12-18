@@ -85,14 +85,14 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
-	EngineEvents::onStripAdded(pLed, nLedsOrOffset - nOffset);
+	fl::EngineEvents::onStripAdded(pLed, nLedsOrOffset - nOffset);
 	return *pLed;
 }
 
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
-	EngineEvents::onBeginFrame();
+	fl::EngineEvents::onBeginFrame();
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -119,8 +119,8 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
-	EngineEvents::onEndShowLeds();
-	EngineEvents::onEndFrame();
+	fl::EngineEvents::onEndShowLeds();
+	fl::EngineEvents::onEndFrame();
 }
 
 int CFastLED::count() {
