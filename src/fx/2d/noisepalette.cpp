@@ -19,7 +19,7 @@ NoisePalette::NoisePalette(XYMap xyMap, float fps)
     // currentPalette = PartyColors_p;
     static_assert(sizeof(currentPalette) == sizeof(CRGBPalette16),
                   "Palette size mismatch");
-    memcpy(&currentPalette, PartyColors_p, sizeof(CRGBPalette16));
+    currentPalette = PartyColors_p;
     width = xyMap.getWidth();
     height = xyMap.getHeight();
 
