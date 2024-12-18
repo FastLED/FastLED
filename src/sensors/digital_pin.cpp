@@ -45,8 +45,8 @@ class DigitalPinImpl : public Referent {
                 break;
         }
     }
-    bool digitalRead() { return HIGH == ::digitalRead(mDigitalPin); }
-    void digitalWrite(bool value) { ::digitalWrite(mDigitalPin, value ? HIGH : LOW); }
+    bool high() { return HIGH == ::digitalRead(mDigitalPin); }
+    void write(bool value) { ::digitalWrite(mDigitalPin, value ? HIGH : LOW); }
 
   private:
     int mDigitalPin;
@@ -69,8 +69,8 @@ class DigitalPinImpl : public Referent {
         }
     }
 
-    bool digitalRead() { return mPin.hival(); }
-    void digitalWrite(bool value) { value ? mPin.hi(): mPin.lo(); }
+    bool high() { return mPin.hival(); }
+    void write(bool value) { value ? mPin.hi(): mPin.lo(); }
     // define pin
     Pin mPin;
 };
@@ -90,11 +90,11 @@ void DigitalPin::setPinMode(Mode mode) {
 }
 
 bool DigitalPin::high() const {
-    return mImpl->digitalRead();
+    return mImpl->high();
 }
 
 void DigitalPin::write(bool is_high) {
-    mImpl->digitalWrite(is_high);
+    mImpl->write(is_high);
 }
 
 }  // namespace fl
