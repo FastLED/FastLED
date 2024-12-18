@@ -4,6 +4,8 @@
 
 #include <FastLED.h>
 
+using namespace fl;
+
 // How many leds in your strip?
 #define NUM_LEDS 64 
 

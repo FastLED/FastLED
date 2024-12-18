@@ -5,6 +5,8 @@
 #include <FastLED.h>
 #include "fx/1d/cylon.hpp"
 
+using namespace fl;
+
 // How many leds in your strip?
 #define NUM_LEDS 64 
 
