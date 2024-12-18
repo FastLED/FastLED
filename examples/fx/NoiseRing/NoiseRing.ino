@@ -24,7 +24,7 @@
 #include "sensors/pir.h"
 #include "timer.h"
 
-#define LED_PIN 2
+#define LED_PIN 1
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
 #define NUM_LEDS 250

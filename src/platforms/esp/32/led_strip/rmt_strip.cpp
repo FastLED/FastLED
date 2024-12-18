@@ -89,6 +89,9 @@ public:
                 // Update the total number of active strips allowed.
                 RmtActiveStripGroup::instance().set_total_allowed(active_strips);
                 // wait for one of the strips to complete and then try again.
+                // TODO: This doesn't make any sense for strips that don't recycle.
+                // This will probably manifest as a bug for someone that is using all the strips they can.
+                // I'll have to come back to this and fix.
                 RmtActiveStripGroup::instance().wait_for_any_strip_to_release();
                 continue;
             }
