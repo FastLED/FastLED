@@ -52,7 +52,18 @@ void loop() {}
 
 #include "arduino/MIDI.h"
 
-MIDI_CREATE_INSTANCE(HardwareSerial, Serial0, MY_MIDI);
+#if defined(ARDUINO_TEENSY30) || defined(ARDUINO_TEENSY41) || defined(ARDUINO_TEENSY32) || defined(ARDUINO_TEENSY31)
+#define SerialType HardwareSerial 
+#define SerialName Serial1
+#elif defined(__AVR__)
+#define SerialType SoftwareSerial 
+#define SerialName Serial 
+#else
+#define SerialType HardwareSerial 
+#define SerialName Serial1
+#endif
+
+MIDI_CREATE_INSTANCE(SerialType, SerialName, MY_MIDI);
 
 
 FASTLED_TITLE("Luminescent Grand");

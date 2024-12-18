@@ -6,6 +6,7 @@
 #include "./led_layout_array.h"
 #include "./dprint.h"
 #include "./Keyboard.h"
+#include "fl/math_macros.h"
 #include <math.h>
 
 namespace {
@@ -84,7 +85,7 @@ float CalcSaturation(float time_delta_ms, const ColorHSV& color, bool key_on) {
                                  0.0f, 1.0f);
   // As time increases the saturation factor will continue
   // to grow past 1.0. We use min to clamp it back to 1.0.
-  saturation_factor = min(1.0f, saturation_factor);
+  saturation_factor = MIN(1.0f, saturation_factor);
   // TODO - make the saturation interpolate between the original
   // color and the unsaturated state.
  return saturation_factor;
@@ -387,7 +388,7 @@ void Painter::VegasVisualizer(const KeyboardState& keyboard,
       led_rope->RawDrawPixel(Color3i::Black());
       painted_lights++;
     }
-    skipped_lights += max(0, static_cast<int32_t>(led_column_table[i]) - static_cast<int32_t>(painted_lights));
+    skipped_lights += MAX(0, static_cast<int32_t>(led_column_table[i]) - static_cast<int32_t>(painted_lights));
   }
   
   for (uint32_t i = 0; i < skipped_lights; ++i) {
