@@ -10,8 +10,9 @@
    (C) Voidstar Lab 2021
 */
 
-#ifdef __AVR__
-// Not powerful enough to run this sketch, so don't even try.
+#if defined(__AVR__) || defined(ARDUINO_ARCH_AVR) || defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350) || defined(ARDUINO_ARCH_RP2040)
+// Avr is not powerful enough.
+// Other platforms have weird issues. Will revisit this later.
 void setup() {}
 void loop() {}
 #else
