@@ -24,10 +24,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -m "Rev 3.9.6 - Fix esp32 first pixel green on WS2812 strips, other compile fixes from 3.9.5."
-$ git tag 3.9.6 master 
+$ git commit -m "Rev 3.9.7 - Fix esp32 first pixel green on WS2812 strips, Arduino Cloud Compiler fix for ancient esp32 chipsets."
+$ git tag 3.9.7 master 
 $ git push 
-$ git push origin 3.9.6
+$ git push origin 3.9.7
 ```
 
 Then use the GitHub UI to make a new “Release”:
