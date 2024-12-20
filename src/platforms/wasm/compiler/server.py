@@ -512,7 +512,7 @@ def make_random_path_string(digits: int) -> str:
 
 
 @app.get("/project/init")
-def project_init() -> FileResponse:
+def project_init(background_tasks: BackgroundTasks) -> FileResponse:
     """Archive /js/fastled/examples/wasm into a zip file and return it."""
     print("Endpoint accessed: /project/init")
     # tmp_zip_file = NamedTemporaryFile(delete=False)
@@ -534,17 +534,19 @@ def project_init() -> FileResponse:
         except Exception as e:
             warnings.warn(f"Error cleaning up: {e}")
 
-    after_response_task = BackgroundTasks().add_task(cleanup)
+    background_tasks.add_task(cleanup)
     return FileResponse(
         path=tmp_zip_path,
         media_type="application/zip",
         filename="fastled_example.zip",
-        background=after_response_task,
+        background=background_tasks,
     )
 
 
 @app.post("/project/init")
-def project_init_example(example: str = Body(...)) -> FileResponse:
+def project_init_example(
+    background_tasks: BackgroundTasks, example: str = Body(...)
+) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/example with example: {example}")
     name = Path("example").name
@@ -564,12 +566,12 @@ def project_init_example(example: str = Body(...)) -> FileResponse:
             warnings.warn(f"Error cleaning up: {e}")
             raise
 
-    after_response_task = BackgroundTasks().add_task(cleanup)
+    background_tasks.add_task(cleanup)
     return FileResponse(
         path=tmp_file_path,
         media_type="application/zip",
         filename="fastled_example.zip",
-        background=after_response_task,
+        background=background_tasks,
     )
 
 
