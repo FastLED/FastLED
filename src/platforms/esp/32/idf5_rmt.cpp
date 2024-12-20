@@ -70,10 +70,9 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
         uint16_t t0h, t0l, t1h, t1l;
         convert(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
         if (mRecycle) {
-            mLedStrip = create_rmt_led_strip_no_recyle(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
-        } else {
             mLedStrip = create_rmt_led_strip(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
-
+        } else {
+            mLedStrip = create_rmt_led_strip_no_recyle(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
         }
         
     } else {
