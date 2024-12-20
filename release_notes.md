@@ -1,3 +1,9 @@
+FastLED 3.9.7
+=============
+* ESP32:
+  * Okay final fix for the green led that's been stuck on. It turns out in 3.9.6 I made a mistake and swapped the RMT recycle vs no recycle. This should now be corrected. To get the old behavior back use `#define FASTLED_RMT5_RECYCLE=0`. The new behavior may become the default if it turns out this is more stable.
+* Arduino Cloud Compiler: This should now work ancient compiler toolchains that they use for some of the older ESP boards. Despite the fact that two bugs were fixed in the last release, another one cropped up in 3.9.6 for extremely old idf toolchians which defines digitalRead/digitalWrite not as functions, but as macros.
+
 
 FastLED 3.9.6
 =============
