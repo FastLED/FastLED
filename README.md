@@ -150,7 +150,7 @@ For more examples see this [link](examples).
 
 
 [![esp32dev](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml)
-
+*platformio seems to have introduced a bug that is affecting the linux github runners with a false failure. This board works correctly in a local build.*
 
 [![esp32wroom](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml)
 
@@ -169,6 +169,7 @@ For more examples see this [link](examples).
 
 
 [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml)
+*platformio seems to have introduced a bug that is affecting the linux github runners with a false failure. This board works correctly in a local build.*
 
 *Specific features*
 
