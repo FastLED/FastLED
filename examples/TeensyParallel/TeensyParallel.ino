@@ -32,7 +32,7 @@ class ObjectFLEDGroup {
     typedef fl::SortedHeapMap<uint8_t, Info> ObjectMap;
 
     scoped_ptr<ObjectFLED> mObjectFLED;
-    scoped_array<CRGB> mBuffer;
+    scoped_array<CRGB> mAllLedsBuffer;
     ObjectMap mObjects;
     bool mDrawn = false;
     bool mNeedsValidation = false;
@@ -84,10 +84,11 @@ class ObjectFLEDGroup {
         if (!mObjectFLED.get() || mNeedsValidation) {
             mObjectFLED.reset();
             uint32_t totalLeds = getTotalLeds();
-            mBuffer.reset();
-            mBuffer.reset(new CRGB[totalLeds]);
+            uint32_t maxLedSegment = getMaxLedInStrip();
+            mAllLedsBuffer.reset();
+            mAllLedsBuffer.reset(new CRGB[totalLeds]);
 
-            CRGB* curr = mBuffer.get();
+            CRGB* curr = mAllLedsBuffer.get();
             // copy leds in the buffer
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 //memcpy(mBuffer.get() + it->second.numLeds, it->second.buffer,
@@ -95,14 +96,19 @@ class ObjectFLEDGroup {
                 CRGB* src = it->second.buffer;
                 size_t nBytes = it->second.numLeds * sizeof(CRGB);
                 memcpy(curr, src, nBytes);
-                curr += it->second.numLeds;
+                if (it->second.numLeds < maxLedSegment) {
+                    // Fill the rest with black.
+                    memset(curr + it->second.numLeds, 0,
+                           (maxLedSegment - it->second.numLeds) * sizeof(CRGB));
+                }
+                curr += maxLedSegment;
             }
 
             PinList42 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->first);
             }
-            mObjectFLED.reset(new ObjectFLED(totalLeds, mBuffer.get(),
+            mObjectFLED.reset(new ObjectFLED(totalLeds, mAllLedsBuffer.get(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
             mObjectFLED->begin();
