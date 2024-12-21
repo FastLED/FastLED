@@ -11,6 +11,14 @@
 
 namespace fl {
 
+template<typename T>
+struct DefaultLess {
+    bool operator()(const T& a, const T& b) const {
+        return a < b;
+    }
+};
+
+
 // A simple unordered map implementation with a fixed size.
 // The user is responsible for making sure that the inserts
 // do not exceed the capacity of the set, otherwise they will
@@ -239,7 +247,8 @@ private:
     VectorType data;
 };
 
-template <typename Key, typename Value, typename Less>
+
+template <typename Key, typename Value, typename Less = fl::DefaultLess<Key>>
 class SortedHeapMap {
 private:
     struct Pair {
