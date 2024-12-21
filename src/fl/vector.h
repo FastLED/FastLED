@@ -265,6 +265,9 @@ private:
     }
 
     void resize(size_t n) {
+        if (mSize == n) {
+            return;
+        }
         HeapVector<T> temp(n);
         for (size_t i = 0; i < n && i < mSize; ++i) {
             temp.mArray[i] = mArray[i];
