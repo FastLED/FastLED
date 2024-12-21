@@ -5,3 +5,5 @@
   * list of projects on reddit:
     * https://www.reddit.com/r/FastLED/wiki/index/user_examples/
   * mesh networked esp32 with mutli wifi connections for redundancy
+
+  * https://github.com/Souravgoswami/Arduino-FastLED-Cool-Effects
