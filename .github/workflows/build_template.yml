@@ -45,6 +45,11 @@ jobs:
           uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
         shell: bash
 
+      - name: Check platformio json bug that's happening right now
+        if: always()
+        run: |
+          cat /home/runner/.platformio/platforms/espressif32/boards/ws_esp32_s3_matrix.json || true
+
       - name: Print out build_info.json
         if: always()
         run: |
