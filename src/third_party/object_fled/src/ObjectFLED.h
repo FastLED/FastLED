@@ -126,6 +126,12 @@ public:
 
 	void show(void);
 
+	void waitForDmaToFinish() {
+		while (!dma3.complete()) {  // wait for dma to complete before reset/re-use
+			delayMicroseconds(10);
+		}
+	}
+
 	int busy(void);
 
 	//Brightness values 0-255

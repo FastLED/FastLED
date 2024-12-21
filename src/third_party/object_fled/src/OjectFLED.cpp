@@ -393,7 +393,7 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 // 4 word32s for each bit in (led data)/pin = 16 * 8 = 96 bitdata bytes for each LED byte: 288 bytes / LED
 // launches DMA with IRQ activation to reload bitdata from frameBuffer
 void ObjectFLED::show(void) {
-	while (!dma3.complete()); // wait for dma to complete before reset/re-use
+	waitForDmaToFinish();	//wait for prior DMA to finish
 
 	//Restore context if needed
 	if (frameBuffer != frameBufferLocal) {		
