@@ -87,10 +87,15 @@ class ObjectFLEDGroup {
             mBuffer.reset();
             mBuffer.reset(new CRGB[totalLeds]);
 
+            CRGB* curr = mBuffer.get();
             // copy leds in the buffer
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-                memcpy(mBuffer.get() + it->second.numLeds, it->second.buffer,
-                       it->second.numLeds * sizeof(CRGB));
+                //memcpy(mBuffer.get() + it->second.numLeds, it->second.buffer,
+                //       it->second.numLeds * sizeof(CRGB));
+                CRGB* src = it->second.buffer;
+                size_t nBytes = it->second.numLeds * sizeof(CRGB);
+                memcpy(curr, src, nBytes);
+                curr += it->second.numLeds;
             }
 
             PinList42 pinList;
