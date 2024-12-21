@@ -243,6 +243,10 @@ public:
     bool has(const Key& it) const {
         return find(it) != end();
     }
+
+    bool contains(const Key& key) const {
+        return has(key);
+    }
 private:
     VectorType data;
 };
@@ -289,8 +293,24 @@ public:
         return data.insert(Pair(key, value), result);
     }
 
+    void update(const Key& key, const Value& value) {
+        if (!insert(key, value)) {
+            iterator it = find(key);
+            it->second = value;
+        }
+    }
+
+    Value& at(const Key& key) {
+        iterator it = find(key);
+        return it->second;
+    }
+
     bool has(const Key& key) const {
         return data.has(Pair(key));
+    }
+
+    bool contains(const Key& key) const {
+        return has(key);
     }
 
     size_t size() const { return data.size(); }
