@@ -876,6 +876,8 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 // At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
 //
 // Python script to calculate the values for T1, T2, and T3 for FastLED:
+// Note: there is a discussion on whether this python script is correct or not:
+//  https://github.com/FastLED/FastLED/issues/1806
 //
 //  print("Enter the values of T0H, T0L, T1H, T1L, in nanoseconds: ")
 //  T0H = int(input("  T0H: "))
