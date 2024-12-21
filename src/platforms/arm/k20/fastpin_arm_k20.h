@@ -2,6 +2,7 @@
 #define __FASTPIN_ARM_K20_H
 
 #include "fl/force_inline.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

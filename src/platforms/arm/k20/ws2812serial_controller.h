@@ -3,6 +3,8 @@
 
 #ifdef USE_WS2812SERIAL
 
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 template<int DATA_PIN, EOrder RGB_ORDER>

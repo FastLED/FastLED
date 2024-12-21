@@ -1,6 +1,8 @@
 #ifndef __INC_CLOCKLESS_ARM_K20_H
 #define __INC_CLOCKLESS_ARM_K20_H
 
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1

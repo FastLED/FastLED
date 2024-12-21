@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_ARM_H
 #define __INC_FASTSPI_ARM_H
 
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
