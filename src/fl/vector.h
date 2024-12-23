@@ -34,6 +34,12 @@ public:
         assign(values, N);
     }
 
+    template<size_t M>
+    FixedVector(const T (&values)[M]) : current_size(M) {
+        static_assert(M <= N, "Too many elements for FixedVector");
+        assign(values, M);
+    }
+
     // Destructor
     ~FixedVector() {
         clear();
