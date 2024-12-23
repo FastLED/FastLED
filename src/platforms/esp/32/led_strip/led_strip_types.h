@@ -40,7 +40,7 @@ typedef struct led_strip_t *led_strip_handle_t;
  * @brief LED Strip Configuration
  */
 typedef struct {
-    int strip_gpio_num;      /*!< GPIO number that used by LED strip */
+    gpio_num_t strip_gpio_num;      /*!< GPIO number that used by LED strip */
     uint32_t max_leds;       /*!< Maximum LEDs in a single strip */
     //led_pixel_format_t led_pixel_format; /*!< LED pixel format */
     // led_model_t led_model;   /*!< LED model */

@@ -16,7 +16,7 @@ namespace fastled_rmt51_strip {
 esp_err_t construct_new_led_strip(config_led_t config, led_strip_handle_t* ret_strip) {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {
-        .strip_gpio_num = config.pin,
+        .strip_gpio_num = static_cast<gpio_num_t>(config.pin),
         .max_leds = config.max_leds,
         .rmt_bytes_encoder_config = config.rmt_bytes_encoder_config,
         .reset_code = config.reset_code,

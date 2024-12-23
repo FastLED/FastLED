@@ -18,6 +18,7 @@
 #include "esp_log.h"
 #include "esp_check.h"
 #include "driver/rmt_tx.h"
+#include "driver/gpio.h"
 
 #include "led_strip.h"
 #include "led_strip_interface.h"
@@ -83,8 +84,11 @@ static esp_err_t led_strip_rmt_wait_refresh_done(led_strip_t *strip, int32_t tim
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     ESP_RETURN_ON_ERROR(rmt_tx_wait_all_done(rmt_strip->rmt_chan, timeout_ms), TAG, "wait for RMT channel done failed");
     ESP_RETURN_ON_ERROR(rmt_disable(rmt_strip->rmt_chan), TAG, "disable RMT channel failed");
+    // Set GPIO to input pulldown, works around bug:
+    // https://github.com/espressif/esp-idf/issues/15049
+    ESP_RETURN_ON_ERROR(gpio_pulldown_en(rmt_strip->gpio_num), TAG, "set GPIO to input pulldown failed");
     return ESP_OK;
-} 
+}
 
 static esp_err_t led_strip_rmt_refresh(led_strip_t *strip)
 {
@@ -92,8 +96,6 @@ static esp_err_t led_strip_rmt_refresh(led_strip_t *strip)
     ESP_RETURN_ON_ERROR(led_strip_rmt_wait_refresh_done(strip, -1), TAG, "wait for RMT channel done failed");
     return ESP_OK;
 }
-
-
 
 static esp_err_t led_strip_rmt_clear(led_strip_t *strip)
 {
@@ -272,6 +274,7 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
 
     rmt_strip->bytes_per_pixel = bytes_per_pixel;
     rmt_strip->strip_len = led_config->max_leds;
+    rmt_strip->gpio_num = led_config->strip_gpio_num;
     rmt_strip->base.set_pixel = led_strip_rmt_set_pixel;
     rmt_strip->base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;
     rmt_strip->base.refresh = led_strip_rmt_refresh;

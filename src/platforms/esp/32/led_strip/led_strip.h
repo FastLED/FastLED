@@ -28,6 +28,7 @@ typedef struct {
     uint32_t strip_len;
     uint8_t bytes_per_pixel;
     uint8_t* pixel_buf;
+    gpio_num_t gpio_num;
 } led_strip_rmt_obj;
 
 /**

@@ -23,8 +23,8 @@ using namespace fastled_rmt51_strip;
 
 #define TAG "idf5_rmt.cpp"
 
-#ifndef FASTLED_RMT5_EXTRA_WAIT_MS
-#define FASTLED_RMT5_EXTRA_WAIT_MS 0
+#ifndef FASTLED_RMT5_EXTRA_WAIT_MICROS
+#define FASTLED_RMT5_EXTRA_WAIT_MICROS 10
 #endif
 
 namespace {  // anonymous namespace
@@ -41,8 +41,8 @@ void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H
 
 
 void do_extra_wait() {
-    if (FASTLED_RMT5_EXTRA_WAIT_MS > 0) {
-        vTaskDelay(FASTLED_RMT5_EXTRA_WAIT_MS / portTICK_PERIOD_MS);
+    if (FASTLED_RMT5_EXTRA_WAIT_MICROS > 0) {
+        vTaskDelay(FASTLED_RMT5_EXTRA_WAIT_MICROS / configTICK_RATE_HZ);
     }
 }
 
@@ -100,6 +100,12 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
 }
 
 void RmtController5::showPixels() {
+    // Work around a blip that happens when the rmt_channel is disabled/deallocated.
+    // We now set the INPUT_PULLDOWN on the pin to avoid the blip, per the recommendations
+    // of espressif. However, but there could still be a momentary blip between the rmt
+    // channel being disable and when the INPUT_PULLDOWN is enabled. However the blip will
+    // be less than a few microseconds.
+    // See espressif bug https://github.com/espressif/esp-idf/issues/15049
     do_extra_wait();
     mLedStrip->draw();
 }
