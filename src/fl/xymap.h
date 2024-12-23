@@ -70,6 +70,13 @@ class XYMap {
     }
 
     uint16_t mapToIndex(uint16_t x, uint16_t y) const;
+    uint16_t mapToIndex(int x, int y) const {
+        if (x < 0) { x = 0; }
+        if (y < 0) { y = 0; }
+        if (x >= width) { x = width - 1; }
+        if (y >= height) { y = height - 1; }
+        return mapToIndex((uint16_t)x, (uint16_t)y);
+    }
 
     uint16_t getWidth() const;
     uint16_t getHeight() const;
