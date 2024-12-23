@@ -44,33 +44,34 @@ Slider scale("Scale", 4, .1, 4, .1);
 Slider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 Slider timescale("Time Scale", 1, .1, 10, .1);
 PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
+Checkbox useDither("Use Binary Dither", true);
 
 Timer timer;
 float current_brightness = 0;
 
+CLEDController* controller = nullptr;
 
 void setup() {
     Serial.begin(115200);
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
-    FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip)
-        .setScreenMap(xyMap);
+    controller = &FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+                .setCorrection(TypicalLEDStrip)
+                .setDither(DISABLE_DITHER)
+                .setScreenMap(xyMap);
     FastLED.setBrightness(brightness);
     pir.activate(millis());  // Activate the PIR sensor on startup.
 }
 
 void loop() {
+    controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
     EVERY_N_SECONDS(1) {
-        // printf("FPS: %d\n", FastLED.getFPS());
         std::cout << "loop" << std::endl;
     }
     uint8_t bri = pir.transition(millis());
     FastLED.setBrightness(bri * brightness.as<float>());
     uint32_t now = millis();
     double angle_offset = double(now) / 32000.0 * 2 * M_PI;
-    //angle_offset = 0;
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
-    // inoise8(x + ioffset,y + joffset,z);
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
@@ -86,9 +87,7 @@ void loop() {
         if (noise4 < 0) {
             noise4 = 0;
         }
-
         leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
-        // std::swap(leds[i].b, leds[i].g);
     }
     FastLED.show();
 }
