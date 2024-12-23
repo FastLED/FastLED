@@ -51,7 +51,8 @@ class ObjectFLEDGroup {
                 return;
             }
         }
-        mObjects.insert(numLeds, newInfo);
+        fl::InsertResult result;
+        bool ok = mObjects.insert(pin, newInfo, &result);
         mNeedsValidation = true;
     }
 
