@@ -156,7 +156,7 @@ class ClocklessController_ObjectFLED_WS2812
   protected:
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds() override {
-        #if 0
+        #if 1
         ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
         group.onNewFrame();
         void *data = Super::beginShowLeds();
@@ -191,7 +191,7 @@ class ClocklessController_ObjectFLED_WS2812
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
-        #if 0
+        #if 1
         Super::endShowLeds(data);
         ObjectFLEDGroup::getInstance().showPixels();
         #endif  // 0
