@@ -16,6 +16,7 @@
 
 #include "fl/json.h"
 #include "fl/math_macros.h"
+#include "fl/warn.h"
 #include "noisegen.h"
 #include "fl/screenmap.h"
 #include "fl/slice.h"
@@ -23,7 +24,6 @@
 #include "FastLED.h"
 #include "sensors/pir.h"
 #include "timer.h"
-#include <iostream>
 
 #define LED_PIN 1
 #define BRIGHTNESS 96
@@ -51,6 +51,19 @@ float current_brightness = 0;
 
 CLEDController* controller = nullptr;
 
+void handleSerialDither() {
+    if (Serial.available()) {
+        char input = Serial.read();
+        if (input == '0') {
+            useDither = false;
+        } else if (input == '1') {
+            useDither = true;
+        } else {
+            FASTLED_WARN("Invalid dither input. Use 0 or 1");
+        }
+    }
+}
+
 void setup() {
     Serial.begin(115200);
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
@@ -63,9 +76,11 @@ void setup() {
 }
 
 void loop() {
+    handleSerialDither();  // Add this line at start of loop()
+    
     controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
     EVERY_N_SECONDS(1) {
-        std::cout << "loop" << std::endl;
+        FASTLED_WARN("loop");
     }
     uint8_t bri = pir.transition(millis());
     FastLED.setBrightness(bri * brightness.as<float>());
