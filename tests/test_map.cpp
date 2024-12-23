@@ -126,5 +126,7 @@ TEST_CASE("SortedHeapMap operations") {
         CHECK(it->first == 3);
         ++it;
         CHECK(it->first == 4);
+        ++it;
+        CHECK(it == map.end());
     }
 }
