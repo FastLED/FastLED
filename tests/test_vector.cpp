@@ -376,3 +376,15 @@ TEST_CASE("SortedVector") {
         CHECK(vec.empty());
     }
 }
+
+TEST_CASE("HeapVector") {
+    SUBCASE("resize") {
+        HeapVector<int> vec;
+        vec.resize(5);
+        CHECK(vec.size() == 5);
+        CHECK(vec.capacity() >= 5);
+        for (int i = 0; i < 5; ++i) {
+            CHECK_EQ(0, vec[i]);
+        }
+    }
+}

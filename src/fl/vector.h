@@ -415,9 +415,15 @@ private:
 
     void swap(HeapVector<T>& other) {
         T* temp = mArray.release();
+        size_t temp_size = mSize;
+        size_t temp_capacity = mCapacity;
         T* temp2 = other.mArray.release();
         mArray.reset(temp2);
         other.mArray.reset(temp);
+        mSize = other.mSize;
+        mCapacity = other.mCapacity;
+        other.mSize = temp_size;
+        other.mCapacity = temp_capacity;
     }
 
     void swap(iterator a, iterator b) {
