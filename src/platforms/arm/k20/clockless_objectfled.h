@@ -60,7 +60,7 @@ class ObjectFLEDGroup {
             FASTLED_WARN("Adding pin " << int(pin) << " to the group.");
         }
         fl::InsertResult result;
-        bool ok = mObjects.insert(numLeds, newInfo, &result);
+        bool ok = mObjects.insert(pin, newInfo, &result);
         FASTLED_WARN("ok: " << ok << ", result: " << int(result));
         mNeedsValidation = true;
         #if 1
