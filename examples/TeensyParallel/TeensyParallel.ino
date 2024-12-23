@@ -16,7 +16,9 @@ void loop() {}
 
 using namespace fl;
 
-ClocklessController_ObjectFLED_WS2812<3, GRB> driver;
+#define PIN_FIRST 3
+
+ClocklessController_ObjectFLED_WS2812<PIN_FIRST, GRB> driver;
 #define NUM_LEDS (22 * 22)
 CRGB leds[NUM_LEDS];
 
