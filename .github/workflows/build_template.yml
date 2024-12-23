@@ -33,33 +33,17 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-
-      - name: Check platformio json bug that's happening right now
-        if: always()
-        run: |
-          cat /home/runner/.platformio/platforms/espressif32/boards/ws_esp32_s3_matrix.json || true
-
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         run: |
           set -o pipefail
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
-      - name: Check platformio json bug that's happening right now
-        if: always()
-        run: |
-          cat /home/runner/.platformio/platforms/espressif32/boards/ws_esp32_s3_matrix.json || true
-
       - name: Build Blink.ino for library info
         continue-on-error: true
         run: |
           uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
         shell: bash
-
-      - name: Check platformio json bug that's happening right now
-        if: always()
-        run: |
-          cat /home/runner/.platformio/platforms/espressif32/boards/ws_esp32_s3_matrix.json || true
 
       - name: Print out build_info.json
         if: always()
