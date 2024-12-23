@@ -11,12 +11,13 @@
 #include "fl/map.h"
 #include "fl/singleton.h"
 #include "fl/vector.h"
+#include "fl/warn.h"
 #include "pixel_iterator.h"
 #include "cpixel_ledcontroller.h"
 
 namespace fl {
 
-class PinList42 : public fl::FixedVector<uint8_t, 42> {};
+typedef fl::FixedVector<uint8_t, 42> PinList42;
 
 struct Info {
     CRGB *buffer = nullptr;
@@ -29,7 +30,7 @@ class ObjectFLEDGroup {
     typedef fl::SortedHeapMap<uint8_t, Info> ObjectMap;
 
     fl::scoped_ptr<ObjectFLED> mObjectFLED;
-    fl::scoped_array<CRGB> mAllLedsBuffer;
+    fl::HeapVector<CRGB> mAllLedsBuffer;
     ObjectMap mObjects;
     bool mDrawn = false;
     bool mNeedsValidation = false;
@@ -52,7 +53,7 @@ class ObjectFLEDGroup {
             }
         }
         fl::InsertResult result;
-        bool ok = mObjects.insert(pin, newInfo, &result);
+        mObjects.insert(pin, newInfo, &result);
         mNeedsValidation = true;
     }
 
@@ -75,38 +76,43 @@ class ObjectFLEDGroup {
         return numStrips * maxLed;
     }
 
-    void showPixels() {
+    void copy_data_to_buffer() {
+        uint32_t totalLeds = getTotalLeds();
+        if (totalLeds == 0) {
+            return;
+        }
+        mAllLedsBuffer.resize(totalLeds);
+        CRGB *curr = &mAllLedsBuffer.front();
+        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
+            CRGB *src = it->second.buffer;
+            size_t nBytes = it->second.numLeds * sizeof(CRGB);
+            memcpy(curr, src, nBytes);
+            uint32_t maxLedSegment = getMaxLedInStrip();
+            if (it->second.numLeds < maxLedSegment) {
+                // Fill the rest with black.
+                memset(curr + it->second.numLeds, 0,
+                       (maxLedSegment - it->second.numLeds) * sizeof(CRGB));
+            }
+            curr += maxLedSegment;
+        }
+    }
+
+    void showPixelsOnceThisFrame() {
         if (mDrawn) {
             return;
         }
+        uint32_t totalLeds = getTotalLeds();
+        if (totalLeds == 0) {
+            return;
+        }
+        copy_data_to_buffer();
         if (!mObjectFLED.get() || mNeedsValidation) {
             mObjectFLED.reset();
-            uint32_t totalLeds = getTotalLeds();
-            uint32_t maxLedSegment = getMaxLedInStrip();
-            mAllLedsBuffer.reset();
-            mAllLedsBuffer.reset(new CRGB[totalLeds]);
-
-            CRGB* curr = mAllLedsBuffer.get();
-            // copy leds in the buffer
-            for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-                //memcpy(mBuffer.get() + it->second.numLeds, it->second.buffer,
-                //       it->second.numLeds * sizeof(CRGB));
-                CRGB* src = it->second.buffer;
-                size_t nBytes = it->second.numLeds * sizeof(CRGB);
-                memcpy(curr, src, nBytes);
-                if (it->second.numLeds < maxLedSegment) {
-                    // Fill the rest with black.
-                    memset(curr + it->second.numLeds, 0,
-                           (maxLedSegment - it->second.numLeds) * sizeof(CRGB));
-                }
-                curr += maxLedSegment;
-            }
-
             PinList42 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->first);
             }
-            mObjectFLED.reset(new ObjectFLED(totalLeds, mAllLedsBuffer.get(),
+            mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBuffer.front(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
             mObjectFLED->begin();
@@ -129,9 +135,10 @@ class ClocklessController_ObjectFLED_WS2812
     // -- The actual controller object for ESP32
     // RmtController5 mRMTController;
 
+    typedef CPixelLEDController<RGB_ORDER> Super;
+
   public:
-    ClocklessController_ObjectFLED_WS2812()
-        : CPixelLEDController<RGB_ORDER>() {}
+    ClocklessController_ObjectFLED_WS2812(): Super() {}
 
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
@@ -141,14 +148,13 @@ class ClocklessController_ObjectFLED_WS2812
     virtual void *beginShowLeds() override {
         ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
         group.onNewFrame();
-        void *data = CPixelLEDController<RGB_ORDER>::beginShowLeds();
+        void *data = Super::beginShowLeds();
         return data;
     }
 
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         int numLeds = pixels.size();
         mBuffer.resize(numLeds);
         uint8_t r, g, b;
@@ -163,8 +169,10 @@ class ClocklessController_ObjectFLED_WS2812
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
-        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
-        ObjectFLEDGroup::getInstance().showPixels();
+        Super::endShowLeds(data);
+        // First one to call this draws everything, every other call this frame
+        // is ignored.
+        ObjectFLEDGroup::getInstance().showPixelsOnceThisFrame();
     }
 
     fl::HeapVector<CRGB> mBuffer;
