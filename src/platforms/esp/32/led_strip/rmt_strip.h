@@ -22,7 +22,7 @@ IRmtLedStrip* create_rmt_led_strip(
         int pin, uint32_t max_leds, bool is_rgbw);
 
 
-IRmtLedStrip* create_rmt_led_strip_no_recyle(
+IRmtLedStrip* create_rmt_led_strip_no_recycle(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, // Timing is in nanoseconds
         int pin, uint32_t max_leds, bool is_rgbw);
 

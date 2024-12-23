@@ -41,9 +41,9 @@ namespace fastled_rmt51_strip {
 // new experiment - try disabling recycling of RMT channels to try and fix
 // first led always on bug.
 
-class RmtLedStripNoRecyle : public IRmtLedStrip {
+class RmtLedStripNoRecycle : public IRmtLedStrip {
 public:
-    RmtLedStripNoRecyle(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
+    RmtLedStripNoRecycle(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
                 int pin, uint32_t max_leds, bool is_rgbw)
         : mT0H(T0H),
           mT0L(T0L),
@@ -119,7 +119,7 @@ public:
     }
 
 
-    virtual ~RmtLedStripNoRecyle() override {
+    virtual ~RmtLedStripNoRecycle() override {
         release_rmt();
 
         if (mLedStrip) {
@@ -327,10 +327,10 @@ IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uin
     return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
-IRmtLedStrip* create_rmt_led_strip_no_recyle(
+IRmtLedStrip* create_rmt_led_strip_no_recycle(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, // Timing is in nanoseconds
         int pin, uint32_t max_leds, bool is_rgbw){
-    return new RmtLedStripNoRecyle(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
+    return new RmtLedStripNoRecycle(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
 }  // namespace fastled_rmt51_strip
