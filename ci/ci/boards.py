@@ -78,7 +78,7 @@ class Board:
 
 ESP32DEV = Board(
     board_name="esp32dev",
-    platform=ESP32_IDF_5_1_PIOARDUINO_LATEST,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ESP32DEV_IDF4_4 = Board(
@@ -102,32 +102,32 @@ ESP32_C2_DEVKITM_1 = Board(
 ESP32_C3_DEVKITM_1 = Board(
     board_name="esp32c3",
     real_board_name="esp32-c3-devkitm-1",
-    platform=ESP32_IDF_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ESP32_C6_DEVKITC_1 = Board(
     board_name="esp32c6",
     real_board_name="esp32-c6-devkitc-1",
-    platform=ESP32_IDF_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="esp32-s3-devkitc-1",
-    platform=ESP32_IDF_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ESP32_S2_DEVKITM_1 = Board(
     board_name="esp32s2",
     real_board_name="esp32dev",
     board_build_mcu="esp32s2",
-    platform=ESP32_IDF_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
-    platform=ESP32_IDF_5_1_PIOARDUINO_LATEST,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(
@@ -219,7 +219,7 @@ ESP32S3_RMT51 = Board(
     board_name="esp32rmt_51",
     real_board_name="esp32-s3-devkitc-1",
     platform_needs_install=True,
-    platform=ESP32_IDF_5_1_PIOARDUINO,
+    platform=ESP32_IDF_5_3_PIOARDUINO,
     defines=[
         "FASTLED_RMT5=1",
     ],
