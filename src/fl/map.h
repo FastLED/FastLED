@@ -255,6 +255,12 @@ private:
 template <typename Key, typename Value, typename Less = fl::DefaultLess<Key>>
 class SortedHeapMap {
 private:
+
+
+
+
+public:
+
     struct Pair {
         Key first;
         Value second;
@@ -271,8 +277,6 @@ private:
     };
 
     SortedHeapVector<Pair, PairLess> data;
-
-public:
 
     typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
     typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;

@@ -11,12 +11,13 @@
 #include "fl/map.h"
 #include "fl/singleton.h"
 #include "fl/vector.h"
+#include "fl/warn.h"
 #include "pixel_iterator.h"
 #include "cpixel_ledcontroller.h"
 
 namespace fl {
 
-class PinList42 : public fl::FixedVector<uint8_t, 42> {};
+typedef fl::FixedVector<uint8_t, 42> PinList42;
 
 struct Info {
     CRGB *buffer = nullptr;
@@ -44,15 +45,29 @@ class ObjectFLEDGroup {
     void onNewFrame() { mDrawn = false; }
 
     void addObject(uint8_t pin, CRGB *leds, uint16_t numLeds) {
+        FASTLED_WARN("addObject, pin: " << int(pin) << " to the group.");
         Info newInfo = {leds, numLeds};
+        ObjectMap::iterator pair = mObjects.find(pin);
+        bool at_end = pair == mObjects.end();
+        FASTLED_WARN("at_end: " << at_end);
         if (mObjects.has(pin)) {
+            FASTLED_WARN("Pin " << int(pin) << " already exists in the group.");
             Info &info = mObjects.at(pin);
             if (info.numLeds == numLeds && info.buffer == leds) {
                 return;
             }
+        } else {
+            FASTLED_WARN("Adding pin " << int(pin) << " to the group.");
         }
-        mObjects.insert(numLeds, newInfo);
+        fl::InsertResult result;
+        bool ok = mObjects.insert(numLeds, newInfo, &result);
+        FASTLED_WARN("ok: " << ok << ", result: " << int(result));
         mNeedsValidation = true;
+        #if 1
+        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
+            FASTLED_WARN("Pin " << int(it->first) << " has " << it->second.numLeds << " leds.");
+        }
+        #endif
     }
 
     void removeObject(uint8_t pin) {
@@ -75,6 +90,7 @@ class ObjectFLEDGroup {
     }
 
     void showPixels() {
+        #if 0
         if (mDrawn) {
             return;
         }
@@ -113,6 +129,7 @@ class ObjectFLEDGroup {
         }
         mObjectFLED->show();
         mDrawn = true;
+        #endif  // 0
     }
 };
 
@@ -128,9 +145,10 @@ class ClocklessController_ObjectFLED_WS2812
     // -- The actual controller object for ESP32
     // RmtController5 mRMTController;
 
+    typedef CPixelLEDController<RGB_ORDER> Super;
+
   public:
-    ClocklessController_ObjectFLED_WS2812()
-        : CPixelLEDController<RGB_ORDER>() {}
+    ClocklessController_ObjectFLED_WS2812(): Super() {}
 
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
@@ -138,18 +156,27 @@ class ClocklessController_ObjectFLED_WS2812
   protected:
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds() override {
+        #if 0
         ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
         group.onNewFrame();
-        void *data = CPixelLEDController<RGB_ORDER>::beginShowLeds();
+        void *data = Super::beginShowLeds();
         return data;
+        #else
+        return nullptr;
+        #endif  // 0
     }
 
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
+
         ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
+
+        //PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         int numLeds = pixels.size();
         mBuffer.resize(numLeds);
+
+
+
         uint8_t r, g, b;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGB(&r, &g, &b);
@@ -157,13 +184,17 @@ class ClocklessController_ObjectFLED_WS2812
             pixels.advanceData();
             pixels.stepDithering();
         }
+        #if 1
         group.addObject(DATA_PIN, mBuffer.data(), numLeds);
+        #endif  // 0
     }
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
-        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
+        #if 0
+        Super::endShowLeds(data);
         ObjectFLEDGroup::getInstance().showPixels();
+        #endif  // 0
     }
 
     fl::HeapVector<CRGB> mBuffer;

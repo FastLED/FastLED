@@ -128,5 +128,10 @@ TEST_CASE("SortedHeapMap operations") {
         CHECK(it->first == 4);
         ++it;
         CHECK(it == map.end());
+        CHECK(map.has(1));
+        CHECK(map.has(2));
+        CHECK(map.has(3));
+        CHECK(map.has(4));
+        CHECK_FALSE(map.has(5));
     }
 }
