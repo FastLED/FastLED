@@ -71,26 +71,16 @@ public:
     void setEnabled(bool enabled) { m_enabled = enabled; }
 
     CLEDController();
-    #if defined(FASTLED_TESTING)
-    // Silences the warning about the destructor not being virtual during testing.
+    // If we added virtual to the AVR boards then we are going to add 600 bytes of memory to the binary
+    // flash size. This is because the virtual destructor pulls in malloc and free, which are the largest
     // Testing shows that this virtual destructor adds a 600 bytes to the binary on
     // attiny85 and about 1k for the teensy 4.X series.
     // Attiny85:
     //   With CLEDController destructor virtual: 11018 bytes to binary.
     //   Without CLEDController destructor virtual: 10666 bytes to binary.
-    // Looking at the ELF/Map file, it appears that adding a virtual destructor to this
-    // base class not only adds vtables to the subclasses, but also pulls in malloc & free,
-    // which are by far the largest functions in binary size.
-    // Since we don't control how this library is compiled, the only thing we can do is
-    // carefully enable this virtual destructor for testing only and in the future, for boards
-    // that have enough space to handle the extra binary size.
-    virtual ~CLEDController();
-    #else
-    ~CLEDController();
-    #endif
+    VIRTUAL_IF_NOT_AVR ~CLEDController();
+
     Rgbw getRgbw() const { return mRgbMode; }
-
-
 
     /// Initialize the LED controller
     virtual void init() = 0;
@@ -236,6 +226,7 @@ public:
         void* out = reinterpret_cast<void*>(d);
         return out;
     }
+
     virtual void endShowLeds(void* data) {
         // By default recieves the integer that beginShowLeds() emitted.
         //For async controllers this should be used to signal the controller
