@@ -14,11 +14,6 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "FastLED.h"
-
-using namespace fl;
-
-// #include "NoiseRing.hpp"
 
 // #include "../examples/fx/NoiseRing/NoiseRing.ino"
 #include "../examples/TeensyParallel/TeensyParallel.ino"
