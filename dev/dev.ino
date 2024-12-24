@@ -18,4 +18,7 @@ void on_startup() {
 
 using namespace fl;
 
-#include "NoiseRing.hpp"
+// #include "NoiseRing.hpp"
+
+// #include "../examples/fx/NoiseRing/NoiseRing.ino"
+#include "../examples/TeensyParallel/TeensyParallel.ino"
