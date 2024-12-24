@@ -27,7 +27,7 @@ namespace fl {
 
 class ObjectFled {
   public:
-    void beginShowLeds();
+    void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
     fl::HeapVector<uint8_t> mBuffer;
@@ -51,7 +51,7 @@ class ClocklessController_ObjectFLED_WS2812
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
         void *data = Super::beginShowLeds(nleds);
-        mObjectFled.beginShowLeds();
+        mObjectFled.beginShowLeds(DATA_PIN, nleds);
         return data;
     }
 

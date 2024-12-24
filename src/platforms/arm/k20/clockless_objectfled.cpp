@@ -170,7 +170,7 @@ class ObjectFLEDGroup {
 
 namespace fl {
 
-void ObjectFled::beginShowLeds() {
+void ObjectFled::beginShowLeds(int datapin, int nleds) {
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
     group.onNewFrame();
 }
