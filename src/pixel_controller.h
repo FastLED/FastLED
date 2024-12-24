@@ -83,7 +83,7 @@ struct PixelController {
         kMask = MASK
     };
 
-    PixelIterator as_iterator(const Rgbw& rgbw = RgbwInvalid::value()) {
+    PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
     }
 

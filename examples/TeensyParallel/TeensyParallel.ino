@@ -18,6 +18,7 @@ using namespace fl;
 
 #define PIN_FIRST 3
 #define PIN_SECOND 1
+#define IS_RGBW false
 
 ClocklessController_ObjectFLED_WS2812<PIN_FIRST, GRB> driver1;
 ClocklessController_ObjectFLED_WS2812<PIN_SECOND, GRB> driver2;
@@ -27,8 +28,8 @@ CRGB leds1[NUM_LEDS1];
 CRGB leds2[NUM_LEDS2];
 
 void wait_for_serial() {
-    uint32_t end_timeout = millis() + 1000;
-    while (!Serial && end_timeout < millis()) {}
+    uint32_t end_timeout = millis() + 3000;
+    while (!Serial && end_timeout > millis()) {}
 }
 
 void print_startup_info() {
@@ -54,6 +55,10 @@ void setup() {
     Serial.begin(115200);
     wait_for_serial();
     dump_last_crash();
+    if (IS_RGBW) {
+        driver1.setRgbw();
+        driver2.setRgbw();
+    }
     CFastLED::addLeds(&driver1, leds1, NUM_LEDS1);
     CFastLED::addLeds(&driver2, leds2, NUM_LEDS2);
     FastLED.setBrightness(8);
