@@ -99,7 +99,7 @@
 
 #pragma once
 
-#ifndef FASTLED_INTERNAL
+#ifdef FASTLED_INTERNAL
 #error "This should only be active for includion of FastLED.h in a sketch."
 #endif
 #pragma message                                                                \
