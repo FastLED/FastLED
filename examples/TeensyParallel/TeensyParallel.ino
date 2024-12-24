@@ -12,8 +12,6 @@ void loop() {}
 #include "FastLED.h"
 #include "fl/warn.h"
 
-#include <iostream>
-
 using namespace fl;
 
 #define PIN_FIRST 3
