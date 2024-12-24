@@ -82,13 +82,11 @@ class ObjectFLEDGroup {
         if (totalLeds == 0) {
             return;
         }
-        FASTLED_WARN("ObjectFLED leds: " << totalLeds);
         // Always assume RGB data. RGBW data will be converted to RGB data.
         mAllLedsBufferUint8.reserve(totalLeds * 3);
     }
 
     void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
-        FASTLED_WARN("ObjectFLEDGroup::addObject: " << int(pin) << " " << numLeds << " " << is_rgbw);
         if (is_rgbw) {
             numLeds = Rgbw::size_as_rgb(numLeds);
         }
@@ -107,12 +105,10 @@ class ObjectFLEDGroup {
     uint32_t getTotalLeds() const {
         uint32_t numStrips = mObjects.size();
         uint32_t maxLed = getMaxLedInStrip();
-        FASTLED_WARN("ObjectFLEDGroup::getTotalLeds: " << numStrips << " " << maxLed);
         return numStrips * maxLed;
     }
 
     void showPixelsOnceThisFrame() {
-        FASTLED_WARN("ObjectFLEDGroup::showPixelsOnceThisFrame");
         if (mDrawn) {
             return;
         }
@@ -122,17 +118,12 @@ class ObjectFLEDGroup {
         }
         
         bool needs_validation = mPrevObjects != mObjects || !mObjectFLED.get();
-        FASTLED_WARN("totalLeds: " << totalLeds << " needs_validation: " << needs_validation);
-        FASTLED_WARN("mAllLedsBufferUint8.size: " << mAllLedsBufferUint8.size());
         if (needs_validation) {
             mObjectFLED.reset();
             PinList42 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->pin);
             }
-
-            FASTLED_WARN("Total leds: " << totalLeds << " num strips: " << pinList.size());
-
             mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
@@ -149,13 +140,11 @@ class ObjectFLEDGroup {
 namespace fl {
 
 void ObjectFled::beginShowLeds(int datapin, int nleds) {
-    FASTLED_WARN("ObjectFled::beginShowLeds");
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
     group.onNewFrame();
 }
 
 void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    FASTLED_WARN("ObjectFled::showPixels");
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
     group.onPreDraw();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
