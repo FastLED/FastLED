@@ -1,5 +1,5 @@
-from pathlib import Path
 import sys
+from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
@@ -89,11 +89,7 @@ build_flags =
 check_tool = clangtidy
 """
 
-_ALL = {
-    "esp32c6": ESP32C6,
-    "esp32s3": ESP32S3
-}
-
+_ALL = {"esp32c6": ESP32C6, "esp32s3": ESP32S3}
 
 
 def prompt_user(msg: str) -> int:
@@ -103,6 +99,7 @@ def prompt_user(msg: str) -> int:
         except ValueError:
             print("Please enter a valid integer")
             continue
+
 
 def main() -> None:
     print("Please select a platform:")
@@ -115,17 +112,11 @@ def main() -> None:
     if val < 0 or val > len(_ALL):
         print("Invalid selection")
         sys.exit(1)
-    platform = list(_ALL.keys())[val-1]
+    platform = list(_ALL.keys())[val - 1]
     with PLATFORMIO_INI.open("w") as f:
         f.write(_ALL[platform])
     print(f"Selected platform: {platform}")
 
-
-
-    
-
-
-    
     sys.exit(1)
 
 
