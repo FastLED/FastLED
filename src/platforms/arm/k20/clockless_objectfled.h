@@ -13,7 +13,7 @@ class ObjectFled {
     void beginShowLeds();
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
-    fl::HeapVector<CRGB> mBuffer;
+    fl::HeapVector<uint8_t> mBuffer;
 };
 
 // TODO: RGBW support, should be pretty easy except the fact that ObjectFLED

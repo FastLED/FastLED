@@ -9,5 +9,6 @@
 #include "smartmatrix_t3.h"
 #include "clockless_arm_k20.h"
 #include "clockless_block_arm_k20.h"
+#include "clockless_objectfled.h"
 
 #endif
