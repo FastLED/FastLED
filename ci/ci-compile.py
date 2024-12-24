@@ -56,6 +56,7 @@ DEFAULT_BOARDS_NAMES = [
     "esp32dev_idf44",
     "bluepill",
     "esp32rmt_51",
+    "giga_r1",
 ]
 
 OTHER_BOARDS_NAMES = [
