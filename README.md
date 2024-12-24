@@ -97,7 +97,7 @@ For more examples see this [link](examples).
 [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml)
 
 [![Arduino Giga-R1](https://github.com/FastLED/FastLED/actions/workflows/build_giga_r1.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_giga_r1.yml)
-**Multiple issues with this board. Pins aren't defined, F_CPU is not defined nor is it constant.**
+*Multiple issues with this board. Pins aren't defined, F_CPU is not defined nor is it constant. And lots of other issues. Help wanted!*
 
 
 ### Teensy
