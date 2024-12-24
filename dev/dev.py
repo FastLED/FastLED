@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
@@ -93,7 +94,7 @@ _ALL = {
     "esp32s3": ESP32S3
 }
 
-import sys
+
 
 def prompt_user(msg: str) -> int:
     while True:
@@ -118,7 +119,7 @@ def main() -> None:
     with PLATFORMIO_INI.open("w") as f:
         f.write(_ALL[platform])
     print(f"Selected platform: {platform}")
-    
+
 
 
     
