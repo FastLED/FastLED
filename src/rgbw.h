@@ -37,6 +37,17 @@ struct Rgbw {
     FASTLED_FORCE_INLINE bool active() const {
         return rgbw_mode != kRGBWInvalid;
     }
+
+    static uint32_t size_as_rgb(uint32_t num_of_rgbw_pixels) {
+        // The ObjectFLED controller expects the raw pixel byte data in multiples of 3.
+        // In the case of src data not a multiple of 3, then we need to
+        // add pad bytes so that the delegate controller doesn't walk off the end
+        // of the array and invoke a buffer overflow panic.
+        num_of_rgbw_pixels = (num_of_rgbw_pixels * 4 + 2) / 3;
+        uint32_t extra = num_of_rgbw_pixels % 3 ? 1 : 0;
+        num_of_rgbw_pixels += extra;
+        return num_of_rgbw_pixels;
+    }
 };
 
 struct RgbwInvalid : public Rgbw {

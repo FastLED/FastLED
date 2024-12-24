@@ -564,6 +564,10 @@ public:
         return end();
     }
 
+    void swap(SortedHeapVector& other) {
+        mArray.swap(other.mArray);
+    }
+
     const_iterator find(const T& value) const {
         return const_cast<SortedHeapVector*>(this)->find(value);
     }

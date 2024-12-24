@@ -159,10 +159,9 @@ class RGBWEmulatedController
             // In the case of src data not a multiple of 3, then we need to
             // add pad bytes so that the delegate controller doesn't walk off the end
             // of the array and invoke a buffer overflow panic.
-            mNumRGBWLeds = (num_leds * 4 + 2) / 3; // Round up to nearest multiple of 3
-            size_t extra = mNumRGBWLeds % 3 ? 1 : 0;
+            uint32_t new_size = Rgbw::size_as_rgb(num_leds);
             delete[] mRGBWPixels;
-            mRGBWPixels = new CRGB[mNumRGBWLeds + extra];
+            mRGBWPixels = new CRGB[new_size];
         }
     }
 
