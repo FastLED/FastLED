@@ -25,6 +25,9 @@ typedef fl::FixedVector<uint8_t, 42> PinList42;
 
 typedef uint8_t Pin;
 
+static float gOverclock = 1.0f;
+static float gPrevOverclock = 1.0f;
+
 struct Info {
     uint8_t pin = 0;
     uint16_t numLeds = 0;
@@ -117,8 +120,9 @@ class ObjectFLEDGroup {
             return;
         }
         
-        bool needs_validation = mPrevObjects != mObjects || !mObjectFLED.get();
+        bool needs_validation = mPrevObjects != mObjects || !mObjectFLED.get() || gOverclock != gPrevOverclock;
         if (needs_validation) {
+            gPrevOverclock = gOverclock;
             mObjectFLED.reset();
             PinList42 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
@@ -127,7 +131,7 @@ class ObjectFLEDGroup {
             mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
-            mObjectFLED->begin();
+            mObjectFLED->begin(gOverclock);
         }
         mObjectFLED->show();
         mDrawn = true;
@@ -138,6 +142,10 @@ class ObjectFLEDGroup {
 
 
 namespace fl {
+
+void ObjectFled::SetOverclock(float overclock) {
+    gOverclock = overclock;
+}
 
 void ObjectFled::beginShowLeds(int datapin, int nleds) {
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();

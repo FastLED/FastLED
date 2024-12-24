@@ -959,9 +959,14 @@ class WS2813Controller : public ClocklessController<DATA_PIN, C_NS_WS2813(320), 
 #error "ObjectFLED is only supported on Teensy 4.0/4.1"
 #else
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public fl::ClocklessController_ObjectFLED_WS2812<
-	DATA_PIN,
-	RGB_ORDER> {};
+class WS2812Controller800Khz:
+	public fl::ClocklessController_ObjectFLED_WS2812<
+		DATA_PIN,
+		RGB_ORDER> {
+ public:
+    typedef fl::ClocklessController_ObjectFLED_WS2812<DATA_PIN, RGB_ORDER> Base;
+	WS2812Controller800Khz(): Base(FASTLED_LED_OVERCLOCK) {}
+};
 #endif  // __IMXRT1062__
 #else
 // WS2812 - 250ns, 625ns, 375ns
