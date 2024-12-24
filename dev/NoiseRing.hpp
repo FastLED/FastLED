@@ -1,1 +1,1 @@
-#include "../examples/fx/NoiseRing/NoiseRing.ino"
+#include "../examples/FxNoiseRing/FxNoiseRing.ino"
