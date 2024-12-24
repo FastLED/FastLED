@@ -1,6 +1,8 @@
 
 #include <stdint.h>
 
+#define FASTLED_INTERNAL
+
 #include "FastLED.h"
 #include "bilinear_expansion.h"
 #include "fl/ptr.h"

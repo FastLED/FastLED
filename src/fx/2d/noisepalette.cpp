@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define FASTLED_INTERNAL
+
 #include "FastLED.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
