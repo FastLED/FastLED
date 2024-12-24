@@ -469,6 +469,22 @@ private:
     const T* data() const {
         return mArray.get();
     }
+
+    bool operator==(const HeapVector<T>& other) const {
+        if (size() != other.size()) {
+            return false;
+        }
+        for (size_t i = 0; i < size(); ++i) {
+            if (mArray[i] != other.mArray[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const HeapVector<T>& other) const {
+        return !(*this == other);
+    }
 };
 
 
