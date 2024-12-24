@@ -1,16 +1,18 @@
 /// FastLED mapping of the ObjectFLED driver for Teensy 4.0/4.1.
 ///
+/// This driver will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
+/// BasicTest example to demonstrate massive parallel output with FastLED using
+/// ObjectFLED for Teensy 4.0/4.1.
+///
 /// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
 ///
-/// Caveats: This driver is a memory hog! In order to map the driver into the way that
-///          FastLED works, we need to have multiple frame buffers. ObjectFLED
-///          has it's own buffer which must be rectangular (i.e. all strips must be the same
-///          number of LEDS). Since FastLED is flexible in this regard, we need to convert
-///          the FastLED data into the rectangular ObjectFLED buffer. This is done by copying
-///          the data, which means extending the buffer size to the LARGEST strip. The number of
-///          of buffers in total is 3-4. This will be reduced in the future, but at the time of
-///          this writing (2024-Dec-23rd), this is the case, and will be reduced in the future.
+/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
+/// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
+/// each at 60fps, is 23k pixels.
 ///
+/// @author Kurt Funderburg
+/// @reddit: reddit.com/u/Tiny_Structure_7
+/// The FastLED code was written by Zach Vorhies
 /// @author Kurt Funderburg
 /// @reddit: reddit.com/u/Tiny_Structure_7
 /// @author: Zach Vorhies (FastLED code)
@@ -30,7 +32,6 @@ class ObjectFled {
     void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
-    fl::HeapVector<uint8_t> mBuffer;
 };
 
 // TODO: RGBW support, should be pretty easy except the fact that ObjectFLED
