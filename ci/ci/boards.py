@@ -87,7 +87,12 @@ ESP32DEV_IDF4_4 = Board(
     platform=ESP32_IDF_4_4_LATEST,
 )
 
-GIGA_R1 = Board(board_name="giga_r1", platform="ststm32", framework="arduino")
+GIGA_R1 = Board(
+    board_name="giga_r1",
+    platform="ststm32",
+    framework="arduino",
+    real_board_name="giga_r1_m7",
+)
 
 # ESP01 = Board(
 #     board_name="esp01",
