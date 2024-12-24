@@ -1,3 +1,6 @@
+
+#pragma once
+
 #ifdef FASTLED_ESP32_I2S
 
 
