@@ -1,6 +1,6 @@
 /// FastLED mapping of the ObjectFLED driver for Teensy 4.0/4.1.
 ///
-/// This mode will support upto 42 parallel strips of LEDS! ~7x that of OctoWS2811!
+/// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
 ///
 /// Caveats: This driver is a memory hog! In order to map the driver into the way that
 ///          FastLED works, we need to have multiple frame buffers. ObjectFLED
