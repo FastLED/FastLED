@@ -29,6 +29,7 @@ namespace fl {
 
 class ObjectFled {
   public:
+    static void SetOverclock(float overclock);
     void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
@@ -40,18 +41,21 @@ template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class ClocklessController_ObjectFLED_WS2812
     : public CPixelLEDController<RGB_ORDER> {
   private:
-    typedef CPixelLEDController<RGB_ORDER> Super;
+    typedef CPixelLEDController<RGB_ORDER> Base;
     ObjectFled mObjectFled;
 
   public:
-    ClocklessController_ObjectFLED_WS2812() : Super() {}
+    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f): Base() {
+        // Warning - overwrites previous overclock value.
+        ObjectFled::SetOverclock(overclock);
+    }
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
   protected:
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
-        void *data = Super::beginShowLeds(nleds);
+        void *data = Base::beginShowLeds(nleds);
         mObjectFled.beginShowLeds(DATA_PIN, nleds);
         return data;
     }
@@ -64,7 +68,7 @@ class ClocklessController_ObjectFLED_WS2812
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
-        Super::endShowLeds(data);
+        Base::endShowLeds(data);
         mObjectFled.endShowLeds();
     }
 };
