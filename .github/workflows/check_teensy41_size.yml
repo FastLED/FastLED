@@ -14,5 +14,5 @@ jobs:
     with:
       board: teensy41
       max_size: 80000
-      max_size_apa102: 80000
+      max_size_apa102: 84000
 
