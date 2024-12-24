@@ -11,6 +11,7 @@
 #include "color.h"
 
 #include "fl/force_inline.h"
+#include "fl/unused.h"
 #include "pixel_controller.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
@@ -94,7 +95,7 @@ public:
 
     // Compatibility with the 3.8.x codebase.
     VIRTUAL_IF_NOT_AVR void showLeds(uint8_t brightness) {
-        void* data = beginShowLeds();
+        void* data = beginShowLeds(m_nLeds);
         showLedsInternal(brightness);
         endShowLeds(data);
     }
@@ -209,7 +210,8 @@ public:
     /// @return the currently set dithering option (CLEDController::m_DitherMode)
     inline uint8_t getDither() { return m_DitherMode; }
 
-    virtual void* beginShowLeds() {
+    virtual void* beginShowLeds(int size) {
+        FASTLED_UNUSED(size);
         // By default, emit an integer. This integer will, by default, be passed back.
         // If you override beginShowLeds() then
         // you should also override endShowLeds() to match the return state.
