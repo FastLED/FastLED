@@ -1,3 +1,10 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+//
+// PlatformIO Debugging Solution
+//
+// Documentation: https://docs.platformio.org/en/latest/plus/debugging.html
+// Configuration: https://docs.platformio.org/en/latest/projectconf/sections/env/options/debug/index.html
+
 {
     "version": "0.2.0",
     "configurations": [
@@ -7,6 +14,38 @@
             "name": "Launch(gdb)",
             "program": "tests/.build/bin/${fileBasenameNoExtension}",
             "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
+            "projectEnvName": "dev",
+            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
+            "projectEnvName": "dev",
+            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "c:/Users/niteris/dev/fastled/.pio/build/dev/firmware.elf",
+            "projectEnvName": "dev",
+            "toolchainBinDir": "C:/Users/niteris/.platformio/packages/toolchain-xtensa-esp-elf/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "loadMode": "manual"
         }
     ]
 }
