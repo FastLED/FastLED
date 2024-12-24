@@ -49,8 +49,8 @@ class ClocklessController_ObjectFLED_WS2812
 
   protected:
     // Wait until the last draw is complete, if necessary.
-    virtual void *beginShowLeds() override {
-        void *data = Super::beginShowLeds();
+    virtual void *beginShowLeds(int nleds) override {
+        void *data = Super::beginShowLeds(nleds);
         mObjectFled.beginShowLeds();
         return data;
     }

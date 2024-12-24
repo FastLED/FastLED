@@ -30,8 +30,8 @@ public:
 protected:
 
     // Wait until the last draw is complete, if necessary.
-    virtual void* beginShowLeds() override {
-        void* data = CPixelLEDController<RGB_ORDER>::beginShowLeds();
+    virtual void* beginShowLeds(int nleds) override {
+        void* data = CPixelLEDController<RGB_ORDER>::beginShowLeds(nleds);
         mRMTController.waitForDrawComplete();
         return data;
     }
