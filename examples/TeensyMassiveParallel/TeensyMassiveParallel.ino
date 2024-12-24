@@ -3,14 +3,9 @@
 ///
 /// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
 ///
-/// Caveats: This driver is a memory hog! In order to map the driver into the way that
-///          FastLED works, we need to have multiple frame buffers. ObjectFLED
-///          has it's own buffer which must be rectangular (i.e. all strips must be the same
-///          number of LEDS). Since FastLED is flexible in this regard, we need to convert
-///          the FastLED data into the rectangular ObjectFLED buffer. This is done by copying
-///          the data, which means extending the buffer size to the LARGEST strip. The number of
-///          of buffers in total is 3-4. This will be reduced in the future, but at the time of
-///          this writing (2024-Dec-23rd), this is the case. We will reduce this in the future.
+/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
+/// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
+/// each at 60fps, is 23k pixels.
 ///
 /// @author Kurt Funderburg
 /// @reddit: reddit.com/u/Tiny_Structure_7
@@ -26,8 +21,6 @@ void loop() {}
 #include "FastLED.h"
 #include "fl/warn.h"
 
-#include <iostream>
-
 using namespace fl;
 
 #define PIN_FIRST 3
@@ -39,8 +32,8 @@ using namespace fl;
 CRGB leds1[NUM_LEDS1];
 CRGB leds2[NUM_LEDS2];
 
-void wait_for_serial() {
-    uint32_t end_timeout = millis() + 3000;
+void wait_for_serial(uint32_t timeout = 3000) {
+    uint32_t end_timeout = millis();
     while (!Serial && end_timeout > millis()) {}
 }
 
@@ -55,17 +48,9 @@ void print_startup_info() {
         tempmonGetTemp() * 9.0 / 5.0 + 32, 800000 * 1.6 / 1000000.0);
 }
 
-void dump_last_crash() {
-  if (CrashReport) {
-    Serial.println("CrashReport:");
-    Serial.println(CrashReport);
-  }
-}
-
 void setup() {
     Serial.begin(115200);
-    wait_for_serial();
-    dump_last_crash();
+    wait_for_serial(3000);
     CLEDController& c1 = FastLED.addLeds<WS2812, PIN_FIRST, GRB>(leds1, NUM_LEDS1);
     CLEDController& c2 = FastLED.addLeds<WS2812, PIN_SECOND, GRB>(leds2, NUM_LEDS2);
     if (IS_RGBW) {

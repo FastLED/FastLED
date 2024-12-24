@@ -23,23 +23,30 @@ namespace { // anonymous namespace
 
 typedef fl::FixedVector<uint8_t, 42> PinList42;
 
+typedef uint8_t Pin;
+
 struct Info {
-    uint8_t *buffer = nullptr;
+    uint8_t pin = 0;
     uint16_t numLeds = 0;
     bool isRgbw = false;
+    bool operator!=(const Info &other) const {
+        return numLeds != other.numLeds || isRgbw != other.isRgbw;
+    }
 };
+
 
 
 // Maps multiple pins and CRGB strips to a single ObjectFLED object.
 class ObjectFLEDGroup {
   public:
-    typedef fl::SortedHeapMap<uint8_t, Info> ObjectMap;
+    typedef fl::HeapVector<Info> DrawList;
 
     fl::scoped_ptr<ObjectFLED> mObjectFLED;
     fl::HeapVector<uint8_t> mAllLedsBufferUint8;
-    ObjectMap mObjects;
+    DrawList mObjects;
+    DrawList mPrevObjects;
     bool mDrawn = false;
-    bool mNeedsValidation = false;
+    bool mOnPreDrawCalled = false;
 
     static ObjectFLEDGroup &getInstance() {
         return fl::Singleton<ObjectFLEDGroup>::instance();
@@ -48,30 +55,51 @@ class ObjectFLEDGroup {
     ObjectFLEDGroup() = default;
     ~ObjectFLEDGroup() { mObjectFLED.reset(); }
 
-    void onNewFrame() { mDrawn = false; }
-
-    void addObject(uint8_t pin, uint8_t *led_data, uint16_t numLeds, bool is_rgbw) {
-        Info newInfo = {led_data, numLeds, is_rgbw};
-        if (mObjects.has(pin)) {
-            Info &info = mObjects.at(pin);
-            if (info.numLeds == numLeds && info.buffer == led_data) {
-                return;
-            }
+    void onNewFrame() {
+        if (!mDrawn) {
+            return;
         }
-        fl::InsertResult result;
-        mObjects.insert(pin, newInfo, &result);
-        mNeedsValidation = true;
+        mDrawn = false;
+        mOnPreDrawCalled = false;
+        mObjects.swap(mPrevObjects);
+        mObjects.clear();
+        if (!mAllLedsBufferUint8.empty()) {
+            memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
+            mAllLedsBufferUint8.clear();
+        }
     }
 
-    void removeObject(uint8_t pin) {
-        mObjects.erase(pin);
-        mNeedsValidation = true;
+    void onPreDraw() {
+        if (mOnPreDrawCalled) {
+            return;
+        }
+        // iterator through the current draw objects and calculate the total number of leds
+        // that will be drawn this frame.
+        uint32_t totalLeds = 0;
+        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
+            totalLeds += it->numLeds;
+        }
+        if (totalLeds == 0) {
+            return;
+        }
+        FASTLED_WARN("ObjectFLED leds: " << totalLeds);
+        // Always assume RGB data. RGBW data will be converted to RGB data.
+        mAllLedsBufferUint8.reserve(totalLeds * 3);
+    }
+
+    void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
+        FASTLED_WARN("ObjectFLEDGroup::addObject: " << int(pin) << " " << numLeds << " " << is_rgbw);
+        if (is_rgbw) {
+            numLeds = Rgbw::size_as_rgb(numLeds);
+        }
+        Info newInfo = {pin, numLeds, is_rgbw};
+        mObjects.push_back(newInfo);
     }
 
     uint32_t getMaxLedInStrip() const {
         uint32_t maxLed = 0;
         for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            maxLed = MAX(maxLed, it->second.numLeds);
+            maxLed = MAX(maxLed, it->numLeds);
         }
         return maxLed;
     }
@@ -79,44 +107,12 @@ class ObjectFLEDGroup {
     uint32_t getTotalLeds() const {
         uint32_t numStrips = mObjects.size();
         uint32_t maxLed = getMaxLedInStrip();
+        FASTLED_WARN("ObjectFLEDGroup::getTotalLeds: " << numStrips << " " << maxLed);
         return numStrips * maxLed;
     }
 
-    void copy_data_to_buffer(bool has_rgbw) {
-        uint32_t totalLeds = getTotalLeds();
-        if (totalLeds == 0) {
-            return;
-        }
-        const int bytes_per_led = has_rgbw ? 4 : 3;
-        uint32_t maxLedSegment = getMaxLedInStrip();
-        mAllLedsBufferUint8.resize(totalLeds * bytes_per_led);
-        uint8_t *curr = &mAllLedsBufferUint8.front();
-        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            uint8_t *src = it->second.buffer;
-            memset(curr, 0, maxLedSegment * bytes_per_led);
-            size_t nBytes = it->second.numLeds * bytes_per_led;
-            memcpy(curr, src, nBytes);
-            curr += maxLedSegment * bytes_per_led;
-        }
-    }
-
-    bool allRgbOrRgbw(bool* has_rgbw) {
-        bool has_rgb = false;
-        *has_rgbw = false;
-        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            if (it->second.isRgbw) {
-                *has_rgbw = true;
-            } else {
-                has_rgb = true;
-            }
-        }
-        if (has_rgb && *has_rgbw) {
-            return false;
-        }
-        return true;
-    }
-
     void showPixelsOnceThisFrame() {
+        FASTLED_WARN("ObjectFLEDGroup::showPixelsOnceThisFrame");
         if (mDrawn) {
             return;
         }
@@ -124,41 +120,23 @@ class ObjectFLEDGroup {
         if (totalLeds == 0) {
             return;
         }
-        bool has_rgbw = false;
-        const bool all_same_format = allRgbOrRgbw(&has_rgbw);
-        if (!all_same_format) {
-            // Actually, because we are doing RGBW emulation, we can actually mix RGB and RGBW strips.
-            // Come back here and fix this. It will take a little code re-work but is totally
-            // doable.
-            FASTLED_WARN("ObjectFLEDGroup: Cannot mix RGB and RGBW strips in the same ObjectFLED object, no strips will be drawn.");
-            return;
-        }
-        copy_data_to_buffer(has_rgbw);
-        if (!mObjectFLED.get() || mNeedsValidation) {
+        
+        bool needs_validation = mPrevObjects != mObjects || !mObjectFLED.get();
+        FASTLED_WARN("totalLeds: " << totalLeds << " needs_validation: " << needs_validation);
+        FASTLED_WARN("mAllLedsBufferUint8.size: " << mAllLedsBufferUint8.size());
+        if (needs_validation) {
             mObjectFLED.reset();
             PinList42 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-                pinList.push_back(it->first);
+                pinList.push_back(it->pin);
             }
 
-            if (has_rgbw) {
-                // Although the ObjectFLED controller can handle RGBW data, the FastLED has more options.
-                // Therefore, we pretend the RGBW data is actually RGB data.
-                //
-                // The ObjectFLED controller expects the raw pixel byte data in multiples of 3.
-                // In the case of src data not a multiple of 3, then we need to
-                // add pad bytes so that the delegate controller doesn't walk off the end
-                // of the array and invoke a buffer overflow panic.
-                totalLeds = (totalLeds * 4 + 2) / 3; // Round up to nearest multiple of 3
-                size_t extra = totalLeds % 3 ? 1 : 0;
-                totalLeds += extra;
-            }
+            FASTLED_WARN("Total leds: " << totalLeds << " num strips: " << pinList.size());
 
             mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
             mObjectFLED->begin();
-            mNeedsValidation = false;
         }
         mObjectFLED->show();
         mDrawn = true;
@@ -171,24 +149,26 @@ class ObjectFLEDGroup {
 namespace fl {
 
 void ObjectFled::beginShowLeds(int datapin, int nleds) {
+    FASTLED_WARN("ObjectFled::beginShowLeds");
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
     group.onNewFrame();
 }
 
 void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+    FASTLED_WARN("ObjectFled::showPixels");
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
+    group.onPreDraw();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
-    const int bytesPerLed = rgbw.active() ? 4 : 3;
-    mBuffer.resize(numLeds * bytesPerLed);
+    fl::HeapVector<uint8_t>& all_pixels = group.mAllLedsBufferUint8;
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         for (int i = 0; pixel_iterator.has(1); ++i) {
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            mBuffer[i * bytesPerLed + 0] = r;
-            mBuffer[i * bytesPerLed + 1] = g;
-            mBuffer[i * bytesPerLed + 2] = b;
-            mBuffer[i * bytesPerLed + 3] = w;
+            all_pixels.push_back(r);
+            all_pixels.push_back(g);
+            all_pixels.push_back(b);
+            all_pixels.push_back(w);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
@@ -196,15 +176,15 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
         uint8_t r, g, b;
         for (int i = 0; pixel_iterator.has(1); ++i) {
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            mBuffer[i * bytesPerLed + 0] = r;
-            mBuffer[i * bytesPerLed + 1] = g;
-            mBuffer[i * bytesPerLed + 2] = b;
+            all_pixels.push_back(r);
+            all_pixels.push_back(g);
+            all_pixels.push_back(b);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
     }
 
-    group.addObject(data_pin, mBuffer.data(), numLeds, rgbw.active());
+    group.addObject(data_pin, numLeds, rgbw.active());
 }
 
 void ObjectFled::endShowLeds() {
