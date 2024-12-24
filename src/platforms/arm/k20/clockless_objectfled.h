@@ -40,7 +40,8 @@ class ClocklessController_ObjectFLED_WS2812
 
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
-        mObjectFled.showPixels(DATA_PIN, pixels.as_iterator());
+        auto pixel_iterator = pixels.as_iterator();
+        mObjectFled.showPixels(DATA_PIN, pixel_iterator);
     }
 
     // Send the data to the strip
