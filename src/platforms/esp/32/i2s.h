@@ -74,7 +74,6 @@ struct DMABuffer {
 
 extern int gCurBuffer;
 extern bool gDoneFilling;
-extern int gCntBuffer;
 extern uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
 extern uint8_t gPixelBits[NUM_COLOR_CHANNELS][8][4];
 extern DMABuffer *dmaBuffers[NUM_DMA_BUFFERS];;
