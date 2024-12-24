@@ -87,3 +87,18 @@ build_flags =
     
 check_tool = clangtidy
 """
+
+_ALL = {
+    "esp32c6": ESP32C6,
+    "esp32s3": ESP32S3
+}
+
+import sys
+
+def main() -> None:
+    print("Please select a platform:")
+    for i, platform in enumerate(_ALL.keys()):
+        print(f"[{i+1}]: {platform}")
+
+    
+    sys.exit(1)
