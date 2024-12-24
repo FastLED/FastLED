@@ -17,10 +17,14 @@ void loop() {}
 using namespace fl;
 
 #define PIN_FIRST 3
+#define PIN_SECOND 1
 
-ClocklessController_ObjectFLED_WS2812<PIN_FIRST, GRB> driver;
-#define NUM_LEDS (22 * 22)
-CRGB leds[NUM_LEDS];
+ClocklessController_ObjectFLED_WS2812<PIN_FIRST, GRB> driver1;
+ClocklessController_ObjectFLED_WS2812<PIN_SECOND, GRB> driver2;
+#define NUM_LEDS1 (22 * 22)
+#define NUM_LEDS2 1
+CRGB leds1[NUM_LEDS1];
+CRGB leds2[NUM_LEDS2];
 
 void wait_for_serial() {
     uint32_t end_timeout = millis() + 1000;
@@ -38,16 +42,29 @@ void print_startup_info() {
         tempmonGetTemp() * 9.0 / 5.0 + 32, 800000 * 1.6 / 1000000.0);
 }
 
+void dump_last_crash() {
+  if (CrashReport) {
+    Serial.println("CrashReport:");
+    Serial.println(CrashReport);
+  }
+}
+
 
 void setup() {
     Serial.begin(115200);
     wait_for_serial();
-    CFastLED::addLeds(&driver, leds, NUM_LEDS);
+    dump_last_crash();
+    CFastLED::addLeds(&driver1, leds1, NUM_LEDS1);
+    CFastLED::addLeds(&driver2, leds2, NUM_LEDS2);
+    FastLED.setBrightness(8);
 }
 
 void fill(CRGB color) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = color;
+    for (int i = 0; i < NUM_LEDS1; i++) {
+        leds1[i] = color;
+    }
+    for (int i = 0; i < NUM_LEDS2; i++) {
+        leds2[i] = color;
     }
 }
 

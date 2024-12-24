@@ -63,6 +63,7 @@
             "+<*.c>",
             "+<*.cpp>",
             "+<*.h>",
+            "+<platforms/arm/k20/**/*.cpp>",
             "+<platforms/esp/32/**/*.cpp>",
             "+<platforms/wasm/**/*.cpp>",
             "+<third_party/**/*.cpp>",

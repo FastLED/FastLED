@@ -1,6 +1,10 @@
 
 #if defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
 
+
+#define FASTLED_INTERNAL
+#include "FastLED.h"
+
 #include "third_party/object_fled/src/ObjectFLED.h"
 
 #include "crgb.h"
@@ -9,6 +13,7 @@
 #include "fl/singleton.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/math_macros.h"
 #include "pixel_iterator.h"
 #include "cpixel_ledcontroller.h"
 
@@ -65,7 +70,7 @@ class ObjectFLEDGroup {
     uint32_t getMaxLedInStrip() const {
         uint32_t maxLed = 0;
         for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            maxLed = max(maxLed, it->second.numLeds);
+            maxLed = MAX(maxLed, it->second.numLeds);
         }
         return maxLed;
     }
@@ -81,18 +86,14 @@ class ObjectFLEDGroup {
         if (totalLeds == 0) {
             return;
         }
+        uint32_t maxLedSegment = getMaxLedInStrip();
         mAllLedsBuffer.resize(totalLeds);
         CRGB *curr = &mAllLedsBuffer.front();
         for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
             CRGB *src = it->second.buffer;
+            memset(curr, 0, maxLedSegment * sizeof(CRGB));
             size_t nBytes = it->second.numLeds * sizeof(CRGB);
             memcpy(curr, src, nBytes);
-            uint32_t maxLedSegment = getMaxLedInStrip();
-            if (it->second.numLeds < maxLedSegment) {
-                // Fill the rest with black.
-                memset(curr + it->second.numLeds, 0,
-                       (maxLedSegment - it->second.numLeds) * sizeof(CRGB));
-            }
             curr += maxLedSegment;
         }
     }
@@ -128,7 +129,6 @@ class ObjectFLEDGroup {
 
 namespace fl {
 
-
 void ObjectFled::beginShowLeds() {
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
     group.onNewFrame();
@@ -139,7 +139,7 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     int numLeds = pixel_iterator.size();
     mBuffer.resize(numLeds);
     uint8_t r, g, b;
-    for (uint16_t i = 0; pixel_iterator.has(1); i++) {
+    for (int i = 0; pixel_iterator.has(1); ++i) {
         pixel_iterator.loadAndScaleRGB(&r, &g, &b);
         mBuffer[i] = CRGB(r, g, b);
         pixel_iterator.advanceData();
