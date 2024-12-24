@@ -79,7 +79,7 @@ jobs:
   build_esp32dev_i2s:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "esp32dev_i2s"
+      args: "esp32dev_i2s --examples EspI2SDemo"
 
   build_esp32dev_idf44:
     uses: ./.github/workflows/build_template.yml
