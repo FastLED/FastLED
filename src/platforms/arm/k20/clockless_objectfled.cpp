@@ -152,7 +152,7 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     fl::HeapVector<uint8_t>& all_pixels = group.mAllLedsBufferUint8;
     if (rgbw.active()) {
         uint8_t r, g, b, w;
-        for (int i = 0; pixel_iterator.has(1); ++i) {
+        while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
             all_pixels.push_back(r);
             all_pixels.push_back(g);
@@ -163,7 +163,7 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
         }
     } else {
         uint8_t r, g, b;
-        for (int i = 0; pixel_iterator.has(1); ++i) {
+        while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
             all_pixels.push_back(r);
             all_pixels.push_back(g);
@@ -172,7 +172,6 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             pixel_iterator.stepDithering();
         }
     }
-
     group.addObject(data_pin, numLeds, rgbw.active());
 }
 
