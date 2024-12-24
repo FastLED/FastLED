@@ -30,7 +30,7 @@ struct Info {
     uint16_t numLeds = 0;
     bool isRgbw = false;
     bool operator!=(const Info &other) const {
-        return numLeds != other.numLeds || isRgbw != other.isRgbw;
+        return pin != other.pin || numLeds != other.numLeds || isRgbw != other.isRgbw;
     }
 };
 
