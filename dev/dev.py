@@ -95,10 +95,38 @@ _ALL = {
 
 import sys
 
+def prompt_user(msg: str) -> int:
+    while True:
+        try:
+            return int(input(msg))
+        except ValueError:
+            print("Please enter a valid integer")
+            continue
+
 def main() -> None:
     print("Please select a platform:")
+    print("[0]: Exit")
     for i, platform in enumerate(_ALL.keys()):
         print(f"[{i+1}]: {platform}")
+    val = prompt_user("Enter a number: ")
+    if val == 0:
+        sys.exit(0)
+    if val < 0 or val > len(_ALL):
+        print("Invalid selection")
+        sys.exit(1)
+    platform = list(_ALL.keys())[val-1]
+    with PLATFORMIO_INI.open("w") as f:
+        f.write(_ALL[platform])
+    print(f"Selected platform: {platform}")
+    
+
+
+    
+
 
     
     sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
