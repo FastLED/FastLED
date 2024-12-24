@@ -15,5 +15,4 @@ void on_startup() {
 #endif  // ESP32
 
 
-// #include "../examples/fx/NoiseRing/NoiseRing.ino"
-#include "../examples/TeensyParallel/TeensyParallel.ino"
+#include "NoiseRing.hpp"
