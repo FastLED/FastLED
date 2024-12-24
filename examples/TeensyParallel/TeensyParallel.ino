@@ -7,9 +7,9 @@ void setup() {}
 void loop() {}
 #else
 
-#include "platforms/arm/k20/clockless_objectfled.h"
+#define FASTLED_USES_OBJECTFLED
 
-#include <FastLED.h>
+#include "FastLED.h"
 #include "fl/warn.h"
 
 #include <iostream>
@@ -20,8 +20,6 @@ using namespace fl;
 #define PIN_SECOND 1
 #define IS_RGBW false
 
-ClocklessController_ObjectFLED_WS2812<PIN_FIRST, GRB> driver1;
-ClocklessController_ObjectFLED_WS2812<PIN_SECOND, GRB> driver2;
 #define NUM_LEDS1 (22 * 22)
 #define NUM_LEDS2 1
 CRGB leds1[NUM_LEDS1];
@@ -50,17 +48,16 @@ void dump_last_crash() {
   }
 }
 
-
 void setup() {
     Serial.begin(115200);
     wait_for_serial();
     dump_last_crash();
+    CLEDController& c1 = FastLED.addLeds<WS2812, PIN_FIRST, GRB>(leds1, NUM_LEDS1);
+    CLEDController& c2 = FastLED.addLeds<WS2812, PIN_SECOND, GRB>(leds2, NUM_LEDS2);
     if (IS_RGBW) {
-        driver1.setRgbw();
-        driver2.setRgbw();
+        c1.setRgbw();
+        c2.setRgbw();
     }
-    CFastLED::addLeds(&driver1, leds1, NUM_LEDS1);
-    CFastLED::addLeds(&driver2, leds2, NUM_LEDS2);
     FastLED.setBrightness(8);
 }
 

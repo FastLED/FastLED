@@ -28,6 +28,10 @@
 #endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
 
 
+#ifdef __IMXRT1062__
+#include "platforms/arm/k20/clockless_objectfled.h"
+#endif
+
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
 
@@ -950,6 +954,17 @@ class WS2813Controller : public ClocklessController<DATA_PIN, C_NS_WS2813(320), 
 #define FASTLED_WS2812_T3 375
 #endif
 
+
+#ifdef FASTLED_USES_OBJECTFLED
+#ifndef __IMXRT1062__
+#error "ObjectFLED is only supported on Teensy 4.0/4.1"
+#else
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2812Controller800Khz : public fl::ClocklessController_ObjectFLED_WS2812<
+	DATA_PIN,
+	RGB_ORDER> {};
+#endif  // __IMXRT1062__
+#else
 // WS2812 - 250ns, 625ns, 375ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public ClocklessController<
@@ -958,6 +973,8 @@ class WS2812Controller800Khz : public ClocklessController<
 	C_NS_WS2812(FASTLED_WS2812_T2),
 	C_NS_WS2812(FASTLED_WS2812_T3),
 	RGB_ORDER> {};
+#endif  // defined(FASTLED_USES_OBJECTFLED)
+
 
 // WS2811@400khz - 800ns, 800ns, 900ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
