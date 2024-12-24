@@ -276,6 +276,7 @@ public:
 
     typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
     typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;
+    typedef Pair value_type;
 
     SortedHeapMap(Less less = Less()) 
         : data(PairLess{less}) {
@@ -300,6 +301,10 @@ public:
         }
     }
 
+    void swap(SortedHeapMap& other) {
+        data.swap(other.data);
+    }
+
     Value& at(const Key& key) {
         iterator it = find(key);
         return it->second;
@@ -311,6 +316,23 @@ public:
 
     bool contains(const Key& key) const {
         return has(key);
+    }
+
+    bool operator==(const SortedHeapMap& other) const {
+        if (size() != other.size()) {
+            return false;
+        }
+        for (const_iterator it = begin(), other_it = other.begin();
+             it != end(); ++it, ++other_it) {
+            if (it->first != other_it->first || it->second != other_it->second) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const SortedHeapMap& other) const {
+        return !(*this == other);
     }
 
     size_t size() const { return data.size(); }
