@@ -111,4 +111,4 @@ void i2s_transpose_and_encode(int channel, uint32_t has_data_mask, volatile uint
 FASTLED_NAMESPACE_END
 
 
-#include "i2s.hpp"  // define the i2s.h. This is used to support Arduino IDE which doesn't have build defines.
+#include "i2s.hpp"  // define the i2s.h functions/data. This is used to support Arduino IDE which doesn't have build defines.
