@@ -102,6 +102,7 @@ def prompt_user(msg: str) -> int:
 
 
 def main() -> None:
+    print("This tool will update the platformio.ini file with the selected platform")
     print("Please select a platform:")
     print("[0]: Exit")
     for i, platform in enumerate(_ALL.keys()):
