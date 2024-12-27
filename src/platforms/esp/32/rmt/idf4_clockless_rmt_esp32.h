@@ -35,7 +35,7 @@
 #pragma once
 
 
-#include "led_strip/enabled.h"
+#include "platforms/esp/32/led_strip/enabled.h"
 
 
 
