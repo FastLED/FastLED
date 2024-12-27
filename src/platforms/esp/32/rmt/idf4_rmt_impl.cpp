@@ -3,7 +3,7 @@
 #ifndef FASTLED_ESP32_I2S
 #define FASTLED_INTERNAL
 
-#include "led_strip/enabled.h"
+#include "platforms/esp/32/led_strip/enabled.h"
 
 #if !FASTLED_RMT5
 
@@ -13,9 +13,9 @@
 
 #include "FastLED.h"
 #include "fl/force_inline.h"
-#include "idf4_rmt.h"
-#include "idf4_rmt_impl.h"
-#include "clock_cycles.h"
+#include "platforms/esp/32/rmt/idf4_rmt.h"
+#include "platforms/esp/32/rmt/idf4_rmt_impl.h"
+#include "platforms/esp/32/clock_cycles.h"
 
 #ifdef __cplusplus
 extern "C"

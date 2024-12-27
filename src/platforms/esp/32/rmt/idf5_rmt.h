@@ -1,12 +1,12 @@
 #pragma once
 
-#include "led_strip/enabled.h"
+#include "platforms/esp/32/led_strip/enabled.h"
 
 #if FASTLED_RMT5
 
 #include "pixel_iterator.h"
 #include <stdint.h>
-#include "led_strip/rmt_strip.h"
+#include "platforms/esp/32/led_strip/rmt_strip.h"
 
 // It turns out that RMT5 recycling causes a lot of problems with
 // the first led. A bug has been filed with Espressif about this.

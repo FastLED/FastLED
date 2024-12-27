@@ -21,7 +21,7 @@ TOOLCHAIN_AVR = PLATFORMIO_PACKAGES_PATH / "toolchain-atmelavr"
 def init() -> None:
     uno_build = PROJECT_ROOT / ".build" / "uno"
     print(f"Checking for Uno build in: {uno_build}")
-    if not uno_build.exists() or not TOOLCHAIN_AVR.exists():
+    if not BUILD_INFO_PATH.exists() or not TOOLCHAIN_AVR.exists():
         print("Uno build not found. Running compilation...")
         try:
             subprocess.run(

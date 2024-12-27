@@ -1,5 +1,5 @@
 
-#include "led_strip/enabled.h"
+#include "platforms/esp/32/led_strip/enabled.h"
 
 #if FASTLED_RMT5
 
@@ -14,10 +14,10 @@
 #include "freertos/task.h"
 
 #include "idf5_rmt.h"
-#include "led_strip/led_strip.h"
+#include "platforms/esp/32/led_strip/led_strip.h"
 #include "esp_log.h"
-#include "led_strip/configure_led.h"
-#include "led_strip/rmt_strip.h"
+#include "platforms/esp/32/led_strip/configure_led.h"
+#include "platforms/esp/32/led_strip/rmt_strip.h"
 
 using namespace fastled_rmt51_strip;
 

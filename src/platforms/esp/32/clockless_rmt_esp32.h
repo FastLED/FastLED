@@ -29,7 +29,7 @@
 #include "led_strip/enabled.h"
 
 #if !FASTLED_RMT5
-#include "idf4_clockless_rmt_esp32.h"
+#include "rmt/idf4_clockless_rmt_esp32.h"
 #else
-#include "idf5_clockless_rmt_esp32.h"
+#include "rmt/idf5_clockless_rmt_esp32.h"
 #endif

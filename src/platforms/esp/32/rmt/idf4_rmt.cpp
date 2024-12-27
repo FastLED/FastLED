@@ -3,7 +3,7 @@
 #ifndef FASTLED_ESP32_I2S
 
 
-#include "led_strip/enabled.h"
+#include "platforms/esp/32/led_strip/enabled.h"
 
 #if !FASTLED_RMT5
 
