@@ -2,8 +2,13 @@
 
 // This file must not be in the fl namespace, it must be in the global namespace.
 
-#ifdef __AVR__
-inline void* operator new(size_t, void* ptr) noexcept {
+#if defined(__AVR__) || !defined(__has_include)
+#ifndef __has_include
+#define _NO_EXCEPT
+#else
+#define _NO_EXCEPT noexcept
+#endif
+inline void* operator new(size_t, void* ptr) _NO_EXCEPT {
     return ptr;
 }
 #elif __has_include(<new>)
