@@ -4,8 +4,6 @@
 
 #if FASTLED_RMT5
 
-
-
 #include "rmt_strip.h"
 #include "esp_log.h"
 #include "configure_led.h"
@@ -17,8 +15,6 @@
 #include "fl/assert.h"
 
 namespace fastled_rmt51_strip {
-
-
 
 #define TAG "rtm_strip.cpp"
 
@@ -37,11 +33,9 @@ namespace fastled_rmt51_strip {
     }
 
 
-
-
-class RmtLedStrip : public IRmtLedStrip {
+class RmtLedStrip_Deprecated : public IRmtLedStrip {
 public:
-    RmtLedStrip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
+    RmtLedStrip_Deprecated(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
                 int pin, uint32_t max_leds, bool is_rgbw)
         : mT0H(T0H),
           mT0L(T0L),
@@ -108,7 +102,7 @@ public:
         mAquired = false;
     }
 
-    virtual ~RmtLedStrip() override {
+    virtual ~RmtLedStrip_Deprecated() override {
         release_rmt();
         free(mBuffer);
     }
@@ -316,8 +310,8 @@ IRmtLedStrip* create_rmt_led_strip_no_recycle(
     return new RmtLedStripNoRecycle(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
-IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, int pin, uint32_t max_leds, bool is_rgbw) {
-    return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
+IRmtLedStrip* create_rmt_led_strip_deprecated(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, int pin, uint32_t max_leds, bool is_rgbw) {
+    return new RmtLedStrip_Deprecated(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
 }  // namespace fastled_rmt51_strip
