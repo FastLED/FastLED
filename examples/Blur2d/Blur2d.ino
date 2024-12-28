@@ -11,7 +11,7 @@ using namespace fl;
 
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define BLUR_AMOUNT 172
-#define DATA_PIN 3 // Change this to match your LED strip's data pin
+#define DATA_PIN 2 // Change this to match your LED strip's data pin
 #define BRIGHTNESS 255
 #define SERPENTINE true
 

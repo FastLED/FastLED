@@ -7,3 +7,5 @@
   * mesh networked esp32 with mutli wifi connections for redundancy
 
   * https://github.com/Souravgoswami/Arduino-FastLED-Cool-Effects
+
+  * https://github.com/jasoncoon/esp32-fastled-webserver
