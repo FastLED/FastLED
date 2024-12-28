@@ -20,8 +20,8 @@ FastLED 3.9.8 - Teensy 4.x now support a whopping 27.5k pixels!!
     * Is anything else supported other than WS2812? - Not at this moment. As far as I know, all strips on this bulk controller **must** use the same
       timings. Because of the popularity of WS2812, it is enabled for this controller first. I will add support for other controllers based on the number of feature requests for other WS281x chipsets.
     * Is overclocking supported? Yes, and it binds to the current overclock `#define FASTLED_OVERCLOCK 1.2` @ a 20% overlock.
-    * Have you tested this? Very lightly in FastLED, but Kurt has done his own tests and FastLED just provides some wrappers to map it to our easy api.
-    * How does this compare to the stock LED driver on Teensy? Better. For some reason the stock Teensy WS2812 driver seems to produce glitches, but with the ObjectFLED driver seems to fix this.
+    * Have you tested this? Very lightly in FastLED, but Kurt has done his own tests and FastLED just provides some wrappers to map it to our familiar and easy api.
+    * How does this compare to the stock LED driver on Teensy for just one strip? Better and way less random light flashes. For some reason the stock Teensy WS2812 driver seems to produce glitches, but with the ObjectFLED driver seems to fix this.
     * Will this become the default driver on Teensy 4.x? Yes, in the next release, unless users report problems.
     * Is RGBW supported? Yes - all FastLED RGBW modes are supported.
     * Can other non WS281x chipsets be supported? It appears so, as ObjectFLED does have flexible timings that make it suitable for other clockless chipsets.
