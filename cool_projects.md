@@ -7,5 +7,11 @@
   * mesh networked esp32 with mutli wifi connections for redundancy
 
   * https://github.com/Souravgoswami/Arduino-FastLED-Cool-Effects
+  * FastLED-IR: https://github.com/marcmerlin/FastLED-IR
+    * https://github.com/marcmerlin/NeoMatrix-FastLED-IR?tab=readme-ov-file
 
-  * https://github.com/jasoncoon/esp32-fastled-webserver
+  * Tree IR:
+    * https://www.evilgeniuslabs.org/tree-v2
+
+  * Esp32 server for fastled
+    * https://github.com/jasoncoon/esp32-fastled-webserver
