@@ -1,15 +1,12 @@
 platformio==6.1.16
 
-
-fastapi==0.114.2
+# API dependencies
+fastapi==0.109.2
 uvicorn[standard]==0.30.6
 python-multipart==0.0.19
 disklru==2.0.0
+psutil==6.1.1
 
-
-# `tx` @ Zach Vorhies - CopyLeft, No Rights Reserved
-# easiest way to get files out of the container.
-# github.com/zackees/tx
-# pip install wormhole-tx
-# tx mydirectory
+# File transfer utility
+# https://github.com/zackees/tx
 wormhole-tx

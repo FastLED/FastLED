@@ -13,6 +13,7 @@ from tempfile import NamedTemporaryFile
 from threading import Timer
 from typing import Callable
 
+import psutil  # type: ignore
 from disklru import DiskLRUCache  # type: ignore
 from fastapi import (  # type: ignore
     BackgroundTasks,
@@ -50,6 +51,9 @@ _TEMP_DIR = Path("/tmp")
 
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
+_MEMORY_LIMIT_MB = int(os.environ.get("MEMORY_LIMIT_MB", "0"))  # 0 means disabled
+_MEMORY_CHECK_INTERVAL = 0.1  # Check every 100ms
+_MEMORY_EXCEEDED_EXIT_CODE = 137  # Standard OOM kill code
 # Protect the endpoints from random bots.
 # Note that that the wasm_compiler.py greps for this string to get the URL of the server.
 # Changing the name could break the compiler.
@@ -399,6 +403,26 @@ def compile_source(
     )
 
 
+def memory_watchdog() -> None:
+    """Monitor memory usage and kill process if it exceeds limit."""
+    if _MEMORY_LIMIT_MB <= 0:
+        return
+
+    def check_memory() -> None:
+        while True:
+            process = psutil.Process(os.getpid())
+            memory_mb = process.memory_info().rss / 1024 / 1024
+            if memory_mb > _MEMORY_LIMIT_MB:
+                print(
+                    f"Memory limit exceeded! Using {memory_mb:.1f}MB > {_MEMORY_LIMIT_MB}MB limit"
+                )
+                os._exit(_MEMORY_EXCEEDED_EXIT_CODE)
+            time.sleep(_MEMORY_CHECK_INTERVAL)
+
+    watchdog_thread = threading.Thread(target=check_memory, daemon=True)
+    watchdog_thread.start()
+
+
 def get_settings() -> dict:
     settings = {
         "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
@@ -422,6 +446,11 @@ def startup_event():
         print(f"Settings: {json.dumps(get_settings(), indent=2)}")
     except Exception as e:
         print(f"Error getting settings: {e}")
+
+    if _MEMORY_LIMIT_MB > 0:
+        print(f"Starting memory watchdog (limit: {_MEMORY_LIMIT_MB}MB)")
+        memory_watchdog()
+
     sync_source_directory_if_volume_is_mapped()
     if _LIVE_GIT_UPDATES_ENABLED:
         Timer(
