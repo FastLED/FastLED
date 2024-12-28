@@ -21,7 +21,7 @@
 
 namespace { // anonymous namespace
 
-typedef fl::FixedVector<uint8_t, 42> PinList42;
+typedef fl::FixedVector<uint8_t, 50> PinList50;
 
 typedef uint8_t Pin;
 
@@ -124,7 +124,7 @@ class ObjectFLEDGroup {
         if (needs_validation) {
             gPrevOverclock = gOverclock;
             mObjectFLED.reset();
-            PinList42 pinList;
+            PinList50 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->pin);
             }
