@@ -578,6 +578,8 @@ def project_init_example(
 ) -> FileResponse:
     """Archive /js/fastled/examples/{example} into a zip file and return it."""
     print(f"Endpoint accessed: /project/init/example with example: {example}")
+    if ".." in example:
+        raise HTTPException(status_code=400, detail="Invalid example name.")
     name = Path("example").name
     tmp_file_path = _TEMP_DIR / f"{name}-{make_random_path_string(16)}.zip"
     zip_example_to_file(example, Path(tmp_file_path))
