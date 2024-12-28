@@ -17,7 +17,7 @@ public:
     virtual uint32_t num_pixels() const = 0;
 };
 
-IRmtLedStrip* create_rmt_led_strip(
+IRmtLedStrip* create_rmt_led_strip_deprecated(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, // Timing is in nanoseconds
         int pin, uint32_t max_leds, bool is_rgbw);
 
