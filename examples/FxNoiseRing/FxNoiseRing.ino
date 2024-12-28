@@ -26,7 +26,6 @@
 #include "timer.h"
 
 #define LED_PIN 2
-#define BRIGHTNESS 96
 #define COLOR_ORDER GRB
 #define NUM_LEDS 250
 #define PIN_PIR 0
