@@ -1,4 +1,4 @@
-FastLED 3.9.8 - Teensy 4.x now support a whopping 27.5k pixels!!
+FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
 =============
 * FastLED 3.9.8 is the 7th beta release of FastLED 4.0
 * We are introducing the new beta release of a *Massive Parallel mode* for Teensy 4.0/4.1 for you to try out!
