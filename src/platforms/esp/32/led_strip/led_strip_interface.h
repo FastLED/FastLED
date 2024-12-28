@@ -91,7 +91,7 @@ struct led_strip_t {
      *      - ESP_ERR_TIMEOUT: Refresh did not complete within the specified timeout
      *      - ESP_FAIL: Waiting for refresh failed due to other errors
      */
-    esp_err_t (*wait_refresh_done)(led_strip_t *strip, int32_t timeout_ms);
+    esp_err_t (*wait_refresh_done)(led_strip_t *strip, int32_t timeout_ms, bool disable_after_done);
 
     /**
      * @brief Clear LED strip (turn off all LEDs)

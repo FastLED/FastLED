@@ -8,6 +8,17 @@
 #include "pixel_iterator.h"
 #include "idf5_rmt.h"
 
+// It turns out that RMT5 recycling causes a lot of problems with
+// the first led. A bug has been filed with Espressif about this.
+// Therefore we use the alternative implementation that does not
+// reycle. To get the old behavior, set FASTLED_RMT5_RECYCLE to 1.
+// If you enable this then it will allow more strips to be processed
+// than RMT channels, however, you will get a staggered affect as some
+// strips will start drawing only after others have finished.
+#ifndef FASTLED_RMT5_RECYCLE
+#define FASTLED_RMT5_RECYCLE 0
+#endif
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
@@ -20,12 +31,12 @@ private:
 
 public:
     ClocklessController()
-        : mRMTController(DATA_PIN, T1, T2, T3)
+        : mRMTController(DATA_PIN, T1, T2, T3, FASTLED_RMT5_RECYCLE)
     {
     }
 
     void init() override { }
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual uint16_t getMaxRefreshRate() const { return 800; }
 
 protected:
 

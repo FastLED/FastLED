@@ -29,6 +29,7 @@ typedef struct {
     uint8_t bytes_per_pixel;
     uint8_t* pixel_buf;
     gpio_num_t gpio_num;
+    bool enabled = false;
 } led_strip_rmt_obj;
 
 /**
@@ -102,6 +103,7 @@ esp_err_t led_strip_refresh_async(led_strip_handle_t strip);
  *
  * @param strip: LED strip
  * @param timeout_ms: Timeout in milliseconds to wait for the refresh to complete
+ * @param disable_after_done: Disable RMT channel after refresh is done
  *
  * @return
  *      - ESP_OK: Refresh completed successfully within the timeout period
@@ -112,7 +114,7 @@ esp_err_t led_strip_refresh_async(led_strip_handle_t strip);
  *      This function blocks until the asynchronous refresh operation completes or the timeout is reached.
  *      It should be called after led_strip_refresh_async to ensure the refresh process has finished.
  */
-esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, int32_t timeout_ms);
+esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, int32_t timeout_ms, bool disable_after_done);
 
 /**
  * @brief Clear LED strip (turn off all LEDs)

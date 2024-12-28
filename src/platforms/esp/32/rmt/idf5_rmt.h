@@ -8,13 +8,7 @@
 #include <stdint.h>
 #include "platforms/esp/32/led_strip/rmt_strip.h"
 
-// It turns out that RMT5 recycling causes a lot of problems with
-// the first led. A bug has been filed with Espressif about this.
-// Therefore we use the alternative implementation that does not
-// reycle. To get the old behavior, set FASTLED_RMT5_RECYCLE to 1.
-#ifndef FASTLED_RMT5_RECYCLE
-#define FASTLED_RMT5_RECYCLE 0
-#endif
+
 
 
 class RmtController5
@@ -28,7 +22,7 @@ public:
     RmtController5(
         int DATA_PIN,
         int T1, int T2, int T3,  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
-        bool recycle=FASTLED_RMT5_RECYCLE);  
+        bool recycle);  
 
     ~RmtController5();
 

@@ -73,27 +73,32 @@ static esp_err_t led_strip_rmt_refresh_async(led_strip_t *strip)
     rmt_transmit_config_t tx_conf = {
         .loop_count = 0,
     };
-    ESP_RETURN_ON_ERROR(rmt_enable(rmt_strip->rmt_chan), TAG, "enable RMT channel failed");
+    if (!rmt_strip->enabled) {
+        ESP_RETURN_ON_ERROR(rmt_enable(rmt_strip->rmt_chan), TAG, "enable RMT channel failed");
+    }
     ESP_RETURN_ON_ERROR(rmt_transmit(rmt_strip->rmt_chan, rmt_strip->strip_encoder, rmt_strip->pixel_buf,
                                      rmt_strip->strip_len * rmt_strip->bytes_per_pixel, &tx_conf), TAG, "transmit pixels by RMT failed");
     return ESP_OK;
 }
 
-static esp_err_t led_strip_rmt_wait_refresh_done(led_strip_t *strip, int32_t timeout_ms)
+static esp_err_t led_strip_rmt_wait_refresh_done(led_strip_t *strip, int32_t timeout_ms, bool disable_after_done)
 {
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     ESP_RETURN_ON_ERROR(rmt_tx_wait_all_done(rmt_strip->rmt_chan, timeout_ms), TAG, "wait for RMT channel done failed");
-    ESP_RETURN_ON_ERROR(rmt_disable(rmt_strip->rmt_chan), TAG, "disable RMT channel failed");
-    // Set GPIO to input pulldown, works around bug:
-    // https://github.com/espressif/esp-idf/issues/15049
-    ESP_RETURN_ON_ERROR(gpio_pulldown_en(rmt_strip->gpio_num), TAG, "set GPIO to input pulldown failed");
+    if (disable_after_done) {
+        ESP_RETURN_ON_ERROR(rmt_disable(rmt_strip->rmt_chan), TAG, "disable RMT channel failed");
+        rmt_strip->enabled = false;
+        // Set GPIO to input pulldown, works around bug:
+        // https://github.com/espressif/esp-idf/issues/15049
+        ESP_RETURN_ON_ERROR(gpio_pulldown_en(rmt_strip->gpio_num), TAG, "set GPIO to input pulldown failed");
+    }
     return ESP_OK;
 }
 
 static esp_err_t led_strip_rmt_refresh(led_strip_t *strip)
 {
     ESP_RETURN_ON_ERROR(led_strip_rmt_refresh_async(strip), TAG, "refresh LED strip failed");
-    ESP_RETURN_ON_ERROR(led_strip_rmt_wait_refresh_done(strip, -1), TAG, "wait for RMT channel done failed");
+    ESP_RETURN_ON_ERROR(led_strip_rmt_wait_refresh_done(strip, -1, false), TAG, "wait for RMT channel done failed");
     return ESP_OK;
 }
 
