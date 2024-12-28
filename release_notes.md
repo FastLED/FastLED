@@ -1,3 +1,41 @@
+FastLED 3.9.8 - Teensy 4.x now support a whopping 27.5k pixels!!
+=============
+* FastLED 3.9.8 is the 7th beta release of FastLED 4.0
+* We are introducing the new beta release of a *Massive Parallel mode* for Teensy 4.0/4.1 for you to try out!
+  * Made possible by Kurt Funderburg's excellent ObjectFLED driver!
+    * Check out his stand alone driver: https://github.com/KurtMF/ObjectFLED
+    * And give him a star on his repo, this is INCREDIBLE WORK!
+  * This will allow you to drive
+    * Teensy 4.1: 50 strips of WS2812 - 27,500 pixels @ 60fps!!
+      * ~36k pixels at 30% overclock (common)
+      * ~46k pixels at 70% overclock (highest end WS2812)
+    * Teensy 4.0: 40 strips of WS2812 - 22,000 pixels @ 60fps.
+  * The Teensy 4.x series is a **absolute** LED driving beast!
+  * This driver is async, so you can prepare the next frame while the current frame draws.
+  * Sketch Example: [https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino)
+  * It's very simple to turn on:
+    * `#define FASTLED_USES_OBJECTFLED`
+    * `#include "FastLED.h"` - that's it! No other changes necessary!
+  * Q/A:
+    * Is anything else supported other than WS2812? - Not at this moment. As far as I know, all strips on this bulk controller **must** use the same
+      timings. Because of the popularity of WS2812, it is enabled for this controller first. I will add support for other controllers based on the number of feature requests for other WS281x chipsets.
+    * Is overclocking supported? Yes, and it binds to the current overclock `#define FASTLED_OVERCLOCK 1.2` @ a 20% overlock.
+    * Have you tested this? Very lightly in FastLED, but Kurt has done his own tests and FastLED just provides some wrappers to map it to our easy api.
+    * How does this compare to the stock LED driver on Teensy? Better. For some reason the stock Teensy WS2812 driver seems to produce glitches, but with the ObjectFLED driver seems to fix this.
+    * Will this become the default driver on Teensy 4.x? Yes, in the next release, unless users report problems.
+    * Is RGBW supported? Yes - all FastLED RGBW modes are supported.
+    * Can other non WS281x chipsets be supported? It appears so, as ObjectFLED does have flexible timings that make it suitable for other clockless chipsets.
+    * Does this consume a lot of memory? Yes. ObjectFLED expects a rectangular pixel buffer and this will be generated automatically. This buffer will then be converted into a DMA memory block. However, this shouldn't be that big of a problem as the Teensy 4.x features a massive amount of memory.
+* Other Changes
+  * ESP32 - bug fixes for RMT5 no recycle mode. This is now the default and addresses the "green led stuck on" issue that some people are facing with ESP-WROOM-32. We also saw it in one bug report for ESP32-S3, so we are going to just enable it everywhere.
+    * If you absolutely need the extra controllers because you have more strips than RMT controllers, then you can re-enable recycle mode with:
+      * `#define FASTLED_RMT5_RECYCLE=1` before `#include "FastLED.h"`
+* Arduino Cloud compile fixes
+  * ESP328622 has an additional compile fix for the in-place new operator. Arduino Cloud compiler uses an ancient gcc compiler version which is missing the __has_include that we use to determine if FastLED needs to define a missing in-place new operator.
+* Internal stuff
+  * `FASTLED_ASSERT(true/false, MSG)` now implemented on ESP32, other platforms will just call `FASTLED_WARN(MSG)` and not abort. Use it via `#include fl/assert.h`. Be careful because on ESP32 it will absolutely abort the program, even in release. This may change later.
+
+
 FastLED 3.9.7
 =============
 * ESP32:
