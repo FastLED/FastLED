@@ -1,6 +1,6 @@
 #pragma once
 
-#if !defined(FASTLED_DBG_USE_IOSTREAM) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__))
+#if !defined(FASTLED_DBG_USE_IOSTREAM) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__)) || defined(ESP32)
 #define FASTLED_DBG_USE_IOSTREAM
 #endif
 
