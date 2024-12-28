@@ -36,7 +36,7 @@ _EXAMPLES: list[str] = [
     "FxCylon",
     "FxDemoReel100",
     "FxFire2012",
-    "FxFxEngine",
+    "FxEngine",
     "FxGfx2Video",
     "FxNoisePlusPalette",
     "FxNoiseRing",
