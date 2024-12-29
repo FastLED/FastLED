@@ -12,6 +12,7 @@
 namespace fl {
 
 // A passive infrared sensor common on amazon.
+// For best results set the PIR to maximum sensitive and minimum delay time before retrigger.
 // Instantiating this class will create a ui Button when
 // compiling using the FastLED web compiler.
 class Pir {
@@ -40,7 +41,7 @@ class Pir {
 class PirAdvanced {
   public:
     PirAdvanced(int pin, uint32_t latchMs = 5000, uint32_t risingTime = 1000, uint32_t fallingTime = 1000);
-    bool detect(uint32_t now);  // Just detects on and off.
+    bool detect(uint32_t now);  // Clamps transition() to false (transition() == 0) or true (transition() > 0).
     // When off this will be 0.
     // When on this will be a value between 0 and 255, defined by the transition params
     // risingTime and fallingTime which are passed into the constructor.
