@@ -20,4 +20,4 @@
 # pass in --build_wasm_compiler to build the wasm compilers.
 
 build_flag="-b"
-uv run ci/wasm_compile.py $build_flag --open "$@"
+uv run ci/wasm_compile.py $build_flag "$@"
