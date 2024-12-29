@@ -211,6 +211,16 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
 
 
+# New Feature Announcements
+
+## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
+![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
+
+
+## New in 3.9.2 - Overclocking of WS2812
+![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
+Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
+
 
 ## Development
 
@@ -332,16 +342,6 @@ https://github.com/FastLED/PlatformIO-Starter
 When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.
 
 Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
-
-# New Feature Announcements
-
-## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
-![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
-
-
-## New in 3.9.2 - Overclocking of WS2812
-![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
-Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
 
 
 ## Porting FastLED to a new platform
