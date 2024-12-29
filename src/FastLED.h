@@ -844,11 +844,11 @@ FASTLED_NAMESPACE_END
 #ifdef FASTLED_UI
 // As a convenience, include the UI headers and bring them into the global namespace
 #include "fl/ui.h"
-using fl::Button;
-using fl::Checkbox;
-using fl::NumberField;
-using fl::Slider;
-#define FASTLED_TITLE(text) fl::Title g_title(text)
-#define FASTLED_DESCRIPTION(text) fl::Description g_description(text)
+using fl::UIButton;
+using fl::UICheckbox;
+using fl::UINumberField;
+using fl::UISlider;
+#define FASTLED_TITLE(text) fl::UITitle g_title(text)
+#define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 #endif // FASTLED_UI
 

@@ -141,7 +141,7 @@ class CountingButton {
   bool on_;
   int curr_val_;
   unsigned long debounce_timestamp_;
-  Button mButton = Button("Counting Button");
+  UIButton mButton = UIButton("Counting UIButton");
 };
 
 class ColorSelector {

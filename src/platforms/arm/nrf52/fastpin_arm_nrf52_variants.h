@@ -101,7 +101,7 @@
     _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
     _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS
     _FL_DEFPIN( 6,  7, 0); // D6  is P0.07
-    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (Button)
+    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)
     
     // Arduino pins 8..15
     _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL
@@ -156,7 +156,7 @@
     _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
     _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS
     _FL_DEFPIN( 6,  7, 0); // D6  is P0.07
-    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (Button)
+    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)
     
     // Arduino pins 8..15
     _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL
@@ -416,7 +416,7 @@
     _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART TX)
     _FL_DEFPIN( 2,  2, 1); // D2  is P1.02
     _FL_DEFPIN( 3,  6, 0); // D3  is P0.06 LED
-    _FL_DEFPIN( 4, 29, 0); // D4  is P0.29 Button
+    _FL_DEFPIN( 4, 29, 0); // D4  is P0.29 UIButton
     _FL_DEFPIN( 5, 27, 0); // D5  is P0.27
     _FL_DEFPIN( 6,  9, 1); // D6  is P1.09 (DotStar Clock)
     _FL_DEFPIN( 7,  8, 1); // D7  is P1.08
@@ -472,7 +472,7 @@
     _FL_DEFPIN( 3, 23, 0); // D3  is P0.23 (SPI MOSI)
     _FL_DEFPIN( 4, 24, 0); // D4  is P0.24 (SPI MISO, also A3)
     _FL_DEFPIN( 5, 25, 0); // D5  is P0.25 (SPI SCK )
-    _FL_DEFPIN( 6, 16, 0); // D6  is P0.16 (Button)
+    _FL_DEFPIN( 6, 16, 0); // D6  is P0.16 (UIButton)
     _FL_DEFPIN( 7, 19, 0); // D7  is P0.19 (R)
     _FL_DEFPIN( 8, 18, 0); // D8  is P0.18 (G)
     _FL_DEFPIN( 9, 17, 0); // D9  is P0.17 (B)
@@ -748,7 +748,7 @@
     _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
     _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS
     _FL_DEFPIN( 6,  7, 0); // D6  is P0.07
-    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (Button)
+    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)
     
     // Arduino pins 8..15
     _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL
@@ -931,7 +931,7 @@
     _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
     _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS
     _FL_DEFPIN( 6,  7, 0); // D6  is P0.07
-    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (Button)
+    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (UIButton)
     
     // Arduino pins 8..15
     _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL

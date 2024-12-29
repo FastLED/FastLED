@@ -24,7 +24,7 @@ using namespace fl;
 
 namespace {
 
-Button buttonAllWhite("All white");
+UIButton buttonAllWhite("All white");
 
 ScreenMap init_screenmap() {
   LedColumns cols = LedLayoutArray();

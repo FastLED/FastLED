@@ -66,13 +66,13 @@ using namespace fl;
 // The higher the value of scale, the more "zoomed out" the noise iwll be.  A
 // value of 1 will be so zoomed in, you'll mostly see solid colors.
 
-Slider SCALE("SCALE", 20, 1, 100, 1);
+UISlider SCALE("SCALE", 20, 1, 100, 1);
 
 // We're using the x/y dimensions to map to the x/y pixels on the matrix.  We'll
 // use the z-axis for "time".  speed determines how fast time moves forward. Try
 // 1 for a very slow moving effect, or 60 for something that ends up looking
 // like water.
-Slider SPEED("SPEED", 30, 1, 60, 1);
+UISlider SPEED("SPEED", 30, 1, 60, 1);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);

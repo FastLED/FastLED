@@ -38,12 +38,12 @@ using namespace fl;
 
 CRGB leds[NUM_LEDS];
 
-Slider brightness("Brightness", 1, 0, 1);
-Slider scale("Scale", 4, .1, 4, .1);
-Slider timeBitshift("Time Bitshift", 5, 0, 16, 1);
-Slider timescale("Time Scale", 1, .1, 10, .1);
+UISlider brightness("Brightness", 1, 0, 1);
+UISlider scale("Scale", 4, .1, 4, .1);
+UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
+UISlider timescale("Time Scale", 1, .1, 10, .1);
 PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
-Checkbox useDither("Use Binary Dither", true);
+UICheckbox useDither("Use Binary Dither", true);
 
 Timer timer;
 float current_brightness = 0;

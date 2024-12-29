@@ -52,8 +52,8 @@ using namespace fl;
 #define IS_SERPINTINE true
 
 
-Title title("SDCard Demo - Mapped Video");
-Description description("Video data is streamed off of a SD card and displayed on a LED strip. The video data is mapped to the LED strip using a ScreenMap.");
+UITitle title("SDCard Demo - Mapped Video");
+UIDescription description("Video data is streamed off of a SD card and displayed on a LED strip. The video data is mapped to the LED strip using a ScreenMap.");
 
 
 CRGB leds[NUM_LEDS];
@@ -63,8 +63,8 @@ FileSystem filesystem;
 Video video;
 Video video2;
 
-Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.01f);
-NumberField whichVideo("Which Video", 0, 0, 1);
+UISlider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.01f);
+UINumberField whichVideo("Which Video", 0, 0, 1);
 
 
 bool gError = false;

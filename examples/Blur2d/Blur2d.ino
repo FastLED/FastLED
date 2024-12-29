@@ -1,4 +1,4 @@
-// Description: This example shows how to blur a strip of LEDs in 2d.
+// UIDescription: This example shows how to blur a strip of LEDs in 2d.
 
 #include "fl/ui.h"
 #include "fl/xymap.h"

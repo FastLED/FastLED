@@ -39,17 +39,17 @@ namespace fl {
 
 #if !FASTLED_HAS_UI_SLIDER
 
-class Slider {
+class UISlider {
   public:
     // If step is -1, it will be calculated as (max - min) / 100
-    Slider(const char *name, float value = 128.0f, float min = 1, float max = 255, float step = -1.f)
+    UISlider(const char *name, float value = 128.0f, float min = 1, float max = 255, float step = -1.f)
       : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(step);
         if (value < min) { mValue = min; }
         if (value > max) { mValue = max; }
     }
-    ~Slider() {}
+    ~UISlider() {}
     float value() const { return mValue; }
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
     operator float() const { return mValue; }
@@ -58,8 +58,8 @@ class Slider {
     operator int() const { return static_cast<int>(mValue); }
     template <typename T> T as() const { return static_cast<T>(mValue); }
     
-    Slider& operator=(float value) { setValue(value); return *this; }
-    Slider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
+    UISlider& operator=(float value) { setValue(value); return *this; }
+    UISlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
   private:
     float mValue;
     float mMin;
@@ -75,12 +75,12 @@ class Slider {
 
 #if !FASTLED_HAS_UI_BUTTON
 
-class Button {
+class UIButton {
   public:
-    Button(const char *name) {
+    UIButton(const char *name) {
       FASTLED_UNUSED(name);
     }
-    ~Button() {}
+    ~UIButton() {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
     int clickedCount() const { return 0; }
@@ -91,16 +91,16 @@ class Button {
 
 #if !FASTLED_HAS_UI_CHECKBOX
 
-class Checkbox {
+class UICheckbox {
   public:
-    Checkbox(const char *name, bool value = false) : mValue(value) {
+    UICheckbox(const char *name, bool value = false) : mValue(value) {
       FASTLED_UNUSED(name);
     }
-    ~Checkbox() {}
+    ~UICheckbox() {}
     operator bool() const { return mValue; }
     operator int() const { return mValue ? 1 : 0; }
-    Checkbox& operator=(bool value) { setValue(value); return *this; }
-    Checkbox& operator=(int value) { setValue(value != 0); return *this; }
+    UICheckbox& operator=(bool value) { setValue(value); return *this; }
+    UICheckbox& operator=(int value) { setValue(value != 0); return *this; }
   private:
     void setValue(bool value) { mValue = value; }
     bool mValue;
@@ -110,19 +110,19 @@ class Checkbox {
 
 #if !FASTLED_HAS_UI_NUMBER_FIELD
 
-class NumberField {
+class UINumberField {
   public:
-    NumberField(const char *name, double value, double min = 0, double max = 100)
+    UINumberField(const char *name, double value, double min = 0, double max = 100)
       : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
         FASTLED_UNUSED(name);
     }
-    ~NumberField() {}
+    ~UINumberField() {}
     double value() const { return mValue; }
     void setValue(double value) { mValue = MAX(mMin, MIN(mMax, value)); }
     operator double() const { return mValue; }
     operator int() const { return static_cast<int>(mValue); }
-    NumberField& operator=(double value) { setValue(value); return *this; }
-    NumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
+    UINumberField& operator=(double value) { setValue(value); return *this; }
+    UINumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
   private:
     double mValue;
     double mMin;
@@ -134,12 +134,12 @@ class NumberField {
 #if !FASTLED_HAS_UI_TITLE
 
 
-class Title {
+class UITitle {
   public:
-    Title(const char *name) {
+    UITitle(const char *name) {
       FASTLED_UNUSED(name);
     }
-    ~Title() {}
+    ~UITitle() {}
 };
 
 #endif
@@ -149,12 +149,12 @@ class Title {
 
 #if !FASTLED_HAS_UI_DESCRIPTION
 
-class Description {
+class UIDescription {
   public:
-    Description(const char *name) {
+    UIDescription(const char *name) {
       FASTLED_UNUSED(name);
     }
-    ~Description() {}
+    ~UIDescription() {}
 };
 
 #endif
@@ -168,10 +168,10 @@ FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, <)  \
 FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, ==) \
 FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, !=)
 
-FASTLED_UI_DEFINE_OPERATORS(Slider);
-FASTLED_UI_DEFINE_OPERATORS(NumberField);
-FASTLED_UI_DEFINE_OPERATORS(Checkbox);
-FASTLED_UI_DEFINE_OPERATORS(Button);
+FASTLED_UI_DEFINE_OPERATORS(UISlider);
+FASTLED_UI_DEFINE_OPERATORS(UINumberField);
+FASTLED_UI_DEFINE_OPERATORS(UICheckbox);
+FASTLED_UI_DEFINE_OPERATORS(UIButton);
 
 }  // end namespace fl
 

@@ -75,19 +75,19 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalette noisePalette = NoisePalette(xyMap);
 
-Title title("FastLED Wasm Demo");
-Description description("This example combines two features of FastLED to produce a remarkable range of effects from a relatively small amount of code.  This example combines FastLED's color palette lookup functions with FastLED's Perlin noise generator, and the combination is extremely powerful");
+UITitle title("FastLED Wasm Demo");
+UIDescription description("This example combines two features of FastLED to produce a remarkable range of effects from a relatively small amount of code.  This example combines FastLED's color palette lookup functions with FastLED's Perlin noise generator, and the combination is extremely powerful");
 
-Slider brightness("Brightness", 255, 0, 255);
-Checkbox isOff("Off", false);
-Slider speed("Noise - Speed", 15, 1, 50);
-Checkbox changePallete("Noise - Auto Palette", true);
-Slider changePalletTime("Noise - Time until next random Palette", 5, 1, 100);
-Slider scale( "Noise - Scale", 20, 1, 100);
-Button changePalette("Noise - Next Palette");
-Button changeFx("Switch between Noise & Animartrix");
-NumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
-Slider timeSpeed("Time Speed", 1, -10, 10, .1);
+UISlider brightness("Brightness", 255, 0, 255);
+UICheckbox isOff("Off", false);
+UISlider speed("Noise - Speed", 15, 1, 50);
+UICheckbox changePallete("Noise - Auto Palette", true);
+UISlider changePalletTime("Noise - Time until next random Palette", 5, 1, 100);
+UISlider scale( "Noise - Scale", 20, 1, 100);
+UIButton changePalette("Noise - Next Palette");
+UIButton changeFx("Switch between Noise & Animartrix");
+UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
+UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);

@@ -66,7 +66,7 @@ void jsSlider::setValue(float value) {
         const Str& name = mInternal->name();
         int id = mInternal->id();
         printf(
-            "Warning: Slider %s with id %d value %f was clamped to range [%f, %f] -> %f\n",
+            "Warning: UISlider %s with id %d value %f was clamped to range [%f, %f] -> %f\n",
             name.c_str(), id,
             value, mMin, mMax, mValue);
     }

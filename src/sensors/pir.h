@@ -13,7 +13,7 @@ namespace fl {
 
 // A passive infrared sensor common on amazon.
 // For best results set the PIR to maximum sensitive and minimum delay time before retrigger.
-// Instantiating this class will create a ui Button when
+// Instantiating this class will create a ui UIButton when
 // compiling using the FastLED web compiler.
 class Pir {
   public:
@@ -22,7 +22,7 @@ class Pir {
     operator bool() { return detect(); }
 
   private:
-    Button mButton;
+    UIButton mButton;
     DigitalPin mPin;
 };
 

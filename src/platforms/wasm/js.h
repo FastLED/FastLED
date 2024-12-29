@@ -239,12 +239,12 @@ void updateJs(const char* jsonStr);
 #define FASTLED_HAS_UI_TITLE 1
 #define FASTLED_HAS_UI_DESCRIPTION 1
 
-typedef jsNumberField NumberField;
-typedef jsSlider Slider;
-typedef jsCheckbox Checkbox;
-typedef jsButton Button;
-typedef jsTitle Title;
-typedef jsDescription Description;
+typedef jsNumberField UINumberField;
+typedef jsSlider UISlider;
+typedef jsCheckbox UICheckbox;
+typedef jsButton UIButton;
+typedef jsTitle UITitle;
+typedef jsDescription UIDescription;
 
 
 }  // namespace fl

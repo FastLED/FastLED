@@ -36,15 +36,15 @@ void loop() {}
 #endif
 
 
-Slider SCALE("SCALE", 20, 20, 100);
-Slider SPEED("SPEED", 30, 20, 100);
+UISlider SCALE("SCALE", 20, 20, 100);
+UISlider SPEED("SPEED", 30, 20, 100);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
 NoisePalette noisePalette1(xyMap);
 NoisePalette noisePalette2(xyMap);
 FxEngine fxEngine(NUM_LEDS);
-Checkbox switchFx("Switch Fx", true);
+UICheckbox switchFx("Switch Fx", true);
 
 void setup() {
     delay(1000); // sanity delay
