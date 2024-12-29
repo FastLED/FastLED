@@ -208,28 +208,6 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 
 
 
-## New in 3.9.2!
-![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
-Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
-
-## Getting Started
-
-### Arduino IDE / PlatformIO Dual Repo
-
-We've created a custom repo you can try to start your projects. This repo is designed to be used with VSCode + PlatformIO but is also *backwards compatible with the Arduino IDE*.
-
-PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.
-
-Get started here:
-
-https://github.com/FastLED/PlatformIO-Starter
-
-### ArduinoIDE
-
-When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.
-
-Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
-
 ## Development
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
@@ -379,9 +357,36 @@ Additionally, version 3.9.0 separated the color temperature from the global brig
 
 Although APA102HD mode offers the highest dynamic range, the standard APA102 mode also benefits from increased resolution when adjusting global brightness. In this mode, instead of pre-mixing scales and multiplying them against each `CRGB` value, the global brightness is applied to the 5-bit brightness component, and only the color scales are multiplied against the `CRGB` values. This approach is superior because each component of the color scale typically exceeds 127, providing ample high-order bits to preserve color information.
 
-**Conclusion**
 
-I hope this explanation clarifies the enhancements and the rationale behind these implementation choices. If you have any questions or require further clarification, please do not hesitate to ask.
+
+## Getting Started
+
+### Arduino IDE / PlatformIO Dual Repo
+
+We've created a custom repo you can try to start your projects. This repo is designed to be used with VSCode + PlatformIO but is also *backwards compatible with the Arduino IDE*.
+
+PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.
+
+Get started here:
+
+https://github.com/FastLED/PlatformIO-Starter
+
+### ArduinoIDE
+
+When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.
+
+Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
+
+# New Feature Announcements
+
+## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
+![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
+
+
+## New in 3.9.2 - Overclocking of WS2812
+![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
+Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
+
 
 ## Porting FastLED to a new platform
 
@@ -394,6 +399,3 @@ Wait, what happened to FastSPI_LED and FastSPI_LED2?  The library was initially 
 ## For more information
 
 Check out the official site http://fastled.io for links to documentation, issues, and news
-
-
-*TODO* - get candy
