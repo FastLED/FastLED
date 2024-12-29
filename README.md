@@ -10,7 +10,7 @@ FastLED Library
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-A robust and mature led driver for Arduino/Esp32/RasperriPi/Atmega/Teensy and more. Supports nearly every single led chipset in existence.
+A robust and mature led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and more. Supports nearly every single led chipset in existence.
 
 <a href="https://star-history.com/#fastled/fastled&Date">
  <picture>
