@@ -57,22 +57,6 @@ For more examples see this [link](examples).
 
 
 
-# Install
-
-## Arduino IDE
-
-After the ArduinoIDE is installed then add the library to your IDE
-
-![image](https://github.com/user-attachments/assets/b1c02cf9-aba6-4f80-851e-78df914e2501)
-
-![image](https://github.com/user-attachments/assets/508eb700-7dd4-4901-a901-68c56cc4d0e1)
-
-## PlatformIO
-
-Follow our guide here. Our template will allow your project to be compiled by both PlatformIO and ArduinoIDE
-
-https://github.com/FastLED/PlatformIO-Starter
-
 
 ## Supported Platforms
 ### Arduino
@@ -218,6 +202,23 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 
 
 [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
+
+# Install
+
+## Arduino IDE
+
+After the ArduinoIDE is installed then add the library to your IDE
+
+![image](https://github.com/user-attachments/assets/b1c02cf9-aba6-4f80-851e-78df914e2501)
+
+![image](https://github.com/user-attachments/assets/508eb700-7dd4-4901-a901-68c56cc4d0e1)
+
+## PlatformIO
+
+Follow our guide here. Our template will allow your project to be compiled by both PlatformIO and ArduinoIDE
+
+https://github.com/FastLED/PlatformIO-Starter
+
 
 
 # New Feature Announcements
