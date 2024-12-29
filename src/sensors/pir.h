@@ -17,7 +17,7 @@ namespace fl {
 // compiling using the FastLED web compiler.
 class Pir {
   public:
-    Pir(int pin);
+    Pir(int pin, const char* button_name = nullptr);
     bool detect();
     operator bool() { return detect(); }
 

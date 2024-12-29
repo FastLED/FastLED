@@ -10,7 +10,10 @@ namespace fl {
 
 namespace {
   int g_counter = 0;
-  Str buttonName() {
+  Str getButtonName(const char* button_name) {
+    if (button_name) {
+      return Str(button_name);
+    }
     int count = g_counter++;
     if (count == 0) {
       return Str("PIR");
@@ -20,7 +23,7 @@ namespace {
 }
 
 
-Pir::Pir(int pin): mButton(buttonName().c_str()), mPin(pin) {
+Pir::Pir(int pin, const char* button_name): mButton(getButtonName(button_name).c_str()), mPin(pin) {
     mPin.setPinMode(DigitalPin::kInput);
 }
 
