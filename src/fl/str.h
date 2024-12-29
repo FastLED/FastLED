@@ -7,6 +7,7 @@
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/namespace.h"
+#include "fl/math_macros.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -173,7 +174,8 @@ template <size_t SIZE = 64> class StrN {
         size_t newLen = mLength + n;
         if (mHeapData && !mHeapData->isShared()) {
             if (!mHeapData->hasCapacity(newLen)) {
-                mHeapData->grow(newLen * 3 / 2); // Grow by 50%
+                size_t grow_length = MAX(3, newLen * 3 / 2);
+                mHeapData->grow(grow_length); // Grow by 50%
             }
             memcpy(mHeapData->data() + mLength, str, n);
             mLength = newLen;
