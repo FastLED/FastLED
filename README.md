@@ -1,5 +1,8 @@
 FastLED Library
 ===========
+
+A robust and mature led driver for Arduino/Esp32/RasperriPi/Atmega/Teensy and more.
+
 [![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
 [![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml)
 [![unit tests](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml)
@@ -19,7 +22,7 @@ FastLED Library
 
 ## About
 
-The led driver for tiny computers the size of a quarter, more or less.
+
 
 esp32, teensy, arduino,
 raspberri pi, attiny family and more.
