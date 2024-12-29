@@ -15,3 +15,6 @@
 
   * Esp32 server for fastled
     * https://github.com/jasoncoon/esp32-fastled-webserver
+
+  * Strip tease - cool fx for strips
+    * https://github.com/lpaolini/Striptease?tab=readme-ov-file
