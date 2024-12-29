@@ -612,7 +612,15 @@ def info_examples() -> dict:
     print("Endpoint accessed: /info")
     uptime = time.time() - START_TIME
     uptime_fmtd = time.strftime("%H:%M:%S", time.gmtime(uptime))
-    build_timestamp = Path("/image_timestamp.txt").read_text(encoding="utf-8").strip()
+    try:
+        build_timestamp = (
+            Path("/image_timestamp.txt").read_text(encoding="utf-8").strip()
+        )
+    except Exception as e:
+        import warnings
+
+        warnings.warn(f"Error reading build timestamp: {e}")
+        build_timestamp = "unknown"
     out = {
         "examples": _EXAMPLES,
         "compile_count": COMPILE_COUNT,
