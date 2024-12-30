@@ -473,7 +473,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
 #if SCALE16BY8_C == 1
     uint16_t result;
 #if FASTLED_SCALE8_FIXED == 1
-    result = (((uint32_t)(i) * (1 + ((uint32_t)scale))) >> 8);
+    result = ((uint32_t)(i) * (1 + ((uint16_t)scale))) >> 8;
 #else
     result = (i * scale) / 256;
 #endif
