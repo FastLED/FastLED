@@ -42,7 +42,7 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
 // the number of shifts on the dst.
 inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *brightness_dst, uint8_t max_shifts, uint8_t steps=2) {
     uint8_t src = *brightness_src;
-    if (*brightness_src == 0 || *brightness_src == 0) {
+    if (*brightness_dst == 0 || src == 0) {
         return 0;
     }
     uint16_t overflow_mask = 0b1000000000000000;
