@@ -30,6 +30,7 @@ namespace fl {
 class ObjectFled {
   public:
     static void SetOverclock(float overclock);
+    static void SetLatchDelay(uint16_t latchDelayUs);
     void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
@@ -45,9 +46,13 @@ class ClocklessController_ObjectFLED_WS2812
     ObjectFled mObjectFled;
 
   public:
-    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f): Base() {
+    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = -1): Base() {
         // Warning - overwrites previous overclock value.
+        // Warning latchDelayUs is GLOBAL!
         ObjectFled::SetOverclock(overclock);
+        if (latchDelayUs >= 0) {
+            ObjectFled::SetLatchDelay(latchDelayUs);
+        }
     }
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }

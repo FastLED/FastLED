@@ -27,6 +27,7 @@ typedef uint8_t Pin;
 
 static float gOverclock = 1.0f;
 static float gPrevOverclock = 1.0f;
+static int gLatchDelayUs = -1;
 
 struct Info {
     uint8_t pin = 0;
@@ -131,7 +132,11 @@ class ObjectFLEDGroup {
             mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
                                              CORDER_RGB, pinList.size(),
                                              pinList.data()));
-            mObjectFLED->begin(gOverclock);
+            if (gLatchDelayUs >= 0) {
+                mObjectFLED->begin(gOverclock, gLatchDelayUs);
+            } else {
+                mObjectFLED->begin(gOverclock);
+            }
         }
         mObjectFLED->show();
         mDrawn = true;
@@ -145,6 +150,10 @@ namespace fl {
 
 void ObjectFled::SetOverclock(float overclock) {
     gOverclock = overclock;
+}
+
+void ObjectFled::SetLatchDelay(uint16_t latch_delay_us) {
+    gLatchDelayUs = latch_delay_us;
 }
 
 void ObjectFled::beginShowLeds(int datapin, int nleds) {
