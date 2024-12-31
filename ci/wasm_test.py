@@ -35,7 +35,9 @@ def start_http_server(port: int, directory: Path):
 async def main():
     install_playwright_browsers()
     # Find an available port
-    port = 8871
+    port = (
+        8080  # Todo, figure out why the http server ignores any port other than 8080.
+    )
     print(f"Using port: {port}")
 
     # Start the HTTP server
