@@ -17,7 +17,7 @@ def parse_args() -> tuple[argparse.Namespace, list]:
 
 def main() -> None:
     args, unknown_args = parse_args()
-    cmd_list = ["fastled", args.sketch_dir, "--build"]
+    cmd_list = ["fastled", args.sketch_dir, "--build", "--just-compile"]
     cmd_list.extend(unknown_args)
     subprocess.call(cmd_list)
 
