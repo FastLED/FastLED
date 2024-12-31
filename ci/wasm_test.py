@@ -32,7 +32,7 @@ def start_http_server(port: int, directory: Path):
     return server_process
 
 
-async def main():
+async def main() -> None:
     install_playwright_browsers()
     # Find an available port
     port = (
@@ -42,7 +42,7 @@ async def main():
 
     # Start the HTTP server
     os.chdir(str(PROJECT_ROOT))
-    directory = "examples/wasm/fastled_js"
+    directory = Path("examples/wasm/fastled_js")
     server_process = start_http_server(port=port, directory=directory)
 
     try:
@@ -63,7 +63,7 @@ async def main():
                         print(
                             "INVALID_OPERATION detected in console log", file=sys.stderr
                         )
-                        sys.exit(1)
+                        raise Exception("INVALID_OPERATION detected in console log")
 
                 page.on("console", console_log_handler)
 
