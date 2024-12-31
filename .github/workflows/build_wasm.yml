@@ -39,8 +39,8 @@ jobs:
           echo "Or check the demo: https://zackees.github.io/fastled-wasm/"
           echo "Happy coding! - Zach Vorhies"
 
-      - name: Install UV for python
-        run: pip install uv
+      - name: Install UV for python and live server
+        run: pip install uv && npm install -g playwright
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
@@ -75,7 +75,7 @@ jobs:
           path: examples/wasm/fastled_js/*.*
           if-no-files-found: ${{ matrix.os == 'ubuntu-latest' && 'error' || 'ignore' }}
 
-      - name: Install Playwright and verify FastLED_onFrame
+      - name: Verify FastLED_onFrame with Playwrite
         run: |
           uv run ci/wasm_test.py
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
