@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import glob
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 
 HERE = Path(__file__).parent
 
@@ -48,8 +49,9 @@ def make_links() -> None:
     for pattern in patterns:
         files.extend(glob.glob(str(_COMPILER_DIR / pattern)))
 
-    for src in files:
-        task(src=src)
+    # Process files in parallel using ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        executor.map(task, files)
 
 
 def init_runtime() -> None:
