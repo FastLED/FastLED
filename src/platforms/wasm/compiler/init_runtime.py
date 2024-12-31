@@ -2,11 +2,42 @@
 import os
 from pathlib import Path
 import glob
+import warnings
 
 HERE = Path(__file__).parent
 
 
 _COMPILER_DIR = Path("/js/fastled/src/platforms/wasm/compiler")
+
+
+def task(src: str | Path) -> None:
+    src = Path(src)
+    if "entrypoint.sh" in str(src):
+        return
+    link_dst = Path("/js") / src.name
+    
+    # Handle shell scripts
+    if src.suffix == '.sh':
+        os.system(f"dos2unix {src} && chmod +x {src}")
+
+    # if link exists, remove it
+    if link_dst.exists():
+        print(f"Removing existing link {link_dst}")
+        try:
+            os.remove(link_dst)
+        except Exception as e:
+            warnings.warn(f"Failed to remove {link_dst}: {e}")
+
+        
+    if not link_dst.exists():
+        print(f"Linking {src} to {link_dst}")
+        try:
+            os.symlink(str(src), str(link_dst))
+        except FileExistsError:
+            print(f"Target {link_dst} already exists")
+    else:
+        print(f"Target {link_dst} already exists")
+
 
 def make_links() -> None:
     # Define file patterns to include
@@ -16,25 +47,10 @@ def make_links() -> None:
     files = []
     for pattern in patterns:
         files.extend(glob.glob(str(_COMPILER_DIR / pattern)))
-    
+
     for src in files:
-        src = Path(src)
-        if "entrypoint.sh" in str(src):
-            continue
-        link_dst = Path("/js") / src.name
-        
-        # Handle shell scripts
-        if src.suffix == '.sh':
-            os.system(f"dos2unix {src} && chmod +x {src}")
-            
-        if not link_dst.exists():
-            print(f"Linking {src} to {link_dst}")
-            try:
-                os.symlink(str(src), str(link_dst))
-            except FileExistsError:
-                print(f"Target {link_dst} already exists")
-        else:
-            print(f"Target {link_dst} already exists")
+        task(src=src)
+
 
 def init_runtime() -> None:
     os.chdir(str(HERE))
