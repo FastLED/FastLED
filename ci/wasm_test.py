@@ -87,11 +87,11 @@ async def main():
                         "Error: FastLED.js had something go wrong and FastLED_onFrame was not called within 5 seconds",
                         file=sys.stderr,
                     )
-                    sys.exit(1)
+                    raise Exception("FastLED.js failed to initialize")
 
             except Exception as e:
                 print(f"An error occurred: {e}", file=sys.stderr)
-                sys.exit(1)
+                raise Exception(f"An error occurred: {e}") from e
 
             finally:
                 await browser.close()
