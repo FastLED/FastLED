@@ -331,9 +331,13 @@ Right now the library is supported on a variety of arduino compatible platforms.
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
 
-### Special Notes on APA102 and the 'High Definition' Mode in FastLED
+### APA102 and the 'High Definition' Mode in FastLED
 
-We have a special APA102HD mode to support gamma correction at the Driver level using "pseudo-13-bit mixing". Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
+FastLED features hardware gamma correction for the APA102 and SK9822 chipsets, using "pseudo-13-bit mixing".
+Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
+
+![image](https://github.com/user-attachments/assets/999e68ce-454f-4f15-9590-a8d2e8d47a22)
+
 
 # Getting Started
 
