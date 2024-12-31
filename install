@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 uv venv --python 3.11
-uv pip install .
+uv pip install . --refresh-package fastled
