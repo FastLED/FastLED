@@ -39,8 +39,15 @@ jobs:
           echo "Or check the demo: https://zackees.github.io/fastled-wasm/"
           echo "Happy coding! - Zach Vorhies"
 
-      - name: Install UV for python and live server
-        run: pip install uv && npm install -g playwright
+      - name: Install UV for python and npm packages
+        run: |
+          pip install uv
+          npm install -g live-server
+
+      - name: Verify live-server installation
+        run: |
+          which live-server || (echo "live-server not found in PATH" && exit 1)
+          live-server --version
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
