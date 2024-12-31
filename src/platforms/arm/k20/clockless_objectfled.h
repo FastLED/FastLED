@@ -25,6 +25,10 @@
 #include "pixel_iterator.h"
 #include "fl/vector.h"
 
+#ifndef FASTLED_OBJECTFLED_LATCH_DELAY
+#define FASTLED_OBJECTFLED_LATCH_DELAY -1  // auto
+#endif
+
 namespace fl {
 
 class ObjectFled {
@@ -46,7 +50,7 @@ class ClocklessController_ObjectFLED_WS2812
     ObjectFled mObjectFled;
 
   public:
-    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = -1): Base() {
+    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = FASTLED_OBJECTFLED_LATCH_DELAY): Base() {
         // Warning - overwrites previous overclock value.
         // Warning latchDelayUs is GLOBAL!
         ObjectFled::SetOverclock(overclock);

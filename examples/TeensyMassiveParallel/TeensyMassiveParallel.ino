@@ -18,6 +18,8 @@ void loop() {}
 
 #define FASTLED_USES_OBJECTFLED
 
+// Optional define to override the latch delay (microseconds)
+// #define FASTLED_OBJECTFLED_LATCH_DELAY 75
 #include "FastLED.h"
 #include "fl/warn.h"
 
