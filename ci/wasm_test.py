@@ -1,11 +1,13 @@
 import asyncio
 import os
-import subprocess
 import sys
 import time
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from pathlib import Path
 
 from playwright.async_api import async_playwright
+
+HERE = Path(__file__).parent
+PROJECT_ROOT = HERE.parent
 
 
 # Ensure Playwright browsers are installed
@@ -21,31 +23,29 @@ def install_playwright_browsers():
 
 
 # Start an HTTP server on the dynamic port
-def start_http_server(port, directory):
-    os.chdir(directory)
-    server = HTTPServer(("localhost", port), SimpleHTTPRequestHandler)
-    print(f"Serving on port {port}")
-    server_process = subprocess.Popen(
-        [sys.executable, "-m", "http.server", str(port)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+def start_http_server(port: int, directory: Path):
+    from fastled import Test  # type: ignore
+
+    server_process = Test.spawn_http_server(
+        directory=directory, port=port, open_browser=False
     )
-    return server_process, server
+    return server_process
 
 
 async def main():
     install_playwright_browsers()
     # Find an available port
-    port = 8888
+    port = 8871
     print(f"Using port: {port}")
 
     # Start the HTTP server
+    os.chdir(str(PROJECT_ROOT))
     directory = "examples/wasm/fastled_js"
-    server_process, _ = start_http_server(port, directory)
+    server_process = start_http_server(port=port, directory=directory)
 
     try:
         # Give the server some time to start
-        time.sleep(5)
+        time.sleep(2)
 
         # Use Playwright to test the server
         async with async_playwright() as p:
