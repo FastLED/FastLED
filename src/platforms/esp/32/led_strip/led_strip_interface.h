@@ -50,20 +50,6 @@ struct led_strip_t {
      */
     esp_err_t (*set_pixel_rgbw)(led_strip_t *strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue, uint32_t white);
 
-    /**
-     * @brief Refresh memory colors to LEDs (blocking)
-     *
-     * @param strip: LED strip
-     *
-     * @return
-     *      - ESP_OK: Refresh successfully
-     *      - ESP_FAIL: Refresh failed because some other error occurred
-     *
-     * @note:
-     *      After updating the LED colors in the memory, a following invocation of this API is needed to flush colors to strip.
-     *      This function blocks until the refresh is complete.
-     */
-    esp_err_t (*refresh)(led_strip_t *strip);
 
     /**
      * @brief Refresh memory colors to LEDs asynchronously

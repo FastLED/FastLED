@@ -230,6 +230,9 @@ public:
 
     virtual ~RmtLedStripNoRecycle() override {
         if (mLedStrip) {
+            if (mAquired) {
+                release_rmt();
+            }
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
         }

@@ -282,7 +282,6 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
     rmt_strip->gpio_num = led_config->strip_gpio_num;
     rmt_strip->base.set_pixel = led_strip_rmt_set_pixel;
     rmt_strip->base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;
-    rmt_strip->base.refresh = led_strip_rmt_refresh;
     rmt_strip->base.clear = led_strip_rmt_clear;
     rmt_strip->base.del = led_strip_rmt_del2;
     rmt_strip->base.refresh_async = led_strip_rmt_refresh_async;
