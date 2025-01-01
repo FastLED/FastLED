@@ -1,4 +1,5 @@
 import subprocess
+import threading
 from pathlib import Path
 
 
@@ -12,7 +13,7 @@ class RunningProcess:
 
     def __init__(
         self,
-        command: str,
+        command: str | list[str],
         cwd: Path | None = None,
         check: bool = False,
         auto_run: bool = True,
@@ -28,6 +29,8 @@ class RunningProcess:
             auto_run (bool): If True, automatically run the command when the instance is created.
             echo (bool): If True, print the output of the command to the console in real-time.
         """
+        if isinstance(command, list):
+            command = subprocess.list2cmdline(command)
         self.command = command
         self.cwd = str(cwd) if cwd is not None else None
         self.buffer: list[str] = []
@@ -35,10 +38,12 @@ class RunningProcess:
         self.check = check
         self.auto_run = auto_run
         self.echo = echo
+        self.reader_thread: threading.Thread | None = None
+        self.shutdown: threading.Event = threading.Event()
         if auto_run:
             self.run()
 
-    def run(self) -> str:
+    def run(self) -> None:
         """
         Execute the command and stream its output in real-time.
 
@@ -53,35 +58,31 @@ class RunningProcess:
             self.command,
             shell=True,
             cwd=self.cwd,
+            bufsize=256,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # Merge stderr into stdout
             text=True,  # Automatically decode bytes to str
         )
 
-        try:
-            # Stream output line by line
-            assert self.proc.stdout is not None
-            for line in iter(self.proc.stdout.readline, ""):
-                line = line.rstrip()
-                if self.echo:
-                    print(line)  # Print to console in real time
-                self.buffer.append(line)
+        def output_reader():
+            try:
+                assert self.proc.stdout is not None
+                for line in iter(self.proc.stdout.readline, ""):
+                    if self.shutdown.is_set():
+                        break
+                    line = line.rstrip()
+                    if self.echo:
+                        print(line)  # Print to console in real time
+                    self.buffer.append(line)
+            finally:
+                if self.proc.stdout:
+                    self.proc.stdout.close()
 
-            # Wait for the process to complete
-            self.proc.wait()
-        finally:
-            if self.proc.stdout:
-                self.proc.stdout.close()
+        # Start output reader thread
+        self.reader_thread = threading.Thread(target=output_reader, daemon=True)
+        self.reader_thread.start()
 
-        if self.proc.returncode != 0:
-            if self.check:
-                raise subprocess.CalledProcessError(
-                    self.proc.returncode, self.command, output=self.stdout
-                )
-
-        return "\n".join(self.buffer)
-
-    def wait(self) -> None:
+    def wait(self) -> int:
         """
         Wait for the process to complete.
 
@@ -90,7 +91,10 @@ class RunningProcess:
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
-        self.proc.wait()
+        rtn = self.proc.wait()
+        assert self.reader_thread is not None
+        self.reader_thread.join(timeout=1)
+        return rtn
 
     def kill(self) -> None:
         """
@@ -101,6 +105,7 @@ class RunningProcess:
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
+        self.shutdown.set()
         self.proc.kill()
 
     def terminate(self) -> None:
@@ -112,6 +117,7 @@ class RunningProcess:
         """
         if self.proc is None:
             raise ValueError("Process is not running.")
+        self.shutdown.set()
         self.proc.terminate()
 
     @property
