@@ -333,7 +333,7 @@ What types of platforms are we thinking about supporting in the future?  Here's 
 
 ### APA102 and the 'High Definition' Mode in FastLED
 
-FastLED features hardware gamma correction for the APA102 and SK9822 chipsets, using "pseudo-13-bit mixing".
+FastLED features driver-level gamma correction for the APA102 and SK9822 chipsets, using our "pseudo-13-bit mixing" algorithm.
 Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
 
 ![image](https://github.com/user-attachments/assets/999e68ce-454f-4f15-9590-a8d2e8d47a22)
