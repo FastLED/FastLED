@@ -3,7 +3,7 @@
 /// @example Cylon.ino
 
 #include <FastLED.h>
-#include "fx/1d/cylon.hpp"
+#include "fx/1d/cylon.h"
 
 using namespace fl;
 

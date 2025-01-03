@@ -3,7 +3,7 @@
 /// @example DemoReel100.ino
 
 #include <FastLED.h>
-#include "fx/1d/demoreel100.hpp"
+#include "fx/1d/demoreel100.h"
 
 using namespace fl;
 

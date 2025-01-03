@@ -6,12 +6,12 @@
 #include <stdint.h>
 
 #include "test.h"
-#include "fx/1d/cylon.hpp"
-#include "fx/1d/demoreel100.hpp"
-#include "fx/1d/noisewave.hpp"
-#include "fx/1d/pacifica.hpp"
-#include "fx/1d/pride2015.hpp" // needs XY defined or linker error.
-#include "fx/1d/twinklefox.hpp"
+#include "fx/1d/cylon.h"
+#include "fx/1d/demoreel100.h"
+#include "fx/1d/noisewave.h"
+#include "fx/1d/pacifica.h"
+#include "fx/1d/pride2015.h" // needs XY defined or linker error.
+#include "fx/1d/twinklefox.h"
 #include "fx/2d/animartrix.hpp"
 #include "fx/2d/noisepalette.h"
 #include "fx/2d/scale_up.h"

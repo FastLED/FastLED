@@ -12,7 +12,7 @@
 
 #define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
-#include "fx/1d/pacifica.hpp"
+#include "fx/1d/pacifica.h"
 
 using namespace fl;
 

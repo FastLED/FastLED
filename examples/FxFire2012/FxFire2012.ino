@@ -37,7 +37,7 @@
 // Default 120, suggested range 50-200.
 
 #include <FastLED.h>
-#include "fx/1d/fire2012.hpp"
+#include "fx/1d/fire2012.h"
 
 using namespace fl;
 
