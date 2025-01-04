@@ -41,7 +41,7 @@ FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
   * Q/A:
     * Is anything else supported other than WS2812? - Not at this moment. As far as I know, all strips on this bulk controller **must** use the same
       timings. Because of the popularity of WS2812, it is enabled for this controller first. I will add support for other controllers based on the number of feature requests for other WS281x chipsets.
-    * Is overclocking supported? Yes, and it binds to the current overclock `#define FASTLED_LED_OVERCLOCK 1.2` @ a 20% overlock.
+    * Is overclocking supported? Yes, and it binds to the current overclock `#define FASTLED_OVERCLOCK 1.2` @ a 20% overlock.
     * Have you tested this? Very lightly in FastLED, but Kurt has done his own tests and FastLED just provides some wrappers to map it to our familiar and easy api.
     * How does this compare to the stock LED driver on Teensy for just one strip? Better and way less random light flashes. For some reason the stock Teensy WS2812 driver seems to produce glitches, but with the ObjectFLED driver seems to fix this.
     * Will this become the default driver on Teensy 4.x? Yes, in the next release, unless users report problems.
@@ -161,8 +161,8 @@ FastLED 3.9.2
   * In this version we introduce the pre-release of our WS2812 overclocking
   * We have compile fixes for 3.9.X
 * WS28XX family of led chipsets can now be overclocked
-  * See also define `FASTLED_LED_OVERCLOCK`
-    * Example: `#define FASTLED_LED_OVERCLOCK 1.2` (gives 20% overclock).
+  * See also define `FASTLED_OVERCLOCK`
+    * Example: `#define FASTLED_OVERCLOCK 1.2` (gives 20% overclock).
     * You can set this define before you include `"FastLED.h"`
     * Slower chips like AVR which do software bitbanging will ignore this.
     * This discovery came from this reddit thread:
@@ -187,7 +187,7 @@ FastLED 3.9.2
 Example of how to enable overclocking.
 
 ```
-#define FASTLED_LED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
+#define FASTLED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
 #include "FastLED.h"
 ```
 

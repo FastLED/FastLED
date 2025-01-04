@@ -41,7 +41,7 @@ We have multiple goals with this library:
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
 ```C++
 // New feature! Overclocking WS2812
-// #define FASTLED_LED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
+// #define FASTLED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
 #include <FastLED.h>
 #define NUM_LEDS 60
 #define DATA_PIN 6
@@ -234,7 +234,7 @@ https://github.com/FastLED/PlatformIO-Starter
 
 ## New in 3.9.2 - Overclocking of WS2812
 ![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
-Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
+Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_FASTLED_OVERCLOCK_17/
 
 
 ## Development
