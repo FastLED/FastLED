@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <stdio.h>
+#include <stdio.h>  // ok include
 #include <string.h>
 #include "soc/soc_memory_types.h"
 #include "esp_attr.h"
