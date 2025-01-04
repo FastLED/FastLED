@@ -14,6 +14,6 @@
             "name": "Launch(gdb)",
             "program": "tests/.build/bin/",
             "cwd": ""
-        }
+        },
     ]
 }

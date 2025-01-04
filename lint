@@ -92,7 +92,7 @@ cat > .vscode/launch.json << EOL
             "name": "Launch(gdb)",
             "program": "tests/.build/bin/${fileBasenameNoExtension}",
             "cwd": "${workspaceRoot}"
-        }
+        },
     ]
 }
 EOL
