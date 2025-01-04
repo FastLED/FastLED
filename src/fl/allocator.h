@@ -51,6 +51,17 @@ public:
 
     struct Deallocator{
         void operator()(T* p) {
+            // ~T();
+            p->~T();
+            Allocator<T>::Free(p);
+        }
+    };
+
+    struct ArrayDeallocator {
+        void operator()(T* p, size_t n) {
+            for (size_t i = 0; i < n; ++i) {
+                p[i].~T();
+            }
             Allocator<T>::Free(p);
         }
     };

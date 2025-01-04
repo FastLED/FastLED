@@ -8,6 +8,7 @@
 #include "fl/scoped_ptr.h"
 #include "fl/insert_result.h"
 #include "fl/allocator.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -228,7 +229,7 @@ private:
     // Constructor
     HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
         T* memory = AllocatorT::Alloc(size);
-        T *ptr = new ((void*)memory) T[size];
+        T *ptr = new ((void*)memory) T[MAX(1, size)];
         mArray.reset(reinterpret_cast<T*>(ptr));
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
