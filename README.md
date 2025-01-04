@@ -225,7 +225,7 @@ https://github.com/FastLED/PlatformIO-Starter
 
 ## New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3
 
-![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/a5767d9a-f4c9-43cf-83d1-88f0994ad461)
+![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
 
 
 ## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
