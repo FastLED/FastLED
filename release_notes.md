@@ -1,7 +1,17 @@
 FastLED 3.9.9 - Bug Fix
 =============
 * ESP32
-  * RMT5 no longer attempts to disable itself between draws (default mode).
+  * Yves's amazing I2S driver for ESP32S3 is available through fastled!
+    * 12 way parallel, I2S/LCD protocol.
+    * https://github.com/hpwit/I2SClockLessLedDriveresp32s3
+    * 12
+    * See the Esp32-S3-I2SDemo: https://github.com/FastLED/FastLED/blob/master/examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino
+      * Be mindful of the requirements, this driver requires psram to be enabled, which requires platformio or esp-idf to work. Instructions are in the example.
+      * There's no standard FastLED.add<....> api for this driver yet... But hopefully soon.
+  * Green light being stuck on for esp32-s3 bug:
+    * Traced it back to RMT disable/delete which puts the pin in floating input mode, which can false signal led colors. If you are affected by this, a weak pulldown resistor will also solve the issue.
+    * Fixed: FastLED no longer attempts to disable rmt between draws - once RMT mode is enabled it stay enabled.
+  * Some internal cleanup. We are now header-stable with 4.0 release: few namespace / header changes from this release forward.
 
 
 FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
