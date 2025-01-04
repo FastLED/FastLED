@@ -179,60 +179,43 @@ public:
           mTRESET(TRESET) {
         const uint8_t bytes_per_pixel = is_rgbw ? 4 : 3;
         mBuffer = static_cast<uint8_t*>(calloc(max_leds, bytes_per_pixel));
+        init();
     }
 
-    void acquire_rmt_if_necessary() {
-        if (mAquired) {
+    void init() {
+        esp_err_t err = construct_led_strip(
+            mT0H, mT0L, mT1H, mT1L, mTRESET,
+            mPin, mMaxLeds, mIsRgbw, mBuffer,
+            &mLedStrip);
+
+        if (err == ESP_OK) {
+            RmtActiveStripGroup::instance().add(this);
             return;
         }
-        do {
-            esp_err_t err = construct_led_strip(
-                mT0H, mT0L, mT1H, mT1L, mTRESET,
-                mPin, mMaxLeds, mIsRgbw, mBuffer,
-                &mLedStrip);
 
-            if (err == ESP_OK) {
-                RmtActiveStripGroup::instance().add(this);
-                break;
+        if (err == ESP_ERR_NOT_FOUND) {  // No free RMT channels yet.
+            int active_strips = RmtActiveStripGroup::instance().count_active();
+            if (active_strips == 0) {
+                // If there are no active strips and we don't have any resources then
+                // this means RMT is not supported on this platform so we just abort.
+                ESP_ERROR_CHECK(err);
             }
-
-            if (err == ESP_ERR_NOT_FOUND) {  // No free RMT channels yet.
-                int active_strips = RmtActiveStripGroup::instance().count_active();
-                if (active_strips == 0) {
-                    // If there are no active strips and we don't have any resources then
-                    // this means RMT is not supported on this platform so we just abort.
-                    ESP_ERROR_CHECK(err);
-                }
-                // Update the total number of active strips allowed.
-                RmtActiveStripGroup::instance().set_total_allowed(active_strips);
-                // FASTLED_WARN("All available RMT channels are in use, and no more can be allocated.");
-                FASTLED_ASSERT(false, "All available RMT channels are in use, and no more can be allocated.");
-                return;
-            }
-            // Some other error that we can't handle.
-
-            ESP_LOGE(TAG, "construct_led_strip failed because of unexpected error, is DMA not supported on this device?: %s", esp_err_to_name(err));
-            ESP_ERROR_CHECK(err);
-        } while (true);
-        mAquired = true;
-    }
-
-
-    void release_rmt() {
-        if (!mAquired) {
-            FASTLED_WARN("release_rmt called but mAquired is false");
+            // Update the total number of active strips allowed.
+            RmtActiveStripGroup::instance().set_total_allowed(active_strips);
+            // FASTLED_WARN("All available RMT channels are in use, and no more can be allocated.");
+            FASTLED_ASSERT(false, "All available RMT channels are in use, and no more can be allocated.");
             return;
         }
-        led_strip_wait_refresh_done(mLedStrip, -1, true);
-        mAquired = false;
+        // Some other error that we can't handle.
+
+        ESP_LOGE(TAG, "construct_led_strip failed because of unexpected error, is DMA not supported on this device?: %s", esp_err_to_name(err));
+        ESP_ERROR_CHECK(err);
     }
 
 
     virtual ~RmtLedStripNoRecycle() override {
         if (mLedStrip) {
-            if (mAquired) {
-                release_rmt();
-            }
+            led_strip_wait_refresh_done(mLedStrip, -1, true);
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
         }
@@ -259,18 +242,18 @@ public:
     }
 
     void draw_and_wait_for_completion() {
-        acquire_rmt_if_necessary();
         draw_async();
         wait_for_draw_complete();
     }
 
     void draw_async() {
+        wait_for_draw_complete();
         ESP_ERROR_CHECK(led_strip_refresh_async(mLedStrip));
     }
 
     virtual void draw() override {
         FASTLED_ASSERT(!mDrawing, "draw called while already drawing");
-        acquire_rmt_if_necessary();
+
         draw_async();
         mDrawing = true;
     }
@@ -279,7 +262,7 @@ public:
         if (!mDrawing) {
             return;
         }
-        led_strip_wait_refresh_done(mLedStrip, -1, true);
+        led_strip_wait_refresh_done(mLedStrip, -1, false);
         mDrawing = false;
     }
 
