@@ -8,11 +8,17 @@ FastLED 3.9.9 - Bug Fix
     * See the Esp32-S3-I2SDemo: https://github.com/FastLED/FastLED/blob/master/examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino
       * Be mindful of the requirements, this driver requires psram to be enabled, which requires platformio or esp-idf to work. Instructions are in the example.
       * There's no standard FastLED.add<....> api for this driver yet... But hopefully soon.
-  * Green light being stuck on for esp32-s3 bug:
+  * RMT Green light being stuck on / Performance issues on the Wroom
     * Traced it back to RMT disable/delete which puts the pin in floating input mode, which can false signal led colors. If you are affected by this, a weak pulldown resistor will also solve the issue.
     * Fixed: FastLED no longer attempts to disable rmt between draws - once RMT mode is enabled it stay enabled.
+    * MAY fix wroom. If this doesn't fix it, just downgrade to RMT4 (sorry), or switch to a higher end chipset. I tested the driver at 6.5ms for 256 * 4 way parallel, which is the max performance on ESP32S3. It was flawless for me.
   * Some internal cleanup. We are now header-stable with 4.0 release: few namespace / header changes from this release forward.
 
+Special thanks to Yves and the amazing work with the 12 way parallel driver. He's pushing the limits on what the ESP32-S3 is capabable of. No joke.
+
+If you are an absolute performance freak, check out Yves's advanced version of this driver with ~8x multiplexing through "turbo" I2S:
+
+https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3
 
 FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
 =============
