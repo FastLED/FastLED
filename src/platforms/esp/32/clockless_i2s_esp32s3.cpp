@@ -19,13 +19,15 @@
 #include "fl/math_macros.h"
 #include "pixel_iterator.h"
 #include "fl/allocator.h"
+#include "fl/scoped_ptr.h"
+#include "fl/assert.h"
 #include "cpixel_ledcontroller.h"
 
 #include "clockless_i2s_esp32s3.h"
 
 namespace { // anonymous namespace
 
-typedef fl::FixedVector<int, 16> PinList50;
+typedef fl::FixedVector<int, 16> PinList16;
 
 typedef uint8_t Pin;
 
@@ -46,7 +48,9 @@ class I2SEsp32S3_Group {
     typedef fl::HeapVector<Info> DrawList;
 
     fl::scoped_ptr<I2SClocklessLedDriveresp32S3> mDriver;
-    fl::HeapVector<uint8_t, fl::LargeBlockAllocator<uint8_t>> mAllLedsBufferUint8;
+    fl::scoped_array<uint8_t> mAllLedsBufferUint8;
+    size_t mAllLedsBufferUint8Size = 0;
+    size_t mAllLedsBufferUint8Pos = 0;
     DrawList mObjects;
     DrawList mPrevObjects;
     bool mDrawn = false;
@@ -67,16 +71,21 @@ class I2SEsp32S3_Group {
         mOnPreDrawCalled = false;
         mObjects.swap(mPrevObjects);
         mObjects.clear();
-        if (!mAllLedsBufferUint8.empty()) {
-            memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
-            mAllLedsBufferUint8.clear();
+ 
+        // if (!mAllLedsBufferUint8.empty()) {
+        if (mAllLedsBufferUint8Pos > 0) {  // if we had writes last frame.
+            // memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
+            memset(mAllLedsBufferUint8.get(), 0, mAllLedsBufferUint8Size);
+            //mAllLedsBufferUint8.clear();
         }
+        mAllLedsBufferUint8Pos = 0;
     }
 
     void onPreDraw() {
         if (mOnPreDrawCalled) {
             return;
         }
+        mOnPreDrawCalled = true;
         // iterator through the current draw objects and calculate the total number of leds
         // that will be drawn this frame.
         uint32_t totalLeds = 0;
@@ -87,7 +96,14 @@ class I2SEsp32S3_Group {
             return;
         }
         // Always assume RGB data. RGBW data will be converted to RGB data.
-        mAllLedsBufferUint8.reserve(totalLeds * 3);
+        size_t new_size = totalLeds * 3;
+        if (mAllLedsBufferUint8Size < new_size)
+        {   
+            FASTLED_ASSERT(mAllLedsBufferUint8Size == 0, "I2S can only be set once");
+            FASTLED_ASSERT(new_size > 0, "Data must be larger than 0");
+            mAllLedsBufferUint8.reset(new uint8_t[new_size]);
+            mAllLedsBufferUint8Size = new_size;
+        }
     }
 
     void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
@@ -124,7 +140,7 @@ class I2SEsp32S3_Group {
         bool needs_validation = mPrevObjects != mObjects || !mDriver.get();
         if (needs_validation) {
             mDriver.reset();
-            PinList50 pinList;
+            PinList16 pinList;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->pin);
             }
@@ -133,8 +149,10 @@ class I2SEsp32S3_Group {
             //                                CORDER_RGB, pinList.size(),
             //                                pinList.data()));
             mDriver.reset(new I2SClocklessLedDriveresp32S3());
+            FASTLED_WARN("I2SEsp32S3_Group::showPixelsOnceThisFrame: initled");
+            FASTLED_ASSERT(mAllLedsBufferUint8Size > 0, "I2S buffer not initialized");
             mDriver->initled(
-                mAllLedsBufferUint8.data(),
+                mAllLedsBufferUint8.get(),
                 pinList.data(),
                 pinList.size(),
                 getMaxLedInStrip()
@@ -153,6 +171,7 @@ namespace fl {
 void I2S_Esp32::beginShowLeds(int datapin, int nleds) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
     group.onNewFrame();
+    group.addObject(datapin, nleds, false);
 }
 
 void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
@@ -160,30 +179,42 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     group.onPreDraw();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
-    auto& all_pixels = group.mAllLedsBufferUint8;
+    uint8_t* all_pixels = group.mAllLedsBufferUint8.get();
+    size_t& pos = group.mAllLedsBufferUint8Pos;
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            all_pixels.push_back(r);
-            all_pixels.push_back(g);
-            all_pixels.push_back(b);
-            all_pixels.push_back(w);
+            FASTLED_ASSERT(pos + 4 <= group.mAllLedsBufferUint8Size, "I2S_Esp32::showPixels: buffer overflow");
+            // all_pixels.push_back(r);
+            all_pixels[pos++] = r;
+            //all_pixels.push_back(g);
+            all_pixels[pos++] = g;
+            //all_pixels.push_back(b);
+            all_pixels[pos++] = b;
+            //all_pixels.push_back(w);
+            all_pixels[pos++] = w;
+            FASTLED_WARN("r: " << int(r) << " g: " << int(g) << " b: " << int(b));
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
     } else {
         uint8_t r, g, b;
         while (pixel_iterator.has(1)) {
+            FASTLED_ASSERT(pos + 3 <= group.mAllLedsBufferUint8Size, "I2S_Esp32::showPixels: buffer overflow");
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            all_pixels.push_back(r);
-            all_pixels.push_back(g);
-            all_pixels.push_back(b);
+            // all_pixels.push_back(r);
+            all_pixels[pos++] = r;
+            // all_pixels.push_back(g);
+            all_pixels[pos++] = g;
+            // all_pixels.push_back(b);
+            all_pixels[pos++] = b;
+            // FASTLED_WARN("r: " << int(r) << " g: " << int(g) << " b: " << int(b));
+            log_d("r: %d g: %d b: %d", r, g, b);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
     }
-    group.addObject(data_pin, numLeds, rgbw.active());
 }
 
 void I2S_Esp32::endShowLeds() {
