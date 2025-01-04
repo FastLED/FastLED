@@ -1,4 +1,4 @@
-FastLED 3.9.9 - Bug Fix
+FastLED 3.9.9 - I2S For ESP32-S3
 =============
 * ESP32
   * Yves's amazing I2S driver for ESP32S3 is available through fastled!
