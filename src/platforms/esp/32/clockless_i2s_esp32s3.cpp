@@ -107,6 +107,7 @@ class I2SEsp32S3_Group {
     }
 
     void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
+        //log_d("pin: %d numLeds: %d is_rgbw: %d", pin, numLeds, is_rgbw);
         if (is_rgbw) {
             numLeds = Rgbw::size_as_rgb(numLeds);
         }
@@ -136,14 +137,20 @@ class I2SEsp32S3_Group {
         if (totalLeds == 0) {
             return;
         }
+        //static uint8_t* debug_pointer = nullptr;
         
         bool needs_validation = mPrevObjects != mObjects || !mDriver.get();
         if (needs_validation) {
+            FASTLED_ASSERT(mDriver.get() == nullptr, "I2SEsp32S3_Group::showPixelsOnceThisFrame: driver not null");
             mDriver.reset();
             PinList16 pinList;
+            //int count = 0;
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->pin);
+                //count++;
             }
+            //FASTLED_ASSERT(count > 0, "I2SEsp32S3_Group::showPixelsOnceThisFrame: no pins");
+            //FASTLED_ASSERT(pinList.size() == count, "I2SEsp32S3_Group::showPixelsOnceThisFrame: pinList size mismatch");
 
             // new Driver(totalLeds, &mAllLedsBufferUint8.front(),
             //                                CORDER_RGB, pinList.size(),
@@ -151,13 +158,18 @@ class I2SEsp32S3_Group {
             mDriver.reset(new I2SClocklessLedDriveresp32S3());
             FASTLED_WARN("I2SEsp32S3_Group::showPixelsOnceThisFrame: initled");
             FASTLED_ASSERT(mAllLedsBufferUint8Size > 0, "I2S buffer not initialized");
+            int max_leds = getTotalLeds();
+            //debug_pointer = mAllLedsBufferUint8.get();
             mDriver->initled(
                 mAllLedsBufferUint8.get(),
                 pinList.data(),
                 pinList.size(),
-                getMaxLedInStrip()
+                max_leds
             );
+            //log_d("max_leds: %d", max_leds);
+            //FASTLED_ASSERT(max_leds == 256, "I2S_Esp32: max_leds must be 256");
         }
+        //FASTLED_ASSERT(debug_pointer == mAllLedsBufferUint8.get(), "I2S buffer pointer changed");
         mDriver->show();
         mDrawn = true;
     }
@@ -194,7 +206,7 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             all_pixels[pos++] = b;
             //all_pixels.push_back(w);
             all_pixels[pos++] = w;
-            FASTLED_WARN("r: " << int(r) << " g: " << int(g) << " b: " << int(b));
+            //FASTLED_WARN("r: " << int(r) << " g: " << int(g) << " b: " << int(b));
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
@@ -210,7 +222,7 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             // all_pixels.push_back(b);
             all_pixels[pos++] = b;
             // FASTLED_WARN("r: " << int(r) << " g: " << int(g) << " b: " << int(b));
-            log_d("r: %d g: %d b: %d", r, g, b);
+            //log_d("r: %d g: %d b: %d", r, g, b);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
