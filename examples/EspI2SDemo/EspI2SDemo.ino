@@ -2,7 +2,6 @@
 
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
-I2SClocklessLedDriveresp32S3 driver;
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256
 
