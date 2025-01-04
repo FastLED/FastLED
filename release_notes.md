@@ -1,3 +1,9 @@
+FastLED 3.9.9 - Bug Fix
+=============
+* ESP32
+  * RMT5 no longer attempts to disable itself between draws (default mode).
+
+
 FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
 =============
 * FastLED 3.9.8 is the 7th beta release of FastLED 4.0
