@@ -36,7 +36,9 @@ class Board:
     board_build_mcu: str | None = None
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
+    build_flags: list[str] | None = None  # Reserved for future use.
     defines: list[str] | None = None
+    board_partitions: str | None = None  # Reserved for future use.
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
@@ -120,8 +122,16 @@ ESP32_C6_DEVKITC_1 = Board(
 
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
-    real_board_name="esp32-s3-devkitc-1",
+    real_board_name="seeed_xiao_esp32s3",  # Seeed Xiao ESP32-S3 has psram.
     platform=ESP32_IDF_5_3_PIOARDUINO,
+    defines=[
+        "BOARD_HAS_PSRAM",
+    ],
+    build_flags=[  # Reserved for future use.
+        "-mfix-esp32-psram-cache-issue",
+        "-mfix-esp32-psram-cache-strategy=memw",
+    ],
+    board_partitions="huge_app.csv",  # Reserved for future use.
 )
 
 ESP32_S2_DEVKITM_1 = Board(
