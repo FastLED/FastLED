@@ -1,22 +1,25 @@
 /// THIS IS A PLACEHOLDER FOR THE ESP32 I2S DEMO
 
+#define COLOR_ORDER_GRB
+
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
+
+#include <esp_psram.h>
 
 // Define your platformio.ino like so:
 //
 // [env:esp32s3]
 // # Developement branch of the open source espressif32 platform
-// platform =  https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
+// platform =
+// https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
 // framework = arduino
 // upload_protocol = esptool
-// monitor_filters = 
+// monitor_filters =
 // 	default
-// 	esp32_exception_decoder  ; Decode exceptions so that they are human readable.
-// ; Symlink in the FastLED library so that changes to the library are reflected in the project
-// ; build immediatly.
-// lib_deps = FastLED
-// board = esp32-s3-devkitc-1
-// build_flags = 
+// 	esp32_exception_decoder  ; Decode exceptions so that they are human
+// readable. ; Symlink in the FastLED library so that changes to the library are
+// reflected in the project ; build immediatly. lib_deps = FastLED board =
+// esp32-s3-devkitc-1 build_flags =
 //     -DBOARD_HAS_PSRAM
 //     -mfix-esp32-psram-cache-issue
 // board_build.partitions = huge_app.csv
@@ -41,55 +44,45 @@
 #define EXAMPLE_PIN_NUM_DATA14 17 // R3
 #define EXAMPLE_PIN_NUM_DATA15 18 // R4
 
- int pins[] = {
-        EXAMPLE_PIN_NUM_DATA0,
-        EXAMPLE_PIN_NUM_DATA1,
-        EXAMPLE_PIN_NUM_DATA2,
-        EXAMPLE_PIN_NUM_DATA3,
-        EXAMPLE_PIN_NUM_DATA4,
-        EXAMPLE_PIN_NUM_DATA5,
-        EXAMPLE_PIN_NUM_DATA6,
-        EXAMPLE_PIN_NUM_DATA7,
-        EXAMPLE_PIN_NUM_DATA8,
-        EXAMPLE_PIN_NUM_DATA9,
-        EXAMPLE_PIN_NUM_DATA10,
-        EXAMPLE_PIN_NUM_DATA11,
-        EXAMPLE_PIN_NUM_DATA12,
-        EXAMPLE_PIN_NUM_DATA13,
-        EXAMPLE_PIN_NUM_DATA14,
-        EXAMPLE_PIN_NUM_DATA15
- };
+int pins[] = {
+    EXAMPLE_PIN_NUM_DATA0,  EXAMPLE_PIN_NUM_DATA1,  EXAMPLE_PIN_NUM_DATA2,
+    EXAMPLE_PIN_NUM_DATA3,  EXAMPLE_PIN_NUM_DATA4,  EXAMPLE_PIN_NUM_DATA5,
+    EXAMPLE_PIN_NUM_DATA6,  EXAMPLE_PIN_NUM_DATA7,  EXAMPLE_PIN_NUM_DATA8,
+    EXAMPLE_PIN_NUM_DATA9,  EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
+    EXAMPLE_PIN_NUM_DATA12, EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14,
+    EXAMPLE_PIN_NUM_DATA15};
 I2SClocklessLedDriveresp32S3 driver;
 
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NUMSTRIPS)
 
-
 CRGB leds[NUM_LEDS];
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
- driver.initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
- driver.setBrightness(32);
+    psramInit();
+    // put your setup code here, to run once:
+    Serial.begin(115200);
 
+    log_d("Total heap: %d", ESP.getHeapSize());
+    log_d("Free heap: %d", ESP.getFreeHeap());
+    log_d("Total PSRAM: %d", ESP.getPsramSize());
+    log_d("Free PSRAM: %d", ESP.getFreePsram());
+
+    driver.initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
+    driver.setBrightness(32);
 }
-int off=0;
+int off = 0;
 
 void loop() {
-  
-    for(int j=0;j<NUMSTRIPS;j++)
-    {
-        
-        for(int i=0;i<NUM_LEDS_PER_STRIP;i++)
-        {
-            
-           leds[(i+off)%NUM_LEDS_PER_STRIP+NUM_LEDS_PER_STRIP*j]=CHSV(i,255,255);
-            
+
+    for (int j = 0; j < NUMSTRIPS; j++) {
+
+        for (int i = 0; i < NUM_LEDS_PER_STRIP; i++) {
+
+            leds[(i + off) % NUM_LEDS_PER_STRIP + NUM_LEDS_PER_STRIP * j] =
+                CHSV(i, 255, 255);
         }
-        for(int i=0;i<j+1;i++)
-        {
-            
-           leds[i%NUM_LEDS_PER_STRIP+NUM_LEDS_PER_STRIP*j]=CRGB::White;
-            
+        for (int i = 0; i < j + 1; i++) {
+
+            leds[i % NUM_LEDS_PER_STRIP + NUM_LEDS_PER_STRIP * j] = CRGB::White;
         }
     }
     driver.show();
