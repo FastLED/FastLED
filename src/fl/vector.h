@@ -7,8 +7,6 @@
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/insert_result.h"
-#include "fl/allocator.h"
-#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -214,10 +212,10 @@ public:
 };
 
 
-template<typename T, typename AllocatorT = Allocator<T> >
+template<typename T>
 class HeapVector {
 private:
-    fl::scoped_array<T, typename AllocatorT::Deallocator> mArray;
+    fl::scoped_array<T> mArray;
     
     size_t mCapacity = 0;
     size_t mSize = 0;
@@ -228,18 +226,16 @@ private:
 
     // Constructor
     HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
-        T* memory = AllocatorT::Alloc(size);
-        T *ptr = new ((void*)memory) T[MAX(1, size)];
-        mArray.reset(reinterpret_cast<T*>(ptr));
+        mArray.reset(new T[mCapacity]);
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
         }
         mSize = size;
     }
-    HeapVector(const HeapVector<T, AllocatorT>& other): mSize(other.size()) {
+    HeapVector(const HeapVector<T>& other): mSize(other.size()) {
         assign(other.begin(), other.end());
     }
-    HeapVector& operator=(const HeapVector<T, AllocatorT>& other) { // cppcheck-suppress operatorEqVarError
+    HeapVector& operator=(const HeapVector<T>& other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             assign(other.begin(), other.end());
         }
