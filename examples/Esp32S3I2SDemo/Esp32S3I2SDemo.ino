@@ -1,4 +1,5 @@
-/// THIS IS A PLACEHOLDER FOR THE ESP32 I2S DEMO
+/// This is a work in progress to bring up the I2S driver for the ESP32-S3
+/// 
 
 
 #include <esp_psram.h>
@@ -46,6 +47,9 @@
 #define EXAMPLE_PIN_NUM_DATA14 17 // R3
 #define EXAMPLE_PIN_NUM_DATA15 18 // R4
 
+
+// #define USE_FASTLED_I2S
+
 int pins[] = {
     EXAMPLE_PIN_NUM_DATA0,  EXAMPLE_PIN_NUM_DATA1,  EXAMPLE_PIN_NUM_DATA2,
     EXAMPLE_PIN_NUM_DATA3,  EXAMPLE_PIN_NUM_DATA4,  EXAMPLE_PIN_NUM_DATA5,
@@ -53,9 +57,10 @@ int pins[] = {
     EXAMPLE_PIN_NUM_DATA9,  EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
     EXAMPLE_PIN_NUM_DATA12, EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14,
     EXAMPLE_PIN_NUM_DATA15};
-// I2SClocklessLedDriveresp32S3 driver;
 
+#ifndef USE_FASTLED_I2S
 fl::InternalI2SDriver *driver = fl::InternalI2SDriver::create();
+#endif
 
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NUMSTRIPS)
 
@@ -73,17 +78,12 @@ void setup() {
     Serial.println("waiting 3 second before startup");
     delay(3000);
 
-    //driver.initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
-    //driver.setBrightness(32);
-    driver->initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
-    driver->setBrightness(32);
-
+    #ifdef USE_FASTLED_I2S
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS);
     #if 0
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA0, GRB>(leds, NUM_LEDS);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA1, GRB>(leds, NUM_LEDS);
-
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA2, GRB>(leds, NUM_LEDS);
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA4, GRB>(leds, NUM_LEDS);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA5, GRB>(leds, NUM_LEDS);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA6, GRB>(leds, NUM_LEDS);
@@ -98,7 +98,12 @@ void setup() {
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA15, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(32);
     #endif
-    
+
+    #else
+    driver->initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
+    driver->setBrightness(32);
+    #endif
+
 }
 int off = 0;
 
@@ -116,7 +121,10 @@ void loop() {
             leds[i % NUM_LEDS_PER_STRIP + NUM_LEDS_PER_STRIP * j] = CRGB::White;
         }
     }
-    // FastLED.show();
+    #ifdef USE_FASTLED_I2S
+    FastLED.show();
+    #else
     driver->show();
+    #endif
     off++;
 }
