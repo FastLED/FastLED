@@ -179,6 +179,8 @@ public:
           mTRESET(TRESET) {
         const uint8_t bytes_per_pixel = is_rgbw ? 4 : 3;
         mBuffer = static_cast<uint8_t*>(calloc(max_leds, bytes_per_pixel));
+        // Unlike it's recycling counterpart, we acquire the RMT channel here.
+        acquire_rmt_if_necessary();
     }
 
     void acquire_rmt_if_necessary() {
@@ -205,6 +207,7 @@ public:
                 }
                 // Update the total number of active strips allowed.
                 RmtActiveStripGroup::instance().set_total_allowed(active_strips);
+                mError = true;
                 // FASTLED_WARN("All available RMT channels are in use, and no more can be allocated.");
                 FASTLED_ASSERT(false, "All available RMT channels are in use, and no more can be allocated.");
                 return;
@@ -218,20 +221,20 @@ public:
     }
 
 
-    void release_rmt() {
+    void release_rmt(bool disable_too = false) {
         if (!mAquired) {
             FASTLED_WARN("release_rmt called but mAquired is false");
             return;
         }
-        led_strip_wait_refresh_done(mLedStrip, -1, true);
+        led_strip_wait_refresh_done(mLedStrip, -1, disable_too);
         mAquired = false;
     }
 
 
     virtual ~RmtLedStripNoRecycle() override {
         if (mLedStrip) {
-            if (mAquired) {
-                release_rmt();
+            if (mDrawn) {
+                release_rmt(true);
             }
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
@@ -265,7 +268,12 @@ public:
     }
 
     void draw_async() {
+        if (mError) {
+            FASTLED_WARN("draw_async called but mError is true");
+            return;
+        }
         ESP_ERROR_CHECK(led_strip_refresh_async(mLedStrip));
+        mDrawn = true;
     }
 
     virtual void draw() override {
@@ -277,6 +285,10 @@ public:
 
     virtual void wait_for_draw_complete() override {
         if (!mDrawing) {
+            return;
+        }
+        if (mError) {
+            FASTLED_WARN("wait_for_draw_complete called but mError is true");
             return;
         }
         led_strip_wait_refresh_done(mLedStrip, -1, true);
@@ -299,7 +311,9 @@ private:
     uint16_t mT1H = 0;
     uint16_t mT1L = 0;
     uint32_t mTRESET = 0;
+    bool mDrawn = false;
     bool mDrawing = false;
+    bool mError = false;
 };
 
 
