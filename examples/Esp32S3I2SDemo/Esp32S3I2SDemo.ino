@@ -2,6 +2,25 @@
 
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
+// Define your platformio.ino like so:
+//
+// [env:esp32s3]
+// # Developement branch of the open source espressif32 platform
+// platform =  https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
+// framework = arduino
+// upload_protocol = esptool
+// monitor_filters = 
+// 	default
+// 	esp32_exception_decoder  ; Decode exceptions so that they are human readable.
+// ; Symlink in the FastLED library so that changes to the library are reflected in the project
+// ; build immediatly.
+// lib_deps = FastLED
+// board = esp32-s3-devkitc-1
+// build_flags = 
+//     -DBOARD_HAS_PSRAM
+//     -mfix-esp32-psram-cache-issue
+// board_build.partitions = huge_app.csv
+
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256
 
