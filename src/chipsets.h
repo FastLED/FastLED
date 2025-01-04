@@ -968,6 +968,14 @@ class WS2812Controller800Khz:
 	WS2812Controller800Khz(): Base(FASTLED_LED_OVERCLOCK) {}
 };
 #endif  // __IMXRT1062__
+#elif defined(FASTLED_USES_ESP32S3_I2S)
+#include "platforms/esp/32/clockless_i2s_esp32s3.h"
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2812Controller800Khz:
+	public fl::ClocklessController_I2S_Esp32_WS2812<
+		DATA_PIN,
+		RGB_ORDER
+	> {};
 #else
 // WS2812 - 250ns, 625ns, 375ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>

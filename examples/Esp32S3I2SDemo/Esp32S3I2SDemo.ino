@@ -1,10 +1,11 @@
 /// THIS IS A PLACEHOLDER FOR THE ESP32 I2S DEMO
 
-#define COLOR_ORDER_GRB
-
-#include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
 #include <esp_psram.h>
+
+#define FASTLED_USES_ESP32S3_I2S
+#include "FastLED.h"
+// #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
 // Define your platformio.ino like so:
 //
@@ -52,7 +53,9 @@ int pins[] = {
     EXAMPLE_PIN_NUM_DATA9,  EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
     EXAMPLE_PIN_NUM_DATA12, EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14,
     EXAMPLE_PIN_NUM_DATA15};
-I2SClocklessLedDriveresp32S3 driver;
+// I2SClocklessLedDriveresp32S3 driver;
+
+fl::InternalI2SDriver *driver = fl::InternalI2SDriver::create();
 
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NUMSTRIPS)
 
@@ -67,8 +70,35 @@ void setup() {
     log_d("Total PSRAM: %d", ESP.getPsramSize());
     log_d("Free PSRAM: %d", ESP.getFreePsram());
 
-    driver.initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
-    driver.setBrightness(32);
+    Serial.println("waiting 3 second before startup");
+    delay(3000);
+
+    //driver.initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
+    //driver.setBrightness(32);
+    driver->initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
+    driver->setBrightness(32);
+
+    #if 0
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA0, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA1, GRB>(leds, NUM_LEDS);
+
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA2, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA4, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA5, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA6, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA7, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA8, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA9, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA10, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA11, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA12, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA13, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA14, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA15, GRB>(leds, NUM_LEDS);
+    FastLED.setBrightness(32);
+    #endif
+    
 }
 int off = 0;
 
@@ -86,6 +116,7 @@ void loop() {
             leds[i % NUM_LEDS_PER_STRIP + NUM_LEDS_PER_STRIP * j] = CRGB::White;
         }
     }
-    driver.show();
+    // FastLED.show();
+    driver->show();
     off++;
 }
