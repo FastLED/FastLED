@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 
@@ -26,6 +27,33 @@ public:
         }
         LargeBlockDeallocate(p);
     }
+    struct Deallocator{
+        void operator()(T* p) {
+            LargeBlockAllocator<T>::Free(p);
+        }
+    };
+};
+
+template<typename T>
+class Allocator {
+public:
+    static T* Alloc(size_t n) {
+        void* ptr = malloc(sizeof(T) * n);
+        return reinterpret_cast<T*>(ptr);
+    }
+
+    static void Free(T* p) {
+        if (p == nullptr) {
+            return;
+        }
+        free(p);
+    }
+
+    struct Deallocator{
+        void operator()(T* p) {
+            Allocator<T>::Free(p);
+        }
+    };
 };
 
 } // namespace fl
