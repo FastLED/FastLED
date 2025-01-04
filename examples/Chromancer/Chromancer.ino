@@ -31,6 +31,7 @@ void loop() {}
 #include "screenmap.json.h"
 #include "fl/str.h"
 
+
 using namespace fl;
 
 enum {
@@ -148,6 +149,8 @@ bool isNodeOnBorder(byte node) {
     return false;
 }
 
+UITitle title("Chromancer");
+UIDescription description("Take 6 seconds to boot up. Chromancer is a wall-mounted hexagonal LED display that originally reacted to biometric data from an EmotiBit sensor. It visualizes your heartbeat, skin temperature, and movement in real-time. Chromancer also has a few built-in effects that can be triggered with the push of a button. Enjoy!");
 UICheckbox allWhite("All White", false);
 
 UIButton simulatedHeartbeat("Simulated Heartbeat");
