@@ -22,6 +22,7 @@
 // esp32-s3-devkitc-1 build_flags =
 //     -DBOARD_HAS_PSRAM
 //     -mfix-esp32-psram-cache-issue
+//     -mfix-esp32-psram-cache-strategy=memw
 // board_build.partitions = huge_app.csv
 
 #define NUMSTRIPS 16
