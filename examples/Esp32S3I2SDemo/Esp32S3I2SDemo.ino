@@ -1,5 +1,4 @@
-/// This is a work in progress to bring up the I2S driver for the ESP32-S3
-/// 
+/// This is a work in progress to bring up the I2S driver for the ESP32-S3.
 
 
 #include <esp_psram.h>
