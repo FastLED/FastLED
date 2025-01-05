@@ -343,6 +343,9 @@ Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
 
 ![image](https://github.com/user-attachments/assets/999e68ce-454f-4f15-9590-a8d2e8d47a22)
 
+Check out thr rust port of this algorithm:
+
+https://github.com/smart-leds-rs/apa102-spi-rs/pull/15
 
 # Getting Started
 
