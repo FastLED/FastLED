@@ -75,7 +75,7 @@ done
 # fi
 
 # Overwrite .vscode/launch.json if it's different
-cat > .vscode/launch.json << EOL
+cat > .vscode/launch.json << 'EOL'
 {
     "version": "0.2.0",
     "configurations": [
