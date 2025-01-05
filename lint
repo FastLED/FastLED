@@ -12,6 +12,31 @@ if [ ! -d .venv ]; then
     ./install
 fi
 
+
+# Overwrite .vscode/launch.json if it's different
+cat > .vscode/launch.json << 'EOL'
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "by-gdb",
+            "request": "launch",
+            "name": "Launch(gdb)",
+            "program": "tests/.build/bin/${fileBasenameNoExtension}",
+            "cwd": "${workspaceRoot}"
+        },
+    ]
+}
+EOL
+
+
 # # Function to handle ESLint output in the background
 # run_eslint() {
 #     eslint_output_file="eslint_output.log"
@@ -73,26 +98,3 @@ done
 #     cat "$eslint_output_file"
 #     rm "$eslint_output_file"
 # fi
-
-# Overwrite .vscode/launch.json if it's different
-cat > .vscode/launch.json << 'EOL'
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: Current File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "",
-            "console": "integratedTerminal"
-        },
-        {
-            "type": "by-gdb",
-            "request": "launch",
-            "name": "Launch(gdb)",
-            "program": "tests/.build/bin/${fileBasenameNoExtension}",
-            "cwd": "${workspaceRoot}"
-        },
-    ]
-}
-EOL
