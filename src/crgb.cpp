@@ -13,11 +13,11 @@ FASTLED_NAMESPACE_BEGIN
 fl::Str CRGB::toString() const {
     fl::Str out;
     out.append("CRGB(");
-    out.append(int(r));
-    out.append(", ");
-    out.append(int(g));
-    out.append(", ");
-    out.append(int(b));
+    out.append(int16_t(r));
+    out.append(",");
+    out.append(int16_t(g));
+    out.append(",");
+    out.append(int16_t(b));
     out.append(")");
     return out;
 }

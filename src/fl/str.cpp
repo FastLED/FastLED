@@ -96,7 +96,7 @@ static float atoff(const char *str, size_t len) {
 
 } // namespace string_functions
 
-void StringFormatter::append(int val, StrN<64> *dst) {
+void StringFormatter::append(int32_t val, StrN<64> *dst) {
     char buf[63] = {0};
     string_functions::itoa(val, buf, 10);
     dst->write(buf, strlen(buf));

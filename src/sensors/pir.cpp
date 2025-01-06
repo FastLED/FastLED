@@ -2,6 +2,7 @@
 #include "FastLED.h"
 
 #include "sensors/pir.h"
+#include "fl/strstream.h"
 #include "fastpin.h"
 #include "fl/warn.h"
 
@@ -18,7 +19,9 @@ namespace {
     if (count == 0) {
       return Str("PIR");
     }
-    return Str("Pir ").append(g_counter++);
+    StrStream s;
+    s << "Pir " << g_counter++;
+    return s.str();
   }
 }
 

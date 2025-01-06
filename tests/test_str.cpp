@@ -58,7 +58,7 @@ TEST_CASE("Str basic operations") {
     SUBCASE("CRGB to Str") {
         CRGB c(255, 0, 0);
         Str s = c.toString();
-        CHECK_EQ(s, "CRGB(255, 0, 0)");
+        CHECK_EQ(s, "CRGB(255,0,0)");
     }
 
     SUBCASE("Copy-on-write behavior") {

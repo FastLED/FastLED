@@ -37,7 +37,7 @@ FASTLED_SMART_PTR(StringHolder);
 
 class StringFormatter {
   public:
-    static void append(int val, StrN<64> *dst);
+    static void append(int32_t val, StrN<64> *dst);
     static bool isSpace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
     static float parseFloat(const char *str, size_t len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
@@ -167,11 +167,6 @@ template <size_t SIZE = 64> class StrN {
         return mHeapData ? mHeapData->capacity() : SIZE;
     }
 
-    size_t write(int n) {
-        StrN<64> dst;
-        StringFormatter::append(n, &dst); // Inlined size should suffice
-        return write(dst.c_str(), dst.size());
-    }
 
     size_t write(const uint8_t *data, size_t n) {
         const char *str = reinterpret_cast<const char *>(data);
@@ -216,6 +211,12 @@ template <size_t SIZE = 64> class StrN {
         return write(str, 1);
     }
 
+    size_t write(uint16_t n) {
+        StrN<64> dst;
+        StringFormatter::append(n, &dst); // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
+    }
+
     size_t write(uint32_t val) {
         StrN<64> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
@@ -225,6 +226,12 @@ template <size_t SIZE = 64> class StrN {
     size_t write(int32_t val) {
         StrN<64> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
+    }
+
+    size_t write(int8_t val) {
+        StrN<64> dst;
+        StringFormatter::append(int16_t(val), &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
@@ -393,8 +400,14 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
-    Str& append(char c) { write(&c, 1); return *this; }
-    Str& append(int n) { write(n); return *this; }
+    //Str& append(char c) { write(&c, 1); return *this; }
+    Str& append(int8_t c) {
+        char* str = reinterpret_cast<char*>(&c);
+        write(str, 1); return *this;
+    }
+    Str& append(uint8_t c) { write(uint16_t(c)); return *this; }
+    Str& append(uint16_t val) { write(val); return *this; }
+    Str& append(int16_t val) { write(uint32_t(val)); return *this; }
     Str& append(uint32_t val) { write(val); return *this; }
     Str& append(int32_t c) { write(c); return *this; }
 
