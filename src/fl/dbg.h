@@ -16,13 +16,22 @@
 #include <iostream>  // ok include
 inline const char* _fastled_file_offset(const char* file) {
   const char* p = file;
+  const char* last_slash = nullptr;
+  
   while (*p) {
-    if (*p == '/') {
-      file = p + 1;
+    if (p[0] == 's' && p[1] == 'r' && p[2] == 'c' && p[3] == '/') {
+      return p + 4;  // Skip past "src/"
+    }
+    if (*p == '/') {  // fallback to using last slash
+      last_slash = p;
     }
     p++;
   }
-  return file;
+  // If "src/" not found but we found at least one slash, return after the last slash
+  if (last_slash) {
+    return last_slash + 1;
+  }
+  return file;  // If no slashes found at all, return original path
 }
 #define _FASTLED_DGB(X) \
   (std::cout <<         \
