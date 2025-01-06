@@ -361,6 +361,10 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+    bool operator<(const Str &other) const {
+        return strcmp(c_str(), other.c_str()) < 0;
+    }
+
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     Str& append(char c) { write(&c, 1); return *this; }
