@@ -26,7 +26,7 @@
 #include "fl/vector.h"
 
 #ifndef FASTLED_OBJECTFLED_LATCH_DELAY
-#define FASTLED_OBJECTFLED_LATCH_DELAY 250  // WS2812-5VB
+#define FASTLED_OBJECTFLED_LATCH_DELAY 300  // WS2812-5VB
 #endif
 
 namespace fl {
