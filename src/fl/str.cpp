@@ -101,18 +101,13 @@ void StringFormatter::append(int val, StrN<64> *dst) {
     string_functions::itoa(val, buf, 10);
     dst->write(buf, strlen(buf));
 }
-
 StringHolder::StringHolder(const char *str) {
-    mLength = strlen(str);
-    mData = (char *)malloc(mLength + 1);
-    if (mData) {
-        memcpy(mData, str, mLength + 1);
-    } else {
-        mLength = 0;
-    }
-    mCapacity = mLength;
+    mLength = strlen(str);  // Don't include null terminator in length
+    mCapacity = mLength + 1;  // Capacity includes null terminator
+    mData = new char[mCapacity];
+    memcpy(mData, str, mLength);
+    mData[mLength] = '\0';
 }
-
 StringHolder::StringHolder(size_t length) {
     mData = (char *)malloc(length + 1);
     if (mData) {

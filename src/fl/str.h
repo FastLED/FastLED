@@ -87,9 +87,9 @@ template <size_t SIZE = 64> class StrN {
     template <size_t M> StrN(const StrN<M> &other) { copy(other); }
     StrN(const char *str) {
         size_t len = strlen(str);
-        mLength = len;
-        if (len + 1 <= SIZE) {
-            memcpy(mInlineData, str, len + 1);
+        mLength = len;  // Length is without null terminator
+        if (len + 1 <= SIZE) {  // Check capacity including null
+            memcpy(mInlineData, str, len + 1);  // Copy including null
             mHeapData.reset();
         } else {
             mHeapData = StringHolderPtr::New(str);
@@ -114,7 +114,7 @@ template <size_t SIZE = 64> class StrN {
     }
 
     template<int N> StrN(const char (&str)[N]) {
-        copy(str, N);
+        copy(str, N-1);  // Subtract 1 to not count null terminator
     }
     template<int N> StrN &operator=(const char (&str)[N]) {
         assign(str, N);
