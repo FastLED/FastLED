@@ -123,6 +123,18 @@ class StrStream {
         return *this;
     }
 
+    bool operator==(const Str &str) const {
+        return mStr == str;
+    }
+
+    bool operator!=(const Str &str) const {
+        return mStr != str;
+    }
+
+    bool operator<(const Str &str) const {
+        return mStr < str;
+    }
+
   private:
     Str mStr;
     bool mTreatCharAsInt = true;
