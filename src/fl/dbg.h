@@ -25,28 +25,28 @@ inline const char* fastled_file_offset(const char* file) {
 }
 
 
-#ifndef FASTLED_DBG_USE_IOSTREAM
+#ifndef FASTLED_DBG_USE_PRINTF
 #if defined(DEBUG) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__) || defined(ESP32))
-#define FASTLED_DBG_USE_IOSTREAM 1
+#define FASTLED_DBG_USE_PRINTF 1
 #else
-#define FASTLED_DBG_USE_IOSTREAM 0
+#define FASTLED_DBG_USE_PRINTF 0
 #endif
 #endif
 
 
-#if FASTLED_DBG_USE_IOSTREAM
+#if FASTLED_DBG_USE_PRINTF
 #define FASTLED_HAS_DBG 1
-#include <iostream>  // ok include
+#include <stdio.h>  // ok include
 namespace fl {
 
 }  // namespace fl
 #define _FASTLED_DGB(X) \
-  (std::cout <<         \
+  printf("%s", \
     (fl::StrStream() << \
-       (fl::fastled_file_offset(__FILE__)) <<  "(" << __LINE__ << "): " << X) \
-    .c_str() << std::endl)
+       (fl::fastled_file_offset(__FILE__)) <<  "(" << __LINE__ << "): " << X << "\n") \
+    .c_str())
 
-#define FASTLED_DBG(X) _FASTLED_DGB(X) << std::endl
+#define FASTLED_DBG(X) _FASTLED_DGB(X)
 #endif
 
 
