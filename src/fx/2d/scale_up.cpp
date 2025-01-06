@@ -1,8 +1,8 @@
 
 #include <stdint.h>
+#include "scale_up.h"
 
 #define FASTLED_INTERNAL
-
 #include "FastLED.h"
 #include "bilinear_expansion.h"
 #include "fl/ptr.h"
@@ -11,7 +11,7 @@
 #include "noise.h"
 #include "fl/xymap.h"
 
-#include "scale_up.h"
+
 
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.

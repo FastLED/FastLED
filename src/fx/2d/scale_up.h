@@ -9,7 +9,6 @@
 
 #include <stdint.h>
 
-#include "FastLED.h"
 #include "bilinear_expansion.h"
 #include "fl/ptr.h"
 #include "fx/fx2d.h"
