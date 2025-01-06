@@ -112,6 +112,14 @@ template <size_t SIZE = 64> class StrN {
             mHeapData = StringHolderPtr::New(str);
         }
     }
+
+    template<int N> StrN(const char (&str)[N]) {
+        copy(str, N);
+    }
+    template<int N> StrN &operator=(const char (&str)[N]) {
+        assign(str, N);
+        return *this;
+    }
     StrN &operator=(const StrN &other) {
         copy(other);
         return *this;
@@ -208,12 +216,18 @@ template <size_t SIZE = 64> class StrN {
         return write(str, 1);
     }
 
+    size_t write(uint32_t val) {
+        StrN<64> dst;
+        StringFormatter::append(val, &dst); // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
+    }
+
     // Destructor
     ~StrN() {}
 
     // Accessors
     size_t size() const { return mLength; }
-    size_t length() const { return mLength; }
+    size_t length() const { return size(); }
     const char *c_str() const {
         return mHeapData ? mHeapData->data() : mInlineData;
     }
@@ -351,6 +365,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     Str& append(char c) { write(&c, 1); return *this; }
     Str& append(int n) { write(n); return *this; }
+    Str& append(uint32_t val) { write(val); return *this; }
+
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 
 

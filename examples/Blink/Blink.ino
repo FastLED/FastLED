@@ -5,7 +5,7 @@
 #include <FastLED.h>
 
 // How many leds in your strip?
-#define NUM_LEDS 1
+#define NUM_LEDS 256
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -20,7 +20,10 @@ CRGB leds[NUM_LEDS];
 void setup() { 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<NEOPIXEL, 1>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<NEOPIXEL, 3>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<NEOPIXEL, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
     // FastLED.addLeds<SM16703, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1829, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1812, DATA_PIN, RGB>(leds, NUM_LEDS);
