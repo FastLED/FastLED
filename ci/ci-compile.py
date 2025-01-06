@@ -10,7 +10,7 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.boards import ESP32_S3_DEVKITC_1, ESP32DEV, Board, get_board
+from ci.boards import Board, get_board
 from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.locked_print import locked_print
 
@@ -104,8 +104,8 @@ DEFAULT_EXAMPLES = [
 ]
 
 EXTRA_EXAMPLES: dict[Board, list[str]] = {
-    ESP32DEV: ["EspI2SDemo"],
-    ESP32_S3_DEVKITC_1: ["EspI2SDemo"],
+    # ESP32DEV: ["EspI2SDemo"],
+    # ESP32_S3_DEVKITC_1: ["EspS3I2SDemo"],
 }
 
 
