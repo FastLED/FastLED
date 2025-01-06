@@ -20,10 +20,7 @@ CRGB leds[NUM_LEDS];
 void setup() { 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
-    FastLED.addLeds<NEOPIXEL, 1>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<NEOPIXEL, 3>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<NEOPIXEL, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
     // FastLED.addLeds<SM16703, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1829, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1812, DATA_PIN, RGB>(leds, NUM_LEDS);
