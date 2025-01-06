@@ -9,4 +9,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32dev_i2s --defines FASTLED_ESP32_I2S --examples EspI2SDemo
+      args: esp32dev_i2s --examples EspI2SDemo

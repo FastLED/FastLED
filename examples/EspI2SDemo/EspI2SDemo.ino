@@ -1,5 +1,7 @@
-/// THIS IS A PLACEHOLDER FOR THE ESP32 I2S DEMO
+// Simple test for the I2S on the ESP32dev board.
 
+
+#define FASTLED_ESP32_I2S
 #include <FastLED.h>
 
 // How many leds in your strip?
