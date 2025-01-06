@@ -5,7 +5,7 @@
 
 
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
-#ifdef __AVR__
+#if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
 #define FASTLED_STRSTREAM_USES_SIZE_T 0
 #else
 #define FASTLED_STRSTREAM_USES_SIZE_T 1
