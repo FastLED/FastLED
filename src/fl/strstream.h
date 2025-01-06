@@ -26,67 +26,7 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(const Str &str) {
-        mStr.append(str);
-        return *this;
-    }
-
-    StrStream &operator<<(const char *str) {
-        mStr.append(str);
-        return *this;
-    }
-
-    StrStream &operator<<(int n) {
-        mStr.append(n);
-        return *this;
-    }
-
-    StrStream &operator<<(unsigned int n) {
-        mStr.append(uint32_t(n));
-        return *this;
-    }
-
-    StrStream &operator<<(uint16_t n) {
-        mStr.append(n);
-        return *this;
-    }
-
-    StrStream &operator<<(uint8_t n) {
-        if (mTreatCharAsInt) {
-            mStr.append(int(n));
-        } else {
-            mStr.append(n);
-        }
-        return *this;
-    }
-
-    StrStream &operator<<(char c) {
-        if (mTreatCharAsInt) {
-            mStr.append(int(c));
-        } else {
-            mStr.append(c);
-        }
-        return *this;
-    }
-
-    // assignment operator completely replaces the current string
-    StrStream &operator=(const Str &str) {
-        mStr = str;
-        return *this;
-    }
-
-    StrStream &operator=(const char *str) {
-        mStr = str;
-        return *this;
-    }
-
     StrStream &operator=(int n) {
-        mStr.clear();
-        (*this) << n;
-        return *this;
-    }
-
-    StrStream &operator=(unsigned int n) {
         mStr.clear();
         (*this) << n;
         return *this;
@@ -107,6 +47,77 @@ class StrStream {
     StrStream &operator=(char c) {
         mStr.clear();
         (*this) << c;
+        return *this;
+    }
+
+    // << operator section
+    StrStream &operator<<(const Str &str) {
+        mStr.append(str);
+        return *this;
+    }
+
+    StrStream &operator<<(const char *str) {
+        mStr.append(str);
+        return *this;
+    }
+
+    // ints - common types first
+    StrStream &operator<<(int n) {
+        mStr.append(n);
+        return *this;
+    }
+
+    StrStream &operator<<(char c) {
+        if (mTreatCharAsInt) {
+            mStr.append(int(c));
+        } else {
+            mStr.append(c);
+        }
+        return *this;
+    }
+
+    StrStream &operator<<(size_t n) {
+        mStr.append(uint32_t(n));
+        return *this;
+    }
+
+    StrStream &operator<<(uint8_t n) {
+        if (mTreatCharAsInt) {
+            mStr.append(int(n));
+        } else {
+            mStr.append(n);
+        }
+        return *this;
+    }
+
+    StrStream &operator<<(uint16_t n) {
+        mStr.append(n);
+        return *this;
+    }
+
+    StrStream &operator<<(int16_t n) {
+        mStr.append(n);
+        return *this;
+    }
+    
+    StrStream &operator<<(uint32_t n) {
+        mStr.append(uint32_t(n));
+        return *this;
+    }
+
+    StrStream &operator<<(int32_t n) {
+        mStr.append(n);
+        return *this;
+    }
+
+    // assignment operator completely replaces the current string
+    StrStream &operator=(const Str &str) {
+        mStr = str;
+        return *this;
+    }
+
+    StrStream &operator=(const char *str) {
+        mStr = str;
         return *this;
     }
 

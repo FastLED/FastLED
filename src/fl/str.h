@@ -222,6 +222,12 @@ template <size_t SIZE = 64> class StrN {
         return write(dst.c_str(), dst.size());
     }
 
+    size_t write(int32_t val) {
+        StrN<64> dst;
+        StringFormatter::append(val, &dst); // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
+    }
+
     // Destructor
     ~StrN() {}
 
@@ -390,6 +396,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(char c) { write(&c, 1); return *this; }
     Str& append(int n) { write(n); return *this; }
     Str& append(uint32_t val) { write(val); return *this; }
+    Str& append(int32_t c) { write(c); return *this; }
 
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 

@@ -2,18 +2,26 @@
 
 #include "fl/strstream.h"
 
-#if defined(DEBUG) && defined(FASTLED_DBG_USE_IOSTREAM) && (!defined(FASTLED_DBG_USE_IOSTREAM) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__)) || defined(ESP32))
-#ifdef DEBUG
-#define FASTLED_DBG_USE_IOSTREAM
+#ifndef FASTLED_DBG_USE_IOSTREAM
+#if defined(DEBUG) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__) || defined(ESP32))
+#define FASTLED_DBG_USE_IOSTREAM 1
+#else
+#define FASTLED_DBG_USE_IOSTREAM 0
 #endif
 #endif
+
 
 #if defined(FASTLED_DBG_USE_IOSTREAM)
 #define FASTLED_HAS_DBG 1
 #include <iostream>  // ok include
 #define _FASTLED_DBG_FILE_OFFSET 12  // strlen("fastled/src/")
-#define _FASTLED_DGB(X) (std::cout << (fl::StrStream() << (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) << "(" << __LINE__ << "): " << X) << std::endl)
-#define FASTLED_DBG(X) _FASTLED_DGB(X) << endl
+#define _FASTLED_DGB(X) \
+  (std::cout <<         \
+    (fl::StrStream() << \
+       (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) <<  "(" << __LINE__ << "): " << X) \
+    .c_str() << std::endl)
+
+#define FASTLED_DBG(X) _FASTLED_DGB(X) << std::endl
 #endif
 
 
