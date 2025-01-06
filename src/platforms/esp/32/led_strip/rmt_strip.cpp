@@ -209,7 +209,8 @@ public:
                 RmtActiveStripGroup::instance().set_total_allowed(active_strips);
                 mError = true;
                 // FASTLED_WARN("All available RMT channels are in use, and no more can be allocated.");
-                FASTLED_ASSERT(false, "All available RMT channels are in use, and no more can be allocated.");
+                // ESP_LOGE("All available RMT channels are in use, failed to allocate RMT driver on pin: " << mPin << ".");
+                ESP_LOGE(TAG, "All available RMT channels are in use, failed to allocate RMT driver on pin: %d.", mPin);
                 return;
             }
             // Some other error that we can't handle.
@@ -268,6 +269,8 @@ public:
     }
 
     void draw_async() {
+        FASTLED_WARN("draw_async called");
+        
         if (mError) {
             FASTLED_WARN("draw_async called but mError is true");
             return;
@@ -277,7 +280,11 @@ public:
     }
 
     virtual void draw() override {
-        FASTLED_ASSERT(!mDrawing, "draw called while already drawing");
+        if (mError) {
+            FASTLED_WARN("draw called but mError is true");
+            return;
+        }
+        FASTLED_WARN_IF(!mDrawing, "draw called while already drawing");
         acquire_rmt_if_necessary();
         draw_async();
         mDrawing = true;
