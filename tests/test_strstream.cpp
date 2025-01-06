@@ -60,9 +60,7 @@ TEST_CASE("StrStream basic operations") {
         CRGB c(255, 0, 0);
         StrStream s;
         s << c;
-        // Str deviates from the cpp implementation by counting the null terminator
-        // as a character in the size, so we need to adjust the expected size.
-        CHECK_MESSAGE(s.str().size() == 13, s.str().c_str());  // "CRGB(255,0,0)" is 13 chars
-        CHECK_MESSAGE(strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0, s.str().c_str());
+        CHECK(s.str().size() == 13);  // "CRGB(255,0,0)" is 13 chars
+        CHECK(strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0);
     }
 }
