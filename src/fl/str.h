@@ -48,7 +48,10 @@ class StringHolder : public fl::Referent {
     StringHolder(const char *str);
     StringHolder(size_t length);
     StringHolder(const char *str, size_t length);
+    StringHolder(const StringHolder &other) = delete;
+    StringHolder &operator=(const StringHolder &other) = delete;
     ~StringHolder();
+
     bool isShared() const { return ref_count() > 1; }
     void grow(size_t newLength);
     bool hasCapacity(size_t newLength) const { return newLength <= mCapacity; }
