@@ -1,4 +1,8 @@
 // Simple test for the I2S on the ESP32dev board.
+// IMPORTANT:
+//   This is using examples is built on esp-idf 4.x. This existed prior to Arduino Core 3.0.0.
+//   To use this example, you MUST downgrade to Arduino Core < 3.0.0
+//   or it won't work on Arduino.
 
 
 #define FASTLED_ESP32_I2S
