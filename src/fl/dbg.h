@@ -12,7 +12,7 @@
 #define FASTLED_HAS_DBG 1
 #include <iostream>  // ok include
 #define _FASTLED_DBG_FILE_OFFSET 12  // strlen("fastled/src/")
-#define _FASTLED_DGB(X) std::cout << (fl::StrStream() << (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) << "(" << __LINE__ << "): " << X)
+#define _FASTLED_DGB(X) (std::cout << (fl::StrStream() << (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) << "(" << __LINE__ << "): " << X) << std::endl)
 #define FASTLED_DBG(X) _FASTLED_DGB(X) << endl
 #endif
 
