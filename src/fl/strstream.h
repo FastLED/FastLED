@@ -3,6 +3,15 @@
 #include "crgb.h"
 #include "str.h"
 
+
+#ifndef FASTLED_STRSTREAM_USES_SIZE_T
+#ifdef __AVR__
+#define FASTLED_STRSTREAM_USES_SIZE_T 0
+#else
+#define FASTLED_STRSTREAM_USES_SIZE_T 1
+#endif
+#endif
+
 namespace fl {
 
 template <typename T> struct StrStreamHelper {
@@ -78,10 +87,12 @@ class StrStream {
         return *this;
     }
 
+    #if FASTLED_STRSTREAM_USES_SIZE_T
     StrStream &operator<<(size_t n) {
         mStr.append(uint32_t(n));
         return *this;
     }
+    #endif
 
     template<typename T>
     StrStream &operator<<(T n) {

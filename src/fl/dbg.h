@@ -11,14 +11,23 @@
 #endif
 
 
-#if defined(FASTLED_DBG_USE_IOSTREAM)
+#if FASTLED_DBG_USE_IOSTREAM
 #define FASTLED_HAS_DBG 1
 #include <iostream>  // ok include
-#define _FASTLED_DBG_FILE_OFFSET 12  // strlen("fastled/src/")
+inline const char* _fastled_file_offset(const char* file) {
+  const char* p = file;
+  while (*p) {
+    if (*p == '/') {
+      file = p + 1;
+    }
+    p++;
+  }
+  return file;
+}
 #define _FASTLED_DGB(X) \
   (std::cout <<         \
     (fl::StrStream() << \
-       (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) <<  "(" << __LINE__ << "): " << X) \
+       (_fastled_file_offset(__FILE__)) <<  "(" << __LINE__ << "): " << X) \
     .c_str() << std::endl)
 
 #define FASTLED_DBG(X) _FASTLED_DGB(X) << std::endl
