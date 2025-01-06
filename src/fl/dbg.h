@@ -2,6 +2,7 @@
 
 #include "fl/strstream.h"
 
+namespace fl {
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
 // "blah/blah/blah.h" -> "blah.h"
 inline const char* fastled_file_offset(const char* file) {
@@ -23,6 +24,7 @@ inline const char* fastled_file_offset(const char* file) {
   }
   return file;  // If no slashes found at all, return original path
 }
+}  // namespace fl
 
 
 #ifndef FASTLED_DBG_USE_PRINTF
