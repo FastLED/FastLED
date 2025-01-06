@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/strstream.h"
+
 #if defined(DEBUG) && defined(FASTLED_DBG_USE_IOSTREAM) && (!defined(FASTLED_DBG_USE_IOSTREAM) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__)) || defined(ESP32))
 #ifdef DEBUG
 #define FASTLED_DBG_USE_IOSTREAM
@@ -9,10 +11,8 @@
 #if defined(FASTLED_DBG_USE_IOSTREAM)
 #define FASTLED_HAS_DBG 1
 #include <iostream>  // ok include
-using std::endl;
-using std::cout;
 #define _FASTLED_DBG_FILE_OFFSET 12  // strlen("fastled/src/")
-#define _FASTLED_DGB(X) cout << (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) << "(" << __LINE__ << "): " << X
+#define _FASTLED_DGB(X) std::cout << (fl::StrStream() << (&__FILE__[_FASTLED_DBG_FILE_OFFSET]) << "(" << __LINE__ << "): " << X)
 #define FASTLED_DBG(X) _FASTLED_DGB(X) << endl
 #endif
 
