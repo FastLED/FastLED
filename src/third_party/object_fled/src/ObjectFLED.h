@@ -31,7 +31,7 @@
 */
 
 #ifndef __IMXRT1062__
-// Do nothing for other platforms.
+#error "Sorry, ObjectFLED only works on Teensy 4.x boards."
 #endif
 #if TEENSYDUINO < 121
 #error "Teensyduino version 1.21 or later is required to compile this library."
@@ -58,9 +58,9 @@
 #define CORDER_RGB	0	//* WS2811, YF923
 #define CORDER_RBG	1
 #define CORDER_GRB	2	//* WS2811B, Most LED strips are wired this way
-#define CORDER_GBR	3
+#define CORDER_GBR	3	//*
 #define CORDER_BRG	4	//* Adafruit Product ID: 5984 As of November 5, 2024 - this strand has different 'internal' color ordering. It's now BRG not RGB,
-#define CORDER_BGR	5	// Adafruit Dotstar LEDs SK9822 uses this CO but they use inverted start/stop bits
+#define CORDER_BGR	5	//* Adafruit Dotstar LEDs SK9822 uses this CO but they use inverted start/stop bits
 #define CORDER_RGBW	6	//* Popular
 #define CORDER_RBGW	7
 #define CORDER_GRBW	8
@@ -105,33 +105,35 @@ public:
 	//    leds.show();
 	//    delay(100);
 	// }
-	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t color_order, uint8_t numPins, const uint8_t* pinList, \
-			   uint8_t serpentine = 0);
+	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t config, uint8_t numPins, const uint8_t* pinList, \
+				uint8_t serpentine = 0);
 
-	~ObjectFLED() { delete frameBuffer; }
+	~ObjectFLED() { 
+		// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
+		while (micros() - update_begin_micros < numbytes * 8 * TH_TL / OC_FACTOR / 1000 + 5);
+		delete frameBuffer; 
+	}
 
-	//begin() - Use defalut LED timing: 1.0 OC Factor, 1250 nS CLK (=800 KHz), 417 nS T0H, 834 nS T1H, 70 uS LED Latch Delay.
+	//begin() - Use defalut LED timing: 1.0 OC Factor, 1250 nS CLK (=800 KHz), 300 nS T0H, 750 nS T1H, 300 uS LED Latch Delay.
 	void begin(void);
 
-	//begin(LED_Overclock_Factor) - divides default 1250 nS LED CLK (=800 KHz), 417 nS T0H, 834 nS T1H.
-	void begin(float);
+	//begin(LED_Latch_Delay_uS) - sets the LED Latch Delay.
+	void begin(uint16_t);
 
 	//begin(LED_Overclock_Factor, LED_Latch_Delay_uS) - divides default 1250 nS LED CLK (=800 KHz), 
-	// 417 nS T0H, 834 nS T1H; and sets the LED Latch Delay.
-	void begin(float, uint16_t);
+	// 300 nS T0H, 750 nS T1H; and optionally sets the LED Latch Delay.
+	void begin(double, uint16_t = 300);
 
-	//begin(LED_Overclock_Factor, LED_CLK_nS, LED_T0H_nS, LED_T1H_nS, LED_Latch_Delay_uS) - 
-	//specifies full LED timing.  Values given for CLK, T0H, T1H are divided by OC Factor.
-	void begin(float, uint16_t, uint16_t, uint16_t, uint16_t);
+	//begin(LED_CLK_nS, LED_T0H_nS, LED_T1H_nS, LED_Latch_Delay_uS) - specifies full LED waveform timing.
+	void begin(uint16_t, uint16_t, uint16_t, uint16_t = 300);
 
 	void show(void);
-
 	void waitForDmaToFinish() {
 		while (!dma3.complete()) {  // wait for dma to complete before reset/re-use
 			delayMicroseconds(10);
 		}
 	}
-
+	
 	int busy(void);
 
 	//Brightness values 0-255
@@ -171,11 +173,11 @@ private:
 	uint8_t pinlist[NUM_DIGITAL_PINS];
 	uint16_t comp1load[3];
 	uint8_t serpNumber;
-	float OC_FACTOR = 1.0;					//used to reduce period of LED output
-	uint16_t TH_TL = 1250;					//nS- period of LED output
-	uint16_t T0H = TH_TL / 3;				//nS- duration of T0H
-	uint16_t T1H = TH_TL * 2 / 3;			//nS- duration of T1H
-	uint16_t LATCH_DELAY = 75;				//uS time to hold output low for LED latch.
+	float OC_FACTOR = 1.0;			//used to reduce period of LED output
+	uint16_t TH_TL = 1250;			//nS- period of LED output
+	uint16_t T0H = 300;				//nS- duration of T0H
+	uint16_t T1H = 750;				//nS- duration of T1H
+	uint16_t LATCH_DELAY = 300;		//uS time to hold output low for LED latch.
 
 	//for show context switch
 	uint32_t bitmaskLocal[4];
