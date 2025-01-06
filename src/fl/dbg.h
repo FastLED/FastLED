@@ -4,7 +4,7 @@
 
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
 // "blah/blah/blah.h" -> "blah.h"
-inline const char* _fastled_file_offset(const char* file) {
+inline const char* fastled_file_offset(const char* file) {
   const char* p = file;
   const char* last_slash = nullptr;
   
@@ -43,7 +43,7 @@ namespace fl {
 #define _FASTLED_DGB(X) \
   (std::cout <<         \
     (fl::StrStream() << \
-       (fl::_fastled_file_offset(__FILE__)) <<  "(" << __LINE__ << "): " << X) \
+       (fl::fastled_file_offset(__FILE__)) <<  "(" << __LINE__ << "): " << X) \
     .c_str() << std::endl)
 
 #define FASTLED_DBG(X) _FASTLED_DGB(X) << std::endl
