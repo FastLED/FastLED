@@ -1,14 +1,9 @@
-
-
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(ARDUINO_XIAO_ESP32S3)
-
 #define FASTLED_INTERNAL
-#include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 #include "FastLED.h"
 
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
-
+#include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
 #include "crgb.h"
 #include "eorder.h"
