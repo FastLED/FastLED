@@ -43,9 +43,9 @@ esp_err_t led_strip_refresh_async(led_strip_handle_t strip) {
     return strip->refresh_async(strip);
 }
 
-esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, int32_t timeout_ms, bool disable_after_done) {
+esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, int32_t timeout_ms) {
     ESP_RETURN_ON_FALSE(strip, ESP_ERR_INVALID_ARG, TAG, "invalid argument");
-    return strip->wait_refresh_done(strip, timeout_ms, disable_after_done);
+    return strip->wait_refresh_done(strip, timeout_ms);
 }
 
 esp_err_t led_strip_set_pixel_rgbw(led_strip_handle_t strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue, uint32_t white)

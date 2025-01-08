@@ -46,7 +46,7 @@ typedef struct {
     // led_model_t led_model;   /*!< LED model */
     rmt_bytes_encoder_config_t rmt_bytes_encoder_config; /*!< RMT bytes encoder configuration */
     rmt_symbol_word_t reset_code; /*!< Reset code for LED strip */
-    struct {
+    struct led_strip_extra_flags {
         uint32_t invert_out: 1; /*!< Invert output signal */
         uint32_t rgbw: 1;       /*!< RGBW mode */
     } flags;                    /*!< Extra driver flags */

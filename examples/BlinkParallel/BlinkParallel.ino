@@ -13,10 +13,15 @@
 CRGB leds[NUM_LEDS];
 
 void setup() { 
-    FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<WS2812, 5>(leds, NUM_LEDS);  // GRB ordering is assumed
+    //FastLED.addLeds<WS2812, 5>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 3>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS);  // GRB ordering is assumed
+
+
+    while (!Serial);  // Wait for serial port to connect
+
+    delay(1000);
 }
 
 void fill(CRGB color) {

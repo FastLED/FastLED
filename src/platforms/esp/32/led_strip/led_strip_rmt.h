@@ -28,7 +28,8 @@ typedef struct {
     rmt_clock_source_t clk_src; /*!< RMT clock source */
     uint32_t resolution_hz;     /*!< RMT tick resolution, if set to zero, a default resolution (10MHz) will be applied */
     size_t mem_block_symbols;   /*!< How many RMT symbols can one RMT channel hold at one time. Set to 0 will fallback to use the default size. */
-    struct {
+    /*!< Extra RMT specific driver flags */
+    struct led_strip_rmt_extra_config {
         uint32_t with_dma: 1;   /*!< Use DMA to transmit data */
     } flags;                    /*!< Extra driver flags */
 } led_strip_rmt_config_t;

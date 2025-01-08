@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "enabled.h"
@@ -7,6 +8,7 @@
 #include <stdint.h>
 
 #include "led_strip_types.h"
+#include "configure_led.h"
 
 namespace fastled_rmt51_strip {
 

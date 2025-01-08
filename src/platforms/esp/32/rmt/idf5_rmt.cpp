@@ -48,8 +48,8 @@ void do_extra_wait() {
 
 }  // namespace
 
-RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, bool recycle)
-        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3), mRecycle(recycle) {
+RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
+        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3) {
 }
 
 RmtController5::~RmtController5() {
@@ -58,27 +58,17 @@ RmtController5::~RmtController5() {
     }
 }
 
-void RmtController5::waitForDrawComplete() {
-    if (mLedStrip) {
-        mLedStrip->wait_for_draw_complete();
-    }
-}
+
 
 void RmtController5::loadPixelData(PixelIterator &pixels) {
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;
         convert(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
-        if (mRecycle) {
-            mLedStrip = create_rmt_led_strip_deprecated(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
-        } else {
-            mLedStrip = create_rmt_led_strip_no_recycle(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
-        }
-        
+        mLedStrip = create_rmt_led_strip(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
     } else {
         assert(mLedStrip->num_pixels() == pixels.size());
     }
-    mLedStrip->wait_for_draw_complete();
     if (is_rgbw) {
         uint8_t r, g, b, w;
         for (uint16_t i = 0; pixels.has(1); i++) {

@@ -27,7 +27,7 @@
 
 namespace fastled_rmt51_strip {
 
-#define TAG "led_strip"
+#define TAG "led_rmt_encoder"
 
 // Replaces C's ability to or enums together. This is a C++ version of the same thing.
 template<typename EnumT>

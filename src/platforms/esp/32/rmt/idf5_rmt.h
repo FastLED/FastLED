@@ -21,19 +21,16 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3,  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
-        bool recycle);  
+        int T1, int T2, int T3);  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
 
     ~RmtController5();
 
     void loadPixelData(PixelIterator &pixels);
     void showPixels();
-    void waitForDrawComplete();
 
 private:
     int mPin;
     int mT1, mT2, mT3;
-    bool mRecycle;
     fastled_rmt51_strip::IRmtLedStrip *mLedStrip = nullptr;
 };
 
