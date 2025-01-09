@@ -100,6 +100,7 @@
         "*.inc": "cpp",
         "enabled.h": "c",
         "esp_version.h": "c",
-        "esp_idf_version.h": "c"
+        "esp_idf_version.h": "c",
+        "fastled_config.h": "c"
     }
 }

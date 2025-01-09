@@ -1,5 +1,10 @@
 #pragma once
 
+
+#include "third_party/espressif/led_strip/src/enabled.h"
+
+#if FASTLED_ESP_HAS_LED_SPI
+
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
@@ -64,3 +69,5 @@ protected:
         mLedStrip->drawAsync();
     }
 };
+
+#endif  // FASTLED_RMT5

@@ -1,12 +1,14 @@
 #pragma once
 
-
+#include "eorder.h"  // We don't need this header, other than to force the build system to define CONFIG_IDF_TARGET_*
 
 #ifndef FASTLED_HAS_RMT
 #if CONFIG_IDF_TARGET_ESP32C2 || !__has_include("driver/rmt_types.h")
 #define FASTLED_HAS_RMT 0
+#define FASTLED_ESP_HAS_LED_SPI 0
 #else
 #define FASTLED_HAS_RMT 1
+#define FASTLED_ESP_HAS_LED_SPI 1
 #endif
 #endif
 
