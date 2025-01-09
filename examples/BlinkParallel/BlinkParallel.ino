@@ -11,13 +11,15 @@
 // Demo of driving multiple WS2812 strips on different pins
 
 // Define the array of leds
-CRGB leds[NUM_LEDS];
+CRGB leds[NUM_LEDS];  // Yes, they all share a buffer.
 
-void setup() { 
+void setup() {
+    Serial.begin(115200);
     //FastLED.addLeds<WS2812, 5>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 3>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<WS2812, 7>(leds, NUM_LEDS);  // GRB ordering is assumed
     delay(1000);
 }
 
@@ -43,4 +45,28 @@ void loop() {
   blink(CRGB(8,0,0), 1);  // blink once for red
   blink(CRGB(0,8,0), 2);  // blink twice for green
   blink(CRGB(0,0,8), 3);  // blink thrice for blue
+
+  delay(50);
+
+
+
+  // now benchmark
+  uint32_t start = millis();
+  fill(CRGB(8,8,8));
+  FastLED.show();
+  uint32_t diff = millis() - start;
+
+  Serial.print("Time to fill and show for non blocking (ms): ");
+  Serial.println(diff);
+
+  delay(50);
+
+  start = millis();
+  fill(CRGB(8,8,8));
+  FastLED.show();
+  FastLED.show();
+
+  diff = millis() - start;
+  Serial.print("Time to fill and show for 2nd blocking (ms): ");
+  Serial.println(diff);
 }

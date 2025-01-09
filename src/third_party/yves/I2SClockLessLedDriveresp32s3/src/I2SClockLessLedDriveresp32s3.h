@@ -33,6 +33,10 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_timer.h"
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+
 #ifndef NUMSTRIPS
 #define NUMSTRIPS 16
 #endif
@@ -529,3 +533,5 @@ isDisplaying=true;
   }
                 return false;
 }
+
+#pragma GCC diagnostic pop
