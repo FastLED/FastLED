@@ -6,7 +6,9 @@ FastLED 3.9.10
     * Unresolved issues:
       * DMA does not work for ESP32-S3 for my test setup with XIAO ESP32-S3
         * This appears to be an espressif bug as using dma is not tested in their examples and does not work with the stock driver.
-        * Therefore DMA is disable for now.
+        * Therefore DMA is disable for now, force it on with
+          * `#define FASTLED_RMT_USE_DMA` 
+          * `#include "FastLED.h"`
 * Teensy
   * Massive Parallel - ObjectFLED clockless driver.
     * Stability improvements with timing.

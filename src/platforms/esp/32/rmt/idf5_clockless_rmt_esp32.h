@@ -3,6 +3,8 @@
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FASTLED_HAS_CLOCKLESS 1
 
+#define FASTLED_RMT_USE_DMA
+
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
@@ -18,6 +20,15 @@ private:
 
     // -- The actual controller object for ESP32
     RmtController5 mRMTController;
+
+    static RmtController5::DmaMode getDmaMode()
+    {
+        #ifdef FASTLED_RMT_USE_DMA
+        return RmtController5::DMA_ENABLED;
+        #else
+        return RmtController5::DMA_AUTO;
+        #endif
+    }
 
 public:
     ClocklessController(): mRMTController(DATA_PIN, T1, T2, T3)

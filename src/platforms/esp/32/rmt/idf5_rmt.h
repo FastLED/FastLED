@@ -12,6 +12,12 @@ class IRmtStrip;
 class RmtController5
 {
 public:
+    enum DmaMode {
+        DMA_AUTO,
+        DMA_ENABLED,
+        DMA_DISABLED
+    };
+
     // Bridge between FastLED and the ESP RMT5 driver.
     RmtController5() = delete;
     RmtController5(RmtController5 &&) = delete;
@@ -19,7 +25,8 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3);  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
+        int T1, int T2, int T3,
+        DmaMode dma_mode);  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. 
 
     ~RmtController5();
 
