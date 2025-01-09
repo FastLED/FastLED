@@ -3,7 +3,7 @@
 
 
 #ifndef FASTLED_HAS_RMT
-#ifdef CONFIG_IDF_TARGET_ESP32C2
+#if CONFIG_IDF_TARGET_ESP32C2 || !__has_include("driver/rmt_types.h")
 #define FASTLED_HAS_RMT 0
 #else
 #define FASTLED_HAS_RMT 1
