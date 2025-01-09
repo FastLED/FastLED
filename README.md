@@ -223,6 +223,10 @@ https://github.com/FastLED/PlatformIO-Starter
 
 # New Feature Announcements
 
+## New in 3.9.10: Super Stable WS2812 SPI driver for ESP32
+
+![image (2)](https://github.com/user-attachments/assets/b3c5801c-66df-40af-a6b8-bbd1520fbb36)
+
 ## New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3
 
 ![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
