@@ -1,7 +1,6 @@
 #ifndef __INC_CHIPSETS_H
 #define __INC_CHIPSETS_H
 
-#include "FastLED.h"
 #include "pixeltypes.h"
 #include "five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
