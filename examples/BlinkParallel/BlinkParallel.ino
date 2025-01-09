@@ -1,7 +1,7 @@
 
-/// @file    Blink.ino
-/// @brief   Blink the first LED of an LED strip
-/// @example Blink.ino
+/// @file    BlinkParallel.ino
+/// @brief   Shows parallel usage of WS2812 strips. Blinks once for red, twice for green, thrice for blue.
+/// @example BlinkParallel.ino
 
 #include <FastLED.h>
 
@@ -27,13 +27,20 @@ void fill(CRGB color) {
   }
 }
 
+void blink(CRGB color, int times) {
+  for (int i = 0; i < times; i++) {
+    fill(color);
+    FastLED.show();
+    delay(500);
+    fill(CRGB::Black);
+    FastLED.show();
+    delay(500);
+  }
+}
+
 void loop() { 
   // Turn the LED on, then pause
-  fill(CRGB(8,0,0));
-  FastLED.show();
-  delay(500);
-  // Now turn the LED off, then pause
-  fill(CRGB::Black);
-  FastLED.show();
-  delay(500);
+  blink(CRGB(8,0,0), 1);  // blink once for red
+  blink(CRGB(0,8,0), 2);  // blink twice for green
+  blink(CRGB(0,0,8), 3);  // blink thrice for blue
 }
