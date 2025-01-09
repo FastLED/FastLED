@@ -1,11 +1,13 @@
 FastLED 3.9.10
 ==============
 * ESP32
-  * RMT driver has been fixed for ESP32-S3 mode. Upto 4 RMT workers may work in parallel.
+  * RMT5 driver has been fixed for ESP32-S3. Upto 4 RMT workers may work in parallel.
     * Rebased espressifs led_strip to v3.0.0
-* ObjectFLED
-  * Stability improvements with timing.
-  * 
+* Teensy
+  * Massive Parallel - ObjectFLED clockless driver.
+    * Stability improvements with timing.
+    * Resolves issue with using ObjectFLED mode with Audio DMA.
+    * ObjectFLED driver is now rebased to version 1.1.0
 
 
 FastLED 3.9.9 - I2S For ESP32-S3
