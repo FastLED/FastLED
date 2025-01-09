@@ -2,7 +2,7 @@
 
 #include "src/enabled.h"
 
-#if FASTLED_RMT5 && FASTLED_HAS_RMT
+#if FASTLED_RMT5 && FASTLED_HAS_RMT && __has_include("drivers/rmt.h")
 
 #include "strip_rmt.h"
 
