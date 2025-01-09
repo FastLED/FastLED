@@ -4,6 +4,8 @@
 
 #include "fl/register.h"
 #include "fl/namespace.h"
+#include "platforms/esp/esp_version.h"
+#include "fastpin.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -173,4 +175,3 @@ _FL_DEFPIN(60); _FL_DEFPIN(61); _FL_DEFPIN(62); _FL_DEFPIN(63);
 #pragma GCC diagnostic pop
 
 FASTLED_NAMESPACE_END
-
