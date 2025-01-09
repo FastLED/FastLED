@@ -108,7 +108,7 @@ ESP32_C2_DEVKITM_1 = Board(
     platform="espressif32",
     defines=[
         "CONFIG_IDF_TARGET_ESP32C2=1",  # why does this need to be forced on?
-    ]
+    ],
 )
 
 ESP32_C3_DEVKITM_1 = Board(
