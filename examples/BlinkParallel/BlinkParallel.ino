@@ -3,7 +3,7 @@
 /// @brief   Shows parallel usage of WS2812 strips. Blinks once for red, twice for green, thrice for blue.
 /// @example BlinkParallel.ino
 
-#include <FastLED.h>
+#include "FastLED.h"
 
 // How many leds in your strip?
 #define NUM_LEDS 256
@@ -16,10 +16,10 @@ CRGB leds[NUM_LEDS];  // Yes, they all share a buffer.
 void setup() {
     Serial.begin(115200);
     //FastLED.addLeds<WS2812, 5>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<WS2812, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<WS2812, 1>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<WS2812, 2>(leds, NUM_LEDS);  // GRB ordering is assumed
     FastLED.addLeds<WS2812, 3>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<WS2812, 6>(leds, NUM_LEDS);  // GRB ordering is assumed
-    FastLED.addLeds<WS2812, 7>(leds, NUM_LEDS);  // GRB ordering is assumed
+    FastLED.addLeds<WS2812, 4>(leds, NUM_LEDS);  // GRB ordering is assumed
     delay(1000);
 }
 
