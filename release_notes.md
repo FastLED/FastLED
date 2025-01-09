@@ -5,14 +5,25 @@ FastLED 3.9.10
     * Rebased espressifs led_strip to v3.0.0
     * Unresolved issues:
       * DMA does not work for ESP32-S3 for my test setup with XIAO ESP32-S3
-        * This appears to be an espressif bug as using dma is not tested in their examples and does not work with the stock driver.
+        * This appears to be an espressif bug as using dma is not tested in their examples and does not work with the stock driver, or there is something I don't understand.
         * Therefore DMA is disable for now, force it on with
           * `#define FASTLED_RMT_USE_DMA` 
           * `#include "FastLED.h"`
+          * If anyone knows what's going on, please file a bug with FastLED [issues](https://github.com/FastLED/FastLED/issues/new) page.
+  * New WS2812 SPI driver for ESP32
+    * Enables the ESP32C2 device, as it does not have a I2S or RMT drivers.
+    * SPI is backed by DMA and is apparently more stable than the RMT driver.
+      * Unfortunately, the driver only works with the WS2812 protocol.
+    * I was able to test that ESP32-S3 was able to use two spi channels in parallel.
+    * You can enable this default via
+      * `#define FASTLED_ESP32_USE_CLOCKLESS_SPI`
+      * `#include "FastLED.h"
+    * Advanced users can enable both the RMT5 and SPI drivers if they are willing to manually construct the SPI driver and at it to the FastLED singleton object via `FastLED.addLeds<...>'
+    * If RMT is not present (ESP32C2) then the ClocklessSpiWS2812 driver will be enabled and selected automatically.
 * Teensy
   * Massive Parallel - ObjectFLED clockless driver.
     * Stability improvements with timing.
-    * Resolves issue with using ObjectFLED mode with Audio DMA.
+    * Resolves issue with using ObjectFLED mode with Teensy Audio DMA.
     * ObjectFLED driver is now rebased to version 1.1.0
 
 
