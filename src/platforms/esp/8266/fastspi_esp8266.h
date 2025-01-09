@@ -1,6 +1,8 @@
 #pragma once
 #pragma message "ESP8266 Hardware SPI support added"
 
+#include "fl/namespace.h"
+
 #include <SPI.h>
 
 FASTLED_NAMESPACE_BEGIN

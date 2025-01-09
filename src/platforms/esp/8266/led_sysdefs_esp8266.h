@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #ifndef ESP8266
 #define ESP8266
 #endif

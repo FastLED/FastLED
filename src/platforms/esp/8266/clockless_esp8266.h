@@ -1,5 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+#include "eorder.h"
+#include "fl/namespace.h"
+#include "fl/register.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES

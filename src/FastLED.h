@@ -329,14 +329,6 @@ enum EBlockChipsets {
 #endif
 };
 
-#if defined(LIB8_ATTINY)
-#define NUM_CONTROLLERS 2
-#else
-/// Unknown NUM_CONTROLLERS definition. Unused elsewhere in the library?
-/// @todo Remove?
-#define NUM_CONTROLLERS 8
-#endif
-
 /// Typedef for a power consumption calculation function. Used within
 /// CFastLED for rescaling brightness before sending the LED data to
 /// the strip with CFastLED::show().

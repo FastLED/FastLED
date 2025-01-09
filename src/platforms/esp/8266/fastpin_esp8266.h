@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 struct FASTLED_ESP_IO {
