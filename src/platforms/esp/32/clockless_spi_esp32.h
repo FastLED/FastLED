@@ -1,8 +1,5 @@
 #pragma once
 
-// signal to the world that we have a ClocklessController to allow WS2812 and others.
-#define FASTLED_HAS_CLOCKLESS 1
-
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
@@ -10,7 +7,7 @@
 #include "fl/scoped_ptr.h"
 #include "fl/assert.h"
 
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessSpiWs2812Controller : public CPixelLEDController<RGB_ORDER>
 {
 private:
@@ -32,9 +29,7 @@ protected:
         const bool is_rgbw = rgbw.active();
         PixelIterator iterator = pixels.as_iterator(rgbw);
         if (!mLedStrip) {
-            auto strip = ISpiStripWs2812::Create(
-                DATA_PIN, iterator.size(), is_rgbw,
-            );
+            auto strip = ISpiStripWs2812::Create(DATA_PIN, iterator.size(), is_rgbw);
             mLedStrip.reset(strip);
         }
         else {
@@ -67,21 +62,5 @@ protected:
         }
         output_iterator.finish();
         mLedStrip->drawAsync();
-    }
-};
-
-
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class ClocklessSpiInvalidController : public CPixelLEDController<RGB_ORDER>
-{
-public:
-    ClocklessSpiInvalidController() = default;
-
-    void init() override {
-        FASTLED_ASSERT(false, "Spi Controller only works for WS2812");
-    }
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
-        FASTLED_ASSERT(false, "Spi Controller only works for WS2812");
     }
 };
