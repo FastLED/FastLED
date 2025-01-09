@@ -1,3 +1,13 @@
+FastLED 3.9.10
+==============
+* ESP32
+  * RMT driver has been fixed for ESP32-S3 mode. Upto 4 RMT workers may work in parallel.
+    * Rebased espressifs led_strip to v3.0.0
+* ObjectFLED
+  * Stability improvements with timing.
+  * 
+
+
 FastLED 3.9.9 - I2S For ESP32-S3
 =============
 * ESP32

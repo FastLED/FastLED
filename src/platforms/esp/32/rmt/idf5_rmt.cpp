@@ -14,21 +14,11 @@
 #include "third_party/espressif/led_strip/strip_rmt.h"
 
 #include "fl/assert.h"
+#include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)
 
 
 #define TAG "idf5_rmt.cpp"
 
-
-namespace {  // anonymous namespace
-
-void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H, uint16_t* T1L) {
-    *T0H = T1;
-    *T0L = T2 + T3;
-    *T1H = T1 + T2;
-    *T1L = T3;
-}
-
-}  // namespace
 
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
         : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3) {
@@ -44,7 +34,7 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;
-        convert(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
+        convert_fastled_timings_to_timedeltas(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
         mLedStrip = IRmtStrip::Create(mPin, pixels.size(), is_rgbw, t0h, t0l, t1h, t1l, 280, IRmtStrip::DMA_AUTO);
         
     } else {

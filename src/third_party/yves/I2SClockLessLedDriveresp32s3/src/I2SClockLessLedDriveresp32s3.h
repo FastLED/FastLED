@@ -1,7 +1,11 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic ignored "-Wvolatile"
+
 #include <stdint.h>
 #include <stdio.h>  // ok include
 #include <string.h>
-#include "soc/soc_memory_types.h"
+#include "esp_memory_utils.h"
 #include "esp_attr.h"
 #include "esp_check.h"
 #include "esp_intr_alloc.h"
@@ -12,7 +16,7 @@
 #include "esp_rom_gpio.h"
 #include "soc/soc_caps.h"
 #include "soc/rtc.h" // for `rtc_clk_xtal_freq_get()`
-#include "soc/soc_memory_types.h"
+#include "esp_memory_utils.h"
 #include "hal/dma_types.h"
 #include "hal/gpio_hal.h"
 #include "esp_private/gdma.h"
@@ -33,9 +37,6 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_timer.h"
 
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wattributes"
 
 #ifndef NUMSTRIPS
 #define NUMSTRIPS 16
