@@ -57,7 +57,10 @@
 #define FF (0xF0F0F0F0L)
 #define FF2 (0x0F0F0F0FL)
 
+#ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 #define __OFFSET 0 //  (24*3*2*2*2+2)
 
 #define __OFFSET_END  (24*3*2*2*2+2)
