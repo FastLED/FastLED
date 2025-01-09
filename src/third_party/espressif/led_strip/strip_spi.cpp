@@ -18,6 +18,9 @@
 
 #include "strip_spi.h"
 
+#include "rgbw.h"
+#include "fl/warn.h"
+
 namespace {  // anonymous namespace
 
 static const char *TAG = "strip_spi";
@@ -185,6 +188,11 @@ public:
         }
     }
 
+    OutputIterator outputIterator() override
+    {
+        return OutputIterator(this, mLedCount);
+    }
+
 private:
     spi_host_device_t mSpiHost = SPI2_HOST;
     led_strip_handle_t mStrip;
@@ -195,10 +203,55 @@ private:
 
 }  // namespace
 
-ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, ISpiStripWs2812::SpiHostMode spi_bus, ISpiStripWs2812::DmaMode dma_mode) {
-    return new SpiStripWs2812(pin, led_count, spi_bus, dma_mode);
+
+ISpiStripWs2812::OutputIterator::OutputIterator(ISpiStripWs2812 *strip, uint32_t num_leds)
+    : mStrip(strip), mNumLeds(num_leds) {}
+
+ISpiStripWs2812::OutputIterator::~OutputIterator() {
+    if (mWritten) {
+        FASTLED_WARN("finish() was not called on OutputIterator before destruction.");
+        finish();
+    }
 }
 
+void ISpiStripWs2812::OutputIterator::flush() {
+    mStrip->setPixel(mPosition, mRed, mGreen, mBlue);
+    mRed = mGreen = mBlue = 0;
+}
+
+void ISpiStripWs2812::OutputIterator::operator()(uint8_t value) {
+    switch (mWritten) {
+    case 0:
+        mRed = value;
+        break;
+    case 1:
+        mGreen = value;
+        break;
+    case 2:
+        mBlue = value;
+        break;
+    }
+    mWritten++;
+    if (mWritten == 3) {
+        flush();
+        mWritten = 0;
+        mPosition++;
+    }
+}
+
+void ISpiStripWs2812::OutputIterator::finish() {
+    if (mWritten) {
+        flush();
+    }
+}
+
+ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rgbw, ISpiStripWs2812::SpiHostMode spi_bus, ISpiStripWs2812::DmaMode dma_mode) {
+    if (!is_rgbw) {
+        return new SpiStripWs2812(pin, led_count, spi_bus, dma_mode);
+    }
+    // Emulate RGBW mode by pretending the RGBW pixels are RGB pixels.
+    uint32_t size_as_rgb = Rgbw::size_as_rgb(led_count);
+    return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
+}
 
 #endif  // FASTLED_RMT5
-
