@@ -46,6 +46,11 @@ protected:
     {
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         mRMTController.loadPixelData(iterator);
+    }
+
+    virtual void endShowLeds(void *data) override
+    {
+        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
         mRMTController.showPixels();
     }
 };
