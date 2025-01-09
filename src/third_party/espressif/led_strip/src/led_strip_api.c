@@ -1,7 +1,7 @@
 
 #include "enabled.h"
 
-#if defined(ESP32) && __has_include("drivers/rmt_types.h")
+#if defined(ESP32) && __has_include("driver/rmt_types.h")
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
  *
