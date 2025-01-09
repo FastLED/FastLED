@@ -19,7 +19,7 @@
 
 #else
 
-#ifndef CONFIG_IDF_TARGET_ESP32C2
+#if FASTLED_HAS_RMT
 #include "clockless_rmt_esp32.h"
 #elif FASTLED_ESP_HAS_LED_SPI
 #include "clockless_spi_esp32.h"
