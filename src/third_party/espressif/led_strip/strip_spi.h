@@ -51,6 +51,7 @@ class ISpiStripWs2812 {
     virtual bool isDrawing() = 0;
 
     virtual void fill(uint8_t red, uint8_t green, uint8_t blue) = 0;
+    virtual uint32_t numPixels() = 0;
 
     // Useful for iterating over the LEDs in a strip, especially RGBW mode which the spi
     // api does not support natively.

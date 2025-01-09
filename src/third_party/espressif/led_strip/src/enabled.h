@@ -1,8 +1,9 @@
 #pragma once
 
 
+
 #ifndef FASTLED_HAS_RMT
-#if CONFIG_IDF_TARGET_ESP32C2
+#ifdef CONFIG_IDF_TARGET_ESP32C2
 #define FASTLED_HAS_RMT 0
 #else
 #define FASTLED_HAS_RMT 1

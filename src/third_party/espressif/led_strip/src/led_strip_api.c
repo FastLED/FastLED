@@ -1,8 +1,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT5 && FASTLED_HAS_RMT
-
+#ifdef ESP32
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
  *
@@ -112,4 +111,4 @@ esp_err_t led_strip_del(led_strip_handle_t strip)
     return strip->del(strip);
 }
 
-#endif  // FASTLED_RMT5
+#endif  // ESP32

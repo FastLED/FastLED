@@ -2,7 +2,7 @@
 
 #include "src/enabled.h"
 
-#if FASTLED_RMT5
+#ifdef ESP32
 
 
 /*
@@ -197,6 +197,11 @@ public:
         return OutputIterator(this, mLedCount);
     }
 
+    uint32_t numPixels() override
+    {
+        return mLedCount;
+    }
+
 private:
     spi_host_device_t mSpiHost = SPI2_HOST;
     led_strip_handle_t mStrip;
@@ -258,4 +263,4 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
 
-#endif  // FASTLED_RMT5
+#endif  // ESP32
