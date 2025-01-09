@@ -19,7 +19,7 @@
 
 #else
 
-#if FASTLED_HAS_RMT
+#ifndef CONFIG_IDF_TARGET_ESP32C2
 #include "clockless_rmt_esp32.h"
 #elif FASTLED_ESP_HAS_LED_SPI
 #include "clockless_spi_esp32.h"
@@ -28,6 +28,8 @@
 // will not work with this driver but will fail silently to render pixels.
 #define ClocklessController ClocklessSpiWs2812Controller
 #define FASTLED_HAS_CLOCKLESS 1
+#else
+#warning "No clockless drivers defined for ESP32 chip. You won't be able to drive WS2812 and other clockless chipsets".
 #endif
 
 #endif
