@@ -97,6 +97,7 @@
         "valarray": "cpp",
         "variant": "cpp",
         "netfwd": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "enabled.h": "c"
     }
 }

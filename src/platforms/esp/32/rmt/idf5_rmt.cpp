@@ -7,9 +7,6 @@
 #warning "FASTLED_RMT_BUILTIN_DRIVER is not supported in RMT5 and will be ignored."
 #endif
 
-#include <assert.h>
-
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -76,12 +73,6 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
 }
 
 void RmtController5::showPixels() {
-    // Work around a blip that happens when the rmt_channel is disabled/deallocated.
-    // We now set the INPUT_PULLDOWN on the pin to avoid the blip, per the recommendations
-    // of espressif. However, but there could still be a momentary blip between the rmt
-    // channel being disable and when the INPUT_PULLDOWN is enabled. However the blip will
-    // be less than a few microseconds.
-    // See espressif bug https://github.com/espressif/esp-idf/issues/15049
     mLedStrip->drawAsync();
 }
 

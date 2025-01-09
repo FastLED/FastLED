@@ -26,6 +26,7 @@ typedef struct {
     struct led_strip_rmt_extra_config {
         uint32_t with_dma: 1;   /*!< Use DMA to transmit data */
     } flags;                    /*!< Extra driver flags */
+    uint8_t interrupt_priority; /*!< RMT interrupt priority, 0-3 are valid values */
 } led_strip_rmt_config_t;
 
 /**

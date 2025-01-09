@@ -140,11 +140,6 @@ public:
         ESP_ERROR_CHECK(led_strip_set_pixel(mStrip, index, red, green, blue));
     }
 
-    void setPixelRGBW(uint32_t index, uint8_t red, uint8_t green, uint8_t blue, uint8_t white) override
-    {
-        ESP_ERROR_CHECK(ESP_ERR_NOT_SUPPORTED); // SPI implementation doesn't support RGBW
-    }
-
     void drawAsync() override
     {
         if (mDrawIssued)

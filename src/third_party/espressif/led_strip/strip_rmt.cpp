@@ -20,7 +20,7 @@ static const char *TAG = "strip_rmt";
 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
 #define LED_STRIP_RMT_RES_HZ (10 * 1000 * 1000)
 
-led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool is_rgbw, uint32_t t0h, uint32_t t0l, uint32_t t1h, uint32_t t1l, uint32_t reset, bool with_dma)
+led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool is_rgbw, uint32_t t0h, uint32_t t0l, uint32_t t1h, uint32_t t1l, uint32_t reset, bool with_dma, uint8_t interrupt_priority)
 {
 
     led_strip_encoder_timings_t timings = {
@@ -44,7 +44,8 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
         .flags = {
             .invert_out = false, // don't invert the output signal
         },
-        .timings = timings};
+        .timings = timings
+    };
 
     // LED strip backend configuration: RMT
     led_strip_rmt_config_t rmt_config = {
@@ -53,7 +54,9 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
         .mem_block_symbols = memory_block_symbols, // the memory size of each RMT channel, in words (4 bytes)
         .flags = {
             .with_dma = false, // DMA feature is available on chips like ESP32-S3/P4
-        }};
+        },
+        .interrupt_priority = interrupt_priority, // RMT interrupt priority
+    };
 
     // LED Strip object handle
     led_strip_handle_t led_strip;
@@ -68,11 +71,11 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
 class RmtStrip : public IRmtStrip
 {
 public:
-    RmtStrip(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_mode)
+    RmtStrip(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_mode, uint8_t interrupt_priority)
         : mIsRgbw(is_rgbw), mLedCount(led_count)
     {
         bool with_dma = dma_mode == IRmtStrip::DMA_ENABLED;
-        led_strip_handle_t led_strip = configure_led_with_timings(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, with_dma);
+        led_strip_handle_t led_strip = configure_led_with_timings(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, with_dma, interrupt_priority);
         mStrip = led_strip;
     }
 
@@ -155,9 +158,12 @@ private:
 }  // namespace
 
 
-IRmtStrip *IRmtStrip::Create(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_config)
+IRmtStrip *IRmtStrip::Create(
+    int pin, uint32_t led_count, bool is_rgbw,
+    uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
+    IRmtStrip::DmaMode dma_config, uint8_t interrupt_priority)
 {
-    return new RmtStrip(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, dma_config);
+    return new RmtStrip(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, dma_config, interrupt_priority);
 }
 
 #endif  // FASTLED_RMT5

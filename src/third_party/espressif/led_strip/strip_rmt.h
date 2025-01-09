@@ -17,7 +17,10 @@ public:
         DMA_DISABLED,
     };
 
-    static IRmtStrip* Create(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, DmaMode dma_config = DMA_AUTO);
+    static IRmtStrip* Create(
+        int pin, uint32_t led_count, bool is_rgbw,
+        uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
+        DmaMode dma_config = DMA_AUTO, uint8_t interrupt_priority = 3);
 
     virtual ~IRmtStrip() {}
     virtual void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) = 0;

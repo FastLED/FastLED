@@ -21,7 +21,6 @@ public:
     static ISpiStripWs2812* Create(int pin, uint32_t led_count, SpiHostMode spi_bus = SPI_HOST_MODE_AUTO, DmaMode dma_mode = DMA_AUTO);
     virtual ~ISpiStripWs2812() {}
     virtual void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) = 0;
-    virtual void setPixelRGBW(uint32_t index, uint8_t red, uint8_t green, uint8_t blue, uint8_t white) = 0;
     virtual void drawSync()
     {
         drawAsync();
