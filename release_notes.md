@@ -3,6 +3,10 @@ FastLED 3.9.10
 * ESP32
   * RMT5 driver has been fixed for ESP32-S3. Upto 4 RMT workers may work in parallel.
     * Rebased espressifs led_strip to v3.0.0
+    * Unresolved issues:
+      * DMA does not work for ESP32-S3 for my test setup with XIAO ESP32-S3
+        * This appears to be an espressif bug as using dma is not tested in their examples and does not work with the stock driver.
+        * Therefore DMA is disable for now.
 * Teensy
   * Massive Parallel - ObjectFLED clockless driver.
     * Stability improvements with timing.
