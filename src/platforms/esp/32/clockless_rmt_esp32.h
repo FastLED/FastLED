@@ -26,7 +26,7 @@
 #pragma once
 
 #include "platforms/esp/esp_version.h"
-#include "led_strip/enabled.h"
+#include "third_party/espressif/led_strip/src/enabled.h"
 
 #if !FASTLED_RMT5
 #include "rmt/idf4_clockless_rmt_esp32.h"

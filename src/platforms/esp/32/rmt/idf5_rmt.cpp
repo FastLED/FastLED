@@ -1,5 +1,5 @@
 
-#include "platforms/esp/32/led_strip/enabled.h"
+#include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
 

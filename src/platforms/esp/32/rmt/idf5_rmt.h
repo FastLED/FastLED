@@ -1,13 +1,11 @@
 #pragma once
 
-#include "platforms/esp/32/led_strip/enabled.h"
+#include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
 
 #include "pixel_iterator.h"
 #include <stdint.h>
-#include "platforms/esp/32/led_strip/rmt_strip.h"
-
 
 
 
