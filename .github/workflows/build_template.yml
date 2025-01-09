@@ -57,7 +57,11 @@ jobs:
 
       - name: CPP Check
         run: |
-          uv run ci/ci-cppcheck.py
+          # take the input.args and parse out the first element, which will be the board name
+          # do this to input.args
+          python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
+          cat board.txt | xargs -I {} uv run ci/ci-cppcheck.py {}
+        shell: bash
 
       - name: Check Compiled size of last compiled example
         continue-on-error: true
