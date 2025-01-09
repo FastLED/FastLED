@@ -2,7 +2,7 @@
 
 #include "src/enabled.h"
 
-#ifdef ESP32
+#if defined(ESP32) && defined(__has_include) && __has_include("driver/rmt_types.h")
 
 
 /*

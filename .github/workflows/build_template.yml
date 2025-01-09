@@ -35,7 +35,7 @@ jobs:
 
       - name: PlatformIO Versions
         run: |
-          platformio --version
+          uv run platformio --version
 
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         run: |
