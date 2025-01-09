@@ -9,6 +9,7 @@ file(GLOB FastLED_SRCS "src/fl/*.cpp")
 list(REMOVE_ITEM FastLED_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/stub_main.cpp")
 
 file(GLOB ESP32_SRCS "src/platforms/esp/32/*.cpp")
+file(GLOB ESP32_THIRD_PARTY "src/third_party/*.c*")
 file(GLOB ESP32_LED_STRIP_COMPONENT_SRCS "src/platforms/esp/32/led_strip/*.cpp")
 list(APPEND FastLED_SRCS ${ESP32_SRCS})
 

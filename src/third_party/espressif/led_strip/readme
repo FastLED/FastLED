@@ -1,0 +1,5 @@
+From espressif led_strip component repository.
+
+Version: 3.0.0
+
+This library has been lightly modified to support async operations for both spi and rmt strip drivers.

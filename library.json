@@ -67,6 +67,7 @@
             "+<platforms/esp/32/**/*.cpp>",
             "+<platforms/wasm/**/*.cpp>",
             "+<third_party/**/*.cpp>",
+            "+<third_party/**/*.c>",
             "+<fx/**/*.cpp>",
             "+<fl/**/*.cpp>",
             "+<sensors/**/*.cpp>"
