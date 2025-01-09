@@ -1,7 +1,8 @@
 
+
 #include "enabled.h"
 
-#if FASTLED_RMT5 && FASTLED_ESP32_HAS_RMT && __has_include("driver/rmt_types.h")
+#if FASTLED_RMT5 && FASTLED_ESP32_HAS_RMT
 
 
 /*

@@ -1,13 +1,14 @@
 #pragma once
 
-#include "eorder.h"  // We don't need this header, other than to force the build system to define CONFIG_IDF_TARGET_*
 
-#ifndef FASTLED_ESP32_HAS_RMT
-#if CONFIG_IDF_TARGET_ESP32C2
-#define FASTLED_ESP32_HAS_RMT 0
-#else
-#define FASTLED_ESP32_HAS_RMT 1
+#if __has_include("soc/soc_caps.h")
+  #include "soc/soc_caps.h"
 #endif
+
+#if defined(SOC_RMT_SUPPORTED) && SOC_RMT_SUPPORTED
+#define FASTLED_ESP32_HAS_RMT 1
+#else
+#define FASTLED_ESP32_HAS_RMT 0
 #endif
 
 #ifndef FASTLED_ESP_HAS_CLOCKLESS_SPI
