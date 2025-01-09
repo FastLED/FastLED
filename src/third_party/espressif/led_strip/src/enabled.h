@@ -1,5 +1,14 @@
 #pragma once
 
+
+#ifndef FASTLED_HAS_RMT
+#if CONFIG_IDF_TARGET_ESP32C2
+#define FASTLED_HAS_RMT 0
+#else
+#define FASTLED_HAS_RMT 1
+#endif
+#endif
+
 #ifndef ESP32
 // No led strip component when not in ESP32 mode.
  #define FASTLED_RMT5 0

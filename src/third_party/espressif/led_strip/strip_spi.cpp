@@ -69,10 +69,10 @@ struct SpiHostUsed {
 
 static SpiHostUsed gSpiHostUsed[] = {
     {SPI2_HOST, false},  // in order of preference
-    {SPI3_HOST, false},
 #if SOC_SPI_PERIPH_NUM > 2
-    {SPI1_HOST, false},
+    {SPI3_HOST, false},
 #endif
+    {SPI1_HOST, false},
 };
 
 static spi_host_device_t getNextAvailableSpiHost()
@@ -120,9 +120,13 @@ public:
             case ISpiStripWs2812::SPI_HOST_MODE_2:
                 mSpiHost = SPI2_HOST;
                 break;
+#if SOC_SPI_PERIPH_NUM > 2
             case ISpiStripWs2812::SPI_HOST_MODE_3:
                 mSpiHost = SPI3_HOST;
                 break;
+#endif
+            default:
+                ESP_ERROR_CHECK(ESP_ERR_NOT_SUPPORTED);
         }
 
         bool with_dma = dma_mode == ISpiStripWs2812::DMA_ENABLED || dma_mode == ISpiStripWs2812::DMA_AUTO;

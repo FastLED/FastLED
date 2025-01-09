@@ -1,7 +1,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT5
+#if FASTLED_RMT5 && FASTLED_HAS_RMT
 
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD

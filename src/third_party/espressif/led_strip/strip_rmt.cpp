@@ -2,7 +2,7 @@
 
 #include "src/enabled.h"
 
-#if FASTLED_RMT5
+#if FASTLED_RMT5 && FASTLED_HAS_RMT
 
 #include "strip_rmt.h"
 
@@ -22,7 +22,6 @@ static const char *TAG = "strip_rmt";
 
 led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool is_rgbw, uint32_t t0h, uint32_t t0l, uint32_t t1h, uint32_t t1l, uint32_t reset, bool with_dma, uint8_t interrupt_priority)
 {
-
     led_strip_encoder_timings_t timings = {
         .t0h = t0h,
         .t1h = t1h,

@@ -10,14 +10,13 @@
 #include "fl/scoped_ptr.h"
 #include "fl/assert.h"
 
-template <int DATA_PIN>
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class ClocklessSpiWs2812Controller : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
     fl::scoped_ptr<ISpiStripWs2812> mLedStrip;
-
 
 public:
     ClocklessSpiWs2812Controller() = default;
@@ -68,5 +67,21 @@ protected:
         }
         output_iterator.finish();
         mLedStrip->drawAsync();
+    }
+};
+
+
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class ClocklessSpiInvalidController : public CPixelLEDController<RGB_ORDER>
+{
+public:
+    ClocklessSpiInvalidController() = default;
+
+    void init() override {
+        FASTLED_ASSERT(false, "Spi Controller only works for WS2812");
+    }
+    virtual uint16_t getMaxRefreshRate() const { return 800; }
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
+        FASTLED_ASSERT(false, "Spi Controller only works for WS2812");
     }
 };

@@ -1,6 +1,6 @@
 #include "enabled.h"
 
-#if FASTLED_RMT5
+#if FASTLED_RMT5 && FASTLED_HAS_RMT
 
 
 /*

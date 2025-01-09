@@ -266,10 +266,10 @@ Available boards:
 [3]: bluepill
 [4]: digix
 [5]: esp01
-[6]: esp32-c2-devkitm-1
-[7]: esp32-c3-devkitm-1
-[8]: esp32-c6-devkitc-1
-[9]: esp32-s3-devkitc-1
+[6]: esp32c2
+[7]: esp32c3
+[8]: esp32c6
+[9]: esp32s3
 [10]: esp32dev
 [11]: esp32dev_i2s
 [12]: esp32dev_idf44
