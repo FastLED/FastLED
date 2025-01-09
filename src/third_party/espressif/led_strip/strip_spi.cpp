@@ -18,6 +18,8 @@
 
 #include "strip_spi.h"
 
+namespace {  // anonymous namespace
+
 static const char *TAG = "strip_spi";
 
 led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_model, spi_host_device_t spi_bus, bool with_dma)
@@ -194,8 +196,9 @@ private:
     bool mDrawIssued = false;
     bool mIsRgbw;
     uint32_t mLedCount = 0;
-
 };
+
+}  // namespace
 
 ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, ISpiStripWs2812::SpiHostMode spi_bus, ISpiStripWs2812::DmaMode dma_mode) {
     return new SpiStripWs2812(pin, led_count, spi_bus, dma_mode);
