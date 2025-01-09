@@ -1,6 +1,9 @@
+#ifdef ESP32
+
+
 #include "enabled.h"
 
-#if defined(ESP32) && __has_include("driver/rmt_types.h")
+#if FASTLED_ESP_HAS_CLOCKLESS_SPI
 
 
 /*
@@ -251,5 +254,7 @@ err:
     }
     return ret;
 }
+
+#endif  // FASTLED_ESP_HAS_CLOCKLESS_SPI
 
 #endif  // ESP32

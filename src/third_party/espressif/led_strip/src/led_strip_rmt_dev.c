@@ -1,5 +1,7 @@
 
 
+#ifdef ESP32
+
 #include "enabled.h"
 
 #if FASTLED_RMT5 && FASTLED_ESP32_HAS_RMT
@@ -207,3 +209,5 @@ err:
 }
 
 #endif  // FASTLED_RMT5
+
+#endif  // ESP32

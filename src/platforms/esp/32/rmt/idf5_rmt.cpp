@@ -1,4 +1,7 @@
 
+
+#ifdef ESP32
+
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
@@ -68,3 +71,4 @@ void RmtController5::showPixels() {
 
 #endif  // FASTLED_RMT5
 
+#endif  // ESP32

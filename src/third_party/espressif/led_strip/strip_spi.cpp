@@ -1,8 +1,10 @@
 
+#ifdef ESP32
+
 
 #include "src/enabled.h"
 
-#if defined(ESP32) && defined(__has_include) && __has_include("driver/rmt_types.h")
+#if FASTLED_RMT5
 
 
 /*
@@ -263,4 +265,7 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
 
+#endif  // FASTLED_RMT5
+
 #endif  // ESP32
+

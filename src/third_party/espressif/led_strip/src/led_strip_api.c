@@ -1,7 +1,9 @@
 
+#ifdef ESP32
+
 #include "enabled.h"
 
-#if defined(ESP32) && __has_include("driver/rmt_types.h")
+#if defined(FASTLED_RMT5) || defined(FASTLED_ESP_HAS_CLOCKLESS_SPI)
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
  *
@@ -110,5 +112,7 @@ esp_err_t led_strip_del(led_strip_handle_t strip)
     ESP_RETURN_ON_FALSE(strip, ESP_ERR_INVALID_ARG, TAG, "invalid argument");
     return strip->del(strip);
 }
+
+#endif  // FASTLED_RMT5 || FASTLED_ESP_HAS_CLOCKLESS_SPI
 
 #endif  // ESP32
