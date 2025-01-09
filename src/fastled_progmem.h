@@ -1,7 +1,6 @@
 #ifndef __INC_FL_PROGMEM_H
 #define __INC_FL_PROGMEM_H
 
-#include "FastLED.h"
 #include "fl/namespace.h"
 
 /// @file fastled_progmem.h
