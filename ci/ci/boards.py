@@ -104,9 +104,11 @@ GIGA_R1 = Board(
 ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32c2",
     real_board_name="esp32-c2-devkitm-1",
-    # platform_needs_install=True,  # Install platform package to get the boards
     use_pio_run=True,
-    platform="https://github.com/Jason2866/platform-espressif32.git",  # No support from PIO so we use a fork.
+    platform="espressif32",
+    defines=[
+        "CONFIG_IDF_TARGET_ESP32C2=1",  # why does this need to be forced on?
+    ]
 )
 
 ESP32_C3_DEVKITM_1 = Board(
