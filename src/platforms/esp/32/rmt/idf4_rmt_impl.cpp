@@ -121,6 +121,10 @@ extern "C"
 #endif
 #endif
 
+namespace {
+    bool gUseBuiltInDriver = false;
+}
+
 // @davidlmorris 2024-08-03
 // This is work-around for the issue of random fastLed freezes randomly sometimes minutes
 // but usually hours after the start, probably caused by interrupts
@@ -336,10 +340,13 @@ uint8_t *ESP32RMTController::getPixelBuffer(int size_in_bytes)
     return mPixelData;
 }
 
+
+
 // -- Initialize RMT subsystem
 //    This only needs to be done once
 void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 {
+    gUseBuiltInDriver = built_in_driver;
     if (gInitialized)
         return;
     esp_err_t espErr = ESP_OK;
@@ -766,7 +773,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
     if (gNumDone == gNumControllers)
     {
         // -- If this is the last controller, signal that we are all done
-        if (FASTLED_RMT_BUILTIN_DRIVER)
+        if (gUseBuiltInDriver)
         {
             xSemaphoreGive(gTX_sem);
         }
