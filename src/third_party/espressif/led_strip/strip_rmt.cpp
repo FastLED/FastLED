@@ -140,6 +140,11 @@ public:
         }
     }
 
+    uint32_t numPixels() override
+    {
+        return mLedCount;
+    }
+
 private:
     led_strip_handle_t mStrip;
     bool mDrawIssued = false;

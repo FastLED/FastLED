@@ -32,4 +32,5 @@ public:
     virtual bool isDrawing() = 0;
     virtual void fill(uint8_t red, uint8_t green, uint8_t blue) = 0;
     virtual void fillRGBW(uint8_t red, uint8_t green, uint8_t blue, uint8_t white) = 0;
+    virtual uint32_t numPixels() = 0;
 };

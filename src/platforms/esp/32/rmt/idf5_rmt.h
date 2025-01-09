@@ -7,7 +7,7 @@
 #include "pixel_iterator.h"
 #include <stdint.h>
 
-
+class IRmtStrip;
 
 class RmtController5
 {
@@ -29,7 +29,7 @@ public:
 private:
     int mPin;
     int mT1, mT2, mT3;
-    fastled_rmt51_strip::IRmtLedStrip *mLedStrip = nullptr;
+    IRmtStrip *mLedStrip = nullptr;
 };
 
 

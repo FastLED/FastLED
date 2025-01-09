@@ -15,7 +15,7 @@
  #if defined(FASTLED_TEENSY4)
    #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
  #elif defined(ESP32)
-   #include "platforms/esp/32/led_strip/enabled.h"
+   #include "third_party/espressif/led_strip/src/enabled.h"
    // RMT 5.1 driver converts from nanoseconds to RMT ticks.
    #if FASTLED_RMT5
 	 #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1

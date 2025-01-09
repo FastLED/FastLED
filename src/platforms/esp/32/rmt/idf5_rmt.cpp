@@ -14,36 +14,21 @@
 #include "freertos/task.h"
 
 #include "idf5_rmt.h"
-#include "platforms/esp/32/led_strip/led_strip.h"
-#include "esp_log.h"
-#include "platforms/esp/32/led_strip/configure_led.h"
-#include "platforms/esp/32/led_strip/rmt_strip.h"
+#include "third_party/espressif/led_strip/strip_rmt.h"
 
-using namespace fastled_rmt51_strip;
+#include "fl/assert.h"
+
 
 #define TAG "idf5_rmt.cpp"
 
-#ifndef FASTLED_RMT5_EXTRA_WAIT_MICROS
-#define FASTLED_RMT5_EXTRA_WAIT_MICROS 10
-#endif
 
 namespace {  // anonymous namespace
-
-// TODO get rid of this
-static const uint32_t TRESET = 280000; // 280us (WS2812-V5)
 
 void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H, uint16_t* T1L) {
     *T0H = T1;
     *T0L = T2 + T3;
     *T1H = T1 + T2;
     *T1L = T3;
-}
-
-
-void do_extra_wait() {
-    if (FASTLED_RMT5_EXTRA_WAIT_MICROS > 0) {
-        vTaskDelay(FASTLED_RMT5_EXTRA_WAIT_MICROS / configTICK_RATE_HZ);
-    }
 }
 
 }  // namespace
@@ -58,22 +43,23 @@ RmtController5::~RmtController5() {
     }
 }
 
-
-
 void RmtController5::loadPixelData(PixelIterator &pixels) {
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;
         convert(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
-        mLedStrip = create_rmt_led_strip(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
+        mLedStrip = IRmtStrip::Create(mPin, pixels.size(), is_rgbw, t0h, t0l, t1h, t1l, 280, IRmtStrip::DMA_AUTO);
+        
     } else {
-        assert(mLedStrip->num_pixels() == pixels.size());
+        FASTLED_ASSERT(
+            mLedStrip->numPixels() == pixels.size(),
+            "mLedStrip->numPixels() (" << mLedStrip->numPixels() << ") != pixels.size() (" << pixels.size() << ")");
     }
     if (is_rgbw) {
         uint8_t r, g, b, w;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-            mLedStrip->set_pixel_rgbw(i, r, g, b, w); // Tested to be faster than memcpy of direct bytes.
+            mLedStrip->setPixelRGBW(i, r, g, b, w); // Tested to be faster than memcpy of direct bytes.
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -81,7 +67,7 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
         uint8_t r, g, b;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGB(&r, &g, &b);
-            mLedStrip->set_pixel(i, r, g, b); // Tested to be faster than memcpy of direct bytes.
+            mLedStrip->setPixel(i, r, g, b); // Tested to be faster than memcpy of direct bytes.
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -96,8 +82,7 @@ void RmtController5::showPixels() {
     // channel being disable and when the INPUT_PULLDOWN is enabled. However the blip will
     // be less than a few microseconds.
     // See espressif bug https://github.com/espressif/esp-idf/issues/15049
-    do_extra_wait();
-    mLedStrip->draw();
+    mLedStrip->drawAsync();
 }
 
 #endif  // FASTLED_RMT5
