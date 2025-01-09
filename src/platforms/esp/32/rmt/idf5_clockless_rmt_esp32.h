@@ -15,9 +15,6 @@ template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
-
     // -- The actual controller object for ESP32
     RmtController5 mRMTController;
 
