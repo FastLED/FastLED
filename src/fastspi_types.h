@@ -4,7 +4,6 @@
 #ifndef __INC_FASTSPI_TYPES_H
 #define __INC_FASTSPI_TYPES_H
 
-#include "FastLED.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 #include "fl/unused.h"
