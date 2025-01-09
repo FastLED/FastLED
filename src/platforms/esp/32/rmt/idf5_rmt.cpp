@@ -20,8 +20,8 @@
 #define TAG "idf5_rmt.cpp"
 
 
-RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
-        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3) {
+RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode)
+        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3), mDmaMode(dma_mode) {
 }
 
 RmtController5::~RmtController5() {

@@ -37,6 +37,7 @@ private:
     int mPin;
     int mT1, mT2, mT3;
     IRmtStrip *mLedStrip = nullptr;
+    DmaMode mDmaMode;
 };
 
 

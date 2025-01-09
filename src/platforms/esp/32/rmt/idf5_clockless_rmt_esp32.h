@@ -21,7 +21,7 @@ private:
     // -- The actual controller object for ESP32
     RmtController5 mRMTController;
 
-    static RmtController5::DmaMode getDmaMode()
+    static RmtController5::DmaMode DefaultDmaMode()
     {
         #ifdef FASTLED_RMT_USE_DMA
         return RmtController5::DMA_ENABLED;
@@ -31,7 +31,7 @@ private:
     }
 
 public:
-    ClocklessController(): mRMTController(DATA_PIN, T1, T2, T3)
+    ClocklessController(): mRMTController(DATA_PIN, T1, T2, T3, DefaultDmaMode())
     {
     }
 
