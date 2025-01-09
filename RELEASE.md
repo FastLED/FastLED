@@ -24,10 +24,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -m "Rev 3.9.9 - Fixes for ESP32 RMT5, I2S for ESP32 for 16 way parallel"
-$ git tag 3.9.9 master 
+$ git commit -m "Rev 3.9.10 - Fixes for ESP32 RMT5, new super stable clockless SPI driver for WS2812 on ESP"
+$ git tag 3.9.10 master 
 $ git push 
-$ git push origin 3.9.9
+$ git push origin 3.9.10
 ```
 
 Then use the GitHub UI to make a new “Release”:
