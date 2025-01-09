@@ -1,6 +1,9 @@
 #ifndef __INC_FASTPIN_APOLLO3_H
 #define __INC_FASTPIN_APOLLO3_H
 
+#include <stdint.h>
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
