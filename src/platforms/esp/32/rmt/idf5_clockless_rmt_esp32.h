@@ -18,6 +18,9 @@ private:
     // -- The actual controller object for ESP32
     RmtController5 mRMTController;
 
+        // -- Verify that the pin is valid
+    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
+
     static RmtController5::DmaMode DefaultDmaMode()
     {
         #ifdef FASTLED_RMT_USE_DMA

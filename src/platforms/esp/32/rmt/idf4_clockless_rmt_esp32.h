@@ -35,15 +35,14 @@
 #pragma once
 
 
-#include "third_party/espressif/led_strip/src/enabled.h"
 
+#include "platforms/esp/32/fastpin_esp32.h"
 
-
-
-#include "idf4_rmt.h"
-#include "FastLED.h"
 #include "platforms/esp/esp_version.h"
 #include "pixel_iterator.h"
+#include "idf4_rmt.h"
+
+
 
 // -- Core or custom driver
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
