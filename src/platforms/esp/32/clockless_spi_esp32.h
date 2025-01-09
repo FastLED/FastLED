@@ -3,7 +3,7 @@
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if FASTLED_ESP_HAS_LED_SPI
+#if FASTLED_ESP_HAS_CLOCKLESS_SPI
 
 #include "crgb.h"
 #include "eorder.h"

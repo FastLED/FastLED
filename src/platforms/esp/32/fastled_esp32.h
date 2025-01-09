@@ -19,9 +19,9 @@
 
 #else
 
-#if FASTLED_HAS_RMT
+#if FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
 #include "clockless_rmt_esp32.h"
-#elif FASTLED_ESP_HAS_LED_SPI
+#elif FASTLED_ESP_HAS_CLOCKLESS_SPI
 #include "clockless_spi_esp32.h"
 // Note that this driver only works with the WS2811x family of LEDs.
 // Other types of WS281x or leds with significantly different timings

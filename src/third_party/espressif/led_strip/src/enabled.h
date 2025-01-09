@@ -2,19 +2,19 @@
 
 #include "eorder.h"  // We don't need this header, other than to force the build system to define CONFIG_IDF_TARGET_*
 
-#ifndef FASTLED_HAS_RMT
+#ifndef FASTLED_ESP32_HAS_RMT
 #if CONFIG_IDF_TARGET_ESP32C2
-#define FASTLED_HAS_RMT 0
+#define FASTLED_ESP32_HAS_RMT 0
 #else
-#define FASTLED_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT 1
 #endif
 #endif
 
-#ifndef FASTLED_ESP_HAS_LED_SPI
-#if !__has_include("driver/rmt_types.h")
-#define FASTLED_ESP_HAS_LED_SPI 0
+#ifndef FASTLED_ESP_HAS_CLOCKLESS_SPI
+#if !__has_include("driver/rmt_types.h") && !CONFIG_IDF_TARGET_ESP32C2
+#define FASTLED_ESP_HAS_CLOCKLESS_SPI 0
 #else
-#define FASTLED_ESP_HAS_LED_SPI 1
+#define FASTLED_ESP_HAS_CLOCKLESS_SPI 1
 #endif
 #endif
 
