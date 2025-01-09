@@ -16,6 +16,6 @@ list(APPEND FastLED_SRCS ${ESP32_SRCS})
 
 idf_component_register(SRCS ${FastLED_SRCS} ${ESP32_LED_STRIP_COMPONENT_SRCS}
                        INCLUDE_DIRS "src"
-                       REQUIRES arduino-esp32 esp_driver_rmt)
+                       REQUIRES arduino-esp32 esp_driver_rmt driver)
 
 project(FastLED)
