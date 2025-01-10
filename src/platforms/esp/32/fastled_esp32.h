@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _FASTLED_ESP32_H
+#define _FASTLED_ESP32_H
 
 #include "fastpin_esp32.h"
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -6,8 +7,6 @@
 #ifdef FASTLED_ALL_PINS_HARDWARE_SPI
 #include "fastspi_esp32.h"
 #endif
-
-
 
 
 #ifdef FASTLED_ESP32_I2S
@@ -21,7 +20,7 @@
 
 #if FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
 #include "clockless_rmt_esp32.h"
-#elif FASTLED_ESP_HAS_CLOCKLESS_SPI
+#elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "clockless_spi_esp32.h"
 // Note that this driver only works with the WS2811x family of LEDs.
 // Other types of WS281x or leds with significantly different timings
@@ -33,3 +32,6 @@
 #endif
 
 #endif
+
+
+#endif // _FASTLED_ESP32_H

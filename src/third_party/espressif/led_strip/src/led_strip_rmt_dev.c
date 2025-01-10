@@ -4,7 +4,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT5 && FASTLED_ESP32_HAS_RMT
+#if FASTLED_RMT5
 
 
 /*
