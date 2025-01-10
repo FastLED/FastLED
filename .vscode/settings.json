@@ -103,6 +103,7 @@
         "esp_idf_version.h": "c",
         "fastled_config.h": "c",
         "rmt_tx.h": "c",
-        "__config": "c"
+        "__config": "c",
+        "espdefs.h": "c"
     }
 }

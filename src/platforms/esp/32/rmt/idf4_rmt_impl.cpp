@@ -5,7 +5,7 @@
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if !FASTLED_RMT5
+#if FASTLED_ESP32_HAS_RMT && !FASTLED_RMT5
 
 
 // Inlines the rmt_set_tx_intr_en function to avoid the overhead of a function call

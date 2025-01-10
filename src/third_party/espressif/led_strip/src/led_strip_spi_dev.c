@@ -7,7 +7,7 @@
 #include "enabled.h"
 
 
-#if FASTLED_ESP_HAS_CLOCKLESS_SPI
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 /*
  * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
