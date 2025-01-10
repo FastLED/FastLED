@@ -22,7 +22,7 @@ cat > .vscode/launch.json << 'EOL'
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "",
+            "program": "${file}",
             "console": "integratedTerminal"
         },
         {
@@ -35,6 +35,8 @@ cat > .vscode/launch.json << 'EOL'
     ]
 }
 EOL
+
+
 
 
 # # Function to handle ESLint output in the background

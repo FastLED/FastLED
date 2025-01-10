@@ -5,7 +5,7 @@
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "",
+            "program": "${file}",
             "console": "integratedTerminal"
         },
         {
