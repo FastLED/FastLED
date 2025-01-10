@@ -13,8 +13,8 @@
 
 #include "FastLED.h"
 #include "fl/force_inline.h"
-#include "platforms/esp/32/rmt/idf4_rmt.h"
-#include "platforms/esp/32/rmt/idf4_rmt_impl.h"
+#include "platforms/esp/32/rmt_4/idf4_rmt.h"
+#include "platforms/esp/32/rmt_4/idf4_rmt_impl.h"
 #include "platforms/esp/32/clock_cycles.h"
 
 #ifdef __cplusplus

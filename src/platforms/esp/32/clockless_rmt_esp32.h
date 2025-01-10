@@ -34,8 +34,8 @@
 
 #if FASTLED_ESP32_HAS_RMT
 #if !FASTLED_RMT5
-#include "rmt/idf4_clockless_rmt_esp32.h"
+#include "rmt_4/idf4_clockless_rmt_esp32.h"
 #else
-#include "rmt/idf5_clockless_rmt_esp32.h"
+#include "rmt_5/idf5_clockless_rmt_esp32.h"
 #endif
 #endif  // FASTLED_ESP32_HAS_RMT
