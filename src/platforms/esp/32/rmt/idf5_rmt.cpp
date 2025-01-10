@@ -14,7 +14,7 @@
 #include "freertos/task.h"
 
 #include "idf5_rmt.h"
-#include "third_party/espressif/led_strip/strip_rmt.h"
+#include "platforms/esp/32/strip_rmt.h"
 
 #include "fl/assert.h"
 #include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)

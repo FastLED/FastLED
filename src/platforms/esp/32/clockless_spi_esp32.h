@@ -8,7 +8,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "third_party/espressif/led_strip/strip_spi.h"
+#include "strip_spi.h"
 #include "fl/scoped_ptr.h"
 #include "fl/assert.h"
 

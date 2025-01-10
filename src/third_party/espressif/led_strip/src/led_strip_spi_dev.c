@@ -1,14 +1,8 @@
-#ifndef ESP32
-#error "This file is for ESP32 only"
-#endif
-
 #ifdef ESP32
 
 #include "enabled.h"
 
-
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-
 /*
  * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
  *

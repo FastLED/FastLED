@@ -1,7 +1,7 @@
 
 #ifdef ESP32
 
-#include "src/enabled.h"
+#include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
@@ -13,7 +13,7 @@
  */
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "src/led_strip.h"
+#include "third_party/espressif/led_strip/src/led_strip.h"
 #include "esp_log.h"
 #include "esp_err.h"
 

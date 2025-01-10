@@ -104,6 +104,11 @@
         "fastled_config.h": "c",
         "rmt_tx.h": "c",
         "__config": "c",
-        "espdefs.h": "c"
+        "espdefs.h": "c",
+        "esp_log.h": "c",
+        "stdarg.h": "c",
+        "led_strip_interface.h": "c",
+        "blah_enable.h": "c",
+        "sdkconfig.h": "c"
     }
 }
