@@ -10,15 +10,14 @@
 #warning "FASTLED_RMT_BUILTIN_DRIVER is not supported in RMT5 and will be ignored."
 #endif
 
+#include "idf5_rmt.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "idf5_rmt.h"
-#include "platforms/esp/32/strip_rmt.h"
-
 #include "fl/assert.h"
 #include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)
-
+#include "strip_rmt.h"
 
 #define TAG "idf5_rmt.cpp"
 

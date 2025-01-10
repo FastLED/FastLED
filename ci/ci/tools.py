@@ -37,3 +37,51 @@ def load_tools(build_info_path: Path) -> Tools:
         if not tool.exists():
             raise FileNotFoundError(f"Tool not found: {tool}")
     return out
+
+
+def cli() -> None:
+    import argparse
+
+    build_info_path = Path(input("Enter path to build info JSON file: "))
+
+    parser = argparse.ArgumentParser(
+        description="Dump object file information using build tools"
+    )
+    parser.add_argument(
+        "object_file", type=Path, nargs="?", help="Path to object file to dump"
+    )
+    parser.add_argument(
+        "--symbols", action="store_true", help="Dump symbol table using nm"
+    )
+    parser.add_argument(
+        "--disassemble", action="store_true", help="Dump disassembly using objdump"
+    )
+
+    args = parser.parse_args()
+
+    # Check if object file was provided and exists
+    if args.object_file is None:
+        while True:
+            args.object_file = Path(input("Enter path to object file to dump: "))
+            if args.object_file.exists():
+                break
+            print(f"Error: Object file not found: {args.object_file}", file=sys.stderr)
+
+    tools = load_tools(build_info_path)
+
+    if args.symbols:
+        import subprocess
+
+        subprocess.run([str(tools.nm_path), str(args.object_file)])
+
+    if args.disassemble:
+        import subprocess
+
+        subprocess.run([str(tools.objdump_path), "-d", str(args.object_file)])
+
+    if not (args.symbols or args.disassemble):
+        parser.print_help()
+
+
+if __name__ == "__main__":
+    cli()

@@ -161,7 +161,7 @@ private:
 IRmtStrip *IRmtStrip::Create(
     int pin, uint32_t led_count, bool is_rgbw,
     uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
-    IRmtStrip::DmaMode dma_config, uint8_t interrupt_priority)
+    DmaMode dma_config = DMA_AUTO, uint8_t interrupt_priority)
 {
     return new RmtStrip(
         pin, led_count, is_rgbw,
