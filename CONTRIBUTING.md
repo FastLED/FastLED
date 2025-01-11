@@ -1,6 +1,6 @@
 ## Contributing
 
-The most important part about working with the FastLED is testing your changes.
+The most important part about working with the FastLED is how to test your changes.
 
 FastLED features a powerful compiler that can run on any supported chipset. This compiler can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed. We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
 
@@ -38,4 +38,4 @@ Then follow the prompts.
 
 <img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
 
-When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
+## Once you are done send us a PR through github
