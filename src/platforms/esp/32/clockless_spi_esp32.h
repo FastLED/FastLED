@@ -8,7 +8,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "strip_spi.h"
+#include "spi_ws2812/strip_spi.h"
 #include "fl/scoped_ptr.h"
 #include "fl/assert.h"
 
