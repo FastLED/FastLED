@@ -386,11 +386,11 @@ Check out the official site http://fastled.io for links to documentation, issues
 In Memory of Daniel Garcia
 Daniel Garcia, the brilliant founder of FastLED, tragically passed away in September 2019 in the Conception dive boat fire alongside his partner, Yulia. This heartbreaking loss was felt deeply by the maker and developer community, where Daniel's contributions had left an indelible mark.
 
-Daniel was more than just a talented programmer; he was a passionate innovator who transformed the way creators interacted with LED technology. His work on FastLED brought high-performance LED control to countless projects, empowering developers to craft breathtaking installations and functional designs.
+Daniel was more than just a talented programmer; he was a passionate innovator who transformed the way creators interacted with LED technology. His work on FastLED brought high-performance LED control to countless projects, empowering developers to craft breathtaking installations.
 
-In his personal life, Daniel was known for his kindness and creativity. A neighbor recalled the beautiful LED installation he proudly displayed on a tree in his front yard—an expression of his love for the art and science of LED programming. His pride in FastLED and the vibrant community it fostered was a testament to his dedication to open-source development and his commitment to helping others bring their ideas to life.
+In his personal life, Daniel was known for his kindness and creativity. His pride in FastLED and the vibrant community it fostered was a testament to his dedication to open-source development and his commitment to helping others bring light into the world.
 
-While Daniel is no longer with us, his legacy continues through the FastLED library and the countless creators who use it. The community he built serves as a living tribute to his ingenuity, generosity, and the joy he found in sharing his work with the world.
+While Daniel is no longer with us, his legacy continues through the FastLED library and the countless makers who use it. The community he built serves as a living tribute to his ingenuity, generosity, and the joy he found in sharing his work with the world.
 
 ## About the Current Contributor
 
