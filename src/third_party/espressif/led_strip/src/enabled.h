@@ -42,6 +42,12 @@
 #warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets."
 #endif
 
+#if FASTLED_ESP32_HAS_RMT5 && !__has_include("driver/rmt_types.h")
+#warning "RMT5 driver because \"driver/rmt_types.h\" is missing, disabling automatic RMT5 support in FastLED."
+#undef FASTLED_ESP32_HAS_RMT5
+#define FASTLED_ESP32_HAS_RMT5 0
+#endif
+
 #if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
 #define FASTLED_RMT5 1
 #else
