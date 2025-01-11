@@ -420,5 +420,3 @@ Zach has this to say about FastLED: *The true power of FastLED lies in its abili
 See our easy to use guide here:
 
 https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
-
-If you find value in FastLED, consider starring the repository. It may seem like a small gesture, but it goes a long way in motivating further contributions to this incredible library.
