@@ -8,7 +8,7 @@ FastLED has a powerful cli that can compile to any device. It will run if you ha
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-The FastLED compiler cli can be invoked when either 
+The FastLED compiler cli can be invoked at the project root.
 
 ```bash (MacOS/Linux, windows us git-bsh or compile.bat)
 git clone https://github.com/fastled/fastled
