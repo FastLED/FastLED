@@ -29,6 +29,9 @@ def compile_for_board_and_example(
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
+    if board.board_name == "web":
+        locked_print(f"Skipping web target for example {example}")
+        return True, ""
     board_name = board.board_name
     use_pio_run = board.use_pio_run
     real_board_name = board.get_real_board_name()

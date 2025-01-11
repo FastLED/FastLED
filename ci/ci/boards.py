@@ -78,6 +78,10 @@ class Board:
         return hash(data_str)
 
 
+WEBTARGET = Board(
+    board_name="web",
+)
+
 ESP32DEV = Board(
     board_name="esp32dev",
     platform=ESP32_IDF_5_3_PIOARDUINO,
@@ -244,6 +248,7 @@ ESP32S3_RMT51 = Board(
 
 
 ALL: list[Board] = [
+    WEBTARGET,
     ESP32DEV,
     ESP32DEV_IDF4_4,
     ESP32DEV_I2S,

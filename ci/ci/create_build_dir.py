@@ -92,6 +92,10 @@ def create_build_dir(
     extra_scripts: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
+    # filter out "web" board because it's not a real board.
+    if board.board_name == "web":
+        locked_print(f"Skipping web target for board {board.board_name}")
+        return True, ""
     if board.defines:
         defines.extend(board.defines)
         # remove duplicates
