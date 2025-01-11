@@ -30,7 +30,6 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
 
  * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
  * Click the compile button.
- * Make sure to visit the FastLED sketch [dev/dev.ino](dev/dev.ino), the entry point for testing the library.
 
 ![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
 *Changes in non platform specific code can be tested quicly via our webcompiler*
