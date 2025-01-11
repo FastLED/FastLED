@@ -1,6 +1,6 @@
 ## Contributing
 
-The most important part about contributing to FastLED is how to test your changes.
+The most important part about contributing to FastLED is knowing how to test your changes.
 
 FastLED has a powerful cli that can compile to any device. 
 
