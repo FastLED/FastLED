@@ -425,4 +425,4 @@ https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
 
 ## Reminder
 
-More stars for for this repo equals more features for you.
+More stars for this repo equals more features for you.
