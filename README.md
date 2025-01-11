@@ -250,7 +250,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-FastLED is simpler to setup than installing the Arduino IDE, and can be done from the command line in seconds. See our [contributing guide](https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md) guide for more information.
+Zero pain setup and install. Can be done from the command line in seconds if `uv` or `python` are installed. See our [contributing guide](https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md) guide for more information.
 
 ![image](https://github.com/user-attachments/assets/f409120e-be6f-4158-81b5-d4bf935833b2)
 
@@ -313,16 +313,16 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by RadioShack
-* UCS1903 - another 3 wire LED chipset, cheap
-* GW6205 - another 3 wire LED chipset
-* LPD8806 - SPI based chipset, very high speed
-* WS2801 - SPI based chipset, cheap and widely available
-* SM16716 - SPI based chipset
-* APA102 - SPI based chipset
-  * APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
+* UCS1903 - another 3-wire LED chipset, cheap
+* GW6205 - another 3-wire LED chipset
+* LPD8806 - SPI-based chipset, very high speed
+* WS2801 - SPI-based chipset, cheap and widely available
+* SM16716 - SPI-based chipset
+* APA102 - SPI-based chipset
+  * APA102HD - Same as APA102 but with a high-definition gamma correction function applied at the driver level.
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
-* LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
+* LPD6803 - SPI-based chipset, chip CMODE pin must be set to 1 (inside oscillator mode)
 
 ## APA102 and the 'High Definition' Mode in FastLED
 
