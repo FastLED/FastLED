@@ -310,8 +310,14 @@ If you run into bugs with the library, or if you'd like to request support for a
 
 Here's a list of all the LED chipsets are supported.  More details on the LED chipsets are included [on our wiki page](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
 
-* Adafruit's DotStars - aka APA102
-* Adafruit's Neopixel - aka WS2812B (also WS2811/WS2812/WS2813, also supported in lo-speed mode) - a 3 wire addressable LED chipset
+* WS281x Clockless family
+  * WS2811 (Old style 400khz & 800khz)
+  * WS2812 (NeoPixel)
+  * WS2812-V5B (250 uS reset)
+  * WS2815
+* APA102 / SK9822 / HD107s (turbo->40mhz) / Adafruit DotStars (SPI)
+* HD107s, same thing as the APA102, but runs at turbo 40 Mhz
+* SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by RadioShack
 * UCS1903 - another 3 wire LED chipset, cheap
@@ -323,29 +329,7 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
   * APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
-* SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
 * LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
-
-HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
-
-## Supported Platforms
-
-Right now the library is supported on a variety of arduino compatible platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
-
-* Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
-* Arduino & compatibles - straight up Arduino devices, Uno, Duo, Leonardo, Mega, Nano, etc...
-* Arduino Due and the digistump DigiX
-* Arduino Yún
-* Arduino Zero
-* AVR microcontrollers - ATtiny, ATmega and more families
-* ESP32 based boards
-* ESP8266 using the Arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json - please be sure to also read https://github.com/FastLED/FastLED/wiki/ESP8266-notes for information specific to the 8266.
-* Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1/3.2, Teensy LC, Teensy 3.5, Teensy 3.6, and Teensy 4.0 - arduino compatible from pjrc.com with some extra goodies (note the teensy LC, 3.2, 3.5, 3.6, 4.0 are ARM, not AVR!)
-* RFDuino
-* SparkCore
-* The wino board - http://wino-board.com
-
-What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
 
 ### APA102 and the 'High Definition' Mode in FastLED
 
