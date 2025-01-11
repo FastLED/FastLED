@@ -17,7 +17,7 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
-## Linting and unit testing
+## Linting and Unit Testing
 
 ```bash
 ./lint
