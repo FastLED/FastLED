@@ -179,5 +179,5 @@ IRmtStrip *IRmtStrip::Create(
 
 
 #endif  // FASTLED_RMT5
-#error "this is a test"
+
 #endif  // ESP32
