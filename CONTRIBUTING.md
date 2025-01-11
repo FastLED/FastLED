@@ -36,7 +36,8 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
  * Click the compile button.
  * Make sure to visit the FastLED sketch [dev/dev.ino](dev/dev.ino), the entry point for testing the library.
 
-<img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
+![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
+
 
 ## Once you are done
   * run `./test`
