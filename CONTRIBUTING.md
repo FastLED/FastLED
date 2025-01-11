@@ -10,27 +10,23 @@ FastLED has a power command line interface. We also support VSCode and IntelliSe
 
 FastLED features a powerful compiler that can run on nearly every chipset, thanks to platformio. The FastLED compiler cli can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed on the system.
 
-```bash
+```bash (MacOS/Linux, windows us git-bsh or compile.bat)
 git clone https://github.com/fastled/fastled
 cd fastled
 ./compile uno --examples Blink  # linux/macos
-# compile.bat uno --examples Blink # on windows.
-# if you don't have any arguments then the compiler will ask you what you want.
 ```
 
 ## Run the unit tests
 
-```
+```bash
 ./test
 ````
 
 ## Linting
 
-```
+```bash
 ./lint
 ```
-
-Then follow the prompts.
 
 ## VSCode
 
