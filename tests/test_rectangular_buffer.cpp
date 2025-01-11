@@ -111,4 +111,12 @@ TEST_CASE("Rectangular Buffer") {
         CHECK(buffer.getMaxBytesInStrip() == 30);
         CHECK(buffer.getTotalBytes() == 30);
     }
+
+    SUBCASE("Add two strips of 10 RGB LEDs") {
+        buffer.queue(DrawItem(1, 10, false));
+        buffer.queue(DrawItem(2, 10, false));
+
+        CHECK(buffer.getMaxBytesInStrip() == 30);
+        CHECK(buffer.getTotalBytes() == 60);
+    }
 }
