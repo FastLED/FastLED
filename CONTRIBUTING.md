@@ -13,7 +13,8 @@ The FastLED compiler cli can be invoked when either [python](https://www.python.
 ```bash (MacOS/Linux, windows us git-bsh or compile.bat)
 git clone https://github.com/fastled/fastled
 cd fastled
-./compile uno --examples Blink  # linux/macos
+./compile uno --examples Blink  # linux/macos/git-bash
+# compile.bat  # Windows.
 ```
 
 ## Run the unit tests
