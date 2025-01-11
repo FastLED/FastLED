@@ -1,12 +1,19 @@
+#include <stdint.h>
+#include <string.h>
 
 #ifdef USE_FASTLED
     #include "FastLED.h"
 #endif
 // #include "Arduino.h"
 
+
 #define _OUT_OF_BOUND -12
 
+namespace fl {
+
 #ifdef COLOR_RGBW
+
+
 
 struct Pixel {
     union {
@@ -415,3 +422,5 @@ inline void setMapFunction(int (*fptr)(int i,void *args),void *args,int size)
        
     
 };
+
+}  // namespace fl

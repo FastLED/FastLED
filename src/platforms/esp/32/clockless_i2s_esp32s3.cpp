@@ -51,7 +51,7 @@ class I2SEsp32S3_Group {
   public:
     typedef fl::HeapVector<Info> DrawList;
 
-    fl::scoped_ptr<I2SClocklessLedDriveresp32S3> mDriver;
+    fl::scoped_ptr<fl::I2SClocklessLedDriveresp32S3> mDriver;
     fl::scoped_array<uint8_t> mAllLedsBufferUint8;
     size_t mAllLedsBufferUint8Size = 0;
     size_t mAllLedsBufferUint8Pos = 0;
@@ -159,7 +159,7 @@ class I2SEsp32S3_Group {
             // new Driver(totalLeds, &mAllLedsBufferUint8.front(),
             //                                CORDER_RGB, pinList.size(),
             //                                pinList.data()));
-            mDriver.reset(new I2SClocklessLedDriveresp32S3());
+            mDriver.reset(new fl::I2SClocklessLedDriveresp32S3());
             FASTLED_WARN("I2SEsp32S3_Group::showPixelsOnceThisFrame: initled");
             FASTLED_ASSERT(mAllLedsBufferUint8Size > 0, "I2S buffer not initialized");
             int max_leds = getTotalLeds();

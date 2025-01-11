@@ -142,6 +142,7 @@
 #define LCD_DRIVER_PSRAM_DATA_ALIGNMENT 64
 #define CLOCKLESS_PIXEL_CLOCK_HZ  (24 * 100 * 1000)
 
+namespace fl {
 
 static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx);
 
@@ -544,5 +545,7 @@ isDisplaying=true;
 }
 
 #pragma GCC diagnostic pop
+
+}  // namespace fl
 
 #endif  // __has_include("esp_memory_utils.h")
