@@ -343,7 +343,16 @@ What types of platforms are we thinking about supporting in the future?  Here's 
 ### APA102 and the 'High Definition' Mode in FastLED
 
 FastLED features driver-level gamma correction for the APA102 and SK9822 chipsets, using our "pseudo-13-bit mixing" algorithm.
+
 Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
+
+Enable it like by using the `APA102HD` type. Example:
+
+```C++
+void setup() {
+  FastLED.addLeds<APA102HD, DATA_PIN, CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
+}
+```
 
 ![image](https://github.com/user-attachments/assets/999e68ce-454f-4f15-9590-a8d2e8d47a22)
 
@@ -380,4 +389,16 @@ Wait, what happened to FastSPI_LED and FastSPI_LED2?  The library was initially 
 
 ## For more information
 
-Check out the official site http://fastled.io for links to documentation, issues, and news
+Check out the official site http://fastled.io for links to documentation, issues, and news.
+
+## About the current main contributor
+
+Zach Vorhies is the current main contributor of FastLED. He has used FastLED for over 13 years for various LED projects.
+
+He became a contributor after the founder of FastLED, Daniel Garcia died unexpectadly in a boating fire near Catalina island.
+
+Zach's first contribution to FastLED came with the APA102HD algorithm which unlocked driver-level gamma correction by leveraging the 5-bit brightness factor, in the Spring of 2014. Shortly thereafter he was granted write access to the FastLED repository.
+
+Many of the feature changes Zach has contributed to FastLED have already been implemented in his various private github repositories, rewritten and producticed for public consumption through FastLED. The hope is that the sizable user base of FastLED will find value in these enhancements, to enable them to be the light they want to see in the world.
+
+If you find value in FastLED, then consider giving this repo a star. It may be a small gesture on your part, but it does a lot to motivate further contributions and make FastLED even better for you.
