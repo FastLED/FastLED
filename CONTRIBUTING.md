@@ -11,8 +11,9 @@ FastLED features a powerful compiler that can run on any supported chipset. This
 ```bash
 git clone https://github.com/fastled/fastled
 cd fastled
-./compile  # linux/macos
-# compile.bat # on windows.
+./compile uno --examples Blink  # linux/macos
+# compile.bat uno --examples Blink # on windows.
+# if you don't have any arguments then the compiler will ask you what you want.
 ```
 
 ## Run the unit tests
