@@ -70,6 +70,7 @@ class RectangularDrawBuffer {
             return;
         }
         mOnQueueingStartCalled = true;
+        mOnQueueingDoneCalled = false;
         mPinToLedSegment.clear();
         mDrawList.swap(mPrevDrawList);
         mDrawList.clear();
@@ -89,6 +90,8 @@ class RectangularDrawBuffer {
         if (mOnQueueingDoneCalled) {
             return;
         }
+        mOnQueueingDoneCalled = true;
+        mOnQueueingStartCalled = false;
         // iterator through the current draw objects and calculate the total
         // number of bytes (representing RGB or RGBW) that will be drawn this frame.
         uint32_t total_bytes = 0;
@@ -166,5 +169,24 @@ TEST_CASE("Rectangular Buffer") {
 
         CHECK(buffer.getMaxBytesInStrip() == max_size_strip_bytes);
         CHECK(buffer.getTotalBytes() == max_size_strip_bytes * 2);
+    }
+}
+
+
+TEST_CASE("Rectangular Buffer queue tests") {
+    RectangularDrawBuffer buffer;
+
+    SUBCASE("Queueing start and done") {
+        CHECK(!buffer.mOnQueueingStartCalled);
+        CHECK(!buffer.mOnQueueingDoneCalled);
+        buffer.onQueuingStart();
+        CHECK(buffer.mOnQueueingStartCalled);
+        CHECK(!buffer.mOnQueueingDoneCalled);
+        buffer.onQueuingDone();
+        CHECK(buffer.mOnQueueingDoneCalled);
+        CHECK(!buffer.mOnQueueingStartCalled);
+        buffer.onQueuingStart();
+        CHECK(buffer.mOnQueueingStartCalled);
+        CHECK(!buffer.mOnQueueingDoneCalled);
     }
 }
