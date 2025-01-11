@@ -4,6 +4,9 @@
     "esp_memory_utils.h is not available, are you using esp-idf 4.4 or earlier?"
 #else
 
+// Experiment for the I2S driver for ESP32-S3 to fix WS2812-V5B extra reset issue.
+#define FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"
 #pragma GCC diagnostic ignored "-Wvolatile"
