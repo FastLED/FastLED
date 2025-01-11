@@ -11,6 +11,8 @@ NUM_WORKERS = (os.cpu_count() or 1) * 4
 
 WRONG_DEFINES: dict[str, str] = {
     "#if ESP32": "Use #ifdef ESP32 instead of #if ESP32",
+    "#if defined(FASTLED_RMT5)": "Use #ifdef FASTLED_RMT5 instead of #if defined(FASTLED_RMT5)",
+    "#if defined(FASTLED_ESP_HAS_CLOCKLESS_SPI)": "Use #ifdef FASTLED_ESP_HAS_CLOCKLESS_SPI instead of #if defined(FASTLED_ESP_HAS_CLOCKLESS_SPI)",
 }
 
 

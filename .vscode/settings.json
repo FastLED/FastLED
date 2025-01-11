@@ -109,6 +109,8 @@
         "stdarg.h": "c",
         "led_strip_interface.h": "c",
         "blah_enable.h": "c",
-        "sdkconfig.h": "c"
+        "sdkconfig.h": "c",
+        "rmt.h": "c",
+        "soc_caps.h": "c"
     }
 }

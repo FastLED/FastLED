@@ -106,7 +106,7 @@
     "NOTE: ESP32 support using I2S parallel driver. All strips must use the same chipset"
 
 #include "eorder.h"
-#include "i2s.h"
+#include "platforms/esp/32/i2s/i2s.h"
 #include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN

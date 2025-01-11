@@ -230,7 +230,6 @@ ESP32DEV_I2S = Board(
     board_name="esp32dev_i2s",
     real_board_name="esp32dev",
     platform=ESP32_IDF_4_4_LATEST,
-    defines=["FASTLED_ESP32_I2S"],
 )
 
 ESP32S3_RMT51 = Board(

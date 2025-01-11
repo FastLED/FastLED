@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sdkconfig.h"
+#include "platforms/esp/esp_version.h"
 
 #if CONFIG_IDF_TARGET_ESP32C2
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
@@ -34,26 +35,16 @@
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #define FASTLED_ESP32_HAS_RMT 0
 #define FASTLED_ESP32_HAS_RMT5 0
-#elif CONFIG_IDF_TARGET_ESP32
+#elif CONFIG_IDF_TARGET_ESP32 || defined(ARDUINO_ESP32_DEV)
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #define FASTLED_ESP32_HAS_RMT 1
 #define FASTLED_ESP32_HAS_RMT5 0
 #else
-#warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets."
+#warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets. Please file an bug report with FastLED and tell them about your board type."
 #endif
 
-#if FASTLED_ESP32_HAS_RMT5 && !__has_include("driver/rmt_types.h")
-#warning "RMT5 driver because \"driver/rmt_types.h\" is missing, disabling automatic RMT5 support in FastLED."
-#undef FASTLED_ESP32_HAS_RMT5
-#define FASTLED_ESP32_HAS_RMT5 0
-#endif
-
-#if FASTLED_ESP32_HAS_CLOCKLESS_SPI && !__has_include("esp_memory_utils.h")
-#warning "Clockless SPI driver because \"esp_memory_utils.h\" is missing, disabling automatic Clockless SPI support in FastLED."
-#undef FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
-#endif
-
+// Note that FASTLED_RMT5 is a legacy name,
+// so we keep it because "RMT" is specific to ESP32
 #if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
 #define FASTLED_RMT5 1
 #else
