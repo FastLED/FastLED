@@ -10,7 +10,7 @@ FastLED Library
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-A robust and massively parallel-led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and more. Drives 10's of thousands of LEDs. Supports nearly every single led chipset in existence. Blazing fast.
+A robust and massively parallel-led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and more. Drives 10's-of-thousands of LEDS on Teensy and ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render.
 
 <a href="https://star-history.com/#fastled/fastled&Date">
  <picture>
