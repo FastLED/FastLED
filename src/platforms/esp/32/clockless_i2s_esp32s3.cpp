@@ -1,4 +1,10 @@
 
+#if !__has_include("esp_memory_utils.h")
+#warning "esp_memory_utils.h is not available, are you on esp-idf 4? The parallel clockless i2s driver will not be available"
+#else
+
+
+
 #define CONFIG_FREERTOS_ENABLE_BACKWARD_COMPATIBILITY 1
 
 #define FASTLED_INTERNAL
@@ -262,3 +268,5 @@ InternalI2SDriver* InternalI2SDriver::create() {
 } // namespace fl
 
 #endif // CONFIG_IDF_TARGET_ESP32S3
+
+#endif // __has_include("esp_memory_utils.h")

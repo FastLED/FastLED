@@ -1,3 +1,8 @@
+
+#if !__has_include("esp_memory_utils.h")
+#error "esp_memory_utils.h is not available, are you using esp-idf 4.4 or earlier?"
+#else
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"
 #pragma GCC diagnostic ignored "-Wvolatile"
@@ -539,3 +544,5 @@ isDisplaying=true;
 }
 
 #pragma GCC diagnostic pop
+
+#endif  // __has_include("esp_memory_utils.h")
