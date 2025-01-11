@@ -2,7 +2,7 @@
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
-FastLED has a powerful cli that can compile to any device. 
+FastLED has a powerful cli that can compile to any device. It will run if you have either `python` or `uv` installed.
 
 ## FastLED compiler cli
 
