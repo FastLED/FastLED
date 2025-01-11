@@ -515,6 +515,12 @@ class I2SClocklessLedDriveresp32S3 {
         }
         isDisplaying = true;
 
+        #ifdef FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS
+        // an experiment for WS2812-V5B which have an extra wait time of ~300ns
+        // after the last bit
+        delayMicroseconds(300);
+        #endif
+
         led_io_handle->tx_color(led_io_handle, 0x2C, buffers[currentframe],
                                 _nb_components * num_leds_per_strip * 8 * 3 *
                                         2 +
