@@ -1,43 +1,10 @@
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 from ci.paths import BUILD
 from ci.tools import load_tools
-
-# @dataclass
-# class Tools:
-#     as_path: Path
-#     ld_path: Path
-#     objcopy_path: Path
-#     objdump_path: Path
-#     cpp_filt_path: Path
-#     nm_path: Path
-
-
-# def load_tools(build_info_path: Path) -> Tools:
-#     build_info = json.loads(build_info_path.read_text())
-#     board_info = build_info[next(iter(build_info))]
-#     aliases = board_info["aliases"]
-#     as_path = Path(aliases["as"])
-#     ld_path = Path(aliases["ld"])
-#     objcopy_path = Path(aliases["objcopy"])
-#     objdump_path = Path(aliases["objdump"])
-#     cpp_filt_path = Path(aliases["c++filt"])
-#     nm_path = Path(aliases["nm"])
-#     if sys.platform == "win32":
-#         as_path = as_path.with_suffix(".exe")
-#         ld_path = ld_path.with_suffix(".exe")
-#         objcopy_path = objcopy_path.with_suffix(".exe")
-#         objdump_path = objdump_path.with_suffix(".exe")
-#         cpp_filt_path = cpp_filt_path.with_suffix(".exe")
-#         nm_path = nm_path.with_suffix(".exe")
-#     out = Tools(as_path, ld_path, objcopy_path, objdump_path, cpp_filt_path, nm_path)
-#     tools = [as_path, ld_path, objcopy_path, objdump_path, cpp_filt_path, nm_path]
-#     for tool in tools:
-#         if not tool.exists():
-#             raise FileNotFoundError(f"Tool not found: {tool}")
-#     return out
 
 
 def _list_builds() -> list[Path]:
@@ -125,17 +92,8 @@ def cli() -> None:
         help="Path to build directory containing build info JSON file",
     )
 
-    parser.add_argument(
-        "--symbols", action="store_true", help="Dump symbol table using nm"
-    )
-    parser.add_argument(
-        "--disassemble", action="store_true", help="Dump disassembly using objdump"
-    )
-
     args = parser.parse_args()
     build_path = args.build_path
-    symbols = args.symbols
-    disassemble = args.disassemble
 
     # Check if object file was provided and exists
     if build_path is None:
@@ -153,46 +111,14 @@ def cli() -> None:
 
     tools = load_tools(build_info_path)
 
-    if not symbols and not disassemble:
-        while True:
-            print(
-                "Error: Please specify at least one action to perform", file=sys.stderr
-            )
-            action = input(
-                "Enter 's' to dump symbols, 'd' to disassemble, or 'q' to quit: "
-            )
-            if action == "s":
-                symbols = True
-                break
-            elif action == "d":
-                disassemble = True
-                break
-            elif action == "q":
-                sys.exit(0)
-            else:
-                print("Error: Invalid action", file=sys.stderr)
-
     object_file = _prompt_object_file(build_path)
-    if symbols:
-        import subprocess
 
-        cmd_str = subprocess.list2cmdline(
-            [str(tools.objdump_path), str(object_file), "--syms"]
-        )
-        print(f"Running command: {cmd_str}")
-        subprocess.run([str(tools.objdump_path), str(object_file)])
-
-    if disassemble:
-        import subprocess
-
-        cmd_str = subprocess.list2cmdline(
-            [str(tools.objdump_path), "-d", str(object_file)]
-        )
-        print(f"Running command: {cmd_str}")
-        subprocess.run([str(tools.objdump_path), "-d", str(object_file)])
-
-    if not (symbols or disassemble):
-        parser.print_help()
+    cmd = [str(tools.objdump_path), "--syms", str(object_file)]
+    if sys.platform == "win32":
+        cmd = ["cmd", "/c"] + cmd
+    cmd_str = subprocess.list2cmdline(cmd)
+    subprocess.run(cmd, check=True)
+    print("\nDone. Command used:", cmd_str)
 
 
 if __name__ == "__main__":
