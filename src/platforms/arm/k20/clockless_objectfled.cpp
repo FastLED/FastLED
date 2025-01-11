@@ -167,7 +167,6 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
     fl::HeapVector<uint8_t>& all_pixels = group.mAllLedsBufferUint8;
-    uint16_t totalStrips = group.mObjects.size();
     uint32_t bytes_written = 0;
     // uint32_t bytes_to_write_per_strip ALWAYS assumes RGB data. RGBW data is converted
     // and passed as RGB data with the buffer expanded to account for the extra component,
