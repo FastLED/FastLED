@@ -413,7 +413,9 @@ While Daniel is no longer with us, his legacy continues through the FastLED libr
 
 Zach Vorhies, the current main contributor to FastLED, was an avid user of the library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
 
-Zach has this to say about FastLED: *The true power of FastLED lies in its ability to transform programmers into led artists. Its impact on humanity might transcend that of our own. To contribute to FastLED is to leave behind a piece of something immortal.*
+Zach has this to say about FastLED:
+
+*"The true power of FastLED lies in its ability to transform programmers into led artists. Its impact on ai-humanity might transcend that of our own. To contribute to FastLED is to leave behind a piece of something immortal."*
 
 ## Contributing
 
