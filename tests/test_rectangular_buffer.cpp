@@ -10,6 +10,7 @@
 #include "rgbw.h"
 #include "test.h"
 #include "fl/slice.h"
+#include "fl/map.h"
 
 #include "fl/namespace.h"
 
@@ -41,20 +42,36 @@ class RectangularDrawBuffer {
     typedef fl::HeapVector<DrawItem> DrawList;
 
     fl::HeapVector<uint8_t> mAllLedsBufferUint8;
+    fl::SortedHeapMap<uint8_t, fl::Slice<uint8_t>> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
-    bool mDrawn = false;
-    bool onBeforeDrawCalled = false;
+    bool mOnQueueingDoneCalled = false;
+    bool mOnQueueingStartCalled = false;
 
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
 
-    void onNewFrame() {
-        if (!mDrawn) {
+
+
+    fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
+        auto it = mPinToLedSegment.find(pin);
+        if (it == mPinToLedSegment.end()) {
+            FASTLED_ASSERT(false, "Pin not found in RectangularDrawBuffer");
+            return fl::Slice<uint8_t>();
+        }
+        fl::Slice<uint8_t> slice = it->second;
+        if (clear_first) {
+            memset(slice.data(), 0, slice.size());
+        }
+        return slice;
+    }
+
+    void onQueuingStart() {
+        if (mOnQueueingStartCalled) {
             return;
         }
-        mDrawn = false;
-        onBeforeDrawCalled = false;
+        mOnQueueingStartCalled = true;
+        mPinToLedSegment.clear();
         mDrawList.swap(mPrevDrawList);
         mDrawList.clear();
         if (!mAllLedsBufferUint8.empty()) {
@@ -63,30 +80,31 @@ class RectangularDrawBuffer {
         }
     }
 
-    // fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
 
-        
-    // }
+    void queue(const DrawItem& item) {
+        mDrawList.push_back(item);
+    }
 
     // Expected to allow the caller to call this multiple times before getLedsBufferBytesForPin(...).
-    void onBeforeDraw() {
-        if (onBeforeDrawCalled) {
+    void onQueuingDone() {
+        if (mOnQueueingDoneCalled) {
             return;
         }
         // iterator through the current draw objects and calculate the total
         // number of bytes (representing RGB or RGBW) that will be drawn this frame.
         uint32_t total_bytes = 0;
-        for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
-            total_bytes += it->mNumBytes;
-        }
-        if (total_bytes == 0) {
-            return;
-        }
-        mAllLedsBufferUint8.reserve(total_bytes);
-    }
+        uint32_t max_bytes_in_strip = 0;
+        getBlockInfo(&total_bytes, &max_bytes_in_strip);
 
-    void queue(const DrawItem& item) {
-        mDrawList.push_back(item);
+        mAllLedsBufferUint8.resize(total_bytes);
+        memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
+        uint32_t offset = 0;
+        for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
+            uint8_t pin = it->mPin;
+            fl::Slice<uint8_t> slice(&mAllLedsBufferUint8.front() + offset, max_bytes_in_strip);
+            mPinToLedSegment[pin] = slice;
+            offset += max_bytes_in_strip;
+        }
     }
 
     uint32_t getMaxBytesInStrip() const {
@@ -101,6 +119,11 @@ class RectangularDrawBuffer {
         uint32_t num_strips = mDrawList.size();
         uint32_t max_bytes = getMaxBytesInStrip();
         return num_strips * max_bytes;
+    }
+
+    void getBlockInfo(uint32_t* num_strips, uint32_t* max_bytes) const {
+        *num_strips = mDrawList.size();
+        *max_bytes = getMaxBytesInStrip();
     }
 };
 
