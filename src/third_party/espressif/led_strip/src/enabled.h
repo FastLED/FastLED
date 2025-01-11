@@ -48,6 +48,12 @@
 #define FASTLED_ESP32_HAS_RMT5 0
 #endif
 
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI && !__has_include("esp_memory_utils.h")
+#warning "Clockless SPI driver because \"esp_memory_utils.h\" is missing, disabling automatic Clockless SPI support in FastLED."
+#undef FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
+#endif
+
 #if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
 #define FASTLED_RMT5 1
 #else
