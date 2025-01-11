@@ -9,6 +9,7 @@
 #include "fl/vector.h"
 #include "rgbw.h"
 #include "test.h"
+#include "fl/slice.h"
 
 #include "fl/namespace.h"
 
@@ -43,7 +44,7 @@ class RectangularDrawBuffer {
     DrawList mDrawList;
     DrawList mPrevDrawList;
     bool mDrawn = false;
-    bool mOnPreDrawCalled = false;
+    bool onBeforeDrawCalled = false;
 
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
@@ -53,7 +54,7 @@ class RectangularDrawBuffer {
             return;
         }
         mDrawn = false;
-        mOnPreDrawCalled = false;
+        onBeforeDrawCalled = false;
         mDrawList.swap(mPrevDrawList);
         mDrawList.clear();
         if (!mAllLedsBufferUint8.empty()) {
@@ -62,8 +63,14 @@ class RectangularDrawBuffer {
         }
     }
 
-    void onPreDraw() {
-        if (mOnPreDrawCalled) {
+    // fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
+
+        
+    // }
+
+    // Expected to allow the caller to call this multiple times before getLedsBufferBytesForPin(...).
+    void onBeforeDraw() {
+        if (onBeforeDrawCalled) {
             return;
         }
         // iterator through the current draw objects and calculate the total
