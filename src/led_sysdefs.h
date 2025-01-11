@@ -5,6 +5,11 @@
 
 #include "fastled_config.h"
 
+// Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
+#if defined(ARDUINO)
+#include <Arduino.h>  // ok include
+#endif
+
 /// @file led_sysdefs.h
 /// Determines which platform system definitions to include
 
@@ -72,11 +77,6 @@
 #endif
 
 #include "fl/namespace.h"
-
-// Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
-#if defined(ARDUINO)
-#include <Arduino.h>  // ok include
-#endif
 
 /// Clock cycles per microsecond. 
 /// Calculated using the F_CPU preprocessor define
