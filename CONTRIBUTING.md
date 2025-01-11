@@ -36,8 +36,15 @@ Then follow the prompts.
 
  * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
  * Click the compile button.
- * Sketch [dev/dev.ino](dev/dev.ino).
+ * Make sure to visit the FastLED sketch [dev/dev.ino](dev/dev.ino), the entry point for testing the library.
 
 <img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
 
-## Once you are done send us a PR through github
+## Once you are done
+  * run `./test`
+  * run `./lint`
+  * Then submit your code via a git pull request.
+
+## Unit Tests
+
+Shared code is unit tested on the host machine. They can be found at `tests/` at the root of the repo.
