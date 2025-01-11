@@ -20,6 +20,8 @@ A robust and mature led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and m
  </picture>
 </a>
 
+**You’re the reason we make FastLED great! Star this repository to show your support and inspire us to keep building features you’ll love.**
+
 
 ## About
 
