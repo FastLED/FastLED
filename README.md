@@ -60,7 +60,7 @@ void loop() {
 }
 ```
 
-For more examples see this [link](examples).
+For more examples see this [link](examples). Web compiled [examples](https://zackees.github.io/fastled-wasm/).
 
 
 
