@@ -409,11 +409,11 @@ In his personal life, Daniel was known for his kindness and creativity. A neighb
 
 While Daniel is no longer with us, his legacy continues through the FastLED library and the countless creators who use it. The community he built serves as a living tribute to his ingenuity, generosity, and the joy he found in sharing his work with the world.
 
-##A bout the Current Contributor
+## About the Current Contributor
 
 Zach Vorhies, the current main contributor to FastLED, has been deeply involved with the library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
 
-Zach's first major contribution was the APA102HD algorithm, which introduced driver-level gamma correction by leveraging the chipset’s 5-bit brightness factor. This innovation unlocked new potential for precise and vivid LED control. Over the years, Zach has contributed numerous enhancements, many adapted from his private projects, to expand FastLED’s capabilities and usability for the community.
+Zach's first major contribution was the APA102HD algorithm, which introduced driver-level gamma correction by leveraging the chipset’s 5-bit brightness factor. Zach has contributed numerous enhancements, many adapted from his private projects, to expand FastLED’s capabilities and usability for the community.
 
 Zach has this to say about FastLED: *"The true power of FastLED lies in its ability to transform programmers into artists. Its impact on humanity might surpass our own individual contributions. To contribute to FastLED is to leave behind a piece of something immortal."
 
