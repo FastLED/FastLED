@@ -331,7 +331,7 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * DMX - send rgb data out over DMX using Arduino DMX libraries
 * LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
 
-### APA102 and the 'High Definition' Mode in FastLED
+## APA102 and the 'High Definition' Mode in FastLED
 
 FastLED features driver-level gamma correction for the APA102 and SK9822 chipsets, using our "pseudo-13-bit mixing" algorithm.
 
@@ -340,8 +340,9 @@ Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
 Enable it like by using the `APA102HD` type. Example:
 
 ```C++
+#define LED_TYPE APA102HD  // "HD" suffix for APA102 family enables hardware gamma correction
 void setup() {
-  FastLED.addLeds<APA102HD, DATA_PIN, CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
 }
 ```
 
