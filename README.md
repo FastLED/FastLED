@@ -25,9 +25,14 @@ A robust and mature led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and m
 
 ## About
 
-This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
-sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
-LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
+This is a driver library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
+sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.
+
+The 3.9.x series introduced:
+  * Massive parallel rendering to drive thousands of LEDs.
+  * Background rendering of LEDs so that your program/sketch can prepare the next frame and respond to user input without affect frame rate.
+
+In addition to writing to the LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
 still keeping things as fast as possible.
 
