@@ -398,14 +398,23 @@ Wait, what happened to FastSPI_LED and FastSPI_LED2?  The library was initially 
 
 Check out the official site http://fastled.io for links to documentation, issues, and news.
 
-## About the current main contributor
+## Daniel Garcia, Founder of FastLED
 
-Zach Vorhies is the current main contributor of FastLED. He has used FastLED for over 13 years for various LED projects.
+In Memory of Daniel Garcia
+Daniel Garcia, the brilliant founder of FastLED, tragically passed away in September 2019 in the Conception dive boat fire alongside his partner, Yulia. This heartbreaking loss was felt deeply by the maker and developer community, where Daniel's contributions had left an indelible mark.
 
-He became a contributor after the founder of FastLED, Daniel Garcia died unexpectadly in a boating fire near Catalina island.
+Daniel was more than just a talented programmer; he was a passionate innovator who transformed the way creators interacted with LED technology. His work on FastLED brought high-performance LED control to countless projects, empowering developers to craft breathtaking installations and functional designs.
 
-Zach's first contribution to FastLED came with the APA102HD algorithm which unlocked driver-level gamma correction by leveraging the 5-bit brightness factor, in the Spring of 2014. Shortly thereafter he was granted write access to the FastLED repository.
+In his personal life, Daniel was known for his kindness and creativity. A neighbor recalled the beautiful LED installation he proudly displayed on a tree in his front yard—an expression of his love for the art and science of LED programming. His pride in FastLED and the vibrant community it fostered was a testament to his dedication to open-source development and his commitment to helping others bring their ideas to life.
 
-Many of the feature changes Zach has contributed to FastLED have already been implemented in his various private github repositories, rewritten and producticed for public consumption through FastLED. The hope is that the sizable user base of FastLED will find value in these enhancements, to enable them to be the light they want to see in the world.
+While Daniel is no longer with us, his legacy continues through the FastLED library and the countless creators who use it. The community he built serves as a living tribute to his ingenuity, generosity, and the joy he found in sharing his work with the world.
 
-If you find value in FastLED, then consider giving this repo a star. It may be a small gesture on your part, but it does a lot to motivate further contributions and make FastLED even better for you.
+##A bout the Current Contributor
+
+Zach Vorhies, the current main contributor to FastLED, has been deeply involved with the library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
+
+Zach's first major contribution was the APA102HD algorithm, which introduced driver-level gamma correction by leveraging the chipset’s 5-bit brightness factor. This innovation unlocked new potential for precise and vivid LED control. Over the years, Zach has contributed numerous enhancements, many adapted from his private projects, to expand FastLED’s capabilities and usability for the community.
+
+Zach has this to say about FastLED: *"The true power of FastLED lies in its ability to transform programmers into artists. Its impact on humanity might surpass our own individual contributions. To contribute to FastLED is to leave behind a piece of something immortal."
+
+If you find value in FastLED, consider starring the repository. It may seem like a small gesture, but it goes a long way in motivating further contributions to this incredible library.
