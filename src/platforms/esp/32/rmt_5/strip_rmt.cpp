@@ -3,14 +3,6 @@
 #include <stdint.h>
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if !defined(FASTLED_RMT5)
-#error "FASTLED_RMT5 is not defined!"
-#endif
-
-#if !FASTLED_RMT5
-#error "FASTLED_RMT5 is not enabled!"
-#endif
-
 #if FASTLED_RMT5
 
 #include "strip_rmt.h"
