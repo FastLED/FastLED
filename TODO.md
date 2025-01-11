@@ -24,3 +24,9 @@
 
   * NimBLE for Arduino
     * https://github.com/h2zero/NimBLE-Arduino?tab=readme-ov-file
+
+
+# Misc:
+
+  * sutaburosu's guide to playing around with FastLED 4
+    * https://github.com/sutaburosu/FastLED4-ESP32-playpen
