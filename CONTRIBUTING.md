@@ -32,7 +32,7 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
  * Click the compile button.
 
 ![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
-*Changes in non platform specific code can be tested quicly via our webcompiler via invoking the script `./wasm`*
+*Changes in non platform specific code can be tested quickly in our webcompiler by invoking the script `./wasm`*
 
 
 ## Once you are done
