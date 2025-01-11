@@ -35,7 +35,7 @@ struct DrawItem {
 };
 
 // Maps multiple pins and CRGB strips to a single ObjectFLED object.
-class RectangularBuffer {
+class RectangularDrawBuffer {
   public:
     typedef fl::HeapVector<DrawItem> DrawList;
 
@@ -45,8 +45,8 @@ class RectangularBuffer {
     bool mDrawn = false;
     bool mOnPreDrawCalled = false;
 
-    RectangularBuffer() = default;
-    ~RectangularBuffer() = default;
+    RectangularDrawBuffer() = default;
+    ~RectangularDrawBuffer() = default;
 
     void onNewFrame() {
         if (!mDrawn) {
@@ -98,7 +98,7 @@ class RectangularBuffer {
 };
 
 TEST_CASE("Rectangular Buffer") {
-    RectangularBuffer buffer;
+    RectangularDrawBuffer buffer;
 
     SUBCASE("Empty buffer has no LEDs") {
         CHECK(buffer.getTotalBytes() == 0);
