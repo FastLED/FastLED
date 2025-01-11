@@ -2,7 +2,7 @@
 
 The most important part about contributing to FastLED is how to test your changes.
 
-FastLED has a powerful cli that can compile to any device. We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
+FastLED has a powerful cli that can compile to any device. 
 
 ## FastLED compiler cli
 
@@ -29,6 +29,8 @@ cd fastled
 ```
 
 ## VSCode
+
+We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
 
  * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
  * Click the compile button.
