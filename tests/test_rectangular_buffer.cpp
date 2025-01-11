@@ -133,9 +133,9 @@ TEST_CASE("Rectangular Buffer") {
         buffer.queue(DrawItem(1, 10, true));
         buffer.queue(DrawItem(2, 10, false));
 
-        uint32_t num_bytes = Rgbw::size_as_rgb(10) * 3;
+        uint32_t max_size_strip_bytes = Rgbw::size_as_rgb(10) * 3;
 
-        CHECK(buffer.getMaxBytesInStrip() == num_bytes);
-        CHECK(buffer.getTotalBytes() == num_bytes * 2);
+        CHECK(buffer.getMaxBytesInStrip() == max_size_strip_bytes);
+        CHECK(buffer.getTotalBytes() == max_size_strip_bytes * 2);
     }
 }
