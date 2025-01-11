@@ -2,7 +2,7 @@
 
 The most important part about working with the FastLED is testing your changes.
 
-FastLED features a powerful compiler that can run on any supported chipset. This compiler can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed.
+FastLED features a powerful compiler that can run on any supported chipset. This compiler can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed. We also support VSCode and intellisence through [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide)
 
 ## FastLED compiler cli
 
