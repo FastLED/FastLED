@@ -15,4 +15,4 @@ void on_startup() {
 #endif  // ESP32
 
 
-#include "../examples/EspI2SDemo/EspI2SDemo.ino"
+#include "../examples/Blink/Blink.ino"

@@ -123,7 +123,9 @@ public:
 // ESP32-H2 datasheet not yet available, when it is, mask the pins commonly used by SPI flash.
 #warning ESP32-H2 chip flash configuration not yet known.  Only pins defined by ESP-IDF will be masked.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
-
+#elif CONFIG_IDF_TARGET_ESP32C2
+#warning ESP32-C2 chip variant is in beta support.  Only pins defined by ESP-IDF will be masked.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL)
 #else
 #warning Unknown ESP32 chip variant.  Only pins defined by ESP-IDF will be masked.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
