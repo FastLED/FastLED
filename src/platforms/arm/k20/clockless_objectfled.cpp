@@ -167,6 +167,13 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
     fl::HeapVector<uint8_t>& all_pixels = group.mAllLedsBufferUint8;
+    uint16_t totalStrips = group.mObjects.size();
+    uint32_t bytes_written = 0;
+    // uint32_t bytes_to_write_per_strip ALWAYS assumes RGB data. RGBW data is converted
+    // and passed as RGB data with the buffer expanded to account for the extra component,
+    // similar to the RGBW emulated clockless in the FastLED library. This allows us to apply
+    // FastLED's various RGBW conversion functions.
+    uint32_t bytes_to_write_per_strip = group.getMaxLedInStrip() * 3;
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
@@ -177,6 +184,7 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             all_pixels.push_back(w);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
+            bytes_written += 4;
         }
     } else {
         uint8_t r, g, b;
@@ -187,7 +195,13 @@ void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             all_pixels.push_back(b);
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
+            bytes_written += 3;
         }
+    }
+    // Fill in the rest of the buffer with zeros.
+    while (bytes_written < bytes_to_write_per_strip) {
+        all_pixels.push_back(0);
+        bytes_written++;
     }
     group.addObject(data_pin, numLeds, rgbw.active());
 }
