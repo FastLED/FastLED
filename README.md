@@ -250,7 +250,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-Zero pain setup and install. Can be done from the command line in seconds if `uv` or `python` are installed. See our [contributing guide](https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md) guide for more information.
+Zero pain setup and install/test/run. Can be done from the command line in seconds if `uv` or `python` are installed. See our [contributing guide](https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md) guide for more information.
 
 ![image](https://github.com/user-attachments/assets/f409120e-be6f-4158-81b5-d4bf935833b2)
 
