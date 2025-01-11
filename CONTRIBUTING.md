@@ -47,4 +47,4 @@ Then follow the prompts.
 
 ## Unit Tests
 
-Shared code is unit tested on the host machine. They can be found at `tests/` at the root of the repo.
+Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
