@@ -17,17 +17,12 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
-## Run the unit tests
-
-```bash
-./test
-````
-
-## Linting
+## Linting and unit testing
 
 ```bash
 ./lint
-```
+./test
+````
 
 ## VSCode
 
