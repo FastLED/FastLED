@@ -2,13 +2,13 @@
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
-FastLED has a powerful cli that can compile to any device. It will run if you have either `python` or `uv` installed.
+FastLED has a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
 
 ## FastLED compiler cli
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-The FastLED compiler cli can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed on the system.
+The FastLED compiler cli can be invoked when either 
 
 ```bash (MacOS/Linux, windows us git-bsh or compile.bat)
 git clone https://github.com/fastled/fastled
