@@ -3,38 +3,47 @@
 
 #include "test.h"
 
-#include "test.h"
-#include "fl/ptr.h"
-#include "fl/vector.h"
-#include "fl/scoped_ptr.h"
-#include "rgbw.h"
 #include "fl/math_macros.h"
+#include "fl/ptr.h"
+#include "fl/scoped_ptr.h"
+#include "fl/vector.h"
+#include "rgbw.h"
+#include "test.h"
 
 #include "fl/namespace.h"
 
 using namespace fl;
 
-struct Info {
-    uint8_t pin = 0;
-    uint16_t numLeds = 0;
-    bool isRgbw = false;
-    bool operator!=(const Info &other) const {
-        return pin != other.pin || numLeds != other.numLeds || isRgbw != other.isRgbw;
+struct DrawItem {
+    DrawItem() = default;
+    DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw): mPin(pin), mIsRgbw(is_rgbw) {
+        if (is_rgbw) {
+            numLeds = Rgbw::size_as_rgb(numLeds);
+        } else {
+            numLeds = numLeds;
+        }
+        mNumBytes = numLeds * 3;
+    }
+    uint8_t mPin = 0;
+    uint32_t mNumBytes = 0;
+    bool mIsRgbw = false;
+    bool operator!=(const DrawItem &other) const {
+        return mPin != other.mPin ||
+               mNumBytes != other.mNumBytes ||
+               mIsRgbw != other.mIsRgbw;
     }
 };
-
 
 // Maps multiple pins and CRGB strips to a single ObjectFLED object.
 class RectangularBuffer {
   public:
-    typedef fl::HeapVector<Info> DrawList;
+    typedef fl::HeapVector<DrawItem> DrawList;
 
     fl::HeapVector<uint8_t> mAllLedsBufferUint8;
     DrawList mDrawList;
     DrawList mPrevDrawList;
     bool mDrawn = false;
     bool mOnPreDrawCalled = false;
-
 
     RectangularBuffer() = default;
     ~RectangularBuffer() = default;
@@ -57,46 +66,49 @@ class RectangularBuffer {
         if (mOnPreDrawCalled) {
             return;
         }
-        // iterator through the current draw objects and calculate the total number of leds
-        // that will be drawn this frame.
-        uint32_t totalLeds = 0;
+        // iterator through the current draw objects and calculate the total
+        // number of bytes (representing RGB or RGBW) that will be drawn this frame.
+        uint32_t total_bytes = 0;
         for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
-            totalLeds += it->numLeds;
+            total_bytes += it->mNumBytes;
         }
-        if (totalLeds == 0) {
+        if (total_bytes == 0) {
             return;
         }
-        // Always assume RGB data. RGBW data will be converted to RGB data.
-        mAllLedsBufferUint8.reserve(totalLeds * 3);
+        mAllLedsBufferUint8.reserve(total_bytes);
     }
 
-    void addObject(uint8_t pin, uint16_t numLeds, bool is_rgbw) {
-        if (is_rgbw) {
-            numLeds = Rgbw::size_as_rgb(numLeds);
-        }
-        Info newInfo = {pin, numLeds, is_rgbw};
-        mDrawList.push_back(newInfo);
+    void queue(const DrawItem& item) {
+        mDrawList.push_back(item);
     }
 
-    uint32_t getMaxLedInStrip() const {
-        uint32_t maxLed = 0;
+    uint32_t getMaxBytesInStrip() const {
+        uint32_t max_bytes = 0;
         for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
-            maxLed = MAX(maxLed, it->numLeds);
+            max_bytes = MAX(max_bytes, it->mNumBytes);
         }
-        return maxLed;
+        return max_bytes;
     }
 
-    uint32_t getTotalLeds() const {
-        uint32_t numStrips = mDrawList.size();
-        uint32_t maxLed = getMaxLedInStrip();
-        return numStrips * maxLed;
+    uint32_t getTotalBytes() const {
+        uint32_t num_strips = mDrawList.size();
+        uint32_t max_bytes = getMaxBytesInStrip();
+        return num_strips * max_bytes;
     }
 };
 
-
-
 TEST_CASE("Rectangular Buffer") {
- 
+    RectangularBuffer buffer;
+
+    SUBCASE("Empty buffer has no LEDs") {
+        CHECK(buffer.getTotalBytes() == 0);
+        CHECK(buffer.getMaxBytesInStrip() == 0);
+    }
+
+    SUBCASE("Add one strip of 10 RGB LEDs") {
+        buffer.queue(DrawItem(1, 10, false));
+
+        CHECK(buffer.getMaxBytesInStrip() == 30);
+        CHECK(buffer.getTotalBytes() == 30);
+    }
 }
-
-

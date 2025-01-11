@@ -61,7 +61,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run FastLED tests')
     parser.add_argument('--cpp', action='store_true',
                        help='Run C++ tests only')
-    parser.add_argument('--test', type=str,
+    parser.add_argument('test', type=str, nargs='?', default=None,
                        help='Specific C++ test to run')
     return parser.parse_args()
 
