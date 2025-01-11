@@ -1,12 +1,14 @@
 ## Contributing
 
-The most important part about working with the FastLED is how to test your changes.
+The most important part about contributing to FastLED is how to test your changes.
 
-FastLED features a powerful compiler that can run on nearly every chipset, thanks to platformio. The FastLED compiler cli can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed on the system. We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
+FastLED has a power command line interface. We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
 
 ## FastLED compiler cli
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
+
+FastLED features a powerful compiler that can run on nearly every chipset, thanks to platformio. The FastLED compiler cli can be invoked when either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) are installed on the system.
 
 ```bash
 git clone https://github.com/fastled/fastled
