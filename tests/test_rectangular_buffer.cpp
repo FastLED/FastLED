@@ -36,7 +36,8 @@ struct DrawItem {
     }
 };
 
-// Maps multiple pins and CRGB strips to a single ObjectFLED object.
+// Maps multiple pins and CRGB strips to a single Rectanguarl Draw Buffer object.
+// This is needed for the ObjectFLED and I2S controllers for ESP32S3.
 class RectangularDrawBuffer {
   public:
     typedef fl::HeapVector<DrawItem> DrawList;
@@ -50,8 +51,6 @@ class RectangularDrawBuffer {
 
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
-
-
 
     fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first) {
         auto it = mPinToLedSegment.find(pin);
