@@ -7,7 +7,10 @@
 #include "hal/cpu_hal.h"
 #define __cpu_hal_get_cycle_count esp_cpu_get_cycle_count
 #else
-#include "esp32-hal.h"
+#include "hal/cpu_ll.h"
+inline uint32_t __cpu_hal_get_cycle_count() {
+  return static_cast<uint32_t>(cpu_ll_get_cycle_count());
+}
 #define __cpu_hal_get_cycle_count cpu_hal_get_cycle_count
 #endif  // ESP_IDF_VERSION
 

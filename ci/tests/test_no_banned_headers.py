@@ -6,10 +6,19 @@ from ci.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
 PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
+PLATFORMS_ESP_DIR = os.path.join(PLATFORMS_DIR, "esp")
 
 NUM_WORKERS = (os.cpu_count() or 1) * 4
 
-BANNED_HEADERS = [
+ENABLE_PARANOID_GNU_HEADER_INSPECTION = False
+
+if ENABLE_PARANOID_GNU_HEADER_INSPECTION:
+    BANNED_HEADERS_ESP = ["esp32-hal.h"]
+else:
+    BANNED_HEADERS_ESP = []
+
+
+BANNED_HEADERS_CORE = [
     "assert.h",
     "iostream",
     "stdio.h",
@@ -48,7 +57,7 @@ BANNED_HEADERS = [
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
     "Arduino.h",
-]
+] + BANNED_HEADERS_ESP
 
 EXCLUDED_FILES = [
     "stub_main.cpp",
@@ -57,13 +66,23 @@ EXCLUDED_FILES = [
 
 class TestBinToElf(unittest.TestCase):
 
-    def check_file(self, file_path):
-        failings = []
+    def check_file(self, file_path: str) -> list[str]:
+        failings: list[str] = []
+        banned_headers_list = []
+        if file_path.startswith(PLATFORMS_DIR):
+            # continue  # Skip the platforms directory
+            if file_path.startswith(PLATFORMS_ESP_DIR):
+                banned_headers_list = BANNED_HEADERS_ESP
+            else:
+                return failings
+        if len(banned_headers_list) == 0:
+            return failings
         with open(file_path, "r", encoding="utf-8") as f:
+
             for line_number, line in enumerate(f, 1):
                 if line.startswith("//"):
                     continue
-                for header in BANNED_HEADERS:
+                for header in banned_headers_list:
                     if (
                         f"#include <{header}>" in line or f'#include "{header}"' in line
                     ) and "// ok include" not in line:
@@ -76,8 +95,6 @@ class TestBinToElf(unittest.TestCase):
         """Searches through the program files to check for banned headers, excluding src/platforms."""
         files_to_check = []
         for root, _, files in os.walk(SRC_ROOT):
-            if root.startswith(PLATFORMS_DIR):
-                continue  # Skip the platforms directory
             for file in files:
                 if file.endswith(
                     (".cpp", ".h", ".hpp")

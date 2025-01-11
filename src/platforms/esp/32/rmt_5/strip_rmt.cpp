@@ -1,9 +1,15 @@
-
-
-#if ESP32
+#ifdef ESP32
 
 #include <stdint.h>
 #include "third_party/espressif/led_strip/src/enabled.h"
+
+#if !defined(FASTLED_RMT5)
+#error "FASTLED_RMT5 is not defined!"
+#endif
+
+#if !FASTLED_RMT5
+#error "FASTLED_RMT5 is not enabled!"
+#endif
 
 #if FASTLED_RMT5
 
@@ -158,6 +164,7 @@ private:
 }  // namespace
 
 
+
 IRmtStrip *IRmtStrip::Create(
     int pin, uint32_t led_count, bool is_rgbw,
     uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
@@ -172,5 +179,5 @@ IRmtStrip *IRmtStrip::Create(
 
 
 #endif  // FASTLED_RMT5
-
+#error "this is a test"
 #endif  // ESP32
