@@ -128,4 +128,14 @@ TEST_CASE("Rectangular Buffer") {
         CHECK(buffer.getMaxBytesInStrip() == num_bytes);
         CHECK(buffer.getTotalBytes() == num_bytes);
     }
+
+    SUBCASE("Add one strip of 10 RGBW LEDs and one strip of 10 RGB LEDs") {
+        buffer.queue(DrawItem(1, 10, true));
+        buffer.queue(DrawItem(2, 10, false));
+
+        uint32_t num_bytes = Rgbw::size_as_rgb(10) * 3;
+
+        CHECK(buffer.getMaxBytesInStrip() == num_bytes);
+        CHECK(buffer.getTotalBytes() == num_bytes * 2);
+    }
 }
