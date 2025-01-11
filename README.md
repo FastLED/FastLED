@@ -406,6 +406,9 @@ See our easy to use guide here:
 
 https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
 
+![image](https://github.com/user-attachments/assets/624c6bf8-4e04-4a33-b750-7ecbd2e12917)
+
+
 ## Reminder
 
 More stars for this repo equals more features for you. It's simple, go to the top of the page and click the ⭐and watch buttons.
