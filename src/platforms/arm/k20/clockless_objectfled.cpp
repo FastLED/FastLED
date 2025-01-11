@@ -45,7 +45,7 @@ class ObjectFLEDGroup {
   public:
     typedef fl::HeapVector<Info> DrawList;
 
-    fl::scoped_ptr<ObjectFLED> mObjectFLED;
+    fl::scoped_ptr<fl::ObjectFLED> mObjectFLED;
     fl::HeapVector<uint8_t> mAllLedsBufferUint8;
     DrawList mObjects;
     DrawList mPrevObjects;
@@ -129,9 +129,9 @@ class ObjectFLEDGroup {
             for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
                 pinList.push_back(it->pin);
             }
-            mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
-                                             CORDER_RGB, pinList.size(),
-                                             pinList.data()));
+            mObjectFLED.reset(new fl::ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
+                                                 CORDER_RGB, pinList.size(),
+                                                 pinList.data()));
             if (gLatchDelayUs >= 0) {
                 mObjectFLED->begin(gOverclock, gLatchDelayUs);
             } else {
