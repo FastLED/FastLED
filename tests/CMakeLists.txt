@@ -78,6 +78,10 @@ set(COMMON_COMPILE_FLAGS
 
     # Not supported in gcc.
     # -Werror=infinite-recursion
+
+    -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
+    # ignore Arduino/PlatformIO-specific PROGMEM macro
+    -DPROGMEM=
 )
 
 set(UNIT_TEST_COMPILE_FLAGS
