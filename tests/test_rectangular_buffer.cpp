@@ -72,7 +72,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
         buffer.onQueuingDone();
 
         CHECK(buffer.mPinToLedSegment.size() == 2);
-        CHECK(buffer.mAllLedsBufferUint8.size() == 60);
+        CHECK(buffer.mAllLedsBufferUint8Size == 60);
 
         fl::Slice<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(1, true);
         fl::Slice<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(2, true);
@@ -92,8 +92,9 @@ TEST_CASE("Rectangular Buffer queue tests") {
             slice2[i] = 0x2;
         }
         // Check that the uint8_t buffer is filled with 0x1 and 0x2.
-        auto& all_leds = buffer.mAllLedsBufferUint8;
-        for (size_t i = 0; i < all_leds.size(); i += 3) {
+        uint8_t* all_leds = buffer.mAllLedsBufferUint8.get();
+        uint32_t n_bytes = buffer.mAllLedsBufferUint8Size;
+        for (size_t i = 0; i < n_bytes; i += 3) {
             if (i < slice1.size()) {
                 REQUIRE(all_leds[i] == 0x1);
             } else {
@@ -120,6 +121,34 @@ TEST_CASE("Rectangular Buffer queue tests") {
                 REQUIRE(all_leds[i] == 0x4);
             }
         }
+    }
+
+    SUBCASE("Test that the order that the pins are added are preserved") {
+        buffer.onQueuingStart();
+        buffer.queue(DrawItem(2, 10, false));
+        buffer.queue(DrawItem(1, 10, false));
+        buffer.queue(DrawItem(3, 10, false));
+        buffer.onQueuingDone();
+
+        CHECK(buffer.mPinToLedSegment.size() == 3);
+        CHECK(buffer.mAllLedsBufferUint8Size == 90);
+
+        fl::Slice<uint8_t> slice1 = buffer.getLedsBufferBytesForPin(2, true);
+        fl::Slice<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(1, true);
+        fl::Slice<uint8_t> slice3 = buffer.getLedsBufferBytesForPin(3, true);
+
+        // Expect that the address of slice1 happens before slice2 in memory.
+        CHECK(slice1.data() < slice2.data());
+        CHECK(slice2.data() < slice3.data());
+
+        // Check that the end byte of slice1 is the first byte of slice2
+        CHECK(slice1.data() + slice1.size() == slice2.data());
+        // Check that the end byte of slice2 is the first byte of slice3
+        CHECK(slice2.data() + slice2.size() == slice3.data());
+        // Check that the ptr of the first byte of slice1 is the same as the ptr of the first byte of the buffer
+        CHECK(slice1.data() == buffer.mAllLedsBufferUint8.get());
+        // check that the start address is aligned to 4 bytes
+        CHECK((reinterpret_cast<uintptr_t>(slice1.data()) & 0x3) == 0);
     }
 
     SUBCASE("Complex test where all strip data is confirmed to be inside the buffer block") {
@@ -151,10 +180,10 @@ TEST_CASE("Rectangular Buffer queue tests") {
             const uint8_t* first_address = &slice.front();
             const uint8_t* last_address = &slice.back();
             // check that they are both in the buffer
-            CHECK(first_address >= buffer.mAllLedsBufferUint8.data());
-            CHECK(first_address <= buffer.mAllLedsBufferUint8.data() + buffer.mAllLedsBufferUint8.size());
-            CHECK(last_address >= buffer.mAllLedsBufferUint8.data());
-            CHECK(last_address <= buffer.mAllLedsBufferUint8.data() + buffer.mAllLedsBufferUint8.size());
+            CHECK(first_address >= buffer.mAllLedsBufferUint8.get());
+            CHECK(first_address <= buffer.mAllLedsBufferUint8.get() + buffer.mAllLedsBufferUint8Size);
+            CHECK(last_address >= buffer.mAllLedsBufferUint8.get());
+            CHECK(last_address <= buffer.mAllLedsBufferUint8.get() + buffer.mAllLedsBufferUint8Size);
         }
     }
 };

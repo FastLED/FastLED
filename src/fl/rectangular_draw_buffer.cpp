@@ -2,6 +2,7 @@
 #include "fl/rectangular_draw_buffer.h"
 #include "fl/namespace.h"
 #include "rgbw.h"
+#include "fl/allocator.h"
 
 namespace fl {
 
@@ -36,9 +37,12 @@ void RectangularDrawBuffer::onQueuingStart() {
     mPinToLedSegment.clear();
     mDrawList.swap(mPrevDrawList);
     mDrawList.clear();
-    if (!mAllLedsBufferUint8.empty()) {
-        memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
-        mAllLedsBufferUint8.clear();
+    // if (!mAllLedsBufferUint8.empty()) {
+    //     memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
+    //     mAllLedsBufferUint8.clear();
+    // }
+    if (mAllLedsBufferUint8Size > 0) {
+        memset(mAllLedsBufferUint8.get(), 0, mAllLedsBufferUint8Size);
     }
 }
 
@@ -58,12 +62,17 @@ void RectangularDrawBuffer::onQueuingDone() {
     uint32_t max_bytes_in_strip = 0;
     uint32_t num_strips = 0;
     getBlockInfo(&num_strips, &max_bytes_in_strip, &total_bytes);
-    mAllLedsBufferUint8.resize(total_bytes);
-    memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
+    if (total_bytes > mAllLedsBufferUint8Size) {
+        uint8_t* old_ptr = mAllLedsBufferUint8.release();
+        fl::LargeBlockAllocator<uint8_t>::Free(old_ptr);
+        uint8_t* ptr = fl::LargeBlockAllocator<uint8_t>::Alloc(total_bytes);
+        mAllLedsBufferUint8.reset(ptr);
+    }
+    mAllLedsBufferUint8Size = total_bytes;
     uint32_t offset = 0;
     for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
         uint8_t pin = it->mPin;
-        Slice<uint8_t> slice(&mAllLedsBufferUint8.front() + offset,
+        Slice<uint8_t> slice(mAllLedsBufferUint8.get() + offset,
                              max_bytes_in_strip);
         mPinToLedSegment[pin] = slice;
         offset += max_bytes_in_strip;
