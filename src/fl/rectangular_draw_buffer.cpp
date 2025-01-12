@@ -23,7 +23,7 @@ Slice<uint8_t> RectangularDrawBuffer::getLedsBufferBytesForPin(uint8_t pin, bool
     }
     fl::Slice<uint8_t> slice = it->second;
     if (clear_first) {
-        memset(slice.data(), 0, slice.size());
+        memset(slice.data(), 0, slice.size() * sizeof(slice[0]));
     }
     return slice;
 }
