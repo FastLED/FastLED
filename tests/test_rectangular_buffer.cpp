@@ -49,7 +49,7 @@ TEST_CASE("Rectangular Buffer") {
         CHECK(buffer.getMaxBytesInStrip() == max_size_strip_bytes);
         CHECK(buffer.getTotalBytes() == max_size_strip_bytes * 2);
     }
-}
+};
 
 
 TEST_CASE("Rectangular Buffer queue tests") {
@@ -121,4 +121,40 @@ TEST_CASE("Rectangular Buffer queue tests") {
             }
         }
     }
-}
+
+    SUBCASE("Complex test where all strip data is confirmed to be inside the buffer block") {
+        buffer.onQueuingStart();
+        buffer.queue(DrawItem(1, 10, true));
+        buffer.queue(DrawItem(2, 11, false));
+        buffer.queue(DrawItem(3, 12, true));
+        buffer.queue(DrawItem(4, 13, false));
+        buffer.queue(DrawItem(5, 14, true));
+        buffer.queue(DrawItem(6, 15, false));
+        buffer.queue(DrawItem(7, 16, true));
+        buffer.queue(DrawItem(8, 17, false));
+        buffer.queue(DrawItem(9, 18, true));
+        buffer.onQueuingDone();
+        CHECK(buffer.mPinToLedSegment.size() == 9);
+
+        uint32_t expected_max_strip_bytes = Rgbw::size_as_rgb(18) * 3;
+        uint32_t actual_max_strip_bytes = buffer.getMaxBytesInStrip();
+        CHECK(actual_max_strip_bytes == expected_max_strip_bytes);
+
+        uint32_t expected_total_bytes = expected_max_strip_bytes * 9;
+        uint32_t actual_total_bytes = buffer.getTotalBytes();
+        CHECK(actual_total_bytes == expected_total_bytes);
+
+        uint8_t pins[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        for (uint8_t pin : pins) {
+            fl::Slice<uint8_t> slice = buffer.getLedsBufferBytesForPin(pin, true);
+            CHECK(slice.size() == expected_max_strip_bytes);
+            const uint8_t* first_address = &slice.front();
+            const uint8_t* last_address = &slice.back();
+            // check that they are both in the buffer
+            CHECK(first_address >= buffer.mAllLedsBufferUint8.data());
+            CHECK(first_address <= buffer.mAllLedsBufferUint8.data() + buffer.mAllLedsBufferUint8.size());
+            CHECK(last_address >= buffer.mAllLedsBufferUint8.data());
+            CHECK(last_address <= buffer.mAllLedsBufferUint8.data() + buffer.mAllLedsBufferUint8.size());
+        }
+    }
+};

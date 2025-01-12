@@ -23,9 +23,13 @@ struct DrawItem {
     }
 };
 
-// Maps multiple pins and CRGB strips to a single Rectangular Draw Buffer
-// blob. This is needed for the ObjectFLED and I2S controllers for ESP32S3, which
-// use a single buffer for all leds to pins.
+// Needed by controllers that require a compact, rectangular buffer of pixel data.
+// Namely, ObjectFLED and the I2S controllers.
+// This class handles using multiple independent strips of LEDs, each with their own
+// buffer of pixel data. The strips are not necessarily contiguous in memory.
+// One or more DrawItems containing the pin number and number are queued
+// up. When the queue-ing is done, a Slice<uint8_t> can be fetched for each pin representing
+// the private buffer for that pin. The caller can then fill in the pixel bytes.
 class RectangularDrawBuffer {
   public:
     typedef fl::HeapVector<DrawItem> DrawList;
@@ -42,7 +46,7 @@ class RectangularDrawBuffer {
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
 
-    fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first);
+    fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first=true);
     void onQueuingStart();
     void queue(const DrawItem &item);
 

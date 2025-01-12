@@ -101,6 +101,22 @@ public:
         return true;
     }
 
+    T& front() {
+        return *mData;
+    }
+
+    const T& front() const {
+        return *mData;
+    }
+
+    T& back() {
+        return *(mData + mSize - 1);
+    }
+
+    const T& back() const {
+        return *(mData + mSize - 1);
+    }
+
     bool empty() {
         return mSize == 0;
     }
