@@ -112,11 +112,10 @@ void CFastLED::show(uint8_t scale) {
 	}
 
 	pCur = CLEDController::head();
-	for (length = 0; length < MAX_CLED_CONTROLLERS; length++) {
-		if (pCur) {
-			pCur->showLedsInternal(scale);
-			pCur = pCur->next();
-		}
+	for (length = 0; length < MAX_CLED_CONTROLLERS && pCur; length++) {
+		pCur->showLedsInternal(scale);
+		pCur = pCur->next();
+
 	}
 
 	length = 0;  // Reset length to 0 and iterate again.
