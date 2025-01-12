@@ -63,7 +63,8 @@ int pins[] = {
     EXAMPLE_PIN_NUM_DATA6,  EXAMPLE_PIN_NUM_DATA7,  EXAMPLE_PIN_NUM_DATA8,
     EXAMPLE_PIN_NUM_DATA9,  EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
     EXAMPLE_PIN_NUM_DATA12, EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14,
-    EXAMPLE_PIN_NUM_DATA15};
+    EXAMPLE_PIN_NUM_DATA15
+};
 
 #ifndef USE_FASTLED_I2S
 fl::InternalI2SDriver *driver = fl::InternalI2SDriver::create();
@@ -86,11 +87,10 @@ void setup() {
     delay(6000);  // The long reset time here is to make it easier to flash the device during the development process.
 
     #ifdef USE_FASTLED_I2S
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS_PER_STRIP);
-    #if 0
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA0, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA1, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA2, GRB>(leds, NUM_LEDS_PER_STRIP);
+    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA4, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA5, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA6, GRB>(leds, NUM_LEDS_PER_STRIP);
@@ -104,7 +104,6 @@ void setup() {
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA14, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA15, GRB>(leds, NUM_LEDS_PER_STRIP);
     FastLED.setBrightness(32);
-    #endif
 
     #else
     driver->initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
