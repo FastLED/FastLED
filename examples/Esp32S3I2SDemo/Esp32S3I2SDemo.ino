@@ -3,7 +3,7 @@
 ///   - Once flashed, the ESP32-S3 will NOT want to be reprogrammed again. To get around
 ///     this hold the reset button and release when the flash tool is looking for an
 ///     an upload port.
-///   - Put a delay in the setup function. This is to make it easier to flash the device. If you dont' do this, you may brick your device and have to use the reset button trick.
+///   - Put a delay in the setup function. This is to make it easier to flash the device. If you don't do this, you may brick your device and have to use the reset button trick.
 ///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
 ///     but just be aware of it.
 ///   - You MUST use all the available pins. Anything less than that will cause FastLED to crash.
@@ -18,7 +18,7 @@
 #include "fl/warn.h"
 // #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
-// Define your platformio.ino like so:
+// Define your platformio.ini like so:
 //
 // [env:esp32s3]
 // # Developement branch of the open source espressif32 platform
