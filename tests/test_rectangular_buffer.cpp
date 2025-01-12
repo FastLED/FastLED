@@ -96,8 +96,8 @@ class RectangularDrawBuffer {
         // number of bytes (representing RGB or RGBW) that will be drawn this frame.
         uint32_t total_bytes = 0;
         uint32_t max_bytes_in_strip = 0;
-        getBlockInfo(&total_bytes, &max_bytes_in_strip);
-
+        uint32_t num_strips = 0;
+        getBlockInfo(&num_strips, &max_bytes_in_strip, &total_bytes);
         mAllLedsBufferUint8.resize(total_bytes);
         memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
         uint32_t offset = 0;
@@ -123,9 +123,10 @@ class RectangularDrawBuffer {
         return num_strips * max_bytes;
     }
 
-    void getBlockInfo(uint32_t* num_strips, uint32_t* max_bytes) const {
+    void getBlockInfo(uint32_t* num_strips, uint32_t* bytes_per_strip, uint32_t* total_bytes) const {
         *num_strips = mDrawList.size();
-        *max_bytes = getMaxBytesInStrip();
+        *bytes_per_strip = getMaxBytesInStrip();
+        *total_bytes = (*num_strips) * (*bytes_per_strip);
     }
 };
 
@@ -188,5 +189,15 @@ TEST_CASE("Rectangular Buffer queue tests") {
         buffer.onQueuingStart();
         CHECK(buffer.mOnQueueingStartCalled);
         CHECK(!buffer.mOnQueueingDoneCalled);
+    }
+
+    SUBCASE("Queue and then draw") {
+        buffer.onQueuingStart();
+        buffer.queue(DrawItem(1, 10, false));
+        buffer.queue(DrawItem(2, 10, false));
+        buffer.onQueuingDone();
+
+        CHECK(buffer.mPinToLedSegment.size() == 2);
+        CHECK(buffer.mAllLedsBufferUint8.size() == 60);
     }
 }
