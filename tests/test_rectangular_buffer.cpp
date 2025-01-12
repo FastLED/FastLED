@@ -46,8 +46,13 @@ class RectangularDrawBuffer {
     fl::SortedHeapMap<uint8_t, fl::Slice<uint8_t>> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
-    bool mOnQueueingDoneCalled = false;
-    bool mOnQueueingStartCalled = false;
+    
+    enum QueueState {
+        IDLE,
+        QUEUEING,
+        QUEUE_DONE
+    };
+    QueueState mQueueState = IDLE;
 
     RectangularDrawBuffer() = default;
     ~RectangularDrawBuffer() = default;
@@ -66,11 +71,10 @@ class RectangularDrawBuffer {
     }
 
     void onQueuingStart() {
-        if (mOnQueueingStartCalled) {
+        if (mQueueState == QUEUEING) {
             return;
         }
-        mOnQueueingStartCalled = true;
-        mOnQueueingDoneCalled = false;
+        mQueueState = QUEUEING;
         mPinToLedSegment.clear();
         mDrawList.swap(mPrevDrawList);
         mDrawList.clear();
@@ -87,11 +91,10 @@ class RectangularDrawBuffer {
 
     // Expected to allow the caller to call this multiple times before getLedsBufferBytesForPin(...).
     void onQueuingDone() {
-        if (mOnQueueingDoneCalled) {
+        if (mQueueState == QUEUE_DONE) {
             return;
         }
-        mOnQueueingDoneCalled = true;
-        mOnQueueingStartCalled = false;
+        mQueueState = QUEUE_DONE;
         // iterator through the current draw objects and calculate the total
         // number of bytes (representing RGB or RGBW) that will be drawn this frame.
         uint32_t total_bytes = 0;
@@ -178,17 +181,13 @@ TEST_CASE("Rectangular Buffer queue tests") {
     RectangularDrawBuffer buffer;
 
     SUBCASE("Queueing start and done") {
-        CHECK(!buffer.mOnQueueingStartCalled);
-        CHECK(!buffer.mOnQueueingDoneCalled);
+        CHECK(buffer.mQueueState == RectangularDrawBuffer::IDLE);
         buffer.onQueuingStart();
-        CHECK(buffer.mOnQueueingStartCalled);
-        CHECK(!buffer.mOnQueueingDoneCalled);
+        CHECK(buffer.mQueueState == RectangularDrawBuffer::QUEUEING);
         buffer.onQueuingDone();
-        CHECK(buffer.mOnQueueingDoneCalled);
-        CHECK(!buffer.mOnQueueingStartCalled);
+        CHECK(buffer.mQueueState == RectangularDrawBuffer::QUEUE_DONE);
         buffer.onQueuingStart();
-        CHECK(buffer.mOnQueueingStartCalled);
-        CHECK(!buffer.mOnQueueingDoneCalled);
+        CHECK(buffer.mQueueState == RectangularDrawBuffer::QUEUEING);
     }
 
     SUBCASE("Queue and then draw") {
