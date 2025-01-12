@@ -23,8 +23,9 @@ struct DrawItem {
     }
 };
 
-// Maps multiple pins and CRGB strips to a single Rectanguarl Draw Buffer
-// object. This is needed for the ObjectFLED and I2S controllers for ESP32S3.
+// Maps multiple pins and CRGB strips to a single Rectangular Draw Buffer
+// blob. This is needed for the ObjectFLED and I2S controllers for ESP32S3, which
+// use a single buffer for all leds to pins.
 class RectangularDrawBuffer {
   public:
     typedef fl::HeapVector<DrawItem> DrawList;
