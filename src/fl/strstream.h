@@ -15,15 +15,23 @@
 namespace fl {
 
 template <typename T> struct StrStreamHelper {
-    static void append(Str &str, uint8_t n) { str.append(n); }
+    static void append(Str &str, const T& n) { str.append(n); }
 };
 
 template <> struct StrStreamHelper<int> {
-    static void append(Str &str, uint8_t n) { str.append(int32_t(n)); }
+    static void append(Str &str, const int& n) { str.append(int32_t(n)); }
 };
 
 template <> struct StrStreamHelper<uint8_t> {
-    static void append(Str &str, uint8_t n) { str.append(uint16_t(n)); }
+    static void append(Str &str, const uint8_t& n) { str.append(uint16_t(n)); }
+};
+
+template <> struct StrStreamHelper<char> {
+    static void append(Str &str, const char& n) { str.append(uint16_t(n)); }
+};
+
+template <> struct StrStreamHelper<unsigned int> {
+    static void append(Str &str, const unsigned int& n) { str.append(uint32_t(n)); }
 };
 
 class StrStream {
