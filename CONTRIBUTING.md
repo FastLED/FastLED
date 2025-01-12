@@ -43,3 +43,10 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
 ## Unit Tests
 
 Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
+
+Alternatively, tests can be built and run for your development machine with CMake:
+
+```
+cmake -S tests -B build-tests
+ctest --test-dir build-tests/ --rerun-failed --output-on-failure
+```
