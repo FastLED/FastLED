@@ -401,8 +401,6 @@ See our easy to use guide here:
 
 https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
 
+## How to stay up to date
 
-## Reminder
-
-More stars for this repo equals more features for you. It's simple, go to the top of the page and click the ⭐and watch buttons.
-
+This repo is under activate development. Click the watch button if you want to be one of the first to know of new releases and features.
