@@ -1,17 +1,20 @@
-/// This is a work in progress to bring up the I2S driver for the ESP32-S3.
-/// Right now the status is:
-///   - The raw driver can be used.
-///   - The FastLED bindings are not yet working.
+
 /// Keep in mind that using this driver has some major pain points:
-///   - Once flashed, the ESP32-S3 will want to be reprogrammed again. To get around
+///   - Once flashed, the ESP32-S3 will NOT want to be reprogrammed again. To get around
 ///     this hold the reset button and release when the flash tool is looking for an
 ///     an upload port.
+///   - Put a delay in the setup function. This is to make it easier to flash the device. If you dont' do this, you may brick your device and have to use the reset button trick.
+///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
+///     but just be aware of it.
+///   - You MUST use all the available pins. Anything less than that will cause FastLED to crash.
+
 
 
 #include <esp_psram.h>
 
 #define FASTLED_USES_ESP32S3_I2S
 #include "FastLED.h"
+#include "fl/warn.h"
 // #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 
 // Define your platformio.ino like so:
@@ -54,15 +57,25 @@
 #define EXAMPLE_PIN_NUM_DATA15 18 // R4
 
 
-// #define USE_FASTLED_I2S  // When enable then the FastLED bindings are used. Otherwise
+#define USE_FASTLED_I2S  // When enable then the FastLED bindings are used. Otherwise
 // we use the raw driver.
 
 int pins[] = {
-    EXAMPLE_PIN_NUM_DATA0,  EXAMPLE_PIN_NUM_DATA1,  EXAMPLE_PIN_NUM_DATA2,
-    EXAMPLE_PIN_NUM_DATA3,  EXAMPLE_PIN_NUM_DATA4,  EXAMPLE_PIN_NUM_DATA5,
-    EXAMPLE_PIN_NUM_DATA6,  EXAMPLE_PIN_NUM_DATA7,  EXAMPLE_PIN_NUM_DATA8,
-    EXAMPLE_PIN_NUM_DATA9,  EXAMPLE_PIN_NUM_DATA10, EXAMPLE_PIN_NUM_DATA11,
-    EXAMPLE_PIN_NUM_DATA12, EXAMPLE_PIN_NUM_DATA13, EXAMPLE_PIN_NUM_DATA14,
+    EXAMPLE_PIN_NUM_DATA0,
+    EXAMPLE_PIN_NUM_DATA1,
+    EXAMPLE_PIN_NUM_DATA2,
+    EXAMPLE_PIN_NUM_DATA3,
+    EXAMPLE_PIN_NUM_DATA4,
+    EXAMPLE_PIN_NUM_DATA5,
+    EXAMPLE_PIN_NUM_DATA6,
+    EXAMPLE_PIN_NUM_DATA7,
+    EXAMPLE_PIN_NUM_DATA8,
+    EXAMPLE_PIN_NUM_DATA9,
+    EXAMPLE_PIN_NUM_DATA10,
+    EXAMPLE_PIN_NUM_DATA11,
+    EXAMPLE_PIN_NUM_DATA12,
+    EXAMPLE_PIN_NUM_DATA13,
+    EXAMPLE_PIN_NUM_DATA14,
     EXAMPLE_PIN_NUM_DATA15
 };
 
@@ -106,6 +119,7 @@ void setup() {
     FastLED.setBrightness(32);
 
     #else
+    FASTLED_WARN("using raw driver with args: numstrips:" << NUMSTRIPS << ", NUM_LEDS_PER_STRIP: " << NUM_LEDS_PER_STRIP);
     driver->initled((uint8_t *)leds, pins, NUMSTRIPS, NUM_LEDS_PER_STRIP);
     driver->setBrightness(32);
     #endif

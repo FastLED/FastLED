@@ -1,10 +1,9 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
 #include "fl/rectangular_draw_buffer.h"
 #include "rgbw.h"
-
+#include "test.h"
 
 using namespace fl;
 
@@ -51,7 +50,6 @@ TEST_CASE("Rectangular Buffer") {
     }
 };
 
-
 TEST_CASE("Rectangular Buffer queue tests") {
     RectangularDrawBuffer buffer;
 
@@ -92,7 +90,7 @@ TEST_CASE("Rectangular Buffer queue tests") {
             slice2[i] = 0x2;
         }
         // Check that the uint8_t buffer is filled with 0x1 and 0x2.
-        uint8_t* all_leds = buffer.mAllLedsBufferUint8.get();
+        uint8_t *all_leds = buffer.mAllLedsBufferUint8.get();
         uint32_t n_bytes = buffer.mAllLedsBufferUint8Size;
         for (size_t i = 0; i < n_bytes; i += 3) {
             if (i < slice1.size()) {
@@ -102,7 +100,8 @@ TEST_CASE("Rectangular Buffer queue tests") {
             }
         }
 
-        // bonus, test the slice::pop_front() works as expected, this time fill with 0x3 and 0x4
+        // bonus, test the slice::pop_front() works as expected, this time fill
+        // with 0x3 and 0x4
         while (!slice1.empty()) {
             slice1[0] = 0x3;
             slice1.pop_front();
@@ -145,13 +144,15 @@ TEST_CASE("Rectangular Buffer queue tests") {
         CHECK(slice1.data() + slice1.size() == slice2.data());
         // Check that the end byte of slice2 is the first byte of slice3
         CHECK(slice2.data() + slice2.size() == slice3.data());
-        // Check that the ptr of the first byte of slice1 is the same as the ptr of the first byte of the buffer
+        // Check that the ptr of the first byte of slice1 is the same as the ptr
+        // of the first byte of the buffer
         CHECK(slice1.data() == buffer.mAllLedsBufferUint8.get());
         // check that the start address is aligned to 4 bytes
         CHECK((reinterpret_cast<uintptr_t>(slice1.data()) & 0x3) == 0);
     }
 
-    SUBCASE("Complex test where all strip data is confirmed to be inside the buffer block") {
+    SUBCASE("Complex test where all strip data is confirmed to be inside the "
+            "buffer block") {
         buffer.onQueuingStart();
         buffer.queue(DrawItem(1, 10, true));
         buffer.queue(DrawItem(2, 11, false));
@@ -175,15 +176,30 @@ TEST_CASE("Rectangular Buffer queue tests") {
 
         uint8_t pins[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         for (uint8_t pin : pins) {
-            fl::Slice<uint8_t> slice = buffer.getLedsBufferBytesForPin(pin, true);
+            fl::Slice<uint8_t> slice =
+                buffer.getLedsBufferBytesForPin(pin, true);
             CHECK(slice.size() == expected_max_strip_bytes);
-            const uint8_t* first_address = &slice.front();
-            const uint8_t* last_address = &slice.back();
+            const uint8_t *first_address = &slice.front();
+            const uint8_t *last_address = &slice.back();
             // check that they are both in the buffer
             CHECK(first_address >= buffer.mAllLedsBufferUint8.get());
-            CHECK(first_address <= buffer.mAllLedsBufferUint8.get() + buffer.mAllLedsBufferUint8Size);
+            CHECK(first_address <= buffer.mAllLedsBufferUint8.get() +
+                                       buffer.mAllLedsBufferUint8Size);
             CHECK(last_address >= buffer.mAllLedsBufferUint8.get());
-            CHECK(last_address <= buffer.mAllLedsBufferUint8.get() + buffer.mAllLedsBufferUint8Size);
+            CHECK(last_address <= buffer.mAllLedsBufferUint8.get() +
+                                      buffer.mAllLedsBufferUint8Size);
+        }
+    }
+
+    SUBCASE("I2S test where we load 16 X 256 leds") {
+        buffer.onQueuingStart();
+        for (int i = 0; i < 16; i++) {
+            buffer.queue(DrawItem(i, 256, false));
+        }
+        buffer.onQueuingDone();
+        CHECK(buffer.mPinToLedSegment.size() == 16);
+        for (uint32_t i = 0; i < buffer.mAllLedsBufferUint8Size; ++i) {
+            buffer.mAllLedsBufferUint8[i] = i % 256;
         }
     }
 };

@@ -55,17 +55,16 @@ class I2SEsp32S3_Group {
     I2SEsp32S3_Group() = default;
     ~I2SEsp32S3_Group() { mDriver.reset(); }
 
-    void onNewFrame() {
+    void onQueuingStart() {
         mRectDrawBuffer.onQueuingStart();
         mDrawn = false;
     }
 
-    void onPreDraw() {
+    void onQueuingDone() {
         mRectDrawBuffer.onQueuingDone();
     }
 
     void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
-        FASTLED_ASSERT(mRectDrawBuffer.mQueueState == fl::RectangularDrawBuffer::QUEUEING, "I2SEsp32S3_Group::addObject: not in queueing state");
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
@@ -75,7 +74,7 @@ class I2SEsp32S3_Group {
             return;
         }
         mDrawn = true;
-        if (mRectDrawBuffer.mAllLedsBufferUint8.empty()) {
+        if (!mRectDrawBuffer.mAllLedsBufferUint8Size) {
             return;
         }
 
@@ -84,25 +83,24 @@ class I2SEsp32S3_Group {
         
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
-            FASTLED_WARN_IF(!drawlist_changed, "I2SEsp32S3_Group::showPixelsOnceThisFrame: changing the strip configuration is not tested after FastLED.show() is invoked");
             mDriver.reset();
             mDriver.reset(new fl::I2SClocklessLedDriveresp32S3());
             fl::FixedVector<int, 16> pinList;
-            FASTLED_WARN_IF(mRectDrawBuffer.mDrawList.size() > 16, "I2SEsp32S3_Group::showPixelsOnceThisFrame: too many strips, we support a maximum of 16");
             for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
                 pinList.push_back(it->mPin);
             }
+            // FASTLED_ASSERT(pinList.size() == 16, "I2SEsp32S3_Group::showPixelsOnceThisFrame: pinList.size() == 16, instead got " << pinList.size());
             uint32_t num_strips = 0;
             uint32_t bytes_per_strip = 0;
             uint32_t total_bytes = 0;
             mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
-            FASTLED_ASSERT(bytes_per_strip % 3 == 0, "FastLED converts RGBW to RGB, so this is always a multiple of 3");
-            uint32_t num_leds = total_bytes / 3;
+            int num_leds_per_strip = bytes_per_strip / 3;
+            uint32_t total_leds = total_bytes / 3;
             mDriver->initled(
-                mRectDrawBuffer.mAllLedsBufferUint8.data(),
+                mRectDrawBuffer.mAllLedsBufferUint8.get(),
                 pinList.data(),
                 pinList.size(),
-                num_leds
+                num_leds_per_strip
             );
         }
         mDriver->show();
@@ -116,20 +114,19 @@ namespace fl {
 
 void I2S_Esp32::beginShowLeds(int datapin, int nleds) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
-    group.onNewFrame();
+    group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
 void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     I2SEsp32S3_Group &group = I2SEsp32S3_Group::getInstance();
-    group.onPreDraw();
+    group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
     int numLeds = pixel_iterator.size();
     Slice<uint8_t> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
-            FASTLED_ASSERT(!strip_bytes.size() >= 4, "I2S_Esp32::showPixels: buffer overflow");
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
             strip_bytes[0] = r;
             strip_bytes[1] = g;
@@ -145,7 +142,6 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     } else {
         uint8_t r, g, b;
         while (pixel_iterator.has(1)) {
-            FASTLED_ASSERT(!strip_bytes.size() >= 3, "I2S_Esp32::showPixels: buffer overflow");
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
             strip_bytes[0] = r;
             strip_bytes[1] = g;
@@ -153,6 +149,8 @@ void I2S_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
             strip_bytes.pop_front();
             strip_bytes.pop_front();
             strip_bytes.pop_front();
+            pixel_iterator.advanceData();
+            pixel_iterator.stepDithering();
         }
     }
 }
