@@ -51,6 +51,7 @@ void RectangularDrawBuffer::onQueuingDone() {
         return;
     }
     mQueueState = QUEUE_DONE;
+    mDrawListChangedThisFrame = mDrawList != mPrevDrawList;
     // iterator through the current draw objects and calculate the total
     // number of bytes (representing RGB or RGBW) that will be drawn this frame.
     uint32_t total_bytes = 0;

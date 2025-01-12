@@ -34,6 +34,7 @@ class RectangularDrawBuffer {
     fl::SortedHeapMap<uint8_t, fl::Slice<uint8_t>> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
+    bool mDrawListChangedThisFrame = false;
 
     enum QueueState { IDLE, QUEUEING, QUEUE_DONE };
     QueueState mQueueState = IDLE;
