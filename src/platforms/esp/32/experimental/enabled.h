@@ -1,7 +1,0 @@
-
-#pragma once
-
-
-#ifndef FASTLED_ESP32_SPI_CLOCKLESS_ENABLED
-#define FASTLED_ESP32_SPI_CLOCKLESS_ENABLED 0
-#endif

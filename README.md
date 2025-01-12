@@ -10,7 +10,7 @@ FastLED Library
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-A robust and mature led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and more. Supports nearly every single led chipset in existence.
+A robust and massively parallel-led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and more. Also runs on dirt cheap sub $1 devices. Drives 10's-of-thousands of LEDS on Teensy and ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render.
 
 <a href="https://star-history.com/#fastled/fastled&Date">
  <picture>
@@ -20,14 +20,17 @@ A robust and mature led driver for Arduino/Esp32/RaspberryPi/Atmega/Teensy and m
  </picture>
 </a>
 
-**You’re the reason we make FastLED great! Star this repository to show your support and inspire us to keep building features you’ll love.**
-
 
 ## About
 
-This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
-sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
-LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
+This is a driver library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
+sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.
+
+The 3.9.x series introduced:
+  * Massive parallel rendering to drive thousands of LEDs.
+  * Background rendering of LEDs so that your program/sketch can prepare the next frame and respond to user input without affect frame rate.
+
+In addition to writing to the LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
 still keeping things as fast as possible.
 
@@ -55,7 +58,7 @@ void loop() {
 }
 ```
 
-For more examples see this [link](examples).
+For more examples see this [link](examples). Web compiled [examples](https://zackees.github.io/fastled-wasm/).
 
 
 
@@ -160,7 +163,7 @@ For more examples see this [link](examples).
 
 
 [![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
-*might work with alternative settings, missing RMT device*
+*Now supported as of FastLED 3.9.10!*
 
 
 [![esp32c3](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml)
@@ -247,16 +250,11 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-If you want to make changes to FastLED then please
+Zero pain setup and install/test/run. Can be done from the command line in seconds if `uv` or `python` are installed. See our [contributing guide](https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md) guide for more information.
 
-  * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
-  * Open up the folder with VSCode.
-    * Make sure VSCode has the platformio extension.
-  * Once FastLED is loading with platformio, give it some time to download the dependencies (esp32-s3 (default) has a 1+GB download!)
-  * Click the platformio compile
-    * Then upload to your device
-  * See [dev/dev.ino](dev/dev.ino).
-<img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
+![image](https://github.com/user-attachments/assets/f409120e-be6f-4158-81b5-d4bf935833b2)
+
+
 
 When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
 
@@ -305,44 +303,28 @@ If you run into bugs with the library, or if you'd like to request support for a
 
 Here's a list of all the LED chipsets are supported.  More details on the LED chipsets are included [on our wiki page](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
 
-* Adafruit's DotStars - aka APA102
-* Adafruit's Neopixel - aka WS2812B (also WS2811/WS2812/WS2813, also supported in lo-speed mode) - a 3 wire addressable LED chipset
+* WS281x Clockless family
+  * WS2811 (Old style 400khz & 800khz)
+  * WS2812 (NeoPixel)
+  * WS2812-V5B (250 uS reset)
+  * WS2815
+* APA102 / SK9822 / HD107s (turbo->40mhz) / Adafruit DotStars (SPI)
+* HD107s, same thing as the APA102, but runs at turbo 40 Mhz
+* SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by RadioShack
-* UCS1903 - another 3 wire LED chipset, cheap
-* GW6205 - another 3 wire LED chipset
-* LPD8806 - SPI based chipset, very high speed
-* WS2801 - SPI based chipset, cheap and widely available
-* SM16716 - SPI based chipset
-* APA102 - SPI based chipset
-  * APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
+* UCS1903 - another 3-wire LED chipset, cheap
+* GW6205 - another 3-wire LED chipset
+* LPD8806 - SPI-based chipset, very high speed
+* WS2801 - SPI-based chipset, cheap and widely available
+* SM16716 - SPI-based chipset
+* APA102 - SPI-based chipset
+  * APA102HD - Same as APA102 but with a high-definition gamma correction function applied at the driver level.
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
-* SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
-* LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
+* LPD6803 - SPI-based chipset, chip CMODE pin must be set to 1 (inside oscillator mode)
 
-HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
-
-## Supported Platforms
-
-Right now the library is supported on a variety of arduino compatible platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
-
-* Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
-* Arduino & compatibles - straight up Arduino devices, Uno, Duo, Leonardo, Mega, Nano, etc...
-* Arduino Due and the digistump DigiX
-* Arduino Yún
-* Arduino Zero
-* AVR microcontrollers - ATtiny, ATmega and more families
-* ESP32 based boards
-* ESP8266 using the Arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json - please be sure to also read https://github.com/FastLED/FastLED/wiki/ESP8266-notes for information specific to the 8266.
-* Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1/3.2, Teensy LC, Teensy 3.5, Teensy 3.6, and Teensy 4.0 - arduino compatible from pjrc.com with some extra goodies (note the teensy LC, 3.2, 3.5, 3.6, 4.0 are ARM, not AVR!)
-* RFDuino
-* SparkCore
-* The wino board - http://wino-board.com
-
-What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
-
-### APA102 and the 'High Definition' Mode in FastLED
+## APA102 and the 'High Definition' Mode in FastLED
 
 FastLED features driver-level gamma correction for the APA102 and SK9822 chipsets, using our "pseudo-13-bit mixing" algorithm.
 
@@ -351,8 +333,9 @@ Read about it here: https://github.com/FastLED/FastLED/blob/master/APA102.md
 Enable it like by using the `APA102HD` type. Example:
 
 ```C++
+#define LED_TYPE APA102HD  // "HD" suffix for APA102 family enables hardware gamma correction
 void setup() {
-  FastLED.addLeds<APA102HD, DATA_PIN, CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
 }
 ```
 
@@ -393,14 +376,33 @@ Wait, what happened to FastSPI_LED and FastSPI_LED2?  The library was initially 
 
 Check out the official site http://fastled.io for links to documentation, issues, and news.
 
-## About the current main contributor
+## Daniel Garcia, Founder of FastLED
 
-Zach Vorhies is the current main contributor of FastLED. He has used FastLED for over 13 years for various LED projects.
+In Memory of Daniel Garcia
+Daniel Garcia, the brilliant founder of FastLED, tragically passed away in September 2019 in the Conception dive boat fire alongside his partner, Yulia. This heartbreaking loss was felt deeply by the maker and developer community, where Daniel's contributions had left an indelible mark.
 
-He became a contributor after the founder of FastLED, Daniel Garcia died unexpectadly in a boating fire near Catalina island.
+Daniel was more than just a talented programmer; he was a passionate innovator who transformed the way creators interacted with LED technology. His work on FastLED brought high-performance LED control to countless projects, empowering developers to craft breathtaking installations.
 
-Zach's first contribution to FastLED came with the APA102HD algorithm which unlocked driver-level gamma correction by leveraging the 5-bit brightness factor, in the Spring of 2014. Shortly thereafter he was granted write access to the FastLED repository.
+In his personal life, Daniel was known for his kindness and creativity. His pride in FastLED and the vibrant community it fostered was a testament to his dedication to open-source development and his commitment to helping others bring light into the world.
 
-Many of the feature changes Zach has contributed to FastLED have already been implemented in his various private github repositories, rewritten and producticed for public consumption through FastLED. The hope is that the sizable user base of FastLED will find value in these enhancements, to enable them to be the light they want to see in the world.
+While Daniel is no longer with us, his legacy continues through the FastLED library and the countless makers who use it. The community he built serves as a living tribute to his ingenuity, generosity, and the joy he found in sharing his work with the world.
 
-If you find value in FastLED, then consider giving this repo a star. It may be a small gesture on your part, but it does a lot to motivate further contributions and make FastLED even better for you.
+## About the Current Contributor
+
+Zach Vorhies, the current main contributor to FastLED, briefly worked with Dan in 2011 in San Francisco and was an avid user of the FastLED library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
+
+Zach has this to say about FastLED:
+
+*"The true power of FastLED lies in its ability to transform programmers into LED artists. Free space becomes their canvas. Its impact on ai-humanity will transcend that of your own. To contribute to FastLED is to leave behind a piece of something immortal."*
+
+## Contributing
+
+See our easy to use guide here:
+
+https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
+
+
+## Reminder
+
+More stars for this repo equals more features for you. It's simple, go to the top of the page and click the ⭐and watch buttons.
+

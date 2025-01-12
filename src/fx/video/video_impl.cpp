@@ -287,7 +287,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
         case PixelStream::kStreaming:
             return updateBufferFromStream(now);
         default:
-            DBG("Unknown type: " << type);
+            DBG("Unknown type: " << uint32_t(type));
             return false;
     }
 }

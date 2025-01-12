@@ -84,6 +84,43 @@ public:
         return size_t(-1);
     }
 
+    bool pop_front() {
+        if (mSize == 0) {
+            return false;
+        }
+        ++mData;
+        --mSize;
+        return true;
+    }
+
+    bool pop_back() {
+        if (mSize == 0) {
+            return false;
+        }
+        --mSize;
+        return true;
+    }
+
+    T& front() {
+        return *mData;
+    }
+
+    const T& front() const {
+        return *mData;
+    }
+
+    T& back() {
+        return *(mData + mSize - 1);
+    }
+
+    const T& back() const {
+        return *(mData + mSize - 1);
+    }
+
+    bool empty() {
+        return mSize == 0;
+    }
+
 private:
     T* mData;
     size_t mSize;

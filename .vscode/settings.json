@@ -111,6 +111,7 @@
         "blah_enable.h": "c",
         "sdkconfig.h": "c",
         "rmt.h": "c",
-        "soc_caps.h": "c"
+        "soc_caps.h": "c",
+        "format": "cpp"
     }
 }

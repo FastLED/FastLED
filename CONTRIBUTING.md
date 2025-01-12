@@ -1,16 +1,45 @@
 ## Contributing
 
+The most important part about contributing to FastLED is knowing how to test your changes.
+
+FastLED has a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
+
+## FastLED compiler cli
+
 [![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
-If you want to make changes to FastLED then please
+The FastLED compiler cli can be invoked at the project root.
 
-  * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
-  * Open up the folder with VSCode.
-    * Make sure VSCode has the platformio extension.
-  * Once FastLED is loading with platformio, give it some time to download the dependencies.
-  * Click the platformio compile
-    * Then upload to your device
-  * See [dev/dev.ino](dev/dev.ino).
-<img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
+```bash (MacOS/Linux, windows us git-bsh or compile.bat)
+git clone https://github.com/fastled/fastled
+cd fastled
+./compile uno --examples Blink  # linux/macos/git-bash
+# compile.bat  # Windows.
+```
 
-When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
+## Linting and Unit Testing
+
+```bash
+./lint
+./test
+````
+
+## VSCode
+
+We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
+
+ * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
+ * Click the compile button.
+
+![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
+*Changes in non platform specific code can be tested quickly in our webcompiler by invoking the script `./wasm` at the project root*
+
+
+## Once you are done
+  * run `./test`
+  * run `./lint`
+  * Then submit your code via a git pull request.
+
+## Unit Tests
+
+Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
