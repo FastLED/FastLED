@@ -208,8 +208,22 @@ TEST_CASE("Rectangular Buffer queue tests") {
         CHECK(slice2.size() == 30);
         // Check that the uint8_t buffer is zeroed out.
         for (size_t i = 0; i < slice1.size(); ++i) {
-            CHECK(slice1[i] == 0);
-            CHECK(slice2[i] == 0);
+            REQUIRE(slice1[i] == 0);
+            REQUIRE(slice2[i] == 0);
+        }
+        // now fill slice1 with 0x1, slice2 with 0x2
+        for (size_t i = 0; i < slice1.size(); i += 3) {
+            slice1[i] = 0x1;
+            slice2[i] = 0x2;
+        }
+        // Check that the uint8_t buffer is filled with 0x1 and 0x2.
+        auto& all_leds = buffer.mAllLedsBufferUint8;
+        for (size_t i = 0; i < all_leds.size(); i += 3) {
+            if (i < slice1.size()) {
+                REQUIRE(all_leds[i] == 0x1);
+            } else {
+                REQUIRE(all_leds[i] == 0x2);
+            }
         }
     }
 }
