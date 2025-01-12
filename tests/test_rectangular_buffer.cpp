@@ -3,6 +3,7 @@
 
 #include "test.h"
 #include "fl/rectangular_draw_buffer.h"
+#include "rgbw.h"
 
 
 using namespace fl;

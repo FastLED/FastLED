@@ -147,15 +147,42 @@ class StrStream {
         return *this;
     }
 
-    bool operator==(const Str &str) const { return mStr == str; }
-
-    bool operator!=(const Str &str) const { return mStr != str; }
-
-    bool operator<(const Str &str) const { return mStr < str; }
 
   private:
     Str mStr;
     bool mTreatCharAsInt = true;
+};
+
+class FakeStrStream {
+  public:
+    template<typename T>
+    FakeStrStream& operator<<(const T&) { return *this; }
+    
+    FakeStrStream& operator<<(const char*) { return *this; }
+    
+    template<typename T> 
+    FakeStrStream& operator=(const T&) { return *this; }
+
+    FakeStrStream& operator<<(const CRGB&) { return *this; }
+    FakeStrStream& operator<<(const Str&) { return *this; }
+    FakeStrStream& operator<<(char) { return *this; }
+    
+    #if FASTLED_STRSTREAM_USES_SIZE_T
+    FakeStrStream& operator<<(size_t) { return *this; }
+    #endif
+    
+    FakeStrStream& operator<<(uint8_t) { return *this; }
+    FakeStrStream& operator<<(uint16_t) { return *this; }
+    FakeStrStream& operator<<(int16_t) { return *this; }
+    FakeStrStream& operator<<(uint32_t) { return *this; }
+    FakeStrStream& operator<<(int32_t) { return *this; }
+    
+    FakeStrStream& operator=(const Str&) { return *this; }
+    FakeStrStream& operator=(const CRGB&) { return *this; }
+    FakeStrStream& operator=(uint16_t) { return *this; }
+    FakeStrStream& operator=(uint8_t) { return *this; }
+    FakeStrStream& operator=(char) { return *this; }
+
 };
 
 } // namespace fl
