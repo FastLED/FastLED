@@ -49,12 +49,13 @@ class RectangularDrawBuffer {
     ~RectangularDrawBuffer() = default;
 
     fl::Slice<uint8_t> getLedsBufferBytesForPin(uint8_t pin, bool clear_first=true);
-    void onQueuingStart();
+
+    // Safe to call multiple times before calling queue() once. Returns true on the first call, false after.
+    bool onQueuingStart();
     void queue(const DrawItem &item);
 
-    // Expected to allow the caller to call this multiple times before
-    // getLedsBufferBytesForPin(...).
-    void onQueuingDone();
+    // Safe to call multiple times before calling onQueueingStart() again. Returns true on the first call, false after.
+    bool onQueuingDone();
     uint32_t getMaxBytesInStrip() const;
     uint32_t getTotalBytes() const;
     void getBlockInfo(uint32_t *num_strips, uint32_t *bytes_per_strip,

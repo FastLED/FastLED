@@ -29,30 +29,27 @@ Slice<uint8_t> RectangularDrawBuffer::getLedsBufferBytesForPin(uint8_t pin, bool
     return slice;
 }
 
-void RectangularDrawBuffer::onQueuingStart() {
+bool RectangularDrawBuffer::onQueuingStart() {
     if (mQueueState == QUEUEING) {
-        return;
+        return false;
     }
     mQueueState = QUEUEING;
     mPinToLedSegment.clear();
     mDrawList.swap(mPrevDrawList);
     mDrawList.clear();
-    // if (!mAllLedsBufferUint8.empty()) {
-    //     memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
-    //     mAllLedsBufferUint8.clear();
-    // }
     if (mAllLedsBufferUint8Size > 0) {
         memset(mAllLedsBufferUint8.get(), 0, mAllLedsBufferUint8Size);
     }
+    return true;
 }
 
 void RectangularDrawBuffer::queue(const DrawItem &item) {
     mDrawList.push_back(item);
 }
 
-void RectangularDrawBuffer::onQueuingDone() {
+bool RectangularDrawBuffer::onQueuingDone() {
     if (mQueueState == QUEUE_DONE) {
-        return;
+        return false;
     }
     mQueueState = QUEUE_DONE;
     mDrawListChangedThisFrame = mDrawList != mPrevDrawList;
@@ -77,6 +74,7 @@ void RectangularDrawBuffer::onQueuingDone() {
         mPinToLedSegment[pin] = slice;
         offset += max_bytes_in_strip;
     }
+    return true;
 }
 
 uint32_t RectangularDrawBuffer::getMaxBytesInStrip() const {
