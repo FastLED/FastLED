@@ -225,5 +225,25 @@ TEST_CASE("Rectangular Buffer queue tests") {
                 REQUIRE(all_leds[i] == 0x2);
             }
         }
+
+        // bonus, test the slice::pop_front() works as expected, this time fill with 0x3 and 0x4
+        while (!slice1.empty()) {
+            slice1[0] = 0x3;
+            slice1.pop_front();
+        }
+
+        while (!slice2.empty()) {
+            slice2[0] = 0x4;
+            slice2.pop_front();
+        }
+
+        // Check that the uint8_t buffer is filled with 0x3 and 0x4.
+        for (size_t i = 0; i < 60; ++i) {
+            if (i < 30) {
+                REQUIRE(all_leds[i] == 0x3);
+            } else {
+                REQUIRE(all_leds[i] == 0x4);
+            }
+        }
     }
 }
