@@ -203,5 +203,13 @@ TEST_CASE("Rectangular Buffer queue tests") {
         fl::Slice<uint8_t> slice2 = buffer.getLedsBufferBytesForPin(2, true);
         // Expect that the address of slice1 happens before slice2 in memory.
         CHECK(slice1.data() < slice2.data());
+        // Check that the size of each slice is 30 bytes.
+        CHECK(slice1.size() == 30);
+        CHECK(slice2.size() == 30);
+        // Check that the uint8_t buffer is zeroed out.
+        for (size_t i = 0; i < slice1.size(); ++i) {
+            CHECK(slice1[i] == 0);
+            CHECK(slice2[i] == 0);
+        }
     }
 }
