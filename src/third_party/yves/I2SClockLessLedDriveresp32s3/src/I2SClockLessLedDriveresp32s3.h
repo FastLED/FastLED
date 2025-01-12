@@ -46,6 +46,11 @@
 
 #define IDF_5_3_OR_EARLIER (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 4, 0))
 
+// According to bug reports, this driver does not work well with the new WS2812-v5b. This is
+// probably due to the extrrra long reset time requirements of this chipset. so we put in
+// a hack that will always add 300 uS to the reset time.
+#define FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS 300
+
 #ifndef NUMSTRIPS
 #define NUMSTRIPS 16
 #endif
@@ -255,74 +260,9 @@ static void IRAM_ATTR transpose16x1_noinline2(unsigned char *A, uint16_t *B) {
         (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
     *((uint16_t *)(B + 21)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 }
+
 esp_lcd_panel_io_handle_t led_io_handle = NULL;
-/*
-       #ifdef __cplusplus
-extern "C"
-{
-#endif
-void _initled( uint8_t * leds, int * pins, int numstrip,int NUM_LED_PER_STRIP)
-    {
 
-                //esp_lcd_panel_io_handle_t init_lcd_driver(unsigned int
-CLOCKLESS_PIXEL_CLOCK_HZ, size_t _nb_components) {
-
-
-
-
-                esp_lcd_i80_bus_handle_t i80_bus = NULL;
-
-                esp_lcd_i80_bus_config_t bus_config;
-
-                    bus_config.clk_src = LCD_CLK_SRC_PLL160M;
-                    bus_config.dc_gpio_num = 0;
-                    bus_config.wr_gpio_num = 0;
-                    //bus_config.data_gpio_nums = (int*)malloc(16*sizeof(int));
-for (int i=0;i<numstrip;i++)
-{
-    bus_config.data_gpio_nums[i]=pins[i];
-}
-if(numstrip<16)
-{
-for (int i=numstrip;i<16;i++)
-{
-    bus_config.data_gpio_nums[i]=0;
-}
-}
-                    bus_config.bus_width = 16;
-                    bus_config.max_transfer_bytes =
-_nb_components*NUM_LED_PER_STRIP*8*3*2+__OFFSET; bus_config.psram_trans_align =
-LCD_DRIVER_PSRAM_DATA_ALIGNMENT; bus_config.sram_trans_align = 4;
-
-
-                ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &i80_bus));
-
-                esp_lcd_panel_io_i80_config_t io_config ;
-
-                io_config.cs_gpio_num = -1;
-                io_config.pclk_hz = CLOCKLESS_PIXEL_CLOCK_HZ;
-                io_config.trans_queue_depth = 1;
-                io_config.dc_levels = {
-                .dc_idle_level = 0,
-                .dc_cmd_level = 0,
-                .dc_dummy_level = 0,
-                .dc_data_level = 1,
-                };
-                //.on_color_trans_done = flush_ready,
-                // .user_ctx = nullptr,
-                io_config.lcd_cmd_bits = 0;
-                io_config.lcd_param_bits = 0;
-                io_config.user_ctx=this;
-
-io_config.on_color_trans_done = flush_ready;
-                 ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(i80_bus, &io_config,
-&led_io_handle));
-
-    }
- #ifdef __cplusplus
-}
-#endif
-*/
 class I2SClocklessLedDriveresp32S3 {
 
   public:
@@ -527,11 +467,9 @@ class I2SClocklessLedDriveresp32S3 {
         }
         isDisplaying = true;
 
-        #ifdef FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS
-        // an experiment for WS2812-V5B which have an extra wait time of ~300ns
-        // after the last bit
-        delayMicroseconds(300);
-        #endif
+        if (FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS) {
+            delayMicroseconds(FASTLED_EXPERIMENTAL_YVES_EXTRA_WAIT_MICROS);
+        }
 
         led_io_handle->tx_color(led_io_handle, 0x2C, buffers[currentframe],
                                 _nb_components * num_leds_per_strip * 8 * 3 *

@@ -20,6 +20,8 @@
 ///
 /// Is Overclocking supported? No.
 ///
+/// What about the new WS2812-5VB leds? Kinda. We put in a hack to add the extra wait time of 300 uS.
+///
 /// What are the advantages of using the FastLED bindings over the raw driver?
 ///  - FastLED api is more user friendly since you don't have to combine all your leds into one rectangular block.
 ///  - FastLED api allows you to have different sized strips which will be upscaled to the largest strip internally.
