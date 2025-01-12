@@ -7,6 +7,7 @@
 ///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
 ///     but just be aware of it.
 ///   - You MUST use all the available pins. Anything less than that will cause FastLED to crash.
+///   - Certain leds will turn white in debug mode. Probably has something to do with timing.
 
 
 
