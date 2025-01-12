@@ -372,7 +372,7 @@ class I2SClocklessLedDriveresp32S3 {
         setBrightness(_brightness);
     }
 
-    void _initled(uint8_t *leds, int *pins, int numstrip,
+    void _initled(uint8_t *leds, const int *pins, int numstrip,
                   int NUM_LED_PER_STRIP) {
 
         // esp_lcd_panel_io_handle_t init_lcd_driver(unsigned int
@@ -433,7 +433,7 @@ class I2SClocklessLedDriveresp32S3 {
             esp_lcd_new_panel_io_i80(i80_bus, &io_config, &led_io_handle));
     }
 
-    void initled(uint8_t *leds, int *pins, int numstrip,
+    void initled(uint8_t *leds, const int *pins, int numstrip,
                  int NUM_LED_PER_STRIP) {
         currentframe = 0;
         _gammab = 1;

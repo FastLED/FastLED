@@ -77,10 +77,7 @@ class I2SEsp32S3_Group {
         if (!mRectDrawBuffer.mAllLedsBufferUint8Size) {
             return;
         }
-
-        //static uint8_t* debug_pointer = nullptr;
         bool drawlist_changed = mRectDrawBuffer.mDrawListChangedThisFrame;
-        
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
@@ -89,7 +86,6 @@ class I2SEsp32S3_Group {
             for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
                 pinList.push_back(it->mPin);
             }
-            // FASTLED_ASSERT(pinList.size() == 16, "I2SEsp32S3_Group::showPixelsOnceThisFrame: pinList.size() == 16, instead got " << pinList.size());
             uint32_t num_strips = 0;
             uint32_t bytes_per_strip = 0;
             uint32_t total_bytes = 0;
@@ -165,7 +161,7 @@ class Driver: public InternalI2SDriver {
   public:
     Driver() = default;
     ~Driver() override = default;
-    void initled(uint8_t * leds, int * pins, int numstrip,int NUM_LED_PER_STRIP) override {
+    void initled(uint8_t* leds, const int * pins, int numstrip, int NUM_LED_PER_STRIP) override {
         mDriver.initled(leds, pins, numstrip, NUM_LED_PER_STRIP);
     }
     void show() override {

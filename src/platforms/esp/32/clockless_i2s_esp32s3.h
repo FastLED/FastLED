@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "sdkconfig.h"
+
 #ifndef CONFIG_IDF_TARGET_ESP32S3
 #error "This file is only for ESP32-S3"
 #endif
@@ -12,18 +14,19 @@
 #include "fl/vector.h"
 #include "eorder.h"
 
-#ifndef FASTLED_I2S_Esp32_LATCH_DELAY
-#define FASTLED_I2S_Esp32_LATCH_DELAY -1  // auto
-#endif
 
 namespace fl {
 
-/// @brief Internal driver interface for I2S_Esp32. Useful for debugging.
+/// @brief Internal driver interface for I2S_Esp32. Use this
 class InternalI2SDriver {
   public:
     static InternalI2SDriver* create();
     virtual ~InternalI2SDriver() {};
-    virtual void initled(uint8_t * leds, int * pins, int numstrip,int NUM_LED_PER_STRIP) = 0;
+    virtual void initled(
+      uint8_t* led_block,
+      const int* pins,  // array of ints representing the gpio pins.
+      int number_of_strips,  // the number of strips, also describes the size of the pins array.
+      int number_of_leds_per_strip) = 0;
     virtual void setBrightness(uint8_t brightness) = 0;
     virtual void show() = 0;
 };
@@ -45,9 +48,7 @@ class ClocklessController_I2S_Esp32_WS2812
     I2S_Esp32 mI2S_Esp32;
 
   public:
-    ClocklessController_I2S_Esp32_WS2812(float overclock = 1.0f, int latchDelayUs = FASTLED_I2S_Esp32_LATCH_DELAY): Base() {
-        
-    }
+    ClocklessController_I2S_Esp32_WS2812() = default;
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
