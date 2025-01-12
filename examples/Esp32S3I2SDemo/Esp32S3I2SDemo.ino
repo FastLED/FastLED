@@ -1,4 +1,11 @@
 /// This is a work in progress to bring up the I2S driver for the ESP32-S3.
+/// Right now the status is:
+///   - The raw driver can be used.
+///   - The FastLED bindings are not yet working.
+/// Keep in mind that using this driver has some major pain points:
+///   - Once flashed, the ESP32-S3 will want to be reprogrammed again. To get around
+///     this hold the reset button and release when the flash tool is looking for an
+///     an upload port.
 
 
 #include <esp_psram.h>
@@ -47,7 +54,8 @@
 #define EXAMPLE_PIN_NUM_DATA15 18 // R4
 
 
-// #define USE_FASTLED_I2S
+// #define USE_FASTLED_I2S  // When enable then the FastLED bindings are used. Otherwise
+// we use the raw driver.
 
 int pins[] = {
     EXAMPLE_PIN_NUM_DATA0,  EXAMPLE_PIN_NUM_DATA1,  EXAMPLE_PIN_NUM_DATA2,
@@ -75,7 +83,7 @@ void setup() {
     log_d("Free PSRAM: %d", ESP.getFreePsram());
 
     Serial.println("waiting 3 second before startup");
-    delay(3000);
+    delay(6000);  // The long reset time here is to make it easier to flash the device during the development process.
 
     #ifdef USE_FASTLED_I2S
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(leds, NUM_LEDS_PER_STRIP);
