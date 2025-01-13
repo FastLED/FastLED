@@ -47,6 +47,6 @@ Shared code is unit-tested on the host machine. They can be found at `tests/` at
 Alternatively, tests can be built and run for your development machine with CMake:
 
 ```
-cmake -S tests -S tests/.build
+cmake -S tests -B tests/.build
 ctest --test-dir tests/.build --rerun-failed --output-on-failure
 ```
