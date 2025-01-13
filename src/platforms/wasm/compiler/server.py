@@ -702,7 +702,16 @@ def compile_wasm(
         print("extracting zip file...")
         hash_value: str | None = None
         with zipfile.ZipFile(file_path, "r") as zip_ref:
+            # Extract everything first
             zip_ref.extractall(temp_src_dir)
+
+            # Then find and remove any platformio.ini files
+            platform_files = list(Path(temp_src_dir).rglob("*platformio.ini"))
+            if platform_files:
+                warnings.warn(f"Removing platformio.ini files: {platform_files}")
+                for p in platform_files:
+                    p.unlink()
+
             try:
                 hash_value = generate_hash_of_project_files(Path(temp_src_dir))
             except Exception as e:
