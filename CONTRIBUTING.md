@@ -28,6 +28,8 @@ cd fastled
 
 Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
 
+The easiest way to run the tests is just use `./test`
+
 Alternatively, tests can be built and run for your development machine with CMake:
 
 ```bash
