@@ -133,7 +133,7 @@ RUN pio settings set enable_telemetry 0
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
 
-ARG FASTLED_VERSION=3.9.11
+ARG FASTLED_VERSION=master
 ENV FASTLED_VERSION=${FASTLED_VERSION}
 RUN git clone -b ${FASTLED_VERSION} https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
     mkdir -p /js/fastled && \
