@@ -182,6 +182,8 @@ RUN chmod +x /entrypoint.sh && dos2unix /entrypoint.sh
 # now sync local to the source directory.
 RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
 
+RUN python /js/init_runtime.py || true
+
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.

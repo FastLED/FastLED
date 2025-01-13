@@ -12,9 +12,12 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Timer
-from typing import Any, AsyncIterator, Callable, Never
 
 import psutil  # type: ignore
+from code_sync import (  # type: ignore
+    sync_source_directory_if_volume_is_mapped,
+    sync_src_to_target,
+)
 from compile_lock import COMPILE_LOCK  # type: ignore
 from disklru import DiskLRUCache  # type: ignore
 from fastapi import (  # type: ignore
@@ -30,11 +33,6 @@ from fastapi.responses import FileResponse, RedirectResponse, Response  # type: 
 from sketch_hasher import generate_hash_of_project_files  # type: ignore
 from starlette.middleware.base import BaseHTTPMiddleware  # type: ignore
 from starlette.requests import Request  # type: ignore
-
-from platforms.wasm.compiler.code_sync import (  # type: ignore
-    sync_source_directory_if_volume_is_mapped,
-    sync_src_to_target,
-)
 
 _EXAMPLES: list[str] = [
     "Chromancer",
@@ -127,7 +125,7 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
 
 
 @asynccontextmanager  # type: ignore
-async def lifespan(app: FastAPI) -> Callable[[Any], AsyncIterator[Never]]:
+async def lifespan(app: FastAPI):  # type: ignore
     print("Starting FastLED wasm compiler server...")
     try:
         print(f"Settings: {json.dumps(get_settings(), indent=2)}")

@@ -103,6 +103,7 @@ def _run_compile(unknown_args: list[str]) -> int:
     return result.returncode
 
 def main() -> int:
+    print("Running...")
     args, unknown_args = _parse_args()
     _update_fastled()
     sync_source_directory_if_volume_is_mapped()
