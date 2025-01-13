@@ -6,8 +6,7 @@ FastLED 3.9.11
     * The FastLED.addLeds(...) style api now works..
       * Please note at this time that all 16 strips must be used. Not sure why this. If anyone has clarification please reach out.
     * RGBW support has been added externally via RGBW -> RGB data spoofing (same thing RGBW Emulated mode uses).
-* Bug fix for other platforms
-  * An esp related header managed to slip in to non esp builds. This has been fixed.
+    * Fixed compiliation issue for Arduino 2.3.4, which is missing some headers. In this case the driver will issue a warning that it will unavailable. 
 * Cross platform improvements for
   * `FASTLED_DBG`
   * `FASTLED_WARN`
