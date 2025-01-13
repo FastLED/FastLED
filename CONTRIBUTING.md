@@ -24,6 +24,17 @@ cd fastled
 ./test
 ````
 
+## Unit Tests
+
+Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
+
+Alternatively, tests can be built and run for your development machine with CMake:
+
+```bash
+cmake -S tests -B tests/.build
+ctest --test-dir tests/.build --rerun-failed --output-on-failure
+```
+
 ## VSCode
 
 We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
@@ -40,13 +51,4 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
   * run `./lint`
   * Then submit your code via a git pull request.
 
-## Unit Tests
 
-Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
-
-Alternatively, tests can be built and run for your development machine with CMake:
-
-```
-cmake -S tests -B tests/.build
-ctest --test-dir tests/.build --rerun-failed --output-on-failure
-```
