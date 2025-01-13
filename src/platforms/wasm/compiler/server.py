@@ -26,8 +26,8 @@ from fastapi import (  # type: ignore
 )
 from fastapi.responses import FileResponse, RedirectResponse, Response  # type: ignore
 from sketch_hasher import generate_hash_of_project_files
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware  # type: ignore
+from starlette.requests import Request  # type: ignore
 
 _EXAMPLES: list[str] = [
     "Chromancer",
