@@ -60,8 +60,6 @@ TEST_CASE("StrStream basic operations") {
         CRGB c(255, 0, 0);
         StrStream s;
         s << c;
-        // std::cout << s.str().c_str() << std::endl;
-        const char* str = s.str().c_str();
         CHECK(s.str().size() == 13);  // "CRGB(255,0,0)" is 13 chars
         CHECK(strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0);
     }

@@ -74,6 +74,7 @@ bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
 
 bool VideoImpl::draw(uint32_t now, Frame *frame) {
     //DBG("draw with now = " << now);
+    FASTLED_WARN("draw with now = " << now);
     if (!mStream) {
         DBG("no stream");
         return false;
@@ -83,7 +84,23 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     if (!frame) {
         return false;
     }
+    uint32_t time = mTimeScale->time();
+    uint32_t brightness = 255;
+    FASTLED_WARN("time = " << time);
+    if (mFadeInTime || mFadeOutTime) {
+        brightness = 255;
+        if (time < mFadeInTime) {
+            brightness = time * 255 / mFadeInTime;
+        }
+    }
+
     bool ok = mFrameInterpolator->draw(now, frame);
+    if (brightness != 255) {
+        CRGB* leds = frame->rgb();
+        for (size_t i = 0; i < frame->size(); ++i) {
+            leds[i].nscale8(brightness);
+        }
+    }
     return ok;
 }
 

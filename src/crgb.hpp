@@ -108,11 +108,6 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int )
     return retval;
 }
 
-FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (uint8_t scaledown )
-{
-    nscale8x3( r, g, b, scaledown);
-    return *this;
-}
 
 constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const
 {

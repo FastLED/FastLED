@@ -55,6 +55,8 @@ class VideoImpl : public fl::Referent {
     uint32_t mPrevNow = 0;
     FrameInterpolatorPtr mFrameInterpolator;
     TimeScalePtr mTimeScale;
+    uint32_t mFadeInTime = 3000;
+    uint32_t mFadeOutTime = 3000;
 };
 
 }  // namespace fl

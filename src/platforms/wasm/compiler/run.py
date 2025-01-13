@@ -6,6 +6,8 @@ from typing import Tuple
 import warnings
 from pathlib import Path
 
+from code_sync import sync_source_directory_if_volume_is_mapped
+
 _PORT = os.environ.get("PORT", 80)
 
 _CHOICES = [
@@ -103,6 +105,7 @@ def _run_compile(unknown_args: list[str]) -> int:
 def main() -> int:
     args, unknown_args = _parse_args()
     _update_fastled()
+    sync_source_directory_if_volume_is_mapped()
 
     try:
         if args.mode == "compile":

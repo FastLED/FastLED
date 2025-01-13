@@ -22,7 +22,7 @@ dependencies = [
     "ninja",
     "cmake",
     "download",
-    "fastled>=1.2.21",
+    "fastled>=1.2.22",
     "playwright"
 ]
 

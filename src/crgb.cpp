@@ -55,4 +55,11 @@ CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
     );
 }
 
+CRGB& CRGB::nscale8 (uint8_t scaledown )
+{
+    nscale8x3( r, g, b, scaledown);
+    return *this;
+}
+
+
 FASTLED_NAMESPACE_END
