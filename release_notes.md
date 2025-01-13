@@ -1,3 +1,19 @@
+FastLED 3.9.11
+==============
+* Bug fix for the Teensy and ESP32S3 masssive parallel drivers.
+  * Teensy ObjectFLED: Each led strip can now be a different length, see [examples](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino)
+  * ESP32 S3 I2S:
+    * The FastLED.addLeds(...) style api now works..
+      * Please note at this time that all 16 strips must be used. Not sure why this. If anyone has clarification please reach out.
+    * RGBW support has been added externally via RGBW -> RGB data spoofing (same thing RGBW Emulated mode uses).
+* Bug fix for other platforms
+  * An esp related header managed to slip in to non esp builds. This has been fixed.
+* Cross platform improvements for
+  * `FASTLED_DBG`
+  * `FASTLED_WARN`
+  * `FASTLED_ASSERT`
+
+
 FastLED 3.9.10
 ==============
 * ESP32
