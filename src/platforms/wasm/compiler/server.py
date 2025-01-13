@@ -71,9 +71,12 @@ _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
     or _VOLUME_MAPPED_SRC.exists()
 )
-_LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
-    os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
-)
+# This feature is broken. To fix, issue a git update, THEN invoke the compiler command to re-warm the cache.
+# otherwise you get worst case scenario on a new compile.
+# _LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
+#     os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
+# )
+_LIVE_GIT_UPDATES_ENABLED = False
 _START_TIME = time.time()
 
 

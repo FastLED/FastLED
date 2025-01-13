@@ -42,6 +42,9 @@
 # This will be set to arm64 to support MacOS M1+ devices (and Linux-based arm64 devices)
 ARG PLATFORM_TAG=""
 
+# Version of FastLED to clone
+ARG FASTLED_VERSION="3.9.11"
+
 # Use only Emscripten base image
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
@@ -132,7 +135,7 @@ RUN pio settings set enable_telemetry 0
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
 
-RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
+RUN git clone -b ${FASTLED_VERSION} https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
     mkdir -p /js/fastled && \
     rsync -a /git/fastled/ /js/fastled/ --exclude='.git'
 
