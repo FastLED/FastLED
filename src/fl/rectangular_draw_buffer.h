@@ -28,8 +28,8 @@ struct DrawItem {
 // This class handles using multiple independent strips of LEDs, each with their own
 // buffer of pixel data. The strips are not necessarily contiguous in memory.
 // One or more DrawItems containing the pin number and number are queued
-// up. When the queue-ing is done, a Slice<uint8_t> can be fetched for each pin representing
-// the private buffer for that pin. The caller can then fill in the pixel bytes.
+// up. When the queue-ing is done, the buffers are compacted into the rectangular buffer.
+// Data access is achieved through a Slice<uint8_t> representing the pixel data for that pin.
 class RectangularDrawBuffer {
   public:
     typedef fl::HeapVector<DrawItem> DrawList;
