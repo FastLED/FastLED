@@ -45,6 +45,7 @@ ARG PLATFORM_TAG=""
 # Use only Emscripten base image
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update the apt-get package list. This takes a long time, so we do it first to maximize cache hits.
@@ -132,8 +133,9 @@ RUN pio settings set enable_telemetry 0
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
 
-
-RUN git clone -b 3.9.11 https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
+ARG FASTLED_VERSION=3.9.11
+ENV FASTLED_VERSION=${FASTLED_VERSION}
+RUN git clone -b ${FASTLED_VERSION} https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
     mkdir -p /js/fastled && \
     rsync -a /git/fastled/ /js/fastled/ --exclude='.git'
 

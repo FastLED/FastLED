@@ -624,6 +624,11 @@ def info_examples() -> dict:
 
         warnings.warn(f"Error reading build timestamp: {e}")
         build_timestamp = "unknown"
+
+    # ARG FASTLED_VERSION=3.9.11
+    # ENV FASTLED_VERSION=${FASTLED_VERSION}
+
+    fastled_version = os.environ.get("FASTLED_VERSION", "unknown")
     out = {
         "examples": _EXAMPLES,
         "compile_count": COMPILE_COUNT,
@@ -631,6 +636,7 @@ def info_examples() -> dict:
         "compile_successes": COMPILE_SUCCESSES,
         "uptime": uptime_fmtd,
         "build_timestamp": build_timestamp,
+        "fastled_version": fastled_version,
     }
     return out
 
