@@ -27,6 +27,9 @@
   * NimBLE for Arduino
     * https://github.com/h2zero/NimBLE-Arduino?tab=readme-ov-file
 
+  * Arduino test compile
+    * https://github.com/hpwit/arduino-test-compile/blob/master/arduino-test-compile.sh
+
 
 # Misc:
 
