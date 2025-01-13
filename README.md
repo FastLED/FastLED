@@ -227,6 +227,39 @@ Follow our guide here. Our template will allow your project to be compiled by bo
 https://github.com/FastLED/PlatformIO-Starter
 
 
+# How to maximize the number of parallel WS2812 outputs
+
+Some of the new processors can drive many many WS2812 strips in parallel. 
+
+## Stock Setups
+
+### Teensy 4.0/4.1
+
+This chipset holds the current record for parallel output in a stock configuration. The theoretical output is 50 strips at a time with Teensy 4.1 and 42 strips with Teensy 4.2.
+
+See this [example](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino) on how to enable.
+
+### ESP32DEV
+
+Surprisingly it's the good old ESP32Dev and not the ESP32S3, which holds the esp record for the amount of parallel outputs at 24 through I2S, and 8 via RMT.
+
+I2S needs special setup as of 3.9.11 and earlier (current version of this writing is 3.9.11) see the [example](https://github.com/FastLED/FastLED/blob/master/examples/EspI2SDemo/EspI2SDemo.ino) here.
+
+### ESP32-S3
+
+The S3 is a CPU beast, but has half the RMT tx channels (4) and 2/3rds the I2S channels (16) of ESPDev. The S3 requires a special driver for I2S which you can find in this [example](https://github.com/FastLED/FastLED/blob/master/examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino)
+
+### RaspberriPi
+
+I (Zach Vorhies) don't use this platform. Help wanted on what the limits of this chip is.
+
+
+## Exotic Setups
+
+If you are willing to make a custom board with shift registers, then the ESp32S3 and ESP32Dev have special "virtual pin" libraries. These libraries will allow you to drive 120 parallel WS2812 outputs. However these are not included in FastLED but are compatible with it.
+
+  * Esp32DEV: https://github.com/hpwit/I2SClocklessVirtualLedDriver
+  * Esp32-S3: https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3
 
 # New Feature Announcements
 
