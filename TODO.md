@@ -21,6 +21,8 @@
 
   * MIT Licensed SdFat library
     * https://github.com/greiman/SdFat
+  * YVes LittleFS implementation for ESP
+    * https://github.com/hpwit/ledOS/blob/main/src/fileSystem.h
 
   * NimBLE for Arduino
     * https://github.com/h2zero/NimBLE-Arduino?tab=readme-ov-file
