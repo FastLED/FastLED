@@ -143,6 +143,8 @@ async def lifespan(app: FastAPI):  # type: ignore
         ).start()  # Start the periodic git update
     else:
         print("Auto updates disabled")
+    yield  # end startup
+    return  # end shutdown
 
 
 app = FastAPI(lifespan=lifespan)
