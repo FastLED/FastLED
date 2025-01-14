@@ -158,3 +158,44 @@ TEST_CASE("video with file handle") {
         CHECK_EQ(leds[i], led_frame[i]);
     }
 }
+
+
+TEST_CASE("video with end frame fadeout") {
+    Video video(LEDS_PER_FRAME, FPS);
+    video.setFade(0, 1000);
+    FakeFileHandlePtr fileHandle = FakeFileHandlePtr::New();
+    CRGB led_frame[LEDS_PER_FRAME];
+    // just set all the leds to white
+
+
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        led_frame[i] = CRGB::White;
+    }
+    // fill frames for all of one second
+    for (uint32_t i = 0; i < FPS; i++) {
+        size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
+        CHECK_EQ(leds_written, LEDS_PER_FRAME);
+    }
+
+    video.begin(fileHandle);
+    CRGB leds[LEDS_PER_FRAME];
+    bool ok = video.draw(0, leds);
+    REQUIRE(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], led_frame[i]);
+    }
+    ok = video.draw(500, leds);
+    // test that the leds are about half as bright
+    REQUIRE(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i].r, 127);
+        CHECK_EQ(leds[i].g, 127);
+        CHECK_EQ(leds[i].b, 127);
+    }
+    ok = video.draw(1000, leds);
+    REQUIRE(ok);
+    // test that the leds are black
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], CRGB::Black);
+    }
+}

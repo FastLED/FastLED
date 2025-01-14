@@ -99,6 +99,7 @@ class FrameInterpolator : public fl::Referent {
 
     FrameTracker &getFrameTracker() { return mFrameTracker; }
 
+
   private:
     FrameBuffer mFrames;
     FrameTracker mFrameTracker;
