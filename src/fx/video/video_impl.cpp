@@ -111,7 +111,6 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds) {
 
     uint32_t time = mTime->time();
     uint32_t brightness = 255;
-    FASTLED_WARN("time = " << time);
     // Compute fade in/out brightness.
     if (mFadeInTime || mFadeOutTime) {
         brightness = 255;
