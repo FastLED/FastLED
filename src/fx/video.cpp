@@ -103,6 +103,13 @@ void Video::draw(DrawContext context) {
     mImpl->draw(context.now, context.leds);
 }
 
+int32_t Video::durationMicros() const {
+    if (!mImpl) {
+        return -1;
+    }
+    return mImpl->durationMicros();
+}
+
 Str Video::fxName() const {
     return "Video";
 }

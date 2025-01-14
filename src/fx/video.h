@@ -67,6 +67,7 @@ public:
     void pause(uint32_t now) override;
     void resume(uint32_t now) override;
     void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
+    int32_t durationMicros() const;  // -1 if this is a stream.
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }

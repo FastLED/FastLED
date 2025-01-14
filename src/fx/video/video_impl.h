@@ -46,6 +46,7 @@ class VideoImpl : public fl::Referent {
     void pause(uint32_t now);
     void resume(uint32_t now);
     bool needsFrame(uint32_t now) const;
+    int32_t durationMicros() const;  // -1 if this is a stream.
 
 
   private:

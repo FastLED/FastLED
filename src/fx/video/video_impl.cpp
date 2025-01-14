@@ -78,6 +78,18 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     return draw(now, frame->rgb());
 }
 
+int32_t VideoImpl::durationMicros() const {
+    if (!mStream) {
+        return -1;
+    }
+    int32_t frames = mStream->framesRemaining();
+    if (frames < 0) {
+        return -1;  // Stream case, duration unknown
+    }
+    uint32_t micros_per_frame = mFrameInterpolator->getFrameTracker().microsecondsPerFrame();
+    return (frames * micros_per_frame);  // Convert to milliseconds
+}
+
 bool VideoImpl::draw(uint32_t now, CRGB *leds) {
     if (!mTime) {
         mTime = TimeScalePtr::New(now);
@@ -103,8 +115,12 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds) {
     // Compute fade in/out brightness.
     if (mFadeInTime || mFadeOutTime) {
         brightness = 255;
-        if (time < mFadeInTime) {
-            brightness = time * 255 / mFadeInTime;
+        if (time <= mFadeInTime) {
+            if (mFadeInTime == 0) {
+                brightness = 255;
+            } else {
+                brightness = time * 255 / mFadeInTime;
+            }
         } else if (mFadeOutTime) {
             int32_t frames_remaining = mStream->framesRemaining();
             if (frames_remaining < 0) {
