@@ -75,6 +75,7 @@ class FakeFileHandle: public FileHandle {
 TEST_CASE("video with memory stream") {
     // Video video(LEDS_PER_FRAME, FPS);
     Video video(LEDS_PER_FRAME, FPS, 1);
+    video.setFade(0, 0);
     ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * 3);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -102,6 +103,7 @@ TEST_CASE("video with memory stream") {
 TEST_CASE("video with memory stream, interpolated") {
     // Video video(LEDS_PER_FRAME, FPS);
     Video video(LEDS_PER_FRAME, 1);
+    video.setFade(0, 0);
     ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * sizeof(CRGB)*2);
     CRGB testData[LEDS_PER_FRAME] = {};
     for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
@@ -133,6 +135,7 @@ TEST_CASE("video with memory stream, interpolated") {
 TEST_CASE("video with file handle") {
     // Video video(LEDS_PER_FRAME, FPS);
     Video video(LEDS_PER_FRAME, FPS);
+    video.setFade(0, 0);
     FakeFileHandlePtr fileHandle = FakeFileHandlePtr::New();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black

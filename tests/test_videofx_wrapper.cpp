@@ -40,6 +40,7 @@ TEST_CASE("test_fixed_fps") {
     fake->mColors.push_back(CRGB(0, 0, 0));
     fake->mColors.push_back(CRGB(255, 0, 0));
     VideoFxWrapper wrapper(fake);
+    wrapper.setFade(0, 0);
     CRGB leds[1];
     Fx::DrawContext context(0, leds);
     wrapper.draw(context);

@@ -66,6 +66,7 @@ public:
     size_t pixelsPerFrame() const;
     void pause(uint32_t now) override;
     void resume(uint32_t now) override;
+    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
@@ -89,6 +90,7 @@ class VideoFxWrapper : public Fx1d {
     ~VideoFxWrapper() override;
     void draw(DrawContext context) override;
     Str fxName() const override;
+    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
 
   private:
     FxPtr mFx;

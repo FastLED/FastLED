@@ -3,12 +3,10 @@
 
 #include "video_impl.h"
 
-#include "fl/dbg.h"
+#include "fl/warn.h"
+#include "fl/assert.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-
-
-#define DBG FASTLED_DBG
 
 using namespace fl;
 
@@ -21,23 +19,28 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
           FrameInterpolatorPtr::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
 
 void VideoImpl::pause(uint32_t now) {
-    if (!mTimeScale) {
-        mTimeScale = TimeScalePtr::New(now);
+    if (!mTime) {
+        mTime = TimeScalePtr::New(now);
     }
-    mTimeScale->pause(now);
+    mTime->pause(now);
 }
 void VideoImpl::resume(uint32_t now) {
-    if (!mTimeScale) {
-        mTimeScale = TimeScalePtr::New(now);
+    if (!mTime) {
+        mTime = TimeScalePtr::New(now);
     }
-    mTimeScale->resume(now);
+    mTime->resume(now);
 }
 
 void VideoImpl::setTimeScale(float timeScale) {
-    if (!mTimeScale) {
-        mTimeScale = TimeScalePtr::New(0, timeScale);
+    mTimeScale = timeScale;
+    if (mTime) {
+        mTime->setScale(timeScale);
     }
-    mTimeScale->setScale(timeScale);
+}
+
+void VideoImpl::setFade(uint32_t fadeInTime, uint32_t fadeOutTime) {
+    mFadeInTime = fadeInTime;
+    mFadeOutTime = fadeOutTime;
 }
 
 bool VideoImpl::needsFrame(uint32_t now) const {
@@ -73,18 +76,29 @@ void VideoImpl::end() {
 bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
 
 bool VideoImpl::draw(uint32_t now, Frame *frame) {
-    //DBG("draw with now = " << now);
-    FASTLED_WARN("draw with now = " << now);
+    return draw(now, frame->rgb());
+}
+
+bool VideoImpl::draw(uint32_t now, CRGB *leds) {
+    if (!mTime) {
+        mTime = TimeScalePtr::New(now);
+        mTime->setScale(mTimeScale);
+        mTime->reset(now);
+    }
+    now = mTime->update(now);
     if (!mStream) {
-        DBG("no stream");
+        FASTLED_WARN("no stream");
         return false;
     }
-    updateBufferIfNecessary(mPrevNow, now);
+    bool ok = updateBufferIfNecessary(mPrevNow, now);
     mPrevNow = now;
-    if (!frame) {
+    if (!ok) {
+        FASTLED_WARN("updateBufferIfNecessary failed");
         return false;
     }
-    uint32_t time = mTimeScale->time();
+    mFrameInterpolator->draw(now, leds);
+
+    uint32_t time = mTime->time();
     uint32_t brightness = 255;
     FASTLED_WARN("time = " << time);
     if (mFadeInTime || mFadeOutTime) {
@@ -92,42 +106,21 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
         if (time < mFadeInTime) {
             brightness = time * 255 / mFadeInTime;
         }
-    }
-
-    bool ok = mFrameInterpolator->draw(now, frame);
-    if (brightness != 255) {
-        CRGB* leds = frame->rgb();
-        for (size_t i = 0; i < frame->size(); ++i) {
+        for (size_t i = 0; i < mPixelsPerFrame; ++i) {
             leds[i].nscale8(brightness);
         }
     }
-    return ok;
-}
 
-bool VideoImpl::draw(uint32_t now, CRGB *leds) {
-    //DBG("draw with now = " << now);
-    if (!mTimeScale) {
-        mTimeScale = TimeScalePtr::New(now);
-    }
-    now = mTimeScale->update(now);
-    if (!mStream) {
-        DBG("no stream");
-        return false;
-    }
-    bool ok = updateBufferIfNecessary(mPrevNow, now);
-    mPrevNow = now;
-    if (!ok) {
-        DBG("updateBufferIfNecessary failed");
-        return false;
-    }
-    mFrameInterpolator->draw(now, leds);
+
+
     return true;
 }
 
 
 bool VideoImpl::updateBufferFromStream(uint32_t now) {
+    FASTLED_ASSERT(mTime, "mTime is null");
     if (!mStream) {
-        FASTLED_DBG("no stream");
+        FASTLED_WARN("no stream");
         return false;
     }
     if (mStream->atEnd()) {
@@ -142,7 +135,7 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
     }
 
     if (mFrameInterpolator->capacity() == 0) {
-        DBG("capacity == 0");
+        FASTLED_WARN("capacity == 0");
         return false;
     }
 
@@ -164,12 +157,12 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
             uint32_t frame_to_erase = 0;
             bool ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
             if (!ok) {
-                DBG("get_oldest_frame_number failed");
+                FASTLED_WARN("get_oldest_frame_number failed");
                 return false;
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                DBG("erase failed for frame: " << frame_to_erase);
+                FASTLED_WARN("erase failed for frame: " << frame_to_erase);
                 return false;
             }
         }
@@ -182,23 +175,23 @@ bool VideoImpl::updateBufferFromStream(uint32_t now) {
         if (!mStream->readFrame(recycled_frame.get())) {
             if (mStream->atEnd()) {
                 if (!mStream->rewind()) {
-                    DBG("rewind failed");
+                    FASTLED_WARN("rewind failed");
                     return false;
                 }
-                mTimeScale->reset(now);
+                mTime->reset(now);
                 frame_to_fetch = 0;
                 if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
-                    DBG("readFrameAt failed");
+                    FASTLED_WARN("readFrameAt failed");
                     return false;
                 }
             } else {
-                DBG("We failed for some other reason");
+                FASTLED_WARN("We failed for some other reason");
                 return false;
             }
         }
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
-            DBG("insert failed");
+            FASTLED_WARN("insert failed");
             return false;
         }
     }
@@ -218,7 +211,7 @@ bool VideoImpl::updateBufferFromFile(uint32_t now, bool forward) {
         return true;
     }
     if (mFrameInterpolator->capacity() == 0) {
-        DBG("capacity == 0");
+        FASTLED_WARN("capacity == 0");
         return false;
     }
 
@@ -238,19 +231,19 @@ bool VideoImpl::updateBufferFromFile(uint32_t now, bool forward) {
             if (forward) {
                 ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
                 if (!ok) {
-                    DBG("get_oldest_frame_number failed");
+                    FASTLED_WARN("get_oldest_frame_number failed");
                     return false;
                 }
             } else {
                 ok = mFrameInterpolator->get_newest_frame_number(&frame_to_erase);
                 if (!ok) {
-                    DBG("get_newest_frame_number failed");
+                    FASTLED_WARN("get_newest_frame_number failed");
                     return false;
                 }
             }
             recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                DBG("erase failed for frame: " << frame_to_erase);
+                FASTLED_WARN("erase failed for frame: " << frame_to_erase);
                 return false;
             }
         }
@@ -268,18 +261,18 @@ bool VideoImpl::updateBufferFromFile(uint32_t now, bool forward) {
                 }
                 if (mStream->atEnd()) {
                     if (!mStream->rewind()) {  // Is this still 
-                        DBG("rewind failed");
+                        FASTLED_WARN("rewind failed");
                         return false;
                     }
-                    mTimeScale->reset(now);
+                    mTime->reset(now);
                     frame_to_fetch = 0;
                     if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
-                        DBG("readFrameAt failed");
+                        FASTLED_WARN("readFrameAt failed");
                         return false;
                     }
                     break;  // we have the frame, so we can break out of the loop
                 }
-                DBG("We failed for some other reason");
+                FASTLED_WARN("We failed for some other reason");
                 return false;
             }
             break;
@@ -287,7 +280,7 @@ bool VideoImpl::updateBufferFromFile(uint32_t now, bool forward) {
         
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
-            DBG("insert failed");
+            FASTLED_WARN("insert failed");
             return false;
         }
     }
@@ -304,7 +297,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
         case PixelStream::kStreaming:
             return updateBufferFromStream(now);
         default:
-            DBG("Unknown type: " << uint32_t(type));
+            FASTLED_WARN("Unknown type: " << uint32_t(type));
             return false;
     }
 }
