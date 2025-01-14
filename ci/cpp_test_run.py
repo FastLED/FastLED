@@ -234,16 +234,7 @@ def main() -> None:
         compile_tests(clean=args.clean, unknown_args=args.unknown)
 
     if not args.compile_only:
-        if args.test:
-            run_tests(args.test)
-        else:
-            rtn, stdout = run_command(
-                "ctest --test-dir tests/.build --rerun-failed --output-on-failure"
-            )
-            if rtn != 0:
-                print("Failed tests:")
-                print(stdout)
-                sys.exit(1)
+        run_tests(args.test)
 
 
 if __name__ == "__main__":
