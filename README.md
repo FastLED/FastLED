@@ -15,7 +15,15 @@ A robust and massively parallel-led driver for Arduino/Esp32/RaspberryPi/Atmega/
 *To stay updated on the latest feature releases, please click the `Watch` button in the upper right*
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=fastled/fastled&type=Date)](https://star-history.com/#fastled/fastled&Date)
+## Star History
+
+<a href="https://star-history.com/#fastled/fastled&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+ </picture>
+</a>
 
 ## About
 
