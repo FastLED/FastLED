@@ -963,6 +963,10 @@ class WS2813Controller : public ClocklessController<DATA_PIN, C_NS_WS2813(320), 
 #define FASTLED_WS2812_T3 375
 #endif
 
+#if defined(__IMXRT1062__) && !defined(FASTLED_USES_OBJECTFLED)
+#define FASTLED_USES_OBJECTFLED
+#endif
+
 
 #ifdef FASTLED_USES_OBJECTFLED
 #ifndef __IMXRT1062__
