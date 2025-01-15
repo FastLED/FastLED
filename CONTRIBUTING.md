@@ -24,7 +24,7 @@ cd fastled
 ./test
 ````
 
-# Examples:
+### Compiling to a bunch of different Boards:
 
 **Compiling to Teensy 4.1**
 
