@@ -42,7 +42,7 @@ Alternatively, tests can be built and run for your development machine with CMak
 
 ```bash
 cmake -S tests -B tests/.build
-ctest --test-dir tests/.build --rerun-failed --output-on-failure
+ctest --test-dir tests/.build --output-on-failure
 ```
 
 ## VSCode
