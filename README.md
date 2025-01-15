@@ -430,7 +430,7 @@ Zach Vorhies, the current main contributor to FastLED, briefly worked with Dan i
 
 Zach has this to say about FastLED:
 
-*"The true power of FastLED lies in its ability to transform programmers into LED artists. Free space becomes their canvas; bending light is their medium. FastLED has grown to transcend any one person. To give a piece of yourself to FastLED is to leave behind something immortal."*
+*"The true power of FastLED lies in its ability to transform programmers into LED artists. Free space becomes their canvas; bending light is their medium. To give a piece of yourself to FastLED is to leave behind something immortal."*
 
 ## Contributing
 
