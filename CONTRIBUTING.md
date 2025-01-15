@@ -24,29 +24,11 @@ cd fastled
 ./test
 ````
 
-### Compiling to a bunch of different Boards:
-
-**Compiling to Teensy 4.1**
+### Testing a bunch of platforms at once.
 
 ```
-./compile teensy41 --examples Blink
-```
-
-**Compiling to ESP32-S3**
-
-```
-./compile esp32s3 --examples Blink
-```
-
-**Compiling to the ESP32 Family**
-
-```
+./compile teensy41,teensy40 --examples Blink
 ./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2--examples Blink,Apa102HD
-```
-
-**Compling against the avr family**
-
-```
 ./compiles uno,digix,attiny85  # digix = Arduino Due
 ```
 
