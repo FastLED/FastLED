@@ -24,6 +24,32 @@ cd fastled
 ./test
 ````
 
+# Examples:
+
+**Compiling to Teensy 4.1**
+
+```
+./compile teensy41 --examples Blink
+```
+
+**Compiling to ESP32-S3**
+
+```
+./compile esp32s3 --examples Blink
+```
+
+**Compiling to the ESP32 Family**
+
+```
+./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2--examples Blink,Apa102HD
+```
+
+**Compling against the avr family**
+
+```
+./compiles uno,digix,attiny85  # digix = Arduino Due
+```
+
 ## Unit Tests
 
 Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
