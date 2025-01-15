@@ -2,7 +2,7 @@
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
-FastLED has a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
+The FastLED library includesa powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
 
 ## FastLED compiler cli
 
