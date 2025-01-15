@@ -28,8 +28,8 @@ cd fastled
 
 ```
 ./compile teensy41,teensy40 --examples Blink
-./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2--examples Blink,Apa102HD
-./compiles uno,digix,attiny85  # digix = Arduino Due
+./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2 --examples Blink,Apa102HD
+./compiles uno,digix,attiny85 --examples Blink,Apa102HD 
 ```
 
 ## Unit Tests
