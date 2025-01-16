@@ -542,7 +542,7 @@ struct PixelController {
         uint8_t w = 0;
         rgb_2_rgbw(rgbw.rgbw_mode,
                    rgbw.white_color_temp,
-                   rgb.r, rgb.b, rgb.g,  // Input colors
+                   rgb.r, rgb.g, rgb.b,  // Input colors
                    mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
                    &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
