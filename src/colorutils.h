@@ -8,6 +8,7 @@
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
 #include "fl/xymap.h"
+#include "fl/deprecated.h"
 
 #if !defined(FASTLED_USE_32_BIT_GRADIENT_FILL)
   #if defined(__AVR__)
@@ -547,6 +548,10 @@ void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount);
 /// @param height the height of the matrix
 /// @param blur_amount the amount of blur to apply
 void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, const fl::XYMap& xymap);
+
+/// Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() function.
+/// If you are hitting a linker error here, then use blur2d(..., const fl::XYMap& xymap) instead.
+void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount) FASTLED_DEPRECATED("Use blur2d(..., const fl::XYMap& xymap) instead");
 
 
 /// Perform a blur1d() on every row of a rectangular matrix

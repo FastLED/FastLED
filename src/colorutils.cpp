@@ -10,11 +10,30 @@
 
 #include "FastLED.h"
 #include "fl/xymap.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
+// Legacy XY function. This is a weak symbol that can be overridden by the user.
+uint16_t XY(uint8_t x, uint8_t y) __attribute__((weak));
+
 FASTLED_NAMESPACE_BEGIN
 
+
+// uint16_t XY(uint8_t x, uint8_t y) {
+//   return 0;
+// }
+// make this a weak symbol
+
+
+namespace {
+    uint16_t xy_legacy_wrapper(uint16_t x, uint16_t y,
+                               uint16_t width, uint16_t height) {
+        FASTLED_UNUSED(width);
+        FASTLED_UNUSED(height);
+        return XY(x, y);
+    }
+}
 
 
 void fill_solid( struct CRGB * targetArray, int numToFill,
@@ -440,6 +459,12 @@ void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, cons
 {
     blurRows(leds, width, height, blur_amount, xymap);
     blurColumns(leds, width, height, blur_amount, xymap);
+}
+
+void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+{
+    XYMap xy = XYMap::constructWithUserFunction(width, height, xy_legacy_wrapper);
+    blur2d(leds, width, height, blur_amount, xy);   
 }
 
 void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, const XYMap& xyMap)
