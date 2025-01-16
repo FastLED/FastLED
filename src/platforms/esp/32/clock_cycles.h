@@ -2,7 +2,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "platforms/esp/esp_version.h"
 
 #if __has_include(<hal/cpu_hal.h>)
 // esp-idf v5.0.0+
