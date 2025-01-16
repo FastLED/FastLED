@@ -1,8 +1,4 @@
-#ifdef _MSC_VER  // Visual Studio
-#  ifndef FASTLED_DEPRECATED
-#    define FASTLED_DEPRECATED(msg) __declspec(deprecated(msg))
-#  endif
-#elif defined(__GNUC__)  // GCC or Clang
+#if defined(__GNUC__)  // GCC or Clang
 #  ifndef FASTLED_DEPRECATED
 #    if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #      define FASTLED_DEPRECATED(msg) __attribute__((deprecated(msg)))

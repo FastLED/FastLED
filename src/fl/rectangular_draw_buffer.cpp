@@ -10,8 +10,6 @@ DrawItem::DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw)
     : mPin(pin), mIsRgbw(is_rgbw) {
     if (is_rgbw) {
         numLeds = Rgbw::size_as_rgb(numLeds);
-    } else {
-        numLeds = numLeds;
     }
     mNumBytes = numLeds * 3;
 }

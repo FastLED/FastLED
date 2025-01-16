@@ -75,14 +75,15 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-parameter
     -Werror=unused-variable
     -Werror=unused-value
-
-    # Not supported in gcc.
-    # -Werror=infinite-recursion
-
     -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
     # ignore Arduino/PlatformIO-specific PROGMEM macro
     -DPROGMEM=
 )
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND COMMON_COMPILE_FLAGS -Wself-assign -Werror=infinite-recursion)
+endif()
+
 
 set(UNIT_TEST_COMPILE_FLAGS
     -Wall

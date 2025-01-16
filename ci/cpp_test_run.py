@@ -227,6 +227,11 @@ def parse_args() -> argparse.Namespace:
         "--test",
         help="Specific test to run (without test_ prefix)",
     )
+    parser.add_argument(
+        "--clang",
+        help="Use Clang compiler",
+        action="store_true",
+    )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
     return args
@@ -238,9 +243,13 @@ def main() -> None:
     compile_only = args.compile_only
     specific_test = args.test
     only_run_failed_test = args.only_run_failed_test
+    use_clang = args.clang
 
     if not run_only:
-        compile_tests(clean=args.clean, unknown_args=args.unknown)
+        passthrough_args = args.unknown
+        if use_clang:
+            passthrough_args.append("--use-clang")
+        compile_tests(clean=args.clean, unknown_args=passthrough_args)
 
     if not compile_only:
         if specific_test:
