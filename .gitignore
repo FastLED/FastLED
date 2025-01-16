@@ -47,3 +47,4 @@ ignore/
 .env
 
 .vscode/launch.json
+./activate
