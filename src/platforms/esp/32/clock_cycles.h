@@ -14,14 +14,11 @@
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32_t>(cpu_ll_get_cycle_count());
 }
-#elif __has_include(<esp_cpu.h>)
-  // older esp-idf versions (?)
+#else  // Fallback to, if this fails then please file a bug at github.com/fastled/FastLED/issues and let us know what board you are using.
 #include <esp_cpu.h>
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32>(esp_cpu_get_cycle_count());
 }
-#else
-#error "We don't know how to get the cycle counts on your esp-idf version. Please file a bug at https://github.com/fastled/fastled/issues"
 #endif  // ESP_IDF_VERSION
 
 
