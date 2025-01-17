@@ -37,6 +37,10 @@ jobs:
         if: runner.os == 'Linux' && matrix.compiler == 'gcc'
         run: sudo apt-get install gcc
 
+      - name: Add gcc for macos
+        if: runner.os == 'macOS' && matrix.compiler == 'gcc'
+        run: brew install gcc
+
       - name: Run Test
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
