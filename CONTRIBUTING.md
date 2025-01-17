@@ -17,7 +17,7 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
-Note that the unit tests will compile in `gcc` if it's installed, otherwise the built in `zig-clang` compiler will be used as a fallback automatically. You do not need to install anything.
+*Note that you do NOT need to install the C++ compiler toolchain for compiling + running unit tests. If `gcc` is not found then the `ziglang` clang compiler will be swapped in automatically.*
 
 ## Linting and Unit Testing
 
