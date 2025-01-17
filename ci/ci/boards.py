@@ -15,6 +15,7 @@ ESP32_IDF_5_1_PIOARDUINO_LATEST = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
 ESP32_IDF_4_4_LATEST = "platformio/espressif32"
+APOLLO3_2_2_0 = "https://github.com/sparkfun/Arduino_Apollo3#v2.2.0"
 # Top of trunk.
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32"
 
@@ -80,6 +81,12 @@ class Board:
 
 WEBTARGET = Board(
     board_name="web",
+)
+
+APOLLO3_RED_BOARD = Board(
+    board_name="apollo3_red",
+    platform=APOLLO3_2_2_0,
+    platform_needs_install=True,
 )
 
 ESP32DEV = Board(
@@ -249,6 +256,7 @@ ESP32S3_RMT51 = Board(
 
 ALL: list[Board] = [
     WEBTARGET,
+    APOLLO3_RED_BOARD,
     ESP32DEV,
     ESP32DEV_IDF4_4,
     ESP32DEV_I2S,
