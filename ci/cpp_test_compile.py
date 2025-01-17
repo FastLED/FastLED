@@ -63,8 +63,9 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
 
 
 def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    ZIG = shutil.which("zig")
-    assert ZIG is not None, "Zig compiler not found in PATH."
+    assert 0 == os.system("uv run python -m ziglang version"), "Zig-clang compiler not found"
+    uv_path = Path(shutil.which("uv")).resolve()
+    zig_command = f"\"{uv_path}\" run python -m ziglang"
     CC_PATH = BUILD_DIR / "cc"
     CXX_PATH = BUILD_DIR / "c++"
     AR_PATH = BUILD_DIR / "ar"
@@ -72,15 +73,16 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH = CC_PATH.with_suffix(".cmd")
         CXX_PATH = CXX_PATH.with_suffix(".cmd")
         AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %* 2>&1\n')
-        CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %* 2>&1\n')
-        AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %* 2>&1\n')
+        CC_PATH.write_text(f'@echo off\n"{zig_command}" cc %* 2>&1\n')
+        CXX_PATH.write_text(f'@echo off\n"{zig_command}" c++ %* 2>&1\n')
+        AR_PATH.write_text(f'@echo off\n"{zig_command}" ar %* 2>&1\n')
     else:
-        CC_PATH.write_text(f'#!/bin/bash\n"{ZIG}" cc "$@"\n')
-        CXX_PATH.write_text(f'#!/bin/bash\n"{ZIG}" c++ "$@"\n')
-        AR_PATH.write_text(f'#!/bin/bash\n"{ZIG}" ar "$@"\n')
+        CC_PATH.write_text(f'#!/bin/bash\n"{zig_command}" cc "$@"\n')
+        CXX_PATH.write_text(f'#!/bin/bash\n"{zig_command}" c++ "$@"\n')
+        AR_PATH.write_text(f'#!/bin/bash\n"{zig_command}" ar "$@"\n')
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
+        AR_PATH.chmod(0o755)
 
     # if WASM_BUILD:
     #     wasm_flags = [
