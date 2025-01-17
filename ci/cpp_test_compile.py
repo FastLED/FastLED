@@ -244,18 +244,26 @@ def main() -> None:
     global USE_ZIG, USE_CLANG, WASM_BUILD
 
     args = parse_arguments()
-    USE_ZIG = args.use_zig or args.use_clang  # use Zig's clang compiler
-    USE_CLANG = args.wasm  # Use pure Clang for WASM builds
+    USE_ZIG = args.use_zig  # use Zig's clang compiler
+    USE_CLANG = args.use_clang  # Use pure Clang for WASM builds
     WASM_BUILD = args.wasm
 
-    using_gcc = not USE_ZIG and not USE_CLANG
+    using_gcc = not USE_ZIG and not USE_CLANG and not WASM_BUILD
     if using_gcc:
-
         if not shutil.which("g++"):
             print(
                 "gcc compiler not found in PATH, falling back zig's built in clang compiler"
             )
             USE_ZIG = True
+            USE_CLANG = False
+
+    if USE_CLANG:
+        if shutil.which("clang") is None:
+            print(
+                "Clang compiler not found in PATH, falling back to Zig-clang compiler"
+            )
+            USE_ZIG = True
+            USE_CLANG = False
 
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
