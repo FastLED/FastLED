@@ -47,7 +47,9 @@ jobs:
 
       - name: Install LLVM for macOS
         if: runner.os == 'macOS' && matrix.compiler == 'clang'
-        run: brew install llvm
+        run: |
+          brew install llvm
+          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
 
       - name: Install LLVM for Windows
         if: runner.os == 'Windows' && matrix.compiler == 'clang'
