@@ -63,7 +63,7 @@ jobs:
           platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
           if [ -f "$platformio_ini" ]; then
             echo "Found platformio.ini at: $platformio_ini"
-            cat "############################################"
+            echo "############################################"
             cat "$platformio_ini"
             echo "\n############################################"
           else
