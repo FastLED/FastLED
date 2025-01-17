@@ -32,6 +32,7 @@
 #else
 #define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS_MULTIPLIER 1
 #endif
+#endif
 
 // the memory size of each RMT channel, in words (4 bytes)
 #ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS
