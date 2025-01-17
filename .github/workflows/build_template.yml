@@ -40,7 +40,7 @@ jobs:
       - name: Install Platform
         if: inputs.platform != ''
         run: |
-          uv run pio pkg install ${{ inputs.platform }}
+          uv run pio pkg -g install ${{ inputs.platform }}
 
       - name: PlatformIO Versions
         run: |
