@@ -11,3 +11,4 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: apollo3_red
+      platform: git+https://github.com/nigelb/platform-apollo3blue

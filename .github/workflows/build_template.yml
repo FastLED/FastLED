@@ -7,6 +7,10 @@ on:
         type: string
         required: false
         default: ""
+      platform:
+        type: string
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -32,6 +36,11 @@ jobs:
 
       - name: Install UV
         run: pip install uv
+
+      - name: Install Platform
+        if: inputs.platform != ''
+        run: |
+          uv run platformio platform install ${{ inputs.platform }}
 
       - name: PlatformIO Versions
         run: |
