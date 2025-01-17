@@ -66,6 +66,7 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     assert 0 == os.system("uv run python -m ziglang version"), "Zig-clang compiler not found"
     uv_path = Path(shutil.which("uv")).resolve()
     zig_command = f"\"{uv_path}\" run python -m ziglang"
+    print(f"Zig command: {zig_command}")
     CC_PATH = BUILD_DIR / "cc"
     CXX_PATH = BUILD_DIR / "c++"
     AR_PATH = BUILD_DIR / "ar"
