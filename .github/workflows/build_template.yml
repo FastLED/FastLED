@@ -56,6 +56,15 @@ jobs:
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
+      - name: Find platformio.ini file and print it out
+        run: |
+          platformio_ini=$(find .build -name platformio.ini)
+          if [ -f "$platformio_ini" ]; then
+            cat $platformio_ini
+          else
+            echo "platformio.ini not found"
+          fi
+
       - name: Build Blink.ino for library info
         continue-on-error: true
         run: |
