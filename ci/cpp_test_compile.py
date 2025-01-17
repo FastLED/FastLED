@@ -233,6 +233,15 @@ def main() -> None:
     USE_CLANG = args.wasm  # Use pure Clang for WASM builds
     WASM_BUILD = args.wasm
 
+    using_gcc = not USE_ZIG and not USE_CLANG
+    if using_gcc:
+
+        if not shutil.which("g++"):
+            print(
+                "gcc compiler not found in PATH, falling back zig's built in clang compiler"
+            )
+            USE_ZIG = True
+
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
 
