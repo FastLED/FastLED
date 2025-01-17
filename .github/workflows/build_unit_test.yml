@@ -33,29 +33,6 @@ jobs:
         run: ./install
         shell: bash
 
-      - name: Add gcc for linux
-        if: runner.os == 'Linux' && matrix.compiler == 'gcc'
-        run: sudo apt-get install gcc
-
-      - name: Add gcc for macos
-        if: runner.os == 'macOS' && matrix.compiler == 'gcc'
-        run: brew install gcc
-
-      - name: Install LLVM for Linux
-        if: runner.os == 'Linux' && matrix.compiler == 'clang'
-        run: sudo apt-get install llvm
-
-      - name: Install LLVM for macOS
-        if: runner.os == 'macOS' && matrix.compiler == 'clang'
-        run: |
-          brew install llvm
-          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
-
-      - name: Install LLVM for Windows
-        if: runner.os == 'Windows' && matrix.compiler == 'clang'
-        run: |
-          choco install llvm
-
       - name: Run Test
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
@@ -65,7 +42,3 @@ jobs:
           fi
         shell: bash
 
-      - name: Run Test
-        if: runner.os != 'Linux'
-        run: ./test
-        shell: bash
