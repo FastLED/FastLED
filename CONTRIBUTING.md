@@ -17,14 +17,13 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
-*Note that you do NOT need to install the C++ compiler toolchain for compiling + running unit tests. If `gcc` is not found in your system `PATH` then the `ziglang` clang compiler will be swapped in automatically.*
-
 ## Linting and Unit Testing
 
 ```bash
 ./lint
-./test
+./test  # runs unit tests
 ````
+*Note that you do NOT need to install the C++ compiler toolchain for compiling + running unit tests. If `gcc` is not found in your system `PATH` then the `ziglang` clang compiler will be swapped in automatically.*
 
 ### Testing a bunch of platforms at once.
 
