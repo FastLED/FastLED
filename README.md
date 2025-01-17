@@ -43,7 +43,6 @@ We have multiple goals with this library:
 * Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
 * High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
 
-
 ## Example
 
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
@@ -230,7 +229,7 @@ After the ArduinoIDE is installed then add the library to your IDE
 
 ## PlatformIO
 
-Follow our guide here. Our template will allow your project to be compiled by both PlatformIO and ArduinoIDE
+PlatformIO offers an incredible IDE experience. Setup is easier than you think. Follow our guide here. Our template will allow your project to be compiled by both PlatformIO and ArduinoIDE
 
 https://github.com/FastLED/PlatformIO-Starter
 
@@ -447,3 +446,7 @@ https://github.com/FastLED/FastLED/blob/master/CONTRIBUTING.md
 ## How to stay up to date
 
 This repo is under activate development. Click the watch button if you want to be one of the first to know of new releases and features.
+
+## Misc
+
+  * FastLED is in the top most 4 libraries downloaded for Arduino: https://docs.arduino.cc/libraries/
