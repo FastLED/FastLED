@@ -8,27 +8,6 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install UV
-        run: pip install uv
-      
-      - name: Install Platform
-        run: uv run pio platform install git+https://github.com/nigelb/platform-apollo3blue.git
-
-      - name: Make Tmp Dir
-        run: mkdir -p redboard
-
-      - name: Init board
-        run: cd redboard && pio init -b SparkFun_RedBoard_Artemis_ATP -O"platform_packages=framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.0"
-
-      - name: Compile test
-        run: cd redboard && pio run
-
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: apollo3_red
