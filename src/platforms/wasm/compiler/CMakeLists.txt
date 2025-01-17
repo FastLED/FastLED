@@ -39,38 +39,6 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
-# Linker flags
-set(COMMON_LINK_FLAGS
-    -sALLOW_MEMORY_GROWTH=0
-    -sDISABLE_EXCEPTION_CATCHING=1
-    -sDISABLE_EXCEPTION_THROWING=0
-    --bind
-    -DUSE_OFFSET_CONVERTER=0
-    -sINITIAL_MEMORY=134217728
-    -fuse-ld=lld
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
-    --no-entry
-    -sMODULARIZE=1
-    -sEXPORT_NAME=fastled
-    -o fastled.js
-)
-
-# Debug-specific flags
-if(BUILD_MODE STREQUAL "DEBUG")
-    list(APPEND COMMON_COMPILE_FLAGS
-        -g3
-        -fsanitize=address
-        -fsanitize=undefined
-    )
-    list(APPEND COMMON_LINK_FLAGS
-        -gsource-map
-        --emit-symbol-map
-        -sSTACK_OVERFLOW_CHECK=2
-        -ASSERTIONS=1
-    )
-endif()
-
 # Set FastLED source directory
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 
@@ -86,7 +54,12 @@ file(GLOB_RECURSE FASTLED_SOURCES
 
 message(STATUS "FastLED sources: ${FASTLED_SOURCES}")
 
-# Create core FastLED library
+# Remove platform-specific files that might cause issues
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
+list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
+
+# Create core FastLED library archive
 add_library(FastLED STATIC ${FASTLED_SOURCES})
 
 # Set properties for the FastLED library
@@ -95,39 +68,6 @@ set_target_properties(FastLED PROPERTIES
     CXX_STANDARD_REQUIRED ON
     POSITION_INDEPENDENT_CODE ON
 )
-target_compile_options(FastLED PRIVATE ${COMMON_COMPILE_FLAGS})
 
-# Create the WASM executable and link FastLED
-add_executable(fastled)
-target_link_libraries(fastled PRIVATE FastLED)
-
-# Set properties for the fastled target
-set_target_properties(fastled PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
-target_link_options(fastled PRIVATE ${COMMON_LINK_FLAGS})
-
-# Debug output for source categorization
-message(STATUS "Current Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-
-# Remove platform-specific files that might cause issues
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
-
-# Try to find libunwind, but make it optional
-find_package(LibUnwind QUIET)
-
-# Define a variable to check if we should use libunwind
-set(USE_LIBUNWIND ${LibUnwind_FOUND})
-
-if(USE_LIBUNWIND)
-    message(STATUS "LibUnwind found. Using it for better stack traces.")
-else()
-    message(STATUS "LibUnwind not found. Falling back to basic stack traces.")
-endif()
-
-# Add verbose output for tests
-set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+# Apply compile options directly (no private linking, all symbols visible)
+target_compile_options(FastLED PUBLIC ${COMMON_COMPILE_FLAGS})
