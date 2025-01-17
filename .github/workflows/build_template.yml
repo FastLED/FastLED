@@ -59,7 +59,7 @@ jobs:
       - name: Find platformio.ini file and print it out
         if: always()
         run: |
-          platformio_ini=$(find .build -name platformio.ini)
+          platformio_ini=$(find .pio/build -name platformio.ini)
           if [ -f "$platformio_ini" ]; then
             cat $platformio_ini
           else
