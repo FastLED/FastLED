@@ -15,7 +15,7 @@ endif()
 # Set optimization level based on build mode
 if(BUILD_MODE STREQUAL "QUICK")
     set(OPT_LEVEL "-O1")
-elif(BUILD_MODE STREQUAL "DEBUG")
+elseif(BUILD_MODE STREQUAL "DEBUG")
     set(OPT_LEVEL "-O0")
 else() # RELEASE
     set(OPT_LEVEL "-Oz")
