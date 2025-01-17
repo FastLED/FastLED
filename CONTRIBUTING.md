@@ -17,6 +17,8 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
+Note that the unit tests will compile in `gcc` if it's installed, otherwise the built in `zig-clang` compiler will be used as a fallback automatically. You do not need to install anything.
+
 ## Linting and Unit Testing
 
 ```bash
