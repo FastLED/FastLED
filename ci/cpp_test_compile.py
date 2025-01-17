@@ -78,9 +78,14 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CXX_PATH.write_text(f'@echo off\n"{zig_command}" c++ %* 2>&1\n')
         AR_PATH.write_text(f'@echo off\n"{zig_command}" ar %* 2>&1\n')
     else:
-        CC_PATH.write_text(f'#!/bin/bash\n"{zig_command}" cc "$@"\n')
-        CXX_PATH.write_text(f'#!/bin/bash\n"{zig_command}" c++ "$@"\n')
-        AR_PATH.write_text(f'#!/bin/bash\n"{zig_command}" ar "$@"\n')
+        cc_cmd = f'#!/bin/bash\n"{zig_command}" cc "$@"\n'
+        cxx_cmd = f'#!/bin/bash\n"{zig_command}" c++ "$@"\n'
+        ar_cmd = f'#!/bin/bash\n"{zig_command}" ar "$@"\n'
+        CC_PATH.write_text(cc_cmd)
+        # CXX_PATH.write_text(f'#!/bin/bash\n"{zig_command}" c++ "$@"\n')
+        CXX_PATH.write_text(cxx_cmd)
+        # AR_PATH.write_text(f'#!/bin/bash\n"{zig_command}" ar "$@"\n')
+        AR_PATH.write_text(ar_cmd)
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
         AR_PATH.chmod(0o755)
