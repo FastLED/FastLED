@@ -15,6 +15,7 @@ ESP32_IDF_5_1_PIOARDUINO_LATEST = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
 ESP32_IDF_4_4_LATEST = "platformio/espressif32"
+APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Top of trunk.
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32"
 
@@ -77,6 +78,26 @@ class Board:
         data_str = self.__repr__()
         return hash(data_str)
 
+
+WEBTARGET = Board(
+    board_name="web",
+)
+
+APOLLO3_RED_BOARD = Board(
+    board_name="apollo3_red",
+    real_board_name="SparkFun_RedBoard_Artemis_ATP",
+    platform=APOLLO3_2_2_0,
+    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.0",
+    platform_needs_install=True,
+)
+
+APOLLO3_SPARKFUN_THING_PLUS_EXPLORERABLE = Board(
+    board_name="apollo3_thing_explorable",
+    real_board_name="SparkFun_Thing_Plus_expLoRaBLE",
+    platform=APOLLO3_2_2_0,
+    platform_packages="framework-arduinoapollo3@https://github.com/sparkfun/Arduino_Apollo3#v2.2.0",
+    platform_needs_install=True,
+)
 
 ESP32DEV = Board(
     board_name="esp32dev",
@@ -230,7 +251,6 @@ ESP32DEV_I2S = Board(
     board_name="esp32dev_i2s",
     real_board_name="esp32dev",
     platform=ESP32_IDF_4_4_LATEST,
-    defines=["FASTLED_ESP32_I2S"],
 )
 
 ESP32S3_RMT51 = Board(
@@ -245,6 +265,9 @@ ESP32S3_RMT51 = Board(
 
 
 ALL: list[Board] = [
+    WEBTARGET,
+    APOLLO3_RED_BOARD,
+    APOLLO3_SPARKFUN_THING_PLUS_EXPLORERABLE,
     ESP32DEV,
     ESP32DEV_IDF4_4,
     ESP32DEV_I2S,

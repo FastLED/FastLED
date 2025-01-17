@@ -39,7 +39,7 @@ class PixelStream: public fl::Referent {
   bool readFrame(Frame* frame);
   bool readFrameAt(uint32_t frameNumber, Frame* frame);
   bool hasFrame(uint32_t frameNumber);
-  int32_t framesRemaining() const;
+  int32_t framesRemaining() const;  // -1 if this is a stream.
   int32_t framesDisplayed() const;
   bool available() const;
   bool atEnd() const;
@@ -50,7 +50,6 @@ class PixelStream: public fl::Referent {
   Type getType() const;  // Returns the type of the video stream (kStreaming or kFile)
   
  private:
-  void init(int bytes_per_frame);
   int32_t mbytesPerFrame;
   fl::FileHandlePtr mFileHandle;
   fl::ByteStreamPtr mByteStream;

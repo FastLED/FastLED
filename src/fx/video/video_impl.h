@@ -33,6 +33,7 @@ class VideoImpl : public fl::Referent {
     // Api
     void begin(fl::FileHandlePtr h);
     void beginStream(fl::ByteStreamPtr s);
+    void setFade(uint32_t fadeInTime, uint32_t fadeOutTime);
     bool draw(uint32_t now, CRGB *leds);
     void end();
     bool rewind();
@@ -40,11 +41,13 @@ class VideoImpl : public fl::Referent {
     bool draw(uint32_t now, Frame *frame);
     bool full() const;
     void setTimeScale(float timeScale);
-    float timeScale() const { return mTimeScale ? mTimeScale->scale() : 1.0f; }
+    float timeScale() const { return mTimeScale; }
     size_t pixelsPerFrame() const { return mPixelsPerFrame; }
     void pause(uint32_t now);
     void resume(uint32_t now);
     bool needsFrame(uint32_t now) const;
+    int32_t durationMicros() const;  // -1 if this is a stream.
+
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
@@ -54,7 +57,10 @@ class VideoImpl : public fl::Referent {
     PixelStreamPtr mStream;
     uint32_t mPrevNow = 0;
     FrameInterpolatorPtr mFrameInterpolator;
-    TimeScalePtr mTimeScale;
+    TimeScalePtr mTime;
+    uint32_t mFadeInTime = 1000;
+    uint32_t mFadeOutTime = 1000;
+    float mTimeScale = 1.0f;
 };
 
 }  // namespace fl

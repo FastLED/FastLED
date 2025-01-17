@@ -104,7 +104,7 @@ class RunningProcess:
             ValueError: If the process hasn't been started.
         """
         if self.proc is None:
-            raise ValueError("Process is not running.")
+            return
         self.shutdown.set()
         self.proc.kill()
 

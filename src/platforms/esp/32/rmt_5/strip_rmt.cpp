@@ -1,17 +1,15 @@
+#ifdef ESP32
 
+#include <stdint.h>
+#include "third_party/espressif/led_strip/src/enabled.h"
 
-#if ESP32
-
-
-#include "src/enabled.h"
-
-#if FASTLED_RMT5 && FASTLED_ESP32_HAS_RMT && __has_include("driver/rmt_types.h")
+#if FASTLED_RMT5
 
 #include "strip_rmt.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "src/led_strip.h"
+#include "third_party/espressif/led_strip/src/led_strip.h"
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"
@@ -65,8 +63,6 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
     ESP_LOGI(TAG, "Created LED strip object with RMT backend");
     return led_strip;
-
-    return nullptr;
 }
 
 
@@ -160,13 +156,19 @@ private:
 }  // namespace
 
 
+
 IRmtStrip *IRmtStrip::Create(
     int pin, uint32_t led_count, bool is_rgbw,
     uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset,
-    IRmtStrip::DmaMode dma_config, uint8_t interrupt_priority)
+    DmaMode dma_config, uint8_t interrupt_priority)
 {
-    return new RmtStrip(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, dma_config, interrupt_priority);
+    return new RmtStrip(
+        pin, led_count, is_rgbw,
+        th0, tl0, th1, tl1, reset,
+        dma_config, interrupt_priority
+    );
 }
+
 
 #endif  // FASTLED_RMT5
 

@@ -86,6 +86,8 @@
 #define CORDER_BRWG	28
 #define CORDER_BGWR	29
 
+namespace fl {
+
 
 //Usage: ObjectFLED myCube ( Num_LEDs, *drawBuffer, LED_type, numPins, *pinList, serpentineNumber )
 class ObjectFLED {
@@ -198,5 +200,7 @@ void fadeToColorBy(void*, uint16_t, uint32_t, uint8_t);
 //Draws square in a 2D RGB array with lower left corner at (Y_Corner, X_Corner).
 //Safe to specify -Y, -X corner, safe to draw a box which partially fits on LED plane.
 void drawSquare(void*, uint16_t, uint16_t, int, int, uint32_t, uint32_t);
+
+}	// namespace fl
 
 #endif

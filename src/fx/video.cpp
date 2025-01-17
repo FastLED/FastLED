@@ -32,16 +32,16 @@ Video::Video(size_t pixelsPerFrame, float fps, size_t frame_history_count): Fx1d
     mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frame_history_count);
 }
 
+void Video::setFade(uint32_t fadeInTime, uint32_t fadeOutTime) {
+    mImpl->setFade(fadeInTime, fadeOutTime);
+}
+
 void Video::pause(uint32_t now) {
-    if (mImpl) {
-        mImpl->pause(now);
-    }
+    mImpl->pause(now);
 }
 
 void Video::resume(uint32_t now) {
-    if (mImpl) {
-        mImpl->resume(now);
-    }
+    mImpl->resume(now);
 }
 
 Video::~Video() = default;
@@ -101,6 +101,13 @@ void Video::draw(DrawContext context) {
         return;
     }
     mImpl->draw(context.now, context.leds);
+}
+
+int32_t Video::durationMicros() const {
+    if (!mImpl) {
+        return -1;
+    }
+    return mImpl->durationMicros();
 }
 
 Str Video::fxName() const {
@@ -165,10 +172,11 @@ VideoFxWrapper::VideoFxWrapper(Ptr<Fx> fx) : Fx1d(fx->getNumLeds()), mFx(fx) {
         FASTLED_WARN("VideoFxWrapper: Fx does not have a fixed frame rate, assuming 30fps.");
         mFps = 30.0f;
     }
-    mVideo = VideoImplPtr::New(fx->getNumLeds(), mFps, 2);
-    mByteStream = ByteStreamMemoryPtr::New(fx->getNumLeds() * sizeof(CRGB));
+    mVideo = VideoImplPtr::New(mFx->getNumLeds(), mFps, 2);
+    mByteStream = ByteStreamMemoryPtr::New(mFx->getNumLeds() * sizeof(CRGB));
     mVideo->beginStream(mByteStream);
 }
+
 
 VideoFxWrapper::~VideoFxWrapper() = default;
 
@@ -187,6 +195,10 @@ void VideoFxWrapper::draw(DrawContext context) {
     if (!ok) {
         FASTLED_WARN("VideoFxWrapper: draw failed.");
     }
+}
+
+void VideoFxWrapper::setFade(uint32_t fadeInTime, uint32_t fadeOutTime) {
+    mVideo->setFade(fadeInTime, fadeOutTime);
 }
 
 

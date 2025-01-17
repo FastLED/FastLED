@@ -45,4 +45,7 @@ dist
 
 ignore/
 .env
+
 .vscode/launch.json
+activate
+temp

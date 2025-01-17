@@ -101,6 +101,8 @@ void NoisePalette::setPalettePreset(int paletteIndex) {
         scale = 20;
         colorLoop = 1;
         break;
+    default:
+        break;
     }
 }
 

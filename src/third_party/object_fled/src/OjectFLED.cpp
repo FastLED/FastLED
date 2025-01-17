@@ -70,6 +70,8 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif
 
+namespace fl {
+
 volatile uint32_t framebuffer_index = 0;		//isr()
 uint8_t* ObjectFLED::frameBuffer;				//isr()
 uint32_t ObjectFLED::numbytes;					//isr()
@@ -647,5 +649,8 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 		}	//if valid y
 	}	//for y
 } // drawSquare()
+
+} // namespace fl
+
 
 #endif // __IMXRT1062__

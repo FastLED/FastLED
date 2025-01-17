@@ -95,6 +95,13 @@ TEST_CASE("fl::FixedMap operations") {
         }
         CHECK(sum == 60);
     }
+
+    SUBCASE("Operator[]") {
+        CHECK(map[1] == 0);  // Default value
+        CHECK(!map.insert(1, 10).first);
+        CHECK(map[1] == 0);
+        CHECK(map[2] == 0);  // Default value
+    }
 }
 
 TEST_CASE("SortedHeapMap operations") {

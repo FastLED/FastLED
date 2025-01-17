@@ -216,11 +216,21 @@ def parse_args() -> argparse.Namespace:
         help="Only run the tests without compiling them",
     )
     parser.add_argument(
+        "--only-run-failed-test",
+        action="store_true",
+        help="Only run the tests that failed in the previous run",
+    )
+    parser.add_argument(
         "--clean", action="store_true", help="Clean build before compiling"
     )
     parser.add_argument(
         "--test",
         help="Specific test to run (without test_ prefix)",
+    )
+    parser.add_argument(
+        "--clang",
+        help="Use Clang compiler",
+        action="store_true",
     )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
@@ -229,12 +239,30 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    run_only = args.run_only
+    compile_only = args.compile_only
+    specific_test = args.test
+    only_run_failed_test = args.only_run_failed_test
+    use_clang = args.clang
 
-    if not args.run_only:
-        compile_tests(clean=args.clean, unknown_args=args.unknown)
+    if not run_only:
+        passthrough_args = args.unknown
+        if use_clang:
+            passthrough_args.append("--use-clang")
+        compile_tests(clean=args.clean, unknown_args=passthrough_args)
 
-    if not args.compile_only:
-        run_tests(args.test)
+    if not compile_only:
+        if specific_test:
+            run_tests(specific_test)
+        else:
+            cmd = "ctest --test-dir tests/.build --output-on-failure"
+            if only_run_failed_test:
+                cmd += " --rerun-failed"
+            rtn, stdout = run_command(cmd)
+            if rtn != 0:
+                print("Failed tests:")
+                print(stdout)
+                sys.exit(1)
 
 
 if __name__ == "__main__":

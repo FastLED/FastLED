@@ -21,6 +21,11 @@ class FrameTracker {
     // Given a frame number, returns the exact timestamp in milliseconds that the frame should be displayed.
     uint32_t get_exact_timestamp_ms(uint32_t frameNumber) const;
 
+    
+    uint32_t microsecondsPerFrame() const {
+        return mMicrosSecondsPerInterval;
+    }
+
   private:
     uint32_t mMicrosSecondsPerInterval;
     uint32_t mStartTime = 0;

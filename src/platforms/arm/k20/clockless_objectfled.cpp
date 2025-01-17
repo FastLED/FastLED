@@ -14,6 +14,7 @@
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/math_macros.h"
+#include "fl/rectangular_draw_buffer.h"
 #include "pixel_iterator.h"
 #include "cpixel_ledcontroller.h"
 
@@ -23,34 +24,21 @@ namespace { // anonymous namespace
 
 typedef fl::FixedVector<uint8_t, 50> PinList50;
 
-typedef uint8_t Pin;
 
 static float gOverclock = 1.0f;
 static float gPrevOverclock = 1.0f;
 static int gLatchDelayUs = -1;
 
-struct Info {
-    uint8_t pin = 0;
-    uint16_t numLeds = 0;
-    bool isRgbw = false;
-    bool operator!=(const Info &other) const {
-        return pin != other.pin || numLeds != other.numLeds || isRgbw != other.isRgbw;
-    }
-};
-
-
 
 // Maps multiple pins and CRGB strips to a single ObjectFLED object.
 class ObjectFLEDGroup {
   public:
-    typedef fl::HeapVector<Info> DrawList;
 
-    fl::scoped_ptr<ObjectFLED> mObjectFLED;
-    fl::HeapVector<uint8_t> mAllLedsBufferUint8;
-    DrawList mObjects;
-    DrawList mPrevObjects;
+
+    fl::scoped_ptr<fl::ObjectFLED> mObjectFLED;
+    fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
-    bool mOnPreDrawCalled = false;
+
 
     static ObjectFLEDGroup &getInstance() {
         return fl::Singleton<ObjectFLEDGroup>::instance();
@@ -59,79 +47,42 @@ class ObjectFLEDGroup {
     ObjectFLEDGroup() = default;
     ~ObjectFLEDGroup() { mObjectFLED.reset(); }
 
-    void onNewFrame() {
-        if (!mDrawn) {
-            return;
-        }
+    void onQueuingStart() {
+        mRectDrawBuffer.onQueuingStart();
         mDrawn = false;
-        mOnPreDrawCalled = false;
-        mObjects.swap(mPrevObjects);
-        mObjects.clear();
-        if (!mAllLedsBufferUint8.empty()) {
-            memset(&mAllLedsBufferUint8.front(), 0, mAllLedsBufferUint8.size());
-            mAllLedsBufferUint8.clear();
-        }
     }
 
-    void onPreDraw() {
-        if (mOnPreDrawCalled) {
-            return;
-        }
-        // iterator through the current draw objects and calculate the total number of leds
-        // that will be drawn this frame.
-        uint32_t totalLeds = 0;
-        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            totalLeds += it->numLeds;
-        }
-        if (totalLeds == 0) {
-            return;
-        }
-        // Always assume RGB data. RGBW data will be converted to RGB data.
-        mAllLedsBufferUint8.reserve(totalLeds * 3);
+    void onQueuingDone() {
+        mRectDrawBuffer.onQueuingDone();
     }
 
-    void addObject(Pin pin, uint16_t numLeds, bool is_rgbw) {
-        if (is_rgbw) {
-            numLeds = Rgbw::size_as_rgb(numLeds);
-        }
-        Info newInfo = {pin, numLeds, is_rgbw};
-        mObjects.push_back(newInfo);
-    }
-
-    uint32_t getMaxLedInStrip() const {
-        uint32_t maxLed = 0;
-        for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-            maxLed = MAX(maxLed, it->numLeds);
-        }
-        return maxLed;
-    }
-
-    uint32_t getTotalLeds() const {
-        uint32_t numStrips = mObjects.size();
-        uint32_t maxLed = getMaxLedInStrip();
-        return numStrips * maxLed;
+    void addObject(uint8_t pin, uint16_t numLeds, bool is_rgbw) {
+        mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
     void showPixelsOnceThisFrame() {
         if (mDrawn) {
             return;
         }
-        uint32_t totalLeds = getTotalLeds();
-        if (totalLeds == 0) {
+        mDrawn = true;
+        if (mRectDrawBuffer.mAllLedsBufferUint8Size == 0) {
             return;
         }
-        
-        bool needs_validation = mPrevObjects != mObjects || !mObjectFLED.get() || gOverclock != gPrevOverclock;
+
+        bool draw_list_changed = mRectDrawBuffer.mDrawListChangedThisFrame;
+        bool needs_validation = draw_list_changed || !mObjectFLED.get() || gOverclock != gPrevOverclock;
         if (needs_validation) {
             gPrevOverclock = gOverclock;
             mObjectFLED.reset();
             PinList50 pinList;
-            for (auto it = mObjects.begin(); it != mObjects.end(); ++it) {
-                pinList.push_back(it->pin);
+            for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
+                pinList.push_back(it->mPin);
             }
-            mObjectFLED.reset(new ObjectFLED(totalLeds, &mAllLedsBufferUint8.front(),
-                                             CORDER_RGB, pinList.size(),
-                                             pinList.data()));
+            int totalLeds = mRectDrawBuffer.getTotalBytes() / 3;  // Always work in RGB, even when in RGBW mode.
+            FASTLED_WARN("ObjectFLEDGroup::showPixelsOnceThisFrame: totalLeds = " <<  totalLeds);
+            mObjectFLED.reset(new fl::ObjectFLED(totalLeds, mRectDrawBuffer.mAllLedsBufferUint8.get(),
+                                                 CORDER_RGB, pinList.size(),
+                                                 pinList.data()));
             if (gLatchDelayUs >= 0) {
                 mObjectFLED->begin(gOverclock, gLatchDelayUs);
             } else {
@@ -139,7 +90,6 @@ class ObjectFLEDGroup {
             }
         }
         mObjectFLED->show();
-        mDrawn = true;
     }
 };
 
@@ -158,38 +108,48 @@ void ObjectFled::SetLatchDelay(uint16_t latch_delay_us) {
 
 void ObjectFled::beginShowLeds(int datapin, int nleds) {
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
-    group.onNewFrame();
+    group.onQueuingStart();
+    group.addObject(datapin, nleds, false);
 }
 
 void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
-    group.onPreDraw();
+    group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
-    int numLeds = pixel_iterator.size();
-    fl::HeapVector<uint8_t>& all_pixels = group.mAllLedsBufferUint8;
+
+    fl::Slice<uint8_t> strip_pixels = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
+            FASTLED_ASSERT(strip_pixels.size() >= 4, "ObjectFled::showPixels: buffer overflow");
             pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            all_pixels.push_back(r);
-            all_pixels.push_back(g);
-            all_pixels.push_back(b);
-            all_pixels.push_back(w);
+            strip_pixels[0] = r;
+            strip_pixels[1] = g;
+            strip_pixels[2] = b;
+            strip_pixels[3] = w;
+            strip_pixels.pop_front();
+            strip_pixels.pop_front();
+            strip_pixels.pop_front();
+            strip_pixels.pop_front();
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
     } else {
         uint8_t r, g, b;
         while (pixel_iterator.has(1)) {
+            FASTLED_ASSERT(strip_pixels.size() >= 3, "ObjectFled::showPixels: buffer overflow");
             pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            all_pixels.push_back(r);
-            all_pixels.push_back(g);
-            all_pixels.push_back(b);
+            strip_pixels[0] = r;
+            strip_pixels[1] = g;
+            strip_pixels[2] = b;
+            strip_pixels.pop_front();
+            strip_pixels.pop_front();
+            strip_pixels.pop_front();
             pixel_iterator.advanceData();
             pixel_iterator.stepDithering();
         }
     }
-    group.addObject(data_pin, numLeds, rgbw.active());
+
 }
 
 void ObjectFled::endShowLeds() {

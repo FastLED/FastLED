@@ -277,7 +277,7 @@ struct CRGB {
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
-    FASTLED_FORCE_INLINE CRGB& nscale8 (uint8_t scaledown );
+    CRGB& nscale8 (uint8_t scaledown );
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light

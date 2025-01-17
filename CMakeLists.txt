@@ -11,7 +11,8 @@ file(GLOB FastLED_SRCS "src/fx/**/*.cpp")
 list(REMOVE_ITEM FastLED_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/stub_main.cpp")
 
 file(GLOB ESP32_SRCS "src/platforms/esp/32/*.cpp")
-file(GLOB ESP32_THIRD_PARTY "src/third_party/*.c*")
+file(GLOB ESP32_THIRD_PARTY "src/third_party/*.c")
+file(GLOB ESP32_THIRD_PARTY "src/third_party/*.cpp")
 list(APPEND FastLED_SRCS ${ESP32_SRCS})
 
 idf_component_register(SRCS ${FastLED_SRCS} ${ESP32_LED_STRIP_COMPONENT_SRCS}

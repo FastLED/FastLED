@@ -5,7 +5,7 @@
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if !FASTLED_RMT5
+#if FASTLED_ESP32_HAS_RMT && !FASTLED_RMT5
 
 #define FASTLED_INTERNAL
 

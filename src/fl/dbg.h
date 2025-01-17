@@ -26,9 +26,12 @@ inline const char* fastled_file_offset(const char* file) {
 }
 }  // namespace fl
 
+#ifdef __EMSCRIPTEN__
+#define FASTLED_DBG_USE_PRINTF 1
+#endif
 
 #ifndef FASTLED_DBG_USE_PRINTF
-#if defined(DEBUG) && (defined(__EMSCRIPTEN__) || defined(__IMXRT1062__) || defined(ESP32))
+#if defined(DEBUG) && (defined(__IMXRT1062__) || defined(ESP32))
 #define FASTLED_DBG_USE_PRINTF 1
 #else
 #define FASTLED_DBG_USE_PRINTF 0
@@ -54,13 +57,13 @@ namespace fl {
 
 #ifndef FASTLED_HAS_DBG
 // FASTLED_DBG is a macro that can be defined to enable debug printing.
-#define FASTLED_DBG(X)
+#define FASTLED_DBG(X) (fl::FakeStrStream() << X)
 #endif
 
 #ifndef FASTLED_DBG_IF
 #ifdef FASTLED_HAS_DBG
 #define FASTLED_DBG_IF(COND, MSG) if (COND) FASTLED_DBG(MSG)
 #else
-#define FASTLED_DBG_IF(COND, MSG)
+#define FASTLED_DBG_IF(COND, MSG) while(false && (COND)) { FASTLED_DBG(MSG); }
 #endif  // FASTLED_HAS_DBG
 #endif  // FASTLED_DBG_IF

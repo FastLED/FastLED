@@ -8,12 +8,17 @@ import time
 import warnings
 import zipfile
 import zlib
+from contextlib import asynccontextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from threading import Timer
-from typing import Callable
 
 import psutil  # type: ignore
+from code_sync import (  # type: ignore
+    sync_source_directory_if_volume_is_mapped,
+    sync_src_to_target,
+)
+from compile_lock import COMPILE_LOCK  # type: ignore
 from disklru import DiskLRUCache  # type: ignore
 from fastapi import (  # type: ignore
     BackgroundTasks,
@@ -25,9 +30,9 @@ from fastapi import (  # type: ignore
     UploadFile,
 )
 from fastapi.responses import FileResponse, RedirectResponse, Response  # type: ignore
-from sketch_hasher import generate_hash_of_project_files
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from sketch_hasher import generate_hash_of_project_files  # type: ignore
+from starlette.middleware.base import BaseHTTPMiddleware  # type: ignore
+from starlette.requests import Request  # type: ignore
 
 _EXAMPLES: list[str] = [
     "Chromancer",
@@ -71,10 +76,12 @@ _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
     or _VOLUME_MAPPED_SRC.exists()
 )
-_LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
-    os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
-)
-_START_TIME = time.time()
+# This feature is broken. To fix, issue a git update, THEN invoke the compiler command to re-warm the cache.
+# otherwise you get worst case scenario on a new compile.
+# _LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
+#     os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
+# )
+_LIVE_GIT_UPDATES_ENABLED = False
 
 
 if _NO_SKETCH_CACHE:
@@ -82,7 +89,6 @@ if _NO_SKETCH_CACHE:
 
 UPLOAD_DIR = Path("/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
-COMPILE_LOCK = threading.Lock()
 COMPILE_COUNT = 0
 COMPILE_FAILURES = 0
 COMPILE_SUCCESSES = 0
@@ -95,9 +101,6 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 SKETCH_CACHE_FILE = OUTPUT_DIR / "compile_cache.db"
 SKETCH_CACHE_MAX_ENTRIES = 50
 SKETCH_CACHE = DiskLRUCache(str(SKETCH_CACHE_FILE), SKETCH_CACHE_MAX_ENTRIES)
-
-
-app = FastAPI()
 
 
 class UploadSizeMiddleware(BaseHTTPMiddleware):
@@ -120,6 +123,31 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
                     )
         return await call_next(request)
 
+
+@asynccontextmanager  # type: ignore
+async def lifespan(app: FastAPI):  # type: ignore
+    print("Starting FastLED wasm compiler server...")
+    try:
+        print(f"Settings: {json.dumps(get_settings(), indent=2)}")
+    except Exception as e:
+        print(f"Error getting settings: {e}")
+
+    if _MEMORY_LIMIT_MB > 0:
+        print(f"Starting memory watchdog (limit: {_MEMORY_LIMIT_MB}MB)")
+        memory_watchdog()
+
+    sync_source_directory_if_volume_is_mapped()
+    if _LIVE_GIT_UPDATES_ENABLED:
+        Timer(
+            _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
+        ).start()  # Start the periodic git update
+    else:
+        print("Auto updates disabled")
+    yield  # end startup
+    return  # end shutdown
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(UploadSizeMiddleware, max_upload_size=_UPLOAD_LIMIT)
 
@@ -173,68 +201,6 @@ def cache_put(hash: str, data: bytes) -> None:
         print("Sketch caching disabled, skipping cache put")
         return
     SKETCH_CACHE.put_bytes(hash, data)
-
-
-def sync_src_to_target(
-    src: Path, dst: Path, callback: Callable[[], None] | None = None
-) -> bool:
-    """Sync the volume mapped source directory to the FastLED source directory."""
-    suppress_print = (
-        _START_TIME + 30 > time.time()
-    )  # Don't print during initial volume map.
-    if not src.exists():
-        # Volume is not mapped in so we don't rsync it.
-        print(f"Skipping rsync, as fastled src at {src} doesn't exist")
-        return False
-    try:
-        print("\nSyncing source directories...")
-        with COMPILE_LOCK:
-            # Use rsync to copy files, preserving timestamps and deleting removed files
-            cp: subprocess.CompletedProcess = subprocess.run(
-                ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
-                check=True,
-                text=True,
-                capture_output=True,
-            )
-            if cp.returncode == 0:
-                changed = False
-                changed_lines: list[str] = []
-                lines = cp.stdout.split("\n")
-                for line in lines:
-                    suffix = line.strip().split(".")[-1]
-                    if suffix in ["cpp", "h", "hpp", "ino", "py", "js", "html", "css"]:
-                        if not suppress_print:
-                            print(f"Changed file: {line}")
-                        changed = True
-                        changed_lines.append(line)
-                if changed:
-                    if not suppress_print:
-                        print(f"FastLED code had updates: {changed_lines}")
-                    if callback:
-                        callback()
-                    return True
-                print("Source directory synced successfully with no changes")
-                return False
-            else:
-                print(f"Error syncing directories: {cp.stdout}\n\n{cp.stderr}")
-                return False
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error syncing directories: {e.stdout}\n\n{e.stderr}")
-    except Exception as e:
-        print(f"Error syncing directories: {e}")
-    return False
-
-
-def sync_source_directory_if_volume_is_mapped(
-    callback: Callable[[], None] | None = None
-) -> bool:
-    """Sync the volume mapped source directory to the FastLED source directory."""
-    if not _VOLUME_MAPPED_SRC.exists():
-        # Volume is not mapped in so we don't rsync it.
-        print("Skipping rsync, as fastled src volume not mapped")
-        return False
-    return sync_src_to_target(_VOLUME_MAPPED_SRC, _RSYNC_DEST, callback=callback)
 
 
 def sync_live_git_to_target() -> None:
@@ -437,10 +403,7 @@ def get_settings() -> dict:
     return settings
 
 
-# on startup
-@app.on_event("startup")
-def startup_event():
-    """Run on startup."""
+def startup() -> None:
     print("Starting FastLED wasm compiler server...")
     try:
         print(f"Settings: {json.dumps(get_settings(), indent=2)}")
@@ -463,6 +426,7 @@ def startup_event():
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
+
     print("Endpoint accessed: / (root redirect to docs)")
     return RedirectResponse(url="/docs")
 
@@ -621,6 +585,11 @@ def info_examples() -> dict:
 
         warnings.warn(f"Error reading build timestamp: {e}")
         build_timestamp = "unknown"
+
+    # ARG FASTLED_VERSION=3.9.11
+    # ENV FASTLED_VERSION=${FASTLED_VERSION}
+
+    fastled_version = os.environ.get("FASTLED_VERSION", "unknown")
     out = {
         "examples": _EXAMPLES,
         "compile_count": COMPILE_COUNT,
@@ -628,6 +597,7 @@ def info_examples() -> dict:
         "compile_successes": COMPILE_SUCCESSES,
         "uptime": uptime_fmtd,
         "build_timestamp": build_timestamp,
+        "fastled_version": fastled_version,
     }
     return out
 
@@ -693,7 +663,16 @@ def compile_wasm(
         print("extracting zip file...")
         hash_value: str | None = None
         with zipfile.ZipFile(file_path, "r") as zip_ref:
+            # Extract everything first
             zip_ref.extractall(temp_src_dir)
+
+            # Then find and remove any platformio.ini files
+            platform_files = list(Path(temp_src_dir).rglob("*platformio.ini"))
+            if platform_files:
+                warnings.warn(f"Removing platformio.ini files: {platform_files}")
+                for p in platform_files:
+                    p.unlink()
+
             try:
                 hash_value = generate_hash_of_project_files(Path(temp_src_dir))
             except Exception as e:

@@ -3,7 +3,7 @@
 
 #include "enabled.h"
 
-#if defined(FASTLED_RMT5) || defined(FASTLED_ESP_HAS_CLOCKLESS_SPI)
+#if FASTLED_RMT5 || FASTLED_ESP32_HAS_CLOCKLESS_SPI
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
  *

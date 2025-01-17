@@ -1,16 +1,72 @@
 ## Contributing
 
-[![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
+The most important part about contributing to FastLED is knowing how to test your changes.
 
-If you want to make changes to FastLED then please
+The FastLED library includes a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
 
-  * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
-  * Open up the folder with VSCode.
-    * Make sure VSCode has the platformio extension.
-  * Once FastLED is loading with platformio, give it some time to download the dependencies.
-  * Click the platformio compile
-    * Then upload to your device
-  * See [dev/dev.ino](dev/dev.ino).
-<img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
+## FastLED compiler cli
 
-When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
+[![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_clone_and_compile.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_clone_and_compile.yml)
+
+The FastLED compiler cli can be invoked at the project root.
+
+```bash (MacOS/Linux, windows us git-bsh or compile.bat)
+git clone https://github.com/fastled/fastled
+cd fastled
+./compile uno --examples Blink  # linux/macos/git-bash
+# compile.bat  # Windows.
+```
+
+## Linting and Unit Testing
+
+```bash
+./lint
+./test  # runs unit tests
+# Note that you do NOT need to install the C++ compiler toolchain
+# for compiling + running unit tests via ./test. If `gcc` is not
+# found in your system `PATH` then the `ziglang` clang compiler
+# will be swapped in automatically.
+````
+
+
+### Testing a bunch of platforms at once.
+
+```
+./compile teensy41,teensy40 --examples Blink
+./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2 --examples Blink,Apa102HD
+./compiles uno,digix,attiny85 --examples Blink,Apa102HD 
+```
+
+## Unit Tests
+
+Shared code is unit-tested on the host machine. They can be found at `tests/` at the root of the repo. Unit testing only requires either `python` or `uv` to be installed. The C++ compiler toolchain will be installed automatically.
+
+The easiest way to run the tests is just use `./test`
+
+Alternatively, tests can be built and run for your development machine with CMake:
+
+```bash
+cmake -S tests -B tests/.build
+ctest --test-dir tests/.build --output-on-failure
+# Not that this will fail if you do not have gcc installed. When in doubt
+# use ./test to compile the unit tests, as a compiler is guaranteed to be
+# available via this tool.
+```
+
+## VSCode
+
+We also support VSCode and IntelliSense auto-completion when the free [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension is installed. The development sketch to test library changes can be found at [dev/dev.ino](dev/dev.ino).
+
+ * Make sure you have [platformio](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) installed.
+ * Click the compile button.
+
+![image](https://github.com/user-attachments/assets/616cc35b-1736-4bb0-b53c-468580be66f4)
+*Changes in non platform specific code can be tested quickly in our webcompiler by invoking the script `./wasm` at the project root*
+
+
+## Once you are done
+  * run `./test`
+  * run `./lint`
+  * Then submit your code via a git pull request.
+
+

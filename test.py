@@ -61,8 +61,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run FastLED tests')
     parser.add_argument('--cpp', action='store_true',
                        help='Run C++ tests only')
-    parser.add_argument('--test', type=str,
+    parser.add_argument('test', type=str, nargs='?', default=None,
                        help='Specific C++ test to run')
+    parser.add_argument("--clang", action="store_true", help="Use Clang compiler")
     return parser.parse_args()
 
 
@@ -80,19 +81,34 @@ def main() -> None:
         # Change to script directory
         os.chdir(Path(__file__).parent)
 
+        cmd_list = [
+            "uv",
+            "run",
+            "ci/cpp_test_run.py"
+        ]
+
+        if args.clang:
+            cmd_list.append("--clang")
+
+        if args.test:
+            cmd_list.append("--test")
+            cmd_list.append(args.test)
+
+        cmd_str_cpp = subprocess.list2cmdline(cmd_list)
+
         if args.cpp:
             # Compile and run C++ tests
             start_time = time.time()
             if args.test:
                 # Run specific C++ test
-                proc = RunningProcess('uv run ci/cpp_test_run.py --test ' + args.test)
+                proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
             else:
                 # Run all C++ tests
-                proc = RunningProcess('uv run ci/cpp_test_run.py')
+                proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
                     print(f"Command failed: {proc.command}")
@@ -107,10 +123,10 @@ def main() -> None:
             cmd_list = ['echo', 'pio check is disabled']
 
         cmd_str = subprocess.list2cmdline(cmd_list)
-        
+    
         print(f"Running command (in the background): {cmd_str}")
         pio_process = RunningProcess(cmd_str, echo=False, auto_run=not _IS_GITHUB)
-        cpp_test_proc = RunningProcess('uv run ci/cpp_test_run.py')
+        cpp_test_proc = RunningProcess(cmd_str_cpp)
         compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False)
         pytest_proc = RunningProcess('uv run pytest ci/tests', echo=False)
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]

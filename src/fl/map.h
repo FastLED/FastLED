@@ -8,6 +8,7 @@
 #include "fl/template_magic.h"
 #include "fl/insert_result.h"
 #include "fl/pair.h"
+#include "fl/assert.h"
 
 namespace fl {
 
@@ -391,6 +392,16 @@ public:
     const Pair& back() const { return data.back(); }
 
 
+    Value& operator[](const Key& key) {
+        iterator it = find(key);
+        if (it != end()) {
+            return it->second;
+        }
+        Pair pair(key, Value());
+        bool ok = data.insert(pair);
+        FASTLED_ASSERT(ok, "Failed to insert into SortedHeapMap");
+        return data.find(pair)->second;  // TODO: optimize.
+    }
 };
 
 }  // namespace fl

@@ -21,11 +21,7 @@ FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
 }
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
-    // DBG("FrameInterpolator::draw");
     bool ok = draw(now, dst->rgb());
-    if (ok) {
-        // dst->setTimestamp(now);
-    }
     return ok;
 }
 
@@ -49,7 +45,6 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds) {
     Frame* frame2 = get(nextFrameNumber).get();
 
     Frame::interpolate(*frame1, *frame2, amountOfNextFrame, leds);
-    // DBG("Interpolated frame " << frameNumber << " and " << nextFrameNumber);
     return true;
 }
 

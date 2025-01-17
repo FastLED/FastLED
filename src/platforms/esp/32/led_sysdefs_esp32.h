@@ -1,5 +1,5 @@
 #pragma once
-#include "esp32-hal.h"
+#include "sdkconfig.h"
 #ifndef ESP32
 #define ESP32
 #endif

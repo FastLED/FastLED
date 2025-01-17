@@ -1,0 +1,13 @@
+name: apollo3_thing_explorable
+
+on:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: apollo3_thing_explorable

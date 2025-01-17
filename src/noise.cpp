@@ -14,10 +14,16 @@
 
 #if !VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
 #define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) TYPE NAME[SIZE]
-#else
+#elif __has_include(<alloca.h>)
 #include <alloca.h>
 #define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
     TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
+#elif __has_include(<cstdlib>)
+#include <cstdlib>
+#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
+    TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
+#else
+#error "Compiler does not allow variable type arrays."
 #endif
 
 

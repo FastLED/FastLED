@@ -3,12 +3,12 @@
 
 #include "third_party/espressif/led_strip/src/enabled.h"
 
-#if FASTLED_ESP_HAS_CLOCKLESS_SPI
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "third_party/espressif/led_strip/strip_spi.h"
+#include "spi_ws2812/strip_spi.h"
 #include "fl/scoped_ptr.h"
 #include "fl/assert.h"
 

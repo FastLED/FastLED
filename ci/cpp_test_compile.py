@@ -28,14 +28,21 @@ USE_ZIG = False
 USE_CLANG = False
 
 
-def use_clang_compiler() -> Tuple[Path, Path, Path]:
+def _has_system_clang_compiler() -> bool:
     CLANG = shutil.which("clang")
     CLANGPP = shutil.which("clang++")
     LLVM_AR = shutil.which("llvm-ar")
-    assert CLANG is not None, "Clang compiler not found in PATH."
-    assert CLANGPP is not None, "Clang++ compiler not found in PATH."
-    assert LLVM_AR is not None, "llvm-ar not found in PATH."
+    return CLANG is not None and CLANGPP is not None and LLVM_AR is not None
 
+
+def use_clang_compiler() -> Tuple[Path, Path, Path]:
+    assert _has_system_clang_compiler(), "Clang system compiler not found"
+    CLANG = shutil.which("clang")
+    CLANGPP = shutil.which("clang++")
+    LLVM_AR = shutil.which("llvm-ar")
+    assert CLANG is not None, "clang compiler not found"
+    assert CLANGPP is not None, "clang++ compiler not found"
+    assert LLVM_AR is not None, "llvm-ar not found"
     # Set environment variables for C and C++ compilers
     os.environ["CC"] = CLANG
     os.environ["CXX"] = CLANGPP
@@ -63,8 +70,14 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
 
 
 def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    ZIG = shutil.which("zig")
-    assert ZIG is not None, "Zig compiler not found in PATH."
+    assert 0 == os.system(
+        "uv run python -m ziglang version"
+    ), "Zig-clang compiler not found"
+    uv_path_str: str | None = shutil.which("uv")
+    assert uv_path_str is not None, "uv not found in PATH"
+    uv_path = Path(uv_path_str).resolve()
+    zig_command = f'"{uv_path}" run python -m ziglang'
+    # We are going to build up shell scripts that look like cc, c++, and ar. It will contain the actual build command.
     CC_PATH = BUILD_DIR / "cc"
     CXX_PATH = BUILD_DIR / "c++"
     AR_PATH = BUILD_DIR / "ar"
@@ -72,15 +85,19 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH = CC_PATH.with_suffix(".cmd")
         CXX_PATH = CXX_PATH.with_suffix(".cmd")
         AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %* 2>&1\n')
-        CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %* 2>&1\n')
-        AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %* 2>&1\n')
+        CC_PATH.write_text(f"@echo off\n{zig_command} cc %* 2>&1\n")
+        CXX_PATH.write_text(f"@echo off\n{zig_command} c++ %* 2>&1\n")
+        AR_PATH.write_text(f"@echo off\n{zig_command} ar %* 2>&1\n")
     else:
-        CC_PATH.write_text(f'#!/bin/bash\n"{ZIG}" cc "$@"\n')
-        CXX_PATH.write_text(f'#!/bin/bash\n"{ZIG}" c++ "$@"\n')
-        AR_PATH.write_text(f'#!/bin/bash\n"{ZIG}" ar "$@"\n')
+        cc_cmd = f'#!/bin/bash\n{zig_command} cc "$@"\n'
+        cxx_cmd = f'#!/bin/bash\n{zig_command} c++ "$@"\n'
+        ar_cmd = f'#!/bin/bash\n{zig_command} ar "$@"\n'
+        CC_PATH.write_text(cc_cmd)
+        CXX_PATH.write_text(cxx_cmd)
+        AR_PATH.write_text(ar_cmd)
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
+        AR_PATH.chmod(0o755)
 
     # if WASM_BUILD:
     #     wasm_flags = [
@@ -128,8 +145,13 @@ def run_command(command: str, cwd: Path | None = None) -> None:
 def compile_fastled_library(specific_test: str | None = None) -> None:
     if USE_ZIG:
         print("USING ZIG COMPILER")
-        zig_prog = shutil.which("zig")
-        assert zig_prog is not None, "Zig compiler not found in PATH."
+        rtn = subprocess.run(
+            "python -m ziglang version", shell=True, capture_output=True
+        ).returncode
+        zig_is_installed = rtn == 0
+        assert (
+            zig_is_installed
+        ), 'Zig compiler not when using "python -m ziglang version" command'
         use_zig_compiler()
     elif USE_CLANG:
         print("USING CLANG COMPILER")
@@ -229,9 +251,26 @@ def main() -> None:
     global USE_ZIG, USE_CLANG, WASM_BUILD
 
     args = parse_arguments()
-    USE_ZIG = args.use_zig
-    USE_CLANG = args.use_clang or args.wasm  # Use Clang for WASM builds
+    USE_ZIG = args.use_zig  # use Zig's clang compiler
+    USE_CLANG = args.use_clang  # Use pure Clang for WASM builds
     WASM_BUILD = args.wasm
+
+    using_gcc = not USE_ZIG and not USE_CLANG and not WASM_BUILD
+    if using_gcc:
+        if not shutil.which("g++"):
+            print(
+                "gcc compiler not found in PATH, falling back zig's built in clang compiler"
+            )
+            USE_ZIG = True
+            USE_CLANG = False
+
+    if USE_CLANG:
+        if not _has_system_clang_compiler():
+            print(
+                "Clang compiler not found in PATH, falling back to Zig-clang compiler"
+            )
+            USE_ZIG = True
+            USE_CLANG = False
 
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")

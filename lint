@@ -5,13 +5,6 @@ set -e
 # Unset VIRTUAL_ENV to avoid warnings about mismatched paths
 unset VIRTUAL_ENV
 
-cd "$(dirname "$0")"
-# if .venv not found
-if [ ! -d .venv ]; then
-    # create virtual environment
-    ./install
-fi
-
 
 # Overwrite .vscode/launch.json if it's different
 cat > .vscode/launch.json << 'EOL'
@@ -22,7 +15,7 @@ cat > .vscode/launch.json << 'EOL'
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "",
+            "program": "${file}",
             "console": "integratedTerminal"
         },
         {
@@ -35,6 +28,8 @@ cat > .vscode/launch.json << 'EOL'
     ]
 }
 EOL
+
+
 
 
 # # Function to handle ESLint output in the background
@@ -54,25 +49,26 @@ EOL
 
 # Linting the Python code.
 echo "Running ruff check"
-uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-uv run ruff check --fix src/platforms/wasm/compiler/compile.py
-uv run ruff check --fix src/platforms/wasm/compiler/server.py
+uvx ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx ruff check --fix src/platforms/wasm/compiler/compile.py
+uvx ruff check --fix src/platforms/wasm/compiler/server.py
 UV run ruff check --fix dev/dev.py
 echo Running black
-black ci --exclude ci/tmp/ --exclude ci/wasm/
-black src/platforms/wasm/compiler/compile.py
-black src/platforms/wasm/compiler/server.py
-black dev/dev.py
-echo Running isort
-isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
-isort --profile black src/platforms/wasm/compiler/compile.py
-isort --profile black src/platforms/wasm/compiler/server.py
-isort --profile black dev/dev.py
+uvx black ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx black src/platforms/wasm/compiler/compile.py
+uvx black src/platforms/wasm/compiler/server.py
+uvx black dev/dev.py
+uvx echo Running isort
+uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
+uvx isort --profile black src/platforms/wasm/compiler/compile.py
+uvx isort --profile black src/platforms/wasm/compiler/server.py
+uvx isort --profile black dev/dev.py
 echo "Running mypy"
-uv run mypy ci --exclude ci/tmp/ --exclude ci/wasm/
-uv run mypy src/platforms/wasm/compiler/compile.py
-uv run mypy src/platforms/wasm/compiler/server.py
-uv run mypy dev/dev.py
+uvx echo yes | mypy --install-type 
+uvx mypy ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx mypy src/platforms/wasm/compiler/compile.py
+uvx mypy src/platforms/wasm/compiler/server.py
+uvx mypy dev/dev.py
 
 
 
@@ -87,7 +83,7 @@ folders=(
 
 for folder in "${folders[@]}"; do
     echo "Running clang-format on $folder"
-    uv run ci/run-clang-format.py -i -r "$folder"
+    uvx ci/run-clang-format.py -i -r "$folder"
 done
 
 # # Wait for ESLint to finish and output its results

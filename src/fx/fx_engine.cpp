@@ -18,7 +18,9 @@ int FxEngine::addFx(FxPtr effect) {
     if (mInterpolate && effect->hasFixedFrameRate(&fps)) {
         // Wrap the effect in a VideoFxWrapper so that we can get
         // interpolation.
-        effect = VideoFxWrapperPtr::New(effect);
+        VideoFxWrapperPtr vid_fx = VideoFxWrapperPtr::New(effect);
+        vid_fx->setFade(0, 0);  // No fade for interpolated effects
+        effect = vid_fx;
     }
     bool auto_set = mEffects.empty();
     bool ok = mEffects.insert(mCounter, effect).first;

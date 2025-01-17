@@ -1,10 +1,9 @@
 
 #ifdef ESP32
 
+#include "third_party/espressif/led_strip/src/enabled.h"
 
-#include "src/enabled.h"
-
-#if FASTLED_RMT5
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 
 /*
@@ -14,7 +13,7 @@
  */
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "src/led_strip.h"
+#include "third_party/espressif/led_strip/src/led_strip.h"
 #include "esp_log.h"
 #include "esp_err.h"
 
@@ -23,7 +22,6 @@
 #include "rgbw.h"
 #include "fl/warn.h"
 
-namespace {  // anonymous namespace
 
 static const char *TAG = "strip_spi";
 
@@ -212,7 +210,6 @@ private:
     uint32_t mLedCount = 0;
 };
 
-}  // namespace
 
 
 ISpiStripWs2812::OutputIterator::OutputIterator(ISpiStripWs2812 *strip, uint32_t num_leds)
@@ -265,7 +262,7 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
 
-#endif  // FASTLED_RMT5
+#endif  // FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #endif  // ESP32
 

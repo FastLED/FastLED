@@ -1,34 +1,60 @@
 #pragma once
 
+#include "sdkconfig.h"
+#include "platforms/esp/esp_version.h"
 
-#include "soc/soc_caps.h"
-
-#define FASTLED_ESP32_HAS_RMT (SOC_RMT_TX_CANDIDATES_PER_GROUP > 0)
-
-
-#ifndef ESP32
-// No led strip component when not in ESP32 mode.
- #define FASTLED_RMT5 0
+#if CONFIG_IDF_TARGET_ESP32C2
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 0
+#define FASTLED_ESP32_HAS_RMT5 0
+#elif CONFIG_IDF_TARGET_ESP32C3
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP32C6
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP32S2
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP32S3
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP32H2
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP32P4
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
+#elif CONFIG_IDF_TARGET_ESP8266
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
+#define FASTLED_ESP32_HAS_RMT 0
+#define FASTLED_ESP32_HAS_RMT5 0
+#elif CONFIG_IDF_TARGET_ESP32 || defined(ARDUINO_ESP32_DEV)
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
+#define FASTLED_ESP32_HAS_RMT 1
+#define FASTLED_ESP32_HAS_RMT5 1
 #else
- #if !defined(FASTLED_RMT5)
-  #include "platforms/esp/esp_version.h"
-  #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-   #define FASTLED_IDF5 1
-  #else
-   #define FASTLED_IDF5 0
-  #endif  // ESP_IDF_VERSION
- #endif  // FASTLED_RMT5
-#endif  // ESP32
+#warning "Unknown board, assuming support for clockless RMT5 and SPI chipsets. Please file an bug report with FastLED and tell them about your board type."
+#endif
 
-#ifndef FASTLED_RMT5
-#define FASTLED_RMT5 (FASTLED_IDF5 && FASTLED_ESP32_HAS_RMT)
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+#undef FASTLED_ESP32_HAS_RMT5
+#undef FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#define FASTLED_ESP32_HAS_RMT5 0
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #endif
 
 
-#ifndef FASTLED_ESP_HAS_CLOCKLESS_SPI
-#if !FASTLED_IDF5
-#define FASTLED_ESP_HAS_CLOCKLESS_SPI 0
+// Note that FASTLED_RMT5 is a legacy name,
+// so we keep it because "RMT" is specific to ESP32
+#if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
+#define FASTLED_RMT5 1
 #else
-#define FASTLED_ESP_HAS_CLOCKLESS_SPI 1
-#endif
+#define FASTLED_RMT5 0
 #endif

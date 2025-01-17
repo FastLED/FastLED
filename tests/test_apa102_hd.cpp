@@ -19,6 +19,116 @@
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
+TEST_CASE("five_bit_bitshift") {
+  const uint16_t test_data[][2][4] = {
+    { // test case
+      //r g  b  brightness
+      {0, 0, 0, 0}, // input
+      {0, 0, 0, 0}, // output
+    },
+    { // 0 brightness brings all colors down to 0
+      {0xffff, 0xffff, 0xffff, 0},
+      {0,      0,      0,      0},
+    },
+    { // color values below 8 become 0 at max brightness
+      {8, 7, 0, 255},
+      {1, 0, 0, 1},
+    },
+    {
+      {0xffff, 0x00f0, 0x000f, 0x01},
+      {0x11,   0x00,   0x00,   0x01},
+    },
+    {
+      {0x0100, 0x00f0, 0x000f, 0xff},
+      {0x08,   0x08,   0x00,   0x03},
+    },
+    {
+      {0x2000, 0x1000, 0x0f00, 0x20},
+      {0x20,   0x10,   0x0f,   0x03},
+    },
+    {
+      {0xffff, 0x8000, 0x4000, 0x40},
+      {0x81,   0x41,   0x20,   0x0f},
+    },
+    {
+      {0xffff, 0x8000, 0x4000, 0x80},
+      {0x81,   0x41,   0x20,   0x1f},
+    },
+    {
+      {0xffff, 0xffff, 0xffff, 0xff},
+      {0xff,   0xff,   0xff,   0x1f},
+    },
+  };
+
+  for (const auto& data : test_data) {
+    CRGB out_color;
+    uint8_t out_brightness;
+    five_bit_bitshift(data[0][0], data[0][1], data[0][2], data[0][3], &out_color, &out_brightness);
+    INFO("input  red ", data[0][0], " green ", data[0][1], " blue ", data[0][2], " brightness ", data[0][3]);
+    INFO("output red ", out_color.r, " green ", out_color.g, " blue ", out_color.b, " brightness ", out_brightness);
+    CHECK_EQ(out_color.r, data[1][0]);
+    CHECK_EQ(out_color.g, data[1][1]);
+    CHECK_EQ(out_color.b, data[1][2]);
+    CHECK_EQ(out_brightness, data[1][3]);
+  }
+}
+
+TEST_CASE("__builtin_five_bit_hd_gamma_bitshift") {
+  // NOTE: FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8 is defined for this test in CMakeLists.txt
+
+  const uint8_t test_data[][2][4] = {
+    { // test case
+      //r g  b  brightness
+      {0, 0, 0, 0}, // input
+      {0, 0, 0, 0}, // output
+    },
+    { // 0 brightness brings all colors down to 0
+      {255, 255, 255, 0},
+      {0,   0,   0,   0},
+    },
+    {
+      {16, 16, 16, 16},
+      {0,  0,  0,  1},
+    },
+    {
+      {64, 64, 64, 8},
+      {4,  4,  4,  1},
+    },
+    {
+      {255, 127, 43, 1},
+      {17,  3,   0,  1},
+    },
+    {
+      {255, 127, 43, 1},
+      {17,  3,   0,  1},
+    },
+    {
+      {255, 127, 43, 64},
+      {129, 21,  1,  15},
+    },
+    {
+      {255, 127, 43, 255},
+      {255, 42,  3,  31},
+    },
+    {
+      {255, 255, 255, 255},
+      {255, 255, 255, 31},
+    },
+  };
+
+  for (const auto& data : test_data) {
+    CRGB out_color;
+    uint8_t out_brightness;
+    __builtin_five_bit_hd_gamma_bitshift(CRGB(data[0][0], data[0][1], data[0][2]), CRGB(255, 255, 255), data[0][3], &out_color, &out_brightness);
+    INFO("input  red ", data[0][0], " green ", data[0][1], " blue ", data[0][2], " brightness ", data[0][3]);
+    INFO("output red ", out_color.r, " green ", out_color.g, " blue ", out_color.b, " brightness ", out_brightness);
+    CHECK_EQ(out_color.r, data[1][0]);
+    CHECK_EQ(out_color.g, data[1][1]);
+    CHECK_EQ(out_color.b, data[1][2]);
+    CHECK_EQ(out_brightness, data[1][3]);
+  }
+}
+
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)
 
 

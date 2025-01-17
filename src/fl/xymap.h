@@ -56,6 +56,7 @@ class XYMap {
           uint16_t offset = 0);
 
     XYMap(const XYMap &other) = default;
+    XYMap &operator=(const XYMap &other) = default;
 
     fl::ScreenMap toScreenMap() const;
 

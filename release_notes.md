@@ -1,3 +1,23 @@
+FastLED 3.9.12 (next release)
+==============
+* Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
+* ESP32C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
+
+FastLED 3.9.11
+==============
+* Bug fix for the Teensy and ESP32S3 massive parallel drivers.
+  * Teensy ObjectFLED: Each led strip can now be a different length, see [examples](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino)
+  * ESP32 S3 I2S:
+    * The FastLED.addLeds(...) style api now works..
+      * Please note at this time that all 16 strips must be used. Not sure why this is. If anyone has clarification please reach out.
+    * RGBW support has been added externally via RGBW -> RGB data spoofing (same thing RGBW Emulated mode uses).
+    * Fixed compiliation issue for Arduino 2.3.4, which is missing some headers. In this case the driver will issue a warning that it will unavailable. 
+* Cross platform improvements for
+  * `FASTLED_DBG`
+  * `FASTLED_WARN`
+  * `FASTLED_ASSERT`
+
+
 FastLED 3.9.10
 ==============
 * ESP32

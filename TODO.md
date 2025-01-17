@@ -21,6 +21,17 @@
 
   * MIT Licensed SdFat library
     * https://github.com/greiman/SdFat
+  * YVes LittleFS implementation for ESP
+    * https://github.com/hpwit/ledOS/blob/main/src/fileSystem.h
 
   * NimBLE for Arduino
     * https://github.com/h2zero/NimBLE-Arduino?tab=readme-ov-file
+
+  * Arduino test compile
+    * https://github.com/hpwit/arduino-test-compile/blob/master/arduino-test-compile.sh
+
+
+# Misc:
+
+  * sutaburosu's guide to playing around with FastLED 4
+    * https://github.com/sutaburosu/FastLED4-ESP32-playpen

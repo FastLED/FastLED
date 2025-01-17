@@ -45,6 +45,7 @@ ARG PLATFORM_TAG=""
 # Use only Emscripten base image
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update the apt-get package list. This takes a long time, so we do it first to maximize cache hits.
@@ -132,7 +133,9 @@ RUN pio settings set enable_telemetry 0
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
 
-RUN git clone https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
+ARG FASTLED_VERSION=master
+ENV FASTLED_VERSION=${FASTLED_VERSION}
+RUN git clone -b ${FASTLED_VERSION} https://github.com/fastled/FastLED.git --depth 1 /git/fastled && \
     mkdir -p /js/fastled && \
     rsync -a /git/fastled/ /js/fastled/ --exclude='.git'
 
@@ -178,6 +181,8 @@ RUN chmod +x /entrypoint.sh && dos2unix /entrypoint.sh
 
 # now sync local to the source directory.
 RUN rsync -av /host/fastled/ /js/fastled/ && rm -rf /host/fastled
+
+RUN python /js/init_runtime.py || true
 
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will

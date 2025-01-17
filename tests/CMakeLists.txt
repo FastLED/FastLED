@@ -66,7 +66,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=missing-include-dirs
     -Werror=date-time
     -Werror=non-virtual-dtor
-    #-Werror=reorder
+    -Werror=reorder
     -Werror=sign-compare
     -Werror=float-equal
     #-Werror=conversion
@@ -75,10 +75,16 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-parameter
     -Werror=unused-variable
     -Werror=unused-value
-
-    # Not supported in gcc.
-    # -Werror=infinite-recursion
+    -Werror=cast-align
+    -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
+    # ignore Arduino/PlatformIO-specific PROGMEM macro
+    -DPROGMEM=
 )
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND COMMON_COMPILE_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens)
+endif()
+
 
 set(UNIT_TEST_COMPILE_FLAGS
     -Wall

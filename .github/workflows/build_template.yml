@@ -7,10 +7,18 @@ on:
         type: string
         required: false
         default: ""
+      platform:
+        type: string
+        required: false
+        default: ""
+      runs-on:
+        type: string
+        required: false
+        default: "ubuntu-latest"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,6 +41,11 @@ jobs:
       - name: Install UV
         run: pip install uv
 
+      - name: Install Platform
+        if: inputs.platform != ''
+        run: |
+          uv run pio pkg -g install ${{ inputs.platform }}
+
       - name: PlatformIO Versions
         run: |
           uv run platformio --version
@@ -42,6 +55,20 @@ jobs:
           set -o pipefail
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
+
+      - name: Find platformio.ini file and print it out
+        if: always()
+        continue-on-error: true
+        run: |
+          platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
+          if [ -f "$platformio_ini" ]; then
+            echo "Found platformio.ini at: $platformio_ini"
+            echo "############################################"
+            cat "$platformio_ini"
+            echo "############################################"
+          else
+            echo "platformio.ini not found"
+          fi
 
       - name: Build Blink.ino for library info
         continue-on-error: true

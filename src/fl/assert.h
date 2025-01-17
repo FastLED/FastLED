@@ -1,12 +1,17 @@
 #pragma once
 
 
-#include "esp_log.h"
-#include "esp_check.h"
+
 #include "fl/warn.h"
 #include "fl/strstream.h"
 
-#ifdef DEBUG
+#ifndef DEBUG
+#define FASTLED_ASSERT(x, MSG) FASTLED_WARN_IF(!(x), MSG)
+#else
+
+#ifdef ESP32
+#include "esp_log.h"
+#include "esp_check.h"
 #define FASTLED_ASSERT(x, MSG)                                                \
     {                                                                         \
         if (!(x)) {                                                           \
@@ -15,5 +20,6 @@
         }                                                                     \
     }
 #else
-#define FASTLED_ASSERT(x, MSG)
+#define FASTLED_ASSERT(x, MSG) FASTLED_WARN_IF(!(x), MSG)
+#endif
 #endif
