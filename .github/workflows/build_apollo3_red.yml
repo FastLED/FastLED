@@ -21,7 +21,7 @@ jobs:
         run: pip install uv
       
       - name: Install Platform
-        run: uv pio platform install git+https://github.com/nigelb/platform-apollo3blue.git
+        run: uv run pio platform install git+https://github.com/nigelb/platform-apollo3blue.git
 
       - name: Make Tmp Dir
         run: mkdir -p redboard
