@@ -63,10 +63,14 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
 
 
 def use_zig_compiler() -> Tuple[Path, Path, Path]:
-    assert 0 == os.system("uv run python -m ziglang version"), "Zig-clang compiler not found"
-    uv_path = Path(shutil.which("uv")).resolve()
-    zig_command = f"\"{uv_path}\" run python -m ziglang"
-    print(f"Zig command: {zig_command}")
+    assert 0 == os.system(
+        "uv run python -m ziglang version"
+    ), "Zig-clang compiler not found"
+    uv_path_str: str | None = shutil.which("uv")
+    assert uv_path_str is not None, "uv not found in PATH"
+    uv_path = Path(uv_path_str).resolve()
+    zig_command = f'"{uv_path}" run python -m ziglang'
+    # We are going to build up shell scripts that look like cc, c++, and ar. It will contain the actual build command.
     CC_PATH = BUILD_DIR / "cc"
     CXX_PATH = BUILD_DIR / "c++"
     AR_PATH = BUILD_DIR / "ar"
@@ -74,17 +78,15 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH = CC_PATH.with_suffix(".cmd")
         CXX_PATH = CXX_PATH.with_suffix(".cmd")
         AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f'@echo off\n{zig_command} cc %* 2>&1\n')
-        CXX_PATH.write_text(f'@echo off\n{zig_command} c++ %* 2>&1\n')
-        AR_PATH.write_text(f'@echo off\n{zig_command} ar %* 2>&1\n')
+        CC_PATH.write_text(f"@echo off\n{zig_command} cc %* 2>&1\n")
+        CXX_PATH.write_text(f"@echo off\n{zig_command} c++ %* 2>&1\n")
+        AR_PATH.write_text(f"@echo off\n{zig_command} ar %* 2>&1\n")
     else:
         cc_cmd = f'#!/bin/bash\n{zig_command} cc "$@"\n'
         cxx_cmd = f'#!/bin/bash\n{zig_command} c++ "$@"\n'
         ar_cmd = f'#!/bin/bash\n{zig_command} ar "$@"\n'
         CC_PATH.write_text(cc_cmd)
-        # CXX_PATH.write_text(f'#!/bin/bash\n"{zig_command}" c++ "$@"\n')
         CXX_PATH.write_text(cxx_cmd)
-        # AR_PATH.write_text(f'#!/bin/bash\n"{zig_command}" ar "$@"\n')
         AR_PATH.write_text(ar_cmd)
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
