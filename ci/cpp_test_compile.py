@@ -74,13 +74,13 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH = CC_PATH.with_suffix(".cmd")
         CXX_PATH = CXX_PATH.with_suffix(".cmd")
         AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f'@echo off\n"{zig_command}" cc %* 2>&1\n')
-        CXX_PATH.write_text(f'@echo off\n"{zig_command}" c++ %* 2>&1\n')
-        AR_PATH.write_text(f'@echo off\n"{zig_command}" ar %* 2>&1\n')
+        CC_PATH.write_text(f'@echo off\n{zig_command} cc %* 2>&1\n')
+        CXX_PATH.write_text(f'@echo off\n{zig_command} c++ %* 2>&1\n')
+        AR_PATH.write_text(f'@echo off\n{zig_command} ar %* 2>&1\n')
     else:
-        cc_cmd = f'#!/bin/bash\n"{zig_command}" cc "$@"\n'
-        cxx_cmd = f'#!/bin/bash\n"{zig_command}" c++ "$@"\n'
-        ar_cmd = f'#!/bin/bash\n"{zig_command}" ar "$@"\n'
+        cc_cmd = f'#!/bin/bash\n{zig_command} cc "$@"\n'
+        cxx_cmd = f'#!/bin/bash\n{zig_command} c++ "$@"\n'
+        ar_cmd = f'#!/bin/bash\n{zig_command} ar "$@"\n'
         CC_PATH.write_text(cc_cmd)
         # CXX_PATH.write_text(f'#!/bin/bash\n"{zig_command}" c++ "$@"\n')
         CXX_PATH.write_text(cxx_cmd)
