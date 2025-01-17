@@ -35,6 +35,7 @@ BUILD_FLAGS = ["-Wl,-Map,firmware.map", "-fopt-info-all=optimization_report.txt"
 # with the github workflow scripts.
 DEFAULT_BOARDS_NAMES = [
     "apollo3_red",
+    "apollo3_thing_explorable",
     "web",  # work in progress
     "uno",  # Build is faster if this is first, because it's used for global init.
     "esp32dev",
