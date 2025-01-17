@@ -65,7 +65,7 @@ jobs:
             echo "Found platformio.ini at: $platformio_ini"
             echo "############################################"
             cat "$platformio_ini"
-            echo "\n############################################"
+            echo "############################################"
           else
             echo "platformio.ini not found"
           fi
