@@ -11,10 +11,14 @@ on:
         type: string
         required: false
         default: ""
+      runs-on:
+        type: string
+        required: false
+        default: "ubuntu-latest"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
