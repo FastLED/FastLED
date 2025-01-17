@@ -16,7 +16,9 @@
 #define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) TYPE NAME[SIZE]
 #elif __has_include(<alloca.h>)
 #include <alloca.h>
-#else
+#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
+    TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
+#elif
 #include <cstdlib>
 #define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
     TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
