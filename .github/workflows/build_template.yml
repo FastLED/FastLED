@@ -60,9 +60,10 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          platformio_ini=$(find /home/runner/work/FastLED/FastLED/.build -name platformio.ini)
+          platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
           if [ -f "$platformio_ini" ]; then
-            cat $platformio_ini
+            echo "Found platformio.ini at: $platformio_ini"
+            cat "$platformio_ini"
           else
             echo "platformio.ini not found"
           fi
