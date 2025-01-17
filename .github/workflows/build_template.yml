@@ -63,16 +63,12 @@ jobs:
           platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
           if [ -f "$platformio_ini" ]; then
             echo "Found platformio.ini at: $platformio_ini"
+            cat "############################################"
             cat "$platformio_ini"
+            echo "\n############################################"
           else
             echo "platformio.ini not found"
           fi
-
-      - name: List all *.ini files from the current directory
-        if: always()
-        continue-on-error: true
-        run: |
-          find . -name '*.ini'
 
       - name: Build Blink.ino for library info
         continue-on-error: true
