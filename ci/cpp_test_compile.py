@@ -229,8 +229,8 @@ def main() -> None:
     global USE_ZIG, USE_CLANG, WASM_BUILD
 
     args = parse_arguments()
-    USE_ZIG = args.use_zig
-    USE_CLANG = args.use_clang or args.wasm  # Use Clang for WASM builds
+    USE_ZIG = args.use_zig or args.use_clang  # use Zig's clang compiler
+    USE_CLANG = args.wasm  # Use pure Clang for WASM builds
     WASM_BUILD = args.wasm
 
     os.chdir(str(HERE))
