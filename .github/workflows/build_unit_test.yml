@@ -33,6 +33,10 @@ jobs:
         run: ./install
         shell: bash
 
+      - name: Add gcc for linux
+        if: runner.os == 'Linux' && matrix.compiler == 'gcc'
+        run: sudo apt-get install gcc
+
       - name: Run Test
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
