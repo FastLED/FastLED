@@ -1,6 +1,7 @@
 FastLED 3.9.12 (next release)
 ==============
 * Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
+* ESP32C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
 
 FastLED 3.9.11
 ==============

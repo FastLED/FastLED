@@ -85,6 +85,7 @@ WEBTARGET = Board(
 
 APOLLO3_RED_BOARD = Board(
     board_name="apollo3_red",
+    real_board_name="SparkFun_RedBoard_Artemis_ATP",
     platform=APOLLO3_2_2_0,
     platform_packages="https://github.com/sparkfun/Arduino_Apollo3#v2.2.0",
     platform_needs_install=True,
