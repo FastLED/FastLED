@@ -1,3 +1,7 @@
+FastLED 3.9.12 (next release)
+==============
+* Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
+
 FastLED 3.9.11
 ==============
 * Bug fix for the Teensy and ESP32S3 massive parallel drivers.
