@@ -41,6 +41,19 @@ jobs:
         if: runner.os == 'macOS' && matrix.compiler == 'gcc'
         run: brew install gcc
 
+      - name: Install LLVM for Linux
+        if: runner.os == 'Linux' && matrix.compiler == 'clang'
+        run: sudo apt-get install llvm
+
+      - name: Install LLVM for macOS
+        if: runner.os == 'macOS' && matrix.compiler == 'clang'
+        run: brew install llvm
+
+      - name: Install LLVM for Windows
+        if: runner.os == 'Windows' && matrix.compiler == 'clang'
+        run: |
+          choco install llvm
+
       - name: Run Test
         run: |
           if [ "${{ matrix.compiler }}" = "clang" ]; then
