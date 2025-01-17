@@ -144,6 +144,22 @@ _FL_DEFPIN(40, 40); _FL_DEFPIN(41, 41); _FL_DEFPIN(42, 42); _FL_DEFPIN(43, 43); 
 _FL_DEFPIN(45, 45); _FL_DEFPIN(47, 47); _FL_DEFPIN(48, 48); _FL_DEFPIN(49, 49);
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ARDUINO_LoRa_THING_PLUS_expLoRaBLE)
+
+#define MAX_PIN 47
+
+// Provided by the community:
+// https://www.reddit.com/r/FastLED/comments/1i30ycy/ambiq_apollo3_commit_specifically_the_spe_lora/
+// Special Thanks to reddit.com/u/Aromatic-Effort-9414 for providing these pin definitions
+_FL_DEFPIN(0, 19); _FL_DEFPIN(1, 18); _FL_DEFPIN(2, 41); _FL_DEFPIN(3, 31); _FL_DEFPIN(4, 10);
+_FL_DEFPIN(5, 30); _FL_DEFPIN(6, 37); _FL_DEFPIN(7, 24); _FL_DEFPIN(8, 46); _FL_DEFPIN(9, 33);
+_FL_DEFPIN(10, 4); _FL_DEFPIN(11, 28); _FL_DEFPIN(12, 25); _FL_DEFPIN(13, 27); _FL_DEFPIN(14, 6);
+_FL_DEFPIN(15, 5); _FL_DEFPIN(16, 9); _FL_DEFPIN(17, 8); _FL_DEFPIN(18, 26); _FL_DEFPIN(19, 13);
+_FL_DEFPIN(20, 12); _FL_DEFPIN(21, 32); _FL_DEFPIN(22, 35); _FL_DEFPIN(23, 34); _FL_DEFPIN(24, 11);
+_FL_DEFPIN(25, 36); _FL_DEFPIN(26, 38); _FL_DEFPIN(27, 39); _FL_DEFPIN(28, 40); _FL_DEFPIN(29, 42);
+_FL_DEFPIN(30, 43); _FL_DEFPIN(31, 44); _FL_DEFPIN(32, 47);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 #else
 
 #error "Unrecognised APOLLO3 board!"
