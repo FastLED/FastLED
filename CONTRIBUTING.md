@@ -45,7 +45,7 @@ Alternatively, tests can be built and run for your development machine with CMak
 ```bash
 cmake -S tests -B tests/.build
 ctest --test-dir tests/.build --output-on-failure
-# Not that this will fail if you do not have gcc installed. Please use ./test instead.
+# Not that this will fail if you do not have gcc installed. When in doubt, use ./test to compile the unit tests.
 ```
 
 ## VSCode
