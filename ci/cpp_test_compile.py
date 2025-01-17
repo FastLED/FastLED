@@ -128,8 +128,13 @@ def run_command(command: str, cwd: Path | None = None) -> None:
 def compile_fastled_library(specific_test: str | None = None) -> None:
     if USE_ZIG:
         print("USING ZIG COMPILER")
-        zig_prog = shutil.which("zig")
-        assert zig_prog is not None, "Zig compiler not found in PATH."
+        rtn = subprocess.run(
+            "python -m ziglang version", shell=True, capture_output=True
+        ).returncode
+        zig_is_installed = rtn == 0
+        assert (
+            zig_is_installed
+        ), 'Zig compiler not when using "python -m ziglang version" command'
         use_zig_compiler()
     elif USE_CLANG:
         print("USING CLANG COMPILER")
