@@ -66,7 +66,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=missing-include-dirs
     -Werror=date-time
     -Werror=non-virtual-dtor
-    #-Werror=reorder
+    -Werror=reorder
     -Werror=sign-compare
     -Werror=float-equal
     #-Werror=conversion
