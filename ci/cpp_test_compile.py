@@ -28,14 +28,21 @@ USE_ZIG = False
 USE_CLANG = False
 
 
-def use_clang_compiler() -> Tuple[Path, Path, Path]:
+def _has_system_clang_compiler() -> bool:
     CLANG = shutil.which("clang")
     CLANGPP = shutil.which("clang++")
     LLVM_AR = shutil.which("llvm-ar")
-    assert CLANG is not None, "Clang compiler not found in PATH."
-    assert CLANGPP is not None, "Clang++ compiler not found in PATH."
-    assert LLVM_AR is not None, "llvm-ar not found in PATH."
+    return CLANG is not None and CLANGPP is not None and LLVM_AR is not None
 
+
+def use_clang_compiler() -> Tuple[Path, Path, Path]:
+    assert _has_system_clang_compiler(), "Clang system compiler not found"
+    CLANG = shutil.which("clang")
+    CLANGPP = shutil.which("clang++")
+    LLVM_AR = shutil.which("llvm-ar")
+    assert CLANG is not None, "clang compiler not found"
+    assert CLANGPP is not None, "clang++ compiler not found"
+    assert LLVM_AR is not None, "llvm-ar not found"
     # Set environment variables for C and C++ compilers
     os.environ["CC"] = CLANG
     os.environ["CXX"] = CLANGPP
@@ -258,7 +265,7 @@ def main() -> None:
             USE_CLANG = False
 
     if USE_CLANG:
-        if shutil.which("clang") is None:
+        if not _has_system_clang_compiler():
             print(
                 "Clang compiler not found in PATH, falling back to Zig-clang compiler"
             )
