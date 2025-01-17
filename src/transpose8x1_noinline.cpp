@@ -5,6 +5,9 @@
 
 #include "transpose8x1_noinline.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
+
 void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
     uint32_t x, y, t;
 
@@ -28,3 +31,5 @@ void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
     *((uint32_t*)B) = y;
     *((uint32_t*)(B+4)) = x;
 }
+
+#pragma GCC diagnostic pop

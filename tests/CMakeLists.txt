@@ -75,6 +75,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-parameter
     -Werror=unused-variable
     -Werror=unused-value
+    -Werror=cast-align
     -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
     # ignore Arduino/PlatformIO-specific PROGMEM macro
     -DPROGMEM=

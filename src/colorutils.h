@@ -18,6 +18,8 @@
   #endif
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
 
 /// Defines a static RGB palette very compactly using a series
 /// of connected color gradients.
@@ -2300,5 +2302,7 @@ void   napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float ga
 /// @} GammaFuncs
 
 FASTLED_NAMESPACE_END
+
+#pragma GCC diagnostic pop
 
 #endif
