@@ -2,7 +2,7 @@
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
-The FastLED library includesa powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
+The FastLED library includes a powerful cli that can compile to any device. It will run if you have either [python](https://www.python.org/downloads/) or [uv](https://github.com/astral-sh/uv) installed on the system.
 
 ## FastLED compiler cli
 
@@ -17,7 +17,7 @@ cd fastled
 # compile.bat  # Windows.
 ```
 
-*Note that you do NOT need to install the C++ compiler toolchain for compiling + running unit tests. If `gcc` is not found then the `ziglang` clang compiler will be swapped in automatically.*
+*Note that you do NOT need to install the C++ compiler toolchain for compiling + running unit tests. If `gcc` is not found in your system `PATH` then the `ziglang` clang compiler will be swapped in automatically.*
 
 ## Linting and Unit Testing
 
