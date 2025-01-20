@@ -257,7 +257,7 @@ public:
     /// @copydoc setTemperature()
     CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
 
-    /// Get the color temperature, aka whipe point, for this controller
+    /// Get the color temperature, aka white point, for this controller
     /// @returns the current color temperature (CLEDController::m_ColorTemperature)
     CRGB getTemperature() { return m_ColorTemperature; }
 

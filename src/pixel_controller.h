@@ -73,7 +73,7 @@ struct PixelController {
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process
     uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-    uint8_t e[3];            ///< values for the scaled dither signal @see init_binary_dithering()
+    uint8_t e[3];            ///< values for the unscaled dither signal @see init_binary_dithering()
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
     ColorAdjustment mColorAdjustment;
@@ -542,7 +542,7 @@ struct PixelController {
         uint8_t w = 0;
         rgb_2_rgbw(rgbw.rgbw_mode,
                    rgbw.white_color_temp,
-                   rgb.r, rgb.b, rgb.g,  // Input colors
+                   rgb.r, rgb.g, rgb.b,  // Input colors
                    mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
                    &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.

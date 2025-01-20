@@ -124,16 +124,6 @@ class RGBWEmulatedController
     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
-        // This version sent down to the real controller.
-        PixelController<RGB, LANES, MASK> pixels_device(pixels);
-        pixels_device.mColorAdjustment.premixed = CRGB(255, 255, 255); // No scaling because we do that.
-		#if FASTLED_HD_COLOR_MIXING
-		pixels_device.mColorAdjustment.color = CRGB(255, 255, 255);
-		pixels_device.mColorAdjustment.brightness = 255;
-		#endif
-        pixels_device.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
-        pixels_device.mLen = mNumRGBWLeds;
-        pixels_device.mLenRemaining = mNumRGBWLeds;
         uint8_t *data = reinterpret_cast<uint8_t *>(mRGBWPixels);
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         while (iterator.has(1)) {
@@ -142,14 +132,31 @@ class RGBWEmulatedController
             data += 4;
             iterator.advanceData();
         }
-        // cast to base class to get around protected/private access issues
-        CPixelLEDController<RGB, LANES, MASK> &base = mController;
-        base.showPixels(pixels_device);
+
+		// Force the device controller to a state where it passes data through
+		// unmodified: color correction, color temperature, dither, and brightness
+		// (passed as an argument to show()).  Temporarily enable the controller,
+		// show the LEDs, and disable it again.
+		//
+		// The device controller is in the global controller list, so if we 
+		// don't keep it disabled, it will refresh again with unknown brightness,
+		// temperature, etc.
+
+		mController.setCorrection(CRGB(255, 255, 255));
+		mController.setTemperature(CRGB(255, 255, 255));
+		mController.setDither(DISABLE_DITHER);
+
+		mController.setEnabled(true);
+		mController.showLeds(255);
+		mController.setEnabled(false);
     }
 
   private:
     // Needed by the interface.
-    void init() override {}
+    void init() override {
+		mController.init();
+		mController.setEnabled(false);
+	}
 
     void ensureBuffer(int32_t num_leds) {
         if (num_leds != mNumRGBLeds) {
@@ -161,6 +168,9 @@ class RGBWEmulatedController
             uint32_t new_size = Rgbw::size_as_rgb(num_leds);
             delete[] mRGBWPixels;
             mRGBWPixels = new CRGB[new_size];
+			// showPixels may never clear the last pixel.
+			mRGBWPixels[new_size - 1] = CRGB(0, 0, 0);
+			mController.setLeds(mRGBWPixels, new_size);
         }
     }
 
