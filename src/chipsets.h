@@ -1013,6 +1013,43 @@ class WS2811Controller400Khz : public ClocklessController<DATA_PIN, C_NS_WS2811(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2815Controller : public ClocklessController<DATA_PIN, C_NS_WS2815(250), C_NS_WS2815(1090), C_NS_WS2815(550), RGB_ORDER> {};
 
+
+// 750NS, 750NS, 750NS
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1803Controller400Khz : public ClocklessController<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller800Khz : public ClocklessController<DATA_PIN, C_NS(340), C_NS(340), C_NS(550), RGB_ORDER, 0, true, 500> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, C_NS(100), C_NS(300), C_NS(200), RGB_ORDER, 0, true, 500> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER, 4> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER> {};
+
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SK6822Controller : public ClocklessController<DATA_PIN, C_NS_SK6822(375), C_NS_SK6822(1000), C_NS_SK6822(375), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SK6812Controller : public ClocklessController<DATA_PIN, C_NS_SK6812(300), C_NS_SK6812(300), C_NS_SK6812(600), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SM16703Controller : public ClocklessController<DATA_PIN, C_NS(300), C_NS(600), C_NS(300), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PL9823Controller : public ClocklessController<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
+
+// UCS1912 - Note, never been tested, this is according to the datasheet
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
+#endif
+/// @} ClocklessChipsets
+
+
 // WS2816 - is an emulated controller that emits 48 bit pixels by forwarding
 // them to a platform specific WS2812 controller.  The WS2812 controller
 // has to output twice as many 24 bit pixels.
@@ -1052,13 +1089,12 @@ public:
         ensureBuffer(pixels.size());
 
         // expand and copy all the pixels
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         size_t out_index = 0;
-        while (iterator.has(1)) {
+        while (pixels.has(1)) {
             pixels.stepDithering();
 
             uint16_t s0, s1, s2;
-            iterator.loadAndScale_WS2816_HD(&s0, &s1, &s2);
+            pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
             uint8_t b0_hi = s0 >> 8;
             uint8_t b0_lo = s0 & 0xFF;
             uint8_t b1_hi = s1 >> 8;
@@ -1069,7 +1105,7 @@ public:
             mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
             mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
 
-            iterator.advanceData();
+            pixels.advanceData();
             out_index += 2;
         }
 
@@ -1104,42 +1140,6 @@ private:
     ControllerT mController;
 
 };
-
-// 750NS, 750NS, 750NS
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public ClocklessController<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public ClocklessController<DATA_PIN, C_NS(340), C_NS(340), C_NS(550), RGB_ORDER, 0, true, 500> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, C_NS(100), C_NS(300), C_NS(200), RGB_ORDER, 0, true, 500> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER, 4> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER> {};
-
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6822Controller : public ClocklessController<DATA_PIN, C_NS_SK6822(375), C_NS_SK6822(1000), C_NS_SK6822(375), RGB_ORDER> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6812Controller : public ClocklessController<DATA_PIN, C_NS_SK6812(300), C_NS_SK6812(300), C_NS_SK6812(600), RGB_ORDER> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16703Controller : public ClocklessController<DATA_PIN, C_NS(300), C_NS(600), C_NS(300), RGB_ORDER> {};
-
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class PL9823Controller : public ClocklessController<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
-
-// UCS1912 - Note, never been tested, this is according to the datasheet
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
-#endif
-/// @} ClocklessChipsets
-
 
 // // WS2816 - is an emulated controller that emits 48 bit pixels by forwarding
 // // them to a platform specific WS2812 controller.  The WS2812 controller
