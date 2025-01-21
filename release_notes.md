@@ -2,6 +2,11 @@ FastLED 3.9.12
 ==============
 * WS2816 (high definition) chipset now supported.
   * Thank you https://github.com/kbob for the code to do this!
+  * This is a 16-bit per channel LED that runs on the WS2812 protocol.
+  * 4-bit internal gamma correction on the chipset.
+    * 8-bit gamma correction from software + hardware is possible, but not implemented yet.
+    * Therefore this is a beta release of the driver that may see a color correction enhancement down the line.
+  * See example: https://github.com/FastLED/FastLED/blob/master/examples/WS2816/WS2816.ino
 * Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
 * ESP32C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
 * ObjectFLED is now automatic for Teensy 4.0/4.1 for WS2812.
