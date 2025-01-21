@@ -1013,6 +1013,7 @@ class WS2811Controller400Khz : public ClocklessController<DATA_PIN, C_NS_WS2811(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2815Controller : public ClocklessController<DATA_PIN, C_NS_WS2815(250), C_NS_WS2815(1090), C_NS_WS2815(550), RGB_ORDER> {};
 
+
 // 750NS, 750NS, 750NS
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
