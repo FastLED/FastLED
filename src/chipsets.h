@@ -974,10 +974,10 @@ class WS2813Controller : public ClocklessController<DATA_PIN, C_NS_WS2813(320), 
 #endif
 
 
-#ifdef FASTLED_USES_OBJECTFLED
-#ifndef __IMXRT1062__
-#error "ObjectFLED is only supported on Teensy 4.0/4.1"
-#else
+#if defined(__IMXRT1062__) && !defined(FASTLED_NOT_USES_OBJECTFLED)
+#if defined(FASTLED_USES_OBJECTFLED)
+#warning "FASTLED_USES_OBJECTFLED is now implicit for Teensy 4.0/4.1 for WS2812 and is no longer needed."
+#endif
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz:
 	public fl::ClocklessController_ObjectFLED_WS2812<
@@ -987,7 +987,6 @@ class WS2812Controller800Khz:
     typedef fl::ClocklessController_ObjectFLED_WS2812<DATA_PIN, RGB_ORDER> Base;
 	WS2812Controller800Khz(): Base(FASTLED_OVERCLOCK) {}
 };
-#endif  // __IMXRT1062__
 #elif defined(FASTLED_USES_ESP32S3_I2S)
 #include "platforms/esp/32/clockless_i2s_esp32s3.h"
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>

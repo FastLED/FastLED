@@ -16,6 +16,7 @@ void setup() {}
 void loop() {}
 #else
 
+// As if FastLED 3.9.12, this is no longer needed for Teensy 4.0/4.1.
 #define FASTLED_USES_OBJECTFLED
 
 // Optional define to override the latch delay (microseconds)
