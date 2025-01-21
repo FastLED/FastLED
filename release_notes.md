@@ -1,7 +1,10 @@
-FastLED 3.9.12 (next release)
+FastLED 3.9.12
 ==============
 * Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
 * ESP32C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
+* ObjectFLED is now automatic for Teensy 4.0/4.1 for WS2812.
+  * To disable use `#define FASTLED_NOT_USES_OBJECTFLED` before `#include "FastLED.h"`
+* Fixes for RGBW emulated mode for SAMD (digit, due) chipsets.
 
 FastLED 3.9.11
 ==============
