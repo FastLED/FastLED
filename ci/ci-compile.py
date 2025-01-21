@@ -104,6 +104,7 @@ DEFAULT_EXAMPLES = [
     "FxNoisePlusPalette",
     "FxPacifica",
     "FxEngine",
+    "WS2816"
 ]
 
 EXTRA_EXAMPLES: dict[Board, list[str]] = {

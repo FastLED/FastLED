@@ -519,6 +519,9 @@ struct PixelController {
     // WS2816B has native 16 bit/channel color and internal 4 bit gamma correction.
     // So we don't do gamma here, and we don't bother with dithering.
     FASTLED_FORCE_INLINE void loadAndScale_WS2816_HD(uint16_t *s0_out, uint16_t *s1_out, uint16_t *s2_out) {
+        // Note that the WS2816 has a 4 bit gamma correction built in. To improve things this algorithm may
+        // change in the future with a partial gamma correction that is completed by the chipset gamma
+        // correction.
         uint16_t r16 = map8_to_16(mData[0]);
         uint16_t g16 = map8_to_16(mData[1]);
         uint16_t b16 = map8_to_16(mData[2]);
