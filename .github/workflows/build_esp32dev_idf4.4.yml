@@ -1,0 +1,15 @@
+name: esp32dev-idf4.4
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev_idf44

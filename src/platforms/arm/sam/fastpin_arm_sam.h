@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_ARM_SAM_H
 #define __INC_FASTPIN_ARM_SAM_H
 
+#include "fl/force_inline.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -25,15 +27,15 @@ public:
 
 	inline static void hi() __attribute__ ((always_inline)) { _PSOR::r() = _MASK; }
 	inline static void lo() __attribute__ ((always_inline)) { _PCOR::r() = _MASK; }
-	inline static void set(register port_t val) __attribute__ ((always_inline)) { _PDOR::r() = val; }
+	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _PDOR::r() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle();  }
 
 	inline static void toggle() __attribute__ ((always_inline)) { _PDOR::r() ^= _MASK; }
 
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PDOR::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PDOR::r() & ~_MASK; }
@@ -56,15 +58,15 @@ public:
 
 	inline static void hi() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 1; }
 	inline static void lo() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 0; }
-	inline static void set(register port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
+	inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	inline static void toggle() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() ^= 1; }
 
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi();  }
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+	inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi();  }
+	inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
 	inline static port_t hival() __attribute__ ((always_inline)) { return 1; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
@@ -76,11 +78,11 @@ public:
 #define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
 #define _R(T) struct __gen_struct_ ## T
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
-	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
+#define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE reg32_t r() { return T; } \
+	template<int BIT> static FASTLED_FORCE_INLINE ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _FL_IO(L,C) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER); _FL_DEFINE_PORT3(L, C, _R(REG_PIO ## L ## _ODSR));
 
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1U << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {}; \
   								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {};

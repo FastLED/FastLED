@@ -1,0 +1,18 @@
+name: teensy41_binary_size
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: teensy41
+      max_size: 104000
+      max_size_apa102: 84000
+

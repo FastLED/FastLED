@@ -1,13 +1,45 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
+#include "fl/singleton.h"
+#include "fl/engine_events.h"
 
+/// @file FastLED.cpp
+/// Central source file for FastLED, implements the CFastLED class/object
+
+#ifndef MAX_CLED_CONTROLLERS
+#ifdef __AVR__
+// if mega or leonardo, allow more controllers
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega32U4__)
+#define MAX_CLED_CONTROLLERS 16
+#else
+#define MAX_CLED_CONTROLLERS 8
+#endif
+#else
+#define MAX_CLED_CONTROLLERS 64
+#endif  // __AVR__
+#endif  // MAX_CLED_CONTROLLERS
 
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
 #endif
 
+/// Has to be declared outside of any namespaces.
+/// Called at program exit when run in a desktop environment. 
+/// Extra C definition that some environments may need. 
+/// @returns 0 to indicate success
+extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
+extern "C"  __attribute__((weak)) void yield(void) { }
+
 FASTLED_NAMESPACE_BEGIN
 
+uint16_t cled_contoller_size() {
+	return sizeof(CLEDController);
+}
+
+uint8_t get_brightness();
+
+/// Pointer to the matrix object when using the Smart Matrix Library
+/// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = NULL;
 
 CFastLED FastLED;
@@ -16,7 +48,12 @@ CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
 static uint32_t lastshow = 0;
 
+/// Global frame counter, used for debugging ESP implementations
+/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
 uint32_t _frame_cnt=0;
+
+/// Global frame retry counter, used for debugging ESP implementations
+/// @todo Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?
 uint32_t _retry_cnt=0;
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
@@ -28,6 +65,15 @@ CFastLED::CFastLED() {
 	m_nFPS = 0;
 	m_pPowerFunc = NULL;
 	m_nPowerData = 0xFFFFFFFF;
+	m_nMinMicros = 0;
+}
+
+int CFastLED::size() {
+	return (*this)[0].size();
+}
+
+CRGB* CFastLED::leds() {
+	return (*this)[0].leds();
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -39,11 +85,14 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
+	fl::EngineEvents::onStripAdded(pLed, nLedsOrOffset - nOffset);
 	return *pLed;
 }
 
+static void* gControllersData[MAX_CLED_CONTROLLERS];
+
 void CFastLED::show(uint8_t scale) {
-	// guard against showing too rapidly
+	fl::EngineEvents::onBeginFrame();
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -52,15 +101,32 @@ void CFastLED::show(uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
+	// static uninitialized gControllersData produces the smallest binary on attiny85.
+	int length = 0;
 	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		uint8_t d = pCur->getDither();
-		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showLeds(scale);
-		pCur->setDither(d);
+
+	while(pCur && length < MAX_CLED_CONTROLLERS) {
+		gControllersData[length++] = pCur->beginShowLeds(pCur->size());
+		if (m_nFPS < 100) { pCur->setDither(0); }
+		pCur = pCur->next();
+	}
+
+	pCur = CLEDController::head();
+	for (length = 0; length < MAX_CLED_CONTROLLERS && pCur; length++) {
+		pCur->showLedsInternal(scale);
+		pCur = pCur->next();
+
+	}
+
+	length = 0;  // Reset length to 0 and iterate again.
+	pCur = CLEDController::head();
+	while(pCur && length < MAX_CLED_CONTROLLERS) {
+		pCur->endShowLeds(gControllersData[length++]);
 		pCur = pCur->next();
 	}
 	countFPS();
+	fl::EngineEvents::onEndShowLeds();
+	fl::EngineEvents::onEndFrame();
 }
 
 int CFastLED::count() {
@@ -94,12 +160,19 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
+	int length = 0;
 	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		uint8_t d = pCur->getDither();
+	while(pCur && length < MAX_CLED_CONTROLLERS) {
+		gControllersData[length++] = pCur->beginShowLeds(pCur->size());
 		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showColor(color, scale);
-		pCur->setDither(d);
+		pCur->showColorInternal(color, scale);
+		pCur = pCur->next();
+	}
+
+	pCur = CLEDController::head();
+	length = 0;  // Reset length to 0 and iterate again.
+	while(pCur && length < MAX_CLED_CONTROLLERS) {
+		pCur->endShowLeds(gControllersData[length++]);
 		pCur = pCur->next();
 	}
 	countFPS();
@@ -115,7 +188,7 @@ void CFastLED::clear(bool writeData) {
 void CFastLED::clearData() {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
-		pCur->clearLedData();
+		pCur->clearLedDataInternal();
 		pCur = pCur->next();
 	}
 }
@@ -200,7 +273,13 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 // 	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
 // }
 
+
+/// Unused value
+/// @todo Remove?
 extern int noise_min;
+
+/// Unused value
+/// @todo Remove?
 extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
@@ -233,11 +312,12 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 	}
 }
 
-extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 
-#ifdef FASTLED_NEEDS_YIELD
-extern "C" void yield(void) { }
-#endif
+uint8_t get_brightness() {
+	return FastLED.getBrightness();
+}
+
+
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

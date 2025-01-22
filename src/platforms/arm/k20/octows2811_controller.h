@@ -3,7 +3,8 @@
 
 #ifdef USE_OCTOWS2811
 
-// #include "OctoWS2811.h"
+#include "OctoWS2811.h"
+#include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

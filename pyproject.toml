@@ -1,0 +1,35 @@
+[project]
+name = "ci"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "platformio==6.1.16",
+    "fastled-wasm",
+    "python-dateutil",
+    "ruff",
+    "mypy",
+    "types-python-dateutil",
+    "clang-format",
+    "isort",
+    "black",
+    "pip",
+    "pytest",
+    "fpvgcc",
+    "uv",
+    "ziglang",
+    "ninja",
+    "cmake",
+    "download",
+    "fastled>=1.2.26",
+    "playwright"
+]
+
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+[tool.hatch.build.targets.wheel]
+
+[tool.hatch.build]
+packages = ["ci/ci"]

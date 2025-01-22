@@ -1,0 +1,25 @@
+name: uno_binary_size
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: uno
+      max_size: 11000
+      max_size_apa102: 9300
+  build_no_forced_inline:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: uno
+      max_size: -1
+      max_size_apa102: -1
+      extra_args: --defines FASTLED_NO_FORCE_INLINE
+

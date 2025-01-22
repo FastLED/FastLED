@@ -1,3 +1,7 @@
+/// @file    ParallelOutputDemo.ino
+/// @brief   Demonstrates how to write to multiple strips simultaneously
+/// @example ParallelOutputDemo.ino
+
 #include <FastLED.h>
 
 #define NUM_LEDS_PER_STRIP 16

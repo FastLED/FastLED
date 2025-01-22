@@ -1,11 +1,22 @@
-#define FASTLED_INTERNAL
+/// @file lib8tion.cpp
+/// Fast, efficient 8-bit math functions specifically
+/// designed for high-performance LED programming. 
+
 #include <stdint.h>
+
+/// Disables pragma messages and warnings
+#define FASTLED_INTERNAL
+
+
 #include "FastLED.h"
 
-FASTLED_NAMESPACE_BEGIN
 
+
+/// @copydoc ::rand16seed
 #define RAND16_SEED  1337
 uint16_t rand16seed = RAND16_SEED;
+
+
 
 
 // memset8, memcpy8, memmove8:
@@ -129,7 +140,7 @@ void * memmove8 ( void * dst, const void* src, uint16_t num )
 
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
-#include <Arduino.h>
+#include <Arduino.h>  // ok include
 #include "lib8tion.h"
 
 void test1abs( int8_t i)
@@ -247,5 +258,3 @@ void testnscale8x3()
 }
 
 #endif
-
-FASTLED_NAMESPACE_END

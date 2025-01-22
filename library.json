@@ -27,21 +27,35 @@
             "name": "Josh Huber",
             "url": "https://github.com/uberjay",
             "maintainer": true
+        },
+        {
+            "name": "Zach Vorhies",
+            "url": "https://github.com/zackees",
+            "maintainer": true
         }
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.4.0",
+    "version": "3.9.12",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
     "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
+    "headers": "FastLED.h",
     "export": {
         "exclude": [
             "docs",
-            "extras"
+            "extras",
+            "ci",
+            ".*",
+            "compile.bat",
+            "compile",
+            "lint",
+            "test",
+            "platformio.ini",
+            "**/*.exe"
         ]
     },
     "build": {
@@ -49,7 +63,14 @@
             "+<*.c>",
             "+<*.cpp>",
             "+<*.h>",
-            "+<platforms/esp/32/*.cpp>"
+            "+<platforms/arm/k20/**/*.cpp>",
+            "+<platforms/esp/32/**/*.cpp>",
+            "+<platforms/wasm/**/*.cpp>",
+            "+<third_party/**/*.cpp>",
+            "+<third_party/**/*.c>",
+            "+<fx/**/*.cpp>",
+            "+<fl/**/*.cpp>",
+            "+<sensors/**/*.cpp>"
         ],
         "libArchive": false
     }

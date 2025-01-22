@@ -1,0 +1,142 @@
+name: Build Template
+
+on:
+  workflow_call:
+    inputs:
+      args:
+        type: string
+        required: false
+        default: ""
+      platform:
+        type: string
+        required: false
+        default: ""
+      runs-on:
+        type: string
+        required: false
+        default: "ubuntu-latest"
+
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+
+      # disabled for now.
+      #- name: Cache .build directory
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: ./.build
+      #    key: ${{ runner.os }}-build-${{ hashFiles('./ci/**') }}
+      #    restore-keys: |
+      #      ${{ runner.os }}-build-
+
+      - name: Install UV
+        run: pip install uv
+
+      - name: Install Platform
+        if: inputs.platform != ''
+        run: |
+          uv run pio pkg -g install ${{ inputs.platform }}
+
+      - name: PlatformIO Versions
+        run: |
+          uv run platformio --version
+
+      - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
+        run: |
+          set -o pipefail
+          ./compile --no-interactive  ${{ inputs.args }} | tee build.log
+        shell: bash
+
+      - name: Find platformio.ini file and print it out
+        if: always()
+        continue-on-error: true
+        run: |
+          platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
+          if [ -f "$platformio_ini" ]; then
+            echo "Found platformio.ini at: $platformio_ini"
+            echo "############################################"
+            cat "$platformio_ini"
+            echo "############################################"
+          else
+            echo "platformio.ini not found"
+          fi
+
+      - name: Build Blink.ino for library info
+        continue-on-error: true
+        run: |
+          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+        shell: bash
+
+      - name: Print out build_info.json
+        if: always()
+        run: |
+          build_info=$(find . -name build_info.json)
+          if [ -f "$build_info" ]; then
+            cat $build_info
+          else
+            echo "build_info.json not found"
+          fi
+
+      - name: CPP Check
+        run: |
+          # take the input.args and parse out the first element, which will be the board name
+          # do this to input.args
+          python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
+          cat board.txt | xargs -I {} uv run ci/ci-cppcheck.py {}
+        shell: bash
+
+      - name: Check Compiled size of last compiled example
+        continue-on-error: true
+        run: |
+          uv run ci/ci-check-compiled-size.py ${{ inputs.args }} --no-build
+
+      - name: Inspect Binary
+        if: always()
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_binary.py --first
+
+      - name: Inspect Elf
+        if: always()
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_elf.py --first
+
+      - name: Optimization Report
+        if: always()
+        continue-on-error: true
+        run: |
+          uv run ci/optimization_report.py --first
+
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: .build/
+          include-hidden-files: true
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: build.log
+
+      - name: Check build status
+        if: failure()
+        run: exit 1

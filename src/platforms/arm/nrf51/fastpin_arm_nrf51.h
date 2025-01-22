@@ -1,6 +1,8 @@
 #ifndef __FASTPIN_ARM_NRF51_H
 #define __FASTPIN_ARM_NRF51_H
 
+#include "fl/force_inline.h"
+
 #if defined(NRF51)
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
@@ -17,15 +19,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { _OUTSET::r() = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { _OUTCLR::r() = _MASK; }
-    inline static void set(register port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { _OUT::r() ^= _MASK; }
 
-    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return _OUT::r() | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return _OUT::r() & ~_MASK; }
@@ -41,7 +43,7 @@ public:
 #define NR_OUTCLR ADDR(0x5000050CUL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x50C)
 #define NR_OUT ADDR(0x50000504UL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x504)
 
-#define _RD32_NRF(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; }};
+#define _RD32_NRF(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE reg32_t r() { return T; }};
 
 _RD32_NRF(NR_DIRSET);
 _RD32_NRF(NR_DIRCLR);
@@ -79,15 +81,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTSET = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTCLR= _MASK; }
-    inline static void set(register port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT ^= _MASK; }
 
-    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT & ~_MASK; }

@@ -1,0 +1,44 @@
+name: unit tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        compiler: ["gcc", "clang"]
+    
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install uv
+      
+
+      - name: Install
+        run: ./install
+        shell: bash
+
+      - name: Run Test
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            ./test --clang
+          else
+            ./test
+          fi
+        shell: bash
+

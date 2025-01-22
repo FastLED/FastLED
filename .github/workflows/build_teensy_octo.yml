@@ -1,0 +1,15 @@
+name: teensy_octoWS2811
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: teensy41 --extra-packages OctoWS2811 --examples OctoWS2811

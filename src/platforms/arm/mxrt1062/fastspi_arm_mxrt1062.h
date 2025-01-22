@@ -7,10 +7,10 @@ FASTLED_NAMESPACE_BEGIN
 #include <SPI.h>
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
-class Teesy4HardwareSPIOutput {
-	Selectable *m_pSelect;
-	uint32_t  m_bitCount;
-	uint32_t m_bitData;
+class Teensy4HardwareSPIOutput {
+	Selectable *m_pSelect = nullptr;
+	uint32_t  m_bitCount = 0;
+	uint32_t m_bitData = 0;
 	inline IMXRT_LPSPI_t & port() __attribute__((always_inline)) {
 		switch(_SPI_INDEX) {
 			case 0:
@@ -23,8 +23,8 @@ class Teesy4HardwareSPIOutput {
 	}
 
 public:
-	Teesy4HardwareSPIOutput() { m_pSelect = NULL; m_bitCount = 0;}
-	Teesy4HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; m_bitCount = 0;}
+	Teensy4HardwareSPIOutput() { m_pSelect = NULL; m_bitCount = 0;}
+	Teensy4HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; m_bitCount = 0;}
 
 	// set the object representing the selectable -- ignore for now
 	void setSelect(Selectable *pSelect) { /* TODO */ }
@@ -82,7 +82,7 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -95,13 +95,13 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
 		m_bitData = (m_bitData<<1) | ((b&(1<<BIT)) != 0);
 		// If this is the 8th bit we've collected, just write it out raw
-		register uint32_t bc = m_bitCount;
+		FASTLED_REGISTER uint32_t bc = m_bitCount;
 		bc = (bc + 1) & 0x07;
 		if (!bc) {
 			m_bitCount = 0;
@@ -112,7 +112,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		select();
     int len = pixels.mLen;
 

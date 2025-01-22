@@ -1,0 +1,12 @@
+From espressif led_strip component repository.
+
+Version: 3.0.0
+
+This library has been lightly modified to support async operations for both spi and rmt strip drivers.
+
+The following files were added by FastLED:
+
+strip_spi.h
+strip_spi.cpp
+strip_rmt.h
+strip_rmt.cpp

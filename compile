@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+# Function to find Python executable
+find_python() {
+    if command -v python3 &> /dev/null; then
+        echo "python3"
+    elif command -v python &> /dev/null; then
+        echo "python"
+    else
+        echo "Python not found. Please install Python 3."
+        exit 1
+    fi
+}
+
+# Check if uv is installed, if not, install it
+if ! command -v uv &> /dev/null; then
+    echo "uv command not found. Installing uv..."
+    PYTHON=$(find_python)
+    $PYTHON -m pip install uv
+fi
+
+cd "$(dirname "$0")"
+# if .venv not found
+if [ ! -d .venv ]; then
+    # create virtual environment
+    ./install
+fi
+
+interactive_stmt=""
+# if no arguments
+if [ $# -eq 0 ]; then
+    # set interactive statement
+    interactive_stmt="--interactive"
+fi
+
+uv run ci/ci-compile.py $interactive_stmt "$@"

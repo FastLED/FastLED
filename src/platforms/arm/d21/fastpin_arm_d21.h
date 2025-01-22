@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_ARM_SAM_H
 #define __INC_FASTPIN_ARM_SAM_H
 
+#include "fl/force_inline.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -36,15 +38,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTSET.reg = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTCLR.reg = _MASK; }
-    inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUT.reg = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUT.reg = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTTGL.reg = _MASK; }
 
-    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg & ~_MASK; }
@@ -55,7 +57,7 @@ public:
 };
 
 #define _R(T) struct __gen_struct_ ## T
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile PortGroup * r() { return T; } };
+#define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile PortGroup * r() { return T; } };
 
 #define _FL_IO(L) _RD32(GPIO ## L)
 
@@ -127,26 +129,6 @@ _FL_DEFPIN( 24,11,1);//SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(ARDUINO_SAMD_ZERO)
-
-#define MAX_PIN 42
-_FL_DEFPIN( 0,10,0); _FL_DEFPIN( 1,11,0); _FL_DEFPIN( 2, 8,0); _FL_DEFPIN( 3, 9,0);
-_FL_DEFPIN( 4,14,0); _FL_DEFPIN( 5,15,0); _FL_DEFPIN( 6,20,0); _FL_DEFPIN( 7,21,0);
-_FL_DEFPIN( 8, 6,0); _FL_DEFPIN( 9, 7,0); _FL_DEFPIN(10,18,0); _FL_DEFPIN(11,16,0);
-_FL_DEFPIN(12,19,0); _FL_DEFPIN(13,17,0); _FL_DEFPIN(14, 2,0); _FL_DEFPIN(15, 8,1);
-_FL_DEFPIN(16, 9,1); _FL_DEFPIN(17, 4,0); _FL_DEFPIN(18, 5,0); _FL_DEFPIN(19, 2,1);
-_FL_DEFPIN(20,22,0); _FL_DEFPIN(21,23,0); _FL_DEFPIN(22,12,0); _FL_DEFPIN(23,11,1);
-_FL_DEFPIN(24,10,1); _FL_DEFPIN(25, 3,1); _FL_DEFPIN(26,27,0); _FL_DEFPIN(27,28,0);
-_FL_DEFPIN(28,24,0); _FL_DEFPIN(29,25,0); _FL_DEFPIN(30,22,1); _FL_DEFPIN(31,23,1);
-_FL_DEFPIN(32,22,0); _FL_DEFPIN(33,23,0); _FL_DEFPIN(34,19,0); _FL_DEFPIN(35,16,0);
-_FL_DEFPIN(36,18,0); _FL_DEFPIN(37,17,0); _FL_DEFPIN(38,13,0); _FL_DEFPIN(39,21,0);
-_FL_DEFPIN(40, 6,0); _FL_DEFPIN(41, 7,0); _FL_DEFPIN(42, 3,0);
-
-#define SPI_DATA 24
-#define SPI_CLOCK 23
-
-#define HAS_HARDWARE_PIN_SUPPORT 1
-
 #elif defined(ARDUINO_SODAQ_AUTONOMO)
 
 #define MAX_PIN 56
@@ -183,7 +165,7 @@ _FL_DEFPIN( 20,  8, 0); _FL_DEFPIN( 21,  9, 0); _FL_DEFPIN( 22, 10, 0); _FL_DEFP
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_SAMD_MKRWIFI1010)
+#elif defined(ARDUINO_SAMD_MKR1000) || defined(ARDUINO_SAMD_MKRWIFI1010) || defined(ARDUINO_SAMD_MKRZERO)
 
 #define MAX_PIN 22
 _FL_DEFPIN(  0, 22, 0); _FL_DEFPIN(  1, 23, 0); _FL_DEFPIN(  2, 10, 0); _FL_DEFPIN(  3, 11, 0);
@@ -263,8 +245,41 @@ _FL_DEFPIN( 41, 0, 1) //APA102 Data
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#endif
+#elif defined(ADAFRUIT_PIXELTRINKEY_M0)
 
+#define MAX_PIN 5
+_FL_DEFPIN( 0, 2, 0); // D0
+_FL_DEFPIN( 1, 1, 0); // D1 (Internal NeoPixel)
+_FL_DEFPIN( 2, 4, 0); // D2 (MOSI)
+_FL_DEFPIN( 3, 5, 0); // D3 (SCK)
+_FL_DEFPIN( 4, 6, 0); // D4 (MISO)
+
+#define SPI_DATA  2
+#define SPI_CLOCK 3
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ARDUINO_SAMD_ZERO)
+
+#define MAX_PIN 42
+_FL_DEFPIN( 0,10,0); _FL_DEFPIN( 1,11,0); _FL_DEFPIN( 2, 8,0); _FL_DEFPIN( 3, 9,0);
+_FL_DEFPIN( 4,14,0); _FL_DEFPIN( 5,15,0); _FL_DEFPIN( 6,20,0); _FL_DEFPIN( 7,21,0);
+_FL_DEFPIN( 8, 6,0); _FL_DEFPIN( 9, 7,0); _FL_DEFPIN(10,18,0); _FL_DEFPIN(11,16,0);
+_FL_DEFPIN(12,19,0); _FL_DEFPIN(13,17,0); _FL_DEFPIN(14, 2,0); _FL_DEFPIN(15, 8,1);
+_FL_DEFPIN(16, 9,1); _FL_DEFPIN(17, 4,0); _FL_DEFPIN(18, 5,0); _FL_DEFPIN(19, 2,1);
+_FL_DEFPIN(20,22,0); _FL_DEFPIN(21,23,0); _FL_DEFPIN(22,12,0); _FL_DEFPIN(23,11,1);
+_FL_DEFPIN(24,10,1); _FL_DEFPIN(25, 3,1); _FL_DEFPIN(26,27,0); _FL_DEFPIN(27,28,0);
+_FL_DEFPIN(28,24,0); _FL_DEFPIN(29,25,0); _FL_DEFPIN(30,22,1); _FL_DEFPIN(31,23,1);
+_FL_DEFPIN(32,22,0); _FL_DEFPIN(33,23,0); _FL_DEFPIN(34,19,0); _FL_DEFPIN(35,16,0);
+_FL_DEFPIN(36,18,0); _FL_DEFPIN(37,17,0); _FL_DEFPIN(38,13,0); _FL_DEFPIN(39,21,0);
+_FL_DEFPIN(40, 6,0); _FL_DEFPIN(41, 7,0); _FL_DEFPIN(42, 3,0);
+
+#define SPI_DATA 24
+#define SPI_CLOCK 23
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 

@@ -1,5 +1,51 @@
 *.gch
 *~
-/.vscode
 /docs/html
 /docs/latex
+/docs/doxygen-awesome-css
+components/
+
+# Build outputs
+.build/
+build/
+out/
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.platformio/
+.vscode/c_cpp_properties.json
+.aider*
+!.aider.conf.yml
+!.aiderignore
+ci/native/.vscode/
+tmp/
+firmware_sizes.csv
+.aiderignore
+uv.lock
+.venv/
+__pycache__
+*.pyc
+**/.mypy_cache/
+**/.pytest_cache/
+**/.ruff_cache/
+dev/dev.ino.cpp
+ci/tmp/
+ci/tests/output
+
+# sometimes appears on windows during test compilation
+ci/-
+**/fastled_js
+dist
+
+ignore/
+.env
+
+.vscode/launch.json
+activate
+temp

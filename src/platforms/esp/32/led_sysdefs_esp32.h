@@ -1,5 +1,5 @@
 #pragma once
-#include "esp32-hal.h"
+#include "sdkconfig.h"
 #ifndef ESP32
 #define ESP32
 #endif
@@ -19,6 +19,10 @@
 // Define missing version macros.  Hard code older version 3.0 since actual version is unknown
 #define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
 #define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(3, 0, 0)
+#else
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 0, 0)
+#define CONFIG_IDF_TARGET_ESP32 1
+#endif
 #endif
 
 // Use system millis timer

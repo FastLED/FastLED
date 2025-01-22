@@ -1,6 +1,14 @@
 #ifndef __INC_CLOCKLESS_BLOCK_ESP8266_H
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
+#include <stdint.h>
+#include "fl/namespace.h"
+#include "clock_cycles.h"
+#include "esp_intr_alloc.h"
+#include "eorder.h"
+#include "transpose8x1_noinline.h"
+#include "fl/force_inline.h"
+
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
@@ -9,12 +17,31 @@
 #define REAL_FIRST_PIN 12
 #define LAST_PIN (12 + USED_LANES - 1)
 
+// These are completely made up but allow the code to compile.
+// It looks like esp32 has a more flexible pin mapping than esp8266.
+// so these might actually work.
+#define PORTD_FIRST_PIN 12
+#define PORTA_FIRST_PIN 14
+#define PORTB_FIRST_PIN 16
+
 FASTLED_NAMESPACE_BEGIN
 
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
 #endif
+
+FASTLED_FORCE_INLINE void interrupt_unlock() {
+	// ets_intr_unlock();
+	// TODO: imlement interrupt_unlock?
+	// These functions were mined out of the code below and
+	// made no-ops here. We probably want to implement them.
+}
+
+FASTLED_FORCE_INLINE void interrupt_lock()  {
+	// ets_intr_lock();
+	// TODO: imlement interrupt_lock?
+}
 
 template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
@@ -36,12 +63,14 @@ public:
 	/*uint32_t clocks = */
 	int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
 	while(!showRGBInternal(pixels) && cnt--) {
-	    ets_intr_unlock();
+	    // ets_intr_unlock();
+		interrupt_unlock();
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	    ++_retry_cnt;
 #endif
 	    delayMicroseconds(WAIT_TIME * 10);
-	    ets_intr_lock();
+	    // ets_intr_lock();
+		interrupt_lock();
 	}
 	// #if FASTLED_ALLOW_INTTERUPTS == 0
 	// Adjust the timer
@@ -54,7 +83,7 @@ public:
 
     template<int PIN> static void initPin() {
 	if(PIN >= REAL_FIRST_PIN && PIN <= LAST_PIN) {
-	    _ESPPIN<PIN, 1<<(PIN & 0xFF)>::setOutput();
+	    _ESPPIN<PIN, 1<<(PIN & 0xFF), true>::setOutput();
 	    // FastPin<PIN>::setOutput();
 	}
     }
@@ -82,14 +111,14 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
 	Lines b2 = b;
 	transpose8x1_noinline(b.bytes,b2.bytes);
 	
-	register uint8_t d = pixels.template getd<PX>(pixels);
-	register uint8_t scale = pixels.template getscale<PX>(pixels);
+	FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+	FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 	
-	for(register uint32_t i = 0; i < USED_LANES; ++i) {
+	for(FASTLED_REGISTER uint32_t i = 0; i < USED_LANES; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
@@ -104,7 +133,7 @@ public:
 	    b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 	}
 
-	for(register uint32_t i = USED_LANES; i < 8; ++i) {
+	for(FASTLED_REGISTER uint32_t i = USED_LANES; i < 8; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
@@ -130,7 +159,8 @@ public:
 	}
 	allpixels.preStepFirstByteDithering();
 	
-	ets_intr_lock();
+	// ets_intr_lock();
+	interrupt_lock();
 	uint32_t _start = __clock_cycles();
 	uint32_t last_mark = _start;
 	
@@ -146,21 +176,24 @@ public:
 	    writeBits<8+XTRA0,0>(last_mark, b0, allpixels);
 	    
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_unlock();
+	    // ets_intr_unlock();
+		interrupt_unlock();
 #endif
 	    
 	    allpixels.stepDithering();
 	    
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_lock();
+	    // ets_intr_lock();
+		interrupt_lock();
 	    // if interrupts took longer than 45µs, punt on the current frame
 	    if((int32_t)(__clock_cycles()-last_mark) > 0) {
-		if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) { ets_intr_unlock(); return 0; }
+		if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) { interrupt_unlock(); return 0; }
 	    }
 #endif
 	};
 	
-	ets_intr_unlock();
+	// ets_intr_unlock();
+	interrupt_unlock();
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	++_frame_cnt;
 #endif

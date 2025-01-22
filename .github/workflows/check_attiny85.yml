@@ -1,0 +1,26 @@
+name: attiny85_binary_size
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: attiny85
+      max_size: 9500
+      max_size_apa102: 12000
+
+  build_no_forced_inline:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: attiny85
+      max_size: -1
+      max_size_apa102: -1
+      extra_args: --defines FASTLED_NO_FORCE_INLINE
+

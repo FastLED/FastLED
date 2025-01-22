@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>LED Grid Demo</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #ledCanvas {
+            display: block;
+            margin: 0 auto;
+            background-color: black;
+        }
+    </style>
+</head>
+
+
+<script>
+
+    const FADE_PER_FRAME = 0.85;  // This should be 0 in production as led's are instant.
+
+    class LedGrid {
+        constructor(width, height, options) {
+            this.SEGMENTS = 16;
+            this.LED_SCALE = 1.0;
+            this.leds = [];
+            this.modules = options.modules
+            this.resize(width, height);
+        }
+
+        resize(width, height) {
+            this.SCREEN_WIDTH = width;
+            this.SCREEN_HEIGHT = height;
+            this.reset();
+            this.initScene();
+            this.createGrid();
+        }
+
+        reset() {
+            // Clean up existing objects
+            if (this.leds) {
+                this.leds.forEach(led => {
+                    led.geometry.dispose();
+                    led.material.dispose();
+                    this.scene?.remove(led);
+                });
+            }
+            this.leds = [];
+
+            if (this.composer) {
+                this.composer.dispose();
+            }
+
+            // Clear the scene
+            if (this.scene) {
+                while(this.scene.children.length > 0) { 
+                    this.scene.remove(this.scene.children[0]); 
+                }
+            }
+
+            // Don't remove the renderer or canvas
+            if (this.renderer) {
+                this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+            }
+        }
+
+        initScene() {
+            const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.modules;
+            this.scene = new THREE.Scene();
+            this.camera = new THREE.OrthographicCamera(
+                -this.SCREEN_WIDTH / 2, this.SCREEN_WIDTH / 2,
+                this.SCREEN_HEIGHT / 2, -this.SCREEN_HEIGHT / 2,
+                1, 1000
+            );
+            this.camera.position.z = 500;
+
+            const canvas = document.getElementById('ledCanvas');
+            canvas.width = this.SCREEN_WIDTH;
+            canvas.height = this.SCREEN_HEIGHT;
+            this.renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true 
+            });
+            this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+
+            const renderScene = new RenderPass(this.scene, this.camera);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
+                16.0,
+                1.0,
+                0.0
+            );
+
+            this.composer = new EffectComposer(this.renderer);
+            this.composer.addPass(renderScene);
+            this.composer.addPass(bloomPass);
+        }
+
+        createGrid(_dotSize = undefined) {
+            const { THREE } = this.modules;
+            const NUM_LEDS = 5000; // Number of LEDs to create
+            const containerWidth = this.SCREEN_WIDTH;
+            const containerHeight = this.SCREEN_HEIGHT;
+
+            // Calculate dot size based on screen area and LED count
+            const screenArea = containerWidth * containerHeight;
+            const dotSize = _dotSize ? _dotSize : Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
+
+            for (let i = 0; i < NUM_LEDS; i++) {
+                const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
+                const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const led = new THREE.Mesh(geometry, material);
+
+                // Random position within container bounds
+                led.position.set(
+                    (Math.random() - 0.5) * containerWidth,
+                    (Math.random() - 0.5) * containerHeight,
+                    0
+                );
+
+                this.scene.add(led);
+                this.leds.push(led);
+            }
+        }
+
+        animationLoop() {
+            this.leds.forEach(led => {
+                led.material.color.multiplyScalar(FADE_PER_FRAME);
+                if (Math.random() < 0.01) {
+                    led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+                }
+            });
+
+            this.composer.render();
+        }
+    };
+</script>
+
+<body>
+    <canvas id="ledCanvas"></canvas>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+
+
+</script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        const modules = { THREE, EffectComposer, RenderPass, UnrealBloomPass };
+
+
+        // Constants for screen dimensions
+        let SCREEN_WIDTH = 800;
+        let SCREEN_HEIGHT = SCREEN_WIDTH / 2;
+
+        const ledGrid = new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT, { modules });
+
+        // Animation loop handled outside the class
+        function animate() {
+            requestAnimationFrame(animate);
+            ledGrid.animationLoop();
+        }
+        animate();
+
+        // Periodically reset with new dimensions
+        setInterval(() => {
+            const new_width = Math.random() * 720;
+            const new_height = Math.random() * 1280;
+            console.log('Resizing to', new_width);
+            ledGrid.resize(new_width, new_height);
+        }, 2000); // Reset every 5 seconds
+    </script>
+</body>
+
+</html>

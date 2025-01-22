@@ -1,0 +1,96 @@
+#!/bin/bash
+
+set -e
+
+# Unset VIRTUAL_ENV to avoid warnings about mismatched paths
+unset VIRTUAL_ENV
+
+
+# Overwrite .vscode/launch.json if it's different
+cat > .vscode/launch.json << 'EOL'
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "by-gdb",
+            "request": "launch",
+            "name": "Launch(gdb)",
+            "program": "tests/.build/bin/${fileBasenameNoExtension}",
+            "cwd": "${workspaceRoot}"
+        },
+    ]
+}
+EOL
+
+
+
+
+# # Function to handle ESLint output in the background
+# run_eslint() {
+#     eslint_output_file="eslint_output.log"
+#     eslint src/platforms/wasm/compiler/*.js src/platforms/wasm/compiler/modules/*.js &> "$eslint_output_file" &
+#     eslint_pid=$!
+# }
+
+# # Start ESLint in the background if available
+# if command -v eslint &> /dev/null; then
+#     echo "Running eslint in the background"
+#     run_eslint
+# else
+#     echo "ESLint not found, skipping JavaScript linting"
+# fi
+
+# Linting the Python code.
+echo "Running ruff check"
+uvx ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx ruff check --fix src/platforms/wasm/compiler/compile.py
+uvx ruff check --fix src/platforms/wasm/compiler/server.py
+UV run ruff check --fix dev/dev.py
+echo Running black
+uvx black ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx black src/platforms/wasm/compiler/compile.py
+uvx black src/platforms/wasm/compiler/server.py
+uvx black dev/dev.py
+uvx echo Running isort
+uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
+uvx isort --profile black src/platforms/wasm/compiler/compile.py
+uvx isort --profile black src/platforms/wasm/compiler/server.py
+uvx isort --profile black dev/dev.py
+echo "Running mypy"
+uvx echo yes | mypy --install-type 
+uvx mypy ci --exclude ci/tmp/ --exclude ci/wasm/
+uvx mypy src/platforms/wasm/compiler/compile.py
+uvx mypy src/platforms/wasm/compiler/server.py
+uvx mypy dev/dev.py
+
+
+
+# Linting the C++ code.
+folders=(
+    #"src/lib8tion"
+    #"src/platforms/stub"
+    #"src/platforms/apollo3"  # clang-format breaks apollo3
+    #"src/platforms/esp/8266"  # clang-format breaks esp8266
+    #"src/platforms/arm" # clang-format breaks arm
+)
+
+for folder in "${folders[@]}"; do
+    echo "Running clang-format on $folder"
+    uvx ci/run-clang-format.py -i -r "$folder"
+done
+
+# # Wait for ESLint to finish and output its results
+# if [ -n "$eslint_pid" ]; then
+#     echo "Waiting for ESLint to complete..."
+#     wait "$eslint_pid"
+#     echo "ESLint output:"
+#     cat "$eslint_output_file"
+#     rm "$eslint_output_file"
+# fi

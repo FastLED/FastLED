@@ -1,3 +1,7 @@
+/// @file    TwinkleFox.ino
+/// @brief   Twinkling "holiday" lights that fade in and out.
+/// @example TwinkleFox.ino
+
 #include "FastLED.h"
 
 

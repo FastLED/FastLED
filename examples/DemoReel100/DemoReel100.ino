@@ -1,6 +1,8 @@
-#include <FastLED.h>
+/// @file    DemoReel100.ino
+/// @brief   FastLED "100 lines of code" demo reel, showing off some effects
+/// @example DemoReel100.ino
 
-FASTLED_USING_NAMESPACE
+#include <FastLED.h>
 
 // FastLED "100-lines-of-code" demo reel, showing just a few 
 // of the kinds of animation patterns you can quickly and easily 

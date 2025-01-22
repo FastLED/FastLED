@@ -1,0 +1,32 @@
+
+# FX Structure
+
+The FX module is an optional component that is not compiled into the core driver by default. 
+
+You can include these modules to achieve advanced visual effects.
+
+While the core driver is optimized to be as lightweight as possible, the rules for the FX directory are more flexible. These effects (FX) are intended for use on more powerful hardware, unlike more constrained platforms such as the Arduino UNO.
+
+As a result, FX components can be "heavyweight," meaning they may include a larger portion of the standard library or even depend on libraries like `Arduino.h`, which the core driver prohibits.
+
+
+## Why the *.hpp files?
+
+*.hpp are somewhere between a standard header and a *.cpp file. While a standard header typically only attempts to declare data layout, functions and
+classes, *.hpp files are typically much more heavy weight and will happy inject global data into your compilation unit. Because of this, *.hpp files should only ever be included once.
+
+Another reason is licensing. Starting with FastLED 4.0, we now distribute some amazing code that has restrictive commercial licensing requirements. If
+we included these by default into the core driver then that would be problematic for the user. Therefore such files are NOT compiled by default and
+must be included by the user explicitly as an *.hpp file.
+
+## Licensing
+
+Some FX components are public domain and can be freely used or copied in commercial applications without the need for a license or permission.
+
+However, not all FX components come with permissive licenses for commercial use. If you include an FX component with restrictions, you will see a compilation warning indicating its non-commercial license. It is your responsibility to contact the creator for proper licensing if used in commercial products.
+
+For non-commercial, artistic projects where no financial transactions are involved, you generally don't need to worry about these restrictions.
+
+Certain higher-end FX components, such as the fx component "animatrix," have more restrictive licensing, but they remain free for non-commercial use.
+
+Happy coding!

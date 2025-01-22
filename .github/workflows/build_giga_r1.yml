@@ -1,0 +1,12 @@
+name: Arduino Giga-R1
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: giga_r1

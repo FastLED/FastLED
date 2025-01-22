@@ -1,6 +1,9 @@
 #ifndef __INC_FASTPIN_APOLLO3_H
 #define __INC_FASTPIN_APOLLO3_H
 
+#include <stdint.h>
+#include "fl/namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -20,15 +23,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PAD); }
     inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PAD); }
-    inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PAD); } else { am_hal_gpio_fastgpio_clr(PAD); } }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PAD); } else { am_hal_gpio_fastgpio_clr(PAD); } }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { if( am_hal_gpio_fastgpio_read(PAD)) { lo(); } else { hi(); } }
 
-    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { set(val); }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { set(val); }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
     inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
@@ -86,7 +89,8 @@ _FL_DEFPIN(30, 36); _FL_DEFPIN(31, 37);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(ARDUINO_AM_AP3_SFE_BB_ARTEMIS_NANO)
+#elif defined(ARDUINO_AM_AP3_SFE_BB_ARTEMIS_NANO) || defined(ARDUINO_APOLLO3_SFE_ARTEMIS_NANO)
+
 
 #define MAX_PIN 23
 _FL_DEFPIN(0, 13); _FL_DEFPIN(1, 33); _FL_DEFPIN(2, 11); _FL_DEFPIN(3, 29); _FL_DEFPIN(4, 18);
@@ -140,6 +144,22 @@ _FL_DEFPIN(40, 40); _FL_DEFPIN(41, 41); _FL_DEFPIN(42, 42); _FL_DEFPIN(43, 43); 
 _FL_DEFPIN(45, 45); _FL_DEFPIN(47, 47); _FL_DEFPIN(48, 48); _FL_DEFPIN(49, 49);
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ARDUINO_LoRa_THING_PLUS_expLoRaBLE) || defined(ARDUINO_AM_AP3_THING_PLUS_expLoRaBLE)
+
+#define MAX_PIN 47
+
+// Provided by the community:
+// https://www.reddit.com/r/FastLED/comments/1i30ycy/ambiq_apollo3_commit_specifically_the_spe_lora/
+// Special Thanks to reddit.com/u/Aromatic-Effort-9414 for providing these pin definitions
+_FL_DEFPIN(0, 19); _FL_DEFPIN(1, 18); _FL_DEFPIN(2, 41); _FL_DEFPIN(3, 31); _FL_DEFPIN(4, 10);
+_FL_DEFPIN(5, 30); _FL_DEFPIN(6, 37); _FL_DEFPIN(7, 24); _FL_DEFPIN(8, 46); _FL_DEFPIN(9, 33);
+_FL_DEFPIN(10, 4); _FL_DEFPIN(11, 28); _FL_DEFPIN(12, 25); _FL_DEFPIN(13, 27); _FL_DEFPIN(14, 6);
+_FL_DEFPIN(15, 5); _FL_DEFPIN(16, 9); _FL_DEFPIN(17, 8); _FL_DEFPIN(18, 26); _FL_DEFPIN(19, 13);
+_FL_DEFPIN(20, 12); _FL_DEFPIN(21, 32); _FL_DEFPIN(22, 35); _FL_DEFPIN(23, 34); _FL_DEFPIN(24, 11);
+_FL_DEFPIN(25, 36); _FL_DEFPIN(26, 38); _FL_DEFPIN(27, 39); _FL_DEFPIN(28, 40); _FL_DEFPIN(29, 42);
+_FL_DEFPIN(30, 43); _FL_DEFPIN(31, 44); _FL_DEFPIN(32, 47);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 #else
 
 #error "Unrecognised APOLLO3 board!"

@@ -1,3 +1,7 @@
+/// @file    RGBCalibrate.ino
+/// @brief   Use this to determine what the RGB ordering for your LEDs should be
+/// @example RGBCalibrate.ino
+
 #include "FastLED.h"
 
 
