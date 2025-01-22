@@ -8,10 +8,17 @@ FastLED 3.9.12
     * Therefore this is a beta release of the driver that may see a color correction enhancement down the line.
   * See example: https://github.com/FastLED/FastLED/blob/master/examples/WS2816/WS2816.ino
 * Apollo3 SPE LoRa Thing Plus expLoRaBLE now supported
-* ESP32C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
+* ESP32-C3 - WS2812 Flicker when using WIFI / Interrupts is now fixed.
+  * This has always been a problem since before 3.9.X series.
+  * ESP32-C3 now is more stable than ESP32-S3 for the RMT controller because they can allocate much more memory per channel.
+  * If you are on the ESP32-S3, please try out the SPI controller if driving one strip, or use the new I2S driver if driving lots of strips.
 * ObjectFLED is now automatic for Teensy 4.0/4.1 for WS2812.
   * To disable use `#define FASTLED_NOT_USES_OBJECTFLED` before `#include "FastLED.h"`
 * Fixes for RGBW emulated mode for SAMD (digit, due) chipsets.
+* AVR platforms will see a 22% shrinkage when using the APA102 chipset.
+  * Firmware size (bytes):
+    * 3.9.11: 11787
+    * 3.9.12: 9243 (-22%)
 
 
 FastLED 3.9.11
