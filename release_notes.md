@@ -15,8 +15,8 @@ FastLED 3.9.12
 * ObjectFLED is now automatic for Teensy 4.0/4.1 for WS2812.
   * To disable use `#define FASTLED_NOT_USES_OBJECTFLED` before `#include "FastLED.h"`
 * Fixes for RGBW emulated mode for SAMD (digit, due) chipsets.
-* AVR platforms will see a 22% shrinkage when using the APA102 chipset.
-  * Firmware size (bytes):
+* AVR platforms will see a 22% shrinkage when using the APA102 and APA102-HD chipset.
+  * Uno Firmware (bytes) w/ APA102-HD (bytes):
     * 3.9.11: 11787
     * 3.9.12: 9243 (-22%)
 
