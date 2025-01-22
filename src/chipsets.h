@@ -124,10 +124,11 @@ class RGBWEmulatedController
     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
+		Rgbw rgbw = this->getRgbw();
         uint8_t *data = reinterpret_cast<uint8_t *>(mRGBWPixels);
         while (pixels.has(1)) {
             pixels.stepDithering();
-            pixels.loadAndScaleRGBW(data, data + 1, data + 2, data + 3);
+            pixels.loadAndScaleRGBW(rgbw, data, data + 1, data + 2, data + 3);
             data += 4;
             pixels.advanceData();
         }
