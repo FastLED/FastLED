@@ -83,7 +83,7 @@ struct PixelController {
         kMask = MASK
     };
 
-    PixelIterator as_iterator(const Rgbw& rgbw) {
+    FASTLED_FORCE_INLINE PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
     }
 
