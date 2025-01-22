@@ -270,6 +270,10 @@ If you are willing to make a custom board with shift registers, then the ESp32S3
 
 # New Feature Announcements
 
+## New in 3.9.12: WS2816 "HD" LED support
+
+![image](https://github.com/user-attachments/assets/258ec44c-af82-44b7-ad7b-fac08daa9bcb)
+
 ## New in 3.9.10: Super Stable WS2812 SPI driver for ESP32
 
 ![image (2)](https://github.com/user-attachments/assets/b3c5801c-66df-40af-a6b8-bbd1520fbb36)
