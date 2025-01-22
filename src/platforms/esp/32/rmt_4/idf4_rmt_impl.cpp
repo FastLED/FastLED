@@ -267,7 +267,7 @@ FASTLED_FORCE_INLINE void IRAM_ATTR convert_byte_to_rmt(
     out[7].val = tmp[7];
 }
 
-void IRAM_ATTR GiveGTX_sem()
+void GiveGTX_sem()
 {
     if (gTX_sem != NULL)
     {
