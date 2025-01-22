@@ -62,6 +62,9 @@ extern "C"
 #define FASTLED_RMT_SERIAL_DEBUG 0
 #endif
 
+#ifdef FASTLED_ASSERT
+#undef FASTLED_ASSERT
+#endif
 #define FASTLED_ASSERT(format, errcode, ...)                                  \
     if (errcode != ESP_OK)                                                    \
     {                                                                         \
