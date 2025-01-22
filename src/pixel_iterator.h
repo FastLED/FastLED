@@ -79,6 +79,9 @@ typedef void (*getHdScaleFunction)(void* pixel_controller, uint8_t* c0, uint8_t*
 // PixelIterator is turns a PixelController<> into a concrete object that can be used to iterate
 // over pixels and transform them into driver data. See PixelController<>::as_iterator() for how
 // to create a PixelIterator.
+// Note: This is designed for micro-controllers with a lot of memory. DO NOT use this in the core library
+// as a PixelIterator consumes a *lot* more instruction data than an instance of PixelController<RGB_ORDER>.
+// This iterator is designed for code in src/platforms/**.
 class PixelIterator {
   public:
     template<typename PixelControllerT>

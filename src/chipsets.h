@@ -396,14 +396,13 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) override {
-		PixelIterator iterator = pixels.as_iterator(this->getRgbw());
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {
-				showPixelsDefault(iterator);
+				showPixelsDefault(pixels);
 				break;
 			}
 			case kFiveBitGammaCorrectionMode_BitShift: {
-				showPixelsGammaBitShift(iterator);
+				showPixelsGammaBitShift(pixels);
 				break;
 			}
 		}
@@ -412,7 +411,7 @@ protected:
 private:
 
 	static inline void getGlobalBrightnessAndScalingFactors(
-		    PixelIterator& pixels,
+		    PixelController<RGB_ORDER> & pixels,
 		    uint8_t* out_s0, uint8_t* out_s1, uint8_t* out_s2, uint8_t* out_brightness) {
 #if FASTLED_HD_COLOR_MIXING
 		uint8_t brightness;
@@ -448,7 +447,7 @@ private:
 	}
 
 	// Legacy showPixels implementation.
-	inline void showPixelsDefault(PixelIterator& pixels) {
+	inline void showPixelsDefault(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 		uint8_t s0, s1, s2, global_brightness;
 		getGlobalBrightnessAndScalingFactors(pixels, &s0, &s1, &s2, &global_brightness);
@@ -466,7 +465,7 @@ private:
 		mSPI.release();
 	}
 
-	inline void showPixelsGammaBitShift(PixelIterator& pixels) {
+	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 		startBoundary();
 		while (pixels.has(1)) {
