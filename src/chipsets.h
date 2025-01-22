@@ -1065,11 +1065,11 @@ public:
     static const int LANES = ControllerT::LANES_VALUE;
     static const uint32_t MASK = ControllerT::MASK_VALUE;
 
-    WS2816Controller() {}
-    ~WS2816Controller() {
-        mController.setLeds(nullptr, 0);
-        delete [] mData;
-    }
+//     WS2816Controller() {}
+//     ~WS2816Controller() {
+//         mController.setLeds(nullptr, 0);
+//         delete [] mData;
+//     }
 
     virtual void *beginShowLeds(int size) override {
         mController.setEnabled(true);
