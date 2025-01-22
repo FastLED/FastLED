@@ -1017,12 +1017,13 @@ class WS2815Controller : public ClocklessController<DATA_PIN, C_NS_WS2815(250), 
 // them to a platform specific WS2812 controller.  The WS2812 controller
 // has to output twice as many 24 bit pixels.
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2816Controller // : public ClocklessController<DATA_PIN, C_NS_WS2816(250), C_NS_WS2816(625), C_NS_WS2816(375)> {
+class WS2816Controller
     : public CPixelLEDController<RGB_ORDER, 
-								 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
+                                 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
                                  WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
 
 public:
+    // N.B., byte order must be RGB.
     typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerT;
     static const int LANES = ControllerT::LANES_VALUE;
     static const uint32_t MASK = ControllerT::MASK_VALUE;
@@ -1033,40 +1034,53 @@ public:
         delete [] mData;
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+    virtual void *beginShowLeds(int size) override {
+        mController.setEnabled(true);
+        void *result = mController.beginShowLeds(2 * size);
+        mController.setEnabled(false);
+        return result;
+    }
+
+    virtual void endShowLeds(void *data) override {
+        mController.setEnabled(true);
+        mController.endShowLeds(data);
+        mController.setEnabled(false);
+    }
+
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 
-		// expand and copy all the pixels
+        // expand and copy all the pixels
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-		size_t out_index = 0;
+        size_t out_index = 0;
         while (iterator.has(1)) {
             pixels.stepDithering();
 
-			uint16_t s0, s1, s2;
+            uint16_t s0, s1, s2;
             iterator.loadAndScale_WS2816_HD(&s0, &s1, &s2);
-			uint8_t b0_hi = s0 >> 8;
-			uint8_t b0_lo = s0 & 0xFF;
-			uint8_t b1_hi = s1 >> 8;
-			uint8_t b1_lo = s1 & 0xFF;
-			uint8_t b2_hi = s2 >> 8;
-			uint8_t b2_lo = s2 & 0xFF;
+            uint8_t b0_hi = s0 >> 8;
+            uint8_t b0_lo = s0 & 0xFF;
+            uint8_t b1_hi = s1 >> 8;
+            uint8_t b1_lo = s1 & 0xFF;
+            uint8_t b2_hi = s2 >> 8;
+            uint8_t b2_lo = s2 & 0xFF;
 
-			mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
-			mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
+            mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
+            mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
 
             iterator.advanceData();
-			out_index += 2;
+            out_index += 2;
         }
 
-		// ensure device controller won't modify color values
+        // ensure device controller won't modify color values
         mController.setCorrection(CRGB(255, 255, 255));
         mController.setTemperature(CRGB(255, 255, 255));
         mController.setDither(DISABLE_DITHER);
 
-		// output the data stream
+        // output the data stream
         mController.setEnabled(true);
-        mController.showLeds(255);
+        mController.show(mData, 2 * pixels.size(), 255);
         mController.setEnabled(false);
     }
 
@@ -1081,7 +1095,7 @@ private:
         if (mController.size() != size_16bit) {
             delete [] mData;
             CRGB *new_leds = new CRGB[size_16bit];
-			mData = new_leds;
+            mData = new_leds;
             mController.setLeds(new_leds, size_16bit);
         }
     }
@@ -1127,81 +1141,81 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1
 /// @} ClocklessChipsets
 
 
-// WS2816 - is an emulated controller that emits 48 bit pixels by forwarding
-// them to a platform specific WS2812 controller.  The WS2812 controller
-// has to output twice as many 24 bit pixels.
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2816Controller // : public ClocklessController<DATA_PIN, C_NS_WS2816(250), C_NS_WS2816(625), C_NS_WS2816(375)> {
-    : public CPixelLEDController<RGB_ORDER, 
-								 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
-                                 WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
+// // WS2816 - is an emulated controller that emits 48 bit pixels by forwarding
+// // them to a platform specific WS2812 controller.  The WS2812 controller
+// // has to output twice as many 24 bit pixels.
+// template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
+// class WS2816Controller // : public ClocklessController<DATA_PIN, C_NS_WS2816(250), C_NS_WS2816(625), C_NS_WS2816(375)> {
+//     : public CPixelLEDController<RGB_ORDER, 
+// 								 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
+//                                  WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
 
-public:
-    typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerT;
-    static const int LANES = ControllerT::LANES_VALUE;
-    static const uint32_t MASK = ControllerT::MASK_VALUE;
+// public:
+//     typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerT;
+//     static const int LANES = ControllerT::LANES_VALUE;
+//     static const uint32_t MASK = ControllerT::MASK_VALUE;
 
-    WS2816Controller() {}
-    ~WS2816Controller() {
-        mController.setLeds(nullptr, 0);
-        delete [] mData;
-    }
+//     WS2816Controller() {}
+//     ~WS2816Controller() {
+//         mController.setLeds(nullptr, 0);
+//         delete [] mData;
+//     }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
-        // Ensure buffer is large enough
-        ensureBuffer(pixels.size());
+//     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+//         // Ensure buffer is large enough
+//         ensureBuffer(pixels.size());
 
-		// expand and copy all the pixels
-		size_t out_index = 0;
-        while (pixels.has(1)) {
-            pixels.stepDithering();
+// 		// expand and copy all the pixels
+// 		size_t out_index = 0;
+//         while (pixels.has(1)) {
+//             pixels.stepDithering();
 
-			uint16_t s0, s1, s2;
-            pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
-			uint8_t b0_hi = s0 >> 8;
-			uint8_t b0_lo = s0 & 0xFF;
-			uint8_t b1_hi = s1 >> 8;
-			uint8_t b1_lo = s1 & 0xFF;
-			uint8_t b2_hi = s2 >> 8;
-			uint8_t b2_lo = s2 & 0xFF;
+// 			uint16_t s0, s1, s2;
+//             pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
+// 			uint8_t b0_hi = s0 >> 8;
+// 			uint8_t b0_lo = s0 & 0xFF;
+// 			uint8_t b1_hi = s1 >> 8;
+// 			uint8_t b1_lo = s1 & 0xFF;
+// 			uint8_t b2_hi = s2 >> 8;
+// 			uint8_t b2_lo = s2 & 0xFF;
 
-			mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
-			mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
+// 			mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
+// 			mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
 
-            pixels.advanceData();
-			out_index += 2;
-        }
+//             pixels.advanceData();
+// 			out_index += 2;
+//         }
 
-		// ensure device controller won't modify color values
-        mController.setCorrection(CRGB(255, 255, 255));
-        mController.setTemperature(CRGB(255, 255, 255));
-        mController.setDither(DISABLE_DITHER);
+// 		// ensure device controller won't modify color values
+//         mController.setCorrection(CRGB(255, 255, 255));
+//         mController.setTemperature(CRGB(255, 255, 255));
+//         mController.setDither(DISABLE_DITHER);
 
-		// output the data stream
-        mController.setEnabled(true);
-        mController.showLeds(255);
-        mController.setEnabled(false);
-    }
+// 		// output the data stream
+//         mController.setEnabled(true);
+//         mController.showLeds(255);
+//         mController.setEnabled(false);
+//     }
 
-private:
-    void init() override {
-        mController.init();
-        mController.setEnabled(false);
-    }
+// private:
+//     void init() override {
+//         mController.init();
+//         mController.setEnabled(false);
+//     }
 
-    void ensureBuffer(int size_8bit) {
-        int size_16bit = 2 * size_8bit;
-        if (mController.size() != size_16bit) {
-            delete [] mData;
-            CRGB *new_leds = new CRGB[size_16bit];
-			mData = new_leds;
-            mController.setLeds(new_leds, size_16bit);
-        }
-    }
+//     void ensureBuffer(int size_8bit) {
+//         int size_16bit = 2 * size_8bit;
+//         if (mController.size() != size_16bit) {
+//             delete [] mData;
+//             CRGB *new_leds = new CRGB[size_16bit];
+// 			mData = new_leds;
+//             mController.setLeds(new_leds, size_16bit);
+//         }
+//     }
 
-    CRGB *mData = 0;
-    ControllerT mController;
-};
+//     CRGB *mData = 0;
+//     ControllerT mController;
+// };
 
 
 #endif
