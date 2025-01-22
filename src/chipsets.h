@@ -125,12 +125,11 @@ class RGBWEmulatedController
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
         uint8_t *data = reinterpret_cast<uint8_t *>(mRGBWPixels);
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        while (iterator.has(1)) {
+        while (pixels.has(1)) {
             pixels.stepDithering();
-            iterator.loadAndScaleRGBW(data, data + 1, data + 2, data + 3);
+            pixels.loadAndScaleRGBW(data, data + 1, data + 2, data + 3);
             data += 4;
-            iterator.advanceData();
+            pixels.advanceData();
         }
 
 		// Force the device controller to a state where it passes data through
@@ -1075,13 +1074,12 @@ public:
         ensureBuffer(pixels.size());
 
 		// expand and copy all the pixels
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
 		size_t out_index = 0;
-        while (iterator.has(1)) {
+        while (pixels.has(1)) {
             pixels.stepDithering();
 
 			uint16_t s0, s1, s2;
-            iterator.loadAndScale_WS2816_HD(&s0, &s1, &s2);
+            pixels.loadAndScale_WS2816_HD(&s0, &s1, &s2);
 			uint8_t b0_hi = s0 >> 8;
 			uint8_t b0_lo = s0 & 0xFF;
 			uint8_t b1_hi = s1 >> 8;
@@ -1092,7 +1090,7 @@ public:
 			mData[out_index] = CRGB(b0_hi, b0_lo, b1_hi);
 			mData[out_index + 1] = CRGB(b1_lo, b2_hi, b2_lo);
 
-            iterator.advanceData();
+            pixels.advanceData();
 			out_index += 2;
         }
 
