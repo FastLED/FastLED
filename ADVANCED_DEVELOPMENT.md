@@ -8,7 +8,7 @@ The hardest part of improving people's code is to convince them to change how th
 
 Within the FastLED repo contains a custom dev environment with the FastLED library, symlinked in.
 
-Instead of building your project and naming FastLED as a dependency, you actually build your app right into the `dev/` folder of FastLED.
+Instead of building your project and naming FastLED as a dependency, you actually clone our repo and build your app right into the `dev/` folder of FastLED.
 
 ## Why would you need this?
 
