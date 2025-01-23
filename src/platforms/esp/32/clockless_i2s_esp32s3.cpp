@@ -183,8 +183,8 @@ InternalI2SDriver* InternalI2SDriver::create() {
 
 } // namespace fl
 
-#endif // CONFIG_IDF_TARGET_ESP32S3
-
 #endif // __has_include("esp_memory_utils.h")
+
+#endif // CONFIG_IDF_TARGET_ESP32S3
 
 #endif // ESP32
