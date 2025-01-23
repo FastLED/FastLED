@@ -556,6 +556,37 @@ class SK9822ControllerHD : public APA102Controller<
 };
 
 
+/// HD107 is just the APA102 with a default 40Mhz clock rate.
+template <
+	uint8_t DATA_PIN,
+	uint8_t CLOCK_PIN,
+	EOrder RGB_ORDER = RGB,
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)
+>
+class HD107Controller : public APA102Controller<
+	DATA_PIN,
+	CLOCK_PIN,
+	RGB_ORDER,
+	SPI_SPEED,
+	kFiveBitGammaCorrectionMode_Null,
+	0x00000000,
+	0x00000000
+> {};
+
+/// HD107HD is just the APA102HD with a default 40Mhz clock rate.
+template <
+	uint8_t DATA_PIN,
+	uint8_t CLOCK_PIN,
+	EOrder RGB_ORDER = RGB,
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(40)\
+>
+class HD107HDController : public APA102ControllerHD<
+	DATA_PIN,
+	CLOCK_PIN,
+	RGB_ORDER,
+	SPI_SPEED> {
+};
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

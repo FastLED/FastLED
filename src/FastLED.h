@@ -104,6 +104,9 @@ enum ESPIChipsets {
 	DOTSTAR,  ///< APA102 LED chipset alias
 	DOTSTARHD, ///< APA102HD LED chipset alias
 	APA102HD, ///< APA102 LED chipset with 5-bit gamma correction
+	HD107,  /// Same as APA102, but in turbo 40-mhz mode.
+	HD107HD,  /// Same as APA102HD, but in turbo 40-mhz mode.
+
 };
 
 /// Smart Matrix Library controller type
@@ -438,6 +441,9 @@ public:
 	// Both DOTSTARHD and APA102HD use the same controller class
 	_FL_MAP_CLOCKED_CHIPSET(DOTSTARHD, APA102ControllerHD)
 	_FL_MAP_CLOCKED_CHIPSET(APA102HD, APA102ControllerHD)
+
+	_FL_MAP_CLOCKED_CHIPSET(HD107, APA102Controller)
+	_FL_MAP_CLOCKED_CHIPSET(HD107HD, APA102ControllerHD)
 
 	_FL_MAP_CLOCKED_CHIPSET(SK9822, SK9822Controller)
 	_FL_MAP_CLOCKED_CHIPSET(SK9822HD, SK9822ControllerHD)
