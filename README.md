@@ -24,6 +24,8 @@ FastLED is a robust and massively parallel-led driver for Arduino, Esp32, Raspbe
  </picture>
 </a>
 
+*Hey everyone, Zach here. I'm trying to make FastLED the #2 most popular library for Arduino. We are neck and neck with the #3 and #2. If you use or like this library then give us a star.*
+
 ## About
 
 This is a driver library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
