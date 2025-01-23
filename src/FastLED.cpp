@@ -173,16 +173,31 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		gControllersData[length++] = pCur->beginShowLeds(pCur->size());
+		if (pCur->getEnabled()) {
+			gControllersData[length] = pCur->beginShowLeds(pCur->size());
+		} else {
+			gControllersData[length] = nullptr;
+		}
+		length++;
+		pCur = pCur->next();
+	}
+
+	pCur = CLEDController::head();
+	while(pCur && length < MAX_CLED_CONTROLLERS) {
 		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showColorInternal(color, scale);
+		if (pCur->getEnabled()) {
+			pCur->showColorInternal(color, scale);
+		}
 		pCur = pCur->next();
 	}
 
 	pCur = CLEDController::head();
 	length = 0;  // Reset length to 0 and iterate again.
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		pCur->endShowLeds(gControllersData[length++]);
+		if (pCur->getEnabled()) {
+			pCur->endShowLeds(gControllersData[length]);
+		}
+		length++;
 		pCur = pCur->next();
 	}
 	countFPS();
