@@ -78,4 +78,4 @@ But some of you... are different. Your powers to manifest exceed your peers.
 
 Therefore, I've created a special guide for the top 1% of LED programmers, that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
 
-But if you do... then follow me down the rabbit hole... (coming soon - link)
+But if you do... then follow me down the rabbit hole... [ (coming soon - link)](https://github.com/FastLED/FastLED/blob/master/ADVANCED_DEVELOPMENT.md)
