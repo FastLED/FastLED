@@ -32,7 +32,7 @@ But some of you integrate so closely with FastLED that you need:
   * Put your source code into here.
   * Now compile + upload it using PlatformIO.
   * Install and use our web compiler (optional, but will grant you the gift of 3 second compile times on sufficiently faster computers)
-      * You must have `docker` installed. It's free. The fallback web compiler meant for common sketch compiling will NOT pick up src code changes.
+      * You must have `docker` installed. It's free. The fallback web compiler meant for common sketch compiling will NOT pick up C++ src code changes.
       * `pip install fastled`
       * `fastled dev/`
         * If you are making changes to our web-compiler located in `src/platforms/wasm/compiler/`, then use `fastled --build dev/`
