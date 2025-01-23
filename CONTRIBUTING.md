@@ -74,7 +74,12 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
 
 Unless you are a power user of FastLED, The above guide is all you'll ever need to get a change in to FastLED.
 
-But some of you... are different. Your powers to manifest exceed your peers.
+But some of you... are different.
+
+Therefore, I've created a special guide for the top 1% of LED programmers that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
+
+But if you do... then follow me down the rabbit hole... [ADVANCED_DEVELOPMENT.md](https://github.com/FastLED/FastLED/blob/master/ADVANCED_DEVELOPMENT.md)
+
 
 Therefore, I've created a special guide for the top 1% of LED programmers that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
 
