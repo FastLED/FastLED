@@ -23,7 +23,8 @@ dependencies = [
     "cmake",
     "download",
     "fastled>=1.2.26",
-    "playwright"
+    "playwright",
+    "advanced-aicode"
 ]
 
 [build-system]
