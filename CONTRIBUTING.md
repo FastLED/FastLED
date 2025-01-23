@@ -1,4 +1,4 @@
-## Contributing
+![image](https://github.com/user-attachments/assets/e14c6d8a-79fa-4d2a-a9f1-cdcfee961e85)## Contributing
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
@@ -70,3 +70,12 @@ We also support VSCode and IntelliSense auto-completion when the free [platformi
   * Then submit your code via a git pull request.
 
 
+## Going deeper
+
+Unless you are a power user of FastLED, The above guide is all you'll ever need to get a change in to FastLED.
+
+But some of you... are different. Your powers to manifest exceed your peers.
+
+Therefore, I've created a special guide for the top 1% of LED programmers, that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
+
+But if you do... then follow me down the rabbit hole... (coming soon - link)
