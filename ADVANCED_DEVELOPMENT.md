@@ -18,7 +18,7 @@ But some of you integrate so closely with FastLED that you need:
 
   * Access to the FastLED code without barriers.
   * You have a crazy number of targets you are compiling to and you need our state-of-the-art testing infrastructure built right into our cli.
-  * You are using our new, semi un-announced `web-compiler`, and it's so fresh that of course it doesn't support what you envision but you have the competence to put in and test it.
+  * You are using our new, semi un-announced `web-compiler`, and it's so fresh that of course it doesn't support what you envision but you have the competence to put it in and test it.
   * You are modifying shared code (anything outside of src/platforms/) and you are a freak, obsessed with instant compile times and lightning fast deployments to our fastest platform: Your Browser
 
 ## Enabling
