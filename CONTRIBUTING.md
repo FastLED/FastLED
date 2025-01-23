@@ -78,9 +78,4 @@ But some of you... are different.
 
 Therefore, I've created a special guide for the top 1% of LED programmers that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
 
-But if you do... then follow me down the rabbit hole... [ADVANCED_DEVELOPMENT.md](https://github.com/FastLED/FastLED/blob/master/ADVANCED_DEVELOPMENT.md)
-
-
-Therefore, I've created a special guide for the top 1% of LED programmers that have projects that closely integrate with FastLED. For most people, they aren't going to need this guide, simply because they don't feel constricted.
-
-But if you do... then follow me down the rabbit hole... [ADVANCED_DEVELOPMENT.md](https://github.com/FastLED/FastLED/blob/master/ADVANCED_DEVELOPMENT.md)
+But if you do... [ADVANCED_DEVELOPMENT.md](https://github.com/FastLED/FastLED/blob/master/ADVANCED_DEVELOPMENT.md)
