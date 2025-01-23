@@ -41,6 +41,10 @@ But some of you integrate so closely with FastLED that you need:
           * If you change your sketch, the `fastled` program will automatically start compiling and then redeploy 1 second after you finish typing
           * If you change C++ code, then `fastled` will notify you that code has changed, but will wait until you hit the space bar.
             * C++ changes take a lot longer than sketch changes, so we aren't going to automatically compile in this case.
+        * If you need to debug your C++ code, flip on debug mode so you can inspect problematic C++ code in your browser
+          * `fastled dev/ --debug`
+        * If `docker` is behaving weird then purge all the fastled docker images and containers
+          * `fastled --purge`
            
 ## Testing your changes
 
