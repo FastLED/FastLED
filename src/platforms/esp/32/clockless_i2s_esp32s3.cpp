@@ -1,10 +1,11 @@
 
 #ifdef ESP32
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #if !__has_include("esp_memory_utils.h")
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 #warning "esp_memory_utils.h is not available, are you on esp-idf 4? The parallel clockless i2s driver will not be available"
+#endif
 #else
 
 
@@ -185,6 +186,5 @@ InternalI2SDriver* InternalI2SDriver::create() {
 
 #endif // __has_include("esp_memory_utils.h")
 
-#endif // CONFIG_IDF_TARGET_ESP32S3
 
 #endif // ESP32
