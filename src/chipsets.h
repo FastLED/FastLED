@@ -1053,12 +1053,13 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1
 // them to a platform specific WS2812 controller.  The WS2812 controller
 // has to output twice as many 24 bit pixels.
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2816Controller // : public ClocklessController<DATA_PIN, C_NS_WS2816(250), C_NS_WS2816(625), C_NS_WS2816(375)> {
+class WS2816Controller
     : public CPixelLEDController<RGB_ORDER, 
-								 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
+                                 WS2812Controller800Khz<DATA_PIN, RGB>::LANES_VALUE,
                                  WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
 
 public:
+    // N.B., byte order must be RGB.
     typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerT;
     static const int LANES = ControllerT::LANES_VALUE;
     static const uint32_t MASK = ControllerT::MASK_VALUE;
@@ -1069,7 +1070,20 @@ public:
         delete [] mData;
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+    virtual void *beginShowLeds(int size) override {
+        mController.setEnabled(true);
+        void *result = mController.beginShowLeds(2 * size);
+        mController.setEnabled(false);
+        return result;
+    }
+
+    virtual void endShowLeds(void *data) override {
+        mController.setEnabled(true);
+        mController.endShowLeds(data);
+        mController.setEnabled(false);
+    }
+
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 
@@ -1101,7 +1115,7 @@ public:
 
 		// output the data stream
         mController.setEnabled(true);
-        mController.showLeds(255);
+        mController.show(mData, 2 * pixels.size(), 255);
         mController.setEnabled(false);
     }
 

@@ -70,6 +70,7 @@ public:
     }
 
     void setEnabled(bool enabled) { m_enabled = enabled; }
+    bool getEnabled() { return m_enabled; }
 
     CLEDController();
     // If we added virtual to the AVR boards then we are going to add 600 bytes of memory to the binary
