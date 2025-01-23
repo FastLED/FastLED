@@ -106,14 +106,21 @@ void CFastLED::show(uint8_t scale) {
 	CLEDController *pCur = CLEDController::head();
 
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		gControllersData[length++] = pCur->beginShowLeds(pCur->size());
+		if (pCur->getEnabled()) {
+			gControllersData[length] = pCur->beginShowLeds(pCur->size());
+		} else {
+			gControllersData[length] = nullptr;
+		}
+		length++;
 		if (m_nFPS < 100) { pCur->setDither(0); }
 		pCur = pCur->next();
 	}
 
 	pCur = CLEDController::head();
 	for (length = 0; length < MAX_CLED_CONTROLLERS && pCur; length++) {
-		pCur->showLedsInternal(scale);
+		if (pCur->getEnabled()) {
+			pCur->showLedsInternal(scale);
+		}
 		pCur = pCur->next();
 
 	}
@@ -121,7 +128,10 @@ void CFastLED::show(uint8_t scale) {
 	length = 0;  // Reset length to 0 and iterate again.
 	pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		pCur->endShowLeds(gControllersData[length++]);
+		if (pCur->getEnabled()) {
+			pCur->endShowLeds(gControllersData[length]);
+		}
+		length++;
 		pCur = pCur->next();
 	}
 	countFPS();
