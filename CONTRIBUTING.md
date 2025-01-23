@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/e14c6d8a-79fa-4d2a-a9f1-cdcfee961e85)## Contributing
+## Contributing
 
 The most important part about contributing to FastLED is knowing how to test your changes.
 
