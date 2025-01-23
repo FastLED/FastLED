@@ -1,3 +1,9 @@
+FastLED 3.9.13 (Upcoming Release)
+==============
+* WS2816 has improved support for the ObjectFLED and Esp32 RMT5 drivers.
+  * Big thanks to https://github.com/kbob for all the PR's he's submitting to do this.
+
+
 FastLED 3.9.12
 ==============
 * WS2816 (high definition) chipset now supported.
