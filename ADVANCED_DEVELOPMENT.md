@@ -71,7 +71,7 @@ There are two modes to use this AI, a watch mode which watches your files for ch
       * `/add src/fl/vector.h`
       * Now tell the AI what you want it to do, and it will do it.
   * Making the AI fix it's own problems it introduced.
-    * At the command prompt, have it run the following
+    * At the AI command prompt, have it run the following
       * Linux/Mac: `/run ./test`
       * On Windows: `/run uv run test.py`
     * After the test concludes, the AI will ask you if you want to add the output back into the chat, agree to it then let it try to correct it's mistakes.
