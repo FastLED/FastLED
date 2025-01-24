@@ -16,6 +16,7 @@
 #include "platforms/esp/32/rmt_4/idf4_rmt.h"
 #include "platforms/esp/32/rmt_4/idf4_rmt_impl.h"
 #include "platforms/esp/32/clock_cycles.h"
+#include "freertos/semphr.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -201,6 +202,7 @@ static int gNumStarted = 0;
 static int gNumDone = 0;
 static int gNext = 0;
 
+static portMUX_TYPE rmt_spinlock = portMUX_INITIALIZER_UNLOCKED;
 static intr_handle_t gRMT_intr_handle = NULL;
 
 // -- Global semaphore for the whole show process
@@ -268,10 +270,12 @@ FASTLED_FORCE_INLINE void IRAM_ATTR convert_byte_to_rmt(
     out[7].val = tmp[7];
 }
 
-void IRAM_ATTR GiveGTX_sem()
+void GiveGTX_sem()
 {
     if (gTX_sem != NULL)
     {
+        // stop waiting for more
+        gNumDone = gNumControllers;
         xSemaphoreGive(gTX_sem);
     }
 }
@@ -458,8 +462,31 @@ void ESP32RMTController::showPixels()
         // -- Wait here while the data is sent. The interrupt handler
         //    will keep refilling the RMT buffers until it is all
         //    done; then it gives the semaphore back.
-        xSemaphoreTake(gTX_sem, FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM);
-        xSemaphoreGive(gTX_sem);
+
+
+        while (gNumDone != gNumControllers)
+        {
+          bool failed = !xSemaphoreTake(gTX_sem, FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM);
+          xSemaphoreGive(gTX_sem);
+          if (failed) 
+          {
+              FASTLED_DEBUG("sending controller data failed: total %d sent: %d", gNumControllers, gNumDone);
+              break;
+          }
+          
+          if (gNext < gNumControllers) 
+          {
+            // find a free channel
+            for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
+            {
+              if(gOnChannel[i] == NULL)
+              {
+                  ESP32RMTController::startNext(i);
+                  continue;
+              }
+            }
+          }
+        }
 
         // -- Make sure we don't call showPixels too quickly
         gWait.mark();
@@ -538,7 +565,9 @@ void ESP32RMTController::startOnChannel(int channel)
         FASTLED_DEBUG("rmt_set_tx_intr_en result: %d", espErr);
 
         // -- Kick off the transmission
+        portENTER_CRITICAL(&rmt_spinlock);
         tx_start();
+        portEXIT_CRITICAL(&rmt_spinlock);
     }
     (void)espErr;
 }
@@ -773,29 +802,16 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
     gOnChannel[channel] = NULL;
     gNumDone++;
 
-    if (gNumDone == gNumControllers)
+    if (gUseBuiltInDriver)
     {
-        // -- If this is the last controller, signal that we are all done
-        if (gUseBuiltInDriver)
-        {
-            xSemaphoreGive(gTX_sem);
-        }
-        else
-        {
-            portBASE_TYPE HPTaskAwoken = 0;
-            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-            if (HPTaskAwoken == pdTRUE)
-                portYIELD_FROM_ISR();
-        }
+        xSemaphoreGive(gTX_sem);
     }
     else
     {
-        // -- Otherwise, if there are still controllers waiting, then
-        //    start the next one on this channel
-        if (gNext < gNumControllers)
-        {
-            startNext(channel);
-        }
+        portBASE_TYPE HPTaskAwoken = 0;
+        xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+        if (HPTaskAwoken == pdTRUE)
+            portYIELD_FROM_ISR();
     }
 }
 
@@ -807,7 +823,9 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 {
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
+    portENTER_CRITICAL_ISR(&rmt_spinlock);
     uint32_t intr_st = RMT.int_st.val;
+    portEXIT_CRITICAL_ISR(&rmt_spinlock);
     uint8_t channel;
 
     for (channel = 0; channel < gMaxChannel; channel++)
@@ -837,16 +855,20 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
             if (intr_st & BIT(tx_next_bit))
             {
                 // -- More to send on this channel
+                portENTER_CRITICAL_ISR(&rmt_spinlock);
                 pController->fillNext(true);
                 RMT.int_clr.val |= BIT(tx_next_bit);
+                portEXIT_CRITICAL_ISR(&rmt_spinlock);
             }
             else
             {
                 // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit))
                 {
+                    portENTER_CRITICAL_ISR(&rmt_spinlock);
                     RMT.int_clr.val |= BIT(tx_done_bit);
                     doneOnChannel(rmt_channel_t(channel), 0);
+                    portEXIT_CRITICAL_ISR(&rmt_spinlock);
                 }
             }
         }

@@ -131,16 +131,16 @@ private:
     // -- Start up the next controller
     //    This method is static so that it can dispatch to the
     //    appropriate startOnChannel method of the given controller.
-    static void IRAM_ATTR startNext(int channel);
+    static void startNext(int channel);
 
     // -- Start this controller on the given channel
     //    This function just initiates the RMT write; it does not wait
     //    for it to finish.
-    void IRAM_ATTR startOnChannel(int channel);
+    void startOnChannel(int channel);
 
     // -- Start RMT transmission
     //    Setting this RMT flag is what actually kicks off the peripheral
-    void IRAM_ATTR tx_start();
+    void tx_start();
 
     // -- A controller is done
     //    This function is called when a controller finishes writing
