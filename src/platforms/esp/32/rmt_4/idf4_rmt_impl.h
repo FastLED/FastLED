@@ -13,7 +13,7 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "platforms/esp/32/clock_cycles.h"
-#include "esp_version.h"
+#include "platforms/esp/esp_version.h"
 
 // ESP_IDF_VERSION_MAJOR 3 uses the thread safe register and ISR handling
 #if !defined(RMT4_USE_SAFE_REGISTERS) && ESP_IDF_VERSION_MAJOR<4 
