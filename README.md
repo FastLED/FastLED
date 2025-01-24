@@ -437,7 +437,7 @@ While Daniel is no longer with us, his legacy continues through the FastLED libr
 
 ## About the Current Contributor
 
-Zach Vorhies, the current main contributor to FastLED, briefly worked with Dan in 2013 in San Francisco and was an avid user of the FastLED library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
+Zach Vorhies, the current main contributor to FastLED, briefly worked with Dan in 2014 in San Francisco and was an avid user of the FastLED library for over 13 years. After Daniel Garcia’s untimely passing, Zach stepped up to ensure FastLED’s continued growth and development.
 
 Zach has this to say about FastLED:
 
