@@ -5,8 +5,6 @@
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-
 #if !__has_include("esp_memory_utils.h")
 #warning "esp_memory_utils.h is not available, are you on esp-idf 4? The parallel clockless i2s driver will not be available"
 #else
