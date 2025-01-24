@@ -84,4 +84,4 @@ There are two modes to use this AI, a watch mode which watches your files for ch
      
 Every single time you do a change, make sure and thoroughly check it. I recommend VSCodes built in git diff tool.
 
-Although the AI is pretty amazing, it will inject entropy into your code and this is the source of a lot of problems. So watch it like a hawk.
+Although the AI is pretty amazing, it will inject entropy into your code and this is the source of a lot of problems. So watch all changes it makes very thoroughly. Under almost all circumstances you will have to revert unnecessary changes (like comments) line by line.
