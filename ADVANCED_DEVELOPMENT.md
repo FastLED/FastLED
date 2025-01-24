@@ -4,8 +4,6 @@
 
 *Warning - this is not for most people*
 
-The hardest part of improving people's code is to convince them to change how they approach the problem.
-
 Within the FastLED repo contains a custom dev environment designed specifically for the FastLED library. This library is symlinked in to the `dev/dev.ino` development sketch.
 
 Instead of building your project and naming FastLED as a dependency, you actually fork/clone our repo and build your app right into the `dev/` folder of FastLED.
