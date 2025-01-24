@@ -124,6 +124,20 @@ extern "C"
 #endif
 #endif
 
+// -- use a thread safe version for register RMT handling, also start channels only from main thread, not within ISR
+#ifdef RMT4_USE_THREADSAFE_REGISTERS
+#include "freertos/semphr.h"
+#define OPTIONAL_RMT4_REGISTER_LOCK_ENTER     portENTER_CRITICAL(&rmt_spinlock)
+#define OPTIONAL_RMT4_REGISTER_LOCK_EXIT      portEXIT_CRITICAL(&rmt_spinlock)
+#define OPTIONAL_RMT4_REGISTER_LOCK_ISR_ENTER portENTER_CRITICAL_ISR(&rmt_spinlock)
+#define OPTIONAL_RMT4_REGISTER_LOCK_ISR_EXIT  portEXIT_CRITICAL_ISR(&rmt_spinlock)
+#else
+#define OPTIONAL_RMT4_REGISTER_LOCK_ENTER
+#define OPTIONAL_RMT4_REGISTER_LOCK_EXIT
+#define OPTIONAL_RMT4_REGISTER_LOCK_ISR_ENTER
+#define OPTIONAL_RMT4_REGISTER_LOCK_ISR_EXIT
+#endif
+
 namespace {
     bool gUseBuiltInDriver = false;
 }
@@ -201,6 +215,9 @@ static int gNumStarted = 0;
 static int gNumDone = 0;
 static int gNext = 0;
 
+#ifdef RMT4_USE_THREADSAFE_REGISTERS
+static portMUX_TYPE rmt_spinlock = portMUX_INITIALIZER_UNLOCKED;
+#endif
 static intr_handle_t gRMT_intr_handle = NULL;
 
 // -- Global semaphore for the whole show process
@@ -272,6 +289,10 @@ void IRAM_ATTR GiveGTX_sem()
 {
     if (gTX_sem != NULL)
     {
+#ifdef RMT4_USE_THREADSAFE_REGISTERS
+        // stop waiting for more
+        gNumDone = gNumControllers;
+#endif
         xSemaphoreGive(gTX_sem);
     }
 }
@@ -458,8 +479,34 @@ void ESP32RMTController::showPixels()
         // -- Wait here while the data is sent. The interrupt handler
         //    will keep refilling the RMT buffers until it is all
         //    done; then it gives the semaphore back.
+#ifndef RMT4_USE_THREADSAFE_REGISTERS
         xSemaphoreTake(gTX_sem, FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM);
         xSemaphoreGive(gTX_sem);
+#else
+        while (gNumDone != gNumControllers)
+        {
+          bool failed = !xSemaphoreTake(gTX_sem, FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM);
+          xSemaphoreGive(gTX_sem);
+          if (failed) 
+          {
+              FASTLED_DEBUG("sending controller data failed: total %d sent: %d", gNumControllers, gNumDone);
+              break;
+          }
+          
+          if (gNext < gNumControllers) 
+          {
+            // find a free channel
+            for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
+            {
+              if(gOnChannel[i] == NULL)
+              {
+                  ESP32RMTController::startNext(i);
+                  continue;
+              }
+            }
+          }
+        }
+#endif
 
         // -- Make sure we don't call showPixels too quickly
         gWait.mark();
@@ -538,7 +585,9 @@ void ESP32RMTController::startOnChannel(int channel)
         FASTLED_DEBUG("rmt_set_tx_intr_en result: %d", espErr);
 
         // -- Kick off the transmission
+        OPTIONAL_RMT4_REGISTER_LOCK_ENTER;
         tx_start();
+        OPTIONAL_RMT4_REGISTER_LOCK_EXIT;
     }
     (void)espErr;
 }
@@ -773,6 +822,9 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
     gOnChannel[channel] = NULL;
     gNumDone++;
 
+#ifndef RMT4_USE_THREADSAFE_REGISTERS        
+    // if at least one controller is waiting start it on the freed channel
+    // notify main thread that ALL channels are done with sending data 
     if (gNumDone == gNumControllers)
     {
         // -- If this is the last controller, signal that we are all done
@@ -797,6 +849,20 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
             startNext(channel);
         }
     }
+#else
+    // notify main thread that ONE channel is done with sending data
+    if (gUseBuiltInDriver)
+    {
+        xSemaphoreGive(gTX_sem);
+    }
+    else
+    {
+        portBASE_TYPE HPTaskAwoken = 0;
+        xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+        if (HPTaskAwoken == pdTRUE)
+            portYIELD_FROM_ISR();
+    }
+#endif
 }
 
 // -- Custom interrupt handler
@@ -807,7 +873,9 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 {
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
+    OPTIONAL_RMT4_REGISTER_LOCK_ISR_ENTER;
     uint32_t intr_st = RMT.int_st.val;
+    OPTIONAL_RMT4_REGISTER_LOCK_ISR_EXIT;
     uint8_t channel;
 
     for (channel = 0; channel < gMaxChannel; channel++)
@@ -837,16 +905,20 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
             if (intr_st & BIT(tx_next_bit))
             {
                 // -- More to send on this channel
+                OPTIONAL_RMT4_REGISTER_LOCK_ISR_ENTER;
                 pController->fillNext(true);
                 RMT.int_clr.val |= BIT(tx_next_bit);
+                OPTIONAL_RMT4_REGISTER_LOCK_ISR_EXIT;
             }
             else
             {
                 // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit))
                 {
+                    OPTIONAL_RMT4_REGISTER_LOCK_ISR_ENTER;
                     RMT.int_clr.val |= BIT(tx_done_bit);
                     doneOnChannel(rmt_channel_t(channel), 0);
+                    OPTIONAL_RMT4_REGISTER_LOCK_ISR_EXIT;
                 }
             }
         }
