@@ -5,6 +5,11 @@ FastLED 3.9.13 (Upcoming Release)
   * Exactly the same as the AP102 chipset, but with turbo 40-mhz.
 * WS2816 has improved support for the ObjectFLED and Esp32 RMT5 drivers.
   * Big thanks to https://github.com/kbob for all the PR's he's submitting to do this.
+* ESP32 Legacy RMT Driver
+  * Long standing espressif bug for RMT under high load has finally been fixed.
+  * Big thanks to https://github.com/Jueff for fixing it.
+  
+![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
 
 
 FastLED 3.9.12
