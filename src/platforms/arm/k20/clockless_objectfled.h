@@ -61,7 +61,7 @@ class ClocklessController_ObjectFLED_WS2812
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
-  //protected:
+  protected:
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
         void *data = Base::beginShowLeds(nleds);

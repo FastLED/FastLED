@@ -1090,8 +1090,23 @@ class WS2816Controller
                                  WS2812Controller800Khz<DATA_PIN, RGB>::MASK_VALUE> {
 
 public:
+
+	// ControllerT is a helper class.  It subclasses the device controller class
+	// and has three methods to call the three protected methods we use.
+	// This is janky, but redeclaring public methods protected in a derived class
+	// is janky, too.
+
     // N.B., byte order must be RGB.
-    typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerT;
+	typedef WS2812Controller800Khz<DATA_PIN, RGB> ControllerBaseT;
+	class ControllerT : public ControllerBaseT {
+		friend class WS2816Controller<DATA_PIN, RGB_ORDER>;
+		void *callBeginShowLeds(int size) { return ControllerBaseT::beginShowLeds(size); }
+		void callShow(CRGB *data, int nLeds, uint8_t brightness) {
+			ControllerBaseT::show(data, nLeds, brightness);
+		}
+		void callEndShowLeds(void *data) { ControllerBaseT::endShowLeds(data); }
+	};
+
     static const int LANES = ControllerT::LANES_VALUE;
     static const uint32_t MASK = ControllerT::MASK_VALUE;
 
@@ -1103,14 +1118,14 @@ public:
 
     virtual void *beginShowLeds(int size) override {
         mController.setEnabled(true);
-        void *result = mController.beginShowLeds(2 * size);
+		void *result = mController.callBeginShowLeds(2 * size);
         mController.setEnabled(false);
         return result;
     }
 
     virtual void endShowLeds(void *data) override {
         mController.setEnabled(true);
-        mController.endShowLeds(data);
+		mController.callEndShowLeds(data);
         mController.setEnabled(false);
     }
 
@@ -1146,7 +1161,11 @@ public:
 
 		// output the data stream
         mController.setEnabled(true);
+#ifdef BOUNCE_SUBCLASS
+		mController.callShow(mData, 2 * pixels.size(), 255);
+#else
         mController.show(mData, 2 * pixels.size(), 255);
+#endif
         mController.setEnabled(false);
     }
 
