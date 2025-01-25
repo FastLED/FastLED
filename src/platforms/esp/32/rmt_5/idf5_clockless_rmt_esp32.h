@@ -38,7 +38,7 @@ public:
     void init() override { }
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
-//protected:
+protected:
 
 
     // Prepares data for the draw.
