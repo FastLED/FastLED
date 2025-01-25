@@ -115,7 +115,7 @@ public:
 
     // -- Show this string of pixels
     //    This is the main entry point for the pixel controller
-    void IRAM_ATTR showPixels();
+    void showPixels();
 
     // -- Init pulse buffer
     //    Set up the buffer that will hold all of the pulse items for this
