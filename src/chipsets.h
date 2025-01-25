@@ -110,6 +110,23 @@ class RGBWEmulatedController
     : public CPixelLEDController<RGB_ORDER, CONTROLLER::LANES_VALUE,
                                  CONTROLLER::MASK_VALUE> {
   public:
+    // ControllerT is a helper class.  It subclasses the device controller class
+    // and has three methods to call the three protected methods we use.
+    // This is janky, but redeclaring public methods protected in a derived class
+    // is janky, too.
+
+    // N.B., byte order must be RGB.
+	typedef CONTROLLER ControllerBaseT;
+    class ControllerT : public CONTROLLER {
+        friend class RGBWEmulatedController<CONTROLLER, RGB_ORDER>;
+        void *callBeginShowLeds(int size) { return ControllerBaseT::beginShowLeds(size); }
+        void callShow(CRGB *data, int nLeds, uint8_t brightness) {
+            ControllerBaseT::show(data, nLeds, brightness);
+        }
+        void callEndShowLeds(void *data) { ControllerBaseT::endShowLeds(data); }
+    };
+
+
     static const int LANES = CONTROLLER::LANES_VALUE;
     static const uint32_t MASK = CONTROLLER::MASK_VALUE;
 
@@ -121,7 +138,15 @@ class RGBWEmulatedController
     };
     ~RGBWEmulatedController() { delete[] mRGBWPixels; }
 
-    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+	virtual void *beginShowLeds(int size) override {
+		return mController.callBeginShowLeds(Rgbw::size_as_rgb(size));
+	}
+
+	virtual void endShowLeds(void *data) override {
+		return mController.callEndShowLeds(data);
+	}
+
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
 		Rgbw rgbw = this->getRgbw();
@@ -147,7 +172,7 @@ class RGBWEmulatedController
 		mController.setDither(DISABLE_DITHER);
 
 		mController.setEnabled(true);
-		mController.showLeds(255);
+		mController.callShow(mRGBWPixels, Rgbw::size_as_rgb(pixels.size()), 255);
 		mController.setEnabled(false);
     }
 
@@ -168,8 +193,11 @@ class RGBWEmulatedController
             uint32_t new_size = Rgbw::size_as_rgb(num_leds);
             delete[] mRGBWPixels;
             mRGBWPixels = new CRGB[new_size];
-			// showPixels may never clear the last pixel.
-			mRGBWPixels[new_size - 1] = CRGB(0, 0, 0);
+			// showPixels may never clear the last two pixels.
+			for (uint32_t i = 0; i < new_size; i++) {
+				mRGBWPixels[i] = CRGB(0, 0, 0);
+			}
+
 			mController.setLeds(mRGBWPixels, new_size);
         }
     }
@@ -177,7 +205,7 @@ class RGBWEmulatedController
     CRGB *mRGBWPixels = nullptr;
     int32_t mNumRGBLeds = 0;
     int32_t mNumRGBWLeds = 0;
-    CONTROLLER mController; // Real controller.
+    ControllerT mController; // Real controller.
 };
 
 /// @defgroup ClockedChipsets Clocked Chipsets
