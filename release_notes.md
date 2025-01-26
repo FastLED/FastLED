@@ -3,6 +3,7 @@ FastLED 3.9.13 (Upcoming Release)
 * HD107(s) and HD mode are now availabe in FastLED.
   * See example HD107.ino
   * Exactly the same as the AP102 chipset, but with turbo 40-mhz.
+  * Keep in mind APA102 is under clocked by FastLED for long strip stability, due to a bug in the chipset. See more: https://forum.makerforums.info/t/hi-all-i-have-800-strip-lengths-of-apa-102-leds-running-off-a/58899/23
 * WS2816 has improved support for the ObjectFLED and Esp32 RMT5 drivers.
   * Big thanks to https://github.com/kbob for all the PR's he's submitting to do this.
 * ESP32 Legacy RMT Driver
