@@ -9,6 +9,7 @@ FastLED 3.9.13 (Upcoming Release)
 * ESP32 Legacy RMT Driver
   * Long standing espressif bug for RMT under high load has finally been fixed.
   * Big thanks to https://github.com/Jueff for fixing it.
+  * A regression was fixed in getting the cpu clock cycles.
   
 ![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
 
