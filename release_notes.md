@@ -1,4 +1,4 @@
-FastLED 3.9.13 (Upcoming Release)
+FastLED 3.9.13
 ==============
 * HD107(s) and HD mode are now availabe in FastLED.
   * See example HD107.ino
