@@ -108,6 +108,66 @@ _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_ATtiny4313__)
+
+// Note, stilll work in progress, we fail with:
+// C:\Users\niteris\AppData\Local\Temp\ccGpqhqm.s:1422: Error: illegal opcode or for mcu avr25
+// lto-wrapper.exe: fatal error: avr-g++ returned 1 exit status
+// compilation terminated.
+// c:/users/niteris/.platformio/packages/toolchain-atmelavr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/ld.exe: error: lto-wrapper failed
+// collect2.exe: error: ld returned 1 exit status
+// *** [.pio\build\attiny4313\firmware.elf] Error 1
+
+#define MAX_PIN 19
+
+_FL_DEFPIN(0, 0, A); // PA0 (ADC0/PCINT0)
+_FL_DEFPIN(1, 1, A); // PA1 (ADC1/PCINT1)
+_FL_DEFPIN(2, 2, A); // PA2 (ADC2/PCINT2)
+
+_FL_DEFPIN(3, 0, D); // PD0 (RXD/PCINT16)
+_FL_DEFPIN(4, 1, D); // PD1 (TXD/PCINT17)
+_FL_DEFPIN(5, 2, D); // PD2 (INT0/PCINT18)
+_FL_DEFPIN(6, 3, D); // PD3 (INT1/PCINT19)
+_FL_DEFPIN(7, 4, D); // PD4 (T0/XCK/PCINT20)
+_FL_DEFPIN(8, 5, D); // PD5 (T1/PCINT21)
+_FL_DEFPIN(9, 6, D); // PD6 (AIN0/PCINT22)
+
+_FL_DEFPIN(11, 0, B); // PB0 (ICP/PCINT8)
+_FL_DEFPIN(12, 1, B); // PB1 (OC0A/PCINT9)
+_FL_DEFPIN(13, 2, B); // PB2 (SS/OC0B/PCINT10)
+_FL_DEFPIN(14, 3, B); // PB3 (MOSI/OC1A/PCINT11)
+_FL_DEFPIN(15, 4, B); // PB4 (MISO/OC1B/PCINT12)
+_FL_DEFPIN(16, 5, B); // PB5 (SCK/PCINT13)
+_FL_DEFPIN(17, 6, B); // PB6 (XTAL1/PCINT14)
+_FL_DEFPIN(18, 7, B); // PB7 (XTAL2/PCINT15)
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtiny13__)
+
+#define MAX_PIN 5
+
+// We are still getting this weird error:
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s: Assembler messages:
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:469: Error: illegal opcode or for mcu avr25
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:1505: Error: illegal opcode or for mcu avr25
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:1508: Error: illegal opcode or for mcu avr25
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:1560: Error: illegal opcode or for mcu avr25
+// C:\Users\niteris\AppData\Local\Temp\ccojfQbm.s:1563: Error: illegal opcode or for mcu avr25
+// lto-wrapper.exe: fatal error: avr-g++ returned 1 exit status
+// compilation terminated.
+// c:/users/niteris/.platformio/packages/toolchain-atmelavr/bin/../lib/gcc/avr/7.3.0/../../../../avr/bin/ld.exe: error: lto-wrapper failed
+// collect2.exe: error: ld returned 1 exit status
+
+_FL_DEFPIN(0, 0, B); // PB0 (MOSI/AIN0/OC0A/PCINT0)
+_FL_DEFPIN(1, 1, B); // PB1 (MISO/AIN1/OC0B/INT0/PCINT1)
+_FL_DEFPIN(2, 2, B); // PB2 (SCK/ADC1/T0/PCINT2)
+_FL_DEFPIN(3, 3, B); // PB3 (PCINT3/CLKI/ADC3)
+_FL_DEFPIN(4, 4, B); // PB4 (PCINT4/ADC2)
+_FL_DEFPIN(5, 5, B); // PB5 (PCINT5/RESET/ADC0/dW)
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__)
 
 #define MAX_PIN 27
