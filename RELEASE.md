@@ -24,10 +24,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -m "Rev 3.9.12 - Adds BETA support for WS2816 HD pixel strip, Teensy 4.x now uses massive parallel driver by default."
-$ git tag 3.9.12 master 
+$ git commit -m "Rev 3.9.13 - HD107 turbo LED support"
+$ git tag 3.9.13 master 
 $ git push 
-$ git push origin 3.9.12
+$ git push origin 3.9.13
 ```
 
 Then use the GitHub UI to make a new “Release”:
