@@ -272,6 +272,10 @@ If you are willing to make a custom board with shift registers, then the ESp32S3
 
 # New Feature Announcements
 
+## New in 3.9.13: HD107 "Turbo" 40Mhz LED Support
+
+![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
+
 ## New in 3.9.12: WS2816 "HD" LED support
 
 ![image](https://github.com/user-attachments/assets/258ec44c-af82-44b7-ad7b-fac08daa9bcb)
