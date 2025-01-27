@@ -110,6 +110,8 @@ _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 
 #elif defined(__AVR_ATtiny4313__)
 
+#define NEED_CXX_BITS 1
+
 // Note, stilll work in progress, we fail with:
 // C:\Users\niteris\AppData\Local\Temp\ccGpqhqm.s:1422: Error: illegal opcode or for mcu avr25
 // lto-wrapper.exe: fatal error: avr-g++ returned 1 exit status
@@ -145,6 +147,7 @@ _FL_DEFPIN(18, 7, B); // PB7 (XTAL2/PCINT15)
 
 #elif defined(__AVR_ATtiny13__)
 
+#define NEED_CXX_BITS 1
 #define MAX_PIN 5
 
 // We are still getting this weird error:
