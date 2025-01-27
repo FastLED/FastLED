@@ -6,12 +6,12 @@
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 
-#include "i2s.h"
+#include "i2s_esp32dev.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-#include "i2s.h"
+#include "i2s_esp32dev.h"
 #include "fl/namespace.h"
 #include <stdint.h>
 #include <string.h> // for memset
@@ -19,6 +19,8 @@
 #include "platforms/esp/esp_version.h"
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+// Patches the i2s driver for compatibility with ESP-IDF v5.0.
+// This has only been compile tested. If there are issues then please file a bug.
 #include "soc/gpio_periph.h"
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
