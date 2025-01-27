@@ -6,6 +6,7 @@
 
 #ifdef CONFIG_IDF_TARGET_ESP32
 
+#include "i2s.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -14,6 +15,13 @@
 #include "fl/namespace.h"
 #include <stdint.h>
 #include <string.h> // for memset
+
+#include "platforms/esp/esp_version.h"
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#include "soc/gpio_periph.h"
+#define gpio_matrix_out esp_rom_gpio_connect_out_signal
+#endif
 
 
 
