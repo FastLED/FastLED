@@ -83,7 +83,7 @@ For more examples see this [link](examples). Web compiled [examples](https://zac
 
 
 [![attiny4313](https://github.com/FastLED/FastLED/actions/workflows/build_attiny4313.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny4313.yml)
-*Now compiles in the upcoming FastLED 3.9.14!*
+*Now compiles in the upcoming FastLED 3.9.14! - Very memory limited, so only tested against examples WS2812 Blink and APA102*
 
 
 [![yun](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml)
