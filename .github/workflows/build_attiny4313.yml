@@ -10,4 +10,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: attiny4313
+      args: attiny4313 --examples Blink,Apa102
