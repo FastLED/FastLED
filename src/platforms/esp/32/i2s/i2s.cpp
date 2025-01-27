@@ -1,7 +1,10 @@
 
-#pragma once
 
-#ifdef FASTLED_ESP32_I2S
+#ifdef ESP32
+
+#include "sdkconfig.h"
+
+#ifdef CONFIG_IDF_TARGET_ESP32
 
 
 #include "freertos/FreeRTOS.h"
@@ -546,4 +549,6 @@ void i2s_transpose_and_encode(int channel, uint32_t has_data_mask,
 
 FASTLED_NAMESPACE_END
 
-#endif // ifdef FASTLED_ESP32_I2S
+#endif // ifdef CONFIG_IDF_TARGET_ESP32
+
+#endif // ifdef ESP32
