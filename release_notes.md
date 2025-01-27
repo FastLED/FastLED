@@ -1,3 +1,9 @@
+FastLED 3.9.14
+==============
+* Attiny13 and Attiny4343 now works
+  * https://github.com/FastLED/FastLED/pull/1874
+  * Thanks https://github.com/sutaburosu!
+
 FastLED 3.9.13
 ==============
 * HD107(s) and HD mode are now availabe in FastLED.
