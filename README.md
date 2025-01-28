@@ -14,6 +14,8 @@ Want to control a strip of leds? Or control 10's of thousands? FastLED has your 
 
 FastLED is a robust and massively parallel-led driver for Arduino, Esp32, RaspberryPi,  Atmega, Teensy, Uno, Apollo3 Arm and more. Also runs on dirt cheap sub $1 devices, due to it's incredibly small compile size. High end devices can drive upto ~30k LEDS (Teensy) and ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render. FastLED is the fourth [most popular library on Arduino](https://docs.arduino.cc/libraries/).
 
+
+
 ## Star History
 
 <a href="https://star-history.com/#fastled/fastled&Date">
@@ -24,7 +26,7 @@ FastLED is a robust and massively parallel-led driver for Arduino, Esp32, Raspbe
  </picture>
 </a>
 
-*Hey everyone, Zach here. If you use or like this library then give us a star. I'm trying to make FastLED the #2 most popular library for Arduino. It's just one click, and you'll benefit from continued updates to FastLED.*
+
 
 ## About
 
@@ -63,6 +65,34 @@ void loop() {
 ```
 
 For more examples see this [link](examples). Web compiled [examples](https://zackees.github.io/fastled-wasm/).
+
+
+# New Feature Announcements
+
+## New in 3.9.13: HD107 "Turbo" 40Mhz LED Support
+
+![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
+
+## New in 3.9.12: WS2816 "HD" LED support
+
+![image](https://github.com/user-attachments/assets/258ec44c-af82-44b7-ad7b-fac08daa9bcb)
+
+## New in 3.9.10: Super Stable WS2812 SPI driver for ESP32
+
+![image (2)](https://github.com/user-attachments/assets/b3c5801c-66df-40af-a6b8-bbd1520fbb36)
+
+## New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3
+
+![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
+
+
+## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
+![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
+
+
+## New in 3.9.2 - Overclocking of WS2812
+![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
+Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_FASTLED_OVERCLOCK_17/
 
 
 
@@ -264,33 +294,6 @@ If you are willing to make a custom board with shift registers, then the ESp32S3
 
   * Esp32DEV: https://github.com/hpwit/I2SClocklessVirtualLedDriver
   * Esp32-S3: https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3
-
-# New Feature Announcements
-
-## New in 3.9.13: HD107 "Turbo" 40Mhz LED Support
-
-![image](https://github.com/user-attachments/assets/9684ab7d-2eaa-40df-a00d-0dff18098917)
-
-## New in 3.9.12: WS2816 "HD" LED support
-
-![image](https://github.com/user-attachments/assets/258ec44c-af82-44b7-ad7b-fac08daa9bcb)
-
-## New in 3.9.10: Super Stable WS2812 SPI driver for ESP32
-
-![image (2)](https://github.com/user-attachments/assets/b3c5801c-66df-40af-a6b8-bbd1520fbb36)
-
-## New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3
-
-![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
-
-
-## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
-![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
-
-
-## New in 3.9.2 - Overclocking of WS2812
-![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
-Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_FASTLED_OVERCLOCK_17/
 
 
 ## Development
