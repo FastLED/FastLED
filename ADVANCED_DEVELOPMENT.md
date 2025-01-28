@@ -2,11 +2,10 @@
 
 ![perpetualmaniac_neo_giving_two_pills _one_of_them_is_black_and__4b145870-9ead-4976-b031-f4df3f2bfbe1](https://github.com/user-attachments/assets/9bba6113-688f-469f-8b51-bcb4fea910e5)
 
-*Warning - this is not for most people*
 
 ## Enabling 3-second compile times using our `web-compiler`
 
-  * You must have `docker` installed. It's free. The fallback web compiler meant for common sketch compiling will NOT pick up C++ src code changes.
+  * You must have `docker` installed. It's free. You can also use the shared web compiler but it's slow.
   * `cd <FASTLED FOLDER>`
   * `pip install fastled`
   * `fastled examples/Blink/Blink.ino`
