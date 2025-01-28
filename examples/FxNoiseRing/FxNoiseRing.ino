@@ -74,16 +74,7 @@ void setup() {
     pir.activate(millis());  // Activate the PIR sensor on startup.
 }
 
-void loop() {
-    handleSerialDither();  // Add this line at start of loop()
-    
-    controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
-    EVERY_N_SECONDS(1) {
-        FASTLED_WARN("loop");
-    }
-    uint8_t bri = pir.transition(millis());
-    FastLED.setBrightness(bri * brightness.as<float>());
-    uint32_t now = millis();
+void draw(uint32_t now) {
     double angle_offset = double(now) / 32000.0 * 2 * M_PI;
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
     // go in circular formation and set the leds
@@ -103,5 +94,17 @@ void loop() {
         }
         leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
     }
+}
+
+void loop() {
+    handleSerialDither();  // Add this line at start of loop()
+    
+    controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
+    EVERY_N_SECONDS(1) {
+        FASTLED_WARN("loop");
+    }
+    uint8_t bri = pir.transition(millis());
+    FastLED.setBrightness(bri * brightness.as<float>());
+    draw(millis());
     FastLED.show();
 }
