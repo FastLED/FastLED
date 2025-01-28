@@ -4,32 +4,6 @@
 
 *Warning - this is not for most people*
 
-Within the FastLED repo contains a custom dev environment designed specifically for the FastLED library. This library is symlinked in to the `dev/dev.ino` development sketch.
-
-Instead of building your project and naming FastLED as a dependency, you actually fork/clone our repo and build your app right into the `dev/` folder of FastLED.
-
-## Why would you need this?
-
-Well, most of the users of FastLED, don't.
-
-But some of you integrate so closely with FastLED that you need:
-
-  * Access to the FastLED code without barriers.
-  * You have a crazy number of targets you are compiling to and you need our state-of-the-art testing infrastructure built right into our cli.
-  * You are using our new, semi un-announced `web-compiler`, and it's so fresh that of course it doesn't support what you envision but you have the competence to put it in and test it.
-  * You are modifying shared code (anything outside of src/platforms/) and you are a freak, obsessed with instant compile times and lightning fast deployments to our fastest platform: Your Browser
-
-## Enabling
-
-  * VSCode + PlatformIO extension
-  * `git clone https://github.com/fastled/fastled && cd fastled`
-    * Or better yet, fork and clone our repo.
-  * Open this up in VSCode
-  * Hit the compile button to make sure everything works.
-  * Now go into `dev/` folder
-  * Put your source code into here.
-  * Now compile + upload it using PlatformIO.
-
 ## Enabling 3-second compile times using our `web-compiler`
 
   * You must have `docker` installed. It's free. The fallback web compiler meant for common sketch compiling will NOT pick up C++ src code changes.
