@@ -33,18 +33,10 @@ But some of you integrate so closely with FastLED that you need:
 ## Enabling 3-second compile times using our `web-compiler`
 
   * You must have `docker` installed. It's free. The fallback web compiler meant for common sketch compiling will NOT pick up C++ src code changes.
+  * `cd <FASTLED FOLDER>`
   * `pip install fastled`
-  * `fastled dev/`
-    * If you are making changes to our web-compiler located in `src/platforms/wasm/compiler/`, then use `fastled --build dev/`
-    * All other changes outside of the `src/platforms/wasm/compiler/` folder will be rsync'd in automatically - you can omit the `--build` flag in this case.
-    * Leave `fastled` running
-      * If you change your sketch, the `fastled` program will automatically start compiling and then redeploy 1 second after you finish typing
-      * If you change C++ code, then `fastled` will notify you that code has changed, but will wait until you hit the space bar.
-        * C++ changes take a lot longer than sketch changes, so we aren't going to automatically compile in this case.
-    * If you need to debug your C++ code, flip on debug mode so you can inspect problematic C++ code in your browser
-      * `fastled dev/ --debug`
-    * If `docker` is behaving weird then purge all the fastled docker images and containers
-      * `fastled --purge`
+  * `fastled examples/Blink/Blink.ino`
+    * Cpp changes to the fastled source can be compiled by the live fastled compiler.
            
 ## Testing your changes
 
