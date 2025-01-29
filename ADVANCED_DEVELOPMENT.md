@@ -5,7 +5,7 @@
 
 ## Enabling 3-second compile times using our `web-compiler`
 
-  * You must have `docker` installed. It's free. You can also use the shared web compiler but it's slow.
+  * You must have `docker` installed for fastest compile times. It's free.
   * `cd <FASTLED FOLDER>`
   * `pip install fastled`
   * `fastled examples/Blink/Blink.ino`
