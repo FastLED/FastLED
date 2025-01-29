@@ -8,7 +8,7 @@
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "hal/cpu_hal.h"
 #define __cpu_hal_get_cycle_count esp_cpu_get_cycle_count
-#elif __has_include(<esp32-hal.h>)
+#elif __has_include(<esp32-hal.h>) && ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(3, 0, 0)
 #include <esp32-hal.h>  // Relies on the Arduino core for ESP32
 inline uint32_t __cpu_hal_get_cycle_count() {
   return static_cast<uint32_t>(cpu_hal_get_cycle_count());
