@@ -68,7 +68,7 @@ static int i2s_base_pin_index;
 // -- A pointer to the memory-mapped structure: I2S0 or I2S1
 static i2s_dev_t *i2s;
 
-static int gCntBuffer = 0;
+int gCntBuffer = 0;
 
 // -- Counters to track progress
 int gCurBuffer = 0;

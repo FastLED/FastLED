@@ -35,4 +35,12 @@ void loop() {
   leds[0] = CRGB::Black;
   FastLED.show();
   delay(500);
+
+  // This is a no-op but tests that we have access to gCntBuffer, part of the
+  // i2s api. You can delete this in your own sketch. It's only here for testing
+  // purposes.
+  if (false) {
+    int value = gCntBuffer;
+    value++;
+  }
 }

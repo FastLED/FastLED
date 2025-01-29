@@ -71,7 +71,7 @@ struct DMABuffer {
     lldesc_t descriptor;
     uint8_t *buffer;
 };
-
+extern int gCntBuffer;
 extern int gCurBuffer;
 extern bool gDoneFilling;
 extern uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
