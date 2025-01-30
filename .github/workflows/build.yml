@@ -85,3 +85,8 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: "esp32dev_idf44"
+
+  build_esp32dev_idf33:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32dev_idf33"
