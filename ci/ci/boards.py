@@ -104,6 +104,12 @@ ESP32DEV = Board(
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
+ESP32DEV_IDF3_3 = Board(
+    board_name="esp32dev_idf33",
+    real_board_name="esp32dev",
+    platform="espressif32@1.11.2",
+)
+
 ESP32DEV_IDF4_4 = Board(
     board_name="esp32dev_idf44",
     real_board_name="esp32dev",
@@ -269,6 +275,7 @@ ALL: list[Board] = [
     APOLLO3_RED_BOARD,
     APOLLO3_SPARKFUN_THING_PLUS_EXPLORERABLE,
     ESP32DEV,
+    ESP32DEV_IDF3_3,
     ESP32DEV_IDF4_4,
     ESP32DEV_I2S,
     # ESP01,

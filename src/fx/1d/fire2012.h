@@ -50,7 +50,7 @@ class Fire2012 : public Fx1d {
   public:
     Fire2012(uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120,
              bool reverse_direction = false,
-             const CRGBPalette16 &palette = HeatColors_p)
+             const CRGBPalette16 &palette = (const CRGBPalette16&)HeatColors_p)
         : Fx1d(num_leds), cooling(cooling), sparking(sparking),
           reverse_direction(reverse_direction), palette(palette) {
         heat.reset(new uint8_t[num_leds]()); // Initialize to zero
