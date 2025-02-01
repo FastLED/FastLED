@@ -219,6 +219,10 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![esp32 extra libs](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml)
 
+*Legacy Toolchains*
+
+[![esp32dev-idf3.3-lts](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml)
+
 Espressif's current evaluation of FastLED's compatibility with their product sheet can be found [here](https://github.com/espressif/arduino-esp32/blob/gh-pages/LIBRARIES_TEST.md)
 
 
