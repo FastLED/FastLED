@@ -203,21 +203,6 @@ set_target_properties(FastLED PROPERTIES
 )
 target_compile_options(FastLED PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
-if(NOT APPLE)
-    target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
-endif()
-
-# Try to find libunwind, but make it optional
-find_package(LibUnwind QUIET)
-
-# Define a variable to check if we should use libunwind
-set(USE_LIBUNWIND ${LibUnwind_FOUND})
-
-if(USE_LIBUNWIND)
-    message(STATUS "LibUnwind found. Using it for better stack traces.")
-else()
-    message(STATUS "LibUnwind not found. Falling back to basic stack traces.")
-endif()
 
 # Remove platform-specific files that might cause issues
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
