@@ -74,6 +74,7 @@ License CC BY-NC 3.0
 #define num_oscillators 10
 
 namespace animartrix_detail {
+using namespace fl;
 
 struct render_parameters {
 
