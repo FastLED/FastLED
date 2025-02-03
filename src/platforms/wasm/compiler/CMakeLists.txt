@@ -74,56 +74,23 @@ if(BUILD_MODE STREQUAL "DEBUG")
     )
 endif()
 
-set(UNIT_TEST_COMPILE_FLAGS
-    -O0
-)
 
-# Set FastLED source directory
+# --- LIBRARY SECTION ---
+# Set FastLED_lib source directory and include it (adds -I fastled/src)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
-
-message(STATUS "FastLED source directory: ${FASTLED_SOURCE_DIR}")
-
-# Include directories (this adds -I fastled/src)
+message(STATUS "FastLED_lib source directory: ${FASTLED_SOURCE_DIR}")
 include_directories(${FASTLED_SOURCE_DIR})
 
-# Find all FastLED source files
+# Find all FastLED_lib source files
 file(GLOB_RECURSE FASTLED_SOURCES 
     "${FASTLED_SOURCE_DIR}/*.cpp"
 )
-
-message(STATUS "FastLED sources: ${FASTLED_SOURCES}")
-
-# --- MINIMUM CHANGE 1 ---
-# Instead of using the FastLED sources for the executable, now use sources from the local src/ directory.
-file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
-
-# Create the WASM executable using the new EXECUTABLE_SOURCES
-add_executable(fastled ${EXECUTABLE_SOURCES})
-
-# Set properties and flags for the executable
-target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
-target_link_options(fastled PRIVATE ${COMMON_LINK_FLAGS})
-set_target_properties(fastled PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-
-# Debug output for source categorization
-#message(STATUS "FX Sources: ${FX_SOURCES}")
-#message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
-#message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
-#message(STATUS "FL Sources: ${FL_SOURCES}")
-#message(STATUS "Other Sources: ${OTHER_SOURCES}")
-
-# message(STATUS "FastLED_core: ${FastLED_core}")
+message(STATUS "FastLED_lib sources: ${FASTLED_SOURCES}")
 
 # Create core library with essential components
 file(GLOB CORE_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
-
 message(STATUS "Core Sources: ${CORE_SOURCES}")
 message(STATUS "Current Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-
 add_library(FastLED_core OBJECT ${CORE_SOURCES})
 set_target_properties(FastLED_core PROPERTIES
     CXX_STANDARD 17
@@ -133,7 +100,7 @@ set_target_properties(FastLED_core PROPERTIES
 target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(FastLED_core PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
-# Create component libraries as OBJECT libraries
+# Create component libraries as OBJECT libraries (if any)
 if(FX_SOURCES)
     add_library(FastLED_fx OBJECT ${FX_SOURCES})
     set_target_properties(FastLED_fx PROPERTIES
@@ -189,8 +156,8 @@ if(SENSORS_SOURCES)
     target_compile_definitions(FastLED_sensors PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
-# Create the main FastLED static library that includes all components
-add_library(FastLED STATIC 
+# Create the main FastLED_lib static library that includes all components
+add_library(FastLED_lib STATIC 
     $<TARGET_OBJECTS:FastLED_core>
     $<$<TARGET_EXISTS:FastLED_fx>:$<TARGET_OBJECTS:FastLED_fx>>
     $<$<TARGET_EXISTS:FastLED_platforms>:$<TARGET_OBJECTS:FastLED_platforms>>
@@ -198,23 +165,42 @@ add_library(FastLED STATIC
     $<$<TARGET_EXISTS:FastLED_fl>:$<TARGET_OBJECTS:FastLED_fl>>
     $<$<TARGET_EXISTS:FastLED_sensors>:$<TARGET_OBJECTS:FastLED_sensors>>
 )
-
-# Add whole archive linking for FastLED
-target_link_options(fastled PRIVATE "-Wl,--whole-archive" $<TARGET_FILE:FastLED> "-Wl,--no-whole-archive")
-
-# Set properties for the main library
-set_target_properties(FastLED PROPERTIES
+# Note: The FastLED_lib target (the static library) gets its compile definitions
+# via the OBJECT libraries and from this target below.
+target_compile_definitions(FastLED_lib PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+set_target_properties(FastLED_lib PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     POSITION_INDEPENDENT_CODE ON
 )
-target_compile_options(FastLED PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
-target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+
+# Add whole archive linking for FastLED_lib
+target_link_options(FastLED_lib PRIVATE "-Wl,--whole-archive" $<TARGET_FILE:FastLED_lib> "-Wl,--no-whole-archive")
 
 # Remove platform-specific files that might cause issues
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
+
+# --- EXECUTABLE SECTION ---
+# Instead of using the FastLED_lib sources for the executable, now use sources from the local src/ directory.
+file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
+
+# Create the WASM executable using the new EXECUTABLE_SOURCES
+add_executable(fastled_sketch ${EXECUTABLE_SOURCES})
+# Set properties and flags for the executable
+target_compile_options(fastled_sketch PRIVATE ${COMMON_COMPILE_FLAGS})
+target_link_options(fastled_sketch PRIVATE ${COMMON_LINK_FLAGS})
+set_target_properties(fastled_sketch PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
+# (Optional) Here you can add additional compile definitions for the executable target,
+# which will be applied after the library definitions.
+# For example:
+# target_compile_definitions(fastled_sketch PRIVATE EXECUTABLE_SPECIFIC_DEFINE=1)
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
