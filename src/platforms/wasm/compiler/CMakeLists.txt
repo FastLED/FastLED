@@ -220,6 +220,7 @@ set_target_properties(fastled_sketch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+target_link_libraries(fastled_sketch PRIVATE FastLED_lib)
 
 # (Optional) Here you can add additional compile definitions for the executable target,
 # which will be applied after the library definitions.
