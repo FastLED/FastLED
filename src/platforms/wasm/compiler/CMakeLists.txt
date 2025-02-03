@@ -44,7 +44,7 @@ set(COMMON_COMPILE_FLAGS
 )
 
 # Linker flags
-set(COMMON_LINK_FLAGS
+set(LIBRARY_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
     -sDISABLE_EXCEPTION_THROWING=0
@@ -60,6 +60,22 @@ set(COMMON_LINK_FLAGS
     -o fastled.js
 )
 
+set(SKETCH_LINK_FLAGS
+    -sALLOW_MEMORY_GROWTH=0
+    -sDISABLE_EXCEPTION_CATCHING=1
+    -sDISABLE_EXCEPTION_THROWING=0
+    --bind
+    -DUSE_OFFSET_CONVERTER=0
+    -sINITIAL_MEMORY=134217728
+    -fuse-ld=lld
+    #-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    #-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+    --no-entry
+    -sMODULARIZE=1
+    -sEXPORT_NAME=fastled
+    -o fastled.js
+)
+
 # Debug-specific flags
 if(BUILD_MODE STREQUAL "DEBUG")
     list(APPEND COMMON_COMPILE_FLAGS
@@ -67,12 +83,14 @@ if(BUILD_MODE STREQUAL "DEBUG")
         -fsanitize=address
         -fsanitize=undefined
     )
-    list(APPEND COMMON_LINK_FLAGS
+    set(DEBUG_LINK_FLAGS
         -gsource-map
         --emit-symbol-map
         -sSTACK_OVERFLOW_CHECK=2
         -ASSERTIONS=1
     )
+    list(APPEND LIBRARY_LINK_FLAGS ${DEBUG_LINK_FLAGS})
+    list(APPEND SKETCH_LINK_FLAGS ${DEBUG_LINK_FLAGS})
 endif()
 
 
@@ -197,7 +215,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src  # Adjust the path accordingly
 )
-target_link_options(fastled_sketch PRIVATE ${COMMON_LINK_FLAGS})
+target_link_options(fastled_sketch PRIVATE ${SKETCH_LINK_FLAGS})
 set_target_properties(fastled_sketch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
