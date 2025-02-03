@@ -43,7 +43,7 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
-# Linker flags
+# Linker flags for the library.
 set(LIBRARY_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
@@ -57,9 +57,9 @@ set(LIBRARY_LINK_FLAGS
     --no-entry
     -sMODULARIZE=1
     -sEXPORT_NAME=fastled
-    -o fastled.js
 )
 
+# Linker flags for the sketch executable.
 set(SKETCH_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
@@ -93,33 +93,67 @@ if(BUILD_MODE STREQUAL "DEBUG")
     list(APPEND SKETCH_LINK_FLAGS ${DEBUG_LINK_FLAGS})
 endif()
 
+# --- FASTLED LIBRARY SETUP ---
 
-# --- LIBRARY SECTION ---
-# Set FastLED_lib source directory and include it (adds -I fastled/src)
+# Set FastLED_lib source directory (assumes your FastLED sources are in fastled/src relative to your top-level directory)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 message(STATUS "FastLED_lib source directory: ${FASTLED_SOURCE_DIR}")
+
+# Include FastLED headers
 include_directories(${FASTLED_SOURCE_DIR})
 
-# Find all FastLED_lib source files
-file(GLOB_RECURSE FASTLED_SOURCES 
-    "${FASTLED_SOURCE_DIR}/*.cpp"
-)
-message(STATUS "FastLED_lib sources: ${FASTLED_SOURCES}")
+# Recursively find all FastLED source files
+file(GLOB_RECURSE FASTLED_ALL_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
 
-# Create core library with essential components
-file(GLOB CORE_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
-message(STATUS "Core Sources: ${CORE_SOURCES}")
-message(STATUS "Current Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-add_library(FastLED_core OBJECT ${CORE_SOURCES})
-set_target_properties(FastLED_core PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-    POSITION_INDEPENDENT_CODE ON
-)
-target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(FastLED_core PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+# (Optional) Remove platform-specific files that might cause issues
+list(FILTER FASTLED_ALL_SOURCES EXCLUDE REGEX ".*esp.*")
+list(FILTER FASTLED_ALL_SOURCES EXCLUDE REGEX ".*arm.*")
+list(FILTER FASTLED_ALL_SOURCES EXCLUDE REGEX ".*avr.*")
 
-# Create component libraries as OBJECT libraries (if any)
+# Group the sources by subdirectory. Files not in one of these subdirectories will go into OTHER_SOURCES.
+set(FX_SOURCES "")
+set(PLATFORMS_SOURCES "")
+set(LIB8TION_SOURCES "")
+set(FL_SOURCES "")
+set(SENSORS_SOURCES "")
+set(OTHER_SOURCES "")
+
+foreach(SOURCE ${FASTLED_ALL_SOURCES})
+    if(SOURCE MATCHES "/fx/")
+        list(APPEND FX_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/platforms/")
+        list(APPEND PLATFORMS_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/lib8tion/")
+        list(APPEND LIB8TION_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/fl/")
+        list(APPEND FL_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/sensors/")
+        list(APPEND SENSORS_SOURCES ${SOURCE})
+    else()
+        list(APPEND OTHER_SOURCES ${SOURCE})
+    endif()
+endforeach()
+
+message(STATUS "Other Sources: ${OTHER_SOURCES}")
+message(STATUS "FX Sources: ${FX_SOURCES}")
+message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
+message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
+message(STATUS "FL Sources: ${FL_SOURCES}")
+message(STATUS "Sensors Sources: ${SENSORS_SOURCES}")
+
+# Create OBJECT libraries for each group
+
+# Core (files not in a subdirectory group)
+if(OTHER_SOURCES)
+    add_library(FastLED_core OBJECT ${OTHER_SOURCES})
+    set_target_properties(FastLED_core PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
+endif()
+
 if(FX_SOURCES)
     add_library(FastLED_fx OBJECT ${FX_SOURCES})
     set_target_properties(FastLED_fx PROPERTIES
@@ -128,7 +162,6 @@ if(FX_SOURCES)
         POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(FastLED_fx PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(FastLED_fx PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
 if(PLATFORMS_SOURCES)
@@ -139,7 +172,6 @@ if(PLATFORMS_SOURCES)
         POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(FastLED_platforms PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(FastLED_platforms PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
 if(LIB8TION_SOURCES)
@@ -150,7 +182,6 @@ if(LIB8TION_SOURCES)
         POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
 if(FL_SOURCES)
@@ -161,7 +192,6 @@ if(FL_SOURCES)
         POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(FastLED_fl PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(FastLED_fl PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
 if(SENSORS_SOURCES)
@@ -172,34 +202,33 @@ if(SENSORS_SOURCES)
         POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(FastLED_sensors PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(FastLED_sensors PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 endif()
 
 # Create the main FastLED_lib static library that includes all components
 add_library(FastLED_lib STATIC 
-    $<TARGET_OBJECTS:FastLED_core>
-    $<$<TARGET_EXISTS:FastLED_fx>:$<TARGET_OBJECTS:FastLED_fx>>
-    $<$<TARGET_EXISTS:FastLED_platforms>:$<TARGET_OBJECTS:FastLED_platforms>>
-    $<$<TARGET_EXISTS:FastLED_lib8tion>:$<TARGET_OBJECTS:FastLED_lib8tion>>
-    $<$<TARGET_EXISTS:FastLED_fl>:$<TARGET_OBJECTS:FastLED_fl>>
-    $<$<TARGET_EXISTS:FastLED_sensors>:$<TARGET_OBJECTS:FastLED_sensors>>
+    $<$<BOOL:${OTHER_SOURCES}>:$<TARGET_OBJECTS:FastLED_core>>
+    $<$<BOOL:${FX_SOURCES}>:$<TARGET_OBJECTS:FastLED_fx>>
+    $<$<BOOL:${PLATFORMS_SOURCES}>:$<TARGET_OBJECTS:FastLED_platforms>>
+    $<$<BOOL:${LIB8TION_SOURCES}>:$<TARGET_OBJECTS:FastLED_lib8tion>>
+    $<$<BOOL:${FL_SOURCES}>:$<TARGET_OBJECTS:FastLED_fl>>
+    $<$<BOOL:${SENSORS_SOURCES}>:$<TARGET_OBJECTS:FastLED_sensors>>
 )
-# Note: The FastLED_lib target (the static library) gets its compile definitions
-# via the OBJECT libraries and from this target below.
-target_compile_definitions(FastLED_lib PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 set_target_properties(FastLED_lib PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     POSITION_INDEPENDENT_CODE ON
 )
 
-# Add whole archive linking for FastLED_lib
-target_link_options(FastLED_lib PRIVATE "-Wl,--whole-archive" $<TARGET_FILE:FastLED_lib> "-Wl,--no-whole-archive")
+target_link_options(FastLED_lib PRIVATE
+    "-Wl,--whole-archive" "-Wl,--no-whole-archive"
+)
 
-# Remove platform-specific files that might cause issues
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
-list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
+# (Optional) Pass any compile definitions to the library here:
+# target_compile_definitions(FastLED_lib PRIVATE ...)
+
+# (Optional) If you need to force whole-archive linking, consider applying the flags at the executable stage.
+# For example:
+# target_link_options(fastled_sketch PRIVATE "-Wl,--whole-archive" $<TARGET_FILE:FastLED_lib> "-Wl,--no-whole-archive")
 
 # --- EXECUTABLE SECTION ---
 # Instead of using the FastLED_lib sources for the executable, now use sources from the local src/ directory.
@@ -211,9 +240,9 @@ add_executable(fastled_sketch ${EXECUTABLE_SOURCES})
 # Set properties and flags for the executable
 target_compile_options(fastled_sketch PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(fastled_sketch PRIVATE SKETCH_COMPILE)
-include_directories(
+target_include_directories(fastled_sketch PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src  # Adjust the path accordingly
+    ${CMAKE_CURRENT_SOURCE_DIR}/src  # Adjust if needed
 )
 target_link_options(fastled_sketch PRIVATE ${SKETCH_LINK_FLAGS})
 set_target_properties(fastled_sketch PROPERTIES
@@ -221,11 +250,3 @@ set_target_properties(fastled_sketch PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 target_link_libraries(fastled_sketch PRIVATE FastLED_lib)
-
-# (Optional) Here you can add additional compile definitions for the executable target,
-# which will be applied after the library definitions.
-# For example:
-# target_compile_definitions(fastled_sketch PRIVATE EXECUTABLE_SPECIFIC_DEFINE=1)
-
-# Add verbose output for tests
-set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
