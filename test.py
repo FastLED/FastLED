@@ -64,6 +64,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('test', type=str, nargs='?', default=None,
                        help='Specific C++ test to run')
     parser.add_argument("--clang", action="store_true", help="Use Clang compiler")
+    parser.add_argument("--clean", action="store_true", help="Clean build before compiling")
     return parser.parse_args()
 
 
@@ -93,6 +94,8 @@ def main() -> None:
         if args.test:
             cmd_list.append("--test")
             cmd_list.append(args.test)
+        if args.clean:
+            cmd_list.append("--clean")
 
         cmd_str_cpp = subprocess.list2cmdline(cmd_list)
 
