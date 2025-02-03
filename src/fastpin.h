@@ -112,11 +112,11 @@ public:
 	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 
 	/// @copydoc Pin::hi()
-	virtual void select() { hi(); }
+	virtual void select() override { hi(); }
 	/// @copydoc Pin::lo()
-	virtual void release() { lo(); }
+	virtual void release() override { lo(); }
 	/// Checks if the pin is currently `HIGH`
-	virtual bool isSelected() { return (*mPort & mPinMask) == mPinMask; }
+	virtual bool isSelected() override { return (*mPort & mPinMask) == mPinMask; }
 };
 
 /// I/O pin initially set to OUTPUT
