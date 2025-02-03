@@ -39,6 +39,7 @@ set(COMMON_COMPILE_FLAGS
     -Wnon-c-typedef-for-linkage
     -Werror=bad-function-cast
     -Werror=cast-function-type
+    -v
     ${OPT_LEVEL}
 )
 
