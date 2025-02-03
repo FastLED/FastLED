@@ -192,6 +192,11 @@ message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 add_executable(fastled_sketch ${EXECUTABLE_SOURCES})
 # Set properties and flags for the executable
 target_compile_options(fastled_sketch PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(fastled_sketch PRIVATE SKETCH_COMPILE)
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src  # Adjust the path accordingly
+)
 target_link_options(fastled_sketch PRIVATE ${COMMON_LINK_FLAGS})
 set_target_properties(fastled_sketch PROPERTIES
     CXX_STANDARD 17
