@@ -43,8 +43,8 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
-# Linker flags for the library.
-set(LIBRARY_LINK_FLAGS
+# Common linker flags for both the library and the executable.
+set(COMMON_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
     -sDISABLE_EXCEPTION_THROWING=0
@@ -52,27 +52,23 @@ set(LIBRARY_LINK_FLAGS
     -DUSE_OFFSET_CONVERTER=0
     -sINITIAL_MEMORY=134217728
     -fuse-ld=lld
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
     --no-entry
     -sMODULARIZE=1
     -sEXPORT_NAME=fastled
 )
 
-# Linker flags for the sketch executable.
+# Additional linker flags specific to the library.
+set(LIBRARY_LINK_FLAGS
+    ${COMMON_LINK_FLAGS}
+    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+)
+
+# Additional linker flags specific to the sketch executable.
 set(SKETCH_LINK_FLAGS
-    -sALLOW_MEMORY_GROWTH=0
-    -sDISABLE_EXCEPTION_CATCHING=1
-    -sDISABLE_EXCEPTION_THROWING=0
-    --bind
-    -DUSE_OFFSET_CONVERTER=0
-    -sINITIAL_MEMORY=134217728
-    -fuse-ld=lld
+    ${COMMON_LINK_FLAGS}
     #-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
     #-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
-    --no-entry
-    -sMODULARIZE=1
-    -sEXPORT_NAME=fastled
     -o fastled.js
 )
 
