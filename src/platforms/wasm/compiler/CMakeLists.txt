@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_WASM)
 
+# Enable verbose makefile output for all compiled sources
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # Set Emscripten as the compiler
 set(CMAKE_C_COMPILER emcc)
 set(CMAKE_CXX_COMPILER em++)
@@ -24,7 +27,6 @@ endif()
 # Common compiler flags
 set(COMMON_COMPILE_FLAGS
     -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
-    -DFASTLED_FORCE_NAMESPACE=1
     -DFASTLED_USE_PROGMEM=0
     -DDISABLE_EXCEPTION_CATCHING=1
     -fno-exceptions
@@ -80,7 +82,7 @@ set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 
 message(STATUS "FastLED source directory: ${FASTLED_SOURCE_DIR}")
 
-# Include directories
+# Include directories (this adds -I fastled/src)
 include_directories(${FASTLED_SOURCE_DIR})
 
 # Find all FastLED source files
@@ -90,10 +92,15 @@ file(GLOB_RECURSE FASTLED_SOURCES
 
 message(STATUS "FastLED sources: ${FASTLED_SOURCES}")
 
-# Create the WASM library
-add_executable(fastled ${FASTLED_SOURCES})
+# --- MINIMUM CHANGE 1 ---
+# Instead of using the FastLED sources for the executable, now use sources from the local src/ directory.
+file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 
-# Set properties and flags
+# Create the WASM executable using the new EXECUTABLE_SOURCES
+add_executable(fastled ${EXECUTABLE_SOURCES})
+
+# Set properties and flags for the executable
 target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
 target_link_options(fastled PRIVATE ${COMMON_LINK_FLAGS})
 set_target_properties(fastled PROPERTIES
@@ -114,7 +121,6 @@ set_target_properties(fastled PROPERTIES
 file(GLOB CORE_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
 
 message(STATUS "Core Sources: ${CORE_SOURCES}")
-# ${CMAKE_CURRENT_SOURCE_DIR}
 message(STATUS "Current Source Dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_library(FastLED_core OBJECT ${CORE_SOURCES})
@@ -208,10 +214,6 @@ target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
-
-
-
-
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
