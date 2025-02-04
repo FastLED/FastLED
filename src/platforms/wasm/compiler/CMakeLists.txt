@@ -53,7 +53,6 @@ set(COMMON_LINK_FLAGS
     -fuse-ld=mold
     --no-entry
     -sMODULARIZE=1
-    -sEXPORT_NAME=fastled
 )
 
 set(LIBRARY_LINK_FLAGS
@@ -64,6 +63,7 @@ set(LIBRARY_LINK_FLAGS
 
 set(SKETCH_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
+    -sEXPORT_NAME=fastled
     -o fastled.js
 )
 
@@ -84,28 +84,28 @@ if(BUILD_MODE STREQUAL "DEBUG")
 endif()
 
 # --- FASTLED LIBRARY SETUP ---
-# Instead of manually scanning for sources and creating targets here,
-# we delegate that work to fastled/src/CMakeLists.txt.
-
 # Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
+# Enable header copying mode.
+set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
+set(FASTLED_INCLUDE_DEST /include CACHE PATH "Destination path for FastLED headers")
+
 # (Optional) Add the FastLED headers to the global include path.
 include_directories(${FASTLED_SOURCE_DIR})
 
-# Delegate building the FastLED library to the subdirectory.
-# The subdirectory’s CMake file will search for sources, group them, and create targets.
+# Delegate building the FastLED library (and header copying) to the subdirectory.
 add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
 
 # In the parent, we can set additional properties on fastled if needed.
-if(TARGET fastled)
+if(TARGET sketch)
     set_target_properties(fastled PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         POSITION_INDEPENDENT_CODE ON
     )
-    target_link_options(fastled PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
+    target_link_options(sketch PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 endif()
 
 # --- EXECUTABLE (SKETCH) SETUP ---
@@ -113,18 +113,18 @@ endif()
 file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 
-add_executable(fastled ${EXECUTABLE_SOURCES})
+add_executable(sketch ${EXECUTABLE_SOURCES})
 
 # Set compile options and definitions for the sketch executable.
-target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(fastled PRIVATE SKETCH_COMPILE)
-target_include_directories(fastled PRIVATE
+target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(sketch PRIVATE SKETCH_COMPILE)
+target_include_directories(sketch PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-target_link_options(fastled PRIVATE ${SKETCH_LINK_FLAGS})
-set_target_properties(fastled PROPERTIES
+target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
+set_target_properties(sketch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_link_libraries(fastled PRIVATE fastled)
+target_link_libraries(sketch PRIVATE fastled)
