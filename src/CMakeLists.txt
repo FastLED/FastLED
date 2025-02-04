@@ -1,5 +1,6 @@
 # -----------------------------------------------------------------------------
-# Setup and gather sources
+# Efficiently compiles the libfastled.a archive to link against.
+# Optionally, you can copy the header tree to a specified include path.
 # -----------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.5)
@@ -84,12 +85,12 @@ endmacro()
 # -----------------------------------------------------------------------------
 
 # Partition some of the sources into separate object libraries, removing them from the global list FASTLED_SOURCES.
-add_partitioned_library(FastLED_fx        ".*/fx/")
-add_partitioned_library(FastLED_platforms ".*/platforms/")
+add_partitioned_library(FastLED_fx          ".*/fx/")
+add_partitioned_library(FastLED_platforms   ".*/platforms/")
 # Uncomment the next line if you wish to partition lib8tion sources:
 # add_partitioned_library(fastled8tion ".*/lib8tion/")
-add_partitioned_library(FastLED_fl        ".*/fl/")
-add_partitioned_library(FastLED_sensors   ".*/sensors/")
+add_partitioned_library(FastLED_fl          ".*/fl/")
+add_partitioned_library(FastLED_sensors     ".*/sensors/")
 add_partitioned_library(FastLED_third_party ".*/third_party/")
 # Anything else will be considered the "core" library
 
