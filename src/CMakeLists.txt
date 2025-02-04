@@ -30,7 +30,7 @@ endif()
 include_directories(${FASTLED_SOURCE_DIR})
 
 # === Step 1: Get all the source files ===
-file(GLOB_RECURSE FASTLED_SOURCES "${FASTLED_SOURCE_DIR}/*.cpp")
+file(GLOB_RECURSE FASTLED_SOURCES "${FASTLED_SOURCE_DIR}/*.c*")
 message(STATUS "Found source files: ${FASTLED_SOURCES}")
 
 if(FASTLED_SOURCES STREQUAL "")
