@@ -113,28 +113,43 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
             shutil.copy2(item, js_src / item.name)
 
 
-def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
+def compile(
+    js_dir: Path, build_mode: BuildMode, auto_clean: bool, no_platformio: bool
+) -> int:
     print("Starting compilation process...")
     max_attempts = 1
     env = os.environ.copy()
     env["BUILD_MODE"] = build_mode.name
     print(f"Build mode: {build_mode.name}")
+    cmd_list: list[str] = []
+    if no_platformio:
+        # execute build_archive.syh
+        cmd_list = [
+            "/bin/bash",
+            "-c",
+            "/js/build_archive.sh",
+        ]
+    else:
+        cmd_list.extend(["pio", "run"])
+        if not auto_clean:
+            cmd_list.append("--disable-auto-clean")
+
+    def _open_process(cmd_list: list[str] = cmd_list) -> subprocess.Popen:
+        out = subprocess.Popen(
+            cmd_list,
+            cwd=js_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+            env=env,
+        )
+        return out
 
     output_lines = []
     for attempt in range(1, max_attempts + 1):
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
-            cmd_list = ["pio", "run"]
-            if not auto_clean:
-                cmd_list.append("--disable-auto-clean")
-            process = subprocess.Popen(
-                cmd_list,
-                cwd=js_dir,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-                env=env,
-            )
+            process = _open_process()
             assert process.stdout is not None
             for line in process.stdout:
                 processed_line = line.replace("fastled/src", "src")
@@ -386,6 +401,11 @@ def parse_args() -> argparse.Namespace:
         help="Massaive speed improvement to not have to rebuild everything, but flakes out sometimes.",
         default=os.getenv("DISABLE_AUTO_CLEAN", "0") == "1",
     )
+    parser.add_argument(
+        "--no-platformio",
+        action="store_true",
+        help="Don't use platformio to compile the project, use the new system of direct emcc calls.",
+    )
     # Add mutually exclusive build mode group
     build_mode = parser.add_mutually_exclusive_group()
     build_mode.add_argument("--debug", action="store_true", help="Build in debug mode")
@@ -413,9 +433,11 @@ def find_project_dir(mapped_dir: Path) -> Path:
     return src_dir
 
 
-def process_compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> None:
+def process_compile(
+    js_dir: Path, build_mode: BuildMode, auto_clean: bool, no_platformio: bool
+) -> None:
     print("Starting compilation...")
-    rtn = compile(js_dir, build_mode, auto_clean)
+    rtn = compile(js_dir, build_mode, auto_clean, no_platformio=no_platformio)
     print(f"Compilation return code: {rtn}")
     if rtn != 0:
         print("Compilation failed.")
@@ -504,6 +526,7 @@ def main() -> int:
                     js_dir=JS_DIR,
                     build_mode=build_mode,
                     auto_clean=not args.disable_auto_clean,
+                    no_platformio=args.no_platformio,
                 )
             except Exception as e:
                 print(f"Error: {str(e)}")

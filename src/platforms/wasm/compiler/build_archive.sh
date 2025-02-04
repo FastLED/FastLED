@@ -1,22 +1,26 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status
 
-# If src/ does not exist, then copy (or generate) it.
-if [ ! -d "src" ]; then
-    echo "Copying src/ directory"
-    python compile.py --keep-files
+# first compile if build doesn't exist
+first_compile=false
+
+# if build directory doesn't exist
+if [ ! -d "build" ]; then
+    # Create the build directory if it doesn't exist and mark as first compile.
+    mkdir -p build
+    first_compile=true
 fi
 
-# Create the build directory if it doesn't exist and switch to it.
-mkdir -p build
 cd build
 
 # Set build mode: QUICK, DEBUG, or RELEASE (default is QUICK)
 export BUILD_MODE=${1:-QUICK}
 
-# Configure with CMake using the Ninja generator.
-# If you want verbose build output, you can enable CMAKE_VERBOSE_MAKEFILE.
-emcmake cmake -G Ninja -DCMAKE_VERBOSE_MAKEFILE=ON ..
+if [ "$first_compile" = true ]; then
+    # Configure with CMake using the Ninja generator.
+    # If you want verbose build output, you can enable CMAKE_VERBOSE_MAKEFILE.
+    emcmake cmake -G Ninja -DCMAKE_VERBOSE_MAKEFILE=ON ..
+fi
 
 # Build the project using Ninja.
 emmake ninja

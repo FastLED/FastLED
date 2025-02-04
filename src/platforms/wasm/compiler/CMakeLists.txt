@@ -113,18 +113,18 @@ endif()
 file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 
-add_executable(fastled_sketch ${EXECUTABLE_SOURCES})
+add_executable(fastled ${EXECUTABLE_SOURCES})
 
 # Set compile options and definitions for the sketch executable.
-target_compile_options(fastled_sketch PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(fastled_sketch PRIVATE SKETCH_COMPILE)
-target_include_directories(fastled_sketch PRIVATE
+target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(fastled PRIVATE SKETCH_COMPILE)
+target_include_directories(fastled PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-target_link_options(fastled_sketch PRIVATE ${SKETCH_LINK_FLAGS})
-set_target_properties(fastled_sketch PROPERTIES
+target_link_options(fastled PRIVATE ${SKETCH_LINK_FLAGS})
+set_target_properties(fastled PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_link_libraries(fastled_sketch PRIVATE FastLED_lib)
+target_link_libraries(fastled PRIVATE FastLED_lib)
