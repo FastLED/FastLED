@@ -2,6 +2,8 @@
 # Setup and gather sources
 # -----------------------------------------------------------------------------
 
+cmake_minimum_required(VERSION 3.5)
+
 # Set FastLED source directory (this is where the FastLED sources live)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "FASTLED_SOURCE_DIR: ${FASTLED_SOURCE_DIR}")
