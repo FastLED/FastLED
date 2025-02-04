@@ -38,7 +38,7 @@ list(FILTER FASTLED_ALL_SOURCES EXCLUDE REGEX ".*avr.*")
 # Categorize source files into groups based on sub-directory patterns
 set(FX_SOURCES "")
 set(PLATFORMS_SOURCES "")
-set(LIB8TION_SOURCES "")
+#set(LIB8TION_SOURCES "")
 set(FL_SOURCES "")
 set(SENSORS_SOURCES "")
 set(OTHER_SOURCES "")
@@ -49,8 +49,8 @@ foreach(SOURCE ${FASTLED_ALL_SOURCES})
         list(APPEND FX_SOURCES "${SOURCE}")
     elseif(SOURCE MATCHES "/platforms/")
         list(APPEND PLATFORMS_SOURCES "${SOURCE}")
-    elseif(SOURCE MATCHES "/lib8tion/")
-        list(APPEND LIB8TION_SOURCES "${SOURCE}")
+    #elseif(SOURCE MATCHES "/lib8tion/")
+    #    list(APPEND LIB8TION_SOURCES "${SOURCE}")
     elseif(SOURCE MATCHES "/fl/")
         list(APPEND FL_SOURCES "${SOURCE}")
     elseif(SOURCE MATCHES "/sensors/")
@@ -94,7 +94,7 @@ endmacro()
 add_fastled_library(FastLED_core SOURCES ${OTHER_SOURCES})
 add_fastled_library(FastLED_fx SOURCES ${FX_SOURCES})
 add_fastled_library(FastLED_platforms SOURCES ${PLATFORMS_SOURCES})
-add_fastled_library(FastLED_lib8tion SOURCES ${LIB8TION_SOURCES})
+#add_fastled_library(FastLED_lib8tion SOURCES ${LIB8TION_SOURCES})
 add_fastled_library(FastLED_fl SOURCES ${FL_SOURCES})
 add_fastled_library(FastLED_sensors SOURCES ${SENSORS_SOURCES})
 
@@ -103,7 +103,7 @@ add_library(FastLED_lib STATIC
     $<TARGET_OBJECTS:FastLED_core>
     $<$<BOOL:${FX_SOURCES}>:$<TARGET_OBJECTS:FastLED_fx>>
     $<$<BOOL:${PLATFORMS_SOURCES}>:$<TARGET_OBJECTS:FastLED_platforms>>
-    $<$<BOOL:${LIB8TION_SOURCES}>:$<TARGET_OBJECTS:FastLED_lib8tion>>
+    #$<$<BOOL:${LIB8TION_SOURCES}>:$<TARGET_OBJECTS:FastLED_lib8tion>>
     $<$<BOOL:${FL_SOURCES}>:$<TARGET_OBJECTS:FastLED_fl>>
     $<$<BOOL:${SENSORS_SOURCES}>:$<TARGET_OBJECTS:FastLED_sensors>>
 )
