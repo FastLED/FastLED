@@ -54,13 +54,13 @@ set(COMMON_COMPILE_FLAGS
 )
 
 # If PROFILE flag is passed (e.g. via -DPROFILE), add Clang statistics flags.
-if(DEFINED PROFILE)
-    message(STATUS "PROFILE flag passed: enabling Clang compiler stats output")
-    list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
-else()
-    message(STATUS "PROFILE flag not passed: skipping Clang compiler stats output")
-endif()
+# if(DEFINED PROFILE)
+#     message(STATUS "PROFILE flag passed: enabling Clang compiler stats output")
+#     list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
+# else()
+#     message(STATUS "PROFILE flag not passed: skipping Clang compiler stats output")
+# endif()
 
 set(COMMON_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
@@ -143,25 +143,33 @@ if(TARGET fastled)
 endif()
 
 # --- EXECUTABLE (SKETCH) SETUP ---
-# Gather sketch source files.
-file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
+# Gather all cpp source files
+file(GLOB_RECURSE ALL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+message(STATUS "All sources: ${ALL_SOURCES}")
 
-# Create the sketch executable.
-add_executable(sketch ${EXECUTABLE_SOURCES})
+# Create the sketch library and executable
+add_library(sketch_lib STATIC ${ALL_SOURCES})
+add_executable(sketch EXCLUDE_FROM_ALL ${ALL_SOURCES})
 
-# Set compile options and definitions for the sketch.
-target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(sketch PRIVATE SKETCH_COMPILE)
-target_include_directories(sketch PRIVATE
-    # ${CMAKE_CURRENT_SOURCE_DIR}/headers
+# Set compile options for the sketch library
+target_compile_options(sketch_lib PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(sketch_lib PRIVATE SKETCH_COMPILE)
+target_include_directories(sketch_lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     "/include"
 )
+set_target_properties(sketch_lib PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
+
+# Set properties for the final executable
+target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
 target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
 set_target_properties(sketch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-# target_link_options(sketch PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
-target_link_libraries(sketch PRIVATE fastled)
+
+# Link the executable with both libraries
+target_link_libraries(sketch PRIVATE sketch_lib fastled)
