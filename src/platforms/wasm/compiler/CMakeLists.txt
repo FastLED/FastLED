@@ -50,7 +50,7 @@ set(COMMON_LINK_FLAGS
     --bind
     -DUSE_OFFSET_CONVERTER=0
     -sINITIAL_MEMORY=134217728
-    -fuse-ld=lld
+    -fuse-ld=mold
     --no-entry
     -sMODULARIZE=1
     -sEXPORT_NAME=fastled
