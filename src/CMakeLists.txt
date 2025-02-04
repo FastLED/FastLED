@@ -6,6 +6,14 @@
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "FASTLED_SOURCE_DIR: ${FASTLED_SOURCE_DIR}")
 
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    message(STATUS "CMAKE_CXX_STANDARD not defined. Setting C++ standard to 17.")
+else()
+    message(STATUS "CMAKE_CXX_STANDARD already defined as: ${CMAKE_CXX_STANDARD}")
+endif()
+
 # Retrieve and print the flags passed from the parent (e.g. tests/CMakeLists.txt)
 message(STATUS "Using compile flags from parent CMakeLists.txt")
 message(STATUS "COMMON_COMPILE_FLAGS: ${COMMON_COMPILE_FLAGS}")
