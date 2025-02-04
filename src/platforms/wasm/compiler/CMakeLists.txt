@@ -4,9 +4,20 @@ project(FastLED_WASM)
 # Enable verbose makefile output for all compiled sources
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+
+# projenv.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
+# env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
+
 # --- Set Emscripten as the Compiler ---
-set(CMAKE_C_COMPILER emcc)
-set(CMAKE_CXX_COMPILER em++)
+set(CMAKE_C_COMPILER "emcc")
+set(CMAKE_CXX_COMPILER "em++")
+set(CMAKE_AR "emar")
+set(CMAKE_RANLIB "emranlib")
+
+# Use ccache as a compiler launcher (requires CMake 3.4 or newer)
+set(CMAKE_C_COMPILER_LAUNCHER "ccache")
+set(CMAKE_CXX_COMPILER_LAUNCHER "ccache")
+
 
 # --- Build Mode and Optimization Level ---
 if(NOT DEFINED ENV{BUILD_MODE})
@@ -16,15 +27,14 @@ else()
 endif()
 
 if(BUILD_MODE STREQUAL "QUICK")
-    set(OPT_LEVEL "-O1")
-elseif(BUILD_MODE STREQUAL "DEBUG")
     set(OPT_LEVEL "-O0")
+elseif(BUILD_MODE STREQUAL "DEBUG")
+    set(OPT_LEVEL "-Og")
 else() # RELEASE
     set(OPT_LEVEL "-Oz")
 endif()
 
 # --- Common Compiler and Linker Flags ---
-
 set(COMMON_COMPILE_FLAGS
     -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
     -DFASTLED_FORCE_NAMESPACE=1
@@ -43,6 +53,15 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
+# If PROFILE flag is passed (e.g. via -DPROFILE), add Clang statistics flags.
+if(DEFINED PROFILE)
+    message(STATUS "PROFILE flag passed: enabling Clang compiler stats output")
+    list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
+else()
+    message(FATAL "PROFILE flag not passed: skipping Clang compiler stats output")
+endif()
+
 set(COMMON_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
@@ -50,19 +69,20 @@ set(COMMON_LINK_FLAGS
     --bind
     -DUSE_OFFSET_CONVERTER=0
     -sINITIAL_MEMORY=134217728
-    -fuse-ld=mold
+    -fuse-ld=lld
     --no-entry
     -sMODULARIZE=1
 )
 
 set(LIBRARY_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+
 )
 
 set(SKETCH_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
+    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
     -sEXPORT_NAME=fastled
     -o fastled.js
 )
@@ -92,39 +112,55 @@ message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
 set(FASTLED_INCLUDE_DEST /include CACHE PATH "Destination path for FastLED headers")
 
-# (Optional) Add the FastLED headers to the global include path.
-include_directories(${FASTLED_SOURCE_DIR})
+# Add FastLED headers to the global include path.
 
-# Delegate building the FastLED library (and header copying) to the subdirectory.
-add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
 
-# In the parent, we can set additional properties on fastled if needed.
-if(TARGET sketch)
+# Check for a prebuilt libfastled.a. If it exists, create an imported target;
+# otherwise, build FastLED from source.
+set(LIBFASTLED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/fastled/libfastled.a)
+
+if(EXISTS ${LIBFASTLED_PATH})
+    message(STATUS "Found prebuilt libfastled.a at ${LIBFASTLED_PATH}, skipping build of FastLED library.")
+    add_library(fastled STATIC IMPORTED)
+    set_target_properties(fastled PROPERTIES IMPORTED_LOCATION ${LIBFASTLED_PATH})
+
+else()
+    message(STATUS "Prebuilt libfastled.a not found; building FastLED library from source.")
+    add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
+    
+    # Apply include directories only for building from source
+    include_directories(${FASTLED_SOURCE_DIR})
+endif()
+
+# Set target properties for fastled (if it exists)
+if(TARGET fastled)
     set_target_properties(fastled PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         POSITION_INDEPENDENT_CODE ON
     )
-    target_link_options(sketch PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 endif()
 
 # --- EXECUTABLE (SKETCH) SETUP ---
-# Instead of using the FastLED sources directly, we build an executable from local sketch sources.
+# Gather sketch source files.
 file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 
+# Create the sketch executable.
 add_executable(sketch ${EXECUTABLE_SOURCES})
 
-# Set compile options and definitions for the sketch executable.
+# Set compile options and definitions for the sketch.
 target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(sketch PRIVATE SKETCH_COMPILE)
 target_include_directories(sketch PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
+    # ${CMAKE_CURRENT_SOURCE_DIR}/headers
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    "/include"
 )
 target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
 set_target_properties(sketch PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
+# target_link_options(sketch PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 target_link_libraries(sketch PRIVATE fastled)
