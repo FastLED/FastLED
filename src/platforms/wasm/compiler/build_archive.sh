@@ -20,6 +20,17 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 # exit 0
 
+# if /include does not exist
+if [ ! -d "/include" ]; then
+   # echo "include directory does not exist, copying header include tree"
+   # copy *.h,*.hpp files from fastled/src/** to /include
+   mkdir -p /include
+   cd fastled/src
+   find . -name "*.h*" -exec cp --parents {} /include \;
+   cd ../../
+fi
+
+
 # first compile if build doesn't exist
 first_compile=false
 

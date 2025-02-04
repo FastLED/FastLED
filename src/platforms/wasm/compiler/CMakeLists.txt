@@ -123,12 +123,7 @@ if(EXISTS ${LIBFASTLED_PATH})
 
 else()
     message(STATUS "Prebuilt libfastled.a not found; building FastLED library from source.")
-    add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
-    # Enable header copying mode.
-    set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
-    set(FASTLED_INCLUDE_DEST /include CACHE PATH "Destination path for FastLED headers")
-
-    
+    add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)    
     # Apply include directories only for building from source
     include_directories(${FASTLED_SOURCE_DIR})
 endif()
