@@ -4,9 +4,20 @@ project(FastLED_WASM)
 # Enable verbose makefile output for all compiled sources
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+
+# projenv.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
+# env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
+
 # --- Set Emscripten as the Compiler ---
-set(CMAKE_C_COMPILER emcc)
-set(CMAKE_CXX_COMPILER em++)
+set(CMAKE_C_COMPILER "emcc")
+set(CMAKE_CXX_COMPILER "em++")
+set(CMAKE_AR "emar")
+set(CMAKE_RANLIB "emranlib")
+
+# Use ccache as a compiler launcher (requires CMake 3.4 or newer)
+set(CMAKE_C_COMPILER_LAUNCHER "ccache")
+set(CMAKE_CXX_COMPILER_LAUNCHER "ccache")
+
 
 # --- Build Mode and Optimization Level ---
 if(NOT DEFINED ENV{BUILD_MODE})
@@ -18,13 +29,12 @@ endif()
 if(BUILD_MODE STREQUAL "QUICK")
     set(OPT_LEVEL "-O1")
 elseif(BUILD_MODE STREQUAL "DEBUG")
-    set(OPT_LEVEL "-O0")
+    set(OPT_LEVEL "-Og")
 else() # RELEASE
     set(OPT_LEVEL "-Oz")
 endif()
 
 # --- Common Compiler and Linker Flags ---
-
 set(COMMON_COMPILE_FLAGS
     -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
     -DFASTLED_FORCE_NAMESPACE=1
@@ -43,6 +53,15 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
+# If PROFILE flag is passed (e.g. via -DPROFILE), add Clang statistics flags.
+# if(DEFINED PROFILE)
+#     message(STATUS "PROFILE flag passed: enabling Clang compiler stats output")
+#     list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
+# else()
+#     message(STATUS "PROFILE flag not passed: skipping Clang compiler stats output")
+# endif()
+
 set(COMMON_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
     -sDISABLE_EXCEPTION_CATCHING=1
@@ -50,19 +69,20 @@ set(COMMON_LINK_FLAGS
     --bind
     -DUSE_OFFSET_CONVERTER=0
     -sINITIAL_MEMORY=134217728
-    -fuse-ld=mold
+    -fuse-ld=lld
     --no-entry
     -sMODULARIZE=1
 )
 
 set(LIBRARY_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
+
 )
 
 set(SKETCH_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
+    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
+    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
     -sEXPORT_NAME=fastled
     -o fastled.js
 )
@@ -83,10 +103,14 @@ if(BUILD_MODE STREQUAL "DEBUG")
     list(APPEND SKETCH_LINK_FLAGS ${DEBUG_LINK_FLAGS})
 endif()
 
+# src\platforms\wasm\compiler\lib\CMakeLists.txt
+
 # --- FASTLED LIBRARY SETUP ---
 # Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
+# set(FASTLED_SOURCE_DIR ../../../../)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
+
 
 # Enable header copying mode.
 set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
@@ -97,15 +121,22 @@ include_directories(${FASTLED_SOURCE_DIR})
 
 # Delegate building the FastLED library (and header copying) to the subdirectory.
 add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
+# Add FastLED headers to the global include path.
 
-# In the parent, we can set additional properties on fastled if needed.
-if(TARGET sketch)
+
+
+
+
+
+
+
+# Set target properties for fastled (if it exists)
+if(TARGET fastled)
     set_target_properties(fastled PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         POSITION_INDEPENDENT_CODE ON
     )
-    target_link_options(sketch PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 endif()
 
 # --- EXECUTABLE (SKETCH) SETUP ---
