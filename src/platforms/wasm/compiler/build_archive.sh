@@ -21,15 +21,14 @@ PROFILE_FLAG="-DPROFILE=ON"
 
 
 if [ "$first_compile" = true ]; then
-    # Configure with CMake using the Ninja generator.
+    # Configure with CMake
     # If you want verbose build output, you can enable CMAKE_VERBOSE_MAKEFILE.
     echo "Configuring build with CMake..."
-    emcmake cmake -G Ninja -DCMAKE_VERBOSE_MAKEFILE=ON ${PROFILE_FLAG} ..
-    # emcmake cmake -G Ninja
+    emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ${PROFILE_FLAG} ..
 else
     # If the build directory already exists, reconfigure with CMake.
     echo "Skipping CMake configuration as build directory already exists."
 fi
 
-# Build the project using Ninja.
-emmake ninja -d stats -v
+# Build the project using CMake
+emmake cmake --build . -v

@@ -59,7 +59,7 @@ if(DEFINED PROFILE)
     list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
 else()
-    message(FATAL "PROFILE flag not passed: skipping Clang compiler stats output")
+    message(STATUS "PROFILE flag not passed: skipping Clang compiler stats output")
 endif()
 
 set(COMMON_LINK_FLAGS
@@ -108,9 +108,6 @@ endif()
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
-# Enable header copying mode.
-set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
-set(FASTLED_INCLUDE_DEST /include CACHE PATH "Destination path for FastLED headers")
 
 # Add FastLED headers to the global include path.
 
@@ -127,6 +124,10 @@ if(EXISTS ${LIBFASTLED_PATH})
 else()
     message(STATUS "Prebuilt libfastled.a not found; building FastLED library from source.")
     add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
+    # Enable header copying mode.
+    set(FASTLED_COPY_HEADERS ON CACHE BOOL "Copy FastLED headers to the include path")
+    set(FASTLED_INCLUDE_DEST /include CACHE PATH "Destination path for FastLED headers")
+
     
     # Apply include directories only for building from source
     include_directories(${FASTLED_SOURCE_DIR})
