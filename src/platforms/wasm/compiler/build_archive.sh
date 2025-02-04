@@ -27,4 +27,4 @@ else
 fi
 
 # Build the project using Ninja.
-emmake ninja
+emmake ninja -d stats -v
