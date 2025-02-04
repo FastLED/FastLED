@@ -7,6 +7,10 @@
 #include "brightness_bitshifter.h"
 
 
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 /// @addtogroup lib8tion
 /// @{
 
@@ -78,3 +82,5 @@ uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *brightness_ds
 
 /// @} Dimming
 /// @} lib8tion
+
+FASTLED_NAMESPACE_END
