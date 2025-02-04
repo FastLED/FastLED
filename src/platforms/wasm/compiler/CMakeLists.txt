@@ -89,7 +89,7 @@ endif()
 
 # Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
-message(STATUS "FastLED_lib source directory: ${FASTLED_SOURCE_DIR}")
+message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
 # (Optional) Add the FastLED headers to the global include path.
 include_directories(${FASTLED_SOURCE_DIR})
@@ -98,14 +98,14 @@ include_directories(${FASTLED_SOURCE_DIR})
 # The subdirectory’s CMake file will search for sources, group them, and create targets.
 add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)
 
-# In the parent, we can set additional properties on FastLED_lib if needed.
-if(TARGET FastLED_lib)
-    set_target_properties(FastLED_lib PROPERTIES
+# In the parent, we can set additional properties on fastled if needed.
+if(TARGET fastled)
+    set_target_properties(fastled PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         POSITION_INDEPENDENT_CODE ON
     )
-    target_link_options(FastLED_lib PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
+    target_link_options(fastled PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 endif()
 
 # --- EXECUTABLE (SKETCH) SETUP ---
@@ -127,4 +127,4 @@ set_target_properties(fastled PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_link_libraries(fastled PRIVATE FastLED_lib)
+target_link_libraries(fastled PRIVATE fastled)

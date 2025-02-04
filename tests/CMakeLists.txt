@@ -156,7 +156,7 @@ include_directories(${FASTLED_SOURCE_DIR}/src)
 add_subdirectory(${FASTLED_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}/fastled)
 
 if(NOT APPLE)
-    target_link_options(FastLED_lib PRIVATE -static-libgcc -static-libstdc++)
+    target_link_options(fastled PRIVATE -static-libgcc -static-libstdc++)
 endif()
 
 # Try to find libunwind, but make it optional
@@ -184,7 +184,7 @@ file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTA
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} FastLED_lib)
+    target_link_libraries(${TEST_NAME} fastled)
     target_link_options(${TEST_NAME} PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
     if(USE_LIBUNWIND)
         target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})

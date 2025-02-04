@@ -142,7 +142,7 @@ def run_command(command: str, cwd: Path | None = None) -> None:
         sys.exit(1)
 
 
-def compile_fastled_library(specific_test: str | None = None) -> None:
+def compile_fastledrary(specific_test: str | None = None) -> None:
     if USE_ZIG:
         print("USING ZIG COMPILER")
         rtn = subprocess.run(
@@ -279,7 +279,7 @@ def main() -> None:
     if args.clean or should_clean_build(build_info):
         clean_build_directory()
 
-    compile_fastled_library(args.test)
+    compile_fastledrary(args.test)
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
 

@@ -77,7 +77,7 @@ endmacro()
 add_partitioned_library(FastLED_fx        ".*/fx/")
 add_partitioned_library(FastLED_platforms ".*/platforms/")
 # Uncomment the next line if you wish to partition lib8tion sources:
-# add_partitioned_library(FastLED_lib8tion ".*/lib8tion/")
+# add_partitioned_library(fastled8tion ".*/lib8tion/")
 add_partitioned_library(FastLED_fl        ".*/fl/")
 add_partitioned_library(FastLED_sensors   ".*/sensors/")
 add_partitioned_library(FastLED_third_party ".*/third_party/")
@@ -99,16 +99,16 @@ endif()
 # Create the main FastLED library by aggregating all object libraries.
 # -----------------------------------------------------------------------------
 
-add_library(FastLED_lib STATIC)
+add_library(fastled STATIC)
 
 # Loop over the global list of object libraries and add their object files.
 foreach(obj_lib IN LISTS FASTLED_OBJECT_LIBS)
-    target_sources(FastLED_lib PRIVATE $<TARGET_OBJECTS:${obj_lib}>)
+    target_sources(fastled PRIVATE $<TARGET_OBJECTS:${obj_lib}>)
 endforeach()
 
 # Forward the compile flags and definitions from the parent.
-target_compile_options(FastLED_lib PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(FastLED_lib PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+target_compile_options(fastled PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(fastled PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
 # Ensure full archive linking: force inclusion of all object files.
-target_link_options(FastLED_lib PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
+target_link_options(fastled PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
