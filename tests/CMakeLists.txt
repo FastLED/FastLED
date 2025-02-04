@@ -5,6 +5,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Enforce C++17 globally for all targets.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Enable parallel compilation
 include(ProcessorCount)
 ProcessorCount(CPU_COUNT)
