@@ -105,8 +105,8 @@ endif()
 
 # --- FASTLED LIBRARY SETUP ---
 # Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
-set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
-message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
+#set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
+#message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
 
 # Add FastLED headers to the global include path.
@@ -114,7 +114,7 @@ message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
 # Check for a prebuilt libfastled.a. If it exists, create an imported target;
 # otherwise, build FastLED from source.
-set(LIBFASTLED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/fastled/libfastled.a)
+set(LIBFASTLED_PATH /precompiled/libfastled.a)
 
 if(EXISTS ${LIBFASTLED_PATH})
     message(STATUS "Found prebuilt libfastled.a at ${LIBFASTLED_PATH}, skipping build of FastLED library.")
@@ -122,10 +122,7 @@ if(EXISTS ${LIBFASTLED_PATH})
     set_target_properties(fastled PROPERTIES IMPORTED_LOCATION ${LIBFASTLED_PATH})
 
 else()
-    message(STATUS "Prebuilt libfastled.a not found; building FastLED library from source.")
-    add_subdirectory(${FASTLED_SOURCE_DIR} ${CMAKE_BINARY_DIR}/fastled)    
-    # Apply include directories only for building from source
-    include_directories(${FASTLED_SOURCE_DIR})
+    message(FATAL_ERROR "Did not find prebuilt libfastled.a at ${LIBFASTLED_PATH}. Please build the library first.")
 endif()
 
 # Set target properties for fastled (if it exists)
@@ -151,7 +148,7 @@ target_compile_options(sketch_lib PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(sketch_lib PRIVATE SKETCH_COMPILE)
 target_include_directories(sketch_lib PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    "/include"
+    "/precompiled/include"
 )
 set_target_properties(sketch_lib PROPERTIES
     CXX_STANDARD 17

@@ -1,5 +1,29 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status
+set -x
+
+
+# if /include does not exist
+if [ ! -d "/precompiled/include" ]; then
+   # echo "include directory does not exist, copying header include tree"
+   # copy *.h,*.hpp files from fastled/src/** to /include
+   mkdir -p /precompiled/include
+   cd fastled/src
+   find . -name "*.h*" -exec cp --parents {} /precompiled/include \;
+   cd ../../
+fi
+
+# if /precompiled/libfastled.a does not exist
+if [ ! -f "/precompiled/libfastled.a" ]; then
+   # echo "libfastled.a does not exist, compiling static library"
+   cd fastled/src/platforms/wasm/compiler/lib
+   mkdir -p build
+   cd build
+   emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
+   emmake cmake --build . -v -j
+   cp fastled/libfastled.a /precompiled/libfastled.a
+   cd ../../../../../
+fi
 
 # static_lib_generated=false
 # # if lib/build directory doesn't exist then enter it so that we can run cmake
@@ -16,19 +40,8 @@ set -e  # Exit immediately if a command exits with a non-zero status
 #     cd build
 #     # emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
 #     emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
+#     emmake cmake --build . -v
 # fi
-
-# exit 0
-
-# if /include does not exist
-if [ ! -d "/include" ]; then
-   # echo "include directory does not exist, copying header include tree"
-   # copy *.h,*.hpp files from fastled/src/** to /include
-   mkdir -p /include
-   cd fastled/src
-   find . -name "*.h*" -exec cp --parents {} /include \;
-   cd ../../
-fi
 
 
 # first compile if build doesn't exist
@@ -38,6 +51,9 @@ first_compile=false
 if [ ! -d "build" ]; then
     # Create the build directory if it doesn't exist and mark as first compile.
     mkdir -p build
+    # if /js/src/CMakeCache.txt exists then delete it
+    if [ -f "/js/src/CMakeCache.txt" ]; then
+        rm -rf /js/src/CMakeCache.txt
     first_compile=true
 fi
 
@@ -47,14 +63,14 @@ cd build
 export BUILD_MODE=${1:-QUICK}
 
 # Check for an optional second parameter to activate PROFILE
-PROFILE_FLAG="-DPROFILE=ON"
+# PROFILE_FLAG="-DPROFILE=ON"
 
 
 if [ "$first_compile" = true ]; then
     # Configure with CMake
     # If you want verbose build output, you can enable CMAKE_VERBOSE_MAKEFILE.
     echo "Configuring build with CMake..."
-    emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ${PROFILE_FLAG} ..
+    emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON  ..
 else
     # If the build directory already exists, reconfigure with CMake.
     echo "Skipping CMake configuration as build directory already exists."

@@ -107,8 +107,8 @@ endif()
 
 # --- FASTLED LIBRARY SETUP ---
 # Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
-# set(FASTLED_SOURCE_DIR ../../../../)
-set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
+set(FASTLED_SOURCE_DIR ../../../../)
+# set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
 message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
 
 
@@ -139,23 +139,23 @@ if(TARGET fastled)
     )
 endif()
 
-# --- EXECUTABLE (SKETCH) SETUP ---
-# Instead of using the FastLED sources directly, we build an executable from local sketch sources.
-file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
+# # --- EXECUTABLE (SKETCH) SETUP ---
+# # Instead of using the FastLED sources directly, we build an executable from local sketch sources.
+# file(GLOB_RECURSE EXECUTABLE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# message(STATUS "Executable sources: ${EXECUTABLE_SOURCES}")
 
-add_executable(sketch ${EXECUTABLE_SOURCES})
+# add_executable(sketch ${EXECUTABLE_SOURCES})
 
-# Set compile options and definitions for the sketch executable.
-target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(sketch PRIVATE SKETCH_COMPILE)
-target_include_directories(sketch PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
-set_target_properties(sketch PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-target_link_libraries(sketch PRIVATE fastled)
+# # Set compile options and definitions for the sketch executable.
+# target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
+# target_compile_definitions(sketch PRIVATE SKETCH_COMPILE)
+# target_include_directories(sketch PRIVATE
+#     ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src
+#     ${CMAKE_CURRENT_SOURCE_DIR}/src
+# )
+# target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
+# set_target_properties(sketch PROPERTIES
+#     CXX_STANDARD 17
+#     CXX_STANDARD_REQUIRED ON
+# )
+# target_link_libraries(sketch PRIVATE fastled)
