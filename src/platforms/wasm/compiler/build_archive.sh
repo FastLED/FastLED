@@ -5,6 +5,7 @@ set -x
 
 # if /include does not exist
 if [ ! -d "/precompiled/include" ]; then
+   echo "include directory does not exist, copying header include tree"
    # echo "include directory does not exist, copying header include tree"
    # copy *.h,*.hpp files from fastled/src/** to /include
    mkdir -p /precompiled/include
@@ -16,6 +17,7 @@ fi
 # if /precompiled/libfastled.a does not exist
 if [ ! -f "/precompiled/libfastled.a" ]; then
    # echo "libfastled.a does not exist, compiling static library"
+   echo "libfastled.a does not exist, compiling static library"
    cd fastled/src/platforms/wasm/compiler/lib
    mkdir -p build
    cd build

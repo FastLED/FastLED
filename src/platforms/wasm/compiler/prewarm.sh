@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -x
+set -e
 
 # --force flag to force prewarm
 #test to see if --force flag is set

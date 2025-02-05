@@ -45,11 +45,6 @@ set(COMMON_COMPILE_FLAGS
     -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
     -std=gnu++17
     -fpermissive
-    -Wno-constant-logical-operand
-    -Wnon-c-typedef-for-linkage
-    -Werror=bad-function-cast
-    -Werror=cast-function-type
-    -v
     ${OPT_LEVEL}
 )
 
@@ -72,6 +67,7 @@ set(COMMON_LINK_FLAGS
     -fuse-ld=lld
     --no-entry
     -sMODULARIZE=1
+    -sUSE_PTHREADS=0          # Disable threading support
 )
 
 set(LIBRARY_LINK_FLAGS

@@ -255,6 +255,8 @@ def compile_source(
     with COMPILE_LOCK:
         COMPILE_LOCK_end = time.time()
 
+        is_quick = build_mode.lower() == "quick"
+
         print("\nRunning compiler...")
         cmd = [
             "python",
@@ -262,6 +264,8 @@ def compile_source(
             "compile",
             f"--mapped-dir={temp_src_dir}",
         ]
+        if is_quick:
+            cmd += ["--no-platformio"]  # fast path that doesn't need a lock.
         cmd.append(f"--{build_mode.lower()}")
         if profile:
             cmd.append("--profile")

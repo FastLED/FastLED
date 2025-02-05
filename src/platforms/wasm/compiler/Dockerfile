@@ -159,8 +159,9 @@ COPY src/platforms/wasm/compiler/wasm_compiler_flags.py /trash/wasm_compiler_fla
 COPY src/platforms/wasm/compiler/CMakeLists.txt /trash/CMakeLists.txt
 RUN rm -rf /trash
 
-# Do not cause the build to fail because the cached pre-warm failed.
-RUN /js/prewarm.sh --force > /logs/prewarm.log.1 || true
+RUN chmod +x /js/prewarm.sh && \
+    cat /js/prewarm.sh >> /logs/prewarm.log.0
+RUN /js/prewarm.sh --force >> /logs/prewarm.log.1
 
 
 # Copy the fastled repo from the host machine and prepare for pre-warm
@@ -187,7 +188,7 @@ RUN python /js/init_runtime.py || true
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.
-RUN /js/prewarm.sh  > /logs/prewarm.log.2
+RUN /js/prewarm.sh --force > /logs/prewarm.log.2
 
 # Now timestamp the image and store it at the end of the build.
 RUN date > /image_timestamp.txt

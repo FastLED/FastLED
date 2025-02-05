@@ -49,7 +49,7 @@ set(COMMON_COMPILE_FLAGS
     -Wnon-c-typedef-for-linkage
     -Werror=bad-function-cast
     -Werror=cast-function-type
-    -v
+    -sUSE_PTHREADS=0          # Disable threading support
     ${OPT_LEVEL}
 )
 
