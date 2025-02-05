@@ -345,7 +345,7 @@ def compile_source(
     start_zip = time.time()
     try:
         with zipfile.ZipFile(
-            output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+            output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=1
         ) as zip_out:
             _print("\nAdding files to output zip:")
             for file_path in fastled_js_dir.rglob("*"):
