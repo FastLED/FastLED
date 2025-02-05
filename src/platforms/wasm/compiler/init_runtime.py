@@ -49,8 +49,6 @@ def make_links() -> None:
     for pattern in patterns:
         files.extend(glob.glob(str(_COMPILER_DIR / pattern)))
 
-    files.append(_COMPILER_DIR / "lib")
-
     # Process files in parallel using ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=16) as executor:
         executor.map(task, files)

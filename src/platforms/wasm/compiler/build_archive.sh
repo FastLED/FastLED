@@ -52,8 +52,9 @@ if [ ! -d "build" ]; then
     # Create the build directory if it doesn't exist and mark as first compile.
     mkdir -p build
     # if /js/src/CMakeCache.txt exists then delete it
-    if [ -f "/js/src/CMakeCache.txt" ]; then
-        rm -rf /js/src/CMakeCache.txt
+    if [ -f "/js/fastled/src/CMakeCache.txt" ]; then
+        rm -rf /js/fastled/src/CMakeCache.txt
+    fi
     first_compile=true
 fi
 
@@ -77,4 +78,5 @@ else
 fi
 
 # Build the project using CMake
-emmake cmake --build . -v
+emmake cmake --build . -v -j
+
