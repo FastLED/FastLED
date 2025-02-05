@@ -38,6 +38,7 @@ endif()
 set(COMMON_COMPILE_FLAGS
     -DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50
     -DFASTLED_FORCE_NAMESPACE=1
+    -DFASTLED_NO_FORCE_INLINE
     -DFASTLED_USE_PROGMEM=0
     -DDISABLE_EXCEPTION_CATCHING=1
     -fno-exceptions
@@ -45,6 +46,7 @@ set(COMMON_COMPILE_FLAGS
     -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0
     -std=gnu++17
     -fpermissive
+    -fno-inline
     -Wno-constant-logical-operand
     -Wnon-c-typedef-for-linkage
     -Werror=bad-function-cast
@@ -52,6 +54,9 @@ set(COMMON_COMPILE_FLAGS
     -sUSE_PTHREADS=0          # Disable threading support
     ${OPT_LEVEL}
 )
+
+
+
 
 # If PROFILE flag is passed (e.g. via -DPROFILE), add Clang statistics flags.
 # if(DEFINED PROFILE)

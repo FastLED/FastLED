@@ -34,7 +34,8 @@ endif()
 #     set(OPT_LEVEL "-Oz")
 # endif()
 
-OPT_LEVEL("-Oz")
+
+set(OPT_LEVEL "-Oz")
 
 # --- Common Compiler and Linker Flags ---
 set(COMMON_COMPILE_FLAGS

@@ -161,7 +161,7 @@ RUN rm -rf /trash
 
 RUN chmod +x /js/prewarm.sh && \
     cat /js/prewarm.sh >> /logs/prewarm.log.0
-RUN /js/prewarm.sh --force >> /logs/prewarm.log.1
+RUN /js/prewarm.sh --force >> /logs/prewarm.log.1 || true
 
 
 # Copy the fastled repo from the host machine and prepare for pre-warm
@@ -188,7 +188,7 @@ RUN python /js/init_runtime.py || true
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.
-RUN /js/prewarm.sh --force > /logs/prewarm.log.2
+RUN /js/prewarm.sh --force > /logs/prewarm.log.2 || true
 
 # Now timestamp the image and store it at the end of the build.
 RUN date > /image_timestamp.txt

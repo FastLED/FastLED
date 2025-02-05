@@ -99,7 +99,6 @@ set(UNIT_TEST_COMPILE_FLAGS
     -ggdb
     -fno-omit-frame-pointer
     -O0
-    -fno-inline
     -Werror=suggest-override
     -Werror=return-type
     -Werror=missing-declarations
