@@ -27,25 +27,6 @@ if [ ! -f "/precompiled/libfastled.a" ]; then
    cd ../../../../../
 fi
 
-# static_lib_generated=false
-# # if lib/build directory doesn't exist then enter it so that we can run cmake
-# if [ ! -d "fastled/src/platforms/wasm/compiler/lib/build" ]; then
-#     static_lib_generated=false
-#     # echo "lib/build directory doesn't exist. Entering lib directory to run cmake."
-#     # mkdir -p lib/build
-#     # cd lib/build
-#     # echo "Running cmake in lib/build directory."
-#     # emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON .
-#     # cmake --build . --target fastled
-#     cd fastled/src/platforms/wasm/compiler/lib
-#     mkdir -p build
-#     cd build
-#     # emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
-#     emcmake cmake -DCMAKE_VERBOSE_MAKEFILE=ON ..
-#     emmake cmake --build . -v
-# fi
-
-
 # first compile if build doesn't exist
 first_compile=false
 
