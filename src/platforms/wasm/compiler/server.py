@@ -235,6 +235,13 @@ def compile_source(
     hash_value: str | None = None,
 ) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
+    epoch = time.time()
+
+    def _print(msg) -> None:
+        diff = time.time() - epoch
+        print(f" = SERVER {diff:.2f}s = {msg}")
+
+    _print("Starting compile_source")
     global COMPILE_COUNT
     global COMPILE_FAILURES
     global COMPILE_SUCCESSES
@@ -243,21 +250,22 @@ def compile_source(
     try:
         # Find the first directory in temp_src_dir
         src_dir = next(Path(temp_src_dir).iterdir())
-        print(f"\nFound source directory: {src_dir}")
+        _print(f"\nFound source directory: {src_dir}")
     except StopIteration:
         return HTTPException(
             status_code=500,
             detail=f"No files found in extracted directory: {temp_src_dir}",
         )
 
-    print("Files are ready, waiting for compile lock...")
+    _print("Files are ready, waiting for compile lock...")
     COMPILE_LOCK_start = time.time()
+
     with COMPILE_LOCK:
         COMPILE_LOCK_end = time.time()
 
         is_quick = build_mode.lower() == "quick"
 
-        print("\nRunning compiler...")
+        _print("\nRunning compiler...")
         cmd = [
             "python",
             "run.py",
@@ -284,6 +292,7 @@ def compile_source(
         for line in iter(proc.stdout.readline, ""):
             print(line, end="")
             stdout_lines.append(line)
+        _print("Compiler finished.")
         stdout = "".join(stdout_lines)
         proc.stdout.close()
         return_code = proc.wait()
@@ -306,6 +315,7 @@ def compile_source(
     fastled_js_dir = src_dir / "fastled_js"
     print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
 
+    _print("Looking for fastled_js directory...")
     if not fastled_js_dir.exists():
         print(f"Directory contents of {src_dir}:")
         for path in src_dir.rglob("*"):
@@ -314,6 +324,7 @@ def compile_source(
             status_code=500,
             detail=f"Compilation artifacts not found at {fastled_js_dir}",
         )
+    _print("Found fastled_js directory, zipping...")
 
     # Replace separate stdout/stderr files with single out.txt
     out_txt = fastled_js_dir / "out.txt"
@@ -329,28 +340,29 @@ def compile_source(
 
     OUTPUT_DIR.mkdir(exist_ok=True)  # Ensure output directory exists
     output_zip_path = OUTPUT_DIR / f"fastled_output_{hash(str(file_path))}.zip"
-    print(f"\nCreating output zip at: {output_zip_path}")
+    _print(f"\nCreating output zip at: {output_zip_path}")
+
     start_zip = time.time()
     try:
         with zipfile.ZipFile(
             output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9
         ) as zip_out:
-            print("\nAdding files to output zip:")
+            _print("\nAdding files to output zip:")
             for file_path in fastled_js_dir.rglob("*"):
                 if file_path.is_file():
                     arc_path = file_path.relative_to(fastled_js_dir)
-                    print(f"  Adding: {arc_path}")
+                    _print(f"  Adding: {arc_path}")
                     zip_out.write(file_path, arc_path)
     except zipfile.BadZipFile as e:
-        print(f"Error creating zip file: {e}")
+        _print(f"Error creating zip file: {e}")
         return HTTPException(status_code=500, detail=f"Failed to create zip file: {e}")
     except zlib.error as e:
-        print(f"Compression error: {e}")
+        _print(f"Compression error: {e}")
         return HTTPException(
             status_code=500, detail=f"Zip compression failed - zlib error: {e}"
         )
     except Exception as e:
-        print(f"Unexpected error creating zip: {e}")
+        _print(f"Unexpected error creating zip: {e}")
         return HTTPException(status_code=500, detail=f"Failed to create zip file: {e}")
     zip_time = time.time() - start_zip
     print(f"Zip file created in {zip_time:.2f}s")
@@ -364,7 +376,7 @@ def compile_source(
             shutil.rmtree(temp_src_dir, ignore_errors=True)
 
     background_tasks.add_task(cleanup_files)
-
+    _print(f"\nReturning output zip: {output_zip_path}")
     return FileResponse(
         path=output_zip_path,
         media_type="application/zip",
