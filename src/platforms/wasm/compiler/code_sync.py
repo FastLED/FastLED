@@ -23,11 +23,12 @@ def sync_src_to_target(
         print(f"Skipping rsync, as fastled src at {src} doesn't exist")
         return False
     try:
+        exclude_hidden = ["--exclude=.*/"]  # suppresses folders like .mypy_cache/
         print("\nSyncing source directories...")
         with COMPILE_LOCK:
             # Use rsync to copy files, preserving timestamps and deleting removed files
             cp: subprocess.CompletedProcess = subprocess.run(
-                ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
+                ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/", exclude_hidden],
                 check=True,
                 text=True,
                 capture_output=True,
