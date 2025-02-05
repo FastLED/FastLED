@@ -26,13 +26,15 @@ else()
     set(BUILD_MODE $ENV{BUILD_MODE})
 endif()
 
-if(BUILD_MODE STREQUAL "QUICK")
-    set(OPT_LEVEL "-O1")
-elseif(BUILD_MODE STREQUAL "DEBUG")
-    set(OPT_LEVEL "-Og")
-else() # RELEASE
-    set(OPT_LEVEL "-Oz")
-endif()
+# if(BUILD_MODE STREQUAL "QUICK")
+#     set(OPT_LEVEL "-O1")
+# elseif(BUILD_MODE STREQUAL "DEBUG")
+#     set(OPT_LEVEL "-Og")
+# else() # RELEASE
+#     set(OPT_LEVEL "-Oz")
+# endif()
+
+OPT_LEVEL("-Oz")
 
 # --- Common Compiler and Linker Flags ---
 set(COMMON_COMPILE_FLAGS
