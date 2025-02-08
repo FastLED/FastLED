@@ -127,7 +127,7 @@ def compile(
         cmd_list = [
             "/bin/bash",
             "-c",
-            "/js/build_archive.sh",
+            "/js/build_fast.sh",
         ]
     else:
         cmd_list.extend(["pio", "run"])
