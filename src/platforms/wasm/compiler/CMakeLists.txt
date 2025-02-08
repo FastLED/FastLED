@@ -4,10 +4,6 @@ project(FastLED_WASM)
 # Enable verbose makefile output for all compiled sources
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-
-# projenv.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
-# env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
-
 # --- Set Emscripten as the Compiler ---
 set(CMAKE_C_COMPILER "emcc")
 set(CMAKE_CXX_COMPILER "em++")
@@ -17,7 +13,6 @@ set(CMAKE_RANLIB "emranlib")
 # Use ccache as a compiler launcher (requires CMake 3.4 or newer)
 set(CMAKE_C_COMPILER_LAUNCHER "ccache")
 set(CMAKE_CXX_COMPILER_LAUNCHER "ccache")
-
 
 # --- Build Mode and Optimization Level ---
 if(NOT DEFINED ENV{BUILD_MODE})
@@ -55,17 +50,7 @@ set(COMMON_COMPILE_FLAGS
     ${OPT_LEVEL}
 )
 
-
-
-
-# If PROFILE flag is passed (e.g. via -DPROFILE), add Clang statistics flags.
-# if(DEFINED PROFILE)
-#     message(STATUS "PROFILE flag passed: enabling Clang compiler stats output")
-#     list(APPEND COMMON_COMPILE_FLAGS -Xclang -print-stats -mllvm -stats -DLLVM_FORCE_ENABLE_STATS=1)
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DLLVM_FORCE_ENABLE_STATS")
-# else()
-#     message(STATUS "PROFILE flag not passed: skipping Clang compiler stats output")
-# endif()
+# (Optional: PROFILE flags can be added here if needed)
 
 set(COMMON_LINK_FLAGS
     -sALLOW_MEMORY_GROWTH=0
@@ -82,7 +67,6 @@ set(COMMON_LINK_FLAGS
 
 set(LIBRARY_LINK_FLAGS
     ${COMMON_LINK_FLAGS}
-
 )
 
 set(SKETCH_LINK_FLAGS
@@ -110,28 +94,16 @@ if(BUILD_MODE STREQUAL "DEBUG")
 endif()
 
 # --- FASTLED LIBRARY SETUP ---
-# Set the FastLED source directory (assumes your FastLED sources are in fastled/src)
-#set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/fastled/src)
-#message(STATUS "fastled source directory: ${FASTLED_SOURCE_DIR}")
-
-
-# Add FastLED headers to the global include path.
-
-
-# Check for a prebuilt libfastled.a. If it exists, create an imported target;
-# otherwise, build FastLED from source.
 set(LIBFASTLED_PATH /precompiled/libfastled.a)
 
 if(EXISTS ${LIBFASTLED_PATH})
     message(STATUS "Found prebuilt libfastled.a at ${LIBFASTLED_PATH}, skipping build of FastLED library.")
     add_library(fastled STATIC IMPORTED)
     set_target_properties(fastled PROPERTIES IMPORTED_LOCATION ${LIBFASTLED_PATH})
-
 else()
-    message(FATAL_ERROR "Did not find prebuilt libfastled.a at ${LIBFASTLED_PATH}. Please build the library first.")
+    message(FATAL_ERROR "Did not find precompiled libfastled.a at ${LIBFASTLED_PATH}. Please build the library first.")
 endif()
 
-# Set target properties for fastled (if it exists)
 if(TARGET fastled)
     set_target_properties(fastled PROPERTIES
         CXX_STANDARD 17
@@ -140,16 +112,12 @@ if(TARGET fastled)
     )
 endif()
 
-# --- EXECUTABLE (SKETCH) SETUP ---
-# Gather all cpp source files
+# --- LIBRARY TARGET: sketch_lib ---
 file(GLOB_RECURSE ALL_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 message(STATUS "All sources: ${ALL_SOURCES}")
 
-# Create the sketch library and executable
 add_library(sketch_lib STATIC ${ALL_SOURCES})
-add_executable(sketch EXCLUDE_FROM_ALL ${ALL_SOURCES})
 
-# Set compile options for the sketch library
 target_compile_options(sketch_lib PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(sketch_lib PRIVATE SKETCH_COMPILE)
 target_include_directories(sketch_lib PRIVATE
@@ -161,13 +129,11 @@ set_target_properties(sketch_lib PROPERTIES
     CXX_STANDARD_REQUIRED ON
 )
 
-# Set properties for the final executable
-target_compile_options(sketch PRIVATE ${COMMON_COMPILE_FLAGS})
-target_link_options(sketch PRIVATE ${SKETCH_LINK_FLAGS})
-set_target_properties(sketch PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
+# ── FINAL LINKING STEP: Produce fastled.js ──
+# This custom target invokes em++ to link the static library (sketch_lib)
+# with the precompiled libfastled.a into the final binary fastled.js.
+add_custom_target(final_wasm ALL
+    COMMAND em++ ${SKETCH_LINK_FLAGS} -Wl,--whole-archive $<TARGET_FILE:sketch_lib> -Wl,--no-whole-archive /precompiled/libfastled.a
+    DEPENDS sketch_lib fastled
+    COMMENT "Linking final wasm binary to fastled.js"
 )
-
-# Link the executable with both libraries
-target_link_libraries(sketch PRIVATE sketch_lib fastled)
