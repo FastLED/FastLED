@@ -78,13 +78,6 @@ set(LIBRARY_LINK_FLAGS
 
 )
 
-set(SKETCH_LINK_FLAGS
-    ${COMMON_LINK_FLAGS}
-    -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']
-    -sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']
-    -sEXPORT_NAME=fastled
-    -o fastled.js
-)
 
 if(BUILD_MODE STREQUAL "DEBUG")
     list(APPEND COMMON_COMPILE_FLAGS
@@ -99,7 +92,6 @@ if(BUILD_MODE STREQUAL "DEBUG")
         -ASSERTIONS=1
     )
     list(APPEND LIBRARY_LINK_FLAGS ${DEBUG_LINK_FLAGS})
-    list(APPEND SKETCH_LINK_FLAGS ${DEBUG_LINK_FLAGS})
 endif()
 
 # src\platforms\wasm\compiler\lib\CMakeLists.txt
