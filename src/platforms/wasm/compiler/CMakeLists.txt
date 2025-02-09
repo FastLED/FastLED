@@ -46,6 +46,7 @@ set(COMMON_COMPILE_FLAGS
     -Wnon-c-typedef-for-linkage
     -Werror=bad-function-cast
     -Werror=cast-function-type
+    -g3
     -sUSE_PTHREADS=0          # Disable threading support
     ${OPT_LEVEL}
 )
@@ -57,12 +58,14 @@ set(COMMON_LINK_FLAGS
     -sDISABLE_EXCEPTION_CATCHING=1
     -sDISABLE_EXCEPTION_THROWING=0
     -sWASM_BIGINT
-    --bind
+    -lembind
     -DUSE_OFFSET_CONVERTER=0
     -sINITIAL_MEMORY=134217728
     -fuse-ld=lld
     --no-entry
     -sMODULARIZE=1
+
+    --emit-symbol-map
 )
 
 set(LIBRARY_LINK_FLAGS
