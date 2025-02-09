@@ -511,6 +511,8 @@ def main() -> int:
                 return 1
             print("Syntax check passed for all files.")
 
+        no_platformio: bool = args.no_platformio
+
         if do_compile:
             try:
                 # Determine build mode from args
@@ -526,17 +528,28 @@ def main() -> int:
                     js_dir=JS_DIR,
                     build_mode=build_mode,
                     auto_clean=not args.disable_auto_clean,
-                    no_platformio=args.no_platformio,
+                    no_platformio=no_platformio,
                 )
             except Exception as e:
                 print(f"Error: {str(e)}")
                 return 1
-            build_dirs = [d for d in PIO_BUILD_DIR.iterdir() if d.is_dir()]
-            if len(build_dirs) != 1:
-                raise RuntimeError(
-                    f"Expected exactly one build directory in {PIO_BUILD_DIR}, found {len(build_dirs)}: {build_dirs}"
-                )
-            build_dir: Path = build_dirs[0]
+
+            def _get_build_dir_platformio() -> Path:
+                build_dirs = [d for d in PIO_BUILD_DIR.iterdir() if d.is_dir()]
+                if len(build_dirs) != 1:
+                    raise RuntimeError(
+                        f"Expected exactly one build directory in {PIO_BUILD_DIR}, found {len(build_dirs)}: {build_dirs}"
+                    )
+                build_dir: Path = build_dirs[0]
+                return build_dir
+
+            def _get_build_dir_cmake() -> Path:
+                return JS_DIR / "build"
+
+            if no_platformio:
+                build_dir = _get_build_dir_cmake()
+            else:
+                build_dir = _get_build_dir_platformio()
 
             print("Copying output files...")
             fastled_js_dir: Path = src_dir / FASTLED_OUTPUT_DIR_NAME
