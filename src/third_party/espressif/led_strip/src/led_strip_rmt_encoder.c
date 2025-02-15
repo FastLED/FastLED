@@ -82,7 +82,6 @@ static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder)
 
 esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder)
 {
-    esp_err_t ret = ESP_OK;
     ESP_GOTO_ON_FALSE(config && ret_encoder, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(config->led_model < LED_MODEL_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led model");
     // Create a temporary config with the same base values
