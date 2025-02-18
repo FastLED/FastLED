@@ -1,0 +1,208 @@
+#ifndef __FASTPIN_ARM_GIGA_H
+#define __FASTPIN_ARM_GIGA_H
+
+#include "fl/force_inline.h"
+#include "fl/namespace.h"
+#include "armpin.h"
+
+FASTLED_NAMESPACE_BEGIN
+
+#if defined (ARDUINO_GIGA_M7)
+#define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile GPIO_TypeDef * r() { return T; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);
+
+#else
+#error "Platform not supported"
+#endif
+
+_FL_IO(A,0);
+_FL_IO(B,1);
+_FL_IO(C,2);
+_FL_IO(D,3);
+_FL_IO(E,4);
+_FL_IO(F,5);
+_FL_IO(G,6);
+_FL_IO(H,7);
+_FL_IO(I,8);
+_FL_IO(J,9);
+_FL_IO(K,10);
+
+// Actual pin definitions
+#if defined(ARDUINO_GIGA_M7)
+#define MAX_PIN 102
+
+// PA0-PA15
+_FL_DEFPIN(83, 0, A);
+_FL_DEFPIN(66, 1, A);
+_FL_DEFPIN(3, 2, A);
+_FL_DEFPIN(2, 3, A);
+_FL_DEFPIN(84, 4, A);
+_FL_DEFPIN(85, 5, A);
+_FL_DEFPIN(56, 6, A);
+_FL_DEFPIN(5, 7, A);
+//_FL_DEFPIN(UART7_RX, 8, A);
+_FL_DEFPIN(1, 9, A);
+//_FL_DEFPIN(BT_ON, 10, A);
+//_FL_DEFPIN(USB-OTG-FS_DM, 11, A);
+//_FL_DEFPIN(USB-OTG-FS_DP, 12, A);
+//_FL_DEFPIN(SWDIO, 13, A);
+//_FL_DEFPIN(SWCLK, 14, A);
+//_FL_DEFPIN(U9 Power Switch, 15, A);
+
+// PB0-PB13
+_FL_DEFPIN(78, 0, B);
+_FL_DEFPIN(79, 1, B);
+_FL_DEFPIN(47, 2, B);
+_FL_DEFPIN(91, 3, B);
+_FL_DEFPIN(7, 4, B);
+_FL_DEFPIN(93, 5, B);
+_FL_DEFPIN(101, 6, B);
+_FL_DEFPIN(0, 7, B);
+_FL_DEFPIN(8, 8, B);
+_FL_DEFPIN(9, 9, B);
+//_FL_DEFPIN(WL_ON, 10, B);
+_FL_DEFPIN(20, 11, B);
+_FL_DEFPIN(74, 12, B);
+_FL_DEFPIN(94, 13, B);
+
+// PC0-PC15
+_FL_DEFPIN(82, 0, C);
+_FL_DEFPIN(73, 1, C);
+_FL_DEFPIN(81, 2, C);
+_FL_DEFPIN(80, 3, C);
+_FL_DEFPIN(76, 4, C);
+_FL_DEFPIN(77, 5, C);
+_FL_DEFPIN(68, 6, C);
+_FL_DEFPIN(15, 7, C);
+//_FL_DEFPIN(D0, 8, C);
+//_FL_DEFPIN(D1, 9, C);
+//_FL_DEFPIN(D2, 10, C);
+//_FL_DEFPIN(D3, 11, C);
+//_FL_DEFPIN(CLK, 12, C);
+//_FL_DEFPIN(BOOT0_BUTTON, 13, C);
+
+// PD0-PD13
+//_FL_DEFPIN(FMC_D3, 0, D);
+//_FL_DEFPIN(FMC_D2, 1, D);
+//_FL_DEFPIN(SDMMC1_CMD, 2, D);
+_FL_DEFPIN(75, 3, D);
+_FL_DEFPIN(67, 4, D);
+_FL_DEFPIN(18, 5, D);
+_FL_DEFPIN(19, 6, D);
+_FL_DEFPIN(90, 7, D);
+//_FL_DEFPIN(FMC_DQ13, 8, D);
+//_FL_DEFPIN(FMC_DQ14, 9, D);
+//_FL_DEFPIN(FMC_DQ15, 10, D);
+//_FL_DEFPIN(SI/IO0, 11, D);
+//_FL_DEFPIN(SO/IO1, 12, D);
+_FL_DEFPIN(6, 13, D);
+//_FL_DEFPIN(FMC_D0, 14, D);
+//_FL_DEFPIN(FMC_D1, 14, D);
+
+// PE0-PE15
+//_FL_DEFPIN(FMC_DQML, 0, E);
+//_FL_DEFPIN(FMC_DQMH, 1, E);
+//_FL_DEFPIN(QUADSPI_BK2-IO1, 2, E);
+_FL_DEFPIN(88, 3, E);
+_FL_DEFPIN(49, 4, E);
+_FL_DEFPIN(51, 5, E);
+_FL_DEFPIN(40, 6, E);
+//_FL_DEFPIN(FMC_DQ4, 7, E);
+//_FL_DEFPIN(FMC_DQ5, 8, E);
+//_FL_DEFPIN(FMC_DQ6, 9, E);
+//_FL_DEFPIN(FMC_DQ7, 10, E);
+//_FL_DEFPIN(FMC_DQ8, 11, E);
+//_FL_DEFPIN(FMC_DQ9, 12, E);
+//_FL_DEFPIN(FMC_DQ10, 13, E);
+//_FL_DEFPIN(FMC_DQ11, 14, E);
+//_FL_DEFPIN(FMC_DQ2, 15, E);
+
+// PG0-PG15
+//_FL_DEFPIN(FMC_A10, 0, G);
+//_FL_DEFPIN(FMC_A11, 1, G);
+//_FL_DEFPIN(FMC_A12, 2, G);
+//_FL_DEFPIN(BT_WAKE_H, 3, G);
+//_FL_DEFPIN(FMC_BA0, 4, G);
+//_FL_DEFPIN(FMC_BA1, 5, G);
+//_FL_DEFPIN(CS, 6, G);
+_FL_DEFPIN(53, 7, G);
+_FL_DEFPIN(89, 9, G);
+_FL_DEFPIN(44, 10, G);
+_FL_DEFPIN(62, 11, G);
+_FL_DEFPIN(24, 12, G);
+_FL_DEFPIN(14, 14, G);
+//_FL_DEFPIN(FMC_SDNCAS, 15, G);
+
+// PH3-PH15
+//_FL_DEFPIN(FMC_SDCKE0, 2, H);
+//_FL_DEFPIN(FMC_SDNCS, 3, H);
+_FL_DEFPIN(21, 4, H);
+//_FL_DEFPIN(FMC_SDNWE, 5, H);
+_FL_DEFPIN(13, 6, H);
+//_FL_DEFPIN(BT_WAKE_D, 7, H);
+_FL_DEFPIN(55, 8, H);
+_FL_DEFPIN(65, 9, H);
+_FL_DEFPIN(64, 10, H);
+_FL_DEFPIN(63, 11, H);
+_FL_DEFPIN(102, 12, H);
+_FL_DEFPIN(16, 13, H);
+_FL_DEFPIN(61, 14, H);
+_FL_DEFPIN(46, 15, H);
+
+// PI0-PI15
+_FL_DEFPIN(69, 0, I);
+_FL_DEFPIN(70, 1, I);
+_FL_DEFPIN(71, 2, I);
+_FL_DEFPIN(72, 3, I);
+_FL_DEFPIN(60, 4, I);
+_FL_DEFPIN(54, 5, I);
+_FL_DEFPIN(59, 6, I);
+_FL_DEFPIN(58, 7, I);
+_FL_DEFPIN(17, 9, I);
+_FL_DEFPIN(43, 10, I);
+_FL_DEFPIN(50, 11, I);
+_FL_DEFPIN(86, 12, I);
+_FL_DEFPIN(45, 13, I);
+_FL_DEFPIN(39, 14, I);
+_FL_DEFPIN(42, 15, I);
+
+// PJ0-PJ15
+_FL_DEFPIN(25, 0, J);
+_FL_DEFPIN(27, 1, J);
+_FL_DEFPIN(29, 2, J);
+_FL_DEFPIN(31, 3, J);
+_FL_DEFPIN(33, 4, J);
+_FL_DEFPIN(35, 5, J);
+_FL_DEFPIN(37, 6, J);
+_FL_DEFPIN(38, 7, J);
+_FL_DEFPIN(4, 8, J);
+_FL_DEFPIN(57, 9, J);
+_FL_DEFPIN(11, 10, J);
+_FL_DEFPIN(12, 11, J);
+_FL_DEFPIN(22, 12, J);
+_FL_DEFPIN(87, 13, J);
+_FL_DEFPIN(26, 14, J);
+_FL_DEFPIN(28, 15, J);
+
+// PK0-PK7
+_FL_DEFPIN(48, 0, K);
+_FL_DEFPIN(10, 1, K);
+_FL_DEFPIN(52, 2, K);
+_FL_DEFPIN(30, 3, K);
+_FL_DEFPIN(32, 4, K);
+_FL_DEFPIN(34, 5, K);
+_FL_DEFPIN(36, 6, K);
+_FL_DEFPIN(41, 7, K);
+
+// SPI2 MOSI
+#define SPI_DATA 90
+// SPI2 SCK
+#define SPI_CLOCK 91
+
+#define HAS_HARDWARE_PIN_SUPPORT
+
+#endif // ARDUINO_GIGA_M7
+
+FASTLED_NAMESPACE_END
+
+#endif // __INC_FASTPIN_ARM_STM32
