@@ -5,6 +5,8 @@
 
 #if FASTLED_RMT5
 
+#include "fl/unused.h"
+
 
 /*
  * SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
@@ -83,6 +85,7 @@ static esp_err_t rmt_led_strip_encoder_reset(rmt_encoder_t *encoder)
 esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder)
 {
     esp_err_t ret = ESP_OK;
+    FASTLED_UNUSED(ret);
     ESP_GOTO_ON_FALSE(config && ret_encoder, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(config->led_model < LED_MODEL_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led model");
     // Create a temporary config with the same base values
@@ -131,6 +134,7 @@ err:
 
 esp_err_t rmt_new_led_strip_encoder_with_timings(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder) {
     esp_err_t ret = ESP_OK;
+    FASTLED_UNUSED(ret);
     rmt_led_strip_encoder_t *led_encoder = NULL;
     ESP_GOTO_ON_FALSE(config && ret_encoder, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     

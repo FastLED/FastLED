@@ -6,6 +6,8 @@
 
 #if FASTLED_RMT5
 
+#include "fl/unused.h"
+
 
 /*
  * SPDX-FileCopyrightText: 2022-2024 Espressif Systems (Shanghai) CO LTD
@@ -142,6 +144,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
 {
     led_strip_rmt_obj *rmt_strip = NULL;
     esp_err_t ret = ESP_OK;
+    FASTLED_UNUSED(ret);
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     led_color_component_format_t component_fmt = led_config->color_component_format;
     // If R/G/B order is not specified, set default GRB order as fallback

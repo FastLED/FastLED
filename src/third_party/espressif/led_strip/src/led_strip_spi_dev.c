@@ -8,6 +8,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/cdefs.h>
@@ -17,6 +18,7 @@
 #include "soc/spi_periph.h"
 #include "led_strip.h"
 #include "led_strip_interface.h"
+#include "fl/unused.h"
 
 #define LED_STRIP_SPI_DEFAULT_RESOLUTION (2.5 * 1000 * 1000) // 2.5MHz resolution
 #define LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE 4
@@ -151,6 +153,7 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
 {
     led_strip_spi_obj *spi_strip = NULL;
     esp_err_t ret = ESP_OK;
+    FASTLED_UNUSED(ret);
     ESP_GOTO_ON_FALSE(led_config && spi_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     led_color_component_format_t component_fmt = led_config->color_component_format;
     // If R/G/B order is not specified, set default GRB order as fallback
