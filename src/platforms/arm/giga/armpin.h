@@ -19,23 +19,11 @@ public:
     typedef volatile uint32_t * port_ptr_t;
     typedef uint32_t port_t;
 
-    #if 0
-    inline static void setOutput() {
-        if(_BIT<8) {
-            _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4)));
-        } else {
-            _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
-        }
-    }
-    inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-    #endif
-
     inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
     inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-
+    
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
-    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }
-    // inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
+    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
 
     inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
@@ -51,8 +39,8 @@ public:
     inline static port_t loval() __attribute__ ((always_inline)) { return _GPIO::r()->ODR & ~_MASK; }
     inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_GPIO::r()->ODR; }
 
-    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
-    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BRR; }
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR = (_MASK<<16); }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR = _MASK; }
 
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
