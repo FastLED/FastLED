@@ -23,14 +23,15 @@
 volatile uint32_t fuckit;
 #endif
 
-#ifndef FASTLED_DEFINE_WEAK_YEILD_FUNCTION
-#if defined(__AVR_ATtiny13__)
-// Arduino.h also defines this as a weak function on this platform.
-#define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 0
-#else
-#define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 1
-#endif
-#endif
+// Disable to fix build breakage.
+// #ifndef FASTLED_DEFINE_WEAK_YEILD_FUNCTION
+// #if defined(__AVR_ATtiny13__)
+// // Arduino.h also defines this as a weak function on this platform.
+// #define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 0
+// #else
+// #define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 1
+// #endif
+// #endif
 
 /// Has to be declared outside of any namespaces.
 /// Called at program exit when run in a desktop environment. 
@@ -38,8 +39,8 @@ volatile uint32_t fuckit;
 /// @returns 0 to indicate success
 extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
 
-#if FASTLED_DEFINE_WEAK_YEILD_FUNCTION 
-extern "C"  __attribute__((weak)) void yield(void) { }
+#ifdef FASTLED_NEEDS_YIELD
+extern "C" void yield(void) { }
 #endif
 
 FASTLED_NAMESPACE_BEGIN
