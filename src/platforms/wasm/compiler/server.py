@@ -365,7 +365,7 @@ def compile_source(
     zip_time = time.time() - start_zip
     print(f"Zip file created in {zip_time:.2f}s")
 
-    def cleanup_files():
+    def cleanup_files(output_zip_path=output_zip_path, temp_zip_dir=temp_zip_dir):
         if output_zip_path.exists():
             output_zip_path.unlink()
         if temp_zip_dir:
