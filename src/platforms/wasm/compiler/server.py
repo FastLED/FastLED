@@ -263,7 +263,7 @@ def compile_source(
     with COMPILE_LOCK:
         COMPILE_LOCK_end = time.time()
 
-        is_debug = build_mode.lower() == "debug"
+        # is_debug = build_mode.lower() == "debug"
 
         _print("\nRunning compiler...")
         cmd = [
@@ -272,13 +272,11 @@ def compile_source(
             "compile",
             f"--mapped-dir={temp_src_dir}",
         ]
-        if is_debug:
-            cmd += ["--no-platformio"]  # fast path that doesn't need a lock.
+        # if is_debug:
+        #    cmd += ["--no-platformio"]  # fast path that doesn't need a lock.
         cmd.append(f"--{build_mode.lower()}")
         if profile:
             cmd.append("--profile")
-        # cp = subprocess.run(cmd, cwd="/js", capture_output=True, text=True)
-        # cp = subprocess.run(cmd, cwd="/js", stdout=subprocess.STDOUT, stderr=subprocess.STDOUT, text=True)
         proc = subprocess.Popen(
             cmd,
             cwd="/js",
