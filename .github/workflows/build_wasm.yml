@@ -41,7 +41,7 @@ jobs:
 
       - name: Install UV for python and npm packages
         run: |
-          pip install uv
+          pip install uv fastled
           npm install -g live-server
 
       - name: Verify live-server installation
@@ -51,7 +51,8 @@ jobs:
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
-          uv run ci/wasm_compile.py -b examples/wasm
+          fastled -b examples/wasm
+          fastled --just-compile examples/wasm
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
         shell: bash
 
