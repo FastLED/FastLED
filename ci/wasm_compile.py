@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+import sys
 
 
 def parse_args() -> tuple[argparse.Namespace, list]:
@@ -15,12 +16,24 @@ def parse_args() -> tuple[argparse.Namespace, list]:
     return known_args, unknown_args
 
 
-def main() -> None:
+def main() -> int:
     args, unknown_args = parse_args()
-    cmd_list = ["fastled", args.sketch_dir, "--build", "--just-compile"]
+    cmd_list = ["fastled", args.sketch_dir, "--build"]
     cmd_list.extend(unknown_args)
-    subprocess.check_call(cmd_list)
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    print(f"Running command: {cmd_str}")
+    rtn = subprocess.call(cmd_list)
+    if rtn != 0:
+        print(f"ERROR: Command {cmd_str} failed with return code {rtn}")
+    cmd_list = ["fastled", args.sketch_dir, "--just-compile"]
+    cmd_list.extend(unknown_args)
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    print(f"Running command: {cmd_str}")
+    rtn = subprocess.call(cmd_list)
+    if rtn != 0:
+        print(f"ERROR: Command {cmd_str} failed with return code {rtn}")
+    return rtn
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
