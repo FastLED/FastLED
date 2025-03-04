@@ -1,9 +1,10 @@
 import argparse
 import subprocess
 import sys
+from typing import List, Tuple
 
 
-def parse_args() -> tuple[argparse.Namespace, list]:
+def parse_args() -> Tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser(description="Compile wasm")
     parser.add_argument(
         "sketch_dir",
@@ -16,23 +17,29 @@ def parse_args() -> tuple[argparse.Namespace, list]:
     return known_args, unknown_args
 
 
-def main() -> int:
-    args, unknown_args = parse_args()
-    cmd_list = ["fastled", args.sketch_dir, "--build"]
-    cmd_list.extend(unknown_args)
-    cmd_str = subprocess.list2cmdline(cmd_list)
-    print(f"Running command: {cmd_str}")
-    rtn = subprocess.call(cmd_list)
-    if rtn != 0:
-        print(f"ERROR: Command {cmd_str} failed with return code {rtn}")
-    cmd_list = ["fastled", args.sketch_dir, "--just-compile"]
-    cmd_list.extend(unknown_args)
+def run_command(cmd_list: List[str]) -> int:
+    """Run a command and return its exit code."""
     cmd_str = subprocess.list2cmdline(cmd_list)
     print(f"Running command: {cmd_str}")
     rtn = subprocess.call(cmd_list)
     if rtn != 0:
         print(f"ERROR: Command {cmd_str} failed with return code {rtn}")
     return rtn
+
+
+def main() -> int:
+    args, unknown_args = parse_args()
+
+    # First run the build command
+    build_cmd = ["fastled", args.sketch_dir, "--build"] + unknown_args
+    build_result = run_command(build_cmd)
+
+    # Then run the compile command
+    compile_cmd = ["fastled", args.sketch_dir, "--just-compile"] + unknown_args
+    compile_result = run_command(compile_cmd)
+
+    # Return non-zero if either command failed
+    return build_result if build_result != 0 else compile_result
 
 
 if __name__ == "__main__":
