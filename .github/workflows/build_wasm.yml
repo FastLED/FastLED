@@ -51,7 +51,6 @@ jobs:
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
-          fastled -b examples/wasm
           fastled --just-compile examples/wasm
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
         shell: bash
