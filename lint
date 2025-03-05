@@ -50,24 +50,16 @@ EOL
 # Linting the Python code.
 echo "Running ruff check"
 uvx ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-uvx ruff check --fix src/platforms/wasm/compiler/compile.py
-uvx ruff check --fix src/platforms/wasm/compiler/server.py
 UV run ruff check --fix dev/dev.py
 echo Running black
 uvx black ci --exclude ci/tmp/ --exclude ci/wasm/
-uvx black src/platforms/wasm/compiler/compile.py
-uvx black src/platforms/wasm/compiler/server.py
 uvx black dev/dev.py
 uvx echo Running isort
 uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
-uvx isort --profile black src/platforms/wasm/compiler/compile.py
-uvx isort --profile black src/platforms/wasm/compiler/server.py
 uvx isort --profile black dev/dev.py
 echo "Running mypy"
 uvx echo yes | mypy --install-type 
 uvx mypy ci --exclude ci/tmp/ --exclude ci/wasm/
-uvx mypy src/platforms/wasm/compiler/compile.py
-uvx mypy src/platforms/wasm/compiler/server.py
 uvx mypy dev/dev.py
 
 
