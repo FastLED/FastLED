@@ -36,6 +36,7 @@ extern "C" {
         return uint32_t(out & 0xFFFFFFFF);
     }
 
+
     // Replacement for 'delay' in WebAssembly context
     EMSCRIPTEN_KEEPALIVE void delay(int ms) {
         // Keep in mind this is NOT ASYNC as of 2024-12, and will block the main thread.
@@ -46,6 +47,12 @@ extern "C" {
         // as possible for the quick build path and must be as small as possible to reduce web compiler
         // upload times back to the client.
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    }
+
+    // Replacement for 'yield' in WebAssembly context
+    EMSCRIPTEN_KEEPALIVE void yield() {
+        // Use emscripten_yield to allow the browser to perform other tasks
+        delay(0);
     }
 }
 
