@@ -119,7 +119,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 
 [![attiny4313](https://github.com/FastLED/FastLED/actions/workflows/build_attiny4313.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny4313.yml)
-*Now compiles in the upcoming FastLED 3.9.14! - Very memory limited, so only tested against examples WS2812 Blink and APA102*
+*New FastLED 3.9.14! - Very memory limited, so only tested against examples WS2812 Blink and APA102*
 
 
 [![yun](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml)
@@ -173,7 +173,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![apollo3_red](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_red.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_red.yml) *Board needs pin definitions.*
 
-[![apollo3_thing_explorable](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_thing_explorable.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_thing_explorable.yml) *Now Supported in the upcoming FastLED 3.9.12!*
+[![apollo3_thing_explorable](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_thing_explorable.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_apollo3_thing_explorable.yml)
 
 ### STM
 
