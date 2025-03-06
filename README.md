@@ -359,6 +359,7 @@ If you are looking for documentation on how something in the library works, plea
 
 If you run into bugs with the library, or if you'd like to request support for a particular platform or LED chipset, please submit an issue at http://fastled.io/issues.
 
+
 ## Supported LED Chipsets
 
 Here's a list of all the LED chipsets are supported.  More details on the LED chipsets are included [on our wiki page](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
