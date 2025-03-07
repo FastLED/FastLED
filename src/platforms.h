@@ -46,7 +46,7 @@
 #include "platforms/apollo3/fastled_apollo3.h"
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
 #include "platforms/arm/renesas/fastled_arm_renesas.h"
-#elif defined(ARDUINO_GIGA_M7)
+#elif defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
 #include "platforms/arm/giga/fastled_arm_giga.h"
 #elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)
 

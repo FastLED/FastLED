@@ -7,7 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if defined (ARDUINO_GIGA_M7)
+#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile GPIO_TypeDef * r() { return T; } };
 #define _FL_IO(L,C) _RD32(GPIO ## L);
 
@@ -28,7 +28,7 @@ _FL_IO(J,9);
 _FL_IO(K,10);
 
 // Actual pin definitions
-#if defined(ARDUINO_GIGA_M7)
+#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
 #define MAX_PIN 102
 
 // PA0-PA15
@@ -201,7 +201,7 @@ _FL_DEFPIN(41, 7, K);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif // ARDUINO_GIGA_M7
+#endif // ARDUINO_GIGA || ARDUINO_GIGA_M7
 
 FASTLED_NAMESPACE_END
 
