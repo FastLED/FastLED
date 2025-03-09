@@ -14,7 +14,6 @@
 
 #define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFFF))
 
-#define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
 #define USED_LANES ((FIRST_PIN==2) ? MIN(LANES,8) : MIN(LANES,12))
 
 #include <kinetis.h>
