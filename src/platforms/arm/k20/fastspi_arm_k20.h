@@ -37,8 +37,6 @@ public:
 	static int highestBit() __attribute__((always_inline)) { return 0; }
 };
 
-#define MAX(A, B) (( (A) > (B) ) ? (A) : (B))
-
 #define USE_CONT 0
 // intra-frame backup data
 struct SPIState {
