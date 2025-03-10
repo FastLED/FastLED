@@ -1,4 +1,4 @@
-name: esp32dev
+name: esp32dev_namespace
 
 on:
   push:
