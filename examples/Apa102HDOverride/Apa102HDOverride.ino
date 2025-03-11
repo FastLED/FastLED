@@ -15,11 +15,11 @@
 #define STRIP_1_DATA_PIN 3
 #define STRIP_1_CLOCK_PIN 4
 
-void five_bit_hd_gamma_bitshift(CRGB colors,
-                                CRGB scale,
-                                uint8_t global_brightness,
-                                CRGB* out_colors,
-                                uint8_t *out_power_5bit) {
+void fl::five_bit_hd_gamma_bitshift(CRGB colors,
+                                    CRGB scale,
+                                    uint8_t global_brightness,
+                                    CRGB* out_colors,
+                                    uint8_t *out_power_5bit) {
     // all 0 values for output
     *out_colors = CRGB(0, 0, 0);
     *out_power_5bit = 0;
