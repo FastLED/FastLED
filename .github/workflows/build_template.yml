@@ -23,10 +23,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
 
       # disabled for now.
@@ -38,8 +34,20 @@ jobs:
       #    restore-keys: |
       #      ${{ runner.os }}-build-
 
-      - name: Install UV
-        run: pip install uv
+      - name: Pin python version
+        run: |
+          echo "3.11" >> .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
 
       - name: Install Platform
         if: inputs.platform != ''
