@@ -13,7 +13,7 @@
 
 #include "FastLED.h"
 #include "rgbw.h"
-#include "five_bit_hd_gamma.h"
+#include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 #include "eorder.h"
@@ -493,7 +493,7 @@ struct PixelController {
             brightness = 255;
             CRGB scale = mColorAdjustment.premixed;
             #endif
-            five_bit_hd_gamma_bitshift(
+            fl::five_bit_hd_gamma_bitshift(
                 rgb,
                 scale,
                 brightness,

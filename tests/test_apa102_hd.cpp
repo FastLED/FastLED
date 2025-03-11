@@ -5,7 +5,7 @@
 
 #include "test.h"
 #include "FastLED.h"
-#include "five_bit_hd_gamma.h"
+#include "fl/five_bit_hd_gamma.h"
 #include "assert.h"
 #include "math.h"
 #include <ctime>

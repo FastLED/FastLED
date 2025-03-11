@@ -14,8 +14,7 @@
 
 
 // Author: Zach Vorhies
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 namespace {
 template <typename T> T mymax(T a, T b) { return (a > b) ? a : b; }
@@ -159,4 +158,4 @@ void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                       out_power_5bit);
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl

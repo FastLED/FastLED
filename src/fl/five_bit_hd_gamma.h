@@ -9,7 +9,7 @@
 #include "fl/force_inline.h"
 #include "crgb.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 enum FiveBitGammaCorrectionMode {
     kFiveBitGammaCorrectionMode_Null = 0,
@@ -90,5 +90,5 @@ void five_bit_hd_gamma_function(CRGB color,
                                 uint16_t *r16, uint16_t *g16, uint16_t *b16);
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
