@@ -1,3 +1,7 @@
+FastLED 3.9.15
+==============
+* ESP32 series now supports FORCE_FASTLED_NAMESPACE=1
+
 FastLED 3.9.14
 ==============
 * Attiny4343 now works
