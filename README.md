@@ -458,6 +458,7 @@ Zach has this to say about FastLED:
 
 *"The true power of FastLED lies in its ability to transform programmers into LED artists. Free space becomes their canvas; bending light is their medium. FastLED is a collective effort by programmers who want to manifest the world that science fiction writers promised us. -- To contribute code to FastLED is to leave behind a piece of something immortal."*
 
+
 ## Contributing
 
 See our easy to use guide here:
