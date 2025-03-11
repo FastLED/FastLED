@@ -6,6 +6,9 @@
 
 #include "pixel_iterator.h"
 #include <stdint.h>
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 class IRmtStrip;
 
@@ -39,6 +42,8 @@ private:
     IRmtStrip *mLedStrip = nullptr;
     DmaMode mDmaMode;
 };
+
+FASTLED_NAMESPACE_END
 
 
 

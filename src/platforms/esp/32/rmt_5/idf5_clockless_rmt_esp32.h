@@ -9,7 +9,9 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "idf5_rmt.h"
+#include "fl/namespace.h"
 
+FASTLED_NAMESPACE_BEGIN
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -54,3 +56,5 @@ protected:
         mRMTController.showPixels();
     }
 };
+
+FASTLED_NAMESPACE_END

@@ -21,6 +21,9 @@
 
 #include "rgbw.h"
 #include "fl/warn.h"
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 
 static const char *TAG = "strip_spi";
@@ -261,6 +264,8 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
     uint32_t size_as_rgb = Rgbw::size_as_rgb(led_count);
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
+
+FASTLED_NAMESPACE_END
 
 #endif  // FASTLED_ESP32_HAS_CLOCKLESS_SPI
 

@@ -17,9 +17,13 @@
 
 #include "fl/assert.h"
 #include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)
+#include "fl/namespace.h"
 #include "strip_rmt.h"
 
+
 #define TAG "idf5_rmt.cpp"
+
+FASTLED_NAMESPACE_BEGIN
 
 
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode)
@@ -67,6 +71,8 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
 void RmtController5::showPixels() {
     mLedStrip->drawAsync();
 }
+
+FASTLED_NAMESPACE_END
 
 #endif  // FASTLED_RMT5
 

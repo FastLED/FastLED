@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 class ISpiStripWs2812 {
   public:
@@ -62,3 +65,5 @@ protected:
     virtual void setPixel(uint32_t index, uint8_t red, uint8_t green,
                           uint8_t blue) = 0;
 };
+
+FASTLED_NAMESPACE_END

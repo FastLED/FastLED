@@ -854,3 +854,7 @@ using fl::UISlider;
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 #endif // FASTLED_UI
 
+#if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
+using namespace fl;
+#endif
+

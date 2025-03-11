@@ -2,6 +2,9 @@
 #pragma once
 
 #include <stdint.h>
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 class IRmtStrip
 {
@@ -32,3 +35,5 @@ public:
     virtual void fillRGBW(uint8_t red, uint8_t green, uint8_t blue, uint8_t white) = 0;
     virtual uint32_t numPixels() = 0;
 };
+
+FASTLED_NAMESPACE_END

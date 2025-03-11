@@ -13,6 +13,9 @@
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 namespace {  // anonymous namespace
 
@@ -169,6 +172,7 @@ IRmtStrip *IRmtStrip::Create(
     );
 }
 
+FASTLED_NAMESPACE_END
 
 #endif  // FASTLED_RMT5
 
