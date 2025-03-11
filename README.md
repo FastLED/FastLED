@@ -225,6 +225,8 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![esp32 extra libs](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp_extra_libs.yml)
 
+[![esp32dev_namespace](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_namespace.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_namespace.yml)
+
 *Legacy Toolchains*
 
 [![esp32dev-idf3.3-lts](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev_idf3.3.yml)
