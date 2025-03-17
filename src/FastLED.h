@@ -846,10 +846,12 @@ FASTLED_NAMESPACE_END
 #ifdef FASTLED_UI
 // As a convenience, include the UI headers and bring them into the global namespace
 #include "fl/ui.h"
+#include "fl/xymap.h"
 using fl::UIButton;
 using fl::UICheckbox;
 using fl::UINumberField;
 using fl::UISlider;
+using fl::XYMap;
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 #endif // FASTLED_UI
@@ -857,4 +859,5 @@ using fl::UISlider;
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
 using namespace fl;
 #endif
+
 
