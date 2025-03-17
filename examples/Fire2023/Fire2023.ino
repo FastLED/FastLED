@@ -1,4 +1,4 @@
-/* This is a fire effect based on the famous Fire2012; but with various small improvements.
+/*This is a fire effect based on the famous Fire2012; but with various small improvements.
 Perlin noise is being used to make a fire layer and a smoke layer;
 and the overlay of both can make a quite realistic effect.
 
@@ -10,7 +10,10 @@ This code was adapted for a matrix with just four LED columns in 90° around a c
 
 Right at the bottom of the code, you find a translation matrix that needs to be adapted to your set up. I included
 a link to a helpful page for this.
- */
+
+@repo https://github.com/Anderas2/Fire2023
+@author https://github.com/Anderas2
+*/
 
 
 #include "FastLED.h"
@@ -114,11 +117,11 @@ ScreenMap makeScreenMap() {
     fl::HeapVector<pair_xy_float> lut;
     for (uint16_t y = 0; y < WIDTH; y++) {
         for (uint16_t x = 0; x < HEIGHT; x++) {
-            pair_xy_float xy = {float(x) * 10, float(y) * 10};
+            pair_xy_float xy = {float(x) * 3, float(y) * 20};
             lut.push_back(xy);
         }
     }
-    return ScreenMap(lut.data(), lut.size(), 5);
+    return ScreenMap(lut.data(), lut.size(), 1);
 }
 
 void Fire2023(uint32_t now) {
