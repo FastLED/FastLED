@@ -422,8 +422,11 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
             //nscale8x3_video( r, g, b, sat);
 #if (FASTLED_SCALE8_FIXED==1)
             r = scale8_LEAVING_R1_DIRTY( r, satscale);
+            asm volatile("");  // Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943
             g = scale8_LEAVING_R1_DIRTY( g, satscale);
+            asm volatile("");
             b = scale8_LEAVING_R1_DIRTY( b, satscale);
+            asm volatile("");
             cleanup_R1();
 #else
             if( r ) r = scale8( r, satscale) + 1;
@@ -447,8 +450,11 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
             // nscale8x3_video( r, g, b, val);
 #if (FASTLED_SCALE8_FIXED==1)
             r = scale8_LEAVING_R1_DIRTY( r, val);
+            asm volatile("");  // Fixes jumping red pixel: https://github.com/FastLED/FastLED/pull/943
             g = scale8_LEAVING_R1_DIRTY( g, val);
+            asm volatile("");
             b = scale8_LEAVING_R1_DIRTY( b, val);
+            asm volatile("");
             cleanup_R1();
 #else
             if( r ) r = scale8( r, val) + 1;
