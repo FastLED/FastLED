@@ -33,10 +33,10 @@ NoisePalette::NoisePalette(XYMap xyMap, float fps)
     setPalettePreset(0);
 
     // Allocate memory for the noise array using scoped_ptr
-    noise = scoped_ptr<uint8_t>(new uint8_t[width * height]);
+    noise = scoped_array<uint8_t>(new uint8_t[width * height]);
 }
 
-void NoisePalette::setPalettePreset(int paletteIndex) {
+void NoisePalette::setPalettePreset(int paletteIndex) { 
     currentPaletteIndex = paletteIndex % 12; // Ensure the index wraps around
     switch (currentPaletteIndex) {
     case 0:

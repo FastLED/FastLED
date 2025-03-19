@@ -60,7 +60,7 @@ class NoisePalette : public Fx2d {
     uint16_t width, height;
     uint16_t speed = 0;
     uint16_t scale = 0;
-    fl::scoped_ptr<uint8_t> noise;
+    fl::scoped_array<uint8_t> noise;
     CRGBPalette16 currentPalette;
     bool colorLoop = 0;
     int currentPaletteIndex = 0;
