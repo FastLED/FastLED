@@ -83,6 +83,7 @@ For more examples see this [link](examples). Web compiled [examples](https://zac
 
 ![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
 
+*Note some users find that newer versions of the ESP32 arduino core (3.10) don't work very well, but older versions do, see [issue 1903](https://github.com/FastLED/FastLED/issues/1903)
 
 ## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
 ![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
@@ -294,6 +295,8 @@ I2S needs special setup as of 3.9.11 and earlier (current version of this writin
 ### ESP32-S3
 
 The S3 is a CPU beast, but has half the RMT tx channels (4) and 2/3rds the I2S channels (16) of ESPDev. The S3 requires a special driver for I2S which you can find in this [example](https://github.com/FastLED/FastLED/blob/master/examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino)
+
+*Note some users find that newer versions of the ESP32 arduino core (3.10) don't work very well, but older versions do, see [issue 1903](https://github.com/FastLED/FastLED/issues/1903)
 
 ### RaspberriPi
 
