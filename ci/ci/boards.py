@@ -83,6 +83,11 @@ WEBTARGET = Board(
     board_name="web",
 )
 
+DUE = Board(
+    board_name="due",
+    platform="atmelsam",
+)
+
 APOLLO3_RED_BOARD = Board(
     board_name="apollo3_red",
     real_board_name="SparkFun_RedBoard_Artemis_ATP",
@@ -271,6 +276,7 @@ ESP32S3_RMT51 = Board(
 
 
 ALL: list[Board] = [
+    DUE,
     WEBTARGET,
     APOLLO3_RED_BOARD,
     APOLLO3_SPARKFUN_THING_PLUS_EXPLORERABLE,
