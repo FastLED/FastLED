@@ -7,7 +7,6 @@ import platform
 import re
 import shutil
 import subprocess
-import tempfile
 import warnings
 from pathlib import Path
 from typing import Optional, Tuple
@@ -22,6 +21,13 @@ DOXYFILE_PATH = Path("docs/Doxyfile")
 HTML_OUTPUT_DIR = Path("docs/html")
 DOXYGEN_CSS_REPO = "https://github.com/jothepro/doxygen-awesome-css"
 GRAPHVIZ_VERSION = "9.0.0"  # Default version if not found in releases
+
+HERE = Path(__file__).parent.resolve()
+PROJECT_ROOT = HERE.parent
+
+DOCS_ROOT = PROJECT_ROOT / "docs"
+DOCS_TOOL_PATH = PROJECT_ROOT / ".tools"
+DOCS_OUTPUT_PATH = DOCS_ROOT / "html"
 
 
 def run(
@@ -71,8 +77,11 @@ def install_doxygen_windows() -> Path:
     doxygen_url = (
         f"https://www.doxygen.nl/files/doxygen-{DOXYGEN_VERSION}.windows.x64.bin.zip"
     )
-    zip_path = Path(tempfile.gettempdir()) / "doxygen.zip"
-    extract_dir = Path(tempfile.gettempdir()) / f"doxygen-{DOXYGEN_VERSION}"
+    zip_path = DOCS_TOOL_PATH / "doxygen.zip"
+    extract_dir = DOCS_TOOL_PATH / f"doxygen-{DOXYGEN_VERSION}"
+
+    # Create tool path if it doesn't exist
+    DOCS_TOOL_PATH.mkdir(exist_ok=True, parents=True)
 
     download(doxygen_url, zip_path)
     shutil.unpack_archive(str(zip_path), extract_dir)
@@ -87,20 +96,31 @@ def install_doxygen_unix() -> Path:
     print("Installing Doxygen...")
     archive = f"doxygen-{DOXYGEN_VERSION}.linux.bin.tar.gz"
     url = f"https://www.doxygen.nl/files/{archive}"
-    run(f"wget -q {url}")
-    run(f"tar -xf {archive}")
-    bin_dir = Path(f"doxygen-{DOXYGEN_VERSION}")
-    return bin_dir / "bin" / "doxygen"
+
+    # Create tool path if it doesn't exist
+    DOCS_TOOL_PATH.mkdir(exist_ok=True, parents=True)
+
+    # Change to tool directory for download and extraction
+    original_dir = os.getcwd()
+    os.chdir(str(DOCS_TOOL_PATH))
+
+    try:
+        run(f"wget -q {url}")
+        run(f"tar -xf {archive}")
+        bin_dir = DOCS_TOOL_PATH / f"doxygen-{DOXYGEN_VERSION}"
+        return bin_dir / "bin" / "doxygen"
+    finally:
+        os.chdir(original_dir)
 
 
 def install_theme() -> Path:
     print("Installing Doxygen Awesome Theme...")
-    theme_path = Path("docs/doxygen-awesome-css")
+    theme_path = DOCS_ROOT / "doxygen-awesome-css"
     if theme_path.exists():
         shutil.rmtree(theme_path)
     run(
         f"git clone --depth 1 -b v{DOXYGEN_AWESOME_VERSION} {DOXYGEN_CSS_REPO}",
-        cwd="docs",
+        cwd=str(DOCS_ROOT),
     )
     return theme_path
 
@@ -116,7 +136,7 @@ def update_doxyfile(project_number: str) -> None:
 
 def generate_docs(doxygen_bin: Path) -> None:
     print("Generating documentation...")
-    run(f'"{doxygen_bin}" Doxyfile', cwd="docs")
+    run(f'"{doxygen_bin}" {DOXYFILE_PATH.name}', cwd=str(DOCS_ROOT))
 
 
 def install_graphviz() -> None:
@@ -151,7 +171,7 @@ def main() -> None:
 
     generate_docs(doxygen_bin)
 
-    print(f"\n✅ Docs generated in: {HTML_OUTPUT_DIR.resolve()}")
+    print(f"\n✅ Docs generated in: {HTML_OUTPUT_DIR}")
     print(f"📄 Commit message: {commit_msg}")
     print("✨ You can now manually deploy to GitHub Pages or automate this step.")
 
