@@ -12,9 +12,8 @@ import warnings
 from pathlib import Path
 from typing import Optional, Tuple
 
+from docs_scrape_graphviz import get_latest_release_for_platform
 from download import download  # type: ignore
-
-# from docs_scrape_graphviz import Releases, fetch_releases
 
 # Configs
 DOXYGEN_VERSION = "1.11.0"
@@ -120,6 +119,11 @@ def generate_docs(doxygen_bin: Path) -> None:
     run(f'"{doxygen_bin}" Doxyfile', cwd="docs")
 
 
+def install_graphviz() -> None:
+    url: str = get_latest_release_for_platform()
+    print(url)
+
+
 def main() -> None:
 
     is_windows = platform.system() == "Windows"
@@ -133,6 +137,8 @@ def main() -> None:
 
     install_theme()
     update_doxyfile(project_number)
+
+    install_graphviz()  # Work in progress
 
     # Verify Graphviz installation
     try:
