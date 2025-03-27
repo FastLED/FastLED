@@ -10,7 +10,8 @@ import tempfile
 import warnings
 from pathlib import Path
 from typing import Optional, Tuple
-from urllib.request import urlretrieve
+
+from download import download  # type: ignore
 
 # Configs
 DOXYGEN_VERSION = "1.11.0"
@@ -27,38 +28,36 @@ def run(
     result = subprocess.run(
         cmd, shell=shell, cwd=cwd, check=False, capture_output=True, text=False
     )
+    stdout = result.stdout.decode("utf-8") if result.stdout else ""
+    stderr = result.stderr.decode("utf-8") if result.stderr else ""
     if result.returncode != 0:
-        stdout_bytes = result.stdout
-        stderr_bytes = result.stderr
-        assert isinstance(stdout_bytes, bytes)
-        assert isinstance(stderr_bytes, bytes)
-        stdout = stdout_bytes.decode("utf-8")
-        stderr = stderr_bytes.decode("utf-8")
         msg = f"Command failed with exit code {result.returncode}:\nstdout:\n{stdout}\n\nstderr:\n{stderr}"
         warnings.warn(msg)
         if check:
             raise subprocess.CalledProcessError(
                 result.returncode, cmd, output=result.stdout
             )
-    stdout = result.stdout.decode("utf-8")
     return stdout.strip()
 
 
 def get_git_info() -> Tuple[str, str]:
-    run("git fetch --prune --unshallow --tags")
+    release_tag = os.environ.get("RELEASE_TAG", "")
+
     try:
-        release_tag = os.environ.get("RELEASE_TAG", "")
         latest_tag = run("git tag | grep -E '^[0-9]' | sort -V | tail -1")
+        latest_tag = latest_tag if latest_tag else ""
     except subprocess.CalledProcessError:
-        raise RuntimeError("No tags found in the repository.")
+        latest_tag = ""
 
     git_sha_short = run("git rev-parse --short HEAD")
+    full_sha = run("git rev-parse HEAD")
     project_number = release_tag or latest_tag or git_sha_short
     commit_message = (
-        f"{project_number} ({run('git rev-parse HEAD')})"
+        f"{project_number} ({full_sha})"
         if project_number != git_sha_short
         else project_number
     )
+
     print(f"Project number: {project_number}")
     print(f"Commit message: {commit_message}")
     return project_number, commit_message
@@ -72,7 +71,7 @@ def install_doxygen_windows() -> Path:
     zip_path = Path(tempfile.gettempdir()) / "doxygen.zip"
     extract_dir = Path(tempfile.gettempdir()) / f"doxygen-{DOXYGEN_VERSION}"
 
-    urlretrieve(doxygen_url, zip_path)
+    download(doxygen_url, zip_path)
     shutil.unpack_archive(str(zip_path), extract_dir)
     bin_path = next(extract_dir.glob("**/doxygen.exe"), None)
     if not bin_path:

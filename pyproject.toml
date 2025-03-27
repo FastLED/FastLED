@@ -26,6 +26,7 @@ dependencies = [
     "fastled>=1.2.26",
     "playwright",
     "advanced-aicode",
+    "download",
 ]
 
 [build-system]

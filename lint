@@ -57,10 +57,7 @@ uvx black dev/dev.py
 uvx echo Running isort
 uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 uvx isort --profile black dev/dev.py
-echo "Running mypy"
-uvx echo yes | mypy --install-type 
-uvx mypy ci --exclude ci/tmp/ --exclude ci/wasm/
-uvx mypy dev/dev.py
+uvx echo Running pyright ci
 uvx pyright ci
 
 
