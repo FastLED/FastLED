@@ -2,7 +2,7 @@
 
 // This file must not be in the fl namespace, it must be in the global namespace.
 
-#if defined(__AVR__) || !defined(__has_include)
+#if (defined(__AVR__) || !defined(__has_include)) && (!defined(FASTLED_HAS_NEW))
 #ifndef __has_include
 #define _NO_EXCEPT
 #else
