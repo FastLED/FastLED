@@ -12,8 +12,9 @@ import warnings
 from pathlib import Path
 from typing import Optional, Tuple
 
-import docs_scrape_graphviz
 from download import download  # type: ignore
+
+# from docs_scrape_graphviz import Releases, fetch_releases
 
 # Configs
 DOXYGEN_VERSION = "1.11.0"
@@ -83,42 +84,6 @@ def install_doxygen_windows() -> Path:
     return bin_path
 
 
-def install_graphviz_windows() -> None:
-    """Install Graphviz on Windows from a .zip archive."""
-    print("Installing Graphviz...")
-    graphviz_releases = docs_scrape_graphviz.main()
-
-    archive_url = next(
-        (
-            url
-            for url in graphviz_releases["windows"]
-            if url.endswith((".zip", ".tar.gz", ".tar.xz"))
-        ),
-        None,
-    )
-    if not archive_url:
-        warnings.warn("No archive-format Graphviz releases found for Windows.")
-        return
-
-    zip_path = Path(tempfile.gettempdir()) / "graphviz.zip"
-    extract_dir = Path(tempfile.gettempdir()) / "graphviz"
-
-    if extract_dir.exists():
-        shutil.rmtree(extract_dir)
-    extract_dir.mkdir(exist_ok=True)
-
-    print(f"Downloading Graphviz from: {archive_url}")
-    download(archive_url, zip_path)
-    shutil.unpack_archive(str(zip_path), extract_dir)
-
-    bin_dir = next(extract_dir.glob("**/bin"), None)
-    if bin_dir:
-        os.environ["PATH"] = f"{bin_dir};{os.environ['PATH']}"
-        print(f"Added Graphviz to PATH: {bin_dir}")
-    else:
-        warnings.warn("Graphviz bin directory not found after extraction.")
-
-
 def install_doxygen_unix() -> Path:
     print("Installing Doxygen...")
     archive = f"doxygen-{DOXYGEN_VERSION}.linux.bin.tar.gz"
@@ -127,43 +92,6 @@ def install_doxygen_unix() -> Path:
     run(f"tar -xf {archive}")
     bin_dir = Path(f"doxygen-{DOXYGEN_VERSION}")
     return bin_dir / "bin" / "doxygen"
-
-
-def install_graphviz_unix(is_macos: bool = False) -> None:
-    """Install Graphviz from archive on Unix-like systems (Linux/macOS)."""
-    print("Installing Graphviz...")
-    graphviz_releases = docs_scrape_graphviz.main()
-
-    key = "darwin" if is_macos else "linux"
-    archive_url = next(
-        (
-            url
-            for url in graphviz_releases[key]
-            if url.endswith((".zip", ".tar.gz", ".tar.xz"))
-        ),
-        None,
-    )
-    if not archive_url:
-        warnings.warn(f"No suitable archive-format Graphviz releases found for {key}.")
-        return
-
-    archive_path = Path(tempfile.gettempdir()) / f"graphviz-{key}.archive"
-    extract_dir = Path(tempfile.gettempdir()) / f"graphviz-{key}"
-
-    if extract_dir.exists():
-        shutil.rmtree(extract_dir)
-    extract_dir.mkdir(exist_ok=True)
-
-    print(f"Downloading Graphviz from: {archive_url}")
-    download(archive_url, archive_path)
-    shutil.unpack_archive(str(archive_path), extract_dir)
-
-    bin_dir = next(extract_dir.glob("**/bin"), None)
-    if bin_dir:
-        os.environ["PATH"] = f"{bin_dir}:{os.environ['PATH']}"
-        print(f"Added Graphviz to PATH: {bin_dir}")
-    else:
-        warnings.warn("Graphviz bin directory not found after extraction.")
 
 
 def install_theme() -> Path:
@@ -195,15 +123,13 @@ def generate_docs(doxygen_bin: Path) -> None:
 def main() -> None:
 
     is_windows = platform.system() == "Windows"
-    is_macos = platform.system() == "Darwin"
+    # is_macos = platform.system() == "Darwin"
     project_number, commit_msg = get_git_info()
 
     if is_windows:
         doxygen_bin = install_doxygen_windows()
-        install_graphviz_windows()
     else:
         doxygen_bin = install_doxygen_unix()
-        install_graphviz_unix(is_macos)
 
     install_theme()
     update_doxyfile(project_number)

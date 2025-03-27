@@ -1,4 +1,5 @@
 import json
+from dataclasses import dataclass
 
 import httpx
 
@@ -18,7 +19,20 @@ def _fetch_all_releases() -> list[dict]:
     return out
 
 
-def classify_assets(releases: list[dict]) -> dict[str, list[str]]:
+@dataclass
+class Releases:
+    windows: list[str]
+    cygwin: list[str]
+    fedora: list[str]
+    darwin: list[str]
+    ubuntu: list[str]
+    msys2: list[str]
+
+    def __str__(self):
+        return json.dumps(self.__dict__, indent=2)
+
+
+def classify_assets(releases: list[dict]) -> Releases:
     """
     Extracts and classifies asset download URLs by operating system.
 
@@ -57,10 +71,17 @@ def classify_assets(releases: list[dict]) -> dict[str, list[str]]:
             elif "msys2" in name.lower():
                 out["msys2"].append(url)
 
-    return out
+    return Releases(
+        windows=out["windows"],
+        cygwin=out["cygwin"],
+        fedora=out["fedora"],
+        darwin=out["darwin"],
+        ubuntu=out["ubuntu"],
+        msys2=out["msys2"],
+    )
 
 
-def limit_releases(releases: dict[str, list[str]], limit: int) -> dict[str, list[str]]:
+def limit_to_newest(assets: Releases, limit: int = 2) -> Releases:
     """
     Limit the number of releases to fetch.
 
@@ -71,13 +92,17 @@ def limit_releases(releases: dict[str, list[str]], limit: int) -> dict[str, list
     Returns:
         A list of release dictionaries.
     """
-    releases = releases.copy()
-    for platform, urls in releases.items():
-        releases[platform] = urls[:limit]
-    return releases
+    return Releases(
+        windows=assets.windows[:limit],
+        cygwin=assets.cygwin[:limit],
+        fedora=assets.fedora[:limit],
+        darwin=assets.darwin[:limit],
+        ubuntu=assets.ubuntu[:limit],
+        msys2=assets.msys2[:limit],
+    )
 
 
-def fetch_releases(limit: int = 3) -> dict[str, list[str]]:
+def fetch_releases(limit: int = 3) -> Releases:
     """
     Fetch the latest Graphviz releases from GitLab.
 
@@ -87,13 +112,13 @@ def fetch_releases(limit: int = 3) -> dict[str, list[str]]:
     Returns:
         A list of release dictionaries.
     """
-    releases: list[dict] = _fetch_all_releases()
-    map = classify_assets(releases)
-    out = limit_releases(map, limit)
-    return out
+    data: list[dict] = _fetch_all_releases()
+    assets = classify_assets(data)
+    assets = limit_to_newest(assets, limit)
+    return assets
 
 
-def main() -> dict[str, list[str]]:
+def main() -> Releases:
     """
     Fetch and classify Graphviz release binaries for Windows, Linux, and macOS.
 
@@ -104,9 +129,5 @@ def main() -> dict[str, list[str]]:
 
 
 if __name__ == "__main__":
-    dict_info = main()
-
-    for os_name, urls in dict_info.items():
-        urls = urls[:2]
-        value_json = json.dumps(urls, indent=2)
-        print(f"{os_name}:\n{value_json}\n")
+    assets: Releases = main()
+    print(assets)
