@@ -6,7 +6,7 @@ import warnings
 from os import stat
 from pathlib import Path
 
-from ci.boards import Board
+from ci.boards import Board  # type: ignore
 from ci.locked_print import locked_print
 
 

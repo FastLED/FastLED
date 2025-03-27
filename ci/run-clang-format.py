@@ -181,6 +181,8 @@ def run_clang_format_diff(args, file):
         )
     proc_stdout = proc.stdout
     proc_stderr = proc.stderr
+    assert proc_stdout is not None
+    assert proc_stderr is not None
     if sys.version_info[0] < 3:
         # make the pipes compatible with Python 3,
         # reading lines should output unicode
@@ -318,13 +320,14 @@ def main():
     # use default signal handling, like diff return SIGINT value on ^C
     # https://bugs.python.org/issue14229#msg156446
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     try:
-        signal.SIGPIPE
+        signal.SIGPIPE  # type: ignore
     except AttributeError:
         # compatibility, SIGPIPE does not exist on Windows
         pass
     else:
-        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)  # type: ignore
 
     colored_stdout = False
     colored_stderr = False

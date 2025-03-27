@@ -66,6 +66,7 @@ class RunningProcess:
 
         def output_reader():
             try:
+                assert self.proc is not None
                 assert self.proc.stdout is not None
                 for line in iter(self.proc.stdout.readline, ""):
                     if self.shutdown.is_set():
@@ -75,7 +76,7 @@ class RunningProcess:
                         print(line)  # Print to console in real time
                     self.buffer.append(line)
             finally:
-                if self.proc.stdout:
+                if self.proc and self.proc.stdout:
                     self.proc.stdout.close()
 
         # Start output reader thread

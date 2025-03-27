@@ -11,15 +11,22 @@ PROJECT_ROOT = HERE.parent
 IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 
 
-def run_command(cmd, shell: bool = False, check=None, capture_output: bool = False):
+def run_command(
+    cmd_list: list[str], shell: bool = False, check=False, capture_output: bool = False
+) -> str | None:
     check = check if check is not None else check
-    if shell:
-        cmd = subprocess.list2cmdline(cmd)
+    cmd = cmd_list if not shell else subprocess.list2cmdline(cmd_list)
 
-    result = subprocess.run(
+    result: subprocess.CompletedProcess = subprocess.run(
         cmd, capture_output=capture_output, text=True, shell=shell, check=check
     )
-    return result.stdout.strip() if capture_output else None
+
+    if not capture_output:
+        return None
+
+    stdout: str = result.stdout
+    stdout = stdout.strip()
+    return stdout
 
 
 def parse_args():
@@ -72,7 +79,7 @@ def main():
         ["uv", "run", "ci/compiled_size.py", "--board", args.board],
         capture_output=True,
     )
-    size_match = re.search(r": *(\d+)", output)
+    size_match = re.search(r": *(\d+)", output)  # type: ignore
 
     if not size_match:
         print("Error: Unable to extract size from output")

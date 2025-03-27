@@ -61,6 +61,7 @@ echo "Running mypy"
 uvx echo yes | mypy --install-type 
 uvx mypy ci --exclude ci/tmp/ --exclude ci/wasm/
 uvx mypy dev/dev.py
+uvx pyright ci
 
 
 
