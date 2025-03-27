@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import warnings
 from pathlib import Path
 from typing import Optional, Tuple
 from urllib.request import urlretrieve
@@ -24,9 +25,23 @@ def run(
 ) -> str:
     print(f"Running: {cmd}")
     result = subprocess.run(
-        cmd, shell=shell, cwd=cwd, check=check, capture_output=True, text=True
+        cmd, shell=shell, cwd=cwd, check=False, capture_output=True, text=False
     )
-    return result.stdout.strip()
+    if result.returncode != 0:
+        stdout_bytes = result.stdout
+        stderr_bytes = result.stderr
+        assert isinstance(stdout_bytes, bytes)
+        assert isinstance(stderr_bytes, bytes)
+        stdout = stdout_bytes.decode("utf-8")
+        stderr = stderr_bytes.decode("utf-8")
+        msg = f"Command failed with exit code {result.returncode}:\nstdout:\n{stdout}\n\nstderr:\n{stderr}"
+        warnings.warn(msg)
+        if check:
+            raise subprocess.CalledProcessError(
+                result.returncode, cmd, output=result.stdout
+            )
+    stdout = result.stdout.decode("utf-8")
+    return stdout.strip()
 
 
 def get_git_info() -> Tuple[str, str]:
