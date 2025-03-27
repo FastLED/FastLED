@@ -41,7 +41,6 @@ def classify_assets(releases: list[dict]) -> dict[str, list[str]]:
         for asset in assets:
             name: str = asset.get("name", "")
             url: str = asset.get("url", "")
-            print(name)
             if "windows" in name.lower():
                 out["windows"].append(url)
             elif "fedora" in name.lower():
