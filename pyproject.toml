@@ -27,6 +27,7 @@ dependencies = [
     "playwright",
     "advanced-aicode",
     "download",
+    "httpx",
 ]
 
 [build-system]

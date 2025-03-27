@@ -58,7 +58,7 @@ uvx echo Running isort
 uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 uvx isort --profile black dev/dev.py
 uvx echo Running pyright ci
-uvx pyright ci
+uv run pyright ci
 
 
 
