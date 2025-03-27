@@ -1,22 +1,10 @@
 import json
+import platform
 from dataclasses import dataclass
 
 import httpx
 
 API_URL: str = "https://gitlab.com/api/v4/projects/4207231/releases"
-
-
-def _fetch_all_releases() -> list[dict]:
-    """
-    Fetch the list of Graphviz releases from GitLab's API.
-
-    Returns:
-        A list of release dictionaries.
-    """
-    response = httpx.get(API_URL, timeout=10)
-    response.raise_for_status()
-    out = response.json()
-    return out
 
 
 @dataclass
@@ -30,6 +18,19 @@ class Releases:
 
     def __str__(self):
         return json.dumps(self.__dict__, indent=2)
+
+
+def _fetch_all_releases() -> list[dict]:
+    """
+    Fetch the list of Graphviz releases from GitLab's API.
+
+    Returns:
+        A list of release dictionaries.
+    """
+    response = httpx.get(API_URL, timeout=10)
+    response.raise_for_status()
+    out = response.json()
+    return out
 
 
 def classify_assets(releases: list[dict]) -> Releases:
@@ -51,12 +52,15 @@ def classify_assets(releases: list[dict]) -> Releases:
         "msys2": [],
     }
 
+    from pathlib import Path
+
     for release in releases:
         assets = release.get("assets", {}).get("links", [])
         for asset in assets:
             name: str = asset.get("name", "")
             url: str = asset.get("url", "")
-            if "zip" not in url and "xz" not in url:
+            suffix = Path(name).suffix.lower()
+            if suffix != ".zip" and suffix != ".xz":
                 continue
             if "windows" in name.lower():
                 out["windows"].append(url)
@@ -118,6 +122,32 @@ def fetch_releases(limit: int = 3) -> Releases:
     return assets
 
 
+def get_latest_release_for_platform(platform_str: str | None = None) -> str:
+    """
+    Fetch the latest Graphviz release from GitLab.
+
+    Returns:
+        A release dictionary.
+    """
+
+    releases = fetch_releases()
+    if platform_str is None:
+        platform_str = platform.system().lower()
+    if platform_str == "windows":
+        return releases.windows[0]
+    if platform_str == "cygwin":
+        return releases.cygwin[0]
+    if platform_str == "fedora":
+        return releases.fedora[0]
+    if platform_str == "darwin":
+        return releases.darwin[0]
+    if platform_str == "ubuntu":
+        return releases.ubuntu[0]
+    if platform_str == "msys2":
+        return releases.msys2[0]
+    raise ValueError(f"Unsupported platform: {platform_str}")
+
+
 def main() -> Releases:
     """
     Fetch and classify Graphviz release binaries for Windows, Linux, and macOS.
@@ -129,5 +159,4 @@ def main() -> Releases:
 
 
 if __name__ == "__main__":
-    assets: Releases = main()
-    print(assets)
+    print(get_latest_release_for_platform())
