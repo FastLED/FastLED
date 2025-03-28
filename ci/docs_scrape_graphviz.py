@@ -145,6 +145,8 @@ def get_latest_release_for_platform(platform_str: str | None = None) -> str:
         return releases.ubuntu[0]
     if platform_str == "msys2":
         return releases.msys2[0]
+    if platform_str == "linux":
+        return releases.ubuntu[0]
     raise ValueError(f"Unsupported platform: {platform_str}")
 
 
