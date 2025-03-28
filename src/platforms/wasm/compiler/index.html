@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>FastLED</title>
+
+    <link rel="stylesheet" href="index.css">
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <h1>FastLED</h1>
+    <div class="studio-link">
+        <a href="https://ledmapper.com" target="_blank">FastLED Video Mapper</a>
+    </div>
+    <div id="main-container">
+        <div id="top-row">
+            <div id="canvas-container">
+                <canvas id="myCanvas" width="16" height="16"></canvas>
+                <div id="canvas-label">stdout</div>
+            </div>
+            <div id="ui-controls"></div>
+        </div>
+        <div id="container"></div>
+        <div class="popup-overlay" id="popup-overlay"></div>
+        <div class="popup" id="output-popup">
+            <pre id="output">stdout:</pre>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://threejs.org/build/three.module.js",
+                "three/addons/": "https://threejs.org/examples/jsm/"
+            }
+        }
+    </script>
+
+</body>
+
+<script type="module">
+    import * as THREE from 'https://threejs.org/build/three.module.js';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+
+    window.threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
+</script>
+
+
+<!-- Include the FastLED script -->
+<script src="fastled.js"></script>
+<script type="module">
+    import { loadFastLED } from './index.js';
+    
+    document.getElementById('myCanvas').addEventListener('click', function() {
+        const output = document.getElementById('output');
+        const popup = document.getElementById('output-popup');
+        const overlay = document.getElementById('popup-overlay');
+        
+        // Move the output element to the popup
+        popup.appendChild(output);
+        
+        // Show the popup and overlay with animation
+        overlay.style.opacity = '0';
+        overlay.style.display = 'block';
+        popup.style.display = 'block';
+        
+        // Trigger reflow
+        void overlay.offsetWidth;
+        
+        // Fade in
+        overlay.style.opacity = '1';
+        
+        // Close popup when clicking overlay
+        overlay.onclick = function() {
+            // Fade out
+            overlay.style.opacity = '0';
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+                
+                // Remove and re-add the animation class to trigger it again
+                const label = document.getElementById('canvas-label');
+                label.classList.remove('show-animation');
+                // Force reflow to ensure animation restarts
+                void label.offsetWidth;
+                label.classList.add('show-animation');
+            }, 200); // Match the transition duration
+        };
+    });
+
+    document.getElementById('output').addEventListener('click', function() {
+        if (document.querySelector('.toast-notification')) {
+            return; // We are already showing a toast notification
+        }
+
+        const text = this.textContent;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = 'Copied to clipboard';
+            document.body.appendChild(toast);
+            
+            // Force reflow
+            void toast.offsetHeight;
+            
+            toast.classList.add('toast-notification-show');
+            
+            setTimeout(() => {
+                toast.classList.add('toast-notification-hide');
+                toast.addEventListener('transitionend', () => {
+                    if (toast.parentElement) {
+                        document.body.removeChild(toast);
+                    }
+                }, {once: true});
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    });
+
+    async function loadThreeJs() {
+        console.log('Using ThreeJS modules:', window.threeJsModules);
+        return {
+            containerId: "container",
+            modules: window.threeJsModules,
+        };
+    }
+
+    // load fastled when the window is loaded.
+    async function runFastLED() {
+        // Load the FastLED module.
+        const threeJs = await loadThreeJs();
+        const options = {
+            canvasId: "myCanvas",
+            uiControlsId: "ui-controls",
+            printId: "output",
+            frameRate: 60,
+            fastled: fastled,
+            threeJs: threeJs,
+        }
+        await loadFastLED(options);
+        
+        // Trigger the animation (it will start after the delay)
+        const label = document.getElementById('canvas-label');
+        label.classList.add('show-animation');
+    }
+
+    // Wait for fonts to load before showing content
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+            document.body.style.opacity = 1;
+        });
+    } else {
+        // Fallback for browsers that do not support document.fonts
+        window.onload = function () {
+            document.body.style.opacity = 1;
+        };
+    }
+
+    let loaded = false;
+    let loadFastLedOnce = () => {
+        if (loaded) return;
+        runFastLED();
+        loaded = true;
+    }
+
+    window.addEventListener('load', loadFastLedOnce);
+    setTimeout(loadFastLedOnce, 100);
+</script>
+
+
+</html>

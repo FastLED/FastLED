@@ -1,0 +1,77 @@
+{
+    "name": "FastLED",
+    "description": "FastLED is a library for programming addressable rgb led strips (APA102/Dotstar, WS2812/Neopixel, LPD8806, and a dozen others) acting both as a driver and as a library for color management and fast math.",
+    "keywords": "led,noise,rgb,math,fast",
+    "authors": [
+        {
+            "name": "Daniel Garcia",
+            "url": "https://github.com/focalintent",
+            "maintainer": true
+        },
+        {
+            "name": "Mark Kriegsman",
+            "url": "https://github.com/kriegsman",
+            "maintainer": true
+        },
+        {
+            "name": "Sam Guyer",
+            "url": "https://github.com/samguyer",
+            "maintainer": true
+        },
+        {
+            "name": "Jason Coon",
+            "url": "https://github.com/jasoncoon",
+            "maintainer": true
+        },
+        {
+            "name": "Josh Huber",
+            "url": "https://github.com/uberjay",
+            "maintainer": true
+        },
+        {
+            "name": "Zach Vorhies",
+            "url": "https://github.com/zackees",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/FastLED/FastLED.git"
+    },
+    "version": "3.9.14",
+    "license": "MIT",
+    "homepage": "http://fastled.io",
+    "frameworks": "arduino",
+    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
+    "headers": "FastLED.h",
+    "export": {
+        "exclude": [
+            "docs",
+            "extras",
+            "ci",
+            ".*",
+            "compile.bat",
+            "compile",
+            "lint",
+            "test",
+            "platformio.ini",
+            "**/*.exe"
+        ]
+    },
+    "build": {
+        "srcFilter": [
+            "+<*.c>",
+            "+<*.cpp>",
+            "+<*.h>",
+            "+<platforms/arm/k20/**/*.cpp>",
+            "+<platforms/esp/32/**/*.cpp>",
+            "+<platforms/wasm/**/*.cpp>",
+            "+<third_party/**/*.cpp>",
+            "+<third_party/**/*.c>",
+            "+<fx/**/*.cpp>",
+            "+<fl/**/*.cpp>",
+            "+<sensors/**/*.cpp>"
+        ],
+        "libArchive": false
+    }
+}

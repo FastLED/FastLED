@@ -1,0 +1,30 @@
+{
+  "build": {
+    "core": "esp32",
+    "f_cpu": "120000000L",
+    "f_flash": "60000000L",
+    "flash_mode": "qio",
+    "mcu": "esp32c2",
+    "variant": "esp32c2"
+  },
+  "connectivity": [
+    "wifi"
+  ],
+  "debug": {
+    "openocd_target": "esp32c2.cfg"
+  },
+  "frameworks": [
+    "arduino",
+    "espidf"
+  ],
+  "name": "Espressif ESP32-C2-DevKitM-1",
+  "upload": {
+    "flash_size": "4MB",
+    "maximum_ram_size": 278528,
+    "maximum_size": 4194304,
+    "require_upload_port": true,
+    "speed": 460800
+  },
+  "url": "https://docs.espressif.com/projects/espressif-esp-dev-kits/en/latest/esp8684/esp8684-devkitm-1/user_guide.html",
+  "vendor": "Espressif"
+}

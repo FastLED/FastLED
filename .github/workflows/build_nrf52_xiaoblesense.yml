@@ -1,0 +1,14 @@
+name: nrf52_xiaoblesense
+
+on:
+  push:
+    branches:
+      - master
+
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: xiaoblesense

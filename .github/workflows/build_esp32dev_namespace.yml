@@ -1,0 +1,15 @@
+name: esp32dev_namespace
+
+on:
+  push:
+    branches:
+      - master
+  pull_request_target:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev --defines FASTLED_FORCE_NAMESPACE=1,FASTLED_FORCE_USE_NAMESPACE=1

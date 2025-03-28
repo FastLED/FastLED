@@ -1,0 +1,40 @@
+KBD		=	$C000	;Read keydown
+KBDSTRB	=	$C010	;Reset keybd
+
+SPKR	=	$C030	;Toggle speaker
+
+; TTL digital output pins on
+; 16-pin DIP game connector
+SETAN0	= $C058
+CLRAN0	= $C059
+SETAN1	= $C05A
+CLRAN1	= $C05B
+SETAN2	= $C05C
+CLRAN2	= $C05D
+SETAN3	= $C05E
+CLRAN3	= $C05F
+
+PIN12ON = CLRAN3
+PIN12OFF= SETAN3
+PIN13ON = CLRAN2
+PIN13OFF= SETAN2
+PIN14ON = CLRAN1
+PIN14OFF= SETAN1
+PIN15ON = CLRAN0
+PIN15OFF= SETAN0
+
+;Special for pin 5, except on //gs
+C040STROBE = $C040 
+PIN5STROBE = C040STROBE
+
+SolidApple	=	$C062 ; read SW1 or SA
+OpenApple	=	$C061 ; read SW0 or OA 
+
+VBL		= $C019	; vertical blanking
+
+WAIT	= $FCA8	; wait a little while
+
+CROUT 	= $FD8E	; print a CR
+PRBYTE 	= $FDDA	; print a hex byte
+
+

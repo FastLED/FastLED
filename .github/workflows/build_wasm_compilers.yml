@@ -1,0 +1,35 @@
+name: wasm_compile_test
+
+on:
+    push:
+      branches:
+        - master
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+    - name: Install UV
+      run: pip install uv
+
+    - name: uv run ci/run_test_wasm_local_compile.py
+      run: uv run ci/run_test_wasm_local_compile.py
+
+
+    - name: Generate timestamp and random hex
+      id: generate_id
+      run: |
+        echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+        echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+        path: dist/*

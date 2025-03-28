@@ -1,0 +1,13 @@
+name: rgbw
+
+on:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32s3 --examples RGBW

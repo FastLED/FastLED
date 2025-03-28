@@ -1,0 +1,44 @@
+## Important
+
+The emscripten target is still under active developement as of Oct. 2024. If you want to rely on
+the code here then you need to pin to one of the commits or releases.
+
+The good news is that it works pretty well and will compile and run most demos (haven't found one yet
+that does not work). However you do need to call set `jsSetCanvasSize(MATRIX_WIDTH, MATRIX_HEIGHT)` in order
+for the js client to correctly set the canvas size.
+
+There are a lot of things that aren't easy such as UI and communication between JS engine and the
+FastLED C++ engine. However, some of the core things have been implemented, such as sending strip
+data, notifying when a strip has been created and how many leds it has, and end frame notifications
+has been implemented.
+
+Also printf() commands will be re-routed to console.log.
+
+## Compiler
+
+We do supply a compiler for this code. And the good news is that it is quite fast - around 8 seconds
+on a good day, which is way faster then compiling code and then uploading it to a physical device. The
+bad news is that the compiler is a docker container and will eat up nearly a gig of memory since
+it needs to run in a VM. But good news again is that it is compatible to run on Windows/MacOS(x64/Arm)
+and Linux. All you need to do is have docker (and python) installed and run the following from the project root
+
+`uv run ci/wasm_compile.py -b examples/wasm --open`
+
+Once this is done, you will have a fastled_js folder at the folder root which will contain
+  * fastled.js
+  * fastled.wasm
+  * index.html
+
+You can fire this up immediatly, you can use `python -m http.server` and you should see your sketch running
+in a web browser.
+
+The -b arg here tells docker to check if it needs to rebuild, which it's pretty fast at. If you aren't developing
+then you can omit this -b arg and it should be pretty fast.
+
+The --open arg tells the command to open up a webbrowser once it finishes compiling.
+
+## TODO List
+
+  * Support for RGB order. Right now it just ignores whatever RGB order is set and assumes RGB.
+  * Control of the `fx_engine` as a first class citizen through a JS or JSON api. The good thing about
+    the latter is that JSON can be saved and then run on a real device.

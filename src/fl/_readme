@@ -1,0 +1,12 @@
+This directory holds core functionality of FastLED.
+
+Every class/struct/function in this directory must be under the
+namespace fl, except for special cases.
+
+This is done because according to the the Arduino build system,
+all headers/cpp/hpp files in the root the src directory will be in global
+scope and other libraries can #include them by mistake.
+
+This has happened so many times that I've just gone ahead and migrated all
+the new code to this directory, to prevent name collisions.
+

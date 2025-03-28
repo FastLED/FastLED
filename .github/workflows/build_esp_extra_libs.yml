@@ -1,0 +1,26 @@
+name: esp32 extra libs
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Platformio Latest
+        run: |
+          pip install platformio
+
+      - name: Run Native Build
+        run: |
+          cd ci/kitchensink && pio run
