@@ -26,7 +26,7 @@ HERE = Path(__file__).parent.resolve()
 PROJECT_ROOT = HERE.parent
 
 DOCS_ROOT = PROJECT_ROOT / "docs"
-DOCS_TOOL_PATH = PROJECT_ROOT / ".tools"
+DOCS_TOOL_PATH = PROJECT_ROOT / ".tools_cache"
 DOCS_OUTPUT_PATH = DOCS_ROOT / "html"
 
 
@@ -117,7 +117,7 @@ def install_theme() -> Path:
     print("Installing Doxygen Awesome Theme...")
     theme_path = DOCS_ROOT / "doxygen-awesome-css"
     if theme_path.exists():
-        shutil.rmtree(theme_path)
+        return theme_path
     run(
         f"git clone --depth 1 -b v{DOXYGEN_AWESOME_VERSION} {DOXYGEN_CSS_REPO}",
         cwd=str(DOCS_ROOT),

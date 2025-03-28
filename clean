@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # cd to the directory of the script
 cd "$(dirname "$0")"
 
@@ -9,6 +11,15 @@ rm -rf .pio
 rm -rf ci/tmp
 rm -rf tests/.build
 
+rm -rf .*_cache
+rm -rf __pycache__
+rm -rf .tools
+
+rm -rf ci/__pycache__
+rm -rf ci/.*_cache
+
+
+
 # remove any CMakeCache.txt files
 find . -name "CMakeCache.txt" -type f -delete
-rm uv.lock
+rm -f uv.lock
