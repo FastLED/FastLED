@@ -1,3 +1,0 @@
-#!/bin/bash
-
-uv run ci/inspect_obj.py
