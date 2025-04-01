@@ -336,7 +336,7 @@ class I2SClocklessLedDriveresp32S3 {
         }
         bus_config.bus_width = 16;
         bus_config.max_transfer_bytes =
-            _nb_components * NUM_LED_PER_STRIP * 8 * 3 * 2 + __OFFSET;
+            _nb_components * NUM_LED_PER_STRIP * 8 * 3 * 2 + __OFFSET + __OFFSET_END;
         #if IDF_5_3_OR_EARLIER
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
