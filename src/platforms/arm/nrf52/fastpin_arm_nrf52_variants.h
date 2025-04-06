@@ -793,7 +793,7 @@
     #endif
 
     #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
-        #warning "ARDUINO_Seeed_XIAO_nRF52840 board is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+        #warning "ARDUINO_Seeed_XIAO_nRF52840 board is semi tested, pins 0-15 have been provided by the community -- if everything works well let us know at https://github.com/FastLED/FastLED/issues so we can suppress this warning"
     #endif
 
     // Arduino pins 0..7
@@ -803,13 +803,13 @@
     _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 
     _FL_DEFPIN( 4, 4, 0); // D4  is P0.4
     _FL_DEFPIN( 5, 5, 0); // D5  is P0.5
-    _FL_DEFPIN( 6, 11, 1); // D6  is P1.11
-    _FL_DEFPIN( 7, 12, 1); // D7  is P1.12
+    _FL_DEFPIN( 6, 43, 1); // D6  is P1.11    <-- 11 to 43
+    _FL_DEFPIN( 7, 44, 1); // D7  is P1.12    <-- 12 to 44
     
     // Arduino pins 8..15
-    _FL_DEFPIN( 8, 13, 1); // D8  is P1.13
-    _FL_DEFPIN( 9, 14, 1); // D9  is P1.14
-    _FL_DEFPIN(10, 15, 1); // D10 is P1.15
+    _FL_DEFPIN( 8, 45, 1); // D8  is P1.13    <-- 13 to 45
+    _FL_DEFPIN( 9, 46, 1); // D9  is P1.14    <-- 14 to 46
+    _FL_DEFPIN(10, 47, 1); // D10 is P1.15    <-- 15 to 47
 
     _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
     _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
