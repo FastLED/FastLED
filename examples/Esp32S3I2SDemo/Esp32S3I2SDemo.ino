@@ -47,7 +47,7 @@
 //
 // Want to get a contributor badge for FastLED? This driver has only been lightly tested.
 // There are certain open questions:
-//  - Can the pins order for the strips be changed?
+//  - Can the pins order for the strips be changed?    (the pins can be defined arbitrarily,Tested on esp32s3, esp32duino version 3.2.0)
 //  - Are there some combination of pins that can be ommitted?
 //  - What other caveats are there?
 //
