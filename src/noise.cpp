@@ -3,14 +3,17 @@
 
 #include <string.h>
 
-#if defined(__clang__)
+#ifndef VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
+#if defined(__clang__) || defined(ARDUINO_GIGA_M7) || defined(ARDUINO_GIGA)
 // Clang doesn't have variable length arrays. Therefore we need to emulate them using
-// alloca.
+// alloca. It's been found that Arduino Giga M7 also doesn't support variable length arrays
+// for some reason so we force it to emulate them as well in this case.
 #define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 1
 #else
 // Else, assume the compiler is gcc, which has variable length arrays
 #define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 0
 #endif
+#endif  // VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
 
 #if !VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
 #define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) TYPE NAME[SIZE]
