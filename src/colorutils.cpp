@@ -12,7 +12,7 @@
 #include "fl/xymap.h"
 #include "fl/unused.h"
 
-#if __has_include(<assert.h>)
+#if __has_include(<assert.h>) && !defined(__AVR__)
 #include <assert.h>
 #else
 #define assert(x) ((void)0)
