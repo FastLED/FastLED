@@ -93,6 +93,11 @@ For more examples see this [link](examples). Web compiled [examples](https://zac
 ![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
 Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_FASTLED_OVERCLOCK_17/
 
+## New in 3.7.7 - RGBW LED Strip Support
+
+![image (1)](https://github.com/user-attachments/assets/d4892626-3dc6-4d6d-a740-49ddad495fa5)
+
+
 ## Star History
 
 <a href="https://star-history.com/#fastled/fastled&Date">
