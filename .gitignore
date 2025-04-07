@@ -49,4 +49,4 @@ ignore/
 .vscode/launch.json
 activate
 temp
-.tools
+.tools_cache

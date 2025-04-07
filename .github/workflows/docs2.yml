@@ -19,7 +19,7 @@ jobs:
         id: repo-info
         run: |
           git fetch --prune --unshallow --tags
-          RELEASE_TAG=${{ github.event.release.tag_name }}
+          RELEASE_TAG=3.9.15
           LATEST_TAG=$(git tag | grep -E '^[0-9]' | sort -V | tail -1)
           GIT_SHA_SHORT=$(sed 's/\(.\{7\}\).*/\1/' <<< "$GITHUB_SHA")
           PROJECT_NUMBER=${RELEASE_TAG:-${LATEST_TAG:-$GIT_SHA_SHORT}}
@@ -40,8 +40,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages2
-          publish_dir: ./docs/html2
+          publish_branch: gh-pages
+          publish_dir: ./docs/html
           destination_dir: docs
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
