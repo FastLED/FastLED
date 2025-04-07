@@ -1,6 +1,21 @@
 FastLED 3.9.15
 ==============
 * ESP32 series now supports FORCE_FASTLED_NAMESPACE=1
+* Giga R1 Support improvement
+  * Better support for building in Arduino
+* Seeed XIAO nRF52840
+  * Pins 0-15 are now defined correctly (provided by community)
+* ESP32-S3 I2S Driver
+  * Arbitrary pins are now supported
+    * https://github.com/FastLED/FastLED/pull/1913
+* AVR
+  * some boards like due should be fixed due to redefinition of `new`
+    * https://github.com/FastLED/FastLED/pull/1910
+  * fixed jumping-red-pixel bug in asm re-order by avr compiler
+    * https://github.com/FastLED/FastLED/commit/0195b34380da0c5234bda38d73a018ea0b7569d5
+* New Example - Fire2023
+  * https://github.com/FastLED/FastLED/blob/master/examples/Fire2023/Fire2023.ino
+  * Uses multiple perlin noise function to generate an improved fire effect
 
 FastLED 3.9.14
 ==============
