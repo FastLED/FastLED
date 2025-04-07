@@ -23,7 +23,7 @@ using namespace fl;
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
 uint16_t XY(uint8_t x, uint8_t y) __attribute__((weak));
 
-uint16_t XY(uint8_t x, uint8_t y) {
+__attribute__((weak)) uint16_t XY(uint8_t x, uint8_t y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
     assert(false);  // The user didn't provide an XY function, so we'll assert here.
