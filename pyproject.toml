@@ -27,7 +27,7 @@ dependencies = [
     "playwright",
     "download",
     "httpx",
-    "static-graphviz>=1.12"
+    "static-graphviz>=1.13"
 ]
 
 [build-system]
