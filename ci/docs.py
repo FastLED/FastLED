@@ -11,7 +11,6 @@ import warnings
 from pathlib import Path
 from typing import Optional, Tuple
 
-from docs_scrape_graphviz import get_latest_release_for_platform
 from download import download  # type: ignore
 
 # Configs
@@ -31,14 +30,22 @@ DOCS_OUTPUT_PATH = DOCS_ROOT / "html"
 
 
 def run(
-    cmd: str, cwd: Optional[str] = None, shell: bool = True, check: bool = True
+    cmd: str,
+    cwd: Optional[str] = None,
+    shell: bool = True,
+    check: bool = True,
+    capture: bool = True,
 ) -> str:
     print(f"Running: {cmd}")
     result = subprocess.run(
-        cmd, shell=shell, cwd=cwd, check=False, capture_output=True, text=False
+        cmd, shell=shell, cwd=cwd, check=False, capture_output=capture, text=False
     )
-    stdout = result.stdout.decode("utf-8") if result.stdout else ""
-    stderr = result.stderr.decode("utf-8") if result.stderr else ""
+    if capture:
+        stdout = result.stdout.decode("utf-8") if result.stdout else ""
+        stderr = result.stderr.decode("utf-8") if result.stderr else ""
+    else:
+        stdout = ""
+        stderr = ""
     if result.returncode != 0:
         msg = f"Command failed with exit code {result.returncode}:\nstdout:\n{stdout}\n\nstderr:\n{stderr}"
         warnings.warn(msg)
@@ -136,12 +143,13 @@ def update_doxyfile(project_number: str) -> None:
 
 def generate_docs(doxygen_bin: Path) -> None:
     print("Generating documentation...")
-    run(f'"{doxygen_bin}" {DOXYFILE_PATH.name}', cwd=str(DOCS_ROOT))
+    cmd_str = f'"{doxygen_bin}" {DOXYFILE_PATH.name}'
+    run(cmd_str, cwd=str(DOCS_ROOT), capture=False)
 
 
-def install_graphviz() -> None:
-    url: str = get_latest_release_for_platform()
-    print(url)
+# def install_graphviz() -> None:
+#     url: str = get_latest_release_for_platform()
+#     print(url)
 
 
 def main() -> None:
@@ -158,7 +166,7 @@ def main() -> None:
     install_theme()
     update_doxyfile(project_number)
 
-    install_graphviz()  # Work in progress
+    # install_graphviz()  # Work in progress
 
     # Verify Graphviz installation
     try:
@@ -169,7 +177,7 @@ def main() -> None:
             "Graphviz (dot) not found in PATH. Diagrams may not be generated."
         )
 
-    generate_docs(doxygen_bin)
+    generate_docs(doxygen_bin=doxygen_bin)
 
     print(f"\n✅ Docs generated in: {HTML_OUTPUT_DIR}")
     print(f"📄 Commit message: {commit_msg}")
