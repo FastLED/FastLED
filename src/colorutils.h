@@ -504,11 +504,11 @@ CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay,
 /// @param overlay the color array to blend into existing
 /// @param count the number of colors to process
 /// @param amountOfOverlay the fraction of overlay to blend into existing
-void  nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay);
+void  nblend( CRGB* existing, const CRGB* overlay, uint16_t count, fract8 amountOfOverlay);
 
-/// @copydoc nblend(CRGB*, CRGB*, uint16_t, fract8)
+/// @copydoc nblend(CRGB*, const CRGB*, uint16_t, fract8)
 /// @param directionCode the direction to travel around the color wheel
-void  nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay,
+void  nblend( CHSV* existing, const CHSV* overlay, uint16_t count, fract8 amountOfOverlay,
              TGradientDirectionCode directionCode = SHORTEST_HUES);
 
 /// @} ColorBlends

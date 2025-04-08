@@ -335,7 +335,7 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
 
 
 
-void nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay)
+void nblend( CRGB* existing, const CRGB* overlay, uint16_t count, fract8 amountOfOverlay)
 {
     for( uint16_t i = count; i; --i) {
         nblend( *existing, *overlay, amountOfOverlay);
@@ -411,7 +411,7 @@ CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGrad
 
 
 
-void nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
+void nblend( CHSV* existing, const CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
 {
     if(existing == overlay) return;
     for( uint16_t i = count; i; --i) {
