@@ -28,6 +28,7 @@ dependencies = [
     "advanced-aicode",
     "download",
     "httpx",
+    "static-graphviz>=1.8"
 ]
 
 [build-system]
