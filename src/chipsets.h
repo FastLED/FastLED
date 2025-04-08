@@ -454,7 +454,13 @@ private:
 				return (delta * rise) / run + out_min;
 			}
 		};
-		*out_brightness = Math::map(brightness, 0, 255, 0, 31);
+		// *out_brightness = Math::map(brightness, 0, 255, 0, 31);
+		uint16_t bri = Math::map(brightness, 0, 255, 0, 31);
+		if (bri == 0 && brightness != 0) {
+			// Fixes https://github.com/FastLED/FastLED/issues/1908
+			bri = 1;
+		}
+		*out_brightness = static_cast<uint8_t>(bri);
 		return;
 #else
 		uint8_t s0, s1, s2;
