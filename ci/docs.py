@@ -14,12 +14,12 @@ from typing import Optional, Tuple
 from download import download  # type: ignore
 
 # Configs
-DOXYGEN_VERSION = "1.11.0"
-DOXYGEN_AWESOME_VERSION = "2.3.3"
+DOXYGEN_VERSION = "1.12.0"
+DOXYGEN_AWESOME_VERSION = "2.3.4"
 DOXYFILE_PATH = Path("docs/Doxyfile")
 HTML_OUTPUT_DIR = Path("docs/html")
 DOXYGEN_CSS_REPO = "https://github.com/jothepro/doxygen-awesome-css"
-GRAPHVIZ_VERSION = "9.0.0"  # Default version if not found in releases
+
 
 HERE = Path(__file__).parent.resolve()
 PROJECT_ROOT = HERE.parent
@@ -84,7 +84,7 @@ def install_doxygen_windows() -> Path:
     doxygen_url = (
         f"https://www.doxygen.nl/files/doxygen-{DOXYGEN_VERSION}.windows.x64.bin.zip"
     )
-    zip_path = DOCS_TOOL_PATH / "doxygen.zip"
+    zip_path = DOCS_TOOL_PATH / f"doxygen-{DOXYGEN_VERSION}.zip"
     extract_dir = DOCS_TOOL_PATH / f"doxygen-{DOXYGEN_VERSION}"
 
     # Create tool path if it doesn't exist
