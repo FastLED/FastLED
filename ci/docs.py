@@ -177,6 +177,9 @@ def main() -> None:
             "Graphviz (dot) not found in PATH. Diagrams may not be generated."
         )
 
+    # Check it graphviz is installed
+    run("dot -Tsvg -Kneato -Grankdir=LR", check=True)
+
     generate_docs(doxygen_bin=doxygen_bin)
 
     print(f"\n✅ Docs generated in: {HTML_OUTPUT_DIR}")
