@@ -2853,7 +2853,7 @@ DOT_IMAGE_FORMAT       = svg
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-INTERACTIVE_SVG        = NO
+INTERACTIVE_SVG        = YES
 
 DOT_TRANSPARENT       = YES
 
