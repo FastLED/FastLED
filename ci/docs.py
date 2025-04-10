@@ -14,12 +14,12 @@ from download import download  # type: ignore
 
 # Configs
 DOXYGEN_VERSION = (
-    "1.12.0"  # DOXYGEN_AWESOME styler is has certain restrictions with doxygen version
+    "1.13.2"  # DOXYGEN_AWESOME styler is has certain restrictions with doxygen version
 )
-DOXYGEN_AWESOME_VERSION = "2.3.4"
+DOXYGEN_AWESOME_VERSION = "2.3.4"  # deprecating
 DOXYFILE_PATH = Path("docs/Doxyfile")
 HTML_OUTPUT_DIR = Path("docs/html")
-DOXYGEN_CSS_REPO = "https://github.com/jothepro/doxygen-awesome-css"
+DOXYGEN_CSS_REPO = "https://github.com/jothepro/doxygen-awesome-css"  # deprecating
 
 
 HERE = Path(__file__).parent.resolve()
@@ -152,10 +152,12 @@ def main() -> None:
 
     if is_windows:
         doxygen_bin = install_doxygen_windows()
+        # add to path C:\Program Files\Graphviz\bin\
+        os.environ["PATH"] += os.pathsep + r"C:\Program Files\Graphviz\bin"
     else:
         doxygen_bin = install_doxygen_unix()
 
-    install_theme()
+    # install_theme()
 
     # install_graphviz()  # Work in progress
 
@@ -169,7 +171,9 @@ def main() -> None:
         )
 
     # Check it graphviz is installed
-    run("dot -Tsvg -Kneato -Grankdir=LR", check=True)
+    # if linux
+    if not is_windows:
+        run("dot -Tsvg -Kneato -Grankdir=LR", check=True)
 
     generate_docs(doxygen_bin=doxygen_bin)
 
