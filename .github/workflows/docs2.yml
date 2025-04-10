@@ -1,13 +1,9 @@
 name: docs2
 
 on:
-  push:
-    branches:
-      - master
-  pull_request_target:
-    branches:
-      - master
-      - pydocs
+  workflow_dispatch:
+  release:
+    types: released
 
 jobs:
   docs:
@@ -37,6 +33,7 @@ jobs:
 
       - name: Run Docs script
         run: |
+          sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
           uv run ci/docs.py
 
       - name: Deploy Docs
