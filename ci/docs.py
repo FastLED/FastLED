@@ -13,7 +13,9 @@ from typing import Optional, Tuple
 from download import download  # type: ignore
 
 # Configs
-DOXYGEN_VERSION = "1.12.0"
+DOXYGEN_VERSION = (
+    "1.12.0"  # DOXYGEN_AWESOME styler is has certain restrictions with doxygen version
+)
 DOXYGEN_AWESOME_VERSION = "2.3.4"
 DOXYFILE_PATH = Path("docs/Doxyfile")
 HTML_OUTPUT_DIR = Path("docs/html")
@@ -146,7 +148,7 @@ def main() -> None:
 
     is_windows = platform.system() == "Windows"
     # is_macos = platform.system() == "Darwin"
-    project_number, commit_msg = get_git_info()
+    _, commit_msg = get_git_info()
 
     if is_windows:
         doxygen_bin = install_doxygen_windows()
