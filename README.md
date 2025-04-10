@@ -8,7 +8,6 @@ FastLED Library
 [![unit tests](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml)
 [![Arduino Library Lint](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml)
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
-[![docs-build](https://github.com/FastLED/FastLED/actions/workflows/docs2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docs2.yml)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 Want to control a strip of leds? Or control 10's of thousands? FastLED has your back.
