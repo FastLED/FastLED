@@ -4,7 +4,6 @@ Work in progress to generate doxygen via a script instead of a GitHub action.
 
 import os
 import platform
-import re
 import shutil
 import subprocess
 import warnings
@@ -132,15 +131,6 @@ def install_theme() -> Path:
     return theme_path
 
 
-def update_doxyfile(project_number: str) -> None:
-    print("Updating Doxyfile with project number...")
-    doxyfile = DOXYFILE_PATH.read_text()
-    updated = re.sub(
-        r"(?m)^PROJECT_NUMBER\s*=.*", f"PROJECT_NUMBER = {project_number}", doxyfile
-    )
-    DOXYFILE_PATH.write_text(updated)
-
-
 def generate_docs(doxygen_bin: Path) -> None:
     print("Generating documentation...")
     cmd_str = f'"{doxygen_bin}" {DOXYFILE_PATH.name}'
@@ -164,7 +154,6 @@ def main() -> None:
         doxygen_bin = install_doxygen_unix()
 
     install_theme()
-    update_doxyfile(project_number)
 
     # install_graphviz()  # Work in progress
 
