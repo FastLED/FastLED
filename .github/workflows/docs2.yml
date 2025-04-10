@@ -9,12 +9,15 @@ on:
       - master
       - pydocs
 
-      
 jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
