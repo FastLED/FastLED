@@ -51,4 +51,5 @@ jobs:
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
           full_commit_message: Update docs for ${{ steps.repo-info.outputs.commit-message }}
-          force_orphan: true  # Keep the large documentation from filling up the git history
+          # DANGER - NEVER USE FORCE ORPHAN - DOCS IS NOT THE ONLY THING IN THIS BRANCH.
+          #force_orphan: true  # Keep the large documentation from filling up the git history
