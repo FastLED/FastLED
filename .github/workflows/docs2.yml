@@ -32,6 +32,7 @@ jobs:
         run: pip install uv
 
       - name: Run Docs script
+        working-directory: ./docs
         run: |
           sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
           uv run ci/docs.py
