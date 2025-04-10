@@ -14,6 +14,9 @@ Want to control a strip of leds? Or control 10's of thousands? FastLED has your 
 
 FastLED is a robust and massively parallel-led driver for Arduino, Esp32, RaspberryPi,  Atmega, Teensy, Uno, Apollo3 Arm and more. Also runs on dirt cheap sub $1 devices, due to it's incredibly small compile size. High end devices can drive upto ~30k LEDS (Teensy) and ~20k on ESP32. Supports nearly every single LED chipset in existence. Background rendering (ESP32/Teensy/RaspberriPi) means you can respond to user input while the leds render. FastLED is the third [most popular library on Arduino](https://docs.arduino.cc/libraries/).
 
+## Documentation
+
+Can be found [here](https://fastled.io/docs/)
 
 ## Star History
 
