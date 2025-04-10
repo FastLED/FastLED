@@ -31,10 +31,14 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Run Docs script
+      - name: Update docs with project number
         working-directory: ./docs
         run: |
           sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
+
+
+      - name: Run Docs script
+        run: |
           uv run ci/docs.py
 
       - name: Deploy Docs
