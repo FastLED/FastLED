@@ -1,13 +1,13 @@
-<map id="FastLED/FastLED/src/fl/allocator.cpp" name="FastLED/FastLED/src/fl/allocator.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="76,5,227,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,76,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,48,70,87,67,83,123,43"/>
-<area shape="rect" id="Node000003" href="$d2/d6f/fl_2allocator_8h.html" title=" " alt="" coords="100,93,203,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,46,154,79,149,79,149,46"/>
-<area shape="rect" id="Node000006" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="227,93,348,119"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="185,43,257,84,254,89,183,48"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="65,167,139,192"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,121,120,157,116,154,141,117"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="164,167,235,192"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="161,118,186,154,182,157,157,121"/>
+<map id="fl/allocator.cpp" name="fl/allocator.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="93,5,210,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,33,72,73,69,69,132,28"/>
+<area shape="rect" id="Node000003" href="$d2/d6f/fl_2allocator_8h.html" title=" " alt="" coords="100,79,203,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,31,154,65,149,65,149,31"/>
+<area shape="rect" id="Node000006" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="227,79,348,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="174,28,254,70,252,75,172,33"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="65,152,139,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,106,120,142,116,139,141,103"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="164,152,235,177"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="161,103,186,139,182,142,157,106"/>
 </map>

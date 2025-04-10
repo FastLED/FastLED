@@ -1,9 +1,9 @@
-<map id="FastLED/FastLED/src/fastspi_types.h" name="FastLED/FastLED/src/fastspi_types.h">
-<area shape="rect" id="Node000001" title="Data types and constants used by SPI interfaces." alt="" coords="138,5,289,45"/>
-<area shape="rect" id="Node000002" href="$d8/d2d/fl_2force__inline_8h.html" title=" " alt="" coords="5,93,128,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,48,102,89,99,84,177,43"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="153,93,274,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,46,216,79,211,79,211,46"/>
-<area shape="rect" id="Node000004" href="$d8/d4b/unused_8h.html" title=" " alt="" coords="299,93,392,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="246,43,315,84,312,88,244,48"/>
+<map id="fastspi_types.h" name="fastspi_types.h">
+<area shape="rect" id="Node000001" title="Data types and constants used by SPI interfaces." alt="" coords="153,5,274,31"/>
+<area shape="rect" id="Node000002" href="$d8/d2d/fl_2force__inline_8h.html" title=" " alt="" coords="5,79,128,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,33,104,75,102,70,189,28"/>
+<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="153,79,274,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,31,216,65,211,65,211,31"/>
+<area shape="rect" id="Node000004" href="$d8/d4b/unused_8h.html" title=" " alt="" coords="299,79,392,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="236,28,313,70,311,74,233,33"/>
 </map>

@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/fx/2d/scale_up.h" name="FastLED/FastLED/src/fx/2d/scale_up.h">
-<area shape="rect" id="Node000001" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="5,5,156,45"/>
-<area shape="rect" id="Node000002" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="5,93,156,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,59,83,93,78,93,78,59"/>
+<map id="fx/2d/scale_up.h" name="fx/2d/scale_up.h">
+<area shape="rect" id="Node000001" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="13,5,141,31"/>
+<area shape="rect" id="Node000002" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="5,79,148,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,44,79,79,74,79,74,44"/>
 </map>

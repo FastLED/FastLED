@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/examples/Multiple/ArrayOfLedArrays/ArrayOfLedArrays.ino" name="FastLED/FastLED/examples/Multiple/ArrayOfLedArrays/ArrayOfLedArrays.ino">
-<area shape="rect" id="Node000001" title="Set up three LED strips, all running from an array of arrays." alt="" coords="1231,5,1430,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/Multiple/ArrayOfLedArrays/ArrayOfLedArrays.ino" name="/home/runner/work/FastLED/FastLED/examples/Multiple/ArrayOfLedArrays/ArrayOfLedArrays.ino">
+<area shape="rect" id="Node000001" title="Set up three LED strips, all running from an array of arrays." alt="" coords="1189,5,1473,60"/>
 <area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1288,108,1373,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1333,60,1333,94,1328,94,1328,60"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="242,636,313,661"/>

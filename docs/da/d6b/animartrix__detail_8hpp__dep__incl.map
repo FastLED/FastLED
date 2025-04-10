@@ -1,11 +1,11 @@
-<map id="FastLED/FastLED/src/fx/2d/animartrix_detail.hpp" name="FastLED/FastLED/src/fx/2d/animartrix_detail.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="251,5,453,45"/>
-<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="273,93,431,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="355,59,355,93,349,93,349,59"/>
-<area shape="rect" id="Node000003" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,181,229,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="289,141,170,184,168,179,287,136"/>
-<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="254,181,450,221"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="355,147,355,181,349,181,349,147"/>
-<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="474,181,670,221"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="414,136,525,179,523,184,412,141"/>
+<map id="fx/2d/animartrix_detail.hpp" name="fx/2d/animartrix_detail.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="270,5,469,31"/>
+<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="292,79,447,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="372,44,372,79,367,79,367,44"/>
+<area shape="rect" id="Node000003" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,152,240,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="324,111,199,155,197,149,322,106"/>
+<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="265,152,474,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="372,118,372,152,367,152,367,118"/>
+<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="499,152,699,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="414,106,530,149,528,154,412,111"/>
 </map>

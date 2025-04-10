@@ -1,12 +1,12 @@
-<map id="FastLED/FastLED/src/rgbw.h" name="FastLED/FastLED/src/rgbw.h">
-<area shape="rect" id="Node000001" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="136,5,287,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,76,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,48,79,90,77,85,169,43"/>
-<area shape="rect" id="Node000003" href="$d8/d2d/fl_2force__inline_8h.html" title=" " alt="" coords="101,93,223,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,47,179,83,174,80,197,44"/>
-<area shape="rect" id="Node000004" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="237,167,359,192"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="225,45,287,153,282,156,220,47"/>
-<area shape="rect" id="Node000005" href="$db/d07/eorder_8h.html" title="Defines color channel ordering enumerations." alt="" coords="298,93,373,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="243,43,307,84,304,88,240,48"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="332,120,313,156,308,153,327,118"/>
+<map id="rgbw.h" name="rgbw.h">
+<area shape="rect" id="Node000001" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="179,5,244,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,33,82,76,80,71,183,28"/>
+<area shape="rect" id="Node000003" href="$d8/d2d/fl_2force__inline_8h.html" title=" " alt="" coords="101,79,223,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="205,33,180,69,176,66,201,29"/>
+<area shape="rect" id="Node000004" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="237,152,359,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="221,30,286,139,282,141,216,32"/>
+<area shape="rect" id="Node000005" href="$db/d07/eorder_8h.html" title="Defines color channel ordering enumerations." alt="" coords="298,79,373,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="233,28,305,69,302,74,230,33"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="332,106,313,141,308,139,327,103"/>
 </map>

@@ -1,5 +1,6 @@
 digraph "CPixelView&lt; PIXEL_TYPE &gt;::pixelset_iterator_base&lt; T &gt;"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

@@ -1,5 +1,6 @@
 digraph "__FL_PORT_INFO::portName"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

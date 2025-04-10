@@ -1,5 +1,6 @@
 digraph "FASTLED_NAMESPACE_BEGIN::min3"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

@@ -1,5 +1,6 @@
 digraph "WS2816&lt; DATA_PIN, RGB_ORDER &gt;"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

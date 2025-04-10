@@ -1,10 +1,11 @@
-digraph "FastLED/FastLED/src/transpose8x1_noinline.h"
+digraph "transpose8x1_noinline.h"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="FastLED/FastLED/src\l/transpose8x1_noinline.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Declares the 8x1 transposition function."];
+  Node1 [id="Node000001",label="transpose8x1_noinline.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Declares the 8x1 transposition function."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="FastLED/FastLED/src\l/transpose8x1_noinline.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dec/transpose8x1__noinline_8cpp.html",tooltip="Defines the 8x1 transposition function."];
+  Node2 [id="Node000002",label="transpose8x1_noinline.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dec/transpose8x1__noinline_8cpp.html",tooltip="Defines the 8x1 transposition function."];
 }

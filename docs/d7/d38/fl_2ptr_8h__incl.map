@@ -1,16 +1,16 @@
-<map id="FastLED/FastLED/src/fl/ptr.h" name="FastLED/FastLED/src/fl/ptr.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="77,5,227,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,167,80,192"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,48,61,67,47,80,36,95,31,108,29,123,35,153,30,154,24,124,25,107,31,92,43,76,58,63,91,43"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="135,167,257,192"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,45,176,93,192,153,187,154,171,94,156,47"/>
-<area shape="rect" id="Node000004" href="$df/d28/fl_2scoped__ptr_8h.html" title=" " alt="" coords="46,93,162,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="143,47,121,83,116,80,138,44"/>
-<area shape="rect" id="Node000005" href="$d8/d0c/template__magic_8h.html" title=" " alt="" coords="237,93,389,119"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="192,43,278,85,276,90,189,48"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="96,121,64,158,60,154,92,117"/>
-<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="120,117,172,156,169,160,117,121"/>
-<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="296,121,228,162,226,157,293,116"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="281,167,351,192"/>
-<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="316,119,318,153,312,153,311,119"/>
+<map id="fl/ptr.h" name="fl/ptr.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="121,5,183,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,152,80,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,28,75,46,53,60,36,80,30,94,29,109,35,139,30,140,24,109,25,93,31,77,49,56,72,41,120,23"/>
+<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="135,152,257,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,30,176,78,193,138,187,139,171,79,154,32"/>
+<area shape="rect" id="Node000004" href="$df/d28/fl_2scoped__ptr_8h.html" title=" " alt="" coords="46,79,162,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="146,33,122,69,117,66,142,30"/>
+<area shape="rect" id="Node000005" href="$d8/d0c/template__magic_8h.html" title=" " alt="" coords="237,79,389,104"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="179,28,276,71,273,75,177,33"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="96,106,64,143,60,140,92,103"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="120,102,172,141,169,146,117,106"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="296,106,228,147,226,142,293,102"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="281,152,351,177"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="316,104,318,138,312,139,311,104"/>
 </map>

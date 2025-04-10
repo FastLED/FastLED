@@ -1,10 +1,11 @@
-digraph "FastLED/FastLED/examples/Overclock/Overclock.ino"
+digraph "/home/runner/work/FastLED/FastLED/examples/Overclock/Overclock.ino"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="FastLED/FastLED/examples\l/Overclock/Overclock.ino",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Demonstrates how to overclock a FastLED setup."];
+  Node1 [id="Node000001",label="/home/runner/work/FastLED\l/FastLED/examples/Overclock\l/Overclock.ino",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Demonstrates how to overclock a FastLED setup."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fx/2d/noisepalette.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dc7/noisepalette_8h.html",tooltip="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];

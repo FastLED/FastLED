@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/src/noisegen.h" name="FastLED/FastLED/src/noisegen.h">
-<area shape="rect" id="Node000001" title="Noise generation classes." alt="" coords="143,5,294,45"/>
-<area shape="rect" id="Node000002" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="5,93,224,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,56,139,95,136,91,183,52"/>
-<area shape="rect" id="Node000003" href="$d9/d2c/noisewave_8h.html" title=" " alt="" coords="249,93,399,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="254,52,302,91,299,95,251,56"/>
+<map id="noisegen.h" name="noisegen.h">
+<area shape="rect" id="Node000001" title="Noise generation classes." alt="" coords="179,5,273,31"/>
+<area shape="rect" id="Node000002" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="5,79,236,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,42,154,81,151,77,199,37"/>
+<area shape="rect" id="Node000003" href="$d9/d2c/noisewave_8h.html" title=" " alt="" coords="261,93,402,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,37,319,91,315,95,249,41"/>
 </map>

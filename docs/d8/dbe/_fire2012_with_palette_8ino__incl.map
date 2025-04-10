@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/examples/Fire2012WithPalette/Fire2012WithPalette.ino" name="FastLED/FastLED/examples/Fire2012WithPalette/Fire2012WithPalette.ino">
-<area shape="rect" id="Node000001" title="Simple one&#45;dimensional fire animation with a programmable color palette." alt="" coords="1207,5,1454,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/Fire2012WithPalette/Fire2012WithPalette.ino" name="/home/runner/work/FastLED/FastLED/examples/Fire2012WithPalette/Fire2012WithPalette.ino">
+<area shape="rect" id="Node000001" title="Simple one&#45;dimensional fire animation with a programmable color palette." alt="" coords="1213,5,1448,60"/>
 <area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1288,108,1373,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1333,60,1333,94,1328,94,1328,60"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="242,636,313,661"/>

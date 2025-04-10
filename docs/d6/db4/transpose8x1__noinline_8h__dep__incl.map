@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/transpose8x1_noinline.h" name="FastLED/FastLED/src/transpose8x1_noinline.h">
-<area shape="rect" id="Node000001" title="Declares the 8x1 transposition function." alt="" coords="13,5,198,45"/>
-<area shape="rect" id="Node000002" href="$d6/dec/transpose8x1__noinline_8cpp.html" title="Defines the 8x1 transposition function." alt="" coords="5,93,205,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,59,108,93,103,93,103,59"/>
+<map id="transpose8x1_noinline.h" name="transpose8x1_noinline.h">
+<area shape="rect" id="Node000001" title="Declares the 8x1 transposition function." alt="" coords="13,5,194,31"/>
+<area shape="rect" id="Node000002" href="$d6/dec/transpose8x1__noinline_8cpp.html" title="Defines the 8x1 transposition function." alt="" coords="5,79,201,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,44,106,79,101,79,101,44"/>
 </map>

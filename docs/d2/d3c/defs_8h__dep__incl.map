@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/shared/defs.h" name="FastLED/FastLED/examples/LuminescentGrand/shared/defs.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="172,5,412,45"/>
-<area shape="rect" id="Node000002" href="$d8/de5/_luminescent_grand_8ino.html" title=" " alt="" coords="5,101,304,141"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,55,184,103,181,98,251,51"/>
-<area shape="rect" id="Node000003" href="$dc/d4e/ui__state_8cpp.html" title=" " alt="" coords="329,93,530,148"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="332,51,392,91,389,95,329,55"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/defs.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/defs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="152,5,423,60"/>
+<area shape="rect" id="Node000002" href="$d8/de5/_luminescent_grand_8ino.html" title=" " alt="" coords="5,108,276,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,70,181,110,178,106,236,66"/>
+<area shape="rect" id="Node000003" href="$dc/d4e/ui__state_8cpp.html" title=" " alt="" coords="300,108,571,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="338,65,398,106,395,110,335,70"/>
 </map>

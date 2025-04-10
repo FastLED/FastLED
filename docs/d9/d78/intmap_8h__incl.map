@@ -1,9 +1,9 @@
-<map id="FastLED/FastLED/src/lib8tion/intmap.h" name="FastLED/FastLED/src/lib8tion/intmap.h">
-<area shape="rect" id="Node000001" title="Defines integer mapping functions." alt="" coords="123,5,273,45"/>
-<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,93,127,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,48,99,88,96,84,165,43"/>
-<area shape="rect" id="Node000003" href="$d4/d7a/lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="151,93,245,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,46,201,79,195,79,195,46"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="269,93,340,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="225,43,279,83,276,87,222,48"/>
+<map id="lib8tion/intmap.h" name="lib8tion/intmap.h">
+<area shape="rect" id="Node000001" title="Defines integer mapping functions." alt="" coords="131,5,265,31"/>
+<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,33,101,74,98,70,176,28"/>
+<area shape="rect" id="Node000003" href="$d4/d7a/lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="151,79,245,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,31,201,65,195,65,195,31"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="269,79,340,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="217,28,277,69,274,73,214,33"/>
 </map>

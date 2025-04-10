@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/src/fx/video/video_impl.h" name="FastLED/FastLED/src/fx/video/video_impl.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="92,5,259,45"/>
-<area shape="rect" id="Node000002" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="5,93,156,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,57,103,95,100,91,142,53"/>
-<area shape="rect" id="Node000003" href="$d0/d7f/video__impl_8cpp.html" title=" " alt="" coords="180,93,363,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,53,252,91,248,95,205,57"/>
+<map id="fx/video/video_impl.h" name="fx/video/video_impl.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,5,221,31"/>
+<area shape="rect" id="Node000002" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="5,79,108,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,42,72,80,68,76,114,38"/>
+<area shape="rect" id="Node000003" href="$d0/d7f/video__impl_8cpp.html" title=" " alt="" coords="133,79,311,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,38,210,76,207,80,161,42"/>
 </map>

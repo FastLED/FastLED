@@ -1,11 +1,11 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.cpp" name="FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="637,5,839,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.cpp" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="603,5,873,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,203,89,229"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="637,44,466,67,369,86,275,111,220,130,166,154,80,199,77,194,164,149,218,125,273,105,368,81,465,62,637,39"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="603,48,444,71,358,88,275,111,220,130,166,154,80,199,77,194,164,149,218,125,273,105,357,83,443,66,602,43"/>
 <area shape="rect" id="Node000003" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="574,284,699,309"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="737,61,728,103,715,149,684,218,653,274,649,271,680,216,710,147,723,101,732,60"/>
 <area shape="rect" id="Node000005" href="$d4/dd2/framebuffer_8h.html" title=" " alt="" coords="114,203,285,229"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="637,44,571,52,497,65,421,84,348,110,312,129,277,152,223,196,220,192,274,148,309,125,346,106,420,79,496,60,570,47,637,38"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="603,48,477,70,411,87,348,110,312,129,277,152,223,196,220,192,274,148,309,125,346,106,410,82,476,65,602,42"/>
 <area shape="rect" id="Node000006" href="$de/d60/settings_8h.html" title=" " alt="" coords="554,115,701,141"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="708,62,653,108,650,104,705,58"/>
 <area shape="rect" id="Node000007" href="$d9/d7e/_led_rope_t_c_l_8h.html" title=" " alt="" coords="360,115,481,141"/>
@@ -13,11 +13,11 @@
 <area shape="rect" id="Node000034" href="$df/da2/led__layout__array_8h.html" title=" " alt="" coords="776,108,927,148"/>
 <area shape="poly" id="edge35_Node000001_Node000034" title=" " alt="" coords="772,58,820,97,816,101,768,62"/>
 <area shape="rect" id="Node000035" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1594,115,1679,141"/>
-<area shape="poly" id="edge36_Node000001_Node000035" title=" " alt="" coords="839,42,1580,118,1580,123,839,47"/>
+<area shape="poly" id="edge36_Node000001_Node000035" title=" " alt="" coords="874,45,1581,118,1580,124,873,51"/>
 <area shape="rect" id="Node000030" href="$d6/d01/dbg_8h.html" title=" " alt="" coords="1704,115,1775,141"/>
-<area shape="poly" id="edge113_Node000001_Node000030" title=" " alt="" coords="839,35,1284,60,1521,80,1618,92,1692,105,1702,108,1700,113,1691,111,1617,98,1520,86,1284,65,839,41"/>
+<area shape="poly" id="edge113_Node000001_Node000030" title=" " alt="" coords="874,37,1310,62,1531,81,1622,93,1692,105,1702,108,1700,113,1691,111,1621,98,1531,87,1310,67,873,42"/>
 <area shape="rect" id="Node000089" href="$d9/d3b/ui_8h.html" title=" " alt="" coords="3005,357,3063,383"/>
-<area shape="poly" id="edge114_Node000001_Node000089" title=" " alt="" coords="839,32,1326,39,1657,48,2005,62,2343,83,2638,111,2762,128,2863,147,2940,169,2968,181,2988,194,3003,209,3015,228,3030,268,3037,309,3038,343,3033,343,3031,309,3025,269,3010,230,2999,213,2984,198,2965,186,2938,174,2862,152,2761,133,2638,116,2342,88,2005,68,1657,53,1326,44,839,37"/>
+<area shape="poly" id="edge114_Node000001_Node000089" title=" " alt="" coords="874,32,1375,40,1702,50,2041,64,2368,85,2652,112,2770,129,2868,148,2941,170,2968,181,2988,194,3003,209,3015,228,3030,268,3037,309,3038,343,3033,343,3031,309,3025,269,3010,230,2999,213,2984,198,2966,186,2939,175,2867,153,2769,134,2651,118,2367,90,2041,69,1701,55,1375,46,873,37"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="1761,504,1832,529"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="643,309,661,345,675,364,693,381,733,406,770,423,804,434,838,439,911,444,1002,453,1219,480,1433,498,1618,507,1748,512,1748,517,1618,513,1433,503,1219,486,1002,459,910,450,837,445,803,439,768,428,731,411,690,385,671,368,657,348,639,311"/>
 <area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="360,142,240,166,103,199,93,202,91,196,101,193,239,161,359,137"/>

@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/src/dither_mode.h" name="FastLED/FastLED/src/dither_mode.h">
-<area shape="rect" id="Node000001" title="Declares dithering options and types." alt="" coords="25,5,176,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,76,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,47,60,84,56,81,84,44"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="100,93,221,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,44,146,81,141,84,113,47"/>
+<map id="dither_mode.h" name="dither_mode.h">
+<area shape="rect" id="Node000001" title="Declares dithering options and types." alt="" coords="43,5,159,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,33,61,70,57,66,89,29"/>
+<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="100,79,221,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="113,29,144,66,140,70,109,33"/>
 </map>

@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/src/singleton.h" name="FastLED/FastLED/src/singleton.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,156,45"/>
-<area shape="rect" id="Node000002" href="$d0/dae/fl_2singleton_8h.html" title=" " alt="" coords="27,93,134,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,46,83,79,78,79,78,46"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="20,167,141,192"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,119,83,153,78,153,78,119"/>
+<map id="singleton.h" name="singleton.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="19,5,113,31"/>
+<area shape="rect" id="Node000002" href="$d0/dae/fl_2singleton_8h.html" title=" " alt="" coords="13,79,119,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,31,69,65,63,65,63,31"/>
+<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,152,127,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="69,104,69,138,63,138,63,104"/>
 </map>

@@ -1,23 +1,24 @@
-digraph "FastLED/FastLED/src/cled_controller.h"
+digraph "cled_controller.h"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="FastLED/FastLED/src\l/cled_controller.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="base definitions used by led controllers for writing out led data"];
+  Node1 [id="Node000001",label="cled_controller.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="base definitions used by led controllers for writing out led data"];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="FastLED/FastLED/src\l/cled_controller.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dd8/cled__controller_8cpp.html",tooltip="base definitions used by led controllers for writing out led data"];
+  Node2 [id="Node000002",label="cled_controller.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dd8/cled__controller_8cpp.html",tooltip="base definitions used by led controllers for writing out led data"];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="FastLED/FastLED/src\l/cpixel_ledcontroller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d57/cpixel__ledcontroller_8h.html",tooltip="defines the templated version of the CLEDController class"];
+  Node3 [id="Node000003",label="cpixel_ledcontroller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d57/cpixel__ledcontroller_8h.html",tooltip="defines the templated version of the CLEDController class"];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="FastLED/FastLED/src\l/controller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd9/controller_8h.html",tooltip="deprecated: base definitions used by led controllers for writing out led data"];
+  Node4 [id="Node000004",label="controller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd9/controller_8h.html",tooltip="deprecated: base definitions used by led controllers for writing out led data"];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="FastLED/FastLED/src\l/FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node5 [id="Node000005",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node5 -> Node2 [id="edge5_Node000005_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node1 [id="edge6_Node000005_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node3 [id="edge7_Node000005_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node77 [id="edge8_Node000005_Node000077",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node77 [id="Node000077",label="FastLED/FastLED/src\l/fastspi.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];
+  Node77 [id="Node000077",label="fastspi.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];
   Node77 -> Node5 [id="edge9_Node000077_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node77 [id="edge10_Node000004_Node000077",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

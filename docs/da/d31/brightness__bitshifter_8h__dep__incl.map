@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/lib8tion/brightness_bitshifter.h" name="FastLED/FastLED/src/lib8tion/brightness_bitshifter.h">
-<area shape="rect" id="Node000001" title="Defines brightness bitshifting functions." alt="" coords="27,5,177,60"/>
-<area shape="rect" id="Node000002" href="$dd/d05/five__bit__hd__gamma_8cpp.html" title="Defines functions for five&#45;bit gamma correction." alt="" coords="5,108,199,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,74,105,108,99,108,99,74"/>
+<map id="lib8tion/brightness_bitshifter.h" name="lib8tion/brightness_bitshifter.h">
+<area shape="rect" id="Node000001" title="Defines brightness bitshifting functions." alt="" coords="29,5,171,45"/>
+<area shape="rect" id="Node000002" href="$dd/d05/five__bit__hd__gamma_8cpp.html" title="Defines functions for five&#45;bit gamma correction." alt="" coords="5,93,195,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,59,103,93,97,93,97,59"/>
 </map>

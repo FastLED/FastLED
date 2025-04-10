@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Platform.h" name="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Platform.h">
-<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="49,5,250,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Platform.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Platform.h">
+<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="14,5,285,60"/>
 <area shape="rect" id="Node000002" href="$d8/dd0/midi___defs_8h.html" title="MIDI Library for the Arduino &#45; Definitions." alt="" coords="99,108,199,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,60,152,94,147,94,147,60"/>
 <area shape="rect" id="Node000003" href="$df/dce/midi___namespace_8h.html" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="5,181,152,207"/>

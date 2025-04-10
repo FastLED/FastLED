@@ -1,24 +1,24 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h" name="FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="345,5,541,60"/>
-<area shape="rect" id="Node000002" href="$dc/db0/_painter_8h.html" title=" " alt="" coords="5,299,201,353"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="333,57,270,76,206,105,148,145,123,170,102,197,92,222,89,248,97,298,92,299,84,248,87,220,97,195,119,166,144,141,203,100,268,71,331,51"/>
-<area shape="rect" id="Node000004" href="$df/d2d/util_8cpp.html" title=" " alt="" coords="853,196,1049,251"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="528,62,882,193,880,198,526,67"/>
-<area shape="rect" id="Node000005" href="$d8/d3c/util_8h.html" title=" " alt="" coords="327,108,560,148"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="446,74,446,108,441,108,441,74"/>
-<area shape="rect" id="Node000003" href="$db/d33/_painter_8cpp.html" title=" " alt="" coords="73,401,269,456"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="131,363,156,400,151,403,127,366"/>
-<area shape="poly" id="edge10_Node000005_Node000002" title=" " alt="" coords="314,145,203,166,159,180,131,198,115,221,107,247,103,299,98,298,102,246,110,218,127,194,157,175,202,161,313,140"/>
-<area shape="poly" id="edge13_Node000005_Node000004" title=" " alt="" coords="574,146,843,193,854,196,853,201,841,199,573,151"/>
-<area shape="rect" id="Node000006" href="$d9/d5c/_keyboard_8cpp.html" title=" " alt="" coords="277,299,473,353"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="423,161,403,197,388,250,380,299,375,298,383,249,398,195,418,158"/>
-<area shape="rect" id="Node000007" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="141,196,337,251"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="391,156,298,198,296,193,389,151"/>
-<area shape="rect" id="Node000008" href="$d3/d03/color_8cpp.html" title=" " alt="" coords="413,196,609,251"/>
-<area shape="poly" id="edge11_Node000005_Node000008" title=" " alt="" coords="467,157,494,194,490,197,463,160"/>
-<area shape="rect" id="Node000009" href="$d4/df0/color__mapper_8cpp.html" title=" " alt="" coords="633,196,829,251"/>
-<area shape="poly" id="edge12_Node000005_Node000009" title=" " alt="" coords="515,150,651,193,649,198,514,155"/>
-<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="194,261,141,301,137,296,191,257"/>
-<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="237,265,229,308,215,354,191,402,186,400,210,352,223,307,232,264"/>
-<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="287,257,341,296,338,301,284,261"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="439,5,709,60"/>
+<area shape="rect" id="Node000002" href="$dc/db0/_painter_8h.html" title=" " alt="" coords="5,313,276,368"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="426,54,348,74,268,106,231,126,196,151,165,179,139,212,129,236,126,263,134,313,129,314,121,263,124,235,134,209,161,176,193,147,228,122,266,101,346,69,424,49"/>
+<area shape="rect" id="Node000004" href="$df/d2d/util_8cpp.html" title=" " alt="" coords="1115,211,1385,265"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="675,61,1164,208,1162,213,673,66"/>
+<area shape="rect" id="Node000005" href="$d8/d3c/util_8h.html" title=" " alt="" coords="439,108,709,163"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="577,74,577,108,571,108,571,74"/>
+<area shape="rect" id="Node000003" href="$db/d33/_painter_8cpp.html" title=" " alt="" coords="92,416,363,471"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,377,207,414,203,418,170,380"/>
+<area shape="poly" id="edge10_Node000005_Node000002" title=" " alt="" coords="425,149,347,158,272,171,209,189,185,200,168,213,152,235,144,261,141,313,135,313,139,260,148,233,164,209,182,196,207,184,271,166,346,153,424,144"/>
+<area shape="poly" id="edge13_Node000005_Node000004" title=" " alt="" coords="723,153,1104,208,1115,210,1114,215,1103,213,723,159"/>
+<area shape="rect" id="Node000006" href="$d9/d5c/_keyboard_8cpp.html" title=" " alt="" coords="352,313,623,368"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="540,175,515,212,498,265,491,313,486,313,493,264,510,210,536,172"/>
+<area shape="rect" id="Node000007" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="179,211,449,265"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="494,170,383,213,381,208,493,165"/>
+<area shape="rect" id="Node000008" href="$d3/d03/color_8cpp.html" title=" " alt="" coords="525,211,796,265"/>
+<area shape="poly" id="edge11_Node000005_Node000008" title=" " alt="" coords="608,171,640,209,636,212,603,175"/>
+<area shape="rect" id="Node000009" href="$d4/df0/color__mapper_8cpp.html" title=" " alt="" coords="820,211,1091,265"/>
+<area shape="poly" id="edge12_Node000005_Node000009" title=" " alt="" coords="687,164,857,208,855,213,686,169"/>
+<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="259,274,187,315,185,311,256,270"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="313,279,305,323,290,369,274,395,256,417,252,414,270,392,285,367,300,322,308,278"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="372,270,443,311,441,315,369,274"/>
 </map>

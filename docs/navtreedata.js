@@ -26,12 +26,12 @@ var NAVTREE =
 [
   [ "FastLED", "index.html", [
     [ "FastLED Library", "index.html", "index" ],
-    [ "Platform Porting Guide", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html", [
-      [ "Fast porting for a new board on existing hardware", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md47", [
-        [ "Setting up the basic files/folders", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md48", null ],
-        [ "Porting fastpin.h", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md49", null ],
-        [ "Porting fastspi.h", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md50", null ],
-        [ "Porting clockless.h", "d4/dd7/md__fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md51", null ]
+    [ "Platform Porting Guide", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html", [
+      [ "Fast porting for a new board on existing hardware", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md0", [
+        [ "Setting up the basic files/folders", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md1", null ],
+        [ "Porting fastpin.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md2", null ],
+        [ "Porting fastspi.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md3", null ],
+        [ "Porting clockless.h", "dd/d9e/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_p_o_r_t_i_n_g.html#autotoc_md4", null ]
       ] ]
     ] ],
     [ "Todo List", "dd/da0/todo.html", null ],
@@ -89,28 +89,28 @@ var NAVTREEINDEX =
 "d3/d73/classfl_1_1_fixed_vector_adb4fd3e27468d2ded1373597e3d1debd.html#adb4fd3e27468d2ded1373597e3d1debd",
 "d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acde97309b0196141809564ffeb097bbe",
 "d4/d98/group___color_palettes.html",
-"d5/d25/_demo_reel100_8ino_a4163b4a4e9d8f2949741962dca6c5944.html#a4163b4a4e9d8f2949741962dca6c5944",
-"d5/db4/class_c_h_s_v_palette256_ae053719706e3276afabd1d3be6e8386c.html#ae053719706e3276afabd1d3be6e8386c",
-"d6/d39/group___palette_classes.html#a8f3ee1dde5a25ab7cb3455b343f0ee45",
-"d7/d22/_color_temperature_8ino_source.html",
-"d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a0aa03db6472288de29596562522590dc",
-"d7/dd3/wasm_8ino_source.html",
-"d8/d94/classfl_1_1_frame_interpolator_a6bf8ea6e2ad5509f65bbefa6f015da2e.html#a6bf8ea6e2ad5509f65bbefa6f015da2e",
-"d8/ddd/classfl_1_1_pixel_stream_af58207602d404460d64ab66d668db598.html#af58207602d404460d64ab66d668db598",
-"d9/d3b/ui_8h.html",
-"da/d7a/pixel__stream_8cpp.html",
-"db/d3b/class_fast_pin_a23ad28734f9597c28afbba8b4bfcda09.html#a23ad28734f9597c28afbba8b4bfcda09",
-"db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",
-"db/df7/class_c_pixel_view_a3bf748c46bc7441342b0d7ee3e1a06cd.html#a3bf748c46bc7441342b0d7ee3e1a06cd",
-"dc/d5a/gen_8py.html",
-"dc/ded/_fx_pacifica_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd",
+"d5/d25/_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f",
+"d5/db8/json_8hpp.html",
+"d6/d39/group___palette_classes_ga9b4bbbaa572ed85baf5d098dc47a347b.html#ga9b4bbbaa572ed85baf5d098dc47a347b",
+"d7/d35/_fx_sd_card_8ino_a16423ee5b5ce2ddbbc502411fdba2ee9.html#a16423ee5b5ce2ddbbc502411fdba2ee9",
+"d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a1190005afb214be40a6302e82767bcd1",
+"d7/ddc/_noise_playground_8ino.html",
+"d8/d94/classfl_1_1_frame_interpolator_a88853a69819cb994edbdc847f14797b0.html#a88853a69819cb994edbdc847f14797b0",
+"d8/de4/classfl_1_1_slice_a0617f698a73734d9661cc9e23cb04f9f.html#a0617f698a73734d9661cc9e23cb04f9f",
+"d9/d3b/ui_8h_abe78ba1f320a6f6a32b4f942775a26b4.html#abe78ba1f320a6f6a32b4f942775a26b4",
+"da/d7a/struct_noise_generator_a2059c6016a3bb65b468a6b117c1085ce.html#a2059c6016a3bb65b468a6b117c1085ce",
+"db/d3b/class_fast_pin_a86ecde204528fd900a89c41bcde9a43e.html#a86ecde204528fd900a89c41bcde9a43e",
+"db/d93/classfl_1_1_null_file_system_a64c67fac1a8feea7e67214586f8bb2bf.html#a64c67fac1a8feea7e67214586f8bb2bf",
+"db/df7/class_c_pixel_view_a5492e41e8b06dc599ab81b465c4236ed.html#a5492e41e8b06dc599ab81b465c4236ed",
+"dc/d60/_m_i_d_i_8cpp_acc4668b85e2bc79dd3f2f5022c60eceb.html#acc4668b85e2bc79dd3f2f5022c60eceb",
+"dc/ded/_fx_pacifica_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",
 "dd/db4/_h_d107_8ino_a7c99553bb79925596d232dbcf68fd2b3.html#a7c99553bb79925596d232dbcf68fd2b3",
 "de/d13/classfl_1_1_fake_str_stream_ac141674f81a60cb24f67bd3af0bd5c6f.html#ac141674f81a60cb24f67bd3af0bd5c6f",
 "de/dca/classfl_1_1_engine_events_ae6b4037ab7b73bf0d69e07c4956f9450.html#ae6b4037ab7b73bf0d69e07c4956f9450",
 "df/d37/classfl_1_1_file_system_a95ebc6d10b6361bca689dffa4b824c28.html#a95ebc6d10b6361bca689dffa4b824c28",
 "df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ab80f5d0aa4154346dbc4d7da7728bd76.html#ab80f5d0aa4154346dbc4d7da7728bd76",
 "df/dc6/classgen_1_1_point_ad78528da0d3b1d029e8b40fa40be47ee.html#ad78528da0d3b1d029e8b40fa40be47ee",
-"globals_func_w.html"
+"globals_h.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

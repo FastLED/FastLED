@@ -1,5 +1,6 @@
 digraph "animartrix_detail::ANIMartRIX::Complex_Kaleido_4"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

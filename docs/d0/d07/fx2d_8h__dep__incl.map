@@ -1,29 +1,29 @@
-<map id="FastLED/FastLED/src/fx/fx2d.h" name="FastLED/FastLED/src/fx/fx2d.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1046,5,1197,45"/>
-<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="383,93,542,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1033,41,543,104,542,99,1032,36"/>
-<area shape="rect" id="Node000006" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="1135,181,1305,221"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1103,58,1088,95,1087,114,1093,132,1105,147,1119,160,1153,179,1151,184,1116,164,1101,151,1088,135,1082,115,1083,94,1098,56"/>
-<area shape="rect" id="Node000007" href="$d6/dc7/noisepalette_8h.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="793,93,949,133"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1055,52,926,96,925,91,1053,47"/>
-<area shape="rect" id="Node000010" href="$d3/db8/redsquare_8h.html" title=" " alt="" coords="1103,93,1254,133"/>
-<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="1144,56,1168,92,1164,95,1140,58"/>
-<area shape="rect" id="Node000011" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="1330,181,1481,221"/>
-<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="1182,49,1267,91,1383,179,1379,183,1264,96,1180,53"/>
-<area shape="rect" id="Node000012" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="1330,93,1481,133"/>
-<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="1198,47,1344,91,1342,96,1196,52"/>
-<area shape="rect" id="Node000003" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,181,229,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="374,139,194,184,192,179,373,134"/>
-<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="474,181,670,221"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="499,140,549,179,546,183,496,144"/>
-<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="254,181,450,221"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="429,144,378,183,375,179,426,140"/>
-<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="793,140,638,184,637,179,791,135"/>
-<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="780,132,462,184,451,186,450,181,461,179,779,127"/>
-<area shape="poly" id="edge11_Node000007_Node000006" title=" " alt="" coords="961,134,1144,179,1143,184,960,139"/>
-<area shape="rect" id="Node000008" href="$d7/d35/_fx_sd_card_8ino.html" title=" " alt="" coords="914,181,1110,221"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="915,138,982,179,980,184,912,143"/>
-<area shape="rect" id="Node000009" href="$df/d43/_overclock_8ino.html" title="Demonstrates how to overclock a FastLED setup." alt="" coords="694,181,890,221"/>
-<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="846,145,811,183,807,179,842,142"/>
-<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="1408,147,1408,181,1403,181,1403,147"/>
+<map id="fx/fx2d.h" name="fx/fx2d.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1157,5,1237,31"/>
+<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="401,79,556,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1144,27,557,85,556,80,1144,22"/>
+<area shape="rect" id="Node000006" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="1195,167,1362,192"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1183,43,1170,73,1169,88,1173,103,1188,123,1207,140,1249,164,1247,169,1204,145,1184,127,1168,105,1164,89,1165,72,1178,41"/>
+<area shape="rect" id="Node000007" href="$d6/dc7/noisepalette_8h.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="855,79,1007,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1144,36,974,81,973,76,1143,31"/>
+<area shape="rect" id="Node000010" href="$d3/db8/redsquare_8h.html" title=" " alt="" coords="1183,79,1319,104"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="1216,40,1244,77,1240,80,1212,43"/>
+<area shape="rect" id="Node000011" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="1386,167,1529,192"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="1242,33,1286,52,1332,76,1398,123,1447,164,1443,168,1395,127,1329,81,1284,57,1240,38"/>
+<area shape="rect" id="Node000012" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="1393,79,1521,104"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="1251,31,1416,76,1415,81,1250,36"/>
+<area shape="rect" id="Node000003" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,152,240,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="419,110,232,155,231,149,417,105"/>
+<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="489,152,698,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="507,110,560,150,557,154,504,115"/>
+<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="264,152,464,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="454,115,401,154,397,150,451,110"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="873,110,697,155,696,149,872,105"/>
+<area shape="poly" id="edge10_Node000007_Node000005" title=" " alt="" coords="841,104,671,125,476,155,465,157,464,152,476,149,671,119,840,99"/>
+<area shape="poly" id="edge11_Node000007_Node000006" title=" " alt="" coords="996,104,1185,149,1239,164,1238,169,1183,155,994,110"/>
+<area shape="rect" id="Node000008" href="$d7/d35/_fx_sd_card_8ino.html" title=" " alt="" coords="961,152,1172,207"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="962,109,1027,150,1024,154,959,114"/>
+<area shape="rect" id="Node000009" href="$df/d43/_overclock_8ino.html" title="Demonstrates how to overclock a FastLED setup." alt="" coords="722,152,937,207"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="908,115,862,154,859,150,905,111"/>
+<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="1460,118,1460,166,1455,166,1455,118"/>
 </map>

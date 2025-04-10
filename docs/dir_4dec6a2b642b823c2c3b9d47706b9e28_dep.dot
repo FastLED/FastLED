@@ -1,0 +1,15 @@
+digraph "/home/runner/work/FastLED/FastLED/examples/FxPacifica"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  compound=true
+  subgraph clusterdir_d28a4824dc47e487b107a5db32ef43c4 {
+    graph [ bgcolor="#edf0f7", pencolor="grey25", label="examples", fontname=Helvetica,fontsize=10 style="filled,dashed", URL="dir_d28a4824dc47e487b107a5db32ef43c4.html",tooltip=""]
+  dir_4dec6a2b642b823c2c3b9d47706b9e28 [label="FxPacifica", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_4dec6a2b642b823c2c3b9d47706b9e28.html",tooltip=""];
+  }
+  dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
+  dir_4dec6a2b642b823c2c3b9d47706b9e28->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000037_000028.html" href="dir_000037_000028.html" color="steelblue1" fontcolor="steelblue1"];
+}

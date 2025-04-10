@@ -1,29 +1,30 @@
-digraph "FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h"
+digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/ApproximatingFunction.h"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/ApproximatingFunction.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 [id="Node000001",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/ApproximatingFunction.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/Painter.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db0/_painter_8h.html",tooltip=" "];
+  Node2 [id="Node000002",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/Painter.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db0/_painter_8h.html",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/Painter.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d33/_painter_8cpp.html",tooltip=" "];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/Painter.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d33/_painter_8cpp.html",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/util.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2d/util_8cpp.html",tooltip=" "];
+  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/util.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2d/util_8cpp.html",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="FastLED/FastLED/examples\l/LuminescentGrand/shared/util.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d3c/util_8h.html",tooltip=" "];
+  Node5 [id="Node000005",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/util.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d3c/util_8h.html",tooltip=" "];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/Keyboard.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5c/_keyboard_8cpp.html",tooltip=" "];
+  Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/Keyboard.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5c/_keyboard_8cpp.html",tooltip=" "];
   Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/Keyboard.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d85/_keyboard_8h.html",tooltip=" "];
+  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/Keyboard.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d85/_keyboard_8h.html",tooltip=" "];
   Node7 -> Node6 [id="edge7_Node000007_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node3 [id="edge8_Node000007_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node2 [id="edge9_Node000007_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node2 [id="edge10_Node000005_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node8 [id="edge11_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/color.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d03/color_8cpp.html",tooltip=" "];
+  Node8 [id="Node000008",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/color.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d03/color_8cpp.html",tooltip=" "];
   Node5 -> Node9 [id="edge12_Node000005_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="FastLED/FastLED/examples\l/LuminescentGrand/shared\l/color_mapper.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df0/color__mapper_8cpp.html",tooltip=" "];
+  Node9 [id="Node000009",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/shared/color_mapper.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df0/color__mapper_8cpp.html",tooltip=" "];
   Node5 -> Node4 [id="edge13_Node000005_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

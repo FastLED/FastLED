@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/eorder.h" name="FastLED/FastLED/src/eorder.h">
-<area shape="rect" id="Node000001" title="Defines color channel ordering enumerations." alt="" coords="5,5,156,45"/>
-<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="20,93,141,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,46,83,79,78,79,78,46"/>
+<map id="eorder.h" name="eorder.h">
+<area shape="rect" id="Node000001" title="Defines color channel ordering enumerations." alt="" coords="29,5,103,31"/>
+<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,31,69,65,63,65,63,31"/>
 </map>

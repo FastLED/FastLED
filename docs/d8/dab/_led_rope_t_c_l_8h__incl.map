@@ -1,7 +1,7 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.h" name="FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="398,5,599,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/LedRopeTCL.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="363,5,634,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="19,115,103,141"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="398,52,264,77,117,111,106,114,105,109,115,105,263,72,397,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,58,243,81,117,111,106,114,105,109,115,105,242,76,363,53"/>
 <area shape="rect" id="Node000003" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="5,196,131,221"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="503,61,499,106,490,130,475,150,145,199,144,194,472,146,485,127,494,105,498,60"/>
 <area shape="rect" id="Node000005" href="$d4/dd2/framebuffer_8h.html" title=" " alt="" coords="291,115,461,141"/>
@@ -9,11 +9,11 @@
 <area shape="rect" id="Node000006" href="$db/d19/led__rope__interface_8h.html" title=" " alt="" coords="128,108,267,148"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="415,63,272,107,270,101,413,58"/>
 <area shape="rect" id="Node000007" href="$d6/d68/vector_8h.html" title=" " alt="" coords="1447,269,1534,295"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="600,34,811,46,939,57,1070,73,1196,94,1310,120,1403,153,1439,173,1467,194,1478,208,1485,224,1492,255,1487,256,1480,225,1473,211,1463,198,1436,177,1401,158,1309,125,1195,99,1069,78,938,63,811,52,599,40"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="634,36,848,49,971,61,1095,77,1214,97,1320,123,1407,155,1441,174,1467,194,1478,208,1485,224,1492,255,1487,256,1480,225,1473,211,1463,198,1438,178,1405,160,1319,128,1213,102,1094,82,970,66,847,54,634,41"/>
 <area shape="rect" id="Node000013" href="$db/dd1/crgb_8h.html" title="Defines the red, green, and blue (RGB) pixel struct." alt="" coords="689,269,751,295"/>
 <area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="524,59,703,257,699,261,520,62"/>
 <area shape="rect" id="Node000019" href="$d7/d0d/fl_2screenmap_8h.html" title=" " alt="" coords="985,115,1103,141"/>
-<area shape="poly" id="edge31_Node000001_Node000019" title=" " alt="" coords="600,49,971,112,971,117,600,54"/>
+<area shape="poly" id="edge31_Node000001_Node000019" title=" " alt="" coords="635,54,972,112,971,117,634,60"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="370,416,441,441"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="72,221,78,251,89,290,109,331,122,350,138,366,176,384,234,399,357,419,356,425,233,405,174,389,134,370,118,353,104,334,84,292,72,252,67,222"/>
 <area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="167,150,100,191,97,187,165,146"/>

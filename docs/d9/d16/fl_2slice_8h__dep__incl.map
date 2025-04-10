@@ -1,17 +1,17 @@
-<map id="FastLED/FastLED/src/fl/slice.h" name="FastLED/FastLED/src/fl/slice.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="715,5,866,45"/>
-<area shape="rect" id="Node000002" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,101,229,141"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="702,38,492,61,242,96,202,103,201,98,241,91,491,56,701,32"/>
-<area shape="rect" id="Node000003" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="253,101,472,141"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="702,49,450,103,449,98,701,43"/>
-<area shape="rect" id="Node000004" href="$dc/d4d/_wasm_screen_coords_8ino.html" title="Simple test for screen coordinates in the web compiled version of FastLED." alt="" coords="496,101,808,141"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="753,55,682,103,679,98,750,51"/>
-<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="833,101,1029,141"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="832,51,904,98,901,103,829,55"/>
-<area shape="rect" id="Node000006" href="$d9/df3/rectangular__draw__buffer_8h.html" title=" " alt="" coords="1053,93,1203,148"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="878,46,1042,91,1053,94,1052,99,1041,96,876,52"/>
-<area shape="rect" id="Node000008" href="$d0/d48/slice_8h.html" title=" " alt="" coords="1227,101,1378,141"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="880,34,1038,57,1217,91,1245,98,1244,103,1215,96,1037,62,879,40"/>
-<area shape="rect" id="Node000007" href="$d3/d8d/rectangular__draw__buffer_8cpp.html" title=" " alt="" coords="1053,196,1203,251"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1131,162,1131,196,1125,196,1125,162"/>
+<map id="fl/slice.h" name="fl/slice.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="753,5,829,31"/>
+<area shape="rect" id="Node000002" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,79,240,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="739,26,527,47,254,81,241,83,240,78,253,76,526,41,738,21"/>
+<area shape="rect" id="Node000003" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="265,79,495,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="740,33,496,83,495,78,738,27"/>
+<area shape="rect" id="Node000004" href="$dc/d4d/_wasm_screen_coords_8ino.html" title="Simple test for screen coordinates in the web compiled version of FastLED." alt="" coords="519,79,798,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="763,41,700,81,697,76,760,36"/>
+<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="823,79,1023,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="822,36,884,76,881,81,819,41"/>
+<area shape="rect" id="Node000006" href="$d9/df3/rectangular__draw__buffer_8h.html" title=" " alt="" coords="1047,86,1193,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="843,28,1035,76,1061,83,1059,88,1034,81,841,34"/>
+<area shape="rect" id="Node000008" href="$d0/d48/slice_8h.html" title=" " alt="" coords="1217,93,1281,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="843,18,916,22,1007,31,1108,49,1206,76,1235,91,1232,96,1204,81,1106,54,1007,37,915,27,842,23"/>
+<area shape="rect" id="Node000007" href="$d3/d8d/rectangular__draw__buffer_8cpp.html" title=" " alt="" coords="1047,181,1193,221"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1123,140,1123,181,1117,181,1117,140"/>
 </map>

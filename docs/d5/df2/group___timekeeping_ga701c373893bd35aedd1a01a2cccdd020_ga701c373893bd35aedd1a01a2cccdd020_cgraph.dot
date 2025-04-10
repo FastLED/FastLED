@@ -1,5 +1,6 @@
 digraph "INSTANTIATE_EVERY_N_TIME_PERIODS"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

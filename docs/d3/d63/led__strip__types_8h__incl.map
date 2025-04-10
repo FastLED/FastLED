@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/third_party/espressif/led_strip/src/led_strip_types.h" name="FastLED/FastLED/src/third_party/espressif/led_strip/src/led_strip_types.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,171,75"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="53,123,123,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,75,91,109,85,109,85,75"/>
+<map id="third_party/espressif/led_strip/src/led_strip_types.h" name="third_party/espressif/led_strip/src/led_strip_types.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,171,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="53,108,123,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,60,91,94,85,94,85,60"/>
 </map>

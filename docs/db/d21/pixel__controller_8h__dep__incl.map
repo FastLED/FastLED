@@ -1,12 +1,12 @@
-<map id="FastLED/FastLED/src/pixel_controller.h" name="FastLED/FastLED/src/pixel_controller.h">
-<area shape="rect" id="Node000001" title="Low level pixel data writing class." alt="" coords="129,5,280,45"/>
-<area shape="rect" id="Node000002" href="$db/d6d/cled__controller_8h.html" title="base definitions used by led controllers for writing out led data" alt="" coords="73,93,224,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,58,163,95,159,92,183,56"/>
-<area shape="rect" id="Node000004" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="180,181,344,221"/>
-<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="223,57,238,92,261,181,256,182,233,94,218,59"/>
-<area shape="rect" id="Node000003" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,181,156,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="127,146,98,183,94,179,123,143"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="186,140,239,179,235,183,183,144"/>
-<area shape="rect" id="Node000005" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="187,269,337,309"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="265,235,265,269,259,269,259,235"/>
+<map id="pixel_controller.h" name="pixel_controller.h">
+<area shape="rect" id="Node000001" title="Low level pixel data writing class." alt="" coords="135,5,268,31"/>
+<area shape="rect" id="Node000002" href="$db/d6d/cled__controller_8h.html" title="base definitions used by led controllers for writing out led data" alt="" coords="86,79,215,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,44,161,80,157,77,183,41"/>
+<area shape="rect" id="Node000004" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="173,152,333,177"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="215,42,229,78,253,151,248,153,224,80,210,44"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,152,149,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="131,116,91,154,87,150,127,112"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="180,110,238,150,235,154,177,114"/>
+<area shape="rect" id="Node000005" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="206,225,301,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="256,191,256,225,251,225,251,191"/>
 </map>

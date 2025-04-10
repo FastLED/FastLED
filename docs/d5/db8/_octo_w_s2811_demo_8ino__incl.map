@@ -1,9 +1,9 @@
-<map id="FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino" name="FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino">
-<area shape="rect" id="Node000001" title="Demonstrates how to use OctoWS2811 output." alt="" coords="644,5,849,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino" name="/home/runner/work/FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino">
+<area shape="rect" id="Node000001" title="Demonstrates how to use OctoWS2811 output." alt="" coords="597,5,896,60"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,181,123,207"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="644,61,127,181,126,176,643,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="635,63,127,181,126,176,634,57"/>
 <area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1375,108,1460,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="850,44,1361,110,1361,115,849,50"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="897,50,1361,110,1361,115,896,56"/>
 <area shape="poly" id="edge5_Node000003_Node000002" title=" " alt="" coords="1374,125,1181,129,878,138,515,155,142,184,137,184,137,179,141,179,515,150,878,133,1181,123,1374,120"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="2141,636,2211,661"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1460,120,1676,122,1979,131,2130,138,2264,149,2366,162,2402,170,2425,179,2452,197,2470,217,2481,241,2484,273,2484,503,2482,524,2476,542,2455,574,2424,598,2387,617,2345,630,2302,640,2226,648,2225,643,2301,634,2344,625,2385,612,2422,594,2451,570,2471,540,2477,523,2479,503,2479,273,2476,243,2466,220,2449,201,2423,184,2401,175,2366,167,2263,154,2130,144,1979,136,1676,128,1460,125"/>

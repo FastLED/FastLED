@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Message.h" name="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Message.h">
-<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Message struct definition." alt="" coords="66,5,267,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Message.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Message.h">
+<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Message struct definition." alt="" coords="31,5,302,60"/>
 <area shape="rect" id="Node000002" href="$df/dce/midi___namespace_8h.html" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="5,181,152,207"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,62,124,84,108,109,95,139,86,168,81,167,90,137,103,107,120,81,139,59"/>
 <area shape="rect" id="Node000003" href="$d8/dd0/midi___defs_8h.html" title="MIDI Library for the Arduino &#45; Definitions." alt="" coords="117,108,217,133"/>

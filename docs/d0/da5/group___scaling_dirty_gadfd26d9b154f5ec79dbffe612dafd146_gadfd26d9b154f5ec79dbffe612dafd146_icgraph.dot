@@ -1,5 +1,6 @@
 digraph "nscale8_video_LEAVING_R1_DIRTY"
 {
+ // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];

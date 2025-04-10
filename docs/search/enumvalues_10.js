@@ -2,7 +2,7 @@ var searchData=
 [
   ['rbg_0',['RBG',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d',1,'eorder.h']]],
   ['red_1',['Red',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a',1,'CRGB']]],
-  ['redstrip_2',['RedStrip',['../d1/ddb/_chromancer_8ino_ad80fffb6c2f7d00ec768c873fc3ed3e4.html#ad80fffb6c2f7d00ec768c873fc3ed3e4a8c61bcebbb3c563ea60ae6f0e5a78274',1,'Chromancer.ino']]],
+  ['redstrip_2',['RedStrip',['../d1/ddb/_chromancer_8ino_a32697a3b87882612c1d63323ba973d2a.html#a32697a3b87882612c1d63323ba973d2aa8c61bcebbb3c563ea60ae6f0e5a78274',1,'Chromancer.ino']]],
   ['resetallcontrollers_3',['ResetAllControllers',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a6b8d5952d0407d09b8fcba53f704ba0b',1,'midi_Defs.h']]],
   ['rgb_4',['RGB',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44',1,'eorder.h']]],
   ['rgb_5fblobs_5',['RGB_BLOBS',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a930df185b5e6e06e24b62d16612be9e0',1,'fl']]],

@@ -1,5 +1,5 @@
-<map id="FastLED/FastLED/src/fl/convert.h" name="FastLED/FastLED/src/fl/convert.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,156,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="45,93,116,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,46,83,79,78,79,78,46"/>
+<map id="fl/convert.h" name="fl/convert.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,100,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="17,79,88,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,31,55,65,50,65,50,31"/>
 </map>

@@ -1,18 +1,18 @@
-<map id="FastLED/FastLED/src/fx/detail/fx_layer.h" name="FastLED/FastLED/src/fx/detail/fx_layer.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="497,5,647,45"/>
-<area shape="rect" id="Node000002" href="$d5/d6b/fx__compositor_8h.html" title=" " alt="" coords="413,93,601,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="551,58,523,95,519,91,547,55"/>
-<area shape="rect" id="Node000003" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="497,181,647,221"/>
-<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="598,56,616,93,620,113,616,134,605,160,590,182,586,180,600,158,611,133,614,113,611,94,593,58"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="531,143,560,179,555,183,527,146"/>
-<area shape="rect" id="Node000004" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,269,229,309"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="484,222,218,272,217,267,483,217"/>
-<area shape="rect" id="Node000005" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="254,269,450,309"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="512,229,401,272,399,267,510,224"/>
-<area shape="rect" id="Node000006" href="$d7/d35/_fx_sd_card_8ino.html" title=" " alt="" coords="474,269,670,309"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="575,235,575,269,569,269,569,235"/>
-<area shape="rect" id="Node000007" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="694,269,890,309"/>
-<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="634,224,745,267,743,272,632,229"/>
-<area shape="rect" id="Node000008" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="914,269,1065,309"/>
-<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="661,218,903,267,914,269,913,274,902,272,660,223"/>
+<map id="fx/detail/fx_layer.h" name="fx/detail/fx_layer.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="532,5,676,31"/>
+<area shape="rect" id="Node000002" href="$d5/d6b/fx__compositor_8h.html" title=" " alt="" coords="448,79,632,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="586,43,552,80,548,77,582,39"/>
+<area shape="rect" id="Node000003" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="547,152,661,177"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="626,40,638,58,647,78,648,100,641,121,618,153,614,150,636,118,643,99,641,79,633,60,621,43"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="562,113,596,150,592,154,558,116"/>
+<area shape="rect" id="Node000004" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,225,240,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="534,180,252,228,240,230,240,225,252,223,533,175"/>
+<area shape="rect" id="Node000005" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="265,225,474,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="561,185,442,228,440,223,559,180"/>
+<area shape="rect" id="Node000006" href="$d7/d35/_fx_sd_card_8ino.html" title=" " alt="" coords="499,225,709,280"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="607,191,607,225,601,225,601,191"/>
+<area shape="rect" id="Node000007" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="733,225,933,280"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="649,180,764,223,762,228,647,185"/>
+<area shape="rect" id="Node000008" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="957,240,1088,265"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="676,173,802,193,946,223,993,237,991,242,945,228,801,198,675,178"/>
 </map>

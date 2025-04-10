@@ -1,16 +1,16 @@
-<map id="FastLED/FastLED/src/fx/video/frame_tracker.h" name="FastLED/FastLED/src/fx/video/frame_tracker.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="164,5,349,45"/>
-<area shape="rect" id="Node000002" href="$d3/dda/frame__interpolator_8h.html" title=" " alt="" coords="33,93,249,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="222,56,168,95,165,91,218,52"/>
-<area shape="rect" id="Node000007" href="$d9/def/frame__tracker_8cpp.html" title=" " alt="" coords="273,93,473,133"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="295,52,349,91,345,95,292,56"/>
-<area shape="rect" id="Node000003" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="5,269,156,309"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="63,141,36,159,15,183,11,194,10,205,19,228,36,249,56,267,53,271,32,253,14,230,5,206,5,193,10,180,32,155,60,137"/>
-<area shape="rect" id="Node000004" href="$d5/da4/frame__interpolator_8cpp.html" title=" " alt="" coords="25,181,256,221"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="143,147,143,181,138,181,138,147"/>
-<area shape="rect" id="Node000005" href="$d5/d82/video__impl_8h.html" title=" " alt="" coords="280,181,447,221"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="203,136,316,179,314,184,201,141"/>
-<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="289,228,143,272,142,267,287,223"/>
-<area shape="rect" id="Node000006" href="$d0/d7f/video__impl_8cpp.html" title=" " alt="" coords="272,269,455,309"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="366,235,366,269,361,269,361,235"/>
+<map id="fx/video/frame_tracker.h" name="fx/video/frame_tracker.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="158,5,339,31"/>
+<area shape="rect" id="Node000002" href="$d3/dda/frame__interpolator_8h.html" title=" " alt="" coords="29,79,241,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,40,155,81,153,76,217,36"/>
+<area shape="rect" id="Node000007" href="$d9/def/frame__tracker_8cpp.html" title=" " alt="" coords="265,79,461,104"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="280,35,346,76,343,81,277,40"/>
+<area shape="rect" id="Node000003" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="36,225,139,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="69,111,37,128,12,153,9,163,9,173,21,192,41,209,64,223,62,227,38,214,17,196,4,174,3,163,8,151,34,124,67,106"/>
+<area shape="rect" id="Node000004" href="$d5/da4/frame__interpolator_8cpp.html" title=" " alt="" coords="22,152,249,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="138,118,138,152,133,152,133,118"/>
+<area shape="rect" id="Node000005" href="$d5/d82/video__impl_8h.html" title=" " alt="" coords="273,152,435,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="185,106,320,149,318,154,183,111"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="299,183,131,228,130,223,297,178"/>
+<area shape="rect" id="Node000006" href="$d0/d7f/video__impl_8cpp.html" title=" " alt="" coords="265,225,443,251"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="357,191,357,225,351,225,351,191"/>
 </map>

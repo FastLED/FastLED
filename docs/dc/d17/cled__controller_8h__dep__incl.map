@@ -1,18 +1,18 @@
-<map id="FastLED/FastLED/src/cled_controller.h" name="FastLED/FastLED/src/cled_controller.h">
-<area shape="rect" id="Node000001" title="base definitions used by led controllers for writing out led data" alt="" coords="63,5,213,45"/>
-<area shape="rect" id="Node000002" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,357,156,397"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,59,86,358,81,357,130,58"/>
-<area shape="rect" id="Node000003" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="176,93,340,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,51,233,91,230,95,174,56"/>
-<area shape="rect" id="Node000004" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="232,181,383,221"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="278,144,299,180,294,182,273,147"/>
-<area shape="rect" id="Node000005" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="119,269,269,309"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="273,232,221,271,217,267,270,228"/>
-<area shape="rect" id="Node000077" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="180,357,331,397"/>
-<area shape="poly" id="edge10_Node000004_Node000077" title=" " alt="" coords="304,236,285,310,266,358,261,356,279,309,298,234"/>
-<area shape="poly" id="edge6_Node000005_Node000001" title=" " alt="" coords="185,257,139,46,145,45,190,255"/>
-<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="160,320,107,359,104,355,157,316"/>
-<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="197,255,206,219,218,180,243,133,248,135,223,182,211,220,202,256"/>
-<area shape="poly" id="edge8_Node000005_Node000077" title=" " alt="" coords="209,319,236,356,232,359,205,323"/>
-<area shape="poly" id="edge9_Node000077_Node000005" title=" " alt="" coords="240,347,213,311,217,308,244,344"/>
+<map id="cled_controller.h" name="cled_controller.h">
+<area shape="rect" id="Node000001" title="base definitions used by led controllers for writing out led data" alt="" coords="63,5,193,31"/>
+<area shape="rect" id="Node000002" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,299,149,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,45,82,299,77,298,121,44"/>
+<area shape="rect" id="Node000003" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="165,79,325,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="160,35,228,76,225,81,157,40"/>
+<area shape="rect" id="Node000004" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="217,152,311,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="254,117,264,151,258,153,249,118"/>
+<area shape="rect" id="Node000005" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="137,225,223,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="242,188,195,227,192,223,238,184"/>
+<area shape="rect" id="Node000077" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="174,299,253,324"/>
+<area shape="poly" id="edge10_Node000004_Node000077" title=" " alt="" coords="258,191,237,252,220,300,215,298,232,250,253,190"/>
+<area shape="poly" id="edge6_Node000005_Node000001" title=" " alt="" coords="171,212,128,32,133,30,177,211"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="154,261,96,301,93,296,151,256"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="183,211,203,151,234,103,238,106,208,153,188,213"/>
+<area shape="poly" id="edge8_Node000005_Node000077" title=" " alt="" coords="185,262,203,297,199,300,181,265"/>
+<area shape="poly" id="edge9_Node000077_Node000005" title=" " alt="" coords="208,287,190,252,195,250,213,284"/>
 </map>

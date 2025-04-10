@@ -1,11 +1,11 @@
-<map id="FastLED/FastLED/src/sensors/digital_pin.h" name="FastLED/FastLED/src/sensors/digital_pin.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="106,5,266,45"/>
-<area shape="rect" id="Node000002" href="$de/d2b/digital__pin_8cpp.html" title=" " alt="" coords="5,93,180,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,57,115,95,112,91,153,53"/>
-<area shape="rect" id="Node000003" href="$d9/dd3/pir_8h.html" title=" " alt="" coords="204,93,355,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,53,260,91,257,95,215,57"/>
-<area shape="rect" id="Node000004" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="65,181,283,221"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="247,144,199,183,196,179,244,140"/>
-<area shape="rect" id="Node000005" href="$d2/da7/pir_8cpp.html" title=" " alt="" coords="308,181,459,221"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="315,140,362,179,359,183,311,144"/>
+<map id="sensors/digital_pin.h" name="sensors/digital_pin.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="93,5,249,31"/>
+<area shape="rect" id="Node000002" href="$de/d2b/digital__pin_8cpp.html" title=" " alt="" coords="5,79,176,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,42,106,80,102,76,146,38"/>
+<area shape="rect" id="Node000003" href="$d9/dd3/pir_8h.html" title=" " alt="" coords="200,79,304,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="196,38,240,76,237,80,192,42"/>
+<area shape="rect" id="Node000004" href="$d3/dac/_fx_noise_ring_8ino.html" title=" " alt="" coords="37,152,267,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,115,184,154,181,150,226,111"/>
+<area shape="rect" id="Node000005" href="$d2/da7/pir_8cpp.html" title=" " alt="" coords="291,167,410,192"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="277,111,339,164,335,168,274,115"/>
 </map>
