@@ -1,0 +1,11 @@
+digraph "REFHardwareSPIOutput::writeBit"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="REFHardwareSPIOutput\l::writeBit",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="write a single bit out, which bit from the passed in byte is determined by template parameter"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="REFHardwareSPIOutput\l::writePixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1",tooltip="write a block of uint8_ts out in groups of three."];
+}

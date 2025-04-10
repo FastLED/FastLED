@@ -1,0 +1,9 @@
+<map id="PixelController::PixelController" name="PixelController::PixelController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,225,80"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="273,29,493,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,54,259,51,260,56,226,60"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="541,55,697,80"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="225,65,527,65,527,70,225,70"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="345,31,337,21,341,11,357,5,383,3,416,7,429,16,426,20,414,11,383,8,358,10,345,15,342,20,349,27"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="494,51,528,55,528,60,493,56"/>
+</map>

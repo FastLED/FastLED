@@ -1,0 +1,33 @@
+<map id="FastLED/FastLED/examples/LuminescentGrand/shared/Painter.cpp" name="FastLED/FastLED/examples/LuminescentGrand/shared/Painter.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="293,5,489,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,255,89,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="294,44,222,58,148,84,113,102,80,124,52,151,30,183,25,197,25,212,35,241,30,243,20,213,20,196,25,180,48,148,77,120,110,98,146,79,221,53,293,39"/>
+<area shape="rect" id="Node000003" href="$dc/db0/_painter_8h.html" title=" " alt="" coords="205,108,292,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="349,62,281,103,278,99,346,58"/>
+<area shape="rect" id="Node000004" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="40,181,143,207"/>
+<area shape="poly" id="edge16_Node000001_Node000004" title=" " alt="" coords="303,63,248,84,194,110,150,141,114,173,111,169,147,137,191,106,246,79,301,58"/>
+<area shape="rect" id="Node000011" href="$df/da2/led__layout__array_8h.html" title=" " alt="" coords="317,108,466,133"/>
+<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="394,60,394,94,389,94,389,60"/>
+<area shape="rect" id="Node000012" href="$df/d29/dprint_8h.html" title=" " alt="" coords="490,108,570,133"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="435,58,501,98,498,103,432,62"/>
+<area shape="rect" id="Node000013" href="$d0/d19/fl_2math__macros_8h.html" title=" " alt="" coords="595,108,729,133"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="475,58,614,101,612,106,473,63"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="753,108,821,133"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="490,51,740,105,739,110,489,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="224,136,130,178,128,173,222,131"/>
+<area shape="rect" id="Node000007" href="$d8/d3c/util_8h.html" title=" " alt="" coords="405,255,468,280"/>
+<area shape="poly" id="edge10_Node000003_Node000007" title=" " alt="" coords="293,131,341,149,365,163,388,179,413,209,430,241,425,243,408,212,384,183,363,167,339,154,291,136"/>
+<area shape="rect" id="Node000008" href="$d7/dd8/_approximating_function_8h.html" title=" " alt="" coords="264,328,457,353"/>
+<area shape="poly" id="edge9_Node000003_Node000008" title=" " alt="" coords="281,131,315,150,331,164,344,180,359,214,366,251,367,314,361,314,361,251,354,216,340,183,327,167,312,155,279,136"/>
+<area shape="rect" id="Node000009" href="$de/d60/settings_8h.html" title=" " alt="" coords="481,328,576,353"/>
+<area shape="poly" id="edge11_Node000003_Node000009" title=" " alt="" coords="293,129,353,148,385,162,416,179,451,210,481,246,520,314,516,317,477,249,447,214,412,184,383,167,351,153,291,134"/>
+<area shape="rect" id="Node000010" href="$db/d19/led__rope__interface_8h.html" title=" " alt="" coords="167,181,330,207"/>
+<area shape="poly" id="edge12_Node000003_Node000010" title=" " alt="" coords="251,134,251,168,246,168,246,134"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="86,208,64,244,59,242,82,206"/>
+<area shape="rect" id="Node000005" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="165,255,231,280"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="110,204,171,245,168,249,107,209"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="144,203,393,254,392,259,142,209"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="426,282,385,320,381,317,423,278"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="453,278,505,317,501,322,450,282"/>
+<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="242,209,216,245,212,242,238,205"/>
+</map>

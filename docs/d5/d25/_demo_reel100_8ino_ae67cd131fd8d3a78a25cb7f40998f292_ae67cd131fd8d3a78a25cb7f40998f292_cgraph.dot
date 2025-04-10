@@ -1,0 +1,17 @@
+digraph "confetti"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="confetti",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98",tooltip="Reduce the brightness of an array of pixels all at once."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b",tooltip="Scale the brightness of an array of pixels all at once."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0",tooltip="Generate a 16-bit random number."];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="random8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe",tooltip="Generate an 8-bit random number."];
+}

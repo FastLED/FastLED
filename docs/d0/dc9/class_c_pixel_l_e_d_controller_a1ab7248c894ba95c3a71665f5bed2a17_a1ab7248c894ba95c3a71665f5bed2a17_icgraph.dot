@@ -1,0 +1,13 @@
+digraph "CPixelLEDController::showPixels"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CPixelLEDController\l::showPixels",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Send the LED data to the strip."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CPixelLEDController\l::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller_a12a891e205028cffb6ce21857850416c.html#a12a891e205028cffb6ce21857850416c",tooltip="Write the passed in RGB data out to the LEDs managed by this controller."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CPixelLEDController\l::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller_aa4c1675ad3be1055251ea482be2d7a15.html#aa4c1675ad3be1055251ea482be2d7a15",tooltip="Set all the LEDs on the controller to a given color."];
+}

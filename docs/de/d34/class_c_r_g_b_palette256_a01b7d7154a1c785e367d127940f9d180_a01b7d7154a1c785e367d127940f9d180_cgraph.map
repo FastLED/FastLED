@@ -1,0 +1,17 @@
+<map id="CRGBPalette256::CRGBPalette256" name="CRGBPalette256::CRGBPalette256">
+<area shape="rect" id="Node000001" title="Create upscaled palette from 16&#45;entry palette." alt="" coords="5,104,248,129"/>
+<area shape="rect" id="Node000002" href="$d6/d0a/group___palette_upscale_gaa88523d1afb29cf3f75b9b2725ba55d3.html#gaa88523d1afb29cf3f75b9b2725ba55d3" title="Convert a 16&#45;entry palette to a 256&#45;entry palette." alt="" coords="296,104,415,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,114,282,114,282,119,248,119"/>
+<area shape="rect" id="Node000003" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="463,104,597,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,114,448,114,448,119,415,119"/>
+<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="714,5,773,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="545,102,588,71,644,40,700,23,701,28,646,44,591,75,549,106"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="695,55,792,80"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="585,101,681,79,682,84,586,107"/>
+<area shape="rect" id="Node000009" href="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="716,104,771,129"/>
+<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="597,114,702,114,702,119,597,119"/>
+<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="714,153,773,179"/>
+<area shape="poly" id="edge6_Node000003_Node000010" title=" " alt="" coords="586,127,701,154,700,159,585,132"/>
+<area shape="rect" id="Node000008" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="645,203,841,228"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="549,127,592,157,646,188,669,196,667,201,644,192,589,162,546,132"/>
+</map>

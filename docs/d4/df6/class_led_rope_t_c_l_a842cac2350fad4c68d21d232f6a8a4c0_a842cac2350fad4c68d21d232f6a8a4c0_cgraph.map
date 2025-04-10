@@ -1,0 +1,16 @@
+<map id="LedRopeTCL::Draw" name="LedRopeTCL::Draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,148,129"/>
+<area shape="rect" id="Node000002" href="$d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464" title=" " alt="" coords="217,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,102,137,70,195,40,217,32,218,37,197,44,140,75,96,106"/>
+<area shape="rect" id="Node000003" href="$d4/df6/class_led_rope_t_c_l_a82a6589500d1934733920c133cdf6710.html#a82a6589500d1934733920c133cdf6710" title=" " alt="" coords="232,55,383,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,101,233,80,235,86,137,107"/>
+<area shape="rect" id="Node000004" href="$d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111" title=" " alt="" coords="203,104,411,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="148,114,190,114,190,119,148,119"/>
+<area shape="rect" id="Node000006" href="$d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454" title=" " alt="" coords="196,153,419,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="137,127,235,148,233,153,136,132"/>
+<area shape="rect" id="Node000007" href="$d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed" title=" " alt="" coords="206,227,409,252"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="98,127,197,188,263,219,261,224,195,192,95,132"/>
+<area shape="rect" id="Node000005" href="$d4/df6/class_led_rope_t_c_l_a4aada290bc25e4cc5dceb5a521ed935e.html#a4aada290bc25e4cc5dceb5a521ed935e" title=" " alt="" coords="467,104,668,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="411,114,453,114,453,119,411,119"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="270,228,262,218,266,208,282,202,307,200,340,204,352,213,349,218,338,209,307,205,283,207,270,212,267,218,274,225"/>
+</map>

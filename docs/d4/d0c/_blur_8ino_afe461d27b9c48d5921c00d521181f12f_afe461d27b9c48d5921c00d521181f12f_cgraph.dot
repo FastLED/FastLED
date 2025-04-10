@@ -1,0 +1,21 @@
+digraph "loop"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="blur1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_gaacf0416f9e0438f23f92d0df6c338ea3.html#gaacf0416f9e0438f23f92d0df6c338ea3",tooltip="One-dimensional blur filter."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CRGB::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa",tooltip="Default constructor."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="nscale8x3",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1",tooltip="Scale three one-byte values by a fourth one, which is treated as the numerator of a fraction whose de..."];
+  Node1 -> Node8 [id="edge5_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98",tooltip="Reduce the brightness of an array of pixels all at once."];
+  Node8 -> Node9 [id="edge6_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b",tooltip="Scale the brightness of an array of pixels all at once."];
+}

@@ -1,0 +1,11 @@
+<map id="TM1829&lt; DATA_PIN, RGB_ORDER &gt;" name="TM1829&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="TM1829 controller class." alt="" coords="933,59,1121,99"/>
+<area shape="rect" id="Node000002" href="$d0/ddf/class_t_m1829_controller800_khz.html" title=" " alt="" coords="680,59,884,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="898,76,933,76,933,81,898,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="252,5,435,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="449,47,680,67,680,72,448,52"/>
+<area shape="rect" id="Node000004" href="$d0/ddf/class_t_m1829_controller800_khz.html" title="TM1829 controller class." alt="" coords="241,99,445,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="459,106,679,85,680,91,459,111"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,84,192,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="206,116,241,116,241,121,206,121"/>
+</map>

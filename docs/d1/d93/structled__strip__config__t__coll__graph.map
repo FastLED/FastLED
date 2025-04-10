@@ -1,0 +1,11 @@
+<map id="led_strip_config_t" name="led_strip_config_t">
+<area shape="rect" id="Node000001" title="LED Strip common configurations The common configurations are not specific to any backend peripheral." alt="" coords="709,77,845,102"/>
+<area shape="rect" id="Node000002" href="$d4/d88/led__strip__types_8h.html#d7/d22/unionled__color__component__format__t" title="LED color component format." alt="" coords="310,5,471,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="486,35,686,67,722,74,720,79,685,72,485,40"/>
+<area shape="rect" id="Node000003" href="$d4/d88/led__strip__types_8h.html#d4/d07/structled__color__component__format__t_1_1format__layout" title=" " alt="" coords="5,5,191,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="204,23,310,23,310,28,204,28"/>
+<area shape="rect" id="Node000004" href="$d4/d88/led__strip__types_8h.html#df/dcf/structled__strip__config__t_1_1led__strip__extra__flags" title=" " alt="" coords="308,69,473,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="487,87,709,87,709,92,487,92"/>
+<area shape="rect" id="Node000005" href="$d4/d88/led__strip__types_8h.html#dc/d66/structled__strip__encoder__timings__t" title="LED strip encoder timings." alt="" coords="288,134,493,159"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="507,132,685,107,721,99,722,105,686,112,507,137"/>
+</map>

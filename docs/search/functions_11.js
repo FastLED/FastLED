@@ -1,10 +1,10 @@
 var searchData=
 [
-  ['toggle_0',['toggle',['../class_pin.html#a5ecffd86fb366af5ff559faf82a1fc81',1,'Pin::toggle()'],['../class_fast_pin.html#a25b537b13a05155051cc663b4877f79f',1,'FastPin::toggle()']]],
-  ['transpose8_1',['transpose8',['../bitswap_8h.html#aa8d834c97f99dae9d7136eca9d13caab',1,'bitswap.h']]],
-  ['transpose8x1_2',['transpose8x1',['../bitswap_8h.html#a621c13d8007fc1b36a62cf0c244cb643',1,'bitswap.h']]],
-  ['transpose8x1_5fmsb_3',['transpose8x1_MSB',['../bitswap_8h.html#a5798031ac62fda6b32523a468a1dbb74',1,'bitswap.h']]],
-  ['transpose8x1_5fnoinline_4',['transpose8x1_noinline',['../bitswap_8h.html#a961f249fa1af0950840b9e2b9a1850e9',1,'transpose8x1_noinline.cpp']]],
-  ['trigger_5',['trigger',['../class_c_every_n_time.html#a192e33c921fff572ca54d4fd85c70e16',1,'CEveryNTime']]],
-  ['triwave8_6',['triwave8',['../group___waveform_generators.html#gae9e011ff745ade1164ae77b0ef62bfac',1,'lib8tion.h']]]
+  ['qadd7_0',['qadd7',['../d5/d98/group___math_ga622205a211419db7dd1f582923aec68d.html#ga622205a211419db7dd1f582923aec68d',1,'math8.h']]],
+  ['qadd8_1',['qadd8',['../d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5',1,'math8.h']]],
+  ['qfx_2',['qfx',['../d8/dd9/classqfx_ae91cf242730c99bbca4e647dd2629a5d.html#ae91cf242730c99bbca4e647dd2629a5d',1,'qfx::qfx(float fx)'],['../d8/dd9/classqfx_a03d47a4198dc046a24fed3086e7cbab9.html#a03d47a4198dc046a24fed3086e7cbab9',1,'qfx::qfx(uint8_t _i, uint8_t _f)']]],
+  ['qmul8_3',['qmul8',['../d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb.html#ga17d0d692de142f4d4379b8cc899eaefb',1,'math8.h']]],
+  ['qsub8_4',['qsub8',['../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3',1,'math8.h']]],
+  ['quadwave8_5',['quadwave8',['../d1/d7a/group___waveform_generators_ga209d6cbdb109cc3139e7bb1e46c6228f.html#ga209d6cbdb109cc3139e7bb1e46c6228f',1,'lib8tion.h']]],
+  ['queue_6',['queue',['../de/d10/classfl_1_1_rectangular_draw_buffer_aeae72390445398560fd88fa3d606296b.html#aeae72390445398560fd88fa3d606296b',1,'fl::RectangularDrawBuffer']]]
 ];

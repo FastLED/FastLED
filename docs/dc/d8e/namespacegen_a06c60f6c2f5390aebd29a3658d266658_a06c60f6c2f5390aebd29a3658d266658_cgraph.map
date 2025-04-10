@@ -1,0 +1,9 @@
+<map id="gen.find_red_anchor_point" name="gen.find_red_anchor_point">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,159,45"/>
+<area shape="rect" id="Node000002" href="$dc/d8e/namespacegen_abcd6c0f8a022a7f642eabd9c662e5ad9.html#abcd6c0f8a022a7f642eabd9c662e5ad9" title=" " alt="" coords="207,13,328,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,23,193,23,193,28,159,28"/>
+<area shape="rect" id="Node000003" href="$dc/d8e/namespacegen_a4fc5b1da59ed64885db8585feea6794a.html#a4fc5b1da59ed64885db8585feea6794a" title=" " alt="" coords="376,13,495,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="328,23,362,23,362,28,328,28"/>
+<area shape="rect" id="Node000004" href="$dc/d8e/namespacegen_abe8bcb9c211028969da2d65b3f1d42fd.html#abe8bcb9c211028969da2d65b3f1d42fd" title=" " alt="" coords="543,13,637,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="495,23,529,23,529,28,495,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::EngineEvents::onBeginFrame" name="fl::EngineEvents::onBeginFrame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="177,5,364,45"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="5,13,129,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,28,130,28,130,23,164,23"/>
+</map>

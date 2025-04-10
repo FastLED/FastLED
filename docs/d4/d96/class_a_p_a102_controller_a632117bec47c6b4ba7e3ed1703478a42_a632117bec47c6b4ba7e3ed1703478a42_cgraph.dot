@@ -1,0 +1,34 @@
+digraph "APA102Controller::showPixelsDefault"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="APA102Controller::showPixels\lDefault",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::advanceData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2",tooltip="Advance the data pointer forward, adjust position counter."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="APA102Controller::endBoundary",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_ac9676b78658ebcab74033429c5c046f8.html#ac9676b78658ebcab74033429c5c046f8",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="APA102Controller::getGlobal\lBrightnessAndScalingFactors",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_a299c89c516c1c32935e75f492137d872.html#a299c89c516c1c32935e75f492137d872",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="PixelController::loadAnd\lScaleRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a3c10f0dd3838aa2b18d28a20393c9333.html#a3c10f0dd3838aa2b18d28a20393c9333",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="PixelController::loadAnd\lScale0",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_a4afe8b8ec93c89308fe185b1eb164ff6.html#a4afe8b8ec93c89308fe185b1eb164ff6",tooltip="non-template alias of loadAndScale<0>()"];
+  Node5 -> Node13 [id="edge6_Node000005_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="PixelController::loadAnd\lScale1",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_ae570967d1b674970cf472feb379f248f.html#ae570967d1b674970cf472feb379f248f",tooltip="non-template alias of loadAndScale<1>()"];
+  Node5 -> Node14 [id="edge7_Node000005_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="PixelController::loadAnd\lScale2",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_af5a5f12205a4187aa4df499b8224ed35.html#af5a5f12205a4187aa4df499b8224ed35",tooltip="non-template alias of loadAndScale<2>()"];
+  Node1 -> Node15 [id="edge8_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="PixelController::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c",tooltip="Do we have n pixels left to process?"];
+  Node1 -> Node5 [id="edge9_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node16 [id="edge10_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="PixelController::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660",tooltip="Get the length of the LED strip."];
+  Node1 -> Node17 [id="edge11_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="APA102Controller::startBoundary",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_ab8d200f508aa910564b8db24c451c28b.html#ab8d200f508aa910564b8db24c451c28b",tooltip=" "];
+  Node1 -> Node18 [id="edge12_Node000001_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="PixelController::stepDithering",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef",tooltip="Step the dithering forward."];
+  Node1 -> Node19 [id="edge13_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="APA102Controller::writeLed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d96/class_a_p_a102_controller_a3e85825537bbd044569052476051a970.html#a3e85825537bbd044569052476051a970",tooltip=" "];
+}

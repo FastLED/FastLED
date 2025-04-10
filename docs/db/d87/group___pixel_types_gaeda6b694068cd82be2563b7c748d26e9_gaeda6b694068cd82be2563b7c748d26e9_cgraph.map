@@ -1,0 +1,5 @@
+<map id="operator*" name="operator*">
+<area shape="rect" id="Node000001" title="Multiply each of the channels by a constant, saturating each channel at 0xFF." alt="" coords="5,5,89,31"/>
+<area shape="rect" id="Node000002" href="$d5/d98/group___math_ga17d0d692de142f4d4379b8cc899eaefb.html#ga17d0d692de142f4d4379b8cc899eaefb" title="8x8 bit multiplication with 8&#45;bit result, saturating at 0xFF." alt="" coords="137,5,200,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,15,124,15,124,21,90,21"/>
+</map>

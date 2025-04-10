@@ -1,0 +1,11 @@
+<map id="CEveryNTime::reset" name="CEveryNTime::reset">
+<area shape="rect" id="Node000001" title="Reset the timestamp to the current time." alt="" coords="516,55,668,80"/>
+<area shape="rect" id="Node000002" href="$de/d1d/class_c_every_n_time_a8842463241cb9579949cb34c724e6d65.html#a8842463241cb9579949cb34c724e6d65" title="Default constructor." alt="" coords="260,5,468,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="519,54,423,33,424,28,520,49"/>
+<area shape="rect" id="Node000003" href="$de/d1d/class_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac.html#a645cdb84da00f4669e1cf22ce86a04ac" title="Constructor." alt="" coords="260,55,468,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="502,70,468,70,468,65,502,65"/>
+<area shape="rect" id="Node000004" href="$de/d1d/class_c_every_n_time_ad248eee37ab69d2f0d27f6cb5a909b32.html#ad248eee37ab69d2f0d27f6cb5a909b32" title="Check if the time interval has elapsed." alt="" coords="286,104,442,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="520,86,424,107,423,101,519,80"/>
+<area shape="rect" id="Node000005" href="$de/d1d/class_c_every_n_time_a6895b6156f44263f53a386c2f83e3a02.html#a6895b6156f44263f53a386c2f83e3a02" title="Check if the time interval has elapsed." alt="" coords="5,104,212,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="272,119,212,119,212,114,272,114"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="calculate_unscaled_power_mW" name="calculate_unscaled_power_mW">
+<area shape="rect" id="Node000001" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="783,69,929,109"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gafff15ebb8adee6a6c76fd46eb980397c.html#gafff15ebb8adee6a6c76fd46eb980397c" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="543,37,735,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="769,79,734,74,735,69,769,74"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="543,101,735,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="769,105,735,110,734,105,769,99"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab519e78baab1cfbaf62663c48c1c2f35.html#gab519e78baab1cfbaf62663c48c1c2f35" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="289,5,481,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="529,46,481,40,482,35,530,41"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_ab07d62cdec036af9ede70cbd06ece40f.html#ab07d62cdec036af9ede70cbd06ece40f" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,69,495,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="530,74,495,78,495,73,529,68"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a996375a3f4a7b8c096f87d8a93c2b196.html#a996375a3f4a7b8c096f87d8a93c2b196" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,69,228,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,92,228,92,228,87,262,87"/>
+</map>

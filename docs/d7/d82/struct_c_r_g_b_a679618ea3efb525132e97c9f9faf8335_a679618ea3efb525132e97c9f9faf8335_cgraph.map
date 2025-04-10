@@ -1,0 +1,5 @@
+<map id="CRGB::CRGB" name="CRGB::CRGB">
+<area shape="rect" id="Node000001" title="Allow construction from a CHSV color." alt="" coords="5,5,109,31"/>
+<area shape="rect" id="Node000002" href="$db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="157,5,291,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,15,144,15,144,21,110,21"/>
+</map>

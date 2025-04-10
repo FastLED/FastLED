@@ -1,0 +1,45 @@
+digraph "CFastLED::clear"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CFastLED::clear",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Clear the leds, wiping the local array of data."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CFastLED::clearData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df88ce80.html#ac4f613f1b3e618528dca3189df88ce80",tooltip="Clear out the local data array."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CLEDController::clearLed\lDataInternal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352.html#aca9f099645c6976b1a52ba13ab455352",tooltip="Zero out the LED data managed by this controller."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CLEDController::head",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0",tooltip="Get the first LED controller in the linked list of controllers."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CLEDController::CLEDController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32",tooltip="Create an led controller object, add it to the chain of controllers."];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CLEDController::next",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0",tooltip="Get the next controller in the linked list after this one."];
+  Node6 -> Node5 [id="edge6_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="CFastLED::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a7315b060d295bad5fbd32e50eaaf02b0.html#a7315b060d295bad5fbd32e50eaaf02b0",tooltip="Set all leds on all controllers to the given color/scale."];
+  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="CLEDController::beginShowLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_af9962ef739bdb3b590ee66f3780765d6.html#af9962ef739bdb3b590ee66f3780765d6",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="CLEDController::getDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7",tooltip="Get the dithering option currently set for this controller."];
+  Node8 -> Node10 [id="edge10_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="CLEDController::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e",tooltip="How many LEDs does this controller manage?"];
+  Node7 -> Node11 [id="edge11_Node000007_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="CFastLED::countFPS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a61d27e179c9b68bde89d220aebc0de32.html#a61d27e179c9b68bde89d220aebc0de32",tooltip="For debugging, this will keep track of time between calls to countFPS()."];
+  Node7 -> Node12 [id="edge12_Node000007_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="CLEDController::endShowLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a49b221af013bf196c2068e2cbd1c299d.html#a49b221af013bf196c2068e2cbd1c299d",tooltip=" "];
+  Node12 -> Node13 [id="edge13_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="CLEDController::setDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279",tooltip="Set the dithering mode for this controller to use."];
+  Node13 -> Node5 [id="edge14_Node000013_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node14 [id="edge15_Node000007_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="CLEDController::getEnabled",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a6bd253f670640ea4d1bd0d71b8029f2a.html#a6bd253f670640ea4d1bd0d71b8029f2a",tooltip=" "];
+  Node7 -> Node4 [id="edge16_Node000007_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node6 [id="edge17_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node13 [id="edge18_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node15 [id="edge19_Node000007_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="CLEDController::showColor\lInternal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_ac3eef15a3a7f8e26ce8c47b64bfb4ed7.html#ac3eef15a3a7f8e26ce8c47b64bfb4ed7",tooltip=" "];
+  Node15 -> Node16 [id="edge20_Node000015_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="CLEDController::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_af4376e36319823c1c2fc1204189f8b57.html#af4376e36319823c1c2fc1204189f8b57",tooltip="Set all the LEDs to a given color."];
+  Node7 -> Node10 [id="edge21_Node000007_Node000010",color="steelblue1",style="solid",tooltip=" "];
+}

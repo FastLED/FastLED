@@ -1,0 +1,21 @@
+digraph "loop"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="Fire2012",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d26/_fire2012_8ino_a381ceb87530dc5fee1be3e77d33b3a53.html#a381ceb87530dc5fee1be3e77d33b3a53",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="HeatColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_gac5c6b83ec07d310385a430f9f0336530.html#gac5c6b83ec07d310385a430f9f0336530",tooltip="Approximates a \"black body radiation\" spectrum for a given \"heat\" level."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="scale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga628b417ea1507e3447cdf5f308d9b6d5.html#ga628b417ea1507e3447cdf5f308d9b6d5",tooltip="The \"video\" version of scale8() guarantees that the output will be only be zero if one or both of the..."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="qadd8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5",tooltip="Add one byte to another, saturating at 0xFF."];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="qsub8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3",tooltip="Subtract one byte from another, saturating at 0x00."];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="random8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe",tooltip="Generate an 8-bit random number."];
+}

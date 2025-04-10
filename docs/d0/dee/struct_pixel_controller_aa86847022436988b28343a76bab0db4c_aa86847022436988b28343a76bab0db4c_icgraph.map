@@ -1,0 +1,9 @@
+<map id="PixelController::enable_dithering" name="PixelController::enable_dithering">
+<area shape="rect" id="Node000001" title="Toggle dithering enable If dithering is set to enabled, this will re&#45;init the dithering values (init_..." alt="" coords="273,47,443,87"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a68e0ae41357f1dda75a5724cde6aa991.html#a68e0ae41357f1dda75a5724cde6aa991" title="Constructor." alt="" coords="5,5,225,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,50,178,33,179,28,260,45"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ac272cca24b476c78cddd257cd9406150.html#ac272cca24b476c78cddd257cd9406150" title="Constructor." alt="" coords="5,55,225,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,70,226,70,226,65,260,65"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ae1e1069b343fc0577828d28ffe3cead9.html#ae1e1069b343fc0577828d28ffe3cead9" title="Constructor." alt="" coords="5,104,225,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="260,90,179,107,178,101,259,85"/>
+</map>

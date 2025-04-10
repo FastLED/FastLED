@@ -1,0 +1,5 @@
+<map id="AVRSoftwareSPIOutput::waitFully" name="AVRSoftwareSPIOutput::waitFully">
+<area shape="rect" id="Node000001" title="Wait until the SPI subsystem is ready for more data to write." alt="" coords="5,5,175,45"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_a15951c5c76cc43be5b8812d29da716dc.html#a15951c5c76cc43be5b8812d29da716dc" title="Wait until the SPI subsystem is ready for more data to write." alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,23,209,23,209,28,175,28"/>
+</map>

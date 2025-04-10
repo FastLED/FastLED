@@ -1,0 +1,13 @@
+<map id="beatsin88" name="beatsin88">
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="295,80,381,105"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="112,5,239,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,75,246,44,217,33,219,28,248,40,306,71"/>
+<area shape="rect" id="Node000003" href="$df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d.html#a331b131b082d622bbd9208bf05308d0d" title=" " alt="" coords="104,55,247,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="281,87,246,81,247,76,282,81"/>
+<area shape="rect" id="Node000004" href="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc" title=" " alt="" coords="122,104,229,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,104,229,111,228,106,281,98"/>
+<area shape="rect" id="Node000006" href="$d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e3b.html#a6e24bc1de16730062b4d4be6ad4f8e3b" title=" " alt="" coords="148,153,203,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="304,114,248,143,204,160,202,155,246,138,302,110"/>
+<area shape="rect" id="Node000005" href="$dc/d25/_pacifica_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,104,56,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="109,119,56,119,56,114,109,114"/>
+</map>

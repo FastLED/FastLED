@@ -1,0 +1,13 @@
+<map id="CFastLED::setCorrection" name="CFastLED::setCorrection">
+<area shape="rect" id="Node000001" title="Set a global color correction." alt="" coords="5,55,183,80"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="258,5,418,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,52,260,31,261,36,158,57"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="259,55,417,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="183,65,246,65,246,70,183,70"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a80d62b44c6901851fd70de3853661525.html#a80d62b44c6901851fd70de3853661525" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="231,104,445,129"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="158,77,261,99,260,104,157,83"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="493,55,720,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,28,524,49,523,55,407,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="417,65,479,65,479,70,417,70"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="407,101,523,80,524,85,408,107"/>
+</map>

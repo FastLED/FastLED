@@ -1,0 +1,15 @@
+digraph "PixelController::getscale"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="PixelController::getscale",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Gets the scale data for the provided output slot."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::getScale0",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a320fa30e08b30b14bf81dfde27c5b971.html#a320fa30e08b30b14bf81dfde27c5b971",tooltip="non-template alias of getscale<0>()"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="PixelController::getScale1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_aec2cbf1845d2343e2e7b840f36d0bbe7.html#aec2cbf1845d2343e2e7b840f36d0bbe7",tooltip="non-template alias of getscale<1>()"];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="PixelController::getScale2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a6ac29f180ad5429301cb6e3ac3966616.html#a6ac29f180ad5429301cb6e3ac3966616",tooltip="non-template alias of getscale<2>()"];
+}

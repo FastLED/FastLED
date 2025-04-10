@@ -1,0 +1,41 @@
+<map id="REFHardwareSPIOutput::writePixels" name="REFHardwareSPIOutput::writePixels">
+<area shape="rect" id="Node000001" title="write a block of uint8_ts out in groups of three." alt="" coords="5,247,180,287"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="229,5,440,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,246,113,203,140,147,177,90,200,64,226,41,237,34,240,39,230,45,204,68,181,93,144,150,118,205,103,248"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a4984f158bbc3b6c79ca16dd847fe67e1.html#a4984f158bbc3b6c79ca16dd847fe67e1" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="245,55,424,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="103,245,151,177,186,138,226,105,237,99,239,104,230,110,190,142,155,180,108,248"/>
+<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a11f9b50f738c6d57d08d6776b3d8eb43.html#a11f9b50f738c6d57d08d6776b3d8eb43" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="245,119,424,159"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="116,245,165,207,227,169,243,162,245,167,229,174,168,211,119,249"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_a33c22b408cbc9eb8b9d98993fe985264.html#a33c22b408cbc9eb8b9d98993fe985264" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="245,183,424,223"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="168,245,245,224,246,229,170,250"/>
+<area shape="rect" id="Node000014" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a7c39a37f4a8d759bfb59623fa95b09ce.html#a7c39a37f4a8d759bfb59623fa95b09ce" title="release the CS select" alt="" coords="247,247,422,287"/>
+<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="180,265,234,265,234,270,180,270"/>
+<area shape="rect" id="Node000015" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a9f51d6a4a6ab66c709ff1d677815946b.html#a9f51d6a4a6ab66c709ff1d677815946b" title="latch the CS select" alt="" coords="247,311,422,351"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="170,285,246,305,245,310,168,290"/>
+<area shape="rect" id="Node000016" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward." alt="" coords="228,376,441,401"/>
+<area shape="poly" id="edge21_Node000001_Node000016" title=" " alt="" coords="118,286,167,324,229,361,251,369,249,374,227,366,164,329,115,290"/>
+<area shape="rect" id="Node000017" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a63c213c547fd413c258e9bfbf4c7b982.html#a63c213c547fd413c258e9bfbf4c7b982" title="write a single bit out, which bit from the passed in byte is determined by template parameter" alt="" coords="247,426,422,466"/>
+<area shape="poly" id="edge22_Node000001_Node000017" title=" " alt="" coords="109,286,157,348,191,382,229,412,240,418,238,423,227,416,188,386,153,352,105,289"/>
+<area shape="rect" id="Node000018" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a077457b7a802ee946db4b2f8117d5ad4.html#a077457b7a802ee946db4b2f8117d5ad4" title="write a byte out via SPI (returns immediately on writing register)" alt="" coords="247,490,422,530"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="104,286,121,327,147,378,184,431,206,455,230,476,237,481,234,486,226,480,202,459,180,434,143,380,116,329,99,289"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="489,181,668,221"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="415,93,443,105,468,123,491,143,534,171,531,176,488,147,464,127,440,110,413,98"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="499,108,658,133"/>
+<area shape="poly" id="edge10_Node000003_Node000010" title=" " alt="" coords="425,89,497,103,496,108,424,95"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="947,184,1167,209"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="630,218,672,232,716,242,807,251,898,242,957,229,1010,212,1012,217,959,234,899,247,807,257,716,247,671,237,629,223"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f" title="Calculate a dither value using the per&#45;channel dither data." alt="" coords="726,159,889,184"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="668,187,712,181,713,186,668,192"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="716,208,899,233"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="668,206,703,209,702,214,668,211"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="1016,186,1008,176,1012,166,1029,160,1057,157,1092,161,1102,166,1105,172,1101,175,1098,170,1090,166,1057,163,1030,165,1016,170,1013,175,1020,182"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="889,177,933,181,933,187,888,182"/>
+<area shape="poly" id="edge9_Node000009_Node000005" title=" " alt="" coords="899,209,933,206,933,211,899,215"/>
+<area shape="poly" id="edge11_Node000010_Node000005" title=" " alt="" coords="659,119,773,126,899,143,959,159,1012,177,1010,182,957,164,898,149,772,131,658,124"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="775,57,839,83"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="636,105,761,77,762,83,638,110"/>
+<area shape="poly" id="edge14_Node000012_Node000004" title=" " alt="" coords="416,157,486,175,484,180,414,162"/>
+<area shape="poly" id="edge15_Node000012_Node000010" title=" " alt="" coords="424,130,485,125,486,130,424,135"/>
+<area shape="poly" id="edge17_Node000013_Node000004" title=" " alt="" coords="424,200,475,199,476,204,424,205"/>
+<area shape="poly" id="edge18_Node000013_Node000010" title=" " alt="" coords="403,181,440,169,531,136,533,141,442,174,405,186"/>
+</map>

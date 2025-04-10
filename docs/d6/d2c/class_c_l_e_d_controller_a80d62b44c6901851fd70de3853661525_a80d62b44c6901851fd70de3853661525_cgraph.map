@@ -1,0 +1,5 @@
+<map id="CLEDController::setCorrection" name="CLEDController::setCorrection">
+<area shape="rect" id="Node000001" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="5,5,220,31"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="268,5,495,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,15,254,15,254,21,220,21"/>
+</map>

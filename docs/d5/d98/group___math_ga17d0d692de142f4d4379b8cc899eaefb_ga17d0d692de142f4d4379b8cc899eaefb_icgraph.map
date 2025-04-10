@@ -1,0 +1,7 @@
+<map id="qmul8" name="qmul8">
+<area shape="rect" id="Node000001" title="8x8 bit multiplication with 8&#45;bit result, saturating at 0xFF." alt="" coords="193,31,256,56"/>
+<area shape="rect" id="Node000002" href="$db/d87/group___pixel_types_gaeda6b694068cd82be2563b7c748d26e9.html#gaeda6b694068cd82be2563b7c748d26e9" title="Multiply each of the channels by a constant, saturating each channel at 0xFF." alt="" coords="33,5,117,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,38,117,28,118,22,180,33"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_aba784833e0a2b040a696273b7dc0fe93.html#aba784833e0a2b040a696273b7dc0fe93" title="Multiply each of the channels by a constant, saturating each channel at 0xFF." alt="" coords="5,55,145,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,53,146,59,145,53,179,48"/>
+</map>

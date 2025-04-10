@@ -1,0 +1,11 @@
+<map id="REFHardwareSPIOutput::release" name="REFHardwareSPIOutput::release">
+<area shape="rect" id="Node000001" title="release the CS select" alt="" coords="451,69,625,109"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_aed13aeec47cdee6166451607311f181c.html#aed13aeec47cdee6166451607311f181c" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="454,68,385,48,386,43,455,63"/>
+<area shape="rect" id="Node000004" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a727c7315fab0f11994b879ee8a27460f.html#a727c7315fab0f11994b879ee8a27460f" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="228,69,403,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="437,92,403,92,403,87,437,87"/>
+<area shape="rect" id="Node000005" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1" title="write a block of uint8_ts out in groups of three." alt="" coords="228,133,403,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="455,116,386,136,385,131,454,111"/>
+<area shape="rect" id="Node000003" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a585373e81d2509a01429f74503b7b56b.html#a585373e81d2509a01429f74503b7b56b" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

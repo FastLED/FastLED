@@ -1,0 +1,14 @@
+<map id="PixelController::loadAndScale0" name="PixelController::loadAndScale0">
+<area shape="rect" id="Node000001" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="752,91,931,131"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a3c10f0dd3838aa2b18d28a20393c9333.html#a3c10f0dd3838aa2b18d28a20393c9333" title=" " alt="" coords="525,59,704,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="738,99,704,94,705,89,739,93"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_aa75c347910343e54b608faf4f4a002bd.html#aa75c347910343e54b608faf4f4a002bd" title=" " alt="" coords="525,123,704,163"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="739,128,705,133,704,127,738,123"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller_a299c89c516c1c32935e75f492137d872.html#a299c89c516c1c32935e75f492137d872" title=" " alt="" coords="268,5,477,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="511,59,463,48,464,43,513,53"/>
+<area shape="rect" id="Node000004" href="$d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42" title=" " alt="" coords="5,35,220,75"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="511,76,220,62,220,57,512,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="255,41,221,45,220,40,254,36"/>
+<area shape="rect" id="Node000007" href="$d5/d83/class_r_g_b_w_emulated_controller_aba9a2f023f2950dbcdf3c2482f765350.html#aba9a2f023f2950dbcdf3c2482f765350" title="Send the LED data to the strip." alt="" coords="278,123,467,163"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="512,145,468,145,468,140,512,140"/>
+</map>

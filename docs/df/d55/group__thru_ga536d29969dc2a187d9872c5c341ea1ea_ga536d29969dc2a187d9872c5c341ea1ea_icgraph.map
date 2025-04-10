@@ -1,0 +1,87 @@
+<map id="MidiInterface::UpdateLastSentTime" name="MidiInterface::UpdateLastSentTime">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1033,879,1224,919"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga806320755dc058fc62cd727329dc1488.html#ga806320755dc058fc62cd727329dc1488" title="Send a MIDI message." alt="" coords="807,433,954,459"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1108,868,887,460,891,458,1112,866"/>
+<area shape="rect" id="Node000026" href="$d7/db2/group__output_ga58454de7d3ee8ee824f955c805151ad2.html#ga58454de7d3ee8ee824f955c805151ad2" title="Generate and send a MIDI message from the values given." alt="" coords="539,937,686,963"/>
+<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="1020,922,986,927,825,942,686,950,686,945,825,937,985,922,1019,917"/>
+<area shape="rect" id="Node000027" href="$d7/db2/group__output_gabc45594bf1156b5020a2fa188c281cd0.html#gabc45594bf1156b5020a2fa188c281cd0" title="Send a Common message. Common messages reset the running status." alt="" coords="777,779,984,804"/>
+<area shape="poly" id="edge26_Node000001_Node000027" title=" " alt="" coords="1068,876,910,806,912,802,1071,871"/>
+<area shape="rect" id="Node000032" href="$d7/db2/group__output_gac23eb04a4dc0d764d6db6f71c43fda12.html#gac23eb04a4dc0d764d6db6f71c43fda12" title="Send a Real Time (one byte) message." alt="" coords="776,1113,985,1139"/>
+<area shape="poly" id="edge33_Node000001_Node000032" title=" " alt="" coords="1097,931,898,1115,894,1111,1094,927"/>
+<area shape="rect" id="Node000040" href="$d7/db2/group__output_gad36fe6dd36de8f539122e54876f4d1b4.html#gad36fe6dd36de8f539122e54876f4d1b4" title="Generate and send a System Exclusive frame." alt="" coords="787,887,974,912"/>
+<area shape="poly" id="edge44_Node000001_Node000040" title=" " alt="" coords="1019,902,974,902,974,897,1019,897"/>
+<area shape="rect" id="Node000003" href="$d7/db2/group__output_ga8f9445f1808b7aa80535aec7d38de6bb.html#ga8f9445f1808b7aa80535aec7d38de6bb" title="Send a Polyphonic AfterTouch message (applies to a specified note)" alt="" coords="523,166,702,206"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="867,421,847,377,817,323,776,267,753,242,726,220,701,206,704,201,730,216,756,238,780,264,821,320,852,375,872,419"/>
+<area shape="rect" id="Node000004" href="$d7/db2/group__output_ga15b8bb0e4b1f528ae81ec018897a3734.html#ga15b8bb0e4b1f528ae81ec018897a3734" title="Send a MonoPhonic AfterTouch message (applies to all notes)" alt="" coords="523,230,702,270"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="862,423,807,354,769,316,727,284,701,272,703,267,729,280,773,312,811,350,866,420"/>
+<area shape="rect" id="Node000005" href="$d7/db2/group__output_ga7a274e7fda3f26a257844e695ef5825b.html#ga7a274e7fda3f26a257844e695ef5825b" title="Send a Control Change message." alt="" coords="515,294,710,334"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="851,427,796,387,727,348,696,337,698,332,729,344,798,383,854,422"/>
+<area shape="rect" id="Node000018" href="$d7/db2/group__output_gad6aba12074008b67bc385a4c32672437.html#gad6aba12074008b67bc385a4c32672437" title="Send a Note Off message." alt="" coords="514,359,711,384"/>
+<area shape="poly" id="edge17_Node000002_Node000018" title=" " alt="" coords="831,431,727,398,680,387,681,381,729,393,833,426"/>
+<area shape="rect" id="Node000019" href="$d7/db2/group__output_ga580fb85c5b020566dc04cabc42aae9dc.html#ga580fb85c5b020566dc04cabc42aae9dc" title="Send a Note On message." alt="" coords="515,408,711,433"/>
+<area shape="poly" id="edge18_Node000002_Node000019" title=" " alt="" coords="793,440,711,433,711,427,794,435"/>
+<area shape="rect" id="Node000020" href="$d7/db2/group__output_ga2fd10aa2a31236679add8a6a01a5e70a.html#ga2fd10aa2a31236679add8a6a01a5e70a" title="Send a Pitch Bend message using a signed integer value." alt="" coords="507,457,719,483"/>
+<area shape="poly" id="edge19_Node000002_Node000020" title=" " alt="" coords="794,456,719,463,719,458,793,451"/>
+<area shape="rect" id="Node000022" href="$d7/db2/group__output_ga9de92ebd5184cf993dbbca98a98afaed.html#ga9de92ebd5184cf993dbbca98a98afaed" title="Send a Polyphonic AfterTouch message (applies to a specified note)" alt="" coords="497,507,728,532"/>
+<area shape="poly" id="edge21_Node000002_Node000022" title=" " alt="" coords="830,466,729,497,676,509,675,504,727,491,829,460"/>
+<area shape="rect" id="Node000023" href="$d7/db2/group__output_ga87eb10a0b528a55fb30b1152d34a6f2f.html#ga87eb10a0b528a55fb30b1152d34a6f2f" title="Send a Program Change message." alt="" coords="511,557,714,597"/>
+<area shape="poly" id="edge22_Node000002_Node000023" title=" " alt="" coords="854,469,798,508,729,546,695,559,693,554,727,541,795,503,851,465"/>
+<area shape="rect" id="Node000024" href="$df/d6a/class_midi_interface_a8405cc7229e4eab30520ae005ec79e10.html#a8405cc7229e4eab30520ae005ec79e10" title=" " alt="" coords="237,804,411,829"/>
+<area shape="poly" id="edge23_Node000002_Node000024" title=" " alt="" coords="866,472,812,542,773,579,729,611,697,626,667,635,614,639,560,642,531,649,499,663,447,697,400,737,337,806,333,802,397,733,443,692,496,658,529,644,560,637,613,633,666,629,695,621,727,606,770,575,808,538,862,469"/>
+<area shape="rect" id="Node000006" href="$d7/db2/group__output_ga8b26d6bf9ee8b1ec412b9fa000825c1b.html#ga8b26d6bf9ee8b1ec412b9fa000825c1b" title="Start a Non&#45;Registered Parameter Number frame." alt="" coords="233,5,415,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="502,290,495,284,475,253,467,222,467,191,472,160,476,130,476,101,468,72,447,44,432,33,415,25,417,20,435,28,451,40,473,70,482,100,482,131,477,161,473,191,472,221,480,251,499,280,506,286"/>
+<area shape="rect" id="Node000007" href="$d7/db2/group__output_ga8c0d80cbbc31164207a5daac5c2c0250.html#ga8c0d80cbbc31164207a5daac5c2c0250" title="Start a Registered Parameter Number frame." alt="" coords="235,55,413,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="502,290,495,284,478,259,470,235,469,210,472,185,474,162,472,138,465,115,447,93,431,82,412,74,414,69,434,77,451,89,469,113,478,137,479,162,477,186,475,210,476,234,483,257,499,280,505,286"/>
+<area shape="rect" id="Node000008" href="$d7/db2/group__output_ga522eea83ce5280e72bbe963d16c63de0.html#ga522eea83ce5280e72bbe963d16c63de0" title="Terminate an NRPN frame. This will send a Null Function to deselect the currently selected NRPN." alt="" coords="239,104,409,129"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="502,289,495,284,481,266,474,247,471,211,469,175,462,159,448,143,429,131,409,123,410,118,432,126,451,139,466,156,474,174,477,210,479,246,486,263,499,280,505,285"/>
+<area shape="rect" id="Node000009" href="$d7/db2/group__output_ga2e41151a46d4f00458668cc0c59b9937.html#ga2e41151a46d4f00458668cc0c59b9937" title="Terminate an RPN frame. This will send a Null Function to deselect the currently selected RPN." alt="" coords="241,153,407,179"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="502,289,496,284,484,272,477,260,471,236,465,213,458,202,448,192,428,181,406,174,408,169,430,176,451,188,463,199,470,211,476,235,482,258,489,269,499,280,505,285"/>
+<area shape="rect" id="Node000010" href="$d7/db2/group__output_ga17e1abb84d45a9062449a674c04a9b74.html#ga17e1abb84d45a9062449a674c04a9b74" title=" " alt="" coords="199,203,449,228"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="510,291,496,284,481,273,472,262,462,251,448,242,419,231,421,226,451,237,466,247,476,259,485,269,499,280,512,286"/>
+<area shape="rect" id="Node000011" href="$d7/db2/group__output_ga0a6887687cf94a54e0d2b05739623e4c.html#ga0a6887687cf94a54e0d2b05739623e4c" title=" " alt="" coords="202,252,446,277"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="501,298,398,280,399,275,502,292"/>
+<area shape="rect" id="Node000012" href="$d7/db2/group__output_ga9a94df00a0b72f66849f9e4db5a29880.html#ga9a94df00a0b72f66849f9e4db5a29880" title="Send separate MSB/LSB values for the currently selected NRPN number." alt="" coords="217,301,431,327"/>
+<area shape="poly" id="edge11_Node000005_Node000012" title=" " alt="" coords="502,317,431,317,431,311,502,311"/>
+<area shape="rect" id="Node000013" href="$d7/db2/group__output_gae5bf8f378de3b787f2b943f2349272f9.html#gae5bf8f378de3b787f2b943f2349272f9" title="Send a 14&#45;bit value for the currently selected NRPN number." alt="" coords="217,351,431,376"/>
+<area shape="poly" id="edge12_Node000005_Node000013" title=" " alt="" coords="502,336,399,353,398,348,501,330"/>
+<area shape="rect" id="Node000014" href="$d7/db2/group__output_gabde92f35330f7656195dc015c5ac8075.html#gabde92f35330f7656195dc015c5ac8075" title=" " alt="" coords="202,400,446,425"/>
+<area shape="poly" id="edge13_Node000005_Node000014" title=" " alt="" coords="513,341,499,348,485,358,475,369,466,380,451,390,417,402,415,397,448,385,462,375,472,365,481,354,496,344,511,337"/>
+<area shape="rect" id="Node000015" href="$d7/db2/group__output_ga11b1ea9c4ae69689c8d7f1b3258f2ec3.html#ga11b1ea9c4ae69689c8d7f1b3258f2ec3" title=" " alt="" coords="205,449,443,475"/>
+<area shape="poly" id="edge14_Node000005_Node000015" title=" " alt="" coords="505,343,499,348,482,370,476,393,470,416,462,428,451,439,428,452,425,447,448,435,458,424,465,414,471,391,478,367,495,344,502,339"/>
+<area shape="rect" id="Node000016" href="$d7/db2/group__output_ga21d533eef35687c9abfa5fc2bf764b1d.html#ga21d533eef35687c9abfa5fc2bf764b1d" title="Send separate MSB/LSB values for the currently selected RPN number." alt="" coords="220,499,428,524"/>
+<area shape="poly" id="edge15_Node000005_Node000016" title=" " alt="" coords="505,343,499,348,486,365,479,381,477,417,474,453,466,471,451,488,430,502,427,497,448,484,461,468,468,452,471,416,474,380,481,362,495,344,502,339"/>
+<area shape="rect" id="Node000017" href="$d7/db2/group__output_gac14d9facb3443437e5c1363042ae091f.html#gac14d9facb3443437e5c1363042ae091f" title="Send a 14&#45;bit value for the currently selected RPN number." alt="" coords="220,548,428,573"/>
+<area shape="poly" id="edge16_Node000005_Node000017" title=" " alt="" coords="505,342,499,348,483,371,476,394,475,417,477,441,479,465,477,490,469,514,451,537,430,552,427,547,448,533,465,511,472,489,473,466,472,442,469,417,470,393,478,368,495,344,502,338"/>
+<area shape="rect" id="Node000021" href="$d7/db2/group__output_gaaaf16c1334640e690ecbd835d645e4cb.html#gaaaf16c1334640e690ecbd835d645e4cb" title="Send a Pitch Bend message using a floating point value." alt="" coords="218,597,430,623"/>
+<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="506,491,499,496,488,506,482,517,476,540,470,564,462,576,451,587,428,600,425,595,448,583,458,572,465,562,471,539,477,515,484,503,496,492,503,487"/>
+<area shape="rect" id="Node000025" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,880,151,905"/>
+<area shape="poly" id="edge24_Node000024_Node000025" title=" " alt="" coords="269,836,121,882,119,877,268,831"/>
+<area shape="rect" id="Node000028" href="$d7/db2/group__output_ga9b28cd9df57263fb665110d034ad8c96.html#ga9b28cd9df57263fb665110d034ad8c96" title="Send a Song Position Pointer message." alt="" coords="497,672,728,697"/>
+<area shape="poly" id="edge27_Node000027_Node000028" title=" " alt="" coords="847,773,792,742,727,712,685,700,686,695,729,708,794,737,849,769"/>
+<area shape="rect" id="Node000029" href="$d7/db2/group__output_gaa3784e12ce67dce72b407ffc3682b27e.html#gaa3784e12ce67dce72b407ffc3682b27e" title="Send a Song Select message." alt="" coords="503,721,722,747"/>
+<area shape="poly" id="edge29_Node000027_Node000029" title=" " alt="" coords="807,778,672,749,673,744,808,773"/>
+<area shape="rect" id="Node000030" href="$d7/db2/group__output_ga5f318604b282c1366616347d211a5aaa.html#ga5f318604b282c1366616347d211a5aaa" title="Send a MIDI Time Code Quarter Frame." alt="" coords="506,771,719,811"/>
+<area shape="poly" id="edge31_Node000027_Node000030" title=" " alt="" coords="764,794,720,794,720,789,764,789"/>
+<area shape="rect" id="Node000031" href="$d7/db2/group__output_ga7303cceabd422631b77a1e6c8f1338c6.html#ga7303cceabd422631b77a1e6c8f1338c6" title="Send a Tune Request message." alt="" coords="497,836,728,861"/>
+<area shape="poly" id="edge32_Node000027_Node000031" title=" " alt="" coords="808,810,673,839,672,833,807,804"/>
+<area shape="poly" id="edge28_Node000028_Node000024" title=" " alt="" coords="524,704,498,712,453,734,409,760,343,806,340,802,406,756,450,730,496,708,523,699"/>
+<area shape="poly" id="edge30_Node000029_Node000024" title=" " alt="" coords="536,752,498,762,361,807,359,801,497,757,535,747"/>
+<area shape="poly" id="edge43_Node000032_Node000024" title=" " alt="" coords="851,1107,795,1069,727,1032,693,1021,663,1016,608,1014,581,1012,554,1008,526,997,496,977,477,956,469,935,462,913,447,890,402,856,356,832,359,827,405,851,451,887,467,911,474,933,482,954,499,973,529,992,556,1002,582,1007,608,1009,663,1010,694,1016,729,1028,798,1064,854,1103"/>
+<area shape="poly" id="edge34_Node000032_Node000026" title=" " alt="" coords="859,1104,804,1044,767,1012,727,984,679,965,681,960,729,980,770,1008,808,1040,863,1101"/>
+<area shape="rect" id="Node000033" href="$df/d6a/class_midi_interface_aca0268305122b38298c5e3f4992f923e.html#aca0268305122b38298c5e3f4992f923e" title=" " alt="" coords="230,901,418,941"/>
+<area shape="poly" id="edge35_Node000032_Node000033" title=" " alt="" coords="827,1111,727,1081,662,1065,611,1055,560,1044,496,1022,417,983,353,943,356,938,420,978,498,1017,561,1039,612,1050,663,1060,729,1075,829,1106"/>
+<area shape="rect" id="Node000034" href="$df/d6a/class_midi_interface_a6294215995f743679b4d15536cb9b0cf.html#a6294215995f743679b4d15536cb9b0cf" title=" " alt="" coords="521,1089,704,1115"/>
+<area shape="poly" id="edge37_Node000032_Node000034" title=" " alt="" coords="762,1118,704,1113,704,1107,763,1113"/>
+<area shape="rect" id="Node000035" href="$df/d6a/class_midi_interface_a7cb85663c319568f24dab2fa9e00bb51.html#a7cb85663c319568f24dab2fa9e00bb51" title=" " alt="" coords="510,1139,715,1164"/>
+<area shape="poly" id="edge38_Node000032_Node000035" title=" " alt="" coords="763,1140,716,1144,716,1139,762,1135"/>
+<area shape="rect" id="Node000036" href="$df/d6a/class_midi_interface_a21bc543581b50f0af2cab15c83192c8d.html#a21bc543581b50f0af2cab15c83192c8d" title=" " alt="" coords="523,1188,702,1213"/>
+<area shape="poly" id="edge39_Node000032_Node000036" title=" " alt="" coords="833,1146,729,1179,681,1191,680,1185,727,1174,831,1141"/>
+<area shape="rect" id="Node000037" href="$df/d6a/class_midi_interface_a00fc8da28083fc9dc7814965f2dee700.html#a00fc8da28083fc9dc7814965f2dee700" title=" " alt="" coords="525,1237,701,1263"/>
+<area shape="poly" id="edge40_Node000032_Node000037" title=" " alt="" coords="855,1150,799,1190,765,1211,729,1228,695,1240,693,1235,727,1224,762,1206,796,1186,852,1145"/>
+<area shape="rect" id="Node000038" href="$df/d6a/class_midi_interface_a4b2302bf337a4b59ceb2aaa54c6365d4.html#a4b2302bf337a4b59ceb2aaa54c6365d4" title=" " alt="" coords="515,1287,711,1327"/>
+<area shape="poly" id="edge41_Node000032_Node000038" title=" " alt="" coords="864,1152,808,1214,771,1249,729,1278,704,1290,702,1285,727,1273,768,1244,805,1211,860,1148"/>
+<area shape="rect" id="Node000039" href="$df/d6a/class_midi_interface_a048fe4d5ef9c51b00649f17cbf885ff7.html#a048fe4d5ef9c51b00649f17cbf885ff7" title=" " alt="" coords="525,1352,700,1377"/>
+<area shape="poly" id="edge42_Node000032_Node000039" title=" " alt="" coords="871,1153,851,1195,820,1246,780,1298,756,1321,729,1342,701,1355,699,1350,727,1337,752,1317,776,1294,816,1243,846,1192,866,1150"/>
+<area shape="poly" id="edge36_Node000033_Node000025" title=" " alt="" coords="216,911,151,904,151,898,217,906"/>
+<area shape="poly" id="edge45_Node000040_Node000024" title=" " alt="" coords="773,902,641,896,568,888,497,877,419,856,355,832,357,827,421,851,498,871,569,883,641,890,774,897"/>
+</map>

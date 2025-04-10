@@ -1,0 +1,4 @@
+<map id="Clocked Chipsets" name="Clocked Chipsets">
+<area shape="rect" id="Node000002" href="$d4/d28/group___chipsets.html" title="Implementations of CLEDController classes for various led chipsets." alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000001" title="Nominally SPI based, these chipsets have a data and a clock line." alt="" coords="228,5,361,31"/>
+</map>

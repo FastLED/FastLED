@@ -1,0 +1,7 @@
+<map id="AVRSoftwareSPIOutput::wait" name="AVRSoftwareSPIOutput::wait">
+<area shape="rect" id="Node000001" title="Wait until the SPI subsystem is ready for more data to write." alt="" coords="223,37,392,77"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_abc475d3c1bd94b5d61e699f7f77af905.html#abc475d3c1bd94b5d61e699f7f77af905" title="Wait until the SPI subsystem is ready for more data to write." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,46,174,40,175,35,209,40"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a80903ee9d3226ced43e8f614a9e486b1.html#a80903ee9d3226ced43e8f614a9e486b1" title="Write a single byte over SPI and wait afterwards." alt="" coords="5,69,175,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,74,175,80,174,74,209,69"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;" name="NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;">
+<area shape="rect" id="Node000001" title="A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset impl..." alt="" coords="5,93,180,148"/>
+<area shape="rect" id="Node000002" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="47,5,138,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,45,95,93,90,93,90,45"/>
+</map>

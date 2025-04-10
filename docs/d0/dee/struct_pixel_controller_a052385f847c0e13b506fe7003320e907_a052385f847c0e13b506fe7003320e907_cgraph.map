@@ -1,0 +1,16 @@
+<map id="PixelController::loadAndScale_WS2816_HD" name="PixelController::loadAndScale_WS2816_HD">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,184,87"/>
+<area shape="rect" id="Node000002" href="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" title=" " alt="" coords="260,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,45,246,30,247,35,184,50"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="232,55,391,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,65,218,65,218,70,184,70"/>
+<area shape="rect" id="Node000007" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="263,104,359,129"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="184,85,250,100,249,105,182,90"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="439,31,659,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="391,57,425,53,425,58,391,62"/>
+<area shape="rect" id="Node000006" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="517,80,581,105"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="391,73,503,85,502,91,391,78"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="511,32,502,22,507,12,522,6,549,4,582,8,594,17,591,22,580,13,549,9,524,11,510,16,507,22,514,29"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="707,31,863,56"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="659,41,693,41,693,46,659,46"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="set_rgb_2_rgbw_function" name="set_rgb_2_rgbw_function">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,189,31"/>
+<area shape="rect" id="Node000002" href="$d1/d8d/rgbw_8cpp_ac22f7204d0501031d2431e7b2f67c25c.html#ac22f7204d0501031d2431e7b2f67c25c" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="237,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,15,224,15,224,21,190,21"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="425,5,489,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,15,412,15,412,21,378,21"/>
+</map>

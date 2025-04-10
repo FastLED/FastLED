@@ -1,0 +1,21 @@
+<map id="fl::five_bit_hd_gamma_bitshift" name="fl::five_bit_hd_gamma_bitshift">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,142,172,182"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff" title=" " alt="" coords="220,142,399,182"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,159,206,159,206,165,172,165"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aae9d44cd34c016ac8522f638f4b2624d.html#aae9d44cd34c016ac8522f638f4b2624d" title=" " alt="" coords="461,99,599,124"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="396,139,460,125,461,130,397,145"/>
+<area shape="rect" id="Node000007" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="699,153,795,179"/>
+<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="399,160,685,163,685,168,399,165"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_abeb8d8ef178da3a4dbbed27dc6c0c3c7.html#abeb8d8ef178da3a4dbbed27dc6c0c3c7" title=" " alt="" coords="447,199,613,239"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="388,179,440,193,439,198,386,185"/>
+<area shape="rect" id="Node000004" href="$dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94" title=" " alt="" coords="661,5,832,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="551,96,600,68,660,40,680,32,682,37,662,44,602,73,553,101"/>
+<area shape="rect" id="Node000005" href="$dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59" title=" " alt="" coords="665,55,828,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="593,96,670,80,671,85,594,101"/>
+<area shape="rect" id="Node000006" href="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e" title=" " alt="" coords="695,104,798,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="600,110,682,112,682,118,600,116"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="582,121,686,148,685,153,580,127"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="611,197,685,178,686,184,612,202"/>
+<area shape="rect" id="Node000009" href="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" title=" " alt="" coords="695,207,798,232"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="613,217,682,217,682,222,613,222"/>
+</map>

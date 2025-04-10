@@ -1,0 +1,7 @@
+<map id="CRGB::setHue" name="CRGB::setHue">
+<area shape="rect" id="Node000001" title="Allow assignment from just a hue." alt="" coords="5,31,119,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="181,5,285,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,32,167,25,168,30,119,38"/>
+<area shape="rect" id="Node000003" href="$db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="167,55,300,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="119,49,153,53,153,59,119,54"/>
+</map>

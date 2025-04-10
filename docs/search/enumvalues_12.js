@@ -1,4 +1,19 @@
 var searchData=
 [
-  ['violet_0',['Violet',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a08966db6d19bc731401bec166936580b',1,'CRGB']]]
+  ['tan_0',['Tan',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a061a3f0990e01f568807e520d70b4d2e',1,'CRGB']]],
+  ['teal_1',['Teal',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a3326988cffb42ee63855e368b1590fdb',1,'CRGB']]],
+  ['thistle_2',['Thistle',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a0aa03db6472288de29596562522590dc',1,'CRGB']]],
+  ['tick_3',['Tick',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84caa81b25684a7e7a64772aec24197626cb',1,'midi_Defs.h']]],
+  ['timecodequarterframe_4',['TimeCodeQuarterFrame',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84cafaf9b74dab5ac5ae3542d66515c2afcf',1,'midi_Defs.h']]],
+  ['tomato_5',['Tomato',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a4d5524b8373cbf5ec2d185f85f473436',1,'CRGB']]],
+  ['travelingdownwards_6',['travelingDownwards',['../de/de3/ripple_8h_a1f2f44ff7f5e1cfc83b354cfdfa2bcdb.html#a1f2f44ff7f5e1cfc83b354cfdfa2bcdbaf63d70a8a3f20a2dd2988a7a9b51cd2d',1,'ripple.h']]],
+  ['travelingupwards_7',['travelingUpwards',['../de/de3/ripple_8h_a1f2f44ff7f5e1cfc83b354cfdfa2bcdb.html#a1f2f44ff7f5e1cfc83b354cfdfa2bcdba9aaf4583dc09331b3f151d015d4b59cd',1,'ripple.h']]],
+  ['tunerequest_8',['TuneRequest',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84caafec2fa09eaa764d5d629798a8f8429c',1,'midi_Defs.h']]],
+  ['tungsten100w_9',['Tungsten100W',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48',1,'color.h']]],
+  ['tungsten40w_10',['Tungsten40W',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91',1,'color.h']]],
+  ['turquoise_11',['Turquoise',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a5b8151aec3deb35b53d8f6c8f2f28a25',1,'CRGB']]],
+  ['typical8mmpixel_12',['Typical8mmPixel',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b',1,'color.h']]],
+  ['typicalledstrip_13',['TypicalLEDStrip',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#ggadf6bcba67c9573665af20788c4431ae8abb6d30d01c054f65ed9c5a52c2855534',1,'color.h']]],
+  ['typicalpixelstring_14',['TypicalPixelString',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#ggadf6bcba67c9573665af20788c4431ae8a42a6cb156c43caf5b256bc931a5d05ca',1,'color.h']]],
+  ['typicalsmd5050_15',['TypicalSMD5050',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3',1,'color.h']]]
 ];

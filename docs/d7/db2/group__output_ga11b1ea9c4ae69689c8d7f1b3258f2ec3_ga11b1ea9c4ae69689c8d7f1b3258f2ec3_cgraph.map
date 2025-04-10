@@ -1,0 +1,13 @@
+<map id="MidiInterface::sendRpnIncrement" name="MidiInterface::sendRpnIncrement">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,244,80"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga7a274e7fda3f26a257844e695ef5825b.html#ga7a274e7fda3f26a257844e695ef5825b" title="Send a Control Change message." alt="" coords="292,47,487,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,65,278,65,278,70,244,70"/>
+<area shape="rect" id="Node000003" href="$d7/db2/group__output_ga806320755dc058fc62cd727329dc1488.html#ga806320755dc058fc62cd727329dc1488" title="Send a MIDI message." alt="" coords="535,55,681,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="487,65,520,65,520,70,487,70"/>
+<area shape="rect" id="Node000004" href="$df/d6a/class_midi_interface_a3a9e2b63cb520e9cea9ef24b8333eeb9.html#a3a9e2b63cb520e9cea9ef24b8333eeb9" title=" " alt="" coords="735,5,914,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="664,52,754,31,756,36,665,57"/>
+<area shape="rect" id="Node000005" href="$d4/daa/struct_message_ab4397a36b44edf4b49cad1fec4b4c41e.html#ab4397a36b44edf4b49cad1fec4b4c41e" title=" " alt="" coords="737,55,912,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="682,65,724,65,724,70,682,70"/>
+<area shape="rect" id="Node000006" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="729,105,920,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="658,77,736,99,735,104,656,83"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="P9813 controller class." alt="" coords="5,287,180,341"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="17,197,168,237"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,251,95,287,90,287,90,251"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="27,5,147,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,45,95,197,89,197,85,45"/>
+<area shape="rect" id="Node000004" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="109,80,282,135"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="114,37,165,78,161,82,111,42"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="162,147,113,199,109,195,159,143"/>
+</map>

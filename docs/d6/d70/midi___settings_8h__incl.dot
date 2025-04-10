@@ -1,0 +1,14 @@
+digraph "FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Settings.h"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="FastLED/FastLED/examples\l/LuminescentGrand/arduino\l/midi_Settings.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="MIDI Library for the Arduino - Settings."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="midi_Defs.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/midi___defs_8h.html",tooltip="MIDI Library for the Arduino - Definitions."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="midi_Namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dce/midi___namespace_8h.html",tooltip="MIDI Library for the Arduino - Namespace declaration."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="inttypes.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+}

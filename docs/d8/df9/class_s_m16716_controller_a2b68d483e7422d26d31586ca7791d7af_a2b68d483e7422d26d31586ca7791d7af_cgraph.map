@@ -1,0 +1,5 @@
+<map id="SM16716Controller::showPixels" name="SM16716Controller::showPixels">
+<area shape="rect" id="Node000001" title="Send the LED data to the strip." alt="" coords="5,5,160,45"/>
+<area shape="rect" id="Node000002" href="$d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9.html#a3e9e62e92d3f9e175b43e28dbb2254e9" title=" " alt="" coords="208,5,363,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,23,194,23,194,28,160,28"/>
+</map>

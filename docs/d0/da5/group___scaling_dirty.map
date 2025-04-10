@@ -1,0 +1,4 @@
+<map id="Scaling Functions that Leave R1 Dirty" name="Scaling Functions that Leave R1 Dirty">
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling.html" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming." alt="" coords="5,13,140,38"/>
+<area shape="rect" id="Node000001" title="These functions are more efficient for scaling multiple bytes at once, but require calling cleanup_R1..." alt="" coords="188,5,353,45"/>
+</map>

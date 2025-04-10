@@ -1,0 +1,7 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,64,31"/>
+<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a328f611f7913b54364ddd78e16fa818c.html#a328f611f7913b54364ddd78e16fa818c" title=" " alt="" coords="112,5,291,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,15,98,15,98,21,64,21"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7" title="Add two numbers, and calculate the modulo of the sum and a third number, M." alt="" coords="339,5,421,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="291,15,325,15,325,21,291,21"/>
+</map>

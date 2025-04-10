@@ -1,0 +1,15 @@
+<map id="animartrix_detail::ANIMartRIX::run_default_oscillators" name="animartrix_detail::ANIMartRIX::run_default_oscillators">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,30,184,85"/>
+<area shape="rect" id="Node000002" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a8f1a3ef6f9688953f30b62ee5a3842e0.html#a8f1a3ef6f9688953f30b62ee5a3842e0" title=" " alt="" coords="232,30,396,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,55,218,55,218,60,184,60"/>
+<area shape="rect" id="Node000003" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_aca68cf41172ac73c388dad51b3ab40ab.html#aca68cf41172ac73c388dad51b3ab40ab" title=" " alt="" coords="444,5,603,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="396,42,430,37,431,42,397,47"/>
+<area shape="rect" id="Node000004" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a4e599e324fb4f9bec1a113f1843f6058.html#a4e599e324fb4f9bec1a113f1843f6058" title=" " alt="" coords="449,69,597,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="397,67,436,73,435,79,396,73"/>
+<area shape="rect" id="Node000005" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_af3fb7d297afe35dea7078be3836aa994.html#af3fb7d297afe35dea7078be3836aa994" title=" " alt="" coords="651,5,793,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="585,67,646,47,647,52,587,72"/>
+<area shape="rect" id="Node000006" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_acb625b48d9c1beec3067e0c38b7a0b22.html#acb625b48d9c1beec3067e0c38b7a0b22" title=" " alt="" coords="651,69,793,109"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="598,87,637,87,637,92,598,92"/>
+<area shape="rect" id="Node000007" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a7ce0a9b9405217a5b8bf71c88bcb571b.html#a7ce0a9b9405217a5b8bf71c88bcb571b" title=" " alt="" coords="651,133,793,173"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="587,107,647,127,646,132,585,112"/>
+</map>

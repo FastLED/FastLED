@@ -1,0 +1,25 @@
+<map id="LedRopeTCL" name="LedRopeTCL">
+<area shape="rect" id="Node000001" title=" " alt="" coords="249,284,351,309"/>
+<area shape="rect" id="Node000002" href="$d2/d84/class_led_rope_interface.html" title=" " alt="" coords="5,196,141,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,224,270,281,269,286,115,229"/>
+<area shape="rect" id="Node000003" href="$d8/d23/class_frame_buffer.html" title=" " alt="" coords="166,196,269,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,233,241,258,256,271,273,282,270,286,253,276,237,262,222,236"/>
+<area shape="rect" id="Node000004" href="$dd/dc5/class_frame_buffer_base.html" title=" " alt="" coords="97,108,231,133"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="181,144,212,194,208,197,176,147"/>
+<area shape="rect" id="Node000005" href="$de/d12/struct_color3i.html" title=" " alt="" coords="114,13,182,38"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="149,51,152,83,160,107,155,109,147,85,144,52"/>
+<area shape="rect" id="Node000006" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="293,196,473,221"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="364,234,337,262,313,285,310,282,333,258,360,230"/>
+<area shape="rect" id="Node000007" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="287,108,479,133"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="385,147,385,195,380,195,380,147"/>
+<area shape="rect" id="Node000008" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="220,13,279,38"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="278,43,368,106,365,110,275,48"/>
+<area shape="rect" id="Node000009" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="303,13,491,38"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="396,52,387,108,382,107,391,51"/>
+<area shape="rect" id="Node000011" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="516,5,668,45"/>
+<area shape="poly" id="edge9_Node000007_Node000011" title=" " alt="" coords="538,53,410,110,407,105,536,48"/>
+<area shape="rect" id="Node000012" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="503,108,654,133"/>
+<area shape="poly" id="edge10_Node000006_Node000012" title=" " alt="" coords="541,141,410,198,408,193,539,136"/>
+<area shape="rect" id="Node000013" href="$d2/d78/classfl_1_1_screen_map.html" title=" " alt="" coords="497,196,607,221"/>
+<area shape="poly" id="edge11_Node000001_Node000013" title=" " alt="" coords="515,229,430,263,348,286,346,281,428,257,513,224"/>
+</map>

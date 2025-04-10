@@ -1,0 +1,9 @@
+<map id="gen.generate_blue_points" name="gen.generate_blue_points">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,196,31"/>
+<area shape="rect" id="Node000002" href="$dc/d8e/namespacegen_abcd6c0f8a022a7f642eabd9c662e5ad9.html#abcd6c0f8a022a7f642eabd9c662e5ad9" title=" " alt="" coords="244,5,365,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,15,230,15,230,21,196,21"/>
+<area shape="rect" id="Node000003" href="$dc/d8e/namespacegen_a4fc5b1da59ed64885db8585feea6794a.html#a4fc5b1da59ed64885db8585feea6794a" title=" " alt="" coords="413,5,532,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,15,399,15,399,21,366,21"/>
+<area shape="rect" id="Node000004" href="$dc/d8e/namespacegen_abe8bcb9c211028969da2d65b3f1d42fd.html#abe8bcb9c211028969da2d65b3f1d42fd" title=" " alt="" coords="580,5,675,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="532,15,566,15,566,21,532,21"/>
+</map>

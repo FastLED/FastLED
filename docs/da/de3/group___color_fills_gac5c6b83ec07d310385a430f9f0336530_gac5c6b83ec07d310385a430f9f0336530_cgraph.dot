@@ -1,0 +1,11 @@
+digraph "HeatColor"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="HeatColor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Approximates a \"black body radiation\" spectrum for a given \"heat\" level."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="scale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga628b417ea1507e3447cdf5f308d9b6d5.html#ga628b417ea1507e3447cdf5f308d9b6d5",tooltip="The \"video\" version of scale8() guarantees that the output will be only be zero if one or both of the..."];
+}

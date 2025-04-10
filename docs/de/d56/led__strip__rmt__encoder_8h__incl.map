@@ -1,0 +1,10 @@
+<map id="FastLED/FastLED/src/third_party/espressif/led_strip/src/led_strip_rmt_encoder.h" name="FastLED/FastLED/src/third_party/espressif/led_strip/src/led_strip_rmt_encoder.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="19,5,184,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="93,196,164,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="46,77,27,93,14,110,8,128,13,147,26,163,43,176,81,194,79,198,40,180,23,167,9,149,3,128,9,108,23,89,42,73"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="23,123,180,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="104,75,104,109,99,109,99,75"/>
+<area shape="rect" id="Node000004" href="$d4/d88/led__strip__types_8h.html" title=" " alt="" coords="204,123,338,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,72,239,113,236,118,162,77"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="249,150,165,192,163,187,247,146"/>
+</map>

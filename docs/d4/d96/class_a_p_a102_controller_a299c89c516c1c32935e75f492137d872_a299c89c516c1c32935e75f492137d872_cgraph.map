@@ -1,0 +1,15 @@
+<map id="APA102Controller::getGlobalBrightnessAndScalingFactors" name="APA102Controller::getGlobalBrightnessAndScalingFactors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,215,109"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a3c10f0dd3838aa2b18d28a20393c9333.html#a3c10f0dd3838aa2b18d28a20393c9333" title=" " alt="" coords="263,69,441,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,87,249,87,249,92,215,92"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a4afe8b8ec93c89308fe185b1eb164ff6.html#a4afe8b8ec93c89308fe185b1eb164ff6" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="489,5,668,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,67,493,47,495,52,424,72"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_ae570967d1b674970cf472feb379f248f.html#ae570967d1b674970cf472feb379f248f" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="489,69,668,109"/>
+<area shape="poly" id="edge4_Node000002_Node000010" title=" " alt="" coords="442,87,475,87,475,92,442,92"/>
+<area shape="rect" id="Node000011" href="$d0/dee/struct_pixel_controller_af5a5f12205a4187aa4df499b8224ed35.html#af5a5f12205a4187aa4df499b8224ed35" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="489,133,668,173"/>
+<area shape="poly" id="edge6_Node000002_Node000011" title=" " alt="" coords="424,107,495,127,493,132,423,112"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="716,69,895,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="651,43,721,63,720,68,650,48"/>
+<area shape="poly" id="edge5_Node000010_Node000004" title=" " alt="" coords="669,87,702,87,702,92,669,92"/>
+<area shape="poly" id="edge7_Node000011_Node000004" title=" " alt="" coords="650,131,720,111,721,116,651,136"/>
+</map>

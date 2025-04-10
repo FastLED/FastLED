@@ -1,0 +1,10 @@
+<map id="Color3i::Orange" name="Color3i::Orange">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,128,56"/>
+<area shape="rect" id="Node000002" href="$de/d12/struct_color3i_a61889348324aefa14c28164d41e98e2a.html#a61889348324aefa14c28164d41e98e2a" title=" " alt="" coords="176,5,299,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,32,162,26,163,32,129,37"/>
+<area shape="rect" id="Node000004" href="$de/d12/struct_color3i_a49dcda1c5a2731858de82313748b85a2.html#a49dcda1c5a2731858de82313748b85a2" title=" " alt="" coords="176,55,299,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="129,49,163,54,162,59,128,55"/>
+<area shape="rect" id="Node000003" href="$de/d12/struct_color3i_a83d27d6442838f43816b4bd5f937b33d.html#a83d27d6442838f43816b4bd5f937b33d" title=" " alt="" coords="347,31,444,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="299,25,334,31,333,36,298,30"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="298,55,333,50,334,55,299,61"/>
+</map>

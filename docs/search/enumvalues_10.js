@@ -1,14 +1,19 @@
 var searchData=
 [
-  ['tan_0',['Tan',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a061a3f0990e01f568807e520d70b4d2e',1,'CRGB']]],
-  ['teal_1',['Teal',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a3326988cffb42ee63855e368b1590fdb',1,'CRGB']]],
-  ['thistle_2',['Thistle',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a0aa03db6472288de29596562522590dc',1,'CRGB']]],
-  ['tomato_3',['Tomato',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a4d5524b8373cbf5ec2d185f85f473436',1,'CRGB']]],
-  ['tungsten100w_4',['Tungsten100W',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48',1,'color.h']]],
-  ['tungsten40w_5',['Tungsten40W',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91',1,'color.h']]],
-  ['turquoise_6',['Turquoise',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a5b8151aec3deb35b53d8f6c8f2f28a25',1,'CRGB']]],
-  ['typical8mmpixel_7',['Typical8mmPixel',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b',1,'color.h']]],
-  ['typicalledstrip_8',['TypicalLEDStrip',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8abb6d30d01c054f65ed9c5a52c2855534',1,'color.h']]],
-  ['typicalpixelstring_9',['TypicalPixelString',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8a42a6cb156c43caf5b256bc931a5d05ca',1,'color.h']]],
-  ['typicalsmd5050_10',['TypicalSMD5050',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3',1,'color.h']]]
+  ['rbg_0',['RBG',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d',1,'eorder.h']]],
+  ['red_1',['Red',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a',1,'CRGB']]],
+  ['redstrip_2',['RedStrip',['../d1/ddb/_chromancer_8ino_ad80fffb6c2f7d00ec768c873fc3ed3e4.html#ad80fffb6c2f7d00ec768c873fc3ed3e4a8c61bcebbb3c563ea60ae6f0e5a78274',1,'Chromancer.ino']]],
+  ['resetallcontrollers_3',['ResetAllControllers',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a6b8d5952d0407d09b8fcba53f704ba0b',1,'midi_Defs.h']]],
+  ['rgb_4',['RGB',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44',1,'eorder.h']]],
+  ['rgb_5fblobs_5',['RGB_BLOBS',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a930df185b5e6e06e24b62d16612be9e0',1,'fl']]],
+  ['rgb_5fblobs2_6',['RGB_BLOBS2',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab63a39cf4ab72366e72709c0abb5d2e4',1,'fl']]],
+  ['rgb_5fblobs3_7',['RGB_BLOBS3',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aecfb84709b4a69017a16c4a7edb3e08b',1,'fl']]],
+  ['rgb_5fblobs4_8',['RGB_BLOBS4',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a4dc891b308ac9b65e2c4b200d429a0ed',1,'fl']]],
+  ['rgb_5fblobs5_9',['RGB_BLOBS5',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acde97309b0196141809564ffeb097bbe',1,'fl']]],
+  ['rings_10',['RINGS',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acd0854bd65648e191ed2ff89e6453e19',1,'fl']]],
+  ['rosybrown_11',['RosyBrown',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a1bd175aab9ed0152cac250f911db0e81',1,'CRGB']]],
+  ['rotating_5fblob_12',['ROTATING_BLOB',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8ad021e507bd2d347e3fa60fda39caa7',1,'fl']]],
+  ['royalblue_13',['RoyalBlue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a750f32dcd4f5e4f11b28100e7d719218',1,'CRGB']]],
+  ['rpnlsb_14',['RPNLSB',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a07f169cde38afb3868aa30714c14e1fc',1,'midi_Defs.h']]],
+  ['rpnmsb_15',['RPNMSB',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a38f51a1c3452ad452cb44868bc81c193',1,'midi_Defs.h']]]
 ];

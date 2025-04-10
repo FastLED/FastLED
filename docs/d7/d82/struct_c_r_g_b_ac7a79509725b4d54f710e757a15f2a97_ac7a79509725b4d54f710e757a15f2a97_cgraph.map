@@ -1,0 +1,11 @@
+<map id="CRGB::operator%=" name="CRGB::operator%=">
+<area shape="rect" id="Node000001" title="%= is a synonym for nscale8_video()." alt="" coords="5,31,152,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="213,5,317,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,31,199,24,200,30,153,36"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="200,55,331,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,50,187,55,186,60,152,55"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="419,25,517,51"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="331,55,405,44,406,50,331,61"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe612dafd146.html#gadfd26d9b154f5ec79dbffe612dafd146" title="In place modifying version of scale8_video() that does not clean up the R1 register on AVR." alt="" coords="379,75,557,115"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="331,74,365,78,364,84,331,79"/>
+</map>

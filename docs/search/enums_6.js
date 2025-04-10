@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['tblendtype_0',['TBlendType',['../group___palette_colors.html#ga565c04e626af4a3ec44bf97edc607b4e',1,'colorutils.h']]],
-  ['tgradientdirectioncode_1',['TGradientDirectionCode',['../group___color_fills.html#ga097bfc6a8459d95e8afa8a16b9e6476a',1,'colorutils.h']]]
+  ['led_5fmodel_5ft_0',['led_model_t',['../d4/d88/led__strip__types_8h_a96acac66c087508b5ea980682d2e4994.html#a96acac66c087508b5ea980682d2e4994',1,'led_strip_types.h']]],
+  ['ledcolorcorrection_1',['LEDColorCorrection',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#gadf6bcba67c9573665af20788c4431ae8',1,'color.h']]],
+  ['leddirection_2',['leddirection',['../d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359',1,'fl']]]
 ];

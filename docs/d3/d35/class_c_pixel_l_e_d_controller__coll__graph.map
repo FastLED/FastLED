@@ -1,0 +1,10 @@
+<map id="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;" name="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;">
+<area shape="rect" id="Node000001" title="Template extension of the CLEDController class." alt="" coords="32,216,205,271"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="59,132,179,157"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,171,121,216,116,216,116,171"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="194,136,205,144,197,153,179,156,178,150,195,148,200,145,191,140"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="32,45,31,71,38,97,57,116,80,130,78,134,53,121,34,100,25,72,26,45"/>
+<area shape="rect" id="Node000004" href="$db/d74/struct_rgbw.html" title=" " alt="" coords="173,5,232,31"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="200,45,190,72,176,100,158,119,139,134,136,130,154,115,171,97,186,70,195,43"/>
+</map>

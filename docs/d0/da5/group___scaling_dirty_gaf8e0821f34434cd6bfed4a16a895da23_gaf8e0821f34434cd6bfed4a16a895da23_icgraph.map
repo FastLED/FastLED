@@ -1,0 +1,9 @@
+<map id="scale8_video_LEAVING_R1_DIRTY" name="scale8_video_LEAVING_R1_DIRTY">
+<area shape="rect" id="Node000001" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="369,23,540,63"/>
+<area shape="rect" id="Node000002" href="$d2/d73/group___palette_colors_gaf65fa1b4fedbbd7b8054a71e1b6474b3.html#gaf65fa1b4fedbbd7b8054a71e1b6474b3" title="Get a color from a palette." alt="" coords="187,5,321,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="355,33,321,29,322,24,356,28"/>
+<area shape="rect" id="Node000003" href="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8" title=" " alt="" coords="187,55,321,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="356,58,321,62,321,57,355,53"/>
+<area shape="rect" id="Node000004" href="$dd/dc7/group___h_s_v2_r_g_b_ga30d4c5d63d1eab20b61e14f6429bf634.html#ga30d4c5d63d1eab20b61e14f6429bf634" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="5,55,139,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="174,70,139,70,139,65,174,65"/>
+</map>

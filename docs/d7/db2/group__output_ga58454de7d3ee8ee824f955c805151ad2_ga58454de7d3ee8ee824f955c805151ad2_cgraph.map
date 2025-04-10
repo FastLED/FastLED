@@ -1,0 +1,10 @@
+<map id="MidiInterface::send" name="MidiInterface::send">
+<area shape="rect" id="Node000001" title="Generate and send a MIDI message from the values given." alt="" coords="5,55,152,80"/>
+<area shape="rect" id="Node000002" href="$df/d6a/class_midi_interface_a3a9e2b63cb520e9cea9ef24b8333eeb9.html#a3a9e2b63cb520e9cea9ef24b8333eeb9" title=" " alt="" coords="215,5,394,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,52,232,31,233,36,138,57"/>
+<area shape="rect" id="Node000003" href="$d7/db2/group__output_gac23eb04a4dc0d764d6db6f71c43fda12.html#gac23eb04a4dc0d764d6db6f71c43fda12" title="Send a Real Time (one byte) message." alt="" coords="200,55,409,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,65,186,65,186,70,153,70"/>
+<area shape="rect" id="Node000004" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="457,73,648,113"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="133,77,200,89,326,96,443,95,444,100,326,101,200,94,132,83"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="410,75,444,79,443,84,409,81"/>
+</map>

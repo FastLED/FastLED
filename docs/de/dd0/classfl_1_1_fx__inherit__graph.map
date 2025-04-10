@@ -1,0 +1,35 @@
+<map id="fl::Fx" name="fl::Fx">
+<area shape="rect" id="Node000001" title=" " alt="" coords="148,376,203,401"/>
+<area shape="rect" id="Node000003" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="251,228,321,253"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,363,273,252,277,255,196,366"/>
+<area shape="rect" id="Node000013" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="251,499,321,524"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="199,410,275,497,271,500,195,414"/>
+<area shape="rect" id="Node000002" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,376,100,401"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,386,148,386,148,391,113,391"/>
+<area shape="rect" id="Node000004" href="$dc/dd6/classfl_1_1_cylon.html" title="An animation that moves a single LED back and forth (Larson Scanner effect)" alt="" coords="405,5,480,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="288,214,297,176,312,129,335,81,368,40,385,28,404,21,406,26,387,33,371,44,339,84,316,131,302,177,294,215"/>
+<area shape="rect" id="Node000005" href="$d1/d60/classfl_1_1_demo_reel100.html" title=" " alt="" coords="377,55,508,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="293,214,319,152,340,118,368,89,386,78,389,82,371,93,345,122,324,154,297,216"/>
+<area shape="rect" id="Node000006" href="$d5/d9b/classfl_1_1_fire2012.html" title=" " alt="" coords="395,104,490,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="300,214,328,176,368,138,394,125,397,130,371,143,332,179,304,218"/>
+<area shape="rect" id="Node000007" href="$d5/d3c/classfl_1_1_noise_wave.html" title=" " alt="" coords="387,153,498,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="315,218,368,188,397,176,399,181,370,192,318,222"/>
+<area shape="rect" id="Node000008" href="$d2/db2/classfl_1_1_pacifica.html" title=" " alt="" coords="399,203,486,228"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="335,230,399,220,399,225,335,235"/>
+<area shape="rect" id="Node000009" href="$df/d11/classfl_1_1_pride2015.html" title=" " alt="" coords="391,252,494,277"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="336,245,391,254,390,259,335,251"/>
+<area shape="rect" id="Node000010" href="$de/db5/classfl_1_1_twinkle_fox.html" title=" " alt="" coords="387,301,498,327"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="320,259,370,286,402,299,400,304,368,291,317,263"/>
+<area shape="rect" id="Node000011" href="$d0/d4b/classfl_1_1_video.html" title=" " alt="" coords="405,351,480,376"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="305,264,333,301,371,336,406,352,404,357,368,340,329,305,301,267"/>
+<area shape="rect" id="Node000012" href="$d4/dd2/classfl_1_1_video_fx_wrapper.html" title=" " alt="" coords="369,400,516,425"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="298,265,324,326,345,358,371,385,391,398,389,402,368,389,341,361,320,328,293,268"/>
+<area shape="rect" id="Node000014" href="$d8/df5/classfl_1_1_animartrix.html" title=" " alt="" coords="389,449,496,475"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="333,494,400,472,402,477,335,499"/>
+<area shape="rect" id="Node000015" href="$d9/d41/classfl_1_1_noise_palette.html" title=" " alt="" coords="383,499,503,524"/>
+<area shape="poly" id="edge14_Node000013_Node000015" title=" " alt="" coords="335,509,382,509,382,514,335,514"/>
+<area shape="rect" id="Node000016" href="$d0/d3e/classfl_1_1_red_square.html" title=" " alt="" coords="389,548,497,573"/>
+<area shape="poly" id="edge15_Node000013_Node000016" title=" " alt="" coords="335,524,402,545,400,550,333,529"/>
+<area shape="rect" id="Node000017" href="$d5/d79/classfl_1_1_scale_up.html" title=" " alt="" coords="397,597,488,623"/>
+<area shape="poly" id="edge16_Node000013_Node000017" title=" " alt="" coords="309,532,337,559,371,584,398,596,396,601,368,588,334,563,306,536"/>
+</map>

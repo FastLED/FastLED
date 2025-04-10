@@ -1,0 +1,5 @@
+<map id="Scaling Functions" name="Scaling Functions">
+<area shape="rect" id="Node000001" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming." alt="" coords="204,13,339,38"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty.html" title="These functions are more efficient for scaling multiple bytes at once, but require calling cleanup_R1..." alt="" coords="387,5,552,45"/>
+<area shape="rect" id="Node000002" href="$df/da2/group__lib8tion.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="5,13,156,38"/>
+</map>

@@ -1,0 +1,13 @@
+digraph "grad8"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="grad8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="avg7",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_gad7af6a5b49aef34ab79e850ddb7d7911.html#gad7af6a5b49aef34ab79e850ddb7d7911",tooltip="Calculate an integer average of two signed 7-bit integers (int8_t)."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="selectBasedOnHashBit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de8/noise_8cpp_a7e9b66e76fd89c94ccb6f26fd713bdca.html#a7e9b66e76fd89c94ccb6f26fd713bdca",tooltip=" "];
+}

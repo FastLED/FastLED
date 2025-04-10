@@ -1,0 +1,27 @@
+<map id="CRGBPalette32::CRGBPalette32" name="CRGBPalette32::CRGBPalette32">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="280,293,507,319"/>
+<area shape="rect" id="Node000002" href="$df/d3d/class_c_r_g_b_palette32_a5daa65c9555826ae69f3fca8ce3c009d.html#a5daa65c9555826ae69f3fca8ce3c009d" title="Copy constructor." alt="" coords="5,5,232,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="382,281,362,231,331,166,287,100,260,71,231,46,207,33,210,28,233,41,264,67,291,97,336,164,367,228,387,279"/>
+<area shape="rect" id="Node000003" href="$df/d3d/class_c_r_g_b_palette32_a40a2fd331d3f5ed6b72c786c17da294f.html#a40a2fd331d3f5ed6b72c786c17da294f" title="Creates a palette from a gradient palette in dynamic (heap) memory." alt="" coords="11,55,226,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="376,282,353,244,320,197,279,150,231,110,208,98,211,93,233,105,283,146,325,194,358,241,381,280"/>
+<area shape="rect" id="Node000004" href="$df/d3d/class_c_r_g_b_palette32_a14f913ad81c3d9ece3ae587e513fbb2e.html#a14f913ad81c3d9ece3ae587e513fbb2e" title="Check if two palettes do not have the same color entries." alt="" coords="19,120,218,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="372,284,314,221,274,187,231,159,203,148,205,143,233,154,278,183,317,217,376,281"/>
+<area shape="rect" id="Node000005" href="$df/d3d/class_c_r_g_b_palette32_a69ef9a4184f3891db5e36e72c953b9bf.html#a69ef9a4184f3891db5e36e72c953b9bf" title="Create palette from array of CHSV colors." alt="" coords="21,169,216,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="363,287,304,247,231,208,196,197,198,192,233,204,307,242,366,283"/>
+<area shape="rect" id="Node000006" href="$df/d3d/class_c_r_g_b_palette32_a409c4e725e720c0fb5e650f02a6ce124.html#a409c4e725e720c0fb5e650f02a6ce124" title="Create palette from CHSV palette." alt="" coords="21,219,216,244"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="342,292,231,258,184,247,185,242,233,253,343,286"/>
+<area shape="rect" id="Node000007" href="$df/d3d/class_c_r_g_b_palette32_a717f641a81d563c7212cf6d26e1b3966.html#a717f641a81d563c7212cf6d26e1b3966" title="Create palette from array of CRGB colors." alt="" coords="21,268,216,293"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="266,297,216,292,217,287,267,292"/>
+<area shape="rect" id="Node000008" href="$df/d3d/class_c_r_g_b_palette32_a7299ef2a59b3784186d9ce67e32d331e.html#a7299ef2a59b3784186d9ce67e32d331e" title="Create upscaled palette from 16&#45;entry palette." alt="" coords="21,317,216,343"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="267,320,217,324,216,319,266,314"/>
+<area shape="rect" id="Node000009" href="$df/d3d/class_c_r_g_b_palette32_a189fc20a57c9f406589454de8e04d645.html#a189fc20a57c9f406589454de8e04d645" title="Copy constructor." alt="" coords="21,367,216,392"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="340,325,233,357,181,369,179,364,231,351,339,320"/>
+<area shape="rect" id="Node000010" href="$df/d3d/class_c_r_g_b_palette32_af96eae2898433380c02d4cb1fa3284be.html#af96eae2898433380c02d4cb1fa3284be" title="Create palette from palette stored in PROGMEM." alt="" coords="21,416,216,441"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="366,329,306,368,233,406,193,419,191,413,231,401,304,364,363,325"/>
+<area shape="rect" id="Node000011" href="$df/d3d/class_c_r_g_b_palette32_a928638c78b1652e9d427006174a29b93.html#a928638c78b1652e9d427006174a29b93" title="Create palette from palette stored in PROGMEM." alt="" coords="21,465,216,491"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="375,331,317,394,277,427,233,455,201,468,199,463,231,450,274,423,313,390,372,328"/>
+<area shape="rect" id="Node000012" href="$df/d3d/class_c_r_g_b_palette32_aa911899b73014cf2aa5ca0ef015a37b5.html#aa911899b73014cf2aa5ca0ef015a37b5" title="Creates a palette from a gradient palette in PROGMEM." alt="" coords="21,515,216,540"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="381,333,358,371,325,418,283,465,233,504,206,517,204,512,231,500,279,461,321,415,354,368,377,330"/>
+<area shape="rect" id="Node000013" href="$df/d3d/class_c_r_g_b_palette32_a2331b3819af30f49d490663aa8f6b357.html#a2331b3819af30f49d490663aa8f6b357" title="Check if two palettes have the same color entries." alt="" coords="16,564,221,589"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="385,333,365,381,333,441,289,502,263,530,233,554,209,566,207,561,231,549,259,526,285,499,328,438,360,378,380,331"/>
+</map>

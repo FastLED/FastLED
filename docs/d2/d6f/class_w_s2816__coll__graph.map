@@ -1,0 +1,31 @@
+<map id="WS2816&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2816&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2816 controller class." alt="" coords="2045,204,2235,244"/>
+<area shape="rect" id="Node000002" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="1808,204,1996,244"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2009,221,2045,221,2045,227,2009,227"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="989,105,1256,189"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1270,159,1808,212,1807,217,1269,164"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="291,170,411,195"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="401,163,503,133,643,102,722,91,803,84,885,84,966,92,1010,102,1009,107,965,97,885,89,804,89,723,96,644,107,505,138,402,168"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="326,155,334,147,351,143,366,146,375,152,377,162,373,171,368,169,372,161,371,155,364,151,351,149,337,151,330,159"/>
+<area shape="rect" id="Node000007" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="511,155,684,210"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="425,180,510,180,510,185,425,185"/>
+<area shape="rect" id="Node000015" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="992,213,1253,297"/>
+<area shape="poly" id="edge15_Node000015_Node000004" title=" " alt="" coords="413,196,503,219,609,245,656,254,716,261,786,266,840,267,965,261,992,260,992,266,965,267,841,272,786,272,716,267,655,259,608,250,502,224,411,201"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="5,170,64,195"/>
+<area shape="poly" id="edge8_Node000002_Node000005" title=" " alt="" coords="55,158,86,131,154,84,210,48,238,35,270,25,306,19,350,17,1481,17,1544,23,1606,39,1665,62,1721,90,1816,151,1880,202,1876,206,1812,155,1718,95,1663,67,1604,44,1543,28,1481,23,350,23,307,25,271,30,240,40,212,53,157,88,90,135,59,162"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="78,180,291,180,291,185,78,185"/>
+<area shape="rect" id="Node000014" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="1385,289,1573,329"/>
+<area shape="poly" id="edge17_Node000014_Node000005" title=" " alt="" coords="62,202,112,240,181,283,221,302,263,318,306,328,350,332,1124,332,1261,327,1385,317,1385,322,1261,332,1124,337,350,337,305,333,261,323,219,307,179,288,109,245,59,206"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="698,173,989,153,989,158,698,178"/>
+<area shape="poly" id="edge16_Node000015_Node000007" title=" " alt="" coords="658,214,717,236,786,249,858,257,992,260,992,265,857,262,785,255,715,241,656,219"/>
+<area shape="rect" id="Node000008" href="$d6/d04/class_w_s2812.html" title=" " alt="" coords="1021,397,1225,422"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="1238,402,1355,391,1494,370,1641,336,1713,314,1783,287,1868,242,1870,246,1785,292,1715,319,1642,342,1495,375,1356,396,1239,407"/>
+<area shape="poly" id="edge18_Node000014_Node000008" title=" " alt="" coords="1238,394,1299,382,1360,365,1404,348,1443,327,1446,332,1406,352,1362,371,1300,387,1239,399"/>
+<area shape="rect" id="Node000009" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="249,404,453,444"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="467,419,1020,409,1020,414,467,424"/>
+<area shape="rect" id="Node000013" href="$d6/d04/class_w_s2812.html" title="WS2812 controller class." alt="" coords="503,439,692,479"/>
+<area shape="poly" id="edge12_Node000013_Node000009" title=" " alt="" coords="467,438,503,443,502,448,466,443"/>
+<area shape="poly" id="edge11_Node000008_Node000013" title=" " alt="" coords="706,452,830,444,965,432,1052,419,1052,425,966,437,831,450,706,457"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="1586,285,1807,240,1808,245,1587,290"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="1268,274,1386,292,1385,298,1267,279"/>
+</map>

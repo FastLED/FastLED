@@ -1,0 +1,11 @@
+<map id="fl::TwinkleFox::TwinkleFox" name="fl::TwinkleFox::TwinkleFox">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,196,60"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d_a72a54fe71ace690011797b178143a242.html#a72a54fe71ace690011797b178143a242" title=" " alt="" coords="286,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,33,272,24,272,29,196,38"/>
+<area shape="rect" id="Node000004" href="$de/db5/classfl_1_1_twinkle_fox_a57e332626c55ed1dcd58b8a1e408e688.html#a57e332626c55ed1dcd58b8a1e408e688" title=" " alt="" coords="244,55,439,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="196,56,231,60,230,65,196,61"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx_aa4a990c2a2d04e57046cf8b0f64ce4e7.html#aa4a990c2a2d04e57046cf8b0f64ce4e7" title=" " alt="" coords="489,5,567,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="397,15,475,15,475,21,397,21"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7" title="Add two numbers, and calculate the modulo of the sum and a third number, M." alt="" coords="487,63,569,88"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="439,73,473,73,473,78,439,78"/>
+</map>

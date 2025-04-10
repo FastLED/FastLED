@@ -1,0 +1,17 @@
+digraph "PixelController::init_binary_dithering"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="PixelController::init\l_binary_dithering",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set up the values for binary dithering."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::enable\l_dithering",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_aa86847022436988b28343a76bab0db4c.html#aa86847022436988b28343a76bab0db4c",tooltip="Toggle dithering enable If dithering is set to enabled, this will re-init the dithering values (init_..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="PixelController::PixelController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a68e0ae41357f1dda75a5724cde6aa991.html#a68e0ae41357f1dda75a5724cde6aa991",tooltip="Constructor."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="PixelController::PixelController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac272cca24b476c78cddd257cd9406150.html#ac272cca24b476c78cddd257cd9406150",tooltip="Constructor."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="PixelController::PixelController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ae1e1069b343fc0577828d28ffe3cead9.html#ae1e1069b343fc0577828d28ffe3cead9",tooltip="Constructor."];
+}

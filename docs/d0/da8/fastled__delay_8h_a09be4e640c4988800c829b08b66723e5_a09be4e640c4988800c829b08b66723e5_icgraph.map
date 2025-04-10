@@ -1,0 +1,6 @@
+<map id="delaycycles" name="delaycycles">
+<area shape="rect" id="Node000001" title="Delay N clock cycles." alt="" coords="192,29,291,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="270,19,262,11,241,8,224,10,215,15,213,20,218,28,214,31,208,21,211,11,222,5,241,3,264,6,274,15"/>
+<area shape="rect" id="Node000002" href="$d0/da8/fastled__delay_8h_a76328edb9ea1a1f017567ff835247d2d.html#a76328edb9ea1a1f017567ff835247d2d" title="A variant of delaycycles that will always delay at least one cycle." alt="" coords="5,29,144,55"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="178,45,144,45,144,39,178,39"/>
+</map>

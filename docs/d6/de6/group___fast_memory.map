@@ -1,0 +1,4 @@
+<map id="Fast Memory Functions for AVR" name="Fast Memory Functions for AVR">
+<area shape="rect" id="Node000001" title="Alternatives to memmove, memcpy, and memset that are faster on AVR than standard avr&#45;libc 1...." alt="" coords="204,5,376,45"/>
+<area shape="rect" id="Node000002" href="$df/da2/group__lib8tion.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="5,13,156,38"/>
+</map>

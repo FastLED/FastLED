@@ -1,0 +1,15 @@
+digraph "CHSV::CHSV"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CHSV::CHSV",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Default constructor."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CHSV::CHSV",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d53/struct_c_h_s_v_a6f4e99781a485a383f0046413c60fbf7.html#a6f4e99781a485a383f0046413c60fbf7",tooltip="Allow copy construction."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CHSV::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d53/struct_c_h_s_v_a14833b9558ee28495522d53c89c23f4c.html#a14833b9558ee28495522d53c89c23f4c",tooltip="Allow copy construction."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CHSV::setHSV",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d53/struct_c_h_s_v_aff1db5740349d7d5180ca6da2a2cc873.html#aff1db5740349d7d5180ca6da2a2cc873",tooltip="Assign new HSV values."];
+}

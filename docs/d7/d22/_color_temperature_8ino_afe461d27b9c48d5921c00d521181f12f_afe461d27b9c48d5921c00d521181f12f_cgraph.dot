@@ -1,0 +1,13 @@
+digraph "loop"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_ga0fef54ded2e4748869f1796603433b6b.html#ga0fef54ded2e4748869f1796603433b6b",tooltip="Fill a range of LEDs with a rainbow of colors."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="memset8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de6/group___fast_memory_ga78fd4f882354956108ebaf92f74abd42.html#ga78fd4f882354956108ebaf92f74abd42",tooltip="Faster alternative to memset() on AVR."];
+}

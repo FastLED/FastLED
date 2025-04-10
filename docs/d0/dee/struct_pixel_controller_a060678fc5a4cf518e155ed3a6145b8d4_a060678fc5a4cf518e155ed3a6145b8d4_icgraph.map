@@ -1,0 +1,55 @@
+<map id="PixelController::scale" name="PixelController::scale">
+<area shape="rect" id="Node000001" title="Scale a value using the per&#45;channel scale data." alt="" coords="792,333,951,358"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a7b2c3f0de852388e61d6b788d24f1ede.html#a7b2c3f0de852388e61d6b788d24f1ede" title="A version of loadAndScale() that advances the output data pointer without dithering." alt="" coords="549,5,729,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="863,320,851,265,829,195,793,122,770,89,742,59,725,48,728,43,746,55,774,85,798,119,834,193,857,264,869,318"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a5ed1cdb992788946f8aa585e014491fa.html#a5ed1cdb992788946f8aa585e014491fa" title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()" alt="" coords="549,69,729,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="860,320,844,277,820,224,786,170,766,145,742,123,724,112,727,107,746,119,769,141,790,167,825,222,849,275,865,318"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a7f2b0c051d473813018715f1621ea259.html#a7f2b0c051d473813018715f1621ea259" title="Loads, dithers, and scales a single byte for a given output slot and lane." alt="" coords="550,133,729,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="855,322,810,255,779,219,742,188,721,176,724,171,746,183,783,215,815,252,859,319"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a2096cee6b377960ef21fbda622f08994.html#a2096cee6b377960ef21fbda622f08994" title="Loads and scales a single byte for a given output slot and lane." alt="" coords="550,197,729,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="845,326,800,288,743,252,715,240,717,235,745,247,803,284,849,322"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a4984f158bbc3b6c79ca16dd847fe67e1.html#a4984f158bbc3b6c79ca16dd847fe67e1" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="550,261,729,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="811,332,712,304,713,299,812,326"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_a11f9b50f738c6d57d08d6776b3d8eb43.html#a11f9b50f738c6d57d08d6776b3d8eb43" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="550,325,729,365"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="778,348,729,348,729,343,778,343"/>
+<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_a33c22b408cbc9eb8b9d98993fe985264.html#a33c22b408cbc9eb8b9d98993fe985264" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="550,389,729,429"/>
+<area shape="poly" id="edge19_Node000001_Node000014" title=" " alt="" coords="812,364,713,392,712,387,811,359"/>
+<area shape="rect" id="Node000015" href="$d0/dee/struct_pixel_controller_a07853a147d535144f71b3f2640f4b0d5.html#a07853a147d535144f71b3f2640f4b0d5" title=" " alt="" coords="550,453,729,493"/>
+<area shape="poly" id="edge26_Node000001_Node000015" title=" " alt="" coords="849,369,803,407,745,444,717,456,715,451,743,439,800,403,845,365"/>
+<area shape="rect" id="Node000018" href="$d0/dee/struct_pixel_controller_a052385f847c0e13b506fe7003320e907.html#a052385f847c0e13b506fe7003320e907" title=" " alt="" coords="550,517,729,557"/>
+<area shape="poly" id="edge29_Node000001_Node000018" title=" " alt="" coords="859,372,815,439,783,476,746,508,724,520,721,515,742,503,779,472,810,436,855,369"/>
+<area shape="rect" id="Node000020" href="$d0/dee/struct_pixel_controller_aad6f8ce8a3aa9429025e67050e312929.html#aad6f8ce8a3aa9429025e67050e312929" title="Scale a value." alt="" coords="560,582,719,607"/>
+<area shape="poly" id="edge31_Node000001_Node000020" title=" " alt="" coords="865,373,850,416,826,470,791,525,770,550,746,572,720,585,718,581,742,567,766,546,787,522,821,468,845,414,860,371"/>
+<area shape="rect" id="Node000021" href="$d0/dee/struct_pixel_controller_acb4a76e70b987649e50290f68648e9d6.html#acb4a76e70b987649e50290f68648e9d6" title="stepDithering() and advanceAndLoadAndScale0()" alt="" coords="535,632,744,672"/>
+<area shape="poly" id="edge32_Node000001_Node000021" title=" " alt="" coords="868,373,855,425,832,492,796,562,773,594,746,622,728,634,725,630,742,618,769,590,792,559,827,490,850,423,863,371"/>
+<area shape="rect" id="Node000007" href="$d9/d0f/class_d_m_x_serial_controller_a861d9beed51cce6441b50398f1eabebf.html#a861d9beed51cce6441b50398f1eabebf" title="Send the LED data to the strip." alt="" coords="300,143,455,183"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="544,258,533,251,518,238,508,223,500,210,485,197,454,182,456,177,488,192,504,206,513,221,522,234,536,247,547,253"/>
+<area shape="rect" id="Node000008" href="$d0/da7/class_d_m_x_simple_controller_a6744d598f10ba5d97a57df08c46bafab.html#a6744d598f10ba5d97a57df08c46bafab" title="Send the LED data to the strip." alt="" coords="296,207,459,247"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="536,263,458,246,459,241,537,257"/>
+<area shape="rect" id="Node000009" href="$d0/d40/class_l_p_d6803_controller_a35f42384ada050146e6813f0fc766356.html#a35f42384ada050146e6813f0fc766356" title="Send the LED data to the strip." alt="" coords="302,271,453,311"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="536,288,453,291,453,285,536,282"/>
+<area shape="rect" id="Node000010" href="$d2/dd6/class_p9813_controller_ab7381f0a1850d006f3449d27838b19c5.html#ab7381f0a1850d006f3449d27838b19c5" title="Send the LED data to the strip." alt="" coords="274,335,481,361"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="554,308,487,325,435,338,434,333,486,320,553,302"/>
+<area shape="rect" id="Node000011" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="293,385,462,425"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="546,310,536,315,521,329,513,344,504,359,488,374,463,388,461,383,485,370,500,356,508,341,517,326,533,311,543,305"/>
+<area shape="rect" id="Node000012" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1" title="write a block of uint8_ts out in groups of three." alt="" coords="290,449,465,489"/>
+<area shape="poly" id="edge11_Node000006_Node000012" title=" " alt="" coords="542,311,537,315,524,330,518,345,513,376,509,407,502,424,488,439,467,454,464,450,485,435,497,421,504,406,508,375,512,343,520,327,533,311,538,307"/>
+<area shape="poly" id="edge13_Node000013_Node000007" title=" " alt="" coords="538,320,533,315,520,300,513,285,508,254,503,225,497,211,485,197,453,178,456,173,488,193,501,208,509,223,513,253,518,283,525,297,537,311,542,316"/>
+<area shape="poly" id="edge14_Node000013_Node000008" title=" " alt="" coords="544,322,533,315,518,302,508,287,500,274,485,261,458,247,460,242,488,256,504,270,513,285,522,298,536,311,547,317"/>
+<area shape="poly" id="edge15_Node000013_Node000009" title=" " alt="" coords="536,327,452,309,453,304,537,321"/>
+<area shape="poly" id="edge16_Node000013_Node000010" title=" " alt="" coords="536,349,481,350,481,344,536,344"/>
+<area shape="poly" id="edge17_Node000013_Node000011" title=" " alt="" coords="539,371,463,389,462,383,537,366"/>
+<area shape="poly" id="edge18_Node000013_Node000012" title=" " alt="" coords="546,374,536,379,521,394,513,409,504,424,488,439,466,452,463,447,485,435,500,421,508,406,517,391,533,375,543,369"/>
+<area shape="poly" id="edge20_Node000014_Node000007" title=" " alt="" coords="537,383,533,379,516,356,508,332,508,286,508,241,501,219,485,197,471,185,454,177,456,172,473,181,489,193,505,216,513,240,513,286,514,331,521,353,537,376,540,379"/>
+<area shape="poly" id="edge21_Node000014_Node000008" title=" " alt="" coords="538,384,533,379,520,364,513,349,508,318,503,289,497,275,485,261,458,244,461,239,488,257,501,272,509,287,513,317,518,347,525,361,537,375,542,380"/>
+<area shape="poly" id="edge22_Node000014_Node000009" title=" " alt="" coords="544,386,533,379,518,366,508,351,500,338,485,325,452,309,454,304,488,320,504,334,513,349,522,362,536,375,547,381"/>
+<area shape="poly" id="edge23_Node000014_Node000010" title=" " alt="" coords="540,389,486,376,432,363,434,358,487,371,542,384"/>
+<area shape="poly" id="edge24_Node000014_Node000011" title=" " alt="" coords="536,410,462,409,462,404,536,405"/>
+<area shape="poly" id="edge25_Node000014_Node000012" title=" " alt="" coords="539,435,465,452,464,447,537,430"/>
+<area shape="rect" id="Node000016" href="$d4/d96/class_a_p_a102_controller_a040f761b3d3bb30a9275f96548ec5ef7.html#a040f761b3d3bb30a9275f96548ec5ef7" title=" " alt="" coords="270,513,485,553"/>
+<area shape="poly" id="edge27_Node000015_Node000016" title=" " alt="" coords="539,499,466,516,465,511,538,494"/>
+<area shape="rect" id="Node000017" href="$d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3" title="Send the LED data to the strip." alt="" coords="5,521,220,546"/>
+<area shape="poly" id="edge28_Node000016_Node000017" title=" " alt="" coords="256,536,220,536,220,531,256,531"/>
+<area shape="rect" id="Node000019" href="$dd/dbc/class_w_s2816_controller_a7d9891631bb3b4e35dcbb93180ac8a55.html#a7d9891631bb3b4e35dcbb93180ac8a55" title="Send the LED data to the strip." alt="" coords="268,578,487,603"/>
+<area shape="poly" id="edge30_Node000018_Node000019" title=" " alt="" coords="537,561,441,581,440,575,536,556"/>
+</map>

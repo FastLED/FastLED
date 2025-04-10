@@ -1,0 +1,9 @@
+<map id="quadwave8" name="quadwave8">
+<area shape="rect" id="Node000001" title="Quadratic waveform generator." alt="" coords="5,31,103,56"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/group___easing_ga381449070b2d6bfba356f87881ab28c0.html#ga381449070b2d6bfba356f87881ab28c0" title="8&#45;bit quadratic ease&#45;in / ease&#45;out function." alt="" coords="151,5,281,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,33,137,28,138,33,103,38"/>
+<area shape="rect" id="Node000004" href="$d1/d7a/group___waveform_generators_gae9e011ff745ade1164ae77b0ef62bfac.html#gae9e011ff745ade1164ae77b0ef62bfac" title="Triangle wave generator." alt="" coords="177,55,255,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="103,48,163,57,162,62,102,53"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="329,5,393,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,15,316,15,316,21,282,21"/>
+</map>

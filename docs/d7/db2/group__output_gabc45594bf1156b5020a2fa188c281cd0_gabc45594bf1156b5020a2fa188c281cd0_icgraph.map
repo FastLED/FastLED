@@ -1,0 +1,16 @@
+<map id="MidiInterface::sendCommon" name="MidiInterface::sendCommon">
+<area shape="rect" id="Node000001" title="Send a Common message. Common messages reset the running status." alt="" coords="700,84,907,109"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga9b28cd9df57263fb665110d034ad8c96.html#ga9b28cd9df57263fb665110d034ad8c96" title="Send a Song Position Pointer message." alt="" coords="421,5,652,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="758,81,651,45,606,33,607,28,653,39,759,76"/>
+<area shape="rect" id="Node000005" href="$d7/db2/group__output_gaa3784e12ce67dce72b407ffc3682b27e.html#gaa3784e12ce67dce72b407ffc3682b27e" title="Send a Song Select message." alt="" coords="427,55,646,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="686,86,646,82,647,77,687,81"/>
+<area shape="rect" id="Node000006" href="$d7/db2/group__output_ga5f318604b282c1366616347d211a5aaa.html#ga5f318604b282c1366616347d211a5aaa" title="Send a MIDI Time Code Quarter Frame." alt="" coords="430,105,643,145"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="687,112,644,116,643,111,686,106"/>
+<area shape="rect" id="Node000007" href="$d7/db2/group__output_ga7303cceabd422631b77a1e6c8f1338c6.html#ga7303cceabd422631b77a1e6c8f1338c6" title="Send a Tune Request message." alt="" coords="421,169,652,195"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="762,118,653,159,604,172,603,167,651,154,760,113"/>
+<area shape="rect" id="Node000003" href="$df/d6a/class_midi_interface_a8405cc7229e4eab30520ae005ec79e10.html#a8405cc7229e4eab30520ae005ec79e10" title=" " alt="" coords="199,31,373,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,34,374,37,373,32,407,28"/>
+<area shape="rect" id="Node000004" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,31,151,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="185,46,151,46,151,41,185,41"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="413,58,373,54,374,49,414,53"/>
+</map>

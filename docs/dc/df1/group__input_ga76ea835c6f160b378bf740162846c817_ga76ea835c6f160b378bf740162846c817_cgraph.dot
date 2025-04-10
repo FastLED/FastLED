@@ -1,0 +1,13 @@
+digraph "MidiInterface::handleNullVelocityNoteOnAsNoteOff"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="MidiInterface::handleNull\lVelocityNoteOnAsNoteOff",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="MidiInterface::getData2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/df1/group__input_gabd651766b36741f1a7ea63ab793ab64b.html#gabd651766b36741f1a7ea63ab793ab64b",tooltip="Get the second data byte of the last received message."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="MidiInterface::getType",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/df1/group__input_ga751630ff3b0829f0de19ea724999df25.html#ga751630ff3b0829f0de19ea724999df25",tooltip="Get the last received message's type."];
+}

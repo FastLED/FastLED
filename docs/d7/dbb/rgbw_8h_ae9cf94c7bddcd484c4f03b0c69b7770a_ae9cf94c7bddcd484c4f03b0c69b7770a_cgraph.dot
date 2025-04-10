@@ -1,0 +1,24 @@
+digraph "rgb_2_rgbw"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="rgb_2_rgbw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Converts RGB to RGBW using one of the functions."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="rgb_2_rgbw_exact",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_ac22f7204d0501031d2431e7b2f67c25c.html#ac22f7204d0501031d2431e7b2f67c25c",tooltip="Converts RGB to RGBW using a color transfer method from saturated color channels to white."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="rgb_2_rgbw_max_brightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_a07e94168baddf333cdc5673f28285aa9.html#a07e94168baddf333cdc5673f28285aa9",tooltip="The minimum brigthness of the RGB channels is used to set the W channel."];
+  Node4 -> Node3 [id="edge4_Node000004_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="rgb_2_rgbw_null_white\l_pixel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_a026bfd212bc23d24cf2e8cc5a9ab5b9e.html#a026bfd212bc23d24cf2e8cc5a9ab5b9e",tooltip="Converts RGB to RGBW with the W channel set to black, always."];
+  Node5 -> Node3 [id="edge6_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="rgb_2_rgbw_user_function",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_a03a50e79b032a49c951919b9570d18f5.html#a03a50e79b032a49c951919b9570d18f5",tooltip=" "];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="rgb_2_rgbw_white_boosted",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_aa6e2b44325da0172a48b20940b6e5fdf.html#aa6e2b44325da0172a48b20940b6e5fdf",tooltip="Converts RGB to RGBW with a boosted white channel."];
+  Node7 -> Node3 [id="edge9_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
+}

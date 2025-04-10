@@ -1,0 +1,17 @@
+digraph "CEveryNTime::reset"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CEveryNTime::reset",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Reset the timestamp to the current time."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CEveryNTime::CEveryNTime",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d1d/class_c_every_n_time_a8842463241cb9579949cb34c724e6d65.html#a8842463241cb9579949cb34c724e6d65",tooltip="Default constructor."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CEveryNTime::CEveryNTime",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d1d/class_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac.html#a645cdb84da00f4669e1cf22ce86a04ac",tooltip="Constructor."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CEveryNTime::ready",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d1d/class_c_every_n_time_ad248eee37ab69d2f0d27f6cb5a909b32.html#ad248eee37ab69d2f0d27f6cb5a909b32",tooltip="Check if the time interval has elapsed."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CEveryNTime::operator bool",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d1d/class_c_every_n_time_a6895b6156f44263f53a386c2f83e3a02.html#a6895b6156f44263f53a386c2f83e3a02",tooltip="Check if the time interval has elapsed."];
+}

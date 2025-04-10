@@ -1,0 +1,7 @@
+<map id="nscale8_video" name="nscale8_video">
+<area shape="rect" id="Node000001" title="Scale the brightness of an array of pixels all at once." alt="" coords="153,31,268,56"/>
+<area shape="rect" id="Node000002" href="$d3/d1c/group___color_fades_gaff656b0046fac0d40b8eb02941ce1755.html#gaff656b0046fac0d40b8eb02941ce1755" title="Reduce the brightness of an array of pixels all at once." alt="" coords="8,5,103,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,34,102,28,103,23,140,29"/>
+<area shape="rect" id="Node000003" href="$d3/d1c/group___color_fades_gac1e25878d16efa6112d907738f525773.html#gac1e25878d16efa6112d907738f525773" title="Reduce the brightness of an array of pixels all at once." alt="" coords="5,55,105,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,57,106,62,105,57,139,52"/>
+</map>

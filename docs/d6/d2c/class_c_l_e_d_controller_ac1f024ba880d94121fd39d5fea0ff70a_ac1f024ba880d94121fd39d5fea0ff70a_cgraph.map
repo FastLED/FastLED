@@ -1,0 +1,11 @@
+<map id="CLEDController::setRgbw" name="CLEDController::setRgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,189,56"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="237,5,464,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,31,223,28,224,33,190,37"/>
+<area shape="rect" id="Node000003" href="$d5/d8d/struct_rgbw_default_a3320052ace2827713b345cc69df2cbe0.html#a3320052ace2827713b345cc69df2cbe0" title=" " alt="" coords="275,55,426,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,49,262,56,261,62,189,55"/>
+<area shape="rect" id="Node000004" href="$db/d74/struct_rgbw_a58df62d45b76be5755b009d05e7abb0e.html#a58df62d45b76be5755b009d05e7abb0e" title=" " alt="" coords="561,29,662,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="426,57,547,46,547,51,427,63"/>
+<area shape="rect" id="Node000005" href="$d5/d8d/struct_rgbw_default_ae00a5e4c9f4e16e5da7b11664afb0384.html#ae00a5e4c9f4e16e5da7b11664afb0384" title=" " alt="" coords="512,79,711,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="427,72,499,78,498,84,426,77"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="fl::EngineEvents::_onStripAdded" name="fl::EngineEvents::_onStripAdded">
+<area shape="rect" id="Node000001" title=" " alt="" coords="617,5,752,45"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a8ec266f9f7b35b9174d331cb6c338d80.html#a8ec266f9f7b35b9174d331cb6c338d80" title=" " alt="" coords="389,5,569,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="604,28,570,28,570,23,604,23"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f" title="Add a CLEDController instance to the world." alt="" coords="197,13,341,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="375,28,342,28,342,23,375,23"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a6c5edd63655c225b62ae35897c6e6602.html#a6c5edd63655c225b62ae35897c6e6602" title="Add an SPI based CLEDController instance to the world." alt="" coords="5,13,149,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,28,149,28,149,23,183,23"/>
+</map>

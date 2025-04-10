@@ -1,0 +1,18 @@
+<map id="APA102ControllerHD&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="APA102ControllerHD&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="APA102 high definition controller class." alt="" coords="1391,45,1589,100"/>
+<area shape="rect" id="Node000008" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title=" " alt="" coords="1831,45,2045,100"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1603,70,1830,70,1830,75,1603,75"/>
+<area shape="rect" id="Node000002" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1111,23,1341,122"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1355,70,1391,70,1391,75,1355,75"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="349,5,523,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="536,26,787,25,937,30,1087,42,1111,45,1110,50,1086,47,937,35,787,30,536,32"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="5,56,125,81"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,59,349,38,349,44,139,64"/>
+<area shape="rect" id="Node000006" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="175,78,325,118"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="140,78,175,83,174,89,139,83"/>
+<area shape="rect" id="Node000005" href="$d4/d96/class_a_p_a102_controller.html" title="APA102 controller class." alt="" coords="547,74,821,143"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="835,122,958,126,1023,123,1086,115,1110,111,1111,116,1087,121,1023,128,958,131,835,128"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="339,98,546,103,546,108,339,103"/>
+<area shape="rect" id="Node000009" href="$df/d1e/class_h_d107_h_d_controller.html" title="HD107HD is just the APA102HD with a default 40Mhz clock rate." alt="" coords="2095,45,2293,100"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="2059,70,2094,70,2094,75,2059,75"/>
+</map>

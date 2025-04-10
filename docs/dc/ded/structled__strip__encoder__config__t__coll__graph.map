@@ -1,0 +1,5 @@
+<map id="led_strip_encoder_config_t" name="led_strip_encoder_config_t">
+<area shape="rect" id="Node000001" title="Type of led strip encoder configuration." alt="" coords="11,93,205,119"/>
+<area shape="rect" id="Node000002" href="$d4/d88/led__strip__types_8h.html#dc/d66/structled__strip__encoder__timings__t" title="LED strip encoder timings." alt="" coords="5,5,211,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,45,111,93,105,93,105,45"/>
+</map>

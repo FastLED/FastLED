@@ -1,0 +1,14 @@
+<map id="fill_raw_2dnoise16into8" name="fill_raw_2dnoise16into8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,181,80"/>
+<area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_ga20a2ff725bc56666c206d54deb372586.html#ga20a2ff725bc56666c206d54deb372586" title="Fill a 2D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="229,55,405,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,65,215,65,215,70,182,70"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="288,56,282,46,286,37,298,30,317,28,341,32,351,40,348,44,339,36,317,33,299,35,290,40,288,46,293,53"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="453,5,531,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="362,52,439,30,441,35,364,57"/>
+<area shape="rect" id="Node000006" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="461,55,523,80"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="406,65,447,65,447,70,406,70"/>
+<area shape="rect" id="Node000007" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="460,104,524,129"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="364,77,447,101,446,107,362,83"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="579,5,687,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="531,15,565,15,565,21,531,21"/>
+</map>

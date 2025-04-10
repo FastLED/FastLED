@@ -1,0 +1,10 @@
+<map id="SoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;" name="SoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;">
+<area shape="rect" id="Node000001" title="Software SPI output." alt="" coords="11,329,199,384"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="5,225,204,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,294,107,329,102,329,102,294"/>
+<area shape="rect" id="Node000003" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="59,5,150,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,44,99,93,100,165,104,225,99,225,94,165,94,93,99,44"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="181,93,367,148"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="137,35,231,91,228,96,134,40"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="231,159,141,227,137,223,227,154"/>
+</map>

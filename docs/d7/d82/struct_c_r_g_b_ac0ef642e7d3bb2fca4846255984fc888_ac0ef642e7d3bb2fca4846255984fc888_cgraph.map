@@ -1,0 +1,7 @@
+<map id="CRGB::operator=" name="CRGB::operator=">
+<area shape="rect" id="Node000001" title="Allow assignment from HSV color." alt="" coords="5,31,139,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="201,5,305,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,31,187,25,188,30,139,37"/>
+<area shape="rect" id="Node000003" href="$db/d87/group___pixel_types_gab316cfeb8bd5f37d8faaf761ad3c834b.html#gab316cfeb8bd5f37d8faaf761ad3c834b" title="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies." alt="" coords="187,55,320,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,49,174,54,173,59,138,55"/>
+</map>

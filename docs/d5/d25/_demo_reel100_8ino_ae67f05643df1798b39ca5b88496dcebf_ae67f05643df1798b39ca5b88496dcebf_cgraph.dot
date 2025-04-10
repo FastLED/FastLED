@@ -1,0 +1,21 @@
+digraph "sinelon"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="sinelon",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="beatsin16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b",tooltip="Generates a 16-bit sine wave at a given BPM that oscillates within a given range."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="beat16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2",tooltip="Generates a 16-bit \"sawtooth\" wave at a given BPM."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="beat88",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395",tooltip="Generates a 16-bit \"sawtooth\" wave at a given BPM, with BPM specified in Q8.8 fixed-point format."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="scale16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145",tooltip="Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who..."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98",tooltip="Reduce the brightness of an array of pixels all at once."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b",tooltip="Scale the brightness of an array of pixels all at once."];
+}

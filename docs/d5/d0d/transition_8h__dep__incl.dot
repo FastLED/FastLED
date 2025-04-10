@@ -1,0 +1,57 @@
+digraph "FastLED/FastLED/src/fx/detail/transition.h"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="FastLED/FastLED/src\l/fx/detail/transition.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="FastLED/FastLED/src\l/fx/fx.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0c/fx_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="FastLED/FastLED/examples\l/Overclock/Overclock.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d43/_overclock_8ino.html",tooltip="Demonstrates how to overclock a FastLED setup."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="FastLED/FastLED/src\l/fx/detail/fx_compositor.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d6b/fx__compositor_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="FastLED/FastLED/src\l/fx/fx_engine.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d3c/fx__engine_8h.html",tooltip=" "];
+  Node2 -> Node11 [id="edge5_Node000002_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="FastLED/FastLED/src\l/fx/detail/fx_layer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2f/fx__layer_8h.html",tooltip=" "];
+  Node11 -> Node4 [id="edge6_Node000011_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node5 [id="edge7_Node000011_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node12 [id="edge8_Node000002_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="FastLED/FastLED/src\l/fx/fx1d.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d81/fx1d_8h.html",tooltip=" "];
+  Node12 -> Node13 [id="edge9_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="FastLED/FastLED/src\l/fx/1d/cylon.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d31/cylon_8h.html",tooltip=" "];
+  Node12 -> Node15 [id="edge10_Node000012_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="FastLED/FastLED/src\l/fx/1d/demoreel100.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dc0/demoreel100_8h.html",tooltip=" "];
+  Node12 -> Node17 [id="edge11_Node000012_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="FastLED/FastLED/src\l/fx/1d/fire2012.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/dcb/fire2012_8h.html",tooltip=" "];
+  Node12 -> Node19 [id="edge12_Node000012_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="FastLED/FastLED/src\l/fx/1d/noisewave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d2c/noisewave_8h.html",tooltip=" "];
+  Node12 -> Node20 [id="edge13_Node000012_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="FastLED/FastLED/src\l/fx/1d/pacifica.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d70/pacifica_8h.html",tooltip=" "];
+  Node12 -> Node22 [id="edge14_Node000012_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="FastLED/FastLED/src\l/fx/1d/pride2015.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dc4/pride2015_8h.html",tooltip=" "];
+  Node12 -> Node24 [id="edge15_Node000012_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="FastLED/FastLED/src\l/fx/1d/twinklefox.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/df6/twinklefox_8h.html",tooltip=" "];
+  Node12 -> Node26 [id="edge16_Node000012_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="FastLED/FastLED/src\l/fx/video.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d78/video_8h.html",tooltip=" "];
+  Node26 -> Node5 [id="edge17_Node000026_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node37 [id="edge18_Node000002_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="FastLED/FastLED/src\l/fx/fx2d.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d43/fx2d_8h.html",tooltip=" "];
+  Node37 -> Node38 [id="edge19_Node000037_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="FastLED/FastLED/src\l/fx/2d/animartrix.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/dc3/animartrix_8hpp.html",tooltip=" "];
+  Node37 -> Node39 [id="edge20_Node000037_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node39 [id="Node000039",label="FastLED/FastLED/src\l/fx/2d/noisepalette.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d66/noisepalette_8cpp.html",tooltip=" "];
+  Node37 -> Node40 [id="edge21_Node000037_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="FastLED/FastLED/src\l/fx/2d/noisepalette.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/dc7/noisepalette_8h.html",tooltip="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix."];
+  Node40 -> Node3 [id="edge22_Node000040_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 -> Node39 [id="edge23_Node000040_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 -> Node41 [id="edge24_Node000037_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node41 [id="Node000041",label="FastLED/FastLED/src\l/fx/2d/redsquare.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/db8/redsquare_8h.html",tooltip=" "];
+  Node37 -> Node42 [id="edge25_Node000037_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 [id="Node000042",label="FastLED/FastLED/src\l/fx/2d/scale_up.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d8c/scale__up_8cpp.html",tooltip=" "];
+  Node37 -> Node43 [id="edge26_Node000037_Node000043",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node43 [id="Node000043",label="FastLED/FastLED/src\l/fx/2d/scale_up.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d74/scale__up_8h.html",tooltip="Expands a grid using bilinear interpolation and scaling up."];
+  Node43 -> Node42 [id="edge27_Node000043_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node5 [id="edge28_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

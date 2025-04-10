@@ -1,5 +1,31 @@
 var searchData=
 [
-  ['partycolors_5fp_0',['PartyColors_p',['../group___predefined_palettes.html#gad33cbcb637e1ff808b56390fcd45fe09',1,'colorpalettes.cpp']]],
-  ['psmartmatrix_1',['pSmartMatrix',['../_fast_l_e_d_8cpp.html#a0d0cd1944c11e20c7382f56e673339c8',1,'FastLED.cpp']]]
+  ['n_5fcolor_5farray_5f_0',['n_color_array_',['../dd/dc5/class_frame_buffer_base_ae5b3fc4ab184c595721cf6e488f4f417.html#ae5b3fc4ab184c595721cf6e488f4f417',1,'FrameBufferBase']]],
+  ['name_1',['name',['../d4/d36/namespacefl.html#a8a56312d52bc7412617407534fd9d230',1,'fl::AnimartrixEntry']]],
+  ['nextsimulatededa_2',['nextSimulatedEda',['../d1/ddb/_chromancer_8ino_aedf01f444cd549ba019164a7f99bc7ca.html#aedf01f444cd549ba019164a7f99bc7ca',1,'Chromancer.ino']]],
+  ['nextsimulatedheartbeat_3',['nextSimulatedHeartbeat',['../d1/ddb/_chromancer_8ino_a2f9ac4f0e01925ae3652c739300525a3.html#a2f9ac4f0e01925ae3652c739300525a3',1,'Chromancer.ino']]],
+  ['nmax_4',['nmax',['../d6/de8/noise_8cpp_a96f7525b7d6a9b4b64fe179dd064b104.html#a96f7525b7d6a9b4b64fe179dd064b104',1,'noise.cpp']]],
+  ['nmin_5',['nmin',['../d6/de8/noise_8cpp_a2eec13b2f7aac3071397e40975c82e48.html#a2eec13b2f7aac3071397e40975c82e48',1,'noise.cpp']]],
+  ['nodeconnections_6',['nodeConnections',['../de/d0c/mapping_8h_a917538d03ac7170879f016d8baea29d5.html#a917538d03ac7170879f016d8baea29d5',1,'mapping.h']]],
+  ['noise_7',['noise',['../d9/d41/classfl_1_1_noise_palette_a65f58d503ef7a59546374b9fcd989b88.html#a65f58d503ef7a59546374b9fcd989b88',1,'fl::NoisePalette::noise'],['../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad',1,'noise:&#160;Fire2023.ino'],['../d6/d9d/_noise_8ino_ab1daa3b4200ab5e038070a3ec84685c5.html#ab1daa3b4200ab5e038070a3ec84685c5',1,'noise:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368',1,'noise:&#160;NoisePlusPalette.ino'],['../da/db6/_smart_matrix_8ino_ab4dc37562a61e47e67eba7dd61457144.html#ab4dc37562a61e47e67eba7dd61457144',1,'noise:&#160;SmartMatrix.ino']]],
+  ['noise2_8',['noise2',['../d8/d2c/_fire2023_8ino_a78ba8011caa71657ddf95aa0f52df0d2.html#a78ba8011caa71657ddf95aa0f52df0d2',1,'Fire2023.ino']]],
+  ['noise_5fangle_9',['noise_angle',['../d6/d74/namespaceanimartrix__detail.html#ac5dae83b69be4d1dfa9b43332ef8267c',1,'animartrix_detail::modulators']]],
+  ['noise_5fmax_10',['noise_max',['../d6/dda/_fast_l_e_d_8cpp_abaa6fdee895d1130d5d498bd37f7eab0.html#abaa6fdee895d1130d5d498bd37f7eab0',1,'FastLED.cpp']]],
+  ['noise_5fmin_11',['noise_min',['../d6/dda/_fast_l_e_d_8cpp_aff7030c575134b5f0c81b47b22f8c98c.html#aff7030c575134b5f0c81b47b22f8c98c',1,'FastLED.cpp']]],
+  ['noisegeneratorblue_12',['noiseGeneratorBlue',['../d5/d3c/classfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7.html#a50e38dcae0bd7e39ae3709641a8ab0c7',1,'fl::NoiseWave']]],
+  ['noisegeneratorred_13',['noiseGeneratorRed',['../d5/d3c/classfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670.html#aa939e8325eb34db0c809399f8c9c9670',1,'fl::NoiseWave']]],
+  ['noisepalette_14',['noisePalette',['../df/d43/_overclock_8ino_a10c0b1308a3fb02a0da258ac0c0485ae.html#a10c0b1308a3fb02a0da258ac0c0485ae',1,'noisePalette:&#160;Overclock.ino'],['../d7/dd3/wasm_8ino_aae7aaf944840433bef7cdbfe719c3a1b.html#aae7aaf944840433bef7cdbfe719c3a1b',1,'noisePalette:&#160;wasm.ino']]],
+  ['noisepalette1_15',['noisePalette1',['../d6/d35/_fx_engine_8ino_aad0702608dc53ecabb699e22236e3d3c.html#aad0702608dc53ecabb699e22236e3d3c',1,'FxEngine.ino']]],
+  ['noisepalette2_16',['noisePalette2',['../d6/d35/_fx_engine_8ino_a2cfba53b76286fe190375c6deed72cbe.html#a2cfba53b76286fe190375c6deed72cbe',1,'FxEngine.ino']]],
+  ['now_17',['now',['../d2/d32/structfl_1_1___draw_context_a246bf7c34a6010905fbb34364003c166.html#a246bf7c34a6010905fbb34364003c166',1,'fl::_DrawContext']]],
+  ['num_5fcomponents_18',['num_components',['../d4/d88/led__strip__types_8h.html#a44f72facd9eafbec1abdea93a796bece',1,'led_color_component_format_t::format_layout']]],
+  ['num_5fx_19',['num_x',['../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_adfa3311d69a20c54ce83fde78f6b45e2.html#adfa3311d69a20c54ce83fde78f6b45e2',1,'animartrix_detail::ANIMartRIX']]],
+  ['num_5fy_20',['num_y',['../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ad47da14450499a276b3d0ef12188e032.html#ad47da14450499a276b3d0ef12188e032',1,'animartrix_detail::ANIMartRIX']]],
+  ['numberofautopulsetypes_21',['numberOfAutoPulseTypes',['../d1/ddb/_chromancer_8ino_af1af6039bd9e7e2b7dab618c911a82cd.html#af1af6039bd9e7e2b7dab618c911a82cd',1,'Chromancer.ino']]],
+  ['numberofbordernodes_22',['numberOfBorderNodes',['../de/d0c/mapping_8h_ab5418699c1431bf460b2b2699a339501.html#ab5418699c1431bf460b2b2699a339501',1,'mapping.h']]],
+  ['numberofcubenodes_23',['numberOfCubeNodes',['../de/d0c/mapping_8h_a4f59e5371fffbb2f058e73d5cbe557d3.html#a4f59e5371fffbb2f058e73d5cbe557d3',1,'mapping.h']]],
+  ['numbytes_24',['numbytes',['../d9/d33/classfl_1_1_object_f_l_e_d_a14dd418554d8c095d34c9ed927f74815.html#a14dd418554d8c095d34c9ed927f74815',1,'fl::ObjectFLED']]],
+  ['numbyteslocal_25',['numbytesLocal',['../d9/d33/classfl_1_1_object_f_l_e_d_ad1763f8f08053f3229914fac0a8fde4c.html#ad1763f8f08053f3229914fac0a8fde4c',1,'fl::ObjectFLED']]],
+  ['numpins_26',['numpins',['../d9/d33/classfl_1_1_object_f_l_e_d_a49c6f2bcefd5d59879c2d3a3d09895c9.html#a49c6f2bcefd5d59879c2d3a3d09895c9',1,'fl::ObjectFLED']]],
+  ['numpinslocal_27',['numpinsLocal',['../d9/d33/classfl_1_1_object_f_l_e_d_aeda5b19e82a4db026dd18a6a95a3db29.html#aeda5b19e82a4db026dd18a6a95a3db29',1,'fl::ObjectFLED']]]
 ];

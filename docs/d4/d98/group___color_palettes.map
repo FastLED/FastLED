@@ -1,0 +1,7 @@
+<map id="Color Palettes" name="Color Palettes">
+<area shape="rect" id="Node000001" title="Functions and class definitions for color palettes." alt="" coords="5,80,117,105"/>
+<area shape="rect" id="Node000002" href="$d6/d39/group___palette_classes.html" title="Class definitions for color palettes." alt="" coords="205,5,327,31"/>
+<area shape="rect" id="Node000003" href="$d2/d73/group___palette_colors.html" title="Functions to retrieve smooth color data from palettes." alt="" coords="181,55,351,80"/>
+<area shape="rect" id="Node000004" href="$d6/d0a/group___palette_upscale.html" title="Functions to upscale palettes from one type to another." alt="" coords="165,104,367,129"/>
+<area shape="rect" id="Node000005" href="$d3/d4f/group___predefined_palettes.html" title="Stock color palettes, only included when used." alt="" coords="173,153,359,179"/>
+</map>

@@ -1,0 +1,42 @@
+digraph "fl::FastLEDANIMartRIX"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::FastLEDANIMartRIX",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="animartrix_detail::\lANIMartRIX",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" animation",fontcolor="grey" ];
+  Node3 [id="Node000003",label="animartrix_detail::\lrender_parameters",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d74/namespaceanimartrix__detail.html#d5/df4/structanimartrix__detail_1_1render__parameters",tooltip=" "];
+  Node4 -> Node2 [id="edge3_Node000002_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" timings",fontcolor="grey" ];
+  Node4 [id="Node000004",label="animartrix_detail::\loscillators",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d74/namespaceanimartrix__detail.html#d5/d40/structanimartrix__detail_1_1oscillators",tooltip=" "];
+  Node5 -> Node2 [id="edge4_Node000002_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" move",fontcolor="grey" ];
+  Node5 [id="Node000005",label="animartrix_detail::\lmodulators",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators",tooltip=" "];
+  Node6 -> Node2 [id="edge5_Node000002_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" pixel",fontcolor="grey" ];
+  Node6 [id="Node000006",label="animartrix_detail::rgb",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d74/namespaceanimartrix__detail.html#d1/d5c/structanimartrix__detail_1_1rgb",tooltip=" "];
+  Node7 -> Node2 [id="edge6_Node000002_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" distance\npolar_theta",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::HeapVector\< fl\l::HeapVector\< float \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node8 -> Node7 [id="edge7_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mArray",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::scoped_array\< fl\l::HeapVector\< float \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node14 -> Node7 [id="edge8_Node000007_Node000014",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::HeapVector\< float \> \>",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node16 -> Node1 [id="edge9_Node000001_Node000016",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" data",fontcolor="grey" ];
+  Node16 [id="Node000016",label="fl::Animartrix",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix.html",tooltip=" "];
+  Node17 -> Node16 [id="edge10_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::Fx2d",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d.html",tooltip=" "];
+  Node18 -> Node17 [id="edge11_Node000017_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::Fx",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d5d/classfl_1_1_fx.html",tooltip=" "];
+  Node26 -> Node17 [id="edge12_Node000017_Node000026",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mXyMap",fontcolor="grey" ];
+  Node26 [id="Node000026",label="fl::XYMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map.html",tooltip=" "];
+  Node27 -> Node16 [id="edge13_Node000016_Node000027",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" impl",fontcolor="grey" ];
+  Node27 [id="Node000027",label="fl::scoped_ptr\< fl\l::FastLEDANIMartRIX \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node1 -> Node27 [id="edge14_Node000027_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" ptr_",fontcolor="grey" ];
+  Node28 -> Node27 [id="edge15_Node000027_Node000028",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
+  Node28 [id="Node000028",label="fl::PointerDeleter\l\< fl::FastLEDANIMartRIX \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node30 -> Node27 [id="edge16_Node000027_Node000030",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FastLEDANIMartRIX \>",fontcolor="grey" ];
+  Node30 [id="Node000030",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node31 -> Node16 [id="edge17_Node000016_Node000031",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" leds",fontcolor="grey" ];
+  Node31 [id="Node000031",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
+}

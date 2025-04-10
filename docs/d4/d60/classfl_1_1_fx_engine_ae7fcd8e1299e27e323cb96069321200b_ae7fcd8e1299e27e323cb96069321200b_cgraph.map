@@ -1,0 +1,15 @@
+<map id="fl::FxEngine::addFx" name="fl::FxEngine::addFx">
+<area shape="rect" id="Node000001" title="Adds a new effect to the engine." alt="" coords="5,43,152,68"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="47,44,41,34,44,24,57,18,79,16,105,20,116,28,112,32,103,24,79,21,59,23,48,28,46,34,52,41"/>
+<area shape="rect" id="Node000002" href="$d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee" title=" " alt="" coords="200,43,336,68"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="152,53,186,53,186,58,152,58"/>
+<area shape="rect" id="Node000003" href="$d1/d56/classfl_1_1_ptr_a092e808d55b10861885afe25aa5aa72a.html#a092e808d55b10861885afe25aa5aa72a" title=" " alt="" coords="384,5,467,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="322,40,370,28,371,34,323,45"/>
+<area shape="rect" id="Node000004" href="$d1/d56/classfl_1_1_ptr_a5eadeb0f9f825544e0280cd8c6d48539.html#a5eadeb0f9f825544e0280cd8c6d48539" title=" " alt="" coords="384,79,467,104"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="324,65,371,76,370,81,323,71"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="400,80,395,70,398,61,408,54,425,52,446,56,455,64,451,68,443,60,425,57,410,59,402,64,400,70,405,77"/>
+<area shape="rect" id="Node000005" href="$d1/d56/classfl_1_1_ptr_aaceba516635f0f11e31fe94549316fb5.html#aaceba516635f0f11e31fe94549316fb5" title=" " alt="" coords="532,53,617,79"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="466,82,518,73,519,78,467,87"/>
+<area shape="rect" id="Node000006" href="$d1/d56/classfl_1_1_ptr_abb1f8eee2682077d22cdabb6d982872a.html#abb1f8eee2682077d22cdabb6d982872a" title=" " alt="" coords="515,103,635,128"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="467,95,502,101,501,106,466,101"/>
+</map>

@@ -1,0 +1,27 @@
+<map id="AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;" name="AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="5,320,191,375"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="431,320,629,375"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,345,431,345,431,350,204,350"/>
+<area shape="rect" id="Node000003" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1087,215,1277,255"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="574,310,634,267,711,219,800,174,847,156,894,142,941,131,979,126,1017,129,1064,142,1094,156,1122,175,1164,213,1161,217,1118,179,1091,161,1062,147,1016,135,979,132,942,137,895,147,848,161,802,179,714,223,637,271,577,314"/>
+<area shape="rect" id="Node000004" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,85,1273,140"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="557,307,609,243,677,176,732,130,777,97,827,71,894,49,941,37,979,32,1017,35,1064,49,1077,58,1088,69,1114,83,1111,88,1085,73,1073,62,1061,54,1016,40,979,37,942,42,895,54,829,76,780,101,735,134,680,180,613,246,561,311"/>
+<area shape="rect" id="Node000005" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,5,1273,60"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="543,306,563,259,592,203,630,147,677,99,724,67,776,43,831,27,887,17,943,12,997,11,1091,16,1091,21,997,16,943,17,888,22,832,32,778,48,727,72,680,103,634,151,596,206,568,261,548,308"/>
+<area shape="rect" id="Node000006" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,288,1273,343"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="644,372,735,387,841,397,953,395,1008,389,1062,378,1131,340,1134,345,1064,383,1009,394,953,401,841,402,734,392,643,377"/>
+<area shape="rect" id="Node000007" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,381,1273,436"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="602,378,736,430,815,454,895,471,979,483,1016,481,1062,471,1104,455,1142,434,1144,438,1106,460,1063,477,1017,486,979,488,894,477,814,460,734,436,600,383"/>
+<area shape="rect" id="Node000008" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,491,1273,545"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="564,383,615,431,646,454,680,472,732,490,786,504,897,521,1002,526,1091,524,1091,529,1002,531,896,526,785,510,730,495,678,476,643,458,612,435,561,387"/>
+<area shape="rect" id="Node000009" href="$d3/d97/class_s_p_i_output.html" title="Hardware SPI output." alt="" coords="679,268,871,323"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="642,321,678,313,679,318,643,326"/>
+<area shape="rect" id="Node000010" href="$d9/d35/class_software_s_p_i_output.html" title="Software SPI output." alt="" coords="681,572,869,627"/>
+<area shape="poly" id="edge15_Node000002_Node000010" title=" " alt="" coords="548,386,565,425,589,469,619,513,655,551,685,570,682,574,652,555,615,516,584,472,561,428,543,389"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="884,267,894,265,993,250,1086,240,1087,246,994,256,895,270,885,272"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="818,258,854,232,893,209,994,166,1090,134,1092,139,996,171,896,214,857,237,821,262"/>
+<area shape="poly" id="edge11_Node000009_Node000005" title=" " alt="" coords="789,254,806,219,829,180,858,142,893,109,940,81,991,61,1042,47,1090,38,1091,43,1043,52,992,66,942,86,896,113,862,145,834,183,811,221,794,256"/>
+<area shape="poly" id="edge12_Node000009_Node000006" title=" " alt="" coords="885,298,1091,308,1091,314,884,303"/>
+<area shape="poly" id="edge13_Node000009_Node000007" title=" " alt="" coords="850,325,895,342,996,370,1091,390,1090,395,995,375,894,347,848,330"/>
+<area shape="poly" id="edge14_Node000009_Node000008" title=" " alt="" coords="806,332,846,377,896,418,944,445,994,466,1092,497,1090,502,993,471,941,450,893,423,842,381,802,336"/>
+</map>

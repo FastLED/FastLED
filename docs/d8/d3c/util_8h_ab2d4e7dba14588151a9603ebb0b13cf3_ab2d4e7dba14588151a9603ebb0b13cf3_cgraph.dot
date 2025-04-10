@@ -1,0 +1,15 @@
+digraph "ToBrightness"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="ToBrightness",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="Interp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="MapT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd8/_approximating_function_8h_adaa033a0d7d5d25b9de906dff963d6d3.html#adaa033a0d7d5d25b9de906dff963d6d3",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="SelectInterpPoints",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd8/_approximating_function_8h_ad602af28198426d21f684f254c890fa1.html#ad602af28198426d21f684f254c890fa1",tooltip=" "];
+}

@@ -1,25 +1,10 @@
 var searchData=
 [
-  ['m_5fcolorcorrection_0',['m_ColorCorrection',['../class_c_l_e_d_controller.html#a4cd7290071572a9844b79b66239cc40b',1,'CLEDController']]],
-  ['m_5fcolortemperature_1',['m_ColorTemperature',['../class_c_l_e_d_controller.html#adb7c56ce6c3f11f392613c3b9bf8c727',1,'CLEDController']]],
-  ['m_5fdata_2',['m_Data',['../class_c_l_e_d_controller.html#a4672f8f1e93d5df90685cb62c4ebbe0e',1,'CLEDController']]],
-  ['m_5fdithermode_3',['m_DitherMode',['../class_c_l_e_d_controller.html#a9af9dd5c08991667e4062396eec5bd8a',1,'CLEDController']]],
-  ['m_5fnleds_4',['m_nLeds',['../class_c_l_e_d_controller.html#ab4d0f0ed5a214b675c9a03aecd7b0df8',1,'CLEDController']]],
-  ['m_5fphead_5',['m_pHead',['../class_c_l_e_d_controller.html#afc138dfd8c32629cf4ecf0d430397e77',1,'CLEDController']]],
-  ['m_5fpnext_6',['m_pNext',['../class_c_l_e_d_controller.html#aaad2e8eeedcb36298e0c45d11bcf14b5',1,'CLEDController']]],
-  ['m_5fptail_7',['m_pTail',['../class_c_l_e_d_controller.html#aba5aa24458cb37f0f5e6b18a74408a47',1,'CLEDController']]],
-  ['madvance_8',['mAdvance',['../struct_pixel_controller.html#a0f4eb594a337bc3a739e65b2a1e5c401',1,'PixelController']]],
-  ['mant16_9',['mant16',['../union_i_e_e_e754binary32__t.html#a7b1c12a1f117e808d12d4d26c5278d66',1,'IEEE754binary32_t']]],
-  ['mant7_10',['mant7',['../union_i_e_e_e754binary32__t.html#ae1f5087af906fccb63f3bca81b22aaa8',1,'IEEE754binary32_t']]],
-  ['mant_5fhi16_5fexp_5flo1_11',['mant_hi16_exp_lo1',['../union_i_e_e_e754binary32__t.html#a9662a563b61afb6bdafb5f005c52b38b',1,'IEEE754binary32_t']]],
-  ['mant_5flo8_12',['mant_lo8',['../union_i_e_e_e754binary32__t.html#a78f17dc24c6f6ae2e5720824493bf533',1,'IEEE754binary32_t']]],
-  ['mantissa_13',['mantissa',['../union_i_e_e_e754binary32__t.html#a2275cfe0cacae08983ad44cdf074a7a6',1,'IEEE754binary32_t']]],
-  ['mask_5fvalue_14',['MASK_VALUE',['../class_c_pixel_l_e_d_controller.html#a32e69eb58eddbeca00179bb5559ec451',1,'CPixelLEDController']]],
-  ['mdata_15',['mData',['../struct_pixel_controller.html#a54bedae9117a19b242b73682c5d1a182',1,'PixelController']]],
-  ['mlen_16',['mLen',['../struct_pixel_controller.html#a6e1491364f944af0eee408fc8dffef58',1,'PixelController']]],
-  ['mlenremaining_17',['mLenRemaining',['../struct_pixel_controller.html#a329cebe498f2d119cf10e0e6a7b5f7c5',1,'PixelController']]],
-  ['moffsets_18',['mOffsets',['../struct_pixel_controller.html#a5ea77404f9ea28134291af923a79c82f',1,'PixelController']]],
-  ['mperiod_19',['mPeriod',['../class_c_every_n_time.html#a27fdededaf37417018f079336feabbf7',1,'CEveryNTime']]],
-  ['mprevtrigger_20',['mPrevTrigger',['../class_c_every_n_time.html#af886ee09b27d68263dfa1e40d6137ce8',1,'CEveryNTime']]],
-  ['mscale_21',['mScale',['../struct_pixel_controller.html#a9c8fa28fd867a4048796b4f88146d332',1,'PixelController']]]
+  ['key_0',['key',['../d0/de2/struct_interp_data_a13cb0f9ebaf5a6f5f8a131a5c5ffbb0d.html#a13cb0f9ebaf5a6f5f8a131a5c5ffbb0d',1,'InterpData']]],
+  ['keys_5f_1',['keys_',['../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3',1,'KeyboardState']]],
+  ['kmatrixheight_2',['kMatrixHeight',['../d6/d9d/_noise_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343',1,'kMatrixHeight:&#160;Noise.ino'],['../d7/ddc/_noise_playground_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343',1,'kMatrixHeight:&#160;NoisePlayground.ino'],['../da/dda/_noise_plus_palette_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343',1,'kMatrixHeight:&#160;NoisePlusPalette.ino'],['../d1/de4/_x_y_matrix_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343',1,'kMatrixHeight:&#160;XYMatrix.ino']]],
+  ['kmatrixserpentinelayout_3',['kMatrixSerpentineLayout',['../d6/d9d/_noise_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c',1,'kMatrixSerpentineLayout:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c',1,'kMatrixSerpentineLayout:&#160;NoisePlusPalette.ino'],['../da/db6/_smart_matrix_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c',1,'kMatrixSerpentineLayout:&#160;SmartMatrix.ino'],['../d1/de4/_x_y_matrix_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c',1,'kMatrixSerpentineLayout:&#160;XYMatrix.ino']]],
+  ['kmatrixvertical_4',['kMatrixVertical',['../d1/de4/_x_y_matrix_8ino_a461a53cf8309c9e35c907f9eaf0ecbc5.html#a461a53cf8309c9e35c907f9eaf0ecbc5',1,'XYMatrix.ino']]],
+  ['kmatrixwidth_5',['kMatrixWidth',['../d6/d9d/_noise_8ino_a2255bcc7c13353a867fe688064782888.html#a2255bcc7c13353a867fe688064782888',1,'kMatrixWidth:&#160;Noise.ino'],['../d7/ddc/_noise_playground_8ino_a2255bcc7c13353a867fe688064782888.html#a2255bcc7c13353a867fe688064782888',1,'kMatrixWidth:&#160;NoisePlayground.ino'],['../da/dda/_noise_plus_palette_8ino_a2255bcc7c13353a867fe688064782888.html#a2255bcc7c13353a867fe688064782888',1,'kMatrixWidth:&#160;NoisePlusPalette.ino'],['../d1/de4/_x_y_matrix_8ino_a2255bcc7c13353a867fe688064782888.html#a2255bcc7c13353a867fe688064782888',1,'kMatrixWidth:&#160;XYMatrix.ino']]],
+  ['knumkeys_6',['kNumKeys',['../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2',1,'KeyboardState']]]
 ];

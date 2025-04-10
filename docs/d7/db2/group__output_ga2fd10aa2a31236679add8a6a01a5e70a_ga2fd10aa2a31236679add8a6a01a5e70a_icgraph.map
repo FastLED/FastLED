@@ -1,0 +1,5 @@
+<map id="MidiInterface::sendPitchBend" name="MidiInterface::sendPitchBend">
+<area shape="rect" id="Node000001" title="Send a Pitch Bend message using a signed integer value." alt="" coords="265,5,477,31"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_gaaaf16c1334640e690ecbd835d645e4cb.html#gaaaf16c1334640e690ecbd835d645e4cb" title="Send a Pitch Bend message using a floating point value." alt="" coords="5,5,217,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="252,21,218,21,218,15,252,15"/>
+</map>

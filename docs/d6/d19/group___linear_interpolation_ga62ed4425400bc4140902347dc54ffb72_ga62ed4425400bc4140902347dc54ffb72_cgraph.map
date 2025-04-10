@@ -1,0 +1,5 @@
+<map id="lerp8by8" name="lerp8by8">
+<area shape="rect" id="Node000001" title="Linear interpolation between two unsigned 8&#45;bit values, with 8&#45;bit fraction." alt="" coords="5,5,84,31"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="132,5,196,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,15,118,15,118,21,84,21"/>
+</map>

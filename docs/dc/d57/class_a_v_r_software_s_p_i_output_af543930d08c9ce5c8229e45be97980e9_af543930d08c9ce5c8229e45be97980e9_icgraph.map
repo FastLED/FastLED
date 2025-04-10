@@ -1,0 +1,5 @@
+<map id="AVRSoftwareSPIOutput::writeBytes" name="AVRSoftwareSPIOutput::writeBytes">
+<area shape="rect" id="Node000001" title="Write an array of data to the SPI interface." alt="" coords="223,5,392,45"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,28,175,28,175,23,209,23"/>
+</map>

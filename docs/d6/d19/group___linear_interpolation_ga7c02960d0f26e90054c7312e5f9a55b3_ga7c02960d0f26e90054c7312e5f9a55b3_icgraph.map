@@ -1,0 +1,5 @@
+<map id="lerp16by16" name="lerp16by16">
+<area shape="rect" id="Node000001" title="Linear interpolation between two unsigned 16&#45;bit values, with 16&#45;bit fraction." alt="" coords="161,5,256,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a50b3dca085a99aa549c19ef0aabe3c5c.html#a50b3dca085a99aa549c19ef0aabe3c5c" title="Return a new CRGB object after performing a linear interpolation between this object and the passed i..." alt="" coords="5,5,113,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,21,114,21,114,15,148,15"/>
+</map>

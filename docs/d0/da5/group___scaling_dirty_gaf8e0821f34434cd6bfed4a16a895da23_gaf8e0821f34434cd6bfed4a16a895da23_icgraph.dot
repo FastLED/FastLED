@@ -1,0 +1,15 @@
+digraph "scale8_video_LEAVING_R1_DIRTY"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="scale8_video_LEAVING\l_R1_DIRTY",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="This version of scale8_video() does not clean up the R1 register on AVR."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf65fa1b4fedbbd7b8054a71e1b6474b3.html#gaf65fa1b4fedbbd7b8054a71e1b6474b3",tooltip="Get a color from a palette."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="hsv2rgb_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.html#a06ee0f21e1bf430ea547244f6ed4add8",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="hsv2rgb_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_ga30d4c5d63d1eab20b61e14f6429bf634.html#ga30d4c5d63d1eab20b61e14f6429bf634",tooltip="Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies."];
+}

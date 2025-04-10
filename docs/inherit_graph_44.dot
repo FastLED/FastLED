@@ -1,0 +1,9 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="CRGBPalette32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d3d/class_c_r_g_b_palette32.html",tooltip="RGB color palette with 32 discrete values."];
+}

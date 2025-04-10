@@ -1,0 +1,7 @@
+<map id="CRGBPalette16::CRGBPalette16" name="CRGBPalette16::CRGBPalette16">
+<area shape="rect" id="Node000001" title="Copy constructor." alt="" coords="5,31,232,56"/>
+<area shape="rect" id="Node000002" href="$d2/dc4/class_c_r_g_b_palette16_af3a6a06fddf749622ffe099e2d39302f.html#af3a6a06fddf749622ffe099e2d39302f" title="Default constructor." alt="" coords="280,5,507,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,30,266,27,267,32,232,36"/>
+<area shape="rect" id="Node000003" href="$d6/de6/group___fast_memory_gaf5537d0243691002376d6a49566a47d4.html#gaf5537d0243691002376d6a49566a47d4" title="Faster alternative to memmove() on AVR." alt="" coords="343,55,444,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,51,329,59,329,64,232,56"/>
+</map>

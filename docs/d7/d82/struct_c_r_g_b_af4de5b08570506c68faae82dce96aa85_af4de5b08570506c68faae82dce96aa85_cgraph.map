@@ -1,0 +1,5 @@
+<map id="CRGB::nscale8" name="CRGB::nscale8">
+<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="5,5,123,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="171,5,275,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,15,157,15,157,21,123,21"/>
+</map>

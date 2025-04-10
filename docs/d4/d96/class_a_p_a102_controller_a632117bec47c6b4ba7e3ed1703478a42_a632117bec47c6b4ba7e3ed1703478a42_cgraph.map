@@ -1,0 +1,28 @@
+<map id="APA102Controller::showPixelsDefault" name="APA102Controller::showPixelsDefault">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,213,220,253"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="280,5,491,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,211,144,173,176,127,217,79,267,40,278,34,280,38,269,44,221,83,180,130,148,176,127,213"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller_ac9676b78658ebcab74033429c5c046f8.html#ac9676b78658ebcab74033429c5c046f8" title=" " alt="" coords="271,55,500,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,211,185,150,224,118,267,90,286,82,288,87,269,95,227,122,188,154,132,214"/>
+<area shape="rect" id="Node000004" href="$d4/d96/class_a_p_a102_controller_a299c89c516c1c32935e75f492137d872.html#a299c89c516c1c32935e75f492137d872" title=" " alt="" coords="281,105,490,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,210,267,161,306,147,308,152,269,166,157,215"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a3c10f0dd3838aa2b18d28a20393c9333.html#a3c10f0dd3838aa2b18d28a20393c9333" title=" " alt="" coords="551,134,729,174"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="220,212,268,205,537,165,537,171,268,210,221,218"/>
+<area shape="rect" id="Node000015" href="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c" title="Do we have n pixels left to process?" alt="" coords="311,220,459,245"/>
+<area shape="poly" id="edge8_Node000001_Node000015" title=" " alt="" coords="220,230,298,230,298,235,220,235"/>
+<area shape="rect" id="Node000016" href="$d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660" title="Get the length of the LED strip." alt="" coords="310,269,461,295"/>
+<area shape="poly" id="edge10_Node000001_Node000016" title=" " alt="" coords="221,249,301,264,300,269,220,255"/>
+<area shape="rect" id="Node000017" href="$d4/d96/class_a_p_a102_controller_ab8d200f508aa910564b8db24c451c28b.html#ab8d200f508aa910564b8db24c451c28b" title=" " alt="" coords="268,319,503,344"/>
+<area shape="poly" id="edge11_Node000001_Node000017" title=" " alt="" coords="152,251,206,278,269,303,301,313,299,318,267,309,204,283,149,255"/>
+<area shape="rect" id="Node000018" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward." alt="" coords="279,368,492,393"/>
+<area shape="poly" id="edge12_Node000001_Node000018" title=" " alt="" coords="135,251,192,303,229,330,269,353,290,361,288,366,267,358,226,335,189,307,132,255"/>
+<area shape="rect" id="Node000019" href="$d4/d96/class_a_p_a102_controller_a3e85825537bbd044569052476051a970.html#a3e85825537bbd044569052476051a970" title=" " alt="" coords="286,417,485,443"/>
+<area shape="poly" id="edge13_Node000001_Node000019" title=" " alt="" coords="128,251,151,285,183,326,223,368,269,402,285,410,283,415,267,407,219,372,179,330,146,288,124,254"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="491,134,537,140,537,145,490,139"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a4afe8b8ec93c89308fe185b1eb164ff6.html#a4afe8b8ec93c89308fe185b1eb164ff6" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="777,70,956,110"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="711,131,781,111,783,116,712,136"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_ae570967d1b674970cf472feb379f248f.html#ae570967d1b674970cf472feb379f248f" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="777,134,956,174"/>
+<area shape="poly" id="edge6_Node000005_Node000013" title=" " alt="" coords="730,151,763,151,763,157,730,157"/>
+<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_af5a5f12205a4187aa4df499b8224ed35.html#af5a5f12205a4187aa4df499b8224ed35" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="777,198,956,238"/>
+<area shape="poly" id="edge7_Node000005_Node000014" title=" " alt="" coords="712,172,783,192,781,197,711,177"/>
+</map>

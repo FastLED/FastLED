@@ -1,0 +1,26 @@
+<map id="WS2816Controller::showPixels" name="WS2816Controller::showPixels">
+<area shape="rect" id="Node000001" title="Send the LED data to the strip." alt="" coords="5,149,224,175"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="273,5,484,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,147,186,96,227,66,271,41,292,32,294,37,273,46,230,71,189,100,131,151"/>
+<area shape="rect" id="Node000003" href="$dd/dbc/class_w_s2816_controller_a46a9b651570db7447dc4222a971a8ed7.html#a46a9b651570db7447dc4222a971a8ed7" title=" " alt="" coords="283,55,474,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="150,147,271,105,296,97,298,102,273,110,152,152"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c" title="Do we have n pixels left to process?" alt="" coords="305,120,453,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,147,291,140,291,145,224,153"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a052385f847c0e13b506fe7003320e907.html#a052385f847c0e13b506fe7003320e907" title=" " alt="" coords="289,170,468,210"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="224,171,276,176,275,182,224,176"/>
+<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660" title="Get the length of the LED strip." alt="" coords="303,235,454,260"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="146,172,273,219,306,229,305,234,271,225,145,177"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward." alt="" coords="272,284,485,309"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="132,173,191,221,230,247,273,270,292,278,290,283,271,275,228,252,187,225,128,177"/>
+<area shape="rect" id="Node000006" href="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" title=" " alt="" coords="561,128,664,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="468,169,547,152,548,157,469,174"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="533,177,692,203"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="468,187,520,187,520,193,468,193"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="565,227,661,252"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="469,206,552,224,551,229,468,211"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="740,152,960,177"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="692,179,726,175,727,181,692,184"/>
+<area shape="rect" id="Node000010" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="818,201,882,227"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="692,195,804,207,804,212,692,201"/>
+<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="811,154,803,144,807,134,823,128,850,125,883,129,896,139,893,143,881,134,850,131,825,133,811,138,808,143,815,150"/>
+</map>

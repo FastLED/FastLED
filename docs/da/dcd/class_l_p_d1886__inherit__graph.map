@@ -1,0 +1,11 @@
+<map id="LPD1886&lt; DATA_PIN, RGB_ORDER &gt;" name="LPD1886&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="LPD1886 controller class." alt="" coords="960,59,1121,99"/>
+<area shape="rect" id="Node000002" href="$d9/da6/class_l_p_d1886_controller1250_khz.html" title=" " alt="" coords="707,59,911,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="924,76,960,76,960,81,924,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="279,5,461,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,47,707,67,706,72,475,52"/>
+<area shape="rect" id="Node000004" href="$d9/da6/class_l_p_d1886_controller1250_khz.html" title="LPD1886 controller class." alt="" coords="268,99,472,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="486,106,706,85,707,91,486,111"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,91,219,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="232,116,268,116,268,121,232,121"/>
+</map>

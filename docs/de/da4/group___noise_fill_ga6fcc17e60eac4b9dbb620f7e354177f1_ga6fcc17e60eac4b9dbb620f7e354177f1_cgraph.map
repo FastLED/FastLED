@@ -1,0 +1,34 @@
+<map id="fill_2dnoise8" name="fill_2dnoise8">
+<area shape="rect" id="Node000001" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="5,139,109,164"/>
+<area shape="rect" id="Node000002" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="195,83,254,108"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,136,181,107,183,112,97,141"/>
+<area shape="rect" id="Node000007" href="$de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="157,225,292,251"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="84,162,188,217,186,221,82,166"/>
+<area shape="rect" id="Node000016" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="340,139,457,164"/>
+<area shape="poly" id="edge14_Node000001_Node000016" title=" " alt="" coords="109,149,326,149,326,154,109,154"/>
+<area shape="rect" id="Node000003" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="365,51,432,76"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="254,87,351,69,352,74,255,93"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="524,25,591,51"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="432,55,510,43,511,48,433,61"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="707,25,804,51"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="418,48,457,27,505,10,556,3,607,5,656,11,699,19,698,25,655,16,607,10,556,9,506,15,459,32,421,53"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="657,76,853,101"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="432,63,644,78,643,83,432,68"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="591,35,693,35,693,41,591,41"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="592,44,693,70,691,75,590,49"/>
+<area shape="poly" id="edge9_Node000007_Node000007" title=" " alt="" coords="197,227,191,217,194,207,206,201,225,199,247,202,257,211,254,215,245,207,225,204,207,206,198,211,196,216,201,224"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="364,225,433,251"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="292,235,350,235,350,241,292,241"/>
+<area shape="rect" id="Node000014" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="367,275,431,300"/>
+<area shape="poly" id="edge13_Node000007_Node000014" title=" " alt="" coords="271,248,354,272,353,277,269,253"/>
+<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="507,275,607,300"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="434,246,503,268,502,273,433,251"/>
+<area shape="rect" id="Node000015" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="526,225,589,251"/>
+<area shape="poly" id="edge12_Node000008_Node000015" title=" " alt="" coords="433,235,512,235,512,241,433,241"/>
+<area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="505,176,609,201"/>
+<area shape="poly" id="edge15_Node000016_Node000017" title=" " alt="" coords="454,161,493,171,491,176,453,167"/>
+<area shape="rect" id="Node000018" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="513,127,601,152"/>
+<area shape="poly" id="edge16_Node000016_Node000018" title=" " alt="" coords="457,144,500,141,500,146,458,149"/>
+<area shape="poly" id="edge17_Node000018_Node000005" title=" " alt="" coords="570,125,607,93,656,61,692,47,694,52,659,66,610,97,573,129"/>
+<area shape="poly" id="edge18_Node000018_Node000006" title=" " alt="" coords="601,126,691,102,693,107,602,131"/>
+</map>

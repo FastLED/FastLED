@@ -1,0 +1,21 @@
+<map id="CLEDController::clearLeds" name="CLEDController::clearLeds">
+<area shape="rect" id="Node000001" title="Clear out/zero out the given number of LEDs." alt="" coords="5,76,196,101"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352.html#aca9f099645c6976b1a52ba13ab455352" title="Zero out the LED data managed by this controller." alt="" coords="249,39,431,79"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,74,235,70,236,75,197,80"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a3b699c9cf0829d15fdc7ceb1d5166412.html#a3b699c9cf0829d15fdc7ceb1d5166412" title=" " alt="" coords="244,104,436,129"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,97,231,101,230,106,196,102"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_af9962ef739bdb3b590ee66f3780765d6.html#af9962ef739bdb3b590ee66f3780765d6" title=" " alt="" coords="484,55,713,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="407,101,517,80,518,85,408,107"/>
+<area shape="rect" id="Node000007" href="$d6/d2c/class_c_l_e_d_controller_a49b221af013bf196c2068e2cbd1c299d.html#a49b221af013bf196c2068e2cbd1c299d" title=" " alt="" coords="490,104,707,129"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="436,114,476,114,476,119,436,119"/>
+<area shape="rect" id="Node000010" href="$d6/d2c/class_c_l_e_d_controller_ac5355e980ac13d9ae97561f183f73990.html#ac5355e980ac13d9ae97561f183f73990" title="Write the data to the LEDs managed by this controller." alt="" coords="503,154,695,194"/>
+<area shape="poly" id="edge8_Node000003_Node000010" title=" " alt="" coords="399,127,495,148,494,154,398,132"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7" title="Get the dithering option currently set for this controller." alt="" coords="761,5,951,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="665,52,775,31,776,36,666,57"/>
+<area shape="rect" id="Node000006" href="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e" title="How many LEDs does this controller manage?" alt="" coords="779,55,933,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="714,65,765,65,765,70,714,70"/>
+<area shape="rect" id="Node000008" href="$d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279" title="Set the dithering mode for this controller to use." alt="" coords="762,104,950,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="708,114,749,114,749,119,708,119"/>
+<area shape="rect" id="Node000011" href="$d6/d2c/class_c_l_e_d_controller_afc8fb063666d03527aabc86d8531e007.html#afc8fb063666d03527aabc86d8531e007" title="Write the passed in RGB data out to the LEDs managed by this controller." alt="" coords="775,161,937,187"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="695,171,761,171,761,177,695,177"/>
+</map>

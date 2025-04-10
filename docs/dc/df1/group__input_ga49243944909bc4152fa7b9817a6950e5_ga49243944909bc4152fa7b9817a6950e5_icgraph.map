@@ -1,0 +1,8 @@
+<map id="MidiInterface::getChannelFromStatusByte" name="MidiInterface::getChannelFromStatusByte">
+<area shape="rect" id="Node000001" title="Returns channel in the range 1&#45;16." alt="" coords="399,22,589,62"/>
+<area shape="rect" id="Node000002" href="$dc/df1/group__input_gafdc73d1d7fd7624e6e25afd240176eef.html#gafdc73d1d7fd7624e6e25afd240176eef" title=" " alt="" coords="199,29,351,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="385,45,351,45,351,39,385,39"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="309,19,299,11,275,8,254,10,243,15,241,20,247,28,243,31,236,21,239,11,253,5,275,3,301,6,313,15"/>
+<area shape="rect" id="Node000003" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,29,151,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="185,45,151,45,151,39,185,39"/>
+</map>

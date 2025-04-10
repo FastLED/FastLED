@@ -1,0 +1,13 @@
+<map id="REFHardwareSPIOutput::writeBytes" name="REFHardwareSPIOutput::writeBytes">
+<area shape="rect" id="Node000001" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="5,101,180,141"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_aed13aeec47cdee6166451607311f181c.html#aed13aeec47cdee6166451607311f181c" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="228,101,403,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,119,214,119,214,124,180,124"/>
+<area shape="rect" id="Node000003" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a7c39a37f4a8d759bfb59623fa95b09ce.html#a7c39a37f4a8d759bfb59623fa95b09ce" title="release the CS select" alt="" coords="451,5,625,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="356,99,450,55,467,48,469,53,452,60,358,103"/>
+<area shape="rect" id="Node000004" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a9f51d6a4a6ab66c709ff1d677815946b.html#a9f51d6a4a6ab66c709ff1d677815946b" title="latch the CS select" alt="" coords="451,69,625,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="403,106,437,101,438,106,403,111"/>
+<area shape="rect" id="Node000005" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_acca3a544ce9f832fab85a471432b12bd.html#acca3a544ce9f832fab85a471432b12bd" title="wait until all queued up data has been written" alt="" coords="451,133,625,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="403,131,438,136,437,142,403,137"/>
+<area shape="rect" id="Node000006" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a077457b7a802ee946db4b2f8117d5ad4.html#a077457b7a802ee946db4b2f8117d5ad4" title="write a byte out via SPI (returns immediately on writing register)" alt="" coords="451,197,625,237"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="358,139,452,183,469,190,467,195,450,188,356,144"/>
+</map>

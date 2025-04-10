@@ -1,0 +1,5 @@
+<map id="PixelController::init_binary_dithering" name="PixelController::init_binary_dithering">
+<area shape="rect" id="Node000001" title="Set up the values for binary dithering." alt="" coords="5,5,152,45"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="200,13,264,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,23,186,23,186,28,152,28"/>
+</map>

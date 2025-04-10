@@ -1,0 +1,13 @@
+digraph "fl::five_bit_hd_gamma_function"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::five_bit_hd_gamma\l_function",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="map8_to_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="scale16by8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf",tooltip="Scale a 16-bit unsigned value by an 8-bit value, which is treated as the numerator of a fraction whos..."];
+}

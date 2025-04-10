@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['lanes_5fvalue_0',['LANES_VALUE',['../class_c_pixel_l_e_d_controller.html#a65eef0060cd7bae5ea9919617557d71b',1,'CPixelLEDController']]],
-  ['lavacolors_5fp_1',['LavaColors_p',['../group___predefined_palettes.html#gaae33b6ee55a67b1dfa47462036d8d006',1,'colorpalettes.cpp']]],
-  ['leds_2',['leds',['../class_c_pixel_view.html#a21679cd86fce5882d1b04aa78f2dd4ab',1,'CPixelView']]],
-  ['len_3',['len',['../class_c_pixel_view.html#afdb7d7da8fc3a387d5df31e69da1cc71',1,'CPixelView']]]
+  ['json_5fmap_0',['JSON_MAP',['../dc/d50/gary__woos__wled__ledmap_8h_ab1ac8ca3e460da80444343edc2e12908.html#ab1ac8ca3e460da80444343edc2e12908',1,'gary_woos_wled_ledmap.h']]],
+  ['json_5fscreen_5fmap_1',['JSON_SCREEN_MAP',['../da/d23/screenmap_8json_8h_abb86cf525c7835f0bca33508c77d0070.html#abb86cf525c7835f0bca33508c77d0070',1,'screenmap.json.h']]],
+  ['juststarted_2',['justStarted',['../d1/d85/class_ripple_a51bea387df6a426f33cece501ccebd92.html#a51bea387df6a426f33cece501ccebd92',1,'Ripple']]]
 ];

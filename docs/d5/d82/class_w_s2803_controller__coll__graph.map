@@ -1,0 +1,31 @@
+<map id="WS2803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="WS2803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="WS2803 controller class." alt="" coords="1777,188,2003,243"/>
+<area shape="rect" id="Node000002" href="$d9/d95/class_w_s2801_controller.html" title=" " alt="" coords="1540,188,1728,243"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1742,213,1777,213,1777,218,1742,218"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="876,64,1049,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1064,97,1274,121,1396,142,1517,169,1568,185,1567,190,1515,174,1395,147,1273,127,1063,102"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="289,73,409,99"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="423,84,876,88,876,93,423,89"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="325,58,333,50,349,47,364,49,372,55,374,65,370,74,365,72,369,64,368,58,361,54,349,52,335,55,329,62"/>
+<area shape="rect" id="Node000015" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="681,110,832,150"/>
+<area shape="poly" id="edge13_Node000015_Node000004" title=" " alt="" coords="423,91,682,119,681,125,423,97"/>
+<area shape="rect" id="Node000007" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="661,174,852,214"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="866,192,1159,196,1516,206,1540,207,1540,212,1516,211,1159,202,866,197"/>
+<area shape="rect" id="Node000008" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="5,197,204,252"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="209,191,253,182,360,165,445,156,529,157,638,166,673,171,672,177,637,171,529,162,445,162,361,170,254,187,210,197"/>
+<area shape="rect" id="Node000011" href="$d3/d97/class_s_p_i_output.html" title="Hardware SPI output." alt="" coords="253,197,445,252"/>
+<area shape="poly" id="edge8_Node000011_Node000008" title=" " alt="" coords="218,222,253,222,253,227,218,227"/>
+<area shape="rect" id="Node000017" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="666,239,847,293"/>
+<area shape="poly" id="edge15_Node000017_Node000008" title=" " alt="" coords="206,253,254,262,364,273,476,276,666,271,666,276,476,282,364,278,253,267,205,258"/>
+<area shape="poly" id="edge7_Node000007_Node000011" title=" " alt="" coords="459,214,661,198,661,204,459,219"/>
+<area shape="poly" id="edge16_Node000017_Node000011" title=" " alt="" coords="459,247,470,249,571,258,666,263,665,268,570,264,469,254,459,252"/>
+<area shape="rect" id="Node000012" href="$d1/d6d/class_c_min_wait.html" title=" " alt="" coords="683,339,830,364"/>
+<area shape="poly" id="edge9_Node000002_Node000012" title=" " alt="" coords="844,349,1052,343,1175,334,1298,318,1408,295,1515,259,1567,240,1569,245,1517,265,1409,300,1299,323,1176,339,1052,348,844,355"/>
+<area shape="rect" id="Node000014" href="$d9/d95/class_w_s2801_controller.html" title="WS2801 controller class." alt="" coords="1073,239,1299,293"/>
+<area shape="poly" id="edge17_Node000014_Node000012" title=" " alt="" coords="834,333,1073,286,1074,291,835,339"/>
+<area shape="rect" id="Node000013" href="$d1/d6d/class_c_min_wait.html" title="Class to ensure that a minimum amount of time has kicked since the last time run &#45; and delay if not e..." alt="" coords="276,339,423,364"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="437,349,683,349,683,354,437,354"/>
+<area shape="poly" id="edge11_Node000002_Node000014" title=" " alt="" coords="1312,256,1516,235,1539,232,1540,237,1516,241,1312,261"/>
+<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="835,152,1099,236,1098,241,833,157"/>
+<area shape="poly" id="edge14_Node000014_Node000017" title=" " alt="" coords="861,263,1073,263,1073,269,861,269"/>
+</map>

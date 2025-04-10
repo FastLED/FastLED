@@ -1,0 +1,7 @@
+<map id="WS2815Controller&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2815Controller&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2815 controller class @ 400 KHz." alt="" coords="10,109,198,149"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="213,124,225,129,199,136,198,130,219,129,211,129"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="212,119,344,120,391,122,411,129,389,136,338,139,198,139,198,134,338,134,388,131,406,129,390,128,344,125,212,125"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,203,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,74,107,109,101,109,101,74"/>
+</map>

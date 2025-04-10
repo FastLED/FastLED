@@ -1,0 +1,21 @@
+<map id="AVRSoftwareSPIOutput::writeByte" name="AVRSoftwareSPIOutput::writeByte">
+<area shape="rect" id="Node000001" title="Write a single byte over SPI." alt="" coords="477,165,647,205"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad5f106b07a655da37d889037f524617d.html#ad5f106b07a655da37d889037f524617d" title="Write a single byte over SPI without waiting." alt="" coords="260,5,429,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,157,487,107,459,82,428,60,406,48,408,43,431,55,462,78,491,104,538,153"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a80903ee9d3226ced43e8f614a9e486b1.html#a80903ee9d3226ced43e8f614a9e486b1" title="Write a single byte over SPI and wait afterwards." alt="" coords="260,69,429,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="508,161,428,124,400,112,402,107,430,119,510,157"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9" title="Write an array of data to the SPI interface." alt="" coords="260,133,429,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="463,174,429,168,430,163,464,168"/>
+<area shape="rect" id="Node000006" href="$dc/d57/class_a_v_r_software_s_p_i_output_abada62794ed922c2798bf462a98b57f0.html#abada62794ed922c2798bf462a98b57f0" title="Write multiple bytes of the given value over SPI, without selecting the interface." alt="" coords="260,197,429,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="464,202,430,208,429,202,463,197"/>
+<area shape="rect" id="Node000009" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="260,261,429,301"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="510,214,430,252,402,264,400,259,428,247,508,209"/>
+<area shape="rect" id="Node000010" href="$dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8" title="Write a word (two bytes) over SPI." alt="" coords="260,325,429,365"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="538,218,491,267,462,293,431,316,408,328,406,323,428,311,459,289,487,263,534,214"/>
+<area shape="rect" id="Node000005" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="24,133,193,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="246,156,193,156,193,151,246,151"/>
+<area shape="rect" id="Node000007" href="$da/d77/class_l_p_d8806_controller_1_1_l_p_d8806___a_d_j_u_s_t_a8e402dc154857e5c6b62bffe0372e856.html#a8e402dc154857e5c6b62bffe0372e856" title=" " alt="" coords="5,197,212,237"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="246,220,212,220,212,215,246,215"/>
+<area shape="rect" id="Node000008" href="$dc/d57/class_a_v_r_software_s_p_i_output_ac4ffa7160697ac63bbd7734b480308bc.html#ac4ffa7160697ac63bbd7734b480308bc" title="Write multiple bytes of the given value over SPI." alt="" coords="24,261,193,301"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="258,244,184,264,182,259,256,238"/>
+</map>

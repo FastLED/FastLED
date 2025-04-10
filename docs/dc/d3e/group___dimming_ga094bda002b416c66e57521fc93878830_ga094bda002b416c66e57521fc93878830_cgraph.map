@@ -1,0 +1,5 @@
+<map id="brighten8_lin" name="brighten8_lin">
+<area shape="rect" id="Node000001" title="Brighten a value (inverse of dim8_lin())" alt="" coords="5,5,112,31"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="160,5,224,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,15,146,15,146,21,112,21"/>
+</map>

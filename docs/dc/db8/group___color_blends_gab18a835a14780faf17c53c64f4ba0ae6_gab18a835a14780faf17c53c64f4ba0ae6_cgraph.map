@@ -1,0 +1,9 @@
+<map id="nblend" name="nblend">
+<area shape="rect" id="Node000001" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="5,55,72,80"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="169,5,267,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,54,119,39,155,30,157,35,121,45,73,59"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="186,55,250,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="72,65,172,65,172,70,72,70"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="120,104,316,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="73,75,121,89,155,98,153,103,119,94,71,80"/>
+</map>

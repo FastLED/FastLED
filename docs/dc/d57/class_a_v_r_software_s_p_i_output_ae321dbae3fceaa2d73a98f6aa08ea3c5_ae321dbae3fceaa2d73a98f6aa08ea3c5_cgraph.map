@@ -1,0 +1,7 @@
+<map id="AVRSoftwareSPIOutput::init" name="AVRSoftwareSPIOutput::init">
+<area shape="rect" id="Node000001" title="Set the clock/data pins to output and make sure the chip select is released." alt="" coords="5,35,175,75"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_a677ab5b52bbd6011d48c3a14e3ebdcb2.html#a677ab5b52bbd6011d48c3a14e3ebdcb2" title="Release the SPI chip select line." alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,41,209,36,210,41,175,46"/>
+<area shape="rect" id="Node000003" href="$db/d3b/class_fast_pin_ab4b349c1763a7565c3ee7b2de52a50c8.html#ab4b349c1763a7565c3ee7b2de52a50c8" title="Set the pin mode as OUTPUT" alt="" coords="237,70,377,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,63,224,69,224,75,175,68"/>
+</map>

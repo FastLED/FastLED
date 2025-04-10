@@ -1,0 +1,7 @@
+<map id="Pin::hi" name="Pin::hi">
+<area shape="rect" id="Node000001" title="Set the pin state to HIGH" alt="" coords="245,42,308,67"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,5,197,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,50,197,44,198,39,233,45"/>
+<area shape="rect" id="Node000003" href="$d7/d68/class_pin_ae9ccf38d18d904e2ba7881c4b5af3fd0.html#ae9ccf38d18d904e2ba7881c4b5af3fd0" title="Set the pin state to HIGH" alt="" coords="57,70,146,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="232,64,147,78,146,73,232,59"/>
+</map>

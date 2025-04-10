@@ -1,0 +1,45 @@
+digraph "P9813Controller::showPixels"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="P9813Controller::showPixels",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Send the LED data to the strip."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::advanceData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2",tooltip="Advance the data pointer forward, adjust position counter."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="PixelController::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c",tooltip="Do we have n pixels left to process?"];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="PixelController::loadAnd\lScale0",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a4984f158bbc3b6c79ca16dd847fe67e1.html#a4984f158bbc3b6c79ca16dd847fe67e1",tooltip="non-template alias of loadAndScale<0>()"];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="PixelController::loadAnd\lScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9",tooltip="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="PixelController::PixelController",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e",tooltip="Copy constructor."];
+  Node6 -> Node6 [id="edge6_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="PixelController::dither",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f",tooltip="Calculate a dither value using the per-channel dither data."];
+  Node8 -> Node6 [id="edge8_Node000008_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node10 [id="edge9_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="PixelController::loadByte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d",tooltip="Read a byte of LED data."];
+  Node10 -> Node6 [id="edge10_Node000010_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node11 [id="edge11_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="PixelController::scale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4",tooltip="Scale a value using the per-channel scale data."];
+  Node11 -> Node6 [id="edge12_Node000011_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node12 [id="edge13_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
+  Node1 -> Node13 [id="edge14_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="PixelController::loadAnd\lScale1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a11f9b50f738c6d57d08d6776b3d8eb43.html#a11f9b50f738c6d57d08d6776b3d8eb43",tooltip="non-template alias of loadAndScale<1>()"];
+  Node13 -> Node5 [id="edge15_Node000013_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node13 -> Node11 [id="edge16_Node000013_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge17_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="PixelController::loadAnd\lScale2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a33c22b408cbc9eb8b9d98993fe985264.html#a33c22b408cbc9eb8b9d98993fe985264",tooltip="non-template alias of loadAndScale<2>()"];
+  Node14 -> Node5 [id="edge18_Node000014_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node11 [id="edge19_Node000014_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node15 [id="edge20_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="PixelController::stepDithering",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef",tooltip="Step the dithering forward."];
+  Node1 -> Node16 [id="edge21_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="P9813Controller::writeBoundary",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd6/class_p9813_controller_a387b638de0fc6cb7a2bccbcf41037b30.html#a387b638de0fc6cb7a2bccbcf41037b30",tooltip=" "];
+  Node1 -> Node17 [id="edge22_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="P9813Controller::writeLed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd6/class_p9813_controller_a153192c5ed8e28168bcb4179ed80598c.html#a153192c5ed8e28168bcb4179ed80598c",tooltip=" "];
+}

@@ -1,0 +1,7 @@
+<map id="div1024_32_16" name="div1024_32_16">
+<area shape="rect" id="Node000001" title="Helper routine to divide a 32&#45;bit value by 1024, returning only the low 16 bits." alt="" coords="371,13,491,38"/>
+<area shape="rect" id="Node000002" href="$d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97417e93b.html#ga52659d1994f2f21eb05080c97417e93b" title="Returns the current time&#45;since&#45;boot in &quot;binary seconds&quot;, which are actually 1024/1000 of a second lon..." alt="" coords="224,13,323,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="357,28,323,28,323,23,357,23"/>
+<area shape="rect" id="Node000003" href="$d5/df2/group___timekeeping_gad9813d2fd3ed9e61acacda3ccf2f6bd4.html#gad9813d2fd3ed9e61acacda3ccf2f6bd4" title="Create the CEveryNBSeconds class for bsecond intervals." alt="" coords="5,5,176,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="210,28,176,28,176,23,210,23"/>
+</map>

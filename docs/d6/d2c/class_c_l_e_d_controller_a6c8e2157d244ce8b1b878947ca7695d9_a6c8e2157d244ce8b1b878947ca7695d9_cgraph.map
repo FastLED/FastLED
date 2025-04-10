@@ -1,0 +1,5 @@
+<map id="CLEDController::setLeds" name="CLEDController::setLeds">
+<area shape="rect" id="Node000001" title="Set the default array of LEDs to be used by this controller." alt="" coords="5,5,184,31"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="232,5,459,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,15,218,15,218,21,184,21"/>
+</map>

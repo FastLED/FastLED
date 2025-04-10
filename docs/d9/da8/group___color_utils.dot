@@ -1,0 +1,17 @@
+digraph "Color Utility Functions"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir=LR;
+  Node2 [id="Node000002",label="Color Blending Functions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db8/group___color_blends.html",tooltip="Functions for blending colors together."];
+  Node3 [id="Node000003",label="Color Blurring Functions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs.html",tooltip="Functions for blurring colors."];
+  Node4 [id="Node000004",label="Color Fade Functions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades.html",tooltip="Functions for fading LED arrays."];
+  Node5 [id="Node000005",label="Color Fill Functions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills.html",tooltip="Functions for filling LED arrays with colors and gradients."];
+  Node1 [id="Node000001",label="Color Utility Functions",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="A variety of functions for working with color, palettes, and leds."];
+  Node1->Node2 [shape=plaintext, dir="back", style="solid"];
+  Node1->Node3 [shape=plaintext, dir="back", style="solid"];
+  Node1->Node4 [shape=plaintext, dir="back", style="solid"];
+  Node1->Node5 [shape=plaintext, dir="back", style="solid"];
+}

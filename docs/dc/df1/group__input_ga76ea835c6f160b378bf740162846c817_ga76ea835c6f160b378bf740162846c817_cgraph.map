@@ -1,0 +1,7 @@
+<map id="MidiInterface::handleNullVelocityNoteOnAsNoteOff" name="MidiInterface::handleNullVelocityNoteOnAsNoteOff">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,195,63"/>
+<area shape="rect" id="Node000002" href="$dc/df1/group__input_gabd651766b36741f1a7ea63ab793ab64b.html#gabd651766b36741f1a7ea63ab793ab64b" title="Get the second data byte of the last received message." alt="" coords="243,5,419,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,30,229,26,229,32,195,36"/>
+<area shape="rect" id="Node000003" href="$dc/df1/group__input_ga751630ff3b0829f0de19ea724999df25.html#ga751630ff3b0829f0de19ea724999df25" title="Get the last received message&#39;s type." alt="" coords="247,55,414,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,51,234,55,233,60,194,56"/>
+</map>

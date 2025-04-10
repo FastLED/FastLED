@@ -1,0 +1,10 @@
+<map id="APA102Controller::writeLed" name="APA102Controller::writeLed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="531,45,729,70"/>
+<area shape="rect" id="Node000002" href="$d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42" title=" " alt="" coords="268,5,483,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="517,46,483,41,483,36,518,41"/>
+<area shape="rect" id="Node000004" href="$d4/d96/class_a_p_a102_controller_a040f761b3d3bb30a9275f96548ec5ef7.html#a040f761b3d3bb30a9275f96548ec5ef7" title=" " alt="" coords="268,69,483,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="518,74,483,78,483,73,517,69"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3" title="Send the LED data to the strip." alt="" coords="5,45,220,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="255,43,218,47,217,42,254,37"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="254,77,217,73,218,67,255,72"/>
+</map>

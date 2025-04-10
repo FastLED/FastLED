@@ -1,0 +1,55 @@
+digraph "Color3i::Color3i"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="Color3i::Color3i",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="Color3i::Color3i",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a5a3f18aac3ad35f3140ad1d62ce47be7.html#a5a3f18aac3ad35f3140ad1d62ce47be7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="Color3i::Add",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a22d432658770c521d12711b570adc6c0.html#a22d432658770c521d12711b570adc6c0",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="Color3i::Interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a6922d9706496f50eae0ff94281457e2f.html#a6922d9706496f50eae0ff94281457e2f",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="Color3i::Black",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="Painter::PaintVuMidNotesFade",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_aac192da55e15dd79b498933180c06725.html#aac192da55e15dd79b498933180c06725",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="Painter::Paint",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="Painter::PaintVuNotes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_a3b521f31ff7f7249ce1c88ca56f5ad80.html#a3b521f31ff7f7249ce1c88ca56f5ad80",tooltip=" "];
+  Node8 -> Node7 [id="edge8_Node000008_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node9 [id="edge9_Node000005_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="Painter::PaintVuSpaceInvaders",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_a405cd2b8e31b1ad6e8d6abe9ba03c074.html#a405cd2b8e31b1ad6e8d6abe9ba03c074",tooltip=" "];
+  Node9 -> Node7 [id="edge10_Node000009_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node10 [id="edge11_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="Painter::VegasVisualizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_ab6318a63a778550cd78f3eae183cb8dc.html#ab6318a63a778550cd78f3eae183cb8dc",tooltip=" "];
+  Node10 -> Node7 [id="edge12_Node000010_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge13_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="Color3i::Blue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a27b90e86e7f7fb98494e26d23a664f0b.html#a27b90e86e7f7fb98494e26d23a664f0b",tooltip=" "];
+  Node1 -> Node12 [id="edge14_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="Color3i::Cyan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ab1260c618abacf133ec6fb9a3a1db339.html#ab1260c618abacf133ec6fb9a3a1db339",tooltip=" "];
+  Node1 -> Node13 [id="edge15_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="Color3i::Green",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a58fa41c3bf6bbf14ed023620ecff925c.html#a58fa41c3bf6bbf14ed023620ecff925c",tooltip=" "];
+  Node1 -> Node4 [id="edge16_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge17_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="Color3i::Mul",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a64153c1deac24bb364c7a1d539dd1368.html#a64153c1deac24bb364c7a1d539dd1368",tooltip=" "];
+  Node14 -> Node4 [id="edge18_Node000014_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node15 [id="edge19_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="Color3i::Mul",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ace8773746358b0a1681b8ab2274d9b07.html#ace8773746358b0a1681b8ab2274d9b07",tooltip=" "];
+  Node1 -> Node16 [id="edge20_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="Color3i::Orange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_ae57016137f2bdb07e54cac8a36267f84.html#ae57016137f2bdb07e54cac8a36267f84",tooltip=" "];
+  Node1 -> Node17 [id="edge21_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="Color3i::Red",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a7c3c8de250985b4c6f6c50891bd5aaf2.html#a7c3c8de250985b4c6f6c50891bd5aaf2",tooltip=" "];
+  Node1 -> Node18 [id="edge22_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="Color3i::Set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_af7dd06a8925d0fac45aa4fb7fd019bf5.html#af7dd06a8925d0fac45aa4fb7fd019bf5",tooltip=" "];
+  Node18 -> Node18 [id="edge23_Node000018_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node19 [id="edge24_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="Color3i::Sub",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a72d9fb0aef1f82f5d6847077622bcf46.html#a72d9fb0aef1f82f5d6847077622bcf46",tooltip=" "];
+  Node1 -> Node20 [id="edge25_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="Color3i::White",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_afb1dfa7f20038b97dff263091cbef278.html#afb1dfa7f20038b97dff263091cbef278",tooltip=" "];
+  Node1 -> Node21 [id="edge26_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="Color3i::Yellow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i_a10db2c3732b34fbc867223d188be9d07.html#a10db2c3732b34fbc867223d188be9d07",tooltip=" "];
+}

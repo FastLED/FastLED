@@ -1,0 +1,5 @@
+<map id="AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;" name="AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="5,93,191,148"/>
+<area shape="rect" id="Node000002" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="53,5,143,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,45,101,93,95,93,95,45"/>
+</map>

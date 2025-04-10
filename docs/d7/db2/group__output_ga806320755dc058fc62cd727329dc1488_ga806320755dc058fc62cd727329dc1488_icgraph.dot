@@ -1,0 +1,55 @@
+digraph "MidiInterface::send"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="MidiInterface::send",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Send a MIDI message."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="MidiInterface::sendAfter\lTouch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga8f9445f1808b7aa80535aec7d38de6bb.html#ga8f9445f1808b7aa80535aec7d38de6bb",tooltip="Send a Polyphonic AfterTouch message (applies to a specified note)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="MidiInterface::sendAfter\lTouch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga15b8bb0e4b1f528ae81ec018897a3734.html#ga15b8bb0e4b1f528ae81ec018897a3734",tooltip="Send a MonoPhonic AfterTouch message (applies to all notes)"];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="MidiInterface::sendControl\lChange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga7a274e7fda3f26a257844e695ef5825b.html#ga7a274e7fda3f26a257844e695ef5825b",tooltip="Send a Control Change message."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="MidiInterface::beginNrpn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga8b26d6bf9ee8b1ec412b9fa000825c1b.html#ga8b26d6bf9ee8b1ec412b9fa000825c1b",tooltip="Start a Non-Registered Parameter Number frame."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="MidiInterface::beginRpn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga8c0d80cbbc31164207a5daac5c2c0250.html#ga8c0d80cbbc31164207a5daac5c2c0250",tooltip="Start a Registered Parameter Number frame."];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="MidiInterface::endNrpn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga522eea83ce5280e72bbe963d16c63de0.html#ga522eea83ce5280e72bbe963d16c63de0",tooltip="Terminate an NRPN frame. This will send a Null Function to deselect the currently selected NRPN."];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="MidiInterface::endRpn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga2e41151a46d4f00458668cc0c59b9937.html#ga2e41151a46d4f00458668cc0c59b9937",tooltip="Terminate an RPN frame. This will send a Null Function to deselect the currently selected RPN."];
+  Node4 -> Node9 [id="edge8_Node000004_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="MidiInterface::sendNrpnDecrement",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga17e1abb84d45a9062449a674c04a9b74.html#ga17e1abb84d45a9062449a674c04a9b74",tooltip=" "];
+  Node4 -> Node10 [id="edge9_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="MidiInterface::sendNrpnIncrement",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga0a6887687cf94a54e0d2b05739623e4c.html#ga0a6887687cf94a54e0d2b05739623e4c",tooltip=" "];
+  Node4 -> Node11 [id="edge10_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="MidiInterface::sendNrpnValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga9a94df00a0b72f66849f9e4db5a29880.html#ga9a94df00a0b72f66849f9e4db5a29880",tooltip="Send separate MSB/LSB values for the currently selected NRPN number."];
+  Node4 -> Node12 [id="edge11_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="MidiInterface::sendNrpnValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_gae5bf8f378de3b787f2b943f2349272f9.html#gae5bf8f378de3b787f2b943f2349272f9",tooltip="Send a 14-bit value for the currently selected NRPN number."];
+  Node4 -> Node13 [id="edge12_Node000004_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="MidiInterface::sendRpnDecrement",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_gabde92f35330f7656195dc015c5ac8075.html#gabde92f35330f7656195dc015c5ac8075",tooltip=" "];
+  Node4 -> Node14 [id="edge13_Node000004_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="MidiInterface::sendRpnIncrement",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga11b1ea9c4ae69689c8d7f1b3258f2ec3.html#ga11b1ea9c4ae69689c8d7f1b3258f2ec3",tooltip=" "];
+  Node4 -> Node15 [id="edge14_Node000004_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="MidiInterface::sendRpnValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga21d533eef35687c9abfa5fc2bf764b1d.html#ga21d533eef35687c9abfa5fc2bf764b1d",tooltip="Send separate MSB/LSB values for the currently selected RPN number."];
+  Node4 -> Node16 [id="edge15_Node000004_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="MidiInterface::sendRpnValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_gac14d9facb3443437e5c1363042ae091f.html#gac14d9facb3443437e5c1363042ae091f",tooltip="Send a 14-bit value for the currently selected RPN number."];
+  Node1 -> Node17 [id="edge16_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="MidiInterface::sendNoteOff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_gad6aba12074008b67bc385a4c32672437.html#gad6aba12074008b67bc385a4c32672437",tooltip="Send a Note Off message."];
+  Node1 -> Node18 [id="edge17_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="MidiInterface::sendNoteOn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga580fb85c5b020566dc04cabc42aae9dc.html#ga580fb85c5b020566dc04cabc42aae9dc",tooltip="Send a Note On message."];
+  Node1 -> Node19 [id="edge18_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="MidiInterface::sendPitchBend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga2fd10aa2a31236679add8a6a01a5e70a.html#ga2fd10aa2a31236679add8a6a01a5e70a",tooltip="Send a Pitch Bend message using a signed integer value."];
+  Node19 -> Node20 [id="edge19_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="MidiInterface::sendPitchBend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_gaaaf16c1334640e690ecbd835d645e4cb.html#gaaaf16c1334640e690ecbd835d645e4cb",tooltip="Send a Pitch Bend message using a floating point value."];
+  Node1 -> Node21 [id="edge20_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="MidiInterface::sendPolyPressure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga9de92ebd5184cf993dbbca98a98afaed.html#ga9de92ebd5184cf993dbbca98a98afaed",tooltip="Send a Polyphonic AfterTouch message (applies to a specified note)"];
+  Node1 -> Node22 [id="edge21_Node000001_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="MidiInterface::sendProgram\lChange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/db2/group__output_ga87eb10a0b528a55fb30b1152d34a6f2f.html#ga87eb10a0b528a55fb30b1152d34a6f2f",tooltip="Send a Program Change message."];
+  Node1 -> Node23 [id="edge22_Node000001_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="MidiInterface::thruFilter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d6a/class_midi_interface_a8405cc7229e4eab30520ae005ec79e10.html#a8405cc7229e4eab30520ae005ec79e10",tooltip=" "];
+  Node23 -> Node24 [id="edge23_Node000023_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="MidiInterface::read",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe",tooltip="Read messages on a specified channel."];
+}

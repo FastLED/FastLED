@@ -1,0 +1,11 @@
+<map id="NEOPIXEL&lt; DATA_PIN &gt;" name="NEOPIXEL&lt; DATA_PIN &gt;">
+<area shape="rect" id="Node000001" title="LED controller for WS2812 LEDs with GRB color order." alt="" coords="873,66,1052,91"/>
+<area shape="rect" id="Node000002" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="637,59,824,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="838,76,873,76,873,81,838,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="263,5,445,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="459,48,637,66,637,72,459,53"/>
+<area shape="rect" id="Node000004" href="$de/d9d/class_w_s2812_controller800_khz.html" title="WS2812 controller class @ 800 KHz." alt="" coords="252,99,456,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="469,104,636,86,637,91,470,109"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,91,203,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,116,252,116,252,121,216,121"/>
+</map>

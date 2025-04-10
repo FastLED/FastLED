@@ -1,0 +1,9 @@
+<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Settings.h" name="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Settings.h">
+<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Settings." alt="" coords="49,5,250,60"/>
+<area shape="rect" id="Node000002" href="$d8/dd0/midi___defs_8h.html" title="MIDI Library for the Arduino &#45; Definitions." alt="" coords="99,108,199,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,60,152,94,147,94,147,60"/>
+<area shape="rect" id="Node000003" href="$df/dce/midi___namespace_8h.html" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="5,181,152,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="140,136,102,174,98,170,136,132"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="177,181,263,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="163,132,201,170,197,174,159,136"/>
+</map>

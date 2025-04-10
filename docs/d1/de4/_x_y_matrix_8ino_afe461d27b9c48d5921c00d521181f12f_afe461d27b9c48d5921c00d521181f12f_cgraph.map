@@ -1,0 +1,11 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,56,80"/>
+<area shape="rect" id="Node000002" href="$d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075.html#ga056952ebed39f55880bb353857b47075" title="Fast 16&#45;bit approximation of cos(x)." alt="" coords="135,5,195,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,56,121,31,123,36,57,61"/>
+<area shape="rect" id="Node000003" href="$d1/de4/_x_y_matrix_8ino_a9526586974056032fe98ca13e908bc73.html#a9526586974056032fe98ca13e908bc73" title=" " alt="" coords="104,55,227,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="56,65,90,65,90,70,56,70"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="133,104,197,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="57,74,121,98,119,103,55,79"/>
+<area shape="rect" id="Node000004" href="$da/d2d/colorutils_8cpp_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb" title=" " alt="" coords="275,55,313,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="227,65,261,65,261,70,227,70"/>
+</map>

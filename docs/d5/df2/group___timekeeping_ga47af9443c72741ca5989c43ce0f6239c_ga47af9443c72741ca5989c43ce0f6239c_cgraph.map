@@ -1,0 +1,5 @@
+<map id="INSTANTIATE_EVERY_N_TIME_PERIODS" name="INSTANTIATE_EVERY_N_TIME_PERIODS">
+<area shape="rect" id="Node000001" title="Create the CEveryNMinutes class for minutes intervals." alt="" coords="5,5,176,45"/>
+<area shape="rect" id="Node000002" href="$d5/df2/group___timekeeping_ga223820399921e32ddf018a90223ff336.html#ga223820399921e32ddf018a90223ff336" title="Return the current minutes since boot in a 16&#45;bit value." alt="" coords="224,13,315,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,23,210,23,210,28,176,28"/>
+</map>

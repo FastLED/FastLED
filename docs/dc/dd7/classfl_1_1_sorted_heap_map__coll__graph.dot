@@ -1,0 +1,21 @@
+digraph "fl::SortedHeapMap&lt; Key, Value, Less &gt;"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::SortedHeapMap\<\l Key, Value, Less \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" data",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::SortedHeapVector\l\< fl::SortedHeapMap::\lPair, fl::SortedHeapMap\l::PairLess \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d5c/classfl_1_1_sorted_heap_vector.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mArray",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::HeapVector\< fl\l::SortedHeapMap::Pair \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mArray",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::scoped_array\< fl\l::SortedHeapMap::Pair \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node11 -> Node3 [id="edge4_Node000003_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::SortedHeapMap\l::Pair \>",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node12 -> Node2 [id="edge5_Node000002_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLess",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::SortedHeapMap\<\l Key, Value, Less \>\l::PairLess",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d53/structfl_1_1_sorted_heap_map_1_1_pair_less.html",tooltip=" "];
+  Node13 -> Node2 [id="edge6_Node000002_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::SortedHeapMap\l::Pair, fl::SortedHeapMap\l::PairLess \>",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::SortedHeapVector\l\< T, LessThan \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d5c/classfl_1_1_sorted_heap_vector.html",tooltip=" "];
+}

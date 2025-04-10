@@ -1,0 +1,10 @@
+<map id="CFastLED::operator[]" name="CFastLED::operator[]">
+<area shape="rect" id="Node000001" title="Get a reference to a registered controller." alt="" coords="5,31,160,56"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="208,5,368,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,31,194,27,195,32,160,36"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="209,55,367,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="160,50,196,54,195,59,160,55"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="416,31,643,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="368,24,402,27,402,33,368,29"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="367,57,402,53,402,59,367,62"/>
+</map>

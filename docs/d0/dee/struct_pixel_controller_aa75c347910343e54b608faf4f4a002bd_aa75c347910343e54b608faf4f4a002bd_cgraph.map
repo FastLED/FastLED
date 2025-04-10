@@ -1,0 +1,41 @@
+<map id="PixelController::loadAndScaleRGBW" name="PixelController::loadAndScaleRGBW">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,133,184,173"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a4afe8b8ec93c89308fe185b1eb164ff6.html#a4afe8b8ec93c89308fe185b1eb164ff6" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="232,5,411,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,131,169,93,231,55,244,48,247,53,233,60,172,98,122,135"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_ae570967d1b674970cf472feb379f248f.html#ae570967d1b674970cf472feb379f248f" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="232,69,411,109"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="166,131,236,111,237,116,167,136"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_af5a5f12205a4187aa4df499b8224ed35.html#af5a5f12205a4187aa4df499b8224ed35" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="232,133,411,173"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="185,151,218,151,218,156,185,156"/>
+<area shape="rect" id="Node000011" href="$d7/dbb/rgbw_8h_ae9cf94c7bddcd484c4f03b0c69b7770a.html#ae9cf94c7bddcd484c4f03b0c69b7770a" title="Converts RGB to RGBW using one of the functions." alt="" coords="273,198,370,223"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="175,171,260,192,258,198,174,176"/>
+<area shape="rect" id="Node000018" href="$d1/d8d/rgbw_8cpp_a8ccb0b40cfa42bb4e4e259c5443e9472.html#a8ccb0b40cfa42bb4e4e259c5443e9472" title=" " alt="" coords="243,247,400,273"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="126,171,175,202,233,232,256,241,254,246,231,237,172,207,123,176"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="473,48,652,88"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="411,38,460,47,459,52,410,44"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="945,55,1165,81"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="652,48,714,40,806,35,898,40,977,50,977,56,897,45,806,40,715,45,652,53"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f" title="Calculate a dither value using the per&#45;channel dither data." alt="" coords="725,55,887,81"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="652,65,711,65,711,71,652,71"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="715,105,897,130"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="653,83,730,99,729,105,652,89"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="1015,57,1006,47,1011,37,1028,31,1055,29,1090,33,1100,37,1104,43,1100,46,1097,41,1089,38,1055,34,1029,36,1015,41,1012,46,1019,53"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="887,65,931,65,931,71,887,71"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="870,102,976,81,978,86,871,107"/>
+<area shape="poly" id="edge10_Node000009_Node000003" title=" " alt="" coords="411,79,459,74,460,80,411,84"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="379,131,410,119,458,98,479,90,481,95,460,102,412,124,381,136"/>
+<area shape="rect" id="Node000012" href="$d1/d8d/rgbw_8cpp_ac22f7204d0501031d2431e7b2f67c25c.html#ac22f7204d0501031d2431e7b2f67c25c" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="493,113,633,138"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="370,198,409,183,433,165,457,147,479,139,481,144,460,152,436,169,412,188,371,203"/>
+<area shape="rect" id="Node000014" href="$d1/d8d/rgbw_8cpp_a07e94168baddf333cdc5673f28285aa9.html#a07e94168baddf333cdc5673f28285aa9" title="The minimum brigthness of the RGB channels is used to set the W channel." alt="" coords="459,162,667,187"/>
+<area shape="poly" id="edge16_Node000011_Node000014" title=" " alt="" coords="370,201,463,187,464,192,371,206"/>
+<area shape="rect" id="Node000015" href="$d1/d8d/rgbw_8cpp_a026bfd212bc23d24cf2e8cc5a9ab5b9e.html#a026bfd212bc23d24cf2e8cc5a9ab5b9e" title="Converts RGB to RGBW with the W channel set to black, always." alt="" coords="477,212,648,252"/>
+<area shape="poly" id="edge18_Node000011_Node000015" title=" " alt="" coords="371,212,464,221,463,226,370,218"/>
+<area shape="rect" id="Node000016" href="$d1/d8d/rgbw_8cpp_a03a50e79b032a49c951919b9570d18f5.html#a03a50e79b032a49c951919b9570d18f5" title=" " alt="" coords="467,277,659,302"/>
+<area shape="poly" id="edge20_Node000011_Node000016" title=" " alt="" coords="371,218,412,232,436,247,460,262,484,270,483,275,458,266,433,252,410,237,369,224"/>
+<area shape="rect" id="Node000017" href="$d1/d8d/rgbw_8cpp_aa6e2b44325da0172a48b20940b6e5fdf.html#aa6e2b44325da0172a48b20940b6e5fdf" title="Converts RGB to RGBW with a boosted white channel." alt="" coords="463,326,662,351"/>
+<area shape="poly" id="edge21_Node000011_Node000017" title=" " alt="" coords="371,214,393,221,412,233,430,253,437,274,444,294,460,313,468,318,465,322,457,317,439,297,432,276,425,256,409,237,390,226,370,219"/>
+<area shape="rect" id="Node000013" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="774,190,838,215"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="625,135,667,147,763,182,762,187,666,152,624,141"/>
+<area shape="poly" id="edge17_Node000014_Node000013" title=" " alt="" coords="667,184,761,195,760,200,666,189"/>
+<area shape="poly" id="edge19_Node000015_Node000013" title=" " alt="" coords="648,219,760,205,760,211,648,224"/>
+<area shape="poly" id="edge22_Node000017_Node000013" title=" " alt="" coords="636,323,666,312,699,292,731,269,782,223,785,227,735,273,702,297,668,317,638,328"/>
+</map>

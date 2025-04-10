@@ -1,0 +1,13 @@
+<map id="inoise8_raw" name="inoise8_raw">
+<area shape="rect" id="Node000001" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="5,80,105,105"/>
+<area shape="rect" id="Node000002" href="$d6/de8/noise_8cpp_a07165473858feff9f2415a77bf841731.html#a07165473858feff9f2415a77bf841731" title=" " alt="" coords="163,55,222,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,81,150,72,151,78,106,86"/>
+<area shape="rect" id="Node000005" href="$d6/de8/noise_8cpp_ad89cf56a81ef482a0027a47eada176bb.html#ad89cf56a81ef482a0027a47eada176bb" title=" " alt="" coords="153,104,232,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="106,99,140,105,139,110,105,104"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_gad7af6a5b49aef34ab79e850ddb7d7911.html#gad7af6a5b49aef34ab79e850ddb7d7911" title="Calculate an integer average of two signed 7&#45;bit integers (int8_t)." alt="" coords="338,5,393,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="222,56,279,39,324,27,326,32,281,45,223,62"/>
+<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a7e9b66e76fd89c94ccb6f26fd713bdca.html#a7e9b66e76fd89c94ccb6f26fd713bdca" title=" " alt="" coords="280,55,451,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="222,65,266,65,266,70,222,70"/>
+<area shape="rect" id="Node000006" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="333,104,397,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="232,114,319,114,319,119,232,119"/>
+</map>

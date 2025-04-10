@@ -1,0 +1,13 @@
+digraph "fl::LargeBlockAllocator::Free"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::LargeBlockAllocator\l::Free",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::LUT\< uint16_t \>\l::~LUT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d18/classfl_1_1_l_u_t_ac845458cfe51b251e8931fb72b671e6a.html#ac845458cfe51b251e8931fb72b671e6a",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::RectangularDrawBuffer\l::onQueuingDone",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c",tooltip=" "];
+}

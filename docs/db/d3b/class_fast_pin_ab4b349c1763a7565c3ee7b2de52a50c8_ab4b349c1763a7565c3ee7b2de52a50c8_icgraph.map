@@ -1,0 +1,5 @@
+<map id="FastPin::setOutput" name="FastPin::setOutput">
+<area shape="rect" id="Node000001" title="Set the pin mode as OUTPUT" alt="" coords="223,13,363,38"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_ae321dbae3fceaa2d73a98f6aa08ea3c5.html#ae321dbae3fceaa2d73a98f6aa08ea3c5" title="Set the clock/data pins to output and make sure the chip select is released." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,28,175,28,175,23,209,23"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="fill_raw_2dnoise8" name="fill_raw_2dnoise8">
+<area shape="rect" id="Node000001" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="5,80,140,105"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="47,81,42,72,45,62,55,56,73,53,93,57,102,65,98,69,91,62,73,59,57,61,49,65,47,71,52,79"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="188,55,257,80"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="140,79,174,73,175,78,141,84"/>
+<area shape="rect" id="Node000008" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="580,80,644,105"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="140,90,566,90,566,95,140,95"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="305,5,405,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="257,52,306,33,308,38,258,57"/>
+<area shape="rect" id="Node000009" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="324,55,387,80"/>
+<area shape="poly" id="edge7_Node000002_Node000009" title=" " alt="" coords="257,65,310,65,310,70,257,70"/>
+<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a07165473858feff9f2415a77bf841731.html#a07165473858feff9f2415a77bf841731" title=" " alt="" coords="463,5,522,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="406,15,450,15,450,21,406,21"/>
+<area shape="rect" id="Node000007" href="$d6/de8/noise_8cpp_ad89cf56a81ef482a0027a47eada176bb.html#ad89cf56a81ef482a0027a47eada176bb" title=" " alt="" coords="453,55,532,80"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="392,28,444,47,443,52,390,33"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="533,73,567,80,566,86,532,78"/>
+</map>

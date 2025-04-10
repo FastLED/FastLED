@@ -1,0 +1,7 @@
+<map id="blend8" name="blend8">
+<area shape="rect" id="Node000001" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="5,31,72,56"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="169,5,267,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,36,155,24,156,29,73,41"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="120,55,316,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="73,45,110,50,109,55,72,50"/>
+</map>

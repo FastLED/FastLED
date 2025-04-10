@@ -1,0 +1,41 @@
+<map id="qsub8" name="qsub8">
+<area shape="rect" id="Node000001" title="Subtract one byte from another, saturating at 0x00." alt="" coords="760,268,821,293"/>
+<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443" title=" " alt="" coords="538,5,699,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="786,254,781,209,769,152,746,95,730,68,710,45,692,33,695,29,714,41,735,65,751,92,774,151,786,208,791,254"/>
+<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_aff3c7b29001c2e1f4f6516e14000b22a.html#aff3c7b29001c2e1f4f6516e14000b22a" title=" " alt="" coords="533,55,704,95"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="782,255,773,222,759,183,738,143,710,109,694,98,697,93,714,105,743,141,764,181,778,221,787,254"/>
+<area shape="rect" id="Node000010" href="$d5/d9b/classfl_1_1_fire2012_a39d20a6dc4f3a771b8b12696db9c4a15.html#a39d20a6dc4f3a771b8b12696db9c4a15" title=" " alt="" coords="551,120,686,145"/>
+<area shape="poly" id="edge7_Node000001_Node000010" title=" " alt="" coords="778,256,752,206,733,180,710,159,685,146,687,141,714,154,737,177,757,203,783,254"/>
+<area shape="rect" id="Node000011" href="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="578,169,659,195"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="769,259,743,232,711,208,685,197,659,190,660,185,687,192,713,204,746,228,772,255"/>
+<area shape="rect" id="Node000012" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="525,219,712,244"/>
+<area shape="poly" id="edge9_Node000001_Node000012" title=" " alt="" coords="746,269,711,258,671,247,672,242,713,253,748,264"/>
+<area shape="rect" id="Node000014" href="$d4/d26/_fire2012_8ino_a381ceb87530dc5fee1be3e77d33b3a53.html#a381ceb87530dc5fee1be3e77d33b3a53" title=" " alt="" coords="579,268,658,293"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="746,283,658,283,658,278,746,278"/>
+<area shape="rect" id="Node000016" href="$db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89" title=" " alt="" coords="542,317,695,343"/>
+<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="748,297,713,307,668,320,667,315,711,302,746,292"/>
+<area shape="rect" id="Node000018" href="$db/d87/group___pixel_types_ga6f22a2e8f0c09c840e3c0d649dcd74c8.html#ga6f22a2e8f0c09c840e3c0d649dcd74c8" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="577,367,660,392"/>
+<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="772,306,746,332,713,356,687,368,661,375,659,370,686,363,711,352,743,328,769,302"/>
+<area shape="rect" id="Node000019" href="$d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2b.html#a53b2e467a153a12691da7f1906960d2b" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="549,416,688,441"/>
+<area shape="poly" id="edge16_Node000001_Node000019" title=" " alt="" coords="782,308,756,357,737,383,714,405,689,419,687,414,710,401,733,380,752,355,777,305"/>
+<area shape="rect" id="Node000020" href="$dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55c68fe4b9.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9" title="Recover approximate HSV values from RGB." alt="" coords="537,465,701,491"/>
+<area shape="poly" id="edge17_Node000001_Node000020" title=" " alt="" coords="787,308,779,341,765,381,743,421,714,455,693,468,690,463,710,451,739,418,760,379,774,340,782,306"/>
+<area shape="rect" id="Node000021" href="$d7/d82/struct_c_r_g_b_a986ac62988523a4371f8f90cf844924d.html#a986ac62988523a4371f8f90cf844924d" title="Subtract a constant from each channel, saturating at 0x00." alt="" coords="528,515,709,540"/>
+<area shape="poly" id="edge18_Node000001_Node000021" title=" " alt="" coords="791,308,785,351,772,404,750,458,734,483,714,505,697,517,694,512,710,501,729,480,745,456,767,402,780,350,785,307"/>
+<area shape="rect" id="Node000003" href="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f" title=" " alt="" coords="299,5,454,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="524,21,454,21,454,15,524,15"/>
+<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="61,5,172,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="286,21,172,21,172,15,286,15"/>
+<area shape="rect" id="Node000007" href="$de/db5/classfl_1_1_twinkle_fox_a39614750a1a87e8a8be19c36f6c48677.html#a39614750a1a87e8a8be19c36f6c48677" title=" " alt="" coords="276,55,477,95"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="520,78,477,78,477,73,520,73"/>
+<area shape="rect" id="Node000008" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="5,63,228,88"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="262,78,228,78,228,73,262,73"/>
+<area shape="rect" id="Node000013" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="297,219,457,244"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="511,234,457,234,457,229,511,229"/>
+<area shape="rect" id="Node000015" href="$d4/d26/_fire2012_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,268,402,293"/>
+<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="565,283,402,283,402,278,565,278"/>
+<area shape="rect" id="Node000017" href="$db/d92/_fire2012_with_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="351,317,402,343"/>
+<area shape="poly" id="edge14_Node000016_Node000017" title=" " alt="" coords="528,333,402,333,402,327,528,327"/>
+<area shape="rect" id="Node000022" href="$d7/d82/struct_c_r_g_b_a6b2d9ed6541cf5a3bdc791bc13af88bf.html#a6b2d9ed6541cf5a3bdc791bc13af88bf" title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00." alt="" coords="311,515,443,540"/>
+<area shape="poly" id="edge19_Node000021_Node000022" title=" " alt="" coords="514,530,443,530,443,525,514,525"/>
+</map>

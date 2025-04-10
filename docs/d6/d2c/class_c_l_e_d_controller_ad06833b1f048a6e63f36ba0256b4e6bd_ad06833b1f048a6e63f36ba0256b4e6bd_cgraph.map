@@ -1,0 +1,18 @@
+<map id="CLEDController::setScreenMap" name="CLEDController::setScreenMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,225,81"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="577,56,804,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,66,564,66,564,71,225,71"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" title=" " alt="" coords="273,5,529,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,53,315,31,316,36,188,59"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a.html#a34a490a6be2f618ffe6ed7d60be5590a" title=" " alt="" coords="291,107,511,132"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="188,79,316,102,315,107,187,84"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f" title=" " alt="" coords="623,5,759,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="530,15,609,15,609,21,530,21"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="474,104,603,81,604,86,475,109"/>
+<area shape="rect" id="Node000006" href="$de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726" title=" " alt="" coords="591,106,790,146"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="512,119,578,121,578,126,511,125"/>
+<area shape="rect" id="Node000007" href="$de/dca/classfl_1_1_engine_events_a7eb765a882db21850019e4ee59f0cce1.html#a7eb765a882db21850019e4ee59f0cce1" title=" " alt="" coords="890,77,1025,117"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="790,112,876,103,877,108,791,118"/>
+<area shape="rect" id="Node000008" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="852,141,1063,167"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="791,134,839,139,838,144,790,139"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="CRGB::computeAdjustment" name="CRGB::computeAdjustment">
+<area shape="rect" id="Node000001" title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,..." alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="252,5,356,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,15,238,15,238,21,204,21"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="CLEDController::showColor" name="CLEDController::showColor">
+<area shape="rect" id="Node000001" title="Set all the LEDs to a given color." alt="" coords="627,45,823,70"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_ac3eef15a3a7f8e26ce8c47b64bfb4ed7.html#ac3eef15a3a7f8e26ce8c47b64bfb4ed7" title=" " alt="" coords="383,5,579,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="614,46,578,41,579,36,615,40"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_aefd1083fa0384d7d79d6468cd9255467.html#aefd1083fa0384d7d79d6468cd9255467" title=" " alt="" coords="383,69,579,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="615,74,579,79,578,74,614,69"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a7315b060d295bad5fbd32e50eaaf02b0.html#a7315b060d295bad5fbd32e50eaaf02b0" title="Set all leds on all controllers to the given color/scale." alt="" coords="176,13,335,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="369,28,335,28,335,23,369,23"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="5,13,128,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="162,28,128,28,128,23,162,23"/>
+</map>

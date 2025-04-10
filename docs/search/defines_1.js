@@ -1,4 +1,19 @@
 var searchData=
 [
-  ['apply_5fdimming_0',['APPLY_DIMMING',['../hsv2rgb_8cpp.html#a177d9e4c6c1125e9499a26c2603d8da6',1,'hsv2rgb.cpp']]]
+  ['abs_0',['ABS',['../d0/d19/fl_2math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759',1,'math_macros.h']]],
+  ['animartrix_5finternal_1',['ANIMARTRIX_INTERNAL',['../d3/dc3/animartrix_8hpp_a8be91ce5d854856b03d69f2b653ee9b9.html#a8be91ce5d854856b03d69f2b653ee9b9',1,'animartrix.hpp']]],
+  ['animartrix_5fprint_2',['ANIMARTRIX_PRINT',['../d3/d3b/animartrix__detail_8hpp_a0c4ac69cd03530dd55918f190ca7b54d.html#a0c4ac69cd03530dd55918f190ca7b54d',1,'animartrix_detail.hpp']]],
+  ['apply_5fdimming_3',['APPLY_DIMMING',['../df/d9d/hsv2rgb_8cpp_a177d9e4c6c1125e9499a26c2603d8da6.html#a177d9e4c6c1125e9499a26c2603d8da6',1,'hsv2rgb.cpp']]],
+  ['arduinojson_5fenable_5farduino_5fprint_4',['ARDUINOJSON_ENABLE_ARDUINO_PRINT',['../d1/d9e/third__party_2arduinojson_2json_8h_a3cc662620cc0feb39673691e8ef50ede.html#a3cc662620cc0feb39673691e8ef50ede',1,'json.h']]],
+  ['arduinojson_5fenable_5farduino_5fstream_5',['ARDUINOJSON_ENABLE_ARDUINO_STREAM',['../d1/d9e/third__party_2arduinojson_2json_8h_ac26a2848a7b385e044949610607595c9.html#ac26a2848a7b385e044949610607595c9',1,'json.h']]],
+  ['arduinojson_5fenable_5farduino_5fstring_6',['ARDUINOJSON_ENABLE_ARDUINO_STRING',['../d1/d9e/third__party_2arduinojson_2json_8h_a8c1d882322eba89f78249dab4d1f8d5f.html#a8c1d882322eba89f78249dab4d1f8d5f',1,'json.h']]],
+  ['arduinojson_5fenable_5fprogmem_7',['ARDUINOJSON_ENABLE_PROGMEM',['../d1/d9e/third__party_2arduinojson_2json_8h_a17ff353e6e213cb064a3b71b549a8859.html#a17ff353e6e213cb064a3b71b549a8859',1,'json.h']]],
+  ['arduinojson_5fenable_5fstd_5fstream_8',['ARDUINOJSON_ENABLE_STD_STREAM',['../d1/d9e/third__party_2arduinojson_2json_8h_a9df92f524f78471921cf8a272ed3b492.html#a9df92f524f78471921cf8a272ed3b492',1,'json.h']]],
+  ['arduinojson_5fenable_5fstd_5fstring_9',['ARDUINOJSON_ENABLE_STD_STRING',['../d1/d9e/third__party_2arduinojson_2json_8h_af5b2b6b4e14c101382c65f3ca93f0014.html#af5b2b6b4e14c101382c65f3ca93f0014',1,'json.h']]],
+  ['arduinojson_5fenable_5fstring_5fview_10',['ARDUINOJSON_ENABLE_STRING_VIEW',['../d1/d9e/third__party_2arduinojson_2json_8h_a21eec5d4b774b6bf12cb2c2ebe156f48.html#a21eec5d4b774b6bf12cb2c2ebe156f48',1,'json.h']]],
+  ['array_5fsize_11',['ARRAY_SIZE',['../d5/d25/_demo_reel100_8ino_a4163b4a4e9d8f2949741962dca6c5944.html#a4163b4a4e9d8f2949741962dca6c5944',1,'DemoReel100.ino']]],
+  ['assert_12',['assert',['../da/d2d/colorutils_8cpp_af576bf8ffa22a44e53018c67095ffbf0.html#af576bf8ffa22a44e53018c67095ffbf0',1,'colorutils.cpp']]],
+  ['auto_5fselect_5fbackground_5fcolor_13',['AUTO_SELECT_BACKGROUND_COLOR',['../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;TwinkleFox.ino']]],
+  ['autopulsechangetime_14',['autoPulseChangeTime',['../d1/ddb/_chromancer_8ino_ae3f0b2edc8a6be3c7e2375933f7f738a.html#ae3f0b2edc8a6be3c7e2375933f7f738a',1,'Chromancer.ino']]],
+  ['autopulsetimeout_15',['autoPulseTimeout',['../d1/ddb/_chromancer_8ino_ab419f69a9503ac15cd3403db8cdac922.html#ab419f69a9503ac15cd3403db8cdac922',1,'Chromancer.ino']]]
 ];

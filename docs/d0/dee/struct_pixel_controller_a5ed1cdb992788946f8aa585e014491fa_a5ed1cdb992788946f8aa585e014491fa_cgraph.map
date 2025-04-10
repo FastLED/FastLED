@@ -1,0 +1,26 @@
+<map id="PixelController::advanceAndLoadAndScale0" name="PixelController::advanceAndLoadAndScale0">
+<area shape="rect" id="Node000001" title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()" alt="" coords="5,127,185,167"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a6c5dff0bd5be54ed5cdc8edb05d3ee2d.html#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer." alt="" coords="233,52,413,92"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,124,248,94,249,99,158,130"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="244,181,403,206"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="186,163,248,176,247,181,185,168"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="951,81,1171,106"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,50,409,30,461,15,538,5,618,3,697,8,773,18,910,46,1010,74,1009,79,908,51,772,23,696,13,618,9,539,10,462,20,410,35,365,55"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="461,30,672,56"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="413,59,448,55,448,60,414,64"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="477,80,656,120"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="414,80,464,86,464,91,413,85"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="1023,83,1014,73,1019,63,1034,56,1061,54,1094,58,1106,68,1103,72,1092,63,1061,60,1036,62,1022,67,1019,72,1026,79"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="1219,81,1375,106"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="1171,91,1205,91,1205,96,1171,96"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="648,78,720,66,811,60,903,66,983,76,982,81,902,71,811,65,720,71,648,83"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f" title="Calculate a dither value using the per&#45;channel dither data." alt="" coords="730,81,893,106"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="656,95,716,94,716,99,656,101"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="720,130,903,156"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="657,113,725,125,724,131,656,118"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="893,91,937,91,937,96,893,96"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="876,128,982,106,983,112,877,133"/>
+<area shape="poly" id="edge13_Node000010_Node000003" title=" " alt="" coords="403,197,504,201,629,199,766,188,835,178,902,164,970,140,1026,111,1029,116,972,145,903,170,836,184,767,194,629,204,504,206,403,202"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="535,232,599,257"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="386,204,521,232,520,238,385,209"/>
+</map>

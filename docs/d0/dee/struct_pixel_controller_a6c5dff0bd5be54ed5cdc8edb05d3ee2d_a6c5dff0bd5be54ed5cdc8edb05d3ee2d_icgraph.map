@@ -1,0 +1,15 @@
+<map id="PixelController::advanceAndLoadAndScale" name="PixelController::advanceAndLoadAndScale">
+<area shape="rect" id="Node000001" title="A version of loadAndScale() that advances the output data pointer." alt="" coords="263,165,443,205"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_aa6a77bc5cd442a95a4f36b3c39d09f6e.html#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()" alt="" coords="20,5,200,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="324,157,276,107,246,81,213,60,189,48,191,43,216,55,249,77,279,103,328,153"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_a9b3aad7f0649ea0d87e2ac243a6ede89.html#a9b3aad7f0649ea0d87e2ac243a6ede89" title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()" alt="" coords="20,69,200,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="299,162,214,124,180,112,182,107,216,119,301,157"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a5ed1cdb992788946f8aa585e014491fa.html#a5ed1cdb992788946f8aa585e014491fa" title="non&#45;template alias of advanceAndLoadAndScale&lt;0&gt;()" alt="" coords="20,133,200,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="249,174,200,168,200,163,249,169"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a0b169100513e0e2fe996401a8f653688.html#a0b169100513e0e2fe996401a8f653688" title="stepDithering() and advanceAndLoadAndScale0()" alt="" coords="5,197,215,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="250,202,215,206,215,201,249,196"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a1fd9d16856c759d9fe45025464eae1de.html#a1fd9d16856c759d9fe45025464eae1de" title="stepDithering() and advanceAndLoadAndScale0()" alt="" coords="5,261,215,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="301,214,216,252,182,264,180,259,214,247,299,209"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_acb4a76e70b987649e50290f68648e9d6.html#acb4a76e70b987649e50290f68648e9d6" title="stepDithering() and advanceAndLoadAndScale0()" alt="" coords="5,325,215,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="328,218,279,268,249,293,216,316,191,328,189,323,213,311,246,289,276,264,324,214"/>
+</map>

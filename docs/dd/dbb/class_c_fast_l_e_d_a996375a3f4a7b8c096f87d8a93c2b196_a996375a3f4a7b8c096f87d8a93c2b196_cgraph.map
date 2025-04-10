@@ -1,0 +1,9 @@
+<map id="CFastLED::setMaxPowerInVoltsAndMilliamps" name="CFastLED::setMaxPowerInVoltsAndMilliamps">
+<area shape="rect" id="Node000001" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,5,228,45"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ab07d62cdec036af9ede70cbd06ece40f.html#ab07d62cdec036af9ede70cbd06ece40f" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,5,495,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,23,262,23,262,28,228,28"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gafff15ebb8adee6a6c76fd46eb980397c.html#gafff15ebb8adee6a6c76fd46eb980397c" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="543,5,735,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="495,23,529,23,529,28,495,28"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="783,5,929,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="735,23,769,23,769,28,735,28"/>
+</map>

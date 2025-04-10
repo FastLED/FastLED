@@ -1,0 +1,9 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="TRGBGradientPaletteEntry\lUnion",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d39/group___palette_classes.html#db/d74/union_t_r_g_b_gradient_palette_entry_union",tooltip="Struct for digesting gradient pointer data into its components."];
+}

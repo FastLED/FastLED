@@ -1,0 +1,8 @@
+<map id="fl::Pixels::getStrip" name="fl::Pixels::getStrip">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,140,31"/>
+<area shape="rect" id="Node000002" href="$df/d0f/classfl_1_1_pixels_aa57cbd76200bbe18e28ea56f91dab62e.html#aa57cbd76200bbe18e28ea56f91dab62e" title=" " alt="" coords="371,5,493,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,15,357,15,357,21,140,21"/>
+<area shape="rect" id="Node000003" href="$df/d0f/classfl_1_1_pixels_ac2ef154e44e244afbbf52a68782e3480.html#ac2ef154e44e244afbbf52a68782e3480" title=" " alt="" coords="188,31,323,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,25,175,29,174,35,140,30"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="323,31,356,26,357,31,323,36"/>
+</map>

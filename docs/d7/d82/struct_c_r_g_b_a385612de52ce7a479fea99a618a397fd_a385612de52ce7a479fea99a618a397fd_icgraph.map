@@ -1,0 +1,5 @@
+<map id="CRGB::getParity" name="CRGB::getParity">
+<area shape="rect" id="Node000001" title="Returns 0 or 1, depending on the lowest bit of the sum of the color components." alt="" coords="177,5,303,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a64c20ff47371ed75b264711adfdf104a.html#a64c20ff47371ed75b264711adfdf104a" title="Adjusts the color in the smallest way possible so that the parity of the coloris now the desired valu..." alt="" coords="5,5,129,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,21,129,21,129,15,164,15"/>
+</map>

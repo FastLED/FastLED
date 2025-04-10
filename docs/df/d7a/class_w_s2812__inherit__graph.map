@@ -1,0 +1,13 @@
+<map id="WS2812&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2812&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2812 controller class." alt="" coords="944,59,1133,99"/>
+<area shape="rect" id="Node000006" href="$d6/d04/class_w_s2812.html" title=" " alt="" coords="1315,66,1519,91"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1147,76,1314,76,1314,81,1147,81"/>
+<area shape="rect" id="Node000002" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="691,59,895,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="908,76,944,76,944,81,908,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="263,5,445,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="460,47,691,67,690,72,459,52"/>
+<area shape="rect" id="Node000004" href="$de/d9d/class_w_s2812_controller800_khz.html" title="WS2812 controller class @ 800 KHz." alt="" coords="252,99,456,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="470,106,690,85,691,91,470,111"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,91,203,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,116,252,116,252,121,216,121"/>
+</map>

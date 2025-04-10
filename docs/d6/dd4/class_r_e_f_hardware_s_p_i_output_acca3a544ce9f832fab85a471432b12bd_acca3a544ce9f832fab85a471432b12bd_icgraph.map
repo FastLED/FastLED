@@ -1,0 +1,7 @@
+<map id="REFHardwareSPIOutput::waitFully" name="REFHardwareSPIOutput::waitFully">
+<area shape="rect" id="Node000001" title="wait until all queued up data has been written" alt="" coords="451,5,625,45"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_aed13aeec47cdee6166451607311f181c.html#aed13aeec47cdee6166451607311f181c" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,28,403,28,403,23,437,23"/>
+<area shape="rect" id="Node000003" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a585373e81d2509a01429f74503b7b56b.html#a585373e81d2509a01429f74503b7b56b" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

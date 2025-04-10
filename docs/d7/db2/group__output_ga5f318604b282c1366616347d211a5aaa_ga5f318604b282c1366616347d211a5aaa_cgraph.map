@@ -1,0 +1,7 @@
+<map id="MidiInterface::sendTimeCodeQuarterFrame" name="MidiInterface::sendTimeCodeQuarterFrame">
+<area shape="rect" id="Node000001" title="Send a MIDI Time Code Quarter Frame." alt="" coords="5,5,219,45"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_gabc45594bf1156b5020a2fa188c281cd0.html#gabc45594bf1156b5020a2fa188c281cd0" title="Send a Common message. Common messages reset the running status." alt="" coords="267,13,473,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,23,253,23,253,28,219,28"/>
+<area shape="rect" id="Node000003" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="521,5,712,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="473,23,507,23,507,28,473,28"/>
+</map>

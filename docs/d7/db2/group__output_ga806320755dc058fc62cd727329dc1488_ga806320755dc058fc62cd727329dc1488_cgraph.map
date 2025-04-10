@@ -1,0 +1,9 @@
+<map id="MidiInterface::send" name="MidiInterface::send">
+<area shape="rect" id="Node000001" title="Send a MIDI message." alt="" coords="5,55,152,80"/>
+<area shape="rect" id="Node000002" href="$df/d6a/class_midi_interface_a3a9e2b63cb520e9cea9ef24b8333eeb9.html#a3a9e2b63cb520e9cea9ef24b8333eeb9" title=" " alt="" coords="206,5,385,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,52,225,31,226,36,136,57"/>
+<area shape="rect" id="Node000003" href="$d4/daa/struct_message_ab4397a36b44edf4b49cad1fec4b4c41e.html#ab4397a36b44edf4b49cad1fec4b4c41e" title=" " alt="" coords="208,55,383,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,65,194,65,194,70,152,70"/>
+<area shape="rect" id="Node000004" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="200,105,391,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="128,77,207,99,206,104,127,83"/>
+</map>

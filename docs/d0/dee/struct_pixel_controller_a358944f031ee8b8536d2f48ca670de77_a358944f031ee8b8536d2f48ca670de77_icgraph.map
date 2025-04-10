@@ -1,0 +1,9 @@
+<map id="PixelController::initOffsets" name="PixelController::initOffsets">
+<area shape="rect" id="Node000001" title="Initialize the PixelController::mOffsets array based on the length of the strip." alt="" coords="273,55,465,80"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a68e0ae41357f1dda75a5724cde6aa991.html#a68e0ae41357f1dda75a5724cde6aa991" title="Constructor." alt="" coords="5,5,225,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,55,181,33,182,28,290,49"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ac272cca24b476c78cddd257cd9406150.html#ac272cca24b476c78cddd257cd9406150" title="Constructor." alt="" coords="5,55,225,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,70,226,70,226,65,259,65"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_ae1e1069b343fc0577828d28ffe3cead9.html#ae1e1069b343fc0577828d28ffe3cead9" title="Constructor." alt="" coords="5,104,225,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="290,85,182,107,181,101,289,80"/>
+</map>

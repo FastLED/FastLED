@@ -1,0 +1,5 @@
+<map id="CLEDController::leds" name="CLEDController::leds">
+<area shape="rect" id="Node000001" title="Pointer to the CRGB array for this controller." alt="" coords="245,13,400,38"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,5,197,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="231,28,198,28,198,23,231,23"/>
+</map>

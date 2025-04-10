@@ -1,0 +1,21 @@
+digraph "fl::Referent"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::Referent",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mWeakPtr",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::Ptr\< fl::WeakReferent \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d56/classfl_1_1_ptr.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::PtrTraits\< fl::\lWeakReferent \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::WeakReferent \>",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::PtrTraits\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits.html",tooltip=" "];
+  Node5 -> Node2 [id="edge4_Node000002_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" referent_",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::WeakReferent",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/da7/classfl_1_1_weak_referent.html",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000005_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mReferent",fontcolor="grey" ];
+  Node6 -> Node2 [id="edge6_Node000002_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::WeakReferent \>",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::Ptr\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d56/classfl_1_1_ptr.html",tooltip=" "];
+  Node7 -> Node6 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::PtrTraits\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits.html",tooltip=" "];
+}

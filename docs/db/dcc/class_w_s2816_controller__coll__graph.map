@@ -1,0 +1,27 @@
+<map id="WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1565,96,1753,136"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="1175,74,1436,158"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1450,113,1565,113,1565,119,1450,119"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="486,126,606,151"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="609,120,697,104,824,91,924,88,1151,97,1175,99,1174,104,1151,103,924,93,824,97,698,109,610,126"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="521,111,529,103,546,99,561,102,570,108,572,118,568,127,563,125,567,117,565,111,559,107,546,105,531,107,525,115"/>
+<area shape="rect" id="Node000006" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="705,119,879,174"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="620,138,705,141,705,147,620,144"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="78,41,137,66"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="150,45,233,36,389,22,545,17,1307,17,1394,25,1479,45,1555,70,1615,93,1613,98,1554,75,1478,50,1393,31,1307,23,545,23,389,27,234,41,151,50"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="150,61,234,80,486,126,485,132,233,85,149,66"/>
+<area shape="rect" id="Node000005" href="$db/d74/struct_rgbw.html" title=" " alt="" coords="78,126,137,151"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="151,136,486,136,486,141,151,141"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="893,155,911,156,1031,163,1083,163,1150,156,1174,152,1175,157,1151,161,1084,168,1031,169,911,161,892,160"/>
+<area shape="rect" id="Node000007" href="$d6/d04/class_w_s2812.html" title=" " alt="" coords="1203,199,1407,225"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="1366,193,1583,134,1585,139,1367,198"/>
+<area shape="rect" id="Node000008" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="444,228,648,268"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="662,237,697,235,1203,213,1203,218,697,240,662,242"/>
+<area shape="rect" id="Node000012" href="$d6/d04/class_w_s2812.html" title="WS2812 controller class." alt="" coords="697,249,887,289"/>
+<area shape="poly" id="edge14_Node000012_Node000008" title=" " alt="" coords="662,255,697,258,697,264,661,261"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="16,205,199,275"/>
+<area shape="poly" id="edge11_Node000008_Node000009" title=" " alt="" coords="213,239,444,243,444,249,213,245"/>
+<area shape="rect" id="Node000010" href="$de/d9d/class_w_s2812_controller800_khz.html" title="WS2812 controller class @ 800 KHz." alt="" coords="5,299,209,339"/>
+<area shape="poly" id="edge12_Node000008_Node000010" title=" " alt="" coords="223,297,443,262,444,267,224,303"/>
+<area shape="poly" id="edge13_Node000007_Node000012" title=" " alt="" coords="900,264,1021,256,1150,243,1254,222,1255,227,1151,248,1021,262,901,269"/>
+</map>

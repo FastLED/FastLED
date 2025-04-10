@@ -1,0 +1,20 @@
+<map id="CEveryNTime::getTime" name="CEveryNTime::getTime">
+<area shape="rect" id="Node000001" title="Get the current time according to the class&#39; timekeeper." alt="" coords="757,104,931,129"/>
+<area shape="rect" id="Node000002" href="$de/d1d/class_c_every_n_time_abf8af3755a0c9c8ac5d1f70eabef5c3b.html#abf8af3755a0c9c8ac5d1f70eabef5c3b" title="Get the time elapsed since the last trigger event." alt="" coords="519,55,709,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="771,104,674,83,675,77,772,99"/>
+<area shape="rect" id="Node000006" href="$de/d1d/class_c_every_n_time_ae8ae82d26045e38ca51fbf424ad58d86.html#ae8ae82d26045e38ca51fbf424ad58d86" title="Reset the timestamp to the current time." alt="" coords="538,104,690,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="743,119,690,119,690,114,743,114"/>
+<area shape="rect" id="Node000009" href="$de/d1d/class_c_every_n_time_a192e33c921fff572ca54d4fd85c70e16.html#a192e33c921fff572ca54d4fd85c70e16" title="Reset the timestamp so it is ready() on next call." alt="" coords="533,153,695,179"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="772,135,675,156,674,151,771,130"/>
+<area shape="rect" id="Node000003" href="$de/d1d/class_c_every_n_time_af9baddee5f65500d9b1488e4264c8ff1.html#af9baddee5f65500d9b1488e4264c8ff1" title="Get the time until the next trigger event." alt="" coords="260,5,471,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="536,55,430,33,431,28,537,49"/>
+<area shape="rect" id="Node000004" href="$de/d1d/class_c_every_n_time_ad248eee37ab69d2f0d27f6cb5a909b32.html#ad248eee37ab69d2f0d27f6cb5a909b32" title="Check if the time interval has elapsed." alt="" coords="287,55,443,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="505,70,444,70,444,65,505,65"/>
+<area shape="rect" id="Node000005" href="$de/d1d/class_c_every_n_time_a6895b6156f44263f53a386c2f83e3a02.html#a6895b6156f44263f53a386c2f83e3a02" title="Check if the time interval has elapsed." alt="" coords="5,55,212,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="274,70,212,70,212,65,274,65"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="536,104,430,83,431,77,537,99"/>
+<area shape="rect" id="Node000007" href="$de/d1d/class_c_every_n_time_a8842463241cb9579949cb34c724e6d65.html#a8842463241cb9579949cb34c724e6d65" title="Default constructor." alt="" coords="261,104,469,129"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="525,119,470,119,470,114,525,114"/>
+<area shape="rect" id="Node000008" href="$de/d1d/class_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac.html#a645cdb84da00f4669e1cf22ce86a04ac" title="Constructor." alt="" coords="261,153,469,179"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="537,135,431,156,430,151,536,129"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="AVRSoftwareSPIOutput::writeBit" name="AVRSoftwareSPIOutput::writeBit">
+<area shape="rect" id="Node000001" title="The version of writeBit() to use when clock and data are on the same port with precomputed values for..." alt="" coords="5,27,175,67"/>
+<area shape="rect" id="Node000002" href="$db/d3b/class_fast_pin_ad560f1e8787dc9c555ec635c0b5c99fa.html#ad560f1e8787dc9c555ec635c0b5c99fa" title="Set the state of a port." alt="" coords="247,5,368,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,33,233,25,233,31,175,39"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad13d8cd559302413e8c885aab5ad7497.html#ad13d8cd559302413e8c885aab5ad7497" title="Write the BIT&#39;th bit out via SPI, setting the data pin then strobing the clock." alt="" coords="223,55,392,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,56,210,60,209,65,175,61"/>
+<area shape="rect" id="Node000004" href="$db/d3b/class_fast_pin_add52474362013eb37903fc832e2abdc2.html#add52474362013eb37903fc832e2abdc2" title="Set the pin state to HIGH" alt="" coords="455,13,543,39"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="385,53,441,38,442,43,386,58"/>
+<area shape="rect" id="Node000005" href="$db/d3b/class_fast_pin_aa7420ec06218b5201f7f54cf6f4bfb86.html#aa7420ec06218b5201f7f54cf6f4bfb86" title="Set the pin state to LOW" alt="" coords="455,63,543,88"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="393,73,441,73,441,78,393,78"/>
+<area shape="rect" id="Node000006" href="$db/d3b/class_fast_pin_a25b537b13a05155051cc663b4877f79f.html#a25b537b13a05155051cc663b4877f79f" title="Toggle the pin." alt="" coords="440,112,557,137"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="386,93,436,106,435,111,385,98"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="REFHardwareSPIOutput::writeBytesValueRaw" name="REFHardwareSPIOutput::writeBytesValueRaw">
+<area shape="rect" id="Node000001" title="A raw set of writing byte values, assumes setup/init/waiting done elsewhere." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a077457b7a802ee946db4b2f8117d5ad4.html#a077457b7a802ee946db4b2f8117d5ad4" title="write a byte out via SPI (returns immediately on writing register)" alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

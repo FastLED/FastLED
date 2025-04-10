@@ -1,0 +1,5 @@
+<map id="rgb_2_rgbw_white_boosted" name="rgb_2_rgbw_white_boosted">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW with a boosted white channel." alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="252,5,316,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,15,238,15,238,21,204,21"/>
+</map>

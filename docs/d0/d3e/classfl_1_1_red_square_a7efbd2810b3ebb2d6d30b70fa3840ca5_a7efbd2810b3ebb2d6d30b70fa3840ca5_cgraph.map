@@ -1,0 +1,9 @@
+<map id="fl::RedSquare::draw" name="fl::RedSquare::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,153,80"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d_a97e2460468edf63b256d7c50ba03f8d0.html#a97e2460468edf63b256d7c50ba03f8d0" title=" " alt="" coords="221,5,364,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,52,223,31,224,36,136,57"/>
+<area shape="rect" id="Node000003" href="$d7/d3e/classfl_1_1_fx2d_ad43b84d2abcda8905bdcd35f9a8c46ff.html#ad43b84d2abcda8905bdcd35f9a8c46ff" title=" " alt="" coords="224,55,361,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,65,210,65,210,70,154,70"/>
+<area shape="rect" id="Node000004" href="$d2/de1/structfl_1_1_red_square_1_1_math_a8d4274f1ecbd10587e4a7bfda0694072.html#a8d4274f1ecbd10587e4a7bfda0694072" title=" " alt="" coords="201,104,384,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="136,77,224,98,223,103,134,83"/>
+</map>

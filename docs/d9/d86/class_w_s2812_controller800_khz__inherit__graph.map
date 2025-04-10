@@ -1,0 +1,15 @@
+<map id="WS2812Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2812Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2812 controller class @ 800 KHz." alt="" coords="130,109,334,149"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="349,124,361,129,335,136,334,130,355,129,347,129"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="348,119,480,120,527,122,547,129,525,136,474,139,334,139,334,134,474,134,524,131,542,129,526,128,480,125,348,125"/>
+<area shape="rect" id="Node000003" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="35,212,221,252"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="188,159,169,175,140,213,136,210,165,171,185,155"/>
+<area shape="rect" id="Node000005" href="$de/d9d/class_w_s2812_controller800_khz.html" title=" " alt="" coords="251,212,437,252"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="280,155,302,171,334,210,330,213,298,175,277,159"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="133,5,331,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,74,235,109,229,109,229,74"/>
+<area shape="rect" id="Node000004" href="$d5/db3/class_w_s2816_controller_1_1_controller_t.html" title=" " alt="" coords="5,301,240,341"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="129,266,126,301,121,301,123,265"/>
+<area shape="rect" id="Node000006" href="$d5/d5c/class_n_e_o_p_i_x_e_l.html" title="LED controller for WS2812 LEDs with GRB color order." alt="" coords="264,309,443,334"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="350,265,355,308,349,309,345,266"/>
+</map>

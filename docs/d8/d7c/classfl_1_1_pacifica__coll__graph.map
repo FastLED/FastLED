@@ -1,0 +1,15 @@
+<map id="fl::Pacifica" name="fl::Pacifica">
+<area shape="rect" id="Node000001" title=" " alt="" coords="143,285,229,311"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="92,168,163,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,204,183,284,178,287,137,207"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="25,80,80,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="74,114,119,166,115,169,70,118"/>
+<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,45,55,80,50,80,50,45"/>
+<area shape="rect" id="Node000011" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="105,80,179,105"/>
+<area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="140,119,132,168,127,167,135,118"/>
+<area shape="rect" id="Node000012" href="$d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values." alt="" coords="187,168,307,193"/>
+<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="237,207,194,287,190,284,232,204"/>
+<area shape="rect" id="Node000013" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="218,80,277,105"/>
+<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="250,119,250,167,245,167,245,119"/>
+</map>

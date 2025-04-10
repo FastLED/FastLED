@@ -1,0 +1,7 @@
+<map id="MidiInterface::sendClock" name="MidiInterface::sendClock">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,188,38"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_gac23eb04a4dc0d764d6db6f71c43fda12.html#gac23eb04a4dc0d764d6db6f71c43fda12" title="Send a Real Time (one byte) message." alt="" coords="236,13,445,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,23,222,23,222,28,188,28"/>
+<area shape="rect" id="Node000003" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="493,5,684,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="446,23,479,23,479,28,446,28"/>
+</map>

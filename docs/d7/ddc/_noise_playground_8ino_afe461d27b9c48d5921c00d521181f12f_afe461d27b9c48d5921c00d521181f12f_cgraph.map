@@ -1,0 +1,25 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,99,56,124"/>
+<area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc" title="Fill an LED matrix with random colors, using 16&#45;bit noise." alt="" coords="104,99,216,124"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,109,90,109,90,114,56,114"/>
+<area shape="rect" id="Node000003" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="323,12,381,37"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,96,263,60,309,39,311,44,265,64,189,101"/>
+<area shape="rect" id="Node000008" href="$de/da4/group___noise_fill_ga20a2ff725bc56666c206d54deb372586.html#ga20a2ff725bc56666c206d54deb372586" title="Fill a 2D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="264,99,440,124"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="216,109,251,109,251,114,216,114"/>
+<area shape="rect" id="Node000014" href="$de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="285,172,419,197"/>
+<area shape="poly" id="edge9_Node000002_Node000014" title=" " alt="" coords="195,122,306,164,304,169,193,127"/>
+<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="493,5,560,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="381,21,479,17,480,22,381,26"/>
+<area shape="poly" id="edge5_Node000008_Node000008" title=" " alt="" coords="323,100,317,90,320,81,332,74,352,72,376,76,386,84,382,88,374,80,352,77,334,79,324,84,322,90,328,97"/>
+<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="488,55,565,80"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="402,96,474,78,475,83,404,101"/>
+<area shape="rect" id="Node000012" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="613,156,676,181"/>
+<area shape="poly" id="edge7_Node000008_Node000012" title=" " alt="" coords="441,119,566,141,601,151,600,156,565,146,440,124"/>
+<area shape="rect" id="Node000013" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="495,156,559,181"/>
+<area shape="poly" id="edge8_Node000008_Node000013" title=" " alt="" coords="403,121,441,133,483,148,481,153,439,138,402,127"/>
+<area shape="poly" id="edge13_Node000014_Node000013" title=" " alt="" coords="419,176,480,170,481,175,420,181"/>
+<area shape="poly" id="edge10_Node000014_Node000014" title=" " alt="" coords="323,173,317,164,320,154,332,148,352,145,376,149,386,158,382,162,374,154,352,151,334,153,324,157,322,163,328,170"/>
+<area shape="rect" id="Node000015" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="492,205,561,231"/>
+<area shape="poly" id="edge11_Node000014_Node000015" title=" " alt="" coords="419,195,479,206,478,212,418,200"/>
+<area shape="poly" id="edge12_Node000015_Node000012" title=" " alt="" coords="557,203,600,184,602,189,559,208"/>
+</map>

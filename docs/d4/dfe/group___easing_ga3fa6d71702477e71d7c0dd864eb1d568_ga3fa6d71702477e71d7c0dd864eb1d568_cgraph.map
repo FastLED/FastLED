@@ -1,0 +1,5 @@
+<map id="ease8InOutCubic" name="ease8InOutCubic">
+<area shape="rect" id="Node000001" title="8&#45;bit cubic ease&#45;in / ease&#45;out function." alt="" coords="5,5,137,31"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="185,5,381,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,15,172,15,172,21,138,21"/>
+</map>

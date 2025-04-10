@@ -1,0 +1,9 @@
+<map id="RgbwDefault::RgbwDefault" name="RgbwDefault::RgbwDefault">
+<area shape="rect" id="Node000001" title=" " alt="" coords="681,13,880,38"/>
+<area shape="rect" id="Node000002" href="$d5/d8d/struct_rgbw_default_a3320052ace2827713b345cc69df2cbe0.html#a3320052ace2827713b345cc69df2cbe0" title=" " alt="" coords="483,13,633,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="668,28,634,28,634,23,668,23"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_ac1f024ba880d94121fd39d5fea0ff70a.html#ac1f024ba880d94121fd39d5fea0ff70a" title=" " alt="" coords="251,13,435,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,28,435,28,435,23,469,23"/>
+<area shape="rect" id="Node000004" href="$d5/d83/class_r_g_b_w_emulated_controller_ad119f2555688176da39dc9f8e18479c0.html#ad119f2555688176da39dc9f8e18479c0" title=" " alt="" coords="5,5,203,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="237,28,203,28,203,23,237,23"/>
+</map>

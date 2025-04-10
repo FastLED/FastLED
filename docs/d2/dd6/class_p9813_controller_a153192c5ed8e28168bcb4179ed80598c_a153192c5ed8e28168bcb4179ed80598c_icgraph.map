@@ -1,0 +1,5 @@
+<map id="P9813Controller::writeLed" name="P9813Controller::writeLed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="260,5,451,31"/>
+<area shape="rect" id="Node000002" href="$d2/dd6/class_p9813_controller_ab7381f0a1850d006f3449d27838b19c5.html#ab7381f0a1850d006f3449d27838b19c5" title="Send the LED data to the strip." alt="" coords="5,5,212,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,21,212,21,212,15,246,15"/>
+</map>

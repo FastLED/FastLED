@@ -1,0 +1,9 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::is_same\< T, U \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d46/structfl_1_1is__same.html",tooltip=" "];
+}

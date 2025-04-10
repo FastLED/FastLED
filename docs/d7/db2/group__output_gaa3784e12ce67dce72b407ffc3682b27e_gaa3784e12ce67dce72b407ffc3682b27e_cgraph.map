@@ -1,0 +1,7 @@
+<map id="MidiInterface::sendSongSelect" name="MidiInterface::sendSongSelect">
+<area shape="rect" id="Node000001" title="Send a Song Select message." alt="" coords="5,13,224,38"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_gabc45594bf1156b5020a2fa188c281cd0.html#gabc45594bf1156b5020a2fa188c281cd0" title="Send a Common message. Common messages reset the running status." alt="" coords="272,13,479,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,23,258,23,258,28,224,28"/>
+<area shape="rect" id="Node000003" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="527,5,717,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="479,23,513,23,513,28,479,28"/>
+</map>

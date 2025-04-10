@@ -1,0 +1,5 @@
+<map id="rgb_2_rgbw_exact" name="rgb_2_rgbw_exact">
+<area shape="rect" id="Node000001" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="5,5,145,31"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="193,5,257,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,15,180,15,180,21,146,21"/>
+</map>

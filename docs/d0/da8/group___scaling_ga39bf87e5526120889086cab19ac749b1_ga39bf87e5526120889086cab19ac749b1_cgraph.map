@@ -1,0 +1,7 @@
+<map id="nscale8x3" name="nscale8x3">
+<area shape="rect" id="Node000001" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="5,31,93,56"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="191,5,288,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,35,177,24,178,29,94,40"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="141,55,337,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,46,128,51,127,56,93,51"/>
+</map>

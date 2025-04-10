@@ -1,0 +1,23 @@
+<map id="pacifica_one_layer" name="pacifica_one_layer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,112,148,137"/>
+<area shape="rect" id="Node000002" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="196,87,331,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,112,182,108,183,113,148,118"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="227,136,299,161"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="148,131,214,140,213,145,148,136"/>
+<area shape="rect" id="Node000003" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="379,36,437,61"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="300,84,365,61,367,66,301,89"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="649,12,747,37"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="276,84,319,50,347,33,378,21,446,7,515,3,580,5,636,11,636,17,580,11,515,8,446,12,379,26,350,38,322,55,280,89"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="600,61,796,87"/>
+<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="331,93,586,78,586,83,331,98"/>
+<area shape="rect" id="Node000008" href="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="381,137,435,163"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="301,110,368,133,366,138,300,115"/>
+<area shape="rect" id="Node000009" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="379,187,437,212"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="310,110,332,121,348,134,358,146,381,173,383,175,379,179,377,177,354,149,344,138,329,126,307,114"/>
+<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="485,36,552,61"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="438,46,471,46,471,51,438,51"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="552,42,635,30,636,36,553,47"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="553,51,595,57,594,62,552,56"/>
+<area shape="rect" id="Node000010" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="487,187,551,212"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="438,197,473,197,473,202,438,202"/>
+</map>

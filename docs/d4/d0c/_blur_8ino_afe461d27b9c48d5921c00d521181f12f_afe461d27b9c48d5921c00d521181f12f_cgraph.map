@@ -1,0 +1,15 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,56,80"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gaacf0416f9e0438f23f92d0df6c338ea3.html#gaacf0416f9e0438f23f92d0df6c338ea3" title="One&#45;dimensional blur filter." alt="" coords="132,29,195,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,60,118,48,119,53,57,65"/>
+<area shape="rect" id="Node000008" href="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98" title="Reduce the brightness of an array of pixels all at once." alt="" coords="104,79,223,104"/>
+<area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="57,69,91,75,90,81,56,74"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="271,29,388,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="195,39,256,39,256,45,195,45"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="436,5,540,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="388,30,422,25,423,31,389,36"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="444,55,532,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="389,49,431,56,430,61,388,54"/>
+<area shape="rect" id="Node000009" href="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b" title="Scale the brightness of an array of pixels all at once." alt="" coords="293,79,365,104"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="223,89,279,89,279,94,223,94"/>
+</map>

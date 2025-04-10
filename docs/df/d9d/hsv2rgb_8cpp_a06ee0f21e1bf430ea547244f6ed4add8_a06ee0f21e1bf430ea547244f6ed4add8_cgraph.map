@@ -1,0 +1,13 @@
+<map id="hsv2rgb_rainbow" name="hsv2rgb_rainbow">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,139,129"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="236,5,333,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,102,130,71,186,40,222,27,223,32,188,44,133,75,90,106"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="253,55,317,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="127,101,238,75,240,80,128,107"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="187,104,383,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="139,114,173,114,173,119,139,119"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga628b417ea1507e3447cdf5f308d9b6d5.html#ga628b417ea1507e3447cdf5f308d9b6d5" title="The &quot;video&quot; version of scale8() guarantees that the output will be only be zero if one or both of the..." alt="" coords="231,153,338,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="128,127,219,148,218,153,127,132"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_gaf8e0821f34434cd6bfed4a16a895da23.html#gaf8e0821f34434cd6bfed4a16a895da23" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="199,203,370,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="92,127,134,157,188,188,207,196,204,201,185,192,131,161,89,132"/>
+</map>

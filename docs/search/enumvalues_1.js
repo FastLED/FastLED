@@ -1,13 +1,21 @@
 var searchData=
 [
-  ['backward_5fhues_0',['BACKWARD_HUES',['../group___color_fills.html#gga097bfc6a8459d95e8afa8a16b9e6476aaeafbd6b84aa73f663c8ab89f53875306',1,'colorutils.h']]],
-  ['beige_1',['Beige',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a435829f3208f8961c3241c56a9326268',1,'CRGB']]],
-  ['bisque_2',['Bisque',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a21927430e53394c5261fa4b86da5833e',1,'CRGB']]],
-  ['black_3',['Black',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7',1,'CRGB']]],
-  ['blacklightfluorescent_4',['BlackLightFluorescent',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9aa836f719c6010ef3df781a5d9e1863b1',1,'color.h']]],
-  ['blanchedalmond_5',['BlanchedAlmond',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a1b60dcb14d5d819f2b715400b6b2c8b8',1,'CRGB']]],
-  ['blue_6',['Blue',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976',1,'CRGB']]],
-  ['blueviolet_7',['BlueViolet',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99aac1ffcb23f7abd0ae8e7021e86adcbc9',1,'CRGB']]],
-  ['brown_8',['Brown',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a54d9c4c1ca1c7b47825046e3f0fb09db',1,'CRGB']]],
-  ['burlywood_9',['BurlyWood',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a7ef32fb720c92b6cca965ba81de3d094',1,'CRGB']]]
+  ['backward_0',['BACKWARD',['../d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359a6377b4908ae38f9a57fe9120cf179eb1',1,'fl']]],
+  ['backward_5fhues_1',['BACKWARD_HUES',['../da/de3/group___color_fills_ga097bfc6a8459d95e8afa8a16b9e6476a.html#gga097bfc6a8459d95e8afa8a16b9e6476aaeafbd6b84aa73f663c8ab89f53875306',1,'colorutils.h']]],
+  ['balance_2',['Balance',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a5dbc35c72252e48e38e11a93fab41655',1,'midi_Defs.h']]],
+  ['bankselect_3',['BankSelect',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263ad35194f91f02370bc6a3370a8038cecf',1,'midi_Defs.h']]],
+  ['beige_4',['Beige',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a435829f3208f8961c3241c56a9326268',1,'CRGB']]],
+  ['bgr_5',['BGR',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c',1,'eorder.h']]],
+  ['bisque_6',['Bisque',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a21927430e53394c5261fa4b86da5833e',1,'CRGB']]],
+  ['black_7',['Black',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7',1,'CRGB']]],
+  ['blacklightfluorescent_8',['BlackLightFluorescent',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9aa836f719c6010ef3df781a5d9e1863b1',1,'color.h']]],
+  ['blackstrip_9',['BlackStrip',['../d1/ddb/_chromancer_8ino_ad80fffb6c2f7d00ec768c873fc3ed3e4.html#ad80fffb6c2f7d00ec768c873fc3ed3e4abc6b184b9aadd48a626f6ce82cc04bbd',1,'Chromancer.ino']]],
+  ['blanchedalmond_10',['BlanchedAlmond',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a1b60dcb14d5d819f2b715400b6b2c8b8',1,'CRGB']]],
+  ['blue_11',['Blue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976',1,'CRGB']]],
+  ['bluestrip_12',['BlueStrip',['../d1/ddb/_chromancer_8ino_ad80fffb6c2f7d00ec768c873fc3ed3e4.html#ad80fffb6c2f7d00ec768c873fc3ed3e4ac8f9e618f7c0c92a64ac74a4ccd2be2e',1,'Chromancer.ino']]],
+  ['blueviolet_13',['BlueViolet',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99aac1ffcb23f7abd0ae8e7021e86adcbc9',1,'CRGB']]],
+  ['breathcontroller_14',['BreathController',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a96b4207d98300fb7ebbef4a63f0ba25a',1,'midi_Defs.h']]],
+  ['brg_15',['BRG',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4aa23d02d9d56089f1419a6c2eee27d16f',1,'eorder.h']]],
+  ['brown_16',['Brown',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a54d9c4c1ca1c7b47825046e3f0fb09db',1,'CRGB']]],
+  ['burlywood_17',['BurlyWood',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a7ef32fb720c92b6cca965ba81de3d094',1,'CRGB']]]
 ];

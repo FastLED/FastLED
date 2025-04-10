@@ -1,0 +1,26 @@
+digraph "XY"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="XY",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="DrawOneFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de4/_x_y_matrix_8ino_a9526586974056032fe98ca13e908bc73.html#a9526586974056032fe98ca13e908bc73",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de4/_x_y_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9d/_noise_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="mapNoiseToLEDsUsingPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::NoisePalette::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="FASTLED_NAMESPACE_BEGIN\l::xy_legacy_wrapper",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a0a22b551256cbe3a7962a4cf221ebbd7.html#a0a22b551256cbe3a7962a4cf221ebbd7",tooltip=" "];
+  Node8 -> Node8 [id="edge8_Node000008_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge9_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="XYsafe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de4/_x_y_matrix_8ino_ad98bdc172624acb23ec638fa20968961.html#ad98bdc172624acb23ec638fa20968961",tooltip=" "];
+}

@@ -1,0 +1,7 @@
+<map id="triwave8" name="triwave8">
+<area shape="rect" id="Node000001" title="Triangle wave generator." alt="" coords="152,31,231,56"/>
+<area shape="rect" id="Node000002" href="$d1/d7a/group___waveform_generators_ga06b04a0cf955ec107d49b76e0cb35225.html#ga06b04a0cf955ec107d49b76e0cb35225" title="Cubic waveform generator." alt="" coords="5,5,104,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,36,104,30,105,24,139,31"/>
+<area shape="rect" id="Node000003" href="$d1/d7a/group___waveform_generators_ga209d6cbdb109cc3139e7bb1e46c6228f.html#ga209d6cbdb109cc3139e7bb1e46c6228f" title="Quadratic waveform generator." alt="" coords="6,55,103,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,55,104,61,103,56,138,50"/>
+</map>

@@ -1,0 +1,47 @@
+digraph "fl::DemoReel100::draw"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::DemoReel100::draw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::DemoReel100::nextPattern",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d60/classfl_1_1_demo_reel100_a464aaf09e28b992fc28ec7db4d427607.html#a464aaf09e28b992fc28ec7db4d427607",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::DemoReel100::runPattern",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d60/classfl_1_1_demo_reel100_aad4b41d93c1a9f7acecea8b49cda7078.html#aad4b41d93c1a9f7acecea8b49cda7078",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="bpm",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="beatsin8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4",tooltip="Generates an 8-bit sine wave at a given BPM that oscillates within a given range."];
+  Node4 -> Node10 [id="edge5_Node000004_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="ColorFromPalette",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd",tooltip="Get a color from a palette."];
+  Node3 -> Node18 [id="edge6_Node000003_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="confetti",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_ae67cd131fd8d3a78a25cb7f40998f292.html#ae67cd131fd8d3a78a25cb7f40998f292",tooltip=" "];
+  Node18 -> Node19 [id="edge7_Node000018_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fadeToBlackBy",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98",tooltip="Reduce the brightness of an array of pixels all at once."];
+  Node18 -> Node21 [id="edge8_Node000018_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="random16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0",tooltip="Generate a 16-bit random number."];
+  Node18 -> Node22 [id="edge9_Node000018_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="random8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe",tooltip="Generate an 8-bit random number."];
+  Node3 -> Node23 [id="edge10_Node000003_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="juggle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1",tooltip=" "];
+  Node23 -> Node24 [id="edge11_Node000023_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="beatsin16",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b",tooltip="Generates a 16-bit sine wave at a given BPM that oscillates within a given range."];
+  Node23 -> Node19 [id="edge12_Node000023_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node26 [id="edge13_Node000003_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db",tooltip=" "];
+  Node26 -> Node27 [id="edge14_Node000026_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_ga0fef54ded2e4748869f1796603433b6b.html#ga0fef54ded2e4748869f1796603433b6b",tooltip="Fill a range of LEDs with a rainbow of colors."];
+  Node3 -> Node28 [id="edge15_Node000003_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="rainbowWithGlitter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24",tooltip=" "];
+  Node28 -> Node29 [id="edge16_Node000028_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="addGlitter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd",tooltip=" "];
+  Node29 -> Node21 [id="edge17_Node000029_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node29 -> Node22 [id="edge18_Node000029_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node28 -> Node26 [id="edge19_Node000028_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node30 [id="edge20_Node000003_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="sinelon",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf",tooltip=" "];
+  Node30 -> Node24 [id="edge21_Node000030_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node30 -> Node19 [id="edge22_Node000030_Node000019",color="steelblue1",style="solid",tooltip=" "];
+}

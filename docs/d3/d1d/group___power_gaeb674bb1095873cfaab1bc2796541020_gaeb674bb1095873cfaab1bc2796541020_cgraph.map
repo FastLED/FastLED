@@ -1,0 +1,20 @@
+<map id="calculate_max_brightness_for_power_mW" name="calculate_max_brightness_for_power_mW">
+<area shape="rect" id="Node000001" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,161,197,201"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="252,5,399,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,159,173,108,207,80,244,55,254,49,257,54,247,60,211,85,177,112,124,163"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="245,70,405,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,159,186,131,244,104,263,97,265,102,246,109,189,136,138,163"/>
+<area shape="rect" id="Node000005" href="$d7/d68/class_pin_a5a2884f01bb407fd628f57553eaaa9f4.html#a5a2884f01bb407fd628f57553eaaa9f4" title="Set the pin state to HIGH" alt="" coords="294,119,357,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="192,159,280,139,281,144,193,164"/>
+<area shape="rect" id="Node000006" href="$d6/d2c/class_c_l_e_d_controller_aa88facc052fcb2c9b86bd635a13f79be.html#aa88facc052fcb2c9b86bd635a13f79be" title="Pointer to the CRGB array for this controller." alt="" coords="248,169,403,194"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="198,179,234,179,234,184,198,184"/>
+<area shape="rect" id="Node000007" href="$d7/d68/class_pin_a6cd185ba2f0d7f5a797635988ab65017.html#a6cd185ba2f0d7f5a797635988ab65017" title="Set the pin state to LOW" alt="" coords="294,218,357,243"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="193,199,281,218,280,224,192,204"/>
+<area shape="rect" id="Node000008" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="247,267,404,293"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="139,199,189,226,246,252,268,260,266,265,244,257,187,230,136,204"/>
+<area shape="rect" id="Node000009" href="$d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e" title="How many LEDs does this controller manage?" alt="" coords="248,317,403,342"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="123,200,176,250,210,278,247,302,262,309,260,314,244,306,207,282,172,254,119,203"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="453,169,680,194"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="373,93,406,104,472,132,530,160,527,165,470,137,404,109,372,98"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="369,265,404,252,526,198,528,203,406,257,370,270"/>
+</map>

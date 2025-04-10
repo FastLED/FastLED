@@ -1,0 +1,17 @@
+<map id="CLEDController::setScreenMap" name="CLEDController::setScreenMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,225,60"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="273,5,500,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,33,260,29,260,34,226,38"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726" title=" " alt="" coords="287,55,486,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,56,274,61,274,66,225,61"/>
+<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a7eb765a882db21850019e4ee59f0cce1.html#a7eb765a882db21850019e4ee59f0cce1" title=" " alt="" coords="586,26,721,66"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="486,62,572,52,573,58,487,67"/>
+<area shape="rect" id="Node000005" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="548,91,759,116"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="487,83,535,88,534,94,486,88"/>
+<area shape="rect" id="Node000006" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="807,42,985,82"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="728,88,793,77,794,82,729,93"/>
+<area shape="rect" id="Node000007" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="815,131,977,156"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="732,113,806,126,805,131,731,119"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="851,42,848,32,855,23,871,17,896,15,924,18,940,25,937,30,923,23,896,21,873,23,858,27,853,33,856,41"/>
+<area shape="poly" id="edge8_Node000007_Node000007" title=" " alt="" coords="857,132,848,122,853,112,869,106,896,104,930,108,940,113,944,118,939,121,936,117,929,113,896,109,870,111,856,116,853,122,861,129"/>
+</map>

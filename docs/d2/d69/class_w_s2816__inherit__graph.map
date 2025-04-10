@@ -1,0 +1,18 @@
+<map id="WS2816&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2816&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2816 controller class." alt="" coords="1621,83,1811,123"/>
+<area shape="rect" id="Node000002" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="1384,83,1572,123"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1585,100,1621,100,1621,106,1585,106"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="645,26,912,110"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="926,71,1360,91,1384,93,1384,98,1360,96,926,76"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="5,100,125,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="110,92,174,70,296,31,395,9,443,4,495,3,622,16,657,24,656,29,621,22,495,9,444,9,396,14,298,37,176,75,112,97"/>
+<area shape="rect" id="Node000005" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="175,85,348,140"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="139,110,175,110,175,115,139,115"/>
+<area shape="rect" id="Node000007" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="648,134,909,218"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="111,128,175,150,298,180,395,194,494,195,621,190,647,188,648,193,621,195,495,201,395,199,297,186,174,155,109,133"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="362,101,645,77,645,82,362,107"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="320,144,373,164,442,178,514,184,648,185,648,190,513,190,441,183,371,170,318,149"/>
+<area shape="rect" id="Node000006" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="961,119,1149,159"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="1162,127,1384,108,1384,114,1163,133"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="923,154,961,149,961,154,923,160"/>
+</map>

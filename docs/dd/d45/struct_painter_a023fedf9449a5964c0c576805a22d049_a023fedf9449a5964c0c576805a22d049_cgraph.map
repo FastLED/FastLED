@@ -1,0 +1,11 @@
+<map id="Painter::PaintBrightSurprise" name="Painter::PaintBrightSurprise">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,204,109"/>
+<area shape="rect" id="Node000002" href="$d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac" title=" " alt="" coords="260,5,503,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,81,188,60,251,39,286,31,288,36,253,45,190,65,137,86"/>
+<area shape="rect" id="Node000003" href="$d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a" title=" " alt="" coords="252,55,511,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,84,248,79,248,84,204,89"/>
+<area shape="rect" id="Node000004" href="$d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123" title=" " alt="" coords="278,105,485,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,104,264,110,264,115,204,109"/>
+<area shape="rect" id="Node000005" href="$d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5" title=" " alt="" coords="315,169,447,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="134,107,188,131,253,154,302,166,301,172,251,159,186,136,132,112"/>
+</map>

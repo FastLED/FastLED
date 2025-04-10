@@ -1,0 +1,5 @@
+<map id="Pin::toggle" name="Pin::toggle">
+<area shape="rect" id="Node000001" title="Toggle the pin." alt="" coords="144,5,235,31"/>
+<area shape="rect" id="Node000002" href="$d7/d68/class_pin_ac4ce6209c47e73e4cbc751d735c56e97.html#ac4ce6209c47e73e4cbc751d735c56e97" title="Toggle the pin twice to create a short pulse." alt="" coords="5,5,96,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,21,96,21,96,15,130,15"/>
+</map>

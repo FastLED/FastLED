@@ -1,0 +1,13 @@
+<map id="CHSVPalette16::CHSVPalette16" name="CHSVPalette16::CHSVPalette16">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="277,104,501,129"/>
+<area shape="rect" id="Node000002" href="$d8/dfa/class_c_h_s_v_palette16_a0e1f91d881fb9fa7a9d1deac88d7c81f.html#a0e1f91d881fb9fa7a9d1deac88d7c81f" title="Copy constructor." alt="" coords="5,5,229,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="352,100,295,71,228,45,188,33,190,28,230,39,297,67,354,95"/>
+<area shape="rect" id="Node000003" href="$d8/dfa/class_c_h_s_v_palette16_a36b7dc77f96f6c79c3029d5ceca6e915.html#a36b7dc77f96f6c79c3029d5ceca6e915" title="Check if two palettes do not have the same color entries." alt="" coords="18,55,217,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="305,104,188,83,189,77,306,99"/>
+<area shape="rect" id="Node000004" href="$d8/dfa/class_c_h_s_v_palette16_a9421140d8f87edbfe0df7a8b535d4121.html#a9421140d8f87edbfe0df7a8b535d4121" title="Copy constructor." alt="" coords="21,104,214,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="263,119,214,119,214,114,263,114"/>
+<area shape="rect" id="Node000005" href="$d8/dfa/class_c_h_s_v_palette16_a18c11b902286c7489cf914339ef91737.html#a18c11b902286c7489cf914339ef91737" title="Create palette from palette stored in PROGMEM." alt="" coords="21,153,214,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="306,134,189,156,188,151,305,129"/>
+<area shape="rect" id="Node000006" href="$d8/dfa/class_c_h_s_v_palette16_a1f0d4237ba0ff87bb88def7256b635e6.html#a1f0d4237ba0ff87bb88def7256b635e6" title="Check if two palettes have the same color entries." alt="" coords="15,203,219,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="354,138,296,166,230,193,186,205,184,200,228,187,294,161,351,133"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="DATA_NOP::adjust" name="DATA_NOP::adjust">
+<area shape="rect" id="Node000001" title="Hook called to adjust a byte of data before writing it to the output." alt="" coords="5,5,144,31"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="192,5,256,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,15,178,15,178,21,144,21"/>
+</map>

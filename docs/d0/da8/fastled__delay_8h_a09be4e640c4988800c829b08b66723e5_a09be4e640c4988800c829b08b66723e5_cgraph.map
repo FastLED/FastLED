@@ -1,0 +1,4 @@
+<map id="delaycycles" name="delaycycles">
+<area shape="rect" id="Node000001" title="Delay N clock cycles." alt="" coords="5,29,104,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="37,30,34,21,35,12,43,5,55,3,69,6,75,15,71,18,66,11,55,8,45,10,40,14,39,20,42,28"/>
+</map>

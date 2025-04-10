@@ -1,0 +1,21 @@
+digraph "FastLED/FastLED/src/fx/video/frame_tracker.h"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="FastLED/FastLED/src\l/fx/video/frame_tracker.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="FastLED/FastLED/src\l/fx/video/frame_interpolator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dda/frame__interpolator_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="FastLED/FastLED/src\l/fx/video.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d05/video_8cpp.html",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="FastLED/FastLED/src\l/fx/video/frame_interpolator.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/da4/frame__interpolator_8cpp.html",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="FastLED/FastLED/src\l/fx/video/video_impl.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d82/video__impl_8h.html",tooltip=" "];
+  Node5 -> Node3 [id="edge5_Node000005_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="FastLED/FastLED/src\l/fx/video/video_impl.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d7f/video__impl_8cpp.html",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="FastLED/FastLED/src\l/fx/video/frame_tracker.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/def/frame__tracker_8cpp.html",tooltip=" "];
+}

@@ -1,0 +1,7 @@
+<map id="SoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;" name="SoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;">
+<area shape="rect" id="Node000001" title="Software SPI output." alt="" coords="11,241,199,296"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="5,137,204,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,206,107,241,102,241,102,206"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="12,5,197,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,74,107,137,102,137,102,74"/>
+</map>

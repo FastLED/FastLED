@@ -1,0 +1,5 @@
+<map id="REFHardwareSPIOutput::writeBit" name="REFHardwareSPIOutput::writeBit">
+<area shape="rect" id="Node000001" title="write a single bit out, which bit from the passed in byte is determined by template parameter" alt="" coords="228,5,403,45"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1" title="write a block of uint8_ts out in groups of three." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

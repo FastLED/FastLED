@@ -1,0 +1,36 @@
+<map id="fl::NoisePalette::draw" name="fl::NoisePalette::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,231,165,256"/>
+<area shape="rect" id="Node000002" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="228,107,415,132"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,228,283,136,285,141,112,233"/>
+<area shape="rect" id="Node000012" href="$da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918" title=" " alt="" coords="213,331,429,356"/>
+<area shape="poly" id="edge8_Node000001_Node000012" title=" " alt="" coords="118,254,279,323,277,328,116,259"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="510,5,579,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,104,502,34,504,39,352,109"/>
+<area shape="rect" id="Node000010" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="727,55,789,80"/>
+<area shape="poly" id="edge5_Node000002_Node000010" title=" " alt="" coords="393,104,477,91,713,68,713,73,478,97,394,109"/>
+<area shape="rect" id="Node000011" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="514,107,575,132"/>
+<area shape="poly" id="edge6_Node000002_Node000011" title=" " alt="" coords="415,117,500,117,500,122,415,122"/>
+<area shape="rect" id="Node000009" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="904,356,968,381"/>
+<area shape="poly" id="edge7_Node000002_Node000009" title=" " alt="" coords="403,129,478,141,536,146,588,145,679,138,721,138,764,145,809,163,858,193,889,226,911,266,925,307,933,341,928,343,920,308,906,268,885,229,854,197,806,167,762,150,720,143,679,143,588,150,536,151,477,146,403,135"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="708,5,808,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="579,15,694,15,694,21,579,21"/>
+<area shape="poly" id="edge4_Node000003_Node000010" title=" " alt="" coords="580,23,714,55,713,60,579,28"/>
+<area shape="rect" id="Node000013" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="477,307,612,332"/>
+<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="429,329,463,325,464,331,430,334"/>
+<area shape="rect" id="Node000021" href="$dc/d3e/group___dimming_gae51352a3522bb8eae5e17dbee97aa1aa.html#gae51352a3522bb8eae5e17dbee97aa1aa" title="Adjust a scaling value for dimming." alt="" coords="501,356,588,381"/>
+<area shape="poly" id="edge16_Node000012_Node000021" title=" " alt="" coords="430,353,488,360,487,365,429,358"/>
+<area shape="rect" id="Node000022" href="$da/d2d/colorutils_8cpp_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb" title=" " alt="" coords="525,405,564,431"/>
+<area shape="poly" id="edge18_Node000012_Node000022" title=" " alt="" coords="361,354,513,405,511,410,360,359"/>
+<area shape="rect" id="Node000014" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="729,208,787,233"/>
+<area shape="poly" id="edge10_Node000013_Node000014" title=" " alt="" coords="560,304,603,273,659,242,714,225,716,230,661,247,606,278,563,309"/>
+<area shape="rect" id="Node000017" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="709,257,807,283"/>
+<area shape="poly" id="edge11_Node000013_Node000017" title=" " alt="" coords="600,304,695,282,697,287,601,309"/>
+<area shape="rect" id="Node000019" href="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="731,307,785,332"/>
+<area shape="poly" id="edge12_Node000013_Node000019" title=" " alt="" coords="612,317,717,317,717,322,612,322"/>
+<area shape="rect" id="Node000020" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="729,356,787,381"/>
+<area shape="poly" id="edge13_Node000013_Node000020" title=" " alt="" coords="601,329,716,356,715,362,600,335"/>
+<area shape="rect" id="Node000018" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="660,405,856,431"/>
+<area shape="poly" id="edge15_Node000013_Node000018" title=" " alt="" coords="591,330,613,341,629,354,638,367,647,379,661,390,677,398,675,403,659,395,643,383,634,370,625,358,611,346,588,334"/>
+<area shape="poly" id="edge14_Node000020_Node000009" title=" " alt="" coords="788,366,890,366,890,371,788,371"/>
+<area shape="poly" id="edge17_Node000021_Node000009" title=" " alt="" coords="589,378,614,390,628,404,637,418,646,430,661,440,714,458,758,464,802,458,855,440,889,418,916,390,920,394,893,422,857,444,803,463,758,469,712,463,659,444,642,434,633,421,624,407,610,395,587,383"/>
+</map>

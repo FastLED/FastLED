@@ -1,0 +1,5 @@
+<map id="MidiInterface::sendSysEx" name="MidiInterface::sendSysEx">
+<area shape="rect" id="Node000001" title="Generate and send a System Exclusive frame." alt="" coords="5,13,192,38"/>
+<area shape="rect" id="Node000002" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="240,5,431,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,23,226,23,226,28,192,28"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="MidiInterface::beginNrpn" name="MidiInterface::beginNrpn">
+<area shape="rect" id="Node000001" title="Start a Non&#45;Registered Parameter Number frame." alt="" coords="5,55,188,80"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga7a274e7fda3f26a257844e695ef5825b.html#ga7a274e7fda3f26a257844e695ef5825b" title="Send a Control Change message." alt="" coords="236,47,431,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,65,222,65,222,70,188,70"/>
+<area shape="rect" id="Node000003" href="$d7/db2/group__output_ga806320755dc058fc62cd727329dc1488.html#ga806320755dc058fc62cd727329dc1488" title="Send a MIDI message." alt="" coords="479,55,625,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="431,65,464,65,464,70,431,70"/>
+<area shape="rect" id="Node000004" href="$df/d6a/class_midi_interface_a3a9e2b63cb520e9cea9ef24b8333eeb9.html#a3a9e2b63cb520e9cea9ef24b8333eeb9" title=" " alt="" coords="679,5,858,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="608,52,698,31,700,36,609,57"/>
+<area shape="rect" id="Node000005" href="$d4/daa/struct_message_ab4397a36b44edf4b49cad1fec4b4c41e.html#ab4397a36b44edf4b49cad1fec4b4c41e" title=" " alt="" coords="681,55,856,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="626,65,668,65,668,70,626,70"/>
+<area shape="rect" id="Node000006" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="673,105,864,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="602,77,680,99,679,104,600,83"/>
+</map>

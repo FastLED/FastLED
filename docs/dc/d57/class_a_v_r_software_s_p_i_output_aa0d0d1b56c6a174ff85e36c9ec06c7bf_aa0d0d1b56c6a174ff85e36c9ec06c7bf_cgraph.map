@@ -1,0 +1,11 @@
+<map id="AVRSoftwareSPIOutput::writeByte" name="AVRSoftwareSPIOutput::writeByte">
+<area shape="rect" id="Node000001" title="writeByte() implementation with not just registers passed in, but pre&#45;baked values for said registers..." alt="" coords="5,47,175,87"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad13d8cd559302413e8c885aab5ad7497.html#ad13d8cd559302413e8c885aab5ad7497" title="Write the BIT&#39;th bit out via SPI, setting the data pin then strobing the clock." alt="" coords="223,47,392,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,65,209,65,209,70,175,70"/>
+<area shape="rect" id="Node000003" href="$db/d3b/class_fast_pin_add52474362013eb37903fc832e2abdc2.html#add52474362013eb37903fc832e2abdc2" title="Set the pin state to HIGH" alt="" coords="455,5,543,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="385,45,441,30,442,35,386,50"/>
+<area shape="rect" id="Node000004" href="$db/d3b/class_fast_pin_aa7420ec06218b5201f7f54cf6f4bfb86.html#aa7420ec06218b5201f7f54cf6f4bfb86" title="Set the pin state to LOW" alt="" coords="455,55,543,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="393,65,441,65,441,70,393,70"/>
+<area shape="rect" id="Node000005" href="$db/d3b/class_fast_pin_a25b537b13a05155051cc663b4877f79f.html#a25b537b13a05155051cc663b4877f79f" title="Toggle the pin." alt="" coords="440,104,557,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="386,85,436,98,435,103,385,90"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="CRGB::lerp8" name="CRGB::lerp8">
+<area shape="rect" id="Node000001" title="Return a new CRGB object after performing a linear interpolation between this object and the passed i..." alt="" coords="5,31,105,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="153,5,257,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,32,139,26,140,32,106,38"/>
+<area shape="rect" id="Node000003" href="$d6/d19/group___linear_interpolation_ga62ed4425400bc4140902347dc54ffb72.html#ga62ed4425400bc4140902347dc54ffb72" title="Linear interpolation between two unsigned 8&#45;bit values, with 8&#45;bit fraction." alt="" coords="166,55,245,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="106,49,153,56,152,62,105,54"/>
+<area shape="rect" id="Node000004" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="305,55,369,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,65,292,65,292,70,245,70"/>
+</map>

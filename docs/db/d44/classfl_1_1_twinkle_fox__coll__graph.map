@@ -1,0 +1,16 @@
+<map id="fl::TwinkleFox" name="fl::TwinkleFox">
+<area shape="rect" id="Node000001" title=" " alt="" coords="165,271,276,296"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="101,168,172,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,202,213,269,209,272,153,206"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="25,80,80,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,113,127,166,123,169,72,117"/>
+<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,45,55,80,50,80,50,45"/>
+<area shape="rect" id="Node000011" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="105,80,179,105"/>
+<area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="143,119,140,168,135,167,138,119"/>
+<area shape="rect" id="Node000012" href="$d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values." alt="" coords="359,168,479,193"/>
+<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="385,202,244,273,242,268,383,197"/>
+<area shape="rect" id="Node000013" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="258,80,317,105"/>
+<area shape="poly" id="edge7_Node000001_Node000013" title=" " alt="" coords="269,117,250,141,235,169,227,197,223,225,223,271,217,270,218,224,222,195,230,167,246,138,265,114"/>
+<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="318,111,403,165,400,170,315,115"/>
+</map>

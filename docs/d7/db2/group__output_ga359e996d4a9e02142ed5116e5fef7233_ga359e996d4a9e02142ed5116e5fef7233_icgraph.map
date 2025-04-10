@@ -1,0 +1,8 @@
+<map id="MidiInterface::sendTimeCodeQuarterFrame" name="MidiInterface::sendTimeCodeQuarterFrame">
+<area shape="rect" id="Node000001" title="Send a MIDI Time Code Quarter Frame." alt="" coords="421,29,635,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="569,18,554,11,528,8,505,10,491,15,486,21,488,28,483,30,481,20,488,10,504,5,528,3,556,6,571,13"/>
+<area shape="rect" id="Node000002" href="$df/d6a/class_midi_interface_a8405cc7229e4eab30520ae005ec79e10.html#a8405cc7229e4eab30520ae005ec79e10" title=" " alt="" coords="199,37,373,62"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="408,52,373,52,373,47,408,47"/>
+<area shape="rect" id="Node000003" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,37,151,62"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="185,52,151,52,151,47,185,47"/>
+</map>

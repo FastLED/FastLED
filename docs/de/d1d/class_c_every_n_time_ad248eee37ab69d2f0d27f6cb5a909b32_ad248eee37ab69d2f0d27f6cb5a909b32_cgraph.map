@@ -1,0 +1,10 @@
+<map id="CEveryNTime::ready" name="CEveryNTime::ready">
+<area shape="rect" id="Node000001" title="Check if the time interval has elapsed." alt="" coords="5,31,161,56"/>
+<area shape="rect" id="Node000002" href="$de/d1d/class_c_every_n_time_abf8af3755a0c9c8ac5d1f70eabef5c3b.html#abf8af3755a0c9c8ac5d1f70eabef5c3b" title="Get the time elapsed since the last trigger event." alt="" coords="209,5,400,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,32,196,28,196,33,162,37"/>
+<area shape="rect" id="Node000004" href="$de/d1d/class_c_every_n_time_ae8ae82d26045e38ca51fbf424ad58d86.html#ae8ae82d26045e38ca51fbf424ad58d86" title="Reset the timestamp to the current time." alt="" coords="229,55,381,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="162,49,215,55,215,60,161,54"/>
+<area shape="rect" id="Node000003" href="$de/d1d/class_c_every_n_time_a9e72ce7dcf1e5b321ec9fa61f6c4fbd5.html#a9e72ce7dcf1e5b321ec9fa61f6c4fbd5" title="Get the current time according to the class&#39; timekeeper." alt="" coords="448,31,621,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="401,26,435,30,434,35,400,31"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="381,57,434,51,434,56,381,62"/>
+</map>

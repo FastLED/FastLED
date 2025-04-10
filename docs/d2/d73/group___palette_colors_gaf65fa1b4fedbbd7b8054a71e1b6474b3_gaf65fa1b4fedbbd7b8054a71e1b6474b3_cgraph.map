@@ -1,0 +1,7 @@
+<map id="ColorFromPalette" name="ColorFromPalette">
+<area shape="rect" id="Node000001" title="Get a color from a palette." alt="" coords="5,35,140,60"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="225,5,322,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,35,210,24,211,30,141,40"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty_gaf8e0821f34434cd6bfed4a16a895da23.html#gaf8e0821f34434cd6bfed4a16a895da23" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="188,55,359,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,54,175,59,174,64,140,59"/>
+</map>

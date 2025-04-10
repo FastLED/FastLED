@@ -1,0 +1,18 @@
+<map id="fl::DigitalPinImpl" name="fl::DigitalPinImpl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="280,175,411,201"/>
+<area shape="rect" id="Node000002" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="137,80,231,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,110,327,173,324,178,214,115"/>
+<area shape="rect" id="Node000006" href="$dd/da7/classfl_1_1_weak_referent.html" title=" " alt="" coords="5,175,136,201"/>
+<area shape="poly" id="edge5_Node000006_Node000002" title=" " alt="" coords="125,111,108,120,94,131,81,153,75,176,70,174,76,151,90,128,105,115,123,106"/>
+<area shape="rect" id="Node000003" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="244,271,439,296"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="280,269,233,246,212,230,194,209,182,183,177,153,179,105,185,106,182,153,187,181,198,207,215,226,236,242,282,264"/>
+<area shape="rect" id="Node000004" href="$da/d84/classfl_1_1_ptr_traits.html" title=" " alt="" coords="435,168,565,208"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="457,217,362,273,360,268,455,213"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="80,213,89,230,103,244,126,255,161,263,244,274,243,279,160,268,124,260,100,249,85,233,76,215"/>
+<area shape="rect" id="Node000007" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="589,175,683,201"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="588,207,578,211,379,273,377,268,577,205,586,202"/>
+<area shape="rect" id="Node000009" href="$d7/d68/class_pin.html" title="Naive fallback solution for low level pin access." alt="" coords="324,80,367,105"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="348,119,348,175,343,175,343,119"/>
+<area shape="rect" id="Node000010" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="300,5,391,31"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="348,45,348,80,343,80,343,45"/>
+</map>

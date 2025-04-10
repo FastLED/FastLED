@@ -1,0 +1,11 @@
+<map id="MidiInterface::sendNoteOn" name="MidiInterface::sendNoteOn">
+<area shape="rect" id="Node000001" title="Send a Note On message." alt="" coords="5,55,201,80"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga806320755dc058fc62cd727329dc1488.html#ga806320755dc058fc62cd727329dc1488" title="Send a MIDI message." alt="" coords="249,55,396,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,65,236,65,236,70,202,70"/>
+<area shape="rect" id="Node000003" href="$df/d6a/class_midi_interface_a3a9e2b63cb520e9cea9ef24b8333eeb9.html#a3a9e2b63cb520e9cea9ef24b8333eeb9" title=" " alt="" coords="450,5,629,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="379,52,469,31,470,36,380,57"/>
+<area shape="rect" id="Node000004" href="$d4/daa/struct_message_ab4397a36b44edf4b49cad1fec4b4c41e.html#ab4397a36b44edf4b49cad1fec4b4c41e" title=" " alt="" coords="452,55,627,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="396,65,438,65,438,70,396,70"/>
+<area shape="rect" id="Node000005" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="444,105,635,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="372,77,451,99,450,104,371,83"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="ColorHSV::ToRGB" name="ColorHSV::ToRGB">
+<area shape="rect" id="Node000001" title=" " alt="" coords="423,89,555,114"/>
+<area shape="rect" id="Node000002" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="5,89,112,114"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="462,82,422,53,399,40,374,30,315,14,267,8,219,13,161,30,135,42,110,58,74,91,70,87,107,54,132,37,159,25,218,8,267,3,316,9,376,25,401,35,425,48,465,78"/>
+<area shape="rect" id="Node000003" href="$dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d049.html#a023fedf9449a5964c0c576805a22d049" title=" " alt="" coords="168,40,367,65"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="417,89,325,68,326,63,418,83"/>
+<area shape="rect" id="Node000004" href="$dd/d45/struct_painter_aac192da55e15dd79b498933180c06725.html#aac192da55e15dd79b498933180c06725" title=" " alt="" coords="160,89,375,114"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="409,104,375,104,375,99,409,99"/>
+<area shape="rect" id="Node000005" href="$dd/d45/struct_painter_a3b521f31ff7f7249ce1c88ca56f5ad80.html#a3b521f31ff7f7249ce1c88ca56f5ad80" title=" " alt="" coords="187,138,348,164"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="418,120,326,141,325,136,417,115"/>
+<area shape="rect" id="Node000006" href="$dd/d45/struct_painter_ab6318a63a778550cd78f3eae183cb8dc.html#ab6318a63a778550cd78f3eae183cb8dc" title=" " alt="" coords="178,188,357,213"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="462,125,423,152,376,178,338,190,336,185,374,173,420,148,459,121"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="196,71,161,79,110,92,109,86,159,74,195,66"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="146,104,112,104,112,99,146,99"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="199,138,159,128,112,117,113,112,161,123,200,133"/>
+<area shape="poly" id="edge9_Node000006_Node000002" title=" " alt="" coords="181,186,159,177,109,147,72,117,75,113,113,143,161,173,183,181"/>
+</map>

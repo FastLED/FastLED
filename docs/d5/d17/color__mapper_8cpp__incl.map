@@ -1,0 +1,20 @@
+<map id="FastLED/FastLED/examples/LuminescentGrand/shared/color_mapper.cpp" name="FastLED/FastLED/examples/LuminescentGrand/shared/color_mapper.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="132,5,328,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,108,89,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,62,85,105,83,100,173,58"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="180,255,251,280"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="193,62,172,83,155,109,152,130,155,158,168,206,180,225,195,243,191,246,176,229,164,208,150,159,147,130,150,107,167,80,190,58"/>
+<area shape="rect" id="Node000004" href="$d0/d4f/color__mapper_8h.html" title=" " alt="" coords="165,108,295,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,60,233,94,227,94,227,60"/>
+<area shape="rect" id="Node000005" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="179,181,252,207"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="274,58,292,74,307,93,314,113,310,135,288,160,262,177,259,173,285,156,305,132,309,113,302,95,289,78,271,62"/>
+<area shape="rect" id="Node000006" href="$d8/d3c/util_8h.html" title=" " alt="" coords="381,108,444,133"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="287,58,377,100,375,105,285,62"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="230,134,223,168,218,167,225,133"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="218,207,218,241,213,241,213,207"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="393,136,317,183,240,247,236,243,314,179,391,131"/>
+<area shape="rect" id="Node000007" href="$d7/dd8/_approximating_function_8h.html" title=" " alt="" coords="328,181,521,207"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="417,133,423,167,418,168,412,134"/>
+<area shape="rect" id="Node000008" href="$de/d60/settings_8h.html" title=" " alt="" coords="545,181,640,207"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="443,131,552,174,550,179,441,136"/>
+</map>

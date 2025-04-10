@@ -1,0 +1,13 @@
+<map id="hsv2rgb_raw_C" name="hsv2rgb_raw_C">
+<area shape="rect" id="Node000001" title="HSV to RGB implementation in raw C, platform independent." alt="" coords="540,31,661,56"/>
+<area shape="rect" id="Node000002" href="$dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="387,31,492,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="526,46,492,46,492,41,526,41"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_ga5ca233d1f5f70b5efdabc405f9bcf8ec.html#ga5ca233d1f5f70b5efdabc405f9bcf8ec" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="215,5,320,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="372,36,320,28,320,23,373,31"/>
+<area shape="rect" id="Node000004" href="$dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440.html#ga704160ddb9173c3420a3dbfb44674440" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="196,55,339,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="373,55,339,60,338,55,373,50"/>
+<area shape="rect" id="Node000005" href="$dd/dc7/group___h_s_v2_r_g_b_gaa9d490009cb1d6ea0491e60b724d360f.html#gaa9d490009cb1d6ea0491e60b724d360f" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="5,29,148,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="182,59,148,54,148,49,183,53"/>
+<area shape="rect" id="Node000006" href="$dd/dc7/group___h_s_v2_r_g_b_gaabe3b0d539d6e15bc4ba86e10ec98fcc.html#gaabe3b0d539d6e15bc4ba86e10ec98fcc" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="5,79,148,104"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="183,81,148,85,148,80,182,75"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="SPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;" name="SPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;">
+<area shape="rect" id="Node000001" title="Hardware SPI output." alt="" coords="679,193,871,247"/>
+<area shape="rect" id="Node000004" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1087,9,1277,49"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="797,179,837,126,863,100,893,79,940,57,990,43,1039,33,1086,28,1087,33,1040,38,991,48,942,62,896,84,867,104,841,130,801,183"/>
+<area shape="rect" id="Node000005" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,74,1273,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="830,184,894,153,995,126,1091,109,1092,114,996,131,896,159,832,188"/>
+<area shape="rect" id="Node000006" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,153,1273,207"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="884,207,1091,186,1092,191,885,212"/>
+<area shape="rect" id="Node000007" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,231,1273,286"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="885,235,895,236,1091,252,1091,257,894,241,884,240"/>
+<area shape="rect" id="Node000008" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,310,1273,365"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="830,252,896,284,945,299,996,311,1091,327,1091,332,995,316,943,305,894,289,827,257"/>
+<area shape="rect" id="Node000009" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1091,389,1273,443"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="801,258,841,311,867,337,896,358,943,380,994,395,1044,405,1091,411,1091,416,1043,411,992,401,941,385,893,362,863,341,837,314,797,261"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="431,193,629,247"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="643,217,679,217,679,223,643,223"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="5,193,191,247"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="204,217,431,217,431,223,204,223"/>
+</map>

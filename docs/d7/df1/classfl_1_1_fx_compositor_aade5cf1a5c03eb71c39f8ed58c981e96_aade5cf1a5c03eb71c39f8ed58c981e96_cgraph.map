@@ -1,0 +1,17 @@
+<map id="fl::FxCompositor::draw" name="fl::FxCompositor::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,175,105"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94" title=" " alt="" coords="271,51,373,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,79,257,69,258,74,175,85"/>
+<area shape="rect" id="Node000007" href="$d7/df1/classfl_1_1_fx_compositor_a709e5926d9918a9dcdbebf79e3a12fc0.html#a709e5926d9918a9dcdbebf79e3a12fc0" title=" " alt="" coords="223,101,421,141"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="175,100,209,104,209,110,174,106"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="525,5,629,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="373,52,511,27,512,32,374,57"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="543,55,610,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="374,61,530,64,530,69,374,67"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="781,31,879,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="610,62,767,47,768,52,611,67"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="732,80,928,105"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="611,68,718,79,718,84,610,73"/>
+<area shape="rect" id="Node000008" href="$d7/df1/classfl_1_1_fx_compositor_a0ed0685b3caac53687f4d75402cd105d.html#a0ed0685b3caac53687f4d75402cd105d" title=" " alt="" coords="469,108,684,133"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="421,118,456,118,456,123,421,123"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="Pin::release" name="Pin::release">
+<area shape="rect" id="Node000001" title="Set the pin state to LOW" alt="" coords="5,5,104,31"/>
+<area shape="rect" id="Node000002" href="$d7/d68/class_pin_a6cd185ba2f0d7f5a797635988ab65017.html#a6cd185ba2f0d7f5a797635988ab65017" title="Set the pin state to LOW" alt="" coords="152,5,215,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,15,138,15,138,21,104,21"/>
+</map>

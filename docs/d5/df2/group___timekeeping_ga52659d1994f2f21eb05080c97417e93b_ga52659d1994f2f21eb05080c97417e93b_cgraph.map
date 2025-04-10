@@ -1,0 +1,5 @@
+<map id="bseconds16" name="bseconds16">
+<area shape="rect" id="Node000001" title="Returns the current time&#45;since&#45;boot in &quot;binary seconds&quot;, which are actually 1024/1000 of a second lon..." alt="" coords="5,5,104,31"/>
+<area shape="rect" id="Node000002" href="$d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e" title="Helper routine to divide a 32&#45;bit value by 1024, returning only the low 16 bits." alt="" coords="152,5,272,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,15,138,15,138,21,104,21"/>
+</map>

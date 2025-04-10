@@ -1,0 +1,11 @@
+<map id="CRGB::fadeLightBy" name="CRGB::fadeLightBy">
+<area shape="rect" id="Node000001" title="fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale" alt="" coords="5,31,151,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="212,5,316,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,31,198,24,198,30,151,36"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="199,55,329,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="151,50,185,54,184,60,150,55"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="418,25,515,51"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="329,55,404,44,405,50,330,61"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe612dafd146.html#gadfd26d9b154f5ec79dbffe612dafd146" title="In place modifying version of scale8_video() that does not clean up the R1 register on AVR." alt="" coords="377,75,556,115"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="330,74,364,78,363,84,329,79"/>
+</map>

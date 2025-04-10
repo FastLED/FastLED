@@ -1,0 +1,13 @@
+<map id="Rgbw::Rgbw" name="Rgbw::Rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="701,62,803,87"/>
+<area shape="rect" id="Node000002" href="$d5/d8d/struct_rgbw_default_a3320052ace2827713b345cc69df2cbe0.html#a3320052ace2827713b345cc69df2cbe0" title=" " alt="" coords="493,13,643,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="690,61,616,41,617,36,692,56"/>
+<area shape="rect" id="Node000005" href="$d3/dbb/struct_rgbw_invalid_ad6d0a9d5a37ed924ad856d1340170978.html#ad6d0a9d5a37ed924ad856d1340170978" title=" " alt="" coords="495,62,641,87"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="687,77,642,77,642,72,687,72"/>
+<area shape="rect" id="Node000006" href="$da/db9/struct_rgbw_white_is_off_af7e680f5b0e6e685696d73d9800bc69b.html#af7e680f5b0e6e685696d73d9800bc69b" title=" " alt="" coords="483,111,653,137"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="692,93,617,114,616,109,690,88"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_ac1f024ba880d94121fd39d5fea0ff70a.html#ac1f024ba880d94121fd39d5fea0ff70a" title=" " alt="" coords="251,13,435,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="479,28,435,28,435,23,479,23"/>
+<area shape="rect" id="Node000004" href="$d5/d83/class_r_g_b_w_emulated_controller_ad119f2555688176da39dc9f8e18479c0.html#ad119f2555688176da39dc9f8e18479c0" title=" " alt="" coords="5,5,203,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="237,28,203,28,203,23,237,23"/>
+</map>

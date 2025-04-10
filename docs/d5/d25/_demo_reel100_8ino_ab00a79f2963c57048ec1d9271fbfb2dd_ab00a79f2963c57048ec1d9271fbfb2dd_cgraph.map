@@ -1,0 +1,7 @@
+<map id="addGlitter" name="addGlitter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,92,56"/>
+<area shape="rect" id="Node000002" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="140,5,228,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,33,126,26,127,31,93,38"/>
+<area shape="rect" id="Node000003" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="144,55,224,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="93,48,131,55,130,61,92,54"/>
+</map>

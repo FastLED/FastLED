@@ -1,0 +1,15 @@
+<map id="Color3i::Interpolate" name="Color3i::Interpolate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,48,152,74"/>
+<area shape="rect" id="Node000002" href="$de/d12/struct_color3i_a49dcda1c5a2731858de82313748b85a2.html#a49dcda1c5a2731858de82313748b85a2" title=" " alt="" coords="349,22,472,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,46,146,25,199,8,240,3,280,4,354,16,353,21,280,9,240,8,201,13,148,30,104,51"/>
+<area shape="rect" id="Node000003" href="$de/d12/struct_color3i_a83d27d6442838f43816b4bd5f937b33d.html#a83d27d6442838f43816b4bd5f937b33d" title=" " alt="" coords="520,72,617,98"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="105,71,148,92,201,108,283,117,365,115,442,107,506,96,507,102,443,112,366,121,282,122,199,113,146,97,102,76"/>
+<area shape="rect" id="Node000004" href="$de/d12/struct_color3i_a22d432658770c521d12711b570adc6c0.html#a22d432658770c521d12711b570adc6c0" title=" " alt="" coords="200,23,301,48"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,48,186,42,187,48,153,53"/>
+<area shape="rect" id="Node000005" href="$de/d12/struct_color3i_a64153c1deac24bb364c7a1d539dd1368.html#a64153c1deac24bb364c7a1d539dd1368" title=" " alt="" coords="201,72,301,98"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="153,69,187,73,186,79,152,74"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,45,516,65,514,70,450,50"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="301,33,336,32,336,38,301,38"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="291,70,356,49,358,54,293,75"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="301,82,506,82,506,88,301,88"/>
+</map>

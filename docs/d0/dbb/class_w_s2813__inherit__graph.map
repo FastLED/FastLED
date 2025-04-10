@@ -1,0 +1,11 @@
+<map id="WS2813&lt; DATA_PIN, RGB_ORDER &gt;" name="WS2813&lt; DATA_PIN, RGB_ORDER &gt;">
+<area shape="rect" id="Node000001" title="WS2813 controller class." alt="" coords="912,59,1101,99"/>
+<area shape="rect" id="Node000002" href="$dc/d78/class_w_s2813_controller.html" title=" " alt="" coords="675,59,863,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="876,76,912,76,912,81,876,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="255,5,437,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="451,47,675,67,674,73,451,52"/>
+<area shape="rect" id="Node000004" href="$dc/d78/class_w_s2813_controller.html" title="WS2813 controller class." alt="" coords="252,99,440,139"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="453,106,674,85,675,90,454,111"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,91,203,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,116,252,116,252,121,216,121"/>
+</map>

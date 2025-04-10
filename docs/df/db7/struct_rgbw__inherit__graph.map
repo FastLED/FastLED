@@ -1,0 +1,9 @@
+<map id="Rgbw" name="Rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="159,5,217,31"/>
+<area shape="rect" id="Node000002" href="$d5/d8d/struct_rgbw_default.html" title=" " alt="" coords="5,79,112,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,40,81,81,79,76,154,35"/>
+<area shape="rect" id="Node000003" href="$d3/dbb/struct_rgbw_invalid.html" title=" " alt="" coords="137,79,239,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,44,191,79,185,79,185,44"/>
+<area shape="rect" id="Node000004" href="$da/db9/struct_rgbw_white_is_off.html" title=" " alt="" coords="263,79,390,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,34,305,76,303,81,221,39"/>
+</map>

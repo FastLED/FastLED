@@ -1,0 +1,11 @@
+digraph "CLEDController::setCorrection"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CLEDController::setCorrection",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="The color corrction to use for this controller, expressed as a CRGB object."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CFastLED::setCorrection",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_ad266c3e649cc12a6dc49a1e229acc282.html#ad266c3e649cc12a6dc49a1e229acc282",tooltip="Set a global color correction."];
+}

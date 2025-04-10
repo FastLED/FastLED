@@ -1,0 +1,7 @@
+<map id="inoise16" name="inoise16">
+<area shape="rect" id="Node000001" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="5,5,83,31"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="131,5,239,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,15,117,15,117,21,83,21"/>
+<area shape="rect" id="Node000003" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="287,5,353,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="239,15,273,15,273,21,239,21"/>
+</map>

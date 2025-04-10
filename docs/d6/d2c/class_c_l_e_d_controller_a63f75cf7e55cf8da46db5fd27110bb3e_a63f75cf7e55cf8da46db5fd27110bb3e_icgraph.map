@@ -1,0 +1,27 @@
+<map id="CLEDController::size" name="CLEDController::size">
+<area shape="rect" id="Node000001" title="How many LEDs does this controller manage?" alt="" coords="780,200,935,225"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_af9962ef739bdb3b590ee66f3780765d6.html#af9962ef739bdb3b590ee66f3780765d6" title=" " alt="" coords="493,63,723,88"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="834,192,789,149,761,128,731,110,679,90,681,85,733,105,764,124,792,145,837,188"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="278,13,402,39"/>
+<area shape="poly" id="edge12_Node000001_Node000003" title=" " alt="" coords="843,189,826,156,801,118,770,81,731,52,690,34,647,22,602,14,558,10,473,10,402,17,402,12,473,5,558,4,603,8,648,16,692,29,733,48,773,77,806,115,831,153,848,186"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a7315b060d295bad5fbd32e50eaaf02b0.html#a7315b060d295bad5fbd32e50eaaf02b0" title="Set all leds on all controllers to the given color/scale." alt="" coords="261,112,419,137"/>
+<area shape="poly" id="edge13_Node000001_Node000004" title=" " alt="" coords="823,195,781,172,731,154,649,137,566,127,487,124,420,124,420,118,487,118,566,122,650,132,733,149,783,168,826,190"/>
+<area shape="rect" id="Node000008" href="$d5/d83/class_r_g_b_w_emulated_controller_a460b948159965c26b3d6eabb58311c36.html#a460b948159965c26b3d6eabb58311c36" title=" " alt="" coords="513,163,703,203"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="766,205,703,197,703,192,767,199"/>
+<area shape="rect" id="Node000009" href="$dd/dbc/class_w_s2816_controller_a707a38914723165e02e6866743b67a6b.html#a707a38914723165e02e6866743b67a6b" title=" " alt="" coords="484,228,732,253"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="767,225,721,230,721,225,766,220"/>
+<area shape="rect" id="Node000010" href="$d3/d1d/group___power_gaeb674bb1095873cfaab1bc2796541020.html#gaeb674bb1095873cfaab1bc2796541020" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="512,278,704,318"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="818,234,733,268,694,280,692,275,731,263,816,229"/>
+<area shape="rect" id="Node000011" href="$d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t_adcbb639de93a59ffc51498fdb163f9a8.html#adcbb639de93a59ffc51498fdb163f9a8" title=" " alt="" coords="491,342,725,382"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="840,238,795,286,765,311,733,332,707,344,704,339,731,328,762,307,791,282,836,234"/>
+<area shape="rect" id="Node000012" href="$d5/db3/class_w_s2816_controller_1_1_controller_t_a179bcd510371dfb0cc53823d2f201b37.html#a179bcd510371dfb0cc53823d2f201b37" title=" " alt="" coords="503,406,713,446"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="848,239,831,274,806,317,774,360,734,396,712,408,710,403,730,392,770,356,802,314,826,272,843,237"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="525,63,402,40,403,35,526,57"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="526,93,410,114,409,109,525,88"/>
+<area shape="rect" id="Node000006" href="$d6/d2c/class_c_l_e_d_controller_a3b699c9cf0829d15fdc7ceb1d5166412.html#a3b699c9cf0829d15fdc7ceb1d5166412" title=" " alt="" coords="244,63,436,88"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="480,78,436,78,436,73,480,73"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="39,112,162,137"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="247,127,162,127,162,122,247,122"/>
+<area shape="rect" id="Node000007" href="$d6/d2c/class_c_l_e_d_controller_a6cd8a28d7585fba96407c9678c00d588.html#a6cd8a28d7585fba96407c9678c00d588" title="Clear out/zero out the given number of LEDs." alt="" coords="5,63,196,88"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="230,78,196,78,196,73,230,73"/>
+</map>

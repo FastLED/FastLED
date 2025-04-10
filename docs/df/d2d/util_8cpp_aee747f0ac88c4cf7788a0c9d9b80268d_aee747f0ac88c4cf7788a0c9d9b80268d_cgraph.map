@@ -1,0 +1,9 @@
+<map id="MapDecayTime" name="MapDecayTime">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,129,56"/>
+<area shape="rect" id="Node000002" href="$d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e" title=" " alt="" coords="177,31,237,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,41,164,41,164,46,130,46"/>
+<area shape="rect" id="Node000003" href="$d7/dd8/_approximating_function_8h_adaa033a0d7d5d25b9de906dff963d6d3.html#adaa033a0d7d5d25b9de906dff963d6d3" title=" " alt="" coords="326,5,385,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="237,36,312,23,313,28,238,41"/>
+<area shape="rect" id="Node000004" href="$d7/dd8/_approximating_function_8h_ad602af28198426d21f684f254c890fa1.html#ad602af28198426d21f684f254c890fa1" title=" " alt="" coords="285,55,425,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="238,45,272,51,271,56,237,51"/>
+</map>

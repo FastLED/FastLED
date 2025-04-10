@@ -1,6 +1,19 @@
 var searchData=
 [
-  ['h_0',['h',['../struct_c_h_s_v.html#a702ca7b9075491f46f7b78e017108ae0',1,'CHSV']]],
-  ['heatcolors_5fp_1',['HeatColors_p',['../group___predefined_palettes.html#ga8932790994cfe78cf535fce88502d649',1,'colorpalettes.cpp']]],
-  ['hue_2',['hue',['../struct_c_h_s_v.html#a53265b749b2df39b7a0be28a482dc80c',1,'CHSV']]]
+  ['h_0',['h',['../db/d87/group___pixel_types.html#a2510c39011c5be704182423e3a695e91',1,'CHSV.__unnamed0__.__unnamed0__.__unnamed0__']]],
+  ['h_5f_1',['h_',['../d7/d38/struct_color_h_s_v_a17055787fae5ee13e283e4c47072f217.html#a17055787fae5ee13e283e4c47072f217',1,'ColorHSV']]],
+  ['handlenullvelocitynoteonasnoteoff_2',['HandleNullVelocityNoteOnAsNoteOff',['../db/d58/struct_default_settings_a13c8f26edeade3374921764fa8650ac9.html#a13c8f26edeade3374921764fa8650ac9',1,'DefaultSettings']]],
+  ['heat_3',['heat',['../d5/d9b/classfl_1_1_fire2012_ab74ef1e7fdc51a2aa4d7eefd3871d791.html#ab74ef1e7fdc51a2aa4d7eefd3871d791',1,'fl::Fire2012::heat'],['../d8/d2c/_fire2023_8ino_a6a301247e6fb4e71e80de85c3c60e2be.html#a6a301247e6fb4e71e80de85c3c60e2be',1,'heat:&#160;Fire2023.ino']]],
+  ['heatcolors_5fp_4',['HeatColors_p',['../d3/d4f/group___predefined_palettes_ga8932790994cfe78cf535fce88502d649.html#ga8932790994cfe78cf535fce88502d649',1,'colorpalettes.cpp']]],
+  ['height_5',['height',['../d0/dce/classfl_1_1_x_y_map_ac7e2ae65af4c96222c5aa10801d6579d.html#ac7e2ae65af4c96222c5aa10801d6579d',1,'fl::XYMap::height'],['../d9/d41/classfl_1_1_noise_palette_ac617628dbc9404acf98f1278d2b657c1.html#ac617628dbc9404acf98f1278d2b657c1',1,'fl::NoisePalette::height']]],
+  ['high_5flimit_6',['high_limit',['../d6/d74/namespaceanimartrix__detail.html#ae62e5868401840fa8c7c4a91f34f0acd',1,'animartrix_detail::render_parameters']]],
+  ['highestirreading_7',['highestIrReading',['../d1/ddb/_chromancer_8ino_ad0532de8bf7d8b93fce68e37df721149.html#ad0532de8bf7d8b93fce68e37df721149',1,'Chromancer.ino']]],
+  ['holly_5fp_8',['Holly_p',['../d4/d36/namespacefl_ae7cf0c4f10bb3bbdc390e5c7cf55fc63.html#ae7cf0c4f10bb3bbdc390e5c7cf55fc63',1,'fl::Holly_p'],['../d4/dd0/_twinkle_fox_8ino_ad0d176b40154ccc2449af0809fe4c4e3.html#ad0d176b40154ccc2449af0809fe4c4e3',1,'Holly_p:&#160;TwinkleFox.ino']]],
+  ['hotpalette_9',['hotPalette',['../d8/d2c/_fire2023_8ino_a70a199bac40761895020c866374b0eb6.html#a70a199bac40761895020c866374b0eb6',1,'Fire2023.ino']]],
+  ['hue_10',['hue',['../dc/dd6/classfl_1_1_cylon_a8df6040198d78e7dc2b2275cbdbe7fb1.html#a8df6040198d78e7dc2b2275cbdbe7fb1',1,'fl::Cylon::hue'],['../d1/d60/classfl_1_1_demo_reel100_ab0e06c6cd746658dae1f23d40682d005.html#ab0e06c6cd746658dae1f23d40682d005',1,'fl::DemoReel100::hue'],['../db/d87/group___pixel_types.html#a71a6b6f094346a8832df801c8428ea06',1,'CHSV.__unnamed0__.__unnamed0__.__unnamed0__::hue']]],
+  ['hue_5foctaves_11',['hue_octaves',['../d7/ddc/_noise_playground_8ino_a12900562e6326c2b591b96d4eb24ce7f.html#a12900562e6326c2b591b96d4eb24ce7f',1,'NoisePlayground.ino']]],
+  ['hue_5fscale_12',['hue_scale',['../d7/ddc/_noise_playground_8ino_aa553d42e3109cf8e90b790337ad76bc4.html#aa553d42e3109cf8e90b790337ad76bc4',1,'NoisePlayground.ino']]],
+  ['hue_5fspeed_13',['hue_speed',['../d7/ddc/_noise_playground_8ino_a345d1d45d6fdaa1429e528949f67aadc.html#a345d1d45d6fdaa1429e528949f67aadc',1,'NoisePlayground.ino']]],
+  ['hue_5ftime_14',['hue_time',['../d7/ddc/_noise_playground_8ino_aa5ed5053d8ab8e329061361d7f47ef9c.html#aa5ed5053d8ab8e329061361d7f47ef9c',1,'NoisePlayground.ino']]],
+  ['hxy_15',['hxy',['../d7/ddc/_noise_playground_8ino_aa73a27e8acbb137356a8f2cfdf864c22.html#aa73a27e8acbb137356a8f2cfdf864c22',1,'NoisePlayground.ino']]]
 ];

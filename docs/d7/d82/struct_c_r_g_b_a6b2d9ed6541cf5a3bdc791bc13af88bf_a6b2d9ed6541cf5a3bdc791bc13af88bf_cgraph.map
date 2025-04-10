@@ -1,0 +1,10 @@
+<map id="CRGB::operator&#45;&#45;" name="CRGB::operator&#45;&#45;">
+<area shape="rect" id="Node000001" title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00." alt="" coords="5,29,137,55"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="415,5,519,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,35,401,19,401,25,138,41"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a986ac62988523a4371f8f90cf844924d.html#a986ac62988523a4371f8f90cf844924d" title="Subtract a constant from each channel, saturating at 0x00." alt="" coords="185,55,367,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,48,172,52,171,57,137,53"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="325,52,403,32,404,37,326,57"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="436,55,497,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="367,65,422,65,422,70,367,70"/>
+</map>

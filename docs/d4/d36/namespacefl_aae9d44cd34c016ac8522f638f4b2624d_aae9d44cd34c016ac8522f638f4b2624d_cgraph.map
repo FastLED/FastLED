@@ -1,0 +1,11 @@
+<map id="fl::five_bit_bitshift" name="fl::five_bit_bitshift">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,144,105"/>
+<area shape="rect" id="Node000002" href="$dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94" title=" " alt="" coords="192,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,78,191,40,213,32,215,37,193,44,103,82"/>
+<area shape="rect" id="Node000003" href="$dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59" title=" " alt="" coords="196,55,359,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="144,81,182,77,183,82,145,87"/>
+<area shape="rect" id="Node000004" href="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e" title=" " alt="" coords="226,104,329,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="145,98,212,106,212,112,144,104"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="229,153,325,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="106,103,193,138,218,147,217,152,191,143,104,108"/>
+</map>

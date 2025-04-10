@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['fastled_0',['FastLED',['../index.html',1,'']]]
+  ['fastled_20library_0',['FastLED Library',['../index.html',1,'']]]
 ];

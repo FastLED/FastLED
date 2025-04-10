@@ -1,0 +1,10 @@
+<map id="PixelController::getScale1" name="PixelController::getScale1">
+<area shape="rect" id="Node000001" title="non&#45;template alias of getscale&lt;1&gt;()" alt="" coords="5,29,195,55"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a9d1ddf7aa7b8e5a3896a898911f0a6cd.html#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot." alt="" coords="243,29,423,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,39,229,39,229,45,195,45"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="471,29,691,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,39,457,39,457,45,423,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="543,31,534,21,539,11,554,5,581,3,614,7,626,16,623,20,612,11,581,8,556,10,542,15,539,20,546,27"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="739,29,895,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="691,39,725,39,725,45,691,45"/>
+</map>

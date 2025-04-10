@@ -1,8 +1,23 @@
 var searchData=
 [
-  ['halogen_0',['Halogen',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ae5ec76aa869b51e645e9f226dfee4b79',1,'color.h']]],
-  ['highnoonsun_1',['HighNoonSun',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76',1,'color.h']]],
-  ['highpressuresodium_2',['HighPressureSodium',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a677f1d00c77b396f7a90e87166fc239a',1,'color.h']]],
-  ['honeydew_3',['Honeydew',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ac64646915c9a7fa35d0e6f6daca2f57b',1,'CRGB']]],
-  ['hotpink_4',['HotPink',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a156c0077e866fb53deb0eb1e2c7b0be9',1,'CRGB']]]
+  ['gainsboro_0',['Gainsboro',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ac80791bb4fff4d47ede84ee41b211a3c',1,'CRGB']]],
+  ['gbr_1',['GBR',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4ad60fbd7d8962ed9fb329aa0c0a47edc9',1,'eorder.h']]],
+  ['generalpurposecontroller1_2',['GeneralPurposeController1',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a5c5e259560524b09d6063160e1e1a9f0',1,'midi_Defs.h']]],
+  ['generalpurposecontroller2_3',['GeneralPurposeController2',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a1fdb656b591a391877bc89095254e8c9',1,'midi_Defs.h']]],
+  ['generalpurposecontroller3_4',['GeneralPurposeController3',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a0e451059b88b60a7347f2c029b2a1d4a',1,'midi_Defs.h']]],
+  ['generalpurposecontroller4_5',['GeneralPurposeController4',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a1c9648b95804874f357440279258d0f0',1,'midi_Defs.h']]],
+  ['generalpurposecontroller5_6',['GeneralPurposeController5',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a94f03d2efb296a0c98ddaf6429cb129b',1,'midi_Defs.h']]],
+  ['generalpurposecontroller6_7',['GeneralPurposeController6',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263aaafe7e883fdddc2af7461b18c8fb2b36',1,'midi_Defs.h']]],
+  ['generalpurposecontroller7_8',['GeneralPurposeController7',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263aaa78fcab6105723e2ce9f0c281dd75c8',1,'midi_Defs.h']]],
+  ['generalpurposecontroller8_9',['GeneralPurposeController8',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a9d585419de34459cd561da434d2aeb20',1,'midi_Defs.h']]],
+  ['ghostwhite_10',['GhostWhite',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a04855e1321cabbde202abbf4f37c00ed',1,'CRGB']]],
+  ['gold_11',['Gold',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a063e44e3135a047a866ce8b84af900d2',1,'CRGB']]],
+  ['goldenrod_12',['Goldenrod',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a24ba4acdfddf022178a7ed56877e7a1e',1,'CRGB']]],
+  ['gray_13',['Gray',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a38e4d15e8b39b607c46c044d11774ce6',1,'CRGB']]],
+  ['grb_14',['GRB',['../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98',1,'eorder.h']]],
+  ['green_15',['Green',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4',1,'CRGB']]],
+  ['greenstrip_16',['GreenStrip',['../d1/ddb/_chromancer_8ino_ad80fffb6c2f7d00ec768c873fc3ed3e4.html#ad80fffb6c2f7d00ec768c873fc3ed3e4a5f5f514794bccd320f9bdec9ad0917a4',1,'Chromancer.ino']]],
+  ['greenyellow_17',['GreenYellow',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99af69f9b7885f3c4480cb9e0873a8b2839',1,'CRGB']]],
+  ['grey_18',['Grey',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99afebff1b56d553cd2789ea3d4db0fd9c2',1,'CRGB']]],
+  ['growlightfluorescent_19',['GrowLightFluorescent',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9af701ac952fdfe6554127017a38af791b',1,'color.h']]]
 ];

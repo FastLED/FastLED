@@ -1,0 +1,11 @@
+<map id="CRGB::scale8" name="CRGB::scale8">
+<area shape="rect" id="Node000001" title="Return a CRGB object that is a scaled down version of this object." alt="" coords="5,31,115,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="163,5,267,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,32,148,26,149,31,115,37"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="171,55,259,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="115,49,157,56,156,61,115,54"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="364,29,461,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="259,59,350,47,351,53,259,64"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="315,79,511,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="259,70,302,75,301,80,259,75"/>
+</map>

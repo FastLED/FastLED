@@ -1,0 +1,50 @@
+digraph "RGBWEmulatedController::showPixels"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="RGBWEmulatedController\l::showPixels",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Send the LED data to the strip."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="PixelController::advanceData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2",tooltip="Advance the data pointer forward, adjust position counter."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="RGBWEmulatedController\l::ensureBuffer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d83/class_r_g_b_w_emulated_controller_ac75fed11a6434fa6d70451850a158636.html#ac75fed11a6434fa6d70451850a158636",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw_a99a23acfbc448d69b2f50f87c133efcd.html#a99a23acfbc448d69b2f50f87c133efcd",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CLEDController::getRgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a8c366fe64db010243986f7f5bc49df4f.html#a8c366fe64db010243986f7f5bc49df4f",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="PixelController::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c",tooltip="Do we have n pixels left to process?"];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="PixelController::loadAnd\lScaleRGBW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_aa75c347910343e54b608faf4f4a002bd.html#aa75c347910343e54b608faf4f4a002bd",tooltip=" "];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="PixelController::loadAnd\lScale0",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a4afe8b8ec93c89308fe185b1eb164ff6.html#a4afe8b8ec93c89308fe185b1eb164ff6",tooltip="non-template alias of loadAndScale<0>()"];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="PixelController::loadAnd\lScale",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9",tooltip="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..."];
+  Node7 -> Node15 [id="edge9_Node000007_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="PixelController::loadAnd\lScale1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ae570967d1b674970cf472feb379f248f.html#ae570967d1b674970cf472feb379f248f",tooltip="non-template alias of loadAndScale<1>()"];
+  Node15 -> Node9 [id="edge10_Node000015_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node16 [id="edge11_Node000007_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="PixelController::loadAnd\lScale2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_af5a5f12205a4187aa4df499b8224ed35.html#af5a5f12205a4187aa4df499b8224ed35",tooltip="non-template alias of loadAndScale<2>()"];
+  Node16 -> Node9 [id="edge12_Node000016_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node17 [id="edge13_Node000007_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="rgb_2_rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dbb/rgbw_8h_ae9cf94c7bddcd484c4f03b0c69b7770a.html#ae9cf94c7bddcd484c4f03b0c69b7770a",tooltip="Converts RGB to RGBW using one of the functions."];
+  Node17 -> Node18 [id="edge14_Node000017_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="rgb_2_rgbw_exact",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d8d/rgbw_8cpp_ac22f7204d0501031d2431e7b2f67c25c.html#ac22f7204d0501031d2431e7b2f67c25c",tooltip="Converts RGB to RGBW using a color transfer method from saturated color channels to white."];
+  Node17 -> Node20 [id="edge15_Node000017_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="rgb_2_rgbw_max_brightness",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d8d/rgbw_8cpp_a07e94168baddf333cdc5673f28285aa9.html#a07e94168baddf333cdc5673f28285aa9",tooltip="The minimum brigthness of the RGB channels is used to set the W channel."];
+  Node17 -> Node21 [id="edge16_Node000017_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="rgb_2_rgbw_null_white\l_pixel",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d8d/rgbw_8cpp_a026bfd212bc23d24cf2e8cc5a9ab5b9e.html#a026bfd212bc23d24cf2e8cc5a9ab5b9e",tooltip="Converts RGB to RGBW with the W channel set to black, always."];
+  Node17 -> Node22 [id="edge17_Node000017_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="rgb_2_rgbw_user_function",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_a03a50e79b032a49c951919b9570d18f5.html#a03a50e79b032a49c951919b9570d18f5",tooltip=" "];
+  Node17 -> Node23 [id="edge18_Node000017_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="rgb_2_rgbw_white_boosted",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d8d/rgbw_8cpp_aa6e2b44325da0172a48b20940b6e5fdf.html#aa6e2b44325da0172a48b20940b6e5fdf",tooltip="Converts RGB to RGBW with a boosted white channel."];
+  Node7 -> Node24 [id="edge19_Node000007_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="rgbw_partial_reorder",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp_a8ccb0b40cfa42bb4e4e259c5443e9472.html#a8ccb0b40cfa42bb4e4e259c5443e9472",tooltip=" "];
+  Node1 -> Node25 [id="edge20_Node000001_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="PixelController::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a85305135ad8ad18edcd32dfc7431c660.html#a85305135ad8ad18edcd32dfc7431c660",tooltip="Get the length of the LED strip."];
+  Node1 -> Node4 [id="edge21_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node26 [id="edge22_Node000001_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="PixelController::stepDithering",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef",tooltip="Step the dithering forward."];
+}

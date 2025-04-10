@@ -1,0 +1,20 @@
+<map id="Painter::VegasVisualizer" name="Painter::VegasVisualizer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,128,184,153"/>
+<area shape="rect" id="Node000002" href="$de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9" title=" " alt="" coords="305,29,417,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,125,166,95,231,65,291,49,292,54,233,70,168,100,117,130"/>
+<area shape="rect" id="Node000006" href="$d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac" title=" " alt="" coords="240,79,483,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="163,125,278,104,279,109,164,131"/>
+<area shape="rect" id="Node000007" href="$d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a" title=" " alt="" coords="232,128,491,153"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="184,138,218,138,218,143,184,143"/>
+<area shape="rect" id="Node000008" href="$d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123" title=" " alt="" coords="258,178,465,218"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="155,151,255,172,254,178,154,156"/>
+<area shape="rect" id="Node000009" href="$d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5" title=" " alt="" coords="295,243,427,268"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="113,151,164,190,198,210,233,228,282,242,281,247,231,232,195,215,161,194,110,156"/>
+<area shape="rect" id="Node000003" href="$de/d12/struct_color3i_a61889348324aefa14c28164d41e98e2a.html#a61889348324aefa14c28164d41e98e2a" title=" " alt="" coords="539,5,661,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="417,34,525,23,525,28,418,39"/>
+<area shape="rect" id="Node000005" href="$de/d12/struct_color3i_a49dcda1c5a2731858de82313748b85a2.html#a49dcda1c5a2731858de82313748b85a2" title=" " alt="" coords="539,55,661,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="418,45,525,57,525,62,417,51"/>
+<area shape="rect" id="Node000004" href="$de/d12/struct_color3i_a83d27d6442838f43816b4bd5f937b33d.html#a83d27d6442838f43816b4bd5f937b33d" title=" " alt="" coords="709,31,807,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="662,25,696,31,695,36,661,30"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="661,55,695,50,696,55,662,61"/>
+</map>

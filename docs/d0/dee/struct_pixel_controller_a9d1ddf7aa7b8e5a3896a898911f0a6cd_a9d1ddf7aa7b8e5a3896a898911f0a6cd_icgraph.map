@@ -1,0 +1,9 @@
+<map id="PixelController::getscale" name="PixelController::getscale">
+<area shape="rect" id="Node000001" title="Gets the scale data for the provided output slot." alt="" coords="243,55,423,80"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a320fa30e08b30b14bf81dfde27c5b971.html#a320fa30e08b30b14bf81dfde27c5b971" title="non&#45;template alias of getscale&lt;0&gt;()" alt="" coords="5,5,195,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,54,160,33,161,28,259,49"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_aec2cbf1845d2343e2e7b840f36d0bbe7.html#aec2cbf1845d2343e2e7b840f36d0bbe7" title="non&#45;template alias of getscale&lt;1&gt;()" alt="" coords="5,55,195,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,70,195,70,195,65,229,65"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a6ac29f180ad5429301cb6e3ac3966616.html#a6ac29f180ad5429301cb6e3ac3966616" title="non&#45;template alias of getscale&lt;2&gt;()" alt="" coords="5,104,195,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="259,85,161,107,160,101,258,80"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="dim8_raw" name="dim8_raw">
+<area shape="rect" id="Node000001" title="Adjust a scaling value for dimming." alt="" coords="477,70,564,95"/>
+<area shape="rect" id="Node000002" href="$d9/d41/classfl_1_1_noise_palette_a546f14f524f7a1b965c872ddad7be8a4.html#a546f14f524f7a1b965c872ddad7be8a4" title=" " alt="" coords="224,5,419,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="464,69,391,48,392,43,465,64"/>
+<area shape="rect" id="Node000003" href="$da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918" title=" " alt="" coords="213,70,429,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="464,85,429,85,429,80,464,80"/>
+<area shape="rect" id="Node000006" href="$d1/d75/_apa102_h_d_8ino_a3846c2e5efbf9845a845f01ec7af35ff.html#a3846c2e5efbf9845a845f01ec7af35ff" title=" " alt="" coords="254,119,389,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="465,101,430,111,383,122,381,117,429,105,463,96"/>
+<area shape="rect" id="Node000004" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="5,21,165,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="246,70,146,49,148,43,247,65"/>
+<area shape="rect" id="Node000005" href="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="60,70,111,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="200,85,111,85,111,80,200,80"/>
+<area shape="rect" id="Node000007" href="$d1/d75/_apa102_h_d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="60,119,111,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="240,135,111,135,111,129,240,129"/>
+</map>

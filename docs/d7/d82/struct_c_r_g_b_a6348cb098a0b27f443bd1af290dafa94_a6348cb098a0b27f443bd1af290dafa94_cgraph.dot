@@ -1,0 +1,17 @@
+digraph "CRGB::blend"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="CRGB::blend",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa",tooltip="Default constructor."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="blend8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377",tooltip="Blend a variable proportion (0-255) of one byte to another."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="cleanup_R1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79",tooltip="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="scale8_LEAVING_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d",tooltip="This version of scale8() does not clean up the R1 register on AVR."];
+}

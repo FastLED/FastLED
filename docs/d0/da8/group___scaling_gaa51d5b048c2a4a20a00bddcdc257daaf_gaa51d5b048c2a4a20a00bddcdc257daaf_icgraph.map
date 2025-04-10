@@ -1,0 +1,23 @@
+<map id="scale16by8" name="scale16by8">
+<area shape="rect" id="Node000001" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="940,127,1036,153"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff" title=" " alt="" coords="467,33,645,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="972,117,940,70,917,47,891,30,856,18,819,11,782,8,744,9,673,20,613,36,612,31,672,15,744,4,782,3,820,5,857,13,893,26,921,43,944,66,976,114"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aae9d44cd34c016ac8522f638f4b2624d.html#aae9d44cd34c016ac8522f638f4b2624d" title=" " alt="" coords="733,41,872,66"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="958,121,926,100,891,81,857,69,858,64,893,76,929,96,961,117"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_abeb8d8ef178da3a4dbbed27dc6c0c3c7.html#abeb8d8ef178da3a4dbbed27dc6c0c3c7" title=" " alt="" coords="719,91,886,131"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="926,133,886,127,887,121,927,128"/>
+<area shape="rect" id="Node000009" href="$d6/d19/group___linear_interpolation_gaacea0eaea98a065dfa08bb1c147c52a1.html#gaacea0eaea98a065dfa08bb1c147c52a1" title="Linear interpolation between two signed 15&#45;bit values, with 8&#45;bit fraction." alt="" coords="759,155,846,181"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="927,152,847,164,846,159,926,147"/>
+<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_ga8c8f06da86c5d7cf13f55c3a5bfdf251.html#ga8c8f06da86c5d7cf13f55c3a5bfdf251" title="Linear interpolation between two unsigned 16&#45;bit values, with 8&#45;bit fraction." alt="" coords="759,205,846,230"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="956,162,893,195,847,210,845,205,891,190,954,157"/>
+<area shape="rect" id="Node000011" href="$d0/dee/struct_pixel_controller_a052385f847c0e13b506fe7003320e907.html#a052385f847c0e13b506fe7003320e907" title=" " alt="" coords="713,255,892,295"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="972,165,939,206,894,245,871,257,869,252,890,241,935,202,968,162"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aeae140ba48d511d1b20d6bd1b383b22b.html#aeae140ba48d511d1b20d6bd1b383b22b" title=" " alt="" coords="232,33,399,73"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="453,56,399,56,399,51,453,51"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a07853a147d535144f71b3f2640f4b0d5.html#a07853a147d535144f71b3f2640f4b0d5" title=" " alt="" coords="5,33,184,73"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,56,184,56,184,51,218,51"/>
+<area shape="poly" id="edge5_Node000007_Node000002" title=" " alt="" coords="719,56,646,56,646,51,719,51"/>
+<area shape="poly" id="edge7_Node000008_Node000002" title=" " alt="" coords="705,91,642,76,643,71,706,86"/>
+<area shape="rect" id="Node000012" href="$dd/dbc/class_w_s2816_controller_a7d9891631bb3b4e35dcbb93180ac8a55.html#a7d9891631bb3b4e35dcbb93180ac8a55" title="Send the LED data to the strip." alt="" coords="447,262,665,287"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="700,277,666,277,666,272,700,272"/>
+</map>

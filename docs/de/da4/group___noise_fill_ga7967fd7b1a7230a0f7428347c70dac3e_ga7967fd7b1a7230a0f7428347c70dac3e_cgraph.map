@@ -1,0 +1,12 @@
+<map id="fill_noise8" name="fill_noise8">
+<area shape="rect" id="Node000001" title="Fill an LED array with random colors, using 8&#45;bit noise." alt="" coords="5,31,93,56"/>
+<area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="141,31,260,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,41,127,41,127,46,94,46"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="308,5,377,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="260,30,294,24,295,29,261,35"/>
+<area shape="rect" id="Node000010" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="444,55,507,80"/>
+<area shape="poly" id="edge5_Node000002_Node000010" title=" " alt="" coords="260,46,431,61,430,66,260,51"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="425,5,525,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="377,15,411,15,411,21,377,21"/>
+<area shape="poly" id="edge4_Node000003_Node000010" title=" " alt="" coords="378,28,432,49,430,54,377,33"/>
+</map>

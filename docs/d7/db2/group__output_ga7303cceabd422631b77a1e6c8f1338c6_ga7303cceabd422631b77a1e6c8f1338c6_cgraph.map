@@ -1,0 +1,7 @@
+<map id="MidiInterface::sendTuneRequest" name="MidiInterface::sendTuneRequest">
+<area shape="rect" id="Node000001" title="Send a Tune Request message." alt="" coords="5,13,236,38"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_gabc45594bf1156b5020a2fa188c281cd0.html#gabc45594bf1156b5020a2fa188c281cd0" title="Send a Common message. Common messages reset the running status." alt="" coords="284,13,491,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,23,270,23,270,28,236,28"/>
+<area shape="rect" id="Node000003" href="$df/d55/group__thru_ga536d29969dc2a187d9872c5c341ea1ea.html#ga536d29969dc2a187d9872c5c341ea1ea" title=" " alt="" coords="539,5,729,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="491,23,525,23,525,28,491,28"/>
+</map>

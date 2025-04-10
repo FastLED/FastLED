@@ -1,5 +1,29 @@
 var searchData=
 [
-  ['demoreel100_2eino_0',['DemoReel100.ino',['../_demo_reel100_8ino.html',1,'']]],
-  ['dmx_2eh_1',['dmx.h',['../dmx_8h.html',1,'']]]
+  ['callback_2eh_0',['callback.h',['../da/d05/callback_8h.html',1,'']]],
+  ['chipsets_2eh_1',['chipsets.h',['../db/d66/chipsets_8h.html',1,'']]],
+  ['chromancer_2eino_2',['Chromancer.ino',['../d1/ddb/_chromancer_8ino.html',1,'']]],
+  ['chsv_2eh_3',['chsv.h',['../d8/dd0/chsv_8h.html',1,'']]],
+  ['circular_5fbuffer_2eh_4',['circular_buffer.h',['../d9/d43/circular__buffer_8h.html',1,'']]],
+  ['cled_5fcontroller_2ecpp_5',['cled_controller.cpp',['../dd/dd8/cled__controller_8cpp.html',1,'']]],
+  ['cled_5fcontroller_2eh_6',['cled_controller.h',['../db/d6d/cled__controller_8h.html',1,'']]],
+  ['color_2ecpp_7',['color.cpp',['../d3/d03/color_8cpp.html',1,'']]],
+  ['color_2eh_8',['color.h',['../de/de1/examples_2_luminescent_grand_2shared_2color_8h.html',1,'(Global Namespace)'],['../d2/d6b/src_2color_8h.html',1,'(Global Namespace)']]],
+  ['color_5fmapper_2ecpp_9',['color_mapper.cpp',['../d4/df0/color__mapper_8cpp.html',1,'']]],
+  ['color_5fmapper_2eh_10',['color_mapper.h',['../d0/d4f/color__mapper_8h.html',1,'']]],
+  ['colorpalette_2eino_11',['ColorPalette.ino',['../d1/dc5/_color_palette_8ino.html',1,'']]],
+  ['colorpalettes_2ecpp_12',['colorpalettes.cpp',['../d6/dcc/colorpalettes_8cpp.html',1,'']]],
+  ['colorpalettes_2eh_13',['colorpalettes.h',['../dc/dcc/colorpalettes_8h.html',1,'']]],
+  ['colortemperature_2eino_14',['ColorTemperature.ino',['../d7/d22/_color_temperature_8ino.html',1,'']]],
+  ['colorutils_2ecpp_15',['colorutils.cpp',['../da/d2d/colorutils_8cpp.html',1,'']]],
+  ['colorutils_2eh_16',['colorutils.h',['../d1/dfb/colorutils_8h.html',1,'']]],
+  ['controller_2eh_17',['controller.h',['../d2/dd9/controller_8h.html',1,'']]],
+  ['convert_2eh_18',['convert.h',['../d3/d82/convert_8h.html',1,'']]],
+  ['cpixel_5fledcontroller_2eh_19',['cpixel_ledcontroller.h',['../d9/d57/cpixel__ledcontroller_8h.html',1,'']]],
+  ['cpp_5fcompat_2eh_20',['cpp_compat.h',['../d9/d13/cpp__compat_8h.html',1,'']]],
+  ['crgb_2ecpp_21',['crgb.cpp',['../d0/de3/crgb_8cpp.html',1,'']]],
+  ['crgb_2eh_22',['crgb.h',['../db/dd1/crgb_8h.html',1,'']]],
+  ['crgb_2ehpp_23',['crgb.hpp',['../d0/d4b/crgb_8hpp.html',1,'']]],
+  ['cylon_2eh_24',['cylon.h',['../db/d31/cylon_8h.html',1,'']]],
+  ['cylon_2eino_25',['Cylon.ino',['../d8/d97/_cylon_8ino.html',1,'']]]
 ];

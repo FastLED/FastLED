@@ -1,0 +1,9 @@
+<map id="CFastLED::countFPS" name="CFastLED::countFPS">
+<area shape="rect" id="Node000001" title="For debugging, this will keep track of time between calls to countFPS()." alt="" coords="383,31,533,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="193,5,317,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="368,35,317,28,318,23,369,30"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a7315b060d295bad5fbd32e50eaaf02b0.html#a7315b060d295bad5fbd32e50eaaf02b0" title="Set all leds on all controllers to the given color/scale." alt="" coords="176,55,335,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="369,57,335,61,335,55,368,51"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="5,55,128,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="162,70,128,70,128,65,162,65"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="PixelController::loadAndScale1" name="PixelController::loadAndScale1">
+<area shape="rect" id="Node000001" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="260,163,439,203"/>
+<area shape="rect" id="Node000002" href="$d9/d0f/class_d_m_x_serial_controller_a861d9beed51cce6441b50398f1eabebf.html#a861d9beed51cce6441b50398f1eabebf" title="Send the LED data to the strip." alt="" coords="31,5,186,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="320,154,272,106,242,81,211,60,185,48,187,43,213,55,246,77,276,102,324,150"/>
+<area shape="rect" id="Node000003" href="$d0/da7/class_d_m_x_simple_controller_a6744d598f10ba5d97a57df08c46bafab.html#a6744d598f10ba5d97a57df08c46bafab" title="Send the LED data to the strip." alt="" coords="27,69,190,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="294,159,211,124,177,112,179,107,213,119,296,154"/>
+<area shape="rect" id="Node000004" href="$d0/d40/class_l_p_d6803_controller_a35f42384ada050146e6813f0fc766356.html#a35f42384ada050146e6813f0fc766356" title="Send the LED data to the strip." alt="" coords="33,133,184,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="246,173,184,165,184,160,246,167"/>
+<area shape="rect" id="Node000005" href="$d2/dd6/class_p9813_controller_ab7381f0a1850d006f3449d27838b19c5.html#ab7381f0a1850d006f3449d27838b19c5" title="Send the LED data to the strip." alt="" coords="5,198,212,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="246,197,213,201,212,196,246,192"/>
+<area shape="rect" id="Node000006" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="24,248,193,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="285,210,213,237,174,250,172,245,211,232,283,205"/>
+<area shape="rect" id="Node000007" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1" title="write a block of uint8_ts out in groups of three." alt="" coords="21,312,196,352"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="322,215,274,260,213,302,187,314,185,310,211,298,270,255,318,211"/>
+</map>

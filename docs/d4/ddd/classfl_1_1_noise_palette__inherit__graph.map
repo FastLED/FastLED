@@ -1,0 +1,9 @@
+<map id="fl::NoisePalette" name="fl::NoisePalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,125,251"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="30,152,101,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,191,68,225,63,225,63,191"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="38,79,93,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="68,118,68,152,63,152,63,118"/>
+<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="18,5,113,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="68,44,68,79,63,79,63,44"/>
+</map>

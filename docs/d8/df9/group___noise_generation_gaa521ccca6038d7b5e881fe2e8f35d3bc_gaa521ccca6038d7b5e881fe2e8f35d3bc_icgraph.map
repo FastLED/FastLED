@@ -1,0 +1,28 @@
+<map id="inoise8" name="inoise8">
+<area shape="rect" id="Node000001" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="547,228,616,253"/>
+<area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="338,80,473,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="553,221,420,108,423,104,556,217"/>
+<area shape="rect" id="Node000007" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="346,203,465,228"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="532,236,465,226,465,221,533,231"/>
+<area shape="rect" id="Node000010" href="$d6/d9d/_noise_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="365,252,446,277"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="533,250,446,262,446,257,533,245"/>
+<area shape="rect" id="Node000012" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="312,301,499,327"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="552,263,500,292,467,304,465,299,498,288,550,259"/>
+<area shape="poly" id="edge5_Node000002_Node000002" title=" " alt="" coords="436,70,427,62,405,59,387,61,377,65,375,71,380,78,376,81,370,72,373,62,385,56,405,53,430,57,440,66"/>
+<area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc" title="Fill an LED matrix with random colors, using 16&#45;bit noise." alt="" coords="128,5,240,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,78,263,46,225,33,226,28,265,41,357,73"/>
+<area shape="rect" id="Node000005" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="132,55,236,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="324,86,236,76,236,71,325,81"/>
+<area shape="rect" id="Node000006" href="$de/da4/group___noise_fill_gaaa7d79bb9fdaf2c6b315c61c2c951142.html#gaaa7d79bb9fdaf2c6b315c61c2c951142" title=" " alt="" coords="117,104,251,129"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="325,104,252,112,251,107,324,99"/>
+<area shape="rect" id="Node000004" href="$d7/ddc/_noise_playground_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,21,56,21,56,15,114,15"/>
+<area shape="rect" id="Node000008" href="$de/da4/group___noise_fill_ga8bf5ab0f87a6bb79204754ef2a62f960.html#ga8bf5ab0f87a6bb79204754ef2a62f960" title="Fill an LED array with random colors, using 16&#45;bit noise." alt="" coords="136,153,232,179"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="334,202,232,179,233,174,335,197"/>
+<area shape="rect" id="Node000009" href="$de/da4/group___noise_fill_ga7967fd7b1a7230a0f7428347c70dac3e.html#ga7967fd7b1a7230a0f7428347c70dac3e" title="Fill an LED array with random colors, using 8&#45;bit noise." alt="" coords="140,203,228,228"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="333,218,228,218,228,213,333,213"/>
+<area shape="rect" id="Node000011" href="$d6/d9d/_noise_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="159,252,209,277"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="350,267,210,267,210,262,350,262"/>
+<area shape="rect" id="Node000013" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="104,301,264,327"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="298,317,264,317,264,311,298,311"/>
+</map>

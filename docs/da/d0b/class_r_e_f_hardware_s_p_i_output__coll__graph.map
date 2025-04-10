@@ -1,0 +1,5 @@
+<map id="REFHardwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;" name="REFHardwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;">
+<area shape="rect" id="Node000001" title="A skeletal implementation of hardware SPI support." alt="" coords="5,93,204,148"/>
+<area shape="rect" id="Node000002" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="59,5,150,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,45,107,93,102,93,102,45"/>
+</map>

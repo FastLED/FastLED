@@ -1,0 +1,22 @@
+<map id="Painter::PaintVuNotes" name="Painter::PaintVuNotes">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,167,179"/>
+<area shape="rect" id="Node000002" href="$de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9" title=" " alt="" coords="288,29,400,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,151,146,108,178,85,214,65,243,54,273,47,275,52,245,59,216,70,181,89,149,112,102,155"/>
+<area shape="rect" id="Node000006" href="$d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25" title=" " alt="" coords="237,79,451,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="115,151,214,114,253,104,255,109,215,119,117,156"/>
+<area shape="rect" id="Node000007" href="$d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac" title=" " alt="" coords="223,128,465,153"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="166,155,209,151,209,157,167,161"/>
+<area shape="rect" id="Node000008" href="$d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a" title=" " alt="" coords="215,177,473,203"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="167,171,201,174,201,179,166,176"/>
+<area shape="rect" id="Node000009" href="$d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123" title=" " alt="" coords="241,227,447,267"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="118,176,216,213,244,221,242,226,214,218,116,181"/>
+<area shape="rect" id="Node000010" href="$d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5" title=" " alt="" coords="278,292,410,317"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="100,177,146,227,179,254,216,277,265,294,264,299,214,282,176,259,143,231,96,181"/>
+<area shape="rect" id="Node000003" href="$de/d12/struct_color3i_a61889348324aefa14c28164d41e98e2a.html#a61889348324aefa14c28164d41e98e2a" title=" " alt="" coords="521,5,644,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,34,507,23,508,28,400,39"/>
+<area shape="rect" id="Node000005" href="$de/d12/struct_color3i_a49dcda1c5a2731858de82313748b85a2.html#a49dcda1c5a2731858de82313748b85a2" title=" " alt="" coords="521,55,644,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="400,45,508,57,507,62,400,51"/>
+<area shape="rect" id="Node000004" href="$de/d12/struct_color3i_a83d27d6442838f43816b4bd5f937b33d.html#a83d27d6442838f43816b4bd5f937b33d" title=" " alt="" coords="692,31,789,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="644,25,679,31,678,36,644,30"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="644,55,678,50,679,55,644,61"/>
+</map>

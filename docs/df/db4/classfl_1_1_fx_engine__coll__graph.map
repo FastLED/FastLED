@@ -1,0 +1,19 @@
+<map id="fl::FxEngine" name="fl::FxEngine">
+<area shape="rect" id="Node000001" title="Manages and renders multiple visual effects (Fx) for LED strips." alt="" coords="996,69,1095,95"/>
+<area shape="rect" id="Node000002" href="$d4/d54/classfl_1_1_time_scale.html" title=" " alt="" coords="687,5,793,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="807,26,973,59,1001,67,1000,72,971,65,806,32"/>
+<area shape="rect" id="Node000003" href="$d8/db5/classfl_1_1_time_function.html" title=" " alt="" coords="297,5,424,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,15,686,15,686,21,438,21"/>
+<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="59,5,154,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="168,15,297,15,297,21,168,21"/>
+<area shape="rect" id="Node000011" href="$d2/df3/classfl_1_1_fixed_map.html" title=" " alt="" coords="637,55,843,109"/>
+<area shape="poly" id="edge4_Node000001_Node000011" title=" " alt="" coords="856,79,996,79,996,85,856,85"/>
+<area shape="rect" id="Node000012" href="$d2/df3/classfl_1_1_fixed_map.html" title=" " alt="" coords="289,62,432,102"/>
+<area shape="poly" id="edge5_Node000011_Node000012" title=" " alt="" coords="446,79,637,79,637,85,446,85"/>
+<area shape="rect" id="Node000013" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="5,69,208,95"/>
+<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="222,79,289,79,289,85,222,85"/>
+<area shape="rect" id="Node000015" href="$d7/df1/classfl_1_1_fx_compositor.html" title=" " alt="" coords="675,133,805,159"/>
+<area shape="poly" id="edge7_Node000001_Node000015" title=" " alt="" coords="818,130,971,99,1000,92,1001,97,973,105,819,136"/>
+<area shape="rect" id="Node000016" href="$d7/dde/classfl_1_1_transition.html" title=" " alt="" coords="310,133,411,159"/>
+<area shape="poly" id="edge8_Node000015_Node000016" title=" " alt="" coords="425,143,675,143,675,149,425,149"/>
+</map>

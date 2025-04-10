@@ -1,0 +1,15 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,56,105"/>
+<area shape="rect" id="Node000002" href="$d4/d26/_fire2012_8ino_a381ceb87530dc5fee1be3e77d33b3a53.html#a381ceb87530dc5fee1be3e77d33b3a53" title=" " alt="" coords="104,80,183,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,90,90,90,90,95,56,95"/>
+<area shape="rect" id="Node000003" href="$da/de3/group___color_fills_gac5c6b83ec07d310385a430f9f0336530.html#gac5c6b83ec07d310385a430f9f0336530" title="Approximates a &quot;black body radiation&quot; spectrum for a given &quot;heat&quot; level." alt="" coords="231,5,317,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="165,78,229,40,237,36,239,40,232,44,168,82"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="243,55,305,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="182,83,229,73,230,79,183,88"/>
+<area shape="rect" id="Node000006" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="243,104,305,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="183,97,230,106,229,111,182,102"/>
+<area shape="rect" id="Node000007" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="234,153,314,179"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="168,103,240,144,237,149,166,108"/>
+<area shape="rect" id="Node000004" href="$d0/da8/group___scaling_ga628b417ea1507e3447cdf5f308d9b6d5.html#ga628b417ea1507e3447cdf5f308d9b6d5" title="The &quot;video&quot; version of scale8() guarantees that the output will be only be zero if one or both of the..." alt="" coords="365,5,472,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="318,15,352,15,352,21,318,21"/>
+</map>

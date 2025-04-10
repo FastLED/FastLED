@@ -1,0 +1,19 @@
+digraph "hsv2rgb_raw_C"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="hsv2rgb_raw_C",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="HSV to RGB implementation in raw C, platform independent."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="hsv2rgb_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019",tooltip="Convert an HSV value to RGB using a mathematically straight spectrum."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="hsv2rgb_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_ga5ca233d1f5f70b5efdabc405f9bcf8ec.html#ga5ca233d1f5f70b5efdabc405f9bcf8ec",tooltip="Convert an HSV value to RGB using a mathematically straight spectrum."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="hsv2rgb_spectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440.html#ga704160ddb9173c3420a3dbfb44674440",tooltip="Convert an HSV value to RGB using a mathematically straight spectrum."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="hsv2rgb_spectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_gaa9d490009cb1d6ea0491e60b724d360f.html#gaa9d490009cb1d6ea0491e60b724d360f",tooltip="Inline version of hsv2rgb_spectrum which returns a CRGB object."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="hsv2rgb_spectrum",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_gaabe3b0d539d6e15bc4ba86e10ec98fcc.html#gaabe3b0d539d6e15bc4ba86e10ec98fcc",tooltip="Convert an HSV value to RGB using a mathematically straight spectrum."];
+}

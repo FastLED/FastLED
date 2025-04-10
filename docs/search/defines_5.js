@@ -1,5 +1,21 @@
 var searchData=
 [
-  ['hsv_5fsection_5f3_0',['HSV_SECTION_3',['../hsv2rgb_8cpp.html#aeeee29536659359a2d1bd0be6339aaa0',1,'hsv2rgb.cpp']]],
-  ['hsv_5fsection_5f6_1',['HSV_SECTION_6',['../hsv2rgb_8cpp.html#a08e6bc6fcc0701f8fbbdbead2f7e3167',1,'hsv2rgb.cpp']]]
+  ['enable_5fsketch_0',['ENABLE_SKETCH',['../d5/d64/defs_8h_a8bdb68d40692fac3a0b1a06f7aec4095.html#a8bdb68d40692fac3a0b1a06f7aec4095',1,'defs.h']]],
+  ['end_5fmidi_5fnamespace_1',['END_MIDI_NAMESPACE',['../df/dce/midi___namespace_8h_abf831eff386c2ded4d253fb11321028e.html#abf831eff386c2ded4d253fb11321028e',1,'midi_Namespace.h']]],
+  ['example_5fpin_5fnum_5fdata0_2',['EXAMPLE_PIN_NUM_DATA0',['../db/de9/_esp32_s3_i2_s_demo_8ino_a448a1566ed3fdb88fc232948caa915bf.html#a448a1566ed3fdb88fc232948caa915bf',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata1_3',['EXAMPLE_PIN_NUM_DATA1',['../db/de9/_esp32_s3_i2_s_demo_8ino_aedb9e3ba1b4bddea8a13db042d698e36.html#aedb9e3ba1b4bddea8a13db042d698e36',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata10_4',['EXAMPLE_PIN_NUM_DATA10',['../db/de9/_esp32_s3_i2_s_demo_8ino_adbb8a257e53c559d31db8991afc51731.html#adbb8a257e53c559d31db8991afc51731',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata11_5',['EXAMPLE_PIN_NUM_DATA11',['../db/de9/_esp32_s3_i2_s_demo_8ino_a0a5a056eb51f9c383a6dbfc2fcd14f76.html#a0a5a056eb51f9c383a6dbfc2fcd14f76',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata12_6',['EXAMPLE_PIN_NUM_DATA12',['../db/de9/_esp32_s3_i2_s_demo_8ino_a453149e6ff311e3328bdb58998d8c891.html#a453149e6ff311e3328bdb58998d8c891',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata13_7',['EXAMPLE_PIN_NUM_DATA13',['../db/de9/_esp32_s3_i2_s_demo_8ino_adb304b6053077a7db7b783328186ba1f.html#adb304b6053077a7db7b783328186ba1f',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata14_8',['EXAMPLE_PIN_NUM_DATA14',['../db/de9/_esp32_s3_i2_s_demo_8ino_af4c6bf34554321d2beb2e87f619ad57a.html#af4c6bf34554321d2beb2e87f619ad57a',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata15_9',['EXAMPLE_PIN_NUM_DATA15',['../db/de9/_esp32_s3_i2_s_demo_8ino_a78b5ac0765128dfa7b7fef2415f30f0d.html#a78b5ac0765128dfa7b7fef2415f30f0d',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata2_10',['EXAMPLE_PIN_NUM_DATA2',['../db/de9/_esp32_s3_i2_s_demo_8ino_a097af3bc0d97d776917b7bc74f428f68.html#a097af3bc0d97d776917b7bc74f428f68',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata3_11',['EXAMPLE_PIN_NUM_DATA3',['../db/de9/_esp32_s3_i2_s_demo_8ino_afb86099d1c12aa1a4785cfa503b721ec.html#afb86099d1c12aa1a4785cfa503b721ec',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata4_12',['EXAMPLE_PIN_NUM_DATA4',['../db/de9/_esp32_s3_i2_s_demo_8ino_a87095fe497c2414aa645ae8f68f9ad60.html#a87095fe497c2414aa645ae8f68f9ad60',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata5_13',['EXAMPLE_PIN_NUM_DATA5',['../db/de9/_esp32_s3_i2_s_demo_8ino_a9c6f4519b104f8a478800fdb63153670.html#a9c6f4519b104f8a478800fdb63153670',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata6_14',['EXAMPLE_PIN_NUM_DATA6',['../db/de9/_esp32_s3_i2_s_demo_8ino_a320577771aa2aabf6fda35619113f0e7.html#a320577771aa2aabf6fda35619113f0e7',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata7_15',['EXAMPLE_PIN_NUM_DATA7',['../db/de9/_esp32_s3_i2_s_demo_8ino_ad1e539ec43caf3971edec6bac0e64985.html#ad1e539ec43caf3971edec6bac0e64985',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata8_16',['EXAMPLE_PIN_NUM_DATA8',['../db/de9/_esp32_s3_i2_s_demo_8ino_a11751ba646ca88ecc31c9a228da6b5ed.html#a11751ba646ca88ecc31c9a228da6b5ed',1,'Esp32S3I2SDemo.ino']]],
+  ['example_5fpin_5fnum_5fdata9_17',['EXAMPLE_PIN_NUM_DATA9',['../db/de9/_esp32_s3_i2_s_demo_8ino_a9bb8f64f1d8643a124b357c65d446a29.html#a9bb8f64f1d8643a124b357c65d446a29',1,'Esp32S3I2SDemo.ino']]]
 ];

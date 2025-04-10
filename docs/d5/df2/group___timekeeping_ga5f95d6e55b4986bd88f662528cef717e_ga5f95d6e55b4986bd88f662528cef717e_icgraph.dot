@@ -1,0 +1,13 @@
+digraph "div1024_32_16"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="div1024_32_16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Helper routine to divide a 32-bit value by 1024, returning only the low 16 bits."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="bseconds16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97417e93b.html#ga52659d1994f2f21eb05080c97417e93b",tooltip="Returns the current time-since-boot in \"binary seconds\", which are actually 1024/1000 of a second lon..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="INSTANTIATE_EVERY_N\l_TIME_PERIODS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df2/group___timekeeping_gad9813d2fd3ed9e61acacda3ccf2f6bd4.html#gad9813d2fd3ed9e61acacda3ccf2f6bd4",tooltip="Create the CEveryNBSeconds class for bsecond intervals."];
+}

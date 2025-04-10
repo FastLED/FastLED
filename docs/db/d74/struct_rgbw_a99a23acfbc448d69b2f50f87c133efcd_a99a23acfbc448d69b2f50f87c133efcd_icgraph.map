@@ -1,0 +1,12 @@
+<map id="Rgbw::size_as_rgb" name="Rgbw::size_as_rgb">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,95,621,120"/>
+<area shape="rect" id="Node000002" href="$da/d9d/structfl_1_1_draw_item_a0adc06939bcddde0d6d6cef8e8a18d60.html#a0adc06939bcddde0d6d6cef8e8a18d60" title=" " alt="" coords="250,5,425,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="516,90,476,67,431,46,393,33,395,28,433,41,479,62,519,85"/>
+<area shape="rect" id="Node000003" href="$d5/d83/class_r_g_b_w_emulated_controller_a460b948159965c26b3d6eabb58311c36.html#a460b948159965c26b3d6eabb58311c36" title=" " alt="" coords="243,55,432,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="466,97,432,92,433,87,467,92"/>
+<area shape="rect" id="Node000004" href="$d5/d83/class_r_g_b_w_emulated_controller_ac75fed11a6434fa6d70451850a158636.html#ac75fed11a6434fa6d70451850a158636" title=" " alt="" coords="243,119,432,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="467,123,433,128,432,122,466,117"/>
+<area shape="rect" id="Node000005" href="$d5/d83/class_r_g_b_w_emulated_controller_aba9a2f023f2950dbcdf3c2482f765350.html#aba9a2f023f2950dbcdf3c2482f765350" title="Send the LED data to the strip." alt="" coords="5,149,195,189"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="522,130,482,155,433,174,372,185,309,189,195,185,195,179,309,184,371,180,431,169,479,150,520,126"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="230,155,195,160,194,154,229,150"/>
+</map>

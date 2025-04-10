@@ -1,0 +1,13 @@
+<map id="CFastLED::setDither" name="CFastLED::setDither">
+<area shape="rect" id="Node000001" title="Set the dithering mode." alt="" coords="5,55,156,80"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="218,5,378,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,52,227,31,229,36,138,57"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="219,55,377,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="156,65,205,65,205,70,156,70"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279" title="Set the dithering mode for this controller to use." alt="" coords="204,104,392,129"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="138,77,229,98,227,104,137,83"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="440,55,667,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,28,474,49,473,55,364,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="377,65,426,65,426,70,377,70"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="364,101,473,80,474,85,365,107"/>
+</map>

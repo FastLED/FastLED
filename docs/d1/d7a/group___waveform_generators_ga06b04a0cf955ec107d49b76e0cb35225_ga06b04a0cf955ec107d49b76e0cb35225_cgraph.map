@@ -1,0 +1,9 @@
+<map id="cubicwave8" name="cubicwave8">
+<area shape="rect" id="Node000001" title="Cubic waveform generator." alt="" coords="5,31,104,56"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d568.html#ga3fa6d71702477e71d7c0dd864eb1d568" title="8&#45;bit cubic ease&#45;in / ease&#45;out function." alt="" coords="152,5,284,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,33,138,28,139,33,105,38"/>
+<area shape="rect" id="Node000004" href="$d1/d7a/group___waveform_generators_gae9e011ff745ade1164ae77b0ef62bfac.html#gae9e011ff745ade1164ae77b0ef62bfac" title="Triangle wave generator." alt="" coords="179,55,257,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="105,48,165,57,164,62,104,53"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="332,5,528,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="284,15,318,15,318,21,284,21"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="CLEDController::next" name="CLEDController::next">
+<area shape="rect" id="Node000001" title="Get the next controller in the linked list after this one." alt="" coords="5,5,163,31"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="211,5,437,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,15,197,15,197,21,163,21"/>
+</map>

@@ -1,0 +1,42 @@
+digraph "fl::NoisePalette::draw"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::NoisePalette::draw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::NoisePalette::fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="inoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc",tooltip="8-Bit, fixed point implementation of Perlin's noise."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="inoise8_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71",tooltip="8-bit, fixed point implementation of Perlin's noise without scaling."];
+  Node3 -> Node10 [id="edge4_Node000003_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="qadd8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5",tooltip="Add one byte to another, saturating at 0xFF."];
+  Node2 -> Node10 [id="edge5_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node11 [id="edge6_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="qsub8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3",tooltip="Subtract one byte from another, saturating at 0x00."];
+  Node2 -> Node9 [id="edge7_Node000002_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
+  Node1 -> Node12 [id="edge8_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="mapNoiseToLEDsUsingPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918",tooltip=" "];
+  Node12 -> Node13 [id="edge9_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd",tooltip="Get a color from a palette."];
+  Node13 -> Node14 [id="edge10_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="blend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c",tooltip="Computes a new color blended some fraction of the way between two other colors."];
+  Node13 -> Node17 [id="edge11_Node000013_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="cleanup_R1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79",tooltip="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls."];
+  Node13 -> Node19 [id="edge12_Node000013_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="lsrX4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170",tooltip="Helper function to divide a number by 16, aka four logical shift right (LSR)'s."];
+  Node13 -> Node20 [id="edge13_Node000013_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="map8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d",tooltip="Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues."];
+  Node20 -> Node9 [id="edge14_Node000020_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node13 -> Node18 [id="edge15_Node000013_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="scale8_LEAVING_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d",tooltip="This version of scale8() does not clean up the R1 register on AVR."];
+  Node12 -> Node21 [id="edge16_Node000012_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="dim8_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d3e/group___dimming_gae51352a3522bb8eae5e17dbee97aa1aa.html#gae51352a3522bb8eae5e17dbee97aa1aa",tooltip="Adjust a scaling value for dimming."];
+  Node21 -> Node9 [id="edge17_Node000021_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node22 [id="edge18_Node000012_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb",tooltip=" "];
+}

@@ -1,0 +1,24 @@
+<map id="fl::NoisePalette::NoisePalette" name="fl::NoisePalette::NoisePalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,85,216,111"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d_a98879bee7a7a97ceb2cc34ea2eefc7fe.html#a98879bee7a7a97ceb2cc34ea2eefc7fe" title=" " alt="" coords="305,9,416,35"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,83,304,36,306,41,154,88"/>
+<area shape="rect" id="Node000004" href="$d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" title=" " alt="" coords="553,55,676,80"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="216,89,539,69,539,75,217,94"/>
+<area shape="rect" id="Node000005" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="317,111,405,136"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="216,106,303,115,303,120,216,111"/>
+<area shape="rect" id="Node000006" href="$d9/d41/classfl_1_1_noise_palette_ae6488d109988a70f949dba4dd8f3d2ed.html#ae6488d109988a70f949dba4dd8f3d2ed" title=" " alt="" coords="264,163,457,203"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="150,108,289,156,287,161,148,113"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx_aa4a990c2a2d04e57046cf8b0f64ce4e7.html#aa4a990c2a2d04e57046cf8b0f64ce4e7" title=" " alt="" coords="575,5,654,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,18,562,16,562,21,417,24"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="417,29,540,51,539,57,416,34"/>
+<area shape="rect" id="Node000007" href="$d9/d41/classfl_1_1_noise_palette_a3edcb0dfbc5280fffcd9776bc59f6899.html#a3edcb0dfbc5280fffcd9776bc59f6899" title=" " alt="" coords="514,105,715,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="447,161,513,145,515,150,448,166"/>
+<area shape="rect" id="Node000009" href="$d9/d41/classfl_1_1_noise_palette_a7b4bff9751e94b0ca2c4deaff12d485b.html#a7b4bff9751e94b0ca2c4deaff12d485b" title=" " alt="" coords="511,169,718,209"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="457,183,498,184,498,189,457,188"/>
+<area shape="rect" id="Node000010" href="$d9/d41/classfl_1_1_noise_palette_ac7e866ba3586a6d8fcc916347ae8e83b.html#ac7e866ba3586a6d8fcc916347ae8e83b" title=" " alt="" coords="505,233,724,273"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="435,201,528,226,527,232,434,206"/>
+<area shape="rect" id="Node000008" href="$da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" title="Fill a range of LEDs with a solid color." alt="" coords="774,112,850,137"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="716,122,760,122,760,127,716,127"/>
+<area shape="rect" id="Node000011" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="772,240,852,265"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="724,250,758,250,758,255,724,255"/>
+</map>

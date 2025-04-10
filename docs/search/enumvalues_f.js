@@ -1,23 +1,5 @@
 var searchData=
 [
-  ['saddlebrown_0',['SaddleBrown',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a40afb53972f8fdf939579c83732f657d',1,'CRGB']]],
-  ['salmon_1',['Salmon',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a09306ce97ac75af4ba707d6070e20070',1,'CRGB']]],
-  ['sandybrown_2',['SandyBrown',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a5c2543c0555eeca82683c7b9dd430cb2',1,'CRGB']]],
-  ['seagreen_3',['SeaGreen',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a96a5e3421d5ba2646dc6fb06c1b9932e',1,'CRGB']]],
-  ['seashell_4',['Seashell',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a29620709e3d00ae9244d761ac7b2cb05',1,'CRGB']]],
-  ['shortest_5fhues_5',['SHORTEST_HUES',['../group___color_fills.html#gga097bfc6a8459d95e8afa8a16b9e6476aadc8aca2a3622de4cab05ca49cb740d03',1,'colorutils.h']]],
-  ['sienna_6',['Sienna',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a020b9f869e5279a46ba83c4b109848ee',1,'CRGB']]],
-  ['silver_7',['Silver',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a3b48c8058f1b90d745a5c94bdb38fc23',1,'CRGB']]],
-  ['sk9822_8',['SK9822',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a4084a8d1074bd46a82ca4a5fabf982cb',1,'FastLED.h']]],
-  ['sk9822hd_9',['SK9822HD',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a3b67cd8706aa03d1d3e662a6199a87e2',1,'FastLED.h']]],
-  ['skyblue_10',['SkyBlue',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a7365c1d1636db7a184e544fad373d1b0',1,'CRGB']]],
-  ['slateblue_11',['SlateBlue',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a399de447abec7c91844070f73fed1149',1,'CRGB']]],
-  ['slategray_12',['SlateGray',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ac1b87f3babb84b57e3c3ed532d43dfb2',1,'CRGB']]],
-  ['slategrey_13',['SlateGrey',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a1190005afb214be40a6302e82767bcd1',1,'CRGB']]],
-  ['sm16716_14',['SM16716',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ae3310d0ea78bcb438c431e44f4da34f7',1,'FastLED.h']]],
-  ['snow_15',['Snow',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99af5a6d928331158fdb7cb84a143b9cc52',1,'CRGB']]],
-  ['sodiumvapor_16',['SodiumVapor',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9aa0d9bb26657105cc2e63e91b75a38dd4',1,'color.h']]],
-  ['springgreen_17',['SpringGreen',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ac401f99bf21224c369ac76f9770b74b2',1,'CRGB']]],
-  ['standardfluorescent_18',['StandardFluorescent',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9abfb2193168a3c15178665eb6b91568ef',1,'color.h']]],
-  ['steelblue_19',['SteelBlue',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a6a94dc91b16e639be9016925fc27596f',1,'CRGB']]]
+  ['queue_5fdone_0',['QUEUE_DONE',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfaafbb6283fe1cf3600b547d579089e2b0',1,'fl::RectangularDrawBuffer']]],
+  ['queueing_1',['QUEUEING',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfa332f6d620a308da9cfc601c35b6d20b9',1,'fl::RectangularDrawBuffer']]]
 ];

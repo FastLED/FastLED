@@ -1,0 +1,35 @@
+<map id="DMXSimpleController::showPixels" name="DMXSimpleController::showPixels">
+<area shape="rect" id="Node000001" title="Send the LED data to the strip." alt="" coords="5,137,168,177"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="217,5,428,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,134,150,86,181,61,215,40,231,33,233,38,217,44,184,65,153,90,107,138"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ac13f3e00855fcf6125ea27543c2fb48c.html#ac13f3e00855fcf6125ea27543c2fb48c" title="Do we have n pixels left to process?" alt="" coords="249,55,397,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="122,134,166,111,215,90,244,81,246,86,217,95,168,116,124,139"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a4984f158bbc3b6c79ca16dd847fe67e1.html#a4984f158bbc3b6c79ca16dd847fe67e1" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="233,105,412,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="168,143,219,136,220,141,169,148"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_a11f9b50f738c6d57d08d6776b3d8eb43.html#a11f9b50f738c6d57d08d6776b3d8eb43" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="233,169,412,209"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="169,165,220,172,219,177,168,170"/>
+<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_a33c22b408cbc9eb8b9d98993fe985264.html#a33c22b408cbc9eb8b9d98993fe985264" title="non&#45;template alias of loadAndScale&lt;2&gt;()" alt="" coords="233,233,412,273"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="125,174,217,218,238,226,236,231,215,223,123,179"/>
+<area shape="rect" id="Node000015" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward." alt="" coords="216,297,429,323"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="104,175,151,229,182,258,217,282,234,290,232,295,215,287,179,262,147,233,100,179"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="477,230,656,270"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="403,142,431,154,456,172,479,192,522,221,519,225,476,196,452,176,428,159,401,147"/>
+<area shape="rect" id="Node000011" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="487,157,646,183"/>
+<area shape="poly" id="edge11_Node000004_Node000011" title=" " alt="" coords="413,139,485,152,484,157,412,144"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="935,233,1155,259"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="618,268,660,281,704,291,795,301,886,291,945,278,998,261,1000,266,947,283,887,297,795,306,704,297,659,286,617,273"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f" title="Calculate a dither value using the per&#45;channel dither data." alt="" coords="714,208,877,233"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="656,236,700,230,701,235,656,241"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="704,257,887,283"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="656,255,691,258,690,264,656,260"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="1004,235,996,225,1000,215,1017,209,1045,207,1080,211,1090,215,1093,221,1089,224,1086,219,1078,216,1045,212,1018,214,1004,219,1001,224,1008,231"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="877,226,921,231,921,236,876,232"/>
+<area shape="poly" id="edge10_Node000010_Node000006" title=" " alt="" coords="887,259,921,255,921,261,887,264"/>
+<area shape="poly" id="edge12_Node000011_Node000006" title=" " alt="" coords="647,168,761,175,887,193,947,208,1000,226,998,231,945,213,886,198,760,181,646,174"/>
+<area shape="rect" id="Node000012" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="763,107,827,132"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="624,155,749,127,750,132,626,160"/>
+<area shape="poly" id="edge15_Node000013_Node000005" title=" " alt="" coords="404,206,474,224,472,229,402,211"/>
+<area shape="poly" id="edge16_Node000013_Node000011" title=" " alt="" coords="412,179,473,174,474,180,412,185"/>
+<area shape="poly" id="edge18_Node000014_Node000005" title=" " alt="" coords="412,249,463,248,464,254,412,254"/>
+<area shape="poly" id="edge19_Node000014_Node000011" title=" " alt="" coords="391,230,428,218,519,185,521,190,430,223,393,235"/>
+</map>

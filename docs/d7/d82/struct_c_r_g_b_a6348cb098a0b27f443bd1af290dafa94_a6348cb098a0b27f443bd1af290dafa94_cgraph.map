@@ -1,0 +1,11 @@
+<map id="CRGB::blend" name="CRGB::blend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,108,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="156,5,260,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,32,142,26,143,32,109,37"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="175,55,241,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="109,49,162,57,161,63,108,54"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="357,29,455,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="241,61,343,47,344,53,242,66"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="308,79,504,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="242,69,295,75,294,80,241,74"/>
+</map>

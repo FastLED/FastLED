@@ -1,0 +1,30 @@
+<map id="FastPin::lo" name="FastPin::lo">
+<area shape="rect" id="Node000001" title="Set the pin state to LOW" alt="" coords="657,323,745,349"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad13d8cd559302413e8c885aab5ad7497.html#ad13d8cd559302413e8c885aab5ad7497" title="Write the BIT&#39;th bit out via SPI, setting the data pin then strobing the clock." alt="" coords="440,284,609,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="643,328,609,322,610,317,644,323"/>
+<area shape="rect" id="Node000017" href="$dc/d57/class_a_v_r_software_s_p_i_output_afbf1b2de4c9085d8260634be760f74fd.html#afbf1b2de4c9085d8260634be760f74fd" title="Write the BIT&#39;th bit out via SPI, setting the data pin then strobing the clock, using the passed in p..." alt="" coords="440,348,609,388"/>
+<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="644,349,610,355,609,350,643,344"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a4c5578242dfaf8d6713ec432d6985187.html#a4c5578242dfaf8d6713ec432d6985187" title="The version of writeBit() to use when clock and data are on the same port with precomputed values for..." alt="" coords="223,133,392,173"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="495,276,448,231,391,188,368,176,370,171,393,183,452,227,498,272"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_a58393081ec8c54bd6968642b89e8bd43.html#a58393081ec8c54bd6968642b89e8bd43" title="Write a single byte over SPI." alt="" coords="223,197,392,237"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="460,281,358,240,360,235,462,276"/>
+<area shape="rect" id="Node000012" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="5,325,175,365"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="426,297,328,294,275,296,223,303,144,328,143,323,222,297,274,291,327,289,426,291"/>
+<area shape="rect" id="Node000014" href="$dc/d57/class_a_v_r_software_s_p_i_output_a0c8dbe47347851f226a525db7262c786.html#a0c8dbe47347851f226a525db7262c786" title="writeByte() implementation with data/clock registers passed in." alt="" coords="223,312,392,352"/>
+<area shape="poly" id="edge10_Node000002_Node000014" title=" " alt="" coords="427,319,392,324,392,318,426,314"/>
+<area shape="rect" id="Node000015" href="$dc/d57/class_a_v_r_software_s_p_i_output_aa0d0d1b56c6a174ff85e36c9ec06c7bf.html#aa0d0d1b56c6a174ff85e36c9ec06c7bf" title="writeByte() implementation with not just registers passed in, but pre&#45;baked values for said registers..." alt="" coords="223,376,392,416"/>
+<area shape="poly" id="edge11_Node000002_Node000015" title=" " alt="" coords="456,332,441,338,393,366,366,378,364,373,391,362,439,334,454,327"/>
+<area shape="rect" id="Node000016" href="$dc/d57/class_a_v_r_software_s_p_i_output_a4bf20050509ed87b15c4df4070d000b6.html#a4bf20050509ed87b15c4df4070d000b6" title="writeByte() implementation with the data register passed in and prebaked values for data hi w/clock h..." alt="" coords="223,440,392,480"/>
+<area shape="poly" id="edge12_Node000002_Node000016" title=" " alt="" coords="447,334,442,338,425,360,419,383,412,406,394,430,377,442,373,438,390,426,407,404,413,381,420,358,438,334,444,329"/>
+<area shape="rect" id="Node000005" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad5f106b07a655da37d889037f524617d.html#ad5f106b07a655da37d889037f524617d" title="Write a single byte over SPI without waiting." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="225,191,221,187,208,171,201,154,196,122,192,90,185,75,173,59,157,47,161,43,177,55,190,72,197,89,201,121,206,152,212,168,225,184,229,188"/>
+<area shape="rect" id="Node000006" href="$dc/d57/class_a_v_r_software_s_p_i_output_a80903ee9d3226ced43e8f614a9e486b1.html#a80903ee9d3226ced43e8f614a9e486b1" title="Write a single byte over SPI and wait afterwards." alt="" coords="5,69,175,109"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="229,193,221,187,205,171,196,155,188,139,173,123,154,112,157,107,176,119,192,136,201,152,209,168,224,183,232,188"/>
+<area shape="rect" id="Node000007" href="$dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9" title="Write an array of data to the SPI interface." alt="" coords="5,133,175,173"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="225,196,158,176,159,171,227,191"/>
+<area shape="rect" id="Node000009" href="$dc/d57/class_a_v_r_software_s_p_i_output_abada62794ed922c2798bf462a98b57f0.html#abada62794ed922c2798bf462a98b57f0" title="Write multiple bytes of the given value over SPI, without selecting the interface." alt="" coords="5,197,175,237"/>
+<area shape="poly" id="edge7_Node000004_Node000009" title=" " alt="" coords="209,220,175,220,175,215,209,215"/>
+<area shape="poly" id="edge8_Node000004_Node000012" title=" " alt="" coords="243,246,224,258,210,272,201,286,192,301,176,315,155,328,153,323,173,311,188,297,197,284,206,269,221,254,240,242"/>
+<area shape="rect" id="Node000013" href="$dc/d57/class_a_v_r_software_s_p_i_output_a34421832d232a692d08d39d87733acd8.html#a34421832d232a692d08d39d87733acd8" title="Write a word (two bytes) over SPI." alt="" coords="5,261,175,301"/>
+<area shape="poly" id="edge9_Node000004_Node000013" title=" " alt="" coords="227,244,159,264,158,259,225,239"/>
+</map>

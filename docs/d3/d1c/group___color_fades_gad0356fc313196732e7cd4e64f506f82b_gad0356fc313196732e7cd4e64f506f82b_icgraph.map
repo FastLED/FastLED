@@ -1,0 +1,25 @@
+<map id="nscale8" name="nscale8">
+<area shape="rect" id="Node000001" title="Scale the brightness of an array of pixels all at once." alt="" coords="661,129,733,155"/>
+<area shape="rect" id="Node000002" href="$d3/d1c/group___color_fades_gac020b03041306ed9c859bbdfebe943cf.html#gac020b03041306ed9c859bbdfebe943cf" title="Reduce the brightness of an array of pixels all at once." alt="" coords="513,104,595,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="648,136,595,127,596,121,649,131"/>
+<area shape="rect" id="Node000003" href="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98" title="Reduce the brightness of an array of pixels all at once." alt="" coords="495,153,613,179"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="648,153,614,159,613,153,647,148"/>
+<area shape="rect" id="Node000004" href="$d5/d25/_demo_reel100_8ino_ae67cd131fd8d3a78a25cb7f40998f292.html#ae67cd131fd8d3a78a25cb7f40998f292" title=" " alt="" coords="317,5,389,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="499,148,493,142,475,116,469,91,463,67,456,55,445,44,418,30,388,23,389,17,420,25,448,40,460,52,468,65,474,90,480,114,497,139,503,144"/>
+<area shape="rect" id="Node000007" href="$d1/d60/classfl_1_1_demo_reel100_a0e2d05b31abfe3a8817db1d0d5d37d78.html#a0e2d05b31abfe3a8817db1d0d5d37d78" title=" " alt="" coords="259,55,447,80"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="503,149,493,143,478,130,469,117,460,105,445,94,420,83,423,78,448,89,464,101,473,114,482,126,496,139,506,145"/>
+<area shape="rect" id="Node000008" href="$d1/d60/classfl_1_1_demo_reel100_ad98699eb2a5f15302d2b95e07f2f69d2.html#ad98699eb2a5f15302d2b95e07f2f69d2" title=" " alt="" coords="263,104,442,129"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="488,153,405,132,406,127,489,147"/>
+<area shape="rect" id="Node000009" href="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1" title=" " alt="" coords="321,153,384,179"/>
+<area shape="poly" id="edge7_Node000003_Node000009" title=" " alt="" coords="481,169,385,169,385,163,481,163"/>
+<area shape="rect" id="Node000010" href="$d4/d0c/_blur_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="327,203,378,228"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="489,185,379,212,378,207,487,179"/>
+<area shape="rect" id="Node000011" href="$d1/d60/classfl_1_1_demo_reel100_a3ff4d3fc05b6e3a158d49d65cd954e1d.html#a3ff4d3fc05b6e3a158d49d65cd954e1d" title=" " alt="" coords="260,252,445,277"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="529,190,492,217,448,242,413,254,411,249,446,237,489,212,525,185"/>
+<area shape="rect" id="Node000012" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="318,301,387,327"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="540,192,503,242,477,269,448,291,418,305,388,312,387,307,417,300,445,286,474,265,499,239,536,189"/>
+<area shape="rect" id="Node000005" href="$d1/d60/classfl_1_1_demo_reel100_aad4b41d93c1a9f7acecea8b49cda7078.html#aad4b41d93c1a9f7acecea8b49cda7078" title=" " alt="" coords="5,153,211,179"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="304,29,260,44,217,71,179,101,123,155,119,151,175,97,214,66,258,40,303,24"/>
+<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="308,169,211,169,211,163,308,163"/>
+<area shape="poly" id="edge12_Node000012_Node000005" title=" " alt="" coords="304,308,258,291,215,265,175,234,119,181,123,177,179,230,218,260,260,286,305,303"/>
+</map>

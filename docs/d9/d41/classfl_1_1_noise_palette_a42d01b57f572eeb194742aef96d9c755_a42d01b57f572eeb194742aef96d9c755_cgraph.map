@@ -1,0 +1,16 @@
+<map id="fl::NoisePalette::changeToRandomPalette" name="fl::NoisePalette::changeToRandomPalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,30,180,70"/>
+<area shape="rect" id="Node000002" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="736,5,816,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,37,316,23,469,11,579,9,688,11,722,13,722,18,688,17,579,14,469,17,316,28,181,42"/>
+<area shape="rect" id="Node000003" href="$d9/d41/classfl_1_1_noise_palette_ae6488d109988a70f949dba4dd8f3d2ed.html#ae6488d109988a70f949dba4dd8f3d2ed" title=" " alt="" coords="228,58,421,98"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,58,215,62,214,67,180,63"/>
+<area shape="rect" id="Node000004" href="$d9/d41/classfl_1_1_noise_palette_a3edcb0dfbc5280fffcd9776bc59f6899.html#a3edcb0dfbc5280fffcd9776bc59f6899" title=" " alt="" coords="478,90,679,130"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="422,87,465,93,464,98,421,93"/>
+<area shape="rect" id="Node000006" href="$d9/d41/classfl_1_1_noise_palette_a7b4bff9751e94b0ca2c4deaff12d485b.html#a7b4bff9751e94b0ca2c4deaff12d485b" title=" " alt="" coords="475,154,682,194"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="368,96,470,140,493,147,491,152,468,144,366,101"/>
+<area shape="rect" id="Node000007" href="$d9/d41/classfl_1_1_noise_palette_ac7e866ba3586a6d8fcc916347ae8e83b.html#ac7e866ba3586a6d8fcc916347ae8e83b" title=" " alt="" coords="469,26,688,66"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="421,63,455,59,456,64,422,69"/>
+<area shape="rect" id="Node000005" href="$da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" title="Fill a range of LEDs with a solid color." alt="" coords="738,97,814,123"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="680,107,724,107,724,113,680,113"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="688,28,722,23,723,28,689,33"/>
+</map>

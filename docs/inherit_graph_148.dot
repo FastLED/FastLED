@@ -1,0 +1,9 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="IEEE754binary32_t.\l__unnamed1__",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d58/group___fractional_types.html#d6/d77/struct_i_e_e_e754binary32__t_8____unnamed1____",tooltip=" "];
+}

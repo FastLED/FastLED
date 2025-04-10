@@ -1,0 +1,9 @@
+<map id="fl::NoisePalette::SetupBlackAndWhiteStripedPalette" name="fl::NoisePalette::SetupBlackAndWhiteStripedPalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="505,27,707,67"/>
+<area shape="rect" id="Node000002" href="$d9/d41/classfl_1_1_noise_palette_ae6488d109988a70f949dba4dd8f3d2ed.html#ae6488d109988a70f949dba4dd8f3d2ed" title=" " alt="" coords="264,27,457,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="492,50,458,50,458,45,492,45"/>
+<area shape="rect" id="Node000003" href="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244" title=" " alt="" coords="5,5,216,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="250,37,216,33,217,28,250,32"/>
+<area shape="rect" id="Node000004" href="$d9/d41/classfl_1_1_noise_palette_a42d01b57f572eeb194742aef96d9c755.html#a42d01b57f572eeb194742aef96d9c755" title=" " alt="" coords="23,55,198,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="251,62,198,68,198,63,250,57"/>
+</map>

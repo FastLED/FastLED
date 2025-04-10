@@ -1,0 +1,4 @@
+<map id="CFastLED::show" name="CFastLED::show">
+<area shape="rect" id="Node000001" title="Update all our controllers with the current led colors." alt="" coords="5,29,129,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="46,30,42,21,44,11,53,5,67,3,84,6,92,14,88,18,82,11,67,8,55,10,48,14,47,20,51,28"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="LPD6803Controller::endBoundary" name="LPD6803Controller::endBoundary">
+<area shape="rect" id="Node000001" title=" " alt="" coords="204,5,355,45"/>
+<area shape="rect" id="Node000002" href="$d0/d40/class_l_p_d6803_controller_a35f42384ada050146e6813f0fc766356.html#a35f42384ada050146e6813f0fc766356" title="Send the LED data to the strip." alt="" coords="5,5,156,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,28,156,28,156,23,191,23"/>
+</map>

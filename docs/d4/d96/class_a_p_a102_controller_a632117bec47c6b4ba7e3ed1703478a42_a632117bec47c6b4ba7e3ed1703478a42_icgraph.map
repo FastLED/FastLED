@@ -1,0 +1,5 @@
+<map id="APA102Controller::showPixelsDefault" name="APA102Controller::showPixelsDefault">
+<area shape="rect" id="Node000001" title=" " alt="" coords="268,5,483,45"/>
+<area shape="rect" id="Node000002" href="$d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3" title="Send the LED data to the strip." alt="" coords="5,13,220,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="255,28,220,28,220,23,255,23"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="FastPin&lt; PIN &gt;" name="FastPin&lt; PIN &gt;">
+<area shape="rect" id="Node000001" title="The simplest level of Pin class." alt="" coords="5,115,125,140"/>
+<area shape="rect" id="Node000002" href="$d5/d51/class_fast_pin_b_b.html" title="FastPin implementation for bit&#45;banded access." alt="" coords="351,5,490,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,101,108,67,127,50,148,37,199,19,252,9,304,6,351,8,351,13,304,12,253,15,200,24,150,42,130,54,112,70,84,105"/>
+<area shape="rect" id="Node000003" href="$db/d3b/class_fast_pin.html" title=" " alt="" coords="331,55,510,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,107,149,94,242,78,331,69,331,74,243,83,150,99,109,112"/>
+<area shape="rect" id="Node000004" href="$db/d3b/class_fast_pin.html" title=" " alt="" coords="327,112,515,137"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="139,124,303,123,326,123,326,128,303,129,139,130"/>
+<area shape="rect" id="Node000005" href="$db/d3b/class_fast_pin.html" title=" " alt="" coords="344,161,497,187"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="128,140,150,145,251,158,344,167,344,172,250,164,149,150,127,146"/>
+<area shape="rect" id="Node000006" href="$db/d3b/class_fast_pin.html" title=" " alt="" coords="339,211,502,236"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="92,147,119,168,150,185,197,200,247,211,339,220,338,226,246,216,196,205,148,190,116,172,89,151"/>
+</map>

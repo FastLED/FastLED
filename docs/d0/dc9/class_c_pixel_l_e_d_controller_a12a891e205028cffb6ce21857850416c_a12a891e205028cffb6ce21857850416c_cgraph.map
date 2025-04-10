@@ -1,0 +1,13 @@
+<map id="CPixelLEDController::show" name="CPixelLEDController::show">
+<area shape="rect" id="Node000001" title="Write the passed in RGB data out to the LEDs managed by this controller." alt="" coords="5,47,156,87"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a6f174d3b4ceacf75eb761c93e78ebff7.html#a6f174d3b4ceacf75eb761c93e78ebff7" title=" " alt="" coords="204,5,459,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,49,203,39,248,31,249,36,205,45,157,54"/>
+<area shape="rect" id="Node000006" href="$d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7" title="Get the dithering option currently set for this controller." alt="" coords="237,55,426,80"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="156,65,223,65,223,70,156,70"/>
+<area shape="rect" id="Node000007" href="$d0/dc9/class_c_pixel_l_e_d_controller_a1ab7248c894ba95c3a71665f5bed2a17.html#a1ab7248c894ba95c3a71665f5bed2a17" title="Send the LED data to the strip." alt="" coords="256,105,407,145"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="157,82,243,102,242,107,155,87"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_af6173cca91ee446766cc15102990d7bb.html#af6173cca91ee446766cc15102990d7bb" title="Get the combined brightness/color adjustment for this controller." alt="" coords="507,5,731,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="459,15,493,15,493,21,459,21"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e3.html#a65e166b90fb7b4aecd2b26a987e312e3" title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,..." alt="" coords="779,5,977,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="731,15,765,15,765,21,731,21"/>
+</map>

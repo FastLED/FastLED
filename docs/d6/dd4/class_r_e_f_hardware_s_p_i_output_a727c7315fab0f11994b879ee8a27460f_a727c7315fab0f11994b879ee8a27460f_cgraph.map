@@ -1,0 +1,11 @@
+<map id="REFHardwareSPIOutput::writeBytesValue" name="REFHardwareSPIOutput::writeBytesValue">
+<area shape="rect" id="Node000001" title="A full cycle of writing a value for len bytes, including select, release, and waiting." alt="" coords="5,69,180,109"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a7c39a37f4a8d759bfb59623fa95b09ce.html#a7c39a37f4a8d759bfb59623fa95b09ce" title="release the CS select" alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,67,231,47,233,52,164,72"/>
+<area shape="rect" id="Node000003" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a9f51d6a4a6ab66c709ff1d677815946b.html#a9f51d6a4a6ab66c709ff1d677815946b" title="latch the CS select" alt="" coords="228,69,403,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,87,214,87,214,92,180,92"/>
+<area shape="rect" id="Node000004" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_aacffbb49cfb242addffb6e7ffdcb3ef7.html#aacffbb49cfb242addffb6e7ffdcb3ef7" title="A raw set of writing byte values, assumes setup/init/waiting done elsewhere." alt="" coords="228,133,403,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,107,233,127,231,132,162,112"/>
+<area shape="rect" id="Node000005" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_a077457b7a802ee946db4b2f8117d5ad4.html#a077457b7a802ee946db4b2f8117d5ad4" title="write a byte out via SPI (returns immediately on writing register)" alt="" coords="451,133,625,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="403,151,437,151,437,156,403,156"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Namespace.h" name="FastLED/FastLED/examples/LuminescentGrand/arduino/midi_Namespace.h">
+<area shape="rect" id="Node000001" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="213,5,415,60"/>
+<area shape="rect" id="Node000002" href="$d8/dd0/midi___defs_8h.html" title="MIDI Library for the Arduino &#45; Definitions." alt="" coords="213,108,415,163"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="317,74,317,108,311,108,311,74"/>
+<area shape="rect" id="Node000005" href="$d0/d7c/midi___message_8h.html" title="MIDI Library for the Arduino &#45; Message struct definition." alt="" coords="5,211,207,265"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="256,69,202,110,157,162,124,212,119,209,153,159,199,106,253,65"/>
+<area shape="rect" id="Node000008" href="$db/dff/serial_m_i_d_i_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="577,108,779,163"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="423,61,584,105,582,111,421,66"/>
+<area shape="rect" id="Node000003" href="$d6/d27/_m_i_d_i_8h.html" title="MIDI Library for the Arduino." alt="" coords="260,313,507,353"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,175,276,197,268,219,266,242,272,264,297,292,329,311,326,316,294,296,268,267,260,243,262,218,271,194,283,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="249,171,161,213,159,208,247,166"/>
+<area shape="rect" id="Node000006" href="$d0/dc7/midi___platform_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="283,211,484,265"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="342,173,367,209,363,212,338,176"/>
+<area shape="rect" id="Node000007" href="$df/d80/midi___settings_8h.html" title="MIDI Library for the Arduino &#45; Settings." alt="" coords="508,211,709,265"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="405,165,533,208,531,213,403,170"/>
+<area shape="rect" id="Node000004" href="$dc/d60/_m_i_d_i_8cpp.html" title="MIDI Library for the Arduino." alt="" coords="283,401,484,456"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="386,367,386,401,381,401,381,367"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="198,267,328,311,327,316,196,272"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="386,279,386,313,381,313,381,279"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="534,273,430,316,428,311,532,268"/>
+<area shape="poly" id="edge12_Node000008_Node000003" title=" " alt="" coords="711,172,724,195,733,220,734,244,724,267,710,279,690,290,637,306,573,318,507,327,506,321,572,313,635,301,688,285,707,275,720,264,729,243,728,221,719,197,706,175"/>
+</map>

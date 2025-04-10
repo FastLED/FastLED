@@ -1,0 +1,15 @@
+<map id="FastPin::hival" name="FastPin::hival">
+<area shape="rect" id="Node000001" title="Gets the state of the port with this pin HIGH" alt="" coords="477,77,585,102"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9" title="Write an array of data to the SPI interface." alt="" coords="260,5,429,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="480,75,403,48,405,43,481,70"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_abada62794ed922c2798bf462a98b57f0.html#abada62794ed922c2798bf462a98b57f0" title="Write multiple bytes of the given value over SPI, without selecting the interface." alt="" coords="260,69,429,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="464,92,430,92,430,87,464,87"/>
+<area shape="rect" id="Node000007" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="260,133,429,173"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="481,109,405,136,403,131,480,104"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="24,5,193,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="246,28,193,28,193,23,246,23"/>
+<area shape="rect" id="Node000005" href="$da/d77/class_l_p_d8806_controller_1_1_l_p_d8806___a_d_j_u_s_t_a8e402dc154857e5c6b62bffe0372e856.html#a8e402dc154857e5c6b62bffe0372e856" title=" " alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="246,92,212,92,212,87,246,87"/>
+<area shape="rect" id="Node000006" href="$dc/d57/class_a_v_r_software_s_p_i_output_ac4ffa7160697ac63bbd7734b480308bc.html#ac4ffa7160697ac63bbd7734b480308bc" title="Write multiple bytes of the given value over SPI." alt="" coords="24,133,193,173"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="258,116,184,136,182,131,256,110"/>
+</map>

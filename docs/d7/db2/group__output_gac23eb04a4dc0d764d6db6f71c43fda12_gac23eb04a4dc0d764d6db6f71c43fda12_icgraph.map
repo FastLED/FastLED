@@ -1,0 +1,24 @@
+<map id="MidiInterface::sendRealTime" name="MidiInterface::sendRealTime">
+<area shape="rect" id="Node000001" title="Send a Real Time (one byte) message." alt="" coords="452,219,661,244"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga58454de7d3ee8ee824f955c805151ad2.html#ga58454de7d3ee8ee824f955c805151ad2" title="Generate and send a MIDI message from the values given." alt="" coords="228,5,375,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="540,208,518,171,487,127,448,83,403,46,374,32,376,27,405,41,452,79,491,124,523,168,545,205"/>
+<area shape="rect" id="Node000003" href="$df/d6a/class_midi_interface_aca0268305122b38298c5e3f4992f923e.html#aca0268305122b38298c5e3f4992f923e" title=" " alt="" coords="207,55,395,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="532,211,476,160,441,133,403,110,377,98,379,93,405,105,444,129,479,156,536,207"/>
+<area shape="rect" id="Node000005" href="$df/d6a/class_midi_interface_a6294215995f743679b4d15536cb9b0cf.html#a6294215995f743679b4d15536cb9b0cf" title=" " alt="" coords="210,120,393,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="520,214,466,186,403,159,365,148,367,143,405,154,468,181,523,210"/>
+<area shape="rect" id="Node000006" href="$df/d6a/class_midi_interface_a7cb85663c319568f24dab2fa9e00bb51.html#a7cb85663c319568f24dab2fa9e00bb51" title=" " alt="" coords="199,169,404,195"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="477,219,367,197,368,192,478,213"/>
+<area shape="rect" id="Node000007" href="$df/d6a/class_midi_interface_a21bc543581b50f0af2cab15c83192c8d.html#a21bc543581b50f0af2cab15c83192c8d" title=" " alt="" coords="212,219,391,244"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="438,234,391,234,391,229,438,229"/>
+<area shape="rect" id="Node000008" href="$df/d6a/class_midi_interface_a00fc8da28083fc9dc7814965f2dee700.html#a00fc8da28083fc9dc7814965f2dee700" title=" " alt="" coords="213,268,389,293"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="478,249,368,271,367,265,477,244"/>
+<area shape="rect" id="Node000009" href="$df/d6a/class_midi_interface_a4b2302bf337a4b59ceb2aaa54c6365d4.html#a4b2302bf337a4b59ceb2aaa54c6365d4" title=" " alt="" coords="203,318,399,358"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="521,253,405,307,369,320,367,315,403,302,519,248"/>
+<area shape="rect" id="Node000010" href="$df/d6a/class_midi_interface_a048fe4d5ef9c51b00649f17cbf885ff7.html#a048fe4d5ef9c51b00649f17cbf885ff7" title=" " alt="" coords="214,383,389,408"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="539,256,483,315,446,346,405,372,374,385,372,380,403,368,443,342,479,311,535,253"/>
+<area shape="rect" id="Node000011" href="$df/d6a/class_midi_interface_a8405cc7229e4eab30520ae005ec79e10.html#a8405cc7229e4eab30520ae005ec79e10" title=" " alt="" coords="214,432,389,457"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="545,258,523,295,491,339,452,384,405,422,379,434,376,430,403,417,448,380,487,336,518,292,540,255"/>
+<area shape="rect" id="Node000004" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,248,151,273"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,104,200,109,162,143,129,183,88,249,84,246,125,180,158,140,197,105,206,99"/>
+<area shape="poly" id="edge11_Node000011_Node000004" title=" " alt="" coords="211,429,197,422,157,387,124,345,99,305,83,275,88,273,103,303,128,342,160,383,200,417,213,424"/>
+</map>

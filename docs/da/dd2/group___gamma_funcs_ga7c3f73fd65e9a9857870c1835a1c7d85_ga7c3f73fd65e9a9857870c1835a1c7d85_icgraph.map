@@ -1,0 +1,15 @@
+<map id="applyGamma_video" name="applyGamma_video">
+<area shape="rect" id="Node000001" title="Applies a gamma adjustment to a color channel." alt="" coords="215,129,368,155"/>
+<area shape="rect" id="Node000002" href="$da/dd2/group___gamma_funcs_ga39c1068518d7697230930504e57c4d91.html#ga39c1068518d7697230930504e57c4d91" title="Applies a gamma adjustment to a color." alt="" coords="9,5,163,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,122,222,82,165,44,139,33,141,28,168,40,225,78,270,118"/>
+<area shape="rect" id="Node000003" href="$da/dd2/group___gamma_funcs_ga7e4fabd5c919111e7405790b9463aea4.html#ga7e4fabd5c919111e7405790b9463aea4" title="Applies a gamma adjustment to a color." alt="" coords="9,55,163,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="247,126,166,94,131,83,133,78,168,89,249,121"/>
+<area shape="rect" id="Node000004" href="$da/dd2/group___gamma_funcs_ga0af2b547872e9a707d5dfa016f30445a.html#ga0af2b547872e9a707d5dfa016f30445a" title="Destructively applies a gamma adjustment to a color." alt="" coords="5,104,167,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="201,134,167,129,167,124,202,128"/>
+<area shape="rect" id="Node000005" href="$da/dd2/group___gamma_funcs_gab78df04338197d73f7cc0e49eb28ead5.html#gab78df04338197d73f7cc0e49eb28ead5" title="Destructively applies a gamma adjustment to a color." alt="" coords="5,153,167,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="202,155,167,159,167,154,201,150"/>
+<area shape="rect" id="Node000006" href="$da/dd2/group___gamma_funcs_ga4e3dbd54679072011f2be08bcd23c337.html#ga4e3dbd54679072011f2be08bcd23c337" title="Destructively applies a gamma adjustment to a color array." alt="" coords="5,203,167,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="247,162,168,193,130,205,128,200,166,187,245,157"/>
+<area shape="rect" id="Node000007" href="$da/dd2/group___gamma_funcs_gac8d8e24305e35eda2e8717c688f36ca4.html#gac8d8e24305e35eda2e8717c688f36ca4" title="Destructively applies a gamma adjustment to a color array." alt="" coords="5,252,167,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="269,167,224,205,168,242,138,254,136,249,165,237,221,200,265,163"/>
+</map>

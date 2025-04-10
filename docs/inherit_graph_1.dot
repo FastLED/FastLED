@@ -1,0 +1,11 @@
+digraph "Graphical Class Hierarchy"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="animartrix_detail::\lANIMartRIX",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html",tooltip=" "];
+  Node0 -> Node1 [id="edge1_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::FastLEDANIMartRIX",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dda/classfl_1_1_fast_l_e_d_a_n_i_mart_r_i_x.html",tooltip=" "];
+}

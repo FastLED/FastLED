@@ -1,5 +1,14 @@
 var searchData=
 [
-  ['fract16_0',['fract16',['../group___fractional_types.html#gaaf46b9f719ef3bdb574f8e967af6dbb5',1,'types.h']]],
-  ['fract8_1',['fract8',['../group___fractional_types.html#ga5d6d013429a5b8a09d564d6137217644',1,'types.h']]]
+  ['channel_0',['Channel',['../d8/dd0/midi___defs_8h_af0fba1bdf23d6f77614ea9697290325d.html#af0fba1bdf23d6f77614ea9697290325d',1,'midi_Defs.h']]],
+  ['clock_5fptr_5ft_1',['clock_ptr_t',['../dc/d57/class_a_v_r_software_s_p_i_output_ade0ae62b59d3ff0b68d9b62b09ced372.html#ade0ae62b59d3ff0b68d9b62b09ced372',1,'AVRSoftwareSPIOutput']]],
+  ['clock_5ft_2',['clock_t',['../dc/d57/class_a_v_r_software_s_p_i_output_acb0905a7f1e88bb01161bc67233fe352.html#acb0905a7f1e88bb01161bc67233fe352',1,'AVRSoftwareSPIOutput']]],
+  ['clockcallback_3',['ClockCallback',['../d8/dd0/midi___defs_8h_afcb8111d613b2db971326e9d07131e6a.html#afcb8111d613b2db971326e9d07131e6a',1,'midi_Defs.h']]],
+  ['const_5fiterator_4',['const_iterator',['../d2/df3/classfl_1_1_fixed_map_ab73d6309d9da0d34eb9b923b531e1233.html#ab73d6309d9da0d34eb9b923b531e1233',1,'fl::FixedMap::const_iterator'],['../dc/d45/classfl_1_1_sorted_heap_map_abd34f1d56e1e40da16ee73eaf625120b.html#abd34f1d56e1e40da16ee73eaf625120b',1,'fl::SortedHeapMap::const_iterator'],['../dd/d44/classfl_1_1_fixed_set_a97f31e9d0521602584219bec237d74b4.html#a97f31e9d0521602584219bec237d74b4',1,'fl::FixedSet::const_iterator'],['../d3/d73/classfl_1_1_fixed_vector_a05ecbdcd4239608b7f167b68b2f110a3.html#a05ecbdcd4239608b7f167b68b2f110a3',1,'fl::FixedVector::const_iterator'],['../db/ddd/classfl_1_1_heap_vector_ab9e5c54d56104d567f79e72f63bdf940.html#ab9e5c54d56104d567f79e72f63bdf940',1,'fl::HeapVector::const_iterator'],['../d0/d5c/classfl_1_1_sorted_heap_vector_a961b9be771d5eb4f4eddac602d4e73c4.html#a961b9be771d5eb4f4eddac602d4e73c4',1,'fl::SortedHeapVector::const_iterator'],['../db/df7/class_c_pixel_view_ad44698b19b0ad875e066c30583777772.html#ad44698b19b0ad875e066c30583777772',1,'CPixelView::const_iterator']]],
+  ['continuecallback_5',['ContinueCallback',['../d8/dd0/midi___defs_8h_aa1d3c27a58b8f5aebd53a73a16378916.html#aa1d3c27a58b8f5aebd53a73a16378916',1,'midi_Defs.h']]],
+  ['controlchangecallback_6',['ControlChangeCallback',['../d8/dd0/midi___defs_8h_a60199bde936cb246c54a6f895a852bf5.html#a60199bde936cb246c54a6f895a852bf5',1,'midi_Defs.h']]],
+  ['controllerbaset_7',['ControllerBaseT',['../d5/d83/class_r_g_b_w_emulated_controller_afc29d77d258b05d831d92518df343810.html#afc29d77d258b05d831d92518df343810',1,'RGBWEmulatedController::ControllerBaseT'],['../dd/dbc/class_w_s2816_controller_a92c89dcd8b105edbbfa2eac1d1de9de0.html#a92c89dcd8b105edbbfa2eac1d1de9de0',1,'WS2816Controller::ControllerBaseT']]],
+  ['controllert_8',['ControllerT',['../d1/d3a/_r_g_b_w_emulated_8ino_a6ac4e89ba1c11811ee992404edc59ded.html#a6ac4e89ba1c11811ee992404edc59ded',1,'RGBWEmulated.ino']]],
+  ['crgbset_9',['CRGBSet',['../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667',1,'pixelset.h']]],
+  ['cycle_5ft_10',['cycle_t',['../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8',1,'fl']]]
 ];

@@ -1,0 +1,11 @@
+<map id="AVRSoftwareSPIOutput::select" name="AVRSoftwareSPIOutput::select">
+<area shape="rect" id="Node000001" title="Select the SPI output (chip select)" alt="" coords="440,69,609,109"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9" title="Write an array of data to the SPI interface." alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="442,68,375,48,377,43,444,63"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_ac4ffa7160697ac63bbd7734b480308bc.html#ac4ffa7160697ac63bbd7734b480308bc" title="Write multiple bytes of the given value over SPI." alt="" coords="223,69,392,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="426,92,392,92,392,87,426,87"/>
+<area shape="rect" id="Node000005" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="223,133,392,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="444,116,377,136,375,131,442,111"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,28,175,28,175,23,209,23"/>
+</map>

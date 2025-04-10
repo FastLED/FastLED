@@ -1,0 +1,12 @@
+<map id="fill_raw_2dnoise16" name="fill_raw_2dnoise16">
+<area shape="rect" id="Node000001" title="Fill a 2D 16&#45;bit buffer with noise, using inoise16()" alt="" coords="5,31,148,56"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="50,32,45,22,48,13,59,6,77,4,98,7,108,16,104,20,96,12,77,9,60,11,52,16,50,22,55,29"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="196,5,273,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="148,29,182,24,183,29,149,34"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="199,55,271,80"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="149,52,185,57,184,62,148,57"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="321,5,429,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="273,15,307,15,307,21,273,21"/>
+<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="477,5,544,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="429,15,464,15,464,21,429,21"/>
+</map>

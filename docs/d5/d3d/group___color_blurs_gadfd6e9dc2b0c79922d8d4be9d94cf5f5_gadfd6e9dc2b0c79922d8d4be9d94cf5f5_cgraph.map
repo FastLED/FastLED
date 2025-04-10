@@ -1,0 +1,14 @@
+<map id="blur2d" name="blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="5,31,68,56"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga33ce178f76009348d3a0f0723b22d4de.html#ga33ce178f76009348d3a0f0723b22d4de" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="116,5,220,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,35,102,28,103,33,69,40"/>
+<area shape="rect" id="Node000008" href="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="127,55,209,80"/>
+<area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="69,46,114,55,113,60,68,52"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="268,31,385,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,24,255,29,254,34,220,29"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="433,5,537,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="385,31,419,26,420,31,386,37"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="441,55,529,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="386,50,428,56,427,61,385,55"/>
+<area shape="poly" id="edge6_Node000008_Node000003" title=" " alt="" coords="209,59,254,52,255,57,210,64"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="FastLED/FastLED/src/fx/video/pixel_stream.h" name="FastLED/FastLED/src/fx/video/pixel_stream.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="192,5,371,45"/>
+<area shape="rect" id="Node000002" href="$d0/d05/video_8cpp.html" title=" " alt="" coords="188,269,338,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,52,145,72,94,100,49,137,30,158,15,182,8,206,14,225,30,241,54,255,119,273,188,282,187,287,118,278,52,259,27,246,9,228,3,206,10,180,26,155,45,133,91,96,143,67,193,47"/>
+<area shape="rect" id="Node000003" href="$d5/da4/frame__interpolator_8cpp.html" title=" " alt="" coords="25,181,256,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,54,187,71,164,95,153,116,146,139,142,181,137,181,141,138,148,114,159,92,184,67,212,49"/>
+<area shape="rect" id="Node000004" href="$d3/dda/frame__interpolator_8h.html" title=" " alt="" coords="174,93,390,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="284,59,284,93,279,93,279,59"/>
+<area shape="rect" id="Node000005" href="$d5/d82/video__impl_8h.html" title=" " alt="" coords="340,181,506,221"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="351,49,380,67,404,92,416,114,422,138,426,181,421,181,417,139,411,116,399,95,376,71,348,54"/>
+<area shape="rect" id="Node000007" href="$da/d7a/pixel__stream_8cpp.html" title=" " alt="" coords="464,93,659,133"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="357,47,501,91,499,96,355,52"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="281,147,268,269,262,269,275,147"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="240,143,173,184,170,179,238,138"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="326,138,393,179,391,184,323,143"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="377,230,299,272,297,267,375,225"/>
+<area shape="rect" id="Node000006" href="$d0/d7f/video__impl_8cpp.html" title=" " alt="" coords="362,269,545,309"/>
+<area shape="poly" id="edge8_Node000005_Node000006" title=" " alt="" coords="437,234,449,268,444,270,432,235"/>
+</map>

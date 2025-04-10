@@ -1,0 +1,20 @@
+<map id="rgb_2_rgbw" name="rgb_2_rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,112,103,137"/>
+<area shape="rect" id="Node000002" href="$d7/dbb/rgbw_8h_ae9cf94c7bddcd484c4f03b0c69b7770a.html#ae9cf94c7bddcd484c4f03b0c69b7770a" title="Converts RGB to RGBW using one of the functions." alt="" coords="151,112,248,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,122,137,122,137,127,103,127"/>
+<area shape="rect" id="Node000003" href="$d1/d8d/rgbw_8cpp_ac22f7204d0501031d2431e7b2f67c25c.html#ac22f7204d0501031d2431e7b2f67c25c" title="Converts RGB to RGBW using a color transfer method from saturated color channels to white." alt="" coords="330,5,470,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="210,110,245,75,269,56,295,40,316,31,318,36,297,44,272,60,249,79,213,114"/>
+<area shape="rect" id="Node000005" href="$d1/d8d/rgbw_8cpp_a07e94168baddf333cdc5673f28285aa9.html#a07e94168baddf333cdc5673f28285aa9" title="The minimum brigthness of the RGB channels is used to set the W channel." alt="" coords="296,55,504,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="235,109,295,90,330,81,331,86,297,95,237,115"/>
+<area shape="rect" id="Node000006" href="$d1/d8d/rgbw_8cpp_a026bfd212bc23d24cf2e8cc5a9ab5b9e.html#a026bfd212bc23d24cf2e8cc5a9ab5b9e" title="Converts RGB to RGBW with the W channel set to black, always." alt="" coords="315,105,485,145"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="248,122,301,122,301,127,248,127"/>
+<area shape="rect" id="Node000007" href="$d1/d8d/rgbw_8cpp_a03a50e79b032a49c951919b9570d18f5.html#a03a50e79b032a49c951919b9570d18f5" title=" " alt="" coords="304,169,496,195"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="237,135,297,154,331,163,330,169,295,159,235,140"/>
+<area shape="rect" id="Node000008" href="$d1/d8d/rgbw_8cpp_aa6e2b44325da0172a48b20940b6e5fdf.html#aa6e2b44325da0172a48b20940b6e5fdf" title="Converts RGB to RGBW with a boosted white channel." alt="" coords="301,219,499,244"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="214,136,249,170,297,204,316,212,314,217,295,208,246,174,210,140"/>
+<area shape="rect" id="Node000004" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="552,84,616,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="471,28,505,40,534,55,559,73,556,78,531,60,503,44,470,33"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="480,77,539,87,538,92,479,83"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="485,109,538,101,539,106,486,114"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="478,216,503,204,524,186,542,164,569,120,574,123,547,167,528,189,505,208,480,221"/>
+</map>

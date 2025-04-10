@@ -1,0 +1,14 @@
+<map id="MidiInterface::parse" name="MidiInterface::parse">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,141,157,166"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="44,142,36,132,40,122,56,116,81,114,114,118,126,127,123,132,112,123,81,119,57,121,44,126,41,132,48,139"/>
+<area shape="rect" id="Node000002" href="$dc/df1/group__input_ga49243944909bc4152fa7b9817a6950e5.html#ga49243944909bc4152fa7b9817a6950e5" title="Returns channel in the range 1&#45;16." alt="" coords="217,5,408,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,139,140,98,171,75,204,55,219,48,221,53,207,60,174,79,143,102,97,143"/>
+<area shape="rect" id="Node000003" href="$dc/df1/group__input_ga5fba3159de1c4aac8b8a33a0a9dbf7de.html#ga5fba3159de1c4aac8b8a33a0a9dbf7de" title="Extract an enumerated MIDI type from a status byte." alt="" coords="213,69,413,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,138,226,110,227,116,129,143"/>
+<area shape="rect" id="Node000004" href="$dc/df1/group__input_ga80caaac9382c92f15f4dc8558e18838c.html#ga80caaac9382c92f15f4dc8558e18838c" title=" " alt="" coords="223,133,403,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="158,151,209,151,209,156,158,156"/>
+<area shape="rect" id="Node000005" href="$df/d6a/class_midi_interface_a2c8eba3af03800a697c55ebc82feb976.html#a2c8eba3af03800a697c55ebc82feb976" title=" " alt="" coords="205,198,420,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,163,206,183,245,192,244,197,205,188,130,169"/>
+<area shape="rect" id="Node000006" href="$dc/df1/group__input_ga99582cbc74ccf82ef923adff3caec962.html#ga99582cbc74ccf82ef923adff3caec962" title=" " alt="" coords="221,247,404,273"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="99,164,146,198,206,232,230,241,228,246,204,237,143,202,96,168"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="PixelController::loadAndScale" name="PixelController::loadAndScale">
+<area shape="rect" id="Node000001" title="Loads and scales a single byte for a given output slot and lane." alt="" coords="5,47,184,87"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="463,29,683,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,45,182,27,232,14,304,7,376,8,444,15,503,24,502,29,444,20,376,13,304,12,232,19,184,32,139,50"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="232,29,415,55"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="184,55,218,51,219,56,184,60"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="244,79,403,104"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="184,74,231,79,230,84,184,79"/>
+<area shape="rect" id="Node000006" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="541,104,605,129"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="141,85,184,102,232,114,313,123,394,126,527,119,527,124,394,131,313,129,232,119,183,107,139,90"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="535,31,526,21,531,11,546,5,573,3,606,7,618,16,615,20,604,11,573,8,548,10,534,15,531,20,538,27"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="731,29,887,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="683,39,717,39,717,45,683,45"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="415,39,449,39,449,45,415,45"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="388,76,494,55,495,60,389,81"/>
+<area shape="poly" id="edge8_Node000005_Node000006" title=" " alt="" coords="403,97,527,109,527,115,402,102"/>
+</map>

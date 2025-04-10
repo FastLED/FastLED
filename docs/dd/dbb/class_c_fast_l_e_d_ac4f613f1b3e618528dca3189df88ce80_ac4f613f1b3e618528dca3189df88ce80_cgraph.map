@@ -1,0 +1,12 @@
+<map id="CFastLED::clearData" name="CFastLED::clearData">
+<area shape="rect" id="Node000001" title="Clear out the local data array." alt="" coords="5,70,159,95"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352.html#aca9f099645c6976b1a52ba13ab455352" title="Zero out the LED data managed by this controller." alt="" coords="207,5,389,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,67,209,46,210,51,131,73"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="218,70,378,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,80,204,80,204,85,159,85"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="219,119,377,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,93,229,114,228,119,138,98"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="437,95,664,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,88,424,93,423,98,378,93"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="376,122,423,117,424,123,377,127"/>
+</map>

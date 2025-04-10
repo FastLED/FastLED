@@ -1,0 +1,21 @@
+<map id="AVRSoftwareSPIOutput::writeBytesValue" name="AVRSoftwareSPIOutput::writeBytesValue">
+<area shape="rect" id="Node000001" title="Write multiple bytes of the given value over SPI." alt="" coords="5,69,175,109"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_a677ab5b52bbd6011d48c3a14e3ebdcb2.html#a677ab5b52bbd6011d48c3a14e3ebdcb2" title="Release the SPI chip select line." alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,67,225,47,227,52,159,72"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a15872bb6ae69fd5a5c04b246fe73740e.html#a15872bb6ae69fd5a5c04b246fe73740e" title="Select the SPI output (chip select)" alt="" coords="223,69,392,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,87,209,87,209,92,175,92"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_abada62794ed922c2798bf462a98b57f0.html#abada62794ed922c2798bf462a98b57f0" title="Write multiple bytes of the given value over SPI, without selecting the interface." alt="" coords="223,133,392,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="159,107,227,127,225,132,158,112"/>
+<area shape="rect" id="Node000005" href="$db/d3b/class_fast_pin_a2270a3882cf8646ce8abcae29cf6923a.html#a2270a3882cf8646ce8abcae29cf6923a" title="Gets the state of the port with this pin HIGH" alt="" coords="471,42,579,67"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="367,131,391,119,404,108,414,98,424,87,439,76,457,68,459,73,441,81,427,91,418,101,408,112,393,124,370,136"/>
+<area shape="rect" id="Node000006" href="$db/d3b/class_fast_pin_a5148b7a0cd5fd551da455c03afc09003.html#a5148b7a0cd5fd551da455c03afc09003" title="Gets the state of the port with this pin LOW" alt="" coords="471,91,579,117"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="392,132,457,117,458,122,393,137"/>
+<area shape="rect" id="Node000007" href="$db/d3b/class_fast_pin_a97fd678e7bc05979582254783a1b5e57.html#a97fd678e7bc05979582254783a1b5e57" title="Get the pin mask." alt="" coords="469,141,581,166"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="392,151,455,151,455,156,392,156"/>
+<area shape="rect" id="Node000008" href="$db/d3b/class_fast_pin_ab005abe848eadb60051daccb4eb7dbe8.html#ab005abe848eadb60051daccb4eb7dbe8" title="Get the output state of the port." alt="" coords="473,190,576,215"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="393,170,460,185,459,191,392,175"/>
+<area shape="rect" id="Node000009" href="$dc/d57/class_a_v_r_software_s_p_i_output_a58393081ec8c54bd6968642b89e8bd43.html#a58393081ec8c54bd6968642b89e8bd43" title="Write a single byte over SPI." alt="" coords="440,240,609,280"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="343,171,441,224,459,232,457,237,439,229,341,176"/>
+<area shape="rect" id="Node000010" href="$dc/d57/class_a_v_r_software_s_p_i_output_ad13d8cd559302413e8c885aab5ad7497.html#ad13d8cd559302413e8c885aab5ad7497" title="Write the BIT&#39;th bit out via SPI, setting the data pin then strobing the clock." alt="" coords="657,240,827,280"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="610,257,644,257,644,263,610,263"/>
+</map>

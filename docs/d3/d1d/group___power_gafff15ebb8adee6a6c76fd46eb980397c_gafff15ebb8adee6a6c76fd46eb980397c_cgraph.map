@@ -1,0 +1,5 @@
+<map id="calculate_max_brightness_for_power_mW" name="calculate_max_brightness_for_power_mW">
+<area shape="rect" id="Node000001" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,5,197,45"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="245,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,23,232,23,232,28,197,28"/>
+</map>

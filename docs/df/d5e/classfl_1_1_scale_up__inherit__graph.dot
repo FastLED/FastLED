@@ -1,0 +1,14 @@
+digraph "fl::ScaleUp"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::ScaleUp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Fx2d",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Fx",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d5d/classfl_1_1_fx.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Referent",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d16/classfl_1_1_referent.html",tooltip=" "];
+}

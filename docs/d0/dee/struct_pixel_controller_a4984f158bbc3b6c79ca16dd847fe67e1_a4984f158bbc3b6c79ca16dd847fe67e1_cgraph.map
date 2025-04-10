@@ -1,0 +1,23 @@
+<map id="PixelController::loadAndScale0" name="PixelController::loadAndScale0">
+<area shape="rect" id="Node000001" title="non&#45;template alias of loadAndScale&lt;0&gt;()" alt="" coords="5,121,184,161"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a56fc5e5bf305e1760198c0a69ac85ff9.html#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values..." alt="" coords="232,70,411,110"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,118,218,110,219,116,185,123"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="242,156,401,181"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="185,149,229,155,228,160,184,154"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="689,92,909,117"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="411,90,676,98,676,104,411,95"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f" title="Calculate a dither value using the per&#45;channel dither data." alt="" coords="469,5,631,31"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="376,67,458,39,484,32,486,37,459,45,377,72"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_a75ef76fbecdc9b39b01eeab216845d9d.html#a75ef76fbecdc9b39b01eeab216845d9d" title="Read a byte of LED data." alt="" coords="459,55,641,80"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="410,79,445,75,445,80,411,84"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="761,94,753,84,757,74,773,68,799,65,832,69,845,79,842,83,830,74,799,71,774,73,761,78,758,83,765,90"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="957,92,1113,117"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="909,102,944,102,944,107,909,107"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="604,28,642,39,757,84,755,89,640,45,603,33"/>
+<area shape="rect" id="Node000006" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="768,5,831,31"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="631,15,754,15,754,21,631,21"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="636,77,701,87,700,93,635,83"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="367,179,423,191,492,200,567,202,604,199,641,191,678,178,713,161,770,123,773,128,715,165,680,183,642,197,605,204,567,208,491,206,422,196,366,184"/>
+<area shape="rect" id="Node000009" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="518,156,582,181"/>
+<area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="401,166,504,166,504,171,401,171"/>
+</map>

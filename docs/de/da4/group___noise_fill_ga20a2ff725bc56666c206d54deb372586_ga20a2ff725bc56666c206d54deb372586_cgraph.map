@@ -1,0 +1,14 @@
+<map id="fill_raw_2dnoise16into8" name="fill_raw_2dnoise16into8">
+<area shape="rect" id="Node000001" title="Fill a 2D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="5,55,181,80"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="64,56,58,46,62,37,74,30,93,28,117,32,127,40,124,44,115,36,93,33,75,35,66,40,64,46,69,53"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="229,5,307,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="138,52,215,30,217,35,140,57"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="237,55,299,80"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="182,65,223,65,223,70,182,70"/>
+<area shape="rect" id="Node000006" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="236,104,300,129"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="140,77,223,101,222,107,138,83"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="355,5,463,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="307,15,341,15,341,21,307,21"/>
+<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="511,5,577,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="463,15,497,15,497,21,463,21"/>
+</map>

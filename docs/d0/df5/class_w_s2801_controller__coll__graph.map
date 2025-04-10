@@ -1,0 +1,31 @@
+<map id="WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="WS2801 controller class." alt="" coords="1613,185,1839,240"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="1314,106,1465,146"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1479,146,1620,183,1618,188,1477,151"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="682,73,802,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="816,81,941,80,1083,83,1179,91,1275,103,1314,109,1313,115,1274,109,1179,96,1083,89,941,85,816,86"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="717,58,725,50,742,47,756,49,765,55,768,65,763,74,758,72,762,64,761,58,754,54,742,52,728,55,721,62"/>
+<area shape="rect" id="Node000006" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="900,99,1073,153"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="816,95,900,109,899,114,816,101"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="281,48,339,73"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="353,60,682,80,682,85,353,66"/>
+<area shape="rect" id="Node000005" href="$db/d74/struct_rgbw.html" title=" " alt="" coords="281,97,339,123"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="353,108,472,109,618,102,682,94,682,99,619,107,472,114,353,114"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="1088,123,1314,123,1314,129,1088,129"/>
+<area shape="rect" id="Node000007" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="1299,185,1480,240"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="1494,210,1613,210,1613,215,1494,215"/>
+<area shape="rect" id="Node000008" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title=" " alt="" coords="643,197,841,252"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="855,216,891,214,1083,207,1275,207,1298,208,1298,213,1275,213,1083,213,891,219,855,221"/>
+<area shape="rect" id="Node000011" href="$d3/d97/class_s_p_i_output.html" title="Hardware SPI output." alt="" coords="891,229,1083,284"/>
+<area shape="poly" id="edge14_Node000011_Node000008" title=" " alt="" coords="855,237,891,242,890,247,854,242"/>
+<area shape="rect" id="Node000009" href="$dd/da1/class_selectable.html" title="Abstract class for &quot;selectable&quot; things." alt="" coords="5,217,96,243"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="109,219,120,218,260,207,369,202,479,202,619,209,642,210,642,216,619,214,478,208,369,207,260,212,120,223,110,224"/>
+<area shape="rect" id="Node000010" href="$dc/d57/class_a_v_r_software_s_p_i_output.html" title="Software SPI (aka bit&#45;banging) support Includes aggressive optimizations for when the clock and data ..." alt="" coords="217,241,403,296"/>
+<area shape="poly" id="edge12_Node000010_Node000009" title=" " alt="" coords="110,236,218,252,217,258,109,241"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="416,257,618,238,642,235,642,241,619,243,417,263"/>
+<area shape="poly" id="edge13_Node000007_Node000011" title=" " alt="" coords="1096,252,1183,247,1274,237,1298,233,1299,238,1275,242,1184,252,1096,257"/>
+<area shape="rect" id="Node000012" href="$d1/d6d/class_c_min_wait.html" title=" " alt="" coords="1316,293,1463,319"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="1449,287,1626,238,1627,243,1450,292"/>
+<area shape="rect" id="Node000013" href="$d1/d6d/class_c_min_wait.html" title="Class to ensure that a minimum amount of time has kicked since the last time run &#45; and delay if not e..." alt="" coords="913,308,1060,333"/>
+<area shape="poly" id="edge16_Node000012_Node000013" title=" " alt="" coords="1074,315,1316,306,1316,311,1074,320"/>
+</map>

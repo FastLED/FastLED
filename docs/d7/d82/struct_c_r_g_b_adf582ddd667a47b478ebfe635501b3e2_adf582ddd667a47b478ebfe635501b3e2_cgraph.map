@@ -1,0 +1,7 @@
+<map id="CRGB::operator+=" name="CRGB::operator+=">
+<area shape="rect" id="Node000001" title="Add one CRGB to another, saturating at 0xFF for each channel." alt="" coords="5,31,149,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="197,5,301,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,30,183,25,184,30,150,35"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="218,55,281,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="150,51,205,59,204,64,149,56"/>
+</map>

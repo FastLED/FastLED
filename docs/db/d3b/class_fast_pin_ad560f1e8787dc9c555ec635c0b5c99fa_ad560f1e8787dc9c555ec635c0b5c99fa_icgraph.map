@@ -1,0 +1,7 @@
+<map id="FastPin::fastset" name="FastPin::fastset">
+<area shape="rect" id="Node000001" title="Set the state of a port." alt="" coords="223,45,344,70"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_aa56bb71129c578ab2439b12c4605380f.html#aa56bb71129c578ab2439b12c4605380f" title="The version of writeBit() to use when clock and data are on separate pins with precomputed values for..." alt="" coords="5,5,175,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,48,174,42,175,37,209,42"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_a4c5578242dfaf8d6713ec432d6985187.html#a4c5578242dfaf8d6713ec432d6985187" title="The version of writeBit() to use when clock and data are on the same port with precomputed values for..." alt="" coords="5,69,175,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,72,175,78,174,73,208,67"/>
+</map>

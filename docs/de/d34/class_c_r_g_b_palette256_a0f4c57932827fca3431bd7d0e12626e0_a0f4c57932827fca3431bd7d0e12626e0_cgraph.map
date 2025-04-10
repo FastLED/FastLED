@@ -1,0 +1,5 @@
+<map id="CRGBPalette256::CRGBPalette256" name="CRGBPalette256::CRGBPalette256">
+<area shape="rect" id="Node000001" title="Create palette with four&#45;color gradient." alt="" coords="5,5,248,31"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills_ga3144bb2bb66aeed33e20f4fdd6cc1a98.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98" title="Fill a range of LEDs with a smooth HSV gradient between two HSV colors." alt="" coords="296,5,395,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="248,15,282,15,282,21,248,21"/>
+</map>

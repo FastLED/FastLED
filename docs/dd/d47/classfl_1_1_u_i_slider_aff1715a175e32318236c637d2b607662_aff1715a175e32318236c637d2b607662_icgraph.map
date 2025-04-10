@@ -1,0 +1,15 @@
+<map id="fl::UISlider::value" name="fl::UISlider::value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="417,51,551,77"/>
+<area shape="rect" id="Node000002" href="$dd/d47/classfl_1_1_u_i_slider_a3fa7147a83e2c1afeeb3f3adde98030b.html#a3fa7147a83e2c1afeeb3f3adde98030b" title=" " alt="" coords="219,26,367,51"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="403,56,367,51,367,46,404,51"/>
+<area shape="rect" id="Node000003" href="$dd/d47/classfl_1_1_u_i_slider_af277d7787e3c8af51c5c415ff700701a.html#af277d7787e3c8af51c5c415ff700701a" title=" " alt="" coords="5,26,168,51"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="448,47,411,29,369,16,306,9,243,11,185,18,136,28,135,23,184,13,243,5,307,3,370,11,413,24,451,42"/>
+<area shape="rect" id="Node000004" href="$dd/d47/classfl_1_1_u_i_slider_a3d340e821bd1bc3a9ab5b86edba0b8a6.html#a3d340e821bd1bc3a9ab5b86edba0b8a6" title=" " alt="" coords="5,75,168,101"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="450,86,412,103,370,116,307,123,243,121,184,113,135,103,136,98,185,108,244,115,307,118,369,111,410,98,448,81"/>
+<area shape="rect" id="Node000005" href="$dd/d47/classfl_1_1_u_i_slider_aa9c9b1937aaa69f312affee87f192d9d.html#aa9c9b1937aaa69f312affee87f192d9d" title=" " alt="" coords="216,75,369,101"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="404,77,370,81,369,76,403,71"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,41,168,41,168,36,205,36"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="226,57,141,78,140,73,225,52"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="225,75,140,54,141,49,226,69"/>
+<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="202,91,168,91,168,85,202,85"/>
+</map>

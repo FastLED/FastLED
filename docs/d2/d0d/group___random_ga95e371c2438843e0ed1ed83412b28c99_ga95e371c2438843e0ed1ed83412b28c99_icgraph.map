@@ -1,0 +1,5 @@
+<map id="random16_set_seed" name="random16_set_seed">
+<area shape="rect" id="Node000001" title="Set the 16&#45;bit seed used for the random number generator." alt="" coords="112,5,265,31"/>
+<area shape="rect" id="Node000002" href="$d7/ddc/_noise_playground_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,21,64,21,64,15,98,15"/>
+</map>

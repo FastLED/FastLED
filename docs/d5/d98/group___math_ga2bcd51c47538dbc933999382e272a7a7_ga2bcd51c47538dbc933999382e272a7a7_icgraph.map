@@ -1,0 +1,13 @@
+<map id="addmod8" name="addmod8">
+<area shape="rect" id="Node000001" title="Add two numbers, and calculate the modulo of the sum and a third number, M." alt="" coords="487,80,569,105"/>
+<area shape="rect" id="Node000002" href="$d4/dd0/_twinkle_fox_8ino_a328f611f7913b54364ddd78e16fa818c.html#a328f611f7913b54364ddd78e16fa818c" title=" " alt="" coords="252,51,431,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,87,422,79,423,73,473,81"/>
+<area shape="rect" id="Node000005" href="$de/db5/classfl_1_1_twinkle_fox_a57e332626c55ed1dcd58b8a1e408e688.html#a57e332626c55ed1dcd58b8a1e408e688" title=" " alt="" coords="244,101,439,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="473,103,439,109,438,103,473,98"/>
+<area shape="rect" id="Node000003" href="$d4/dd0/_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="75,5,126,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="259,51,126,25,127,20,260,45"/>
+<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="71,55,130,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="238,68,130,70,130,64,238,62"/>
+<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_a99aa1e90fbd791186b6fc4708dabad80.html#a99aa1e90fbd791186b6fc4708dabad80" title=" " alt="" coords="5,108,196,133"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="230,123,196,123,196,118,230,118"/>
+</map>

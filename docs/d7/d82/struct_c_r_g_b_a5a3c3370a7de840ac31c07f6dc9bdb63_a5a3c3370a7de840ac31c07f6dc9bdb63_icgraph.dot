@@ -1,0 +1,28 @@
+digraph "CRGB::nscale8"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CRGB::nscale8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Scale down a RGB to N/256ths of its current brightness, using \"plain math\" dimming rules."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="blur1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_gaacf0416f9e0438f23f92d0df6c338ea3.html#gaacf0416f9e0438f23f92d0df6c338ea3",tooltip="One-dimensional blur filter."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d0c/_blur_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="blurColumns",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga33ce178f76009348d3a0f0723b22d4de.html#ga33ce178f76009348d3a0f0723b22d4de",tooltip="Perform a blur1d() on every column of a rectangular matrix."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="blur2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_gadfd6e9dc2b0c79922d8d4be9d94cf5f5.html#gadfd6e9dc2b0c79922d8d4be9d94cf5f5",tooltip="Two-dimensional blur filter."];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="blur2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="blurRows",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21",tooltip="Perform a blur1d() on every row of a rectangular matrix."];
+  Node8 -> Node5 [id="edge8_Node000008_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge9_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
+}

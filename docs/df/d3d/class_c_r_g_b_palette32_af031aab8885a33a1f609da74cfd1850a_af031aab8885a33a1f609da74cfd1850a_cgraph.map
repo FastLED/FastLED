@@ -1,0 +1,5 @@
+<map id="CRGBPalette32::CRGBPalette32" name="CRGBPalette32::CRGBPalette32">
+<area shape="rect" id="Node000001" title="Create palette with a gradient from one color to another." alt="" coords="5,5,232,31"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills_ga6afaa1f712186a4b67445f69871cad88.html#ga6afaa1f712186a4b67445f69871cad88" title="Fill a range of LEDs with a smooth RGB gradient between two RGB colors." alt="" coords="280,5,415,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,15,266,15,266,21,232,21"/>
+</map>

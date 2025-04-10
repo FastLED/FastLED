@@ -1,11 +1,19 @@
 var searchData=
 [
-  ['aliceblue_0',['AliceBlue',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ae2ea0f490f57098b37aedb69e04ecc29',1,'CRGB']]],
-  ['amethyst_1',['Amethyst',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99aa60be635e425d451b623d66a1ed0c5c3',1,'CRGB']]],
-  ['antiquewhite_2',['AntiqueWhite',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a9904dc1e9d7c0524e1b97712f85e61cf',1,'CRGB']]],
-  ['apa102_3',['APA102',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48',1,'FastLED.h']]],
-  ['apa102hd_4',['APA102HD',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f',1,'FastLED.h']]],
-  ['aqua_5',['Aqua',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a52c1791809b3da8dbf750dbbc1e79587',1,'CRGB']]],
-  ['aquamarine_6',['Aquamarine',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a0842031c2ffb40e6769fbc2da18c525a',1,'CRGB']]],
-  ['azure_7',['Azure',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ab107f41cc0a1e5810e358549775fe83a',1,'CRGB']]]
+  ['activesensing_0',['ActiveSensing',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca55c1135b4b41d3cff4b7832b81352823',1,'midi_Defs.h']]],
+  ['aftertouchchannel_1',['AfterTouchChannel',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca040c84d19624cf23edd3f54c2d432793',1,'midi_Defs.h']]],
+  ['aftertouchpoly_2',['AfterTouchPoly',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84caef074e16a30d86e0a42b873dd6843cd2',1,'midi_Defs.h']]],
+  ['aliceblue_3',['AliceBlue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ae2ea0f490f57098b37aedb69e04ecc29',1,'CRGB']]],
+  ['allnotesoff_4',['AllNotesOff',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a0ff39bd822a95c907b989d90e9c8f945',1,'midi_Defs.h']]],
+  ['allsoundoff_5',['AllSoundOff',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a980953c0f8a2bfed6ff76ee05885a908',1,'midi_Defs.h']]],
+  ['alwaysturnsleft_6',['alwaysTurnsLeft',['../de/de3/ripple_8h_a634431dc85c7ae6b9a0cf08d1f7e416c.html#a634431dc85c7ae6b9a0cf08d1f7e416cad8af5ae4c3d5c4dab7ed2fcb4b1555c7',1,'ripple.h']]],
+  ['alwaysturnsright_7',['alwaysTurnsRight',['../de/de3/ripple_8h_a634431dc85c7ae6b9a0cf08d1f7e416c.html#a634431dc85c7ae6b9a0cf08d1f7e416ca19abd20aedccce3207b19fa0457bb229',1,'ripple.h']]],
+  ['amethyst_8',['Amethyst',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99aa60be635e425d451b623d66a1ed0c5c3',1,'CRGB']]],
+  ['angry_9',['angry',['../de/de3/ripple_8h_a634431dc85c7ae6b9a0cf08d1f7e416c.html#a634431dc85c7ae6b9a0cf08d1f7e416ca9ee474ff900b36d9be669fd6af4c5963',1,'ripple.h']]],
+  ['antiquewhite_10',['AntiqueWhite',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a9904dc1e9d7c0524e1b97712f85e61cf',1,'CRGB']]],
+  ['apa102_11',['APA102',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48',1,'FastLED.h']]],
+  ['apa102hd_12',['APA102HD',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f',1,'FastLED.h']]],
+  ['aqua_13',['Aqua',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a52c1791809b3da8dbf750dbbc1e79587',1,'CRGB']]],
+  ['aquamarine_14',['Aquamarine',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a0842031c2ffb40e6769fbc2da18c525a',1,'CRGB']]],
+  ['azure_15',['Azure',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab107f41cc0a1e5810e358549775fe83a',1,'CRGB']]]
 ];

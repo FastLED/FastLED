@@ -1,0 +1,7 @@
+<map id="calculate_max_brightness_for_power_vmA" name="calculate_max_brightness_for_power_vmA">
+<area shape="rect" id="Node000001" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,5,197,45"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gafff15ebb8adee6a6c76fd46eb980397c.html#gafff15ebb8adee6a6c76fd46eb980397c" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="245,5,437,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,23,232,23,232,28,197,28"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="485,5,632,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,23,472,23,472,28,437,28"/>
+</map>

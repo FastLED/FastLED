@@ -1,0 +1,13 @@
+<map id="AVRSoftwareSPIOutput::release" name="AVRSoftwareSPIOutput::release">
+<area shape="rect" id="Node000001" title="Release the SPI chip select line." alt="" coords="440,101,609,141"/>
+<area shape="rect" id="Node000002" href="$dc/d57/class_a_v_r_software_s_p_i_output_ae321dbae3fceaa2d73a98f6aa08ea3c5.html#ae321dbae3fceaa2d73a98f6aa08ea3c5" title="Set the clock/data pins to output and make sure the chip select is released." alt="" coords="223,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="471,97,391,60,362,48,364,43,393,55,473,93"/>
+<area shape="rect" id="Node000003" href="$dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9" title="Write an array of data to the SPI interface." alt="" coords="223,69,392,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="426,110,392,104,392,99,427,104"/>
+<area shape="rect" id="Node000005" href="$dc/d57/class_a_v_r_software_s_p_i_output_ac4ffa7160697ac63bbd7734b480308bc.html#ac4ffa7160697ac63bbd7734b480308bc" title="Write multiple bytes of the given value over SPI." alt="" coords="223,133,392,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="427,138,392,144,392,138,426,133"/>
+<area shape="rect" id="Node000006" href="$dc/d57/class_a_v_r_software_s_p_i_output_a20772a8fdfa75015731375c36ccb3515.html#a20772a8fdfa75015731375c36ccb3515" title="Write LED pixel data to the SPI interface." alt="" coords="223,197,392,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="473,150,393,188,364,200,362,195,391,183,471,145"/>
+<area shape="rect" id="Node000004" href="$dc/d57/class_a_v_r_software_s_p_i_output_a8e0f5d9fd6f2c1e1eab4436c1b5cb23a.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a" title="Write an array of data to the SPI interface." alt="" coords="5,69,175,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,92,175,92,175,87,209,87"/>
+</map>

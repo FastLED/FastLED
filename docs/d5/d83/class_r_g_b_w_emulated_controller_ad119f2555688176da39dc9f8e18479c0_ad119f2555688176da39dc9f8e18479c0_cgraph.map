@@ -1,0 +1,13 @@
+<map id="RGBWEmulatedController::RGBWEmulatedController" name="RGBWEmulatedController::RGBWEmulatedController">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,203,63"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_ac1f024ba880d94121fd39d5fea0ff70a.html#ac1f024ba880d94121fd39d5fea0ff70a" title=" " alt="" coords="251,31,435,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,41,237,41,237,46,203,46"/>
+<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="483,5,709,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="435,31,469,28,469,33,435,37"/>
+<area shape="rect" id="Node000004" href="$d5/d8d/struct_rgbw_default_a3320052ace2827713b345cc69df2cbe0.html#a3320052ace2827713b345cc69df2cbe0" title=" " alt="" coords="521,55,671,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="435,49,507,56,507,62,435,55"/>
+<area shape="rect" id="Node000005" href="$db/d74/struct_rgbw_a58df62d45b76be5755b009d05e7abb0e.html#a58df62d45b76be5755b009d05e7abb0e" title=" " alt="" coords="806,29,907,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="671,57,792,46,792,51,672,63"/>
+<area shape="rect" id="Node000006" href="$d5/d8d/struct_rgbw_default_ae00a5e4c9f4e16e5da7b11664afb0384.html#ae00a5e4c9f4e16e5da7b11664afb0384" title=" " alt="" coords="757,79,956,104"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="672,72,744,78,743,84,671,77"/>
+</map>

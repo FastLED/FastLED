@@ -1,0 +1,51 @@
+digraph "drawTwinkles"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="drawTwinkles",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="blend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c",tooltip="Computes a new color blended some fraction of the way between two other colors."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="nblend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e",tooltip="Destructively modifies one color, blending in a given fraction of an overlay color."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="blend8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377",tooltip="Blend a variable proportion (0-255) of one byte to another."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="cleanup_R1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79",tooltip="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="scale8_LEAVING_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d",tooltip="This version of scale8() does not clean up the R1 register on AVR."];
+  Node3 -> Node5 [id="edge6_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node6 [id="edge7_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="computeOneTwinkle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dd0/_twinkle_fox_8ino_aff322ac4b9956a48a5d4e90853178b9f.html#aff322ac4b9956a48a5d4e90853178b9f",tooltip=" "];
+  Node7 -> Node8 [id="edge9_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="attackDecayWave8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dd0/_twinkle_fox_8ino_a4a0681804cc2a596cf7821c15aafd777.html#a4a0681804cc2a596cf7821c15aafd777",tooltip=" "];
+  Node7 -> Node9 [id="edge10_Node000007_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd",tooltip="Get a color from a palette."];
+  Node9 -> Node2 [id="edge11_Node000009_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node5 [id="edge12_Node000009_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node10 [id="edge13_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="lsrX4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170",tooltip="Helper function to divide a number by 16, aka four logical shift right (LSR)'s."];
+  Node9 -> Node11 [id="edge14_Node000009_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="map8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d",tooltip="Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues."];
+  Node9 -> Node6 [id="edge15_Node000009_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node13 [id="edge16_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="coolLikeIncandescent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dd0/_twinkle_fox_8ino_a14cf156bb2b5669bf1cc2c4859c9f443.html#a14cf156bb2b5669bf1cc2c4859c9f443",tooltip=" "];
+  Node13 -> Node14 [id="edge17_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="qsub8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3",tooltip="Subtract one byte from another, saturating at 0x00."];
+  Node1 -> Node15 [id="edge18_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="CRGB::getAverageLight",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356",tooltip="Get the average of the R, G, and B values."];
+  Node15 -> Node5 [id="edge19_Node000015_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node6 [id="edge20_Node000015_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node16 [id="edge21_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="CRGB::nscale8_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461",tooltip="Scale down a RGB to N/256ths of it's current brightness using \"video\" dimming rules."];
+  Node16 -> Node17 [id="edge22_Node000016_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa",tooltip="Default constructor."];
+  Node16 -> Node18 [id="edge23_Node000016_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="nscale8x3_video",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9",tooltip="Scale three one-byte values by a fourth one, which is treated as the numerator of a fraction whose de..."];
+  Node18 -> Node5 [id="edge24_Node000018_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node18 -> Node19 [id="edge25_Node000018_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="nscale8_video_LEAVING\l_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe612dafd146.html#gadfd26d9b154f5ec79dbffe612dafd146",tooltip="In place modifying version of scale8_video() that does not clean up the R1 register on AVR."];
+}

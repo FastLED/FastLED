@@ -1,0 +1,7 @@
+<map id="MidiInterface::getType" name="MidiInterface::getType">
+<area shape="rect" id="Node000001" title="Get the last received message&#39;s type." alt="" coords="436,13,603,38"/>
+<area shape="rect" id="Node000002" href="$dc/df1/group__input_ga76ea835c6f160b378bf740162846c817.html#ga76ea835c6f160b378bf740162846c817" title=" " alt="" coords="199,5,388,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="422,28,388,28,388,23,422,23"/>
+<area shape="rect" id="Node000003" href="$dc/df1/group__input_gac7da892409239a434deff28b5d5cedbe.html#gac7da892409239a434deff28b5d5cedbe" title="Read messages on a specified channel." alt="" coords="5,13,151,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="185,28,151,28,151,23,185,23"/>
+</map>

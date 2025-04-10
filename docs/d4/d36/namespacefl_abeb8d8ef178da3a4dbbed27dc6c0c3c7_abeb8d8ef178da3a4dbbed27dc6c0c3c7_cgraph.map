@@ -1,0 +1,7 @@
+<map id="fl::five_bit_hd_gamma_function" name="fl::five_bit_hd_gamma_function">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,172,63"/>
+<area shape="rect" id="Node000002" href="$d1/d12/group__intmap_gab217a118917847ecb8148cdc41fa6e07.html#gab217a118917847ecb8148cdc41fa6e07" title=" " alt="" coords="220,5,323,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,29,206,24,207,30,172,34"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="223,55,319,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,52,210,57,209,62,172,57"/>
+</map>

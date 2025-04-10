@@ -1,0 +1,28 @@
+digraph "fl::Fire2012"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::Fire2012",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Fx1d",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d1c/classfl_1_1_fx1d.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Fx",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d5d/classfl_1_1_fx.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Referent",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d16/classfl_1_1_referent.html",tooltip=" "];
+  Node11 -> Node2 [id="edge4_Node000002_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mXMap",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::XMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d6c/classfl_1_1_x_map.html",tooltip=" "];
+  Node12 -> Node1 [id="edge5_Node000001_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" heat",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::scoped_array\< uint8_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::ArrayDeleter\< uint8_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
+  Node14 -> Node13 [id="edge7_Node000013_Node000014",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t \>",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::ArrayDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
+  Node15 -> Node12 [id="edge8_Node000012_Node000015",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t \>",fontcolor="grey" ];
+  Node15 [id="Node000015",label="fl::scoped_array\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node16 -> Node1 [id="edge9_Node000001_Node000016",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" palette",fontcolor="grey" ];
+  Node16 [id="Node000016",label="CRGBPalette16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/dc4/class_c_r_g_b_palette16.html",tooltip="RGB color palette with 16 discrete values."];
+  Node17 -> Node16 [id="edge10_Node000016_Node000017",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" entries",fontcolor="grey" ];
+  Node17 [id="Node000017",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
+}

@@ -1,0 +1,13 @@
+digraph "fl::FixedMap&lt; Key, Value, N &gt;"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::FixedMap\< Key,\l Value, N \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int, FxPtr, FASTLED\l_FX_ENGINE_MAX_FX \>",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::FixedMap\< int,\l FxPtr, FASTLED_FX_ENGINE\l_MAX_FX \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/df3/classfl_1_1_fixed_map.html",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t, fl::Slice\l\< uint8_t \>, 50 \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::FixedMap\< uint8\l_t, fl::Slice\< uint8\l_t \>, 50 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/df3/classfl_1_1_fixed_map.html",tooltip=" "];
+}

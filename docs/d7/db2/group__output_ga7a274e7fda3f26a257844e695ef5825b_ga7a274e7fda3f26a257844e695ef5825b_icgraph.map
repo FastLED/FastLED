@@ -1,0 +1,27 @@
+<map id="MidiInterface::sendControlChange" name="MidiInterface::sendControlChange">
+<area shape="rect" id="Node000001" title="Send a Control Change message." alt="" coords="304,270,499,310"/>
+<area shape="rect" id="Node000002" href="$d7/db2/group__output_ga8b26d6bf9ee8b1ec412b9fa000825c1b.html#ga8b26d6bf9ee8b1ec412b9fa000825c1b" title="Start a Non&#45;Registered Parameter Number frame." alt="" coords="39,5,222,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="388,258,370,209,343,151,304,92,281,66,255,44,221,28,224,24,257,40,285,63,309,89,348,148,375,207,393,256"/>
+<area shape="rect" id="Node000003" href="$d7/db2/group__output_ga8c0d80cbbc31164207a5daac5c2c0250.html#ga8c0d80cbbc31164207a5daac5c2c0250" title="Start a Registered Parameter Number frame." alt="" coords="42,55,219,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="384,259,363,220,335,174,298,130,255,94,219,78,221,73,257,89,302,126,339,171,368,217,388,256"/>
+<area shape="rect" id="Node000004" href="$d7/db2/group__output_ga522eea83ce5280e72bbe963d16c63de0.html#ga522eea83ce5280e72bbe963d16c63de0" title="Terminate an NRPN frame. This will send a Null Function to deselect the currently selected NRPN." alt="" coords="45,104,216,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="377,261,326,199,292,168,255,143,216,128,217,123,257,138,296,164,330,196,381,257"/>
+<area shape="rect" id="Node000005" href="$d7/db2/group__output_ga2e41151a46d4f00458668cc0c59b9937.html#ga2e41151a46d4f00458668cc0c59b9937" title="Terminate an RPN frame. This will send a Null Function to deselect the currently selected RPN." alt="" coords="48,153,213,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="365,263,315,226,255,192,213,179,214,174,257,188,318,221,369,259"/>
+<area shape="rect" id="Node000006" href="$d7/db2/group__output_ga17e1abb84d45a9062449a674c04a9b74.html#ga17e1abb84d45a9062449a674c04a9b74" title=" " alt="" coords="5,203,256,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="336,268,255,242,207,231,208,225,257,237,337,263"/>
+<area shape="rect" id="Node000007" href="$d7/db2/group__output_ga0a6887687cf94a54e0d2b05739623e4c.html#ga0a6887687cf94a54e0d2b05739623e4c" title=" " alt="" coords="9,252,253,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="290,282,252,279,253,273,291,277"/>
+<area shape="rect" id="Node000008" href="$d7/db2/group__output_ga9a94df00a0b72f66849f9e4db5a29880.html#ga9a94df00a0b72f66849f9e4db5a29880" title="Send separate MSB/LSB values for the currently selected NRPN number." alt="" coords="23,301,238,327"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="290,303,239,307,238,302,290,297"/>
+<area shape="rect" id="Node000009" href="$d7/db2/group__output_gae5bf8f378de3b787f2b943f2349272f9.html#gae5bf8f378de3b787f2b943f2349272f9" title="Send a 14&#45;bit value for the currently selected NRPN number." alt="" coords="23,351,238,376"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="333,317,257,341,202,353,201,348,255,335,331,312"/>
+<area shape="rect" id="Node000010" href="$d7/db2/group__output_gabde92f35330f7656195dc015c5ac8075.html#gabde92f35330f7656195dc015c5ac8075" title=" " alt="" coords="9,400,253,425"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="368,321,317,357,257,390,218,402,217,397,255,385,314,353,364,316"/>
+<area shape="rect" id="Node000011" href="$d7/db2/group__output_ga11b1ea9c4ae69689c8d7f1b3258f2ec3.html#ga11b1ea9c4ae69689c8d7f1b3258f2ec3" title=" " alt="" coords="11,449,250,475"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="380,323,329,383,295,414,257,439,227,452,225,447,255,434,292,409,325,379,376,320"/>
+<area shape="rect" id="Node000012" href="$d7/db2/group__output_ga21d533eef35687c9abfa5fc2bf764b1d.html#ga21d533eef35687c9abfa5fc2bf764b1d" title="Send separate MSB/LSB values for the currently selected RPN number." alt="" coords="27,499,235,524"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="388,324,367,363,338,407,302,452,257,488,231,501,229,496,255,484,298,448,334,404,363,360,383,321"/>
+<area shape="rect" id="Node000013" href="$d7/db2/group__output_gac14d9facb3443437e5c1363042ae091f.html#gac14d9facb3443437e5c1363042ae091f" title="Send a 14&#45;bit value for the currently selected RPN number." alt="" coords="27,548,235,573"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="393,324,375,372,347,430,308,489,284,515,257,538,234,550,231,546,255,533,281,511,304,485,342,428,370,370,388,322"/>
+</map>

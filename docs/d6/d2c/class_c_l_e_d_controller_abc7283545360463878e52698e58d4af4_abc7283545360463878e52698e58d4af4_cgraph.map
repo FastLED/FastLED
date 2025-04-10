@@ -1,0 +1,5 @@
+<map id="CLEDController::showInternal" name="CLEDController::showInternal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,217,31"/>
+<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_afc8fb063666d03527aabc86d8531e007.html#afc8fb063666d03527aabc86d8531e007" title="Write the passed in RGB data out to the LEDs managed by this controller." alt="" coords="265,5,428,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,15,252,15,252,21,217,21"/>
+</map>

@@ -1,0 +1,20 @@
+<map id="HD107HDController&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="HD107HDController&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
+<area shape="rect" id="Node000001" title="HD107HD is just the APA102HD with a default 40Mhz clock rate." alt="" coords="1613,149,1812,203"/>
+<area shape="rect" id="Node000002" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title=" " alt="" coords="1349,149,1564,203"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1578,173,1613,173,1613,179,1578,179"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="569,181,860,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="874,210,1349,180,1349,185,874,215"/>
+<area shape="rect" id="Node000004" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="56,151,229,206"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="243,201,304,212,440,222,569,224,569,230,440,228,304,217,242,207"/>
+<area shape="rect" id="Node000018" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="599,52,830,151"/>
+<area shape="poly" id="edge8_Node000018_Node000004" title=" " alt="" coords="210,143,255,126,303,112,380,100,457,93,599,92,599,97,457,99,380,105,305,117,257,131,212,148"/>
+<area shape="rect" id="Node000008" href="$d3/d97/class_s_p_i_output.html" title=" " alt="" coords="47,9,238,49"/>
+<area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="252,45,432,79,506,97,547,113,557,125,560,137,563,149,571,161,594,179,591,183,567,165,558,151,555,139,552,127,544,117,504,102,431,84,251,50"/>
+<area shape="poly" id="edge9_Node000018_Node000008" title=" " alt="" coords="252,18,393,17,470,22,546,33,603,49,602,54,545,39,469,28,392,22,252,24"/>
+<area shape="rect" id="Node000013" href="$d4/d96/class_a_p_a102_controller.html" title="APA102 controller class." alt="" coords="5,233,280,303"/>
+<area shape="poly" id="edge5_Node000003_Node000013" title=" " alt="" coords="294,302,354,310,417,314,482,312,545,303,596,286,645,262,647,267,598,291,546,308,482,318,417,320,353,315,293,307"/>
+<area shape="poly" id="edge10_Node000018_Node000013" title=" " alt="" coords="286,228,304,224,373,217,428,218,481,214,511,206,544,191,556,180,568,166,598,147,600,152,571,170,560,183,547,196,513,211,482,219,428,223,373,222,304,229,287,233"/>
+<area shape="rect" id="Node000017" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title="APA102 high definition controller class." alt="" coords="909,93,1108,147"/>
+<area shape="poly" id="edge6_Node000002_Node000017" title=" " alt="" coords="1122,131,1349,160,1349,165,1122,137"/>
+<area shape="poly" id="edge7_Node000017_Node000018" title=" " alt="" coords="844,107,909,111,909,116,844,112"/>
+</map>

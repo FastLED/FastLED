@@ -1,0 +1,26 @@
+<map id="fl::Animartrix" name="fl::Animartrix">
+<area shape="rect" id="Node000001" title=" " alt="" coords="525,175,632,201"/>
+<area shape="rect" id="Node000013" href="$d1/dda/classfl_1_1_fast_l_e_d_a_n_i_mart_r_i_x.html" title=" " alt="" coords="905,134,1069,159"/>
+<area shape="poly" id="edge8_Node000013_Node000001" title=" " alt="" coords="645,179,904,152,905,158,646,184"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="343,143,413,169"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="427,161,526,177,525,182,426,166"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="163,115,218,141"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="232,131,343,148,342,153,231,137"/>
+<area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,115,100,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,125,163,125,163,131,114,131"/>
+<area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="149,165,232,190"/>
+<area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="245,173,318,167,342,162,343,167,319,172,246,179"/>
+<area shape="rect" id="Node000012" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="1309,93,1480,133"/>
+<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="1320,140,1286,149,1186,174,1084,188,957,196,831,198,632,194,632,188,831,193,957,191,1084,183,1185,168,1285,144,1319,135"/>
+<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="1082,140,1285,125,1309,123,1309,128,1286,131,1082,145"/>
+<area shape="rect" id="Node000014" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html" title=" " alt="" coords="507,100,650,140"/>
+<area shape="poly" id="edge7_Node000013_Node000014" title=" " alt="" coords="664,123,866,136,905,139,904,144,865,141,664,128"/>
+<area shape="rect" id="Node000028" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="889,5,1084,45"/>
+<area shape="poly" id="edge9_Node000012_Node000028" title=" " alt="" coords="1098,38,1190,54,1286,75,1339,91,1338,96,1285,80,1189,59,1097,43"/>
+<area shape="rect" id="Node000029" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="493,13,664,38"/>
+<area shape="poly" id="edge10_Node000028_Node000029" title=" " alt="" coords="678,23,889,23,889,28,678,28"/>
+<area shape="rect" id="Node000030" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="919,69,1055,109"/>
+<area shape="poly" id="edge11_Node000012_Node000030" title=" " alt="" coords="1069,91,1309,106,1309,111,1068,97"/>
+<area shape="rect" id="Node000031" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="349,193,407,218"/>
+<area shape="poly" id="edge12_Node000001_Node000031" title=" " alt="" coords="421,199,525,190,525,195,421,204"/>
+</map>

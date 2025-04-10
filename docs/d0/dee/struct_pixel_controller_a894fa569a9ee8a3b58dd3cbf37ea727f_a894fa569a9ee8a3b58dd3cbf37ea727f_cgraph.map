@@ -1,0 +1,8 @@
+<map id="PixelController::getd" name="PixelController::getd">
+<area shape="rect" id="Node000001" title="Gets the dithering data for the provided output slot." alt="" coords="5,29,160,55"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="208,29,428,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,39,194,39,194,45,160,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="280,31,272,21,276,11,292,5,318,3,351,7,364,16,360,20,349,11,318,8,293,10,279,15,277,20,284,27"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="476,29,632,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="428,39,462,39,462,45,428,45"/>
+</map>
