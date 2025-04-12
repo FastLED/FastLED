@@ -407,7 +407,7 @@ void setup() {
 
 Check out thr rust port of this algorithm:
 
-https://github.com/smart-leds-rs/apa102-spi-rs/pull/15
+https://docs.rs/apa102-spi/latest/apa102_spi/
 
 # Getting Started
 
