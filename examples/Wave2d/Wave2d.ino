@@ -20,7 +20,11 @@ UITitle title("Wave2D Demo");
 UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
-WaveSimulation2D waveSim(WIDTH, HEIGHT);
+UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
+UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
+UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
+
+WaveSimulation2D2x waveSim(WIDTH, HEIGHT);
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
@@ -29,7 +33,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
 }
 
-void triggerRipple(WaveSimulation2D& waveSim) {
+void triggerRipple(WaveSimulation2D2x& waveSim) {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
     for (int i = x-1; i <= x+1; i++) {
@@ -44,10 +48,17 @@ void triggerRipple(WaveSimulation2D& waveSim) {
 
 void loop() {
     // Your code here
+    waveSim.setSpeed(slider);
+    waveSim.setDampenening(dampening);
     if (button) {
         triggerRipple(waveSim);
     }
     waveSim.update();
+    if (extraFrames.value() > 0) {
+        for (int i = 0; i < extraFrames.value(); i++) {
+            waveSim.update();
+        }
+    }
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             int16_t value16 = ABS(waveSim.geti16(x, y));
