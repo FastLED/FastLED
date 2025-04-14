@@ -29,7 +29,7 @@ class WaveSimulation1D {
     // Constructor:
     //  - length: desired downsampled grid length.
     //  - factor: supersampling multiplier (e.g., 1x, 2x, 4x, or 8x).
-    //    The underlying simulation will have length * multiplier cells.
+    //     Higher values yield better quality but are more cpu intensive.
     //  - speed and dampening are passed on to the internal simulation.
     WaveSimulation1D(uint32_t length,
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
@@ -86,6 +86,7 @@ class WaveSimulation2D {
     //   - W and H specify the desired inner grid size of the downsampled
     //   simulation.
     //   - 'factor' selects the supersampling multiplier (e.g., 2x, 4x, or 8x).
+    //     Higher values yield better quality but are more cpu intensive.
     //   - Internally, the simulation is created with dimensions (factor*W x
     //   factor*H).
     //   - 'speed' and 'dampening' parameters are passed on to the internal
