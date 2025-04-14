@@ -1,6 +1,5 @@
 
 
-
 #include <stdint.h>
 
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
@@ -9,19 +8,20 @@
 #include "fl/warn.h"
 
 #include "fl/ptr.h"
+#include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
 
 namespace fl {
 
-
 class WaveSimulation1D {
   public:
     // Constructor:
     //  - length: inner simulation grid length (excluding the 2 boundary cells).
     //  - speed: simulation speed (in float, will be stored in Q15).
-    //  - dampening: exponent so that the effective damping factor is 2^(dampening).
+    //  - dampening: exponent so that the effective damping factor is
+    //  2^(dampening).
     WaveSimulation1D(uint32_t length, float speed = 0.16f, int dampening = 6);
     ~WaveSimulation1D() = default;
 
@@ -37,14 +37,13 @@ class WaveSimulation1D {
     // Get the simulation speed as a float.
     float getSpeed() const;
 
-    // Get the simulation value at the inner grid cell x (converted to float in the range [-1.0, 1.0]).
+    // Get the simulation value at the inner grid cell x (converted to float in
+    // the range [-1.0, 1.0]).
     float get(size_t x) const;
 
     int16_t geti16(size_t x) const;
 
-    int8_t geti8(size_t x) const {
-        return static_cast<int8_t>(geti16(x) >> 8);
-    }
+    int8_t geti8(size_t x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
     uint8_t getu8(size_t x) const {
         int16_t value = geti16(x);
@@ -57,7 +56,8 @@ class WaveSimulation1D {
     // Returns whether x is within the inner grid bounds.
     bool has(size_t x) const;
 
-    // Set the value at grid cell x (expected range: [-1.0, 1.0]); the value is stored in Q15.
+    // Set the value at grid cell x (expected range: [-1.0, 1.0]); the value is
+    // stored in Q15.
     void set(size_t x, float value);
 
     // Advance the simulation one time step.
@@ -65,17 +65,15 @@ class WaveSimulation1D {
 
   private:
     uint32_t length; // Length of the inner simulation grid.
-    // Two grids stored in fixed Q15 format, each with length+2 entries (including boundary cells).
+    // Two grids stored in fixed Q15 format, each with length+2 entries
+    // (including boundary cells).
     fl::scoped_array<int16_t> grid1;
     fl::scoped_array<int16_t> grid2;
     size_t whichGrid; // Indicates the active grid (0 or 1).
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
-    int mDampenening;    // Dampening exponent (damping factor = 2^(mDampenening)).
+    int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
 };
-
-
-
 
 class WaveSimulation2D_Real {
   public:
@@ -85,7 +83,7 @@ class WaveSimulation2D_Real {
     // and 'dampening' is given as an exponent so that the damping factor is
     // 2^dampening.
     WaveSimulation2D_Real(uint32_t W, uint32_t H, float speed = 0.16f,
-                     float dampening = 6.0f);
+                          float dampening = 6.0f);
     ~WaveSimulation2D_Real() = default;
 
     // Set the simulation speed (courantSq) using a float value.
@@ -150,60 +148,44 @@ class WaveSimulation2D_Real {
     int mDampening;     // Dampening exponent; used as 2^(dampening).
 };
 
-
 class WaveSimulation2D {
-public:
-
-    // Enumeration for supersampling factors.
-    enum SuperSample {
-        k1x = 1, // 1x supersampling (no supersampling)
-        k2x = 2, // 2x supersampling
-        k4x = 4, // 4x supersampling
-        k8x = 8  // 8x supersampling
-    };
-
+  public:
     // Constructor:
-    //   - W and H specify the desired inner grid size of the downsampled simulation.
+    //   - W and H specify the desired inner grid size of the downsampled
+    //   simulation.
     //   - 'factor' selects the supersampling multiplier (e.g., 2x, 4x, or 8x).
-    //   - Internally, the simulation is created with dimensions (factor*W x factor*H).
-    //   - 'speed' and 'dampening' parameters are passed on to the internal simulation.
-    WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor = k1x,
-                    float speed = 0.16f, float dampening = 6.0f)
+    //   - Internally, the simulation is created with dimensions (factor*W x
+    //   factor*H).
+    //   - 'speed' and 'dampening' parameters are passed on to the internal
+    //   simulation.
+    WaveSimulation2D(uint32_t W, uint32_t H,
+                     SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
+                     float speed = 0.16f, float dampening = 6.0f)
         : outerWidth(W), outerHeight(H),
           multiplier(static_cast<uint32_t>(factor)),
-          sim(new WaveSimulation2D_Real(W * multiplier, H * multiplier, speed, dampening))
-    {
-        // Extra frames are needed because the simulation slows down in proportion
-        // to the supersampling factor.
+          sim(new WaveSimulation2D_Real(W * multiplier, H * multiplier, speed,
+                                        dampening)) {
+        // Extra frames are needed because the simulation slows down in
+        // proportion to the supersampling factor.
         extraFrames = uint8_t(factor) - 1;
     }
 
     ~WaveSimulation2D() = default;
 
     // Delegated simulation methods.
-    void setSpeed(float speed) {
-        sim->setSpeed(speed);
-    }
+    void setSpeed(float speed) { sim->setSpeed(speed); }
 
+    void setExtraFrames(uint8_t extra) { extraFrames = extra; }
 
-    void setExtraFrames(uint8_t extra) {
-        extraFrames = extra;
-    }
+    void setDampenening(int damp) { sim->setDampenening(damp); }
 
-    void setDampenening(int damp) {
-        sim->setDampenening(damp);
-    }
+    int getDampenening() const { return sim->getDampenening(); }
 
-    int getDampenening() const {
-        return sim->getDampenening();
-    }
+    float getSpeed() const { return sim->getSpeed(); }
 
-    float getSpeed() const {
-        return sim->getSpeed();
-    }
-
-    // Downsampled getter for the floating point value at (x,y) in the outer grid.
-    // It averages over the corresponding multiplier×multiplier block in the high-res simulation.
+    // Downsampled getter for the floating point value at (x,y) in the outer
+    // grid. It averages over the corresponding multiplier×multiplier block in
+    // the high-res simulation.
     float getf(size_t x, size_t y) const {
         if (!has(x, y))
             return 0.0f;
@@ -237,7 +219,8 @@ public:
 
     uint8_t getu8(size_t x, size_t y) const {
         int16_t value = geti16(x, y);
-        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
+        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+                                    8);
     }
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
@@ -245,8 +228,9 @@ public:
         return (x < outerWidth) && (y < outerHeight);
     }
 
-    // Upsampling setter: set the value at an outer grid cell (x,y) by replicating it
-    // to all cells of the corresponding multiplier×multiplier block in the high-res simulation.
+    // Upsampling setter: set the value at an outer grid cell (x,y) by
+    // replicating it to all cells of the corresponding multiplier×multiplier
+    // block in the high-res simulation.
     void set(size_t x, size_t y, float value) {
         if (!has(x, y))
             return;
@@ -269,11 +253,11 @@ public:
     uint32_t getWidth() const { return outerWidth; }
     uint32_t getHeight() const { return outerHeight; }
 
-private:
-    uint32_t outerWidth;   // Width of the downsampled (outer) grid.
-    uint32_t outerHeight;  // Height of the downsampled (outer) grid.
+  private:
+    uint32_t outerWidth;  // Width of the downsampled (outer) grid.
+    uint32_t outerHeight; // Height of the downsampled (outer) grid.
     uint8_t extraFrames = 0;
-    uint32_t multiplier;   // Supersampling multiplier (e.g., 2, 4, or 8).
+    uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> sim;
 };

@@ -40,8 +40,7 @@ class WaveCrgbMapDefault : public IWaveCrgbMap {
 class WaveFx : public Fx2d {
   public:
     WaveFx(XYMap xymap,
-           WaveSimulation2D::SuperSample factor =
-               WaveSimulation2D::SuperSample::k2x,
+           SuperSample factor = SuperSample::SUPER_SAMPLE_2X,
            float speed = 0.16f, float dampening = 6.0f)
         : Fx2d(xymap), mWaveSim(xymap.getWidth(), xymap.getHeight(), factor,
                                 speed, dampening) {

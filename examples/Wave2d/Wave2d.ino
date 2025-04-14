@@ -24,7 +24,7 @@ UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
 UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
 
-WaveSimulation2D waveSim(WIDTH, HEIGHT, WaveSimulation2D::k4x);
+WaveSimulation2D waveSim(WIDTH, HEIGHT, SUPER_SAMPLE_4X);
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
