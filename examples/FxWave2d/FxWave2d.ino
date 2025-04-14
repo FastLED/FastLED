@@ -42,7 +42,6 @@ void loop() {
             uint8_t value8 = static_cast<uint8_t>(value * 255);
             uint32_t idx = xyMap.mapToIndex(x, y);
             leds[idx] = CRGB(value8, value8, value8);
-            FASTLED_WARN("leds[" << idx << "] = " << value8);
         }
     }
     FastLED.show();
