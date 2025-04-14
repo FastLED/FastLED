@@ -1,8 +1,9 @@
 
 /*
-Experimental bileaner downscaling algorithm. Not tested yet and completely
+Experimental bilinearn downscaling algorithm. Not tested yet and completely
 "vibe-coded" by ai.
 
+If you use this and find an issue then please report it.
 */
 
 
