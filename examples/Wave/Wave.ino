@@ -18,8 +18,7 @@ UITitle title("Wave Demo");
 UIDescription description("Shows the use of the Wave1D effect.");
 
 UIButton button("Trigger");
-using MyWaveSimulation1D = fl::WaveSimulation1D<NUM_LEDS>;
-MyWaveSimulation1D waveSim;
+WaveSimulation1D waveSim(NUM_LEDS);
 
 
 void setup() {
@@ -27,7 +26,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);
 }
 
-void triggerRipple(MyWaveSimulation1D &waveSim) {
+void triggerRipple(WaveSimulation1D &waveSim) {
     int x = random() % NUM_LEDS;
     waveSim.set(x, 1.f);
 }
