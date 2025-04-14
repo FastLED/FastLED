@@ -1,6 +1,7 @@
 
 
 #include <stdint.h>
+#include "fl/warn.h"
 
 // Two dimensional wave simulation.
 template <uint32_t W, uint32_t H> class WaveSimulation2D {
@@ -18,7 +19,7 @@ template <uint32_t W, uint32_t H> class WaveSimulation2D {
 
     float get(size_t x, size_t y) const {
         if (x >= W || y >= H) {
-            printf("Out of range.\n");
+            FASTLED_WARN("Out of range: " << x << ", " << y);
             return 0.0f;
         }
         return grid[whichGrid_][y + 1][x + 1];
@@ -33,7 +34,8 @@ template <uint32_t W, uint32_t H> class WaveSimulation2D {
 
     void set(size_t x, size_t y, float value) {
         if (x >= W || y >= H) {
-            printf("Out of range.\n");
+            //printf("Out of range.\n");
+            FASTLED_WARN("Out of range: " << x << ", " << y);
             return;
         }
         grid[whichGrid_][y + 1][x + 1] = value;

@@ -9,9 +9,10 @@
 
 using namespace fl;
 
-#define HEIGHT 32
-#define WIDTH 32
+#define HEIGHT 100
+#define WIDTH 100
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
+#define IS_SERPINTINE true
 
 CRGB leds[NUM_LEDS];
 
@@ -21,7 +22,7 @@ UIDescription description("Shows the use of the Wave2d effect.");
 UIButton button("Trigger");
 WaveSimulation2D<WIDTH, HEIGHT> waveSim;
 
-XYMap xyMap(WIDTH, HEIGHT, false);
+XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
 void setup() {
     Serial.begin(115200);
@@ -33,6 +34,13 @@ void loop() {
     if (button) {
         int x = random() % WIDTH;
         int y = random() % HEIGHT;
+        for (int i = x-1; i <= x+1; i++) {
+            if (i < 0 || i >= WIDTH) continue;
+            for (int j = y-1; j <= y+1; j++) {
+                if (j < 0 || j >= HEIGHT) continue;
+                waveSim.set(i, j, 1);
+            }
+        }
         waveSim.set(x, y, 1);
     }
     waveSim.update();
