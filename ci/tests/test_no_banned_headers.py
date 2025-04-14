@@ -22,6 +22,7 @@ BANNED_HEADERS_CORE = [
     "assert.h",
     "iostream",
     "stdio.h",
+    "cmath",
     "cstdio",
     "cstdlib",
     "vector",
