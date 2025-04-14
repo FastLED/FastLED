@@ -9,7 +9,7 @@
 
 using namespace fl;
 
-#define NUM_LEDS 200
+#define NUM_LEDS 100
 #define IS_SERPINTINE true
 
 CRGB leds[NUM_LEDS];
