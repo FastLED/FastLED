@@ -12,17 +12,17 @@ namespace fl {
 #define FIXED_ONE (FIXED_SCALE)
 
 // Convert float to fixed Q15.
-static inline int16_t float_to_fixed(float f) {
+int16_t float_to_fixed(float f) {
     return (int16_t)(f * FIXED_SCALE);
 }
 
 // Convert fixed Q15 to float.
-static inline float fixed_to_float(int16_t f) {
+float fixed_to_float(int16_t f) {
     return ((float)f) / FIXED_SCALE;
 }
 
 // Multiply two Q15 fixed point numbers.
-static inline int16_t fixed_mul(int16_t a, int16_t b) {
+int16_t fixed_mul(int16_t a, int16_t b) {
     return (int16_t)(((int32_t)a * b) >> 15);
 }
 
