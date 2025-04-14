@@ -11,6 +11,7 @@ namespace fl {
 #define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
 #define FIXED_ONE (FIXED_SCALE)
 
+namespace {  // Anonymous namespace for internal linkage
 // Convert float to fixed Q15.
 int16_t float_to_fixed(float f) {
     return (int16_t)(f * FIXED_SCALE);
@@ -25,6 +26,7 @@ float fixed_to_float(int16_t f) {
 int16_t fixed_mul(int16_t a, int16_t b) {
     return (int16_t)(((int32_t)a * b) >> 15);
 }
+}  // namespace
 
 
 WaveSimulation1D::WaveSimulation1D(uint32_t len, float courantSq, int dampening)

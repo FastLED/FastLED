@@ -15,14 +15,6 @@
 
 namespace fl {
 
-// Convert float to fixed Q15.
-int16_t float_to_fixed(float f);
-
-// Convert fixed Q15 to float.
-float fixed_to_float(int16_t f);
-
-// Multiply two Q15 fixed point numbers.
-int16_t fixed_mul(int16_t a, int16_t b);
 
 class WaveSimulation1D {
   public:
