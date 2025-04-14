@@ -33,82 +33,41 @@ class WaveSimulation1D {
     //  - speed and dampening are passed on to the internal simulation.
     WaveSimulation1D(uint32_t length,
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
-                     float speed = 0.16f, int dampening = 6)
-        : outerLength(length),
-          multiplier(static_cast<uint32_t>(factor)),
-          sim(new WaveSimulation1D_Real(length * multiplier, speed, dampening)) {
-        // Extra updates (frames) are applied because the simulation slows down in
-        // proportion to the supersampling factor.
-        extraFrames = static_cast<uint8_t>(factor) - 1;
-    }
+                     float speed = 0.16f, int dampening = 6);
 
     ~WaveSimulation1D() = default;
 
     // Delegate methods to the internal simulation.
-    void setSpeed(float speed) { sim->setSpeed(speed); }
-    void setDampenening(int damp) { sim->setDampenening(damp); }
-    int getDampenening() const { return sim->getDampenening(); }
-    float getSpeed() const { return sim->getSpeed(); }
+    void setSpeed(float speed) ;
+    void setDampenening(int damp) ;
+    int getDampenening() const ;
+    float getSpeed() const ;
 
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the high-res simulation.
-    float get(size_t x) const {
-        if (!has(x))
-            return 0.0f;
-        float sum = 0.0f;
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += sim->get(x * multiplier + i);
-        }
-        return sum / static_cast<float>(multiplier);
-    }
+    float get(size_t x) const ;
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
-    int16_t geti16(size_t x) const {
-        if (!has(x))
-            return 0;
-        int32_t sum = 0;
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += sim->geti16(x * multiplier + i);
-        }
-        return static_cast<int16_t>(sum / multiplier);
-    }
+    int16_t geti16(size_t x) const ;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(size_t x) const {
-        return static_cast<int8_t>(geti16(x) >> 8);
-    }
+    int8_t geti8(size_t x) const ;
 
-    uint8_t getu8(size_t x) const {
-        int16_t value = geti16(x);
-        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
-    }
+    uint8_t getu8(size_t x) const ;
 
     // Check if x is within the bounds of the outer (downsampled) simulation.
-    bool has(size_t x) const {
-        return (x < outerLength);
-    }
+    bool has(size_t x) const ;
 
     // Upsampling setter: set the value at an outer grid cell x by replicating it
     // to the corresponding multiplier cells in the high-res simulation.
-    void set(size_t x, float value) {
-        if (!has(x))
-            return;
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sim->set(x * multiplier + i, value);
-        }
-    }
+    void set(size_t x, float value) ;
 
     // Advance the simulation one time step.
-    void update() {
-        sim->update();
-        for (uint8_t i = 0; i < extraFrames; ++i) {
-            sim->update();
-        }
-    }
+    void update() ;
 
     // Get the outer (downsampled) grid length.
-    uint32_t getLength() const { return outerLength; }
+    uint32_t getLength() const ;
 
   private:
     uint32_t outerLength;   // Length of the downsampled simulation.
@@ -131,98 +90,49 @@ class WaveSimulation2D {
     //   simulation.
     WaveSimulation2D(uint32_t W, uint32_t H,
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
-                     float speed = 0.16f, float dampening = 6.0f)
-        : outerWidth(W), outerHeight(H),
-          multiplier(static_cast<uint32_t>(factor)),
-          sim(new WaveSimulation2D_Real(W * multiplier, H * multiplier, speed,
-                                        dampening)) {
-        // Extra frames are needed because the simulation slows down in
-        // proportion to the supersampling factor.
-        extraFrames = uint8_t(factor) - 1;
-    }
+                     float speed = 0.16f, float dampening = 6.0f);
 
     ~WaveSimulation2D() = default;
 
     // Delegated simulation methods.
-    void setSpeed(float speed) { sim->setSpeed(speed); }
+    void setSpeed(float speed) ;
 
-    void setExtraFrames(uint8_t extra) { extraFrames = extra; }
+    void setExtraFrames(uint8_t extra) ;
 
-    void setDampenening(int damp) { sim->setDampenening(damp); }
+    void setDampenening(int damp) ;
 
-    int getDampenening() const { return sim->getDampenening(); }
+    int getDampenening() const ;
 
-    float getSpeed() const { return sim->getSpeed(); }
+    float getSpeed() const ;
 
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in
     // the high-res simulation.
-    float getf(size_t x, size_t y) const {
-        if (!has(x, y))
-            return 0.0f;
-        float sum = 0.0f;
-        for (uint32_t j = 0; j < multiplier; ++j) {
-            for (uint32_t i = 0; i < multiplier; ++i) {
-                sum += sim->getf(x * multiplier + i, y * multiplier + j);
-            }
-        }
-        return sum / static_cast<float>(multiplier * multiplier);
-    }
+    float getf(size_t x, size_t y) const ;
 
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
-    int16_t geti16(size_t x, size_t y) const {
-        if (!has(x, y))
-            return 0;
-        int32_t sum = 0;
-        for (uint32_t j = 0; j < multiplier; ++j) {
-            for (uint32_t i = 0; i < multiplier; ++i) {
-                sum += sim->geti16(x * multiplier + i, y * multiplier + j);
-            }
-        }
-        return static_cast<int16_t>(sum / (multiplier * multiplier));
-    }
+    int16_t geti16(size_t x, size_t y) const ;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(size_t x, size_t y) const {
-        return static_cast<int8_t>(geti16(x, y) >> 8);
-    }
+    int8_t geti8(size_t x, size_t y) const ;
 
-    uint8_t getu8(size_t x, size_t y) const {
-        int16_t value = geti16(x, y);
-        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                    8);
-    }
+    uint8_t getu8(size_t x, size_t y) const ;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
-    bool has(size_t x, size_t y) const {
-        return (x < outerWidth) && (y < outerHeight);
-    }
+    bool has(size_t x, size_t y) const ;
 
     // Upsampling setter: set the value at an outer grid cell (x,y) by
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
-    void set(size_t x, size_t y, float value) {
-        if (!has(x, y))
-            return;
-        for (uint32_t j = 0; j < multiplier; ++j) {
-            for (uint32_t i = 0; i < multiplier; ++i) {
-                sim->set(x * multiplier + i, y * multiplier + j, value);
-            }
-        }
-    }
+    void set(size_t x, size_t y, float value) ;
 
     // Advance the simulation one time step.
-    void update() {
-        sim->update();
-        for (uint8_t i = 0; i < extraFrames; ++i) {
-            sim->update();
-        }
-    }
+    void update() ;
 
     // Get the outer grid dimensions.
-    uint32_t getWidth() const { return outerWidth; }
-    uint32_t getHeight() const { return outerHeight; }
+    uint32_t getWidth() const ;
+    uint32_t getHeight() const ;
 
   private:
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.
