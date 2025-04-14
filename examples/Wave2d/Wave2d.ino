@@ -16,7 +16,7 @@ using namespace fl;
 
 CRGB leds[NUM_LEDS];
 
-UITitle title("FxWave2D Demo");
+UITitle title("Wave2D Demo");
 UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
@@ -29,29 +29,29 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
 }
 
+void triggerRipple() {
+    int x = random() % WIDTH;
+    int y = random() % HEIGHT;
+    for (int i = x-1; i <= x+1; i++) {
+        if (i < 0 || i >= WIDTH) continue;
+        for (int j = y-1; j <= y+1; j++) {
+            if (j < 0 || j >= HEIGHT) continue;
+            waveSim.set(i, j, 1);
+        }
+    }
+    waveSim.set(x, y, 1);
+}
+
 void loop() {
     // Your code here
     if (button) {
-        int x = random() % WIDTH;
-        int y = random() % HEIGHT;
-        for (int i = x-1; i <= x+1; i++) {
-            if (i < 0 || i >= WIDTH) continue;
-            for (int j = y-1; j <= y+1; j++) {
-                if (j < 0 || j >= HEIGHT) continue;
-                waveSim.set(i, j, 1);
-            }
-        }
-        waveSim.set(x, y, 1);
+        triggerRipple();
     }
     waveSim.update();
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            //float value = waveSim.getf(x, y);
             int16_t value16 = ABS(waveSim.geti16(x, y));
             uint8_t value8 = map(value16, 0, 32767, 0, 255);
-            // value = value ? value > 0 : -value;
-            //value = ABS(value);
-            // uint8_t value8 = static_cast<uint8_t>(value * 255);
             uint32_t idx = xyMap.mapToIndex(x, y);
             leds[idx] = CRGB(value8, value8, value8);
         }
