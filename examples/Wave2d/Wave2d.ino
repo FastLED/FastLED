@@ -29,7 +29,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
 }
 
-void triggerRipple() {
+void triggerRipple(WaveSimulation2D& waveSim) {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
     for (int i = x-1; i <= x+1; i++) {
@@ -45,7 +45,7 @@ void triggerRipple() {
 void loop() {
     // Your code here
     if (button) {
-        triggerRipple();
+        triggerRipple(waveSim);
     }
     waveSim.update();
     for (int y = 0; y < HEIGHT; y++) {
