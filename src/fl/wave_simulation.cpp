@@ -29,7 +29,7 @@ int16_t fixed_mul(int16_t a, int16_t b) {
 }  // namespace
 
 
-WaveSimulation1D::WaveSimulation1D(uint32_t len, float courantSq, int dampening)
+WaveSimulation1D_Real::WaveSimulation1D_Real(uint32_t len, float courantSq, int dampening)
     : length(len),
       grid1(new int16_t[length + 2]()), // Allocate and zero-initialize with length+2 elements.
       grid2(new int16_t[length + 2]()),
@@ -40,23 +40,23 @@ WaveSimulation1D::WaveSimulation1D(uint32_t len, float courantSq, int dampening)
     // Additional initialization can be added here if needed.
 }
 
-void WaveSimulation1D::setSpeed(float something) {
+void WaveSimulation1D_Real::setSpeed(float something) {
     mCourantSq = float_to_fixed(something);
 }
 
-void WaveSimulation1D::setDampenening(int damp) {
+void WaveSimulation1D_Real::setDampenening(int damp) {
     mDampenening = damp;
 }
 
-int WaveSimulation1D::getDampenening() const {
+int WaveSimulation1D_Real::getDampenening() const {
     return mDampenening;
 }
 
-float WaveSimulation1D::getSpeed() const {
+float WaveSimulation1D_Real::getSpeed() const {
     return fixed_to_float(mCourantSq);
 }
 
-int16_t WaveSimulation1D::geti16(size_t x) const {
+int16_t WaveSimulation1D_Real::geti16(size_t x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0;
@@ -65,7 +65,7 @@ int16_t WaveSimulation1D::geti16(size_t x) const {
     return curr[x + 1];
 }
 
-float WaveSimulation1D::get(size_t x) const {
+float WaveSimulation1D_Real::get(size_t x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0.0f;
@@ -75,11 +75,11 @@ float WaveSimulation1D::get(size_t x) const {
     return fixed_to_float(curr[x + 1]);
 }
 
-bool WaveSimulation1D::has(size_t x) const {
+bool WaveSimulation1D_Real::has(size_t x) const {
     return (x < length);
 }
 
-void WaveSimulation1D::set(size_t x, float value) {
+void WaveSimulation1D_Real::set(size_t x, float value) {
     if (x >= length) {
         FASTLED_WARN("warning X value too high");
         return;
@@ -88,7 +88,7 @@ void WaveSimulation1D::set(size_t x, float value) {
     curr[x + 1] = float_to_fixed(value);
 }
 
-void WaveSimulation1D::update() {
+void WaveSimulation1D_Real::update() {
     int16_t* curr = (whichGrid == 0) ? grid1.get() : grid2.get();
     int16_t* next = (whichGrid == 0) ? grid2.get() : grid1.get();
 
