@@ -38,45 +38,45 @@ class WaveSimulation1D {
     ~WaveSimulation1D() = default;
 
     // Delegate methods to the internal simulation.
-    void setSpeed(float speed) ;
-    void setDampenening(int damp) ;
-    int getDampenening() const ;
-    float getSpeed() const ;
+    void setSpeed(float speed);
+    void setDampenening(int damp);
+    int getDampenening() const;
+    float getSpeed() const;
 
     // Downsampled getter for the floating point value at index x.
-    // It averages over the corresponding 'multiplier'-sized block in the high-res simulation.
-    float get(size_t x) const ;
+    // It averages over the corresponding 'multiplier'-sized block in the
+    // high-res simulation.
+    float get(size_t x) const;
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
-    int16_t geti16(size_t x) const ;
+    int16_t geti16(size_t x) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(size_t x) const ;
+    int8_t geti8(size_t x) const;
 
-    uint8_t getu8(size_t x) const ;
+    uint8_t getu8(size_t x) const;
 
     // Check if x is within the bounds of the outer (downsampled) simulation.
-    bool has(size_t x) const ;
+    bool has(size_t x) const;
 
-    // Upsampling setter: set the value at an outer grid cell x by replicating it
-    // to the corresponding multiplier cells in the high-res simulation.
-    void set(size_t x, float value) ;
+    // Upsampling setter: set the value at an outer grid cell x by replicating
+    // it to the corresponding multiplier cells in the high-res simulation.
+    void set(size_t x, float value);
 
     // Advance the simulation one time step.
-    void update() ;
+    void update();
 
     // Get the outer (downsampled) grid length.
-    uint32_t getLength() const ;
+    uint32_t getLength() const;
 
   private:
-    uint32_t outerLength;   // Length of the downsampled simulation.
+    uint32_t outerLength; // Length of the downsampled simulation.
     uint8_t extraFrames = 0;
-    uint32_t multiplier;    // Supersampling multiplier (e.g., 2, 4, or 8).
+    uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation1D_Real> sim;
 };
-
 
 class WaveSimulation2D {
   public:
@@ -95,44 +95,44 @@ class WaveSimulation2D {
     ~WaveSimulation2D() = default;
 
     // Delegated simulation methods.
-    void setSpeed(float speed) ;
+    void setSpeed(float speed);
 
-    void setExtraFrames(uint8_t extra) ;
+    void setExtraFrames(uint8_t extra);
 
-    void setDampenening(int damp) ;
+    void setDampenening(int damp);
 
-    int getDampenening() const ;
+    int getDampenening() const;
 
-    float getSpeed() const ;
+    float getSpeed() const;
 
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in
     // the high-res simulation.
-    float getf(size_t x, size_t y) const ;
+    float getf(size_t x, size_t y) const;
 
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
-    int16_t geti16(size_t x, size_t y) const ;
+    int16_t geti16(size_t x, size_t y) const;
 
     // Downsampled getters for the 8-bit representations.
-    int8_t geti8(size_t x, size_t y) const ;
+    int8_t geti8(size_t x, size_t y) const;
 
-    uint8_t getu8(size_t x, size_t y) const ;
+    uint8_t getu8(size_t x, size_t y) const;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
-    bool has(size_t x, size_t y) const ;
+    bool has(size_t x, size_t y) const;
 
     // Upsampling setter: set the value at an outer grid cell (x,y) by
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
-    void set(size_t x, size_t y, float value) ;
+    void set(size_t x, size_t y, float value);
 
     // Advance the simulation one time step.
-    void update() ;
+    void update();
 
     // Get the outer grid dimensions.
-    uint32_t getWidth() const ;
-    uint32_t getHeight() const ;
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
 
   private:
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.

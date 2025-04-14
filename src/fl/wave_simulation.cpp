@@ -4,16 +4,13 @@
 #include "fl/namespace.h"
 #include "fl/wave_simulation.h"
 
-
 namespace fl {
 
 void WaveSimulation2D::setSpeed(float speed) { sim->setSpeed(speed); }
 
-WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H,
-                 SuperSample factor,
-                 float speed, float dampening)
-    : outerWidth(W), outerHeight(H),
-      multiplier(static_cast<uint32_t>(factor)),
+WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
+                                   float speed, float dampening)
+    : outerWidth(W), outerHeight(H), multiplier(static_cast<uint32_t>(factor)),
       sim(new WaveSimulation2D_Real(W * multiplier, H * multiplier, speed,
                                     dampening)) {
     // Extra frames are needed because the simulation slows down in
@@ -57,8 +54,7 @@ int8_t WaveSimulation2D::geti8(size_t x, size_t y) const {
 
 uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
     int16_t value = geti16(x, y);
-    return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                8);
+    return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
 bool WaveSimulation2D::has(size_t x, size_t y) const {
@@ -87,11 +83,9 @@ uint32_t WaveSimulation2D::getHeight() const { return outerHeight; }
 
 void WaveSimulation2D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
 
-WaveSimulation1D::WaveSimulation1D(uint32_t length,
-                 SuperSample factor,
-                 float speed, int dampening)
-    : outerLength(length),
-      multiplier(static_cast<uint32_t>(factor)),
+WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
+                                   float speed, int dampening)
+    : outerLength(length), multiplier(static_cast<uint32_t>(factor)),
       sim(new WaveSimulation1D_Real(length * multiplier, speed, dampening)) {
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
@@ -135,9 +129,7 @@ uint8_t WaveSimulation1D::getu8(size_t x) const {
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation1D::has(size_t x) const {
-    return (x < outerLength);
-}
+bool WaveSimulation1D::has(size_t x) const { return (x < outerLength); }
 
 void WaveSimulation1D::set(size_t x, float value) {
     if (!has(x))
@@ -156,4 +148,4 @@ void WaveSimulation1D::update() {
 
 uint32_t WaveSimulation1D::getLength() const { return outerLength; }
 
-}  // namespace fl
+} // namespace fl

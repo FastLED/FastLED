@@ -1,7 +1,7 @@
 /*
 Wave simulation classes for 1D and 2D simulations. This is called _Real because
-there is a one to one mapping between the simulation and the LED grid. For flexible
-super sampling see wave_simluation.h.
+there is a one to one mapping between the simulation and the LED grid. For
+flexible super sampling see wave_simluation.h.
 */
 
 #pragma once
@@ -28,7 +28,8 @@ class WaveSimulation1D_Real {
     //  - speed: simulation speed (in float, will be stored in Q15).
     //  - dampening: exponent so that the effective damping factor is
     //  2^(dampening).
-    WaveSimulation1D_Real(uint32_t length, float speed = 0.16f, int dampening = 6);
+    WaveSimulation1D_Real(uint32_t length, float speed = 0.16f,
+                          int dampening = 6);
     ~WaveSimulation1D_Real() = default;
 
     // Set simulation speed (courant parameter) using a float.
@@ -80,8 +81,6 @@ class WaveSimulation1D_Real {
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
 };
-
-
 
 class WaveSimulation2D_Real {
   public:
