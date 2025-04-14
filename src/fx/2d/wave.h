@@ -13,7 +13,8 @@ class WaveSimulation2D {
     // Here, 'speed' is specified as a float (converted to fixed Q15)
     // and 'dampening' is given as an exponent so that the damping factor is
     // 2^dampening.
-    WaveSimulation2D(uint32_t W, uint32_t H, float courantSq = 0.16f, float dampening = 6.0f);
+    WaveSimulation2D(uint32_t W, uint32_t H, float courantSq = 0.16f,
+                     float dampening = 6.0f);
     ~WaveSimulation2D() = default;
 
     // Set the simulation speed (courantSq) using a float value.
@@ -32,6 +33,22 @@ class WaveSimulation2D {
     // Return the value at an inner grid cell (x,y), converted to float.
     // The value returned is in the range [-1.0, 1.0].
     float getf(size_t x, size_t y) const;
+
+    // Return the value at an inner grid cell (x,y) as a fixed Q15 integer
+    // in the range [-32768, 32767].
+    int16_t geti16(size_t x, size_t y) const;
+
+    int8_t geti8(size_t x, size_t y) const {
+        return static_cast<int8_t>(geti16(x, y) >> 8);
+    }
+
+    uint8_t getu8(size_t x, size_t y) const {
+        int16_t value = geti16(x, y);
+        // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
+        // upper 8 bits.
+        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+                                    8);
+    }
 
     // Check if (x,y) is within the inner grid.
     bool has(size_t x, size_t y) const;

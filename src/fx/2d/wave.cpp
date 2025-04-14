@@ -52,6 +52,15 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
     return fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
 
+int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
+    if (x >= width || y >= height) {
+        FASTLED_WARN("Out of range: " << x << ", " << y);
+        return 0;
+    }
+    const int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
+    return curr[(y + 1) * stride + (x + 1)];
+}
+
 bool WaveSimulation2D::has(size_t x, size_t y) const {
     return (x < width && y < height);
 }
