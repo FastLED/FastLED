@@ -20,30 +20,45 @@ UIDescription description("Shows the use of the Wave1D effect.");
 UIButton button("Trigger");
 WaveSimulation1D waveSim(NUM_LEDS);
 
+UISlider slider("Speed", 0.16f, 0.0f, 1.0f);
+UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
+UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
 
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);
 }
 
-void triggerRipple(WaveSimulation1D &waveSim) {
-    int x = random() % NUM_LEDS;
-    waveSim.set(x, 1.f);
+void triggerRipple(WaveSimulation1D &waveSim, int x) {
+
+    for (int i = x - 1; i <= x + 1; i++) {
+        if (i < 0 || i >= NUM_LEDS)
+            continue;
+        FASTLED_WARN("Setting " << i);
+        waveSim.set(i, -1.f);
+    }
 }
 
 void loop() {
     // Your code here
-    if (button) {
-        triggerRipple(waveSim);
+    waveSim.setSpeed(slider);
+    static int x = 0;
+    if (button.clicked()) {
+        x = random() % NUM_LEDS;
+    }
+    if (button.isPressed()) {
+        FASTLED_WARN("Button is pressed at " << x);
+        triggerRipple(waveSim, x);
     }
     waveSim.update();
+    for (int i = 0; i < extraFrames.value(); i++) {
+        waveSim.update();
+    }
 
     for (int x = 0; x < NUM_LEDS; x++) {
         float value = waveSim.get(x);
         uint8_t value8 = static_cast<uint8_t>(value * 255);
         leds[x] = CRGB(value8, value8, value8);
-        // FASTLED_WARN("leds[" << x << "] = " << value8);
     }
-
     FastLED.show();
 }
