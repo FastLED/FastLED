@@ -20,7 +20,7 @@ UITitle title("FxWave2D Demo");
 UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
-WaveSimulation2D<WIDTH, HEIGHT> waveSim;
+WaveSimulation2D waveSim(WIDTH, HEIGHT);
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
