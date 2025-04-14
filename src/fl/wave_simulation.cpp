@@ -56,6 +56,15 @@ float WaveSimulation1D::getSpeed() const {
     return fixed_to_float(mCourantSq);
 }
 
+int16_t WaveSimulation1D::geti16(size_t x) const {
+    if (x >= length) {
+        FASTLED_WARN("Out of range.");
+        return 0;
+    }
+    const int16_t* curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    return curr[x + 1];
+}
+
 float WaveSimulation1D::get(size_t x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
@@ -147,6 +156,8 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
     const int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
     return fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
+
+
 
 int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     if (x >= width || y >= height) {

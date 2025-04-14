@@ -40,6 +40,20 @@ class WaveSimulation1D {
     // Get the simulation value at the inner grid cell x (converted to float in the range [-1.0, 1.0]).
     float get(size_t x) const;
 
+    int16_t geti16(size_t x) const;
+
+    int8_t geti8(size_t x) const {
+        return static_cast<int8_t>(geti16(x) >> 8);
+    }
+
+    uint8_t getu8(size_t x) const {
+        int16_t value = geti16(x);
+        // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
+        // upper 8 bits.
+        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+                                    8);
+    }
+
     // Returns whether x is within the inner grid bounds.
     bool has(size_t x) const;
 

@@ -4,6 +4,7 @@
 
 #include "fl/ui.h"
 #include "fl/wave_simulation.h"
+#include "fl/math_macros.h"
 #include <Arduino.h>
 #include <FastLED.h>
 
@@ -42,6 +43,8 @@ void triggerRipple(WaveSimulation1D &waveSim, int x) {
 void loop() {
     // Your code here
     waveSim.setSpeed(slider);
+    waveSim.setDampenening(dampening);
+
     static int x = 0;
     if (button.clicked()) {
         x = random() % NUM_LEDS;
@@ -54,10 +57,10 @@ void loop() {
     for (int i = 0; i < extraFrames.value(); i++) {
         waveSim.update();
     }
-
     for (int x = 0; x < NUM_LEDS; x++) {
-        float value = waveSim.get(x);
-        uint8_t value8 = static_cast<uint8_t>(value * 255);
+        // float value = waveSim.get(x);
+        int16_t value16 = ABS(waveSim.geti16(x));
+        uint8_t value8 = map(value16, 0, 32767, 0, 255);
         leds[x] = CRGB(value8, value8, value8);
     }
     FastLED.show();
