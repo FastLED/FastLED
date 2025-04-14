@@ -128,7 +128,7 @@ void WaveSimulation1D::update() {
     whichGrid ^= 1;
 }
 
-WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float speed, float dampening)
+WaveSimulation2D_Real::WaveSimulation2D_Real(uint32_t W, uint32_t H, float speed, float dampening)
     : width(W), height(H), stride(W + 2),
       grid1(new int16_t[(W + 2) * (H + 2)]()),
       grid2(new int16_t[(W + 2) * (H + 2)]()),
@@ -138,17 +138,17 @@ WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float speed, float da
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
       mDampening(dampening) {}
 
-void WaveSimulation2D::setSpeed(float something) {
+void WaveSimulation2D_Real::setSpeed(float something) {
     mCourantSq = float_to_fixed(something);
 }
 
-void WaveSimulation2D::setDampenening(int damp) { mDampening = damp; }
+void WaveSimulation2D_Real::setDampenening(int damp) { mDampening = damp; }
 
-int WaveSimulation2D::getDampenening() const { return mDampening; }
+int WaveSimulation2D_Real::getDampenening() const { return mDampening; }
 
-float WaveSimulation2D::getSpeed() const { return fixed_to_float(mCourantSq); }
+float WaveSimulation2D_Real::getSpeed() const { return fixed_to_float(mCourantSq); }
 
-float WaveSimulation2D::getf(size_t x, size_t y) const {
+float WaveSimulation2D_Real::getf(size_t x, size_t y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
@@ -159,7 +159,7 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
 
 
 
-int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
+int16_t WaveSimulation2D_Real::geti16(size_t x, size_t y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
@@ -168,11 +168,11 @@ int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     return curr[(y + 1) * stride + (x + 1)];
 }
 
-bool WaveSimulation2D::has(size_t x, size_t y) const {
+bool WaveSimulation2D_Real::has(size_t x, size_t y) const {
     return (x < width && y < height);
 }
 
-void WaveSimulation2D::set(size_t x, size_t y, float value) {
+void WaveSimulation2D_Real::set(size_t x, size_t y, float value) {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;
@@ -181,7 +181,7 @@ void WaveSimulation2D::set(size_t x, size_t y, float value) {
     curr[(y + 1) * stride + (x + 1)] = float_to_fixed(value);
 }
 
-void WaveSimulation2D::update() {
+void WaveSimulation2D_Real::update() {
     int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
     int16_t *next = (whichGrid == 0 ? grid2.get() : grid1.get());
 

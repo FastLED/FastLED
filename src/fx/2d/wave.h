@@ -5,13 +5,12 @@
 #include "fl/warn.h"
 
 #include "fl/ptr.h"
+#include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
-#include "fl/wave_simulation.h"
 
 namespace fl {
-
 
 FASTLED_SMART_PTR(WaveFx);
 
@@ -21,8 +20,8 @@ class IWaveCrgbMap {
     virtual void mapWaveToLEDs(CRGB *leds, const WaveSimulation2D &waveSim) = 0;
 };
 
-// A great deafult for the wave rendering. It will draw black and then the amplitude of the
-// wave will be more white.
+// A great deafult for the wave rendering. It will draw black and then the
+// amplitude of the wave will be more white.
 class WaveCrgbMapDefault : public IWaveCrgbMap {
   public:
     void mapWaveToLEDs(CRGB *leds, const WaveSimulation2D &waveSim) override {
@@ -40,9 +39,12 @@ class WaveCrgbMapDefault : public IWaveCrgbMap {
 // Uses bilearn filtering to double the size of the grid.
 class WaveFx : public Fx2d {
   public:
-    WaveFx(XYMap xymap, float courantSq = 0.16f, float dampening = 6.0f)
-        : Fx2d(xymap),
-          mWaveSim(xymap.getWidth(), xymap.getHeight(), courantSq, dampening) {
+    WaveFx(XYMap xymap,
+           WaveSimulation2D::SuperSample factor =
+               WaveSimulation2D::SuperSample::k2x,
+           float speed = 0.16f, float dampening = 6.0f)
+        : Fx2d(xymap), mWaveSim(xymap.getWidth(), xymap.getHeight(), factor,
+                                speed, dampening) {
         // Initialize the wave simulation with the given parameters.
         mCrgbMap.reset(new WaveCrgbMapDefault());
     }
