@@ -70,6 +70,8 @@ class WaveSimulation1D {
     // Get the outer (downsampled) grid length.
     uint32_t getLength() const;
 
+    WaveSimulation1D_Real &real() { return *sim; }
+
   private:
     uint32_t outerLength; // Length of the downsampled simulation.
     uint8_t extraFrames = 0;
@@ -133,6 +135,8 @@ class WaveSimulation2D {
     // Get the outer grid dimensions.
     uint32_t getWidth() const;
     uint32_t getHeight() const;
+
+    WaveSimulation2D_Real &real() { return *sim; }
 
   private:
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.
