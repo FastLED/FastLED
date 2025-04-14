@@ -99,6 +99,7 @@ void WaveSimulation1D::update() {
     // Compute dampening factor as an integer value: 2^(mDampenening)
     int32_t dampening_factor = 1 << mDampenening;
 
+    int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
     // Iterate over each inner cell.
     for (size_t i = 1; i < length + 1; i++) {
         // Compute the 1D Laplacian:
@@ -106,7 +107,7 @@ void WaveSimulation1D::update() {
         int32_t lap = (int32_t)curr[i + 1] - ((int32_t)curr[i] << 1) + curr[i - 1];
 
         // Multiply the Laplacian by the simulation speed using Q15 arithmetic:
-        int32_t term = ((int32_t)mCourantSq * lap) >> 15;
+        int32_t term = (mCourantSq32 * lap) >> 15;
 
         // Compute the new value:
         // f = -next[i] + 2 * curr[i] + term
@@ -199,6 +200,7 @@ void WaveSimulation2D_Real::update() {
 
     // Compute the dampening factor as an integer: 2^(dampening).
     int32_t dampening_factor = 1 << mDampening; // e.g., 6 -> 64
+    int32_t mCourantSq32 = static_cast<int32_t>(mCourantSq);
 
     // Update each inner cell.
     for (size_t j = 1; j <= height; ++j) {
@@ -211,7 +213,7 @@ void WaveSimulation2D_Real::update() {
             // Compute the new value:
             // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
             // The multiplication is in Q15, so we shift right by 15.
-            int32_t term = ((int32_t)mCourantSq * laplacian) >> 15;
+            int32_t term = (mCourantSq32 * laplacian) >> 15;
             int32_t f =
                 -(int32_t)next[index] + ((int32_t)curr[index] << 1) + term;
 
