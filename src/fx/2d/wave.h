@@ -2,10 +2,6 @@
 
 #include <stdint.h>
 
-#ifndef TRY_WAVE_FIX
-#define TRY_WAVE_FIX 0
-#endif
-
 // Two dimensional wave simulation.
 template <uint32_t W, uint32_t H> class WaveSimulation2D {
   public:
@@ -58,8 +54,6 @@ template <uint32_t W, uint32_t H> class WaveSimulation2D {
 
         const float dampening_factor = pow(2.0, dampening);
 
-#if defined(TRY_WAVE_FIX)
-
         for (size_t j = 1; j <= H; j++) {
             for (size_t i = 1; i <= W; i++) {
                 float f = -next[j][i] + 2.0f * curr[j][i] +
@@ -71,20 +65,6 @@ template <uint32_t W, uint32_t H> class WaveSimulation2D {
                 next[j][i] = f;
             }
         }
-
-#else
-        for (size_t j = 1; j < H; j++) {
-            for (size_t i = 1; i < W; i++) {
-                float f = -next[j][i] + 2.0f * curr[j][i] +
-                          courantSq_ * (curr[j][i + 1] + curr[j][i - 1] +
-                                        curr[j + 1][i] + curr[j - 1][i] -
-                                        4.0f * curr[j][i]);
-                f = f - (f / dampening_factor);
-                f = std::max<float>(-1.0f, std::min<float>(1.0f, f));
-                next[j][i] = f;
-            }
-        }
-#endif
     }
 
   private:
