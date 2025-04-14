@@ -31,7 +31,7 @@ class WaveSimulation2D {
 
     // Return the value at an inner grid cell (x,y), converted to float.
     // The value returned is in the range [-1.0, 1.0].
-    float get(size_t x, size_t y) const;
+    float getf(size_t x, size_t y) const;
 
     // Check if (x,y) is within the inner grid.
     bool has(size_t x, size_t y) const;

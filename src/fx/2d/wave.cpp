@@ -43,7 +43,7 @@ int WaveSimulation2D::getDampenening() const { return mDampening; }
 
 float WaveSimulation2D::getSpeed() const { return fixed_to_float(mCourantSq); }
 
-float WaveSimulation2D::get(size_t x, size_t y) const {
+float WaveSimulation2D::getf(size_t x, size_t y) const {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
