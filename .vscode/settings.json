@@ -112,6 +112,8 @@
         "sdkconfig.h": "c",
         "rmt.h": "c",
         "soc_caps.h": "c",
-        "format": "cpp"
+        "format": "cpp",
+        "expected": "cpp",
+        "ranges": "cpp"
     }
 }
