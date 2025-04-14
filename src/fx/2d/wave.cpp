@@ -2,7 +2,7 @@
 
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // Define Q15 conversion constants.
 #define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
@@ -125,4 +125,4 @@ void WaveSimulation2D::update() {
     whichGrid ^= 1;
 }
 
-FASTLED_NAMESPACE_END
+}
