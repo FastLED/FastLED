@@ -98,6 +98,8 @@ void WaveSimulation1D::setDampenening(int damp) { sim->setDampenening(damp); }
 
 int WaveSimulation1D::getDampenening() const { return sim->getDampenening(); }
 
+void WaveSimulation1D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
+
 float WaveSimulation1D::getSpeed() const { return sim->getSpeed(); }
 
 float WaveSimulation1D::get(size_t x) const {

@@ -1,3 +1,15 @@
+/*
+This is the WaveSimulation API. These classes allow flexible super sampling
+to achieve much better visual quality. They will also run the simulator
+update multiple times in order to achieve consistent speed between super
+sampling factors.
+
+A super sampling value of 2x will give the best results as most artifacts will
+be averaged out at this resolution.
+*/
+
+
+
 #pragma once
 
 #include <stdint.h>
@@ -42,6 +54,9 @@ class WaveSimulation1D {
     void setDampenening(int damp);
     int getDampenening() const;
     float getSpeed() const;
+
+    // Runs the simulator faster by updating it multiple times.
+    void setExtraFrames(uint8_t extra);
 
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the
