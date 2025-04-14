@@ -3,7 +3,7 @@
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
-#include "bilinear_expansion.h"
+#include "fl/bilinear_expansion.h"
 #include "fl/ptr.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
