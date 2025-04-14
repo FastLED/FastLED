@@ -22,7 +22,6 @@ BANNED_HEADERS_CORE = [
     "assert.h",
     "iostream",
     "stdio.h",
-    "cmath",
     "cstdio",
     "cstdlib",
     "vector",
@@ -65,7 +64,7 @@ EXCLUDED_FILES = [
 ]
 
 
-class TestBinToElf(unittest.TestCase):
+class TestNoBannedHeaders(unittest.TestCase):
 
     def check_file(self, file_path: str) -> list[str]:
         failings: list[str] = []

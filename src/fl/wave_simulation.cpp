@@ -128,13 +128,13 @@ void WaveSimulation1D::update() {
     whichGrid ^= 1;
 }
 
-WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float courantSq, float dampening)
+WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float speed, float dampening)
     : width(W), height(H), stride(W + 2),
       grid1(new int16_t[(W + 2) * (H + 2)]()),
       grid2(new int16_t[(W + 2) * (H + 2)]()),
       whichGrid(0),
       // Initialize speed 0.16 in fixed Q15
-      mCourantSq(float_to_fixed(courantSq)),
+      mCourantSq(float_to_fixed(speed)),
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
       mDampening(dampening) {}
 

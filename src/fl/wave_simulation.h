@@ -1,6 +1,6 @@
 
 
-#include <cmath>
+
 #include <stdint.h>
 
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
@@ -20,9 +20,9 @@ class WaveSimulation1D {
   public:
     // Constructor:
     //  - length: inner simulation grid length (excluding the 2 boundary cells).
-    //  - courantSq: simulation speed (in float, will be stored in Q15).
+    //  - speed: simulation speed (in float, will be stored in Q15).
     //  - dampening: exponent so that the effective damping factor is 2^(dampening).
-    WaveSimulation1D(uint32_t length, float courantSq = 0.16f, int dampening = 6);
+    WaveSimulation1D(uint32_t length, float speed = 0.16f, int dampening = 6);
     ~WaveSimulation1D() = default;
 
     // Set simulation speed (courant parameter) using a float.
@@ -84,7 +84,7 @@ class WaveSimulation2D {
     // Here, 'speed' is specified as a float (converted to fixed Q15)
     // and 'dampening' is given as an exponent so that the damping factor is
     // 2^dampening.
-    WaveSimulation2D(uint32_t W, uint32_t H, float courantSq = 0.16f,
+    WaveSimulation2D(uint32_t W, uint32_t H, float speed = 0.16f,
                      float dampening = 6.0f);
     ~WaveSimulation2D() = default;
 
@@ -160,10 +160,10 @@ public:
     //   - W and H specify the desired inner grid size of the downsampled simulation.
     //   - Internally, the simulation is created with dimensions (2*W x 2*H).
     //   - courantSq and dampening parameters are passed to the internal simulation.
-    WaveSimulation2D2x(uint32_t W, uint32_t H, float courantSq = 0.16f, float dampening = 6.0f)
+    WaveSimulation2D2x(uint32_t W, uint32_t H, float speed = 0.16f, float dampening = 6.0f)
         : outerWidth(W), outerHeight(H),
           // Create the internal simulation at 2x resolution.
-          sim(new WaveSimulation2D(W * 2, H * 2, courantSq, dampening))
+          sim(new WaveSimulation2D(W * 2, H * 2, speed, dampening))
     { }
 
     ~WaveSimulation2D2x() = default;
