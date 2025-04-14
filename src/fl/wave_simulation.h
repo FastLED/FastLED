@@ -24,104 +24,48 @@ float fixed_to_float(int16_t f);
 // Multiply two Q15 fixed point numbers.
 int16_t fixed_mul(int16_t a, int16_t b);
 
-template <size_t N> class WaveSimulation1D {
+class WaveSimulation1D {
   public:
-    WaveSimulation1D() = default;
+    // Constructor:
+    //  - length: inner simulation grid length (excluding the 2 boundary cells).
+    //  - courantSq: simulation speed (in float, will be stored in Q15).
+    //  - dampening: exponent so that the effective damping factor is 2^(dampening).
+    WaveSimulation1D(uint32_t length, float courantSq = 0.16f, int dampening = 6);
     ~WaveSimulation1D() = default;
 
-    // Set the simulation speed (courant parameter) as a float.
-    // Internally, it will be stored in Q15 fixed point.
-    void setSpeed(float something) { mCourantSq = float_to_fixed(something); }
+    // Set simulation speed (courant parameter) using a float.
+    void setSpeed(float something);
 
-    // Set the dampening exponent.
-    // The effective dampening factor is 2^(mDampenening).
-    void setDampenening(int damp) { mDampenening = damp; }
+    // Set the dampening exponent (effective damping factor is 2^(dampening)).
+    void setDampenening(int damp);
 
     // Get the current dampening exponent.
-    int getDampenening() const { return mDampenening; }
+    int getDampenening() const;
 
-    // Get the simulation speed as a float (converted from fixed Q15).
-    float getSpeed() const { return fixed_to_float(mCourantSq); }
+    // Get the simulation speed as a float.
+    float getSpeed() const;
 
-    // Get the value at position x (as a float in the range [-1.0, 1.0]).
-    float get(size_t x) const {
-        if (x >= N) {
-            FASTLED_WARN("Out of range.");
-            return 0.0f;
-        }
-        // Note the +1 offset is for the boundary cell.
-        return fixed_to_float(grid[whichGrid][x + 1]);
-    }
+    // Get the simulation value at the inner grid cell x (converted to float in the range [-1.0, 1.0]).
+    float get(size_t x) const;
 
-    // Check if the index is within the simulation grid.
-    bool has(size_t x) const { return x < N; }
+    // Returns whether x is within the inner grid bounds.
+    bool has(size_t x) const;
 
-    // Set the value at position x using a float (expected range: [-1.0, 1.0]).
-    // The value is converted and stored in fixed Q15 format.
-    void set(int x, float value) {
-        if (x >= N) {
-            FASTLED_WARN("warning X value too high");
-            return;
-        }
-        if (x < 0) {
-            FASTLED_WARN("warning X value is negative");
-            return;
-        }
-        // Clamp x for safety, then store.
-        x = MAX(0, MIN(x, N - 1));
-        grid[whichGrid][x + 1] = float_to_fixed(value);
-    }
+    // Set the value at grid cell x (expected range: [-1.0, 1.0]); the value is stored in Q15.
+    void set(size_t x, float value);
 
-    // Advance the simulation one time step using fixed-point arithmetic.
-    void update() {
-        // Obtain pointers to the current and next grids.
-        int16_t *curr = grid[whichGrid];
-        int16_t *next = grid[whichGrid ^= 1]; // Toggle active grid.
-
-        // Update the boundary conditions.
-        // Use a zero-gradient (Neumann) boundary: copy the adjacent value.
-        curr[0] = curr[1];
-        curr[N + 1] = curr[N];
-
-        // Compute the dampening factor as an integer: 2^(mDampenening)
-        int32_t dampening_factor = 1 << mDampenening;
-
-        // Iterate over each inner cell.
-        for (size_t i = 1; i < N + 1; i++) {
-            // Compute the discrete second derivative (the 1D Laplacian):
-            // lap = curr[i+1] - 2*curr[i] + curr[i-1]
-            int32_t lap =
-                (int32_t)curr[i + 1] - ((int32_t)curr[i] << 1) + curr[i - 1];
-
-            // Multiply the Laplacian by the speed parameter (Q15
-            // multiplication). The product is adjusted back to Q15.
-            int32_t term = ((int32_t)mCourantSq * lap) >> 15;
-
-            // Compute the new state:
-            // f = -next[i] + 2*curr[i] + term
-            int32_t f = -(int32_t)next[i] + ((int32_t)curr[i] << 1) + term;
-
-            // Apply damping:
-            f = f - (f / dampening_factor);
-
-            // Clamp f to the valid Q15 range.
-            if (f > 32767)
-                f = 32767;
-            else if (f < -32768)
-                f = -32768;
-
-            next[i] = (int16_t)f;
-        }
-    }
+    // Advance the simulation one time step.
+    void update();
 
   private:
-    size_t whichGrid = 0;
-    // Two grids with extra boundary cells at both ends.
-    int16_t grid[2][N + 2] = {{0}, {0}};
-    // Simulation speed (courant squared) stored in fixed Q15.
-    int16_t mCourantSq = float_to_fixed(0.16f);
-    // Dampening exponent: effective damping factor is 2^(mDampenening).
-    int mDampenening = 6;
+    uint32_t length; // Length of the inner simulation grid.
+    // Two grids stored in fixed Q15 format, each with length+2 entries (including boundary cells).
+    fl::scoped_array<int16_t> grid1;
+    fl::scoped_array<int16_t> grid2;
+    size_t whichGrid; // Indicates the active grid (0 or 1).
+
+    int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
+    int mDampenening;    // Dampening exponent (damping factor = 2^(mDampenening)).
 };
 
 class WaveSimulation2D {

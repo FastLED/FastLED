@@ -26,6 +26,97 @@ int16_t fixed_mul(int16_t a, int16_t b) {
     return (int16_t)(((int32_t)a * b) >> 15);
 }
 
+
+WaveSimulation1D::WaveSimulation1D(uint32_t len, float courantSq, int dampening)
+    : length(len),
+      grid1(new int16_t[length + 2]()), // Allocate and zero-initialize with length+2 elements.
+      grid2(new int16_t[length + 2]()),
+      whichGrid(0),
+      mCourantSq(float_to_fixed(courantSq)),
+      mDampenening(dampening)
+{
+    // Additional initialization can be added here if needed.
+}
+
+void WaveSimulation1D::setSpeed(float something) {
+    mCourantSq = float_to_fixed(something);
+}
+
+void WaveSimulation1D::setDampenening(int damp) {
+    mDampenening = damp;
+}
+
+int WaveSimulation1D::getDampenening() const {
+    return mDampenening;
+}
+
+float WaveSimulation1D::getSpeed() const {
+    return fixed_to_float(mCourantSq);
+}
+
+float WaveSimulation1D::get(size_t x) const {
+    if (x >= length) {
+        FASTLED_WARN("Out of range.");
+        return 0.0f;
+    }
+    // Retrieve value from the active grid (offset by 1 for boundary).
+    const int16_t* curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    return fixed_to_float(curr[x + 1]);
+}
+
+bool WaveSimulation1D::has(size_t x) const {
+    return (x < length);
+}
+
+void WaveSimulation1D::set(size_t x, float value) {
+    if (x >= length) {
+        FASTLED_WARN("warning X value too high");
+        return;
+    }
+    int16_t* curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    curr[x + 1] = float_to_fixed(value);
+}
+
+void WaveSimulation1D::update() {
+    int16_t* curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    int16_t* next = (whichGrid == 0) ? grid2.get() : grid1.get();
+
+    // Update boundaries with a Neumann (zero-gradient) condition:
+    curr[0] = curr[1];
+    curr[length + 1] = curr[length];
+
+    // Compute dampening factor as an integer value: 2^(mDampenening)
+    int32_t dampening_factor = 1 << mDampenening;
+
+    // Iterate over each inner cell.
+    for (size_t i = 1; i < length + 1; i++) {
+        // Compute the 1D Laplacian:
+        // lap = curr[i+1] - 2 * curr[i] + curr[i-1]
+        int32_t lap = (int32_t)curr[i + 1] - ((int32_t)curr[i] << 1) + curr[i - 1];
+
+        // Multiply the Laplacian by the simulation speed using Q15 arithmetic:
+        int32_t term = ((int32_t)mCourantSq * lap) >> 15;
+
+        // Compute the new value:
+        // f = -next[i] + 2 * curr[i] + term
+        int32_t f = -(int32_t)next[i] + ((int32_t)curr[i] << 1) + term;
+
+        // Apply damping:
+        f = f - (f / dampening_factor);
+
+        // Clamp the result to the Q15 range [-32768, 32767].
+        if (f > 32767)
+            f = 32767;
+        else if (f < -32768)
+            f = -32768;
+
+        next[i] = (int16_t)f;
+    }
+
+    // Toggle the active grid.
+    whichGrid ^= 1;
+}
+
 WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float courantSq, float dampening)
     : width(W), height(H), stride(W + 2),
       grid1(new int16_t[(W + 2) * (H + 2)]()),
