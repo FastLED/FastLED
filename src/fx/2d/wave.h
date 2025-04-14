@@ -13,7 +13,7 @@ class WaveSimulation2D {
     // Here, 'speed' is specified as a float (converted to fixed Q15)
     // and 'dampening' is given as an exponent so that the damping factor is
     // 2^dampening.
-    WaveSimulation2D(uint32_t W, uint32_t H);
+    WaveSimulation2D(uint32_t W, uint32_t H, float courantSq = 0.16f, float dampening = 6.0f);
     ~WaveSimulation2D() = default;
 
     // Set the simulation speed (courantSq) using a float value.
@@ -55,8 +55,8 @@ class WaveSimulation2D {
 
     size_t whichGrid; // Indicates the active grid (0 or 1).
 
-    int16_t courantSq; // Fixed speed parameter in Q15.
-    int dampening;     // Dampening exponent; used as 2^(dampening).
+    int16_t mCourantSq; // Fixed speed parameter in Q15.
+    int mDampening;     // Dampening exponent; used as 2^(dampening).
 };
 
 FASTLED_NAMESPACE_END

@@ -23,25 +23,25 @@ static inline int16_t fixed_mul(int16_t a, int16_t b) {
     return (int16_t)(((int32_t)a * b) >> 15);
 }
 
-WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H)
+WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, float courantSq, float dampening)
     : width(W), height(H), stride(W + 2),
       grid1(new int16_t[(W + 2) * (H + 2)]()),
       grid2(new int16_t[(W + 2) * (H + 2)]()),
       whichGrid(0),
       // Initialize speed 0.16 in fixed Q15
-      courantSq(float_to_fixed(0.16f)),
+      mCourantSq(float_to_fixed(courantSq)),
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
-      dampening(6) {}
+      mDampening(dampening) {}
 
 void WaveSimulation2D::setSpeed(float something) {
-    courantSq = float_to_fixed(something);
+    mCourantSq = float_to_fixed(something);
 }
 
-void WaveSimulation2D::setDampenening(int damp) { dampening = damp; }
+void WaveSimulation2D::setDampenening(int damp) { mDampening = damp; }
 
-int WaveSimulation2D::getDampenening() const { return dampening; }
+int WaveSimulation2D::getDampenening() const { return mDampening; }
 
-float WaveSimulation2D::getSpeed() const { return fixed_to_float(courantSq); }
+float WaveSimulation2D::getSpeed() const { return fixed_to_float(mCourantSq); }
 
 float WaveSimulation2D::get(size_t x, size_t y) const {
     if (x >= width || y >= height) {
@@ -82,7 +82,7 @@ void WaveSimulation2D::update() {
     }
 
     // Compute the dampening factor as an integer: 2^(dampening).
-    int32_t dampening_factor = 1 << dampening; // e.g., 6 -> 64
+    int32_t dampening_factor = 1 << mDampening; // e.g., 6 -> 64
 
     // Update each inner cell.
     for (size_t j = 1; j <= height; ++j) {
@@ -93,9 +93,9 @@ void WaveSimulation2D::update() {
                                 curr[index + stride] + curr[index - stride] -
                                 ((int32_t)curr[index] << 2);
             // Compute the new value:
-            // f = - next[index] + 2 * curr[index] + courantSq * laplacian
+            // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
             // The multiplication is in Q15, so we shift right by 15.
-            int32_t term = ((int32_t)courantSq * laplacian) >> 15;
+            int32_t term = ((int32_t)mCourantSq * laplacian) >> 15;
             int32_t f =
                 -(int32_t)next[index] + ((int32_t)curr[index] << 1) + term;
 
