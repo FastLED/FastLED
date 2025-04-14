@@ -1,9 +1,12 @@
-#include <cstdint>
-#include <cmath>
-#include <algorithm>
-#include <iostream>
+#include <stdint.h>
 #include "fl/warn.h"
 #include "fl/scoped_ptr.h"
+#include "fl/math_macros.h"
+#include <cmath>
+
+#include "fl/namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 class WaveSimulation2D {
 public:
@@ -80,7 +83,7 @@ public:
             curr[(height + 1) * stride + i] = curr[height * stride + i];
         }
 
-        const float dampening_factor = std::pow(2.0f, dampening);
+        const float dampening_factor = ::powf(2.0f, dampening);
 
         // Compute the new state of each inner cell.
         for (size_t j = 1; j <= height; ++j) {
@@ -93,7 +96,7 @@ public:
                                          curr[(j - 1) * stride + i] -
                                          4.0f * curr[j * stride + i] );
                 f = f - (f / dampening_factor);
-                f = std::max(-1.0f, std::min(1.0f, f));
+                f = MAX(-1.0f, MIN(1.0f, f));
                 next[j * stride + i] = f;
             }
         }
@@ -115,3 +118,5 @@ private:
     float courantSq_;     // Speed parameter for the simulation.
     float dampening;      // Dampening factor.
 };
+
+FASTLED_NAMESPACE_END

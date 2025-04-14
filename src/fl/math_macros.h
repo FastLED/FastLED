@@ -15,3 +15,8 @@
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
 #endif
+
+
+#ifndef SQR(x)
+#define SQR(x) ((x)*(x))
+#endif
