@@ -77,8 +77,7 @@ void loop() {
     waveSim.update();
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            int16_t value16 = ABS(waveSim.geti16(x, y));
-            uint8_t value8 = map(value16, 0, 32767, 0, 255);
+            uint8_t value8 = waveSim.getu8(x, y);
             uint32_t idx = xyMap.mapToIndex(x, y);
             leds[idx] = CRGB(value8, value8, value8);
         }

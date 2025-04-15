@@ -124,6 +124,8 @@ class WaveSimulation2D {
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
                      float speed = 0.16f, float dampening = 6.0f);
 
+    void init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening);
+
     ~WaveSimulation2D() = default;
 
     // Delegated simulation methods.
@@ -136,6 +138,14 @@ class WaveSimulation2D {
     int getDampenening() const;
 
     float getSpeed() const;
+
+    void setSuperSample(SuperSample factor) {
+        if (int(factor) == multiplier) {
+            return;
+        }
+        init(outerWidth, outerHeight, factor, sim->getSpeed(),
+             sim->getDampenening());
+    }
 
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in

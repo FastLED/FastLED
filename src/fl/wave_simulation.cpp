@@ -9,10 +9,15 @@ namespace fl {
 void WaveSimulation2D::setSpeed(float speed) { sim->setSpeed(speed); }
 
 WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
-                                   float speed, float dampening)
-    : outerWidth(W), outerHeight(H), multiplier(static_cast<uint32_t>(factor)),
-      sim(new WaveSimulation2D_Real(W * multiplier, H * multiplier, speed,
-                                    dampening)) {
+                                   float speed, float dampening) {
+    init(W, H, factor, speed, dampening);
+}
+
+void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening) {
+    outerWidth = width;
+    outerHeight = height;
+    multiplier = static_cast<uint32_t>(factor);
+    sim.reset(new WaveSimulation2D_Real(width * multiplier, height * multiplier, speed, dampening));
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = uint8_t(factor) - 1;
