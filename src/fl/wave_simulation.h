@@ -66,6 +66,9 @@ class WaveSimulation1D {
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
     int16_t geti16(size_t x) const;
+    int16_t geti16Previous(size_t x) const;
+
+    bool geti16All(size_t x, int16_t* curr, int16_t* prev, int16_t* diff) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x) const;
@@ -131,6 +134,7 @@ class WaveSimulation2D {
     // Downsampled getter for the Q15 (fixed point) value at (x,y).
     // It averages the multiplier×multiplier block of Q15 values.
     int16_t geti16(size_t x, size_t y) const;
+    int16_t geti16Previous(size_t x, size_t y) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x, size_t y) const;

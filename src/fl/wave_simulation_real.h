@@ -49,6 +49,7 @@ class WaveSimulation1D_Real {
     float get(size_t x) const;
 
     int16_t geti16(size_t x) const;
+    int16_t geti16Previous(size_t x) const;
 
     int8_t geti8(size_t x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
@@ -113,6 +114,7 @@ class WaveSimulation2D_Real {
     // Return the value at an inner grid cell (x,y) as a fixed Q15 integer
     // in the range [-32768, 32767].
     int16_t geti16(size_t x, size_t y) const;
+    int16_t geti16Previous(size_t x, size_t y) const;
 
     int8_t geti8(size_t x, size_t y) const {
         return static_cast<int8_t>(geti16(x, y) >> 8);

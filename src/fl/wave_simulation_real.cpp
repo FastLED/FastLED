@@ -54,6 +54,15 @@ int16_t WaveSimulation1D_Real::geti16(size_t x) const {
     return curr[x + 1];
 }
 
+int16_t WaveSimulation1D_Real::geti16Previous(size_t x) const {
+    if (x >= length) {
+        FASTLED_WARN("Out of range.");
+        return 0;
+    }
+    const int16_t *prev = (whichGrid == 0) ? grid2.get() : grid1.get();
+    return prev[x + 1];
+}
+
 float WaveSimulation1D_Real::get(size_t x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
@@ -155,6 +164,15 @@ int16_t WaveSimulation2D_Real::geti16(size_t x, size_t y) const {
     }
     const int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
     return curr[(y + 1) * stride + (x + 1)];
+}
+
+int16_t WaveSimulation2D_Real::geti16Previous(size_t x, size_t y) const {
+    if (x >= width || y >= height) {
+        FASTLED_WARN("Out of range: " << x << ", " << y);
+        return 0;
+    }
+    const int16_t *prev = (whichGrid == 0 ? grid2.get() : grid1.get());
+    return prev[(y + 1) * stride + (x + 1)];
 }
 
 bool WaveSimulation2D_Real::has(size_t x, size_t y) const {
