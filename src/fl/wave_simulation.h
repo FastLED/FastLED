@@ -136,6 +136,9 @@ class WaveSimulation2D {
     int16_t geti16(size_t x, size_t y) const;
     int16_t geti16Previous(size_t x, size_t y) const;
 
+    bool geti16All(size_t x, size_t y, int16_t* curr, int16_t* prev,
+                   int16_t* diff) const;
+
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x, size_t y) const;
 

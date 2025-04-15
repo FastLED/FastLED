@@ -60,6 +60,16 @@ int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     return static_cast<int16_t>(sum / (multiplier * multiplier));
 }
 
+bool WaveSimulation2D::geti16All(size_t x, size_t y, int16_t *curr,
+                                 int16_t *prev, int16_t *diff) const {
+    if (!has(x, y))
+        return false;
+    *curr = geti16(x, y);
+    *prev = geti16Previous(x, y);
+    *diff = *curr - *prev;
+    return true;
+}
+
 int8_t WaveSimulation2D::geti8(size_t x, size_t y) const {
     return static_cast<int8_t>(geti16(x, y) >> 8);
 }
@@ -144,7 +154,8 @@ int16_t WaveSimulation1D::geti16Previous(size_t x) const {
     return static_cast<int16_t>(sum / multiplier);
 }
 
-bool WaveSimulation1D::geti16All(size_t x, int16_t* curr, int16_t* prev, int16_t* diff) const {
+bool WaveSimulation1D::geti16All(size_t x, int16_t *curr, int16_t *prev,
+                                 int16_t *diff) const {
     if (!has(x))
         return false;
     *curr = geti16(x);
