@@ -76,6 +76,11 @@ int8_t WaveSimulation2D::geti8(size_t x, size_t y) const {
 
 uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
     int16_t value = geti16(x, y);
+    if (sim->getOnlyPositive()) {
+        uint16_t v2 = static_cast<uint16_t>(value);
+        v2 *= 2;
+        return static_cast<uint8_t>(v2 >> 8);
+    }
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
@@ -170,6 +175,11 @@ int8_t WaveSimulation1D::geti8(size_t x) const {
 
 uint8_t WaveSimulation1D::getu8(size_t x) const {
     int16_t value = geti16(x);
+    if (sim->getOnlyPositive()) {
+        uint16_t v2 = static_cast<uint16_t>(value);
+        v2 *= 2;
+        return static_cast<uint8_t>(v2 >> 8);
+    }
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 

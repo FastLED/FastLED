@@ -48,6 +48,8 @@ class WaveSimulation1D_Real {
         mOnlyPositive = onlyPositive;
     }
 
+    bool getOnlyPositive() const { return mOnlyPositive; }
+
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
     float get(size_t x) const;
@@ -57,12 +59,21 @@ class WaveSimulation1D_Real {
 
     int8_t geti8(size_t x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
+    // If mOnlyPositive is set then the the values are adjusted so that negative values will instead
+    // be represented by zero.
     uint8_t getu8(size_t x) const {
         int16_t value = geti16(x);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                    8);
+        //return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+        //                            8);
+        if (mOnlyPositive) {
+            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 16384)) >>
+                                        8);
+        } else {
+            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+                                        8);
+        }
     }
 
     // Returns whether x is within the inner grid bounds.
@@ -129,8 +140,15 @@ class WaveSimulation2D_Real {
         int16_t value = geti16(x, y);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                    8);
+        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+        //                             8);
+        if (mOnlyPositive) {
+            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 16384)) >>
+                                        8);
+        } else {
+            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+                                        8);
+        }
     }
 
     // Check if (x,y) is within the inner grid.
@@ -145,6 +163,7 @@ class WaveSimulation2D_Real {
         mOnlyPositive = onlyPositive;
     }
 
+    bool getOnlyPositive() const { return mOnlyPositive; }
 
     // Advance the simulation one time step using fixed-point arithmetic.
     void update();
