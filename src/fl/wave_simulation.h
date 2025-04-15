@@ -4,8 +4,8 @@ to achieve much better visual quality. They will also run the simulator
 update multiple times in order to achieve consistent speed between super
 sampling factors.
 
-A super sampling value of 2x will give the best results as most artifacts will
-be averaged out at this resolution.
+A super sampling value of 2x will give the best results for the CPU consumption
+as most artifacts will be averaged out at this resolution.
 */
 
 
