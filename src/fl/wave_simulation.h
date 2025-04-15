@@ -8,8 +8,6 @@ A super sampling value of 2x will give the best results for the CPU consumption
 as most artifacts will be averaged out at this resolution.
 */
 
-
-
 #pragma once
 
 #include <stdint.h>
@@ -47,6 +45,15 @@ class WaveSimulation1D {
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
                      float speed = 0.16f, int dampening = 6);
 
+    void init(uint32_t length, SuperSample factor, float speed, int dampening);
+
+    void setSuperSample(SuperSample factor) {
+        if (int(factor) == multiplier) {
+            return;
+        }
+        init(outerLength, factor, sim->getSpeed(), sim->getDampenening());
+    }
+
     ~WaveSimulation1D() = default;
 
     // Delegate methods to the internal simulation.
@@ -68,7 +75,7 @@ class WaveSimulation1D {
     int16_t geti16(size_t x) const;
     int16_t geti16Previous(size_t x) const;
 
-    bool geti16All(size_t x, int16_t* curr, int16_t* prev, int16_t* diff) const;
+    bool geti16All(size_t x, int16_t *curr, int16_t *prev, int16_t *diff) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x) const;
@@ -140,8 +147,8 @@ class WaveSimulation2D {
     int16_t geti16(size_t x, size_t y) const;
     int16_t geti16Previous(size_t x, size_t y) const;
 
-    bool geti16All(size_t x, size_t y, int16_t* curr, int16_t* prev,
-                   int16_t* diff) const;
+    bool geti16All(size_t x, size_t y, int16_t *curr, int16_t *prev,
+                   int16_t *diff) const;
 
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x, size_t y) const;

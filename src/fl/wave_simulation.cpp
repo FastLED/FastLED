@@ -111,9 +111,15 @@ uint32_t WaveSimulation2D::getHeight() const { return outerHeight; }
 void WaveSimulation2D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
 
 WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
-                                   float speed, int dampening)
-    : outerLength(length), multiplier(static_cast<uint32_t>(factor)),
-      sim(new WaveSimulation1D_Real(length * multiplier, speed, dampening)) {
+                                   float speed, int dampening) {
+    init(length, factor, speed, dampening);
+}
+
+void WaveSimulation1D::init(uint32_t length, SuperSample factor,
+                            float speed, int dampening) {
+    outerLength = length;
+    multiplier = static_cast<uint32_t>(factor);
+    sim.reset(new WaveSimulation1D_Real(length * multiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = static_cast<uint8_t>(factor) - 1;
