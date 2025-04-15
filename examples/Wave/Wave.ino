@@ -2,9 +2,9 @@
 
 #define TRY_WAVE_FIX 1
 
+#include "fl/math_macros.h"
 #include "fl/ui.h"
 #include "fl/wave_simulation.h"
-#include "fl/math_macros.h"
 #include <Arduino.h>
 #include <FastLED.h>
 
@@ -12,7 +12,6 @@ using namespace fl;
 
 #define NUM_LEDS 100
 #define IS_SERPINTINE true
-
 
 CRGB leds[NUM_LEDS];
 
@@ -45,16 +44,16 @@ void triggerRipple(WaveSimulation1D &waveSim, int x) {
 
 SuperSample getSuperSample() {
     switch (int(superSample)) {
-        case 0:
-            return SuperSample::SUPER_SAMPLE_NONE;
-        case 1:
-            return SuperSample::SUPER_SAMPLE_2X;
-        case 2:
-            return SuperSample::SUPER_SAMPLE_4X;
-        case 3:
-            return SuperSample::SUPER_SAMPLE_8X;
-        default:
-            return SuperSample::SUPER_SAMPLE_NONE;
+    case 0:
+        return SuperSample::SUPER_SAMPLE_NONE;
+    case 1:
+        return SuperSample::SUPER_SAMPLE_2X;
+    case 2:
+        return SuperSample::SUPER_SAMPLE_4X;
+    case 3:
+        return SuperSample::SUPER_SAMPLE_8X;
+    default:
+        return SuperSample::SUPER_SAMPLE_NONE;
     }
 }
 

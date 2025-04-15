@@ -23,6 +23,8 @@ UIButton button("Trigger");
 UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
 UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
+UICheckbox positiveOnly("Positive Only", false);
+UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
 
 WaveSimulation2D waveSim(WIDTH, HEIGHT, SUPER_SAMPLE_4X);
 
@@ -33,13 +35,30 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
 }
 
-void triggerRipple(WaveSimulation2D& waveSim) {
+SuperSample getSuperSample() {
+    switch (int(superSample)) {
+    case 0:
+        return SuperSample::SUPER_SAMPLE_NONE;
+    case 1:
+        return SuperSample::SUPER_SAMPLE_2X;
+    case 2:
+        return SuperSample::SUPER_SAMPLE_4X;
+    case 3:
+        return SuperSample::SUPER_SAMPLE_8X;
+    default:
+        return SuperSample::SUPER_SAMPLE_NONE;
+    }
+}
+
+void triggerRipple(WaveSimulation2D &waveSim) {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
-    for (int i = x-1; i <= x+1; i++) {
-        if (i < 0 || i >= WIDTH) continue;
-        for (int j = y-1; j <= y+1; j++) {
-            if (j < 0 || j >= HEIGHT) continue;
+    for (int i = x - 1; i <= x + 1; i++) {
+        if (i < 0 || i >= WIDTH)
+            continue;
+        for (int j = y - 1; j <= y + 1; j++) {
+            if (j < 0 || j >= HEIGHT)
+                continue;
             waveSim.set(i, j, 1);
         }
     }
@@ -50,6 +69,8 @@ void loop() {
     // Your code here
     waveSim.setSpeed(slider);
     waveSim.setDampenening(dampening);
+    waveSim.setOnlyPositive(positiveOnly);
+    waveSim.setSuperSample(getSuperSample());
     if (button) {
         triggerRipple(waveSim);
     }
