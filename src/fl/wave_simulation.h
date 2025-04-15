@@ -48,7 +48,7 @@ class WaveSimulation1D {
     void init(uint32_t length, SuperSample factor, float speed, int dampening);
 
     void setSuperSample(SuperSample factor) {
-        if (int(factor) == multiplier) {
+        if (uint32_t(factor) == multiplier) {
             return;
         }
         init(outerLength, factor, sim->getSpeed(), sim->getDampenening());
@@ -140,7 +140,7 @@ class WaveSimulation2D {
     float getSpeed() const;
 
     void setSuperSample(SuperSample factor) {
-        if (int(factor) == multiplier) {
+        if (uint32_t(factor) == multiplier) {
             return;
         }
         init(outerWidth, outerHeight, factor, sim->getSpeed(),
