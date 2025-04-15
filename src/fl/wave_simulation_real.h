@@ -44,9 +44,7 @@ class WaveSimulation1D_Real {
     // Get the simulation speed as a float.
     float getSpeed() const;
 
-    void setOnlyPositive(bool onlyPositive) {
-        mOnlyPositive = onlyPositive;
-    }
+    void setOnlyPositive(bool onlyPositive) { mOnlyPositive = onlyPositive; }
 
     bool getOnlyPositive() const { return mOnlyPositive; }
 
@@ -59,20 +57,22 @@ class WaveSimulation1D_Real {
 
     int8_t geti8(size_t x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
-    // If mOnlyPositive is set then the the values are adjusted so that negative values will instead
-    // be represented by zero.
+    // If mOnlyPositive is set then the the values are adjusted so that negative
+    // values will instead be represented by zero.
     uint8_t getu8(size_t x) const {
         int16_t value = geti16(x);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        //return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
+        // >>
         //                            8);
         if (mOnlyPositive) {
-            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 16384)) >>
-                                        8);
+            uint16_t v2 = static_cast<uint16_t>(value);
+            v2 *= 2;
+            return static_cast<uint8_t>(v2 >> 8);
         } else {
-            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                        8);
+            return static_cast<uint8_t>(
+                ((static_cast<uint16_t>(value) + 32768)) >> 8);
         }
     }
 
@@ -96,7 +96,8 @@ class WaveSimulation1D_Real {
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
-    bool mOnlyPositive = false; // Flag to restrict values to positive range during update.
+    bool mOnlyPositive =
+        false; // Flag to restrict values to positive range during update.
 };
 
 class WaveSimulation2D_Real {
@@ -140,14 +141,16 @@ class WaveSimulation2D_Real {
         int16_t value = geti16(x, y);
         // Rebase the range from [-32768, 32767] to [0, 65535] then extract the
         // upper 8 bits.
-        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+        // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
+        // >>
         //                             8);
         if (mOnlyPositive) {
-            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 16384)) >>
-                                        8);
+            uint16_t v2 = static_cast<uint16_t>(value);
+            v2 *= 2;
+            return static_cast<uint8_t>(v2 >> 8);
         } else {
-            return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
-                                        8);
+            return static_cast<uint8_t>(
+                ((static_cast<uint16_t>(value) + 32768)) >> 8);
         }
     }
 
@@ -159,9 +162,7 @@ class WaveSimulation2D_Real {
     // value shoudl be between -1.0 and 1.0.
     void set(size_t x, size_t y, float value);
 
-    void setOnlyPositive(bool onlyPositive) {
-        mOnlyPositive = onlyPositive;
-    }
+    void setOnlyPositive(bool onlyPositive) { mOnlyPositive = onlyPositive; }
 
     bool getOnlyPositive() const { return mOnlyPositive; }
 
@@ -184,7 +185,8 @@ class WaveSimulation2D_Real {
 
     int16_t mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).
-    bool mOnlyPositive = false; // Flag to restrict values to positive range during update.
+    bool mOnlyPositive =
+        false; // Flag to restrict values to positive range during update.
 };
 
 } // namespace fl
