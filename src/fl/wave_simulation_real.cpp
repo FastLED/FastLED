@@ -122,6 +122,15 @@ void WaveSimulation1D_Real::update() {
         next[i] = (int16_t)f;
     }
 
+    if (mOnlyPositive) {
+        // Set the negative values to zero.
+        for (size_t i = 1; i < length + 1; i++) {
+            if (next[i] < 0) {
+                next[i] = 0;
+            }
+        }
+    }
+
     // Toggle the active grid.
     whichGrid ^= 1;
 }
@@ -233,6 +242,18 @@ void WaveSimulation2D_Real::update() {
                 f = -32768;
 
             next[index] = (int16_t)f;
+        }
+    }
+
+    if (mOnlyPositive) {
+        // Set negative values to zero.
+        for (size_t j = 1; j <= height; ++j) {
+            for (size_t i = 1; i <= width; ++i) {
+                int index = j * stride + i;
+                if (next[index] < 0) {
+                    next[index] = 0;
+                }
+            }
         }
     }
 

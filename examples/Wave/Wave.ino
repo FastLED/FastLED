@@ -19,7 +19,7 @@ UITitle title("Wave Demo");
 UIDescription description("Shows the use of the Wave1D effect.");
 
 UIButton button("Trigger");
-WaveSimulation1D waveSim(NUM_LEDS);
+WaveSimulation1D waveSim(NUM_LEDS, SuperSample::SUPER_SAMPLE_2X);
 
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
 UISlider extraFrames("Extra Frames", 1.0f, 0.0f, 8.0f, 1.0f);
@@ -60,7 +60,8 @@ void loop() {
     for (int x = 0; x < NUM_LEDS; x++) {
         // float value = waveSim.get(x);
         int16_t value16 = waveSim.geti16(x);
-        uint8_t value8 = map(value16, -32768, 32767, 0, 255);
+        value16 = MAX(0, value16);
+        uint8_t value8 = map(value16, 0, 32767, 0, 255);
         leds[x] = CRGB(value8, value8, value8);
     }
     FastLED.show();

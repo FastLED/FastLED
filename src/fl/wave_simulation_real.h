@@ -44,6 +44,10 @@ class WaveSimulation1D_Real {
     // Get the simulation speed as a float.
     float getSpeed() const;
 
+    void setOnlyPositive(bool onlyPositive) {
+        mOnlyPositive = onlyPositive;
+    }
+
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
     float get(size_t x) const;
@@ -81,6 +85,7 @@ class WaveSimulation1D_Real {
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
+    bool mOnlyPositive = false; // Flag to restrict values to positive range during update.
 };
 
 class WaveSimulation2D_Real {
@@ -136,6 +141,11 @@ class WaveSimulation2D_Real {
     // value shoudl be between -1.0 and 1.0.
     void set(size_t x, size_t y, float value);
 
+    void setOnlyPositive(bool onlyPositive) {
+        mOnlyPositive = onlyPositive;
+    }
+
+
     // Advance the simulation one time step using fixed-point arithmetic.
     void update();
 
@@ -155,6 +165,7 @@ class WaveSimulation2D_Real {
 
     int16_t mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).
+    bool mOnlyPositive = false; // Flag to restrict values to positive range during update.
 };
 
 } // namespace fl

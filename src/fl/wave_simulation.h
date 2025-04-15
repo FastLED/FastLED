@@ -82,6 +82,10 @@ class WaveSimulation1D {
     // it to the corresponding multiplier cells in the high-res simulation.
     void set(size_t x, float value);
 
+    void setOnlyPositive(bool onlyPositive) {
+        sim->setOnlyPositive(onlyPositive);
+    }
+
     // Advance the simulation one time step.
     void update();
 
@@ -151,6 +155,10 @@ class WaveSimulation2D {
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
     void set(size_t x, size_t y, float value);
+
+    void setOnlyPositive(bool onlyPositive) {
+        sim->setOnlyPositive(onlyPositive);
+    }
 
     // Advance the simulation one time step.
     void update();
