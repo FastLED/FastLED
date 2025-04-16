@@ -3,9 +3,9 @@
 This demo is best viewed using the FastLED compiler.
 Install: pip install fastled
 Run: fastled <this sketch directory>
-This will compile and preview the sketch in the browser.
+This will compile and preview the sketch in the browser, and enable
+all the UI elements you see below.
 */
-
 
 // Perlin noise fire procedure
 // 16x16 rgb led cylinder demo
