@@ -13,9 +13,9 @@
 
 namespace fl {
 
-class Fx2dBlend: public Fx2d {
+class Blend2d: public Fx2d {
   public:
-    Fx2dBlend(uint16_t width, uint16_t height): Fx2d(XYMap::constructRectangularGrid(width, height)) {
+    Blend2d(uint16_t width, uint16_t height): Fx2d(XYMap::constructRectangularGrid(width, height)) {
         // Warning, the xyMap will be the final transrformation applied to the
         // frame. If the delegate Fx2d layers have their own transformation then
         // both will be applied.

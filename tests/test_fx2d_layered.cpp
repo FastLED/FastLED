@@ -38,7 +38,7 @@ TEST_CASE("Test FX2d Layered Blending") {
     SolidColorFx2d redLayer(width, height, CRGB(255, 0, 0));
     
     // Create a layered effect with just the red layer
-    fl::Fx2dBlend blendFx(width, height);
+    fl::Blend2d blendFx(width, height);
     blendFx.add(redLayer);
     
     // Create a buffer for the output

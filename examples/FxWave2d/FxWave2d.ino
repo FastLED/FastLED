@@ -74,7 +74,7 @@ WaveFx waveFxUpper(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
 });
 
-Fx2dBlend fxBlend(WIDTH, HEIGHT);
+Blend2d fxBlend(WIDTH, HEIGHT);
 
 void setup() {
     Serial.begin(115200);
