@@ -1,6 +1,16 @@
 FastLED 3.9.16
 ==============
-* New noise
+* New inoise16 function taking in x,y,z,t
+  * This is good for 3D oriented noise functions + time factor.
+* New Wave Simulator in 1D and 2D
+  * Full and half duplix wave simulators (half duplix supports black)
+  * For improved rendering we allow 2x, 4x, 8x super sampling
+  * Speed control via multiplying the rendering iterations per frame.
+  * Looks phenominal! Check it out: (insert link here)
+* New Examples:
+  * Wave2d
+  * Wave (1D)
+  * FireMatrix
 
 
 FastLED 3.9.15

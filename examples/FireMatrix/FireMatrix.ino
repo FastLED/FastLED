@@ -4,6 +4,7 @@
 // https://vk.com/ldirko
 // https://www.reddit.com/user/ldirko/
 // https://www.reddit.com/r/FastLED/comments/hgu16i/my_fire_effect_implementation_based_on_perlin/
+// Based on the code found at: https://editor.soulmatelights.com/gallery/1229-
 
 // idea in make perlin noise with time offset X and Z coord
 // this automatic scroll fire pattern
