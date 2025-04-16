@@ -1,0 +1,71 @@
+// Perlin noise fire procedure
+// 16x16 rgb led matrix demo
+// Yaroslaw Turbin, 22.06.2020
+// https://vk.com/ldirko
+// https://www.reddit.com/user/ldirko/
+// https://www.reddit.com/r/FastLED/comments/hgu16i/my_fire_effect_implementation_based_on_perlin/
+
+// idea in make perlin noise with time offset X and Z coord
+// this automatic scroll fire pattern
+// and distort fire noise.
+// then substract Y based coodrd value to shift
+// fire color (not brightness) in palette.
+// this fadeout color from bottom matrix to up.
+// this need some palette tweak for good looking fire color
+
+#include "FastLED.h"
+#include "fl/xymap.h"
+
+using namespace fl;
+
+#define HEIGHT 100
+#define WIDTH 100
+#define SCALEXY 20 // scale of fire
+#define Z_SPEED 20   // speed of fire
+#define SERPENTINE true
+#define BRIGHTNESS 255
+
+CRGB leds[HEIGHT * WIDTH];
+
+DEFINE_GRADIENT_PALETTE(firepal){
+    // define fire palette
+    0,   0,   0,   0,  // black
+    32,  255, 0,   0,  // red
+    190, 255, 255, 0,  // yellow
+    255, 255, 255, 255 // white
+};
+
+XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
+
+void setup() {
+    Serial.begin(115200);
+    FastLED.addLeds<NEOPIXEL, 3>(leds, HEIGHT * WIDTH).setScreenMap(xyMap);
+    FastLED.setBrightness(BRIGHTNESS);
+    FastLED.setCorrection(TypicalLEDStrip);
+    FastLED.setDither(0);
+    delay(1000);
+}
+
+uint8_t getPaletteIndex(uint16_t millis16, int i, int j) {
+    // get palette index
+    uint16_t x = i * SCALEXY;
+    uint16_t y = j * SCALEXY + millis16;
+    uint16_t z = millis16 / Z_SPEED;
+    uint8_t noise_val = inoise8(x, y, z);
+    return qsub8(noise_val, abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1));
+}
+
+void loop() {
+    CRGBPalette16 myPal = firepal;
+
+    uint16_t a = millis();
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            uint8_t palette_index = getPaletteIndex(a, i, j);
+            CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
+            int index = xyMap((HEIGHT - 1) - i, (WIDTH - 1) - j);
+            leds[index] = c;
+        }
+    }
+    FastLED.show();
+}
