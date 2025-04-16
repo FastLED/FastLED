@@ -15,16 +15,19 @@
 namespace fl {
 
 FASTLED_SMART_PTR(WaveFx);
+FASTLED_SMART_PTR(WaveCrgbMap);
+FASTLED_SMART_PTR(WaveCrgbMapDefault);
+FASTLED_SMART_PTR(WaveCrgbGradientMap);
 
-class IWaveCrgbMap {
+class WaveCrgbMap: public Referent {
   public:
-    virtual ~IWaveCrgbMap() = default;
+    virtual ~WaveCrgbMap() = default;
     virtual void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) = 0;
 };
 
 // A great deafult for the wave rendering. It will draw black and then the
 // amplitude of the wave will be more white.
-class WaveCrgbMapDefault : public IWaveCrgbMap {
+class WaveCrgbMapDefault : public WaveCrgbMap {
   public:
     void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) override {
         const uint32_t width = waveSim.getWidth();
@@ -39,7 +42,7 @@ class WaveCrgbMapDefault : public IWaveCrgbMap {
     }
 };
 
-class WaveCrgbGradientMap : public IWaveCrgbMap {
+class WaveCrgbGradientMap : public WaveCrgbMap {
   public:
     WaveCrgbGradientMap(CRGBPalette16 palette) : mPalette(palette) {}
 
@@ -65,7 +68,7 @@ struct WaveFxArgs {
     bool auto_updates = true;
     float speed = 0.16f;
     float dampening = 6.0f;
-    IWaveCrgbMap *crgbMap = nullptr;
+    WaveCrgbMapPtr crgbMap;
 };
 
 
@@ -80,12 +83,11 @@ class WaveFx : public Fx2d {
         // Initialize the wave simulation with the given parameters.
         if (args.crgbMap == nullptr) {
             // Use the default CRGB mapping function.
-            mCrgbMap.reset(new WaveCrgbMapDefault());
+            mCrgbMap = WaveCrgbMapDefaultPtr::New();
         } else {
             // Set a custom CRGB mapping function.
-            mCrgbMap.reset(args.crgbMap);
+            mCrgbMap = args.crgbMap;
         }
-
         setAutoUpdate(args.auto_updates);
     }
 
@@ -120,7 +122,7 @@ class WaveFx : public Fx2d {
     }
 
     // This will now own the crgbMap.
-    void setCrgbMap(IWaveCrgbMap *crgbMap) {
+    void setCrgbMap(WaveCrgbMapPtr crgbMap) {
         // Set a custom CRGB mapping function.
         mCrgbMap.reset(crgbMap);
     }
@@ -149,7 +151,7 @@ class WaveFx : public Fx2d {
     fl::Str fxName() const override { return "WaveFx"; }
 
     WaveSimulation2D mWaveSim;
-    scoped_ptr<IWaveCrgbMap> mCrgbMap;
+    WaveCrgbMapPtr mCrgbMap;
     bool mAutoUpdates = true;
 };
 

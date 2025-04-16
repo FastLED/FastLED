@@ -50,7 +50,7 @@ WaveFx waveFx(xyMap, WaveFx::Args{
     .half_duplex = true,
     .speed = 0.18f,
     .dampening = 9.0f,
-    .crgbMap = new WaveCrgbGradientMap(electricBlueFirePal),
+    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
     
 });
 
