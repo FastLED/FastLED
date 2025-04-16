@@ -18,3 +18,7 @@
 
   * Strip tease - cool fx for strips
     * https://github.com/lpaolini/Striptease?tab=readme-ov-file
+
+
+* Soulematelights:
+  * https://editor.soulmatelights.com/gallery
