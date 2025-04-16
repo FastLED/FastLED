@@ -75,7 +75,7 @@ void triggerRipple(WaveSimulation2D &waveSim) {
 void loop() {
     // Your code here
     waveSim.setSpeed(slider);
-    waveSim.setDampenening(dampening);
+    waveSim.setDampening(dampening);
     waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
     if (button) {

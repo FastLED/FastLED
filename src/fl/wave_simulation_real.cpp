@@ -38,7 +38,7 @@ void WaveSimulation1D_Real::setSpeed(float something) {
     mCourantSq = float_to_fixed(something);
 }
 
-void WaveSimulation1D_Real::setDampenening(int damp) { mDampenening = damp; }
+void WaveSimulation1D_Real::setDampening(int damp) { mDampenening = damp; }
 
 int WaveSimulation1D_Real::getDampenening() const { return mDampenening; }
 
@@ -150,7 +150,7 @@ void WaveSimulation2D_Real::setSpeed(float something) {
     mCourantSq = float_to_fixed(something);
 }
 
-void WaveSimulation2D_Real::setDampenening(int damp) { mDampening = damp; }
+void WaveSimulation2D_Real::setDampening(int damp) { mDampening = damp; }
 
 int WaveSimulation2D_Real::getDampenening() const { return mDampening; }
 
