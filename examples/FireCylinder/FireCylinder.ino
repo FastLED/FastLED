@@ -26,6 +26,10 @@ using namespace fl;
 #define SERPENTINE true
 #define BRIGHTNESS 255
 
+UITitle title("FireCylinder Demo");
+UIDescription description("This example combines two features of FastLED to produce a remarkable range of effects from a relatively small amount of code.  This example combines FastLED's color palette lookup functions with FastLED's Perlin noise generator, and the combination is extremely powerful");
+
+
 TimeScale timeScale(0, 1.0f);
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
@@ -66,16 +70,20 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint32_t millis32, int width, int height, int max_height,
+uint8_t getPaletteIndex(uint32_t millis32, int width, int max_width, int height, int max_height,
                         uint32_t y_speed) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
-    uint16_t x = width * scale; // swapped: now using width
-    uint32_t xx = 0;
+    float xf = (float)width / (float)max_width;
+    uint8_t x = (uint8_t)(xf * 255);
+    uint32_t cosx = cos8(x);
+    uint32_t sinx = sin8(x);
+    cosx *= scale;
+    sinx *= scale;
     uint32_t y = height * scale + y_speed; // swapped: now using height
     uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
 
-    uint16_t noise16 = inoise16(x << 8, xx << 8, y << 8, z << 8);
+    uint16_t noise16 = inoise16(cosx << 8, sinx << 8, y << 8, 0);
     uint8_t noise_val = noise16 >> 8;
     int8_t subtraction_factor = abs8(height - (max_height - 1)) * 255 /
                                 (max_height - 1); // swapped: now using height
@@ -104,7 +112,7 @@ void loop() {
     for (int width = 0; width < WIDTH; width++) {
         for (int height = 0; height < HEIGHT; height++) {
             uint8_t palette_index =
-                getPaletteIndex(now, width, height, HEIGHT, y_speed);
+                getPaletteIndex(now, width, WIDTH, height, HEIGHT, y_speed);
             CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
             int index = xyMap((WIDTH - 1) - width, (HEIGHT - 1) - height);
             leds[index] = c;
