@@ -8,10 +8,13 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
-#include "fl/ui.h"
-#include "fx/2d/wave.h"
 #include <Arduino.h>
 #include <FastLED.h>
+
+#include "fl/ui.h"
+#include "fx/2d/wave.h"
+
+
 
 using namespace fl;
 
@@ -34,12 +37,21 @@ UICheckbox halfDuplex("Half Duplex", true);
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 
+DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
+    0,   0,   0,   0,   // Black
+    32,  0,   0,   70,  // Dark blue
+    128, 20,  57,  255, // Electric blue
+    255, 255, 255, 255  // White
+};
+
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 WaveFx waveFx(xyMap, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
     .half_duplex = true,
     .speed = 0.18f,
     .dampening = 9.0f,
+    .crgbMap = new WaveCrgbGradientMap(electricBlueFirePal),
+    
 });
 
 void setup() {

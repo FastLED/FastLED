@@ -9,6 +9,8 @@
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
+#include "pixelset.h"
+#include "colorutils.h"
 
 namespace fl {
 
@@ -35,6 +37,26 @@ class WaveCrgbMapDefault : public IWaveCrgbMap {
             }
         }
     }
+};
+
+class WaveCrgbGradientMap : public IWaveCrgbMap {
+  public:
+    WaveCrgbGradientMap(CRGBPalette16 palette) : mPalette(palette) {}
+
+    void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) override {
+        const uint32_t width = waveSim.getWidth();
+        const uint32_t height = waveSim.getHeight();
+        for (uint32_t y = 0; y < height; y++) {
+            for (uint32_t x = 0; x < width; x++) {
+                uint32_t idx = xymap(x, y);
+                uint8_t value8 = waveSim.getu8(x, y);
+                leds[idx] = ColorFromPalette(mPalette, value8);
+            }
+        }
+    }
+
+  private:
+    CRGBPalette16 mPalette;
 };
 
 struct WaveFxArgs {
