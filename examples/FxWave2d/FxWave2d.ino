@@ -34,7 +34,7 @@ UICheckbox autoTrigger("Auto Trigger", true);
 
 
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
-UISlider dampeningUpper("Wave Upper: Dampening", 6.6f, 0.0f, 20.0f, 0.1f);
+UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
 UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
@@ -53,7 +53,9 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
 
 DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     0,   0,   0,   0,  // black
-    32, 255, 255, 255, // white
+    8,  128, 64, 64, // green
+    16, 255, 222, 222, // red
+    64, 255, 255, 255, // white
     255, 255, 255, 255 // white
 };
 
@@ -101,15 +103,6 @@ SuperSample getSuperSample() {
 void triggerRipple() {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
-    for (int i = x - 1; i <= x + 1; i++) {
-        if (i < 0 || i >= WIDTH)
-            continue;
-        for (int j = y - 1; j <= y + 1; j++) {
-            if (j < 0 || j >= HEIGHT)
-                continue;
-            waveFxLower.setf(i, j, 1);
-        }
-    }
     waveFxLower.setf(x, y, 1);
     waveFxUpper.setf(x, y, 1);
 }
