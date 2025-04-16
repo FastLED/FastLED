@@ -45,6 +45,13 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     255, 255, 255, 255  // White
 };
 
+DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
+    0,   0,   0,   0,  // black
+    32,  0,   70,  0,  // dark green
+    190, 57,  255, 20, // electric neon green
+    255, 255, 255, 255 // white
+};
+
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 WaveFx waveFx(xyMap, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
@@ -54,12 +61,21 @@ WaveFx waveFx(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
 });
 
+WaveFx waveFx2(xyMap, WaveFx::Args{
+    .factor = SUPER_SAMPLE_4X,
+    .half_duplex = true,
+    .speed = 0.25f,
+    .dampening = 3.0f,
+    .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
+});
+
 Fx2dLayered fxLayer(WIDTH, HEIGHT);
 
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
     fxLayer.add(waveFx);
+    fxLayer.add(waveFx2);
 }
 
 SuperSample getSuperSample() {
@@ -77,7 +93,7 @@ SuperSample getSuperSample() {
     }
 }
 
-void triggerRipple(WaveFx &waveFx) {
+void triggerRipple() {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
     for (int i = x - 1; i <= x + 1; i++) {
@@ -90,6 +106,7 @@ void triggerRipple(WaveFx &waveFx) {
         }
     }
     waveFx.set(x, y, 1);
+    waveFx2.set(x, y, 1);
 }
 
 void loop() {
@@ -99,12 +116,12 @@ void loop() {
     waveFx.setHalfDuplex(halfDuplex);
     waveFx.setSuperSample(getSuperSample());
     if (button) {
-        triggerRipple(waveFx);
+        triggerRipple();
     }
 
     EVERY_N_MILLISECONDS_RANDOM(400, 2000) {
         if (autoTrigger) {
-            triggerRipple(waveFx);
+            triggerRipple();
         }
     }
 
