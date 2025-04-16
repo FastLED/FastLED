@@ -12,6 +12,12 @@ namespace fl {
 
 FASTLED_SMART_PTR(Frame);
 
+
+enum DrawMode {
+    DRAW_MODE_OVERWRITE,
+    DRAW_MODE_BLEND_BY_BLACK
+};
+
 // Frames are used to hold led data. This includes an optional alpha channel. This object
 // is used by the fx and video engines. Most of the memory used for Fx and Video will be located
 // in instances of this class. See Frame::SetAllocator() for custom memory allocation.
@@ -28,7 +34,7 @@ public:
     void copy(const Frame& other);
     void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountOfFrame2);
     static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels);
-    void draw(CRGB* leds) const;
+    void draw(CRGB* leds, DrawMode draw_mode = DRAW_MODE_OVERWRITE) const;
     void clear();
 private:
     const size_t mPixelsCount;

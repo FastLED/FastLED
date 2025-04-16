@@ -76,14 +76,8 @@ struct CRGB {
     };
 
     static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
-
-    FASTLED_FORCE_INLINE CRGB alphaBlendByBlack(const CRGB& other) const {
-        // Use luma of this pixel as alpha (0..255)
-        uint8_t alpha = getLuma();
-        // blend(other, this, alpha) → (other * (255−alpha) + this * alpha) / 256
-        return CRGB::blend(other, *this, alpha);
-    }
-
+    static CRGB blendByBlack(const CRGB& upper, const CRGB& lower);
+    
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index

@@ -24,7 +24,13 @@ class Fx2dLayered: public Fx2d {
 
      virtual void draw(DrawContext context) override {
         mFrame->clear();
-        
+        DrawContext tmp = context;
+        tmp.leds = mFrame->rgb();
+
+        for (auto it = mLayers.rbegin(); it != mLayers.rend(); ++it) {
+            (*it)->draw(tmp);
+            mFrame->draw(context.leds, DrawMode::DRAW_MODE_BLEND_BY_BLACK);
+        }
      }
 
     void clear() {

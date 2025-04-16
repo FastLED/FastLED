@@ -55,6 +55,13 @@ CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
     );
 }
 
+CRGB CRGB::blendByBlack(const CRGB& upper, const CRGB& lower) {
+    // Use luma of upper pixel as alpha (0..255)
+    uint8_t alpha = upper.getLuma();
+    // blend(lower, upper, alpha) → (lower * (255−alpha) + upper * alpha) / 256
+    return CRGB::blend(lower, upper, alpha);
+}
+
 CRGB& CRGB::nscale8 (uint8_t scaledown )
 {
     nscale8x3( r, g, b, scaledown);

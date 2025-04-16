@@ -224,6 +224,14 @@ private:
     typedef T* iterator;
     typedef const T* const_iterator;
 
+    struct reverse_iterator {
+        iterator it;
+        reverse_iterator(iterator i): it(i) {}
+        T& operator*() { return *(it - 1); }
+        reverse_iterator& operator++() { --it; return *this; }
+        bool operator!=(const reverse_iterator& other) const { return it != other.it; }
+    }; 
+
     // Constructor
     HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
         mArray.reset(new T[mCapacity]);
@@ -339,6 +347,15 @@ private:
     const_iterator begin() const { return &mArray[0]; }
     iterator end() { return &mArray[mSize]; }
     const_iterator end() const { return &mArray[mSize]; }
+
+
+    reverse_iterator rbegin() {
+        return reverse_iterator(end());
+    }
+
+    reverse_iterator rend() {
+        return reverse_iterator(begin());
+    }
 
     // Element access
     T& front() {

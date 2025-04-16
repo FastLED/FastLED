@@ -8,7 +8,7 @@ FastLED 3.9.16
   * Speed control via multiplying the rendering iterations per frame.
   * Looks phenominal! Check it out: (insert link here)
 * EVERY_N_MILLISECONDS_RANDOM(MIN, MAX) macro for sketches.
-* CRGB CRGB::alphaBlendByBlack(const CRGB& other) for fx blending.
+* static CRGB CRGB::alphaBlendByBlack(const CRGB& upper, const CRGB& lower) for fx blending.
 * New Examples:
   * Wave2d
   * Wave (1D)

@@ -24,9 +24,20 @@ Frame::~Frame() {
     }
 }
 
-void Frame::draw(CRGB* leds) const {
+void Frame::draw(CRGB* leds, DrawMode draw_mode) const {
     if (mRgb) {
-        memcpy(leds, mRgb.get(), mPixelsCount * sizeof(CRGB));
+        switch (draw_mode) {
+            case DRAW_MODE_OVERWRITE: {
+                memcpy(leds, mRgb.get(), mPixelsCount * sizeof(CRGB));
+                break;
+            }
+            case DRAW_MODE_BLEND_BY_BLACK: {
+                for (size_t i = 0; i < mPixelsCount; ++i) {
+                    leds[i] = CRGB::blendByBlack(mRgb[i], leds[i]);
+                }
+                break;
+            }
+        }
     }
 }
 
