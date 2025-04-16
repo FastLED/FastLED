@@ -29,7 +29,7 @@ WaveSimulation1D waveSim(NUM_LEDS, SuperSample::SUPER_SAMPLE_2X);
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
 UISlider extraFrames("Extra Frames", 1.0f, 0.0f, 8.0f, 1.0f);
 UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
-UICheckbox positiveOnly("Positive Only", false);
+UICheckbox halfDuplex("Half Duplex", false);
 UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
 
 void setup() {
@@ -66,7 +66,7 @@ void loop() {
     // Your code here
     waveSim.setSpeed(slider);
     waveSim.setDampenening(dampening);
-    waveSim.setOnlyPositive(positiveOnly);
+    waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
     static int x = 0;
     if (button.clicked()) {

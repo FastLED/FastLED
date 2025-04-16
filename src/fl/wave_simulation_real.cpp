@@ -123,7 +123,7 @@ void WaveSimulation1D_Real::update() {
         next[i] = (int16_t)f;
     }
 
-    if (mOnlyPositive) {
+    if (mHalfDuplex) {
         // Set the negative values to zero.
         for (size_t i = 1; i < length + 1; i++) {
             if (next[i] < 0) {
@@ -246,7 +246,7 @@ void WaveSimulation2D_Real::update() {
         }
     }
 
-    if (mOnlyPositive) {
+    if (mHalfDuplex) {
         // Set negative values to zero.
         for (size_t j = 1; j <= height; ++j) {
             for (size_t i = 1; i <= width; ++i) {

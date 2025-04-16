@@ -26,11 +26,12 @@ UITitle title("Wave2D Demo");
 UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
+UICheckbox autoTrigger("Auto Trigger", true);
 UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
-UISlider dampening("Dampening", 6.0f, 0.0f, 10.0f, 0.1f);
-UICheckbox positiveOnly("Positive Only", false);
-UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
+UISlider dampening("Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
+UICheckbox halfDuplex("Half Duplex", true);
+UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 WaveSimulation2D waveSim(WIDTH, HEIGHT, SUPER_SAMPLE_4X);
 
@@ -75,11 +76,19 @@ void loop() {
     // Your code here
     waveSim.setSpeed(slider);
     waveSim.setDampenening(dampening);
-    waveSim.setOnlyPositive(positiveOnly);
+    waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
     if (button) {
         triggerRipple(waveSim);
     }
+
+
+    EVERY_N_MILLISECONDS(400) {
+        if (autoTrigger) {
+            triggerRipple(waveSim);
+        }
+    }
+
     waveSim.update();
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {

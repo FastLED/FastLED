@@ -46,9 +46,9 @@ class WaveSimulation1D_Real {
     // Get the simulation speed as a float.
     float getSpeed() const;
 
-    void setOnlyPositive(bool onlyPositive) { mOnlyPositive = onlyPositive; }
+    void setHalfDuplex(bool on) { mHalfDuplex = on; }
 
-    bool getOnlyPositive() const { return mOnlyPositive; }
+    bool getHalfDuplex() const { return mHalfDuplex; }
 
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
@@ -59,7 +59,7 @@ class WaveSimulation1D_Real {
 
     int8_t geti8(size_t x) const { return static_cast<int8_t>(geti16(x) >> 8); }
 
-    // If mOnlyPositive is set then the the values are adjusted so that negative
+    // If mHalfDuplex is set then the the values are adjusted so that negative
     // values will instead be represented by zero.
     uint8_t getu8(size_t x) const {
         int16_t value = geti16(x);
@@ -68,7 +68,7 @@ class WaveSimulation1D_Real {
         // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
         // >>
         //                            8);
-        if (mOnlyPositive) {
+        if (mHalfDuplex) {
             uint16_t v2 = static_cast<uint16_t>(value);
             v2 *= 2;
             return static_cast<uint8_t>(v2 >> 8);
@@ -98,7 +98,7 @@ class WaveSimulation1D_Real {
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
-    bool mOnlyPositive =
+    bool mHalfDuplex =
         false; // Flag to restrict values to positive range during update.
 };
 
@@ -146,7 +146,7 @@ class WaveSimulation2D_Real {
         // return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768))
         // >>
         //                             8);
-        if (mOnlyPositive) {
+        if (mHalfDuplex) {
             uint16_t v2 = static_cast<uint16_t>(value);
             v2 *= 2;
             return static_cast<uint8_t>(v2 >> 8);
@@ -164,9 +164,9 @@ class WaveSimulation2D_Real {
     // value shoudl be between -1.0 and 1.0.
     void set(size_t x, size_t y, float value);
 
-    void setOnlyPositive(bool onlyPositive) { mOnlyPositive = onlyPositive; }
+    void setHalfDuplex(bool on) { mHalfDuplex = on; }
 
-    bool getOnlyPositive() const { return mOnlyPositive; }
+    bool getHalfDuplex() const { return mHalfDuplex; }
 
     // Advance the simulation one time step using fixed-point arithmetic.
     void update();
@@ -187,7 +187,7 @@ class WaveSimulation2D_Real {
 
     int16_t mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).
-    bool mOnlyPositive =
+    bool mHalfDuplex =
         false; // Flag to restrict values to positive range during update.
 };
 

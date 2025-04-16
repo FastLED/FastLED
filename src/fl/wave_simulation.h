@@ -91,8 +91,8 @@ class WaveSimulation1D {
     // it to the corresponding multiplier cells in the high-res simulation.
     void set(size_t x, float value);
 
-    void setOnlyPositive(bool onlyPositive) {
-        sim->setOnlyPositive(onlyPositive);
+    void setHalfDuplex(bool on) {
+        sim->setHalfDuplex(on);
     }
 
     // Advance the simulation one time step.
@@ -175,8 +175,8 @@ class WaveSimulation2D {
     // block in the high-res simulation.
     void set(size_t x, size_t y, float value);
 
-    void setOnlyPositive(bool onlyPositive) {
-        sim->setOnlyPositive(onlyPositive);
+    void setHalfDuplex(bool on) {
+        sim->setHalfDuplex(on);
     }
 
     // Advance the simulation one time step.
