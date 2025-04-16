@@ -87,7 +87,7 @@ void loop() {
         triggerRipple(waveFx);
     }
 
-    EVERY_N_MILLISECONDS(400) {
+    EVERY_N_MILLISECONDS_RANDOM(400, 2000) {
         if (autoTrigger) {
             triggerRipple(waveFx);
         }

@@ -1207,6 +1207,47 @@ public:
 };
 /// @} CEveryNTime Base Classes
 
+
+
+// ————————————————————————————————————————————————
+// Random‐interval version of EVERY_N_MILLISECONDS:
+// on each trigger, pick the next period randomly in [MIN..MAX].
+// ————————————————————————————————————————————————
+class CEveryNMillisRandom {
+public:
+    uint32_t mPrevTrigger;
+    uint32_t mPeriod;
+    uint32_t mMinPeriod;
+    uint32_t mMaxPeriod;
+
+    CEveryNMillisRandom(uint32_t minPeriod, uint32_t maxPeriod)
+      : mMinPeriod(minPeriod), mMaxPeriod(maxPeriod)
+    {
+        computeNext();
+        reset();
+    }
+
+    void computeNext() {
+        // random16(x) returns [0..x-1], so this yields MIN..MAX
+        uint32_t range = mMaxPeriod - mMinPeriod + 1;
+        mPeriod = mMinPeriod + random16(range);
+    }
+
+    uint32_t getTime() const { return GET_MILLIS(); }
+
+    bool ready() {
+        uint32_t now = getTime();
+        if (now - mPrevTrigger >= mPeriod) {
+            mPrevTrigger = now;
+            computeNext();
+            return true;
+        }
+        return false;
+    }
+
+    void reset() { mPrevTrigger = getTime(); }
+};
+
 #else
 
 // Under C++11 rules, we would be allowed to use not-external
@@ -1327,6 +1368,15 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
     static CEveryNMillisDynamic NAME(1); \
     NAME.setPeriod(PERIOD_FUNC); \
     if( NAME )
+
+
+#define EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)                                 \
+    EVERY_N_MILLISECONDS_RANDOM_I(                                           \
+        CONCAT_MACRO(_permRand, __COUNTER__), MIN, MAX)
+
+#define EVERY_N_MILLISECONDS_RANDOM_I(NAME, MIN, MAX)                        \
+    static CEveryNMillisRandom NAME(MIN, MAX);                               \
+    if (NAME.ready())
 
 /// @} Every_N
 /// @} Timekeeping
