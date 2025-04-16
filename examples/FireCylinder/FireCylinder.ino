@@ -1,18 +1,7 @@
 // Perlin noise fire procedure
-// 16x16 rgb led matrix demo
-// Yaroslaw Turbin, 22.06.2020
-// https://vk.com/ldirko
-// https://www.reddit.com/user/ldirko/
-// https://www.reddit.com/r/FastLED/comments/hgu16i/my_fire_effect_implementation_based_on_perlin/
-// Based on the code found at: https://editor.soulmatelights.com/gallery/1229-
-
-// idea in make perlin noise with time offset X and Z coord
-// this automatic scroll fire pattern
-// and distort fire noise.
-// then substract Y based coodrd value to shift
-// fire color (not brightness) in palette.
-// this fadeout color from bottom matrix to up.
-// this need some palette tweak for good looking fire color
+// 16x16 rgb led cylinder demo
+// Exactly the same as the FireMatrix example, but with a cylinder, meaning that the x=0
+// and x = len-1 are connected.
 
 #include "FastLED.h"
 #include "fl/ui.h"
@@ -32,8 +21,8 @@ UIDescription description("This example combines two features of FastLED to prod
 
 TimeScale timeScale(0, 1.0f);
 
-UISlider scaleXY("Scale", 20, 1, 100, 1);
-UISlider speedY("SpeedY", 1, 1, 6, .1);
+UISlider scaleXY("Scale", 8, 1, 100, 1);
+UISlider speedY("SpeedY", 1.3, 1, 6, .1);
 UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
 UINumberField palette("Palette", 0, 0, 2);
