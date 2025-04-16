@@ -1,3 +1,8 @@
+FastLED 3.9.16
+==============
+* New noise
+
+
 FastLED 3.9.15
 ==============
 * ESP32 series now supports FORCE_FASTLED_NAMESPACE=1
