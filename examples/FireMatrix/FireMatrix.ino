@@ -31,7 +31,7 @@ UISlider scaleXY("Scale", 20, 1, 100, 1);
 UISlider speedY("SpeedY", 1, 1, 6, .1);
 UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
-UINumberField palette("Palette", 0, 0, 1);
+UINumberField palette("Palette", 0, 0, 2);
 
 CRGB leds[HEIGHT * WIDTH];
 
@@ -48,6 +48,13 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     32,  0,   70,  0,  // dark green
     190, 57,  255, 20, // electric neon green
     255, 255, 255, 255 // white
+};
+
+DEFINE_GRADIENT_PALETTE(electricBlueFirePal) {
+    0,   0,   0,   0,    // Black
+    32,  0,   0,  70,    // Dark blue
+    128, 20, 57, 255,    // Electric blue
+    255, 255, 255, 255   // White
 };
 
 XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
@@ -77,6 +84,8 @@ CRGBPalette16 getPalette() {
         return firepal;
     case 1:
         return electricGreenFirePal;
+    case 2:
+        return electricBlueFirePal;
     default:
         return firepal;
     }
