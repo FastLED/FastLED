@@ -101,8 +101,8 @@ void loop() {
     uint32_t now = millis();
     timeScale.setScale(speedY);
     uint32_t y_speed = timeScale.update(now);
-    for (int height = 0; height < HEIGHT; height++) {
-        for (int width = 0; width < WIDTH; width++) {
+    for (int width = 0; width < WIDTH; width++) {
+        for (int height = 0; height < HEIGHT; height++) {
             uint8_t palette_index =
                 getPaletteIndex(now, width, height, HEIGHT, y_speed);
             CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
