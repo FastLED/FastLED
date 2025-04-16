@@ -16,6 +16,7 @@
 #include "FastLED.h"
 #include "fl/xymap.h"
 #include "fl/ui.h"
+#include "fx/time.h"
 
 using namespace fl;
 
@@ -23,6 +24,8 @@ using namespace fl;
 #define WIDTH 100
 #define SERPENTINE true
 #define BRIGHTNESS 255
+
+TimeScale timeScale(0, 1.0f);
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
 UISlider speedY("SpeedY", 1, 1, 6, 1);
@@ -47,11 +50,11 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint32_t millis32, int i, int j) {
+uint8_t getPaletteIndex(uint32_t millis32, int i, int j, uint32_t y_speed) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
     uint16_t x = i * scale;
-    uint32_t y = j * scale + (millis32 * speedY.as<uint32_t>());
+    uint32_t y = j * scale + y_speed;
     uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
     uint16_t noise16 = inoise16(x << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
@@ -62,11 +65,11 @@ uint8_t getPaletteIndex(uint32_t millis32, int i, int j) {
 void loop() {
     FastLED.setBrightness(brightness);
     CRGBPalette16 myPal = firepal;
-
-    uint32_t a = millis();
+    uint32_t now = millis();
+    uint32_t y_speed = (now * speedY.as<uint32_t>());
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
-            uint8_t palette_index = getPaletteIndex(a, i, j);
+            uint8_t palette_index = getPaletteIndex(now, i, j, y_speed);
             CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
             int index = xyMap((HEIGHT - 1) - i, (WIDTH - 1) - j);
             leds[index] = c;
