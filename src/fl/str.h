@@ -401,6 +401,11 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
+    Str& operator+=(const Str &other) {
+        append(other.c_str(), other.size());
+        return *this;
+    }
+
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     //Str& append(char c) { write(&c, 1); return *this; }
