@@ -25,6 +25,11 @@ FASTLED_NAMESPACE_BEGIN
 /// @name 16-Bit Scaled Noise Functions
 /// @{
 
+
+/// @copydoc inoise16(uint32_t, uint32_t)
+/// @param z z-axis coordinate on noise map (3D)
+extern uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t t);
+
 /// @copydoc inoise16(uint32_t, uint32_t)
 /// @param z z-axis coordinate on noise map (3D)
 extern uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z);
@@ -48,6 +53,8 @@ extern uint16_t inoise16(uint32_t x);
 /// @copydoc inoise16_raw(uint32_t, uint32_t)
 /// @param z z-axis coordinate on noise map (3D)
 extern int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z);
+
+extern int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z, uint32_t w);
 
 /// @copydoc inoise16_raw(uint32_t)
 /// @param y y-axis coordinate on noise map (2D)
