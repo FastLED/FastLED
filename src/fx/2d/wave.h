@@ -17,20 +17,21 @@ FASTLED_SMART_PTR(WaveFx);
 class IWaveCrgbMap {
   public:
     virtual ~IWaveCrgbMap() = default;
-    virtual void mapWaveToLEDs(CRGB *leds, const WaveSimulation2D &waveSim) = 0;
+    virtual void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) = 0;
 };
 
 // A great deafult for the wave rendering. It will draw black and then the
 // amplitude of the wave will be more white.
 class WaveCrgbMapDefault : public IWaveCrgbMap {
   public:
-    void mapWaveToLEDs(CRGB *leds, const WaveSimulation2D &waveSim) override {
-        for (uint16_t y = 0; y < waveSim.getHeight(); y++) {
-            for (uint16_t x = 0; x < waveSim.getWidth(); x++) {
-                uint16_t idx = waveSim.geti8(x, y);
-                if (idx < waveSim.getWidth() * waveSim.getHeight()) {
-                    leds[idx] = CRGB(waveSim.getu8(x, y), 0, 0);
-                }
+    void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) override {
+        const uint32_t width = waveSim.getWidth();
+        const uint32_t height = waveSim.getHeight();
+        for (uint32_t y = 0; y < height; y++) {
+            for (uint32_t x = 0; x < width; x++) {
+                uint32_t idx = xymap(x, y);
+                uint8_t value8 = waveSim.getu8(x, y);
+                leds[idx] = CRGB(value8, value8, value8);
             }
         }
     }
@@ -108,7 +109,7 @@ class WaveFx : public Fx2d {
             mWaveSim.update();
         }
         // Map the wave values to the LEDs.
-        mCrgbMap->mapWaveToLEDs(context.leds, mWaveSim);
+        mCrgbMap->mapWaveToLEDs(mXyMap, mWaveSim, context.leds);
     }
 
     void setAutoUpdate(bool autoUpdate) {

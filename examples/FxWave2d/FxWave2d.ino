@@ -93,13 +93,7 @@ void loop() {
         }
     }
 
-    waveFx.update();
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            uint8_t value8 = waveFx.getu8(x, y);
-            uint32_t idx = xyMap.mapToIndex(x, y);
-            leds[idx] = CRGB(value8, value8, value8);
-        }
-    }
+    Fx::DrawContext ctx(millis(), leds);
+    waveFx.draw(ctx);
     FastLED.show();
 }
