@@ -21,11 +21,15 @@ class TimeFunction: public fl::Referent {
     virtual void reset(uint32_t realTimeNow) = 0;
 };
 
-// Time clock, but you can warp time. Scale can go negative for back and
-// forth time based effects. Starts at 0.
+// Time clock. Use this to gracefully handle time manipulation. You can input a float value
+// representing the current time scale and this will adjust a the clock smoothly. Updating
+// requires inputing the real clock from the millis() function.
+// HANDLES NEGATIVE TIME SCALES!!!
+// Use this to control viusualizers back and forth motion which draw according to a clock value.
+// Clock will never go below 0.
 class TimeScale: public TimeFunction {
   public:
-    TimeScale(uint32_t realTimeNow, float initialTimeScale = 1.0f);
+    TimeScale(uint32_t realTimeNow = 0, float initialTimeScale = 1.0f);
     ~TimeScale();
     void setScale(float timeScale);
     float scale() const;
