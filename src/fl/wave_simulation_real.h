@@ -99,7 +99,7 @@ class WaveSimulation1D_Real {
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
     bool mHalfDuplex =
-        false; // Flag to restrict values to positive range during update.
+        true; // Flag to restrict values to positive range during update.
 };
 
 class WaveSimulation2D_Real {
@@ -188,7 +188,7 @@ class WaveSimulation2D_Real {
     int16_t mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).
     bool mHalfDuplex =
-        false; // Flag to restrict values to positive range during update.
+        true; // Flag to restrict values to positive range during update.
 };
 
 } // namespace fl
