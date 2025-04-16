@@ -1,3 +1,12 @@
+
+
+/*
+This demo is best viewed using the FastLED compiler.
+Install: pip install fastled
+Run: fastled <this sketch directory>
+This will compile and preview the sketch in the browser.
+*/
+
 // Perlin noise fire procedure
 // 16x16 rgb led matrix demo
 // Yaroslaw Turbin, 22.06.2020

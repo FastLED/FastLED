@@ -1,6 +1,11 @@
 
 
-#define TRY_WAVE_FIX 1
+/*
+This demo is best viewed using the FastLED compiler.
+Install: pip install fastled
+Run: fastled <this sketch directory>
+This will compile and preview the sketch in the browser.
+*/
 
 #include "fl/ui.h"
 #include "fx/2d/wave.h"

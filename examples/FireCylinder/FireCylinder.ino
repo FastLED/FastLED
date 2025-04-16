@@ -1,3 +1,12 @@
+
+/*
+This demo is best viewed using the FastLED compiler.
+Install: pip install fastled
+Run: fastled <this sketch directory>
+This will compile and preview the sketch in the browser.
+*/
+
+
 // Perlin noise fire procedure
 // 16x16 rgb led cylinder demo
 // Exactly the same as the FireMatrix example, but with a cylinder, meaning that the x=0
