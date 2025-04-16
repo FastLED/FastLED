@@ -37,3 +37,16 @@ TEST_CASE("test frame custom allocator") {
     CHECK(allocation_count == 0);
 }
 
+
+TEST_CASE("test blend by black") {
+    SetLargeBlockAllocator(custom_malloc, custom_free);
+    FramePtr frame = FramePtr::New(1);  // 1 pixels.
+    frame->rgb()[0] = CRGB(255, 0, 0);  // Red
+    CRGB out;
+    frame->draw(&out, DRAW_MODE_BLEND_BY_BLACK);
+    CHECK(out == CRGB(255, 0, 0));  // full red because max luma is 255
+    out = CRGB(0, 0, 0);
+    frame->rgb()[0] = CRGB(128, 0, 0);  // Red
+    frame->draw(&out, DRAW_MODE_BLEND_BY_BLACK);
+    CHECK(out == CRGB(64, 0, 0));
+}
