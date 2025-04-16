@@ -32,20 +32,17 @@ UIDescription description("Shows the use of the Wave2d effect.");
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
 
-UISlider extraFrames("Wave Lower: Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
 
-
-
-UISlider speed("Wave Lower: Speed", 0.18f, 0.0f, 1.0f);
-UISlider dampening("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
-UICheckbox halfDuplex("Wave Lower: Half Duplex", true);
-UISlider superSample("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
-
-UISlider speedUpper("Wave Upper: Speed", 0.18f, 0.0f, 1.0f);
-UISlider dampeningUpper("Wave Upper: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
+UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
+UISlider dampeningUpper("Wave Upper: Dampening", 6.6f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
 UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
+
+UISlider speed("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
+UISlider dampening("Wave Lower: Dampening", 10.4f, 0.0f, 20.0f, 0.1f);
+UICheckbox halfDuplex("Wave Lower: Half Duplex", true);
+UISlider superSample("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -56,8 +53,7 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
 
 DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     0,   0,   0,   0,  // black
-    32,  0,   70,  0,  // dark green
-    190, 57,  255, 20, // electric neon green
+    32, 255, 255, 255, // white
     255, 255, 255, 255 // white
 };
 
