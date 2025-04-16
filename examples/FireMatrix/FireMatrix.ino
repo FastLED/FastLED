@@ -14,8 +14,8 @@
 // this need some palette tweak for good looking fire color
 
 #include "FastLED.h"
-#include "fl/xymap.h"
 #include "fl/ui.h"
+#include "fl/xymap.h"
 #include "fx/time.h"
 
 using namespace fl;
@@ -31,14 +31,22 @@ UISlider scaleXY("Scale", 20, 1, 100, 1);
 UISlider speedY("SpeedY", 1, 1, 6, .1);
 UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
+UINumberField palette("Palette", 0, 0, 1);
 
 CRGB leds[HEIGHT * WIDTH];
 
-DEFINE_GRADIENT_PALETTE(firepal) {
+DEFINE_GRADIENT_PALETTE(firepal){
     // define fire palette
     0,   0,   0,   0,  // black
     32,  255, 0,   0,  // red
     190, 255, 255, 0,  // yellow
+    255, 255, 255, 255 // white
+};
+
+DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
+    0,   0,   0,   0,  // black
+    32,  0,   70,  0,  // dark green
+    190, 57,  255, 20, // electric neon green
     255, 255, 255, 255 // white
 };
 
@@ -62,9 +70,21 @@ uint8_t getPaletteIndex(uint32_t millis32, int i, int j, uint32_t y_speed) {
     return qsub8(noise_val, subtraction_factor);
 }
 
+CRGBPalette16 getPalette() {
+    // get palette
+    switch (palette) {
+    case 0:
+        return firepal;
+    case 1:
+        return electricGreenFirePal;
+    default:
+        return firepal;
+    }
+}
+
 void loop() {
     FastLED.setBrightness(brightness);
-    CRGBPalette16 myPal = firepal;
+    CRGBPalette16 myPal = getPalette();
     uint32_t now = millis();
     timeScale.setScale(speedY);
     uint32_t y_speed = timeScale.update(now);
