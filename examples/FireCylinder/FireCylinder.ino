@@ -2,6 +2,9 @@
 // 16x16 rgb led cylinder demo
 // Exactly the same as the FireMatrix example, but with a cylinder, meaning that the x=0
 // and x = len-1 are connected.
+// This also showcases the inoise16(x,y,z,t) function which handles 3D+time noise effects.
+// Keep in mind that a cylinder is embedded in a 3D space with time being used to add
+// additional noise to the effect.
 
 #include "FastLED.h"
 #include "fl/ui.h"
