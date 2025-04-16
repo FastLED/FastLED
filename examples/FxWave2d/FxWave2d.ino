@@ -40,9 +40,9 @@ UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f)
 
 
 UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
-UISlider dampening("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
-UICheckbox halfDuplex("Wave Lower: Half Duplex", true);
-UISlider superSample("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
+UISlider dampeningLower("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
+UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);
+UISlider superSampleLower("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -84,7 +84,7 @@ void setup() {
 }
 
 SuperSample getSuperSample() {
-    switch (int(superSample)) {
+    switch (int(superSampleLower)) {
     case 0:
         return SuperSample::SUPER_SAMPLE_NONE;
     case 1:
@@ -115,9 +115,9 @@ void triggerRipple() {
 }
 
 bool ui() {
-    waveFxLower.setSpeed(speed);
-    waveFxLower.setDampening(dampening);
-    waveFxLower.setHalfDuplex(halfDuplex);
+    waveFxLower.setSpeed(speedLower);
+    waveFxLower.setDampening(dampeningLower);
+    waveFxLower.setHalfDuplex(halfDuplexLower);
     waveFxLower.setSuperSample(getSuperSample());
 
     waveFxUpper.setSpeed(speedUpper);
