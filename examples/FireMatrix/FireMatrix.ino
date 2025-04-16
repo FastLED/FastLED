@@ -26,12 +26,12 @@ using namespace fl;
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
 UISlider speedY("SpeedY", 1, 1, 6, 1);
-UISlider speedZ("SpeedZ", 20, 1, 100, 1);
+UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
 
 CRGB leds[HEIGHT * WIDTH];
 
-DEFINE_GRADIENT_PALETTE(firepal){
+DEFINE_GRADIENT_PALETTE(firepal) {
     // define fire palette
     0,   0,   0,   0,  // black
     32,  255, 0,   0,  // red
@@ -52,10 +52,11 @@ uint8_t getPaletteIndex(uint32_t millis32, int i, int j) {
     uint16_t scale = scaleXY.as<uint16_t>();
     uint16_t x = i * scale;
     uint32_t y = j * scale + (millis32 * speedY.as<uint32_t>());
-    uint16_t z = millis32 / speedZ.as<uint16_t>();
+    uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
     uint16_t noise16 = inoise16(x << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
-    return qsub8(noise_val, abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1));
+    int8_t subtraction_factor = abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1);
+    return qsub8(noise_val, subtraction_factor);
 }
 
 void loop() {
