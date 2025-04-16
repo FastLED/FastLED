@@ -118,8 +118,7 @@ void triggerRipple() {
     waveFxUpper.setf(x, y, 1);
 }
 
-void loop() {
-    // Your code here
+bool ui() {
     waveFxLower.setSpeed(speed);
     waveFxLower.setDampening(dampening);
     waveFxLower.setHalfDuplex(halfDuplex);
@@ -129,7 +128,13 @@ void loop() {
     waveFxUpper.setDampening(dampeningUpper);
     waveFxUpper.setHalfDuplex(halfDuplexUpper);
     waveFxUpper.setSuperSample(getSuperSample());
-    if (button) {
+    return button;
+}
+
+void loop() {
+    // Your code here
+    bool triggered = ui();
+    if (triggered) {
         triggerRipple();
     }
 
