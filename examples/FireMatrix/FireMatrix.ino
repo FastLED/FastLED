@@ -15,15 +15,18 @@
 
 #include "FastLED.h"
 #include "fl/xymap.h"
+#include "fl/ui.h"
 
 using namespace fl;
 
 #define HEIGHT 100
 #define WIDTH 100
-#define SCALEXY 20 // scale of fire
-#define Z_SPEED 20   // speed of fire
 #define SERPENTINE true
 #define BRIGHTNESS 255
+
+UISlider scaleXY("Scale", 20, 1, 100, 1);
+UISlider speedZ("SpeedZ", 20, 1, 100, 1);
+UISlider brightness("Brightness", 255, 0, 255, 1);
 
 CRGB leds[HEIGHT * WIDTH];
 
@@ -40,22 +43,23 @@ XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 3>(leds, HEIGHT * WIDTH).setScreenMap(xyMap);
-    FastLED.setBrightness(BRIGHTNESS);
+    //FastLED.setBrightness(BRIGHTNESS);
     FastLED.setCorrection(TypicalLEDStrip);
-    FastLED.setDither(0);
     delay(1000);
 }
 
 uint8_t getPaletteIndex(uint16_t millis16, int i, int j) {
     // get palette index
-    uint16_t x = i * SCALEXY;
-    uint16_t y = j * SCALEXY + millis16;
-    uint16_t z = millis16 / Z_SPEED;
+    uint16_t scale = scaleXY.as<uint16_t>();
+    uint16_t x = i * scale;
+    uint16_t y = j * scale + millis16;
+    uint16_t z = millis16 / speedZ.as<uint16_t>();
     uint8_t noise_val = inoise8(x, y, z);
     return qsub8(noise_val, abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1));
 }
 
 void loop() {
+    FastLED.setBrightness(brightness);
     CRGBPalette16 myPal = firepal;
 
     uint16_t a = millis();
