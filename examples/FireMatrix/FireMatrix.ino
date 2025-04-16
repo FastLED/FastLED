@@ -28,7 +28,7 @@ using namespace fl;
 TimeScale timeScale(0, 1.0f);
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
-UISlider speedY("SpeedY", 1, 1, 6, 1);
+UISlider speedY("SpeedY", 1, 1, 6, .1);
 UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
 
@@ -66,7 +66,8 @@ void loop() {
     FastLED.setBrightness(brightness);
     CRGBPalette16 myPal = firepal;
     uint32_t now = millis();
-    uint32_t y_speed = (now * speedY.as<uint32_t>());
+    timeScale.setScale(speedY);
+    uint32_t y_speed = timeScale.update(now);
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             uint8_t palette_index = getPaletteIndex(now, i, j, y_speed);
