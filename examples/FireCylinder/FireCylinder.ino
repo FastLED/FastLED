@@ -51,11 +51,11 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     255, 255, 255, 255 // white
 };
 
-DEFINE_GRADIENT_PALETTE(electricBlueFirePal) {
-    0,   0,   0,   0,    // Black
-    32,  0,   0,  70,    // Dark blue
-    128, 20, 57, 255,    // Electric blue
-    255, 255, 255, 255   // White
+DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
+    0,   0,   0,   0,   // Black
+    32,  0,   0,   70,  // Dark blue
+    128, 20,  57,  255, // Electric blue
+    255, 255, 255, 255  // White
 };
 
 XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
@@ -66,19 +66,21 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint32_t millis32, int height, int width, int max_width, uint32_t y_speed) {
+uint8_t getPaletteIndex(uint32_t millis32, int width, int height, int max_width,
+                        uint32_t y_speed) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
-    uint16_t x = height * scale;
-    uint32_t y = width * scale + y_speed;
-    uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
+    uint16_t x = width * scale; // swapped: now using width
     uint32_t xx = 0;
+    uint32_t y = height * scale + y_speed; // swapped: now using height
+    uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
+
     uint16_t noise16 = inoise16(x << 8, xx << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
-    int8_t subtraction_factor = abs8(width - (max_width - 1)) * 255 / (max_width - 1);
+    int8_t subtraction_factor = abs8(height - (max_width - 1)) * 255 /
+                                (max_width - 1); // swapped: now using height
     return qsub8(noise_val, subtraction_factor);
 }
-
 CRGBPalette16 getPalette() {
     // get palette
     switch (palette) {
@@ -101,9 +103,10 @@ void loop() {
     uint32_t y_speed = timeScale.update(now);
     for (int height = 0; height < HEIGHT; height++) {
         for (int width = 0; width < WIDTH; width++) {
-            uint8_t palette_index = getPaletteIndex(now, height, width, WIDTH, y_speed);
+            uint8_t palette_index =
+                getPaletteIndex(now, width, height, HEIGHT, y_speed);
             CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
-            int index = xyMap((HEIGHT - 1) - height, (WIDTH - 1) - width);
+            int index = xyMap((WIDTH - 1) - width, (HEIGHT - 1) - height);
             leds[index] = c;
         }
     }
