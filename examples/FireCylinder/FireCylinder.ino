@@ -66,7 +66,7 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint32_t millis32, int width, int height, int max_width,
+uint8_t getPaletteIndex(uint32_t millis32, int width, int height, int max_height,
                         uint32_t y_speed) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
@@ -77,8 +77,8 @@ uint8_t getPaletteIndex(uint32_t millis32, int width, int height, int max_width,
 
     uint16_t noise16 = inoise16(x << 8, xx << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
-    int8_t subtraction_factor = abs8(height - (max_width - 1)) * 255 /
-                                (max_width - 1); // swapped: now using height
+    int8_t subtraction_factor = abs8(height - (max_height - 1)) * 255 /
+                                (max_height - 1); // swapped: now using height
     return qsub8(noise_val, subtraction_factor);
 }
 CRGBPalette16 getPalette() {
