@@ -31,11 +31,20 @@ UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
-UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
-UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
-UISlider dampening("Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
-UICheckbox halfDuplex("Half Duplex", true);
-UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
+
+UISlider extraFrames("Wave Lower: Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
+
+
+
+UISlider speed("Wave Lower: Speed", 0.18f, 0.0f, 1.0f);
+UISlider dampening("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
+UICheckbox halfDuplex("Wave Lower: Half Duplex", true);
+UISlider superSample("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
+
+UISlider speedUpper("Wave Upper: Speed", 0.18f, 0.0f, 1.0f);
+UISlider dampeningUpper("Wave Upper: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
+UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
+UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
@@ -53,7 +62,7 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
 };
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-WaveFx waveFx(xyMap, WaveFx::Args{
+WaveFx waveFxLower(xyMap, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
     .half_duplex = true,
     .speed = 0.18f,
@@ -61,7 +70,7 @@ WaveFx waveFx(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
 });
 
-WaveFx waveFx2(xyMap, WaveFx::Args{
+WaveFx waveFxUpper(xyMap, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
     .half_duplex = true,
     .speed = 0.25f,
@@ -74,8 +83,8 @@ Fx2dLayered fxLayer(WIDTH, HEIGHT);
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
-    fxLayer.add(waveFx);
-    fxLayer.add(waveFx2);
+    fxLayer.add(waveFxUpper);
+    fxLayer.add(waveFxLower);
 }
 
 SuperSample getSuperSample() {
@@ -102,19 +111,24 @@ void triggerRipple() {
         for (int j = y - 1; j <= y + 1; j++) {
             if (j < 0 || j >= HEIGHT)
                 continue;
-            waveFx.set(i, j, 1);
+            waveFxLower.setf(i, j, 1);
         }
     }
-    waveFx.set(x, y, 1);
-    waveFx2.set(x, y, 1);
+    waveFxLower.setf(x, y, 1);
+    waveFxUpper.setf(x, y, 1);
 }
 
 void loop() {
     // Your code here
-    waveFx.setSpeed(slider);
-    waveFx.setDampening(dampening);
-    waveFx.setHalfDuplex(halfDuplex);
-    waveFx.setSuperSample(getSuperSample());
+    waveFxLower.setSpeed(speed);
+    waveFxLower.setDampening(dampening);
+    waveFxLower.setHalfDuplex(halfDuplex);
+    waveFxLower.setSuperSample(getSuperSample());
+
+    waveFxUpper.setSpeed(speedUpper);
+    waveFxUpper.setDampening(dampeningUpper);
+    waveFxUpper.setHalfDuplex(halfDuplexUpper);
+    waveFxUpper.setSuperSample(getSuperSample());
     if (button) {
         triggerRipple();
     }

@@ -51,11 +51,13 @@ class Fx2dLayered: public Fx2d {
         // Draw each layer in reverse order and applying the blending.
         for (auto it = mLayers.rbegin(); it != mLayers.rend(); ++it) {
             DrawContext tmp_ctx = context;
-            tmp_ctx.leds = mFrameTransform->rgb();
+            tmp_ctx.leds = mFrame->rgb();
             (*it)->draw(tmp_ctx);
             mFrame->draw(mFrameTransform->rgb(), DrawMode::DRAW_MODE_BLEND_BY_BLACK);
         }
 
+        // Copy the final result to the output
+        // memcpy(mFrameTransform->rgb(), context.leds, sizeof(CRGB) * mXyMap.getTotal());
         mFrameTransform->draw(context.leds, DrawMode::DRAW_MODE_OVERWRITE);
      }
 
