@@ -111,9 +111,9 @@ class WaveFx : public Fx2d {
         mWaveSim.setSuperSample(factor);
     }
 
-    void set(size_t x, size_t y, float value) {
+    void setf(size_t x, size_t y, float value) {
         // Set the value at the given coordinates in the wave simulation.
-        mWaveSim.set(x, y, value);
+        mWaveSim.setf(x, y, value);
     }
 
     uint8_t getu8(size_t x, size_t y) const {

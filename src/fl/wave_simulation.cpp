@@ -94,7 +94,7 @@ bool WaveSimulation2D::has(size_t x, size_t y) const {
     return (x < outerWidth) && (y < outerHeight);
 }
 
-void WaveSimulation2D::set(size_t x, size_t y, float value) {
+void WaveSimulation2D::setf(size_t x, size_t y, float value) {
     if (!has(x, y))
         return;
     for (uint32_t j = 0; j < multiplier; ++j) {
@@ -197,7 +197,7 @@ uint8_t WaveSimulation1D::getu8(size_t x) const {
 
 bool WaveSimulation1D::has(size_t x) const { return (x < outerLength); }
 
-void WaveSimulation1D::set(size_t x, float value) {
+void WaveSimulation1D::setf(size_t x, float value) {
     if (!has(x))
         return;
     for (uint32_t i = 0; i < multiplier; ++i) {

@@ -89,7 +89,7 @@ class WaveSimulation1D {
 
     // Upsampling setter: set the value at an outer grid cell x by replicating
     // it to the corresponding multiplier cells in the high-res simulation.
-    void set(size_t x, float value);
+    void setf(size_t x, float value);
 
     void setHalfDuplex(bool on) {
         sim->setHalfDuplex(on);
@@ -173,7 +173,7 @@ class WaveSimulation2D {
     // Upsampling setter: set the value at an outer grid cell (x,y) by
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
-    void set(size_t x, size_t y, float value);
+    void setf(size_t x, size_t y, float value);
 
     void setHalfDuplex(bool on) {
         sim->setHalfDuplex(on);
