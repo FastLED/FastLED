@@ -77,8 +77,12 @@ struct CRGB {
 
     static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
 
-
-
+    FASTLED_FORCE_INLINE CRGB alphaBlendByBlack(const CRGB& other) const {
+        // Use luma of this pixel as alpha (0..255)
+        uint8_t alpha = getLuma();
+        // blend(other, this, alpha) → (other * (255−alpha) + this * alpha) / 256
+        return CRGB::blend(other, *this, alpha);
+    }
 
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
@@ -374,15 +378,9 @@ struct CRGB {
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
-    FASTLED_FORCE_INLINE uint8_t getLuma() const;
+    uint8_t getLuma() const;
 
 
-    FASTLED_FORCE_INLINE CRGB alphaBlendByBlack(const CRGB& other) const {
-        // Use luma of this pixel as alpha (0..255)
-        uint8_t alpha = getLuma();
-        // blend(other, this, alpha) → (other * (255−alpha) + this * alpha) / 256
-        return CRGB::blend(other, *this, alpha);
-    }
 
     /// Get the average of the R, G, and B values
     FASTLED_FORCE_INLINE uint8_t getAverageLight() const;
