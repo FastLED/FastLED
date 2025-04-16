@@ -30,6 +30,10 @@ void Frame::draw(CRGB* leds) const {
     }
 }
 
+void Frame::clear() {
+    memset(mRgb.get(), 0, mPixelsCount * sizeof(CRGB));
+}
+
 
 void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels) {
     if (frame1.size() != frame2.size()) {

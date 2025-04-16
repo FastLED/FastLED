@@ -29,6 +29,7 @@ public:
     void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountOfFrame2);
     static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels);
     void draw(CRGB* leds) const;
+    void clear();
 private:
     const size_t mPixelsCount;
     fl::scoped_array<CRGB> mRgb;
