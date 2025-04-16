@@ -25,6 +25,7 @@ using namespace fl;
 #define BRIGHTNESS 255
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
+UISlider speedY("SpeedY", 1, 1, 6, 1);
 UISlider speedZ("SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
 
@@ -50,7 +51,7 @@ uint8_t getPaletteIndex(uint32_t millis32, int i, int j) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
     uint16_t x = i * scale;
-    uint16_t y = j * scale + millis32;
+    uint32_t y = j * scale + (millis32 * speedY.as<uint32_t>());
     uint16_t z = millis32 / speedZ.as<uint16_t>();
     uint16_t noise16 = inoise16(x << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
