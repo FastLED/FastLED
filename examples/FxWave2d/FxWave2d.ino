@@ -13,7 +13,7 @@ all the UI elements you see below.
 
 #include "fl/ui.h"
 #include "fx/2d/wave.h"
-#include "fx/2d/layered.h"
+#include "fx/2d/blend.h"
 
 
 
@@ -74,13 +74,13 @@ WaveFx waveFxUpper(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
 });
 
-Fx2dLayered fxLayer(WIDTH, HEIGHT);
+Fx2dBlend fxBlend(WIDTH, HEIGHT);
 
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
-    fxLayer.add(waveFxUpper);
-    fxLayer.add(waveFxLower);
+    fxBlend.add(waveFxUpper);
+    fxBlend.add(waveFxLower);
 }
 
 SuperSample getSuperSample() {
@@ -141,6 +141,6 @@ void loop() {
     }
 
     Fx::DrawContext ctx(millis(), leds);
-    fxLayer.draw(ctx);
+    fxBlend.draw(ctx);
     FastLED.show();
 }

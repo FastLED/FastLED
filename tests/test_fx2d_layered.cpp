@@ -5,7 +5,7 @@
 
 #include "test.h"
 #include "fx/time.h"
-#include "fx/2d/layered.h"
+#include "fx/2d/blend.h"
 #include "fx/fx.h"
 
 #include "fl/namespace.h"
@@ -38,8 +38,8 @@ TEST_CASE("Test FX2d Layered Blending") {
     SolidColorFx2d redLayer(width, height, CRGB(255, 0, 0));
     
     // Create a layered effect with just the red layer
-    fl::Fx2dLayered layeredFx(width, height);
-    layeredFx.add(redLayer);
+    fl::Fx2dBlend blendFx(width, height);
+    blendFx.add(redLayer);
     
     // Create a buffer for the output
     CRGB led;
@@ -47,7 +47,7 @@ TEST_CASE("Test FX2d Layered Blending") {
     // Draw the layered effect
     Fx::DrawContext context(0, &led);
     context.now = 0;
-    layeredFx.draw(context);
+    blendFx.draw(context);
 
     MESSAGE("Layered Effect Output: %s", led.toString().c_str());
     
