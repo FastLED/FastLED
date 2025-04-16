@@ -11,6 +11,8 @@ FastLED 3.9.16
   * Wave2d
   * Wave (1D)
   * FireMatrix
+  * FireCylinder
+    * Same as FireMatrix, but the visualizer wraps around so it is seemless (y(0) ~= y(width -1))
 
 
 FastLED 3.9.15
