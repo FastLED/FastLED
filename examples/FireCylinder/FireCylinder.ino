@@ -66,10 +66,10 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint32_t millis32, int i, int width, int max_width, uint32_t y_speed) {
+uint8_t getPaletteIndex(uint32_t millis32, int height, int width, int max_width, uint32_t y_speed) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
-    uint16_t x = i * scale;
+    uint16_t x = height * scale;
     uint32_t y = width * scale + y_speed;
     uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
     uint32_t xx = 0;
