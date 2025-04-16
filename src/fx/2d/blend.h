@@ -49,11 +49,14 @@ class Blend2d: public Fx2d {
         mFrameTransform->clear();
 
         // Draw each layer in reverse order and applying the blending.
-        for (auto it = mLayers.rbegin(); it != mLayers.rend(); ++it) {
+        bool first = true;
+        for (auto it = mLayers.begin(); it != mLayers.end(); ++it) {
             DrawContext tmp_ctx = context;
             tmp_ctx.leds = mFrame->rgb();
             (*it)->draw(tmp_ctx);
-            mFrame->draw(mFrameTransform->rgb(), DrawMode::DRAW_MODE_BLEND_BY_BLACK);
+            DrawMode mode = first ? DrawMode::DRAW_MODE_OVERWRITE : DrawMode::DRAW_MODE_BLEND_BY_BLACK;
+            first = false;
+            mFrame->draw(mFrameTransform->rgb(), mode);
         }
 
         // Copy the final result to the output

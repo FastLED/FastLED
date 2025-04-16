@@ -39,8 +39,8 @@ UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
 UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 
-UISlider speed("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
-UISlider dampening("Wave Lower: Dampening", 10.4f, 0.0f, 20.0f, 0.1f);
+UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
+UISlider dampening("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplex("Wave Lower: Half Duplex", true);
 UISlider superSample("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
@@ -79,8 +79,8 @@ Blend2d fxBlend(WIDTH, HEIGHT);
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
-    fxBlend.add(waveFxUpper);
     fxBlend.add(waveFxLower);
+    fxBlend.add(waveFxUpper);
 }
 
 SuperSample getSuperSample() {
