@@ -43,9 +43,7 @@ XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<NEOPIXEL, 3>(leds, HEIGHT * WIDTH).setScreenMap(xyMap);
-    //FastLED.setBrightness(BRIGHTNESS);
     FastLED.setCorrection(TypicalLEDStrip);
-    delay(1000);
 }
 
 uint8_t getPaletteIndex(uint16_t millis16, int i, int j) {
@@ -54,7 +52,8 @@ uint8_t getPaletteIndex(uint16_t millis16, int i, int j) {
     uint16_t x = i * scale;
     uint16_t y = j * scale + millis16;
     uint16_t z = millis16 / speedZ.as<uint16_t>();
-    uint8_t noise_val = inoise8(x, y, z);
+    uint16_t noise16 = inoise16(x << 8, y << 8, z << 8);
+    uint8_t noise_val = noise16 >> 8;
     return qsub8(noise_val, abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1));
 }
 
