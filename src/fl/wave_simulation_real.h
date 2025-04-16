@@ -38,7 +38,7 @@ class WaveSimulation1D_Real {
     void setSpeed(float something);
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
-    void setDampenening(int damp);
+    void setDampening(int damp);
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -118,7 +118,7 @@ class WaveSimulation2D_Real {
 
     // Set the dampening factor exponent.
     // The dampening factor used is 2^(dampening).
-    void setDampenening(int damp);
+    void setDampening(int damp);
 
     // Get the current dampening exponent.
     int getDampenening() const;

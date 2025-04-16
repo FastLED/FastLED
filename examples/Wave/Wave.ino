@@ -65,7 +65,7 @@ SuperSample getSuperSample() {
 void loop() {
     // Your code here
     waveSim.setSpeed(slider);
-    waveSim.setDampenening(dampening);
+    waveSim.setDampening(dampening);
     waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
     static int x = 0;

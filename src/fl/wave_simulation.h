@@ -60,7 +60,7 @@ class WaveSimulation1D {
 
     // Delegate methods to the internal simulation.
     void setSpeed(float speed);
-    void setDampenening(int damp);
+    void setDampening(int damp);
     int getDampenening() const;
     float getSpeed() const;
 
@@ -135,7 +135,7 @@ class WaveSimulation2D {
 
     void setExtraFrames(uint8_t extra);
 
-    void setDampenening(int damp);
+    void setDampening(int damp);
 
     int getDampenening() const;
 

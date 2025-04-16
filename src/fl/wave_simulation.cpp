@@ -24,7 +24,7 @@ void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor,
     extraFrames = uint8_t(factor) - 1;
 }
 
-void WaveSimulation2D::setDampenening(int damp) { sim->setDampenening(damp); }
+void WaveSimulation2D::setDampening(int damp) { sim->setDampening(damp); }
 
 int WaveSimulation2D::getDampenening() const { return sim->getDampenening(); }
 
@@ -133,7 +133,7 @@ void WaveSimulation1D::init(uint32_t length, SuperSample factor,
 
 void WaveSimulation1D::setSpeed(float speed) { sim->setSpeed(speed); }
 
-void WaveSimulation1D::setDampenening(int damp) { sim->setDampenening(damp); }
+void WaveSimulation1D::setDampening(int damp) { sim->setDampening(damp); }
 
 int WaveSimulation1D::getDampenening() const { return sim->getDampenening(); }
 
