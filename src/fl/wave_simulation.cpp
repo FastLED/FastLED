@@ -1,3 +1,4 @@
+// Based on works and code by Shawn Silverman.
 
 #include <stdint.h>
 

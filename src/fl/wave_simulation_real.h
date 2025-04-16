@@ -2,6 +2,8 @@
 Wave simulation classes for 1D and 2D simulations. This is called _Real because
 there is a one to one mapping between the simulation and the LED grid. For
 flexible super sampling see wave_simluation.h.
+
+Based on works and code by Shawn Silverman.
 */
 
 #pragma once

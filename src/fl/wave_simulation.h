@@ -6,6 +6,8 @@ sampling factors.
 
 A super sampling value of 2x will give the best results for the CPU consumption
 as most artifacts will be averaged out at this resolution.
+
+Based on works and code by Shawn Silverman.
 */
 
 #pragma once
