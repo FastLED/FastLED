@@ -46,12 +46,12 @@ void setup() {
     FastLED.setCorrection(TypicalLEDStrip);
 }
 
-uint8_t getPaletteIndex(uint16_t millis16, int i, int j) {
+uint8_t getPaletteIndex(uint32_t millis32, int i, int j) {
     // get palette index
     uint16_t scale = scaleXY.as<uint16_t>();
     uint16_t x = i * scale;
-    uint16_t y = j * scale + millis16;
-    uint16_t z = millis16 / speedZ.as<uint16_t>();
+    uint16_t y = j * scale + millis32;
+    uint16_t z = millis32 / speedZ.as<uint16_t>();
     uint16_t noise16 = inoise16(x << 8, y << 8, z << 8);
     uint8_t noise_val = noise16 >> 8;
     return qsub8(noise_val, abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1));
@@ -61,7 +61,7 @@ void loop() {
     FastLED.setBrightness(brightness);
     CRGBPalette16 myPal = firepal;
 
-    uint16_t a = millis();
+    uint32_t a = millis();
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             uint8_t palette_index = getPaletteIndex(a, i, j);
