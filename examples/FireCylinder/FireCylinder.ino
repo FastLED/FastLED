@@ -16,13 +16,14 @@ using namespace fl;
 #define BRIGHTNESS 255
 
 UITitle title("FireCylinder Demo");
-UIDescription description("This example combines two features of FastLED to produce a remarkable range of effects from a relatively small amount of code.  This example combines FastLED's color palette lookup functions with FastLED's Perlin noise generator, and the combination is extremely powerful");
+UIDescription description("This Fire demo wraps around the cylinder. It uses Perlin noise to create a fire effect.");
 
 
 TimeScale timeScale(0, 1.0f);
 
 UISlider scaleXY("Scale", 8, 1, 100, 1);
 UISlider speedY("SpeedY", 1.3, 1, 6, .1);
+UISlider scaleX("ScaleX", .3, 0.1, 3, .01);
 UISlider invSpeedZ("Inverse SpeedZ", 20, 1, 100, 1);
 UISlider brightness("Brightness", 255, 0, 255, 1);
 UINumberField palette("Palette", 0, 0, 2);
@@ -67,8 +68,9 @@ uint8_t getPaletteIndex(uint32_t millis32, int width, int max_width, int height,
     uint8_t x = (uint8_t)(xf * 255);
     uint32_t cosx = cos8(x);
     uint32_t sinx = sin8(x);
-    cosx *= scale;
-    sinx *= scale;
+    float trig_scale = scale * scaleX.value();
+    cosx *= trig_scale;
+    sinx *= trig_scale;
     uint32_t y = height * scale + y_speed; // swapped: now using height
     uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
 
