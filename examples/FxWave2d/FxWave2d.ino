@@ -11,6 +11,7 @@ all the UI elements you see below.
 #include <Arduino.h>
 #include <FastLED.h>
 
+#include "fl/math_macros.h"
 #include "fl/ui.h"
 #include "fx/2d/wave.h"
 #include "fx/2d/blend.h"
@@ -31,6 +32,7 @@ UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
+UISlider triggerSpeed("Trigger Speed", .5f, 0.0f, 1.0f, 0.01f);
 UICheckbox easeModeSqrt("Ease Mode Sqrt", false);
 UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);
 UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);
@@ -145,20 +147,40 @@ bool ui() {
     return button;
 }
 
+
+void processAutoTrigger(uint32_t now) {
+    static uint32_t nextTrigger = 0;
+    uint32_t trigger_delta = nextTrigger - now;
+    if (trigger_delta > 10000) {
+        // rolled over!
+        trigger_delta = 0;
+    }
+    if (autoTrigger) {
+        if (now >= nextTrigger) {
+            triggerRipple();
+            float speed = 1.0f - triggerSpeed.value();
+            uint32_t min_rand = 400 * speed;
+            uint32_t max_rand = 2000 * speed;
+
+            uint32_t min = MIN(min_rand, max_rand);
+            uint32_t max = MAX(min_rand, max_rand);
+            if (min == max) {
+                max += 1;
+            }
+            nextTrigger = now + random(min, max);
+        }
+    }
+}
+
 void loop() {
     // Your code here
     bool triggered = ui();
     if (triggered) {
         triggerRipple();
     }
-
-    EVERY_N_MILLISECONDS_RANDOM(400, 2000) {
-        if (autoTrigger) {
-            triggerRipple();
-        }
-    }
-
-    Fx::DrawContext ctx(millis(), leds);
+    uint32_t now = millis();
+    processAutoTrigger(now);
+    Fx::DrawContext ctx(now, leds);
     fxBlend.draw(ctx);
     FastLED.show();
 }
