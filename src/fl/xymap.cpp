@@ -54,6 +54,7 @@ XYMap XYMap::constructSerpentine(uint16_t width, uint16_t height,
                                  uint16_t offset) {
     XYMap out(width, height, true);
     out.mOffset = offset;
+    return out;
 }
 
 XYMap::XYMap(uint16_t width, uint16_t height, bool is_serpentine,
