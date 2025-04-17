@@ -6,7 +6,9 @@
 namespace fl {
 
 // Use this function to compute the alpha value based on the time elapsed
+// 0 -> 255
 uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end);
+// 0 -> 65535
 uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
 
@@ -15,6 +17,9 @@ class TimeAlpha {
     virtual ~TimeAlpha() = default;
     virtual void trigger(uint32_t now) = 0;
     virtual uint8_t update(uint32_t now) = 0;
+    virtual uint16_t update16(uint32_t now) {
+        return static_cast<uint16_t>(update(now) << 8);
+    }
     virtual bool isActive(uint32_t now) const = 0;
 };
 
