@@ -127,8 +127,20 @@ bool WaveSimulation2D::has(size_t x, size_t y) const {
 void WaveSimulation2D::setf(size_t x, size_t y, float value) {
     if (!has(x, y))
         return;
+
+    // radius in pixels of your diamond
+    int rad = static_cast<int>(multiplier) / 2;
+
     for (size_t j = 0; j < multiplier; ++j) {
         for (size_t i = 0; i < multiplier; ++i) {
+            // compute offset from the center of this block
+            int dx = static_cast<int>(i) - rad;
+            int dy = static_cast<int>(j) - rad;
+
+            // keep only those points whose Manhattan distance ≤ rad
+            if (ABS(dx) + ABS(dy) > rad)
+                continue;
+
             size_t xx = x * multiplier + i;
             size_t yy = y * multiplier + j;
             if (sim->has(xx, yy)) {
