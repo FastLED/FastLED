@@ -6,7 +6,8 @@
 namespace fl {
 
 // Use this function to compute the alpha value based on the time elapsed
-uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end);
+uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end);
+uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
 
 class TimeAlpha {
@@ -113,7 +114,7 @@ class TimeLinear: TimeAlpha {
             // if we have not started, we are not active
             return 0;
         }
-        uint8_t out = time_alpha(now, mStart, mEnd);
+        uint8_t out = time_alpha8(now, mStart, mEnd);
         return out;
     }
 

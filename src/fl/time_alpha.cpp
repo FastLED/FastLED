@@ -5,7 +5,7 @@
 
 namespace fl {
 
-uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end) {
+uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
         return 0;
     }
@@ -19,6 +19,22 @@ uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end) {
         out = 255;
     }
     return static_cast<uint8_t>(out);
+}
+
+uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end) {
+    if (now < start) {
+        return 0;
+    }
+    if (now > end) {
+        return 65535;
+    }
+    uint32_t elapsed = now - start;
+    uint32_t total = end - start;
+    uint32_t out = (elapsed * 65535) / total;
+    if (out > 65535) {
+        out = 65535;
+    }
+    return static_cast<uint16_t>(out);
 }
 
 TimeRamp::TimeRamp(uint32_t risingTime, uint32_t latchMs,
@@ -71,14 +87,14 @@ uint8_t TimeRamp::update(uint32_t now) {
     // uint32_t elapsed = now - mStart;
     uint8_t out = 0;
     if (now < mFinishedRisingTime) {
-        out = time_alpha(now, mStart, mFinishedRisingTime);
+        out = time_alpha8(now, mStart, mFinishedRisingTime);
     } else if (now < mFinishedPlateauTime) {
         // plateau
         out = 255;
     } else if (now < mFinishedFallingTime) {
         // ramp down
         uint8_t alpha =
-            time_alpha(now, mFinishedPlateauTime, mFinishedFallingTime);
+            time_alpha8(now, mFinishedPlateauTime, mFinishedFallingTime);
         out = 255 - alpha;
     } else {
         // finished
