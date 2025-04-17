@@ -1,3 +1,10 @@
+/*
+Fx2d class that allows to blend multiple Fx2d layers together.
+The bottom layer is always drawn at full capacity. Upper layers
+are blended by the the max luminance of the components.
+*/
+
+
 #pragma once
 
 #include <stdint.h>
