@@ -12,7 +12,7 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/math_macros.h"
-#include "fl/transition_ramp.h"
+#include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fx/2d/blend.h"
 #include "fx/2d/wave.h"
@@ -50,9 +50,9 @@ UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);
 UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);
 UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);
 
-UISlider fancyRampup("Fancy Rampup", 321, 0, 1000, 1);
-UISlider fancyLatch("Fancy Latch", 47, 0, 1000, 1);
-UISlider fancyRampdown("Fancy Rampdown", 9, 0, 1000, 1);
+UISlider fancySpeed("Fancy Speed", 320, 0, 1000, 1);
+UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);
+
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -121,40 +121,56 @@ void triggerRipple() {
     waveFxUpper.setf(x, y, 1);
 }
 
-
-
 void applyFancyEffect(uint32_t now, bool button_active) {
-    static TimeRamp transition =
-        TimeRamp(fancyRampup.as<uint32_t>(), fancyLatch.as<uint32_t>(),
-                       fancyRampdown.as<uint32_t>());
+    uint32_t total = fancySpeed.as<uint32_t>();
+    static TimeRamp pointTransition = TimeRamp(total, 0, 0);
+
     if (button_active) {
-        FASTLED_WARN("FANCY BUTTON TRIGGERED AT " << now);
-        transition.trigger(now,
-                           fancyRampup.as<uint32_t>(),
-                           fancyLatch.as<uint32_t>(),
-                           fancyRampdown.as<uint32_t>());
+        pointTransition.trigger(now, total, 0, 0);
     }
-    uint8_t value = transition.update(now) >> 6;
-    if (value == 0) {
+
+    if (!pointTransition.isActive(now)) {
         // no need to draw
         return;
     }
-    float valuef = value / 255.0f;
     int mid_x = WIDTH / 2;
     int mid_y = HEIGHT / 2;
     // now make a cross
-    int amount = WIDTH / 3;
+    int amount = WIDTH / 2;
     int start_x = mid_x - amount;
     int end_x = mid_x + amount;
     int start_y = mid_y - amount;
     int end_y = mid_y + amount;
 
-    for (int x = start_x; x < end_x; x++) {
+    int curr_alpha = pointTransition.update(now);
+
+
+    int left_x = map(curr_alpha, 0, 255, mid_x, start_x);
+    int down_y = map(curr_alpha, 0, 255, mid_y, start_y);
+    int right_x = map(curr_alpha, 0, 255, mid_x, end_x);
+    int up_y = map(curr_alpha, 0, 255, mid_y, end_y);
+
+    float curr_alpha_f = curr_alpha / 255.0f;
+
+    float valuef = (1.0f - curr_alpha_f) * fancyIntensity.value() / 255.0f;
+
+    int span = .06 * WIDTH;
+    for (int x = left_x - span; x < left_x + span; x++) {
         waveFxLower.addf(x, mid_y, valuef);
         waveFxUpper.addf(x, mid_y, valuef);
     }
 
-    for (int y = start_y; y < end_y; y++) {
+    for (int x = right_x - span; x < right_x + span; x++) {
+        waveFxLower.addf(x, mid_y, valuef);
+        waveFxUpper.addf(x, mid_y, valuef);
+    }
+
+    for (int y = down_y - span; y < down_y + span; y++) {
+        waveFxLower.addf(mid_x, y, valuef);
+        waveFxUpper.addf(mid_x, y, valuef);
+    }
+
+    for (int y = up_y - span; y < up_y + span; y++) {
         waveFxLower.addf(mid_x, y, valuef);
         waveFxUpper.addf(mid_x, y, valuef);
     }

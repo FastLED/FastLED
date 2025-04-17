@@ -86,6 +86,18 @@ class StrStream {
         return *this;
     }
 
+    StrStream& operator<<(const float& f) {
+        // multiply by 100 and round to get 2 decimal places
+        mStr.append(f);
+        return *this;
+    }
+
+    StrStream& operator<<(const double& f) {
+        // multiply by 100 and round to get 2 decimal places
+        mStr.append(f);
+        return *this;
+    }
+
     StrStream &operator<<(char c) {
         if (mTreatCharAsInt) {
             StrStreamHelper<int>::append(mStr, c);

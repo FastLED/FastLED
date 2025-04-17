@@ -419,6 +419,20 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const uint32_t& val) { write(val); return *this; }
     Str& append(const int32_t& c) { write(c); return *this; }
 
+    Str& append(const float& val) {
+        int32_t i = static_cast<int32_t>(val * 100);
+        // append the integer part
+        append(i / 100);
+        append(".");
+        // append the decimal part
+        append(i % 100);
+        return *this;
+    }
+
+    Str& append(const double& val) {
+        return append(float(val));
+    }
+
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 
 
