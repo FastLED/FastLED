@@ -7,6 +7,10 @@
 #include "fl/ptr.h"
 #include "fl/dbg.h"
 #include "fl/allocator.h"
+#include "fl/xymap.h"
+#include "fl/warn.h"
+
+using namespace fl;
 
 
 namespace fl {
@@ -36,6 +40,31 @@ void Frame::draw(CRGB* leds, DrawMode draw_mode) const {
                     leds[i] = CRGB::blendByBlack(mRgb[i], leds[i]);
                 }
                 break;
+            }
+        }
+    }
+}
+
+void Frame::drawXY(CRGB* leds, const XYMap& xyMap, DrawMode draw_mode) const {
+    const uint16_t width = xyMap.getWidth();
+    const uint16_t height = xyMap.getHeight();
+
+    for (uint16_t w = 0; w < width; ++w) {
+        for (uint16_t h = 0; h < height; ++h) {
+            const uint16_t index = xyMap(w, h);
+            if (index >= mPixelsCount) {
+                FASTLED_WARN("Frame::drawXY: index out of range: " << index);
+                continue;
+            }
+            switch (draw_mode) {
+                case DRAW_MODE_OVERWRITE: {
+                    leds[index] = mRgb[index];
+                    break;
+                }
+                case DRAW_MODE_BLEND_BY_BLACK: {
+                    leds[index] = CRGB::blendByBlack(mRgb[index], leds[index]);
+                    break;
+                }
             }
         }
     }
