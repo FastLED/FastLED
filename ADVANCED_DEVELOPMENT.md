@@ -1,6 +1,17 @@
 # Advanced Development with FastLED
 
+
 ![perpetualmaniac_neo_giving_two_pills _one_of_them_is_black_and__4b145870-9ead-4976-b031-f4df3f2bfbe1](https://github.com/user-attachments/assets/9bba6113-688f-469f-8b51-bcb4fea910e5)
+
+
+## GDB On Unit Tests
+
+Yes, we have step through debugging with FastLED.
+
+  * VSCode
+  * Install Plugin: GDB Debugger - Beyond
+  * Navigate to one of the tests in `tests/` and open in
+  * Hit `F5`
 
 
 ## Enabling 3-second compile times using our `web-compiler`
