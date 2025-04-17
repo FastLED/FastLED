@@ -13,6 +13,11 @@ Yes, we have step through debugging with FastLED.
   * Navigate to one of the tests in `tests/` and open in
   * Hit `F5`
 
+If the Python Debugger pops up, then manually switch the VSCode debugger using `Launch(gdb)`
+
+![image](https://github.com/user-attachments/assets/c1246803-df4b-4583-8c11-8243c084afc5)
+
+
 
 ## Enabling 3-second compile times using our `web-compiler`
 
