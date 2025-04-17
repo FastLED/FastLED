@@ -5,9 +5,12 @@
 
 namespace fl {
 
+
+uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end);
+
 class TimeRamp {
   public:
-    static uint8_t timeAlpha(uint32_t now, uint32_t start, uint32_t end);
+    
 
     /// @param latchMs     total active time (ms)
     /// @param risingTime  time to ramp from 0→255 (ms)
@@ -55,7 +58,7 @@ class TimeLinear {
             // if we have not started, we are not active
             return 0;
         }
-        uint8_t out = TimeRamp::timeAlpha(now, mStart, mEnd);
+        uint8_t out = time_alpha(now, mStart, mEnd);
         return out;
     }
 

@@ -5,7 +5,7 @@
 
 namespace fl {
 
-uint8_t TimeRamp::timeAlpha(uint32_t now, uint32_t start, uint32_t end) {
+uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
         return 0;
     }
@@ -71,14 +71,14 @@ uint8_t TimeRamp::update(uint32_t now) {
     // uint32_t elapsed = now - mStart;
     uint8_t out = 0;
     if (now < mFinishedRisingTime) {
-        out = timeAlpha(now, mStart, mFinishedRisingTime);
+        out = time_alpha(now, mStart, mFinishedRisingTime);
     } else if (now < mFinishedPlateauTime) {
         // plateau
         out = 255;
     } else if (now < mFinishedFallingTime) {
         // ramp down
         uint8_t alpha =
-            timeAlpha(now, mFinishedPlateauTime, mFinishedFallingTime);
+            time_alpha(now, mFinishedPlateauTime, mFinishedFallingTime);
         out = 255 - alpha;
     } else {
         // finished
