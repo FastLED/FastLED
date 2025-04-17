@@ -32,14 +32,16 @@ Str Blend2d::fxName() const {
     return out;
 }
 
-void Blend2d::add(Fx2dPtr layer, uint8_t blurAmount, uint8_t blurPasses) {
+void Blend2d::add(Fx2dPtr layer, const Blend2dParams& p) {
+    uint8_t blurAmount = p.blur_amount;
+    uint8_t blurPasses = p.blur_passes;
     Entry entry = {layer, blurAmount, blurPasses};
     mLayers.push_back(entry);
 }
 
-void Blend2d::add(Fx2d &layer, uint8_t blurAmount, uint8_t blurPasses) {
+void Blend2d::add(Fx2d &layer, const Blend2dParams& p) {
     Fx2dPtr fx = Fx2dPtr::NoTracking(layer);
-    this->add(fx, blurAmount, blurPasses);
+    this->add(fx, p);
 }
 
 void Blend2d::draw(DrawContext context) {
@@ -92,8 +94,9 @@ void Blend2d::draw(DrawContext context) {
 
 void Blend2d::clear() { mLayers.clear(); }
 
-bool Blend2d::setBlurParams(Fx2dPtr fx, uint8_t blur_amount,
-                            uint8_t blur_passes) {
+bool Blend2d::setParams(Fx2dPtr fx, const Blend2dParams& p) {
+    uint8_t blur_amount = p.blur_amount;
+    uint8_t blur_passes = p.blur_passes;
     for (auto &layer : mLayers) {
         if (layer.fx == fx) {
             layer.blur_amount = blur_amount;
@@ -106,11 +109,10 @@ bool Blend2d::setBlurParams(Fx2dPtr fx, uint8_t blur_amount,
     return false;
 }
 
-bool Blend2d::setBlurParams(Fx2d &fx, uint8_t blur_amount,
-                            uint8_t blur_passes) {
+bool Blend2d::setParams(Fx2d &fx, const Blend2dParams& p) {
 
     Fx2dPtr fxPtr = Fx2dPtr::NoTracking(fx);
-    return setBlurParams(fxPtr, blur_amount, blur_passes);
+    return setParams(fxPtr, p);
 }
 
 } // namespace fl

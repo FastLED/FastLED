@@ -19,14 +19,20 @@ are blended by the the max luminance of the components.
 
 namespace fl {
 
+struct Blend2dParams {
+    uint8_t blur_amount = 0;
+    uint8_t blur_passes = 1;
+};
+
+
 class Blend2d : public Fx2d {
   public:
     // Note that if this xymap is non rectangular then it's recommended that the
     // Fx2d layers that are added should be rectangular.
     Blend2d(const XYMap &xymap);
     fl::Str fxName() const override;
-    void add(Fx2dPtr layer, uint8_t blur_amount = 0, uint8_t blur_passes = 1);
-    void add(Fx2d &layer, uint8_t blur_amount = 0, uint8_t blur_passes = 1);
+    void add(Fx2dPtr layer, const Blend2dParams& p = Blend2dParams());
+    void add(Fx2d &layer, const Blend2dParams& p = Blend2dParams());
     void draw(DrawContext context) override;
     void clear();
     void setGlobalBlurAmount(uint8_t blur_amount) {
@@ -35,8 +41,8 @@ class Blend2d : public Fx2d {
     void setGlobalBlurPasses(uint8_t blur_passes) {
         mGlobalBlurPasses = blur_passes;
     }
-    bool setBlurParams(Fx2dPtr fx, uint8_t blur_amount, uint8_t blur_passes);
-    bool setBlurParams(Fx2d &fx, uint8_t blur_amount, uint8_t blur_passes);
+    bool setParams(Fx2dPtr fx, const Blend2dParams& p);
+    bool setParams(Fx2d &fx, const Blend2dParams& p);
   protected:
     struct Entry {
         Fx2dPtr fx;

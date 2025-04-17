@@ -130,8 +130,18 @@ bool ui() {
     fxBlend.setGlobalBlurAmount(blurAmount);
     fxBlend.setGlobalBlurPasses(blurPasses);
 
-    fxBlend.setBlurParams(waveFxLower, blurAmountLower, blurPassesLower);
-    fxBlend.setBlurParams(waveFxUpper, blurAmountUpper, blurPassesUpper);
+    Blend2dParams lower_params = {
+        .blur_amount = blurAmountLower,
+        .blur_passes = blurPassesLower,
+    };
+
+    Blend2dParams upper_params = {
+        .blur_amount = blurAmountUpper,
+        .blur_passes = blurPassesUpper,
+    };
+
+    fxBlend.setParams(waveFxLower, lower_params);
+    fxBlend.setParams(waveFxUpper, upper_params);
     return button;
 }
 
