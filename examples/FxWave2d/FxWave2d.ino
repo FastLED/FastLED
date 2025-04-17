@@ -61,7 +61,8 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
 };
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-WaveFx waveFxLower(xyMap, WaveFx::Args{
+XYMap xyRect(WIDTH, HEIGHT, false);
+WaveFx waveFxLower(xyRect, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
     .half_duplex = true,
     .speed = 0.18f,
@@ -69,7 +70,7 @@ WaveFx waveFxLower(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
 });
 
-WaveFx waveFxUpper(xyMap, WaveFx::Args{
+WaveFx waveFxUpper(xyRect, WaveFx::Args{
     .factor = SUPER_SAMPLE_4X,
     .half_duplex = true,
     .speed = 0.25f,
@@ -77,7 +78,7 @@ WaveFx waveFxUpper(xyMap, WaveFx::Args{
     .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
 });
 
-Blend2d fxBlend(WIDTH, HEIGHT);
+Blend2d fxBlend(xyMap);
 
 void setup() {
     Serial.begin(115200);
