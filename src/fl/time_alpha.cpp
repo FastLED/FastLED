@@ -1,5 +1,5 @@
 
-#include "fl/transition_ramp.h"
+#include "fl/time_alpha.h"
 #include "fl/warn.h"
 #include "math_macros.h"
 

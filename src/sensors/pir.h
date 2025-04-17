@@ -5,7 +5,7 @@
 #include "digital_pin.h"
 #include "fl/ptr.h"
 #include "fl/ui.h"
-#include "fl/transition_ramp.h"
+#include "fl/time_alpha.h"
 
 #include "fl/namespace.h"
 
