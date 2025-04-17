@@ -8,6 +8,21 @@ namespace fl {
 
 uint8_t time_alpha(uint32_t now, uint32_t start, uint32_t end);
 
+
+/*
+ *                       amplitude
+ *                          ^
+ *  255 ───────────────────────
+ *                     /        \
+ *                    /          \
+ *                   /            \
+ *                  /              \
+ *    0 ────────────┴               ┴──────────────────> time (ms)
+ *                  t0   t1     t2   t4
+ *
+ *
+ *
+ */
 class TimeRamp {
   public:
     
@@ -43,6 +58,21 @@ class TimeRamp {
     uint8_t mLastValue = 0;
 };
 
+
+/*
+ *                       amplitude
+ *                          ^
+ *  255 ─────────────────────────────────────────────────────
+ *                     /         
+ *                    /           
+ *                   /             
+ *                  /               
+ *    0 ────────────┴                                --> time (ms)
+ *                  t0   t1
+ *
+ *
+ *
+ */
 class TimeLinear {
   public:
     TimeLinear(uint32_t duration) : mDuration(duration) {}
