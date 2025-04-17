@@ -65,7 +65,7 @@ public:
 
 private:
     Pir        mPir;
-    TransitionRamp  mRamp;
+    TimeRamp  mRamp;
     bool       mLastState = false;
 };
 

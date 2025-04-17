@@ -5,14 +5,14 @@
 
 namespace fl {
 
-class TransitionRamp {
+class TimeRamp {
   public:
     static uint8_t timeAlpha(uint32_t now, uint32_t start, uint32_t end);
 
     /// @param latchMs     total active time (ms)
     /// @param risingTime  time to ramp from 0→255 (ms)
     /// @param fallingTime time to ramp from 255→0 (ms)
-    TransitionRamp(uint32_t risingTime, uint32_t latchMs, uint32_t fallingTime);
+    TimeRamp(uint32_t risingTime, uint32_t latchMs, uint32_t fallingTime);
 
     /// Call this when you want to (re)start the ramp cycle.
     void trigger(uint32_t now);
@@ -40,9 +40,9 @@ class TransitionRamp {
     uint8_t mLastValue = 0;
 };
 
-class TransitionLinear {
+class TimeLinear {
   public:
-    TransitionLinear(uint32_t duration) : mDuration(duration) {}
+    TimeLinear(uint32_t duration) : mDuration(duration) {}
 
     void trigger(uint32_t now) {
         mStart = now;
@@ -55,7 +55,7 @@ class TransitionLinear {
             // if we have not started, we are not active
             return 0;
         }
-        uint8_t out = TransitionRamp::timeAlpha(now, mStart, mEnd);
+        uint8_t out = TimeRamp::timeAlpha(now, mStart, mEnd);
         return out;
     }
 

@@ -124,8 +124,8 @@ void triggerRipple() {
 
 
 void applyFancyEffect(uint32_t now, bool button_active) {
-    static TransitionRamp transition =
-        TransitionRamp(fancyRampup.as<uint32_t>(), fancyLatch.as<uint32_t>(),
+    static TimeRamp transition =
+        TimeRamp(fancyRampup.as<uint32_t>(), fancyLatch.as<uint32_t>(),
                        fancyRampdown.as<uint32_t>());
     if (button_active) {
         FASTLED_WARN("FANCY BUTTON TRIGGERED AT " << now);

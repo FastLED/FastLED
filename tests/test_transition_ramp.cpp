@@ -10,7 +10,7 @@ using namespace fl;
 
 TEST_CASE("Test transition ramp") {
     // total latch = 100 ms, ramp‑up = 10 ms, ramp‑down = 10 ms
-    TransitionRamp ramp(10, 100, 10);
+    TimeRamp ramp(10, 100, 10);
     uint32_t t0 = 0;
     ramp.trigger(t0);
 
@@ -53,7 +53,7 @@ TEST_CASE("Test transition ramp") {
 }
 
 TEST_CASE("Real world Bug") {
-    TransitionRamp transition = TransitionRamp(500, 0, 500);
+    TimeRamp transition = TimeRamp(500, 0, 500);
 
     uint8_t value = transition.update(0);
     CHECK(value == 0);
