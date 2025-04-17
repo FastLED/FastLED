@@ -31,4 +31,10 @@ TEST_CASE("Test transition ramp") {
 
     // after latch: 110 ms → off
     REQUIRE(ramp.value(t0 + 110) == 0);
+
+    // now do it again
+    ramp.trigger(200);
+    // at start: still at zero
+    REQUIRE(ramp.value(200) == 0);
+
 }
