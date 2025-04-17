@@ -7,7 +7,6 @@ namespace fl {
 
 class TransitionRamp {
   public:
-
     static uint8_t timeAlpha(uint32_t now, uint32_t start, uint32_t end);
 
     /// @param latchMs     total active time (ms)
@@ -37,9 +36,33 @@ class TransitionRamp {
     uint32_t mFinishedPlateauTime = 0;
     uint32_t mFinishedFallingTime = 0;
 
-
     uint32_t mStart = 0;
     uint8_t mLastValue = 0;
+};
+
+class TransitionLinear {
+  public:
+    TransitionLinear(uint32_t duration) : mDuration(duration) {}
+
+    void trigger(uint32_t now) {
+        mStart = now;
+        mEnd = now + mDuration;
+    }
+
+    uint8_t update(uint32_t now) {
+        bool not_started = (mEnd == 0) && (mStart == 0);
+        if (not_started) {
+            // if we have not started, we are not active
+            return 0;
+        }
+        uint8_t out = TransitionRamp::timeAlpha(now, mStart, mEnd);
+        return out;
+    }
+
+  private:
+    uint32_t mStart = 0;
+    uint32_t mDuration = 0;
+    uint32_t mEnd = 0;
 };
 
 } // namespace fl
