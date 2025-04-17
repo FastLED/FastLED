@@ -31,6 +31,7 @@ UIDescription description("Shows the use of the Wave2d effect.");
 
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
+UICheckbox easeModeSqrt("Ease Mode Sqrt", false);
 
 
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
@@ -108,15 +109,18 @@ void triggerRipple() {
 }
 
 bool ui() {
+    U8EasingFunction easeMode = easeModeSqrt ? U8EasingFunction::WAVE_U8_MODE_SQRT : U8EasingFunction::WAVE_U8_MODE_LINEAR;
     waveFxLower.setSpeed(speedLower);
     waveFxLower.setDampening(dampeningLower);
     waveFxLower.setHalfDuplex(halfDuplexLower);
     waveFxLower.setSuperSample(getSuperSample());
+    waveFxLower.setEasingMode(easeMode);
 
     waveFxUpper.setSpeed(speedUpper);
     waveFxUpper.setDampening(dampeningUpper);
     waveFxUpper.setHalfDuplex(halfDuplexUpper);
     waveFxUpper.setSuperSample(getSuperSample());
+    waveFxUpper.setEasingMode(easeMode);
     return button;
 }
 

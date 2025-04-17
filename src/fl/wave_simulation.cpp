@@ -18,7 +18,7 @@ uint8_t half_duplex_blend_sqrt_q15(uint16_t x) {
     for (int i = 0; i < 4; i++) {
         y = ( y + (X / y) ) >> 1;
     }
-    return (int16_t)y >> 8;
+    return static_cast<int16_t>(y) >> 8;
 }
 
 uint8_t half_duplex_blend_linear(uint16_t x) {

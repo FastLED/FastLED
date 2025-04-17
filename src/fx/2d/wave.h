@@ -111,6 +111,11 @@ class WaveFx : public Fx2d {
         mWaveSim.setSuperSample(factor);
     }
 
+    void setEasingMode(U8EasingFunction mode) {
+        // Set the easing mode for the 8-bit value.
+        mWaveSim.setEasingMode(mode);
+    }
+
     void setf(size_t x, size_t y, float value) {
         // Set the value at the given coordinates in the wave simulation.
         mWaveSim.setf(x, y, value);
