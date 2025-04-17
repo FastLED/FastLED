@@ -40,7 +40,7 @@ UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
 UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
-UISlider blurAmountUpper("Wave Upper: Blur Amount", 0, 0, 172, 1);
+UISlider blurAmountUpper("Wave Upper: Blur Amount", 95, 0, 172, 1);
 UISlider blurPassesUpper("Wave Upper: Blur Passes", 1, 1, 10, 1);
 
 UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
