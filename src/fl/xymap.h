@@ -6,9 +6,9 @@
 #include "crgb.h"
 #include "fl/force_inline.h"
 #include "fl/lut.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
-#include "fl/namespace.h"
 
 namespace fl {
 class ScreenMap;
@@ -50,6 +50,9 @@ class XYMap {
                                           const uint16_t *lookUpTable,
                                           uint16_t offset = 0);
 
+    static XYMap constructSerpentine(uint16_t width, uint16_t height,
+                                     uint16_t offset = 0);
+
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
     XYMap(uint16_t width, uint16_t height, bool is_serpentine = true,
@@ -72,10 +75,16 @@ class XYMap {
 
     uint16_t mapToIndex(uint16_t x, uint16_t y) const;
     uint16_t mapToIndex(int x, int y) const {
-        if (x < 0) { x = 0; }
-        else if (uint16_t(x) >= width) { x = width - 1; }
-        if (y < 0) { y = 0; }
-        else if (uint16_t(y) >= height) { y = height - 1; }
+        if (x < 0) {
+            x = 0;
+        } else if (uint16_t(x) >= width) {
+            x = width - 1;
+        }
+        if (y < 0) {
+            y = 0;
+        } else if (uint16_t(y) >= height) {
+            y = height - 1;
+        }
         return mapToIndex((uint16_t)x, (uint16_t)y);
     }
 
