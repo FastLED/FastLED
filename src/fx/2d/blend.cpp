@@ -23,7 +23,7 @@ Blend2d::Blend2d(const XYMap &xymap) : Fx2d(xymap) {
 Str Blend2d::fxName() const {
     fl::Str out = "LayeredFx2d(";
     for (size_t i = 0; i < mLayers.size(); ++i) {
-        out += mLayers[i]->fxName();
+        out += mLayers[i].fx->fxName();
         if (i != mLayers.size() - 1) {
             out += ",";
         }
@@ -32,11 +32,14 @@ Str Blend2d::fxName() const {
     return out;
 }
 
-void Blend2d::add(Fx2dPtr layer) { mLayers.push_back(layer); }
+void Blend2d::add(Fx2dPtr layer, uint8_t blurAmount, uint8_t blurPasses) {
+    Entry entry = {layer, blurAmount, blurPasses};
+    mLayers.push_back(entry);
+}
 
-void Blend2d::add(Fx2d &layer) {
+void Blend2d::add(Fx2d &layer, uint8_t blurAmount, uint8_t blurPasses) {
     Fx2dPtr fx = Fx2dPtr::NoTracking(layer);
-    this->add(fx);
+    this->add(fx, blurAmount, blurPasses);
 }
 
 void Blend2d::draw(DrawContext context) {
@@ -48,23 +51,35 @@ void Blend2d::draw(DrawContext context) {
     for (auto it = mLayers.begin(); it != mLayers.end(); ++it) {
         DrawContext tmp_ctx = context;
         tmp_ctx.leds = mFrame->rgb();
-        (*it)->draw(tmp_ctx);
+        auto &fx = it->fx;
+        fx->draw(tmp_ctx);
         DrawMode mode = first ? DrawMode::DRAW_MODE_OVERWRITE
                               : DrawMode::DRAW_MODE_BLEND_BY_BLACK;
         first = false;
+        // Apply the blur effect per effect.
+        uint8_t blur_amount = it->blur_amount;
+        if (blur_amount > 0) {
+            const XYMap &xyMap = fx->getXYMap();
+            uint8_t blur_passes = MAX(1, it->blur_passes);
+            for (uint8_t i = 0; i < blur_passes; ++i) {
+                // Apply the blur effect
+                blur2d(mFrame->rgb(), mXyMap.getWidth(), mXyMap.getHeight(),
+                       blur_amount, xyMap);
+            }
+        }
         mFrame->draw(mFrameTransform->rgb(), mode);
     }
 
-    if (mBlurAmount > 0) {
+    if (mGlobalBlurAmount > 0) {
         // Apply the blur effect
         uint16_t width = mXyMap.getWidth();
         uint16_t height = mXyMap.getHeight();
         XYMap rect = XYMap::constructRectangularGrid(width, height);
         CRGB *rgb = mFrameTransform->rgb();
-        uint8_t blur_passes = MAX(1, mBlurPasses);
+        uint8_t blur_passes = MAX(1, mGlobalBlurPasses);
         for (uint8_t i = 0; i < blur_passes; ++i) {
             // Apply the blur effect
-            blur2d(rgb, width, height, mBlurAmount, rect);
+            blur2d(rgb, width, height, mGlobalBlurAmount, rect);
         }
     }
 
@@ -76,5 +91,26 @@ void Blend2d::draw(DrawContext context) {
 }
 
 void Blend2d::clear() { mLayers.clear(); }
+
+bool Blend2d::setBlurParams(Fx2dPtr fx, uint8_t blur_amount,
+                            uint8_t blur_passes) {
+    for (auto &layer : mLayers) {
+        if (layer.fx == fx) {
+            layer.blur_amount = blur_amount;
+            layer.blur_passes = blur_passes;
+            return true;
+        }
+    }
+
+    FASTLED_WARN("Fx2d not found in Blend2d::setBlurParams");
+    return false;
+}
+
+bool Blend2d::setBlurParams(Fx2d &fx, uint8_t blur_amount,
+                            uint8_t blur_passes) {
+
+    Fx2dPtr fxPtr = Fx2dPtr::NoTracking(fx);
+    return setBlurParams(fxPtr, blur_amount, blur_passes);
+}
 
 } // namespace fl

@@ -25,22 +25,29 @@ class Blend2d : public Fx2d {
     // Fx2d layers that are added should be rectangular.
     Blend2d(const XYMap &xymap);
     fl::Str fxName() const override;
-    void add(Fx2dPtr layer);
-    void add(Fx2d &layer);
+    void add(Fx2dPtr layer, uint8_t blur_amount = 0, uint8_t blur_passes = 1);
+    void add(Fx2d &layer, uint8_t blur_amount = 0, uint8_t blur_passes = 1);
     void draw(DrawContext context) override;
     void clear();
-    void setBlurAmount(uint8_t blur_amount) {
-        mBlurAmount = blur_amount;
+    void setGlobalBlurAmount(uint8_t blur_amount) {
+        mGlobalBlurAmount = blur_amount;
     }
-    void setBlurPasses(uint8_t blur_passes) {
-        mBlurPasses = blur_passes;
+    void setGlobalBlurPasses(uint8_t blur_passes) {
+        mGlobalBlurPasses = blur_passes;
     }
+    bool setBlurParams(Fx2dPtr fx, uint8_t blur_amount, uint8_t blur_passes);
+    bool setBlurParams(Fx2d &fx, uint8_t blur_amount, uint8_t blur_passes);
   protected:
-    HeapVector<Fx2dPtr> mLayers;
+    struct Entry {
+        Fx2dPtr fx;
+        uint8_t blur_amount = 0;
+        uint8_t blur_passes = 1;
+    };
+    HeapVector<Entry> mLayers;
     FramePtr mFrame;
     FramePtr mFrameTransform;
-    uint8_t mBlurAmount = 0;
-    uint8_t mBlurPasses = 1;
+    uint8_t mGlobalBlurAmount = 0;
+    uint8_t mGlobalBlurPasses = 1;
 };
 
 } // namespace fl
