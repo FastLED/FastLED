@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include "fl/transition_ramp.h"
 #include "fl/warn.h"
 #include "math_macros.h"
