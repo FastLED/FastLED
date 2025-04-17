@@ -56,8 +56,7 @@ class UISlider {
     ~UISlider() {}
     float value() const { return mValue; }
     float value_normalized() const {
-        float diff = MAX(mMax, mMin) - MIN(mMax, mMin);
-        if (diff < 0.0001f) {
+        if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
             return 0;
         }
         return (mValue - mMin) / (mMax - mMin);

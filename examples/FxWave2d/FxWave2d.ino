@@ -142,10 +142,7 @@ void applyFancyEffect(uint32_t now, bool button_active) {
     int end_x = mid_x + amount;
     int start_y = mid_y - amount;
     int end_y = mid_y + amount;
-
     int curr_alpha = pointTransition.update(now);
-
-
     int left_x = map(curr_alpha, 0, 255, mid_x, start_x);
     int down_y = map(curr_alpha, 0, 255, mid_y, start_y);
     int right_x = map(curr_alpha, 0, 255, mid_x, end_x);

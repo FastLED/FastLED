@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "fl/json.h"
+#include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
@@ -49,8 +50,7 @@ void jsSlider::toJson(FLArduinoJson::JsonObject &json) const {
 float jsSlider::value() const { return mValue; }
 
 float jsSlider::value_normalized() const {
-
-    if (mMax == mMin) {
+    if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
         return 0;
     }
     return (mValue - mMin) / (mMax - mMin);
