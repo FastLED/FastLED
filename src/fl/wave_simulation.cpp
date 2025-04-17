@@ -171,7 +171,7 @@ void WaveSimulation1D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
 
 float WaveSimulation1D::getSpeed() const { return sim->getSpeed(); }
 
-float WaveSimulation1D::get(size_t x) const {
+float WaveSimulation1D::getf(size_t x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;

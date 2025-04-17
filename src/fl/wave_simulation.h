@@ -78,7 +78,7 @@ class WaveSimulation1D {
     // Downsampled getter for the floating point value at index x.
     // It averages over the corresponding 'multiplier'-sized block in the
     // high-res simulation.
-    float get(size_t x) const;
+    float getf(size_t x) const;
 
     // Downsampled getter for the Q15 (fixed point) value at index x.
     // It averages the multiplier cells of Q15 values.
