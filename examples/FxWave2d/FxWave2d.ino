@@ -132,6 +132,37 @@ void triggerFancy() {
     }
 }
 
+// make a class that will do a smooth transition
+struct FancyTriggerAnimation {
+
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t start_time = 0;
+    uint32_t finish_time = 0;
+    static const uint32_t duration = 1000;
+
+
+    void trigger(uint32_t now, int x, int y) {
+        start_time = now;
+        finish_time = now + duration;
+        this->x = x;
+        this->y = y;
+    }
+
+    void update() {
+        if (done) {
+            return;
+        }
+        if (step < 10) {
+            waveFxLower.setf(x, y, 1);
+            waveFxUpper.setf(x, y, 1);
+            step++;
+        } else {
+            done = true;
+        }
+    }
+};
+
 struct ui_state {
     bool button = false;
     bool bigButton = false;
