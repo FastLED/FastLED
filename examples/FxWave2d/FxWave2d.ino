@@ -143,14 +143,20 @@ void applyFancyEffect(uint32_t now, bool button_active) {
     int mid_x = WIDTH / 2;
     int mid_y = HEIGHT / 2;
     // now make a cross
-    for (int i = 0; i < WIDTH; i++) {
-        waveFxLower.addf(i, mid_y, valuef);
-        waveFxUpper.addf(i, mid_y, valuef);
+    int amount = WIDTH / 3;
+    int start_x = mid_x - amount;
+    int end_x = mid_x + amount;
+    int start_y = mid_y - amount;
+    int end_y = mid_y + amount;
+
+    for (int x = start_x; x < end_x; x++) {
+        waveFxLower.addf(x, mid_y, valuef);
+        waveFxUpper.addf(x, mid_y, valuef);
     }
 
-    for (int i = 0; i < HEIGHT; i++) {
-        waveFxLower.addf(mid_x, i, valuef);
-        waveFxUpper.addf(mid_x, i, valuef);
+    for (int y = start_y; y < end_y; y++) {
+        waveFxLower.addf(mid_x, y, valuef);
+        waveFxUpper.addf(mid_x, y, valuef);
     }
 }
 
