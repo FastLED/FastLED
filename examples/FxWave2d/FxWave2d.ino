@@ -31,6 +31,7 @@ UITitle title("FxWave2D Demo");
 UIDescription description("Advanced layered and blended wave effects.");
 
 UIButton button("Trigger");
+UIButton buttonFancy("Trigger Fancy");
 UICheckbox autoTrigger("Auto Trigger", true);
 UISlider triggerSpeed("Trigger Speed", .5f, 0.0f, 1.0f, 0.01f);
 UICheckbox easeModeSqrt("Ease Mode Sqrt", false);
@@ -116,7 +117,27 @@ void triggerRipple() {
     waveFxUpper.setf(x, y, 1);
 }
 
-bool ui() {
+void triggerFancy() {
+    int mid_x = WIDTH / 2;
+    int mid_y = HEIGHT / 2;
+    // now make a cross
+    for (int i = 0; i < WIDTH; i++) {
+        waveFxLower.setf(i, mid_y, 1);
+        waveFxUpper.setf(i, mid_y, 1);
+    }
+
+    for (int i = 0; i < HEIGHT; i++) {
+        waveFxLower.setf(mid_x, i, 1);
+        waveFxUpper.setf(mid_x, i, 1);
+    }
+}
+
+struct ui_state {
+    bool button = false;
+    bool bigButton = false;
+};
+
+ui_state ui() {
     U8EasingFunction easeMode = easeModeSqrt ? U8EasingFunction::WAVE_U8_MODE_SQRT : U8EasingFunction::WAVE_U8_MODE_LINEAR;
     waveFxLower.setSpeed(speedLower);
     waveFxLower.setDampening(dampeningLower);
@@ -144,7 +165,11 @@ bool ui() {
 
     fxBlend.setParams(waveFxLower, lower_params);
     fxBlend.setParams(waveFxUpper, upper_params);
-    return button;
+    ui_state state {
+        .button = button,
+        .bigButton = buttonFancy,
+    };
+    return state;
 }
 
 
@@ -174,9 +199,12 @@ void processAutoTrigger(uint32_t now) {
 
 void loop() {
     // Your code here
-    bool triggered = ui();
-    if (triggered) {
+    ui_state state = ui();
+    if (state.button) {
         triggerRipple();
+    }
+    if (state.bigButton) {
+        triggerFancy();
     }
     uint32_t now = millis();
     processAutoTrigger(now);
