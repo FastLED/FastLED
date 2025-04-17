@@ -32,6 +32,8 @@ UIDescription description("Shows the use of the Wave2d effect.");
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
 UICheckbox easeModeSqrt("Ease Mode Sqrt", false);
+UISlider blurAmount("Blur Amount", 0, 0, 172, 1);
+// UISlider blurPasses("Blur Passes", 1, 1, 10, 1);
 
 
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
@@ -122,6 +124,8 @@ bool ui() {
     waveFxUpper.setHalfDuplex(halfDuplexUpper);
     waveFxUpper.setSuperSample(getSuperSample());
     waveFxUpper.setEasingMode(easeMode);
+    fxBlend.setBlurAmount(blurAmount);
+    //fxBlend.setBlurPasses(blurPasses);
     return button;
 }
 
