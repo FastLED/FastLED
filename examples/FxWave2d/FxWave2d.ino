@@ -34,18 +34,17 @@ UICheckbox autoTrigger("Auto Trigger", true);
 UICheckbox easeModeSqrt("Ease Mode Sqrt", false);
 UISlider blurAmount("Blur Amount", 0, 0, 172, 1);
 UISlider blurPasses("Blur Passes", 1, 1, 10, 1);
+UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
 
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
 UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
-UISlider superSampleUpper("Wave Upper: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
-
 
 UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);
 UISlider dampeningLower("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);
-UISlider superSampleLower("Wave Lower: SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
+
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -90,7 +89,7 @@ void setup() {
 }
 
 SuperSample getSuperSample() {
-    switch (int(superSampleLower)) {
+    switch (int(superSample)) {
     case 0:
         return SuperSample::SUPER_SAMPLE_NONE;
     case 1:
