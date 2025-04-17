@@ -27,10 +27,13 @@ class Blend2d : public Fx2d {
     fl::Str fxName() const override;
     void add(Fx2dPtr layer);
     void add(Fx2d &layer);
-    virtual void draw(DrawContext context) override;
+    void draw(DrawContext context) override;
     void clear();
     void setBlurAmount(uint8_t blur_amount) {
         mBlurAmount = blur_amount;
+    }
+    void setBlurPasses(uint8_t blur_passes) {
+        mBlurPasses = blur_passes;
     }
   protected:
     HeapVector<Fx2dPtr> mLayers;
