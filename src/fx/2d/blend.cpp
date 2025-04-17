@@ -61,7 +61,11 @@ void Blend2d::draw(DrawContext context) {
         uint16_t height = mXyMap.getHeight();
         XYMap rect = XYMap::constructRectangularGrid(width, height);
         CRGB *rgb = mFrameTransform->rgb();
-        blur2d(rgb, width, height, mBlurAmount, rect);
+        uint8_t blur_passes = MAX(1, mBlurPasses);
+        for (uint8_t i = 0; i < blur_passes; ++i) {
+            // Apply the blur effect
+            blur2d(rgb, width, height, mBlurAmount, rect);
+        }
     }
 
     // Copy the final result to the output
