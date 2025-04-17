@@ -116,8 +116,13 @@ SuperSample getSuperSample() {
 }
 
 void triggerRipple() {
-    int x = random() % WIDTH;
-    int y = random() % HEIGHT;
+    float perc = .15f;
+    uint8_t min_x = perc * WIDTH;
+    uint8_t max_x = (1 - perc) * WIDTH;
+    uint8_t min_y = perc * HEIGHT;
+    uint8_t max_y = (1 - perc) * HEIGHT;
+    int x = random(min_x, max_x);
+    int y = random(min_y, max_y);
     waveFxLower.setf(x, y, 1);
     waveFxUpper.setf(x, y, 1);
 }
