@@ -28,6 +28,11 @@ Based on works and code by Shawn Silverman.
 
 namespace fl {
 
+enum U8EasingFunction {
+    WAVE_U8_MODE_LINEAR,
+    WAVE_U8_MODE_SQRT
+};
+
 // -----------------------------------------------------------------------------
 // New supersampled 1D simulation class.
 //
@@ -55,6 +60,9 @@ class WaveSimulation1D {
         }
         init(outerLength, factor, sim->getSpeed(), sim->getDampenening());
     }
+
+    // Only applies to getu8().
+    void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
 
     ~WaveSimulation1D() = default;
 
@@ -107,6 +115,7 @@ class WaveSimulation1D {
     uint32_t outerLength; // Length of the downsampled simulation.
     uint8_t extraFrames = 0;
     uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
+    U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation1D_Real> sim;
 };
@@ -137,6 +146,8 @@ class WaveSimulation2D {
 
     void setDampening(int damp);
 
+    void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
+
     int getDampenening() const;
 
     float getSpeed() const;
@@ -165,6 +176,8 @@ class WaveSimulation2D {
     // Downsampled getters for the 8-bit representations.
     int8_t geti8(size_t x, size_t y) const;
 
+    // Special function to get the value as a uint8_t for drawing / gradients.
+    // Ease out functions are applied to this when in half duplex mode.
     uint8_t getu8(size_t x, size_t y) const;
 
     // Check if (x,y) is within the bounds of the outer (downsampled) grid.
@@ -193,6 +206,7 @@ class WaveSimulation2D {
     uint32_t outerHeight; // Height of the downsampled (outer) grid.
     uint8_t extraFrames = 0;
     uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
+    U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> sim;
 };
