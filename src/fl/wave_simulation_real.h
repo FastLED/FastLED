@@ -162,7 +162,7 @@ class WaveSimulation2D_Real {
     // Set the value at an inner grid cell using a float;
     // the value is stored in fixed Q15 format.
     // value shoudl be between -1.0 and 1.0.
-    void set(size_t x, size_t y, float value);
+    void setf(size_t x, size_t y, float value);
 
     void setHalfDuplex(bool on) { mHalfDuplex = on; }
 

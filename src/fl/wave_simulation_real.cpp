@@ -189,7 +189,7 @@ bool WaveSimulation2D_Real::has(size_t x, size_t y) const {
     return (x < width && y < height);
 }
 
-void WaveSimulation2D_Real::set(size_t x, size_t y, float value) {
+void WaveSimulation2D_Real::setf(size_t x, size_t y, float value) {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;

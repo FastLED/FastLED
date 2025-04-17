@@ -144,7 +144,7 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
             size_t xx = x * multiplier + i;
             size_t yy = y * multiplier + j;
             if (sim->has(xx, yy)) {
-                sim->set(xx, yy, value);
+                sim->setf(xx, yy, value);
             }
         }
     }
