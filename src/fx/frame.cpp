@@ -46,13 +46,11 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
 void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
     const uint16_t width = xyMap.getWidth();
     const uint16_t height = xyMap.getHeight();
-
-    uint32_t index = 0;
-
+    uint32_t count = 0;
     for (uint16_t h = 0; h < height; ++h) {
         for (uint16_t w = 0; w < width; ++w) {
             uint32_t in_idx = xyMap(w, h);
-            uint32_t out_idx = index++;
+            uint32_t out_idx = count++;
             if (in_idx >= mPixelsCount) {
                 FASTLED_WARN("Frame::drawXY: in index out of range: " << in_idx);
                 continue;
