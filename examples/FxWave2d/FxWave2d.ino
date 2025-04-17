@@ -27,8 +27,8 @@ using namespace fl;
 
 CRGB leds[NUM_LEDS];
 
-UITitle title("Wave2D Demo");
-UIDescription description("Shows the use of the Wave2d effect.");
+UITitle title("FxWave2D Demo");
+UIDescription description("Advanced layered and blended wave effects.");
 
 UIButton button("Trigger");
 UICheckbox autoTrigger("Auto Trigger", true);
