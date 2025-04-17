@@ -99,6 +99,7 @@ class WaveSimulation1D {
     // it to the corresponding multiplier cells in the high-res simulation.
     void setf(size_t x, float value);
 
+
     void setHalfDuplex(bool on) {
         sim->setHalfDuplex(on);
     }
@@ -187,6 +188,8 @@ class WaveSimulation2D {
     // replicating it to all cells of the corresponding multiplier×multiplier
     // block in the high-res simulation.
     void setf(size_t x, size_t y, float value);
+
+    void seti16(size_t x, size_t y, int16_t value);
 
     void setHalfDuplex(bool on) {
         sim->setHalfDuplex(on);

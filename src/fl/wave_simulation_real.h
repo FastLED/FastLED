@@ -23,6 +23,13 @@ Based on works and code by Shawn Silverman.
 
 namespace fl {
 
+namespace wave_detail {
+int16_t float_to_fixed(float f);
+
+// Convert fixed Q15 to float.
+float fixed_to_float(int16_t f);
+} // namespace wave_detail
+
 class WaveSimulation1D_Real {
   public:
     // Constructor:
@@ -163,6 +170,8 @@ class WaveSimulation2D_Real {
     // the value is stored in fixed Q15 format.
     // value shoudl be between -1.0 and 1.0.
     void setf(size_t x, size_t y, float value);
+
+    void seti16(size_t x, size_t y, int16_t value);
 
     void setHalfDuplex(bool on) { mHalfDuplex = on; }
 

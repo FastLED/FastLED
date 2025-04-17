@@ -11,7 +11,7 @@ namespace fl {
 #define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
 #define FIXED_ONE (FIXED_SCALE)
 
-namespace { // Anonymous namespace for internal linkage
+namespace wave_detail { // Anonymous namespace for internal linkage
 // Convert float to fixed Q15.
 int16_t float_to_fixed(float f) { return (int16_t)(f * FIXED_SCALE); }
 
@@ -23,6 +23,8 @@ float fixed_to_float(int16_t f) { return ((float)f) / FIXED_SCALE; }
 //     return (int16_t)(((int32_t)a * b) >> 15);
 // }
 } // namespace
+
+using namespace wave_detail;
 
 WaveSimulation1D_Real::WaveSimulation1D_Real(uint32_t len, float courantSq,
                                              int dampening)
@@ -190,12 +192,17 @@ bool WaveSimulation2D_Real::has(size_t x, size_t y) const {
 }
 
 void WaveSimulation2D_Real::setf(size_t x, size_t y, float value) {
+    int16_t v = float_to_fixed(value);
+    return seti16(x, y, v);
+}
+
+void WaveSimulation2D_Real::seti16(size_t x, size_t y, int16_t value) {
     if (x >= width || y >= height) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;
     }
     int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
-    curr[(y + 1) * stride + (x + 1)] = float_to_fixed(value);
+    curr[(y + 1) * stride + (x + 1)] = value;
 }
 
 void WaveSimulation2D_Real::update() {

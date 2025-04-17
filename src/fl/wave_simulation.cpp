@@ -124,7 +124,7 @@ bool WaveSimulation2D::has(size_t x, size_t y) const {
     return (x < outerWidth) && (y < outerHeight);
 }
 
-void WaveSimulation2D::setf(size_t x, size_t y, float value) {
+void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
     if (!has(x, y))
         return;
 
@@ -144,10 +144,18 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
             size_t xx = x * multiplier + i;
             size_t yy = y * multiplier + j;
             if (sim->has(xx, yy)) {
-                sim->setf(xx, yy, value);
+                sim->seti16(xx, yy, v16);
             }
         }
     }
+}
+
+void WaveSimulation2D::setf(size_t x, size_t y, float value) {
+    if (!has(x, y))
+        return;
+
+    int16_t v16 = wave_detail::float_to_fixed(value);
+    seti16(x, y, v16);
 }
 
 void WaveSimulation2D::update() {
