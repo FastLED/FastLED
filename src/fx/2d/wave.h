@@ -121,6 +121,12 @@ class WaveFx : public Fx2d {
         mWaveSim.setf(x, y, value);
     }
 
+    void addf(size_t x, size_t y, float value) {
+        // Add a value at the given coordinates in the wave simulation.
+        float sum = value + mWaveSim.getf(x, y);        
+        mWaveSim.setf(x, y, MIN(1.0f, sum));
+    }
+
     uint8_t getu8(size_t x, size_t y) const {
         // Get the 8-bit value at the given coordinates in the wave simulation.
         return mWaveSim.getu8(x, y);

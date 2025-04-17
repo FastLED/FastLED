@@ -134,24 +134,23 @@ void applyFancyEffect(uint32_t now, bool button_active) {
                            fancyLatch.as<uint32_t>(),
                            fancyRampdown.as<uint32_t>());
     }
-    uint8_t value = transition.update(now) >> 2;
+    uint8_t value = transition.update(now) >> 6;
     if (value == 0) {
         // no need to draw
         return;
     }
-    FASTLED_WARN("value: " << value);
     float valuef = value / 255.0f;
     int mid_x = WIDTH / 2;
     int mid_y = HEIGHT / 2;
     // now make a cross
     for (int i = 0; i < WIDTH; i++) {
-        waveFxLower.setf(i, mid_y, valuef);
-        waveFxUpper.setf(i, mid_y, valuef);
+        waveFxLower.addf(i, mid_y, valuef);
+        waveFxUpper.addf(i, mid_y, valuef);
     }
 
     for (int i = 0; i < HEIGHT; i++) {
-        waveFxLower.setf(mid_x, i, valuef);
-        waveFxUpper.setf(mid_x, i, valuef);
+        waveFxLower.addf(mid_x, i, valuef);
+        waveFxUpper.addf(mid_x, i, valuef);
     }
 }
 
