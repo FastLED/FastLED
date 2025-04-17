@@ -36,5 +36,16 @@ TEST_CASE("Test transition ramp") {
     ramp.trigger(200);
     // at start: still at zero
     REQUIRE(ramp.value(200) == 0);
-
+    // mid‑rise: 205 ms → (5*255/10) ≈ 127
+    REQUIRE(ramp.value(205) == static_cast<uint8_t>((5 * 255) / 10));
+    // end of rise: 210 ms → full on
+    REQUIRE(ramp.value(210) == 255);
+    // plateau: well within [210, 290) ms
+    REQUIRE(ramp.value(250) == 255);
+    // mid‑fall: elapsed=295 ms → fallingElapsed=5 ms → 255 - (5*255/10) ≈ 128
+    REQUIRE(ramp.value(295) == static_cast<uint8_t>(255 - (5 * 255) / 10));
+    // after latch: 310 ms → off
+    REQUIRE(ramp.value(310) == 0);
+    // after latch: 410 ms → off
+    REQUIRE(ramp.value(410) == 0);
 }
