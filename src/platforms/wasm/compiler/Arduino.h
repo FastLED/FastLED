@@ -42,6 +42,9 @@ using fl::constrain;
 
 
 inline long random(long min, long max) {
+    if (min == max) {
+        return min;
+    }
     std::random_device rd;
     std::mt19937 gen(rd());
     // Arduino random is exclusive of the max value, but
