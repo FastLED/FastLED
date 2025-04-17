@@ -57,6 +57,8 @@ class jsSlider {
     const fl::Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     float value() const;
+    float value_normalized() const;
+    float max() const { return mMax; }
     void setValue(float value);
     operator float() const;
     operator uint8_t() const;

@@ -50,8 +50,9 @@ UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);
 UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);
 UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);
 
-UISlider fancySpeed("Fancy Speed", 320, 0, 1000, 1);
+UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);
 UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);
+UISlider fancyParticleSpan("Fancy Particle Span", 0.06f, 0.01f, 0.2f, 0.01f);
 
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
@@ -122,7 +123,7 @@ void triggerRipple() {
 }
 
 void applyFancyEffect(uint32_t now, bool button_active) {
-    uint32_t total = fancySpeed.as<uint32_t>();
+    uint32_t total = map(fancySpeed.as<uint32_t>(), 0, fancySpeed.max(), 1000, 100);
     static TimeRamp pointTransition = TimeRamp(total, 0, 0);
 
     if (button_active) {
@@ -154,7 +155,7 @@ void applyFancyEffect(uint32_t now, bool button_active) {
 
     float valuef = (1.0f - curr_alpha_f) * fancyIntensity.value() / 255.0f;
 
-    int span = .06 * WIDTH;
+    int span = fancyParticleSpan.value() * WIDTH;
     for (int x = left_x - span; x < left_x + span; x++) {
         waveFxLower.addf(x, mid_y, valuef);
         waveFxUpper.addf(x, mid_y, valuef);
