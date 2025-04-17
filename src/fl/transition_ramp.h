@@ -18,6 +18,9 @@ class TransitionRamp {
     /// Call this when you want to (re)start the ramp cycle.
     void trigger(uint32_t now);
 
+    void trigger(uint32_t now, uint32_t risingTime, uint32_t latchMs,
+                 uint32_t fallingTime);
+
     /// @return true iff we're still within the latch period.
     bool isActive(uint32_t now) const;
 
@@ -37,7 +40,6 @@ class TransitionRamp {
 
     uint32_t mStart = 0;
     uint8_t mLastValue = 0;
-    bool mActive = false;
 };
 
 } // namespace fl

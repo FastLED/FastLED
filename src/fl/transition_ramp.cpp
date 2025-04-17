@@ -5,7 +5,6 @@
 
 namespace fl {
 
-
 uint8_t TransitionRamp::timeAlpha(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
         return 0;
@@ -22,23 +21,33 @@ uint8_t TransitionRamp::timeAlpha(uint32_t now, uint32_t start, uint32_t end) {
     return static_cast<uint8_t>(out);
 }
 
-
 TransitionRamp::TransitionRamp(uint32_t risingTime, uint32_t latchMs,
                                uint32_t fallingTime)
     : mLatchMs(latchMs), mRisingTime(risingTime), mFallingTime(fallingTime) {}
 
 void TransitionRamp::trigger(uint32_t now) {
-    mActive = true;
     mStart = now;
-    mLastValue = 0;
+    // mLastValue = 0;
 
     mFinishedRisingTime = mStart + mRisingTime;
     mFinishedPlateauTime = mFinishedRisingTime + mLatchMs;
     mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
 }
 
+void TransitionRamp::trigger(uint32_t now, uint32_t risingTime,
+                             uint32_t latchMs, uint32_t fallingTime) {
+    mRisingTime = risingTime;
+    mLatchMs = latchMs;
+    mFallingTime = fallingTime;
+    trigger(now);
+}
+
 bool TransitionRamp::isActive(uint32_t now) const {
-    if (!mActive) {
+
+    bool not_started = (mFinishedRisingTime == 0) && (mFinishedPlateauTime == 0) &&
+                       (mFinishedFallingTime == 0);
+    if (not_started) {
+        // if we have not started, we are not active
         return false;
     }
 
@@ -48,14 +57,12 @@ bool TransitionRamp::isActive(uint32_t now) const {
     }
 
     if (now > mFinishedFallingTime) {
-        // if the time is after the plateau, we are not active
+        // if the time is after the finished rising, we are not active
         return false;
     }
 
     return true;
 }
-
-
 
 uint8_t TransitionRamp::update(uint32_t now) {
     if (!isActive(now)) {
@@ -76,7 +83,6 @@ uint8_t TransitionRamp::update(uint32_t now) {
     } else {
         // finished
         out = 0;
-        mActive = false;
     }
 
     mLastValue = out;

@@ -12,12 +12,10 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/math_macros.h"
-#include "fl/ui.h"
-#include "fx/2d/wave.h"
-#include "fx/2d/blend.h"
 #include "fl/transition_ramp.h"
-
-
+#include "fl/ui.h"
+#include "fx/2d/blend.h"
+#include "fx/2d/wave.h"
 
 using namespace fl;
 
@@ -40,7 +38,6 @@ UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);
 UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
-
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);
 UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);
@@ -53,6 +50,9 @@ UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);
 UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);
 UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);
 
+UISlider fancyRampup("Fancy Rampup", 321, 0, 1000, 1);
+UISlider fancyLatch("Fancy Latch", 47, 0, 1000, 1);
+UISlider fancyRampdown("Fancy Rampdown", 9, 0, 1000, 1);
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -62,30 +62,33 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
 };
 
 DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
-    0,   0,   0,   0,  // black
-    8,  128, 64, 64, // green
-    16, 255, 222, 222, // red
-    64, 255, 255, 255, // white
-    255, 255, 255, 255 // white
+    0,   0,   0,   0,   // black
+    8,   128, 64,  64,  // green
+    16,  255, 222, 222, // red
+    64,  255, 255, 255, // white
+    255, 255, 255, 255  // white
 };
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 XYMap xyRect(WIDTH, HEIGHT, false);
-WaveFx waveFxLower(xyRect, WaveFx::Args{
-    .factor = SUPER_SAMPLE_4X,
-    .half_duplex = true,
-    .speed = 0.18f,
-    .dampening = 9.0f,
-    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
-});
+WaveFx
+    waveFxLower(xyRect,
+                WaveFx::Args{
+                    .factor = SUPER_SAMPLE_4X,
+                    .half_duplex = true,
+                    .speed = 0.18f,
+                    .dampening = 9.0f,
+                    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
+                });
 
-WaveFx waveFxUpper(xyRect, WaveFx::Args{
-    .factor = SUPER_SAMPLE_4X,
-    .half_duplex = true,
-    .speed = 0.25f,
-    .dampening = 3.0f,
-    .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
-});
+WaveFx waveFxUpper(
+    xyRect, WaveFx::Args{
+                .factor = SUPER_SAMPLE_4X,
+                .half_duplex = true,
+                .speed = 0.25f,
+                .dampening = 3.0f,
+                .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
+            });
 
 Blend2d fxBlend(xyMap);
 
@@ -111,8 +114,6 @@ SuperSample getSuperSample() {
     }
 }
 
-
-
 void triggerRipple() {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
@@ -123,12 +124,17 @@ void triggerRipple() {
 
 
 void applyFancyEffect(uint32_t now, bool button_active) {
-    static TransitionRamp transition = TransitionRamp(500, 0, 500);
+    static TransitionRamp transition =
+        TransitionRamp(fancyRampup.as<uint32_t>(), fancyLatch.as<uint32_t>(),
+                       fancyRampdown.as<uint32_t>());
     if (button_active) {
         FASTLED_WARN("FANCY BUTTON TRIGGERED AT " << now);
-        transition.trigger(now);
+        transition.trigger(now,
+                           fancyRampup.as<uint32_t>(),
+                           fancyLatch.as<uint32_t>(),
+                           fancyRampdown.as<uint32_t>());
     }
-    uint8_t value = transition.value(now) >> 2;
+    uint8_t value = transition.update(now) >> 2;
     if (value == 0) {
         // no need to draw
         return;
@@ -149,15 +155,15 @@ void applyFancyEffect(uint32_t now, bool button_active) {
     }
 }
 
-
-
 struct ui_state {
     bool button = false;
     bool bigButton = false;
 };
 
 ui_state ui() {
-    U8EasingFunction easeMode = easeModeSqrt ? U8EasingFunction::WAVE_U8_MODE_SQRT : U8EasingFunction::WAVE_U8_MODE_LINEAR;
+    U8EasingFunction easeMode = easeModeSqrt
+                                    ? U8EasingFunction::WAVE_U8_MODE_SQRT
+                                    : U8EasingFunction::WAVE_U8_MODE_LINEAR;
     waveFxLower.setSpeed(speedLower);
     waveFxLower.setDampening(dampeningLower);
     waveFxLower.setHalfDuplex(halfDuplexLower);
@@ -184,13 +190,12 @@ ui_state ui() {
 
     fxBlend.setParams(waveFxLower, lower_params);
     fxBlend.setParams(waveFxUpper, upper_params);
-    ui_state state {
+    ui_state state{
         .button = button,
         .bigButton = buttonFancy,
     };
     return state;
 }
-
 
 void processAutoTrigger(uint32_t now) {
     static uint32_t nextTrigger = 0;
