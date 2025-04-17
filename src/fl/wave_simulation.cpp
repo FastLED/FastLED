@@ -176,7 +176,7 @@ float WaveSimulation1D::getf(size_t x) const {
         return 0.0f;
     float sum = 0.0f;
     for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += sim->get(x * multiplier + i);
+        sum += sim->getf(x * multiplier + i);
     }
     return sum / static_cast<float>(multiplier);
 }

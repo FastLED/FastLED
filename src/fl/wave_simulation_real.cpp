@@ -64,7 +64,7 @@ int16_t WaveSimulation1D_Real::geti16Previous(size_t x) const {
     return prev[x + 1];
 }
 
-float WaveSimulation1D_Real::get(size_t x) const {
+float WaveSimulation1D_Real::getf(size_t x) const {
     if (x >= length) {
         FASTLED_WARN("Out of range.");
         return 0.0f;

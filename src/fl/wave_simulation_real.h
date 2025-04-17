@@ -52,7 +52,7 @@ class WaveSimulation1D_Real {
 
     // Get the simulation value at the inner grid cell x (converted to float in
     // the range [-1.0, 1.0]).
-    float get(size_t x) const;
+    float getf(size_t x) const;
 
     int16_t geti16(size_t x) const;
     int16_t geti16Previous(size_t x) const;
