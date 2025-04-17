@@ -127,8 +127,8 @@ bool WaveSimulation2D::has(size_t x, size_t y) const {
 void WaveSimulation2D::setf(size_t x, size_t y, float value) {
     if (!has(x, y))
         return;
-    for (uint32_t j = 0; j < multiplier; ++j) {
-        for (uint32_t i = 0; i < multiplier; ++i) {
+    for (size_t j = 0; j < multiplier; ++j) {
+        for (size_t i = 0; i < multiplier; ++i) {
             size_t xx = x * multiplier + i;
             size_t yy = y * multiplier + j;
             if (sim->has(xx, yy)) {
