@@ -129,6 +129,10 @@ void applyFancyEffect(uint32_t now, bool button_active) {
         transition.trigger(now);
     }
     uint8_t value = transition.value(now) >> 2;
+    if (value == 0) {
+        // no need to draw
+        return;
+    }
     FASTLED_WARN("value: " << value);
     float valuef = value / 255.0f;
     int mid_x = WIDTH / 2;

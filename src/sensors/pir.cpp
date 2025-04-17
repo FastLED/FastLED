@@ -35,11 +35,7 @@ bool Pir::detect() {
 
 PirAdvanced::PirAdvanced(int pin, uint32_t latchMs, uint32_t risingTime,
                          uint32_t fallingTime)
-    : mPir(pin), mRamp(latchMs, risingTime, fallingTime) {
-    if (risingTime + fallingTime > latchMs) {
-        FASTLED_WARN(
-            "PirAdvanced: risingTime + fallingTime must be less than latchMs");
-    }
+    : mPir(pin), mRamp(risingTime, latchMs, fallingTime) {
 }
 
 bool PirAdvanced::detect(uint32_t now) {
@@ -54,7 +50,7 @@ bool PirAdvanced::detect(uint32_t now) {
 uint8_t PirAdvanced::transition(uint32_t now) {
     // ensure detect() logic runs so we trigger on edges
     detect(now);
-    return mRamp.value(now);
+    return mRamp.update(now);
 }
 
 } // namespace fl
