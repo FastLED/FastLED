@@ -60,16 +60,7 @@ SuperSample getSuperSample() {
 void triggerRipple(WaveSimulation2D &waveSim) {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
-    for (int i = x - 1; i <= x + 1; i++) {
-        if (i < 0 || i >= WIDTH)
-            continue;
-        for (int j = y - 1; j <= y + 1; j++) {
-            if (j < 0 || j >= HEIGHT)
-                continue;
-            waveSim.set(i, j, 1);
-        }
-    }
-    waveSim.set(x, y, 1);
+    waveSim.setf(x, y, 1);
 }
 
 void loop() {

@@ -43,7 +43,7 @@ void triggerRipple(WaveSimulation1D &waveSim, int x) {
         if (i < 0 || i >= NUM_LEDS)
             continue;
         FASTLED_WARN("Setting " << i);
-        waveSim.set(i, -1.f);
+        waveSim.setf(i, -1.f);
     }
 }
 
