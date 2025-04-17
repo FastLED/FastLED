@@ -15,6 +15,7 @@ all the UI elements you see below.
 #include "fl/ui.h"
 #include "fx/2d/wave.h"
 #include "fx/2d/blend.h"
+#include "fl/transition_ramp.h"
 
 
 
@@ -110,6 +111,8 @@ SuperSample getSuperSample() {
     }
 }
 
+
+
 void triggerRipple() {
     int x = random() % WIDTH;
     int y = random() % HEIGHT;
@@ -117,51 +120,31 @@ void triggerRipple() {
     waveFxUpper.setf(x, y, 1);
 }
 
-void triggerFancy() {
+
+
+void applyFancyEffect(uint32_t now, bool button_active) {
+    static TransitionRamp transition = TransitionRamp(500, 0, 500);
+    if (button_active) {
+        transition.trigger(now);
+    }
+    uint8_t value = transition.value(now) >> 2;
+    FASTLED_WARN("value: " << value);
+    float valuef = value / 255.0f;
     int mid_x = WIDTH / 2;
     int mid_y = HEIGHT / 2;
     // now make a cross
     for (int i = 0; i < WIDTH; i++) {
-        waveFxLower.setf(i, mid_y, 1);
-        waveFxUpper.setf(i, mid_y, 1);
+        waveFxLower.setf(i, mid_y, valuef);
+        waveFxUpper.setf(i, mid_y, valuef);
     }
 
     for (int i = 0; i < HEIGHT; i++) {
-        waveFxLower.setf(mid_x, i, 1);
-        waveFxUpper.setf(mid_x, i, 1);
+        waveFxLower.setf(mid_x, i, valuef);
+        waveFxUpper.setf(mid_x, i, valuef);
     }
 }
 
-// make a class that will do a smooth transition
-struct FancyTriggerAnimation {
 
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t start_time = 0;
-    uint32_t finish_time = 0;
-    static const uint32_t duration = 1000;
-
-
-    void trigger(uint32_t now, int x, int y) {
-        start_time = now;
-        finish_time = now + duration;
-        this->x = x;
-        this->y = y;
-    }
-
-    void update() {
-        if (done) {
-            return;
-        }
-        if (step < 10) {
-            waveFxLower.setf(x, y, 1);
-            waveFxUpper.setf(x, y, 1);
-            step++;
-        } else {
-            done = true;
-        }
-    }
-};
 
 struct ui_state {
     bool button = false;
@@ -230,14 +213,12 @@ void processAutoTrigger(uint32_t now) {
 
 void loop() {
     // Your code here
+    uint32_t now = millis();
     ui_state state = ui();
     if (state.button) {
         triggerRipple();
     }
-    if (state.bigButton) {
-        triggerFancy();
-    }
-    uint32_t now = millis();
+    applyFancyEffect(now, state.bigButton);
     processAutoTrigger(now);
     Fx::DrawContext ctx(now, leds);
     fxBlend.draw(ctx);

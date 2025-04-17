@@ -5,12 +5,12 @@
 
 namespace fl {
 
-class RampTimer {
+class TransitionRamp {
   public:
     /// @param latchMs     total active time (ms)
     /// @param risingTime  time to ramp from 0→255 (ms)
     /// @param fallingTime time to ramp from 255→0 (ms)
-    RampTimer(uint32_t latchMs, uint32_t risingTime, uint32_t fallingTime);
+    TransitionRamp(uint32_t latchMs, uint32_t risingTime, uint32_t fallingTime);
 
     /// Call this when you want to (re)start the ramp cycle.
     void trigger(uint32_t now);

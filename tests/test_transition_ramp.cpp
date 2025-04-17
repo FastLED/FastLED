@@ -10,7 +10,7 @@ using namespace fl;
 
 TEST_CASE("Test transition ramp") {
     // total latch = 100 ms, ramp‑up = 10 ms, ramp‑down = 10 ms
-    RampTimer ramp(100, 10, 10);
+    TransitionRamp ramp(100, 10, 10);
     uint32_t t0 = 0;
     ramp.trigger(t0);
 

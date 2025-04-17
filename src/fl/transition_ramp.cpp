@@ -7,7 +7,7 @@
 
 namespace fl {
 
-RampTimer::RampTimer(uint32_t latchMs, uint32_t risingTime,
+TransitionRamp::TransitionRamp(uint32_t latchMs, uint32_t risingTime,
                      uint32_t fallingTime)
     : mLatchMs(latchMs), mRisingTime(risingTime), mFallingTime(fallingTime) {
     // enforce rising+fall ≤ latch
@@ -17,16 +17,19 @@ RampTimer::RampTimer(uint32_t latchMs, uint32_t risingTime,
     }
 }
 
-void RampTimer::trigger(uint32_t now) {
+void TransitionRamp::trigger(uint32_t now) {
     mStart = now;
     mLastValue = 0;
 }
 
-bool RampTimer::isActive(uint32_t now) const {
+bool TransitionRamp::isActive(uint32_t now) const {
     return (now - mStart) < mLatchMs;
 }
 
-uint8_t RampTimer::value(uint32_t now) {
+uint8_t TransitionRamp::value(uint32_t now) {
+    if (!isActive(now)) {
+        return 0;
+    }
     uint32_t elapsed = now - mStart;
     uint8_t out = 0;
 
