@@ -23,6 +23,10 @@ void TransitionRamp::trigger(uint32_t now) {
 }
 
 bool TransitionRamp::isActive(uint32_t now) const {
+    if (now == 0) {
+        // if now is 0, we are not active
+        return false;
+    }
     return (now - mStart) < mLatchMs;
 }
 

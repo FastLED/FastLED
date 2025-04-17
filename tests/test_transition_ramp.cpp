@@ -49,3 +49,10 @@ TEST_CASE("Test transition ramp") {
     // after latch: 410 ms → off
     REQUIRE(ramp.value(410) == 0);
 }
+
+TEST_CASE("Real world Bug") {
+     TransitionRamp transition = TransitionRamp(500, 0, 500);
+
+     uint8_t value = transition.value(0);
+     CHECK(value == 0);
+}
