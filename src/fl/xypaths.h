@@ -42,6 +42,31 @@ class XYPath : public Referent {
     LUTXY16Ptr generateLUT(uint16_t steps);
 };
 
+// TransformPath is a wrapper for XYPath that applies a transform.
+class TransformPath : public XYPath {
+  public:
+    TransformPath(XYPathPtr path, float scale = 1.0f, float x_offset = 0.0f,
+                  float y_offset = 0.0f, float rotation = 0.0f);
+    pair_xy<float> at(float alpha) override;
+
+    float getScale() const;
+    float getXOffset() const;
+    float getYOffset() const;
+    float getRotation() const;
+
+    void setPath(XYPathPtr path);
+    void setScale(float scale);
+    void setXOffset(float x_offset);
+    void setYOffset(float y_offset);
+    void setRotation(float rotation);
+    void setTransform(float scale, float x_offset, float y_offset,
+                      float rotation);
+
+  private:
+    XYPathPtr mPath;
+    float mXOffset, mYOffset, mScale, mRotation;
+};
+
 class LinePath : public XYPath {
   public:
     LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
@@ -50,17 +75,6 @@ class LinePath : public XYPath {
 
   private:
     float mX0, mY0, mX1, mY1;
-};
-
-class TransformPath : public XYPath {
-  public:
-    TransformPath(XYPathPtr path, float scale = 1.0f, float x_offset = 0.0f,
-                  float y_offset = 0.0f, float rotation = 0.0f);
-    pair_xy<float> at(float alpha) override;
-
-  private:
-    XYPathPtr mPath;
-    float mXOffset, mYOffset, mScale, mRotation;
 };
 
 class CirclePath : public XYPath {

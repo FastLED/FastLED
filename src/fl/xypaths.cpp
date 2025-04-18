@@ -57,6 +57,13 @@ void XYPath::buildLut(uint16_t steps) {
     }
 }
 
+TransformPath::TransformPath(XYPathPtr path, float scale, float x_offset,
+                             float y_offset, float rotation)
+    : mPath(path), mXOffset(x_offset), mYOffset(y_offset), mScale(scale),
+      mRotation(rotation) {
+    FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
+}
+
 pair_xy<float> TransformPath::at(float alpha) {
     pair_xy<float> xy = mPath->at(alpha);
     xy.x = xy.x * mScale + mXOffset;
@@ -64,11 +71,46 @@ pair_xy<float> TransformPath::at(float alpha) {
     return xy;
 }
 
-TransformPath::TransformPath(XYPathPtr path, float scale, float x_offset,
-                             float y_offset, float rotation)
-    : mPath(path), mXOffset(x_offset), mYOffset(y_offset), mScale(scale),
-      mRotation(rotation) {
-    FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
+void TransformPath::setScale(float scale) {
+    mScale = scale;
+    XYPath::clearLut();
+}
+
+void TransformPath::setXOffset(float x_offset) {
+    mXOffset = x_offset;
+    XYPath::clearLut();
+}
+
+float TransformPath::getScale() const { return mScale; }
+
+void TransformPath::setYOffset(float y_offset) {
+    mYOffset = y_offset;
+    XYPath::clearLut();
+}
+
+float TransformPath::getXOffset() const { return mXOffset; }
+
+float TransformPath::getYOffset() const { return mYOffset; }
+
+float TransformPath::getRotation() const { return mRotation; }
+
+void TransformPath::setRotation(float rotation) {
+    mRotation = rotation;
+    XYPath::clearLut();
+}
+
+void TransformPath::setPath(XYPathPtr path) {
+    mPath = path;
+    XYPath::clearLut();
+}
+
+void TransformPath::setTransform(float scale, float x_offset, float y_offset,
+                                 float rotation) {
+    mScale = scale;
+    mXOffset = x_offset;
+    mYOffset = y_offset;
+    mRotation = rotation;
+    XYPath::clearLut();
 }
 
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
