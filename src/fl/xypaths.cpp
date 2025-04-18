@@ -8,6 +8,22 @@
 
 namespace fl {
 
+pair_xy<float> TransformFloat::transform(const pair_xy<float> &xy) const {
+    float x = xy.x * scale + x_offset;
+    float y = xy.y * scale + y_offset;
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+    const bool has_rotation = (rotation != 0.0f);
+#pragma GCC diagnostic pop
+    if (has_rotation) {
+        float cos_theta = cosf(rotation);
+        float sin_theta = sinf(rotation);
+        float x_rotated = x * cos_theta - y * sin_theta;
+        float y_rotated = x * sin_theta + y * cos_theta;
+        return pair_xy<float>(x_rotated, y_rotated);
+    }
+    return pair_xy<float>(x, y);
+}
+
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
 
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
@@ -28,6 +44,11 @@ void XYPath::initLutOnce() {
         return;
     }
     mLut = generateLUT(mSteps);
+}
+
+pair_xy<float> XYPath::at(float alpha, const TransformFloat &tx) {
+    pair_xy<float> xy = at(alpha);
+    return tx.transform(xy);
 }
 
 pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
@@ -55,6 +76,36 @@ void XYPath::buildLut(uint16_t steps) {
     if (steps > 0) {
         mLut = generateLUT(steps);
     }
+}
+
+void XYPath::output(float alpha_start, float alpha_end,
+                pair_xy<float> *out, uint16_t out_size,
+                const TransformFloat &tx) {
+    if (out_size == 0) {
+        return;
+    }
+    if (out_size == 1) {
+        pair_xy<float> avg = at(alpha_start);
+        avg += at(alpha_end);
+        avg /= 2.0f;
+        out[0] = avg;
+        return;
+    }
+
+    out[0] = at(alpha_start, tx);
+    out[out_size-1] = at(alpha_end, tx);
+    if (out_size == 2) {
+      return;
+    }
+
+    const float inverse_out_size_minus_one = 1.0f / (out_size - 1);
+    const float delta = alpha_end - alpha_start;
+
+    for (uint16_t i = 1; i < out_size - 1; i++) {
+        float alpha = alpha_start + (delta * i * inverse_out_size_minus_one);
+        out[i] = at(alpha, tx);
+    }
+    return;
 }
 
 TransformPath::TransformPath(XYPathPtr path, const Params &params)
@@ -206,7 +257,6 @@ pair_xy<float> PhyllotaxisPath::at(float alpha) {
     return pair_xy<float>(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
 }
 
-
 XYPathPtr TransformPath::getPath() const { return mPath; }
 
 TransformPath::Params &TransformPath::params() { return mParams; }
@@ -253,5 +303,11 @@ pair_xy<float> CatmullRomPath::at(float alpha) {
 
     return pair_xy<float>(x, y);
 }
+
+
+
+
+
+
 
 } // namespace fl
