@@ -32,8 +32,16 @@ class XYPath : public Referent {
     virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff,
                                    int16_t x_translate = 0,
                                    int16_t y_translate = 0);
+
+    // optimizes at16(...).
     void buildLut(uint16_t steps);
+
+    // Called by subclasses when something changes. The LUT will be rebuilt on the next call
+    // to at16(...) if mSteps > 0.
     void clearLut();
+
+    // Clears lut and sets new steps.
+    void clearLut(uint16_t steps) { mSteps = steps; mLut.reset(); }
 
   protected:
     uint32_t mSteps;
