@@ -16,13 +16,13 @@
 /// * 1 digit for the major version
 /// * 3 digits for the minor version
 /// * 3 digits for the patch version
-#define FASTLED_VERSION 3009015
+#define FASTLED_VERSION 3009016
 #ifndef FASTLED_INTERNAL
 #  ifdef  FASTLED_SHOW_VERSION
 #    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "FastLED version 3.009.015"
+#      pragma message "FastLED version 3.009.016"
 #    else
-#      warning FastLED version 3.009.015  (Not really a warning, just telling you here.)
+#      warning FastLED version 3.009.016  (Not really a warning, just telling you here.)
 #    endif
 #  endif
 #endif
