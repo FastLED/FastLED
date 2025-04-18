@@ -4,6 +4,7 @@
 
 #include <FastLED.h>
 #include "fx/1d/cylon.h"
+#include "fl/screenmap.h"
 
 using namespace fl;
 
@@ -21,8 +22,9 @@ CRGB leds[NUM_LEDS];
 // Create a Cylon instance
 Cylon cylon(NUM_LEDS);
 
-void setup() { 
-    FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
+void setup() {
+    ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
+    FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw().setScreenMap(screenMap);
     FastLED.setBrightness(84);
 }
 
