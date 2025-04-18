@@ -9,7 +9,7 @@ FastLED 3.9.16
   * Speed control via multiplying the rendering iterations per frame.
 * `EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)` macro for sketches.
 * `CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower)` for fx blending without `alpha`.
-* `fl/2dfx/blend.h`
+* [fl/2dfx/blend.h](https://github.com/FastLED/FastLED/blob/master/src/fx/2d/blend.h)
   * Visualizer blend stack.
   * Multiple visualizers can be stacked and then composited via `blendAlphaMaxChannel(...)`
   * Blur2d can be applied per layer and globally.
