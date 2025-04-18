@@ -202,7 +202,7 @@ pair_xy_float HeartPath::at(float alpha) {
     float x = (xo - minx) / (maxx - minx);
     float y = (yo - miny) / (maxy - miny);
 
-    return {x, y};
+    return pair_xy_float(x, y);
 }
 
 pair_xy_float LissajousPath::at(float alpha) {
@@ -210,7 +210,7 @@ pair_xy_float LissajousPath::at(float alpha) {
     float t = alpha * 2.0f * PI;
     float x = 0.5f + 0.5f * sinf(mA * t + mDelta);
     float y = 0.5f + 0.5f * sinf(mB * t);
-    return {x, y};
+    return pair_xy_float(x, y);
 }
 
 LissajousPath::LissajousPath(uint8_t a, uint8_t b, float delta, uint16_t steps)
@@ -228,7 +228,7 @@ pair_xy_float ArchimedeanSpiralPath::at(float alpha) {
     // convert polar → cartesian, then shift center to (0.5,0.5)
     float x = 0.5f + r * cosf(t);
     float y = 0.5f + r * sinf(t);
-    return {x, y};
+    return pair_xy_float(x, y);
 }
 
 RosePath::RosePath(uint8_t petals, uint16_t steps)
@@ -245,7 +245,7 @@ pair_xy_float RosePath::at(float alpha) {
     // remap from [-1,1] to [0,1]
     float x = 0.5f + 0.5f * x0;
     float y = 0.5f + 0.5f * y0;
-    return {x, y};
+    return pair_xy_float(x, y);
 }
 
 GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b, float n1,
@@ -270,7 +270,7 @@ pair_xy_float GielisCurvePath::at(float alpha) {
     float x = 0.5f + 0.5f * x0;
     float y = 0.5f + 0.5f * y0;
 
-    return {x, y};
+    return pair_xy_float(x, y);
 }
 
 void XYPath::clearLut() { mLut.reset(); }
@@ -301,7 +301,7 @@ void CatmullRomPath::addPoint(pair_xy_float p) { mPoints.push_back(p); }
 pair_xy_float CatmullRomPath::at(float alpha) {
     const size_t n = mPoints.size();
     if (n == 0) {
-        return {0.5f, 0.5f};
+        return pair_xy_float(.5f, 0.5f);
     }
     if (n == 1) {
         return mPoints[0];
