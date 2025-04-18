@@ -176,7 +176,7 @@ pair_xy_float CirclePath::at(float alpha) {
     float t = alpha * 2.0f * PI;
     float x = .5f * cosf(t);
     float y = .5f * sinf(t);
-    return {0.5f + 0.5f * x, 0.5f + 0.5f * y};
+    return pair_xy_float(.5f + 0.5f * x, 0.5f + 0.5f * y);
 }
 
 CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
