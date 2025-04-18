@@ -1,10 +1,11 @@
 FastLED 3.9.16
 ==============
-* New inoise16 function taking in x,y,z,t
+* New inoise16 $D function taking in x,y,z,t
   * This is good for 3D oriented noise functions + time factor.
+  * Wrap an led strip as a cylinder and use this function to map noise to it.
 * New Wave Simulator in 1D and 2D
   * Thanks [/u/ssilverman](https://github.com/ssilverman)
-  * Full and half duplix wave simulators (half duplix supports black)
+  * Full and half duplex wave simulators (half duplix supports black)
   * For improved rendering we allow 2x, 4x, 8x super sampling
   * Speed control via multiplying the rendering iterations per frame.
 * `EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)` macro for sketches.
