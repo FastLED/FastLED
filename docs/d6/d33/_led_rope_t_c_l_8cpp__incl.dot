@@ -168,11 +168,11 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/Led
   Node1 -> Node89 [id="edge114_Node000001_Node000089",color="steelblue1",style="solid",tooltip=" "];
   Node89 [id="Node000089",label="fl/ui.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3b/ui_8h.html",tooltip=" "];
   Node89 -> Node4 [id="edge115_Node000089_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node89 -> Node90 [id="edge116_Node000089_Node000090",color="steelblue1",style="solid",tooltip=" "];
-  Node90 [id="Node000090",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node89 -> Node12 [id="edge117_Node000089_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node89 -> Node33 [id="edge118_Node000089_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node89 -> Node33 [id="edge116_Node000089_Node000033",color="steelblue1",style="solid",tooltip=" "];
   Node33 [id="Node000033",label="fl/math_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d19/fl_2math__macros_8h.html",tooltip=" "];
-  Node89 -> Node20 [id="edge119_Node000089_Node000020",color="steelblue1",style="solid",tooltip=" "];
-  Node89 -> Node64 [id="edge120_Node000089_Node000064",color="steelblue1",style="solid",tooltip=" "];
+  Node89 -> Node12 [id="edge117_Node000089_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node89 -> Node20 [id="edge118_Node000089_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node89 -> Node64 [id="edge119_Node000089_Node000064",color="steelblue1",style="solid",tooltip=" "];
+  Node89 -> Node90 [id="edge120_Node000089_Node000090",color="steelblue1",style="solid",tooltip=" "];
+  Node90 [id="Node000090",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
 }

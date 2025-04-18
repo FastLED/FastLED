@@ -4,7 +4,7 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,34,135,29,136,34,102,39"/>
 <area shape="rect" id="Node000006" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="170,55,289,80"/>
 <area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="102,47,157,55,156,60,101,52"/>
-<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="357,5,435,31"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="357,5,435,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="310,15,344,15,344,21,310,21"/>
 <area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="483,5,591,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="435,15,469,15,469,21,435,21"/>

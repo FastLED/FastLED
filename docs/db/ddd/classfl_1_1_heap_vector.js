@@ -1,5 +1,6 @@
 var classfl_1_1_heap_vector =
 [
+    [ "reverse_iterator", "d1/d9e/structfl_1_1_heap_vector_1_1reverse__iterator.html", "d1/d9e/structfl_1_1_heap_vector_1_1reverse__iterator" ],
     [ "const_iterator", "db/ddd/classfl_1_1_heap_vector_ab9e5c54d56104d567f79e72f63bdf940.html#ab9e5c54d56104d567f79e72f63bdf940", null ],
     [ "iterator", "db/ddd/classfl_1_1_heap_vector_af5ccaef48bee350c89aae792775126d0.html#af5ccaef48bee350c89aae792775126d0", null ],
     [ "HeapVector", "db/ddd/classfl_1_1_heap_vector_a4f35c70f404b93a8047529078f9a13ff.html#a4f35c70f404b93a8047529078f9a13ff", null ],
@@ -36,6 +37,8 @@ var classfl_1_1_heap_vector =
     [ "operator[]", "db/ddd/classfl_1_1_heap_vector_a83fd48b0fd088a5f26802a8cadbee805.html#a83fd48b0fd088a5f26802a8cadbee805", null ],
     [ "pop_back", "db/ddd/classfl_1_1_heap_vector_a6bdcbbf21b478646961663a3e43acff4.html#a6bdcbbf21b478646961663a3e43acff4", null ],
     [ "push_back", "db/ddd/classfl_1_1_heap_vector_a701c6f44506bee8254a5c66a6f132487.html#a701c6f44506bee8254a5c66a6f132487", null ],
+    [ "rbegin", "db/ddd/classfl_1_1_heap_vector_ad330121b12dd7c32e3a6f9b04951ff4a.html#ad330121b12dd7c32e3a6f9b04951ff4a", null ],
+    [ "rend", "db/ddd/classfl_1_1_heap_vector_aa2913177210828cf8810f8a6ddffc085.html#aa2913177210828cf8810f8a6ddffc085", null ],
     [ "reserve", "db/ddd/classfl_1_1_heap_vector_a1fcddf51102899a08f36d441b3229951.html#a1fcddf51102899a08f36d441b3229951", null ],
     [ "resize", "db/ddd/classfl_1_1_heap_vector_a9fae0dadbb1a36e82e295fb70175a63a.html#a9fae0dadbb1a36e82e295fb70175a63a", null ],
     [ "resize", "db/ddd/classfl_1_1_heap_vector_a2817063f57b691307b3f8009060d0257.html#a2817063f57b691307b3f8009060d0257", null ],

@@ -10,7 +10,7 @@ digraph "fill_noise16"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fill_raw_noise16into8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga9db885e8cd887367fbf17e70f7d6b7fd.html#ga9db885e8cd887367fbf17e70f7d6b7fd",tooltip="Fill a 1D 8-bit buffer with noise, using inoise16()"];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00",tooltip="16-bit, fixed point implementation of Perlin's noise."];
+  Node3 [id="Node000003",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c",tooltip="16-bit, fixed point implementation of Perlin's noise."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="inoise16_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node1 -> Node6 [id="edge4_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];

@@ -1,5 +1,9 @@
 <map id="fl::scoped_ptr&lt; T, Deleter &gt;" name="fl::scoped_ptr&lt; T, Deleter &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="23,5,159,45"/>
-<area shape="rect" id="Node000002" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="5,108,176,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,59,93,108,88,108,88,59"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,141,109"/>
+<area shape="rect" id="Node000002" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="384,5,555,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,62,165,52,278,33,383,25,384,30,279,38,166,57,134,67"/>
+<area shape="rect" id="Node000003" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="367,69,572,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,87,367,87,367,92,155,92"/>
+<area shape="rect" id="Node000004" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="367,133,572,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="134,112,166,121,269,139,367,148,366,153,268,144,165,127,132,117"/>
 </map>

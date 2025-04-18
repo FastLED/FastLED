@@ -199,53 +199,53 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc01244
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000027">Todo</a></b></dt><dd>Why isn't this declared in the header (<a class="el" href="../../d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise.">noise.h</a>)? </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000028">Todo</a></b></dt><dd>Why isn't this declared in the header (<a class="el" href="../../d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise.">noise.h</a>)? </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00663">663</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  663</span>                                                                                                                                                                                              {</div>
-<div class="line"><span class="lineno">  664</span>  <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a> &gt; 1) {</div>
-<div class="line"><span class="lineno">  665</span>    <a class="code hl_function" href="#ga3dc6c55a3f8495a7bc6dc0124434c688">fill_raw_2dnoise8</a>(pData, width, height, <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>-1, freq44, amplitude, skip+1, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>*freq44, freq44 * scalex, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>*freq44, freq44 * scaley, time);</div>
-<div class="line"><span class="lineno">  666</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  667</span>    <span class="comment">// amplitude is always 255 on the lowest level</span></div>
-<div class="line"><span class="lineno">  668</span>    amplitude=255;</div>
-<div class="line"><span class="lineno">  669</span>  }</div>
-<div class="line"><span class="lineno">  670</span> </div>
-<div class="line"><span class="lineno">  671</span>  scalex *= skip;</div>
-<div class="line"><span class="lineno">  672</span>  scaley *= skip;</div>
-<div class="line"><span class="lineno">  673</span> </div>
-<div class="line"><span class="lineno">  674</span>  <a class="code hl_typedef" href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> invamp = 255-amplitude;</div>
-<div class="line"><span class="lineno">  675</span>  uint16_t xx = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>;</div>
-<div class="line"><span class="lineno">  676</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; height; ++i, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>+=scaley) {</div>
-<div class="line"><span class="lineno">  677</span>    uint8_t *pRow = pData + (i*width);</div>
-<div class="line"><span class="lineno">  678</span>    xx = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>;</div>
-<div class="line"><span class="lineno">  679</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; width; ++j, xx+=scalex) {</div>
-<div class="line"><span class="lineno">  680</span>      uint8_t noise_base = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a>(xx,<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>,time);</div>
-<div class="line"><span class="lineno">  681</span>      noise_base = (0x80 &amp; noise_base) ? (noise_base - 127) : (127 - noise_base);</div>
-<div class="line"><span class="lineno">  682</span>      noise_base = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(noise_base&lt;&lt;1,amplitude);</div>
-<div class="line"><span class="lineno">  683</span>      <span class="keywordflow">if</span>(skip == 1) {</div>
-<div class="line"><span class="lineno">  684</span>        pRow[j] = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pRow[j],invamp) + noise_base;</div>
-<div class="line"><span class="lineno">  685</span>      } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  686</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> ii = i; ii&lt;(i+skip) &amp;&amp; ii&lt;height; ++ii) {</div>
-<div class="line"><span class="lineno">  687</span>          uint8_t *pRow = pData + (ii*width);</div>
-<div class="line"><span class="lineno">  688</span>          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> jj=j; jj&lt;(j+skip) &amp;&amp; jj&lt;width; ++jj) {</div>
-<div class="line"><span class="lineno">  689</span>            pRow[jj] = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pRow[jj],invamp) + noise_base;</div>
-<div class="line"><span class="lineno">  690</span>          }</div>
-<div class="line"><span class="lineno">  691</span>        }</div>
-<div class="line"><span class="lineno">  692</span>      }</div>
-<div class="line"><span class="lineno">  693</span>    }</div>
-<div class="line"><span class="lineno">  694</span>  }</div>
-<div class="line"><span class="lineno">  695</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00758">758</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  758</span>                                                                                                                                                                                              {</div>
+<div class="line"><span class="lineno">  759</span>  <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a> &gt; 1) {</div>
+<div class="line"><span class="lineno">  760</span>    <a class="code hl_function" href="#ga3dc6c55a3f8495a7bc6dc0124434c688">fill_raw_2dnoise8</a>(pData, width, height, <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a>-1, freq44, amplitude, skip+1, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>*freq44, freq44 * scalex, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>*freq44, freq44 * scaley, time);</div>
+<div class="line"><span class="lineno">  761</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  762</span>    <span class="comment">// amplitude is always 255 on the lowest level</span></div>
+<div class="line"><span class="lineno">  763</span>    amplitude=255;</div>
+<div class="line"><span class="lineno">  764</span>  }</div>
+<div class="line"><span class="lineno">  765</span> </div>
+<div class="line"><span class="lineno">  766</span>  scalex *= skip;</div>
+<div class="line"><span class="lineno">  767</span>  scaley *= skip;</div>
+<div class="line"><span class="lineno">  768</span> </div>
+<div class="line"><span class="lineno">  769</span>  <a class="code hl_typedef" href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> invamp = 255-amplitude;</div>
+<div class="line"><span class="lineno">  770</span>  uint16_t xx = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>;</div>
+<div class="line"><span class="lineno">  771</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; height; ++i, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>+=scaley) {</div>
+<div class="line"><span class="lineno">  772</span>    uint8_t *pRow = pData + (i*width);</div>
+<div class="line"><span class="lineno">  773</span>    xx = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>;</div>
+<div class="line"><span class="lineno">  774</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; width; ++j, xx+=scalex) {</div>
+<div class="line"><span class="lineno">  775</span>      uint8_t noise_base = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a>(xx,<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>,time);</div>
+<div class="line"><span class="lineno">  776</span>      noise_base = (0x80 &amp; noise_base) ? (noise_base - 127) : (127 - noise_base);</div>
+<div class="line"><span class="lineno">  777</span>      noise_base = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(noise_base&lt;&lt;1,amplitude);</div>
+<div class="line"><span class="lineno">  778</span>      <span class="keywordflow">if</span>(skip == 1) {</div>
+<div class="line"><span class="lineno">  779</span>        pRow[j] = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pRow[j],invamp) + noise_base;</div>
+<div class="line"><span class="lineno">  780</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  781</span>        <span class="keywordflow">for</span>(<span class="keywordtype">int</span> ii = i; ii&lt;(i+skip) &amp;&amp; ii&lt;height; ++ii) {</div>
+<div class="line"><span class="lineno">  782</span>          uint8_t *pRow = pData + (ii*width);</div>
+<div class="line"><span class="lineno">  783</span>          <span class="keywordflow">for</span>(<span class="keywordtype">int</span> jj=j; jj&lt;(j+skip) &amp;&amp; jj&lt;width; ++jj) {</div>
+<div class="line"><span class="lineno">  784</span>            pRow[jj] = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pRow[jj],invamp) + noise_base;</div>
+<div class="line"><span class="lineno">  785</span>          }</div>
+<div class="line"><span class="lineno">  786</span>        }</div>
+<div class="line"><span class="lineno">  787</span>      }</div>
+<div class="line"><span class="lineno">  788</span>    }</div>
+<div class="line"><span class="lineno">  789</span>  }</div>
+<div class="line"><span class="lineno">  790</span>}</div>
 <div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
 <div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
 <div class="ttc" id="a_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c_html_a453bb447145d05bae0b0ad07d33f3f0c"><div class="ttname"><a href="../../d7/ddc/_noise_playground_8ino_a453bb447145d05bae0b0ad07d33f3f0c.html#a453bb447145d05bae0b0ad07d33f3f0c">octaves</a></div><div class="ttdeci">uint8_t octaves</div><div class="ttdef"><b>Definition</b> <a href="../../d7/ddc/_noise_playground_8ino_source.html#l00035">NoisePlayground.ino:35</a></div></div>
 <div class="ttc" id="agroup___fractional_types_ga5d6d013429a5b8a09d564d6137217644_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI: unsigned short _Fract.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/ddf/lib8tion_2types_8h_source.html#l00036">types.h:36</a></div></div>
-<div class="ttc" id="agroup___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688_html_ga3dc6c55a3f8495a7bc6dc0124434c688"><div class="ttname"><a href="#ga3dc6c55a3f8495a7bc6dc0124434c688">fill_raw_2dnoise8</a></div><div class="ttdeci">void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time)</div><div class="ttdoc">Fill a 2D 8-bit buffer with noise, using inoise8()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00663">noise.cpp:663</a></div></div>
-<div class="ttc" id="agroup___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc_html_gaa521ccca6038d7b5e881fe2e8f35d3bc"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a></div><div class="ttdeci">uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z)</div><div class="ttdoc">8-Bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00521">noise.cpp:521</a></div></div>
+<div class="ttc" id="agroup___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688_html_ga3dc6c55a3f8495a7bc6dc0124434c688"><div class="ttname"><a href="#ga3dc6c55a3f8495a7bc6dc0124434c688">fill_raw_2dnoise8</a></div><div class="ttdeci">void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time)</div><div class="ttdoc">Fill a 2D 8-bit buffer with noise, using inoise8()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00758">noise.cpp:758</a></div></div>
+<div class="ttc" id="agroup___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc_html_gaa521ccca6038d7b5e881fe2e8f35d3bc"><div class="ttname"><a href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a></div><div class="ttdeci">uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z)</div><div class="ttdoc">8-Bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00616">noise.cpp:616</a></div></div>
 <div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00034">scale8.h:34</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00663">fill_raw_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00521">inoise8()</a>, <a class="el" href="../../d7/ddc/_noise_playground_8ino_source.html#l00035">octaves</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00034">scale8()</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00758">fill_raw_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00616">inoise8()</a>, <a class="el" href="../../d7/ddc/_noise_playground_8ino_source.html#l00035">octaves</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00034">scale8()</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00869">fill_2dnoise16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00829">fill_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00663">fill_raw_2dnoise8()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00697">fill_raw_2dnoise8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00964">fill_2dnoise16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00924">fill_2dnoise8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00758">fill_raw_2dnoise8()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00792">fill_raw_2dnoise8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -270,7 +270,7 @@ $(function(){initNavTree('de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc01244
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/da4/group___noise_fill.html">Noise Fill Functions</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

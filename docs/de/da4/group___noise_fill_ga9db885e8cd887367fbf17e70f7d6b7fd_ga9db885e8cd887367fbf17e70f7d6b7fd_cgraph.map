@@ -1,6 +1,6 @@
 <map id="fill_raw_noise16into8" name="fill_raw_noise16into8">
 <area shape="rect" id="Node000001" title="Fill a 1D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="5,5,165,31"/>
-<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="213,5,291,31"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="213,5,291,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,15,200,15,200,21,166,21"/>
 <area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="339,5,447,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="291,15,325,15,325,21,291,21"/>

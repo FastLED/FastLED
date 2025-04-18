@@ -16,8 +16,8 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand"
   }
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_786f9dc3989cf40b3de9df2d18ba04d7->dir_82c6f96b5a39b3aa6c2c41086d3f3d73 [headlabel="9", labeldistance=1.5 headhref="dir_000047_000071.html" href="dir_000047_000071.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_7276da76aefd3f61ae33022be714ac97->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000006_000027.html" href="dir_000006_000027.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_7276da76aefd3f61ae33022be714ac97->dir_82c6f96b5a39b3aa6c2c41086d3f3d73 [headlabel="8", labeldistance=1.5 headhref="dir_000006_000071.html" href="dir_000006_000071.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_82c6f96b5a39b3aa6c2c41086d3f3d73->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000071_000027.html" href="dir_000071_000027.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_786f9dc3989cf40b3de9df2d18ba04d7->dir_82c6f96b5a39b3aa6c2c41086d3f3d73 [headlabel="9", labeldistance=1.5 headhref="dir_000051_000075.html" href="dir_000051_000075.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_7276da76aefd3f61ae33022be714ac97->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000006_000029.html" href="dir_000006_000029.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_7276da76aefd3f61ae33022be714ac97->dir_82c6f96b5a39b3aa6c2c41086d3f3d73 [headlabel="8", labeldistance=1.5 headhref="dir_000006_000075.html" href="dir_000006_000075.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_82c6f96b5a39b3aa6c2c41086d3f3d73->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000075_000029.html" href="dir_000075_000029.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -24,7 +24,7 @@ digraph "loop"
   Node3 -> Node8 [id="edge8_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="scale8_LEAVING_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d",tooltip="This version of scale8() does not clean up the R1 register on AVR."];
   Node2 -> Node12 [id="edge9_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00",tooltip="16-bit, fixed point implementation of Perlin's noise."];
+  Node12 [id="Node000012",label="inoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c",tooltip="16-bit, fixed point implementation of Perlin's noise."];
   Node12 -> Node13 [id="edge10_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="inoise16_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node2 -> Node11 [id="edge11_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];

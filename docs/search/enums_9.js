@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['queuestate_0',['QueueState',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbf',1,'fl::RectangularDrawBuffer']]]
+  ['ows2811_0',['OWS2811',['../db/d97/_fast_l_e_d_8h_a69ae16731cd4ff30f81793033758d59c.html#a69ae16731cd4ff30f81793033758d59c',1,'FastLED.h']]]
 ];

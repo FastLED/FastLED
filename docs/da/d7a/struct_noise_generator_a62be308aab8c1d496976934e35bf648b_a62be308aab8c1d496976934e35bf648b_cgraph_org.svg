@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
+<g id="a_Node000003"><a xlink:href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="white" stroke="#666666" points="399,-19 341,-19 341,0 399,0 399,-19"/>
 <text text-anchor="middle" x="370" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16</text>
 </a>

@@ -22,7 +22,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="Returns a 0–255 ramp value: • ramps 0→255 over risingTime • holds 255 until latchMs–fallingTime • ram...">
 <polygon fill="#999999" stroke="#666666" points="142,-19 0,-19 0,0 142,0 142,-19"/>
 <text text-anchor="middle" x="71" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PirAdvanced::transition</text>
 </a>
@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11" target="_top" xlink:title="Returns true if the PIR is “latched on” (within latchMs of last trigger).">
 <polygon fill="white" stroke="#666666" points="304,-19 178,-19 178,0 304,0 304,-19"/>
 <text text-anchor="middle" x="241" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PirAdvanced::detect</text>
 </a>

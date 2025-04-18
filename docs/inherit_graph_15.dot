@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CHSV.__unnamed0__",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types.html#d2/d4c/union_c_h_s_v_8____unnamed0____",tooltip=" "];
+  Node0 [id="Node000000",label="CHSV",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d53/struct_c_h_s_v.html",tooltip="Representation of an HSV pixel (hue, saturation, value (aka brightness))."];
 }

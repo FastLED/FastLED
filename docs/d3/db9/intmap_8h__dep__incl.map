@@ -19,12 +19,12 @@
 <area shape="poly" id="edge9_Node000005_Node000009" title=" " alt="" coords="812,170,868,188,896,203,919,224,938,250,953,278,970,340,977,399,978,445,972,445,972,399,965,341,948,280,934,252,915,227,893,207,866,193,810,175"/>
 <area shape="rect" id="Node000010" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="768,372,853,397"/>
 <area shape="poly" id="edge10_Node000005_Node000010" title=" " alt="" coords="756,191,766,251,784,323,800,371,795,372,779,325,761,252,750,192"/>
-<area shape="rect" id="Node000073" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="771,460,850,485"/>
-<area shape="poly" id="edge23_Node000005_Node000073" title=" " alt="" coords="754,191,748,231,744,283,747,340,759,396,777,431,800,458,796,461,773,434,753,398,742,341,739,283,743,231,748,190"/>
-<area shape="rect" id="Node000113" href="$d0/d4b/crgb_8hpp.html" title="Defines utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="806,225,885,251"/>
-<area shape="poly" id="edge20_Node000005_Node000113" title=" " alt="" coords="783,184,832,223,829,227,779,188"/>
-<area shape="rect" id="Node000114" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="805,299,907,324"/>
-<area shape="poly" id="edge24_Node000005_Node000114" title=" " alt="" coords="812,172,860,189,882,204,900,224,905,245,898,266,885,285,871,300,867,297,881,282,893,264,900,245,895,227,878,208,857,194,810,177"/>
+<area shape="rect" id="Node000078" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="771,460,850,485"/>
+<area shape="poly" id="edge23_Node000005_Node000078" title=" " alt="" coords="754,191,748,231,744,283,747,340,759,396,777,431,800,458,796,461,773,434,753,398,742,341,739,283,743,231,748,190"/>
+<area shape="rect" id="Node000121" href="$d0/d4b/crgb_8hpp.html" title="Defines utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="806,225,885,251"/>
+<area shape="poly" id="edge20_Node000005_Node000121" title=" " alt="" coords="783,184,832,223,829,227,779,188"/>
+<area shape="rect" id="Node000122" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="805,299,907,324"/>
+<area shape="poly" id="edge24_Node000005_Node000122" title=" " alt="" coords="812,172,860,189,882,204,900,224,905,245,898,266,885,285,871,300,867,297,881,282,893,264,900,245,895,227,878,208,857,194,810,177"/>
 <area shape="poly" id="edge18_Node000010_Node000002" title=" " alt="" coords="868,391,1013,412,1187,443,1251,457,1249,462,1186,448,1012,417,867,396"/>
 <area shape="poly" id="edge15_Node000010_Node000004" title=" " alt="" coords="867,391,970,410,1029,425,1086,443,1118,458,1116,462,1084,448,1027,430,969,416,866,396"/>
 <area shape="poly" id="edge19_Node000010_Node000005" title=" " alt="" coords="812,359,803,325,781,241,762,178,767,177,787,239,808,323,817,358"/>
@@ -32,8 +32,8 @@
 <area shape="poly" id="edge12_Node000010_Node000007" title=" " alt="" coords="755,397,460,448,449,450,448,445,460,443,754,392"/>
 <area shape="poly" id="edge13_Node000010_Node000008" title=" " alt="" coords="772,405,672,448,670,443,770,400"/>
 <area shape="poly" id="edge14_Node000010_Node000009" title=" " alt="" coords="846,401,925,443,923,448,843,406"/>
-<area shape="poly" id="edge16_Node000010_Node000073" title=" " alt="" coords="805,411,807,459,802,460,800,411"/>
-<area shape="poly" id="edge17_Node000073_Node000010" title=" " alt="" coords="816,446,814,398,820,397,822,446"/>
-<area shape="poly" id="edge21_Node000113_Node000114" title=" " alt="" coords="852,264,857,298,852,299,846,265"/>
-<area shape="poly" id="edge22_Node000114_Node000010" title=" " alt="" coords="843,337,820,373,816,370,839,334"/>
+<area shape="poly" id="edge16_Node000010_Node000078" title=" " alt="" coords="805,411,807,459,802,460,800,411"/>
+<area shape="poly" id="edge17_Node000078_Node000010" title=" " alt="" coords="816,446,814,398,820,397,822,446"/>
+<area shape="poly" id="edge21_Node000121_Node000122" title=" " alt="" coords="852,264,857,298,852,299,846,265"/>
+<area shape="poly" id="edge22_Node000122_Node000010" title=" " alt="" coords="843,337,820,373,816,370,839,334"/>
 </map>

@@ -34,9 +34,13 @@ digraph "fl::Fx"
   Node13 -> Node14 [id="edge13_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl::Animartrix",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix.html",tooltip=" "];
   Node13 -> Node15 [id="edge14_Node000013_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="fl::NoisePalette",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette.html",tooltip=" "];
+  Node15 [id="Node000015",label="fl::Blend2d",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d.html",tooltip=" "];
   Node13 -> Node16 [id="edge15_Node000013_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fl::RedSquare",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square.html",tooltip=" "];
+  Node16 [id="Node000016",label="fl::NoisePalette",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette.html",tooltip=" "];
   Node13 -> Node17 [id="edge16_Node000013_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl::ScaleUp",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up.html",tooltip=" "];
+  Node17 [id="Node000017",label="fl::RedSquare",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square.html",tooltip=" "];
+  Node13 -> Node18 [id="edge17_Node000013_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::ScaleUp",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up.html",tooltip=" "];
+  Node13 -> Node19 [id="edge18_Node000013_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::WaveFx",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx.html",tooltip=" "];
 }

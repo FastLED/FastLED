@@ -16,9 +16,17 @@ digraph "fl::Fx2d::Fx2d"
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::Animartrix::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df5/classfl_1_1_animartrix_a376c91df5dcf27046037a8ad94c5b188.html#a376c91df5dcf27046037a8ad94c5b188",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::NoisePalette::NoisePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Blend2d::Blend2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_a46d2a049e57d4d91790eb93371972702.html#a46d2a049e57d4d91790eb93371972702",tooltip=" "];
   Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::RedSquare::RedSquare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square_ae8f84aa6b19859b64950ac0d8cd49b7d.html#ae8f84aa6b19859b64950ac0d8cd49b7d",tooltip=" "];
+  Node7 [id="Node000007",label="fl::NoisePalette::NoisePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244",tooltip=" "];
   Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::ScaleUp::ScaleUp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a2b96f658d915143d8a27a7e9d51d8a60.html#a2b96f658d915143d8a27a7e9d51d8a60",tooltip=" "];
+  Node8 [id="Node000008",label="fl::RedSquare::RedSquare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square_ae8f84aa6b19859b64950ac0d8cd49b7d.html#ae8f84aa6b19859b64950ac0d8cd49b7d",tooltip=" "];
+  Node1 -> Node9 [id="edge8_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::ScaleUp::ScaleUp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a2b96f658d915143d8a27a7e9d51d8a60.html#a2b96f658d915143d8a27a7e9d51d8a60",tooltip=" "];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::WaveFx::WaveFx",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_a3b178e616d310ad0fb2dfd9f0960a8e3.html#a3b178e616d310ad0fb2dfd9f0960a8e3",tooltip=" "];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::Blend2d::add",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_aa6b753d9f7a72e49bb11b0e25a6a2948.html#aa6b753d9f7a72e49bb11b0e25a6a2948",tooltip=" "];
+  Node1 -> Node12 [id="edge11_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::Blend2d::setParams",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_aad17ffdf04279a43a6f3825c910ccb13.html#aad17ffdf04279a43a6f3825c910ccb13",tooltip=" "];
 }

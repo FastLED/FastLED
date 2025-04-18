@@ -154,19 +154,19 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node17 -->
-<g id="Node000017" class="node">
-<title>Node17</title>
-<g id="a_Node000017"><a xlink:href="../../d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
+<!-- Node18 -->
+<g id="Node000018" class="node">
+<title>Node18</title>
+<g id="a_Node000018"><a xlink:href="../../d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
 <polygon fill="white" stroke="#666666" points="364.5,-85.5 282.5,-85.5 282.5,-66.5 364.5,-66.5 364.5,-85.5"/>
 <text text-anchor="middle" x="323.5" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::scale8</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node17 -->
-<g id="edge15_Node000001_Node000017" class="edge">
-<title>Node1&#45;&gt;Node17</title>
-<g id="a_edge15_Node000001_Node000017"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node18 -->
+<g id="edge15_Node000001_Node000018" class="edge">
+<title>Node1&#45;&gt;Node18</title>
+<g id="a_edge15_Node000001_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M460.17,-149.77C448.11,-132.7 427.82,-107.8 404,-94 392.12,-87.12 377.83,-82.87 364.66,-80.24"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="457.48,-152.04 466,-158.34 463.26,-148.1 457.48,-152.04"/>
 </a>
@@ -226,56 +226,56 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
+<!-- Node15 -->
+<g id="Node000015" class="node">
+<title>Node15</title>
+<g id="a_Node000015"><a xlink:href="../../d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
 <polygon fill="white" stroke="#666666" points="176,-104.5 114,-104.5 114,-85.5 176,-85.5 176,-104.5"/>
 <text text-anchor="middle" x="145" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">blurRows</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node14 -->
-<g id="edge11_Node000007_Node000014" class="edge">
-<title>Node7&#45;&gt;Node14</title>
-<g id="a_edge11_Node000007_Node000014"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node15 -->
+<g id="edge11_Node000007_Node000015" class="edge">
+<title>Node7&#45;&gt;Node15</title>
+<g id="a_edge11_Node000007_Node000015"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M269.25,-107.57C238.72,-104.46 201.51,-100.66 176.02,-98.06"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="269.02,-111.06 279.32,-108.6 269.73,-104.1 269.02,-111.06"/>
-</a>
-</g>
-</g>
-<!-- Node15 -->
-<g id="Node000015" class="node">
-<title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" target="_top" xlink:title="Fill an LED matrix with random colors, using 8&#45;bit noise.">
-<polygon fill="white" stroke="#666666" points="184,-67.5 106,-67.5 106,-48.5 184,-48.5 184,-67.5"/>
-<text text-anchor="middle" x="145" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fill_2dnoise8</text>
-</a>
-</g>
-</g>
-<!-- Node7&#45;&gt;Node15 -->
-<g id="edge13_Node000007_Node000015" class="edge">
-<title>Node7&#45;&gt;Node15</title>
-<g id="a_edge13_Node000007_Node000015"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M269.49,-102.12C260.54,-99.78 251.43,-97.07 243,-94 226.19,-87.88 223.64,-82.56 207,-76 199.09,-72.88 190.42,-70.01 182.16,-67.52"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="268.92,-105.59 279.47,-104.61 270.62,-98.8 268.92,-105.59"/>
 </a>
 </g>
 </g>
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f" target="_top" xlink:title="Maps an array of palette color indexes into an array of LED colors.">
+<g id="a_Node000016"><a xlink:href="../../de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" target="_top" xlink:title="Fill an LED matrix with random colors, using 8&#45;bit noise.">
+<polygon fill="white" stroke="#666666" points="184,-67.5 106,-67.5 106,-48.5 184,-48.5 184,-67.5"/>
+<text text-anchor="middle" x="145" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fill_2dnoise8</text>
+</a>
+</g>
+</g>
+<!-- Node7&#45;&gt;Node16 -->
+<g id="edge13_Node000007_Node000016" class="edge">
+<title>Node7&#45;&gt;Node16</title>
+<g id="a_edge13_Node000007_Node000016"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M269.49,-102.12C260.54,-99.78 251.43,-97.07 243,-94 226.19,-87.88 223.64,-82.56 207,-76 199.09,-72.88 190.42,-70.01 182.16,-67.52"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="268.92,-105.59 279.47,-104.61 270.62,-98.8 268.92,-105.59"/>
+</a>
+</g>
+</g>
+<!-- Node17 -->
+<g id="Node000017" class="node">
+<title>Node17</title>
+<g id="a_Node000017"><a xlink:href="../../d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f" target="_top" xlink:title="Maps an array of palette color indexes into an array of LED colors.">
 <polygon fill="white" stroke="#666666" points="207,-30 83,-30 83,0 207,0 207,-30"/>
 <text text-anchor="start" x="91" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">map_data_into_colors</text>
 <text text-anchor="middle" x="145" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">_through_palette</text>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node16 -->
-<g id="edge14_Node000007_Node000016" class="edge">
-<title>Node7&#45;&gt;Node16</title>
-<g id="a_edge14_Node000007_Node000016"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node17 -->
+<g id="edge14_Node000007_Node000017" class="edge">
+<title>Node7&#45;&gt;Node17</title>
+<g id="a_edge14_Node000007_Node000017"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M269.43,-106.23C260.08,-103.44 250.84,-99.51 243,-94 219.1,-77.19 229.66,-57.44 207,-39 202.85,-35.62 198.17,-32.68 193.29,-30.12"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="268.6,-109.64 279.16,-108.75 270.36,-102.86 268.6,-109.64"/>
 </a>
@@ -317,10 +317,10 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node14&#45;&gt;Node11 -->
-<g id="edge12_Node000014_Node000011" class="edge">
-<title>Node14&#45;&gt;Node11</title>
-<g id="a_edge12_Node000014_Node000011"><a xlink:title=" ">
+<!-- Node15&#45;&gt;Node11 -->
+<g id="edge12_Node000015_Node000011" class="edge">
+<title>Node15&#45;&gt;Node11</title>
+<g id="a_edge12_Node000015_Node000011"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M103.71,-101.41C84.83,-104.41 63.04,-107.87 47.1,-110.41"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="104.52,-104.82 113.85,-99.79 103.42,-97.91 104.52,-104.82"/>
 </a>

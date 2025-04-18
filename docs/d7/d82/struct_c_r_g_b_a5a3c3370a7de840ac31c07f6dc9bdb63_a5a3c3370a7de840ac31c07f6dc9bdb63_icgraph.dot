@@ -18,12 +18,14 @@ digraph "CRGB::nscale8"
   Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="blur2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba",tooltip=" "];
   Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
-  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="blurRows",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21",tooltip="Perform a blur1d() on every row of a rectangular matrix."];
-  Node8 -> Node5 [id="edge8_Node000008_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node9 [id="edge9_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
+  Node7 [id="Node000007",label="fl::Blend2d::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node9 [id="edge8_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="blurRows",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21",tooltip="Perform a blur1d() on every row of a rectangular matrix."];
+  Node9 -> Node5 [id="edge9_Node000009_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node10 [id="edge10_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
+  Node10 [id="Node000010",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
+  Node1 -> Node11 [id="edge11_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
 }

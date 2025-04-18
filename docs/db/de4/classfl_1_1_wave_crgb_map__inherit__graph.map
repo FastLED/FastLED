@@ -1,0 +1,9 @@
+<map id="fl::WaveCrgbMap" name="fl::WaveCrgbMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="137,79,269,104"/>
+<area shape="rect" id="Node000003" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map.html" title=" " alt="" coords="5,152,193,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,114,118,154,115,150,174,110"/>
+<area shape="rect" id="Node000004" href="$de/d99/classfl_1_1_wave_crgb_map_default.html" title=" " alt="" coords="217,152,397,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,110,292,150,289,154,230,114"/>
+<area shape="rect" id="Node000002" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="156,5,251,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,44,206,79,201,79,201,44"/>
+</map>

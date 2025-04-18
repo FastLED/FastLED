@@ -27,13 +27,13 @@ digraph "nscale8x3"
   Node10 [id="Node000010",label="blurColumns",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga33ce178f76009348d3a0f0723b22d4de.html#ga33ce178f76009348d3a0f0723b22d4de",tooltip="Perform a blur1d() on every column of a rectangular matrix."];
   Node10 -> Node11 [id="edge10_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="blur2d",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d3d/group___color_blurs_gadfd6e9dc2b0c79922d8d4be9d94cf5f5.html#gadfd6e9dc2b0c79922d8d4be9d94cf5f5",tooltip="Two-dimensional blur filter."];
-  Node7 -> Node14 [id="edge11_Node000007_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="blurRows",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21",tooltip="Perform a blur1d() on every row of a rectangular matrix."];
-  Node14 -> Node11 [id="edge12_Node000014_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 -> Node15 [id="edge13_Node000007_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
-  Node7 -> Node16 [id="edge14_Node000007_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
-  Node1 -> Node17 [id="edge15_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="CRGB::scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc",tooltip="Return a CRGB object that is a scaled down version of this object."];
+  Node7 -> Node15 [id="edge11_Node000007_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="blurRows",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21",tooltip="Perform a blur1d() on every row of a rectangular matrix."];
+  Node15 -> Node11 [id="edge12_Node000015_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node16 [id="edge13_Node000007_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
+  Node7 -> Node17 [id="edge14_Node000007_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
+  Node1 -> Node18 [id="edge15_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="CRGB::scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc",tooltip="Return a CRGB object that is a scaled down version of this object."];
 }

@@ -1,0 +1,15 @@
+<map id="fl::WaveSimulation2D" name="fl::WaveSimulation2D">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1103,86,1265,111"/>
+<area shape="rect" id="Node000002" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="820,79,1025,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1039,96,1103,96,1103,101,1039,101"/>
+<area shape="rect" id="Node000003" href="$d5/d94/classfl_1_1_wave_simulation2_d___real.html" title=" " alt="" coords="413,22,612,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="610,47,796,76,820,80,819,85,796,81,609,52"/>
+<area shape="rect" id="Node000004" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="5,22,205,47"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="219,32,413,32,413,37,219,37"/>
+<area shape="rect" id="Node000008" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="424,71,601,126"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="615,96,820,96,820,101,615,101"/>
+<area shape="rect" id="Node000009" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="20,86,191,111"/>
+<area shape="poly" id="edge5_Node000008_Node000009" title=" " alt="" coords="205,96,424,96,424,101,205,101"/>
+<area shape="rect" id="Node000010" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="445,151,581,191"/>
+<area shape="poly" id="edge6_Node000002_Node000010" title=" " alt="" coords="594,160,691,148,795,131,855,116,856,121,797,136,692,154,595,166"/>
+</map>

@@ -15,6 +15,17 @@ var group___timekeeping =
       [ "mPeriod", "de/d72/class_c_every_n_millis_dynamic_ab1c5f8358daf15c0d53345f157f560c9.html#ab1c5f8358daf15c0d53345f157f560c9", null ],
       [ "mPrevTrigger", "de/d72/class_c_every_n_millis_dynamic_a51ce5f7e287b34c3d4dbeed4c013062c.html#a51ce5f7e287b34c3d4dbeed4c013062c", null ]
     ] ],
+    [ "CEveryNMillisRandom", "d3/df3/class_c_every_n_millis_random.html", [
+      [ "CEveryNMillisRandom", "d3/df3/class_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a.html#a7ce7a18a081a60821fe8085d651a988a", null ],
+      [ "computeNext", "d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a", null ],
+      [ "getTime", "d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5", null ],
+      [ "ready", "d3/df3/class_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4.html#aa0783f52ff89ba25e9dc6de82261f1d4", null ],
+      [ "reset", "d3/df3/class_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459.html#aed808d63c84436374ada8fa020d9a459", null ],
+      [ "mMaxPeriod", "d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454", null ],
+      [ "mMinPeriod", "d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034", null ],
+      [ "mPeriod", "d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd", null ],
+      [ "mPrevTrigger", "d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a", null ]
+    ] ],
     [ "CEveryNTime", "de/d1d/class_c_every_n_time.html", [
       [ "CEveryNTime", "de/d1d/class_c_every_n_time_a8842463241cb9579949cb34c724e6d65.html#a8842463241cb9579949cb34c724e6d65", null ],
       [ "CEveryNTime", "de/d1d/class_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac.html#a645cdb84da00f4669e1cf22ce86a04ac", null ],
@@ -42,6 +53,8 @@ var group___timekeeping =
     [ "EVERY_N_MILLISECONDS_DYNAMIC", "d5/df2/group___timekeeping_ga84622b4bfb271a01d0a3bab2f2217f47.html#ga84622b4bfb271a01d0a3bab2f2217f47", null ],
     [ "EVERY_N_MILLISECONDS_DYNAMIC_I", "d5/df2/group___timekeeping_ga33823fb898e26e976f4394bf3fed8b10.html#ga33823fb898e26e976f4394bf3fed8b10", null ],
     [ "EVERY_N_MILLISECONDS_I", "d5/df2/group___timekeeping_ga8b6fa2a3e84d33ffebf136f6bd9019b3.html#ga8b6fa2a3e84d33ffebf136f6bd9019b3", null ],
+    [ "EVERY_N_MILLISECONDS_RANDOM", "d5/df2/group___timekeeping_ga4f2db23a849eecce6d992ebccae0140f.html#ga4f2db23a849eecce6d992ebccae0140f", null ],
+    [ "EVERY_N_MILLISECONDS_RANDOM_I", "d5/df2/group___timekeeping_gaccd061b76d3fc10b99fec70bb0966363.html#gaccd061b76d3fc10b99fec70bb0966363", null ],
     [ "EVERY_N_MINUTES", "d5/df2/group___timekeeping_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad", null ],
     [ "EVERY_N_MINUTES_I", "d5/df2/group___timekeeping_ga08ec76930e29e8685edacc060f01a9fd.html#ga08ec76930e29e8685edacc060f01a9fd", null ],
     [ "EVERY_N_SECONDS", "d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb", null ],

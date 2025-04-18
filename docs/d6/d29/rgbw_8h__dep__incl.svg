@@ -65,37 +65,37 @@
 </a>
 </g>
 </g>
-<!-- Node116 -->
-<g id="Node000116" class="node">
-<title>Node116</title>
-<g id="a_Node000116"><a xlink:href="../../d8/d6c/pixel__iterator_8h.html" target="_top" xlink:title="Non&#45;templated low level pixel data writing class.">
+<!-- Node124 -->
+<g id="Node000124" class="node">
+<title>Node124</title>
+<g id="a_Node000124"><a xlink:href="../../d8/d6c/pixel__iterator_8h.html" target="_top" xlink:title="Non&#45;templated low level pixel data writing class.">
 <polygon fill="white" stroke="#666666" points="255.5,-189.5 166.5,-189.5 166.5,-170.5 255.5,-170.5 255.5,-189.5"/>
 <text text-anchor="middle" x="211" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">pixel_iterator.h</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node116 -->
-<g id="edge7_Node000001_Node000116" class="edge">
-<title>Node1&#45;&gt;Node116</title>
-<g id="a_edge7_Node000001_Node000116"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node124 -->
+<g id="edge7_Node000001_Node000124" class="edge">
+<title>Node1&#45;&gt;Node124</title>
+<g id="a_edge7_Node000001_Node000124"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M184.88,-222.3C191.66,-211.58 200.1,-198.23 205.52,-189.67"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="181.85,-220.55 179.46,-230.87 187.76,-224.29 181.85,-220.55"/>
 </a>
 </g>
 </g>
-<!-- Node113 -->
-<g id="Node000113" class="node">
-<title>Node113</title>
-<g id="a_Node000113"><a xlink:href="../../d1/d8d/rgbw_8cpp.html" target="_top" xlink:title="Functions for red, green, blue, white (RGBW) output.">
+<!-- Node121 -->
+<g id="Node000121" class="node">
+<title>Node121</title>
+<g id="a_Node000121"><a xlink:href="../../d1/d8d/rgbw_8cpp.html" target="_top" xlink:title="Functions for red, green, blue, white (RGBW) output.">
 <polygon fill="white" stroke="#666666" points="333,-189.5 273,-189.5 273,-170.5 333,-170.5 333,-189.5"/>
 <text text-anchor="middle" x="303" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">rgbw.cpp</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node113 -->
-<g id="edge11_Node000001_Node000113" class="edge">
-<title>Node1&#45;&gt;Node113</title>
-<g id="a_edge11_Node000001_Node000113"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node121 -->
+<g id="edge11_Node000001_Node000121" class="edge">
+<title>Node1&#45;&gt;Node121</title>
+<g id="a_edge11_Node000001_Node000121"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M202.04,-226.78C226.94,-215.49 262.62,-199.31 284.22,-189.52"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="200.42,-223.68 192.76,-230.99 203.31,-230.05 200.42,-223.68"/>
 </a>
@@ -164,37 +164,37 @@
 </a>
 </g>
 </g>
-<!-- Node116&#45;&gt;Node3 -->
-<g id="edge10_Node000116_Node000003" class="edge">
-<title>Node116&#45;&gt;Node3</title>
-<g id="a_edge10_Node000116_Node000003"><a xlink:title=" ">
+<!-- Node124&#45;&gt;Node3 -->
+<g id="edge10_Node000124_Node000003" class="edge">
+<title>Node124&#45;&gt;Node3</title>
+<g id="a_edge10_Node000124_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M189.67,-164.66C173.14,-153.55 150.79,-138.51 136.89,-129.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="187.91,-167.69 198.16,-170.37 191.82,-161.88 187.91,-167.69"/>
 </a>
 </g>
 </g>
-<!-- Node116&#45;&gt;Node4 -->
-<g id="edge9_Node000116_Node000004" class="edge">
-<title>Node116&#45;&gt;Node4</title>
-<g id="a_edge9_Node000116_Node000004"><a xlink:title=" ">
+<!-- Node124&#45;&gt;Node4 -->
+<g id="edge9_Node000124_Node000004" class="edge">
+<title>Node124&#45;&gt;Node4</title>
+<g id="a_edge9_Node000124_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M234.83,-164.75C246.89,-156.09 260.36,-143.84 267,-129 276.3,-108.22 254.38,-86 239.77,-74.14"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="232.76,-161.92 226.42,-170.4 236.67,-167.73 232.76,-161.92"/>
 </a>
 </g>
 </g>
-<!-- Node107 -->
-<g id="Node000107" class="node">
-<title>Node107</title>
-<g id="a_Node000107"><a xlink:href="../../db/d66/chipsets_8h.html" target="_top" xlink:title="Contains the bulk of the definitions for the various LED chipsets supported.">
+<!-- Node115 -->
+<g id="Node000115" class="node">
+<title>Node115</title>
+<g id="a_Node000115"><a xlink:href="../../db/d66/chipsets_8h.html" target="_top" xlink:title="Contains the bulk of the definitions for the various LED chipsets supported.">
 <polygon fill="#fff0f0" stroke="red" points="258,-129 192,-129 192,-110 258,-110 258,-129"/>
 <text text-anchor="middle" x="225" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">chipsets.h</text>
 </a>
 </g>
 </g>
-<!-- Node116&#45;&gt;Node107 -->
-<g id="edge8_Node000116_Node000107" class="edge">
-<title>Node116&#45;&gt;Node107</title>
-<g id="a_edge8_Node000116_Node000107"><a xlink:title=" ">
+<!-- Node124&#45;&gt;Node115 -->
+<g id="edge8_Node000124_Node000115" class="edge">
+<title>Node124&#45;&gt;Node115</title>
+<g id="a_edge8_Node000124_Node000115"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M215.43,-160.49C217.94,-150.01 220.96,-137.39 222.93,-129.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="211.99,-159.83 213.07,-170.37 218.8,-161.46 211.99,-159.83"/>
 </a>

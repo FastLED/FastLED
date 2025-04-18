@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CRGBPalette256",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d34/class_c_r_g_b_palette256.html",tooltip="RGB color palette with 256 discrete values."];
+  Node0 [id="Node000000",label="CRGBPalette16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dc4/class_c_r_g_b_palette16.html",tooltip="RGB color palette with 16 discrete values."];
 }

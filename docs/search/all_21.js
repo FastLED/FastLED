@@ -9,5 +9,5 @@ var searchData=
   ['yscale_6',['yscale',['../d7/ddc/_noise_playground_8ino_a404135f1b630de6583f5bb7d45627518.html#a404135f1b630de6583f5bb7d45627518',1,'NoisePlayground.ino']]],
   ['yves_7',['YVES',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab34aec3026234fb3163c29ce04f239fe',1,'fl']]],
   ['yves_8',['Yves',['../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_a03df3b0b29ff7961737bf7533e6a83f5.html#a03df3b0b29ff7961737bf7533e6a83f5',1,'animartrix_detail::ANIMartRIX']]],
-  ['yves_20i2s_20parallel_20driver_20for_20the_20esp32_20s3_9',['New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3',['../index.html#autotoc_md13',1,'']]]
+  ['yves_20i2s_20parallel_20driver_20for_20the_20esp32_20s3_9',['New in 3.9.9: 16-way Yves I2S parallel driver for the ESP32-S3',['../index.html#autotoc_md14',1,'']]]
 ];

@@ -9,10 +9,14 @@ var searchData=
   ['wasspiralclicked_6',['wasSpiralClicked',['../d1/ddb/_chromancer_8ino_a9601d97a8abe5117af142d098091e33d.html#a9601d97a8abe5117af142d098091e33d',1,'Chromancer.ino']]],
   ['wasstarburstclicked_7',['wasStarburstClicked',['../d1/ddb/_chromancer_8ino_a1dc8854cec78d0a24c3437970a9f3b95.html#a1dc8854cec78d0a24c3437970a9f3b95',1,'Chromancer.ino']]],
   ['water_8',['water',['../dd/d61/_fx_water_8ino_ad162ec2cac69388536ca7747e408c569.html#ad162ec2cac69388536ca7747e408c569',1,'FxWater.ino']]],
-  ['which_5fvisualizer_9',['which_visualizer',['../da/db7/structui__state_a64e160b26e32e15c6cae1c534d112eec.html#a64e160b26e32e15c6cae1c534d112eec',1,'ui_state']]],
-  ['whichvideo_10',['whichVideo',['../d7/d35/_fx_sd_card_8ino_a52385082e6a9a87a420a50d31f9a35c6.html#a52385082e6a9a87a420a50d31f9a35c6',1,'FxSdCard.ino']]],
-  ['white_5fcolor_5ftemp_11',['white_color_temp',['../db/d74/struct_rgbw_a67117cdd6c42ac18d4f9ab176d471d1d.html#a67117cdd6c42ac18d4f9ab176d471d1d',1,'Rgbw']]],
-  ['width_12',['width',['../d0/dce/classfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66.html#a14faee68282b9a4b37fa166f0a075e66',1,'fl::XYMap::width'],['../d9/d41/classfl_1_1_noise_palette_a92e4810a42be1a895a35291e65e10562.html#a92e4810a42be1a895a35291e65e10562',1,'fl::NoisePalette::width']]],
-  ['with_5fdma_13',['with_dma',['../da/d7c/led__strip__rmt_8h.html#aad3ff980ce20eb031c0fcea641b94844',1,'led_strip_rmt_config_t::led_strip_rmt_extra_config::with_dma'],['../db/d8e/led__strip__spi_8h.html#a7cb3efad078f0ddc184f879f6163f2bc',1,'led_strip_spi_config_t.flags::with_dma']]],
-  ['word_14',['word',['../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8',1,'bitswap_type']]]
+  ['wavefxlower_9',['waveFxLower',['../dd/d10/_fx_wave2d_8ino_a313ae68d0af0406e800df4ac6550b3e8.html#a313ae68d0af0406e800df4ac6550b3e8',1,'FxWave2d.ino']]],
+  ['wavefxupper_10',['waveFxUpper',['../dd/d10/_fx_wave2d_8ino_a79c6c23d5b733c06d2bda85fc9645a04.html#a79c6c23d5b733c06d2bda85fc9645a04',1,'FxWave2d.ino']]],
+  ['wavesim_11',['waveSim',['../d1/d16/_wave_8ino_af5620b13c749b2290ba349d067705271.html#af5620b13c749b2290ba349d067705271',1,'waveSim:&#160;Wave.ino'],['../dd/d44/_wave2d_8ino_afddb1f09a5040dfff98e670ec9082231.html#afddb1f09a5040dfff98e670ec9082231',1,'waveSim:&#160;Wave2d.ino']]],
+  ['which_5fvisualizer_12',['which_visualizer',['../da/db7/structui__state_a64e160b26e32e15c6cae1c534d112eec.html#a64e160b26e32e15c6cae1c534d112eec',1,'ui_state']]],
+  ['whichgrid_13',['whichGrid',['../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4',1,'fl::WaveSimulation1D_Real::whichGrid'],['../d5/d94/classfl_1_1_wave_simulation2_d___real_a32b1538e177a62d54b04b528ef3d1218.html#a32b1538e177a62d54b04b528ef3d1218',1,'fl::WaveSimulation2D_Real::whichGrid']]],
+  ['whichvideo_14',['whichVideo',['../d7/d35/_fx_sd_card_8ino_a52385082e6a9a87a420a50d31f9a35c6.html#a52385082e6a9a87a420a50d31f9a35c6',1,'FxSdCard.ino']]],
+  ['white_5fcolor_5ftemp_15',['white_color_temp',['../db/d74/struct_rgbw_a67117cdd6c42ac18d4f9ab176d471d1d.html#a67117cdd6c42ac18d4f9ab176d471d1d',1,'Rgbw']]],
+  ['width_16',['width',['../d5/d94/classfl_1_1_wave_simulation2_d___real_a7e52f477c5304e495b883a89f0cf3abe.html#a7e52f477c5304e495b883a89f0cf3abe',1,'fl::WaveSimulation2D_Real::width'],['../d0/dce/classfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66.html#a14faee68282b9a4b37fa166f0a075e66',1,'fl::XYMap::width'],['../d9/d41/classfl_1_1_noise_palette_a92e4810a42be1a895a35291e65e10562.html#a92e4810a42be1a895a35291e65e10562',1,'fl::NoisePalette::width']]],
+  ['with_5fdma_17',['with_dma',['../da/d7c/led__strip__rmt_8h.html#aad3ff980ce20eb031c0fcea641b94844',1,'led_strip_rmt_config_t::led_strip_rmt_extra_config::with_dma'],['../db/d8e/led__strip__spi_8h.html#a7cb3efad078f0ddc184f879f6163f2bc',1,'led_strip_spi_config_t.flags::with_dma']]],
+  ['word_18',['word',['../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8',1,'bitswap_type']]]
 ];

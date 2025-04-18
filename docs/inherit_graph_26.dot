@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="Color3i",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i.html",tooltip=" "];
+  Node0 [id="Node000000",label="CMinWait\< WAIT \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d6d/class_c_min_wait.html",tooltip="Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e..."];
 }

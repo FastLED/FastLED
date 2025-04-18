@@ -6,5 +6,6 @@ var searchData=
   ['activesensingcallback_3',['ActiveSensingCallback',['../d8/dd0/midi___defs_8h_a333248cb59a7ca0457d650d13c229bcf.html#a333248cb59a7ca0457d650d13c229bcf',1,'midi_Defs.h']]],
   ['advancedatafunction_4',['advanceDataFunction',['../d8/d6c/pixel__iterator_8h_a64e845e00bf1312fed8893eb4d071319.html#a64e845e00bf1312fed8893eb4d071319',1,'pixel_iterator.h']]],
   ['aftertouchchannelcallback_5',['AfterTouchChannelCallback',['../d8/dd0/midi___defs_8h_a603b29320f039258cc464dadfe4b4b32.html#a603b29320f039258cc464dadfe4b4b32',1,'midi_Defs.h']]],
-  ['aftertouchpolycallback_6',['AfterTouchPolyCallback',['../d8/dd0/midi___defs_8h_a555981df7e9ef5453b7d5bb92d0103af.html#a555981df7e9ef5453b7d5bb92d0103af',1,'midi_Defs.h']]]
+  ['aftertouchpolycallback_6',['AfterTouchPolyCallback',['../d8/dd0/midi___defs_8h_a555981df7e9ef5453b7d5bb92d0103af.html#a555981df7e9ef5453b7d5bb92d0103af',1,'midi_Defs.h']]],
+  ['args_7',['Args',['../d6/d5f/classfl_1_1_wave_fx_a95c9a65bf6147be56b0dc1c96a031627.html#a95c9a65bf6147be56b0dc1c96a031627',1,'fl::WaveFx']]]
 ];

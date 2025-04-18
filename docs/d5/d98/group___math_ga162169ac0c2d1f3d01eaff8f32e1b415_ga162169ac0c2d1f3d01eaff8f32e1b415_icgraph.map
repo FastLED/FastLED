@@ -1,0 +1,11 @@
+<map id="abs8" name="abs8">
+<area shape="rect" id="Node000001" title="Take the absolute value of a signed 8&#45;bit uint8_t." alt="" coords="276,31,329,56"/>
+<area shape="rect" id="Node000002" href="$dc/dfc/_fire_matrix_8ino_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="104,5,228,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="262,39,228,32,229,27,263,33"/>
+<area shape="rect" id="Node000004" href="$df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d" title=" " alt="" coords="104,55,228,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="263,53,229,59,228,54,262,48"/>
+<area shape="rect" id="Node000003" href="$dc/dfc/_fire_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+<area shape="rect" id="Node000005" href="$df/d5c/_fire_cylinder_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="90,70,56,70,56,65,90,65"/>
+</map>

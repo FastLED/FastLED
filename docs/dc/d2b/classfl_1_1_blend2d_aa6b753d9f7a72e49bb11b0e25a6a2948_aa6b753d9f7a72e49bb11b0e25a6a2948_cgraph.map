@@ -1,0 +1,11 @@
+<map id="fl::Blend2d::add" name="fl::Blend2d::add">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,128,80"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d_a98879bee7a7a97ceb2cc34ea2eefc7fe.html#a98879bee7a7a97ceb2cc34ea2eefc7fe" title=" " alt="" coords="182,29,293,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,56,168,50,169,55,129,61"/>
+<area shape="rect" id="Node000005" href="$dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184dbccbcc.html#a5ee229ce7c02bd25ae86ef184dbccbcc" title=" " alt="" coords="176,79,299,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="129,73,163,78,162,83,128,79"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx_aa4a990c2a2d04e57046cf8b0f64ce4e7.html#aa4a990c2a2d04e57046cf8b0f64ce4e7" title=" " alt="" coords="369,5,447,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="292,32,355,23,356,28,293,37"/>
+<area shape="rect" id="Node000004" href="$d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" title=" " alt="" coords="347,55,469,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="293,48,333,54,333,59,292,53"/>
+</map>

@@ -119,7 +119,7 @@
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
+<g id="a_Node000009"><a xlink:href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" target="_top" xlink:title="16&#45;bit, fixed point implementation of Perlin&#39;s noise.">
 <polygon fill="#fff0f0" stroke="red" points="420,-132 362,-132 362,-113 420,-113 420,-132"/>
 <text text-anchor="middle" x="391" y="-120" font-family="Helvetica,sans-Serif" font-size="10.00">inoise16</text>
 </a>

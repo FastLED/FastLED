@@ -93,11 +93,11 @@ digraph "/home/runner/work/FastLED/FastLED/examples/wasm/wasm.ino"
   Node28 -> Node13 [id="edge57_Node000028_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node28 -> Node8 [id="edge58_Node000028_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node53 -> Node8 [id="edge59_Node000053_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node53 -> Node38 [id="edge60_Node000053_Node000038",color="steelblue1",style="solid",tooltip=" "];
+  Node53 -> Node13 [id="edge60_Node000053_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node53 -> Node38 [id="edge61_Node000053_Node000038",color="steelblue1",style="solid",tooltip=" "];
   Node38 [id="Node000038",label="fl/ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/df1/fl_2ptr_8h.html",tooltip=" "];
-  Node38 -> Node19 [id="edge61_Node000038_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node38 -> Node13 [id="edge62_Node000038_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node53 -> Node13 [id="edge63_Node000053_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node38 -> Node19 [id="edge62_Node000038_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node38 -> Node13 [id="edge63_Node000038_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node76 [id="edge64_Node000004_Node000076",color="steelblue1",style="solid",tooltip=" "];
   Node76 [id="Node000076",label="pixelset.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d46/pixelset_8h.html",tooltip="Declares classes for managing logical groups of LEDs."];
   Node76 -> Node4 [id="edge65_Node000076_Node000004",color="steelblue1",style="solid",tooltip=" "];

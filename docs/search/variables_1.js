@@ -22,5 +22,7 @@ var searchData=
   ['arguments_19',['arguments',['../df/d0f/classfl_1_1_pixels_a1fee3c1eb1e16dac26115f3cca83d828.html#a1fee3c1eb1e16dac26115f3cca83d828',1,'fl::Pixels']]],
   ['arr_5f_20',['arr_',['../d3/d92/classfl_1_1scoped__array_a4333e67c9348d17999abaefa7f45131c.html#a4333e67c9348d17999abaefa7f45131c',1,'fl::scoped_array']]],
   ['array_21',['array',['../d7/d4a/struct_led_columns_a2323dbaac46cc0c03e8d261f0702c2d8.html#a2323dbaac46cc0c03e8d261f0702c2d8',1,'LedColumns']]],
-  ['autoselectbackgroundcolor_22',['autoSelectBackgroundColor',['../de/db5/classfl_1_1_twinkle_fox_a2c378fabc45c60acf64e9d59f0aa3b7f.html#a2c378fabc45c60acf64e9d59f0aa3b7f',1,'fl::TwinkleFox']]]
+  ['auto_5fupdates_22',['auto_updates',['../d4/d36/namespacefl.html#a31d87fcefb3cc18bc7024d421a39f79f',1,'fl::WaveFxArgs']]],
+  ['autoselectbackgroundcolor_23',['autoSelectBackgroundColor',['../de/db5/classfl_1_1_twinkle_fox_a2c378fabc45c60acf64e9d59f0aa3b7f.html#a2c378fabc45c60acf64e9d59f0aa3b7f',1,'fl::TwinkleFox']]],
+  ['autotrigger_24',['autoTrigger',['../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc',1,'autoTrigger:&#160;FxWave2d.ino'],['../dd/d44/_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc',1,'autoTrigger:&#160;Wave2d.ino']]]
 ];

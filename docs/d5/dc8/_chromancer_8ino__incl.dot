@@ -147,12 +147,12 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Chromancer/Chromancer.ino"
   Node1 -> Node88 [id="edge99_Node000001_Node000088",color="steelblue1",style="solid",tooltip=" "];
   Node88 [id="Node000088",label="fl/ui.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3b/ui_8h.html",tooltip=" "];
   Node88 -> Node6 [id="edge100_Node000088_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node88 -> Node89 [id="edge101_Node000088_Node000089",color="steelblue1",style="solid",tooltip=" "];
-  Node89 [id="Node000089",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node88 -> Node44 [id="edge101_Node000088_Node000044",color="steelblue1",style="solid",tooltip=" "];
   Node88 -> Node14 [id="edge102_Node000088_Node000014",color="steelblue1",style="solid",tooltip=" "];
-  Node88 -> Node44 [id="edge103_Node000088_Node000044",color="steelblue1",style="solid",tooltip=" "];
-  Node88 -> Node32 [id="edge104_Node000088_Node000032",color="steelblue1",style="solid",tooltip=" "];
-  Node88 -> Node51 [id="edge105_Node000088_Node000051",color="steelblue1",style="solid",tooltip=" "];
+  Node88 -> Node32 [id="edge103_Node000088_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node88 -> Node51 [id="edge104_Node000088_Node000051",color="steelblue1",style="solid",tooltip=" "];
+  Node88 -> Node89 [id="edge105_Node000088_Node000089",color="steelblue1",style="solid",tooltip=" "];
+  Node89 [id="Node000089",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node1 -> Node59 [id="edge106_Node000001_Node000059",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node90 [id="edge107_Node000001_Node000090",color="steelblue1",style="solid",tooltip=" "];
   Node90 [id="Node000090",label="screenmap.json.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d23/screenmap_8json_8h.html",tooltip=" "];

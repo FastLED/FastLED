@@ -101,7 +101,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga77c11f2f9fea19661e8e
 
 <div class="contents">
 <a id="ga77c11f2f9fea19661e8eaa04cf9a4155" name="ga77c11f2f9fea19661e8eaa04cf9a4155"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga77c11f2f9fea19661e8eaa04cf9a4155">&#9670;&#160;</a></span>inoise16_raw() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga77c11f2f9fea19661e8eaa04cf9a4155">&#9670;&#160;</a></span>inoise16_raw() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -137,38 +137,38 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga77c11f2f9fea19661e8e
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00403">403</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  404</span>{</div>
-<div class="line"><span class="lineno">  405</span>    <span class="comment">// Find the unit cube containing the point</span></div>
-<div class="line"><span class="lineno">  406</span>    uint8_t X = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>&gt;&gt;16;</div>
-<div class="line"><span class="lineno">  407</span>    uint8_t Y = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>&gt;&gt;16;</div>
-<div class="line"><span class="lineno">  408</span> </div>
-<div class="line"><span class="lineno">  409</span>    <span class="comment">// Hash cube corner coordinates</span></div>
-<div class="line"><span class="lineno">  410</span>    uint8_t A = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X)+Y;</div>
-<div class="line"><span class="lineno">  411</span>    uint8_t AA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A);</div>
-<div class="line"><span class="lineno">  412</span>    uint8_t AB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A+1);</div>
-<div class="line"><span class="lineno">  413</span>    uint8_t B = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X+1)+Y;</div>
-<div class="line"><span class="lineno">  414</span>    uint8_t BA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B);</div>
-<div class="line"><span class="lineno">  415</span>    uint8_t BB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B+1);</div>
-<div class="line"><span class="lineno">  416</span> </div>
-<div class="line"><span class="lineno">  417</span>    <span class="comment">// Get the relative position of the point in the cube</span></div>
-<div class="line"><span class="lineno">  418</span>    uint16_t u = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  419</span>    uint16_t v = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>    <span class="comment">// Get a signed version of the above for the grad function</span></div>
-<div class="line"><span class="lineno">  422</span>    int16_t xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  423</span>    int16_t yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  424</span>    uint16_t N = 0x8000L;</div>
-<div class="line"><span class="lineno">  425</span> </div>
-<div class="line"><span class="lineno">  426</span>    u = EASE16(u); v = EASE16(v);</div>
-<div class="line"><span class="lineno">  427</span> </div>
-<div class="line"><span class="lineno">  428</span>    int16_t X1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA), xx, yy), <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA), xx - N, yy), u);</div>
-<div class="line"><span class="lineno">  429</span>    int16_t X2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB), xx, yy-N), <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB), xx - N, yy - N), u);</div>
-<div class="line"><span class="lineno">  430</span> </div>
-<div class="line"><span class="lineno">  431</span>    int16_t ans = LERP(X1,X2,v);</div>
-<div class="line"><span class="lineno">  432</span> </div>
-<div class="line"><span class="lineno">  433</span>    <span class="keywordflow">return</span> ans;</div>
-<div class="line"><span class="lineno">  434</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00498">498</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  499</span>{</div>
+<div class="line"><span class="lineno">  500</span>    <span class="comment">// Find the unit cube containing the point</span></div>
+<div class="line"><span class="lineno">  501</span>    uint8_t X = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>&gt;&gt;16;</div>
+<div class="line"><span class="lineno">  502</span>    uint8_t Y = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>&gt;&gt;16;</div>
+<div class="line"><span class="lineno">  503</span> </div>
+<div class="line"><span class="lineno">  504</span>    <span class="comment">// Hash cube corner coordinates</span></div>
+<div class="line"><span class="lineno">  505</span>    uint8_t A = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X)+Y;</div>
+<div class="line"><span class="lineno">  506</span>    uint8_t AA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A);</div>
+<div class="line"><span class="lineno">  507</span>    uint8_t AB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A+1);</div>
+<div class="line"><span class="lineno">  508</span>    uint8_t B = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X+1)+Y;</div>
+<div class="line"><span class="lineno">  509</span>    uint8_t BA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B);</div>
+<div class="line"><span class="lineno">  510</span>    uint8_t BB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B+1);</div>
+<div class="line"><span class="lineno">  511</span> </div>
+<div class="line"><span class="lineno">  512</span>    <span class="comment">// Get the relative position of the point in the cube</span></div>
+<div class="line"><span class="lineno">  513</span>    uint16_t u = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  514</span>    uint16_t v = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  515</span> </div>
+<div class="line"><span class="lineno">  516</span>    <span class="comment">// Get a signed version of the above for the grad function</span></div>
+<div class="line"><span class="lineno">  517</span>    int16_t xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  518</span>    int16_t yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  519</span>    uint16_t N = 0x8000L;</div>
+<div class="line"><span class="lineno">  520</span> </div>
+<div class="line"><span class="lineno">  521</span>    u = EASE16(u); v = EASE16(v);</div>
+<div class="line"><span class="lineno">  522</span> </div>
+<div class="line"><span class="lineno">  523</span>    int16_t X1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA), xx, yy), <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA), xx - N, yy), u);</div>
+<div class="line"><span class="lineno">  524</span>    int16_t X2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB), xx, yy-N), <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(<a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB), xx - N, yy - N), u);</div>
+<div class="line"><span class="lineno">  525</span> </div>
+<div class="line"><span class="lineno">  526</span>    int16_t ans = LERP(X1,X2,v);</div>
+<div class="line"><span class="lineno">  527</span> </div>
+<div class="line"><span class="lineno">  528</span>    <span class="keywordflow">return</span> ans;</div>
+<div class="line"><span class="lineno">  529</span>}</div>
 <div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
 <div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
 <div class="ttc" id="anoise_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdoc">Reads a single byte from the p array.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00051">noise.cpp:51</a></div></div>
@@ -192,7 +192,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga77c11f2f9fea19661e8e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/group___noise_generation.html">Noise Generation Functions</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

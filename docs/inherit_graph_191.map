@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$d6/d39/group___palette_classes.html#df/dd6/struct_t_r_g_b_gradient_palette_entry_union_8____unnamed0____" title=" " alt="" coords="5,5,199,45"/>
+<area shape="rect" id="Node000000" href="$db/d74/struct_rgbw.html" title=" " alt="" coords="5,55,64,80"/>
+<area shape="rect" id="Node000001" href="$d5/d8d/struct_rgbw_default.html" title=" " alt="" coords="122,5,229,31"/>
+<area shape="poly" id="edge175_Node000000_Node000001" title=" " alt="" coords="76,50,138,28,139,33,78,55"/>
+<area shape="rect" id="Node000002" href="$d3/dbb/struct_rgbw_invalid.html" title=" " alt="" coords="124,55,227,80"/>
+<area shape="poly" id="edge176_Node000000_Node000002" title=" " alt="" coords="78,65,123,65,123,70,78,70"/>
+<area shape="rect" id="Node000003" href="$da/db9/struct_rgbw_white_is_off.html" title=" " alt="" coords="112,104,239,129"/>
+<area shape="poly" id="edge177_Node000000_Node000003" title=" " alt="" coords="78,80,139,101,138,106,76,85"/>
 </map>

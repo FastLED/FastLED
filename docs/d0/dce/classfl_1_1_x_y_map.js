@@ -10,6 +10,7 @@ var classfl_1_1_x_y_map =
     [ "XYMap", "d0/dce/classfl_1_1_x_y_map_a66320ff898a584bf26e3783607c2cc5e.html#a66320ff898a584bf26e3783607c2cc5e", null ],
     [ "XYMap", "d0/dce/classfl_1_1_x_y_map_aba1abf1f5d9679f0ada9fdf589568f3a.html#aba1abf1f5d9679f0ada9fdf589568f3a", null ],
     [ "constructRectangularGrid", "d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e", null ],
+    [ "constructSerpentine", "d0/dce/classfl_1_1_x_y_map_a29454fe0a5380af96f921085bbf34b87.html#a29454fe0a5380af96f921085bbf34b87", null ],
     [ "constructWithLookUpTable", "d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9.html#a2193220fbe218947fdd4fd2aba56f6a9", null ],
     [ "constructWithUserFunction", "d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7", null ],
     [ "convertToLookUpTable", "d0/dce/classfl_1_1_x_y_map_a87a40fc38645968ce810ee35a6a70239.html#a87a40fc38645968ce810ee35a6a70239", null ],

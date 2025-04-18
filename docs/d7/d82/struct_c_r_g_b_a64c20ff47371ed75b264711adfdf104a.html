@@ -129,55 +129,55 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a64c20ff47371ed75b264711adfdf104
 <p>There's no such thing as a free lunch; in many cases this "hidden bit" may actually be visible, but this code makes reasonable efforts to hide it as much as is reasonably possible.</p>
 <p>Also, an effort is made to make it such that repeatedly setting the parity to different values will not cause the color to "drift". Toggling the parity twice should generally result in the original color again. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00439">439</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  440</span>    {</div>
-<div class="line"><span class="lineno">  441</span>        uint8_t curparity = <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a385612de52ce7a479fea99a618a397fd.html#a385612de52ce7a479fea99a618a397fd">getParity</a>();</div>
-<div class="line"><span class="lineno">  442</span> </div>
-<div class="line"><span class="lineno">  443</span>        <span class="keywordflow">if</span>( parity == curparity) <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  444</span> </div>
-<div class="line"><span class="lineno">  445</span>        <span class="keywordflow">if</span>( parity ) {</div>
-<div class="line"><span class="lineno">  446</span>            <span class="comment">// going &#39;up&#39;</span></div>
-<div class="line"><span class="lineno">  447</span>            <span class="keywordflow">if</span>( (b &gt; 0) &amp;&amp; (b &lt; 255)) {</div>
-<div class="line"><span class="lineno">  448</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
-<div class="line"><span class="lineno">  449</span>                    ++r;</div>
-<div class="line"><span class="lineno">  450</span>                    ++g;</div>
-<div class="line"><span class="lineno">  451</span>                }</div>
-<div class="line"><span class="lineno">  452</span>                ++b;</div>
-<div class="line"><span class="lineno">  453</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( (r &gt; 0) &amp;&amp; (r &lt; 255)) {</div>
-<div class="line"><span class="lineno">  454</span>                ++r;</div>
-<div class="line"><span class="lineno">  455</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( (g &gt; 0) &amp;&amp; (g &lt; 255)) {</div>
-<div class="line"><span class="lineno">  456</span>                ++g;</div>
-<div class="line"><span class="lineno">  457</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  458</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
-<div class="line"><span class="lineno">  459</span>                    r ^= 0x01;</div>
-<div class="line"><span class="lineno">  460</span>                    g ^= 0x01;</div>
-<div class="line"><span class="lineno">  461</span>                }</div>
-<div class="line"><span class="lineno">  462</span>                b ^= 0x01;</div>
-<div class="line"><span class="lineno">  463</span>            }</div>
-<div class="line"><span class="lineno">  464</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  465</span>            <span class="comment">// going &#39;down&#39;</span></div>
-<div class="line"><span class="lineno">  466</span>            <span class="keywordflow">if</span>( b &gt; 1) {</div>
-<div class="line"><span class="lineno">  467</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
-<div class="line"><span class="lineno">  468</span>                    --r;</div>
-<div class="line"><span class="lineno">  469</span>                    --g;</div>
-<div class="line"><span class="lineno">  470</span>                }</div>
-<div class="line"><span class="lineno">  471</span>                --b;</div>
-<div class="line"><span class="lineno">  472</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( g &gt; 1) {</div>
-<div class="line"><span class="lineno">  473</span>                --g;</div>
-<div class="line"><span class="lineno">  474</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( r &gt; 1) {</div>
-<div class="line"><span class="lineno">  475</span>                --r;</div>
-<div class="line"><span class="lineno">  476</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  477</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
-<div class="line"><span class="lineno">  478</span>                    r ^= 0x01;</div>
-<div class="line"><span class="lineno">  479</span>                    g ^= 0x01;</div>
-<div class="line"><span class="lineno">  480</span>                }</div>
-<div class="line"><span class="lineno">  481</span>                b ^= 0x01;</div>
-<div class="line"><span class="lineno">  482</span>            }</div>
-<div class="line"><span class="lineno">  483</span>        }</div>
-<div class="line"><span class="lineno">  484</span>    }</div>
-<div class="ttc" id="astruct_c_r_g_b_a385612de52ce7a479fea99a618a397fd_html_a385612de52ce7a479fea99a618a397fd"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a385612de52ce7a479fea99a618a397fd.html#a385612de52ce7a479fea99a618a397fd">CRGB::getParity</a></div><div class="ttdeci">FASTLED_FORCE_INLINE uint8_t getParity()</div><div class="ttdoc">Returns 0 or 1, depending on the lowest bit of the sum of the color components.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00411">crgb.h:411</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00442">442</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  443</span>    {</div>
+<div class="line"><span class="lineno">  444</span>        uint8_t curparity = <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a385612de52ce7a479fea99a618a397fd.html#a385612de52ce7a479fea99a618a397fd">getParity</a>();</div>
+<div class="line"><span class="lineno">  445</span> </div>
+<div class="line"><span class="lineno">  446</span>        <span class="keywordflow">if</span>( parity == curparity) <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  447</span> </div>
+<div class="line"><span class="lineno">  448</span>        <span class="keywordflow">if</span>( parity ) {</div>
+<div class="line"><span class="lineno">  449</span>            <span class="comment">// going &#39;up&#39;</span></div>
+<div class="line"><span class="lineno">  450</span>            <span class="keywordflow">if</span>( (b &gt; 0) &amp;&amp; (b &lt; 255)) {</div>
+<div class="line"><span class="lineno">  451</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
+<div class="line"><span class="lineno">  452</span>                    ++r;</div>
+<div class="line"><span class="lineno">  453</span>                    ++g;</div>
+<div class="line"><span class="lineno">  454</span>                }</div>
+<div class="line"><span class="lineno">  455</span>                ++b;</div>
+<div class="line"><span class="lineno">  456</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( (r &gt; 0) &amp;&amp; (r &lt; 255)) {</div>
+<div class="line"><span class="lineno">  457</span>                ++r;</div>
+<div class="line"><span class="lineno">  458</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( (g &gt; 0) &amp;&amp; (g &lt; 255)) {</div>
+<div class="line"><span class="lineno">  459</span>                ++g;</div>
+<div class="line"><span class="lineno">  460</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  461</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
+<div class="line"><span class="lineno">  462</span>                    r ^= 0x01;</div>
+<div class="line"><span class="lineno">  463</span>                    g ^= 0x01;</div>
+<div class="line"><span class="lineno">  464</span>                }</div>
+<div class="line"><span class="lineno">  465</span>                b ^= 0x01;</div>
+<div class="line"><span class="lineno">  466</span>            }</div>
+<div class="line"><span class="lineno">  467</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  468</span>            <span class="comment">// going &#39;down&#39;</span></div>
+<div class="line"><span class="lineno">  469</span>            <span class="keywordflow">if</span>( b &gt; 1) {</div>
+<div class="line"><span class="lineno">  470</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
+<div class="line"><span class="lineno">  471</span>                    --r;</div>
+<div class="line"><span class="lineno">  472</span>                    --g;</div>
+<div class="line"><span class="lineno">  473</span>                }</div>
+<div class="line"><span class="lineno">  474</span>                --b;</div>
+<div class="line"><span class="lineno">  475</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( g &gt; 1) {</div>
+<div class="line"><span class="lineno">  476</span>                --g;</div>
+<div class="line"><span class="lineno">  477</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( r &gt; 1) {</div>
+<div class="line"><span class="lineno">  478</span>                --r;</div>
+<div class="line"><span class="lineno">  479</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  480</span>                <span class="keywordflow">if</span>( r == g &amp;&amp; g == b) {</div>
+<div class="line"><span class="lineno">  481</span>                    r ^= 0x01;</div>
+<div class="line"><span class="lineno">  482</span>                    g ^= 0x01;</div>
+<div class="line"><span class="lineno">  483</span>                }</div>
+<div class="line"><span class="lineno">  484</span>                b ^= 0x01;</div>
+<div class="line"><span class="lineno">  485</span>            }</div>
+<div class="line"><span class="lineno">  486</span>        }</div>
+<div class="line"><span class="lineno">  487</span>    }</div>
+<div class="ttc" id="astruct_c_r_g_b_a385612de52ce7a479fea99a618a397fd_html_a385612de52ce7a479fea99a618a397fd"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a385612de52ce7a479fea99a618a397fd.html#a385612de52ce7a479fea99a618a397fd">CRGB::getParity</a></div><div class="ttdeci">FASTLED_FORCE_INLINE uint8_t getParity()</div><div class="ttdoc">Returns 0 or 1, depending on the lowest bit of the sum of the color components.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00414">crgb.h:414</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00411">getParity()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00414">getParity()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -195,7 +195,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a64c20ff47371ed75b264711adfdf104
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

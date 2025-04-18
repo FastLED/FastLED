@@ -18,6 +18,8 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Fire2012", "dir_a5438c32bb8a8ac18387223a3f06b103.html", "dir_a5438c32bb8a8ac18387223a3f06b103" ],
     [ "Fire2012WithPalette", "dir_251c36837ef2b5132d93dde41ef3cbc8.html", "dir_251c36837ef2b5132d93dde41ef3cbc8" ],
     [ "Fire2023", "dir_a7814f5eb642f8fc842d435ed906d060.html", "dir_a7814f5eb642f8fc842d435ed906d060" ],
+    [ "FireCylinder", "dir_a83f5321b6fdce4474b55dfcf0fb2e86.html", "dir_a83f5321b6fdce4474b55dfcf0fb2e86" ],
+    [ "FireMatrix", "dir_874aa52466291c494f7db7e1a8c97a3e.html", "dir_874aa52466291c494f7db7e1a8c97a3e" ],
     [ "FirstLight", "dir_98ca105c125a65040d83d7608744422a.html", "dir_98ca105c125a65040d83d7608744422a" ],
     [ "FxAnimartrix", "dir_a47cefd1a9dc5204ece7f659f55684ee.html", "dir_a47cefd1a9dc5204ece7f659f55684ee" ],
     [ "FxCylon", "dir_b17b03dbbeff6440d0c46be77fbddfc7.html", "dir_b17b03dbbeff6440d0c46be77fbddfc7" ],
@@ -32,6 +34,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "FxSdCard", "dir_c35e3ac77356cdc3fc8e34259008fe74.html", "dir_c35e3ac77356cdc3fc8e34259008fe74" ],
     [ "FxTwinkleFox", "dir_fae673d975293bb8b4e1f63bff51afa7.html", "dir_fae673d975293bb8b4e1f63bff51afa7" ],
     [ "FxWater", "dir_ab6a50b665c95753653c6bcb45a0efa9.html", "dir_ab6a50b665c95753653c6bcb45a0efa9" ],
+    [ "FxWave2d", "dir_47eec6d0c0bc604dac9aa356a4226313.html", "dir_47eec6d0c0bc604dac9aa356a4226313" ],
     [ "HD107", "dir_198c7e66809ffe209271e4bbb6691565.html", "dir_198c7e66809ffe209271e4bbb6691565" ],
     [ "LuminescentGrand", "dir_786f9dc3989cf40b3de9df2d18ba04d7.html", "dir_786f9dc3989cf40b3de9df2d18ba04d7" ],
     [ "Multiple", "dir_b0ccd010afae1b6736eeed36b0121387.html", "dir_b0ccd010afae1b6736eeed36b0121387" ],
@@ -55,6 +58,8 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "TwinkleFox", "dir_3d7f0dd01d50ae27368def194e8e7b46.html", "dir_3d7f0dd01d50ae27368def194e8e7b46" ],
     [ "wasm", "dir_a5f15344905e1cdba3f0cc6e4b36e105.html", "dir_a5f15344905e1cdba3f0cc6e4b36e105" ],
     [ "WasmScreenCoords", "dir_75afe82a44c9d3274eef9e58c545822a.html", "dir_75afe82a44c9d3274eef9e58c545822a" ],
+    [ "Wave", "dir_62798ea9a090ceb87f4747f68ba3eda3.html", "dir_62798ea9a090ceb87f4747f68ba3eda3" ],
+    [ "Wave2d", "dir_80f7443b4793499ecb90496bd7f8a795.html", "dir_80f7443b4793499ecb90496bd7f8a795" ],
     [ "WS2816", "dir_cb4a10e64a7e9eee0f3b58f5f8b62c83.html", "dir_cb4a10e64a7e9eee0f3b58f5f8b62c83" ],
     [ "XYMatrix", "dir_a1f73a1624754db6b6179d3280e34825.html", "dir_a1f73a1624754db6b6179d3280e34825" ]
 ];

@@ -1,0 +1,35 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,219,56,244"/>
+<area shape="rect" id="Node000002" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="104,119,239,144"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="48,216,140,150,143,154,52,221"/>
+<area shape="rect" id="Node000011" href="$df/d5c/_fire_cylinder_8ino_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220" title=" " alt="" coords="127,219,215,244"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="56,229,114,229,114,234,56,234"/>
+<area shape="rect" id="Node000012" href="$df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d" title=" " alt="" coords="109,294,233,319"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="57,242,136,285,133,289,55,247"/>
+<area shape="rect" id="Node000003" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="296,44,355,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="198,116,285,73,287,78,200,121"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="617,19,715,44"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="180,117,222,71,252,47,286,29,327,17,370,8,456,3,537,7,604,16,603,22,536,12,456,8,370,14,328,22,288,34,255,52,225,75,184,120"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="568,118,764,143"/>
+<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="197,142,238,162,287,177,352,188,403,191,454,187,519,177,574,164,623,146,625,151,576,169,521,182,455,192,403,196,351,193,286,182,236,166,194,147"/>
+<area shape="rect" id="Node000008" href="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="298,94,353,119"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="239,118,284,110,285,116,239,123"/>
+<area shape="rect" id="Node000009" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="296,143,355,168"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="239,140,283,146,282,152,239,145"/>
+<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="433,44,499,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="355,54,419,54,419,60,355,60"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="499,50,603,37,604,42,500,56"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="500,66,619,110,617,115,499,71"/>
+<area shape="rect" id="Node000010" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="434,143,498,168"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="355,153,420,153,420,158,355,158"/>
+<area shape="rect" id="Node000013" href="$d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415.html#ga162169ac0c2d1f3d01eaff8f32e1b415" title="Take the absolute value of a signed 8&#45;bit uint8_t." alt="" coords="299,294,352,319"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="233,304,285,304,285,309,233,309"/>
+<area shape="rect" id="Node000014" href="$d1/ddc/group___trig_ga4432f985c94f5bff715db402d767b0e8.html#ga4432f985c94f5bff715db402d767b0e8" title="Fast 8&#45;bit approximation of cos(x)." alt="" coords="299,343,351,368"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="212,317,287,341,285,346,211,322"/>
+<area shape="rect" id="Node000015" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="287,392,364,418"/>
+<area shape="poly" id="edge15_Node000012_Node000015" title=" " alt="" coords="193,317,288,379,294,383,291,387,285,383,191,321"/>
+<area shape="rect" id="Node000018" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="295,244,356,270"/>
+<area shape="poly" id="edge17_Node000012_Node000018" title=" " alt="" coords="211,291,280,268,282,273,212,296"/>
+<area shape="rect" id="Node000016" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="412,392,520,418"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="364,402,398,402,398,408,364,408"/>
+</map>

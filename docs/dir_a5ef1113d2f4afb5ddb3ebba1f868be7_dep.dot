@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxDemoReel100"
   dir_a5ef1113d2f4afb5ddb3ebba1f868be7 [label="FxDemoReel100", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_a5ef1113d2f4afb5ddb3ebba1f868be7.html",tooltip=""];
   }
   dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
-  dir_a5ef1113d2f4afb5ddb3ebba1f868be7->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000031_000028.html" href="dir_000031_000028.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_a5ef1113d2f4afb5ddb3ebba1f868be7->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000034_000031.html" href="dir_000034_000031.html" color="steelblue1" fontcolor="steelblue1"];
 }

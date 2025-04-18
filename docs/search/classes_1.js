@@ -15,10 +15,12 @@ var searchData=
   ['apa106_12',['APA106',['../d6/d3f/class_a_p_a106.html',1,'']]],
   ['arraydeleter_13',['ArrayDeleter',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
   ['arraydeleter_3c_20crgb_20_3e_14',['ArrayDeleter&lt; CRGB &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
-  ['arraydeleter_3c_20fl_3a_3aheapvector_3c_20float_20_3e_20_3e_15',['ArrayDeleter&lt; fl::HeapVector&lt; float &gt; &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
-  ['arraydeleter_3c_20fl_3a_3asortedheapmap_3a_3apair_20_3e_16',['ArrayDeleter&lt; fl::SortedHeapMap::Pair &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
-  ['arraydeleter_3c_20float_20_3e_17',['ArrayDeleter&lt; float &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
-  ['arraydeleter_3c_20uint8_5ft_20_3e_18',['ArrayDeleter&lt; uint8_t &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
-  ['avrsoftwarespioutput_19',['AVRSoftwareSPIOutput',['../dc/d57/class_a_v_r_software_s_p_i_output.html',1,'']]],
-  ['avrsoftwarespioutput_3c_20_5fdata_5fpin_2c_20_5fclock_5fpin_2c_20_5fspi_5fclock_5fdivider_20_3e_20',['AVRSoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;',['../dc/d57/class_a_v_r_software_s_p_i_output.html',1,'']]]
+  ['arraydeleter_3c_20fl_3a_3ablend2d_3a_3aentry_20_3e_15',['ArrayDeleter&lt; fl::Blend2d::Entry &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['arraydeleter_3c_20fl_3a_3aheapvector_3c_20float_20_3e_20_3e_16',['ArrayDeleter&lt; fl::HeapVector&lt; float &gt; &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['arraydeleter_3c_20fl_3a_3asortedheapmap_3a_3apair_20_3e_17',['ArrayDeleter&lt; fl::SortedHeapMap::Pair &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['arraydeleter_3c_20float_20_3e_18',['ArrayDeleter&lt; float &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['arraydeleter_3c_20int16_5ft_20_3e_19',['ArrayDeleter&lt; int16_t &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['arraydeleter_3c_20uint8_5ft_20_3e_20',['ArrayDeleter&lt; uint8_t &gt;',['../df/db6/structfl_1_1_array_deleter.html',1,'fl']]],
+  ['avrsoftwarespioutput_21',['AVRSoftwareSPIOutput',['../dc/d57/class_a_v_r_software_s_p_i_output.html',1,'']]],
+  ['avrsoftwarespioutput_3c_20_5fdata_5fpin_2c_20_5fclock_5fpin_2c_20_5fspi_5fclock_5fdivider_20_3e_22',['AVRSoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;',['../dc/d57/class_a_v_r_software_s_p_i_output.html',1,'']]]
 ];

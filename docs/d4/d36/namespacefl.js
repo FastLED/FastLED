@@ -21,10 +21,16 @@ var namespacefl =
       [ "atoff", "d7/d59/namespacefl_1_1string__functions_a1cb21467f5357bb585fccb785a24cd08.html#a1cb21467f5357bb585fccb785a24cd08", null ],
       [ "itoa", "d7/d59/namespacefl_1_1string__functions_ab8b04fe24b6e6c654342bc2f77b6869d.html#ab8b04fe24b6e6c654342bc2f77b6869d", null ]
     ] ],
+    [ "wave_detail", "d9/d75/namespacefl_1_1wave__detail.html", [
+      [ "fixed_to_float", "d9/d75/namespacefl_1_1wave__detail_a62bc772acead5bbfc872ce904d4181aa.html#a62bc772acead5bbfc872ce904d4181aa", null ],
+      [ "float_to_fixed", "d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108.html#a9ca9a055f84e9653e43a239c491d5108", null ]
+    ] ],
     [ "_DrawContext", "d2/d32/structfl_1_1___draw_context.html", "d2/d32/structfl_1_1___draw_context" ],
     [ "Animartrix", "d8/df5/classfl_1_1_animartrix.html", "d8/df5/classfl_1_1_animartrix" ],
     [ "AnimartrixEntry", "d4/d36/namespacefl.html#d3/d78/structfl_1_1_animartrix_entry", "d4/d36/namespacefl_d3/d78/structfl_1_1_animartrix_entry_dup" ],
     [ "ArrayDeleter", "df/db6/structfl_1_1_array_deleter.html", "df/db6/structfl_1_1_array_deleter" ],
+    [ "Blend2d", "dc/d2b/classfl_1_1_blend2d.html", "dc/d2b/classfl_1_1_blend2d" ],
+    [ "Blend2dParams", "d4/d36/namespacefl.html#d2/dd0/structfl_1_1_blend2d_params", "d4/d36/namespacefl_d2/dd0/structfl_1_1_blend2d_params_dup" ],
     [ "ByteStream", "d2/d5e/classfl_1_1_byte_stream.html", "d2/d5e/classfl_1_1_byte_stream" ],
     [ "ByteStreamMemory", "d1/dc0/classfl_1_1_byte_stream_memory.html", "d1/dc0/classfl_1_1_byte_stream_memory" ],
     [ "Callback", "de/d03/classfl_1_1_callback.html", "de/d03/classfl_1_1_callback" ],
@@ -122,7 +128,10 @@ var namespacefl =
     [ "StrStreamHelper< int >", "d5/dda/structfl_1_1_str_stream_helper_3_01int_01_4.html", "d5/dda/structfl_1_1_str_stream_helper_3_01int_01_4" ],
     [ "StrStreamHelper< uint8_t >", "dc/ddb/structfl_1_1_str_stream_helper_3_01uint8__t_01_4.html", "dc/ddb/structfl_1_1_str_stream_helper_3_01uint8__t_01_4" ],
     [ "StrStreamHelper< unsigned int >", "d7/d42/structfl_1_1_str_stream_helper_3_01unsigned_01int_01_4.html", "d7/d42/structfl_1_1_str_stream_helper_3_01unsigned_01int_01_4" ],
+    [ "TimeAlpha", "d2/d4a/classfl_1_1_time_alpha.html", "d2/d4a/classfl_1_1_time_alpha" ],
     [ "TimeFunction", "d8/db5/classfl_1_1_time_function.html", "d8/db5/classfl_1_1_time_function" ],
+    [ "TimeLinear", "df/d86/classfl_1_1_time_linear.html", "df/d86/classfl_1_1_time_linear" ],
+    [ "TimeRamp", "d0/d9d/classfl_1_1_time_ramp.html", "d0/d9d/classfl_1_1_time_ramp" ],
     [ "TimeScale", "d4/d54/classfl_1_1_time_scale.html", "d4/d54/classfl_1_1_time_scale" ],
     [ "Transition", "d7/dde/classfl_1_1_transition.html", "d7/dde/classfl_1_1_transition" ],
     [ "TwinkleFox", "de/db5/classfl_1_1_twinkle_fox.html", "de/db5/classfl_1_1_twinkle_fox" ],
@@ -134,6 +143,15 @@ var namespacefl =
     [ "UITitle", "d9/d82/classfl_1_1_u_i_title.html", "d9/d82/classfl_1_1_u_i_title" ],
     [ "Video", "d0/d4b/classfl_1_1_video.html", "d0/d4b/classfl_1_1_video" ],
     [ "VideoFxWrapper", "d4/dd2/classfl_1_1_video_fx_wrapper.html", "d4/dd2/classfl_1_1_video_fx_wrapper" ],
+    [ "WaveCrgbGradientMap", "d0/da7/classfl_1_1_wave_crgb_gradient_map.html", "d0/da7/classfl_1_1_wave_crgb_gradient_map" ],
+    [ "WaveCrgbMap", "dc/dce/classfl_1_1_wave_crgb_map.html", "dc/dce/classfl_1_1_wave_crgb_map" ],
+    [ "WaveCrgbMapDefault", "de/d99/classfl_1_1_wave_crgb_map_default.html", "de/d99/classfl_1_1_wave_crgb_map_default" ],
+    [ "WaveFx", "d6/d5f/classfl_1_1_wave_fx.html", "d6/d5f/classfl_1_1_wave_fx" ],
+    [ "WaveFxArgs", "d4/d36/namespacefl.html#d3/da2/structfl_1_1_wave_fx_args", "d4/d36/namespacefl_d3/da2/structfl_1_1_wave_fx_args_dup" ],
+    [ "WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d.html", "d8/dc1/classfl_1_1_wave_simulation1_d" ],
+    [ "WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real.html", "da/df9/classfl_1_1_wave_simulation1_d___real" ],
+    [ "WaveSimulation2D", "da/d47/classfl_1_1_wave_simulation2_d.html", "da/d47/classfl_1_1_wave_simulation2_d" ],
+    [ "WaveSimulation2D_Real", "d5/d94/classfl_1_1_wave_simulation2_d___real.html", "d5/d94/classfl_1_1_wave_simulation2_d___real" ],
     [ "WeakPtr", "db/d77/classfl_1_1_weak_ptr.html", "db/d77/classfl_1_1_weak_ptr" ],
     [ "WeakReferent", "dd/da7/classfl_1_1_weak_referent.html", "dd/da7/classfl_1_1_weak_referent" ],
     [ "XMap", "d7/d6c/classfl_1_1_x_map.html", "d7/d6c/classfl_1_1_x_map" ],
@@ -200,6 +218,10 @@ var namespacefl =
       [ "MODULE_EXPERIMENT_SM10", "d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab8b4fd90aefa539249bf9f624f85c867", null ],
       [ "NUM_ANIMATIONS", "d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8a9d8df5da35f677fdccd1c606edaf6e", null ]
     ] ],
+    [ "DrawMode", "d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2", [
+      [ "DRAW_MODE_OVERWRITE", "d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2ac448cafd3e2853b07896a817491d5b7e", null ],
+      [ "DRAW_MODE_BLEND_BY_BLACK", "d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2a94666c10126a90d9bb73fdb9f2b984df", null ]
+    ] ],
     [ "FiveBitGammaCorrectionMode", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466", [
       [ "kFiveBitGammaCorrectionMode_Null", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466aa821d28841c088d4127c12ec664daf89", null ],
       [ "kFiveBitGammaCorrectionMode_BitShift", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466afd1ee17be036ab937ccff8900d00c08c", null ]
@@ -214,6 +236,16 @@ var namespacefl =
       [ "BACKWARD", "d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359a6377b4908ae38f9a57fe9120cf179eb1", null ],
       [ "MAP", "d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359a5af1a3a285c2bdee4192223e31e1f833", null ]
     ] ],
+    [ "SuperSample", "d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6", [
+      [ "SUPER_SAMPLE_NONE", "d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6af213904fd17b4c9630581686d2e4ca89", null ],
+      [ "SUPER_SAMPLE_2X", "d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a1e910f180f77f3704a8066db79cd6111", null ],
+      [ "SUPER_SAMPLE_4X", "d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a24072aca92c61bd88948f7118d96c21b", null ],
+      [ "SUPER_SAMPLE_8X", "d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a086e36ad906a8ab6071172529675ff3e", null ]
+    ] ],
+    [ "U8EasingFunction", "d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517", [
+      [ "WAVE_U8_MODE_LINEAR", "d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517a0cf5c24d21781176aa004b1c99a2bd83", null ],
+      [ "WAVE_U8_MODE_SQRT", "d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517aebe90d9386335a6f83dd651108cc83c7", null ]
+    ] ],
     [ "__builtin_five_bit_hd_gamma_bitshift", "d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff", null ],
     [ "AnimartrixLoop", "d4/d36/namespacefl_ae54f817fa490cb5eb21b98cb2d12c6c3.html#ae54f817fa490cb5eb21b98cb2d12c6c3", null ],
     [ "bilinearExpand", "d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6", null ],
@@ -226,6 +258,7 @@ var namespacefl =
     [ "bilinearInterpolatePowerOf2", "d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.html#a31d30c7ed12b05422e7aa7f03c25fb07", null ],
     [ "cos16lut", "d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb", null ],
     [ "cos32", "d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0", null ],
+    [ "downscaleBilinear", "d4/d36/namespacefl_a01ae8d0b41b97beeab9f6db44a90d4f2.html#a01ae8d0b41b97beeab9f6db44a90d4f2", null ],
     [ "drawSquare", "d4/d36/namespacefl_a6a3feb94c38b5b5e9a3991a20bd84d4e.html#a6a3feb94c38b5b5e9a3991a20bd84d4e", null ],
     [ "fadeToColorBy", "d4/d36/namespacefl_ac50649d797d5b67ccd6d6c70a0ee5ab6.html#ac50649d797d5b67ccd6d6c70a0ee5ab6", null ],
     [ "fastled_file_offset", "d4/d36/namespacefl_ae8e0626219073ef6b24d63a749af3283.html#ae8e0626219073ef6b24d63a749af3283", null ],
@@ -257,6 +290,10 @@ var namespacefl =
     [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a11c263d6090be1028bd0ec4b23381c22.html#a11c263d6090be1028bd0ec4b23381c22", null ],
     [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a6b18e277771eac907ca69faf5df4b574.html#a6b18e277771eac907ca69faf5df4b574", null ],
     [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a19b30f396c4c408a9f239067047a5bf5.html#a19b30f396c4c408a9f239067047a5bf5", null ],
+    [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a38d53387f77167ea9b6b2ee9118fc0d3.html#a38d53387f77167ea9b6b2ee9118fc0d3", null ],
+    [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a177ef2a59eb96c3eb85a418b24877375.html#a177ef2a59eb96c3eb85a418b24877375", null ],
+    [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a271a559f99306e98adb04826738b5a5f.html#a271a559f99306e98adb04826738b5a5f", null ],
+    [ "FASTLED_SMART_PTR", "d4/d36/namespacefl_a96ef7c28b90418627d3d7438b7daf9f4.html#a96ef7c28b90418627d3d7438b7daf9f4", null ],
     [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a234c2f2e01ee4096118541ef93de3fcd.html#a234c2f2e01ee4096118541ef93de3fcd", null ],
     [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a62986fa3751de77035b7a343907ef650.html#a62986fa3751de77035b7a343907ef650", null ],
     [ "FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_a17a25f9a9eb5be6d08ee831a92abbb57.html#a17a25f9a9eb5be6d08ee831a92abbb57", null ],
@@ -273,6 +310,8 @@ var namespacefl =
     [ "SetLargeBlockAllocator", "d4/d36/namespacefl_a4b22c2b724650a63fed4a2c67dd1baa8.html#a4b22c2b724650a63fed4a2c67dd1baa8", null ],
     [ "sin16lut", "d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1", null ],
     [ "sin32", "d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd", null ],
+    [ "time_alpha16", "d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626", null ],
+    [ "time_alpha8", "d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8", null ],
     [ "toJson", "d4/d36/namespacefl_a966e65a21faacfa6fe6c00989a2f505c.html#a966e65a21faacfa6fe6c00989a2f505c", null ],
     [ "x_linear", "d4/d36/namespacefl_ab4423d58fcba9954b507dd846059dbba.html#ab4423d58fcba9954b507dd846059dbba", null ],
     [ "x_reverse", "d4/d36/namespacefl_afe6c153e1d4fc2ea710f3e0687b182c6.html#afe6c153e1d4fc2ea710f3e0687b182c6", null ],

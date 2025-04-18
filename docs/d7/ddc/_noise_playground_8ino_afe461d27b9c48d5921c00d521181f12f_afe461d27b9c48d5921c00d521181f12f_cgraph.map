@@ -11,7 +11,7 @@
 <area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="493,5,560,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="381,21,479,17,480,22,381,26"/>
 <area shape="poly" id="edge5_Node000008_Node000008" title=" " alt="" coords="323,100,317,90,320,81,332,74,352,72,376,76,386,84,382,88,374,80,352,77,334,79,324,84,322,90,328,97"/>
-<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="488,55,565,80"/>
+<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="488,55,565,80"/>
 <area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="402,96,474,78,475,83,404,101"/>
 <area shape="rect" id="Node000012" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="613,156,676,181"/>
 <area shape="poly" id="edge7_Node000008_Node000012" title=" " alt="" coords="441,119,566,141,601,151,600,156,565,146,440,124"/>

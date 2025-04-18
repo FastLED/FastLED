@@ -12,17 +12,17 @@ digraph "sensors/digital_pin.h"
   Node3 [id="Node000003",label="fl/ui.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3b/ui_8h.html",tooltip=" "];
   Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node4 [id="Node000004",label="fl/math_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d19/fl_2math__macros_8h.html",tooltip=" "];
   Node3 -> Node5 [id="edge5_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
   Node3 -> Node6 [id="edge6_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl/math_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d19/fl_2math__macros_8h.html",tooltip=" "];
-  Node3 -> Node7 [id="edge7_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl/template_magic.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
-  Node7 -> Node2 [id="edge8_Node000007_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node7 -> Node5 [id="edge9_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/template_magic.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
+  Node6 -> Node2 [id="edge7_Node000006_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node5 [id="edge8_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node7 [id="edge9_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/unused.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4b/unused_8h.html",tooltip=" "];
   Node3 -> Node8 [id="edge10_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl/unused.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4b/unused_8h.html",tooltip=" "];
+  Node8 [id="Node000008",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node1 -> Node9 [id="edge11_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="fl/ptr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df1/fl_2ptr_8h.html",tooltip=" "];
   Node9 -> Node10 [id="edge12_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
@@ -32,6 +32,6 @@ digraph "sensors/digital_pin.h"
   Node11 [id="Node000011",label="fl/scoped_ptr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d28/fl_2scoped__ptr_8h.html",tooltip=" "];
   Node11 -> Node10 [id="edge15_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node11 -> Node5 [id="edge16_Node000011_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node9 -> Node7 [id="edge17_Node000009_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node6 [id="edge17_Node000009_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node5 [id="edge18_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
 }

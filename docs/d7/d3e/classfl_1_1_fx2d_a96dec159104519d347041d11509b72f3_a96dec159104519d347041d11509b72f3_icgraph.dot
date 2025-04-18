@@ -19,12 +19,22 @@ digraph "fl::Fx2d::xyMap"
   Node6 [id="Node000006",label="fl::Fx2d::Fx2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_a98879bee7a7a97ceb2cc34ea2eefc7fe.html#a98879bee7a7a97ceb2cc34ea2eefc7fe",tooltip=" "];
   Node6 -> Node2 [id="edge6_Node000006_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::NoisePalette::NoisePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Blend2d::Blend2d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_a46d2a049e57d4d91790eb93371972702.html#a46d2a049e57d4d91790eb93371972702",tooltip=" "];
   Node6 -> Node8 [id="edge8_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::RedSquare::RedSquare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square_ae8f84aa6b19859b64950ac0d8cd49b7d.html#ae8f84aa6b19859b64950ac0d8cd49b7d",tooltip=" "];
+  Node8 [id="Node000008",label="fl::NoisePalette::NoisePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244",tooltip=" "];
   Node6 -> Node9 [id="edge9_Node000006_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fl::ScaleUp::ScaleUp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a2b96f658d915143d8a27a7e9d51d8a60.html#a2b96f658d915143d8a27a7e9d51d8a60",tooltip=" "];
-  Node1 -> Node7 [id="edge10_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node10 [id="edge11_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="fl::Fx2d::setXYMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_a253952c9111790299c1e934f3f7573b7.html#a253952c9111790299c1e934f3f7573b7",tooltip=" "];
+  Node9 [id="Node000009",label="fl::RedSquare::RedSquare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d3e/classfl_1_1_red_square_ae8f84aa6b19859b64950ac0d8cd49b7d.html#ae8f84aa6b19859b64950ac0d8cd49b7d",tooltip=" "];
+  Node6 -> Node10 [id="edge10_Node000006_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::ScaleUp::ScaleUp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a2b96f658d915143d8a27a7e9d51d8a60.html#a2b96f658d915143d8a27a7e9d51d8a60",tooltip=" "];
+  Node6 -> Node11 [id="edge11_Node000006_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::WaveFx::WaveFx",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_a3b178e616d310ad0fb2dfd9f0960a8e3.html#a3b178e616d310ad0fb2dfd9f0960a8e3",tooltip=" "];
+  Node6 -> Node12 [id="edge12_Node000006_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::Blend2d::add",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_aa6b753d9f7a72e49bb11b0e25a6a2948.html#aa6b753d9f7a72e49bb11b0e25a6a2948",tooltip=" "];
+  Node6 -> Node13 [id="edge13_Node000006_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::Blend2d::setParams",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_aad17ffdf04279a43a6f3825c910ccb13.html#aad17ffdf04279a43a6f3825c910ccb13",tooltip=" "];
+  Node1 -> Node8 [id="edge14_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge15_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::Blend2d::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f",tooltip=" "];
+  Node1 -> Node15 [id="edge16_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::Fx2d::setXYMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_a253952c9111790299c1e934f3f7573b7.html#a253952c9111790299c1e934f3f7573b7",tooltip=" "];
 }

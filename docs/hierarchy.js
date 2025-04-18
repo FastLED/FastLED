@@ -22,6 +22,7 @@ var hierarchy =
     [ "bitswap_type", "de/ded/bitswap_8h.html#d6/d93/unionbitswap__type", null ],
     [ "bitswap_type.__unnamed0__", "de/ded/bitswap_8h.html#dc/dfc/structbitswap__type_8____unnamed0____", null ],
     [ "CEveryNMillisDynamic", "de/d72/class_c_every_n_millis_dynamic.html", null ],
+    [ "CEveryNMillisRandom", "d3/df3/class_c_every_n_millis_random.html", null ],
     [ "CEveryNTime", "de/d1d/class_c_every_n_time.html", null ],
     [ "CFastLED", "dd/dbb/class_c_fast_l_e_d.html", null ],
     [ "CFastLED::ClockedChipsetHelper< CHIPSET, DATA_PIN, CLOCK_PIN >", "d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html", null ],
@@ -228,6 +229,8 @@ var hierarchy =
     [ "fl::_DrawContext", "d2/d32/structfl_1_1___draw_context.html", null ],
     [ "fl::AnimartrixEntry", "d4/d36/namespacefl.html#d3/d78/structfl_1_1_animartrix_entry", null ],
     [ "fl::ArrayDeleter< T >", "df/db6/structfl_1_1_array_deleter.html", null ],
+    [ "fl::Blend2d::Entry", "d3/d4d/structfl_1_1_blend2d_1_1_entry.html", null ],
+    [ "fl::Blend2dParams", "d4/d36/namespacefl.html#d2/dd0/structfl_1_1_blend2d_params", null ],
     [ "fl::Callback< Args >", "de/d03/classfl_1_1_callback.html", null ],
     [ "fl::CircularBuffer< T >", "d2/d4f/classfl_1_1_circular_buffer.html", null ],
     [ "fl::DefaultLess< T >", "d6/de8/structfl_1_1_default_less.html", null ],
@@ -248,6 +251,7 @@ var hierarchy =
     [ "fl::FxCompositor", "d7/df1/classfl_1_1_fx_compositor.html", null ],
     [ "fl::FxEngine", "d4/d60/classfl_1_1_fx_engine.html", null ],
     [ "fl::HeapVector< T >", "db/ddd/classfl_1_1_heap_vector.html", null ],
+    [ "fl::HeapVector< T >::reverse_iterator", "d1/d9e/structfl_1_1_heap_vector_1_1reverse__iterator.html", null ],
     [ "fl::is_base_of< Base, Derived >", "d7/d68/structfl_1_1is__base__of.html", null ],
     [ "fl::is_base_of_v_helper< Base, Derived >", "d8/d85/structfl_1_1is__base__of__v__helper.html", null ],
     [ "fl::is_pod< T >", "d5/dfa/structfl_1_1is__pod.html", null ],
@@ -325,9 +329,11 @@ var hierarchy =
         ] ],
         [ "fl::Fx2d", "d7/d3e/classfl_1_1_fx2d.html", [
           [ "fl::Animartrix", "d8/df5/classfl_1_1_animartrix.html", null ],
+          [ "fl::Blend2d", "dc/d2b/classfl_1_1_blend2d.html", null ],
           [ "fl::NoisePalette", "d9/d41/classfl_1_1_noise_palette.html", null ],
           [ "fl::RedSquare", "d0/d3e/classfl_1_1_red_square.html", null ],
-          [ "fl::ScaleUp", "d5/d79/classfl_1_1_scale_up.html", null ]
+          [ "fl::ScaleUp", "d5/d79/classfl_1_1_scale_up.html", null ],
+          [ "fl::WaveFx", "d6/d5f/classfl_1_1_wave_fx.html", null ]
         ] ]
       ] ],
       [ "fl::FxLayer", "d6/d7f/classfl_1_1_fx_layer.html", null ],
@@ -336,6 +342,10 @@ var hierarchy =
       [ "fl::StringHolder", "dc/da7/classfl_1_1_string_holder.html", null ],
       [ "fl::TimeFunction", "d8/db5/classfl_1_1_time_function.html", [
         [ "fl::TimeScale", "d4/d54/classfl_1_1_time_scale.html", null ]
+      ] ],
+      [ "fl::WaveCrgbMap", "dc/dce/classfl_1_1_wave_crgb_map.html", [
+        [ "fl::WaveCrgbGradientMap", "d0/da7/classfl_1_1_wave_crgb_gradient_map.html", null ],
+        [ "fl::WaveCrgbMapDefault", "de/d99/classfl_1_1_wave_crgb_map_default.html", null ]
       ] ]
     ] ],
     [ "fl::scoped_array< T, Deleter >", "d3/d92/classfl_1_1scoped__array.html", null ],
@@ -358,6 +368,10 @@ var hierarchy =
     [ "fl::StrStreamHelper< int >", "d5/dda/structfl_1_1_str_stream_helper_3_01int_01_4.html", null ],
     [ "fl::StrStreamHelper< uint8_t >", "dc/ddb/structfl_1_1_str_stream_helper_3_01uint8__t_01_4.html", null ],
     [ "fl::StrStreamHelper< unsigned int >", "d7/d42/structfl_1_1_str_stream_helper_3_01unsigned_01int_01_4.html", null ],
+    [ "fl::TimeAlpha", "d2/d4a/classfl_1_1_time_alpha.html", [
+      [ "fl::TimeLinear", "df/d86/classfl_1_1_time_linear.html", null ],
+      [ "fl::TimeRamp", "d0/d9d/classfl_1_1_time_ramp.html", null ]
+    ] ],
     [ "fl::Transition", "d7/dde/classfl_1_1_transition.html", null ],
     [ "fl::UIButton", "d3/d1d/classfl_1_1_u_i_button.html", null ],
     [ "fl::UICheckbox", "d7/dfe/classfl_1_1_u_i_checkbox.html", null ],
@@ -365,6 +379,11 @@ var hierarchy =
     [ "fl::UINumberField", "d9/d5f/classfl_1_1_u_i_number_field.html", null ],
     [ "fl::UISlider", "dd/d47/classfl_1_1_u_i_slider.html", null ],
     [ "fl::UITitle", "d9/d82/classfl_1_1_u_i_title.html", null ],
+    [ "fl::WaveFxArgs", "d4/d36/namespacefl.html#d3/da2/structfl_1_1_wave_fx_args", null ],
+    [ "fl::WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d.html", null ],
+    [ "fl::WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real.html", null ],
+    [ "fl::WaveSimulation2D", "da/d47/classfl_1_1_wave_simulation2_d.html", null ],
+    [ "fl::WaveSimulation2D_Real", "d5/d94/classfl_1_1_wave_simulation2_d___real.html", null ],
     [ "fl::WeakPtr< T >", "db/d77/classfl_1_1_weak_ptr.html", null ],
     [ "fl::WeakReferent", "dd/da7/classfl_1_1_weak_referent.html", null ],
     [ "fl::XMap", "d7/d6c/classfl_1_1_x_map.html", null ],

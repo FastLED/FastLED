@@ -597,7 +597,7 @@ blue</td>
   </dd>
 </dl>
 
-<p class="reference">Referenced by <a class="el" href="../../db/dd1/crgb_8h_source.html#l00141">CRGB::CRGB()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00191">CRGB::operator=()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00175">CRGB::setHSV()</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00184">CRGB::setHue()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/dd1/crgb_8h_source.html#l00142">CRGB::CRGB()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00192">CRGB::operator=()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00176">CRGB::setHSV()</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00185">CRGB::setHue()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -629,10 +629,10 @@ blue</td>
 
 <p>Check if two <a class="el" href="../../dc/d53/struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> objects do <em>not</em> have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00669">669</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  670</span>{</div>
-<div class="line"><span class="lineno">  671</span>    <span class="keywordflow">return</span> !(lhs == rhs);</div>
-<div class="line"><span class="lineno">  672</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00672">672</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  673</span>{</div>
+<div class="line"><span class="lineno">  674</span>    <span class="keywordflow">return</span> !(lhs == rhs);</div>
+<div class="line"><span class="lineno">  675</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -659,10 +659,10 @@ blue</td>
 
 <p>Check if two <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects do <em>not</em> have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00657">657</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  658</span>{</div>
-<div class="line"><span class="lineno">  659</span>    <span class="keywordflow">return</span> !(lhs == rhs);</div>
-<div class="line"><span class="lineno">  660</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00660">660</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  661</span>{</div>
+<div class="line"><span class="lineno">  662</span>    <span class="keywordflow">return</span> !(lhs == rhs);</div>
+<div class="line"><span class="lineno">  663</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -729,12 +729,12 @@ blue</td>
 
 <p>Combine two <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects, taking the smallest value of each channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00720">720</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  721</span>{</div>
-<div class="line"><span class="lineno">  722</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r &lt; p2.r ? p1.r : p2.r,</div>
-<div class="line"><span class="lineno">  723</span>                 p1.g &lt; p2.g ? p1.g : p2.g,</div>
-<div class="line"><span class="lineno">  724</span>                 p1.b &lt; p2.b ? p1.b : p2.b);</div>
-<div class="line"><span class="lineno">  725</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00723">723</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  724</span>{</div>
+<div class="line"><span class="lineno">  725</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r &lt; p2.r ? p1.r : p2.r,</div>
+<div class="line"><span class="lineno">  726</span>                 p1.g &lt; p2.g ? p1.g : p2.g,</div>
+<div class="line"><span class="lineno">  727</span>                 p1.b &lt; p2.b ? p1.b : p2.b);</div>
+<div class="line"><span class="lineno">  728</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -881,10 +881,10 @@ blue</td>
 
 <p>Divide each of the channels by a constant.    </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00713">713</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  714</span>{</div>
-<div class="line"><span class="lineno">  715</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r/d, p1.g/d, p1.b/d);</div>
-<div class="line"><span class="lineno">  716</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00716">716</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  717</span>{</div>
+<div class="line"><span class="lineno">  718</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r/d, p1.g/d, p1.b/d);</div>
+<div class="line"><span class="lineno">  719</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -911,13 +911,13 @@ blue</td>
 
 <p>Check if the sum of the color channels in one <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is less than another. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00675">675</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  676</span>{</div>
-<div class="line"><span class="lineno">  677</span>    uint16_t sl, sr;</div>
-<div class="line"><span class="lineno">  678</span>    sl = lhs.r + lhs.g + lhs.b;</div>
-<div class="line"><span class="lineno">  679</span>    sr = rhs.r + rhs.g + rhs.b;</div>
-<div class="line"><span class="lineno">  680</span>    <span class="keywordflow">return</span> sl &lt; sr;</div>
-<div class="line"><span class="lineno">  681</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00678">678</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  679</span>{</div>
+<div class="line"><span class="lineno">  680</span>    uint16_t sl, sr;</div>
+<div class="line"><span class="lineno">  681</span>    sl = lhs.r + lhs.g + lhs.b;</div>
+<div class="line"><span class="lineno">  682</span>    sr = rhs.r + rhs.g + rhs.b;</div>
+<div class="line"><span class="lineno">  683</span>    <span class="keywordflow">return</span> sl &lt; sr;</div>
+<div class="line"><span class="lineno">  684</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -944,13 +944,13 @@ blue</td>
 
 <p>Check if the sum of the color channels in one <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is less than or equal to another. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00702">702</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  703</span>{</div>
-<div class="line"><span class="lineno">  704</span>    uint16_t sl, sr;</div>
-<div class="line"><span class="lineno">  705</span>    sl = lhs.r + lhs.g + lhs.b;</div>
-<div class="line"><span class="lineno">  706</span>    sr = rhs.r + rhs.g + rhs.b;</div>
-<div class="line"><span class="lineno">  707</span>    <span class="keywordflow">return</span> sl &lt;= sr;</div>
-<div class="line"><span class="lineno">  708</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00705">705</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  706</span>{</div>
+<div class="line"><span class="lineno">  707</span>    uint16_t sl, sr;</div>
+<div class="line"><span class="lineno">  708</span>    sl = lhs.r + lhs.g + lhs.b;</div>
+<div class="line"><span class="lineno">  709</span>    sr = rhs.r + rhs.g + rhs.b;</div>
+<div class="line"><span class="lineno">  710</span>    <span class="keywordflow">return</span> sl &lt;= sr;</div>
+<div class="line"><span class="lineno">  711</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -977,10 +977,10 @@ blue</td>
 
 <p>Check if two <a class="el" href="../../dc/d53/struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> objects have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00663">663</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  664</span>{</div>
-<div class="line"><span class="lineno">  665</span>    <span class="keywordflow">return</span> (lhs.h == rhs.h) &amp;&amp; (lhs.s == rhs.s) &amp;&amp; (lhs.v == rhs.v);</div>
-<div class="line"><span class="lineno">  666</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00666">666</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  667</span>{</div>
+<div class="line"><span class="lineno">  668</span>    <span class="keywordflow">return</span> (lhs.h == rhs.h) &amp;&amp; (lhs.s == rhs.s) &amp;&amp; (lhs.v == rhs.v);</div>
+<div class="line"><span class="lineno">  669</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -1007,10 +1007,10 @@ blue</td>
 
 <p>Check if two <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00651">651</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  652</span>{</div>
-<div class="line"><span class="lineno">  653</span>    <span class="keywordflow">return</span> (lhs.r == rhs.r) &amp;&amp; (lhs.g == rhs.g) &amp;&amp; (lhs.b == rhs.b);</div>
-<div class="line"><span class="lineno">  654</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00654">654</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  655</span>{</div>
+<div class="line"><span class="lineno">  656</span>    <span class="keywordflow">return</span> (lhs.r == rhs.r) &amp;&amp; (lhs.g == rhs.g) &amp;&amp; (lhs.b == rhs.b);</div>
+<div class="line"><span class="lineno">  657</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -1037,13 +1037,13 @@ blue</td>
 
 <p>Check if the sum of the color channels in one <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is greater than another. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00684">684</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  685</span>{</div>
-<div class="line"><span class="lineno">  686</span>    uint16_t sl, sr;</div>
-<div class="line"><span class="lineno">  687</span>    sl = lhs.r + lhs.g + lhs.b;</div>
-<div class="line"><span class="lineno">  688</span>    sr = rhs.r + rhs.g + rhs.b;</div>
-<div class="line"><span class="lineno">  689</span>    <span class="keywordflow">return</span> sl &gt; sr;</div>
-<div class="line"><span class="lineno">  690</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00687">687</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  688</span>{</div>
+<div class="line"><span class="lineno">  689</span>    uint16_t sl, sr;</div>
+<div class="line"><span class="lineno">  690</span>    sl = lhs.r + lhs.g + lhs.b;</div>
+<div class="line"><span class="lineno">  691</span>    sr = rhs.r + rhs.g + rhs.b;</div>
+<div class="line"><span class="lineno">  692</span>    <span class="keywordflow">return</span> sl &gt; sr;</div>
+<div class="line"><span class="lineno">  693</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -1070,13 +1070,13 @@ blue</td>
 
 <p>Check if the sum of the color channels in one <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is greater than or equal to another. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00693">693</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  694</span>{</div>
-<div class="line"><span class="lineno">  695</span>    uint16_t sl, sr;</div>
-<div class="line"><span class="lineno">  696</span>    sl = lhs.r + lhs.g + lhs.b;</div>
-<div class="line"><span class="lineno">  697</span>    sr = rhs.r + rhs.g + rhs.b;</div>
-<div class="line"><span class="lineno">  698</span>    <span class="keywordflow">return</span> sl &gt;= sr;</div>
-<div class="line"><span class="lineno">  699</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00696">696</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  697</span>{</div>
+<div class="line"><span class="lineno">  698</span>    uint16_t sl, sr;</div>
+<div class="line"><span class="lineno">  699</span>    sl = lhs.r + lhs.g + lhs.b;</div>
+<div class="line"><span class="lineno">  700</span>    sr = rhs.r + rhs.g + rhs.b;</div>
+<div class="line"><span class="lineno">  701</span>    <span class="keywordflow">return</span> sl &gt;= sr;</div>
+<div class="line"><span class="lineno">  702</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -1103,12 +1103,12 @@ blue</td>
 
 <p>Combine two <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects, taking the largest value of each channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00728">728</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  729</span>{</div>
-<div class="line"><span class="lineno">  730</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r &gt; p2.r ? p1.r : p2.r,</div>
-<div class="line"><span class="lineno">  731</span>                 p1.g &gt; p2.g ? p1.g : p2.g,</div>
-<div class="line"><span class="lineno">  732</span>                 p1.b &gt; p2.b ? p1.b : p2.b);</div>
-<div class="line"><span class="lineno">  733</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00731">731</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  732</span>{</div>
+<div class="line"><span class="lineno">  733</span>    <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( p1.r &gt; p2.r ? p1.r : p2.r,</div>
+<div class="line"><span class="lineno">  734</span>                 p1.g &gt; p2.g ? p1.g : p2.g,</div>
+<div class="line"><span class="lineno">  735</span>                 p1.b &gt; p2.b ? p1.b : p2.b);</div>
+<div class="line"><span class="lineno">  736</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
 
@@ -1120,7 +1120,7 @@ blue</td>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

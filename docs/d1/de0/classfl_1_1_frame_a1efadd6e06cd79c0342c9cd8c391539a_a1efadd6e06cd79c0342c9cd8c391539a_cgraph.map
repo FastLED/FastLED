@@ -1,0 +1,12 @@
+<map id="fl::Frame::draw" name="fl::Frame::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,124,55"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601" title=" " alt="" coords="172,29,393,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,39,159,39,159,45,124,45"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="592,5,696,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="393,32,578,20,578,25,394,37"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94" title=" " alt="" coords="441,55,544,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="389,52,428,57,427,62,388,57"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="531,52,590,33,592,38,533,57"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="611,55,677,80"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="544,65,597,65,597,70,544,70"/>
+</map>

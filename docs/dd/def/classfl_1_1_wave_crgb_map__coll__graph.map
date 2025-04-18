@@ -1,0 +1,14 @@
+<map id="fl::WaveCrgbMap" name="fl::WaveCrgbMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,137,126"/>
+<area shape="rect" id="Node000002" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="180,5,275,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,40,92,103,89,98,195,35"/>
+<area shape="rect" id="Node000006" href="$dd/da7/classfl_1_1_weak_referent.html" title=" " alt="" coords="162,101,293,126"/>
+<area shape="poly" id="edge5_Node000006_Node000002" title=" " alt="" coords="230,44,230,101,225,101,225,44"/>
+<area shape="rect" id="Node000003" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="323,196,518,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,188,352,135,338,112,330,93,321,75,304,57,285,43,263,33,266,28,287,39,308,53,325,72,335,91,343,110,356,132,402,184"/>
+<area shape="rect" id="Node000004" href="$da/d84/classfl_1_1_ptr_traits.html" title=" " alt="" coords="437,93,567,133"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="478,145,433,197,429,194,474,142"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="237,138,246,155,260,170,290,187,324,198,322,203,288,192,256,174,242,158,232,140"/>
+<area shape="rect" id="Node000007" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="591,101,685,126"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="600,134,449,198,446,193,598,129"/>
+</map>

@@ -1,0 +1,19 @@
+digraph "applyFancyEffect"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="applyFancyEffect",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::TimeRamp::isActive",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30.html#a2afdf19685e9f588d22fb45aef62ae30",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::TimeRamp::trigger",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a431f445197b6ac690c83e27ed3005843.html#a431f445197b6ac690c83e27ed3005843",tooltip="Call this when you want to (re)start the ramp cycle."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::TimeRamp::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a17b1376b4c537c669912cef12d9f211d.html#a17b1376b4c537c669912cef12d9f211d",tooltip="Compute current 0–255 output based on how much time has elapsed since trigger()."];
+  Node4 -> Node2 [id="edge4_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::time_alpha8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8",tooltip=" "];
+}

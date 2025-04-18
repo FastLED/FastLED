@@ -1,7 +1,9 @@
 <map id="blur2d" name="blur2d">
-<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="116,31,179,56"/>
-<area shape="rect" id="Node000002" href="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba" title=" " alt="" coords="5,5,68,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,36,68,28,69,23,103,31"/>
-<area shape="rect" id="Node000003" href="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="11,55,62,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="103,56,63,65,62,59,102,50"/>
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="184,55,247,80"/>
+<area shape="rect" id="Node000002" href="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba" title=" " alt="" coords="39,5,102,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,55,101,31,103,26,172,50"/>
+<area shape="rect" id="Node000003" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="5,55,136,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,70,137,70,137,65,170,65"/>
+<area shape="rect" id="Node000004" href="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="45,104,96,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,85,97,111,96,106,170,80"/>
 </map>

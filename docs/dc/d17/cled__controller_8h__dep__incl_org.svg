@@ -89,19 +89,19 @@
 </a>
 </g>
 </g>
-<!-- Node77 -->
-<g id="Node000077" class="node">
-<title>Node77</title>
-<g id="a_Node000077"><a xlink:href="../../d6/ddc/fastspi_8h.html" target="_top" xlink:title="Serial peripheral interface (SPI) definitions per platform.">
+<!-- Node85 -->
+<g id="Node000085" class="node">
+<title>Node85</title>
+<g id="a_Node000085"><a xlink:href="../../d6/ddc/fastspi_8h.html" target="_top" xlink:title="Serial peripheral interface (SPI) definitions per platform.">
 <polygon fill="white" stroke="#666666" points="185.5,-19 126.5,-19 126.5,0 185.5,0 185.5,-19"/>
 <text text-anchor="middle" x="156" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fastspi.h</text>
 </a>
 </g>
 </g>
-<!-- Node4&#45;&gt;Node77 -->
-<g id="edge10_Node000004_Node000077" class="edge">
-<title>Node4&#45;&gt;Node77</title>
-<g id="a_edge10_Node000004_Node000077"><a xlink:title=" ">
+<!-- Node4&#45;&gt;Node85 -->
+<g id="edge10_Node000004_Node000085" class="edge">
+<title>Node4&#45;&gt;Node85</title>
+<g id="a_edge10_Node000004_Node000085"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M187.67,-100.05C183.31,-87.37 177.35,-70.15 172,-55 167.57,-42.46 162.34,-27.97 159.1,-19.02"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="184.48,-101.54 191.04,-109.86 191.1,-99.27 184.48,-101.54"/>
 </a>
@@ -134,19 +134,19 @@
 </a>
 </g>
 </g>
-<!-- Node5&#45;&gt;Node77 -->
-<g id="edge8_Node000005_Node000077" class="edge">
-<title>Node5&#45;&gt;Node77</title>
-<g id="a_edge8_Node000005_Node000077"><a xlink:title=" ">
+<!-- Node5&#45;&gt;Node85 -->
+<g id="edge8_Node000005_Node000085" class="edge">
+<title>Node5&#45;&gt;Node85</title>
+<g id="a_edge8_Node000005_Node000085"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M133.16,-45.24C136.68,-36.37 141.95,-26.14 146.82,-19.09"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="129.83,-44.15 129.96,-54.75 136.47,-46.39 129.83,-44.15"/>
 </a>
 </g>
 </g>
-<!-- Node77&#45;&gt;Node5 -->
-<g id="edge9_Node000077_Node000005" class="edge">
-<title>Node77&#45;&gt;Node5</title>
-<g id="a_edge9_Node000077_Node000005"><a xlink:title=" ">
+<!-- Node85&#45;&gt;Node5 -->
+<g id="edge9_Node000085_Node000005" class="edge">
+<title>Node85&#45;&gt;Node5</title>
+<g id="a_edge9_Node000085_Node000005"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M153.8,-28.84C150.31,-37.62 145.12,-47.72 140.29,-54.75"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="157.21,-29.68 157.08,-19.09 150.58,-27.46 157.21,-29.68"/>
 </a>

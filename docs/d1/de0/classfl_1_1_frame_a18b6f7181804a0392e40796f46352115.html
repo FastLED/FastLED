@@ -137,28 +137,30 @@ $(function(){initNavTree('d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f4635
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d14/frame_8cpp_source.html#l00034">34</a> of file <a class="el" href="../../da/d14/frame_8cpp_source.html">frame.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   34</span>                                                                                                      {</div>
-<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">if</span> (frame1.size() != frame2.size()) {</div>
-<div class="line"><span class="lineno">   36</span>        <span class="keywordflow">return</span>;  <span class="comment">// Frames must have the same size</span></div>
-<div class="line"><span class="lineno">   37</span>    }</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span>    <span class="keyword">const</span> CRGB* rgbFirst = frame1.rgb();</div>
-<div class="line"><span class="lineno">   40</span>    <span class="keyword">const</span> CRGB* rgbSecond = frame2.rgb();</div>
-<div class="line"><span class="lineno">   41</span> </div>
-<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">if</span> (!rgbFirst || !rgbSecond) {</div>
-<div class="line"><span class="lineno">   43</span>        <span class="comment">// Error, why are we getting null pointers?</span></div>
-<div class="line"><span class="lineno">   44</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   45</span>    }</div>
-<div class="line"><span class="lineno">   46</span> </div>
-<div class="line"><span class="lineno">   47</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; frame2.size(); ++i) {</div>
-<div class="line"><span class="lineno">   48</span>        pixels[i] = <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a>(rgbFirst[i], rgbSecond[i], amountofFrame2);</div>
-<div class="line"><span class="lineno">   49</span>    }</div>
-<div class="line"><span class="lineno">   50</span>    <span class="comment">// We will eventually do something with alpha.</span></div>
-<div class="line"><span class="lineno">   51</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/d14/frame_8cpp_source.html#l00078">78</a> of file <a class="el" href="../../da/d14/frame_8cpp_source.html">frame.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   79</span>                                                              {</div>
+<div class="line"><span class="lineno">   80</span>    <span class="keywordflow">if</span> (frame1.<a class="code hl_function" href="../../d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2">size</a>() != frame2.<a class="code hl_function" href="../../d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2">size</a>()) {</div>
+<div class="line"><span class="lineno">   81</span>        <span class="keywordflow">return</span>; <span class="comment">// Frames must have the same size</span></div>
+<div class="line"><span class="lineno">   82</span>    }</div>
+<div class="line"><span class="lineno">   83</span> </div>
+<div class="line"><span class="lineno">   84</span>    <span class="keyword">const</span> CRGB *rgbFirst = frame1.<a class="code hl_function" href="../../d1/de0/classfl_1_1_frame_af87085697e2f19076fa6cd89d995501b.html#af87085697e2f19076fa6cd89d995501b">rgb</a>();</div>
+<div class="line"><span class="lineno">   85</span>    <span class="keyword">const</span> CRGB *rgbSecond = frame2.<a class="code hl_function" href="../../d1/de0/classfl_1_1_frame_af87085697e2f19076fa6cd89d995501b.html#af87085697e2f19076fa6cd89d995501b">rgb</a>();</div>
+<div class="line"><span class="lineno">   86</span> </div>
+<div class="line"><span class="lineno">   87</span>    <span class="keywordflow">if</span> (!rgbFirst || !rgbSecond) {</div>
+<div class="line"><span class="lineno">   88</span>        <span class="comment">// Error, why are we getting null pointers?</span></div>
+<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   90</span>    }</div>
+<div class="line"><span class="lineno">   91</span> </div>
+<div class="line"><span class="lineno">   92</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; frame2.<a class="code hl_function" href="../../d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2">size</a>(); ++i) {</div>
+<div class="line"><span class="lineno">   93</span>        pixels[i] = <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a>(rgbFirst[i], rgbSecond[i], amountofFrame2);</div>
+<div class="line"><span class="lineno">   94</span>    }</div>
+<div class="line"><span class="lineno">   95</span>    <span class="comment">// We will eventually do something with alpha.</span></div>
+<div class="line"><span class="lineno">   96</span>}</div>
+<div class="ttc" id="aclassfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2_html_a33cf60e696151e0d5777d89ed299c2f2"><div class="ttname"><a href="../../d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2">fl::Frame::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="../../df/d7d/frame_8h_source.html#l00034">frame.h:34</a></div></div>
+<div class="ttc" id="aclassfl_1_1_frame_af87085697e2f19076fa6cd89d995501b_html_af87085697e2f19076fa6cd89d995501b"><div class="ttname"><a href="../../d1/de0/classfl_1_1_frame_af87085697e2f19076fa6cd89d995501b.html#af87085697e2f19076fa6cd89d995501b">fl::Frame::rgb</a></div><div class="ttdeci">CRGB * rgb()</div><div class="ttdef"><b>Definition</b> <a href="../../df/d7d/frame_8h_source.html#l00032">frame.h:32</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94_html_a6348cb098a0b27f443bd1af290dafa94"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a></div><div class="ttdeci">static CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/de3/crgb_8cpp_source.html#l00050">crgb.cpp:50</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d14/frame_8cpp_source.html#l00015">Frame()</a>, <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00050">CRGB::blend()</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00025">rgb()</a>, and <a class="el" href="../../df/d7d/frame_8h_source.html#l00027">size()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d14/frame_8cpp_source.html#l00017">Frame()</a>, <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00050">CRGB::blend()</a>, <a class="el" href="../../df/d7d/frame_8h_source.html#l00032">rgb()</a>, and <a class="el" href="../../df/d7d/frame_8h_source.html#l00034">size()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -176,7 +178,7 @@ $(function(){initNavTree('d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f4635
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/de0/classfl_1_1_frame.html">Frame</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:47 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -128,30 +128,23 @@ $(function(){initNavTree('d6/d4d/classfl_1_1_pir_advanced_a75b19a61f8498e975d603
         </tr>
       </table>
 </div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pin</td><td>GPIO pin for PIR sensor </td></tr>
+    <tr><td class="paramname">latchMs</td><td>total active time (ms) </td></tr>
+    <tr><td class="paramname">risingTime</td><td>ramp‑up duration (ms) </td></tr>
+    <tr><td class="paramname">fallingTime</td><td>ramp‑down duration (ms) </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00037">37</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   38</span>    : <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801.html#a26250989a821d89c6d2c8a473d77b801">mPir</a>(pin)</div>
-<div class="line"><span class="lineno">   39</span>    , <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18.html#a30a72a8158375b169bc271cdabe0de18">mLatchMs</a>(latchMs)</div>
-<div class="line"><span class="lineno">   40</span>    , <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8cf0aca3b53a1b006fc3a73ae9af309d.html#a8cf0aca3b53a1b006fc3a73ae9af309d">mRisingTime</a>(risingTime)</div>
-<div class="line"><span class="lineno">   41</span>    , <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_ac7b28b052b0015cd9fc331d9d31ec8c6.html#ac7b28b052b0015cd9fc331d9d31ec8c6">mFallingTime</a>(fallingTime)</div>
-<div class="line"><span class="lineno">   42</span>    , <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_aaa6a288149790a515237101245119396.html#aaa6a288149790a515237101245119396">mLastTrigger</a>(0)</div>
-<div class="line"><span class="lineno">   43</span>    , <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8df2c2d6eaae862a70a50611fe8c0958.html#a8df2c2d6eaae862a70a50611fe8c0958">mLastState</a>(<span class="keyword">false</span>) {</div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8cf0aca3b53a1b006fc3a73ae9af309d.html#a8cf0aca3b53a1b006fc3a73ae9af309d">mRisingTime</a> + <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_ac7b28b052b0015cd9fc331d9d31ec8c6.html#ac7b28b052b0015cd9fc331d9d31ec8c6">mFallingTime</a> &gt; <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18.html#a30a72a8158375b169bc271cdabe0de18">mLatchMs</a>) {</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;PirAdvanced: risingTime + fallingTime must be less than latchMs&quot;</span>);</div>
-<div class="line"><span class="lineno">   47</span>        <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8cf0aca3b53a1b006fc3a73ae9af309d.html#a8cf0aca3b53a1b006fc3a73ae9af309d">mRisingTime</a> = <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18.html#a30a72a8158375b169bc271cdabe0de18">mLatchMs</a> / 2;</div>
-<div class="line"><span class="lineno">   48</span>        <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_ac7b28b052b0015cd9fc331d9d31ec8c6.html#ac7b28b052b0015cd9fc331d9d31ec8c6">mFallingTime</a> = <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18.html#a30a72a8158375b169bc271cdabe0de18">mLatchMs</a> / 2;</div>
-<div class="line"><span class="lineno">   49</span>    }</div>
-<div class="line"><span class="lineno">   50</span>}</div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801_html_a26250989a821d89c6d2c8a473d77b801"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801.html#a26250989a821d89c6d2c8a473d77b801">fl::PirAdvanced::mPir</a></div><div class="ttdeci">Pir mPir</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00054">pir.h:54</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18_html_a30a72a8158375b169bc271cdabe0de18"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a30a72a8158375b169bc271cdabe0de18.html#a30a72a8158375b169bc271cdabe0de18">fl::PirAdvanced::mLatchMs</a></div><div class="ttdeci">uint32_t mLatchMs</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00055">pir.h:55</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_a8cf0aca3b53a1b006fc3a73ae9af309d_html_a8cf0aca3b53a1b006fc3a73ae9af309d"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a8cf0aca3b53a1b006fc3a73ae9af309d.html#a8cf0aca3b53a1b006fc3a73ae9af309d">fl::PirAdvanced::mRisingTime</a></div><div class="ttdeci">uint32_t mRisingTime</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00056">pir.h:56</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_a8df2c2d6eaae862a70a50611fe8c0958_html_a8df2c2d6eaae862a70a50611fe8c0958"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a8df2c2d6eaae862a70a50611fe8c0958.html#a8df2c2d6eaae862a70a50611fe8c0958">fl::PirAdvanced::mLastState</a></div><div class="ttdeci">bool mLastState</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00059">pir.h:59</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_aaa6a288149790a515237101245119396_html_aaa6a288149790a515237101245119396"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_aaa6a288149790a515237101245119396.html#aaa6a288149790a515237101245119396">fl::PirAdvanced::mLastTrigger</a></div><div class="ttdeci">uint32_t mLastTrigger</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00058">pir.h:58</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_ac7b28b052b0015cd9fc331d9d31ec8c6_html_ac7b28b052b0015cd9fc331d9d31ec8c6"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_ac7b28b052b0015cd9fc331d9d31ec8c6.html#ac7b28b052b0015cd9fc331d9d31ec8c6">fl::PirAdvanced::mFallingTime</a></div><div class="ttdeci">uint32_t mFallingTime</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00057">pir.h:57</a></div></div>
-<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00036">36</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   38</span>    : <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801.html#a26250989a821d89c6d2c8a473d77b801">mPir</a>(pin), <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">mRamp</a>(risingTime, latchMs, fallingTime) {</div>
+<div class="line"><span class="lineno">   39</span>}</div>
+<div class="ttc" id="aclassfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801_html_a26250989a821d89c6d2c8a473d77b801"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a26250989a821d89c6d2c8a473d77b801.html#a26250989a821d89c6d2c8a473d77b801">fl::PirAdvanced::mPir</a></div><div class="ttdeci">Pir mPir</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00067">pir.h:67</a></div></div>
+<div class="ttc" id="aclassfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a_html_a8e958be6de640010148ff2f54b202e0a"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">fl::PirAdvanced::mRamp</a></div><div class="ttdeci">TimeRamp mRamp</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00068">pir.h:68</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00057">mFallingTime</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00059">mLastState</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00058">mLastTrigger</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00055">mLatchMs</a>, <a class="el" href="../../d9/dd3/pir_8h_source.html#l00054">mPir</a>, and <a class="el" href="../../d9/dd3/pir_8h_source.html#l00056">mRisingTime</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dd3/pir_8h_source.html#l00067">mPir</a>, and <a class="el" href="../../d9/dd3/pir_8h_source.html#l00068">mRamp</a>.</p>
 
 </div>
 </div>
@@ -162,7 +155,7 @@ $(function(){initNavTree('d6/d4d/classfl_1_1_pir_advanced_a75b19a61f8498e975d603
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d4d/classfl_1_1_pir_advanced.html">PirAdvanced</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:47 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

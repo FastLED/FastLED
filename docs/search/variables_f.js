@@ -9,5 +9,8 @@ var searchData=
   ['offset_5fy_6',['offset_y',['../d6/d74/namespaceanimartrix__detail.html#a4def770865352b22cd8798cc59a3b914',1,'animartrix_detail::render_parameters']]],
   ['offset_5fz_7',['offset_z',['../d6/d74/namespaceanimartrix__detail.html#a3f6a63f75cd3df8a6fccd47a53ac5610',1,'animartrix_detail::render_parameters']]],
   ['on_5f_8',['on_',['../d8/ddd/class_toggle_button_ab4507485bf1b7d331190e66e7f5bfeda.html#ab4507485bf1b7d331190e66e7f5bfeda',1,'ToggleButton::on_'],['../d6/d58/class_counting_button_a0efc7ef5ae97ad4fd0187228e617e2dd.html#a0efc7ef5ae97ad4fd0187228e617e2dd',1,'CountingButton::on_'],['../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67',1,'Key::on_']]],
-  ['orig_5fcolor_5f_9',['orig_color_',['../db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84',1,'Key']]]
+  ['orig_5fcolor_5f_9',['orig_color_',['../db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84',1,'Key']]],
+  ['outerheight_10',['outerHeight',['../da/d47/classfl_1_1_wave_simulation2_d_a64f6560c145a1c591ad8801af63c95fb.html#a64f6560c145a1c591ad8801af63c95fb',1,'fl::WaveSimulation2D']]],
+  ['outerlength_11',['outerLength',['../d8/dc1/classfl_1_1_wave_simulation1_d_ab7d52153630aa84000fe8e90014b7cdf.html#ab7d52153630aa84000fe8e90014b7cdf',1,'fl::WaveSimulation1D']]],
+  ['outerwidth_12',['outerWidth',['../da/d47/classfl_1_1_wave_simulation2_d_a0e1f03a751dbaa29acbc342710f8e60b.html#a0e1f03a751dbaa29acbc342710f8e60b',1,'fl::WaveSimulation2D']]]
 ];

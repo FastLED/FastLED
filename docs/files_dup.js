@@ -2,6 +2,7 @@ var files_dup =
 [
     [ "examples", "dir_d28a4824dc47e487b107a5db32ef43c4.html", "dir_d28a4824dc47e487b107a5db32ef43c4" ],
     [ "fl", "dir_4d1829fa9bd13d7db71e765b2707b248.html", "dir_4d1829fa9bd13d7db71e765b2707b248" ],
+    [ "fonts", "dir_bec663b67e4420d39ecb45ef100bdbac.html", "dir_bec663b67e4420d39ecb45ef100bdbac" ],
     [ "fx", "dir_acbb946b833f21b16ec30aa21c4c3a72.html", "dir_acbb946b833f21b16ec30aa21c4c3a72" ],
     [ "lib8tion", "dir_d91669bda445047ed1892ac77a05ddb9.html", "dir_d91669bda445047ed1892ac77a05ddb9" ],
     [ "sensors", "dir_7349e89ef19c117195f8e371603e1b1f.html", "dir_7349e89ef19c117195f8e371603e1b1f" ],

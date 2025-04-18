@@ -1,9 +1,13 @@
 <map id="fl::PirAdvanced" name="fl::PirAdvanced">
-<area shape="rect" id="Node000001" title=" " alt="" coords="55,181,173,207"/>
-<area shape="rect" id="Node000002" href="$db/db1/classfl_1_1_pir.html" title=" " alt="" coords="87,93,141,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,133,117,181,111,181,111,133"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="168,181,287,207"/>
+<area shape="rect" id="Node000002" href="$db/db1/classfl_1_1_pir.html" title=" " alt="" coords="148,93,203,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,129,222,179,218,182,187,132"/>
 <area shape="rect" id="Node000003" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="5,5,100,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="69,41,87,68,106,92,102,95,83,71,64,44"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,38,110,67,152,91,149,96,107,72,72,42"/>
 <area shape="rect" id="Node000004" href="$d0/d32/classfl_1_1_digital_pin.html" title=" " alt="" coords="125,5,226,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="165,45,148,71,128,95,124,91,144,68,160,42"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="178,45,178,93,173,93,173,45"/>
+<area shape="rect" id="Node000005" href="$d0/d9d/classfl_1_1_time_ramp.html" title=" " alt="" coords="238,93,347,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="278,131,239,182,234,179,273,128"/>
+<area shape="rect" id="Node000006" href="$d2/d4a/classfl_1_1_time_alpha.html" title=" " alt="" coords="251,5,359,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="304,44,297,93,292,92,299,44"/>
 </map>

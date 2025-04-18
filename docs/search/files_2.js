@@ -1,16 +1,20 @@
 var searchData=
 [
-  ['bilinear_5fexpansion_2ecpp_0',['bilinear_expansion.cpp',['../de/d80/bilinear__expansion_8cpp.html',1,'']]],
-  ['bilinear_5fexpansion_2eh_1',['bilinear_expansion.h',['../da/d34/bilinear__expansion_8h.html',1,'']]],
-  ['bitswap_2ecpp_2',['bitswap.cpp',['../d7/d91/bitswap_8cpp.html',1,'']]],
-  ['bitswap_2eh_3',['bitswap.h',['../de/ded/bitswap_8h.html',1,'']]],
-  ['blink_2eino_4',['Blink.ino',['../d0/dc3/_blink_8ino.html',1,'']]],
-  ['blinkparallel_2eino_5',['BlinkParallel.ino',['../d5/d4d/_blink_parallel_8ino.html',1,'']]],
-  ['blur_2eino_6',['Blur.ino',['../d4/d0c/_blur_8ino.html',1,'']]],
-  ['blur2d_2eino_7',['Blur2d.ino',['../df/d42/_blur2d_8ino.html',1,'']]],
-  ['brightness_5fbitshifter_2eh_8',['brightness_bitshifter.h',['../d5/d25/brightness__bitshifter_8h.html',1,'']]],
-  ['buttons_2eh_9',['buttons.h',['../de/d05/buttons_8h.html',1,'']]],
-  ['bytestream_2eh_10',['bytestream.h',['../dd/d2b/bytestream_8h.html',1,'']]],
-  ['bytestreammemory_2ecpp_11',['bytestreammemory.cpp',['../de/d95/bytestreammemory_8cpp.html',1,'']]],
-  ['bytestreammemory_2eh_12',['bytestreammemory.h',['../d1/d24/bytestreammemory_8h.html',1,'']]]
+  ['bilinear_5fcompression_2ecpp_0',['bilinear_compression.cpp',['../d0/d4b/bilinear__compression_8cpp.html',1,'']]],
+  ['bilinear_5fcompression_2eh_1',['bilinear_compression.h',['../d8/d48/bilinear__compression_8h.html',1,'']]],
+  ['bilinear_5fexpansion_2ecpp_2',['bilinear_expansion.cpp',['../de/d80/bilinear__expansion_8cpp.html',1,'']]],
+  ['bilinear_5fexpansion_2eh_3',['bilinear_expansion.h',['../da/d34/bilinear__expansion_8h.html',1,'']]],
+  ['bitswap_2ecpp_4',['bitswap.cpp',['../d7/d91/bitswap_8cpp.html',1,'']]],
+  ['bitswap_2eh_5',['bitswap.h',['../de/ded/bitswap_8h.html',1,'']]],
+  ['blend_2ecpp_6',['blend.cpp',['../d7/d68/blend_8cpp.html',1,'']]],
+  ['blend_2eh_7',['blend.h',['../d8/d4e/blend_8h.html',1,'']]],
+  ['blink_2eino_8',['Blink.ino',['../d0/dc3/_blink_8ino.html',1,'']]],
+  ['blinkparallel_2eino_9',['BlinkParallel.ino',['../d5/d4d/_blink_parallel_8ino.html',1,'']]],
+  ['blur_2eino_10',['Blur.ino',['../d4/d0c/_blur_8ino.html',1,'']]],
+  ['blur2d_2eino_11',['Blur2d.ino',['../df/d42/_blur2d_8ino.html',1,'']]],
+  ['brightness_5fbitshifter_2eh_12',['brightness_bitshifter.h',['../d5/d25/brightness__bitshifter_8h.html',1,'']]],
+  ['buttons_2eh_13',['buttons.h',['../de/d05/buttons_8h.html',1,'']]],
+  ['bytestream_2eh_14',['bytestream.h',['../dd/d2b/bytestream_8h.html',1,'']]],
+  ['bytestreammemory_2ecpp_15',['bytestreammemory.cpp',['../de/d95/bytestreammemory_8cpp.html',1,'']]],
+  ['bytestreammemory_2eh_16',['bytestreammemory.h',['../d1/d24/bytestreammemory_8h.html',1,'']]]
 ];

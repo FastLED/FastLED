@@ -1,10 +1,10 @@
-<map id="fx/2d/bilinear_expansion.h" name="fx/2d/bilinear_expansion.h">
-<area shape="rect" id="Node000001" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="155,5,350,31"/>
-<area shape="rect" id="Node000002" href="$de/d80/bilinear__expansion_8cpp.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="5,79,215,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,39,135,81,132,76,216,34"/>
-<area shape="rect" id="Node000003" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="232,152,375,177"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,43,281,103,300,151,295,153,275,105,257,45"/>
-<area shape="rect" id="Node000004" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="290,79,418,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,36,339,76,336,81,279,41"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="340,117,314,153,309,150,335,114"/>
+<map id="fl/bilinear_expansion.h" name="fl/bilinear_expansion.h">
+<area shape="rect" id="Node000001" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="142,5,311,31"/>
+<area shape="rect" id="Node000002" href="$de/d80/bilinear__expansion_8cpp.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="5,79,189,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,40,120,81,117,76,192,35"/>
+<area shape="rect" id="Node000003" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="206,152,349,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,43,255,103,274,151,269,153,249,105,231,45"/>
+<area shape="rect" id="Node000004" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="264,79,392,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="256,36,313,76,310,81,253,41"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="314,117,288,153,283,150,309,114"/>
 </map>

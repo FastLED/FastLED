@@ -162,6 +162,7 @@ var struct_c_r_g_b =
     [ "addToRGB", "d7/d82/struct_c_r_g_b_a971eb811b79c5748d02a0abc2162a223.html#a971eb811b79c5748d02a0abc2162a223", null ],
     [ "as_uint32_t", "d7/d82/struct_c_r_g_b_a4340fb67053d65790e49aa7afb92651c.html#a4340fb67053d65790e49aa7afb92651c", null ],
     [ "blend", "d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94", null ],
+    [ "blendAlphaMaxChannel", "d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601", null ],
     [ "computeAdjustment", "d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e3.html#a65e166b90fb7b4aecd2b26a987e312e3", null ],
     [ "fadeLightBy", "d7/d82/struct_c_r_g_b_a3b098899b112c2c9a7ad7490992e0d84.html#a3b098899b112c2c9a7ad7490992e0d84", null ],
     [ "fadeToBlackBy", "d7/d82/struct_c_r_g_b_aec2425ad20ac3c5191ac2b47eec4dca0.html#aec2425ad20ac3c5191ac2b47eec4dca0", null ],

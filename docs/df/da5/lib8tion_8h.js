@@ -11,6 +11,8 @@ var lib8tion_8h =
     [ "EVERY_N_MILLISECONDS_DYNAMIC", "d5/df2/group___timekeeping_ga84622b4bfb271a01d0a3bab2f2217f47.html#ga84622b4bfb271a01d0a3bab2f2217f47", null ],
     [ "EVERY_N_MILLISECONDS_DYNAMIC_I", "d5/df2/group___timekeeping_ga33823fb898e26e976f4394bf3fed8b10.html#ga33823fb898e26e976f4394bf3fed8b10", null ],
     [ "EVERY_N_MILLISECONDS_I", "d5/df2/group___timekeeping_ga8b6fa2a3e84d33ffebf136f6bd9019b3.html#ga8b6fa2a3e84d33ffebf136f6bd9019b3", null ],
+    [ "EVERY_N_MILLISECONDS_RANDOM", "d5/df2/group___timekeeping_ga4f2db23a849eecce6d992ebccae0140f.html#ga4f2db23a849eecce6d992ebccae0140f", null ],
+    [ "EVERY_N_MILLISECONDS_RANDOM_I", "d5/df2/group___timekeeping_gaccd061b76d3fc10b99fec70bb0966363.html#gaccd061b76d3fc10b99fec70bb0966363", null ],
     [ "EVERY_N_MINUTES", "d5/df2/group___timekeeping_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad", null ],
     [ "EVERY_N_MINUTES_I", "d5/df2/group___timekeeping_ga08ec76930e29e8685edacc060f01a9fd.html#ga08ec76930e29e8685edacc060f01a9fd", null ],
     [ "EVERY_N_SECONDS", "d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb", null ],

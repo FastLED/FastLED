@@ -130,14 +130,14 @@ $(function(){initNavTree('da/d7a/struct_noise_generator_addecf502634007f361b6563
 <p class="definition">Definition at line <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00024">24</a> of file <a class="el" href="../../d8/d10/noisegen_8h_source.html">noisegen.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   24</span>                                                          {</div>
 <div class="line"><span class="lineno">   25</span>        uint32_t input = <a class="code hl_variable" href="../../da/d7a/struct_noise_generator_a346480e4103621eac77445153e29e076.html#a346480e4103621eac77445153e29e076">iteration_scale</a> * i + time_ms * <a class="code hl_variable" href="../../da/d7a/struct_noise_generator_a2059c6016a3bb65b468a6b117c1085ce.html#a2059c6016a3bb65b468a6b117c1085ce">time_multiplier</a>;</div>
-<div class="line"><span class="lineno">   26</span>        uint16_t v1 = <a class="code hl_function" href="../../d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00">inoise16</a>(input);</div>
+<div class="line"><span class="lineno">   26</span>        uint16_t v1 = <a class="code hl_function" href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c">inoise16</a>(input);</div>
 <div class="line"><span class="lineno">   27</span>        <span class="keywordflow">return</span> uint8_t(v1 &gt;&gt; 8);</div>
 <div class="line"><span class="lineno">   28</span>    }</div>
-<div class="ttc" id="agroup___noise_generation_ga94be5ce8402e6147209f94d6006e8f00_html_ga94be5ce8402e6147209f94d6006e8f00"><div class="ttname"><a href="../../d8/df9/group___noise_generation_ga94be5ce8402e6147209f94d6006e8f00.html#ga94be5ce8402e6147209f94d6006e8f00">inoise16</a></div><div class="ttdeci">uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z)</div><div class="ttdoc">16-bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00387">noise.cpp:387</a></div></div>
+<div class="ttc" id="agroup___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c_html_ga46e9de1842d8977b77bee089d0f3b25c"><div class="ttname"><a href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c">inoise16</a></div><div class="ttdeci">uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t t)</div><div class="ttdoc">16-bit, fixed point implementation of Perlin&#39;s noise.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00466">noise.cpp:466</a></div></div>
 <div class="ttc" id="astruct_noise_generator_a2059c6016a3bb65b468a6b117c1085ce_html_a2059c6016a3bb65b468a6b117c1085ce"><div class="ttname"><a href="../../da/d7a/struct_noise_generator_a2059c6016a3bb65b468a6b117c1085ce.html#a2059c6016a3bb65b468a6b117c1085ce">NoiseGenerator::time_multiplier</a></div><div class="ttdeci">unsigned long time_multiplier</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d10/noisegen_8h_source.html#l00019">noisegen.h:19</a></div></div>
 <div class="ttc" id="astruct_noise_generator_a346480e4103621eac77445153e29e076_html_a346480e4103621eac77445153e29e076"><div class="ttname"><a href="../../da/d7a/struct_noise_generator_a346480e4103621eac77445153e29e076.html#a346480e4103621eac77445153e29e076">NoiseGenerator::iteration_scale</a></div><div class="ttdeci">int32_t iteration_scale</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d10/noisegen_8h_source.html#l00018">noisegen.h:18</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00387">inoise16()</a>, <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00018">iteration_scale</a>, and <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00019">time_multiplier</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00466">inoise16()</a>, <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00018">iteration_scale</a>, and <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00019">time_multiplier</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/d10/noisegen_8h_source.html#l00030">LedValue()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -164,7 +164,7 @@ $(function(){initNavTree('da/d7a/struct_noise_generator_addecf502634007f361b6563
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../da/d7a/struct_noise_generator.html">NoiseGenerator</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

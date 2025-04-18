@@ -1,0 +1,8 @@
+<map id="fonts/console_font_5x8.h" name="fonts/console_font_5x8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="65,5,207,45"/>
+<area shape="rect" id="Node000002" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="5,93,155,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,47,98,84,94,80,120,44"/>
+<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="75,167,197,192"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="151,44,167,78,171,99,169,119,154,156,149,154,164,118,165,99,162,80,146,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,117,121,154,116,157,87,121"/>
+</map>

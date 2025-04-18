@@ -1,5 +1,9 @@
 <map id="fl::PointerDeleter&lt; T &gt;" name="fl::PointerDeleter&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="17,5,188,31"/>
-<area shape="rect" id="Node000002" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="5,93,200,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,44,105,93,100,93,100,44"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,85,176,110"/>
+<area shape="rect" id="Node000002" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="401,5,596,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,78,199,60,303,42,401,30,401,35,304,47,201,65,140,83"/>
+<area shape="rect" id="Node000003" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,70,587,125"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,95,410,95,410,100,190,100"/>
+<area shape="rect" id="Node000004" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,149,587,203"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="140,112,201,129,309,150,410,164,409,169,308,155,199,135,139,117"/>
 </map>

@@ -880,100 +880,162 @@ $(function(){initNavTree('df/da5/lib8tion_8h_source.html','../../'); initResizab
 </div>
 <div class="line"><a id="l01208" name="l01208"></a><span class="lineno"> 1208</span></div>
 <div class="line"><a id="l01209" name="l01209"></a><span class="lineno"> 1209</span> </div>
-<div class="line"><a id="l01210" name="l01210"></a><span class="lineno"> 1210</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l01210" name="l01210"></a><span class="lineno"> 1210</span> </div>
 <div class="line"><a id="l01211" name="l01211"></a><span class="lineno"> 1211</span> </div>
-<div class="line"><a id="l01212" name="l01212"></a><span class="lineno"> 1212</span><span class="comment">// Under C++11 rules, we would be allowed to use not-external</span></div>
-<div class="line"><a id="l01213" name="l01213"></a><span class="lineno"> 1213</span><span class="comment">// -linkage-type symbols as template arguments,</span></div>
-<div class="line"><a id="l01214" name="l01214"></a><span class="lineno"> 1214</span><span class="comment">// e.g., LIB8STATIC seconds16, and we&#39;d be able to use these</span></div>
-<div class="line"><a id="l01215" name="l01215"></a><span class="lineno"> 1215</span><span class="comment">// templates as shown below.</span></div>
-<div class="line"><a id="l01216" name="l01216"></a><span class="lineno"> 1216</span><span class="comment">// However, under C++03 rules, we cannot do that, and thus we</span></div>
-<div class="line"><a id="l01217" name="l01217"></a><span class="lineno"> 1217</span><span class="comment">// have to resort to the preprocessor to &#39;instantiate&#39; &#39;templates&#39;,</span></div>
-<div class="line"><a id="l01218" name="l01218"></a><span class="lineno"> 1218</span><span class="comment">// as handled above.</span></div>
-<div class="line"><a id="l01219" name="l01219"></a><span class="lineno"> 1219</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> timeType,timeType (*timeGetter)()&gt;</div>
-<div class="line"><a id="l01220" name="l01220"></a><span class="lineno"> 1220</span><span class="keyword">class </span>CEveryNTimePeriods {</div>
-<div class="line"><a id="l01221" name="l01221"></a><span class="lineno"> 1221</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l01222" name="l01222"></a><span class="lineno"> 1222</span>    timeType mPrevTrigger;</div>
-<div class="line"><a id="l01223" name="l01223"></a><span class="lineno"> 1223</span>    timeType mPeriod;</div>
-<div class="line"><a id="l01224" name="l01224"></a><span class="lineno"> 1224</span> </div>
-<div class="line"><a id="l01225" name="l01225"></a><span class="lineno"> 1225</span>    CEveryNTimePeriods() { reset(); mPeriod = 1; };</div>
-<div class="line"><a id="l01226" name="l01226"></a><span class="lineno"> 1226</span>    CEveryNTimePeriods(timeType period) { reset(); setPeriod(period); };</div>
-<div class="line"><a id="l01227" name="l01227"></a><span class="lineno"> 1227</span>    <span class="keywordtype">void</span> setPeriod( timeType period) { mPeriod = period; };</div>
-<div class="line"><a id="l01228" name="l01228"></a><span class="lineno"> 1228</span>    timeType getTime() { <span class="keywordflow">return</span> (timeType)(timeGetter()); };</div>
-<div class="line"><a id="l01229" name="l01229"></a><span class="lineno"> 1229</span>    timeType getPeriod() { <span class="keywordflow">return</span> mPeriod; };</div>
-<div class="line"><a id="l01230" name="l01230"></a><span class="lineno"> 1230</span>    timeType getElapsed() { <span class="keywordflow">return</span> getTime() - mPrevTrigger; }</div>
-<div class="line"><a id="l01231" name="l01231"></a><span class="lineno"> 1231</span>    timeType getRemaining() { <span class="keywordflow">return</span> mPeriod - getElapsed(); }</div>
-<div class="line"><a id="l01232" name="l01232"></a><span class="lineno"> 1232</span>    timeType getLastTriggerTime() { <span class="keywordflow">return</span> mPrevTrigger; }</div>
-<div class="line"><a id="l01233" name="l01233"></a><span class="lineno"> 1233</span>    <span class="keywordtype">bool</span> ready() {</div>
-<div class="line"><a id="l01234" name="l01234"></a><span class="lineno"> 1234</span>        <span class="keywordtype">bool</span> isReady = (getElapsed() &gt;= mPeriod);</div>
-<div class="line"><a id="l01235" name="l01235"></a><span class="lineno"> 1235</span>        <span class="keywordflow">if</span>( isReady ) { reset(); }</div>
-<div class="line"><a id="l01236" name="l01236"></a><span class="lineno"> 1236</span>        <span class="keywordflow">return</span> isReady;</div>
-<div class="line"><a id="l01237" name="l01237"></a><span class="lineno"> 1237</span>    }</div>
-<div class="line"><a id="l01238" name="l01238"></a><span class="lineno"> 1238</span>    <span class="keywordtype">void</span> reset() { mPrevTrigger = getTime(); };</div>
-<div class="line"><a id="l01239" name="l01239"></a><span class="lineno"> 1239</span>    <span class="keywordtype">void</span> trigger() { mPrevTrigger = getTime() - mPeriod; };</div>
-<div class="line"><a id="l01240" name="l01240"></a><span class="lineno"> 1240</span> </div>
-<div class="line"><a id="l01241" name="l01241"></a><span class="lineno"> 1241</span>    <span class="keyword">operator</span> bool() { <span class="keywordflow">return</span> ready(); }</div>
-<div class="line"><a id="l01242" name="l01242"></a><span class="lineno"> 1242</span>};</div>
-<div class="line"><a id="l01243" name="l01243"></a><span class="lineno"> 1243</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,seconds16&gt; CEveryNSeconds;</div>
-<div class="line"><a id="l01244" name="l01244"></a><span class="lineno"> 1244</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,bseconds16&gt; CEveryNBSeconds;</div>
-<div class="line"><a id="l01245" name="l01245"></a><span class="lineno"> 1245</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint32_t,millis&gt; CEveryNMillis;</div>
-<div class="line"><a id="l01246" name="l01246"></a><span class="lineno"> 1246</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,minutes16&gt; CEveryNMinutes;</div>
-<div class="line"><a id="l01247" name="l01247"></a><span class="lineno"> 1247</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint8_t,hours8&gt; CEveryNHours;</div>
-<div class="line"><a id="l01248" name="l01248"></a><span class="lineno"> 1248</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l01249" name="l01249"></a><span class="lineno"> 1249</span> </div>
-<div class="line"><a id="l01250" name="l01250"></a><span class="lineno"> 1250</span></div>
-<div class="line"><a id="l01265" name="l01265"></a><span class="lineno"> 1265</span></div>
-<div class="line"><a id="l01267" name="l01267"></a><span class="lineno"> 1267</span><span class="preprocessor">#define CONCAT_HELPER( x, y ) x##y</span></div>
-<div class="line"><a id="l01268" name="l01268"></a><span class="lineno"> 1268</span><span class="preprocessor">#define CONCAT_MACRO( x, y ) CONCAT_HELPER( x, y )</span></div>
-<div class="line"><a id="l01270" name="l01270"></a><span class="lineno"> 1270</span> </div>
-<div class="line"><a id="l01271" name="l01271"></a><span class="lineno"> 1271</span></div>
-<div class="line"><a id="l01274" name="l01274"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga90e084b8253af257a0257a23aeef53e1.html#ga90e084b8253af257a0257a23aeef53e1"> 1274</a></span><span class="preprocessor">#define EVERY_N_MILLIS(N) EVERY_N_MILLIS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
-<div class="line"><a id="l01275" name="l01275"></a><span class="lineno"> 1275</span></div>
-<div class="line"><a id="l01278" name="l01278"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga7efd8f560d5490e6d2e79039a775b195.html#ga7efd8f560d5490e6d2e79039a775b195"> 1278</a></span><span class="preprocessor">#define EVERY_N_MILLIS_I(NAME,N) static CEveryNMillis NAME(N); if( NAME )</span></div>
-<div class="line"><a id="l01279" name="l01279"></a><span class="lineno"> 1279</span> </div>
-<div class="line"><a id="l01280" name="l01280"></a><span class="lineno"> 1280</span></div>
-<div class="line"><a id="l01283" name="l01283"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb"> 1283</a></span><span class="preprocessor">#define EVERY_N_SECONDS(N) EVERY_N_SECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
-<div class="line"><a id="l01284" name="l01284"></a><span class="lineno"> 1284</span></div>
-<div class="line"><a id="l01287" name="l01287"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gafea3f4f8abfc01e3da03fdaa4ee34349.html#gafea3f4f8abfc01e3da03fdaa4ee34349"> 1287</a></span><span class="preprocessor">#define EVERY_N_SECONDS_I(NAME,N) static CEveryNSeconds NAME(N); if( NAME )</span></div>
-<div class="line"><a id="l01288" name="l01288"></a><span class="lineno"> 1288</span> </div>
-<div class="line"><a id="l01289" name="l01289"></a><span class="lineno"> 1289</span></div>
-<div class="line"><a id="l01292" name="l01292"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga860bac35464e2c83c313e92a59e0e39a.html#ga860bac35464e2c83c313e92a59e0e39a"> 1292</a></span><span class="preprocessor">#define EVERY_N_BSECONDS(N) EVERY_N_BSECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
-<div class="line"><a id="l01293" name="l01293"></a><span class="lineno"> 1293</span></div>
-<div class="line"><a id="l01296" name="l01296"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga8057578b51f0a5cff337fb2fd5521de7.html#ga8057578b51f0a5cff337fb2fd5521de7"> 1296</a></span><span class="preprocessor">#define EVERY_N_BSECONDS_I(NAME,N) static CEveryNBSeconds NAME(N); if( NAME )</span></div>
-<div class="line"><a id="l01297" name="l01297"></a><span class="lineno"> 1297</span> </div>
-<div class="line"><a id="l01298" name="l01298"></a><span class="lineno"> 1298</span></div>
-<div class="line"><a id="l01301" name="l01301"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad"> 1301</a></span><span class="preprocessor">#define EVERY_N_MINUTES(N) EVERY_N_MINUTES_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
-<div class="line"><a id="l01302" name="l01302"></a><span class="lineno"> 1302</span></div>
-<div class="line"><a id="l01305" name="l01305"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga08ec76930e29e8685edacc060f01a9fd.html#ga08ec76930e29e8685edacc060f01a9fd"> 1305</a></span><span class="preprocessor">#define EVERY_N_MINUTES_I(NAME,N) static CEveryNMinutes NAME(N); if( NAME )</span></div>
-<div class="line"><a id="l01306" name="l01306"></a><span class="lineno"> 1306</span> </div>
-<div class="line"><a id="l01307" name="l01307"></a><span class="lineno"> 1307</span></div>
-<div class="line"><a id="l01310" name="l01310"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga15cbb1cba95ba3a57f08ef0f65dacd28.html#ga15cbb1cba95ba3a57f08ef0f65dacd28"> 1310</a></span><span class="preprocessor">#define EVERY_N_HOURS(N) EVERY_N_HOURS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
-<div class="line"><a id="l01311" name="l01311"></a><span class="lineno"> 1311</span></div>
-<div class="line"><a id="l01314" name="l01314"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga67a3f043c1028c677b99698a82d5f22e.html#ga67a3f043c1028c677b99698a82d5f22e"> 1314</a></span><span class="preprocessor">#define EVERY_N_HOURS_I(NAME,N) static CEveryNHours NAME(N); if( NAME )</span></div>
-<div class="line"><a id="l01315" name="l01315"></a><span class="lineno"> 1315</span> </div>
-<div class="line"><a id="l01316" name="l01316"></a><span class="lineno"> 1316</span></div>
-<div class="line"><a id="l01318" name="l01318"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga5eeb30462c2c1d653b7f4abaf262fc3d.html#ga5eeb30462c2c1d653b7f4abaf262fc3d"> 1318</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)</span></div>
-<div class="line"><a id="l01320" name="l01320"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga8b6fa2a3e84d33ffebf136f6bd9019b3.html#ga8b6fa2a3e84d33ffebf136f6bd9019b3"> 1320</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)</span></div>
-<div class="line"><a id="l01321" name="l01321"></a><span class="lineno"> 1321</span></div>
-<div class="line"><a id="l01323" name="l01323"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga84622b4bfb271a01d0a3bab2f2217f47.html#ga84622b4bfb271a01d0a3bab2f2217f47"> 1323</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_DYNAMIC(PERIOD_FUNC) EVERY_N_MILLISECONDS_DYNAMIC_I(CONCAT_MACRO(__dynamic_millis_timer, __COUNTER__ ), (PERIOD_FUNC))</span></div>
-<div class="line"><a id="l01324" name="l01324"></a><span class="lineno"> 1324</span></div>
-<div class="foldopen" id="foldopen01326" data-start="" data-end="">
-<div class="line"><a id="l01326" name="l01326"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga33823fb898e26e976f4394bf3fed8b10.html#ga33823fb898e26e976f4394bf3fed8b10"> 1326</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_DYNAMIC_I(NAME, PERIOD_FUNC) \</span></div>
-<div class="line"><a id="l01327" name="l01327"></a><span class="lineno"> 1327</span><span class="preprocessor">    static CEveryNMillisDynamic NAME(1); \</span></div>
-<div class="line"><a id="l01328" name="l01328"></a><span class="lineno"> 1328</span><span class="preprocessor">    NAME.setPeriod(PERIOD_FUNC); \</span></div>
-<div class="line"><a id="l01329" name="l01329"></a><span class="lineno"> 1329</span><span class="preprocessor">    if( NAME )</span></div>
+<div class="line"><a id="l01212" name="l01212"></a><span class="lineno"> 1212</span><span class="comment">// ————————————————————————————————————————————————</span></div>
+<div class="line"><a id="l01213" name="l01213"></a><span class="lineno"> 1213</span><span class="comment">// Random‐interval version of EVERY_N_MILLISECONDS:</span></div>
+<div class="line"><a id="l01214" name="l01214"></a><span class="lineno"> 1214</span><span class="comment">// on each trigger, pick the next period randomly in [MIN..MAX].</span></div>
+<div class="line"><a id="l01215" name="l01215"></a><span class="lineno"> 1215</span><span class="comment">// ————————————————————————————————————————————————</span></div>
+<div class="foldopen" id="foldopen01216" data-start="{" data-end="};">
+<div class="line"><a id="l01216" name="l01216"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random.html"> 1216</a></span><span class="keyword">class </span><a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a.html#a7ce7a18a081a60821fe8085d651a988a">CEveryNMillisRandom</a> {</div>
+<div class="line"><a id="l01217" name="l01217"></a><span class="lineno"> 1217</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l01218" name="l01218"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a"> 1218</a></span>    uint32_t <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a">mPrevTrigger</a>;</div>
+<div class="line"><a id="l01219" name="l01219"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd"> 1219</a></span>    uint32_t <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd">mPeriod</a>;</div>
+<div class="line"><a id="l01220" name="l01220"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034"> 1220</a></span>    uint32_t <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034">mMinPeriod</a>;</div>
+<div class="line"><a id="l01221" name="l01221"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454"> 1221</a></span>    uint32_t <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454">mMaxPeriod</a>;</div>
+<div class="line"><a id="l01222" name="l01222"></a><span class="lineno"> 1222</span> </div>
+<div class="foldopen" id="foldopen01223" data-start="{" data-end="}">
+<div class="line"><a id="l01223" name="l01223"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a.html#a7ce7a18a081a60821fe8085d651a988a"> 1223</a></span>    <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a.html#a7ce7a18a081a60821fe8085d651a988a">CEveryNMillisRandom</a>(uint32_t minPeriod, uint32_t maxPeriod)</div>
+<div class="line"><a id="l01224" name="l01224"></a><span class="lineno"> 1224</span>      : <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034">mMinPeriod</a>(minPeriod), <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454">mMaxPeriod</a>(maxPeriod)</div>
+<div class="line"><a id="l01225" name="l01225"></a><span class="lineno"> 1225</span>    {</div>
+<div class="line"><a id="l01226" name="l01226"></a><span class="lineno"> 1226</span>        <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a">computeNext</a>();</div>
+<div class="line"><a id="l01227" name="l01227"></a><span class="lineno"> 1227</span>        <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459.html#aed808d63c84436374ada8fa020d9a459">reset</a>();</div>
+<div class="line"><a id="l01228" name="l01228"></a><span class="lineno"> 1228</span>    }</div>
 </div>
+<div class="line"><a id="l01229" name="l01229"></a><span class="lineno"> 1229</span> </div>
+<div class="foldopen" id="foldopen01230" data-start="{" data-end="}">
+<div class="line"><a id="l01230" name="l01230"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a"> 1230</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a">computeNext</a>() {</div>
+<div class="line"><a id="l01231" name="l01231"></a><span class="lineno"> 1231</span>        <span class="comment">// random16(x) returns [0..x-1], so this yields MIN..MAX</span></div>
+<div class="line"><a id="l01232" name="l01232"></a><span class="lineno"> 1232</span>        uint32_t range = <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454">mMaxPeriod</a> - <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034">mMinPeriod</a> + 1;</div>
+<div class="line"><a id="l01233" name="l01233"></a><span class="lineno"> 1233</span>        <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd">mPeriod</a> = <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034">mMinPeriod</a> + <a class="code hl_function" href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a>(range);</div>
+<div class="line"><a id="l01234" name="l01234"></a><span class="lineno"> 1234</span>    }</div>
+</div>
+<div class="line"><a id="l01235" name="l01235"></a><span class="lineno"> 1235</span> </div>
+<div class="line"><a id="l01236" name="l01236"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5"> 1236</a></span>    uint32_t <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5">getTime</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code hl_define" href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a>(); }</div>
+<div class="line"><a id="l01237" name="l01237"></a><span class="lineno"> 1237</span> </div>
+<div class="foldopen" id="foldopen01238" data-start="{" data-end="}">
+<div class="line"><a id="l01238" name="l01238"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4.html#aa0783f52ff89ba25e9dc6de82261f1d4"> 1238</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4.html#aa0783f52ff89ba25e9dc6de82261f1d4">ready</a>() {</div>
+<div class="line"><a id="l01239" name="l01239"></a><span class="lineno"> 1239</span>        uint32_t now = <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5">getTime</a>();</div>
+<div class="line"><a id="l01240" name="l01240"></a><span class="lineno"> 1240</span>        <span class="keywordflow">if</span> (now - <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a">mPrevTrigger</a> &gt;= <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd">mPeriod</a>) {</div>
+<div class="line"><a id="l01241" name="l01241"></a><span class="lineno"> 1241</span>            <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a">mPrevTrigger</a> = now;</div>
+<div class="line"><a id="l01242" name="l01242"></a><span class="lineno"> 1242</span>            <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a">computeNext</a>();</div>
+<div class="line"><a id="l01243" name="l01243"></a><span class="lineno"> 1243</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l01244" name="l01244"></a><span class="lineno"> 1244</span>        }</div>
+<div class="line"><a id="l01245" name="l01245"></a><span class="lineno"> 1245</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l01246" name="l01246"></a><span class="lineno"> 1246</span>    }</div>
+</div>
+<div class="line"><a id="l01247" name="l01247"></a><span class="lineno"> 1247</span> </div>
+<div class="line"><a id="l01248" name="l01248"></a><span class="lineno"><a class="line" href="../../d3/df3/class_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459.html#aed808d63c84436374ada8fa020d9a459"> 1248</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459.html#aed808d63c84436374ada8fa020d9a459">reset</a>() { <a class="code hl_variable" href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a">mPrevTrigger</a> = <a class="code hl_function" href="../../d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5">getTime</a>(); }</div>
+<div class="line"><a id="l01249" name="l01249"></a><span class="lineno"> 1249</span>};</div>
+</div>
+<div class="line"><a id="l01250" name="l01250"></a><span class="lineno"> 1250</span> </div>
+<div class="line"><a id="l01251" name="l01251"></a><span class="lineno"> 1251</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l01252" name="l01252"></a><span class="lineno"> 1252</span> </div>
+<div class="line"><a id="l01253" name="l01253"></a><span class="lineno"> 1253</span><span class="comment">// Under C++11 rules, we would be allowed to use not-external</span></div>
+<div class="line"><a id="l01254" name="l01254"></a><span class="lineno"> 1254</span><span class="comment">// -linkage-type symbols as template arguments,</span></div>
+<div class="line"><a id="l01255" name="l01255"></a><span class="lineno"> 1255</span><span class="comment">// e.g., LIB8STATIC seconds16, and we&#39;d be able to use these</span></div>
+<div class="line"><a id="l01256" name="l01256"></a><span class="lineno"> 1256</span><span class="comment">// templates as shown below.</span></div>
+<div class="line"><a id="l01257" name="l01257"></a><span class="lineno"> 1257</span><span class="comment">// However, under C++03 rules, we cannot do that, and thus we</span></div>
+<div class="line"><a id="l01258" name="l01258"></a><span class="lineno"> 1258</span><span class="comment">// have to resort to the preprocessor to &#39;instantiate&#39; &#39;templates&#39;,</span></div>
+<div class="line"><a id="l01259" name="l01259"></a><span class="lineno"> 1259</span><span class="comment">// as handled above.</span></div>
+<div class="line"><a id="l01260" name="l01260"></a><span class="lineno"> 1260</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> timeType,timeType (*timeGetter)()&gt;</div>
+<div class="line"><a id="l01261" name="l01261"></a><span class="lineno"> 1261</span><span class="keyword">class </span>CEveryNTimePeriods {</div>
+<div class="line"><a id="l01262" name="l01262"></a><span class="lineno"> 1262</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l01263" name="l01263"></a><span class="lineno"> 1263</span>    timeType mPrevTrigger;</div>
+<div class="line"><a id="l01264" name="l01264"></a><span class="lineno"> 1264</span>    timeType mPeriod;</div>
+<div class="line"><a id="l01265" name="l01265"></a><span class="lineno"> 1265</span> </div>
+<div class="line"><a id="l01266" name="l01266"></a><span class="lineno"> 1266</span>    CEveryNTimePeriods() { reset(); mPeriod = 1; };</div>
+<div class="line"><a id="l01267" name="l01267"></a><span class="lineno"> 1267</span>    CEveryNTimePeriods(timeType period) { reset(); setPeriod(period); };</div>
+<div class="line"><a id="l01268" name="l01268"></a><span class="lineno"> 1268</span>    <span class="keywordtype">void</span> setPeriod( timeType period) { mPeriod = period; };</div>
+<div class="line"><a id="l01269" name="l01269"></a><span class="lineno"> 1269</span>    timeType getTime() { <span class="keywordflow">return</span> (timeType)(timeGetter()); };</div>
+<div class="line"><a id="l01270" name="l01270"></a><span class="lineno"> 1270</span>    timeType getPeriod() { <span class="keywordflow">return</span> mPeriod; };</div>
+<div class="line"><a id="l01271" name="l01271"></a><span class="lineno"> 1271</span>    timeType getElapsed() { <span class="keywordflow">return</span> getTime() - mPrevTrigger; }</div>
+<div class="line"><a id="l01272" name="l01272"></a><span class="lineno"> 1272</span>    timeType getRemaining() { <span class="keywordflow">return</span> mPeriod - getElapsed(); }</div>
+<div class="line"><a id="l01273" name="l01273"></a><span class="lineno"> 1273</span>    timeType getLastTriggerTime() { <span class="keywordflow">return</span> mPrevTrigger; }</div>
+<div class="line"><a id="l01274" name="l01274"></a><span class="lineno"> 1274</span>    <span class="keywordtype">bool</span> ready() {</div>
+<div class="line"><a id="l01275" name="l01275"></a><span class="lineno"> 1275</span>        <span class="keywordtype">bool</span> isReady = (getElapsed() &gt;= mPeriod);</div>
+<div class="line"><a id="l01276" name="l01276"></a><span class="lineno"> 1276</span>        <span class="keywordflow">if</span>( isReady ) { reset(); }</div>
+<div class="line"><a id="l01277" name="l01277"></a><span class="lineno"> 1277</span>        <span class="keywordflow">return</span> isReady;</div>
+<div class="line"><a id="l01278" name="l01278"></a><span class="lineno"> 1278</span>    }</div>
+<div class="line"><a id="l01279" name="l01279"></a><span class="lineno"> 1279</span>    <span class="keywordtype">void</span> reset() { mPrevTrigger = getTime(); };</div>
+<div class="line"><a id="l01280" name="l01280"></a><span class="lineno"> 1280</span>    <span class="keywordtype">void</span> trigger() { mPrevTrigger = getTime() - mPeriod; };</div>
+<div class="line"><a id="l01281" name="l01281"></a><span class="lineno"> 1281</span> </div>
+<div class="line"><a id="l01282" name="l01282"></a><span class="lineno"> 1282</span>    <span class="keyword">operator</span> bool() { <span class="keywordflow">return</span> ready(); }</div>
+<div class="line"><a id="l01283" name="l01283"></a><span class="lineno"> 1283</span>};</div>
+<div class="line"><a id="l01284" name="l01284"></a><span class="lineno"> 1284</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,seconds16&gt; CEveryNSeconds;</div>
+<div class="line"><a id="l01285" name="l01285"></a><span class="lineno"> 1285</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,bseconds16&gt; CEveryNBSeconds;</div>
+<div class="line"><a id="l01286" name="l01286"></a><span class="lineno"> 1286</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint32_t,millis&gt; CEveryNMillis;</div>
+<div class="line"><a id="l01287" name="l01287"></a><span class="lineno"> 1287</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint16_t,minutes16&gt; CEveryNMinutes;</div>
+<div class="line"><a id="l01288" name="l01288"></a><span class="lineno"> 1288</span><span class="keyword">typedef</span> CEveryNTimePeriods&lt;uint8_t,hours8&gt; CEveryNHours;</div>
+<div class="line"><a id="l01289" name="l01289"></a><span class="lineno"> 1289</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01290" name="l01290"></a><span class="lineno"> 1290</span> </div>
+<div class="line"><a id="l01291" name="l01291"></a><span class="lineno"> 1291</span></div>
+<div class="line"><a id="l01306" name="l01306"></a><span class="lineno"> 1306</span></div>
+<div class="line"><a id="l01308" name="l01308"></a><span class="lineno"> 1308</span><span class="preprocessor">#define CONCAT_HELPER( x, y ) x##y</span></div>
+<div class="line"><a id="l01309" name="l01309"></a><span class="lineno"> 1309</span><span class="preprocessor">#define CONCAT_MACRO( x, y ) CONCAT_HELPER( x, y )</span></div>
+<div class="line"><a id="l01311" name="l01311"></a><span class="lineno"> 1311</span> </div>
+<div class="line"><a id="l01312" name="l01312"></a><span class="lineno"> 1312</span></div>
+<div class="line"><a id="l01315" name="l01315"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga90e084b8253af257a0257a23aeef53e1.html#ga90e084b8253af257a0257a23aeef53e1"> 1315</a></span><span class="preprocessor">#define EVERY_N_MILLIS(N) EVERY_N_MILLIS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
+<div class="line"><a id="l01316" name="l01316"></a><span class="lineno"> 1316</span></div>
+<div class="line"><a id="l01319" name="l01319"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga7efd8f560d5490e6d2e79039a775b195.html#ga7efd8f560d5490e6d2e79039a775b195"> 1319</a></span><span class="preprocessor">#define EVERY_N_MILLIS_I(NAME,N) static CEveryNMillis NAME(N); if( NAME )</span></div>
+<div class="line"><a id="l01320" name="l01320"></a><span class="lineno"> 1320</span> </div>
+<div class="line"><a id="l01321" name="l01321"></a><span class="lineno"> 1321</span></div>
+<div class="line"><a id="l01324" name="l01324"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb"> 1324</a></span><span class="preprocessor">#define EVERY_N_SECONDS(N) EVERY_N_SECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
+<div class="line"><a id="l01325" name="l01325"></a><span class="lineno"> 1325</span></div>
+<div class="line"><a id="l01328" name="l01328"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gafea3f4f8abfc01e3da03fdaa4ee34349.html#gafea3f4f8abfc01e3da03fdaa4ee34349"> 1328</a></span><span class="preprocessor">#define EVERY_N_SECONDS_I(NAME,N) static CEveryNSeconds NAME(N); if( NAME )</span></div>
+<div class="line"><a id="l01329" name="l01329"></a><span class="lineno"> 1329</span> </div>
 <div class="line"><a id="l01330" name="l01330"></a><span class="lineno"> 1330</span></div>
-<div class="line"><a id="l01333" name="l01333"></a><span class="lineno"> 1333</span> </div>
-<div class="line"><a id="l01334" name="l01334"></a><span class="lineno"> 1334</span> </div>
-<div class="line"><a id="l01335" name="l01335"></a><span class="lineno"> 1335</span><span class="comment">// These defines are used to declare hidden or commented symbols for the</span></div>
-<div class="line"><a id="l01336" name="l01336"></a><span class="lineno"> 1336</span><span class="comment">// purposes of Doxygen documentation generation. They do not affect your program.</span></div>
-<div class="line"><a id="l01337" name="l01337"></a><span class="lineno"> 1337</span><span class="preprocessor">#ifdef FASTLED_DOXYGEN</span></div>
-<div class="line"><a id="l01341" name="l01341"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga0752496eb665978815787a2aed11d8f2.html#ga0752496eb665978815787a2aed11d8f2"> 1341</a></span><span class="preprocessor">#define USE_GET_MILLISECOND_TIMER</span></div>
-<div class="line"><a id="l01342" name="l01342"></a><span class="lineno"> 1342</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l01343" name="l01343"></a><span class="lineno"> 1343</span> </div>
-<div class="line"><a id="l01344" name="l01344"></a><span class="lineno"> 1344</span><a class="code hl_define" href="../../df/d2a/namespace_8h_a1d5d01fb2365bb29ff7972156bff53e8.html#a1d5d01fb2365bb29ff7972156bff53e8">FASTLED_NAMESPACE_END</a></div>
-<div class="line"><a id="l01345" name="l01345"></a><span class="lineno"> 1345</span> </div>
-<div class="line"><a id="l01346" name="l01346"></a><span class="lineno"> 1346</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01333" name="l01333"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga860bac35464e2c83c313e92a59e0e39a.html#ga860bac35464e2c83c313e92a59e0e39a"> 1333</a></span><span class="preprocessor">#define EVERY_N_BSECONDS(N) EVERY_N_BSECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
+<div class="line"><a id="l01334" name="l01334"></a><span class="lineno"> 1334</span></div>
+<div class="line"><a id="l01337" name="l01337"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga8057578b51f0a5cff337fb2fd5521de7.html#ga8057578b51f0a5cff337fb2fd5521de7"> 1337</a></span><span class="preprocessor">#define EVERY_N_BSECONDS_I(NAME,N) static CEveryNBSeconds NAME(N); if( NAME )</span></div>
+<div class="line"><a id="l01338" name="l01338"></a><span class="lineno"> 1338</span> </div>
+<div class="line"><a id="l01339" name="l01339"></a><span class="lineno"> 1339</span></div>
+<div class="line"><a id="l01342" name="l01342"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad"> 1342</a></span><span class="preprocessor">#define EVERY_N_MINUTES(N) EVERY_N_MINUTES_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
+<div class="line"><a id="l01343" name="l01343"></a><span class="lineno"> 1343</span></div>
+<div class="line"><a id="l01346" name="l01346"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga08ec76930e29e8685edacc060f01a9fd.html#ga08ec76930e29e8685edacc060f01a9fd"> 1346</a></span><span class="preprocessor">#define EVERY_N_MINUTES_I(NAME,N) static CEveryNMinutes NAME(N); if( NAME )</span></div>
+<div class="line"><a id="l01347" name="l01347"></a><span class="lineno"> 1347</span> </div>
+<div class="line"><a id="l01348" name="l01348"></a><span class="lineno"> 1348</span></div>
+<div class="line"><a id="l01351" name="l01351"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga15cbb1cba95ba3a57f08ef0f65dacd28.html#ga15cbb1cba95ba3a57f08ef0f65dacd28"> 1351</a></span><span class="preprocessor">#define EVERY_N_HOURS(N) EVERY_N_HOURS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)</span></div>
+<div class="line"><a id="l01352" name="l01352"></a><span class="lineno"> 1352</span></div>
+<div class="line"><a id="l01355" name="l01355"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga67a3f043c1028c677b99698a82d5f22e.html#ga67a3f043c1028c677b99698a82d5f22e"> 1355</a></span><span class="preprocessor">#define EVERY_N_HOURS_I(NAME,N) static CEveryNHours NAME(N); if( NAME )</span></div>
+<div class="line"><a id="l01356" name="l01356"></a><span class="lineno"> 1356</span> </div>
+<div class="line"><a id="l01357" name="l01357"></a><span class="lineno"> 1357</span></div>
+<div class="line"><a id="l01359" name="l01359"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga5eeb30462c2c1d653b7f4abaf262fc3d.html#ga5eeb30462c2c1d653b7f4abaf262fc3d"> 1359</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)</span></div>
+<div class="line"><a id="l01361" name="l01361"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga8b6fa2a3e84d33ffebf136f6bd9019b3.html#ga8b6fa2a3e84d33ffebf136f6bd9019b3"> 1361</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)</span></div>
+<div class="line"><a id="l01362" name="l01362"></a><span class="lineno"> 1362</span></div>
+<div class="line"><a id="l01364" name="l01364"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga84622b4bfb271a01d0a3bab2f2217f47.html#ga84622b4bfb271a01d0a3bab2f2217f47"> 1364</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_DYNAMIC(PERIOD_FUNC) EVERY_N_MILLISECONDS_DYNAMIC_I(CONCAT_MACRO(__dynamic_millis_timer, __COUNTER__ ), (PERIOD_FUNC))</span></div>
+<div class="line"><a id="l01365" name="l01365"></a><span class="lineno"> 1365</span></div>
+<div class="foldopen" id="foldopen01367" data-start="" data-end="">
+<div class="line"><a id="l01367" name="l01367"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga33823fb898e26e976f4394bf3fed8b10.html#ga33823fb898e26e976f4394bf3fed8b10"> 1367</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_DYNAMIC_I(NAME, PERIOD_FUNC) \</span></div>
+<div class="line"><a id="l01368" name="l01368"></a><span class="lineno"> 1368</span><span class="preprocessor">    static CEveryNMillisDynamic NAME(1); \</span></div>
+<div class="line"><a id="l01369" name="l01369"></a><span class="lineno"> 1369</span><span class="preprocessor">    NAME.setPeriod(PERIOD_FUNC); \</span></div>
+<div class="line"><a id="l01370" name="l01370"></a><span class="lineno"> 1370</span><span class="preprocessor">    if( NAME )</span></div>
+</div>
+<div class="line"><a id="l01371" name="l01371"></a><span class="lineno"> 1371</span> </div>
+<div class="line"><a id="l01372" name="l01372"></a><span class="lineno"> 1372</span> </div>
+<div class="foldopen" id="foldopen01373" data-start="" data-end="">
+<div class="line"><a id="l01373" name="l01373"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga4f2db23a849eecce6d992ebccae0140f.html#ga4f2db23a849eecce6d992ebccae0140f"> 1373</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)                                 \</span></div>
+<div class="line"><a id="l01374" name="l01374"></a><span class="lineno"> 1374</span><span class="preprocessor">    EVERY_N_MILLISECONDS_RANDOM_I(                                           \</span></div>
+<div class="line"><a id="l01375" name="l01375"></a><span class="lineno"> 1375</span><span class="preprocessor">        CONCAT_MACRO(_permRand, __COUNTER__), MIN, MAX)</span></div>
+</div>
+<div class="line"><a id="l01376" name="l01376"></a><span class="lineno"> 1376</span> </div>
+<div class="foldopen" id="foldopen01377" data-start="" data-end="">
+<div class="line"><a id="l01377" name="l01377"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_gaccd061b76d3fc10b99fec70bb0966363.html#gaccd061b76d3fc10b99fec70bb0966363"> 1377</a></span><span class="preprocessor">#define EVERY_N_MILLISECONDS_RANDOM_I(NAME, MIN, MAX)                        \</span></div>
+<div class="line"><a id="l01378" name="l01378"></a><span class="lineno"> 1378</span><span class="preprocessor">    static CEveryNMillisRandom NAME(MIN, MAX);                               \</span></div>
+<div class="line"><a id="l01379" name="l01379"></a><span class="lineno"> 1379</span><span class="preprocessor">    if (NAME.ready())</span></div>
+</div>
+<div class="line"><a id="l01380" name="l01380"></a><span class="lineno"> 1380</span></div>
+<div class="line"><a id="l01383" name="l01383"></a><span class="lineno"> 1383</span> </div>
+<div class="line"><a id="l01384" name="l01384"></a><span class="lineno"> 1384</span> </div>
+<div class="line"><a id="l01385" name="l01385"></a><span class="lineno"> 1385</span><span class="comment">// These defines are used to declare hidden or commented symbols for the</span></div>
+<div class="line"><a id="l01386" name="l01386"></a><span class="lineno"> 1386</span><span class="comment">// purposes of Doxygen documentation generation. They do not affect your program.</span></div>
+<div class="line"><a id="l01387" name="l01387"></a><span class="lineno"> 1387</span><span class="preprocessor">#ifdef FASTLED_DOXYGEN</span></div>
+<div class="line"><a id="l01391" name="l01391"></a><span class="lineno"><a class="line" href="../../d5/df2/group___timekeeping_ga0752496eb665978815787a2aed11d8f2.html#ga0752496eb665978815787a2aed11d8f2"> 1391</a></span><span class="preprocessor">#define USE_GET_MILLISECOND_TIMER</span></div>
+<div class="line"><a id="l01392" name="l01392"></a><span class="lineno"> 1392</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l01393" name="l01393"></a><span class="lineno"> 1393</span> </div>
+<div class="line"><a id="l01394" name="l01394"></a><span class="lineno"> 1394</span><a class="code hl_define" href="../../df/d2a/namespace_8h_a1d5d01fb2365bb29ff7972156bff53e8.html#a1d5d01fb2365bb29ff7972156bff53e8">FASTLED_NAMESPACE_END</a></div>
+<div class="line"><a id="l01395" name="l01395"></a><span class="lineno"> 1395</span> </div>
+<div class="line"><a id="l01396" name="l01396"></a><span class="lineno"> 1396</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
 <div class="ttc" id="aclass_c_every_n_millis_dynamic_a0572b514140c603c4ee92130bd5b527c_html_a0572b514140c603c4ee92130bd5b527c"><div class="ttname"><a href="../../de/d72/class_c_every_n_millis_dynamic_a0572b514140c603c4ee92130bd5b527c.html#a0572b514140c603c4ee92130bd5b527c">CEveryNMillisDynamic::setPeriod</a></div><div class="ttdeci">void setPeriod(uint32_t period)</div><div class="ttdef"><b>Definition</b> <a href="#l01204">lib8tion.h:1204</a></div></div>
@@ -988,6 +1050,15 @@ $(function(){initNavTree('df/da5/lib8tion_8h_source.html','../../'); initResizab
 <div class="ttc" id="aclass_c_every_n_millis_dynamic_aa7fd8de7dd186ee5d3b4370882fb1ec2_html_aa7fd8de7dd186ee5d3b4370882fb1ec2"><div class="ttname"><a href="../../de/d72/class_c_every_n_millis_dynamic_aa7fd8de7dd186ee5d3b4370882fb1ec2.html#aa7fd8de7dd186ee5d3b4370882fb1ec2">CEveryNMillisDynamic::trigger</a></div><div class="ttdeci">void trigger()</div><div class="ttdef"><b>Definition</b> <a href="#l01203">lib8tion.h:1203</a></div></div>
 <div class="ttc" id="aclass_c_every_n_millis_dynamic_ab1c5f8358daf15c0d53345f157f560c9_html_ab1c5f8358daf15c0d53345f157f560c9"><div class="ttname"><a href="../../de/d72/class_c_every_n_millis_dynamic_ab1c5f8358daf15c0d53345f157f560c9.html#ab1c5f8358daf15c0d53345f157f560c9">CEveryNMillisDynamic::mPeriod</a></div><div class="ttdeci">uint32_t mPeriod</div><div class="ttdef"><b>Definition</b> <a href="#l01189">lib8tion.h:1189</a></div></div>
 <div class="ttc" id="aclass_c_every_n_millis_dynamic_adf560409fae3890034cc952aad0a7412_html_adf560409fae3890034cc952aad0a7412"><div class="ttname"><a href="../../de/d72/class_c_every_n_millis_dynamic_adf560409fae3890034cc952aad0a7412.html#adf560409fae3890034cc952aad0a7412">CEveryNMillisDynamic::ready</a></div><div class="ttdeci">bool ready()</div><div class="ttdef"><b>Definition</b> <a href="#l01197">lib8tion.h:1197</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a_html_a21b30e3129ca78838e60df5e7f3f0d1a"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a">CEveryNMillisRandom::computeNext</a></div><div class="ttdeci">void computeNext()</div><div class="ttdef"><b>Definition</b> <a href="#l01230">lib8tion.h:1230</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454_html_a247fb86a5a83c7d25dd69c65ec4c1454"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_a247fb86a5a83c7d25dd69c65ec4c1454.html#a247fb86a5a83c7d25dd69c65ec4c1454">CEveryNMillisRandom::mMaxPeriod</a></div><div class="ttdeci">uint32_t mMaxPeriod</div><div class="ttdef"><b>Definition</b> <a href="#l01221">lib8tion.h:1221</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034_html_a2c0cf69c24c16905b8bce4aafb28d034"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_a2c0cf69c24c16905b8bce4aafb28d034.html#a2c0cf69c24c16905b8bce4aafb28d034">CEveryNMillisRandom::mMinPeriod</a></div><div class="ttdeci">uint32_t mMinPeriod</div><div class="ttdef"><b>Definition</b> <a href="#l01220">lib8tion.h:1220</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a_html_a7ce7a18a081a60821fe8085d651a988a"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_a7ce7a18a081a60821fe8085d651a988a.html#a7ce7a18a081a60821fe8085d651a988a">CEveryNMillisRandom::CEveryNMillisRandom</a></div><div class="ttdeci">CEveryNMillisRandom(uint32_t minPeriod, uint32_t maxPeriod)</div><div class="ttdef"><b>Definition</b> <a href="#l01223">lib8tion.h:1223</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd_html_a7f2b26874e245463ca045f4af3323bdd"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_a7f2b26874e245463ca045f4af3323bdd.html#a7f2b26874e245463ca045f4af3323bdd">CEveryNMillisRandom::mPeriod</a></div><div class="ttdeci">uint32_t mPeriod</div><div class="ttdef"><b>Definition</b> <a href="#l01219">lib8tion.h:1219</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4_html_aa0783f52ff89ba25e9dc6de82261f1d4"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4.html#aa0783f52ff89ba25e9dc6de82261f1d4">CEveryNMillisRandom::ready</a></div><div class="ttdeci">bool ready()</div><div class="ttdef"><b>Definition</b> <a href="#l01238">lib8tion.h:1238</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5_html_acbac6f12fbb0115360f8e09bce6f61b5"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_acbac6f12fbb0115360f8e09bce6f61b5.html#acbac6f12fbb0115360f8e09bce6f61b5">CEveryNMillisRandom::getTime</a></div><div class="ttdeci">uint32_t getTime() const</div><div class="ttdef"><b>Definition</b> <a href="#l01236">lib8tion.h:1236</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459_html_aed808d63c84436374ada8fa020d9a459"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_aed808d63c84436374ada8fa020d9a459.html#aed808d63c84436374ada8fa020d9a459">CEveryNMillisRandom::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdef"><b>Definition</b> <a href="#l01248">lib8tion.h:1248</a></div></div>
+<div class="ttc" id="aclass_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a_html_af67ad1f8d3e75333d6b0af2d452f446a"><div class="ttname"><a href="../../d3/df3/class_c_every_n_millis_random_af67ad1f8d3e75333d6b0af2d452f446a.html#af67ad1f8d3e75333d6b0af2d452f446a">CEveryNMillisRandom::mPrevTrigger</a></div><div class="ttdeci">uint32_t mPrevTrigger</div><div class="ttdef"><b>Definition</b> <a href="#l01218">lib8tion.h:1218</a></div></div>
 <div class="ttc" id="aclass_c_every_n_time_a192e33c921fff572ca54d4fd85c70e16_html_a192e33c921fff572ca54d4fd85c70e16"><div class="ttname"><a href="../../de/d1d/class_c_every_n_time_a192e33c921fff572ca54d4fd85c70e16.html#a192e33c921fff572ca54d4fd85c70e16">CEveryNTime::trigger</a></div><div class="ttdeci">void trigger()</div><div class="ttdoc">Reset the timestamp so it is ready() on next call.</div><div class="ttdef"><b>Definition</b> <a href="#l01160">lib8tion.h:1160</a></div></div>
 <div class="ttc" id="aclass_c_every_n_time_a27fdededaf37417018f079336feabbf7_html_a27fdededaf37417018f079336feabbf7"><div class="ttname"><a href="../../de/d1d/class_c_every_n_time_a27fdededaf37417018f079336feabbf7.html#a27fdededaf37417018f079336feabbf7">CEveryNTime::mPeriod</a></div><div class="ttdeci">TIMETYPE mPeriod</div><div class="ttdoc">Timing interval to check.</div><div class="ttdef"><b>Definition</b> <a href="#l01123">lib8tion.h:1123</a></div></div>
 <div class="ttc" id="aclass_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac_html_a645cdb84da00f4669e1cf22ce86a04ac"><div class="ttname"><a href="../../de/d1d/class_c_every_n_time_a645cdb84da00f4669e1cf22ce86a04ac.html#a645cdb84da00f4669e1cf22ce86a04ac">CEveryNTime::CEveryNTime</a></div><div class="ttdeci">CEveryNTime(TIMETYPE period)</div><div class="ttdoc">Constructor.</div><div class="ttdef"><b>Definition</b> <a href="#l01129">lib8tion.h:1129</a></div></div>
@@ -1026,6 +1097,7 @@ $(function(){initNavTree('df/da5/lib8tion_8h_source.html','../../'); initResizab
 <div class="ttc" id="agroup___linear_interpolation_gaacea0eaea98a065dfa08bb1c147c52a1_html_gaacea0eaea98a065dfa08bb1c147c52a1"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_gaacea0eaea98a065dfa08bb1c147c52a1.html#gaacea0eaea98a065dfa08bb1c147c52a1">lerp15by8</a></div><div class="ttdeci">LIB8STATIC int16_t lerp15by8(int16_t a, int16_t b, fract8 frac)</div><div class="ttdoc">Linear interpolation between two signed 15-bit values, with 8-bit fraction.</div><div class="ttdef"><b>Definition</b> <a href="#l00506">lib8tion.h:506</a></div></div>
 <div class="ttc" id="agroup___linear_interpolation_gad4b09aba4e188e14d3e71d1c9f77f1a5_html_gad4b09aba4e188e14d3e71d1c9f77f1a5"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_gad4b09aba4e188e14d3e71d1c9f77f1a5.html#gad4b09aba4e188e14d3e71d1c9f77f1a5">lerp15by16</a></div><div class="ttdeci">LIB8STATIC int16_t lerp15by16(int16_t a, int16_t b, fract16 frac)</div><div class="ttdoc">Linear interpolation between two signed 15-bit values, with 8-bit fraction.</div><div class="ttdef"><b>Definition</b> <a href="#l00523">lib8tion.h:523</a></div></div>
 <div class="ttc" id="agroup___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d_html_gaf65357c7aeca9778e5a2f80a6bac2b5d"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d">map8</a></div><div class="ttdeci">LIB8STATIC uint8_t map8(uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)</div><div class="ttdoc">Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues.</div><div class="ttdef"><b>Definition</b> <a href="#l00559">lib8tion.h:559</a></div></div>
+<div class="ttc" id="agroup___random_ga17034d936ef716efe820e11c1df043b0_html_ga17034d936ef716efe820e11c1df043b0"><div class="ttname"><a href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0">random16</a></div><div class="ttdeci">LIB8STATIC uint16_t random16()</div><div class="ttdoc">Generate a 16-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dfa/random8_8h_source.html#l00054">random8.h:54</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00170">scale8.h:170</a></div></div>
 <div class="ttc" id="agroup___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00540">scale8.h:540</a></div></div>
 <div class="ttc" id="agroup___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf_html_gaa51d5b048c2a4a20a00bddcdc257daaf"><div class="ttname"><a href="../../d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf">scale16by8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 8-bit value, which is treated as the numerator of a fraction whos...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00468">scale8.h:468</a></div></div>
@@ -1060,7 +1132,7 @@ $(function(){initNavTree('df/da5/lib8tion_8h_source.html','../../'); initResizab
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/da5/lib8tion_8h.html">lib8tion.h</a></li>
-    <li class="footer">Generated on Thu Apr 10 2025 04:14:46 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

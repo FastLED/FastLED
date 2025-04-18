@@ -89,11 +89,11 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxSdCard/FxSdCard.ino"
   Node26 -> Node11 [id="edge55_Node000026_Node000011",color="steelblue1",style="solid",tooltip=" "];
   Node26 -> Node6 [id="edge56_Node000026_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node51 -> Node6 [id="edge57_Node000051_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node51 -> Node36 [id="edge58_Node000051_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node51 -> Node11 [id="edge58_Node000051_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node51 -> Node36 [id="edge59_Node000051_Node000036",color="steelblue1",style="solid",tooltip=" "];
   Node36 [id="Node000036",label="fl/ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/df1/fl_2ptr_8h.html",tooltip=" "];
-  Node36 -> Node17 [id="edge59_Node000036_Node000017",color="steelblue1",style="solid",tooltip=" "];
-  Node36 -> Node11 [id="edge60_Node000036_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node51 -> Node11 [id="edge61_Node000051_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node36 -> Node17 [id="edge60_Node000036_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node36 -> Node11 [id="edge61_Node000036_Node000011",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node74 [id="edge62_Node000002_Node000074",color="steelblue1",style="solid",tooltip=" "];
   Node74 [id="Node000074",label="pixelset.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d46/pixelset_8h.html",tooltip="Declares classes for managing logical groups of LEDs."];
   Node74 -> Node2 [id="edge63_Node000074_Node000002",color="steelblue1",style="solid",tooltip=" "];

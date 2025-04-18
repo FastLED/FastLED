@@ -70,13 +70,13 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node1 -> Node35 [id="edge43_Node000001_Node000035",color="steelblue1",style="solid",tooltip=" "];
   Node35 [id="Node000035",label="fl/ui.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3b/ui_8h.html",tooltip=" "];
   Node35 -> Node10 [id="edge44_Node000035_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node35 -> Node36 [id="edge45_Node000035_Node000036",color="steelblue1",style="solid",tooltip=" "];
-  Node36 [id="Node000036",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node35 -> Node5 [id="edge45_Node000035_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node35 -> Node12 [id="edge46_Node000035_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node35 -> Node5 [id="edge47_Node000035_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node35 -> Node16 [id="edge48_Node000035_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node35 -> Node16 [id="edge47_Node000035_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node35 -> Node36 [id="edge48_Node000035_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl/unused.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4b/unused_8h.html",tooltip=" "];
   Node35 -> Node37 [id="edge49_Node000035_Node000037",color="steelblue1",style="solid",tooltip=" "];
-  Node37 [id="Node000037",label="fl/unused.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4b/unused_8h.html",tooltip=" "];
+  Node37 [id="Node000037",label="platforms/ui_defs.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node1 -> Node38 [id="edge50_Node000001_Node000038",color="steelblue1",style="solid",tooltip=" "];
   Node38 [id="Node000038",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node38 -> Node10 [id="edge51_Node000038_Node000010",color="steelblue1",style="solid",tooltip=" "];
@@ -110,12 +110,12 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node71 -> Node38 [id="edge70_Node000071_Node000038",color="steelblue1",style="solid",tooltip=" "];
   Node71 -> Node44 [id="edge71_Node000071_Node000044",color="steelblue1",style="solid",tooltip=" "];
   Node71 -> Node20 [id="edge72_Node000071_Node000020",color="steelblue1",style="solid",tooltip=" "];
-  Node71 -> Node37 [id="edge73_Node000071_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node71 -> Node36 [id="edge73_Node000071_Node000036",color="steelblue1",style="solid",tooltip=" "];
   Node38 -> Node72 [id="edge74_Node000038_Node000072",color="steelblue1",style="solid",tooltip=" "];
   Node72 [id="Node000072",label="fastspi_types.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/ddb/fastspi__types_8h.html",tooltip="Data types and constants used by SPI interfaces."];
   Node72 -> Node15 [id="edge75_Node000072_Node000015",color="steelblue1",style="solid",tooltip=" "];
   Node72 -> Node12 [id="edge76_Node000072_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node72 -> Node37 [id="edge77_Node000072_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node72 -> Node36 [id="edge77_Node000072_Node000036",color="steelblue1",style="solid",tooltip=" "];
   Node38 -> Node73 [id="edge78_Node000038_Node000073",color="steelblue1",style="solid",tooltip=" "];
   Node73 [id="Node000073",label="dmx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/de1/dmx_8h.html",tooltip="Defines the DMX512-based LED controllers."];
   Node73 -> Node38 [id="edge79_Node000073_Node000038",color="steelblue1",style="solid",tooltip=" "];
@@ -147,7 +147,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node82 [id="Node000082",label="pixelset.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d46/pixelset_8h.html",tooltip="Declares classes for managing logical groups of LEDs."];
   Node82 -> Node38 [id="edge99_Node000082_Node000038",color="steelblue1",style="solid",tooltip=" "];
   Node82 -> Node15 [id="edge100_Node000082_Node000015",color="steelblue1",style="solid",tooltip=" "];
-  Node82 -> Node37 [id="edge101_Node000082_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node82 -> Node36 [id="edge101_Node000082_Node000036",color="steelblue1",style="solid",tooltip=" "];
   Node82 -> Node12 [id="edge102_Node000082_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node38 -> Node84 [id="edge103_Node000038_Node000084",color="steelblue1",style="solid",tooltip=" "];
   Node84 [id="Node000084",label="colorpalettes.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dcc/colorpalettes_8h.html",tooltip="Declarations for the predefined color palettes supplied by FastLED."];
@@ -173,7 +173,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node66 -> Node28 [id="edge119_Node000066_Node000028",color="steelblue1",style="solid",tooltip=" "];
   Node66 -> Node12 [id="edge120_Node000066_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node89 [id="edge121_Node000001_Node000089",color="steelblue1",style="solid",tooltip=" "];
-  Node89 [id="Node000089",label="sensors/pir.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
+  Node89 [id="Node000089",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
   Node89 -> Node10 [id="edge122_Node000089_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node89 -> Node90 [id="edge123_Node000089_Node000090",color="steelblue1",style="solid",tooltip=" "];
   Node90 [id="Node000090",label="digital_pin.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d83/digital__pin_8h.html",tooltip=" "];
@@ -184,7 +184,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node89 -> Node19 [id="edge128_Node000089_Node000019",color="steelblue1",style="solid",tooltip=" "];
   Node89 -> Node35 [id="edge129_Node000089_Node000035",color="steelblue1",style="solid",tooltip=" "];
   Node89 -> Node12 [id="edge130_Node000089_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node91 [id="edge131_Node000001_Node000091",color="steelblue1",style="solid",tooltip=" "];
-  Node91 [id="Node000091",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
-  Node91 -> Node10 [id="edge132_Node000091_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node92 [id="edge131_Node000001_Node000092",color="steelblue1",style="solid",tooltip=" "];
+  Node92 [id="Node000092",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
+  Node92 -> Node10 [id="edge132_Node000092_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

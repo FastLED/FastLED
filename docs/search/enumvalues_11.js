@@ -44,9 +44,13 @@ var searchData=
   ['start_41',['Start',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84cabd5f9c956752ce4dc707b4624b3a36f7',1,'midi_Defs.h']]],
   ['steelblue_42',['SteelBlue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a6a94dc91b16e639be9016925fc27596f',1,'CRGB']]],
   ['stop_43',['Stop',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84caf98d707eb4ed173ccfdbaf4eaa87100d',1,'midi_Defs.h']]],
-  ['sustain_44',['Sustain',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263ad11e47bcc1661b5ed2b6c5b5d8710c8e',1,'midi_Defs.h']]],
-  ['systemexclusive_45',['SystemExclusive',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca76531e9669a6601f0c84b1702314e5e3',1,'midi_Defs.h']]],
-  ['systemexclusiveend_46',['SystemExclusiveEnd',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84cae52b192e9bf8dbc18eca5d5203f1ee03',1,'midi_Defs.h']]],
-  ['systemexclusivestart_47',['SystemExclusiveStart',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca3c895a4ea1fbe76c98e332aac0b997ed',1,'midi_Defs.h']]],
-  ['systemreset_48',['SystemReset',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca7256ac4658ec7af1eb4705b83266a603',1,'midi_Defs.h']]]
+  ['super_5fsample_5f2x_44',['SUPER_SAMPLE_2X',['../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a1e910f180f77f3704a8066db79cd6111',1,'fl']]],
+  ['super_5fsample_5f4x_45',['SUPER_SAMPLE_4X',['../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a24072aca92c61bd88948f7118d96c21b',1,'fl']]],
+  ['super_5fsample_5f8x_46',['SUPER_SAMPLE_8X',['../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a086e36ad906a8ab6071172529675ff3e',1,'fl']]],
+  ['super_5fsample_5fnone_47',['SUPER_SAMPLE_NONE',['../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6af213904fd17b4c9630581686d2e4ca89',1,'fl']]],
+  ['sustain_48',['Sustain',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263ad11e47bcc1661b5ed2b6c5b5d8710c8e',1,'midi_Defs.h']]],
+  ['systemexclusive_49',['SystemExclusive',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca76531e9669a6601f0c84b1702314e5e3',1,'midi_Defs.h']]],
+  ['systemexclusiveend_50',['SystemExclusiveEnd',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84cae52b192e9bf8dbc18eca5d5203f1ee03',1,'midi_Defs.h']]],
+  ['systemexclusivestart_51',['SystemExclusiveStart',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca3c895a4ea1fbe76c98e332aac0b997ed',1,'midi_Defs.h']]],
+  ['systemreset_52',['SystemReset',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca7256ac4658ec7af1eb4705b83266a603',1,'midi_Defs.h']]]
 ];

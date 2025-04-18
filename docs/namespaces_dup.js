@@ -10,6 +10,10 @@ var namespaces_dup =
       [ "CalcSaturation", "dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_03_a71139e578af954a541b329b41b45aa4f.html#a71139e578af954a541b329b41b45aa4f", null ],
       [ "LuminanceDecay", "dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_03_afac2eea34857897444e6a1dd09bab603.html#afac2eea34857897444e6a1dd09bab603", null ]
     ] ],
+    [ "anonymous_namespace{wave_simulation.cpp}", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03.html", [
+      [ "half_duplex_blend_linear", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_ab7a696be5b5131c76c444ec0335e6ecb.html#ab7a696be5b5131c76c444ec0335e6ecb", null ],
+      [ "half_duplex_blend_sqrt_q15", "d9/dbf/namespaceanonymous__namespace_02wave__simulation_8cpp_03_a883a0b9da3b31cfdf65463e0214e7a7a.html#a883a0b9da3b31cfdf65463e0214e7a7a", null ]
+    ] ],
     [ "FASTLED_NAMESPACE_BEGIN", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n.html", [
       [ "divide_by_3", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a4aa4bd3bd3593ae770fbc7233d26f79c.html#a4aa4bd3bd3593ae770fbc7233d26f79c", null ],
       [ "min3", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a4488d6e0ee54517f8e9b2b326bc165cf.html#a4488d6e0ee54517f8e9b2b326bc165cf", null ],

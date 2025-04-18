@@ -1,7 +1,15 @@
 <map id="CRGB::blend" name="CRGB::blend">
-<area shape="rect" id="Node000001" title=" " alt="" coords="223,31,325,56"/>
-<area shape="rect" id="Node000002" href="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96" title=" " alt="" coords="5,5,175,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,37,175,32,175,27,210,32"/>
-<area shape="rect" id="Node000003" href="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115" title=" " alt="" coords="11,55,169,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,54,170,60,169,54,209,49"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="661,86,764,111"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601" title=" " alt="" coords="392,37,613,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="650,85,613,76,563,65,564,59,614,71,651,80"/>
+<area shape="rect" id="Node000006" href="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96" title=" " alt="" coords="418,86,587,111"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="648,101,588,101,588,96,648,96"/>
+<area shape="rect" id="Node000007" href="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115" title=" " alt="" coords="423,135,582,161"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="651,117,614,127,564,138,563,133,613,121,650,112"/>
+<area shape="rect" id="Node000003" href="$d1/de0/classfl_1_1_frame_a1efadd6e06cd79c0342c9cd8c391539a.html#a1efadd6e06cd79c0342c9cd8c391539a" title=" " alt="" coords="217,13,335,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,39,335,34,336,29,379,34"/>
+<area shape="rect" id="Node000005" href="$d1/de0/classfl_1_1_frame_af228b83cd52447b2416893f39d0753df.html#af228b83cd52447b2416893f39d0753df" title=" " alt="" coords="208,62,344,87"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="379,66,345,70,344,64,378,61"/>
+<area shape="rect" id="Node000004" href="$d8/d94/classfl_1_1_frame_interpolator_a681dd7d646b6b2b75c4035678693206a.html#a681dd7d646b6b2b75c4035678693206a" title=" " alt="" coords="5,5,160,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="203,28,160,28,160,23,203,23"/>
 </map>
