@@ -6,7 +6,7 @@
 
 namespace fl {
 
-pair_xy_float HeartPath::at(float alpha) const {
+pair_xy<float> HeartPath::at(float alpha) {
     // 1) raw parametric heart
     constexpr float PI = 3.14159265358979323846f;
     float t = alpha * 2.0f * PI;
