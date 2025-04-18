@@ -7,6 +7,7 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"
 #include "fl/warn.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -32,6 +33,18 @@ class HeartPath : public XYPath {
   public:
     HeartPath(uint16_t steps = 0): XYPath(steps) {}
     pair_xy<float> at(float alpha) override;
+};
+
+class LissajousPath : public XYPath {
+public:
+  // Tweakable paramterized Lissajous path. Often used for led animations.
+  // a, b are frequency ratios; delta is phase offset
+  LissajousPath(uint8_t a = 3, uint8_t b = 2, float delta = PI/2, uint16_t steps = 0);
+  pair_xy<float> at(float alpha) override;
+
+private:
+  uint8_t mA, mB;
+  float   mDelta;
 };
 
 } // namespace fl

@@ -68,4 +68,15 @@ pair_xy<float> HeartPath::at(float alpha) {
     return {x, y};
 }
 
+pair_xy<float> LissajousPath::at(float alpha) {
+    // t in [0,2π]
+    float t = alpha * 2.0f * PI;
+    float x = 0.5f + 0.5f * sinf(mA * t + mDelta);
+    float y = 0.5f + 0.5f * sinf(mB * t);
+    return {x, y};
+}
+
+LissajousPath::LissajousPath(uint8_t a, uint8_t b, float delta, uint16_t steps)
+    : XYPath(steps), mA(a), mB(b), mDelta(delta) {}
+
 } // namespace fl
