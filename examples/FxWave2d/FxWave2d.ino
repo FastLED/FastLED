@@ -19,8 +19,8 @@ all the UI elements you see below.
 
 using namespace fl;
 
-#define HEIGHT 100
-#define WIDTH 100
+#define HEIGHT 64
+#define WIDTH 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
 
@@ -95,7 +95,9 @@ Blend2d fxBlend(xyMap);
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+    auto screenmap = xyMap.toScreenMap();
+    screenmap.setDiameter(.2);
+    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
 }
