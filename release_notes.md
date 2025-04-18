@@ -1,6 +1,6 @@
 FastLED 3.9.16
 ==============
-* New inoise16 $D function taking in x,y,z,t
+* New inoise16 4D function taking in x,y,z,t
   * This is good for 3D oriented noise functions + time factor.
   * Wrap an led strip as a cylinder and use this function to map noise to it.
 * New Wave Simulator in 1D and 2D
