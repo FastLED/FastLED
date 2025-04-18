@@ -81,6 +81,14 @@ pair_xy<float> LinePath::at(float alpha) {
     return {x, y};
 }
 
+void LinePath::set(float x0, float y0, float x1, float y1) {
+    XYPath::clearLut();
+    mX0 = x0;
+    mY0 = y0;
+    mX1 = x1;
+    mY1 = y1;
+}
+
 pair_xy<float> CirclePath::at(float alpha) {
     // α in [0,1] → (x,y) on the circle
     float t = alpha * 2.0f * PI;

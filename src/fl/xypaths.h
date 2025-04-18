@@ -46,6 +46,7 @@ class LinePath : public XYPath {
   public:
     LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
     pair_xy<float> at(float alpha) override;
+    void set(float x0, float y0, float x1, float y1);
 
   private:
     float mX0, mY0, mX1, mY1;
