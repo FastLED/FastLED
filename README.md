@@ -73,6 +73,8 @@ For more examples, see this [link](examples). Web compiled [examples](https://za
 
 ## New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control
 
+Video:
+
 https://github.com/user-attachments/assets/9155124b-a93e-4317-b272-8bacc1b9c3a8
 
 #### Major release for tech-artists!
