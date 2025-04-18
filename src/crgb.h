@@ -76,7 +76,7 @@ struct CRGB {
     };
 
     static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
-    static CRGB blendByBlack(const CRGB& upper, const CRGB& lower);
+    static CRGB blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower);
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)

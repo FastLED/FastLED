@@ -55,7 +55,7 @@ CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
     );
 }
 
-CRGB CRGB::blendByBlack(const CRGB& upper, const CRGB& lower) {
+CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower) {
     // Use luma of upper pixel as alpha (0..255)
     uint8_t max_component = 0;
     for (int i = 0; i < 3; ++i) {

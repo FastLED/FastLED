@@ -6,12 +6,20 @@ FastLED 3.9.16
   * Full and half duplix wave simulators (half duplix supports black)
   * For improved rendering we allow 2x, 4x, 8x super sampling
   * Speed control via multiplying the rendering iterations per frame.
-  * Looks phenominal! Check it out: (insert link here)
-* EVERY_N_MILLISECONDS_RANDOM(MIN, MAX) macro for sketches.
-* static CRGB CRGB::alphaBlendByBlack(const CRGB& upper, const CRGB& lower) for fx blending.
+* `EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)` macro for sketches.
+* `CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower)` for fx blending.
+* `fl/2dfx/blend.h`
+  * Visualizer blend stack.
+  * Multiple visualizers can be stacked and then composited via `blendAlphaMaxChannel(...)`
+  * Blur2d can be applied per layer and globally.
+* `fl/time_alpha.h`
+  * New time based functions for controlling animations.
+  * Give it a beginning time, and end time and the current time
+    * `update(...)` will give you the current time progression.
+  * Trigger then called upated to get `uint8_t` from 0 -> 255 representing current animation progression.
 * New Examples:
-  * Wave2d
-  * Wave (1D)
+  * FxWave2d
+    * Complex multi wave simulator visualizer.
   * FireMatrix
   * FireCylinder
     * Same as FireMatrix, but the visualizer wraps around so it is seemless (y(0) ~= y(width -1))

@@ -35,7 +35,7 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
         }
         case DRAW_MODE_BLEND_BY_BLACK: {
             for (size_t i = 0; i < mPixelsCount; ++i) {
-                leds[i] = CRGB::blendByBlack(mRgb[i], leds[i]);
+                leds[i] = CRGB::blendAlphaMaxChannel(mRgb[i], leds[i]);
             }
             break;
         }
@@ -65,7 +65,7 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
                 break;
             }
             case DRAW_MODE_BLEND_BY_BLACK: {
-                leds[out_idx] = CRGB::blendByBlack(mRgb[in_idx], leds[in_idx]);
+                leds[out_idx] = CRGB::blendAlphaMaxChannel(mRgb[in_idx], leds[in_idx]);
                 break;
             }
             }
