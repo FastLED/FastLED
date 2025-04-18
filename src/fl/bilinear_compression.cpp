@@ -6,19 +6,19 @@
 
 namespace fl {
 
-void downscaleBilinear(const CRGB *src, int srcWidth, int srcHeight,
-                       CRGB *dst, int dstWidth, int dstHeight) {
+void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
+                       CRGB *dst, uint16_t dstWidth, uint16_t dstHeight) {
     // Use 8 bits for fixed-point fractional precision.
-    const int SHIFT = 8;
-    const int FP_ONE = 1 << SHIFT; // 256 in fixed-point
-    const int WEIGHT_SHIFT =
+    const uint16_t SHIFT = 8;
+    const uint16_t FP_ONE = 1 << SHIFT; // 256 in fixed-point
+    const uint16_t WEIGHT_SHIFT =
         SHIFT * 2; // 16 bits (for the product of two fixed-point numbers)
-    const int rounding = 1 << (WEIGHT_SHIFT - 1);
+    const uint16_t rounding = 1 << (WEIGHT_SHIFT - 1);
 
     // Compute scale factors in fixed-point: factor = (srcDimension << SHIFT) /
     // dstDimension.
-    int scaleX = (srcWidth << SHIFT) / dstWidth;
-    int scaleY = (srcHeight << SHIFT) / dstHeight;
+    uint16_t scaleX = (srcWidth << SHIFT) / dstWidth;
+    uint16_t scaleY = (srcHeight << SHIFT) / dstHeight;
 
     // Loop over each pixel in the destination image.
     for (int y = 0; y < dstHeight; ++y) {

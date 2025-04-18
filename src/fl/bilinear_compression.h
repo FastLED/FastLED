@@ -11,7 +11,7 @@ If you use this and find an issue then please report it.
 
 namespace fl {
 
-void downscaleBilinear(const CRGB *src, int srcWidth, int srcHeight,
-                       CRGB *dst, int dstWidth, int dstHeight);
+void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
+                       CRGB *dst, uint16_t dstWidth, uint16_t dstHeight);
 
 } // namespace fl

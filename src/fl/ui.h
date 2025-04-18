@@ -61,7 +61,7 @@ class UISlider {
         }
         return (mValue - mMin) / (mMax - mMin);
     }
-    float max() const { return mMax; }
+    float max_value() const { return mMax; }
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
     operator float() const { return mValue; }
     operator uint8_t() const { return static_cast<uint8_t>(mValue); }

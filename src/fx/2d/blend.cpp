@@ -35,7 +35,7 @@ Str Blend2d::fxName() const {
 void Blend2d::add(Fx2dPtr layer, const Params& p) {
     uint8_t blurAmount = p.blur_amount;
     uint8_t blurPasses = p.blur_passes;
-    Entry entry = {layer, blurAmount, blurPasses};
+    Entry entry(layer, blurAmount, blurPasses);
     mLayers.push_back(entry);
 }
 

@@ -49,6 +49,10 @@ class Blend2d : public Fx2d {
         Fx2dPtr fx;
         uint8_t blur_amount = 0;
         uint8_t blur_passes = 1;
+        Entry() = default;
+        Entry(Fx2dPtr fx, uint8_t blur_amount,
+              uint8_t blur_passes)
+            : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };
     HeapVector<Entry> mLayers;
     FramePtr mFrame;
