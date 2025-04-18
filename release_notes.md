@@ -8,7 +8,7 @@ FastLED 3.9.16
   * For improved rendering we allow 2x, 4x, 8x super sampling
   * Speed control via multiplying the rendering iterations per frame.
 * `EVERY_N_MILLISECONDS_RANDOM(MIN, MAX)` macro for sketches.
-* `CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower)` for fx blending.
+* `CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower)` for fx blending without `alpha`.
 * `fl/2dfx/blend.h`
   * Visualizer blend stack.
   * Multiple visualizers can be stacked and then composited via `blendAlphaMaxChannel(...)`
