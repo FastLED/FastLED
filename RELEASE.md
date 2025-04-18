@@ -24,10 +24,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -am "Rev 3.9.15 - Bug fixes"
-$ git tag 3.9.15 master 
+$ git commit -am "Rev 3.9.16 - FxWave2d, advanced compositing, time based alpha transitions."
+$ git tag 3.9.16 master 
 $ git push 
-$ git push origin 3.9.15
+$ git push origin 3.9.16
 ```
 
 Then use the GitHub UI to make a new “Release”:
