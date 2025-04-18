@@ -31,8 +31,7 @@ void XYPath::initLutOnce() {
 }
 
 pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
-                               int16_t x_translate,
-                               int16_t y_translate) {
+                               int16_t x_translate, int16_t y_translate) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -45,9 +44,9 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
     float scalef = static_cast<float>(scale);
     float alpha_f = static_cast<float>(alpha) / scalef;
     pair_xy<float> xy = at(alpha_f);
-    return pair_xy<uint16_t>(
-        static_cast<uint16_t>(xy.x * scalef) + x_translate,
-        static_cast<uint16_t>(xy.y * scalef) + y_translate);
+    return pair_xy<uint16_t>(static_cast<uint16_t>(xy.x * scalef) + x_translate,
+                             static_cast<uint16_t>(xy.y * scalef) +
+                                 y_translate);
 }
 
 void XYPath::buildLut(uint16_t steps) {
@@ -204,7 +203,55 @@ pair_xy<float> PhyllotaxisPath::at(float alpha) {
     // Cartesian & normalize to [0,1]²
     float x0 = r * cosf(theta);
     float y0 = r * sinf(theta);
-    return {0.5f + 0.5f * x0, 0.5f + 0.5f * y0};
+    return pair_xy<float>(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
+}
+
+
+XYPathPtr TransformPath::getPath() const { return mPath; }
+
+TransformPath::Params &TransformPath::params() { return mParams; }
+
+CatmullRomPath::CatmullRomPath(uint16_t steps) : XYPath(steps) {}
+
+void CatmullRomPath::addPoint(pair_xy<float> p) { mPoints.push_back(p); }
+
+pair_xy<float> CatmullRomPath::at(float alpha) {
+    const size_t n = mPoints.size();
+    if (n == 0) {
+        return {0.5f, 0.5f};
+    }
+    if (n == 1) {
+        return mPoints[0];
+    }
+
+    // Scale α ∈ [0,1] to segment index [0..n-2]
+    float scaled = alpha * (n - 1);
+    size_t i1 = MIN(size_t(floorf(scaled)), n - 2);
+    float t = scaled - i1;
+
+    // Indices for p0, p1, p2, p3 (clamping at ends)
+    size_t i0 = (i1 == 0 ? 0 : i1 - 1);
+    size_t i2 = i1 + 1;
+    size_t i3 = (i2 + 1 < n ? i2 + 1 : n - 1);
+
+    auto P0 = mPoints[i0];
+    auto P1 = mPoints[i1];
+    auto P2 = mPoints[i2];
+    auto P3 = mPoints[i3];
+
+    // Catmull-Rom basis (tension = 0.5)
+    float t2 = t * t;
+    float t3 = t2 * t;
+
+    float x = 0.5f * ((2.0f * P1.x) + (-P0.x + P2.x) * t +
+                      (2.0f * P0.x - 5.0f * P1.x + 4.0f * P2.x - P3.x) * t2 +
+                      (-P0.x + 3.0f * P1.x - 3.0f * P2.x + P3.x) * t3);
+
+    float y = 0.5f * ((2.0f * P1.y) + (-P0.y + P2.y) * t +
+                      (2.0f * P0.y - 5.0f * P1.y + 4.0f * P2.y - P3.y) * t2 +
+                      (-P0.y + 3.0f * P1.y - 3.0f * P2.y + P3.y) * t3);
+
+    return pair_xy<float>(x, y);
 }
 
 } // namespace fl

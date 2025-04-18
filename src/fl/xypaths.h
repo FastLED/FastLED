@@ -7,6 +7,7 @@
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
+#include "fl/vector.h"
 #include "fl/warn.h"
 
 namespace fl {
@@ -27,8 +28,7 @@ class XYPath : public Referent {
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
-    virtual pair_xy<uint16_t> at16(uint16_t alpha,
-                                   uint16_t scale = 0xffff,
+    virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff,
                                    int16_t x_translate = 0,
                                    int16_t y_translate = 0);
     void buildLut(uint16_t steps);
@@ -43,25 +43,27 @@ class XYPath : public Referent {
     LUTXY16Ptr generateLUT(uint16_t steps);
 };
 
+struct TransformPathParams {
+    TransformPathParams(float scale = 1.0f, float x_offset = 0.0f,
+                        float y_offset = 0.0f, float rotation = 0.0f)
+        : scale(scale), x_offset(x_offset), y_offset(y_offset),
+          rotation(rotation) {}
+    float scale = 1.0f;
+    float x_offset = 0.0f;
+    float y_offset = 0.0f;
+    float rotation = 0.0f;
+};
+
 // TransformPath is a wrapper for XYPath that applies a transform.
 class TransformPath : public XYPath {
   public:
-    struct Params {
-        Params(float scale = 1.0f, float x_offset = 0.0f, float y_offset = 0.0f, float rotation = 0.0f)
-            : scale(scale), x_offset(x_offset), y_offset(y_offset),
-              rotation(rotation) {}
-        float scale = 1.0f;
-        float x_offset = 0.0f;
-        float y_offset = 0.0f;
-        float rotation = 0.0f;
-    };
-
+    using Params = TransformPathParams;
     TransformPath(XYPathPtr path, const Params &params = Params());
     pair_xy<float> at(float alpha) override;
 
     void setPath(XYPathPtr path);
-    XYPathPtr getPath() const { return mPath; }
-    Params& params() { return mParams; }
+    XYPathPtr getPath() const;
+    Params &params();
 
   private:
     XYPathPtr mPath;
@@ -76,6 +78,24 @@ class LinePath : public XYPath {
 
   private:
     float mX0, mY0, mX1, mY1;
+};
+
+/// Catmull–Rom spline through arbitrary points.
+/// Simply add control points and at(α) will smoothly interpolate through them.
+class CatmullRomPath : public XYPath {
+  public:
+    /**
+     * @param steps  LUT resolution (0 = no LUT)
+     */
+    CatmullRomPath(uint16_t steps = 0);
+
+    /// Add a point in [0,1]² to the path
+    void addPoint(pair_xy<float> p);
+
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    HeapVector<pair_xy<float>> mPoints;
 };
 
 class CirclePath : public XYPath {
