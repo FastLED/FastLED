@@ -130,7 +130,7 @@ void triggerRipple() {
 }
 
 void applyFancyEffect(uint32_t now, bool button_active) {
-    uint32_t total = map(fancySpeed.as<uint32_t>(), 0, fancySpeed.max(), 1000, 100);
+    uint32_t total = map(fancySpeed.as<uint32_t>(), 0, fancySpeed.max_value(), 1000, 100);
     static TimeRamp pointTransition = TimeRamp(total, 0, 0);
 
     if (button_active) {
