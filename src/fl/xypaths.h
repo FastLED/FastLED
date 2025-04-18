@@ -12,6 +12,7 @@
 namespace fl {
 
 FASTLED_SMART_PTR(XYPath);
+FASTLED_SMART_PTR(TransformPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(HeartPath);
@@ -26,7 +27,9 @@ class XYPath : public Referent {
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
-    virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff, uint16_t x_translate_left = 0, uint16_t y_translate_down = 0);
+    virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff,
+                                   uint16_t x_translate_left = 0,
+                                   uint16_t y_translate_down = 0);
     void buildLut(uint16_t steps);
     void clearLut();
 
@@ -46,6 +49,17 @@ class LinePath : public XYPath {
 
   private:
     float mX0, mY0, mX1, mY1;
+};
+
+class TransformPath : public XYPath {
+  public:
+    TransformPath(XYPathPtr path, float scale = 1.0f, float x_offset = 0.0f,
+                  float y_offset = 0.0f, float rotation = 0.0f);
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    XYPathPtr mPath;
+    float mXOffset, mYOffset, mScale, mRotation;
 };
 
 class CirclePath : public XYPath {

@@ -1,6 +1,7 @@
 
 #include <math.h>
 
+#include "fl/assert.h"
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/xypaths.h"
@@ -30,7 +31,8 @@ void XYPath::initLutOnce() {
 }
 
 pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
-                               uint16_t x_translate_left, uint16_t y_translate_down) {
+                               uint16_t x_translate_left,
+                               uint16_t y_translate_down) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -53,6 +55,20 @@ void XYPath::buildLut(uint16_t steps) {
     if (steps > 0) {
         mLut = generateLUT(steps);
     }
+}
+
+pair_xy<float> TransformPath::at(float alpha) {
+    pair_xy<float> xy = mPath->at(alpha);
+    xy.x = xy.x * mScale + mXOffset;
+    xy.y = xy.y * mScale + mYOffset;
+    return xy;
+}
+
+TransformPath::TransformPath(XYPathPtr path, float scale, float x_offset,
+                             float y_offset, float rotation)
+    : mPath(path), mXOffset(x_offset), mYOffset(y_offset), mScale(scale),
+      mRotation(rotation) {
+    FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
 }
 
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
