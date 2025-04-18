@@ -28,11 +28,12 @@ Rgbw rgbwMode = RgbwInvalid();  // No RGBW mode, just use RGB.
 DemoReel100Ptr demoReel = DemoReel100Ptr::New(NUM_LEDS);
 
 void setup() {
-  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
+  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS);
   
   // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
+  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS, 2.0f)
     .setCorrection(TypicalLEDStrip)
+    .setScreenMap(screenMap)
     .setRgbw(rgbwMode);
 
   // set master brightness control

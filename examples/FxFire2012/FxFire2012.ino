@@ -38,13 +38,14 @@
 
 #include <FastLED.h>
 #include "fx/1d/fire2012.h"
+#include "fl/screenmap.h"
 
 using namespace fl;
 
 #define LED_PIN     5
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2811
-#define NUM_LEDS    30
+#define NUM_LEDS    92
 
 #define BRIGHTNESS  128
 #define FRAMES_PER_SECOND 30
@@ -56,9 +57,10 @@ CRGB leds[NUM_LEDS];
 Fire2012Ptr fire = Fire2012Ptr::New(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
-  delay(3000); // sanity delay
+  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5, .4);
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip)
+    .setScreenMap(screenMap)
     .setRgbw();
   FastLED.setBrightness(BRIGHTNESS);
 }

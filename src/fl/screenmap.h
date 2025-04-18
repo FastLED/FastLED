@@ -31,7 +31,7 @@ class ScreenMap {
                             float cm_led_diameter = 0.5f, float completion = 1.0f);
 
     static ScreenMap DefaultStrip(int numLeds, float cm_between_leds = 1.5f,
-                                 float cm_led_diameter = 0.5f, float completion = .9f){
+                                 float cm_led_diameter = 0.2f, float completion = .9f){
         return Circle(numLeds, cm_between_leds, cm_led_diameter, completion);
     }
 
