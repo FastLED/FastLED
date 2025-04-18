@@ -12,6 +12,8 @@
 namespace fl {
 
 FASTLED_SMART_PTR(XYPath);
+FASTLED_SMART_PTR(LinePath);
+FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(LissajousPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
