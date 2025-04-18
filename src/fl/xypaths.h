@@ -30,7 +30,7 @@ class XYPath : public Referent {
 
 class HeartPath : public XYPath {
   public:
-    HeartPath() = default;
+    HeartPath(uint16_t steps = 0): XYPath(steps) {}
     pair_xy<float> at(float alpha) override;
 };
 
