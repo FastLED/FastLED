@@ -5,6 +5,7 @@
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/xypaths.h"
+#include "lib8tion/trig8.h"
 
 namespace fl {
 
@@ -22,6 +23,40 @@ pair_xy<float> TransformFloat::transform(const pair_xy<float> &xy) const {
         return pair_xy<float>(x_rotated, y_rotated);
     }
     return pair_xy<float>(x, y);
+}
+
+pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
+    pair_xy<uint16_t> out = xy;
+    if (scale != 0xffff) {
+        uint32_t x = out.x;
+        uint32_t y = out.y;
+        x = (x * scale) >> 16;
+        y = (y * scale) >> 16;
+    }
+    if (x_offset != 0) {
+        out.x += x_offset;
+    }
+    if (y_offset != 0) {
+        out.y += y_offset;
+    }
+    if (rotation != 0) {
+        // promote to signed so the muls don’t overflow
+        int32_t x = static_cast<int32_t>(out.x);
+        int32_t y = static_cast<int32_t>(out.y);
+
+        // Q15 cosine & sine of 0…65535 angle
+        int32_t c =  cos16(rotation);  // [-32768..+32767]
+        int32_t s =  sin16(rotation);
+
+        // rotate:  x' = x*c - y*s ;  y' = x*s + y*c
+        // >>15 to remove the Q15 factor
+        int32_t xr = ((x * c) - (y * s)) >> 15;
+        int32_t yr = ((x * s) + (y * c)) >> 15;
+
+        out.x = static_cast<uint16_t>(xr);
+        out.y = static_cast<uint16_t>(yr);
+    }
+    return out;
 }
 
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
@@ -302,6 +337,10 @@ pair_xy<float> CatmullRomPath::at(float alpha) {
 
     return pair_xy<float>(x, y);
 }
+
+
+
+
 
 
 

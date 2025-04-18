@@ -41,8 +41,11 @@ struct TransformFloat {
 struct Transform16 {
     Transform16() = default;
     uint16_t scale = 0xffff;
-    int16_t x_offset = 0;
-    int16_t y_offset = 0;
+    uint16_t x_offset = 0;
+    uint16_t y_offset = 0;
+    uint16_t rotation = 0;
+
+    pair_xy<uint16_t> transform(const pair_xy<uint16_t> &xy) const;
 };
 
 class XYPath : public Referent {
@@ -51,7 +54,8 @@ class XYPath : public Referent {
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
     pair_xy<float> at(float alpha, const TransformFloat &tx);
-    virtual pair_xy<uint16_t> at16(uint16_t alpha, const Transform16& tx = Transform16());
+    virtual pair_xy<uint16_t> at16(uint16_t alpha,
+                                   const Transform16 &tx = Transform16());
 
     // optimizes at16(...).
     void buildLut(uint16_t steps);
@@ -78,8 +82,8 @@ class XYPath : public Referent {
     LUTXY16Ptr generateLUT(uint16_t steps);
 };
 
-// TransformPath is a wrapper for XYPath that applies a transform. This is for people that
-// are lazy and don't want to pass around a transform.
+// TransformPath is a wrapper for XYPath that applies a transform. This is for
+// people that are lazy and don't want to pass around a transform.
 class TransformPath : public XYPath {
   public:
     using Params = TransformFloat;
