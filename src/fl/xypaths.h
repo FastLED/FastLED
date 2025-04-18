@@ -1,26 +1,37 @@
 
+// Parameterized xypaths that can be generated from an alpha value
+// or LUT.
+
 #include <math.h>
 
 #include "fl/lut.h"
 #include "fl/ptr.h"
+#include "fl/warn.h"
 
 namespace fl {
 
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(HeartPath);
 
-
-class XYPath: public Referent {
+class XYPath : public Referent {
   public:
-    XYPath() = default;
+    XYPath(uint16_t steps = 0);
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
+
+    virtual pair_xy<uint16_t> at16(uint16_t alpha);
+
+  private:
+    LUTXY16Ptr generateLUT(uint16_t steps);
+
+    void initLutOnce();
+    uint32_t mSteps;
+    LUTXY16Ptr mLut;
 };
 
-class HeartPath: public XYPath {
+class HeartPath : public XYPath {
   public:
     HeartPath() = default;
-    // α in [0,1] → (x,y) on the heart, both in [0,1].
     pair_xy<float> at(float alpha) override;
 };
 

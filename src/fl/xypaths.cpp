@@ -3,12 +3,13 @@
 
 #include "fl/lut.h"
 #include "fl/xypaths.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
 pair_xy<float> HeartPath::at(float alpha) {
     // 1) raw parametric heart
-    constexpr float PI = 3.14159265358979323846f;
+    // constexpr float PI = 3.14159265358979323846f;
     float t = alpha * 2.0f * PI;
     float s = sinf(t);
     float c = cosf(t);
@@ -26,6 +27,49 @@ pair_xy<float> HeartPath::at(float alpha) {
     float y = (yo - miny) / (maxy - miny);
 
     return {x, y};
+}
+
+
+XYPath::XYPath(uint16_t steps): mSteps(steps) {}
+
+LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
+    LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
+    pair_xy<uint16_t> *mutable_data = lut->getData();
+    float stepsf = (float)steps;
+    for (uint16_t i = 0; i < steps; i++) {
+        float alpha = static_cast<float>(i) / stepsf;
+        pair_xy<float> xy = at(alpha);
+        mutable_data[i].x = (uint16_t)(xy.x * 65535.0f);
+        mutable_data[i].y = (uint16_t)(xy.y * 65535.0f);
+    }
+    return lut;
+}
+
+
+
+void XYPath::initLutOnce() {
+    if (mLut) {
+        return;
+    }
+    mLut = generateLUT(mSteps);
+}
+
+
+
+pair_xy<uint16_t> XYPath::at16(uint16_t alpha) {
+    if (mSteps > 0) {
+        initLutOnce();
+        if (mLut) {
+            return mLut->getData()[alpha];
+        } else {
+            FASTLED_WARN("XYPath::at16: mLut is null");
+        }
+    }
+    // Fallback to the default implementation.
+    float alpha_f = static_cast<float>(alpha) / 65535.0f;
+    pair_xy<float> xy = at(alpha_f);
+    return {static_cast<uint16_t>(xy.x * 65535.0f),
+            static_cast<uint16_t>(xy.y * 65535.0f)};
 }
 
 } // namespace fl
