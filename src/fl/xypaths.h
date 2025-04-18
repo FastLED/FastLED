@@ -54,6 +54,10 @@ class XYPath : public Referent {
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
     pair_xy<float> at(float alpha, const TransformFloat &tx);
+
+    // α in [0,65535] → (x,y) on the path, both in [0,65535].
+    // This default implementation will build a LUT if mSteps > 0.
+    // Subclasses may override this to avoid the LUT.
     virtual pair_xy<uint16_t> at16(uint16_t alpha,
                                    const Transform16 &tx = Transform16());
 
