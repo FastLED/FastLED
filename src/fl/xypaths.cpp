@@ -46,6 +46,14 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale) {
             static_cast<uint16_t>(xy.y * scalef)};
 }
 
+void XYPath::buildLut(uint16_t steps) {
+    mLut.reset();
+    mSteps = steps;
+    if (steps > 0) {
+        mLut = generateLUT(steps);
+    }
+}
+
 HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 
 pair_xy<float> HeartPath::at(float alpha) {

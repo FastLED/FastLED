@@ -23,10 +23,10 @@ class XYPath : public Referent {
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
     virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff);
+    void buildLut(uint16_t steps);
+    void clearLut() { mLut.reset(); }
 
   protected:
-    // allow sub classes to access the LUT.
-    void clearLut() { mLut.reset(); }
     uint32_t mSteps;
     LUTXY16Ptr mLut;
 
