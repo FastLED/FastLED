@@ -29,7 +29,7 @@ void XYPath::initLutOnce() {
     mLut = generateLUT(mSteps);
 }
 
-pair_xy<uint16_t> XYPath::at16(uint16_t alpha) {
+pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -38,11 +38,12 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha) {
             FASTLED_WARN("XYPath::at16: mLut is null");
         }
     }
-    // Fallback to the default implementation.
-    float alpha_f = static_cast<float>(alpha) / 65535.0f;
+    // Fallback to the default implementation. Fine most paths.
+    float scalef = static_cast<float>(scale);
+    float alpha_f = static_cast<float>(alpha) / scalef;
     pair_xy<float> xy = at(alpha_f);
-    return {static_cast<uint16_t>(xy.x * 65535.0f),
-            static_cast<uint16_t>(xy.y * 65535.0f)};
+    return {static_cast<uint16_t>(xy.x * scalef),
+            static_cast<uint16_t>(xy.y * scalef)};
 }
 
 pair_xy<float> HeartPath::at(float alpha) {

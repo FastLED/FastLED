@@ -19,6 +19,26 @@ struct pair_xy {
     T y = 0;
     constexpr pair_xy() = default;
     constexpr pair_xy(T x, T y) : x(x), y(y) {}
+    pair_xy& operator*=(const float& f) {
+        x *= f;
+        y *= f;
+        return *this;
+    }
+    pair_xy& operator/=(const float& f) {
+        x /= f;
+        y /= f;
+        return *this;
+    }
+    pair_xy& operator*=(const double& f) {
+        x *= f;
+        y *= f;
+        return *this;
+    }
+    pair_xy& operator/=(const double& f) {
+        x /= f;
+        y /= f;
+        return *this;
+    }
 };
 
 using pair_xy_float = pair_xy<float>;  // It's just easier if we allow negative values.
