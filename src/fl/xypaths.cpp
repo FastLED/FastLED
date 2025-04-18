@@ -9,7 +9,7 @@
 
 namespace fl {
 
-pair_xy<float> TransformFloat::transform(const pair_xy<float> &xy) const {
+pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
     float x = xy.x * scale + x_offset;
     float y = xy.y * scale + y_offset;
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -20,9 +20,9 @@ pair_xy<float> TransformFloat::transform(const pair_xy<float> &xy) const {
         float sin_theta = sinf(rotation);
         float x_rotated = x * cos_theta - y * sin_theta;
         float y_rotated = x * sin_theta + y * cos_theta;
-        return pair_xy<float>(x_rotated, y_rotated);
+        return pair_xy_float(x_rotated, y_rotated);
     }
-    return pair_xy<float>(x, y);
+    return pair_xy_float(x, y);
 }
 
 pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
@@ -45,8 +45,8 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
         int32_t y = static_cast<int32_t>(out.y);
 
         // Q15 cosine & sine of 0…65535 angle
-        int32_t c =  cos16(rotation);  // [-32768..+32767]
-        int32_t s =  sin16(rotation);
+        int32_t c = cos16(rotation); // [-32768..+32767]
+        int32_t s = sin16(rotation);
 
         // rotate:  x' = x*c - y*s ;  y' = x*s + y*c
         // >>15 to remove the Q15 factor
@@ -67,7 +67,7 @@ LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     float stepsf = (float)steps;
     for (uint16_t i = 0; i < steps; i++) {
         float alpha = static_cast<float>(i) / stepsf;
-        pair_xy<float> xy = at(alpha);
+        pair_xy_float xy = at(alpha);
         mutable_data[i].x = (uint16_t)(xy.x * 65535.0f);
         mutable_data[i].y = (uint16_t)(xy.y * 65535.0f);
     }
@@ -81,12 +81,12 @@ void XYPath::initLutOnce() {
     mLut = generateLUT(mSteps);
 }
 
-pair_xy<float> XYPath::at(float alpha, const TransformFloat &tx) {
-    pair_xy<float> xy = at(alpha);
+pair_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
+    pair_xy_float xy = at(alpha);
     return tx.transform(xy);
 }
 
-pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16& tx) {
+pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -98,7 +98,7 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16& tx) {
     // Fallback to the default implementation. Fine most paths.
     float scalef = static_cast<float>(tx.scale);
     float alpha_f = static_cast<float>(alpha) / scalef;
-    pair_xy<float> xy = at(alpha_f);
+    pair_xy_float xy = at(alpha_f);
     return pair_xy<uint16_t>(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset,
                              static_cast<uint16_t>(xy.y * scalef) +
                                  tx.y_offset);
@@ -112,14 +112,13 @@ void XYPath::buildLut(uint16_t steps) {
     }
 }
 
-void XYPath::output(float alpha_start, float alpha_end,
-                pair_xy<float> *out, uint16_t out_size,
-                const TransformFloat &tx) {
+void XYPath::output(float alpha_start, float alpha_end, pair_xy_float *out,
+                    uint16_t out_size, const TransformFloat &tx) {
     if (out_size == 0) {
         return;
     }
     if (out_size == 1) {
-        pair_xy<float> avg = at(alpha_start);
+        pair_xy_float avg = at(alpha_start);
         avg += at(alpha_end);
         avg /= 2.0f;
         out[0] = avg;
@@ -127,9 +126,9 @@ void XYPath::output(float alpha_start, float alpha_end,
     }
 
     out[0] = at(alpha_start, tx);
-    out[out_size-1] = at(alpha_end, tx);
+    out[out_size - 1] = at(alpha_end, tx);
     if (out_size == 2) {
-      return;
+        return;
     }
 
     const float inverse_out_size_minus_one = 1.0f / (out_size - 1);
@@ -147,8 +146,8 @@ TransformPath::TransformPath(XYPathPtr path, const Params &params)
     FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
 }
 
-pair_xy<float> TransformPath::at(float alpha) {
-    pair_xy<float> xy = mPath->at(alpha);
+pair_xy_float TransformPath::at(float alpha) {
+    pair_xy_float xy = mPath->at(alpha);
     xy.x = xy.x * mParams.scale + mParams.x_offset;
     xy.y = xy.y * mParams.scale + mParams.y_offset;
     return xy;
@@ -157,7 +156,7 @@ pair_xy<float> TransformPath::at(float alpha) {
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
     : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
 
-pair_xy<float> LinePath::at(float alpha) {
+pair_xy_float LinePath::at(float alpha) {
     // α in [0,1] → (x,y) on the line
     float x = mX0 + alpha * (mX1 - mX0);
     float y = mY0 + alpha * (mY1 - mY0);
@@ -172,7 +171,7 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
     mY1 = y1;
 }
 
-pair_xy<float> CirclePath::at(float alpha) {
+pair_xy_float CirclePath::at(float alpha) {
     // α in [0,1] → (x,y) on the circle
     float t = alpha * 2.0f * PI;
     float x = .5f * cosf(t);
@@ -184,7 +183,7 @@ CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
 
 HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 
-pair_xy<float> HeartPath::at(float alpha) {
+pair_xy_float HeartPath::at(float alpha) {
     // 1) raw parametric heart
     // constexpr float PI = 3.14159265358979323846f;
     float t = alpha * 2.0f * PI;
@@ -206,7 +205,7 @@ pair_xy<float> HeartPath::at(float alpha) {
     return {x, y};
 }
 
-pair_xy<float> LissajousPath::at(float alpha) {
+pair_xy_float LissajousPath::at(float alpha) {
     // t in [0,2π]
     float t = alpha * 2.0f * PI;
     float x = 0.5f + 0.5f * sinf(mA * t + mDelta);
@@ -221,7 +220,7 @@ ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius,
                                              uint16_t steps)
     : XYPath(steps), mTurns(turns), mRadius(radius) {}
 
-pair_xy<float> ArchimedeanSpiralPath::at(float alpha) {
+pair_xy_float ArchimedeanSpiralPath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π·turns]
     float t = alpha * 2.0f * PI * mTurns;
     // r grows linearly from 0 to mRadius as α goes 0→1
@@ -235,7 +234,7 @@ pair_xy<float> ArchimedeanSpiralPath::at(float alpha) {
 RosePath::RosePath(uint8_t petals, uint16_t steps)
     : XYPath(steps), mPetals(petals) {}
 
-pair_xy<float> RosePath::at(float alpha) {
+pair_xy_float RosePath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
     // polar radius
@@ -253,7 +252,7 @@ GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b, float n1,
                                  float n2, float n3, uint16_t steps)
     : XYPath(steps), mM(m), mA(a), mB(b), mN1(n1), mN2(n2), mN3(n3) {}
 
-pair_xy<float> GielisCurvePath::at(float alpha) {
+pair_xy_float GielisCurvePath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
 
@@ -279,7 +278,7 @@ void XYPath::clearLut() { mLut.reset(); }
 PhyllotaxisPath::PhyllotaxisPath(uint16_t count, float angle, uint16_t steps)
     : XYPath(steps), mCount(count), mAngle(angle) {}
 
-pair_xy<float> PhyllotaxisPath::at(float alpha) {
+pair_xy_float PhyllotaxisPath::at(float alpha) {
     // Map α∈[0,1] → n∈[0,count−1]
     float n = alpha * float(mCount > 1 ? mCount - 1 : 1);
     // Polar coords
@@ -288,7 +287,7 @@ pair_xy<float> PhyllotaxisPath::at(float alpha) {
     // Cartesian & normalize to [0,1]²
     float x0 = r * cosf(theta);
     float y0 = r * sinf(theta);
-    return pair_xy<float>(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
+    return pair_xy_float(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
 }
 
 XYPathPtr TransformPath::getPath() const { return mPath; }
@@ -297,9 +296,9 @@ TransformPath::Params &TransformPath::params() { return mParams; }
 
 CatmullRomPath::CatmullRomPath(uint16_t steps) : XYPath(steps) {}
 
-void CatmullRomPath::addPoint(pair_xy<float> p) { mPoints.push_back(p); }
+void CatmullRomPath::addPoint(pair_xy_float p) { mPoints.push_back(p); }
 
-pair_xy<float> CatmullRomPath::at(float alpha) {
+pair_xy_float CatmullRomPath::at(float alpha) {
     const size_t n = mPoints.size();
     if (n == 0) {
         return {0.5f, 0.5f};
@@ -335,17 +334,7 @@ pair_xy<float> CatmullRomPath::at(float alpha) {
                       (2.0f * P0.y - 5.0f * P1.y + 4.0f * P2.y - P3.y) * t2 +
                       (-P0.y + 3.0f * P1.y - 3.0f * P2.y + P3.y) * t3);
 
-    return pair_xy<float>(x, y);
+    return pair_xy_float(x, y);
 }
-
-
-
-
-
-
-
-
-
-
 
 } // namespace fl
