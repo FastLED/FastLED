@@ -14,6 +14,8 @@ namespace fl {
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(LissajousPath);
+FASTLED_SMART_PTR(ArchimedeanSpiralPath);
+FASTLED_SMART_PTR(RosePath);
 
 class XYPath : public Referent {
   public:
@@ -66,6 +68,19 @@ class ArchimedeanSpiralPath : public XYPath {
   private:
     uint8_t mTurns;
     float mRadius;
+};
+
+class RosePath : public XYPath {
+  public:
+    /**
+     * @param petals  Number of petals (integer k)
+     * @param steps   LUT steps (0 = no LUT)
+     */
+    RosePath(uint8_t petals = 5, uint16_t steps = 0);
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    uint8_t mPetals;
 };
 
 } // namespace fl
