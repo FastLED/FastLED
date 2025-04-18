@@ -75,9 +75,11 @@ For more examples, see this [link](examples). Web compiled [examples](https://za
 
 https://github.com/user-attachments/assets/9155124b-a93e-4317-b272-8bacc1b9c3a8
 
-####
+#### Major release for tech-artists!
 
 Lots of improvements in this release, read the full [change list here](https://github.com/FastLED/FastLED/releases/tag/3.9.16)
+
+#### Links
 
   * [FxWave2d](https://github.com/FastLED/FastLED/blob/master/examples/FxWave2d/FxWave2d.ino)
     * [Wave Simulation Library](https://github.com/FastLED/FastLED/blob/master/src/fl/wave_simulation.h)
