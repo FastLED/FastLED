@@ -29,7 +29,8 @@ void XYPath::initLutOnce() {
     mLut = generateLUT(mSteps);
 }
 
-pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale) {
+pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
+                               uint16_t x_translate, uint16_t y_translate) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -42,8 +43,8 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale) {
     float scalef = static_cast<float>(scale);
     float alpha_f = static_cast<float>(alpha) / scalef;
     pair_xy<float> xy = at(alpha_f);
-    return {static_cast<uint16_t>(xy.x * scalef),
-            static_cast<uint16_t>(xy.y * scalef)};
+    return {static_cast<uint16_t>(xy.x * scalef) + x_translate,
+            static_cast<uint16_t>(xy.y * scalef) + y_translate};
 }
 
 void XYPath::buildLut(uint16_t steps) {
