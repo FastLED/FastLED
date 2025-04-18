@@ -54,6 +54,26 @@ void XYPath::buildLut(uint16_t steps) {
     }
 }
 
+LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
+    : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
+
+pair_xy<float> LinePath::at(float alpha) {
+    // α in [0,1] → (x,y) on the line
+    float x = mX0 + alpha * (mX1 - mX0);
+    float y = mY0 + alpha * (mY1 - mY0);
+    return {x, y};
+}
+
+pair_xy<float> CirclePath::at(float alpha) {
+    // α in [0,1] → (x,y) on the circle
+    float t = alpha * 2.0f * PI;
+    float x = .5f * cosf(t);
+    float y = .5f * sinf(t);
+    return {0.5f + 0.5f * x, 0.5f + 0.5f * y};
+}
+
+CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
+
 HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 
 pair_xy<float> HeartPath::at(float alpha) {

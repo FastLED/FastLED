@@ -37,6 +37,24 @@ class XYPath : public Referent {
     LUTXY16Ptr generateLUT(uint16_t steps);
 };
 
+class LinePath : public XYPath {
+  public:
+    LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    float mX0, mY0, mX1, mY1;
+};
+
+class CirclePath : public XYPath {
+  public:
+    CirclePath(uint16_t steps = 0);
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    float mRadius;
+};
+
 class HeartPath : public XYPath {
   public:
     HeartPath(uint16_t steps = 0);
