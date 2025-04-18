@@ -1,6 +1,13 @@
 
-// Parameterized xypaths that can be generated from an alpha value
-// or LUT.
+// This is a drawing/graphics related class.
+//
+// XYPath represents a parameterized (x,y) path. The input will always be
+// an alpha value between 0->1 (float) or 0->0xffff (uint16_t).
+// A look up table can be used to optimize path calculations when steps > 0.
+//
+// We provide common paths discovered throughout human history, for use in
+// your animations.
+
 
 #include <math.h>
 

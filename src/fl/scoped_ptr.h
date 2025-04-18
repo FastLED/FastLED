@@ -84,6 +84,12 @@ class scoped_ptr {
         return tmp;
     }
 
+    void swap(scoped_ptr &other) noexcept {
+        T* tmp = ptr_;
+        ptr_ = other.ptr_;
+        other.ptr_ = tmp;
+    }
+
   private:
     T *ptr_; // Managed pointer
     Deleter deleter_; // Custom deleter
@@ -146,6 +152,12 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
         T* tmp = arr_;
         arr_ = nullptr;
         return tmp;
+    }
+
+    void swap(scoped_array &other) noexcept {
+        T* tmp = arr_;
+        arr_ = other.arr_;
+        other.arr_ = tmp;
     }
 
   private:

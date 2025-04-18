@@ -10,6 +10,16 @@ Provides eanble_if and is_derived for compilers before C++14.
 
 namespace fl {  // mandatory namespace to prevent name collision with std::enable_if.
 
+template <typename T>
+void swap(T &a, T &b) {
+    // TODO: use is_pod to check if T is a POD type, then swap
+    // using this copy operation, otherwise it should error or
+    // try and call T::Swap(T& a, T& b) unconditionally.
+    T tmp = a;
+    a = b;
+    b = tmp;
+}
+
 // Define enable_if for SFINAE
 template <bool Condition, typename T = void>
 struct enable_if {};
