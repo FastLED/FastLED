@@ -121,9 +121,8 @@ pair_xy<float> RosePath::at(float alpha) {
     return {x, y};
 }
 
-GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b ,
-                                 float n1, float n2,
-                                 float n3, uint16_t steps)
+GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b, float n1,
+                                 float n2, float n3, uint16_t steps)
     : XYPath(steps), mM(m), mA(a), mB(b), mN1(n1), mN2(n2), mN3(n3) {}
 
 pair_xy<float> GielisCurvePath::at(float alpha) {
@@ -145,6 +144,23 @@ pair_xy<float> GielisCurvePath::at(float alpha) {
     float y = 0.5f + 0.5f * y0;
 
     return {x, y};
+}
+
+void XYPath::clearLut() { mLut.reset(); }
+
+PhyllotaxisPath::PhyllotaxisPath(uint16_t count, float angle, uint16_t steps)
+    : XYPath(steps), mCount(count), mAngle(angle) {}
+
+pair_xy<float> PhyllotaxisPath::at(float alpha) {
+    // Map α∈[0,1] → n∈[0,count−1]
+    float n = alpha * float(mCount > 1 ? mCount - 1 : 1);
+    // Polar coords
+    float theta = n * mAngle;
+    float r = sqrtf(n / (mCount > 1 ? float(mCount - 1) : 1.0f));
+    // Cartesian & normalize to [0,1]²
+    float x0 = r * cosf(theta);
+    float y0 = r * sinf(theta);
+    return {0.5f + 0.5f * x0, 0.5f + 0.5f * y0};
 }
 
 } // namespace fl

@@ -16,6 +16,8 @@ FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(LissajousPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 FASTLED_SMART_PTR(RosePath);
+FASTLED_SMART_PTR(PhyllotaxisPath);
+FASTLED_SMART_PTR(GielisCurvePath);
 
 class XYPath : public Referent {
   public:
@@ -24,7 +26,7 @@ class XYPath : public Referent {
     virtual pair_xy<float> at(float alpha) = 0;
     virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff);
     void buildLut(uint16_t steps);
-    void clearLut() { mLut.reset(); }
+    void clearLut();
 
   protected:
     uint32_t mSteps;
@@ -88,26 +90,44 @@ class RosePath : public XYPath {
 /// “Superformula” (Gielis curve), can turn into many shapes.
 /// r(θ) = [ |cos(m·θ/4)/a|ⁿ² + |sin(m·θ/4)/b|ⁿ³ ]^(–1/n¹)
 class GielisCurvePath : public XYPath {
-public:
-  /**
-   * @param m      Symmetry count (repetitions)
-   * @param a,b    Shape control (usually 1.0)
-   * @param n1,n2,n3 Exponents shaping the curve
-   * @param steps  LUT resolution (0 = no LUT)
-   */
-  GielisCurvePath(uint8_t  m      = 6,
-                   float    a      = 1.0f,
-                   float    b      = 1.0f,
-                   float    n1     = 1.0f,
-                   float    n2     = 1.0f,
-                   float    n3     = 1.0f,
-                   uint16_t steps  = 0);
+  public:
+    /**
+     * @param m      Symmetry count (repetitions)
+     * @param a,b    Shape control (usually 1.0)
+     * @param n1,n2,n3 Exponents shaping the curve
+     * @param steps  LUT resolution (0 = no LUT)
+     */
+    GielisCurvePath(uint8_t m = 6, float a = 1.0f, float b = 1.0f,
+                    float n1 = 1.0f, float n2 = 1.0f, float n3 = 1.0f,
+                    uint16_t steps = 0);
 
-  pair_xy<float> at(float alpha) override ;
+    pair_xy<float> at(float alpha) override;
 
-private:
-  uint8_t mM;
-  float   mA, mB, mN1, mN2, mN3;
+  private:
+    uint8_t mM;
+    float mA, mB, mN1, mN2, mN3;
+};
+
+/// “Phyllotaxis” / Sunflower spiral:
+///  n = α·(count−1),
+///  θ = n·goldenAngle,
+///  r = √(n/(count−1))
+/// then (x,y) = (0.5+0.5·r·cosθ, 0.5+0.5·r·sinθ)
+class PhyllotaxisPath : public XYPath {
+  public:
+    /**
+     * @param count  Number of seeds (controls density)
+     * @param angle  Angular increment in radians (default ≈137.508°)
+     * @param steps  LUT resolution (0 = no LUT)
+     */
+    PhyllotaxisPath(uint16_t count = 500,
+                    float angle = 137.508f * (PI / 180.0f), uint16_t steps = 0);
+
+    pair_xy<float> at(float alpha) override;
+
+  private:
+    uint16_t mCount;
+    float mAngle;
 };
 
 } // namespace fl
