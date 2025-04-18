@@ -45,10 +45,7 @@ class XYPath : public Referent {
 };
 
 struct TransformPathParams {
-    TransformPathParams(float scale = 1.0f, float x_offset = 0.0f,
-                        float y_offset = 0.0f, float rotation = 0.0f)
-        : scale(scale), x_offset(x_offset), y_offset(y_offset),
-          rotation(rotation) {}
+    TransformPathParams() = default;
     float scale = 1.0f;
     float x_offset = 0.0f;
     float y_offset = 0.0f;
