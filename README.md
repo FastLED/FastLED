@@ -73,7 +73,7 @@ For more examples, see this [link](examples). Web compiled [examples](https://za
 
 ## New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control
 
-https://github.com/user-attachments/assets/156f77c6-9f95-4787-b296-70b882f399dd
+https://github.com/user-attachments/assets/9155124b-a93e-4317-b272-8bacc1b9c3a8
 
 
   * [FxWave2d](https://github.com/FastLED/FastLED/blob/master/examples/FxWave2d/FxWave2d.ino)
