@@ -85,4 +85,29 @@ class RosePath : public XYPath {
     uint8_t mPetals;
 };
 
+/// “Superformula” (Gielis curve), can turn into many shapes.
+/// r(θ) = [ |cos(m·θ/4)/a|ⁿ² + |sin(m·θ/4)/b|ⁿ³ ]^(–1/n¹)
+class GielisCurvePath : public XYPath {
+public:
+  /**
+   * @param m      Symmetry count (repetitions)
+   * @param a,b    Shape control (usually 1.0)
+   * @param n1,n2,n3 Exponents shaping the curve
+   * @param steps  LUT resolution (0 = no LUT)
+   */
+  GielisCurvePath(uint8_t  m      = 6,
+                   float    a      = 1.0f,
+                   float    b      = 1.0f,
+                   float    n1     = 1.0f,
+                   float    n2     = 1.0f,
+                   float    n3     = 1.0f,
+                   uint16_t steps  = 0);
+
+  pair_xy<float> at(float alpha) override ;
+
+private:
+  uint8_t mM;
+  float   mA, mB, mN1, mN2, mN3;
+};
+
 } // namespace fl

@@ -121,4 +121,30 @@ pair_xy<float> RosePath::at(float alpha) {
     return {x, y};
 }
 
+GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b ,
+                                 float n1, float n2,
+                                 float n3, uint16_t steps)
+    : XYPath(steps), mM(m), mA(a), mB(b), mN1(n1), mN2(n2), mN3(n3) {}
+
+pair_xy<float> GielisCurvePath::at(float alpha) {
+    // α ∈ [0,1] → θ ∈ [0, 2π]
+    float t = alpha * 2.0f * PI;
+
+    // Superformula radial term
+    float p1 = powf(fabsf(cosf(mM * t / 4.0f) / mA), mN2);
+    float p2 = powf(fabsf(sinf(mM * t / 4.0f) / mB), mN3);
+    float denom = powf(p1 + p2, 1.0f / mN1);
+    float r = 1.0f / denom;
+
+    // Polar → Cartesian
+    float x0 = r * cosf(t);
+    float y0 = r * sinf(t);
+
+    // Normalize from [-1..1] → [0..1]
+    float x = 0.5f + 0.5f * x0;
+    float y = 0.5f + 0.5f * y0;
+
+    return {x, y};
+}
+
 } // namespace fl
