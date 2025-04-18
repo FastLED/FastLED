@@ -65,10 +65,25 @@ void loop() {
 }
 ```
 
-For more examples see this [link](examples). Web compiled [examples](https://zackees.github.io/fastled-wasm/).
+For more examples, see this [link](examples). Web compiled [examples](https://zackees.github.io/fastled-wasm/).
 
 
 # New Feature Announcements
+
+
+## New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control
+
+https://github.com/user-attachments/assets/156f77c6-9f95-4787-b296-70b882f399dd
+
+
+  * [FxWave2d](https://github.com/FastLED/FastLED/blob/master/examples/FxWave2d/FxWave2d.ino)
+    * [Wave Simulation Library](https://github.com/FastLED/FastLED/blob/master/src/fl/wave_simulation.h)
+  * [FireCylinder](https://github.com/FastLED/FastLED/blob/master/examples/FireCylinder/FireCylinder.ino)
+    * Wraps around so that (0,y) ~= (width-1,y)
+  * [TimeAlpha](https://github.com/FastLED/FastLED/blob/master/src/fl/time_alpha.h)
+    * Precision control of animations with time-based alpha transition.
+
+
 
 ## New in 3.9.13: HD107 "Turbo" 40Mhz LED Support
 
