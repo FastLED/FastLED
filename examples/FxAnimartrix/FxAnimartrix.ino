@@ -27,8 +27,8 @@ using namespace fl;
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
 
-#define MATRIX_WIDTH 22
-#define MATRIX_HEIGHT 22
+#define MATRIX_WIDTH 32
+#define MATRIX_HEIGHT 32
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
@@ -50,9 +50,11 @@ Animartrix animartrix(xyMap, FIRST_ANIMATION);
 FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
+    auto screen_map = xyMap.toScreenMap();
+    screen_map.setDiameter(.1);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenMap(xyMap);
+        .setScreenMap(screen_map);
     FastLED.setBrightness(brightness);
     fxEngine.addFx(animartrix);
 }
