@@ -18,7 +18,10 @@ class TimeAlpha {
     virtual void trigger(uint32_t now) = 0;
     virtual uint8_t update(uint32_t now) = 0;
     virtual uint16_t update16(uint32_t now) {
-        return static_cast<uint16_t>(update(now) << 8);
+        return static_cast<uint16_t>(update(now) << 8) + 0xFF;
+    }
+    virtual float updatef(uint32_t now) {
+        return static_cast<float>(update16(now)) / 65535.0f;
     }
     virtual bool isActive(uint32_t now) const = 0;
 };
