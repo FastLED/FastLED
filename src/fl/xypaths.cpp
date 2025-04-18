@@ -51,8 +51,7 @@ pair_xy<float> XYPath::at(float alpha, const TransformFloat &tx) {
     return tx.transform(xy);
 }
 
-pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
-                               int16_t x_translate, int16_t y_translate) {
+pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16& tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
@@ -62,12 +61,12 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale,
         }
     }
     // Fallback to the default implementation. Fine most paths.
-    float scalef = static_cast<float>(scale);
+    float scalef = static_cast<float>(tx.scale);
     float alpha_f = static_cast<float>(alpha) / scalef;
     pair_xy<float> xy = at(alpha_f);
-    return pair_xy<uint16_t>(static_cast<uint16_t>(xy.x * scalef) + x_translate,
+    return pair_xy<uint16_t>(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset,
                              static_cast<uint16_t>(xy.y * scalef) +
-                                 y_translate);
+                                 tx.y_offset);
 }
 
 void XYPath::buildLut(uint16_t steps) {

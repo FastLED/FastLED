@@ -13,8 +13,34 @@ LUT - Look up table implementation for various types.
 
 namespace fl {
 
+template<typename PairXyType>
+struct pair_xy_traits {
+    using value_type = typename PairXyType::value_type;
+    static constexpr PairXyType zero() {
+        return PairXyType();
+    }
+    static constexpr PairXyType add(const PairXyType& a, const PairXyType& b) {
+        return PairXyType(a.x + b.x, a.y + b.y);
+    }
+
+    static constexpr PairXyType sub(const PairXyType& a, const PairXyType& b) {
+        return PairXyType(a.x - b.x, a.y - b.y);
+    }
+
+    static constexpr PairXyType mul(const PairXyType& a, const float& f) {
+        return PairXyType(a.x * f, a.y * f);
+    }
+    static constexpr PairXyType div(const PairXyType& a, const float& f) {
+        return PairXyType(a.x / f, a.y / f);
+    }
+
+    
+};
+
 template<typename T>
 struct pair_xy {
+    // value_type
+    using value_type = T;
     T x = 0;
     T y = 0;
     constexpr pair_xy() = default;
@@ -26,30 +52,25 @@ struct pair_xy {
         return *this;
     }
     pair_xy& operator/=(const float& f) {
-        x /= f;
-        y /= f;
+        *this = pair_xy_traits<pair_xy>::div(*this, f);
         return *this;
     }
     pair_xy& operator*=(const double& f) {
-        x *= f;
-        y *= f;
+        *this = pair_xy_traits<pair_xy>::mul(*this, f);
         return *this;
     }
     pair_xy& operator/=(const double& f) {
-        x /= f;
-        y /= f;
+        *this = pair_xy_traits<pair_xy>::div(*this, f);
         return *this;
     }
 
     pair_xy& operator+=(const pair_xy& p) {
-        x += p.x;
-        y += p.y;
+        *this = pair_xy_traits<pair_xy>::add(*this, p);
         return *this;
     }
 
     pair_xy& operator-=(const pair_xy& p) {
-        x -= p.x;
-        y -= p.y;
+        *this = pair_xy_traits<pair_xy>::sub(*this, p);
         return *this;
     }
 
