@@ -18,21 +18,40 @@
 
 namespace fl {
 
-ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
-                            float cm_led_diameter) {
-    ScreenMap screenMap = ScreenMap(numLeds);
-    float circumference = numLeds * cm_between_leds;
-    float radius = circumference / (2 * PI);
+ScreenMap ScreenMap::Circle(int numLeds,
+                            float cm_between_leds,
+                            float cm_led_diameter,
+                            float completion) {
+    ScreenMap screenMap(numLeds);
 
-    for (int i = 0; i < numLeds; i++) {
-        float angle = i * 2 * PI / numLeds;
-        float x = radius * cos(angle) * 2;
-        float y = radius * sin(angle) * 2;
-        screenMap[i] = {x, y};
+    // radius from LED spacing
+    float circumference = numLeds * cm_between_leds;
+    float radius        = circumference / (2 * PI);
+
+    // how big an arc we light vs leave dark
+    float totalAngle = completion * 2 * PI;
+    float gapAngle   = 2 * PI - totalAngle;
+
+    // shift so the dark gap is centered at the bottom (–π/2)
+    float startAngle = -PI/2 + gapAngle / 2.0f;
+
+    // if partial, land last LED exactly at startAngle+totalAngle
+    float divisor = (completion < 1.0f && numLeds > 1)
+                      ? (numLeds - 1)
+                      : numLeds;
+
+    for (int i = 0; i < numLeds; ++i) {
+        float angle = startAngle + (i * totalAngle) / divisor;
+        float x     = radius * cos(angle) * 2;
+        float y     = radius * sin(angle) * 2;
+        screenMap[i] = { x, y };
     }
+
     screenMap.setDiameter(cm_led_diameter);
     return screenMap;
 }
+
+
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps, Str *err) {

@@ -236,6 +236,8 @@ function FastLED_SetupAndLoop(extern_setup, extern_loop, frame_rate) {
 }
 
 function FastLED_onStripUpdate(jsonData) {
+  // Hooks into FastLED to receive updates from the FastLED library related
+  // to the strip state. This is where the ScreenMap will be effectively set.
   // uses global variables.
   console.log('Received strip update:', jsonData);
 

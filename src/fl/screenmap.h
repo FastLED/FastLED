@@ -28,7 +28,7 @@ class JsonDocument;
 class ScreenMap {
   public:
     static ScreenMap Circle(int numLeds, float cm_between_leds = 1.5f,
-                            float cm_led_diameter = 0.5f);
+                            float cm_led_diameter = 0.5f, float completion = 1.0f);
 
     ScreenMap() = default;
 
