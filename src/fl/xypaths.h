@@ -68,7 +68,8 @@ class XYPath : public Referent {
     // the next call to at16(...) if mSteps > 0.
     void clearLut();
 
-    // Clears lut and sets new steps.
+    // Clears lut and sets new steps. LUT will be rebuilt on next call to
+    // at16(...) if mSteps > 0.
     void clearLut(uint16_t steps) {
         mSteps = steps;
         mLut.reset();
