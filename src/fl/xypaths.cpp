@@ -45,7 +45,7 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, uint16_t scale) {
     return {static_cast<uint16_t>(xy.x * scalef),
             static_cast<uint16_t>(xy.y * scalef)};
 }
-
+HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 pair_xy<float> HeartPath::at(float alpha) {
     // 1) raw parametric heart
     // constexpr float PI = 3.14159265358979323846f;
@@ -78,5 +78,22 @@ pair_xy<float> LissajousPath::at(float alpha) {
 
 LissajousPath::LissajousPath(uint8_t a, uint8_t b, float delta, uint16_t steps)
     : XYPath(steps), mA(a), mB(b), mDelta(delta) {}
+
+
+
+ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius,
+                                             uint16_t steps)
+    : XYPath(steps), mTurns(turns), mRadius(radius) {}
+
+pair_xy<float> ArchimedeanSpiralPath::at(float alpha) {
+    // α ∈ [0,1] → θ ∈ [0, 2π·turns]
+    float t = alpha * 2.0f * PI * mTurns;
+    // r grows linearly from 0 to mRadius as α goes 0→1
+    float r = mRadius * alpha;
+    // convert polar → cartesian, then shift center to (0.5,0.5)
+    float x = 0.5f + r * cosf(t);
+    float y = 0.5f + r * sinf(t);
+    return {x, y};
+}
 
 } // namespace fl
