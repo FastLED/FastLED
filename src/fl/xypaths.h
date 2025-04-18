@@ -22,6 +22,7 @@ FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 FASTLED_SMART_PTR(RosePath);
 FASTLED_SMART_PTR(PhyllotaxisPath);
 FASTLED_SMART_PTR(GielisCurvePath);
+FASTLED_SMART_PTR(CatmullRomPath);
 
 class XYPath : public Referent {
   public:
