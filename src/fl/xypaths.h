@@ -8,7 +8,6 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
-
 #include <math.h>
 
 #include "fl/lut.h"
@@ -19,6 +18,7 @@
 
 namespace fl {
 
+// Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(TransformPath);
 FASTLED_SMART_PTR(LinePath);
@@ -31,11 +31,40 @@ FASTLED_SMART_PTR(PhyllotaxisPath);
 FASTLED_SMART_PTR(GielisCurvePath);
 FASTLED_SMART_PTR(CatmullRomPath);
 
+struct TransformFloat {
+    TransformFloat() = default;
+    float scale = 1.0f;
+    float x_offset = 0.0f;
+    float y_offset = 0.0f;
+    float rotation = 0.0f;
+
+    pair_xy<float> transform(const pair_xy<float> &xy) const {
+        float x = xy.x * scale + x_offset;
+        float y = xy.y * scale + y_offset;
+        #pragma GCC diagnostic ignored "-Wfloat-equal"
+        const bool has_rotation = (rotation != 0.0f);
+        #pragma GCC diagnostic pop
+        if (has_rotation) {
+            float cos_theta = cosf(rotation);
+            float sin_theta = sinf(rotation);
+            float x_rotated = x * cos_theta - y * sin_theta;
+            float y_rotated = x * sin_theta + y * cos_theta;
+            return pair_xy<float>(x_rotated, y_rotated);
+        }
+        return pair_xy<float>(x, y);
+
+    }
+};
+
 class XYPath : public Referent {
   public:
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
     virtual pair_xy<float> at(float alpha) = 0;
+    pair_xy<float> at(float alpha, const TransformFloat &tx) {
+        pair_xy<float> xy = at(alpha);
+        return tx.transform(xy);
+    }
     virtual pair_xy<uint16_t> at16(uint16_t alpha, uint16_t scale = 0xffff,
                                    int16_t x_translate = 0,
                                    int16_t y_translate = 0);
@@ -43,12 +72,44 @@ class XYPath : public Referent {
     // optimizes at16(...).
     void buildLut(uint16_t steps);
 
-    // Called by subclasses when something changes. The LUT will be rebuilt on the next call
-    // to at16(...) if mSteps > 0.
+    // Called by subclasses when something changes. The LUT will be rebuilt on
+    // the next call to at16(...) if mSteps > 0.
     void clearLut();
 
     // Clears lut and sets new steps.
-    void clearLut(uint16_t steps) { mSteps = steps; mLut.reset(); }
+    void clearLut(uint16_t steps) {
+        mSteps = steps;
+        mLut.reset();
+    }
+
+    void output(float alpha_start, float alpha_end,
+                pair_xy<float> *out, uint16_t out_size,
+                const TransformFloat &tx = TransformFloat()) {
+        if (out_size == 0) {
+            return;
+        }
+        if (out_size == 1) {
+            pair_xy<float> avg = at(alpha_start);
+            avg += at(alpha_end);
+            avg /= 2.0f;
+            out[0] = avg;
+            return;
+        }
+
+        out[0] = at(alpha_start, tx);
+        out[out_size-1] = at(alpha_end, tx);
+        if (out_size == 2) {
+          return;
+        }
+
+        const float inverse_out_size_minus_one = 1.0f / (out_size - 1);
+        const float delta = alpha_end - alpha_start;
+
+        for (uint16_t i = 1; i < out_size - 1; i++) {
+            float alpha = alpha_start + (delta * i * inverse_out_size_minus_one);
+            out[i] = at(alpha, tx);
+        }
+    }
 
   protected:
     uint32_t mSteps;
@@ -59,18 +120,10 @@ class XYPath : public Referent {
     LUTXY16Ptr generateLUT(uint16_t steps);
 };
 
-struct TransformPathParams {
-    TransformPathParams() = default;
-    float scale = 1.0f;
-    float x_offset = 0.0f;
-    float y_offset = 0.0f;
-    float rotation = 0.0f;
-};
-
 // TransformPath is a wrapper for XYPath that applies a transform.
 class TransformPath : public XYPath {
   public:
-    using Params = TransformPathParams;
+    using Params = TransformFloat;
     TransformPath(XYPathPtr path, const Params &params = Params());
     pair_xy<float> at(float alpha) override;
 

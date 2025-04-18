@@ -19,6 +19,7 @@ struct pair_xy {
     T y = 0;
     constexpr pair_xy() = default;
     constexpr pair_xy(T x, T y) : x(x), y(y) {}
+    constexpr pair_xy(const pair_xy& p) : x(p.x), y(p.y) {}
     pair_xy& operator*=(const float& f) {
         x *= f;
         y *= f;
@@ -37,6 +38,24 @@ struct pair_xy {
     pair_xy& operator/=(const double& f) {
         x /= f;
         y /= f;
+        return *this;
+    }
+
+    pair_xy& operator+=(const pair_xy& p) {
+        x += p.x;
+        y += p.y;
+        return *this;
+    }
+
+    pair_xy& operator-=(const pair_xy& p) {
+        x -= p.x;
+        y -= p.y;
+        return *this;
+    }
+
+    pair_xy& operator=(const pair_xy& p) {
+        x = p.x;
+        y = p.y;
         return *this;
     }
 };
