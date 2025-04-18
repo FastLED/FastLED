@@ -26,6 +26,7 @@ class XYPath : public Referent {
 
   protected:
     // allow sub classes to access the LUT.
+    void clearLut() { mLut.reset(); }
     uint32_t mSteps;
     LUTXY16Ptr mLut;
 
@@ -46,6 +47,7 @@ class LissajousPath : public XYPath {
     // a, b are frequency ratios; delta is phase offset
     LissajousPath(uint8_t a = 3, uint8_t b = 2, float delta = PI / 2,
                   uint16_t steps = 0);
+
     pair_xy<float> at(float alpha) override;
 
   private:
