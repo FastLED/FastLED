@@ -14,11 +14,12 @@ CRGB leds[NUM_LEDS];
 Pride2015 pride(NUM_LEDS);
 
 void setup() {
-  delay(3000); // 3 second delay for recovery
+  ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.8f);
   
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip)
+    .setScreenMap(screenMap)
     .setDither(BRIGHTNESS < 255);
 
   // set master brightness control
