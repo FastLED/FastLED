@@ -151,5 +151,14 @@ struct point_xy {
 using point_xy_float = point_xy<float>;  // It's just easier if we allow negative values.
 using pair_xy_float = point_xy<float>;  // Legacy name for point_xy_float
 
+// pair_xy<T> is the legacy name for point_xy<T>
+template<typename T>
+struct pair_xy : public point_xy<T> {
+    using value_type = T;
+    using point_xy<T>::point_xy;
+    pair_xy() = default;
+    pair_xy(const point_xy<T>& p) : point_xy<T>(p) {}
+};
+
 
 }  // namespace fl
