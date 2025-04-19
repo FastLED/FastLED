@@ -26,6 +26,7 @@ class TimeAlpha {
     virtual bool isActive(uint32_t now) const = 0;
 };
 
+
 /*
  *                       amplitude
  *                          ^

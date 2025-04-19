@@ -31,6 +31,8 @@ CRGB leds[NUM_LEDS];
 UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
 
+UIButton button("Trigger");
+
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
     32,  0,   0,   70,  // Dark blue
@@ -69,8 +71,8 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr circle = CirclePathPtr::New();
-Transform16 tx = Transform16::ToBounds(0xFFFF);
+XYPathPtr shape = GielisCurvePathPtr::New();
+TimeLinear pointTransition(5000);
 
 void setup() {
     Serial.begin(115200);
@@ -79,12 +81,26 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
+    shape->set(WIDTH-1, HEIGHT-1);
 }
 
 
 void loop() {
     // Your code here
     uint32_t now = millis();
+
+    // unconditionally apply the circle.
+    if (button) {
+        // trigger the transition
+        pointTransition.trigger(now);
+    }
+    
+    uint8_t curr_alpha = pointTransition.update(now);
+    float alpha = curr_alpha / 255.0f;
+    auto xy = shape->at(alpha);
+    waveFxLower.addf(xy.x, xy.y, 1.0f);
+    waveFxUpper.addf(xy.x, xy.y, 1.0f);
+
     fxBlend.draw(Fx::DrawContext(now, leds));
     FastLED.show();
 }

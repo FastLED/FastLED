@@ -85,6 +85,14 @@ class XYPath : public Referent {
         return compute_float(alpha, tx);
     }
 
+    void set(uint16_t width, uint16_t height, float scale = 1.0f) {
+        mTransform.scale_x = width * scale;
+        mTransform.scale_y = height * scale;
+        mTransform.x_offset = 0;
+        mTransform.y_offset = 0;
+        onTransformFloatChanged();
+    }
+
     void onTransformFloatChanged() {
         // This is called when the transform changes. We need to clear the LUT
         // so that it will be rebuilt with the new transform.
