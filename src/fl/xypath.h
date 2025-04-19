@@ -1,7 +1,5 @@
 
-// WARNING: BETA
-// Most of this is "vibe-coded" with AI. TODO: Add tests.
-//
+
 // This is a drawing/graphics related class.
 //
 // XYPath represents a parameterized (x,y) path. The input will always be
