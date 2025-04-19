@@ -47,6 +47,35 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
     return tx;
 }
 
+
+Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min, 
+                                  const pair_xy<uint16_t> &max) {
+    Transform16 tx;
+    // Compute a Q16 “scale” so that:
+    //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
+    uint16_t scale16 = 0;
+    if (max.x > min.x) {
+        // numerator = max_value * 2^16
+        uint32_t numer   = static_cast<uint32_t>(max.x - min.x) << 16;
+        // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
+        uint32_t scale32 = numer / 0xFFFF;
+        scale16 = static_cast<uint16_t>(scale32);
+    }
+    tx.scale_x    = scale16;
+    if (max.y > min.y) {
+        // numerator = max_value * 2^16
+        uint32_t numer   = static_cast<uint32_t>(max.y - min.y) << 16;
+        // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
+        uint32_t scale32 = numer / 0xFFFF;
+        scale16 = static_cast<uint16_t>(scale32);
+    }
+    tx.scale_y    = scale16;
+    tx.x_offset = min.x;
+    tx.y_offset = min.y;
+    tx.rotation = 0;
+    return tx;
+}
+
 pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
     pair_xy<uint16_t> out = xy;
     if (scale_x != 0xffff) {
@@ -410,6 +439,9 @@ pair_xy_float CatmullRomPath::at(float alpha) {
 
     return pair_xy_float(x, y);
 }
+
+
+
 
 
 
