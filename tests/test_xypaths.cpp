@@ -104,7 +104,8 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Check float point range with transform to -8,8") {
         TransformFloat tx;
-        tx.scale = 8.0f;
+        tx.scale_x = 8.0f;
+        tx.scale_y = 8.0f;
         tx.x_offset = -4.0f;
         tx.y_offset = -4.0f;
 
@@ -141,7 +142,8 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Check uint16 point range with transform to 0,255") {
         Transform16 tx;
-        tx.scale = 255;
+        tx.scale_x = 255;
+        tx.scale_y = 255;
         tx.x_offset = 0;
         tx.y_offset = 0;
 
@@ -231,7 +233,8 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Circle with LUT and transform") {
         Transform16 tx;
-        tx.scale = 255;
+        tx.scale_x = 255;
+        tx.scale_y = 255;
         tx.x_offset = 0;
         tx.y_offset = 0;
 
@@ -261,7 +264,8 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Check uint16 point range with LUT and transform to 0,255") {
         Transform16 tx;
-        tx.scale = 255;
+        tx.scale_x = 255;
+        tx.scale_y = 255;
         tx.x_offset = 0;
         tx.y_offset = 0;
 

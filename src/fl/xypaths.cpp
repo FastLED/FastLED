@@ -11,8 +11,8 @@
 namespace fl {
 
 pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
-    float x = xy.x * scale + x_offset;
-    float y = xy.y * scale + y_offset;
+    float x = xy.x * scale_x + x_offset;
+    float y = xy.y * scale_y + y_offset;
 #pragma GCC diagnostic ignored "-Wfloat-equal"
     const bool has_rotation = (rotation != 0.0f);
 #pragma GCC diagnostic pop
@@ -39,7 +39,8 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
         uint32_t scale32 = numer / 0xFFFF;
         scale16 = static_cast<uint16_t>(scale32);
     }
-    tx.scale    = scale16;
+    tx.scale_x    = scale16;
+    tx.scale_y    = scale16;
     tx.x_offset = 0;
     tx.y_offset = 0;
     tx.rotation = 0;
@@ -48,12 +49,14 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
 
 pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
     pair_xy<uint16_t> out = xy;
-    if (scale != 0xffff) {
+    if (scale_x != 0xffff) {
         uint32_t x = out.x;
-        uint32_t y = out.y;
-        x *= scale;
-        y *= scale;
+        x *= scale_x;
         out.x = map32_to_16(x);
+    }
+    if (scale_y != 0xffff) {
+        uint32_t y = out.y;
+        y *= scale_y;
         out.y = map32_to_16(y);
     }
     if (x_offset != 0) {
@@ -128,14 +131,15 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
         }
     }
     // Fallback to the default float implementation. Fine most paths.
-    float scalef = static_cast<float>(tx.scale);
+    float scale_x_f = static_cast<float>(tx.scale_x);
+    float scale_y_f = static_cast<float>(tx.scale_y);
     float alpha_f = static_cast<float>(alpha) / 65535.0f;
     pair_xy_float xy = at(alpha_f);
     // Ensure values are clamped to the target range
     uint16_t x_val =
-        MIN(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset, tx.scale);
+        MIN(static_cast<uint16_t>(xy.x * scale_x_f) + tx.x_offset, tx.scale_x);
     uint16_t y_val =
-        MIN(static_cast<uint16_t>(xy.y * scalef) + tx.y_offset, tx.scale);
+        MIN(static_cast<uint16_t>(xy.y * scale_y_f) + tx.y_offset, tx.scale_y);
     return pair_xy<uint16_t>(x_val, y_val);
 }
 
@@ -218,8 +222,8 @@ TransformPath::TransformPath(XYPathPtr path, const Params &params)
 
 pair_xy_float TransformPath::at(float alpha) {
     pair_xy_float xy = mPath->at(alpha);
-    xy.x = xy.x * mParams.scale + mParams.x_offset;
-    xy.y = xy.y * mParams.scale + mParams.y_offset;
+    xy.x = xy.x * mParams.scale_x + mParams.x_offset;
+    xy.y = xy.y * mParams.scale_y + mParams.y_offset;
     return xy;
 }
 

@@ -34,7 +34,8 @@ FASTLED_SMART_PTR(CatmullRomPath);
 
 struct TransformFloat {
     TransformFloat() = default;
-    float scale = 1.0f;
+    float scale_x = 1.0f;
+    float scale_y = 1.0f;
     float x_offset = 0.0f;
     float y_offset = 0.0f;
     float rotation = 0.0f;
@@ -46,7 +47,8 @@ struct Transform16 {
     // (0,0) to (max_value,max_value), inclusive.
     static Transform16 ToBounds(uint16_t max_value);
     Transform16() = default;
-    uint16_t scale = 0xffff;
+    uint16_t scale_x = 0xffff;
+    uint16_t scale_y = 0xffff;
     uint16_t x_offset = 0;
     uint16_t y_offset = 0;
     uint16_t rotation = 0;
