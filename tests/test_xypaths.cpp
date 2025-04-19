@@ -73,8 +73,7 @@ TEST_CASE("Transform16::ToBounds(min, max)") {
 
 
         auto t1 = tx.transform(pair_xy<uint16_t>(0, 0));
-        REQUIRE_EQ(low, t1.x);
-        REQUIRE_EQ(low, t1.y);
+        REQUIRE_EQ(pair_xy<uint16_t>(low, low), t1);
         // uint16_t i16 = map8_to_16(128);
         // pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);
         // pair_xy<uint16_t> xy = tx.transform(xy_input);
