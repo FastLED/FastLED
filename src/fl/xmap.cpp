@@ -50,7 +50,7 @@ void XMap::convertToLookUpTable() {
     }
     mLookUpTable.reset();
     mLookUpTable = LUT16Ptr::New(length);
-    uint16_t* dataMutable = mLookUpTable->getData();
+    uint16_t* dataMutable = mLookUpTable->getDataMutable();
     mData = mLookUpTable->getData();
     for (uint16_t x = 0; x < length; x++) {
         dataMutable[x] = mapToIndex(x);

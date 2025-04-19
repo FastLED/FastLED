@@ -12,7 +12,7 @@ using namespace fl;
 
 TEST_CASE("LUT interp8") {
     LUT<uint16_t> lut(2);
-    uint16_t* data = lut.getData();
+    uint16_t* data = lut.getDataMutable();
     data[0] = 0;
     data[1] = 255;
     CHECK_EQ(lut.interp8(0), 0);
@@ -28,7 +28,7 @@ TEST_CASE("LUT interp8") {
 
 TEST_CASE("LUT interp16") {
     LUT<uint16_t> lut(2);
-    uint16_t* data = lut.getData();
+    uint16_t* data = lut.getDataMutable();
     data[0] = 0;
     data[1] = 255;
     CHECK_EQ(lut.interp16(0), 0);

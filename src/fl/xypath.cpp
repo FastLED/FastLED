@@ -13,7 +13,7 @@ namespace fl {
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
-    point_xy<uint16_t> *mutable_data = lut->getData();
+    point_xy<uint16_t> *mutable_data = lut->getDataMutable();
     if (steps == 0)
         return lut;
 

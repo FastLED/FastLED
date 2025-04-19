@@ -47,7 +47,7 @@ class XYPath : public Referent {
     // This default implementation will build a LUT if mSteps > 0.
     // Subclasses may override this to avoid the LUT.
     virtual point_xy<uint16_t> at16(uint16_t alpha,
-                                   const Transform16 &tx = Transform16());
+                                    const Transform16 &tx = Transform16());
 
     // optimizes at16(...).
     void buildLut(uint16_t steps);
@@ -63,9 +63,15 @@ class XYPath : public Referent {
         mLut.reset();
     }
 
+    // Outputs the path as a series of points in floating poitn. The first and last points are
+    // always the start and end points. The middle points are evenly spaced
+    // according to the alpha range.
     void output(float alpha_start, float alpha_end, point_xy_float *out,
                 uint16_t out_size, const TransformFloat &tx = TransformFloat());
 
+    // Outputs the path as a series of points in uint16_t. The first and last points are
+    // always the start and end points. The middle points are evenly spaced
+    // according to the alpha range.
     void output16(uint16_t alpha_start, uint16_t alpha_end,
                   point_xy<uint16_t> *out, uint16_t out_size,
                   const Transform16 &tx = Transform16());

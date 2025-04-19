@@ -44,7 +44,7 @@ XYMap XYMap::constructWithLookUpTable(uint16_t width, uint16_t height,
                                       uint16_t offset) {
     XYMap out(width, height, kLookUpTable);
     out.mLookUpTable = LUT16Ptr::New(width * height);
-    memcpy(out.mLookUpTable->getData(), lookUpTable,
+    memcpy(out.mLookUpTable->getDataMutable(), lookUpTable,
            width * height * sizeof(uint16_t));
     out.mOffset = offset;
     return out;
@@ -77,7 +77,7 @@ void XYMap::convertToLookUpTable() {
         return;
     }
     mLookUpTable = LUT16Ptr::New(width * height);
-    uint16_t *data = mLookUpTable->getData();
+    uint16_t *data = mLookUpTable->getDataMutable();
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
             data[y * width + x] = mapToIndex(x, y);

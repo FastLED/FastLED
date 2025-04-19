@@ -56,7 +56,11 @@ public:
         return data[index];
     }
 
-    T* getData() const {
+    T* getDataMutable() {
+        return data;
+    }
+
+    const T* getData() const {
         return data;
     }
 

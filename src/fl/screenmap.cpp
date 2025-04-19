@@ -170,7 +170,7 @@ ScreenMap::ScreenMap(uint32_t length, float mDiameter)
     : length(length), mDiameter(mDiameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut = *mLookUpTable.get();
-    point_xy_float *data = lut.getData();
+    point_xy_float *data = lut.getDataMutable();
     for (uint32_t x = 0; x < length; x++) {
         data[x] = {0, 0};
     }
@@ -180,7 +180,7 @@ ScreenMap::ScreenMap(const point_xy_float *lut, uint32_t length, float diameter)
     : length(length), mDiameter(diameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut16xy = *mLookUpTable.get();
-    point_xy_float *data = lut16xy.getData();
+    point_xy_float *data = lut16xy.getDataMutable();
     for (uint32_t x = 0; x < length; x++) {
         data[x] = lut[x];
     }
@@ -195,7 +195,7 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
 void ScreenMap::set(uint16_t index, const point_xy_float &p) {
     if (mLookUpTable) {
         LUTXYFLOAT &lut = *mLookUpTable.get();
-        auto *data = lut.getData();
+        auto *data = lut.getDataMutable();
         data[index] = p;
     }
 }
@@ -233,7 +233,7 @@ point_xy_float &ScreenMap::operator[](uint32_t x) {
         return const_cast<point_xy_float &>(empty()); // better than crashing.
     }
     LUTXYFLOAT &lut = *mLookUpTable.get();
-    auto *data = lut.getData();
+    auto *data = lut.getDataMutable();
     return data[x];
 }
 
