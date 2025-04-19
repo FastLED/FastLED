@@ -166,6 +166,25 @@ public:
     uint32_t size() const {
         return length;
     }
+
+    T interp8(uint8_t alpha) {
+        if (length == 0) return T();
+        if (alpha ==   0) return data[0];
+        if (alpha == 255) return data[length-1];
+
+        // treat alpha/255 as fraction, scale to [0..length-1]
+        uint32_t maxIndex = length - 1;
+        uint32_t pos      = uint32_t(alpha) * maxIndex;   // numerator
+        uint32_t idx0     = pos / 255;                     // floor(position)
+        uint32_t idx1     = idx0 < maxIndex ? idx0 + 1 : maxIndex;
+        uint8_t  blend    = pos % 255;                     // fractional part
+
+        const T& a = data[idx0];
+        const T& b = data[idx1];
+        // a + (b-a) * blend/255
+        return a + (b - a) * blend / 255;
+    }
+
 private:
     fl::scoped_ptr<T> mDataHandle;
     T* data = nullptr;

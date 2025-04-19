@@ -68,14 +68,19 @@ LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     for (uint16_t i = 0; i < steps; i++) {
         float alpha = static_cast<float>(i) / stepsf;
         pair_xy_float xy = at(alpha);
-        mutable_data[i].x = (uint16_t)(xy.x * 65535.0f);
-        mutable_data[i].y = (uint16_t)(xy.y * 65535.0f);
+        uint16_t x = static_cast<uint16_t>(xy.x * 65535.0f);
+        uint16_t y = static_cast<uint16_t>(xy.y * 65535.0f);
+        pair_xy<uint16_t> out(x, y);
+        mutable_data[i] = out;
     }
     return lut;
 }
 
 void XYPath::initLutOnce() {
     if (mLut) {
+        return;
+    }
+    if (mSteps == 0) {
         return;
     }
     mLut = generateLUT(mSteps);
@@ -90,13 +95,16 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
-            uint32_t index = (alpha * mSteps) >> 16;
+            uint32_t index = (uint32_t(alpha) * mSteps) >> 16;
             uint32_t lut_size = mLut->size();
             if (index >= lut_size) {
-                FASTLED_WARN("XYPath::at: index out of bounds, index="<< index << ",lut_size=" << lut_size);
+                FASTLED_WARN("XYPath::at: index out of bounds, index="
+                             << index << ",lut_size=" << lut_size);
                 index = lut_size - 1;
             }
-            return mLut->getData()[index];
+            pair_xy<uint16_t> out = mLut->getData()[index];
+            out = tx.transform(out);
+            return out;
         }
     }
     // Fallback to the default float implementation. Fine most paths.
@@ -104,8 +112,10 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     float alpha_f = static_cast<float>(alpha) / 65535.0f;
     pair_xy_float xy = at(alpha_f);
     // Ensure values are clamped to the target range
-    uint16_t x_val = MIN(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset, tx.scale);
-    uint16_t y_val = MIN(static_cast<uint16_t>(xy.y * scalef) + tx.y_offset, tx.scale);
+    uint16_t x_val =
+        MIN(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset, tx.scale);
+    uint16_t y_val =
+        MIN(static_cast<uint16_t>(xy.y * scalef) + tx.y_offset, tx.scale);
     return pair_xy<uint16_t>(x_val, y_val);
 }
 
@@ -214,9 +224,9 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
 pair_xy_float CirclePath::at(float alpha) {
     // α in [0,1] → (x,y) on the circle
     float t = alpha * 2.0f * PI;
-    float x = .5f * cosf(t);
-    float y = .5f * sinf(t);
-    return pair_xy_float(.5f + 0.5f * x, 0.5f + 0.5f * y);
+    float x = .5f * cosf(t) + .5f;
+    float y = .5f * sinf(t) + .5f;
+    return pair_xy_float(x, y);
 }
 
 CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
