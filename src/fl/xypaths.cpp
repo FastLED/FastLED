@@ -90,18 +90,22 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
-            return mLut->getData()[alpha];
+            uint32_t index = (alpha * mSteps) >> 16;
+            return mLut->getData()[index];
         } else {
             FASTLED_WARN("XYPath::at16: mLut is null");
         }
     }
     // Fallback to the default implementation. Fine most paths.
     float scalef = static_cast<float>(tx.scale);
-    float alpha_f = static_cast<float>(alpha) / scalef;
+    float alpha_f = static_cast<float>(alpha) / 65535.0f;
     pair_xy_float xy = at(alpha_f);
-    return pair_xy<uint16_t>(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset,
-                             static_cast<uint16_t>(xy.y * scalef) +
-                                 tx.y_offset);
+    
+    // Ensure values are clamped to the target range
+    uint16_t x_val = MIN(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset, tx.scale);
+    uint16_t y_val = MIN(static_cast<uint16_t>(xy.y * scalef) + tx.y_offset, tx.scale);
+    
+    return pair_xy<uint16_t>(x_val, y_val);
 }
 
 void XYPath::buildLut(uint16_t steps) {

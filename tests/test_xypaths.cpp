@@ -12,16 +12,16 @@ using namespace fl;
 TEST_CASE("LinePath") {
     LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
     pair_xy_float xy = path.at(0.5f);
-    CHECK(xy.x == 0.5f);
-    CHECK(xy.y == 0.5f);
+    REQUIRE(xy.x == 0.5f);
+    REQUIRE(xy.y == 0.5f);
 
     xy = path.at(1.0f);
-    CHECK(xy.x == 1.0f);
-    CHECK(xy.y == 1.0f);
+    REQUIRE(xy.x == 1.0f);
+    REQUIRE(xy.y == 1.0f);
 
     xy = path.at(0.0f);
-    CHECK(xy.x == 0.0f);
-    CHECK(xy.y == 0.0f);
+    REQUIRE(xy.x == 0.0f);
+    REQUIRE(xy.y == 0.0f);
 }
 
 
@@ -41,10 +41,10 @@ TEST_CASE("Check complex types") {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = MIN(1.f, alpha);
                 pair_xy_float xy = path->at(alpha);
-                CHECK(xy.x >= 0.0f);
-                CHECK(xy.x <= 1.0f);
-                CHECK(xy.y >= 0.0f);
-                CHECK(xy.y <= 1.0f);
+                REQUIRE(xy.x >= 0.0f);
+                REQUIRE(xy.x <= 1.0f);
+                REQUIRE(xy.y >= 0.0f);
+                REQUIRE(xy.y <= 1.0f);
                 if (ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
                     break;
                 }
@@ -62,10 +62,10 @@ TEST_CASE("Check complex types") {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = MIN(1.f, alpha);
                 pair_xy_float xy = path->at(alpha, tx);
-                CHECK(xy.x >= -4.0f);
-                CHECK(xy.x <= 4.0f);
-                CHECK(xy.y >= -4.0f);
-                CHECK(xy.y <= 4.0f);
+                REQUIRE(xy.x >= -4.0f);
+                REQUIRE(xy.x <= 4.0f);
+                REQUIRE(xy.y >= -4.0f);
+                REQUIRE(xy.y <= 4.0f);
                 if (ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
                     break;
                 }
@@ -78,10 +78,31 @@ TEST_CASE("Check complex types") {
             for (uint16_t alpha = 0; true; alpha += 1) {
                 alpha = MIN(65535, alpha);
                 pair_xy<uint16_t> xy = path->at16(alpha);
-                CHECK(xy.x >= 0);
-                CHECK(xy.x <= 65535);
-                CHECK(xy.y >= 0);
-                CHECK(xy.y <= 65535);
+                REQUIRE(xy.x >= 0);
+                REQUIRE(xy.x <= 65535);
+                REQUIRE(xy.y >= 0);
+                REQUIRE(xy.y <= 65535);
+                if (alpha == 65535) {
+                    break;
+                }
+            }
+        }
+    }
+
+    SUBCASE("Check uint16 point range with transform to 0,255") {
+        Transform16 tx;
+        tx.scale = 255;
+        tx.x_offset = 0;
+        tx.y_offset = 0;
+
+        for (auto &path : paths) {
+            for (uint16_t alpha = 0; true; alpha += 1) {
+                alpha = MIN(65535, alpha);
+                pair_xy<uint16_t> xy = path->at16(alpha, tx);
+                REQUIRE_GE(xy.x, 0);
+                REQUIRE_LE(xy.x, 255);
+                REQUIRE_GE(xy.y, 0);
+                REQUIRE_LE(xy.y, 255);
                 if (alpha == 65535) {
                     break;
                 }
