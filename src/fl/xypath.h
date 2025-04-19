@@ -20,7 +20,6 @@ namespace fl {
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
-FASTLED_SMART_PTR(TransformPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(HeartPath);
@@ -34,6 +33,46 @@ FASTLED_SMART_PTR(CatmullRomPath);
 
 class XYPath : public Referent {
   public:
+    static LinePathPtr NewLinePath(float x0, float y0, float x1, float y1,
+                                    uint16_t steps = 0) {
+        return LinePathPtr::New(x0, y0, x1, y1, steps);
+    }
+    static CirclePathPtr NewCirclePath(uint16_t steps = 0) {
+        return CirclePathPtr::New(steps);
+    }
+
+    static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
+        return HeartPathPtr::New(steps);
+    }
+
+    static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
+                                             float delta, uint16_t steps = 0) {
+        return LissajousPathPtr::New(a, b, delta, steps);
+    }
+
+    static ArchimedeanSpiralPathPtr NewArchimedeanSpiralPath(
+        uint8_t turns, float radius, uint16_t steps = 0) {
+        return ArchimedeanSpiralPathPtr::New(turns, radius, steps);
+    }
+
+    static RosePathPtr NewRosePath(uint8_t petals, uint16_t steps = 0) {
+        return RosePathPtr::New(petals, steps);
+    }
+    static PhyllotaxisPathPtr NewPhyllotaxisPath(uint16_t count, float angle,
+                                                uint16_t steps = 0) {
+        return PhyllotaxisPathPtr::New(count, angle, steps);
+    }
+
+    static GielisCurvePathPtr NewGielisCurvePath(uint8_t m, float a, float b,
+                                                 float n1, float n2, float n3,
+                                                 uint16_t steps = 0) {
+        return GielisCurvePathPtr::New(m, a, b, n1, n2, n3, steps);
+    }
+
+    static CatmullRomPathPtr NewCatmullRomPath(uint16_t steps = 0) {
+        return CatmullRomPathPtr::New(steps);
+    }
+
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
 
@@ -46,12 +85,55 @@ class XYPath : public Referent {
         return compute_float(alpha, tx);
     }
 
+    void onTransformFloatChanged() {
+        // This is called when the transform changes. We need to clear the LUT
+        // so that it will be rebuilt with the new transform.
+        clearLut();
+        mTransform.validate();
+        // Just recompute unconditionally. If this is a performance issue,
+        // we can add a flag to make it lazy.
+        mTransform16 = mTransform.toTransform16();
+    }
 
     void setTransform(const TransformFloat &tx) {
         mTransform = tx;
-        mTransform16 = tx.toTransform16();
+        onTransformFloatChanged();
     }
 
+    float getScaleX() const { return mTransform.scale_x; }
+    float getScaleY() const { return mTransform.scale_y; }
+    float getXOffset() const { return mTransform.x_offset; }
+    float getYOffset() const { return mTransform.y_offset; }
+    float getRotation() const { return mTransform.rotation; }
+    void setScaleX(float scale_x) { mTransform.scale_x = scale_x; onTransformFloatChanged(); }
+    void setScaleY(float scale_y) { mTransform.scale_y = scale_y; onTransformFloatChanged(); }
+    void setXOffset(float x_offset) { mTransform.x_offset = x_offset; onTransformFloatChanged(); }
+    void setYOffset(float y_offset) { mTransform.y_offset = y_offset; onTransformFloatChanged(); }
+    void setRotation(float rotation) { mTransform.rotation = rotation; onTransformFloatChanged(); }
+
+    void addScaleX(float scale_x) {
+        mTransform.scale_x += scale_x;
+        onTransformFloatChanged();
+    }
+    void addScaleY(float scale_y) {
+        mTransform.scale_y += scale_y;
+        onTransformFloatChanged();
+    }
+
+    void addXOffset(float x_offset) {
+        mTransform.x_offset += x_offset;
+        onTransformFloatChanged();
+    }
+
+    void addYOffset(float y_offset) {
+        mTransform.y_offset += y_offset;
+        onTransformFloatChanged();
+    }
+
+    void addRotation(float rotation) {
+        mTransform.rotation += rotation;
+        onTransformFloatChanged();
+    }
 
     // Subclasses must implement this method.
     virtual point_xy_float compute(float alpha) = 0;
@@ -112,23 +194,6 @@ class XYPath : public Referent {
     point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
-// TransformPath is a wrapper for XYPath that applies a transform. This is for
-// people that are lazy and don't want to pass around a transform.
-class TransformPath : public XYPath {
-  public:
-    using Params = TransformFloat;
-    TransformPath(XYPathPtr path, const Params &params = Params());
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "TransformPath"; }
-
-    void setPath(XYPathPtr path);
-    XYPathPtr getPath() const;
-    Params &params();
-
-  private:
-    XYPathPtr mPath;
-    Params mParams;
-};
 
 class LinePath : public XYPath {
   public:

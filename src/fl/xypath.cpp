@@ -140,17 +140,6 @@ void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
     return;
 }
 
-TransformPath::TransformPath(XYPathPtr path, const Params &params)
-    : mPath(path), mParams(params) {
-    FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
-}
-
-point_xy_float TransformPath::compute(float alpha) {
-    point_xy_float xy = mPath->at(alpha);
-    xy.x = xy.x * mParams.scale_x + mParams.x_offset;
-    xy.y = xy.y * mParams.scale_y + mParams.y_offset;
-    return xy;
-}
 
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
     : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
@@ -289,9 +278,6 @@ point_xy_float PhyllotaxisPath::compute(float alpha) {
     return point_xy_float(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
 }
 
-XYPathPtr TransformPath::getPath() const { return mPath; }
-
-TransformPath::Params &TransformPath::params() { return mParams; }
 
 CatmullRomPath::CatmullRomPath(uint16_t steps) : XYPath(steps) {}
 

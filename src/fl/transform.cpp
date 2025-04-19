@@ -7,10 +7,7 @@
 #include "fl/math_macros.h"
 #include "fl/lut.h"
 
-
 namespace fl {
-
-
 
 point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     float x = xy.x * scale_x + x_offset;
@@ -139,5 +136,20 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
 
 
 
+
+
+
+void TransformFloat::validate() {
+    scale_x = MAX(0.0f, MIN(1.0f, scale_x));
+    scale_y = MAX(0.0f, MIN(1.0f, scale_y));
+    x_offset = MAX(0.0f, MIN(1.0f, x_offset));
+    y_offset = MAX(0.0f, MIN(1.0f, y_offset));
+    while (rotation < 0.0f) {
+        rotation += 1.0f;
+    }
+    while (rotation > 1.0f) {
+        rotation -= 1.0f;
+    }
+}
 
 } // namespace fl

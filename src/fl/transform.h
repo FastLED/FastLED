@@ -11,7 +11,8 @@ expensive trig functions are needed. Same with scale and offset.
 
 namespace fl {
 
-using alpha16 = uint16_t;  // fixed point representation of 0->1 in the range [0, 65535]
+using alpha16 =
+    uint16_t; // fixed point representation of 0->1 in the range [0, 65535]
 
 // This transform assumes the coordinates are in the range [0,65535].
 struct Transform16 {
@@ -41,6 +42,10 @@ struct TransformFloat {
     float rotation = 0.0f; // 0 -> 1
     point_xy_float transform(const point_xy_float &xy) const;
     Transform16 toTransform16() const;
+
+    // If a transform has changed then this function should be called to
+    // make sure that the values stay within 0->1 bounds.
+    void validate();
 };
 
 } // namespace fl
