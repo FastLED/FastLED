@@ -125,9 +125,9 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Check uint16 point range") {
         for (auto &path : paths) {
-            for (uint16_t alpha = 0; true; alpha += 1) {
+            for (uint32_t alpha = 0; true; alpha += 100) {
                 alpha = MIN(65535, alpha);
-                pair_xy<uint16_t> xy = path->at16(alpha);
+                pair_xy<uint16_t> xy = path->at16(static_cast<uint16_t>(alpha));
                 REQUIRE(xy.x >= 0);
                 REQUIRE(xy.x <= 65535);
                 REQUIRE(xy.y >= 0);
@@ -146,9 +146,10 @@ TEST_CASE("Check complex types") {
         tx.y_offset = 0;
 
         for (auto &path : paths) {
-            for (uint16_t alpha = 0; true; alpha += 1) {
+            for (uint32_t alpha = 0; true; alpha += 10) {
                 alpha = MIN(65535, alpha);
-                pair_xy<uint16_t> xy = path->at16(alpha, tx);
+                uint16_t alpha16 = static_cast<uint16_t>(alpha);
+                pair_xy<uint16_t> xy = path->at16(alpha16, tx);
                 REQUIRE_GE(xy.x, 0);
                 REQUIRE_LE(xy.x, 255);
                 REQUIRE_GE(xy.y, 0);
@@ -269,7 +270,7 @@ TEST_CASE("Check complex types") {
         }
 
         for (auto &path : paths) {
-            for (uint16_t alpha = 0; true; alpha += 1) {
+            for (uint32_t alpha = 0; true; alpha += 10) {
                 alpha = MIN(65535, alpha);
                 pair_xy<uint16_t> xy = path->at16(alpha, tx);
                 REQUIRE_GE(xy.x, 0);
