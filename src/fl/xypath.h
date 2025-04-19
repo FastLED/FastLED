@@ -36,10 +36,15 @@ class XYPath : public Referent {
   public:
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
-    virtual point_xy_float at(float alpha) = 0;
+
     virtual const char *name() const = 0;
 
+    point_xy_float at(float alpha) { return compute(alpha); }
     point_xy_float at(float alpha, const TransformFloat &tx);
+
+
+    // Subclasses must implement this method.
+    virtual point_xy_float compute(float alpha) = 0;
 
     // α in [0,65535] → (x,y) on the path, both in [0,65535].
     // This default implementation will build a LUT if mSteps > 0.
@@ -90,7 +95,7 @@ class TransformPath : public XYPath {
   public:
     using Params = TransformFloat;
     TransformPath(XYPathPtr path, const Params &params = Params());
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "TransformPath"; }
 
     void setPath(XYPathPtr path);
@@ -105,7 +110,7 @@ class TransformPath : public XYPath {
 class LinePath : public XYPath {
   public:
     LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "LinePath"; }
     void set(float x0, float y0, float x1, float y1);
 
@@ -114,7 +119,7 @@ class LinePath : public XYPath {
 };
 
 /// Catmull–Rom spline through arbitrary points.
-/// Simply add control points and at(α) will smoothly interpolate through them.
+/// Simply add control points and compute(α) will smoothly interpolate through them.
 class CatmullRomPath : public XYPath {
   public:
     /**
@@ -125,7 +130,7 @@ class CatmullRomPath : public XYPath {
     /// Add a point in [0,1]² to the path
     void addPoint(point_xy_float p);
 
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "CatmullRomPath"; }
 
   private:
@@ -135,7 +140,7 @@ class CatmullRomPath : public XYPath {
 class CirclePath : public XYPath {
   public:
     CirclePath(uint16_t steps = 0);
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "CirclePath"; }
 
   private:
@@ -145,7 +150,7 @@ class CirclePath : public XYPath {
 class HeartPath : public XYPath {
   public:
     HeartPath(uint16_t steps = 0);
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "HeartPath"; }
 };
 
@@ -156,7 +161,7 @@ class LissajousPath : public XYPath {
     LissajousPath(uint8_t a = 3, uint8_t b = 2, float delta = PI / 2,
                   uint16_t steps = 0);
 
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "LissajousPath"; }
 
   private:
@@ -174,7 +179,7 @@ class ArchimedeanSpiralPath : public XYPath {
     ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 0.5f,
                           uint16_t steps = 0);
 
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "ArchimedeanSpiralPath"; }
 
   private:
@@ -189,7 +194,7 @@ class RosePath : public XYPath {
      * @param steps   LUT steps (0 = no LUT)
      */
     RosePath(uint8_t petals = 5, uint16_t steps = 0);
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "RosePath"; }
 
   private:
@@ -210,7 +215,7 @@ class GielisCurvePath : public XYPath {
                     float n1 = 1.0f, float n2 = 1.0f, float n3 = 1.0f,
                     uint16_t steps = 0);
 
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "GielisCurvePath"; }
 
   private:
@@ -233,7 +238,7 @@ class PhyllotaxisPath : public XYPath {
     PhyllotaxisPath(uint16_t count = 500,
                     float angle = 137.508f * (PI / 180.0f), uint16_t steps = 0);
 
-    point_xy_float at(float alpha) override;
+    point_xy_float compute(float alpha) override;
     const char *name() const override { return "PhyllotaxisPath"; }
 
   private:

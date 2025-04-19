@@ -145,7 +145,7 @@ TransformPath::TransformPath(XYPathPtr path, const Params &params)
     FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
 }
 
-point_xy_float TransformPath::at(float alpha) {
+point_xy_float TransformPath::compute(float alpha) {
     point_xy_float xy = mPath->at(alpha);
     xy.x = xy.x * mParams.scale_x + mParams.x_offset;
     xy.y = xy.y * mParams.scale_y + mParams.y_offset;
@@ -155,7 +155,7 @@ point_xy_float TransformPath::at(float alpha) {
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
     : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
 
-point_xy_float LinePath::at(float alpha) {
+point_xy_float LinePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the line
     float x = mX0 + alpha * (mX1 - mX0);
     float y = mY0 + alpha * (mY1 - mY0);
@@ -170,7 +170,7 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
     mY1 = y1;
 }
 
-point_xy_float CirclePath::at(float alpha) {
+point_xy_float CirclePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the circle
     float t = alpha * 2.0f * PI;
     float x = .5f * cosf(t) + .5f;
@@ -182,7 +182,7 @@ CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
 
 HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 
-point_xy_float HeartPath::at(float alpha) {
+point_xy_float HeartPath::compute(float alpha) {
     // 1) raw parametric heart
     // constexpr float PI = 3.14159265358979323846f;
     float t = alpha * 2.0f * PI;
@@ -204,7 +204,7 @@ point_xy_float HeartPath::at(float alpha) {
     return point_xy_float(x, y);
 }
 
-point_xy_float LissajousPath::at(float alpha) {
+point_xy_float LissajousPath::compute(float alpha) {
     // t in [0,2π]
     float t = alpha * 2.0f * PI;
     float x = 0.5f + 0.5f * sinf(mA * t + mDelta);
@@ -219,7 +219,7 @@ ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius,
                                              uint16_t steps)
     : XYPath(steps), mTurns(turns), mRadius(radius) {}
 
-point_xy_float ArchimedeanSpiralPath::at(float alpha) {
+point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π·turns]
     float t = alpha * 2.0f * PI * mTurns;
     // r grows linearly from 0 to mRadius as α goes 0→1
@@ -233,7 +233,7 @@ point_xy_float ArchimedeanSpiralPath::at(float alpha) {
 RosePath::RosePath(uint8_t petals, uint16_t steps)
     : XYPath(steps), mPetals(petals) {}
 
-point_xy_float RosePath::at(float alpha) {
+point_xy_float RosePath::compute(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
     // polar radius
@@ -251,7 +251,7 @@ GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b, float n1,
                                  float n2, float n3, uint16_t steps)
     : XYPath(steps), mM(m), mA(a), mB(b), mN1(n1), mN2(n2), mN3(n3) {}
 
-point_xy_float GielisCurvePath::at(float alpha) {
+point_xy_float GielisCurvePath::compute(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
 
@@ -277,7 +277,7 @@ void XYPath::clearLut() { mLut.reset(); }
 PhyllotaxisPath::PhyllotaxisPath(uint16_t count, float angle, uint16_t steps)
     : XYPath(steps), mCount(count), mAngle(angle) {}
 
-point_xy_float PhyllotaxisPath::at(float alpha) {
+point_xy_float PhyllotaxisPath::compute(float alpha) {
     // Map α∈[0,1] → n∈[0,count−1]
     float n = alpha * float(mCount > 1 ? mCount - 1 : 1);
     // Polar coords
@@ -297,7 +297,7 @@ CatmullRomPath::CatmullRomPath(uint16_t steps) : XYPath(steps) {}
 
 void CatmullRomPath::addPoint(point_xy_float p) { mPoints.push_back(p); }
 
-point_xy_float CatmullRomPath::at(float alpha) {
+point_xy_float CatmullRomPath::compute(float alpha) {
     const size_t n = mPoints.size();
     if (n == 0) {
         return point_xy_float(.5f, 0.5f);
