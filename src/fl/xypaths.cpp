@@ -6,6 +6,7 @@
 #include "fl/math_macros.h"
 #include "fl/xypaths.h"
 #include "lib8tion/trig8.h"
+#include "lib8tion/intmap.h"
 
 namespace fl {
 
@@ -30,8 +31,14 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
     if (scale != 0xffff) {
         uint32_t x = out.x;
         uint32_t y = out.y;
-        x = (x * scale) >> 16;
-        y = (y * scale) >> 16;
+        x *= scale;
+        y *= scale;
+        x = map32_to_16(x);
+        y = map32_to_16(y);
+        // x = (x * scale) >> 16;
+        // y = (y * scale) >> 16;
+        out.x = static_cast<uint16_t>(x);
+        out.y = static_cast<uint16_t>(y);
     }
     if (x_offset != 0) {
         out.x += x_offset;

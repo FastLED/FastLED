@@ -40,6 +40,18 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
     return uint8_t((x + 128) >> 8);
 }
 
+LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
+    // Tested to be nearly identical to double precision floating point
+    // doing this operation.
+    if (x == 0) {
+        return 0;
+    }
+    if (x >= 0xffff0000) {
+        return 0xffff;
+    }
+    return uint16_t((x + 32768) >> 16);
+}
+
 LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
     return uint32_t(x) * 0x1010101;
 }

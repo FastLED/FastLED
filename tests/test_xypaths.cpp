@@ -163,7 +163,6 @@ TEST_CASE("Check complex types") {
         REQUIRE(xy.x == 0xffff);
         REQUIRE(xy.y == 0xffff >> 1);
 
-
         xy = circle->at16(alpha1,tx);
         REQUIRE(xy.x == 0xffff >> 1);
         REQUIRE(xy.y == 0xffff);
@@ -181,36 +180,76 @@ TEST_CASE("Check complex types") {
         REQUIRE(xy.y == 0xffff >> 1);
     }
 
+    SUBCASE("Circle with LUT and transform") {
+        Transform16 tx;
+        tx.scale = 255;
+        tx.x_offset = 0;
+        tx.y_offset = 0;
 
-    // SUBCASE("Check uint16 point range with LUT and transform to 0,255") {
-    //     Transform16 tx;
-    //     tx.scale = 255;
-    //     tx.x_offset = 0;
-    //     tx.y_offset = 0;
+        CirclePathPtr circle = CirclePathPtr::New();
+        circle->buildLut(5);
+        auto lut = circle->getLut();
+        REQUIRE_EQ(lut->size(), 5);
+        REQUIRE(lut != nullptr);
+        for (uint16_t i = 0; i < 4; i++) {
+            pair_xy<uint16_t> xy = lut->getData()[i];
+            std::cout << "lut[" << i << "] = " << xy.x << ", " << xy.y
+                      << std::endl;
+        }
 
-    //     for (auto &path : paths) {
-    //         // will build on next at16() call.
-    //         path->clearLut(255);
-    //     }
+        pair_xy<uint16_t> expected_xy0(255, 127);
+        pair_xy<uint16_t> expected_xy1(127, 255);
+        pair_xy<uint16_t> expected_xy2(0, 127);
+        pair_xy<uint16_t> expected_xy3(127, 0);
+        pair_xy<uint16_t> expected_xy4(255, 127);
 
-    //     for (auto &path : paths) {
-    //         for (uint16_t alpha = 0; true; alpha += 1) {
-    //             INFO("path=" << std::string(path->name()) << ", alpha=" << alpha);
-    //             alpha = MIN(65535, alpha);
-    //             pair_xy<uint16_t> xy = path->at16(alpha, tx);
-    //             REQUIRE_GE(xy.x, 0);
-    //             REQUIRE_LE(xy.x, 255);
-    //             REQUIRE_GE(xy.y, 0);
-    //             REQUIRE_LE(xy.y, 255);
-    //             if (alpha == 65535) {
-    //                 break;
-    //             }
-    //         }
-    //     }
+        pair_xy<uint16_t> xy0 = circle->at16(0, tx);
+        pair_xy<uint16_t> xy1 = circle->at16(16384, tx);
+        pair_xy<uint16_t> xy2 = circle->at16(32768, tx);
+        pair_xy<uint16_t> xy3 = circle->at16(49152, tx);
+        pair_xy<uint16_t> xy4 = circle->at16(65535, tx);
+        // REQUIRE_EQ(expected_xy0, lut->getData()[0]);
+        // REQUIRE_EQ(expected_xy1, lut->getData()[1]);
+        // REQUIRE_EQ(expected_xy2, lut->getData()[2]);
+        // REQUIRE_EQ(expected_xy3, lut->getData()[3]);
+        // REQUIRE_EQ(expected_xy4, lut->getData()[4]);
+        REQUIRE_EQ(expected_xy0, xy0);
+        REQUIRE_EQ(expected_xy1, xy1);
+        REQUIRE_EQ(expected_xy2, xy2);
+        REQUIRE_EQ(expected_xy3, xy3);
+        REQUIRE_EQ(expected_xy4, xy4);
+    }
 
-    //     // clear the LUTs and reset the steps.
-    //     for (auto &path : paths) {
-    //         path->clearLut(0);
-    //     }
-    // }
+
+    SUBCASE("Check uint16 point range with LUT and transform to 0,255") {
+        Transform16 tx;
+        tx.scale = 255;
+        tx.x_offset = 0;
+        tx.y_offset = 0;
+
+        for (auto &path : paths) {
+            // will build on next at16() call.
+            path->clearLut(255);
+        }
+
+        for (auto &path : paths) {
+            for (uint16_t alpha = 0; true; alpha += 1) {
+                INFO("path=" << std::string(path->name()) << ", alpha=" << alpha);
+                alpha = MIN(65535, alpha);
+                pair_xy<uint16_t> xy = path->at16(alpha, tx);
+                REQUIRE_GE(xy.x, 0);
+                REQUIRE_LE(xy.x, 255);
+                REQUIRE_GE(xy.y, 0);
+                REQUIRE_LE(xy.y, 255);
+                if (alpha == 65535) {
+                    break;
+                }
+            }
+        }
+
+        // clear the LUTs and reset the steps.
+        for (auto &path : paths) {
+            path->clearLut(0);
+        }
+    }
 }
