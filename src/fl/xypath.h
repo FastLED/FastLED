@@ -39,7 +39,7 @@ class XYPath : public Referent {
 
     virtual const char *name() const = 0;
 
-    point_xy_float at(float alpha) { return compute_float(alpha, mTransform); }
+    point_xy_float at(float alpha) { return at(alpha, mTransform); }
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {
