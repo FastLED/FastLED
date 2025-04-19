@@ -6,8 +6,10 @@ expensive trig functions are needed. Same with scale and offset.
 
 */
 
-#include "fl/lut.h"
 #include "lib8tion/types.h"
+#include "fl/lut.h"
+#include "fl/xymap.h"
+
 
 namespace fl {
 
@@ -22,6 +24,16 @@ struct Transform16 {
     static Transform16 ToBounds(const point_xy<alpha16> &min,
                                 const point_xy<alpha16> &max,
                                 alpha16 rotation = 0);
+
+    static Transform16 From(uint16_t width, uint16_t height) {
+        point_xy<alpha16> min = point_xy<alpha16>(0,0);
+        point_xy<alpha16> max = point_xy<alpha16>(width, height);
+        return Transform16::ToBounds(min, max);
+    }
+
+    // static Transform16 From(const XYMap &map) {
+    //     return Transform16::ToBounds(map.getWidth(), map.getHeight());
+    // }
     Transform16() = default;
     alpha16 scale_x = 0xffff;
     alpha16 scale_y = 0xffff;
@@ -41,11 +53,6 @@ struct TransformFloat {
     float y_offset = 0.0f; // 0 -> 1
     float rotation = 0.0f; // 0 -> 1
     point_xy_float transform(const point_xy_float &xy) const;
-    Transform16 toTransform16() const;
-
-    // If a transform has changed then this function should be called to
-    // make sure that the values stay within 0->1 bounds.
-    void validate();
 };
 
 } // namespace fl

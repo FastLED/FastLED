@@ -45,22 +45,6 @@ Transform16 Transform16::ToBounds(alpha16 max_value) {
     return tx;
 }
 
-Transform16 TransformFloat::toTransform16() const {
-    Transform16 tx;
-    // Bounds check the float values.
-    float _scale_x = MAX(0.0f, MIN(1.0f, scale_x));
-    float _scale_y = MAX(0.0f, MIN(1.0f, scale_y));
-    float _x_offset = MAX(0.0f, MIN(1.0f, x_offset));
-    float _y_offset = MAX(0.0f, MIN(1.0f, y_offset));
-    float _rotation = MAX(0.0f, MIN(1.0f, rotation));
-
-    tx.scale_x = static_cast<alpha16>(_scale_x * 65535.0f);
-    tx.scale_y = static_cast<alpha16>(_scale_y * 65535.0f);
-    tx.x_offset = static_cast<alpha16>(_x_offset * 65535.0f);
-    tx.y_offset = static_cast<alpha16>(_y_offset * 65535.0f);
-    tx.rotation = static_cast<alpha16>(_rotation * 65535.0f);
-    return tx;
-}
 
 Transform16 Transform16::ToBounds(const point_xy<alpha16> &min,
                                   const point_xy<alpha16> &max,
@@ -132,24 +116,6 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
         out.y = alpha16(out.y + y_offset);
 
     return out;
-}
-
-
-
-
-
-
-void TransformFloat::validate() {
-    scale_x = MAX(0.0f, MIN(1.0f, scale_x));
-    scale_y = MAX(0.0f, MIN(1.0f, scale_y));
-    x_offset = MAX(0.0f, MIN(1.0f, x_offset));
-    y_offset = MAX(0.0f, MIN(1.0f, y_offset));
-    while (rotation < 0.0f) {
-        rotation += 1.0f;
-    }
-    while (rotation > 1.0f) {
-        rotation -= 1.0f;
-    }
 }
 
 } // namespace fl

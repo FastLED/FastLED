@@ -89,10 +89,10 @@ class XYPath : public Referent {
         // This is called when the transform changes. We need to clear the LUT
         // so that it will be rebuilt with the new transform.
         clearLut();
-        mTransform.validate();
+        // mTransform.validate();
         // Just recompute unconditionally. If this is a performance issue,
         // we can add a flag to make it lazy.
-        mTransform16 = mTransform.toTransform16();
+        //mTransform16 = mTransform.toTransform16();
     }
 
     void setTransform(const TransformFloat &tx) {
@@ -164,11 +164,6 @@ class XYPath : public Referent {
     void output(float alpha_start, float alpha_end, point_xy_float *out,
                 uint16_t out_size, const TransformFloat &tx);
 
-    void output(float alpha_start, float alpha_end, point_xy_float *out,
-                uint16_t out_size) {
-        output(alpha_start, alpha_end, out, out_size, mTransform);
-    }
-
     // Outputs the path as a series of points in uint16_t. The first and last points are
     // always the start and end points. The middle points are evenly spaced
     // according to the alpha range.
@@ -176,19 +171,15 @@ class XYPath : public Referent {
                   point_xy<uint16_t> *out, uint16_t out_size,
                   const Transform16 &tx);
 
-    void output16(uint16_t alpha_start, uint16_t alpha_end,
-                  point_xy<uint16_t> *out, uint16_t out_size) {
-        output16(alpha_start, alpha_end, out, out_size, mTransform16);
-    }
-
     LUTXY16Ptr getLut() const { return mLut; }
+
   protected:
     uint32_t mSteps;
     LUTXY16Ptr mLut;
 
   private:
     TransformFloat mTransform;
-    Transform16 mTransform16;
+    //Transform16 mTransform16;
     void initLutOnce();
     LUTXY16Ptr generateLUT(uint16_t steps);
     point_xy_float compute_float(float alpha, const TransformFloat &tx);
