@@ -1,4 +1,8 @@
 
+// BETA - NOT TESTED!!!
+// VIBE CODED WITH AI
+
+
 #include "bilinear_compression.h"
 
 #include "crgb.h"
