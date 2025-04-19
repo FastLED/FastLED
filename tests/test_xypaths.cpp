@@ -51,4 +51,20 @@ TEST_CASE("Check complex types") {
             }
         }
     }
+
+    SUBCASE("Check uint16 point range") {
+        for (auto &path : paths) {
+            for (uint16_t alpha = 0; true; alpha += 1) {
+                alpha = MIN(65535, alpha);
+                pair_xy<uint16_t> xy = path->at16(alpha);
+                CHECK(xy.x >= 0);
+                CHECK(xy.x <= 65535);
+                CHECK(xy.y >= 0);
+                CHECK(xy.y <= 65535);
+                if (alpha == 65535) {
+                    break;
+                }
+            }
+        }
+    }
 }
