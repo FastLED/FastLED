@@ -9,6 +9,10 @@ namespace fl {
 void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
                        CRGB *dst, uint16_t dstWidth, uint16_t dstHeight) {
     // Use 8 bits for fixed-point fractional precision.
+    if (srcWidth == 0 || srcHeight == 0 || dstWidth == 0 ||
+        dstHeight == 0) {
+        return; // Nothing to do.
+    }
     const uint16_t SHIFT = 8;
     const uint16_t FP_ONE = 1 << SHIFT; // 256 in fixed-point
     const uint16_t WEIGHT_SHIFT =
