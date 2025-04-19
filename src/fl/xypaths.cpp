@@ -88,12 +88,6 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
         y *= scale_y;
         out.y = map32_to_16(y);
     }
-    if (x_offset != 0) {
-        out.x += x_offset;
-    }
-    if (y_offset != 0) {
-        out.y += y_offset;
-    }
     if (rotation != 0) {
         // promote to signed so the muls don’t overflow
         int32_t x = static_cast<int32_t>(out.x);
@@ -110,6 +104,13 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
 
         out.x = static_cast<uint16_t>(xr);
         out.y = static_cast<uint16_t>(yr);
+    }
+
+    if (x_offset != 0) {
+        out.x += x_offset;
+    }
+    if (y_offset != 0) {
+        out.y += y_offset;
     }
     return out;
 }

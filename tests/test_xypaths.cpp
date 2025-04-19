@@ -246,6 +246,37 @@ TEST_CASE("Check complex types") {
         REQUIRE(xy.y == 0xffff >> 1);
     }
 
+    // SUBCASE("Circle works with LUT and rotation") {
+    //     Transform16 tx;
+    //     tx.scale_x = 255;
+    //     tx.scale_y = 255;
+    //     tx.x_offset = 0;
+    //     tx.y_offset = 0;
+    //     tx.rotation = 32768; // rotate by 180 degrees
+
+    //     CirclePathPtr circle = CirclePathPtr::New();
+    //     circle->buildLut(5);  // circle->at16(0) == circle->at16(65535)
+    //     auto lut = circle->getLut();
+    //     REQUIRE_EQ(lut->size(), 5);
+    //     REQUIRE(lut != nullptr);
+
+    //     pair_xy<uint16_t> expected_xy0(0, 127);
+    //     pair_xy<uint16_t> expected_xy1(127, 0);
+    //     pair_xy<uint16_t> expected_xy2(255, 127);
+    //     pair_xy<uint16_t> expected_xy3(127, 255);
+    //     pair_xy<uint16_t> expected_xy4(0, 127);
+
+    //     pair_xy<uint16_t> xy0 = circle->at16(0, tx);
+    //     pair_xy<uint16_t> xy1 = circle->at16(16384, tx);
+    //     pair_xy<uint16_t> xy2 = circle->at16(32768, tx);
+    //     pair_xy<uint16_t> xy3 = circle->at16(49152, tx);
+    //     pair_xy<uint16_t> xy4 = circle->at16(65535, tx);
+    //     REQUIRE_EQ(expected_xy1, xy1);
+    //     REQUIRE_EQ(expected_xy2, xy2);
+    //     REQUIRE_EQ(expected_xy3, xy3);
+    //     REQUIRE_EQ(expected_xy4, xy4);
+    // }
+
     SUBCASE("Circle with LUT and transform") {
         Transform16 tx;
         tx.scale_x = 255;
