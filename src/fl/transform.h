@@ -11,7 +11,7 @@ expensive trig functions are needed. Same with scale and offset.
 
 namespace fl {
 
-using alpha16 = uint16_t;  // Represents alpha in the range [0, 65535]
+using alpha16 = uint16_t;  // fixed point representation of 0->1 in the range [0, 65535]
 
 // This transform assumes the coordinates are in the range [0,65535].
 struct Transform16 {
