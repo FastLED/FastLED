@@ -11,6 +11,22 @@ uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end);
 // 0 -> 65535
 uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
+inline float time_alphaf(uint32_t now, uint32_t start, uint32_t end) {
+    if (now < start) {
+        return 0.0f;
+    }
+    if (now > end) {
+        return 1.0f;
+    }
+    uint32_t elapsed = now - start;
+    uint32_t total = end - start;
+    float out = static_cast<float>(elapsed) / static_cast<float>(total);
+    if (out > 1.0f) {
+        out = 1.0f;
+    }
+    return out;
+}
+
 
 class TimeAlpha {
   public:
@@ -125,6 +141,15 @@ class TimeLinear: TimeAlpha {
         }
         uint8_t out = time_alpha8(now, mStart, mEnd);
         return out;
+    }
+
+    float updatef(uint32_t now) override {
+        bool not_started = (mEnd == 0) && (mStart == 0);
+        if (not_started) {
+            // if we have not started, we are not active
+            return 0;
+        }
+        return time_alphaf(now, mStart, mEnd);
     }
 
   private:

@@ -95,9 +95,8 @@ void loop() {
         pointTransition.trigger(now);
     }
     
-    uint8_t curr_alpha = pointTransition.update(now);
-    float alpha = curr_alpha / 255.0f;
-    auto xy = shape->at(alpha);
+    float curr_alpha = pointTransition.updatef(now);
+    auto xy = shape->at(curr_alpha);
     waveFxLower.addf(xy.x, xy.y, 1.0f);
     waveFxUpper.addf(xy.x, xy.y, 1.0f);
 
