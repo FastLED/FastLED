@@ -5,8 +5,8 @@
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/xypaths.h"
-#include "lib8tion/trig8.h"
 #include "lib8tion/intmap.h"
+#include "lib8tion/trig8.h"
 
 namespace fl {
 
@@ -26,7 +26,6 @@ pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
     return pair_xy_float(x, y);
 }
 
-
 Transform16 Transform16::ToBounds(uint16_t max_value) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
@@ -34,21 +33,20 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
     uint16_t scale16 = 0;
     if (max_value) {
         // numerator = max_value * 2^16
-        uint32_t numer   = static_cast<uint32_t>(max_value) << 16;
+        uint32_t numer = static_cast<uint32_t>(max_value) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
         scale16 = static_cast<uint16_t>(scale32);
     }
-    tx.scale_x    = scale16;
-    tx.scale_y    = scale16;
+    tx.scale_x = scale16;
+    tx.scale_y = scale16;
     tx.x_offset = 0;
     tx.y_offset = 0;
     tx.rotation = 0;
     return tx;
 }
 
-
-Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min, 
+Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min,
                                   const pair_xy<uint16_t> &max) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
@@ -56,20 +54,20 @@ Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min,
     uint16_t scale16 = 0;
     if (max.x > min.x) {
         // numerator = max_value * 2^16
-        uint32_t numer   = static_cast<uint32_t>(max.x - min.x) << 16;
+        uint32_t numer = static_cast<uint32_t>(max.x - min.x) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
         scale16 = static_cast<uint16_t>(scale32);
     }
-    tx.scale_x    = scale16;
+    tx.scale_x = scale16;
     if (max.y > min.y) {
         // numerator = max_value * 2^16
-        uint32_t numer   = static_cast<uint32_t>(max.y - min.y) << 16;
+        uint32_t numer = static_cast<uint32_t>(max.y - min.y) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
         scale16 = static_cast<uint16_t>(scale32);
     }
-    tx.scale_y    = scale16;
+    tx.scale_y = scale16;
     tx.x_offset = min.x;
     tx.y_offset = min.y;
     tx.rotation = 0;
@@ -78,60 +76,64 @@ Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min,
 
 pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
     pair_xy<uint16_t> out = xy;
-    if (scale_x != 0xffff) {
-        uint32_t x = out.x;
-        x *= scale_x;
-        out.x = map32_to_16(x);
-    }
-    if (scale_y != 0xffff) {
-        uint32_t y = out.y;
-        y *= scale_y;
-        out.y = map32_to_16(y);
-    }
-    if (rotation != 0) {
-        // promote to signed so the muls don’t overflow
-        int32_t x = static_cast<int32_t>(out.x);
-        int32_t y = static_cast<int32_t>(out.y);
 
-        // Q15 cosine & sine of 0…65535 angle
+    // 1) Rotate around the 16‑bit center first
+    if (rotation != 0) {
+        constexpr int32_t MID = 0x8000; // center of 0…0xFFFF interval
+
+        // bring into signed centered coords
+        int32_t x = int32_t(out.x) - MID;
+        int32_t y = int32_t(out.y) - MID;
+
+        // Q15 cosine & sine
         int32_t c = cos16(rotation); // [-32768..+32767]
         int32_t s = sin16(rotation);
 
-        // rotate:  x' = x*c - y*s ;  y' = x*s + y*c
-        // >>15 to remove the Q15 factor
-        int32_t xr = ((x * c) - (y * s)) >> 15;
-        int32_t yr = ((x * s) + (y * c)) >> 15;
+        // rotate & truncate
+        int32_t xr = (x * c - y * s) >> 15;
+        int32_t yr = (x * s + y * c) >> 15;
 
-        out.x = static_cast<uint16_t>(xr);
-        out.y = static_cast<uint16_t>(yr);
+        // shift back into [0…0xFFFF]
+        out.x = uint16_t(xr + MID);
+        out.y = uint16_t(yr + MID);
     }
 
-    if (x_offset != 0) {
-        out.x += x_offset;
+    // 2) Then scale in X/Y (Q16 → map32_to_16)
+    if (scale_x != 0xFFFF) {
+        uint32_t tx = uint32_t(out.x) * scale_x;
+        out.x = map32_to_16(tx);
     }
-    if (y_offset != 0) {
-        out.y += y_offset;
+    if (scale_y != 0xFFFF) {
+        uint32_t ty = uint32_t(out.y) * scale_y;
+        out.y = map32_to_16(ty);
     }
+
+    // 3) Finally translate
+    if (x_offset)
+        out.x = uint16_t(out.x + x_offset);
+    if (y_offset)
+        out.y = uint16_t(out.y + y_offset);
+
     return out;
 }
 
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
-    pair_xy<uint16_t>* mutable_data = lut->getData();
-    if (steps == 0) return lut;
+    pair_xy<uint16_t> *mutable_data = lut->getData();
+    if (steps == 0)
+        return lut;
 
     // use (steps‑1) as the denominator so that i=steps‑1 → alpha=1.0
-    float denom = (steps > 1)
-        ? static_cast<float>(steps - 1)
-        : 1.0f;              // avoid divide-by-zero when steps==1
+    float denom = (steps > 1) ? static_cast<float>(steps - 1)
+                              : 1.0f; // avoid divide-by-zero when steps==1
 
     for (uint16_t i = 0; i < steps; ++i) {
-        float alpha = static_cast<float>(i) / denom;  // now last α == 1.0
+        float alpha = static_cast<float>(i) / denom; // now last α == 1.0
         pair_xy_float xy = at(alpha);
         uint16_t x = static_cast<uint16_t>(xy.x * 65535.0f);
         uint16_t y = static_cast<uint16_t>(xy.y * 65535.0f);
-        mutable_data[i] = { x, y };
+        mutable_data[i] = {x, y};
     }
     return lut;
 }
@@ -440,12 +442,5 @@ pair_xy_float CatmullRomPath::at(float alpha) {
 
     return pair_xy_float(x, y);
 }
-
-
-
-
-
-
-
 
 } // namespace fl
