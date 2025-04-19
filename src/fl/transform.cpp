@@ -59,7 +59,7 @@ Transform16 TransformFloat::toTransform16() const {
     tx.scale_y = static_cast<fract16>(_scale_y * 65535.0f);
     tx.x_offset = static_cast<fract16>(_x_offset * 65535.0f);
     tx.y_offset = static_cast<fract16>(_y_offset * 65535.0f);
-    tx.rotation = static_cast<fract16>(_rotation * 65535.0f / (2.0f * PI));
+    tx.rotation = static_cast<fract16>(_rotation * 65535.0f);
     return tx;
 }
 
