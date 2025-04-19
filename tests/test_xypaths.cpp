@@ -38,13 +38,16 @@ TEST_CASE("Check complex types") {
 
     SUBCASE("Check floating point range") {
         for (auto &path : paths) {
-            for (float alpha = 0.0f; alpha < 1.0f; alpha += 0.01f) {
+            for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = MIN(1.f, alpha);
                 pair_xy_float xy = path->at(alpha);
                 CHECK(xy.x >= 0.0f);
                 CHECK(xy.x <= 1.0f);
                 CHECK(xy.y >= 0.0f);
                 CHECK(xy.y <= 1.0f);
+                if (ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
+                    break;
+                }
             }
         }
     }
