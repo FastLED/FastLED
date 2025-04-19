@@ -79,7 +79,7 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
 
     // 1) Rotate around the 16‑bit center first
     if (rotation != 0) {
-        constexpr int32_t MID = 0x8000; // center of 0…0xFFFF interval
+        constexpr int32_t MID = 0x7FFF; // center of 0…0xFFFF interval
 
         // bring into signed centered coords
         int32_t x = int32_t(out.x) - MID;
