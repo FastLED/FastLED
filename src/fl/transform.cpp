@@ -10,6 +10,8 @@
 
 namespace fl {
 
+
+
 point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     float x = xy.x * scale_x + x_offset;
     float y = xy.y * scale_y + y_offset;
@@ -26,17 +28,17 @@ point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     return point_xy_float(x, y);
 }
 
-Transform16 Transform16::ToBounds(fract16 max_value) {
+Transform16 Transform16::ToBounds(alpha16 max_value) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
-    fract16 scale16 = 0;
+    alpha16 scale16 = 0;
     if (max_value) {
         // numerator = max_value * 2^16
         uint32_t numer = static_cast<uint32_t>(max_value) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<fract16>(scale32);
+        scale16 = static_cast<alpha16>(scale32);
     }
     tx.scale_x = scale16;
     tx.scale_y = scale16;
@@ -55,27 +57,27 @@ Transform16 TransformFloat::toTransform16() const {
     float _y_offset = MAX(0.0f, MIN(1.0f, y_offset));
     float _rotation = MAX(0.0f, MIN(1.0f, rotation));
 
-    tx.scale_x = static_cast<fract16>(_scale_x * 65535.0f);
-    tx.scale_y = static_cast<fract16>(_scale_y * 65535.0f);
-    tx.x_offset = static_cast<fract16>(_x_offset * 65535.0f);
-    tx.y_offset = static_cast<fract16>(_y_offset * 65535.0f);
-    tx.rotation = static_cast<fract16>(_rotation * 65535.0f);
+    tx.scale_x = static_cast<alpha16>(_scale_x * 65535.0f);
+    tx.scale_y = static_cast<alpha16>(_scale_y * 65535.0f);
+    tx.x_offset = static_cast<alpha16>(_x_offset * 65535.0f);
+    tx.y_offset = static_cast<alpha16>(_y_offset * 65535.0f);
+    tx.rotation = static_cast<alpha16>(_rotation * 65535.0f);
     return tx;
 }
 
-Transform16 Transform16::ToBounds(const point_xy<fract16> &min,
-                                  const point_xy<fract16> &max,
-                                  fract16 rotation) {
+Transform16 Transform16::ToBounds(const point_xy<alpha16> &min,
+                                  const point_xy<alpha16> &max,
+                                  alpha16 rotation) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
-    fract16 scale16 = 0;
+    alpha16 scale16 = 0;
     if (max.x > min.x) {
         // numerator = max_value * 2^16
         uint32_t numer = static_cast<uint32_t>(max.x - min.x) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<fract16>(scale32);
+        scale16 = static_cast<alpha16>(scale32);
     }
     tx.scale_x = scale16;
     if (max.y > min.y) {
@@ -83,7 +85,7 @@ Transform16 Transform16::ToBounds(const point_xy<fract16> &min,
         uint32_t numer = static_cast<uint32_t>(max.y - min.y) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<fract16>(scale32);
+        scale16 = static_cast<alpha16>(scale32);
     }
     tx.scale_y = scale16;
     tx.x_offset = min.x;
@@ -92,8 +94,8 @@ Transform16 Transform16::ToBounds(const point_xy<fract16> &min,
     return tx;
 }
 
-point_xy<fract16> Transform16::transform(const point_xy<fract16> &xy) const {
-    point_xy<fract16> out = xy;
+point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
+    point_xy<alpha16> out = xy;
 
     // 1) Rotate around the 16‑bit center first
     if (rotation != 0) {
@@ -112,8 +114,8 @@ point_xy<fract16> Transform16::transform(const point_xy<fract16> &xy) const {
         int32_t yr = (x * s + y * c) >> 15;
 
         // shift back into [0…0xFFFF]
-        out.x = fract16(xr + MID);
-        out.y = fract16(yr + MID);
+        out.x = alpha16(xr + MID);
+        out.y = alpha16(yr + MID);
     }
 
     // 2) Then scale in X/Y (Q16 → map32_to_16)
@@ -128,9 +130,9 @@ point_xy<fract16> Transform16::transform(const point_xy<fract16> &xy) const {
 
     // 3) Finally translate
     if (x_offset)
-        out.x = fract16(out.x + x_offset);
+        out.x = alpha16(out.x + x_offset);
     if (y_offset)
-        out.y = fract16(out.y + y_offset);
+        out.y = alpha16(out.y + y_offset);
 
     return out;
 }
