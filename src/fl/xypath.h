@@ -80,14 +80,24 @@ class XYPath : public Referent {
     // always the start and end points. The middle points are evenly spaced
     // according to the alpha range.
     void output(float alpha_start, float alpha_end, point_xy_float *out,
-                uint16_t out_size, const TransformFloat &tx = TransformFloat());
+                uint16_t out_size, const TransformFloat &tx);
+
+    void output(float alpha_start, float alpha_end, point_xy_float *out,
+                uint16_t out_size) {
+        output(alpha_start, alpha_end, out, out_size, mTransform);
+    }
 
     // Outputs the path as a series of points in uint16_t. The first and last points are
     // always the start and end points. The middle points are evenly spaced
     // according to the alpha range.
     void output16(uint16_t alpha_start, uint16_t alpha_end,
                   point_xy<uint16_t> *out, uint16_t out_size,
-                  const Transform16 &tx = Transform16());
+                  const Transform16 &tx);
+
+    void output16(uint16_t alpha_start, uint16_t alpha_end,
+                  point_xy<uint16_t> *out, uint16_t out_size) {
+        output16(alpha_start, alpha_end, out, out_size, mTransform16);
+    }
 
     LUTXY16Ptr getLut() const { return mLut; }
   protected:
