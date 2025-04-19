@@ -63,7 +63,6 @@ TEST_CASE("Transform16::ToBounds(min, max)") {
     SUBCASE("Check bounds at 128") {
         uint16_t low = 127;
         uint16_t high = 255 + 127;
-        uint16_t mid = low + (high - low) / 2;
         pair_xy<uint16_t> min = pair_xy<uint16_t>(low, low);
         pair_xy<uint16_t> max = pair_xy<uint16_t>(high, high);
         Transform16 tx = Transform16::ToBounds(min, max);
