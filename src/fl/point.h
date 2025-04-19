@@ -149,5 +149,7 @@ struct point_xy {
 };
 
 using point_xy_float = point_xy<float>;  // It's just easier if we allow negative values.
+using pair_xy_float = point_xy<float>;  // Legacy name for point_xy_float
+
 
 }  // namespace fl
