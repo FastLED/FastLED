@@ -195,6 +195,8 @@ class XYPath : public Referent {
 };
 
 
+///////////////// Implementations of common XYPaths ///////////////////
+
 class LinePath : public XYPath {
   public:
     LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
