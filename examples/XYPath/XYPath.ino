@@ -14,10 +14,9 @@ all the UI elements you see below.
 #include "fl/math_macros.h"
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
+#include "fl/xypath.h"
 #include "fx/2d/blend.h"
 #include "fx/2d/wave.h"
-#include "fl/xypath.h"
-
 
 using namespace fl;
 
@@ -81,9 +80,8 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
-    shape->set(WIDTH-1, HEIGHT-1);
+    shape->set(WIDTH - 1, HEIGHT - 1);
 }
-
 
 void loop() {
     // Your code here
@@ -94,11 +92,13 @@ void loop() {
         // trigger the transition
         pointTransition.trigger(now);
     }
-    
-    float curr_alpha = pointTransition.updatef(now);
-    auto xy = shape->at(curr_alpha);
-    waveFxLower.addf(xy.x, xy.y, 1.0f);
-    waveFxUpper.addf(xy.x, xy.y, 1.0f);
+
+    if (pointTransition.isActive(now)) {
+        float curr_alpha = pointTransition.updatef(now);
+        auto xy = shape->at(curr_alpha);
+        waveFxLower.addf(xy.x, xy.y, 1.0f);
+        waveFxUpper.addf(xy.x, xy.y, 1.0f);
+    }
 
     fxBlend.draw(Fx::DrawContext(now, leds));
     FastLED.show();
