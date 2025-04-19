@@ -6,22 +6,10 @@ expensive trig functions are needed. Same with scale and offset.
 
 */
 
-
 #include "fl/lut.h"
 #include "lib8tion/types.h"
 
 namespace fl {
-
-// This transform assumes the coordinates are in the range [0,1].
-struct TransformFloat {
-    TransformFloat() = default;
-    float scale_x = 1.0f;
-    float scale_y = 1.0f;
-    float x_offset = 0.0f;
-    float y_offset = 0.0f;
-    float rotation = 0.0f;
-    point_xy_float transform(const point_xy_float &xy) const;
-};
 
 // This transform assumes the coordinates are in the range [0,65535].
 struct Transform16 {
@@ -39,6 +27,18 @@ struct Transform16 {
     fract16 rotation = 0;
 
     point_xy<fract16> transform(const point_xy<fract16> &xy) const;
+};
+
+// This transform assumes the coordinates are in the range [0,1].
+struct TransformFloat {
+    TransformFloat() = default;
+    float scale_x = 1.0f;  // 0 -> 1
+    float scale_y = 1.0f;  // 0 -> 1
+    float x_offset = 0.0f; // 0 -> 1
+    float y_offset = 0.0f; // 0 -> 1
+    float rotation = 0.0f; // 0 -> 1
+    point_xy_float transform(const point_xy_float &xy) const;
+    Transform16 toTransform16() const;
 };
 
 } // namespace fl

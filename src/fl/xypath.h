@@ -49,6 +49,7 @@ class XYPath : public Referent {
 
     void setTransform(const TransformFloat &tx) {
         mTransform = tx;
+        mTransform16 = tx.toTransform16();
     }
 
 
@@ -95,6 +96,7 @@ class XYPath : public Referent {
 
   private:
     TransformFloat mTransform;
+    Transform16 mTransform16;
     void initLutOnce();
     LUTXY16Ptr generateLUT(uint16_t steps);
     point_xy_float compute_float(float alpha, const TransformFloat &tx);

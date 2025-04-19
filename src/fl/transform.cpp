@@ -4,6 +4,7 @@
 #include "lib8tion/trig8.h"
 #include "lib8tion/intmap.h"
 #include "fl/transform.h"
+#include "fl/math_macros.h"
 #include "fl/lut.h"
 
 
@@ -42,6 +43,23 @@ Transform16 Transform16::ToBounds(fract16 max_value) {
     tx.x_offset = 0;
     tx.y_offset = 0;
     tx.rotation = 0;
+    return tx;
+}
+
+Transform16 TransformFloat::toTransform16() const {
+    Transform16 tx;
+    // Bounds check the float values.
+    float _scale_x = MAX(0.0f, MIN(1.0f, scale_x));
+    float _scale_y = MAX(0.0f, MIN(1.0f, scale_y));
+    float _x_offset = MAX(0.0f, MIN(1.0f, x_offset));
+    float _y_offset = MAX(0.0f, MIN(1.0f, y_offset));
+    float _rotation = MAX(0.0f, MIN(1.0f, rotation));
+
+    tx.scale_x = static_cast<fract16>(_scale_x * 65535.0f);
+    tx.scale_y = static_cast<fract16>(_scale_y * 65535.0f);
+    tx.x_offset = static_cast<fract16>(_x_offset * 65535.0f);
+    tx.y_offset = static_cast<fract16>(_y_offset * 65535.0f);
+    tx.rotation = static_cast<fract16>(_rotation * 65535.0f / (2.0f * PI));
     return tx;
 }
 
@@ -116,5 +134,8 @@ point_xy<fract16> Transform16::transform(const point_xy<fract16> &xy) const {
 
     return out;
 }
+
+
+
 
 } // namespace fl
