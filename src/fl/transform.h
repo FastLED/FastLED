@@ -17,8 +17,9 @@ struct Transform16 {
     // Make a transform that maps a rectangle to the given bounds from
     // (0,0) to (max_value,max_value), inclusive.
     static Transform16 ToBounds(uint16_t max_value);
-    static Transform16 ToBounds(const point_xy<uint16_t> &min, 
-                                const point_xy<uint16_t> &max) ;
+    static Transform16 ToBounds(const point_xy<uint16_t> &min,
+                                const point_xy<uint16_t> &max,
+                                uint16_t rotation = 0);
     Transform16() = default;
     uint16_t scale_x = 0xffff;
     uint16_t scale_y = 0xffff;
@@ -29,4 +30,4 @@ struct Transform16 {
     point_xy<uint16_t> transform(const point_xy<uint16_t> &xy) const;
 };
 
-}
+} // namespace fl

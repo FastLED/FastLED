@@ -46,7 +46,8 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
 }
 
 Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
-                                  const point_xy<uint16_t> &max) {
+                                  const point_xy<uint16_t> &max,
+                                  uint16_t rotation) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
@@ -69,7 +70,7 @@ Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
     tx.scale_y = scale16;
     tx.x_offset = min.x;
     tx.y_offset = min.y;
-    tx.rotation = 0;
+    tx.rotation = rotation;
     return tx;
 }
 
