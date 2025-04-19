@@ -23,10 +23,10 @@ namespace doctest {
         }
     };
 
-    template<typename T> struct StringMaker<pair_xy<T>> {
-        static String convert(const pair_xy<T>& value) {
+    template<typename T> struct StringMaker<point_xy<T>> {
+        static String convert(const point_xy<T>& value) {
             fl::Str out;
-            out += "pair_xy(";
+            out += "point_xy(";
             out += value.x;
             out += ", ";
             out += value.y;

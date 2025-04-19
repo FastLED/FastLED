@@ -17,7 +17,7 @@ ScreenMap XYMap::toScreenMap() const {
     for (uint16_t w = 0; w < width; w++) {
         for (uint16_t h = 0; h < height; h++) {
             uint16_t index = mapToIndex(w, h);
-            pair_xy_float p = {static_cast<float>(w), static_cast<float>(h)};
+            point_xy_float p = {static_cast<float>(w), static_cast<float>(h)};
             out.set(index, p);
         }
     }

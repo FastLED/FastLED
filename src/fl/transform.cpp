@@ -9,7 +9,7 @@
 
 namespace fl {
 
-pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
+point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     float x = xy.x * scale_x + x_offset;
     float y = xy.y * scale_y + y_offset;
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -20,9 +20,9 @@ pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
         float sin_theta = sinf(rotation);
         float x_rotated = x * cos_theta - y * sin_theta;
         float y_rotated = x * sin_theta + y * cos_theta;
-        return pair_xy_float(x_rotated, y_rotated);
+        return point_xy_float(x_rotated, y_rotated);
     }
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 Transform16 Transform16::ToBounds(uint16_t max_value) {
@@ -45,8 +45,8 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
     return tx;
 }
 
-Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min,
-                                  const pair_xy<uint16_t> &max) {
+Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
+                                  const point_xy<uint16_t> &max) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
@@ -73,8 +73,8 @@ Transform16 Transform16::ToBounds(const pair_xy<uint16_t> &min,
     return tx;
 }
 
-pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
-    pair_xy<uint16_t> out = xy;
+point_xy<uint16_t> Transform16::transform(const point_xy<uint16_t> &xy) const {
+    point_xy<uint16_t> out = xy;
 
     // 1) Rotate around the 16‑bit center first
     if (rotation != 0) {

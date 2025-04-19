@@ -96,7 +96,7 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
                 for (uint16_t i = 0; i < side; i++) {
                     for (uint16_t j = 0; j < side; j++) {
                         uint16_t index = i * side + j;
-                        pair_xy_float p = {
+                        point_xy_float p = {
                             static_cast<float>(i),
                             static_cast<float>(j)
                         };

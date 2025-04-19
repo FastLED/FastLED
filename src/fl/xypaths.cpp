@@ -13,7 +13,7 @@ namespace fl {
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
-    pair_xy<uint16_t> *mutable_data = lut->getData();
+    point_xy<uint16_t> *mutable_data = lut->getData();
     if (steps == 0)
         return lut;
 
@@ -23,7 +23,7 @@ LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
 
     for (uint16_t i = 0; i < steps; ++i) {
         float alpha = static_cast<float>(i) / denom; // now last α == 1.0
-        pair_xy_float xy = at(alpha);
+        point_xy_float xy = at(alpha);
         uint16_t x = static_cast<uint16_t>(xy.x * 65535.0f);
         uint16_t y = static_cast<uint16_t>(xy.y * 65535.0f);
         mutable_data[i] = {x, y};
@@ -41,16 +41,16 @@ void XYPath::initLutOnce() {
     mLut = generateLUT(mSteps);
 }
 
-pair_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
-    pair_xy_float xy = at(alpha);
+point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
+    point_xy_float xy = at(alpha);
     return tx.transform(xy);
 }
 
-pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
+point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
-            pair_xy<uint16_t> out = mLut->interp16(alpha);
+            point_xy<uint16_t> out = mLut->interp16(alpha);
             out = tx.transform(out);
             return out;
         }
@@ -59,13 +59,13 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     float scale_x_f = static_cast<float>(tx.scale_x);
     float scale_y_f = static_cast<float>(tx.scale_y);
     float alpha_f = static_cast<float>(alpha) / 65535.0f;
-    pair_xy_float xy = at(alpha_f);
+    point_xy_float xy = at(alpha_f);
     // Ensure values are clamped to the target range
     uint16_t x_val =
         MIN(static_cast<uint16_t>(xy.x * scale_x_f) + tx.x_offset, tx.scale_x);
     uint16_t y_val =
         MIN(static_cast<uint16_t>(xy.y * scale_y_f) + tx.y_offset, tx.scale_y);
-    return pair_xy<uint16_t>(x_val, y_val);
+    return point_xy<uint16_t>(x_val, y_val);
 }
 
 void XYPath::buildLut(uint16_t steps) {
@@ -76,13 +76,13 @@ void XYPath::buildLut(uint16_t steps) {
     }
 }
 
-void XYPath::output(float alpha_start, float alpha_end, pair_xy_float *out,
+void XYPath::output(float alpha_start, float alpha_end, point_xy_float *out,
                     uint16_t out_size, const TransformFloat &tx) {
     if (out_size == 0) {
         return;
     }
     if (out_size == 1) {
-        pair_xy_float avg = at(alpha_start);
+        point_xy_float avg = at(alpha_start);
         avg += at(alpha_end);
         avg /= 2.0f;
         out[0] = avg;
@@ -106,14 +106,14 @@ void XYPath::output(float alpha_start, float alpha_end, pair_xy_float *out,
 }
 
 void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
-                      pair_xy<uint16_t> *out, uint16_t out_size,
+                      point_xy<uint16_t> *out, uint16_t out_size,
                       const Transform16 &tx) {
     if (out_size == 0) {
         return;
     }
 
     if (out_size == 1) {
-        pair_xy<uint16_t> avg = at16(alpha_start, tx);
+        point_xy<uint16_t> avg = at16(alpha_start, tx);
         avg += at16(alpha_end, tx);
         avg /= 2;
         out[0] = avg;
@@ -145,8 +145,8 @@ TransformPath::TransformPath(XYPathPtr path, const Params &params)
     FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
 }
 
-pair_xy_float TransformPath::at(float alpha) {
-    pair_xy_float xy = mPath->at(alpha);
+point_xy_float TransformPath::at(float alpha) {
+    point_xy_float xy = mPath->at(alpha);
     xy.x = xy.x * mParams.scale_x + mParams.x_offset;
     xy.y = xy.y * mParams.scale_y + mParams.y_offset;
     return xy;
@@ -155,7 +155,7 @@ pair_xy_float TransformPath::at(float alpha) {
 LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
     : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
 
-pair_xy_float LinePath::at(float alpha) {
+point_xy_float LinePath::at(float alpha) {
     // α in [0,1] → (x,y) on the line
     float x = mX0 + alpha * (mX1 - mX0);
     float y = mY0 + alpha * (mY1 - mY0);
@@ -170,19 +170,19 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
     mY1 = y1;
 }
 
-pair_xy_float CirclePath::at(float alpha) {
+point_xy_float CirclePath::at(float alpha) {
     // α in [0,1] → (x,y) on the circle
     float t = alpha * 2.0f * PI;
     float x = .5f * cosf(t) + .5f;
     float y = .5f * sinf(t) + .5f;
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
 
 HeartPath::HeartPath(uint16_t steps) : XYPath(steps) {}
 
-pair_xy_float HeartPath::at(float alpha) {
+point_xy_float HeartPath::at(float alpha) {
     // 1) raw parametric heart
     // constexpr float PI = 3.14159265358979323846f;
     float t = alpha * 2.0f * PI;
@@ -201,15 +201,15 @@ pair_xy_float HeartPath::at(float alpha) {
     float x = (xo - minx) / (maxx - minx);
     float y = (yo - miny) / (maxy - miny);
 
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
-pair_xy_float LissajousPath::at(float alpha) {
+point_xy_float LissajousPath::at(float alpha) {
     // t in [0,2π]
     float t = alpha * 2.0f * PI;
     float x = 0.5f + 0.5f * sinf(mA * t + mDelta);
     float y = 0.5f + 0.5f * sinf(mB * t);
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 LissajousPath::LissajousPath(uint8_t a, uint8_t b, float delta, uint16_t steps)
@@ -219,7 +219,7 @@ ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius,
                                              uint16_t steps)
     : XYPath(steps), mTurns(turns), mRadius(radius) {}
 
-pair_xy_float ArchimedeanSpiralPath::at(float alpha) {
+point_xy_float ArchimedeanSpiralPath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π·turns]
     float t = alpha * 2.0f * PI * mTurns;
     // r grows linearly from 0 to mRadius as α goes 0→1
@@ -227,13 +227,13 @@ pair_xy_float ArchimedeanSpiralPath::at(float alpha) {
     // convert polar → cartesian, then shift center to (0.5,0.5)
     float x = 0.5f + r * cosf(t);
     float y = 0.5f + r * sinf(t);
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 RosePath::RosePath(uint8_t petals, uint16_t steps)
     : XYPath(steps), mPetals(petals) {}
 
-pair_xy_float RosePath::at(float alpha) {
+point_xy_float RosePath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
     // polar radius
@@ -244,14 +244,14 @@ pair_xy_float RosePath::at(float alpha) {
     // remap from [-1,1] to [0,1]
     float x = 0.5f + 0.5f * x0;
     float y = 0.5f + 0.5f * y0;
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 GielisCurvePath::GielisCurvePath(uint8_t m, float a, float b, float n1,
                                  float n2, float n3, uint16_t steps)
     : XYPath(steps), mM(m), mA(a), mB(b), mN1(n1), mN2(n2), mN3(n3) {}
 
-pair_xy_float GielisCurvePath::at(float alpha) {
+point_xy_float GielisCurvePath::at(float alpha) {
     // α ∈ [0,1] → θ ∈ [0, 2π]
     float t = alpha * 2.0f * PI;
 
@@ -269,7 +269,7 @@ pair_xy_float GielisCurvePath::at(float alpha) {
     float x = 0.5f + 0.5f * x0;
     float y = 0.5f + 0.5f * y0;
 
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 void XYPath::clearLut() { mLut.reset(); }
@@ -277,7 +277,7 @@ void XYPath::clearLut() { mLut.reset(); }
 PhyllotaxisPath::PhyllotaxisPath(uint16_t count, float angle, uint16_t steps)
     : XYPath(steps), mCount(count), mAngle(angle) {}
 
-pair_xy_float PhyllotaxisPath::at(float alpha) {
+point_xy_float PhyllotaxisPath::at(float alpha) {
     // Map α∈[0,1] → n∈[0,count−1]
     float n = alpha * float(mCount > 1 ? mCount - 1 : 1);
     // Polar coords
@@ -286,7 +286,7 @@ pair_xy_float PhyllotaxisPath::at(float alpha) {
     // Cartesian & normalize to [0,1]²
     float x0 = r * cosf(theta);
     float y0 = r * sinf(theta);
-    return pair_xy_float(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
+    return point_xy_float(0.5f + 0.5f * x0, 0.5f + 0.5f * y0);
 }
 
 XYPathPtr TransformPath::getPath() const { return mPath; }
@@ -295,12 +295,12 @@ TransformPath::Params &TransformPath::params() { return mParams; }
 
 CatmullRomPath::CatmullRomPath(uint16_t steps) : XYPath(steps) {}
 
-void CatmullRomPath::addPoint(pair_xy_float p) { mPoints.push_back(p); }
+void CatmullRomPath::addPoint(point_xy_float p) { mPoints.push_back(p); }
 
-pair_xy_float CatmullRomPath::at(float alpha) {
+point_xy_float CatmullRomPath::at(float alpha) {
     const size_t n = mPoints.size();
     if (n == 0) {
-        return pair_xy_float(.5f, 0.5f);
+        return point_xy_float(.5f, 0.5f);
     }
     if (n == 1) {
         return mPoints[0];
@@ -333,7 +333,7 @@ pair_xy_float CatmullRomPath::at(float alpha) {
                       (2.0f * P0.y - 5.0f * P1.y + 4.0f * P2.y - P3.y) * t2 +
                       (-P0.y + 3.0f * P1.y - 3.0f * P2.y + P3.y) * t3);
 
-    return pair_xy_float(x, y);
+    return point_xy_float(x, y);
 }
 
 } // namespace fl

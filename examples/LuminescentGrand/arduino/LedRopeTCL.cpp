@@ -39,7 +39,7 @@ ScreenMap init_screenmap() {
     int n = cols.array[i];
     int stagger = i % 2 ? 4 : 0;
     for (int j = 0; j < n; ++j) {
-      fl::pair_xy_float xy(i*4, j*8 + stagger);
+      fl::point_xy_float xy(i*4, j*8 + stagger);
       screen_map.set(curr_idx++, xy);
     }
   }
