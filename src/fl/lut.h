@@ -185,6 +185,24 @@ public:
         return a + (b - a) * blend / 255;
     }
 
+    T interp16(uint16_t alpha) {
+        if (length == 0) return T();
+        if (alpha ==   0) return data[0];
+        if (alpha == 65535) return data[length-1];
+
+        // treat alpha/65535 as fraction, scale to [0..length-1]
+        uint32_t maxIndex = length - 1;
+        uint32_t pos      = uint32_t(alpha) * maxIndex;   // numerator
+        uint32_t idx0     = pos / 65535;                   // floor(position)
+        uint32_t idx1     = idx0 < maxIndex ? idx0 + 1 : maxIndex;
+        uint16_t blend    = pos % 65535;                   // fractional part
+
+        const T& a = data[idx0];
+        const T& b = data[idx1];
+        // a + (b-a) * blend/65535
+        return a + (b - a) * blend / 65535;
+    }
+
 private:
     fl::scoped_ptr<T> mDataHandle;
     T* data = nullptr;
