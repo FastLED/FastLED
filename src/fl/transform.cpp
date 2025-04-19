@@ -25,17 +25,17 @@ point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     return point_xy_float(x, y);
 }
 
-Transform16 Transform16::ToBounds(uint16_t max_value) {
+Transform16 Transform16::ToBounds(fract16 max_value) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
-    uint16_t scale16 = 0;
+    fract16 scale16 = 0;
     if (max_value) {
         // numerator = max_value * 2^16
         uint32_t numer = static_cast<uint32_t>(max_value) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<uint16_t>(scale32);
+        scale16 = static_cast<fract16>(scale32);
     }
     tx.scale_x = scale16;
     tx.scale_y = scale16;
@@ -45,19 +45,19 @@ Transform16 Transform16::ToBounds(uint16_t max_value) {
     return tx;
 }
 
-Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
-                                  const point_xy<uint16_t> &max,
-                                  uint16_t rotation) {
+Transform16 Transform16::ToBounds(const point_xy<fract16> &min,
+                                  const point_xy<fract16> &max,
+                                  fract16 rotation) {
     Transform16 tx;
     // Compute a Q16 “scale” so that:
     //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
-    uint16_t scale16 = 0;
+    fract16 scale16 = 0;
     if (max.x > min.x) {
         // numerator = max_value * 2^16
         uint32_t numer = static_cast<uint32_t>(max.x - min.x) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<uint16_t>(scale32);
+        scale16 = static_cast<fract16>(scale32);
     }
     tx.scale_x = scale16;
     if (max.y > min.y) {
@@ -65,7 +65,7 @@ Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
         uint32_t numer = static_cast<uint32_t>(max.y - min.y) << 16;
         // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
         uint32_t scale32 = numer / 0xFFFF;
-        scale16 = static_cast<uint16_t>(scale32);
+        scale16 = static_cast<fract16>(scale32);
     }
     tx.scale_y = scale16;
     tx.x_offset = min.x;
@@ -74,8 +74,8 @@ Transform16 Transform16::ToBounds(const point_xy<uint16_t> &min,
     return tx;
 }
 
-point_xy<uint16_t> Transform16::transform(const point_xy<uint16_t> &xy) const {
-    point_xy<uint16_t> out = xy;
+point_xy<fract16> Transform16::transform(const point_xy<fract16> &xy) const {
+    point_xy<fract16> out = xy;
 
     // 1) Rotate around the 16‑bit center first
     if (rotation != 0) {
@@ -94,8 +94,8 @@ point_xy<uint16_t> Transform16::transform(const point_xy<uint16_t> &xy) const {
         int32_t yr = (x * s + y * c) >> 15;
 
         // shift back into [0…0xFFFF]
-        out.x = uint16_t(xr + MID);
-        out.y = uint16_t(yr + MID);
+        out.x = fract16(xr + MID);
+        out.y = fract16(yr + MID);
     }
 
     // 2) Then scale in X/Y (Q16 → map32_to_16)
@@ -110,9 +110,9 @@ point_xy<uint16_t> Transform16::transform(const point_xy<uint16_t> &xy) const {
 
     // 3) Finally translate
     if (x_offset)
-        out.x = uint16_t(out.x + x_offset);
+        out.x = fract16(out.x + x_offset);
     if (y_offset)
-        out.y = uint16_t(out.y + y_offset);
+        out.y = fract16(out.y + y_offset);
 
     return out;
 }
