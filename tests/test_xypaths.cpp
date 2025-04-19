@@ -52,6 +52,27 @@ TEST_CASE("Check complex types") {
         }
     }
 
+    SUBCASE("Check float point range with transform to -8,8") {
+        TransformFloat tx;
+        tx.scale = 8.0f;
+        tx.x_offset = -4.0f;
+        tx.y_offset = -4.0f;
+
+        for (auto &path : paths) {
+            for (float alpha = 0.0f; true; alpha += 0.01f) {
+                alpha = MIN(1.f, alpha);
+                pair_xy_float xy = path->at(alpha, tx);
+                CHECK(xy.x >= -4.0f);
+                CHECK(xy.x <= 4.0f);
+                CHECK(xy.y >= -4.0f);
+                CHECK(xy.y <= 4.0f);
+                if (ALMOST_EQUAL(alpha, 1.0f, 0.001f)) {
+                    break;
+                }
+            }
+        }
+    }
+
     SUBCASE("Check uint16 point range") {
         for (auto &path : paths) {
             for (uint16_t alpha = 0; true; alpha += 1) {
