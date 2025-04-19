@@ -162,6 +162,10 @@ public:
     T* getData() const {
         return data;
     }
+
+    uint32_t size() const {
+        return length;
+    }
 private:
     fl::scoped_ptr<T> mDataHandle;
     T* data = nullptr;

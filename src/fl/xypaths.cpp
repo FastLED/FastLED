@@ -91,20 +91,21 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
         initLutOnce();
         if (mLut) {
             uint32_t index = (alpha * mSteps) >> 16;
+            uint32_t lut_size = mLut->size();
+            if (index >= lut_size) {
+                FASTLED_WARN("XYPath::at: index out of bounds, index="<< index << ",lut_size=" << lut_size);
+                index = lut_size - 1;
+            }
             return mLut->getData()[index];
-        } else {
-            FASTLED_WARN("XYPath::at16: mLut is null");
         }
     }
-    // Fallback to the default implementation. Fine most paths.
+    // Fallback to the default float implementation. Fine most paths.
     float scalef = static_cast<float>(tx.scale);
     float alpha_f = static_cast<float>(alpha) / 65535.0f;
     pair_xy_float xy = at(alpha_f);
-    
     // Ensure values are clamped to the target range
     uint16_t x_val = MIN(static_cast<uint16_t>(xy.x * scalef) + tx.x_offset, tx.scale);
     uint16_t y_val = MIN(static_cast<uint16_t>(xy.y * scalef) + tx.y_offset, tx.scale);
-    
     return pair_xy<uint16_t>(x_val, y_val);
 }
 
