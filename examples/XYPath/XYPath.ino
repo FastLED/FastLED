@@ -71,7 +71,7 @@ WaveFx waveFxUpper(
 Blend2d fxBlend(xyMap);
 
 XYPathPtr shape = GielisCurvePathPtr::New();
-TimeLinear pointTransition(5000);
+TimeLinear pointTransition(10000);
 
 void setup() {
     Serial.begin(115200);
@@ -80,7 +80,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
-    shape->set(WIDTH - 1, HEIGHT - 1);
+    shape->set(WIDTH, HEIGHT);
 }
 
 void loop() {
