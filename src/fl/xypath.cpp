@@ -4,7 +4,7 @@
 #include "fl/assert.h"
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "fl/xypaths.h"
+#include "fl/xypath.h"
 
 
 namespace fl {
