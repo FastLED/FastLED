@@ -33,12 +33,8 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
         uint32_t y = out.y;
         x *= scale;
         y *= scale;
-        x = map32_to_16(x);
-        y = map32_to_16(y);
-        // x = (x * scale) >> 16;
-        // y = (y * scale) >> 16;
-        out.x = static_cast<uint16_t>(x);
-        out.y = static_cast<uint16_t>(y);
+        out.x = map32_to_16(x);
+        out.y = map32_to_16(y);
     }
     if (x_offset != 0) {
         out.x += x_offset;
