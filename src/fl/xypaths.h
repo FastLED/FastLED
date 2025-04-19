@@ -42,6 +42,9 @@ struct TransformFloat {
 };
 
 struct Transform16 {
+    // Make a transform that maps a rectangle to the given bounds from
+    // (0,0) to (max_value,max_value), inclusive.
+    static Transform16 ToBounds(uint16_t max_value);
     Transform16() = default;
     uint16_t scale = 0xffff;
     uint16_t x_offset = 0;
