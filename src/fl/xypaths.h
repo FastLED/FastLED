@@ -87,6 +87,7 @@ class XYPath : public Referent {
                   pair_xy<uint16_t> *out, uint16_t out_size,
                   const Transform16 &tx = Transform16());
 
+    LUTXY16Ptr getLut() const { return mLut; }
   protected:
     uint32_t mSteps;
     LUTXY16Ptr mLut;

@@ -6,6 +6,7 @@
 #include "test.h"
 #include "fl/xypaths.h"
 #include "fl/vector.h"
+#include "fl/unused.h"
 #include <string>
 
 using namespace fl;
@@ -114,13 +115,49 @@ TEST_CASE("Check complex types") {
     SUBCASE("Circle works with LUT") {
         CirclePathPtr circle = CirclePathPtr::New();
         Transform16 tx;
-        circle->buildLut(4);
+        circle->buildLut(5);
+        auto lut = circle->getLut();
+        REQUIRE_EQ(lut->size(), 5);
+        REQUIRE(lut != nullptr);
+        for (uint16_t i = 0; i < 4; i++) {
+            pair_xy<uint16_t> xy = lut->getData()[i];
+            std::cout << "lut[" << i << "] = " << xy.x << ", " << xy.y
+                      << std::endl;
+        }
+
+        pair_xy<uint16_t> expected_xy0(65535, 32767);
+        pair_xy<uint16_t> expected_xy1(32767, 65535);
+        pair_xy<uint16_t> expected_xy2(0, 32767);
+        pair_xy<uint16_t> expected_xy3(32767, 0);
+
+        
+        REQUIRE_EQ(expected_xy0, lut->getData()[0]);
+        REQUIRE_EQ(expected_xy1, lut->getData()[1]);
+        REQUIRE_EQ(expected_xy2, lut->getData()[2]);
+        REQUIRE_EQ(expected_xy3, lut->getData()[3]);
 
         uint16_t alpha0 = 0;
         uint16_t alpha1 = 16384;
         uint16_t alpha2 = 32768;
         uint16_t alpha3 = 49152;
         uint16_t alpha4 = 65535;
+
+        // test LUT interpolation
+
+        REQUIRE_EQ(lut->interp16(alpha0), expected_xy0);
+        REQUIRE_EQ(lut->interp16(alpha1), expected_xy1);
+        REQUIRE_EQ(lut->interp16(alpha2), expected_xy2);
+        REQUIRE_EQ(lut->interp16(alpha3), expected_xy3);
+
+        pair_xy<uint16_t> xy0 = circle->at16(alpha0, tx);
+        pair_xy<uint16_t> xy1 = circle->at16(alpha1, tx);
+        pair_xy<uint16_t> xy2 = circle->at16(alpha2, tx);
+        pair_xy<uint16_t> xy3 = circle->at16(alpha3, tx);
+
+        FASTLED_UNUSED(xy0);
+        FASTLED_UNUSED(xy1);
+        FASTLED_UNUSED(xy2);
+        FASTLED_UNUSED(xy3);
 
         pair_xy <uint16_t> xy = circle->at16(alpha0, tx);
         REQUIRE(xy.x == 0xffff);
@@ -139,9 +176,9 @@ TEST_CASE("Check complex types") {
         REQUIRE(xy.x == 0xffff >> 1);
         REQUIRE(xy.y == 0);
 
-        // xy = circle->at16(alpha4, tx);
-        // REQUIRE(xy.x == 0xffff);
-        // REQUIRE(xy.y == 0xffff >> 1);
+        xy = circle->at16(alpha4, tx);
+        REQUIRE(xy.x == 0xffff);
+        REQUIRE(xy.y == 0xffff >> 1);
     }
 
 

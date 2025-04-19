@@ -114,6 +114,50 @@ struct pair_xy {
         y = p.y;
         return *this;
     }
+
+    pair_xy operator-(const pair_xy& p) const {
+        return pair_xy_traits<pair_xy>::sub(*this, p);
+    }
+
+    pair_xy operator+(const pair_xy& p) const {
+        return pair_xy_traits<pair_xy>::add(*this, p);
+    }
+
+    pair_xy operator*(const pair_xy& p) const {
+        return pair_xy_traits<pair_xy>::mul(*this, p);
+    }
+
+    pair_xy operator/(const pair_xy& p) const {
+        return pair_xy_traits<pair_xy>::div(*this, p);
+    }
+
+    template<typename NumberT>
+    pair_xy operator+(const NumberT& p) const {
+        return pair_xy_traits<pair_xy>::add(*this, p);
+    }
+
+    template<typename NumberT>
+    pair_xy operator-(const NumberT& p) const {
+        return pair_xy_traits<pair_xy>::sub(*this, p);
+    }
+
+    template<typename NumberT>
+    pair_xy operator*(const NumberT& p) const {
+        return pair_xy_traits<pair_xy>::mul(*this, p);
+    }
+
+    template<typename NumberT>
+    pair_xy operator/(const NumberT& p) const {
+        return pair_xy_traits<pair_xy>::div(*this, p);
+    }
+
+    bool operator==(const pair_xy& p) const {
+        return (x == p.x && y == p.y);
+    }
+
+    bool operator!=(const pair_xy& p) const {
+        return (x != p.x || y != p.y);
+    }
 };
 
 using pair_xy_float = pair_xy<float>;  // It's just easier if we allow negative values.

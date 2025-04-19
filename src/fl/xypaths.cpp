@@ -60,18 +60,22 @@ pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
 }
 
 XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
-
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
-    pair_xy<uint16_t> *mutable_data = lut->getData();
-    float stepsf = (float)steps;
-    for (uint16_t i = 0; i < steps; i++) {
-        float alpha = static_cast<float>(i) / stepsf;
+    pair_xy<uint16_t>* mutable_data = lut->getData();
+    if (steps == 0) return lut;
+
+    // use (steps‑1) as the denominator so that i=steps‑1 → alpha=1.0
+    float denom = (steps > 1)
+        ? static_cast<float>(steps - 1)
+        : 1.0f;              // avoid divide-by-zero when steps==1
+
+    for (uint16_t i = 0; i < steps; ++i) {
+        float alpha = static_cast<float>(i) / denom;  // now last α == 1.0
         pair_xy_float xy = at(alpha);
         uint16_t x = static_cast<uint16_t>(xy.x * 65535.0f);
         uint16_t y = static_cast<uint16_t>(xy.y * 65535.0f);
-        pair_xy<uint16_t> out(x, y);
-        mutable_data[i] = out;
+        mutable_data[i] = { x, y };
     }
     return lut;
 }
@@ -95,14 +99,7 @@ pair_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
         if (mLut) {
-            uint32_t index = (uint32_t(alpha) * mSteps) >> 16;
-            uint32_t lut_size = mLut->size();
-            if (index >= lut_size) {
-                FASTLED_WARN("XYPath::at: index out of bounds, index="
-                             << index << ",lut_size=" << lut_size);
-                index = lut_size - 1;
-            }
-            pair_xy<uint16_t> out = mLut->getData()[index];
+            pair_xy<uint16_t> out = mLut->interp16(alpha);
             out = tx.transform(out);
             return out;
         }
