@@ -25,7 +25,7 @@ TEST_CASE("LinePath") {
 }
 
 
-TEST_CASE("Check float range of all comlex path types") {
+TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
     paths.push_back(CirclePathPtr::New());
     paths.push_back(HeartPathPtr::New());
@@ -36,16 +36,16 @@ TEST_CASE("Check float range of all comlex path types") {
     paths.push_back(GielisCurvePathPtr::New());
     paths.push_back(CatmullRomPathPtr::New());
 
-    for (auto &path : paths) {
-        for (float alpha = 0.0f; alpha < 1.0f; alpha += 0.01f) {
-            alpha = MIN(1.f, alpha);
-            pair_xy_float xy = path->at(alpha);
-            CHECK(xy.x >= 0.0f);
-            CHECK(xy.x <= 1.0f);
-            CHECK(xy.y >= 0.0f);
-            CHECK(xy.y <= 1.0f);
+    SUBCASE("Check floating point range") {
+        for (auto &path : paths) {
+            for (float alpha = 0.0f; alpha < 1.0f; alpha += 0.01f) {
+                alpha = MIN(1.f, alpha);
+                pair_xy_float xy = path->at(alpha);
+                CHECK(xy.x >= 0.0f);
+                CHECK(xy.x <= 1.0f);
+                CHECK(xy.y >= 0.0f);
+                CHECK(xy.y <= 1.0f);
+            }
         }
     }
-
-
 }
