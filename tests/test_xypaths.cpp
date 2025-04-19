@@ -14,19 +14,21 @@ using namespace fl;
 
 
 TEST_CASE("Transform16::ToBounds") {
-    Transform16 tx = Transform16::ToBounds(255);
+    // Transform16 tx = Transform16::ToBounds(255);
 
-    // SUBCASE("Check bounds at 128") {
-    //     // known bad at i == 128
-    //     uint16_t i16 = map8_to_16(128);
-    //     pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);
-    //     pair_xy<uint16_t> xy = tx.transform(xy_input);
-    //     INFO("i = " << 128);
-    //     REQUIRE_EQ(128, xy.x);
-    //     REQUIRE_EQ(128, xy.y);
-    // }
+    SUBCASE("Check bounds at 128") {
+        // known bad at i == 128
+        Transform16 tx = Transform16::ToBounds(255);
+        uint16_t i16 = map8_to_16(128);
+        pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);
+        pair_xy<uint16_t> xy = tx.transform(xy_input);
+        INFO("i = " << 128);
+        REQUIRE_EQ(128, xy.x);
+        REQUIRE_EQ(128, xy.y);
+    }
 
     SUBCASE("Check all bounds are in 255") {
+        Transform16 tx = Transform16::ToBounds(255);
         for (uint16_t i = 0; i < 256; i++) {
             uint16_t i16 = map8_to_16(i);
             pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);

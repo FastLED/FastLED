@@ -29,19 +29,23 @@ pair_xy_float TransformFloat::transform(const pair_xy_float &xy) const {
 
 Transform16 Transform16::ToBounds(uint16_t max_value) {
     Transform16 tx;
-    // build Q16 scale so that (alpha16 * scale) / 0xFFFF == max_value at alpha16==0xFFFF
-    uint32_t scale32 = 0;
-    if (max_value != 0) {
-        // floor( (max_value << 16) / 0xFFFF )
-        scale32 = (static_cast<uint32_t>(max_value) << 16) / 0xFFFF;
+    // Compute a Q16 “scale” so that:
+    //    (alpha16 * scale) >> 16  == max_value  when alpha16==0xFFFF
+    uint16_t scale16 = 0;
+    if (max_value) {
+        // numerator = max_value * 2^16
+        uint32_t numer   = static_cast<uint32_t>(max_value) << 16;
+        // denom = 0xFFFF; use ceil so 0xFFFF→max_value exactly:
+        uint32_t scale32 = numer / 0xFFFF;
+        scale16 = static_cast<uint16_t>(scale32);
     }
-    // safely narrow into 16 bits (with saturation if needed)
-    tx.scale    = map32_to_16(scale32);
+    tx.scale    = scale16;
     tx.x_offset = 0;
     tx.y_offset = 0;
     tx.rotation = 0;
     return tx;
 }
+
 pair_xy<uint16_t> Transform16::transform(const pair_xy<uint16_t> &xy) const {
     pair_xy<uint16_t> out = xy;
     if (scale != 0xffff) {
