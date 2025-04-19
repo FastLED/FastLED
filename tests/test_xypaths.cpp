@@ -29,6 +29,8 @@ TEST_CASE("Transform16::ToBounds") {
 
     SUBCASE("Check all bounds are in 255") {
         Transform16 tx = Transform16::ToBounds(255);
+        uint32_t smallest = ~0;
+        uint32_t largest = 0;
         for (uint16_t i = 0; i < 256; i++) {
             uint16_t i16 = map8_to_16(i);
             pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);
@@ -36,7 +38,12 @@ TEST_CASE("Transform16::ToBounds") {
             INFO("i = " << i);
             REQUIRE_LE(xy.x, 255);
             REQUIRE_LE(xy.y, 255);
+            smallest = MIN(smallest, xy.x);
+            largest = MAX(largest, xy.x);
         }
+
+        REQUIRE_EQ(0, smallest);
+        REQUIRE_EQ(255, largest);
     }
 }
 
