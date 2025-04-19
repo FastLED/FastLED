@@ -41,8 +41,8 @@ void XYPath::initLutOnce() {
     mLut = generateLUT(mSteps);
 }
 
-point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
-    point_xy_float xy = at(alpha);
+point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
+    point_xy_float xy = compute(alpha);
     return tx.transform(xy);
 }
 
@@ -59,7 +59,7 @@ point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     float scale_x_f = static_cast<float>(tx.scale_x);
     float scale_y_f = static_cast<float>(tx.scale_y);
     float alpha_f = static_cast<float>(alpha) / 65535.0f;
-    point_xy_float xy = at(alpha_f);
+    point_xy_float xy = compute(alpha_f);
     // Ensure values are clamped to the target range
     uint16_t x_val =
         MIN(static_cast<uint16_t>(xy.x * scale_x_f) + tx.x_offset, tx.scale_x);

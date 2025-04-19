@@ -39,8 +39,17 @@ class XYPath : public Referent {
 
     virtual const char *name() const = 0;
 
-    point_xy_float at(float alpha) { return compute(alpha); }
-    point_xy_float at(float alpha, const TransformFloat &tx);
+    point_xy_float at(float alpha) { return compute_float(alpha, mTransform); }
+
+    // Overloaded to allow transform to be passed in.
+    point_xy_float at(float alpha, const TransformFloat &tx) {
+        return compute_float(alpha, tx);
+    }
+
+
+    void setTransform(const TransformFloat &tx) {
+        mTransform = tx;
+    }
 
 
     // Subclasses must implement this method.
@@ -85,8 +94,10 @@ class XYPath : public Referent {
     LUTXY16Ptr mLut;
 
   private:
+    TransformFloat mTransform;
     void initLutOnce();
     LUTXY16Ptr generateLUT(uint16_t steps);
+    point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
 // TransformPath is a wrapper for XYPath that applies a transform. This is for
