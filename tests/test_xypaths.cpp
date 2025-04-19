@@ -63,23 +63,16 @@ TEST_CASE("Transform16::ToBounds(min, max)") {
     // Transform16 tx = Transform16::ToBounds(255);
 
     SUBCASE("Check bounds at 128") {
-        // known bad at i == 128
         uint16_t low = 127;
         uint16_t high = 255 + 127;
         uint16_t mid = low + (high - low) / 2;
         pair_xy<uint16_t> min = pair_xy<uint16_t>(low, low);
-        pair_xy<uint16_t> max = pair_xy<uint16_t>(low+high, low+high);
+        pair_xy<uint16_t> max = pair_xy<uint16_t>(high, high);
         Transform16 tx = Transform16::ToBounds(min, max);
-
-
         auto t1 = tx.transform(pair_xy<uint16_t>(0, 0));
+        auto t2 = tx.transform(pair_xy<uint16_t>(0xffff, 0xffff));
         REQUIRE_EQ(pair_xy<uint16_t>(low, low), t1);
-        // uint16_t i16 = map8_to_16(128);
-        // pair_xy<uint16_t> xy_input = pair_xy<uint16_t>(i16, i16);
-        // pair_xy<uint16_t> xy = tx.transform(xy_input);
-        // INFO("i = " << 128);
-        // REQUIRE_EQ(mid, xy.x);
-        // REQUIRE_EQ(mid, xy.y);
+        REQUIRE_EQ(pair_xy<uint16_t>(high, high), t2);
     }
 }
 
