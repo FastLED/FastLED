@@ -19,6 +19,7 @@ struct pair_xy_traits {
     static constexpr PairXyType zero() {
         return PairXyType();
     }
+
     static constexpr PairXyType add(const PairXyType& a, const PairXyType& b) {
         return PairXyType(a.x + b.x, a.y + b.y);
     }
@@ -27,14 +28,33 @@ struct pair_xy_traits {
         return PairXyType(a.x - b.x, a.y - b.y);
     }
 
-    static constexpr PairXyType mul(const PairXyType& a, const float& f) {
-        return PairXyType(a.x * f, a.y * f);
-    }
-    static constexpr PairXyType div(const PairXyType& a, const float& f) {
-        return PairXyType(a.x / f, a.y / f);
+    static constexpr PairXyType mul(const PairXyType& a, const PairXyType& b) {
+        return PairXyType(a.x * b.x, a.y * b.y);
     }
 
-    
+    static constexpr PairXyType div(const PairXyType& a, const PairXyType& b) {
+        return PairXyType(a.x / b.x, a.y / b.y);
+    }
+
+    template<typename NumberT>
+    static constexpr PairXyType add(const PairXyType& a, const NumberT& b) {
+        return PairXyType(a.x + b, a.y + b);
+    }
+
+    template<typename NumberT>
+    static constexpr PairXyType sub(const PairXyType& a, const NumberT& b) {
+        return PairXyType(a.x - b, a.y - b);
+    }
+
+    template<typename NumberT>
+    static constexpr PairXyType mul(const PairXyType& a, const NumberT& b) {
+        return PairXyType(a.x * b, a.y * b);
+    }
+
+    template<typename NumberT>
+    static constexpr PairXyType div(const PairXyType& a, const NumberT& b) {
+        return PairXyType(a.x / b, a.y / b);
+    }
 };
 
 template<typename T>
@@ -61,6 +81,21 @@ struct pair_xy {
     }
     pair_xy& operator/=(const double& f) {
         *this = pair_xy_traits<pair_xy>::div(*this, f);
+        return *this;
+    }
+
+    pair_xy& operator/=(const uint16_t& d) {
+        *this = pair_xy_traits<pair_xy>::div(*this, d);
+        return *this;
+    }
+
+    pair_xy& operator/=(const int& d) {
+        *this = pair_xy_traits<pair_xy>::div(*this, d);
+        return *this;
+    }
+
+    pair_xy& operator/=(const pair_xy& p) {
+        *this = pair_xy_traits<pair_xy>::div(*this, p);
         return *this;
     }
 

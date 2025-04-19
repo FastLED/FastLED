@@ -1,4 +1,7 @@
 
+// WARNING: BETA
+// Most of this is "vibe-coded" with AI. TODO: Add tests.
+//
 // This is a drawing/graphics related class.
 //
 // XYPath represents a parameterized (x,y) path. The input will always be
@@ -77,6 +80,10 @@ class XYPath : public Referent {
 
     void output(float alpha_start, float alpha_end, pair_xy_float *out,
                 uint16_t out_size, const TransformFloat &tx = TransformFloat());
+
+    void output16(uint16_t alpha_start, uint16_t alpha_end,
+                  pair_xy<uint16_t> *out, uint16_t out_size,
+                  const Transform16 &tx = Transform16());
 
   protected:
     uint32_t mSteps;

@@ -141,6 +141,41 @@ void XYPath::output(float alpha_start, float alpha_end, pair_xy_float *out,
     return;
 }
 
+void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
+                      pair_xy<uint16_t> *out, uint16_t out_size,
+                      const Transform16 &tx) {
+    if (out_size == 0) {
+        return;
+    }
+
+    if (out_size == 1) {
+        pair_xy<uint16_t> avg = at16(alpha_start, tx);
+        avg += at16(alpha_end, tx);
+        avg /= 2;
+        out[0] = avg;
+        return;
+    }
+    out[0] = at16(alpha_start, tx);
+    out[out_size - 1] = at16(alpha_end, tx);
+    if (out_size == 2) {
+        return;
+    }
+    const uint16_t delta = (alpha_end - alpha_start) / (out_size - 1);
+    if (delta == 0) {
+        // alpha_start == alpha_end
+        for (uint16_t i = 1; i < out_size - 1; i++) {
+            out[i] = out[0];
+        }
+        return;
+    }
+
+    for (uint16_t i = 1; i < out_size - 1; i++) {
+        uint16_t alpha = alpha_start + (delta * i);
+        out[i] = at16(alpha, tx);
+    }
+    return;
+}
+
 TransformPath::TransformPath(XYPathPtr path, const Params &params)
     : mPath(path), mParams(params) {
     FASTLED_ASSERT(mPath != nullptr, "TransformPath: path is null");
