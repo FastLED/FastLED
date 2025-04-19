@@ -240,6 +240,7 @@ TEST_CASE("Check complex types") {
         point_xy<uint16_t> xy2 = circle->at16(32768, tx);
         point_xy<uint16_t> xy3 = circle->at16(49152, tx);
         point_xy<uint16_t> xy4 = circle->at16(65535, tx);
+        REQUIRE_EQ(expected_xy0, xy0);
         REQUIRE_EQ(expected_xy1, xy1);
         REQUIRE_EQ(expected_xy2, xy2);
         REQUIRE_EQ(expected_xy3, xy3);
