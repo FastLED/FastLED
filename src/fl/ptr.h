@@ -3,8 +3,23 @@
 
 #include <stddef.h>
 
-// FastLED smart pointer. This was originally called Ptr<T> but that conflicts with
-// ArduinoJson::Ptr<T> so it was renamed to Ptr<T>.
+// FastLED smart pointer.
+//
+//   * Make your subclasses inherit from fl::Referent.
+//     * `class Foo: public fl::Referent {};`
+//   * Use a macro to declare your smart pointer.
+//     * For regular, non-template classes:
+//       * `FASTLED_SMART_PTR(Foo)` -> `FooPtr` is now available.
+//     * For templates use `FASTLED_SMART_PTR_NO_FWD(Foo)`
+//       * `template <typename T> class Foo {}; using FooInt = Foo<int>;`
+//       * `FASTLED_SAMRT_PTR_NO_FWD(FooInt)`
+//       * `FooIntPtr` is now available.
+//   * Instantiate from heap
+//     * `FooPtr foo = NewPtr<Foo>(a, b, ...args);`
+//     * Use `foo->method()` to call methods.
+//   * Instantiate from stack object and disable tracking
+//     * `Foo foo; FooPtr fooPtr = FooPtr::NoTracking(foo);`
+///   
 
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
