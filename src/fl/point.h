@@ -106,7 +106,7 @@ struct point_xy {
     }
 };
 
-using point_xy_float = point_xy<float>;  // It's just easier if we allow negative values.
+using point_xy_float = point_xy<float>;  // Full precision but slow.
 
 // Legacy support
 
