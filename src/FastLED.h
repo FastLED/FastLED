@@ -860,4 +860,9 @@ using fl::XYMap;
 using namespace fl;
 #endif
 
+// useful for sketches
+#include "fl/warn.h"  // FASTLED_WARN("message" << "more message");
+#include "fl/str.h"   // Str class.
+// #include "fl/vector.h"
+
 

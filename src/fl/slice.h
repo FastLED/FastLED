@@ -102,45 +102,45 @@ template <typename T> class Slice {
     size_t mSize;
 };
 
-template <typename T, typename IntType = uint16_t> class MatrixSlice {
+template <typename T, typename point_t = point_xy<int>> class MatrixSlice {
   public:
     // represents a window into a matrix
-    MatrixSlice(T *data, IntType width, IntType height,
-                point_xy<IntType> bottomLeft, point_xy<IntType> topRight)
+    MatrixSlice(T *data, size_t width, size_t height,
+                point_t bottomLeft, point_t topRight)
         : mData(data), mDataWidth(width), mDataHeight(height),
           mBottomLeft(bottomLeft), mTopRight(topRight) {}
 
-    point_xy<IntType> getParentCoord(point_xy<IntType> p) const {
+    point_t getParentCoord(point_t p) const {
         // convert from local coordinates to parent coordinates
-        return point_xy<IntType>(p.x + mBottomLeft.x, p.y + mBottomLeft.y);
+        return point_t(p.x + mBottomLeft.x, p.y + mBottomLeft.y);
     }
 
-    point_xy<IntType> getLocalCoord(point_xy<IntType> p) const {
+    point_t getLocalCoord(point_t p) const {
         // convert from parent coordinates to local coordinates
         if (p.x < mBottomLeft.x || p.x > mTopRight.x || p.y < mBottomLeft.y ||
             p.y > mTopRight.y) {
-            return point_xy<IntType>(0, 0);
+            return point_t(0, 0);
         }
-        return point_xy<IntType>(p.x - mBottomLeft.x, p.y - mBottomLeft.y);
+        return point_t(p.x - mBottomLeft.x, p.y - mBottomLeft.y);
     }
 
-    T &operator()(point_xy<IntType> p) {
+    T &operator()(point_t p) {
         // convert from local coordinates to parent coordinates
         return at(p);
     }
 
-    T& at(point_xy<IntType> p) {
+    T& at(point_t p) {
         // convert from local coordinates to parent coordinates
-        point_xy<IntType> parentCoord = getParentCoord(p);
+        point_t parentCoord = getParentCoord(p);
         return mData[parentCoord.x + parentCoord.y * mDataWidth];
     }
 
   private:
     T *mData;
-    IntType mDataWidth;
-    IntType mDataHeight;
-    point_xy<IntType> mBottomLeft;
-    point_xy<IntType> mTopRight;
+    size_t mDataWidth;
+    size_t mDataHeight;
+    point_t mBottomLeft;
+    point_t mTopRight;
 };
 
 } // namespace fl

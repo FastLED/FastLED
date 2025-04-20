@@ -6,6 +6,7 @@
 #include "test.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
@@ -29,6 +30,22 @@ TEST_CASE("vector slice") {
     REQUIRE_EQ(slice2.length(), 2);
     REQUIRE_EQ(slice2[0], 2);
     REQUIRE_EQ(slice2[1], 3);
+}
+
+TEST_CASE("matrix compile") {
+    int data[2][2] = {
+        {1, 2},
+        {3, 4}
+    };
+
+    point_xy<uint16_t> bottomLeft(0, 0);
+    point_xy<uint16_t> topRight(1, 1);
+
+    MatrixSlice<int, point_xy<uint16_t>> slice(
+        &data[0][0], 2, 2, bottomLeft, topRight);
+
+    FASTLED_UNUSED(slice);
+    // just a compile test
 }
 
 #if 0
