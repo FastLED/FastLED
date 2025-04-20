@@ -40,6 +40,13 @@ class Referent; // Inherit this if you want your object to be able to go into a
 template <typename T> class Ptr; // Reference counted smart pointer base class.
 template <typename T> class WeakPtr; // Weak reference smart pointer base class.
 
+
+template <typename T, typename... Args>
+Ptr<T> NewPtr(Args... args);
+
+template <typename T, typename... Args>
+Ptr<T> NewPtrNoTracking(Args... args);
+
 template <typename T> class PtrTraits {
   public:
     using element_type = T;
@@ -426,5 +433,17 @@ template <typename T> inline WeakPtr<T> Ptr<T>::weakRefNoCreate() const {
     out.mWeakPtr = get()->mWeakPtr;
     return out;
 }
+
+
+template <typename T, typename... Args>
+Ptr<T> NewPtr(Args... args) {
+    return Ptr<T>::New(args...);
+}
+
+template <typename T>
+Ptr<T> NewPtrNoTracking(T& obj) {
+    return Ptr<T>::NoTracking(obj);
+}
+
 
 }  // namespace fl

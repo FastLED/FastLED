@@ -224,3 +224,11 @@ TEST_CASE("WeakPtr additional functionality") {
 }
 
 
+TEST_CASE("PtrNew") {
+    MyClassPtr ptr = NewPtr<MyClass>();  // compile test.
+    CHECK(ptr.get() != nullptr);
+
+    MyClass stack_objects;
+    MyClassPtr stack_ptr = NewPtrNoTracking<MyClass>(stack_objects);
+    CHECK(stack_ptr.get() == &stack_objects);
+}
