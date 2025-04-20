@@ -22,13 +22,13 @@ namespace fl {
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
-FASTLED_SMART_PTR(HeartPath);
-FASTLED_SMART_PTR(LissajousPath);
-FASTLED_SMART_PTR(ArchimedeanSpiralPath);
-FASTLED_SMART_PTR(RosePath);
-FASTLED_SMART_PTR(PhyllotaxisPath);
-FASTLED_SMART_PTR(GielisCurvePath);
-FASTLED_SMART_PTR(CatmullRomPath);
+// FASTLED_SMART_PTR(HeartPath);
+// FASTLED_SMART_PTR(LissajousPath);
+// FASTLED_SMART_PTR(ArchimedeanSpiralPath);
+// FASTLED_SMART_PTR(RosePath);
+// FASTLED_SMART_PTR(PhyllotaxisPath);
+// FASTLED_SMART_PTR(GielisCurvePath);
+// FASTLED_SMART_PTR(CatmullRomPath);
 
 
 class XYPath : public Referent {
@@ -41,37 +41,38 @@ class XYPath : public Referent {
         return CirclePathPtr::New(steps);
     }
 
-    static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
-        return HeartPathPtr::New(steps);
-    }
 
-    static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
-                                             float delta, uint16_t steps = 0) {
-        return LissajousPathPtr::New(a, b, delta, steps);
-    }
+    // static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
+    //     return HeartPathPtr::New(steps);
+    // }
 
-    static ArchimedeanSpiralPathPtr NewArchimedeanSpiralPath(
-        uint8_t turns, float radius, uint16_t steps = 0) {
-        return ArchimedeanSpiralPathPtr::New(turns, radius, steps);
-    }
+    // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
+    //                                          float delta, uint16_t steps = 0) {
+    //     return LissajousPathPtr::New(a, b, delta, steps);
+    // }
 
-    static RosePathPtr NewRosePath(uint8_t petals, uint16_t steps = 0) {
-        return RosePathPtr::New(petals, steps);
-    }
-    static PhyllotaxisPathPtr NewPhyllotaxisPath(uint16_t count, float angle,
-                                                uint16_t steps = 0) {
-        return PhyllotaxisPathPtr::New(count, angle, steps);
-    }
+    // static ArchimedeanSpiralPathPtr NewArchimedeanSpiralPath(
+    //     uint8_t turns, float radius, uint16_t steps = 0) {
+    //     return ArchimedeanSpiralPathPtr::New(turns, radius, steps);
+    // }
 
-    static GielisCurvePathPtr NewGielisCurvePath(uint8_t m, float a, float b,
-                                                 float n1, float n2, float n3,
-                                                 uint16_t steps = 0) {
-        return GielisCurvePathPtr::New(m, a, b, n1, n2, n3, steps);
-    }
+    // static RosePathPtr NewRosePath(uint8_t petals, uint16_t steps = 0) {
+    //     return RosePathPtr::New(petals, steps);
+    // }
+    // static PhyllotaxisPathPtr NewPhyllotaxisPath(uint16_t count, float angle,
+    //                                             uint16_t steps = 0) {
+    //     return PhyllotaxisPathPtr::New(count, angle, steps);
+    // }
 
-    static CatmullRomPathPtr NewCatmullRomPath(uint16_t steps = 0) {
-        return CatmullRomPathPtr::New(steps);
-    }
+    // static GielisCurvePathPtr NewGielisCurvePath(uint8_t m, float a, float b,
+    //                                              float n1, float n2, float n3,
+    //                                              uint16_t steps = 0) {
+    //     return GielisCurvePathPtr::New(m, a, b, n1, n2, n3, steps);
+    // }
+
+    // static CatmullRomPathPtr NewCatmullRomPath(uint16_t steps = 0) {
+    //     return CatmullRomPathPtr::New(steps);
+    // }
 
     XYPath(uint16_t steps = 0); // 0 steps means no LUT.
     // α in [0,1] → (x,y) on the path, both in [0,1].
@@ -163,7 +164,9 @@ class XYPath : public Referent {
 
     // Called by subclasses when something changes. The LUT will be rebuilt on
     // the next call to at16(...) if mSteps > 0.
-    void clearLut();
+    void clearLut() {
+        mLut.reset();
+    }
 
     // Clears lut and sets new steps. LUT will be rebuilt on next call to
     // at16(...) if mSteps > 0.
@@ -242,103 +245,5 @@ class CirclePath : public XYPath {
     float mRadius;
 };
 
-class HeartPath : public XYPath {
-  public:
-    HeartPath(uint16_t steps = 0);
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "HeartPath"; }
-};
-
-class LissajousPath : public XYPath {
-  public:
-    // Tweakable paramterized Lissajous path. Often used for led animations.
-    // a, b are frequency ratios; delta is phase offset
-    LissajousPath(uint8_t a = 3, uint8_t b = 2, float delta = PI / 2,
-                  uint16_t steps = 0);
-
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "LissajousPath"; }
-
-  private:
-    uint8_t mA, mB;
-    float mDelta;
-};
-
-class ArchimedeanSpiralPath : public XYPath {
-  public:
-    /**
-     * @param turns   Number of full revolutions around the center.
-     * @param radius  Maximum radius (in normalized [0,1] units) from center.
-     * @param steps   Number of LUT steps (0 = no LUT).
-     */
-    ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 0.5f,
-                          uint16_t steps = 0);
-
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "ArchimedeanSpiralPath"; }
-
-  private:
-    uint8_t mTurns;
-    float mRadius;
-};
-
-class RosePath : public XYPath {
-  public:
-    /**
-     * @param petals  Number of petals (integer k)
-     * @param steps   LUT steps (0 = no LUT)
-     */
-    RosePath(uint8_t petals = 5, uint16_t steps = 0);
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "RosePath"; }
-
-  private:
-    uint8_t mPetals;
-};
-
-/// “Superformula” (Gielis curve), can turn into many shapes.
-/// r(θ) = [ |cos(m·θ/4)/a|ⁿ² + |sin(m·θ/4)/b|ⁿ³ ]^(–1/n¹)
-class GielisCurvePath : public XYPath {
-  public:
-    /**
-     * @param m      Symmetry count (repetitions)
-     * @param a,b    Shape control (usually 1.0)
-     * @param n1,n2,n3 Exponents shaping the curve
-     * @param steps  LUT resolution (0 = no LUT)
-     */
-    GielisCurvePath(uint8_t m = 6, float a = 1.0f, float b = 1.0f,
-                    float n1 = 1.0f, float n2 = 1.0f, float n3 = 1.0f,
-                    uint16_t steps = 0);
-
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "GielisCurvePath"; }
-
-  private:
-    uint8_t mM;
-    float mA, mB, mN1, mN2, mN3;
-};
-
-/// “Phyllotaxis” / Sunflower spiral:
-///  n = α·(count−1),
-///  θ = n·goldenAngle,
-///  r = √(n/(count−1))
-/// then (x,y) = (0.5+0.5·r·cosθ, 0.5+0.5·r·sinθ)
-class PhyllotaxisPath : public XYPath {
-  public:
-    /**
-     * @param count  Number of seeds (controls density)
-     * @param angle  Angular increment in radians (default ≈137.508°)
-     * @param steps  LUT resolution (0 = no LUT)
-     */
-    PhyllotaxisPath(uint16_t count = 500,
-                    float angle = 137.508f * (PI / 180.0f), uint16_t steps = 0);
-
-    point_xy_float compute(float alpha) override;
-    const char *name() const override { return "PhyllotaxisPath"; }
-
-  private:
-    uint16_t mCount;
-    float mAngle;
-};
 
 } // namespace fl

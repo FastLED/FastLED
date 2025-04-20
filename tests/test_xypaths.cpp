@@ -31,13 +31,15 @@ TEST_CASE("LinePath") {
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
     paths.push_back(CirclePathPtr::New());
-    paths.push_back(HeartPathPtr::New());
-    paths.push_back(LissajousPathPtr::New());
-    paths.push_back(ArchimedeanSpiralPathPtr::New());
-    paths.push_back(RosePathPtr::New());
-    paths.push_back(PhyllotaxisPathPtr::New());
-    paths.push_back(GielisCurvePathPtr::New());
-    paths.push_back(CatmullRomPathPtr::New());
+
+    
+    // paths.push_back(HeartPathPtr::New());
+    // paths.push_back(LissajousPathPtr::New());
+    // paths.push_back(ArchimedeanSpiralPathPtr::New());
+    // paths.push_back(RosePathPtr::New());
+    // paths.push_back(PhyllotaxisPathPtr::New());
+    // paths.push_back(GielisCurvePathPtr::New());
+    // paths.push_back(CatmullRomPathPtr::New());
 
     SUBCASE("Check floating point range") {
         for (auto &path : paths) {
