@@ -40,10 +40,6 @@ class Referent; // Inherit this if you want your object to be able to go into a
 template <typename T> class Ptr; // Reference counted smart pointer base class.
 template <typename T> class WeakPtr; // Weak reference smart pointer base class.
 
-
-template <typename T> class Ptr;
-template <typename T> class WeakPtr;
-
 template <typename T> class PtrTraits {
   public:
     using element_type = T;
