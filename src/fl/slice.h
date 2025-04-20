@@ -126,6 +126,11 @@ template <typename T, typename IntType = uint16_t> class MatrixSlice {
 
     T &operator()(point_xy<IntType> p) {
         // convert from local coordinates to parent coordinates
+        return at(p);
+    }
+
+    T& at(point_xy<IntType> p) {
+        // convert from local coordinates to parent coordinates
         point_xy<IntType> parentCoord = getParentCoord(p);
         return mData[parentCoord.x + parentCoord.y * mDataWidth];
     }
