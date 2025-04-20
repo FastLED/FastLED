@@ -843,35 +843,35 @@ FASTLED_NAMESPACE_END
 
 #endif
 
-#ifdef FASTLED_UI
-// As a convenience, include the UI headers and bring them into the global namespace
-#include "fl/ui.h"
-#include "fl/xymap.h"
-using fl::UIButton;
+
+/////////////////////////// Convenience includes for sketches ///////////////////////////
+
+#if !defined(FASTLED_INTERNAL) && !defined(FASTLED_LEAN_AND_MEAN)
+
+#include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
+#include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
+
+#include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
+#include "fl/assert.h"  // FASTLED_ASSERT(condition, "message");
+
+// provides:
+//   fl::vector<T> - Standard heap vector
+//   fl::vector_inlined<T,N> - Allocate on stack N elements, then overflow to heap vector.
+//   fl::vector_fixed<T,N> - Stack allocated fixed size vector, elements will fail to add when full.
+#include "fl/vector.h"
+
+#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
+using fl::UIButton;  // These names are unique enough that we don't need to namespace them
 using fl::UICheckbox;
 using fl::UINumberField;
 using fl::UISlider;
 using fl::XYMap;
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
-#endif // FASTLED_UI
 
+#endif // FASTLED_INTERNAL
+
+// Auto namespace if necessary.
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
 using namespace fl;
 #endif
-
-
-/////////////////////////// Convenience includes for sketches ///////////////////////////
-
-#ifndef FASTLED_INTERNAL
-
-// useful for sketches
-#include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
-#include "fl/warn.h"  // FASTLED_WARN("message" << "more message");
-#include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
-#include "fl/vector.h"  // provides fl::vector<T> and fl::vector_inlined<T,N>;
-#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
-
-// #include "fl/vector.h"
-
-#endif // FASTLED_INTERNAL

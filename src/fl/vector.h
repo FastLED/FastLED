@@ -738,10 +738,13 @@ private:
     HeapVector<T>                mHeap;
 };
 
+template<typename T, size_t INLINED_SIZE>
+using vector_fixed = FixedVector<T, INLINED_SIZE>;
+
 template<typename T>
 using vector = HeapVector<T>;
 
-template<typename T, size_t INLINED_SIZE>
+template<typename T, size_t INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
 
 
