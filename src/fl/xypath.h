@@ -1,4 +1,6 @@
 
+#pragma once
+
 
 // This is a drawing/graphics related class.
 //

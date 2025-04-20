@@ -1,4 +1,6 @@
 
+#pragma once
+
 namespace fl {
 
 template<typename T> struct point_xy_math;
