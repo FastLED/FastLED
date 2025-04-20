@@ -860,9 +860,16 @@ using fl::XYMap;
 using namespace fl;
 #endif
 
+
+/////////////////////////// Convenience includes for sketches ///////////////////////////
+
+#ifndef FASTLED_INTERNAL
+
 // useful for sketches
+#include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
 #include "fl/warn.h"  // FASTLED_WARN("message" << "more message");
-#include "fl/str.h"   // Str class.
+#include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
+
 // #include "fl/vector.h"
 
-
+#endif // FASTLED_INTERNAL

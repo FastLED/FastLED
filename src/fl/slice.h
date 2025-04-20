@@ -101,46 +101,56 @@ template <typename T> class Slice {
     T *mData;
     size_t mSize;
 };
-
-template <typename T, typename point_t = point_xy<int>> class MatrixSlice {
-  public:
+template<typename T>
+class MatrixSlice {
+public:
     // represents a window into a matrix
-    MatrixSlice(T *data, size_t width, size_t height,
-                point_t bottomLeft, point_t topRight)
-        : mData(data), mDataWidth(width), mDataHeight(height),
-          mBottomLeft(bottomLeft), mTopRight(topRight) {}
+    // bottom-left and top-right corners are passed as plain ints
+    MatrixSlice(T*           data,
+                int32_t      dataWidth,
+                int32_t      dataHeight,
+                int32_t      bottomLeftX,
+                int32_t      bottomLeftY,
+                int32_t      topRightX,
+                int32_t      topRightY)
+      : mData(data)
+      , mDataWidth(dataWidth)
+      , mDataHeight(dataHeight)
+      , mBottomLeft{ bottomLeftX,  bottomLeftY }
+      , mTopRight  { topRightX,     topRightY    }
+    {}
 
-    point_t getParentCoord(point_t p) const {
-        // convert from local coordinates to parent coordinates
-        return point_t(p.x + mBottomLeft.x, p.y + mBottomLeft.y);
+    // outputs a point_xy but takes x,y as inputs
+    point_xy<int32_t> getParentCoord(int32_t x, int32_t y) const {
+        return { x + mBottomLeft.x,
+                 y + mBottomLeft.y };
     }
 
-    point_t getLocalCoord(point_t p) const {
-        // convert from parent coordinates to local coordinates
-        if (p.x < mBottomLeft.x || p.x > mTopRight.x || p.y < mBottomLeft.y ||
-            p.y > mTopRight.y) {
-            return point_t(0, 0);
+    point_xy<int32_t> getLocalCoord(int32_t x, int32_t y) const {
+        if (x < mBottomLeft.x || x > mTopRight.x ||
+            y < mBottomLeft.y || y > mTopRight.y) {
+            return { 0, 0 };
         }
-        return point_t(p.x - mBottomLeft.x, p.y - mBottomLeft.y);
+        return { x - mBottomLeft.x,
+                 y - mBottomLeft.y };
     }
 
-    T &operator()(point_t p) {
-        // convert from local coordinates to parent coordinates
-        return at(p);
+    // element access via (x,y)
+    T& operator()(int32_t x, int32_t y) {
+        return at(x, y);
     }
 
-    T& at(point_t p) {
-        // convert from local coordinates to parent coordinates
-        point_t parentCoord = getParentCoord(p);
-        return mData[parentCoord.x + parentCoord.y * mDataWidth];
+    T& at(int32_t x, int32_t y) {
+        auto parent = getParentCoord(x, y);
+        return mData[parent.x + parent.y * mDataWidth];
     }
 
-  private:
-    T *mData;
-    size_t mDataWidth;
-    size_t mDataHeight;
-    point_t mBottomLeft;
-    point_t mTopRight;
+private:
+    T*                mData;
+    int32_t           mDataWidth;
+    int32_t           mDataHeight;
+    point_xy<int32_t> mBottomLeft;
+    point_xy<int32_t> mTopRight;
 };
 
 } // namespace fl

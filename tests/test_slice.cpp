@@ -3,10 +3,10 @@
 
 #include "test.h"
 
-#include "test.h"
 #include "fl/slice.h"
-#include "fl/vector.h"
 #include "fl/unused.h"
+#include "fl/vector.h"
+#include "test.h"
 
 using namespace fl;
 
@@ -33,19 +33,63 @@ TEST_CASE("vector slice") {
 }
 
 TEST_CASE("matrix compile") {
-    int data[2][2] = {
-        {1, 2},
-        {3, 4}
-    };
+    int data[2][2] = {{1, 2}, {3, 4}};
 
-    point_xy<uint16_t> bottomLeft(0, 0);
-    point_xy<uint16_t> topRight(1, 1);
-
-    MatrixSlice<int, point_xy<uint16_t>> slice(
-        &data[0][0], 2, 2, bottomLeft, topRight);
+    // Window from (0,0) up to (1,1)
+    MatrixSlice<int> slice(&data[0][0], // data pointer
+                           2,           // data width
+                           2,           // data height
+                           0, 0,        // bottom-left x,y
+                           1, 1         // top-right x,y
+    );
 
     FASTLED_UNUSED(slice);
-    // just a compile test
+    // just a compile‐time smoke test
+}
+
+TEST_CASE("matrix slice returns correct values") {
+    int data[2][2] = {{1, 2}, {3, 4}};
+
+    // Window from (0,0) up to (1,1)
+    MatrixSlice<int> slice(&data[0][0], // data pointer
+                           2,           // data width
+                           2,           // data height
+                           0, 0,        // bottom-left x,y
+                           1, 1         // top-right x,y
+    );
+
+    // sanity‐check each element
+    REQUIRE_EQ(slice(0, 0), data[0][0]);
+    REQUIRE_EQ(slice(1, 0), data[0][1]);
+    REQUIRE_EQ(slice(0, 1), data[1][0]);
+    REQUIRE_EQ(slice(1, 1), data[1][1]);
+}
+
+TEST_CASE("4x4 matrix slice returns correct values") {
+    int data[4][4] = {
+        {  1,  2,  3,  4 },
+        {  5,  6,  7,  8 },
+        {  9, 10, 11, 12 },
+        { 13, 14, 15, 16 }
+    };
+
+    // Take a 2×2 window from (1,1) up to (2,2)
+    MatrixSlice<int> slice(
+        &data[0][0],  // data pointer
+        4,            // data width
+        4,            // data height
+        1, 1,         // bottom-left x,y
+        2, 2          // top-right x,y
+    );
+
+    // Local (0,0) → parent (1,1) → data[1][1] ==  6
+    REQUIRE_EQ( slice(0, 0), data[1][1] );
+    // Local (1,0) → parent (2,1) → data[1][2] ==  7
+    REQUIRE_EQ( slice(1, 0), data[1][2] );
+    // Local (0,1) → parent (1,2) → data[2][1] == 10
+    REQUIRE_EQ( slice(0, 1), data[2][1] );
+    // Local (1,1) → parent (2,2) → data[2][2] == 11
+    REQUIRE_EQ( slice(1, 1), data[2][2] );
 }
 
 #if 0
@@ -110,4 +154,4 @@ TEST_CASE("4x4 matrix slice") {
     REQUIRE_EQ(v4, 11);
 }
 
-#endif  // 0
+#endif // 0
