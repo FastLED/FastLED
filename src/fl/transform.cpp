@@ -12,6 +12,7 @@ namespace fl {
 point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     float x = xy.x * scale_x + x_offset;
     float y = xy.y * scale_y + y_offset;
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
     const bool has_rotation = (rotation != 0.0f);
 #pragma GCC diagnostic pop

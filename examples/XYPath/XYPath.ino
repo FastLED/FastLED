@@ -70,7 +70,7 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = GielisCurvePathPtr::New();
+XYPathPtr shape = NewPtr<CirclePath>();
 TimeLinear pointTransition(10000);
 
 void setup() {
