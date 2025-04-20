@@ -869,6 +869,8 @@ using namespace fl;
 #include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
 #include "fl/warn.h"  // FASTLED_WARN("message" << "more message");
 #include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
+#include "fl/vector.h"  // provides fl::vector<T> and fl::vector_inlined<T,N>;
+#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
 
 // #include "fl/vector.h"
 

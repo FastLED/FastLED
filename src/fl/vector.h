@@ -656,4 +656,93 @@ public:
 };
 
 
+template<typename T, size_t INLINED_SIZE>
+class InlinedVector {
+public:
+    using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
+    using const_iterator = typename FixedVector<T, INLINED_SIZE>::const_iterator;
+
+    InlinedVector() = default;
+
+    // Get current size
+    size_t size() const {
+        return mUsingHeap ? mHeap.size() : mFixed.size();
+    }
+
+    bool empty() const {
+        return size() == 0;
+    }
+
+    // Element access
+    T& operator[](size_t idx) {
+        return mUsingHeap ? mHeap[idx] : mFixed[idx];
+    }
+    const T& operator[](size_t idx) const {
+        return mUsingHeap ? mHeap[idx] : mFixed[idx];
+    }
+
+    // Add an element
+    void push_back(const T& value) {
+        if (!mUsingHeap) {
+            if (mFixed.size() < INLINED_SIZE) {
+                mFixed.push_back(value);
+                return;
+            }
+            // overflow: move inline data into heap
+            mHeap.reserve(INLINED_SIZE * 2);
+            for (auto& v : mFixed) {
+                mHeap.push_back(v);
+            }
+            mFixed.clear();
+            mUsingHeap = true;
+        }
+        mHeap.push_back(value);
+    }
+
+    // Remove last element
+    void pop_back() {
+        if (mUsingHeap) {
+            mHeap.pop_back();
+        } else {
+            mFixed.pop_back();
+        }
+    }
+
+    // Clear all elements
+    void clear() {
+        if (mUsingHeap) {
+            mHeap.clear();
+            mUsingHeap = false;
+        } else {
+            mFixed.clear();
+        }
+    }
+
+    // Iterators
+    iterator begin() {
+        return mUsingHeap ? mHeap.begin() : mFixed.begin();
+    }
+    iterator end() {
+        return mUsingHeap ? mHeap.end() : mFixed.end();
+    }
+    const_iterator begin() const {
+        return mUsingHeap ? mHeap.begin() : mFixed.begin();
+    }
+    const_iterator end() const {
+        return mUsingHeap ? mHeap.end() : mFixed.end();
+    }
+
+private:
+    bool                       mUsingHeap = false;
+    FixedVector<T, INLINED_SIZE> mFixed;
+    HeapVector<T>                mHeap;
+};
+
+template<typename T>
+using vector = HeapVector<T>;
+
+template<typename T, size_t INLINED_SIZE>
+using vector_inlined = InlinedVector<T, INLINED_SIZE>;
+
+
 }  // namespace fl
