@@ -25,7 +25,6 @@ TEST_CASE("vector slice") {
     REQUIRE_EQ(slice[2], 3);
     REQUIRE_EQ(slice[3], 4);
 
-
     Slice<int> slice2 = slice.slice(1, 3);
     REQUIRE_EQ(slice2.length(), 2);
     REQUIRE_EQ(slice2[0], 2);
