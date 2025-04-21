@@ -178,7 +178,7 @@ WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
 
 void WaveSimulation1D::init(uint32_t length, SuperSample factor,
                             float speed, int dampening) {
-    outerLength = length;
+    mOuterLength = length;
     mMultiplier = static_cast<uint32_t>(factor);
     mSim.reset(new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
@@ -268,7 +268,7 @@ uint8_t WaveSimulation1D::getu8(size_t x) const {
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
 }
 
-bool WaveSimulation1D::has(size_t x) const { return (x < outerLength); }
+bool WaveSimulation1D::has(size_t x) const { return (x < mOuterLength); }
 
 void WaveSimulation1D::setf(size_t x, float value) {
     if (!has(x))
@@ -285,6 +285,6 @@ void WaveSimulation1D::update() {
     }
 }
 
-uint32_t WaveSimulation1D::getLength() const { return outerLength; }
+uint32_t WaveSimulation1D::getLength() const { return mOuterLength; }
 
 } // namespace fl

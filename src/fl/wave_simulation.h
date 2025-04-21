@@ -58,7 +58,7 @@ class WaveSimulation1D {
         if (uint32_t(factor) == mMultiplier) {
             return;
         }
-        init(outerLength, factor, mSim->getSpeed(), mSim->getDampenening());
+        init(mOuterLength, factor, mSim->getSpeed(), mSim->getDampenening());
     }
 
     // Only applies to getu8().
@@ -113,7 +113,7 @@ class WaveSimulation1D {
     WaveSimulation1D_Real &real() { return *mSim; }
 
   private:
-    uint32_t outerLength; // Length of the downsampled simulation.
+    uint32_t mOuterLength; // Length of the downsampled simulation.
     uint8_t mExtraFrames = 0;
     uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
