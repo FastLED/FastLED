@@ -1,7 +1,6 @@
 
 #pragma once
 
-
 // This is a drawing/graphics related class.
 //
 // XYPath represents a parameterized (x,y) path. The input will always be
@@ -14,11 +13,15 @@
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
+#include "fl/transform.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/transform.h"
 
 namespace fl {
+
+template <typename T> struct Tile3x3 {
+    T mTile[3][3] = {};
+};
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
@@ -33,12 +36,11 @@ FASTLED_SMART_PTR(XYPathGenerator);
 // FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
-class XYPathGenerator: public Referent {
-   public:
+class XYPathGenerator : public Referent {
+  public:
     virtual const Str name() const = 0;
     virtual point_xy_float compute(float alpha) = 0;
 };
-
 
 class XYPath : public Referent {
   public:
@@ -52,19 +54,19 @@ class XYPath : public Referent {
     }
 
     static XYPathPtr NewCirclePath(uint16_t width, uint16_t height) {
-        auto path = CirclePathPtr::New();
-        auto out = XYPathPtr::New(path);
+        CirclePathPtr path = CirclePathPtr::New();
+        XYPathPtr out = XYPathPtr::New(path);
         out->setDrawBounds(width, height);
         return out;
     }
-
 
     // static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
     //     return HeartPathPtr::New(steps);
     // }
 
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
-    //                                          float delta, uint16_t steps = 0) {
+    //                                          float delta, uint16_t steps = 0)
+    //                                          {
     //     return LissajousPathPtr::New(a, b, delta, steps);
     // }
 
@@ -82,8 +84,8 @@ class XYPath : public Referent {
     // }
 
     // static GielisCurvePathPtr NewGielisCurvePath(uint8_t m, float a, float b,
-    //                                              float n1, float n2, float n3,
-    //                                              uint16_t steps = 0) {
+    //                                              float n1, float n2, float
+    //                                              n3, uint16_t steps = 0) {
     //     return GielisCurvePathPtr::New(m, a, b, n1, n2, n3, steps);
     // }
 
@@ -95,8 +97,9 @@ class XYPath : public Referent {
            TransformFloatPtr transform = TransformFloat::Identity(),
            uint16_t steps = 0); // 0 steps means no LUT.
 
-
     point_xy_float at(float alpha) { return at(alpha, *mTransform); }
+
+    point_xy_float at_gaussian(float alpha, Tile3x3<float> *out);
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {
@@ -105,10 +108,10 @@ class XYPath : public Referent {
 
     void setDrawBounds(uint16_t width, uint16_t height) {
         if (width > 0) {
-          width -= 1;
+            width -= 1;
         }
         if (height > 0) {
-          height -= 1;
+            height -= 1;
         }
         // map [-1, 1] -> [0, width]
         mGridTransform->scale_x = width / 2.0f;
@@ -125,12 +128,10 @@ class XYPath : public Referent {
         // mTransform->validate();
         // Just recompute unconditionally. If this is a performance issue,
         // we can add a flag to make it lazy.
-        //mTransform16 = mTransform->toTransform16();
+        // mTransform16 = mTransform->toTransform16();
     }
 
-    TransformFloatPtr transform() {
-        return mTransform;
-    }
+    TransformFloatPtr transform() { return mTransform; }
 
     void setScale(float scale) {
         mTransform->scale_x = scale;
@@ -138,7 +139,7 @@ class XYPath : public Referent {
         onTransformFloatChanged();
     }
 
-    point_xy_float compute(float alpha) { 
+    point_xy_float compute(float alpha) {
         return compute_float(alpha, *mTransform);
     }
 
@@ -153,9 +154,7 @@ class XYPath : public Referent {
 
     // Called by subclasses when something changes. The LUT will be rebuilt on
     // the next call to at16(...) if mSteps > 0.
-    void clearLut() {
-        mLut.reset();
-    }
+    void clearLut() { mLut.reset(); }
 
     // Clears lut and sets new steps. LUT will be rebuilt on next call to
     // at16(...) if mSteps > 0.
@@ -186,19 +185,16 @@ class XYPath : public Referent {
     TransformFloatPtr mTransform = TransformFloat::Identity();
     TransformFloatPtr mGridTransform = TransformFloat::Identity();
 
-
     uint32_t mSteps = 0;
     LUTXY16Ptr mLut;
 
-    //Transform16 mTransform16;
+    // Transform16 mTransform16;
     void initLutOnce();
     LUTXY16Ptr generateLUT(uint16_t steps);
     point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
-
 ///////////////// Implementations of common XYPaths ///////////////////
-
 
 class LinePath : public XYPathGenerator {
   public:
@@ -233,7 +229,6 @@ class CatmullRomPath : public XYPath {
 };
 #endif
 
-
 class CirclePath : public XYPathGenerator {
   public:
     CirclePath();
@@ -243,6 +238,5 @@ class CirclePath : public XYPathGenerator {
   private:
     float mRadius;
 };
-
 
 } // namespace fl

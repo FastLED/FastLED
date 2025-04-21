@@ -49,6 +49,50 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     return out;
 }
 
+
+
+point_xy_float XYPath::at_gaussian(float alpha, Tile3x3<float>* out) {
+    // 1) get the continuous point in [0..1]²
+    point_xy_float xy = at(alpha);
+
+    // 2) find the integer cell containing it
+    int cx = static_cast<int>(std::floor(xy.x));
+    int cy = static_cast<int>(std::floor(xy.y));
+
+    // 3) compute the fractional offsets inside that cell
+    float fx = xy.x - cx;
+    float fy = xy.y - cy;
+
+    // 4) Gaussian parameters (adjust sigma for wider/narrower splats)
+    constexpr float sigma = 1.0f;
+    constexpr float twoSigmaSq = 2.0f * sigma * sigma;
+
+    // 5) fill the 3×3 tile of weights
+    float sum = 0.0f;
+    for (int dy = -1; dy <= 1; ++dy) {
+        for (int dx = -1; dx <= 1; ++dx) {
+            float dxr = fx - dx;
+            float dyr = fy - dy;
+            float w = expf(-(dxr*dxr + dyr*dyr) / twoSigmaSq);
+            // store into your Tile3x3 – here I assume row‑major m[row][col]:
+            out->mTile[dy + 1][dx + 1] = w;
+            sum += w;
+        }
+    }
+
+    float inv_sum = 1.f/sum;
+
+    // 6) normalize so that all weights sum to 1
+    for (int y = 0; y < 3; ++y) {
+        for (int x = 0; x < 3; ++x) {
+            out->mTile[y][x] *= inv_sum;
+        }
+    }
+
+    // return the original continuous point
+    return xy;
+}
+
 point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     if (mSteps > 0) {
         initLutOnce();
@@ -171,5 +215,8 @@ point_xy_float CirclePath::compute(float alpha) {
 }
 
 CirclePath::CirclePath() {}
+
+
+
 
 } // namespace fl
