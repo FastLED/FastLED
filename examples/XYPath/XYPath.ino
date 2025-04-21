@@ -166,6 +166,7 @@ void loop() {
                     uint8_t value = subpixel.at(x, y);
                     // leds[idx] = CRGB(value, value, value);
                     float valuef = value / 255.0f;
+                    valuef = sqrt(valuef);
                     waveFxLower.addf(origin.x + x, origin.y + y, valuef);
                     msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
                     if (!useWaveFx) {
@@ -173,7 +174,7 @@ void loop() {
                     }
                 }
             }
-            // FASTLED_WARN(msg.c_str());
+            FASTLED_WARN(msg.c_str());
         }
     }
 
