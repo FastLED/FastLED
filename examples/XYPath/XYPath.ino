@@ -104,8 +104,8 @@ void loop() {
         const CRGB white = CRGB(32, 32, 32);
         const CRGB black = CRGB(0, 0, 0);
         float curr_alpha = pointTransition.updatef(now);
-        Tile3x3<float> tile;
-        auto xy = shape->at_gaussian(curr_alpha, &tile);
+        Tile2x2<float> tile;
+        auto xy = shape->at_subpixel(curr_alpha, &tile);
         // waveFxLower.addf(xy.x, xy.y, 1.0f);
         // waveFxUpper.addf(xy.x, xy.y, 1.0f);
 

@@ -14,13 +14,12 @@ using namespace fl;
 
 #define MESSAGE_TILE(TILE) \
     MESSAGE("\nTile:\n" \
-            << "  " << TILE.at(0, 0) << " " << TILE.at(1, 0) << " " << TILE.at(2, 0) << "\n" \
-            << "  " << TILE.at(0, 1) << " " << TILE.at(1, 1) << " " << TILE.at(2, 1) << "\n" \
-            << "  " << TILE.at(0, 2) << " " << TILE.at(1, 2) << " " << TILE.at(2, 2) << "\n");
+            << "  " << TILE.at(0, 0) << " " << TILE.at(1, 0) << "\n" \
+            << "  " << TILE.at(0, 1) << " " << TILE.at(1, 1) << "\n");
 
 #define MESSAGE_TILE_ROW(TILE, ROW) \
     MESSAGE("\nTile Row " << ROW << ":\n" \
-            << "  " << TILE.at(0, ROW) << " " << TILE.at(1, ROW) << " " << TILE.at(2, ROW) << "\n");
+            << "  " << TILE.at(0, ROW) << " " << TILE.at(1, ROW) << "\n");
 
 
 TEST_CASE("LinePath") {
@@ -38,13 +37,13 @@ TEST_CASE("LinePath") {
     REQUIRE(xy.y == 0.0f);
 }
 
-TEST_CASE("LinePath at_gaussian") {
+TEST_CASE("LinePath at_subpixel") {
     // Tests that we can get the correct gaussian values at center point 0,0
     PointPath point(0.0f, 0.0f);
     XYPath path(NewPtrNoTracking(point));
-    Tile3x3<float> tile;
-    point_xy_float xy = path.at_gaussian(0.5f, &tile);
-    REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
+    Tile2x2<float> tile;
+    path.at_subpixel(0.5f, &tile);
+    REQUIRE_EQ(tile.origin, point_xy<uint16_t>(0, 0));
     MESSAGE_TILE(tile);
 }
 
@@ -71,14 +70,14 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
     REQUIRE_EQ(point_xy_float(1.5f, 0.5f), end);
 }
 
-// TEST_CASE("LinePath at_gaussian moves x") {
+// TEST_CASE("LinePath at_subpixel moves x") {
 //     // Tests that we can get the correct gaussian values at center point 0,0
 //     LinePath point(0, 1.f, 1.f, 1.f);
 //     XYPath path(NewPtrNoTracking(point));
 //     path.setDrawBounds(3, 3);
 //     //path.setDrawBounds(3, 3);
-//     Tile3x3<float> tile;
-//     point_xy_float xy = path.at_gaussian(0.0f, &tile);
+//     Tile2x2<float> tile;
+//     point_xy_float xy = path.at_subpixel(0.0f, &tile);
 //     MESSAGE_TILE(tile);
 //     REQUIRE_EQ(point_xy_float(.5f, 1.5f), xy);
 
@@ -89,7 +88,7 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
 
 //     for (float x = 0; true; x += step) {
 //         x = MIN(3.f, x);
-//         point_xy_float xy = path.at_gaussian(x, &tile);
+//         point_xy_float xy = path.at_subpixel(x, &tile);
 //         //MESSAGE("x: " << x << " y: " << y);
 //         //MESSAGE_TILE_ROW(tile, y);
 
@@ -117,12 +116,12 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
 //     MESSAGE("Done!");
 // }
 
-// TEST_CASE("LinePath at_gaussian slightly off center") {
+// TEST_CASE("LinePath at_subpixel slightly off center") {
 //     // Tests that we can get the correct gaussian values at center point 0,0
 //     PointPath point(0.1f, 0.0f);
 //     XYPath path(NewPtrNoTracking(point));
-//     Tile3x3<float> tile;
-//     point_xy_float xy = path.at_gaussian(0.5f, &tile);
+//     Tile2x2<float> tile;
+//     point_xy_float xy = path.at_subpixel(0.5f, &tile);
 //     MESSAGE_TILE(tile);
 //     REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
 // }

@@ -51,7 +51,7 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
 
 
 
-point_xy_float XYPath::at_gaussian(float alpha, Tile3x3<float>* out) {
+void XYPath::at_subpixel(float alpha, Tile2x2<float>* out) {
     // 1) get the continuous point in [0..1]²
     point_xy_float xy = at(alpha);
 
@@ -64,33 +64,33 @@ point_xy_float XYPath::at_gaussian(float alpha, Tile3x3<float>* out) {
     float fy = xy.y - cy;
 
     // 4) Gaussian parameters (adjust sigma for wider/narrower splats)
-    constexpr float sigma = 1.0f;
+    constexpr float sigma     = 1.0f;
     constexpr float twoSigmaSq = 2.0f * sigma * sigma;
 
-    // 5) fill the 3×3 tile of weights
+    // 5) fill the 2×2 tile of weights
     float sum = 0.0f;
-    for (int dy = -1; dy <= 1; ++dy) {
-        for (int dx = -1; dx <= 1; ++dx) {
+    for (int dy = 0; dy <= 1; ++dy) {
+        for (int dx = 0; dx <= 1; ++dx) {
+            // dxr, dyr are the distance from the subpixel to each neighbor
             float dxr = fx - dx;
             float dyr = fy - dy;
             float w = expf(-(dxr*dxr + dyr*dyr) / twoSigmaSq);
-            // store into your Tile3x3 – here I assume row‑major m[row][col]:
-            out->at(dx + 1, dy + 1) = w;
+            out->at(dx, dy) = w;
             sum += w;
         }
     }
 
-    float inv_sum = 1.f/sum;
-
-    // 6) normalize so that all weights sum to 1
-    for (int y = 0; y < 3; ++y) {
-        for (int x = 0; x < 3; ++x) {
-            out->mTile[y][x] *= inv_sum;
+    // 6) normalize so that all four weights sum to 1
+    float inv_sum = 1.f / sum;
+    for (int y = 0; y < 2; ++y) {
+        for (int x = 0; x < 2; ++x) {
+            out->tile[y][x] *= inv_sum;
         }
     }
 
     // return the original continuous point
-    return xy;
+    out->origin.x = cx;
+    out->origin.y = cy;
 }
 
 point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {

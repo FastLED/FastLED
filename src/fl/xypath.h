@@ -20,12 +20,11 @@
 
 namespace fl {
 
-template <typename T> struct Tile3x3 {
-    T mTile[3][3] = {};
-
+template <typename T> struct Tile2x2 {
+    point_xy<uint16_t> origin;
+    T tile[2][2] = {};
     T &operator()(int x, int y) { return at(x, y); }
-
-    T &at(int x, int y) { return mTile[y][x]; }
+    T &at(int x, int y) { return tile[y][x]; }
 };
 
 // Smart pointers for the XYPath family.
@@ -110,7 +109,7 @@ class XYPath : public Referent {
 
     point_xy_float at(float alpha) { return at(alpha, *mTransform); }
 
-    point_xy_float at_gaussian(float alpha, Tile3x3<float> *out);
+    void at_subpixel(float alpha, Tile2x2<float> *out);
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {
