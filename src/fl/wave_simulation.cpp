@@ -152,23 +152,25 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             // compute offset from the center of this block
             int dx = static_cast<int>(i) - rad;
             int dy = static_cast<int>(j) - rad;
-
             // keep only those points whose Manhattan distance ≤ rad
-            if (ABS(dx) + ABS(dy) > rad)
+            if (ABS(dx) + ABS(dy) > rad) {
                 continue;
-
+            }
             size_t xx = x * mMultiplier + i;
             size_t yy = y * mMultiplier + j;
             if (mSim->has(xx, yy)) {
                 int16_t& pt = mChangeGrid.at(xx, yy);
-                // mChangeGrid(xx, yy) = v16;
                 if (pt == 0) {
+                    // not set yet so set unconditionally.
                     pt = v16;
                 } else {
                     const bool sign_matches = (pt >= 0) == (v16 >= 0);
                     if (!sign_matches) {
+                        // opposite signs, so overwrite
                         pt = v16;
                     } else {
+                        // if the magnitude of the new pt is greater than what
+                        // was already there, then overwrite.
                         uint16_t abs_pt = static_cast<uint16_t>(ABS(pt));
                         uint16_t abs_v16 = static_cast<uint16_t>(ABS(v16));
                         if (abs_pt > abs_v16) {
