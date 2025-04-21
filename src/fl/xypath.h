@@ -42,8 +42,9 @@ class XYPathGenerator: public Referent {
 
 class XYPath : public Referent {
   public:
-    static LinePathPtr NewLinePath(float x0, float y0, float x1, float y1) {
-        return LinePathPtr::New(x0, y0, x1, y1);
+    static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
+        auto path = LinePathPtr::New(x0, y0, x1, y1);
+        return XYPathPtr::New(path);
     }
     static XYPathPtr NewCirclePath() {
         auto path = CirclePathPtr::New();
