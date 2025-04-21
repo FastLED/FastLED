@@ -16,6 +16,7 @@
 #include "fl/transform.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/unused.h"
 
 namespace fl {
 
@@ -33,6 +34,7 @@ template <typename T> struct Tile3x3 {
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
+FASTLED_SMART_PTR(PointPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(XYPathGenerator);
@@ -52,6 +54,12 @@ class XYPathGenerator : public Referent {
 
 class XYPath : public Referent {
   public:
+
+    static XYPathPtr NewPointPath(float x, float y) {
+        auto path = PointPathPtr::New(x, y);
+        return XYPathPtr::New(path);
+    }
+
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
         auto path = LinePathPtr::New(x0, y0, x1, y1);
         return XYPathPtr::New(path);
@@ -203,6 +211,27 @@ class XYPath : public Referent {
 };
 
 ///////////////// Implementations of common XYPaths ///////////////////
+
+
+class PointPath: public XYPathGenerator {
+  public:
+    PointPath(float x, float y): mPoint(x, y) {}
+    PointPath(point_xy_float p): mPoint(p) {}
+    point_xy_float compute(float alpha) override {
+      FASTLED_UNUSED(alpha);
+      return mPoint;
+    }
+    const Str name() const override { return "PointPath"; }
+    void set(float x, float y) { 
+      set(point_xy_float(x, y));
+    }
+    void set(point_xy_float p) {
+      mPoint = p;
+    }
+
+  private:
+    point_xy_float mPoint;
+};
 
 class LinePath : public XYPathGenerator {
   public:

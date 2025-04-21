@@ -27,6 +27,17 @@ TEST_CASE("LinePath") {
     REQUIRE(xy.y == 0.0f);
 }
 
+TEST_CASE("LinePath at_gaussian") {
+    // Tests that we can get the correct gaussian values at center point 0,0
+    PointPath point(0.0f, 0.0f);
+    XYPath path(NewPtrNoTracking(point));
+    Tile3x3<float> tile;
+    point_xy_float xy = path.at_gaussian(0.5f, &tile);
+    REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
+    REQUIRE(xy.x == 0.0f);
+    MESSAGE("x: " << xy.x << " y: " << xy.y);
+}
+
 
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
