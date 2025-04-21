@@ -44,7 +44,6 @@ void XYPath::initLutOnce() {
 
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
-    FASTLED_WARN("xy0: " << xy);
     point_xy_float out = tx.transform(xy);
     out = mGridTransform->transform(out);
     return out;
