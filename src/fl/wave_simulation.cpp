@@ -48,7 +48,7 @@ void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor,
     mSim.reset(new WaveSimulation2D_Real(width * mMultiplier, height * mMultiplier, speed, dampening));
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
-    extraFrames = uint8_t(factor) - 1;
+    mExtraFrames = uint8_t(factor) - 1;
 }
 
 void WaveSimulation2D::setDampening(int damp) { mSim->setDampening(damp); }
@@ -161,7 +161,7 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 
 void WaveSimulation2D::update() {
     mSim->update();
-    for (uint8_t i = 0; i < extraFrames; ++i) {
+    for (uint8_t i = 0; i < mExtraFrames; ++i) {
         mSim->update();
     }
 }
@@ -169,7 +169,7 @@ void WaveSimulation2D::update() {
 uint32_t WaveSimulation2D::getWidth() const { return outerWidth; }
 uint32_t WaveSimulation2D::getHeight() const { return outerHeight; }
 
-void WaveSimulation2D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
+void WaveSimulation2D::setExtraFrames(uint8_t extra) { mExtraFrames = extra; }
 
 WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
                                    float speed, int dampening) {
@@ -183,7 +183,7 @@ void WaveSimulation1D::init(uint32_t length, SuperSample factor,
     mSim.reset(new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
-    extraFrames = static_cast<uint8_t>(factor) - 1;
+    mExtraFrames = static_cast<uint8_t>(factor) - 1;
 }
 
 void WaveSimulation1D::setSpeed(float speed) { mSim->setSpeed(speed); }
@@ -192,7 +192,7 @@ void WaveSimulation1D::setDampening(int damp) { mSim->setDampening(damp); }
 
 int WaveSimulation1D::getDampenening() const { return mSim->getDampenening(); }
 
-void WaveSimulation1D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
+void WaveSimulation1D::setExtraFrames(uint8_t extra) { mExtraFrames = extra; }
 
 float WaveSimulation1D::getSpeed() const { return mSim->getSpeed(); }
 
@@ -280,7 +280,7 @@ void WaveSimulation1D::setf(size_t x, float value) {
 
 void WaveSimulation1D::update() {
     mSim->update();
-    for (uint8_t i = 0; i < extraFrames; ++i) {
+    for (uint8_t i = 0; i < mExtraFrames; ++i) {
         mSim->update();
     }
 }

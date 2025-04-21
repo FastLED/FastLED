@@ -114,7 +114,7 @@ class WaveSimulation1D {
 
   private:
     uint32_t outerLength; // Length of the downsampled simulation.
-    uint8_t extraFrames = 0;
+    uint8_t mExtraFrames = 0;
     uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
@@ -207,7 +207,7 @@ class WaveSimulation2D {
   private:
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.
     uint32_t outerHeight; // Height of the downsampled (outer) grid.
-    uint8_t extraFrames = 0;
+    uint8_t mExtraFrames = 0;
     uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
