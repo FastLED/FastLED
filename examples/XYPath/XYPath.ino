@@ -71,7 +71,7 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = XYPath::NewCirclePath();
+XYPathPtr shape = XYPath::NewCirclePath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 
 void setup() {
@@ -81,7 +81,6 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
-    shape->setDrawBounds(WIDTH, HEIGHT);
 }
 
 void loop() {

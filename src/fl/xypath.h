@@ -51,6 +51,13 @@ class XYPath : public Referent {
         return XYPathPtr::New(path);
     }
 
+    static XYPathPtr NewCirclePath(uint16_t width, uint16_t height) {
+        auto path = CirclePathPtr::New();
+        auto out = XYPathPtr::New(path);
+        out->setDrawBounds(width, height);
+        return out;
+    }
+
 
     // static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
     //     return HeartPathPtr::New(steps);
