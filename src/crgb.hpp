@@ -19,15 +19,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-/// Add one CRGB to another, saturating at 0xFF for each channel
-FASTLED_FORCE_INLINE CRGB& CRGB::operator+= (const CRGB& rhs )
-{
-    r = qadd8( r, rhs.r);
-    g = qadd8( g, rhs.g);
-    b = qadd8( b, rhs.b);
-    return *this;
-}
-
 FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (uint8_t d )
 {
     r = qadd8( r, d);
@@ -143,11 +134,6 @@ FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const
     return out;
 }
 
-inline CRGB& CRGB::fadeToBlackBy (uint8_t fadefactor )
-{
-    nscale8x3( r, g, b, 255 - fadefactor);
-    return *this;
-}
 
 FASTLED_FORCE_INLINE uint8_t CRGB::getLuma( )  const {
     //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
@@ -173,16 +159,7 @@ FASTLED_FORCE_INLINE uint8_t CRGB::getAverageLight( )  const {
     return avg;
 }
 
-FASTLED_FORCE_INLINE CRGB CRGB::lerp8( const CRGB& other, fract8 frac) const
-{
-    CRGB ret;
 
-    ret.r = lerp8by8(r,other.r,frac);
-    ret.g = lerp8by8(g,other.g,frac);
-    ret.b = lerp8by8(b,other.b,frac);
-
-    return ret;
-}
 
 FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 {

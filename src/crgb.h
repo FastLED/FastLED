@@ -207,7 +207,7 @@ struct CRGB {
 
 
     /// Add one CRGB to another, saturating at 0xFF for each channel
-    FASTLED_FORCE_INLINE CRGB& operator+= (const CRGB& rhs);
+    CRGB& operator+= (const CRGB& rhs);
 
     /// Add a constant to each channel, saturating at 0xFF.
     /// @note This is NOT an operator+= overload because the compiler
@@ -297,7 +297,7 @@ struct CRGB {
 
     /// fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8() as (255 - fadefactor)
-    FASTLED_FORCE_INLINE CRGB& fadeToBlackBy (uint8_t fadefactor );
+    CRGB& fadeToBlackBy (uint8_t fadefactor );
 
     /// "or" operator brings each channel up to the higher of the two values
     FASTLED_FORCE_INLINE CRGB& operator|= (const CRGB& rhs )
@@ -406,7 +406,7 @@ struct CRGB {
     static CRGB computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature);
 
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
-    FASTLED_FORCE_INLINE CRGB lerp8( const CRGB& other, fract8 frac) const;
+    CRGB lerp8( const CRGB& other, fract8 amountOf2) const;
 
     /// @copydoc lerp8
     FASTLED_FORCE_INLINE CRGB lerp16( const CRGB& other, fract16 frac) const;

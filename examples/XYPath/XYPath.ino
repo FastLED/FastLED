@@ -72,8 +72,10 @@ WaveFx waveFxUpper(
 Blend2d fxBlend(xyMap);
 
 
-XYPathPtr shape = XYPath::NewLinePath(0, 0, WIDTH, HEIGHT);
+XYPathPtr shape = XYPath::NewCirclePath();
 TimeLinear pointTransition(10000);
+
+UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 
 void setup() {
     Serial.begin(115200);
@@ -82,14 +84,13 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
+    shape->setDrawBounds(WIDTH, HEIGHT);
 }
 
 void loop() {
     // Your code here
     uint32_t now = millis();
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
-
-    // FASTLED_WARN("Now: " << now);
 
     shape->setScale(scale.value());
 
@@ -100,37 +101,20 @@ void loop() {
         FASTLED_WARN("Transition triggered");
     }
 
-    if (pointTransition.isActive(now)) {
-        const CRGB white = CRGB(32, 32, 32);
-        const CRGB black = CRGB(0, 0, 0);
-        float curr_alpha = pointTransition.updatef(now);
-        SubPixel<float> tile;
-        auto xy = shape->at_subpixel(curr_alpha, &tile);
-        // waveFxLower.addf(xy.x, xy.y, 1.0f);
-        // waveFxUpper.addf(xy.x, xy.y, 1.0f);
-
-        for (int x = 0; x <= 2; ++x) {
-            int xx = xy.x + x - 1;
-            if (xx < 0 || xx >= WIDTH) {
-                continue;
-            }
-            for (int y = 0; y <= 2; ++y) {
-                int yy = xy.y + y -1;
-                if (yy < 0 || yy >= HEIGHT) {
-                    continue;
-                }
-                float val = tile.at(x, y);
-                FASTLED_WARN("x: " << x << " y: " << y << " val: " << val);
-                // waveFxLower.addf(xy.x, xy.y, val);
-                // waveFxUpper.addf(xy.x, xy.y, val);
-                if (xyMap.has(xx,yy)) {
-                    int idx = xyMap(xx,yy);
-                    CRGB color = white.lerp8(black, val * 255);
-                    leds[idx] = color;
-                }
-            }
-        }
+    // if (pointTransition.isActive(now)) {
+    if (true) {
+        const CRGB white = CRGB(255, 255, 255);
+        float curr_alpha = pointTransition.updatef(now) + transition.value();
+        //float curr_alpha = transition.value();
+        SubPixel subpixel = shape->at_subpixel(curr_alpha);
+        subpixel.draw(white, xyMap, leds);
     }
+
+    int first = xyMap(1, 1);
+    int last = xyMap(WIDTH - 2, HEIGHT - 2);
+
+    leds[first] = CRGB(255, 0, 0);
+    leds[last] = CRGB(0, 255, 0);
 
     //fxBlend.draw(Fx::DrawContext(now, leds));
     FastLED.show();

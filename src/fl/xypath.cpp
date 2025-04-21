@@ -60,33 +60,33 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
 
 
 SubPixel XYPath::at_subpixel(float alpha) {
-    // 1) get the continuous point in [0..1]²
+    // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     point_xy_float xy = at(alpha);
 
-    // 2) find the integer cell containing it
-    int cx = static_cast<int>(xy.x);
-    int cy = static_cast<int>(xy.y);
+    // 2) shift back so whole‐pixels go 0…W–1, 0…H–1
+    float x = xy.x - 0.5f;
+    float y = xy.y - 0.5f;
 
-    // 3) compute the fractional offsets inside that cell
-    float fx = xy.x - cx - .5f;   // in [0..1)
-    float fy = xy.y - cy - .5f;   // in [0..1)
+    // 3) integer cell indices
+    int cx = static_cast<int>(floorf(x));
+    int cy = static_cast<int>(floorf(y));
 
-    // 4) compute bilinear weights
-    //    top‑left     top‑right
-    float w00 = (1 - fx) * (1 - fy);
-    float w10 = fx       * (1 - fy);
-    //    bottom‑left  bottom‑right
-    float w01 = (1 - fx) * fy;
-    float w11 = fx       * fy;
+    // 4) fractional offsets in [0..1)
+    float fx = x - cx;
+    float fy = y - cy;
 
-    // 5) record which pixel this tile is anchored to
+    // 5) bilinear weights
+    float w_ll = (1 - fx) * (1 - fy);  // lower‑left
+    float w_lr = fx       * (1 - fy);  // lower‑right
+    float w_ul = (1 - fx) * fy;        // upper‑left
+    float w_ur = fx       * fy;        // upper‑right
+
+    // 6) build SubPixel anchored at (cx,cy)
     SubPixel out(point_xy<int>(cx, cy));
-
-    // 6) write into the 2×2 tile (tile[row][col], i.e. [y][x])
-    out.lower_left() = to_uint8(w00);
-    out.upper_left() = to_uint8(w10);
-    out.lower_right() = to_uint8(w01);
-    out.upper_right() = to_uint8(w11);
+    out.lower_left()  = to_uint8(w_ll);
+    out.lower_right() = to_uint8(w_lr);
+    out.upper_left()  = to_uint8(w_ul);
+    out.upper_right() = to_uint8(w_ur);
 
     return out;
 }

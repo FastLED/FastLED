@@ -2,8 +2,9 @@
 /// Utility functions for the red, green, and blue (RGB) pixel struct
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
 #include "crgb.h"
+#include "FastLED.h"
+
 #include "lib8tion/math8.h"
 
 #include "fl/namespace.h"
@@ -22,40 +23,37 @@ fl::Str CRGB::toString() const {
     return out;
 }
 
-CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
-    #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
-            return CRGB(scale,scale,scale);
-    #else
-            CRGB adj(0,0,0);
-            if(scale > 0) {
-                for(uint8_t i = 0; i < 3; ++i) {
-                    uint8_t cc = colorCorrection.raw[i];
-                    uint8_t ct = colorTemperature.raw[i];
-                    if(cc > 0 && ct > 0) {
-                        // Optimized for AVR size. This function is only called very infrequently so size
-                        // matters more than speed.
-                        uint32_t work = (((uint16_t)cc)+1);
-                        work *= (((uint16_t)ct)+1);
-                        work *= scale;
-                        work /= 0x10000L;
-                        adj.raw[i] = work & 0xFF;
-                    }
-                }
+CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB &colorCorrection,
+                             const CRGB &colorTemperature) {
+#if defined(NO_CORRECTION) && (NO_CORRECTION == 1)
+    return CRGB(scale, scale, scale);
+#else
+    CRGB adj(0, 0, 0);
+    if (scale > 0) {
+        for (uint8_t i = 0; i < 3; ++i) {
+            uint8_t cc = colorCorrection.raw[i];
+            uint8_t ct = colorTemperature.raw[i];
+            if (cc > 0 && ct > 0) {
+                // Optimized for AVR size. This function is only called very
+                // infrequently so size matters more than speed.
+                uint32_t work = (((uint16_t)cc) + 1);
+                work *= (((uint16_t)ct) + 1);
+                work *= scale;
+                work /= 0x10000L;
+                adj.raw[i] = work & 0xFF;
             }
-            return adj;
-    #endif
+        }
+    }
+    return adj;
+#endif
 }
 
-
-CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
-    return CRGB(
-        blend8(p1.r, p2.r, amountOfP2),
-        blend8(p1.g, p2.g, amountOfP2),
-        blend8(p1.b, p2.b, amountOfP2)
-    );
+CRGB CRGB::blend(const CRGB &p1, const CRGB &p2, fract8 amountOfP2) {
+    return CRGB(blend8(p1.r, p2.r, amountOfP2), blend8(p1.g, p2.g, amountOfP2),
+                blend8(p1.b, p2.b, amountOfP2));
 }
 
-CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower) {
+CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     // Use luma of upper pixel as alpha (0..255)
     uint8_t max_component = 0;
     for (int i = 0; i < 3; ++i) {
@@ -69,9 +67,32 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower) {
     return CRGB::blend(upper, lower, amountOf2);
 }
 
-CRGB& CRGB::nscale8 (uint8_t scaledown )
+CRGB &CRGB::nscale8(uint8_t scaledown) {
+    nscale8x3(r, g, b, scaledown);
+    return *this;
+}
+
+/// Add one CRGB to another, saturating at 0xFF for each channel
+CRGB &CRGB::operator+=(const CRGB &rhs) {
+    r = qadd8(r, rhs.r);
+    g = qadd8(g, rhs.g);
+    b = qadd8(b, rhs.b);
+    return *this;
+}
+
+CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const {
+    CRGB ret;
+
+    ret.r = lerp8by8(r, other.r, amountOf2);
+    ret.g = lerp8by8(g, other.g, amountOf2);
+    ret.b = lerp8by8(b, other.b, amountOf2);
+
+    return ret;
+}
+
+CRGB& CRGB::fadeToBlackBy (uint8_t fadefactor )
 {
-    nscale8x3( r, g, b, scaledown);
+    nscale8x3( r, g, b, 255 - fadefactor);
     return *this;
 }
 

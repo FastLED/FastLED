@@ -56,7 +56,7 @@ void Blend2d::draw(DrawContext context) {
         auto &fx = it->fx;
         fx->draw(tmp_ctx);
         DrawMode mode = first ? DrawMode::DRAW_MODE_OVERWRITE
-                              : DrawMode::DRAW_MODE_BLEND_BY_BLACK;
+                              : DrawMode::DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS;
         first = false;
         // Apply the blur effect per effect.
         uint8_t blur_amount = it->blur_amount;
