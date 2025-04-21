@@ -75,7 +75,7 @@ point_xy_float XYPath::at_gaussian(float alpha, Tile3x3<float>* out) {
             float dyr = fy - dy;
             float w = expf(-(dxr*dxr + dyr*dyr) / twoSigmaSq);
             // store into your Tile3x3 – here I assume row‑major m[row][col]:
-            out->mTile[dy + 1][dx + 1] = w;
+            out->at(dx + 1, dy + 1) = w;
             sum += w;
         }
     }
