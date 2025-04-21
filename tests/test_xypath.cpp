@@ -70,51 +70,54 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
     REQUIRE_EQ(point_xy_float(1.5f, 0.5f), end);
 }
 
-// TEST_CASE("LinePath at_subpixel moves x") {
-//     // Tests that we can get the correct gaussian values at center point 0,0
-//     LinePath point(0, 1.f, 1.f, 1.f);
-//     XYPath path(NewPtrNoTracking(point));
-//     path.setDrawBounds(3, 3);
-//     //path.setDrawBounds(3, 3);
-//     Tile2x2<float> tile;
-//     point_xy_float xy = path.at_subpixel(0.0f, &tile);
-//     MESSAGE_TILE(tile);
-//     REQUIRE_EQ(point_xy_float(.5f, 1.5f), xy);
-
-//     // sweep left to right and get the values.
-//     const int y = 1;
-//     const int num_steps = 20;
-//     const float step = 3.0f / num_steps;
-
-//     for (float x = 0; true; x += step) {
-//         x = MIN(3.f, x);
-//         point_xy_float xy = path.at_subpixel(x, &tile);
-//         //MESSAGE("x: " << x << " y: " << y);
-//         //MESSAGE_TILE_ROW(tile, y);
-
-//         float row[3] = {};
-
-//         // now draw.
-//         for (int i = MAX(0, xy.x - 1); i <= MIN(2, xy.x + 1); ++i) {
-//             row[i] = tile.at(i, y);
-//             //MESSAGE("row[" << i << "] = " << row[i]);
-//         }
-
-//         // now print out the entire row.
-
-//         MESSAGE("Row at " << x <<  " => " << row[0] << "," << row[1] << "," << row[2]);
+TEST_CASE("LinePath at_subpixel moves x") {
+    // Tests that we can get the correct gaussian values at center point 0,0
+    LinePath point(-1.f, -1.f, 1.f, -1.f);
+    XYPath path(NewPtrNoTracking(point));
+    path.setDrawBounds(3, 3);
+    //path.setDrawBounds(3, 3);
+    Tile2x2<float> tile;
+    path.at_subpixel(0.0f, &tile);
+    MESSAGE_TILE(tile);
+    REQUIRE_EQ(tile.origin, point_xy<uint16_t>(0, 0));
 
 
-//         if (x >= 3.0f) {
-//             break;
-//         }
+    
+
+    // // sweep left to right and get the values.
+    // const int y = 1;
+    // const int num_steps = 20;
+    // const float step = 3.0f / num_steps;
+
+    // for (float x = 0; true; x += step) {
+    //     x = MIN(3.f, x);
+    //     point_xy_float xy = path.at_subpixel(x, &tile);
+    //     //MESSAGE("x: " << x << " y: " << y);
+    //     //MESSAGE_TILE_ROW(tile, y);
+
+    //     float row[3] = {};
+
+    //     // now draw.
+    //     for (int i = MAX(0, xy.x - 1); i <= MIN(2, xy.x + 1); ++i) {
+    //         row[i] = tile.at(i, y);
+    //         //MESSAGE("row[" << i << "] = " << row[i]);
+    //     }
+
+    //     // now print out the entire row.
+
+    //     MESSAGE("Row at " << x <<  " => " << row[0] << "," << row[1] << "," << row[2]);
 
 
-//         // REQUIRE_EQ(xy.x, x);
-//         // REQUIRE_EQ(xy.y, y);
-//     }
-//     MESSAGE("Done!");
-// }
+    //     if (x >= 3.0f) {
+    //         break;
+    //     }
+
+
+    //     // REQUIRE_EQ(xy.x, x);
+    //     // REQUIRE_EQ(xy.y, y);
+    // }
+    // MESSAGE("Done!");
+}
 
 // TEST_CASE("LinePath at_subpixel slightly off center") {
 //     // Tests that we can get the correct gaussian values at center point 0,0

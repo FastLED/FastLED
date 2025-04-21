@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Efficient transform classes for floating point and alpha16 coordinate systems.
 Note that component transforms are used because it's easy to skip calculations

@@ -6,6 +6,7 @@
 #include "crgb.h"
 #include "fl/str.h"
 #include "fl/lut.h"
+#include "fl/xypath.h"
 
 using namespace fl;
 
@@ -30,6 +31,18 @@ namespace doctest {
             out += value.x;
             out += ", ";
             out += value.y;
+            out += ")";
+            return out.c_str();
+        }
+    };
+
+    template<typename T> struct StringMaker<Tile2x2<T>> {
+        static String convert(const Tile2x2<T>& value) {
+            fl::Str out;
+            out += "Tile2x2(";
+            out += value.origin.x;
+            out += ", ";
+            out += value.origin.y;
             out += ")";
             return out.c_str();
         }
