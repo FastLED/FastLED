@@ -173,7 +173,7 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
                         // was already there, then overwrite.
                         uint16_t abs_pt = static_cast<uint16_t>(ABS(pt));
                         uint16_t abs_v16 = static_cast<uint16_t>(ABS(v16));
-                        if (abs_pt > abs_v16) {
+                        if (abs_v16 > abs_pt) {
                             pt = v16;
                         }
                     }

@@ -34,6 +34,8 @@ UICheckbox useWaveFx("Use WaveFX", true);
 UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 UIButton button("Trigger");
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
+UISlider speed("Speed", 1.0f, 0.25f, 20.0f, 0.01f);
+UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 
 UICheckbox advancedFrame("Advanced Frame", true);
 UIButton advancedFrameButton("Advanced Frame Button");
@@ -91,6 +93,11 @@ void setup() {
     shape->setDrawBounds(WIDTH, HEIGHT);
 }
 
+float getAlpha(uint32_t now) {
+    return speed.value() * pointTransition.updatef(now) + transition.value();
+}
+
+
 void loop() {
 
     FASTLED_WARN("Loop");
@@ -114,7 +121,7 @@ void loop() {
 
     shape->setScale(scale.value());
 
-    float curr_alpha = pointTransition.updatef(now) + transition.value();
+    float curr_alpha = getAlpha(now);
     static float s_prev_alpha = 0.0f;
 
     // unconditionally apply the circle.
@@ -122,7 +129,7 @@ void loop() {
         // trigger the transition
         pointTransition.trigger(now);
         FASTLED_WARN("Transition triggered");
-        curr_alpha = pointTransition.updatef(now) + transition.value();
+        curr_alpha = getAlpha(now);
         s_prev_alpha = curr_alpha;
     }
 
@@ -144,9 +151,11 @@ void loop() {
 
         // const float step = 0.005f;
 
+        const int number_of_steps = numberOfSteps.value();
+
         //const float prev_alpha = s_prev_alpha;
-        for (int i = 0; i < 32; ++i) {
-            float a = fl::map_range<float>(i, 0, 32, s_prev_alpha, curr_alpha);
+        for (int i = 0; i < number_of_steps; ++i) {
+            float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha, curr_alpha);
             SubPixel2x2 subpixel = shape->at_subpixel(a);
             subpixels.push_back(subpixel);
         }
