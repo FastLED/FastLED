@@ -121,18 +121,18 @@ public:
     {}
 
     // outputs a point_xy but takes x,y as inputs
-    point_xy<int32_t> getParentCoord(int32_t x, int32_t y) const {
-        return { x + mBottomLeft.x,
-                 y + mBottomLeft.y };
+    point_xy<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
+        return { x_local + mBottomLeft.x,
+                 y_local + mBottomLeft.y };
     }
 
-    point_xy<int32_t> getLocalCoord(int32_t x, int32_t y) const {
-        if (x < mBottomLeft.x || x > mTopRight.x ||
-            y < mBottomLeft.y || y > mTopRight.y) {
+    point_xy<int32_t> getLocalCoord(int32_t x_world, int32_t y_world) const {
+        if (x_world < mBottomLeft.x || x_world > mTopRight.x ||
+            y_world < mBottomLeft.y || y_world > mTopRight.y) {
             return { 0, 0 };
         }
-        return { x - mBottomLeft.x,
-                 y - mBottomLeft.y };
+        return { x_world - mBottomLeft.x,
+                 y_world - mBottomLeft.y };
     }
 
     // element access via (x,y)
