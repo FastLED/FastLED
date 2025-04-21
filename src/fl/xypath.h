@@ -17,21 +17,10 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/subpixel.h"
 
 namespace fl {
 
-template <typename T> struct Tile2x2 {
-    point_xy<int> origin;
-    T tile[2][2] = {};
-    T &operator()(int x, int y) { return at(x, y); }
-    T &at(int x, int y) { return tile[y][x]; }
-
-    T& lower_left() { return at(0,0); }
-    T& upper_left() { return at(0,1); }
-    T& lower_right() { return at(1,0); }
-    T& upper_right() { return at(1,1); }
-    
-};
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
@@ -115,7 +104,7 @@ class XYPath : public Referent {
 
     point_xy_float at(float alpha) { return at(alpha, *mTransform); }
 
-    void at_subpixel(float alpha, Tile2x2<float> *out);
+    SubPixel at_subpixel(float alpha);
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {

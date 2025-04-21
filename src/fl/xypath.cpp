@@ -8,6 +8,14 @@
 
 namespace fl {
 
+namespace {
+uint8_t to_uint8(float f) {
+    // convert to [0..255] range
+    uint8_t i = static_cast<uint8_t>(f * 255.0f + .5f);
+    return MIN(i, 255);
+}
+}
+
 XYPath::XYPath(XYPathGeneratorPtr path, TransformFloatPtr transform,
                uint16_t steps)
     : mPath(path), mTransform(transform), mSteps(steps) {}
@@ -51,7 +59,7 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
 
 
 
-void XYPath::at_subpixel(float alpha, Tile2x2<float>* out) {
+SubPixel XYPath::at_subpixel(float alpha) {
     // 1) get the continuous point in [0..1]²
     point_xy_float xy = at(alpha);
 
@@ -71,13 +79,16 @@ void XYPath::at_subpixel(float alpha, Tile2x2<float>* out) {
     float w01 = (1 - fx) * fy;
     float w11 = fx       * fy;
 
-    // 5) write into the 2×2 tile (tile[row][col], i.e. [y][x])
-    out->tile[0][0] = w00;  out->tile[0][1] = w10;
-    out->tile[1][0] = w01;  out->tile[1][1] = w11;
+    // 5) record which pixel this tile is anchored to
+    SubPixel out(point_xy<int>(cx, cy));
 
-    // 6) record which pixel this tile is anchored to
-    out->origin.x = cx;
-    out->origin.y = cy;
+    // 6) write into the 2×2 tile (tile[row][col], i.e. [y][x])
+    out.lower_left() = to_uint8(w00);
+    out.upper_left() = to_uint8(w10);
+    out.lower_right() = to_uint8(w01);
+    out.upper_right() = to_uint8(w11);
+
+    return out;
 }
 
 point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {

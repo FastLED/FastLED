@@ -7,6 +7,7 @@
 #include "fl/str.h"
 #include "fl/lut.h"
 #include "fl/xypath.h"
+#include "fl/subpixel.h"
 
 using namespace fl;
 
@@ -36,13 +37,13 @@ namespace doctest {
         }
     };
 
-    template<typename T> struct StringMaker<Tile2x2<T>> {
-        static String convert(const Tile2x2<T>& value) {
+    template<> struct StringMaker<SubPixel> {
+        static String convert(const SubPixel& value) {
             fl::Str out;
-            out += "Tile2x2(";
-            out += value.origin.x;
+            out += "SubPixel(";
+            out += value.origin().x;
             out += ", ";
-            out += value.origin.y;
+            out += value.origin().y;
             out += ")";
             return out.c_str();
         }

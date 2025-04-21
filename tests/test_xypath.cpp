@@ -42,11 +42,10 @@ TEST_CASE("LinePath at_subpixel") {
     LinePath line(-1.0f, -1.0f, 1.0f, -1.0f);
     XYPath path(NewPtrNoTracking(line));
     path.setDrawBounds(2,2);
-    Tile2x2<float> tile;
-    path.at_subpixel(0, &tile);
-    REQUIRE_EQ(point_xy<int>(0, 0), tile.origin);
+    SubPixel tile = path.at_subpixel(0);
+    REQUIRE_EQ(point_xy<int>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
-    REQUIRE_EQ(1.0f, tile.at(0, 0));
+    REQUIRE_EQ(255, tile.at(0, 0));
 }
 
 TEST_CASE("LinePath simple float sweep") {
@@ -73,72 +72,18 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
 }
 
 TEST_CASE("LinePath at_subpixel moves x") {
-    // Tests that we can get the correct gaussian values at center point 0,0
+    // Tests that we can get the correct subpixel.
     LinePath point(-1.f, -1.f, 1.f, -1.f);
     XYPath path(NewPtrNoTracking(point));
     path.setDrawBounds(3, 3);
-    //path.setDrawBounds(3, 3);
-    Tile2x2<float> tile;
-    path.at_subpixel(0.0f, &tile);
+    SubPixel tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin, point_xy<int>(0, 0));
-    REQUIRE_EQ(tile.at(0, 0), 1.0f);
-
-
-    path.at_subpixel(1.0f, &tile);
-    REQUIRE_EQ(tile.origin, point_xy<int>(2, 0));
-    REQUIRE_EQ(tile.at(0, 0), 1.0f);
-
-    // just check the x value
-    
-
-
-
-
-    // // sweep left to right and get the values.
-    // const int y = 1;
-    // const int num_steps = 20;
-    // const float step = 3.0f / num_steps;
-
-    // for (float x = 0; true; x += step) {
-    //     x = MIN(3.f, x);
-    //     point_xy_float xy = path.at_subpixel(x, &tile);
-    //     //MESSAGE("x: " << x << " y: " << y);
-    //     //MESSAGE_TILE_ROW(tile, y);
-
-    //     float row[3] = {};
-
-    //     // now draw.
-    //     for (int i = MAX(0, xy.x - 1); i <= MIN(2, xy.x + 1); ++i) {
-    //         row[i] = tile.at(i, y);
-    //         //MESSAGE("row[" << i << "] = " << row[i]);
-    //     }
-
-    //     // now print out the entire row.
-
-    //     MESSAGE("Row at " << x <<  " => " << row[0] << "," << row[1] << "," << row[2]);
-
-
-    //     if (x >= 3.0f) {
-    //         break;
-    //     }
-
-
-    //     // REQUIRE_EQ(xy.x, x);
-    //     // REQUIRE_EQ(xy.y, y);
-    // }
-    // MESSAGE("Done!");
+    REQUIRE_EQ(tile.origin(), point_xy<int>(0, 0));
+    REQUIRE_EQ(tile.at(0, 0), 255);
+    tile = path.at_subpixel(1.0f);
+    REQUIRE_EQ(tile.origin(), point_xy<int>(2, 0));
+    REQUIRE_EQ(tile.at(0, 0), 255);
 }
-
-// TEST_CASE("LinePath at_subpixel slightly off center") {
-//     // Tests that we can get the correct gaussian values at center point 0,0
-//     PointPath point(0.1f, 0.0f);
-//     XYPath path(NewPtrNoTracking(point));
-//     Tile2x2<float> tile;
-//     point_xy_float xy = path.at_subpixel(0.5f, &tile);
-//     MESSAGE_TILE(tile);
-//     REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
-// }
 
 
 TEST_CASE("Check complex types") {
