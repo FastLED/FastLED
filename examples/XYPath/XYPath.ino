@@ -104,9 +104,9 @@ void loop() {
 
     const bool advanceFrame = advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
     if (!advanceFrame) {
-        auto v1 = static_cast<bool>(advancedFrameButton);
-        auto v2 = static_cast<bool>(advancedFrame);
-        FastLED.onEndFrame();
+        // auto v1 = static_cast<bool>(advancedFrameButton);
+        // auto v2 = static_cast<bool>(advancedFrame);
+        //FastLED.onEndFrame();
         return;
     }
 

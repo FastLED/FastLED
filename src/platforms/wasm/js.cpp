@@ -195,7 +195,24 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
 }
 
 
+struct EndFrameListener : public fl::EngineEvents::Listener {
+    EndFrameListener() = default;
+    void onEndFrame() override {
+        // This is called at the end of the frame.
+        // We can do some cleanup here if needed.
+        // For now, we will just call the JavaScript function.
+        mEndFrameHappened = true;
+    }
+    bool mEndFrameHappened = false;
 
+    bool endFrameHappened() {
+        bool result = mEndFrameHappened;
+        mEndFrameHappened = false;
+        return result;
+    }
+};
+
+EndFrameListener gEndFrameListener;
 
 
 inline void setup_once() {
@@ -204,6 +221,7 @@ inline void setup_once() {
         return;
     }
     EngineListener::Init();
+    EngineEvents::addListener(&gEndFrameListener);
     g_setup_called = true;
     setup();
 }
@@ -221,6 +239,13 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     //fastled_resume_timer();
     fl::EngineEvents::onPlatformPreLoop();
     loop();
+
+    if (!gEndFrameListener.endFrameHappened()) {
+        // UI needs to pump the event loop.
+        // This happens if the sketch fails to call FastLED.show().
+        // This is a problem because the UI will not update, so we manually pump it here.
+        fl::EngineEvents::onEndFrame();
+    }
     //fastled_pause_timer();
     return 0;
 }
