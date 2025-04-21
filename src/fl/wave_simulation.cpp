@@ -43,9 +43,9 @@ WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
 void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening) {
     outerWidth = width;
     outerHeight = height;
-    multiplier = static_cast<uint32_t>(factor);
+    mMultiplier = static_cast<uint32_t>(factor);
     mSim.reset();  // clear out memory first.
-    mSim.reset(new WaveSimulation2D_Real(width * multiplier, height * multiplier, speed, dampening));
+    mSim.reset(new WaveSimulation2D_Real(width * mMultiplier, height * mMultiplier, speed, dampening));
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = uint8_t(factor) - 1;
@@ -61,36 +61,36 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
     if (!has(x, y))
         return 0.0f;
     float sum = 0.0f;
-    for (uint32_t j = 0; j < multiplier; ++j) {
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += mSim->getf(x * multiplier + i, y * multiplier + j);
+    for (uint32_t j = 0; j < mMultiplier; ++j) {
+        for (uint32_t i = 0; i < mMultiplier; ++i) {
+            sum += mSim->getf(x * mMultiplier + i, y * mMultiplier + j);
         }
     }
-    return sum / static_cast<float>(multiplier * multiplier);
+    return sum / static_cast<float>(mMultiplier * mMultiplier);
 }
 
 int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     if (!has(x, y))
         return 0;
     int32_t sum = 0;
-    for (uint32_t j = 0; j < multiplier; ++j) {
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += mSim->geti16(x * multiplier + i, y * multiplier + j);
+    for (uint32_t j = 0; j < mMultiplier; ++j) {
+        for (uint32_t i = 0; i < mMultiplier; ++i) {
+            sum += mSim->geti16(x * mMultiplier + i, y * mMultiplier + j);
         }
     }
-    return static_cast<int16_t>(sum / (multiplier * multiplier));
+    return static_cast<int16_t>(sum / (mMultiplier * mMultiplier));
 }
 
 int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     if (!has(x, y))
         return 0;
     int32_t sum = 0;
-    for (uint32_t j = 0; j < multiplier; ++j) {
-        for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += mSim->geti16Previous(x * multiplier + i, y * multiplier + j);
+    for (uint32_t j = 0; j < mMultiplier; ++j) {
+        for (uint32_t i = 0; i < mMultiplier; ++i) {
+            sum += mSim->geti16Previous(x * mMultiplier + i, y * mMultiplier + j);
         }
     }
-    return static_cast<int16_t>(sum / (multiplier * multiplier));
+    return static_cast<int16_t>(sum / (mMultiplier * mMultiplier));
 }
 
 bool WaveSimulation2D::geti16All(size_t x, size_t y, int16_t *curr,
@@ -130,10 +130,10 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
         return;
 
     // radius in pixels of your diamond
-    int rad = static_cast<int>(multiplier) / 2;
+    int rad = static_cast<int>(mMultiplier) / 2;
 
-    for (size_t j = 0; j < multiplier; ++j) {
-        for (size_t i = 0; i < multiplier; ++i) {
+    for (size_t j = 0; j < mMultiplier; ++j) {
+        for (size_t i = 0; i < mMultiplier; ++i) {
             // compute offset from the center of this block
             int dx = static_cast<int>(i) - rad;
             int dy = static_cast<int>(j) - rad;
@@ -142,8 +142,8 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             if (ABS(dx) + ABS(dy) > rad)
                 continue;
 
-            size_t xx = x * multiplier + i;
-            size_t yy = y * multiplier + j;
+            size_t xx = x * mMultiplier + i;
+            size_t yy = y * mMultiplier + j;
             if (mSim->has(xx, yy)) {
                 mSim->seti16(xx, yy, v16);
             }
@@ -179,8 +179,8 @@ WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
 void WaveSimulation1D::init(uint32_t length, SuperSample factor,
                             float speed, int dampening) {
     outerLength = length;
-    multiplier = static_cast<uint32_t>(factor);
-    mSim.reset(new WaveSimulation1D_Real(length * multiplier, speed, dampening));
+    mMultiplier = static_cast<uint32_t>(factor);
+    mSim.reset(new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = static_cast<uint8_t>(factor) - 1;
@@ -200,30 +200,30 @@ float WaveSimulation1D::getf(size_t x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
-    for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += mSim->getf(x * multiplier + i);
+    for (uint32_t i = 0; i < mMultiplier; ++i) {
+        sum += mSim->getf(x * mMultiplier + i);
     }
-    return sum / static_cast<float>(multiplier);
+    return sum / static_cast<float>(mMultiplier);
 }
 
 int16_t WaveSimulation1D::geti16(size_t x) const {
     if (!has(x))
         return 0;
     int32_t sum = 0;
-    for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += mSim->geti16(x * multiplier + i);
+    for (uint32_t i = 0; i < mMultiplier; ++i) {
+        sum += mSim->geti16(x * mMultiplier + i);
     }
-    return static_cast<int16_t>(sum / multiplier);
+    return static_cast<int16_t>(sum / mMultiplier);
 }
 
 int16_t WaveSimulation1D::geti16Previous(size_t x) const {
     if (!has(x))
         return 0;
     int32_t sum = 0;
-    for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += mSim->geti16Previous(x * multiplier + i);
+    for (uint32_t i = 0; i < mMultiplier; ++i) {
+        sum += mSim->geti16Previous(x * mMultiplier + i);
     }
-    return static_cast<int16_t>(sum / multiplier);
+    return static_cast<int16_t>(sum / mMultiplier);
 }
 
 bool WaveSimulation1D::geti16All(size_t x, int16_t *curr, int16_t *prev,
@@ -273,8 +273,8 @@ bool WaveSimulation1D::has(size_t x) const { return (x < outerLength); }
 void WaveSimulation1D::setf(size_t x, float value) {
     if (!has(x))
         return;
-    for (uint32_t i = 0; i < multiplier; ++i) {
-        mSim->set(x * multiplier + i, value);
+    for (uint32_t i = 0; i < mMultiplier; ++i) {
+        mSim->set(x * mMultiplier + i, value);
     }
 }
 

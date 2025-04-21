@@ -55,7 +55,7 @@ class WaveSimulation1D {
     void init(uint32_t length, SuperSample factor, float speed, int dampening);
 
     void setSuperSample(SuperSample factor) {
-        if (uint32_t(factor) == multiplier) {
+        if (uint32_t(factor) == mMultiplier) {
             return;
         }
         init(outerLength, factor, mSim->getSpeed(), mSim->getDampenening());
@@ -115,7 +115,7 @@ class WaveSimulation1D {
   private:
     uint32_t outerLength; // Length of the downsampled simulation.
     uint8_t extraFrames = 0;
-    uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
+    uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation1D_Real> mSim;
@@ -126,7 +126,7 @@ class WaveSimulation2D {
     // Constructor:
     //   - W and H specify the desired inner grid size of the downsampled
     //   simulation.
-    //   - 'factor' selects the supersampling multiplier (e.g., 2x, 4x, or 8x).
+    //   - 'factor' selects the supersampling mMultiplier (e.g., 2x, 4x, or 8x).
     //     Higher values yield better quality but are more cpu intensive.
     //   - Internally, the simulation is created with dimensions (factor*W x
     //   factor*H).
@@ -154,7 +154,7 @@ class WaveSimulation2D {
     float getSpeed() const;
 
     void setSuperSample(SuperSample factor) {
-        if (uint32_t(factor) == multiplier) {
+        if (uint32_t(factor) == mMultiplier) {
             return;
         }
         init(outerWidth, outerHeight, factor, mSim->getSpeed(),
@@ -208,7 +208,7 @@ class WaveSimulation2D {
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.
     uint32_t outerHeight; // Height of the downsampled (outer) grid.
     uint8_t extraFrames = 0;
-    uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
+    uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
