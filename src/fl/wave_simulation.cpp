@@ -41,8 +41,8 @@ WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
 }
 
 void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening) {
-    outerWidth = width;
-    outerHeight = height;
+    mOuterWidth = width;
+    mOuterHeight = height;
     mMultiplier = static_cast<uint32_t>(factor);
     mSim.reset();  // clear out memory first.
     mSim.reset(new WaveSimulation2D_Real(width * mMultiplier, height * mMultiplier, speed, dampening));
@@ -122,7 +122,7 @@ uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
 }
 
 bool WaveSimulation2D::has(size_t x, size_t y) const {
-    return (x < outerWidth) && (y < outerHeight);
+    return (x < mOuterWidth) && (y < mOuterHeight);
 }
 
 void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
@@ -166,8 +166,8 @@ void WaveSimulation2D::update() {
     }
 }
 
-uint32_t WaveSimulation2D::getWidth() const { return outerWidth; }
-uint32_t WaveSimulation2D::getHeight() const { return outerHeight; }
+uint32_t WaveSimulation2D::getWidth() const { return mOuterWidth; }
+uint32_t WaveSimulation2D::getHeight() const { return mOuterHeight; }
 
 void WaveSimulation2D::setExtraFrames(uint8_t extra) { mExtraFrames = extra; }
 

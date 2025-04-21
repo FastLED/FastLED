@@ -157,7 +157,7 @@ class WaveSimulation2D {
         if (uint32_t(factor) == mMultiplier) {
             return;
         }
-        init(outerWidth, outerHeight, factor, mSim->getSpeed(),
+        init(mOuterWidth, mOuterHeight, factor, mSim->getSpeed(),
              mSim->getDampenening());
     }
 
@@ -205,8 +205,8 @@ class WaveSimulation2D {
     WaveSimulation2D_Real &real() { return *mSim; }
 
   private:
-    uint32_t outerWidth;  // Width of the downsampled (outer) grid.
-    uint32_t outerHeight; // Height of the downsampled (outer) grid.
+    uint32_t mOuterWidth;  // Width of the downsampled (outer) grid.
+    uint32_t mOuterHeight; // Height of the downsampled (outer) grid.
     uint8_t mExtraFrames = 0;
     uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
