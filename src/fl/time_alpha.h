@@ -32,9 +32,9 @@ class TimeAlpha {
   public:
     virtual ~TimeAlpha() = default;
     virtual void trigger(uint32_t now) = 0;
-    virtual uint8_t update(uint32_t now) = 0;
+    virtual uint8_t update8(uint32_t now) = 0;
     virtual uint16_t update16(uint32_t now) {
-        return static_cast<uint16_t>(update(now) << 8) + 0xFF;
+        return static_cast<uint16_t>(update8(now) << 8) + 0xFF;
     }
     virtual float updatef(uint32_t now) {
         return static_cast<float>(update16(now)) / 65535.0f;
@@ -77,7 +77,7 @@ class TimeRamp: public TimeAlpha {
 
     /// Compute current 0–255 output based on how much time has elapsed since
     /// trigger().
-    uint8_t update(uint32_t now) override;
+    uint8_t update8(uint32_t now) override;
 
   private:
     uint32_t mLatchMs;
@@ -133,7 +133,7 @@ class TimeLinear: TimeAlpha {
         return true;
     }
 
-    uint8_t update(uint32_t now) override {
+    uint8_t update8(uint32_t now) override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             // if we have not started, we are not active

@@ -50,7 +50,7 @@ bool PirAdvanced::detect(uint32_t now) {
 uint8_t PirAdvanced::transition(uint32_t now) {
     // ensure detect() logic runs so we trigger on edges
     detect(now);
-    return mRamp.update(now);
+    return mRamp.update8(now);
 }
 
 } // namespace fl

@@ -80,7 +80,7 @@ bool TimeRamp::isActive(uint32_t now) const {
     return true;
 }
 
-uint8_t TimeRamp::update(uint32_t now) {
+uint8_t TimeRamp::update8(uint32_t now) {
     if (!isActive(now)) {
         return 0;
     }
