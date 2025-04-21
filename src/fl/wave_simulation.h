@@ -58,7 +58,7 @@ class WaveSimulation1D {
         if (uint32_t(factor) == multiplier) {
             return;
         }
-        init(outerLength, factor, sim->getSpeed(), sim->getDampenening());
+        init(outerLength, factor, mSim->getSpeed(), mSim->getDampenening());
     }
 
     // Only applies to getu8().
@@ -101,7 +101,7 @@ class WaveSimulation1D {
 
 
     void setHalfDuplex(bool on) {
-        sim->setHalfDuplex(on);
+        mSim->setHalfDuplex(on);
     }
 
     // Advance the simulation one time step.
@@ -110,7 +110,7 @@ class WaveSimulation1D {
     // Get the outer (downsampled) grid length.
     uint32_t getLength() const;
 
-    WaveSimulation1D_Real &real() { return *sim; }
+    WaveSimulation1D_Real &real() { return *mSim; }
 
   private:
     uint32_t outerLength; // Length of the downsampled simulation.
@@ -118,7 +118,7 @@ class WaveSimulation1D {
     uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
-    fl::scoped_ptr<WaveSimulation1D_Real> sim;
+    fl::scoped_ptr<WaveSimulation1D_Real> mSim;
 };
 
 class WaveSimulation2D {
@@ -157,8 +157,8 @@ class WaveSimulation2D {
         if (uint32_t(factor) == multiplier) {
             return;
         }
-        init(outerWidth, outerHeight, factor, sim->getSpeed(),
-             sim->getDampenening());
+        init(outerWidth, outerHeight, factor, mSim->getSpeed(),
+             mSim->getDampenening());
     }
 
     // Downsampled getter for the floating point value at (x,y) in the outer
@@ -192,7 +192,7 @@ class WaveSimulation2D {
     void seti16(size_t x, size_t y, int16_t value);
 
     void setHalfDuplex(bool on) {
-        sim->setHalfDuplex(on);
+        mSim->setHalfDuplex(on);
     }
 
     // Advance the simulation one time step.
@@ -202,7 +202,7 @@ class WaveSimulation2D {
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 
-    WaveSimulation2D_Real &real() { return *sim; }
+    WaveSimulation2D_Real &real() { return *mSim; }
 
   private:
     uint32_t outerWidth;  // Width of the downsampled (outer) grid.
@@ -211,7 +211,7 @@ class WaveSimulation2D {
     uint32_t multiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
-    fl::scoped_ptr<WaveSimulation2D_Real> sim;
+    fl::scoped_ptr<WaveSimulation2D_Real> mSim;
 };
 
 } // namespace fl

@@ -33,7 +33,7 @@ uint8_t half_duplex_blend_linear(uint16_t x) {
 namespace fl {
 
 
-void WaveSimulation2D::setSpeed(float speed) { sim->setSpeed(speed); }
+void WaveSimulation2D::setSpeed(float speed) { mSim->setSpeed(speed); }
 
 WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
                                    float speed, float dampening) {
@@ -44,17 +44,18 @@ void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor,
     outerWidth = width;
     outerHeight = height;
     multiplier = static_cast<uint32_t>(factor);
-    sim.reset(new WaveSimulation2D_Real(width * multiplier, height * multiplier, speed, dampening));
+    mSim.reset();  // clear out memory first.
+    mSim.reset(new WaveSimulation2D_Real(width * multiplier, height * multiplier, speed, dampening));
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = uint8_t(factor) - 1;
 }
 
-void WaveSimulation2D::setDampening(int damp) { sim->setDampening(damp); }
+void WaveSimulation2D::setDampening(int damp) { mSim->setDampening(damp); }
 
-int WaveSimulation2D::getDampenening() const { return sim->getDampenening(); }
+int WaveSimulation2D::getDampenening() const { return mSim->getDampenening(); }
 
-float WaveSimulation2D::getSpeed() const { return sim->getSpeed(); }
+float WaveSimulation2D::getSpeed() const { return mSim->getSpeed(); }
 
 float WaveSimulation2D::getf(size_t x, size_t y) const {
     if (!has(x, y))
@@ -62,7 +63,7 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
     float sum = 0.0f;
     for (uint32_t j = 0; j < multiplier; ++j) {
         for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += sim->getf(x * multiplier + i, y * multiplier + j);
+            sum += mSim->getf(x * multiplier + i, y * multiplier + j);
         }
     }
     return sum / static_cast<float>(multiplier * multiplier);
@@ -74,7 +75,7 @@ int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     int32_t sum = 0;
     for (uint32_t j = 0; j < multiplier; ++j) {
         for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += sim->geti16(x * multiplier + i, y * multiplier + j);
+            sum += mSim->geti16(x * multiplier + i, y * multiplier + j);
         }
     }
     return static_cast<int16_t>(sum / (multiplier * multiplier));
@@ -86,7 +87,7 @@ int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     int32_t sum = 0;
     for (uint32_t j = 0; j < multiplier; ++j) {
         for (uint32_t i = 0; i < multiplier; ++i) {
-            sum += sim->geti16Previous(x * multiplier + i, y * multiplier + j);
+            sum += mSim->geti16Previous(x * multiplier + i, y * multiplier + j);
         }
     }
     return static_cast<int16_t>(sum / (multiplier * multiplier));
@@ -108,7 +109,7 @@ int8_t WaveSimulation2D::geti8(size_t x, size_t y) const {
 
 uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
     int16_t value = geti16(x, y);
-    if (sim->getHalfDuplex()) {
+    if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
         switch (mU8Mode) {
             case WAVE_U8_MODE_LINEAR:
@@ -143,8 +144,8 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
 
             size_t xx = x * multiplier + i;
             size_t yy = y * multiplier + j;
-            if (sim->has(xx, yy)) {
-                sim->seti16(xx, yy, v16);
+            if (mSim->has(xx, yy)) {
+                mSim->seti16(xx, yy, v16);
             }
         }
     }
@@ -159,9 +160,9 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 }
 
 void WaveSimulation2D::update() {
-    sim->update();
+    mSim->update();
     for (uint8_t i = 0; i < extraFrames; ++i) {
-        sim->update();
+        mSim->update();
     }
 }
 
@@ -179,28 +180,28 @@ void WaveSimulation1D::init(uint32_t length, SuperSample factor,
                             float speed, int dampening) {
     outerLength = length;
     multiplier = static_cast<uint32_t>(factor);
-    sim.reset(new WaveSimulation1D_Real(length * multiplier, speed, dampening));
+    mSim.reset(new WaveSimulation1D_Real(length * multiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
     extraFrames = static_cast<uint8_t>(factor) - 1;
 }
 
-void WaveSimulation1D::setSpeed(float speed) { sim->setSpeed(speed); }
+void WaveSimulation1D::setSpeed(float speed) { mSim->setSpeed(speed); }
 
-void WaveSimulation1D::setDampening(int damp) { sim->setDampening(damp); }
+void WaveSimulation1D::setDampening(int damp) { mSim->setDampening(damp); }
 
-int WaveSimulation1D::getDampenening() const { return sim->getDampenening(); }
+int WaveSimulation1D::getDampenening() const { return mSim->getDampenening(); }
 
 void WaveSimulation1D::setExtraFrames(uint8_t extra) { extraFrames = extra; }
 
-float WaveSimulation1D::getSpeed() const { return sim->getSpeed(); }
+float WaveSimulation1D::getSpeed() const { return mSim->getSpeed(); }
 
 float WaveSimulation1D::getf(size_t x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
     for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += sim->getf(x * multiplier + i);
+        sum += mSim->getf(x * multiplier + i);
     }
     return sum / static_cast<float>(multiplier);
 }
@@ -210,7 +211,7 @@ int16_t WaveSimulation1D::geti16(size_t x) const {
         return 0;
     int32_t sum = 0;
     for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += sim->geti16(x * multiplier + i);
+        sum += mSim->geti16(x * multiplier + i);
     }
     return static_cast<int16_t>(sum / multiplier);
 }
@@ -220,7 +221,7 @@ int16_t WaveSimulation1D::geti16Previous(size_t x) const {
         return 0;
     int32_t sum = 0;
     for (uint32_t i = 0; i < multiplier; ++i) {
-        sum += sim->geti16Previous(x * multiplier + i);
+        sum += mSim->geti16Previous(x * multiplier + i);
     }
     return static_cast<int16_t>(sum / multiplier);
 }
@@ -241,7 +242,7 @@ int8_t WaveSimulation1D::geti8(size_t x) const {
 
 // uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
 //     int16_t value = geti16(x, y);
-//     if (sim->getHalfDuplex()) {
+//     if (mSim->getHalfDuplex()) {
 //         uint16_t v2 = static_cast<uint16_t>(value);
 //         switch (mU8Mode) {
 //             case WAVE_U8_MODE_LINEAR:
@@ -255,7 +256,7 @@ int8_t WaveSimulation1D::geti8(size_t x) const {
 
 uint8_t WaveSimulation1D::getu8(size_t x) const {
     int16_t value = geti16(x);
-    if (sim->getHalfDuplex()) {
+    if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
         switch (mU8Mode) {
             case WAVE_U8_MODE_LINEAR:
@@ -273,14 +274,14 @@ void WaveSimulation1D::setf(size_t x, float value) {
     if (!has(x))
         return;
     for (uint32_t i = 0; i < multiplier; ++i) {
-        sim->set(x * multiplier + i, value);
+        mSim->set(x * multiplier + i, value);
     }
 }
 
 void WaveSimulation1D::update() {
-    sim->update();
+    mSim->update();
     for (uint8_t i = 0; i < extraFrames; ++i) {
-        sim->update();
+        mSim->update();
     }
 }
 
