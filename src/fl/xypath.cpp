@@ -60,35 +60,22 @@ void XYPath::at_subpixel(float alpha, Tile2x2<float>* out) {
     int cy = static_cast<int>(xy.y);
 
     // 3) compute the fractional offsets inside that cell
-    float fx = xy.x - cx;
-    float fy = xy.y - cy;
+    float fx = xy.x - cx - .5f;   // in [0..1)
+    float fy = xy.y - cy - .5f;   // in [0..1)
 
-    // 4) Gaussian parameters (adjust sigma for wider/narrower splats)
-    constexpr float sigma     = 1.0f;
-    constexpr float twoSigmaSq = 2.0f * sigma * sigma;
+    // 4) compute bilinear weights
+    //    top‑left     top‑right
+    float w00 = (1 - fx) * (1 - fy);
+    float w10 = fx       * (1 - fy);
+    //    bottom‑left  bottom‑right
+    float w01 = (1 - fx) * fy;
+    float w11 = fx       * fy;
 
-    // 5) fill the 2×2 tile of weights
-    float sum = 0.0f;
-    for (int dy = 0; dy <= 1; ++dy) {
-        for (int dx = 0; dx <= 1; ++dx) {
-            // dxr, dyr are the distance from the subpixel to each neighbor
-            float dxr = fx - dx;
-            float dyr = fy - dy;
-            float w = expf(-(dxr*dxr + dyr*dyr) / twoSigmaSq);
-            out->at(dx, dy) = w;
-            sum += w;
-        }
-    }
+    // 5) write into the 2×2 tile (tile[row][col], i.e. [y][x])
+    out->tile[0][0] = w00;  out->tile[0][1] = w10;
+    out->tile[1][0] = w01;  out->tile[1][1] = w11;
 
-    // 6) normalize so that all four weights sum to 1
-    float inv_sum = 1.f / sum;
-    for (int y = 0; y < 2; ++y) {
-        for (int x = 0; x < 2; ++x) {
-            out->tile[y][x] *= inv_sum;
-        }
-    }
-
-    // return the original continuous point
+    // 6) record which pixel this tile is anchored to
     out->origin.x = cx;
     out->origin.y = cy;
 }

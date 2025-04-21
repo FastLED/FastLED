@@ -21,10 +21,16 @@
 namespace fl {
 
 template <typename T> struct Tile2x2 {
-    point_xy<uint16_t> origin;
+    point_xy<int> origin;
     T tile[2][2] = {};
     T &operator()(int x, int y) { return at(x, y); }
     T &at(int x, int y) { return tile[y][x]; }
+
+    T& lower_left() { return at(0,0); }
+    T& upper_left() { return at(0,1); }
+    T& lower_right() { return at(1,0); }
+    T& upper_right() { return at(1,1); }
+    
 };
 
 // Smart pointers for the XYPath family.

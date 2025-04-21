@@ -38,13 +38,15 @@ TEST_CASE("LinePath") {
 }
 
 TEST_CASE("LinePath at_subpixel") {
-    // Tests that we can get the correct gaussian values at center point 0,0
-    PointPath point(0.0f, 0.0f);
-    XYPath path(NewPtrNoTracking(point));
+    // Tests that we can get the correct subpixel values at center point 0,0
+    LinePath line(-1.0f, -1.0f, 1.0f, -1.0f);
+    XYPath path(NewPtrNoTracking(line));
+    path.setDrawBounds(2,2);
     Tile2x2<float> tile;
-    path.at_subpixel(0.5f, &tile);
-    REQUIRE_EQ(tile.origin, point_xy<uint16_t>(0, 0));
+    path.at_subpixel(0, &tile);
+    REQUIRE_EQ(point_xy<int>(0, 0), tile.origin);
     MESSAGE_TILE(tile);
+    REQUIRE_EQ(1.0f, tile.at(0, 0));
 }
 
 TEST_CASE("LinePath simple float sweep") {
@@ -78,11 +80,20 @@ TEST_CASE("LinePath at_subpixel moves x") {
     //path.setDrawBounds(3, 3);
     Tile2x2<float> tile;
     path.at_subpixel(0.0f, &tile);
-    MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin, point_xy<uint16_t>(0, 0));
+    // MESSAGE_TILE(tile);
+    REQUIRE_EQ(tile.origin, point_xy<int>(0, 0));
+    REQUIRE_EQ(tile.at(0, 0), 1.0f);
 
 
+    path.at_subpixel(1.0f, &tile);
+    REQUIRE_EQ(tile.origin, point_xy<int>(2, 0));
+    REQUIRE_EQ(tile.at(0, 0), 1.0f);
+
+    // just check the x value
     
+
+
+
 
     // // sweep left to right and get the values.
     // const int y = 1;
