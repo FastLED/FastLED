@@ -45,7 +45,11 @@ void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor,
     mOuterHeight = height;
     mMultiplier = static_cast<uint32_t>(factor);
     mSim.reset();  // clear out memory first.
-    mSim.reset(new WaveSimulation2D_Real(width * mMultiplier, height * mMultiplier, speed, dampening));
+    mChangeGrid.reset();
+    uint32_t w = width * mMultiplier;
+    uint32_t h = height * mMultiplier;
+    mSim.reset(new WaveSimulation2D_Real(w, h, speed, dampening));
+    mChangeGrid.reset(new int16_t[w * h]());
     // Extra frames are needed because the simulation slows down in
     // proportion to the supersampling factor.
     mExtraFrames = uint8_t(factor) - 1;
@@ -180,6 +184,7 @@ void WaveSimulation1D::init(uint32_t length, SuperSample factor,
                             float speed, int dampening) {
     mOuterLength = length;
     mMultiplier = static_cast<uint32_t>(factor);
+    mSim.reset();  // clear out memory first.
     mSim.reset(new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
