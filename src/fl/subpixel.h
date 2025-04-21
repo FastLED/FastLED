@@ -16,13 +16,13 @@ namespace fl {
 
 class XYMap;
 
-class SubPixel {
+class SubPixel2x2 {
 
   public:
-    SubPixel(const point_xy<int> &origin) : mOrigin(origin) {}
-    SubPixel(const SubPixel &) = default;
-    SubPixel &operator=(const SubPixel &) = default;
-    SubPixel(SubPixel &&) = default;
+    SubPixel2x2(const point_xy<int> &origin) : mOrigin(origin) {}
+    SubPixel2x2(const SubPixel2x2 &) = default;
+    SubPixel2x2 &operator=(const SubPixel2x2 &) = default;
+    SubPixel2x2(SubPixel2x2 &&) = default;
 
     uint8_t &operator()(int x, int y) { return at(x, y); }
     uint8_t &at(int x, int y) { return mTile[y][x]; }
@@ -34,6 +34,8 @@ class SubPixel {
     uint8_t &upper_right() { return at(1, 1); }
 
     point_xy<int> origin() const { return mOrigin; }
+
+    // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
   private:

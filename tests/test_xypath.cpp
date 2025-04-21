@@ -42,7 +42,7 @@ TEST_CASE("LinePath at_subpixel") {
     LinePath line(-1.0f, -1.0f, 1.0f, -1.0f);
     XYPath path(NewPtrNoTracking(line));
     path.setDrawBounds(2,2);
-    SubPixel tile = path.at_subpixel(0);
+    SubPixel2x2 tile = path.at_subpixel(0);
     REQUIRE_EQ(point_xy<int>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
     REQUIRE_EQ(255, tile.at(0, 0));
@@ -65,7 +65,7 @@ TEST_CASE("Point at exactly the middle") {
     XYPath path(NewPtrNoTracking(point));
     path.setDrawBounds(2,2);
     // auto xy = path.at(0);
-    fl::SubPixel sp = path.at_subpixel(0);
+    fl::SubPixel2x2 sp = path.at_subpixel(0);
     //MESSAGE_TILE(tile);
     // REQUIRE_EQ(point_xy_float(0.0f, 0.f), sp);
     // print out
@@ -101,7 +101,7 @@ TEST_CASE("LinePath at_subpixel moves x") {
     LinePath point(-1.f, -1.f, 1.f, -1.f);
     XYPath path(NewPtrNoTracking(point));
     path.setDrawBounds(3, 3);
-    SubPixel tile = path.at_subpixel(0.0f);
+    SubPixel2x2 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
     REQUIRE_EQ(tile.origin(), point_xy<int>(0, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);

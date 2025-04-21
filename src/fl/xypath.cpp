@@ -59,7 +59,7 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
 
 
 
-SubPixel XYPath::at_subpixel(float alpha) {
+SubPixel2x2 XYPath::at_subpixel(float alpha) {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     point_xy_float xy = at(alpha);
 
@@ -81,8 +81,8 @@ SubPixel XYPath::at_subpixel(float alpha) {
     float w_ul = (1 - fx) * fy;        // upper‑left
     float w_ur = fx       * fy;        // upper‑right
 
-    // 6) build SubPixel anchored at (cx,cy)
-    SubPixel out(point_xy<int>(cx, cy));
+    // 6) build SubPixel2x2 anchored at (cx,cy)
+    SubPixel2x2 out(point_xy<int>(cx, cy));
     out.lower_left()  = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
     out.upper_left()  = to_uint8(w_ul);

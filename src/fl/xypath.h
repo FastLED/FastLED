@@ -104,7 +104,7 @@ class XYPath : public Referent {
 
     point_xy_float at(float alpha) { return at(alpha, *mTransform); }
 
-    SubPixel at_subpixel(float alpha);
+    SubPixel2x2 at_subpixel(float alpha);
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {

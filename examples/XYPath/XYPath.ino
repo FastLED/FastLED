@@ -109,7 +109,7 @@ void loop() {
     if (true) {
         const CRGB purple = CRGB(255, 0, 255);
         float curr_alpha = pointTransition.updatef(now) + transition.value();
-        SubPixel subpixel = shape->at_subpixel(curr_alpha);
+        SubPixel2x2 subpixel = shape->at_subpixel(curr_alpha);
         auto origin = subpixel.origin();
 
         StrStream msg;

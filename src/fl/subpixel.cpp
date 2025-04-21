@@ -8,7 +8,7 @@ using namespace fl;
 namespace fl {
 
 
-void SubPixel::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
+void SubPixel2x2::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     uint8_t ll = at(0,0);
     uint8_t ul = at(0,1);
     uint8_t lr = at(1,0);
