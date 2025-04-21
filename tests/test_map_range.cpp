@@ -41,14 +41,14 @@ TEST_CASE("map_range<float, point_xy<float>") {
     float min = 0.0f;
     float max = 1.0f;
     point_xy<float> in_min(0.0f, 0.0f);
-    point_xy<float> out_max(1.0f, 1.0f);
+    point_xy<float> out_max(1.0f, 2.0f);
 
     point_xy<float> out = map_range(.5f, min, max, in_min, out_max);
     CHECK_EQ(out.x, 0.5f);
-    CHECK_EQ(out.y, 0.5f);
+    CHECK_EQ(out.y, 1.f);
 
     // Now try negative number
     out = map_range(-1.f, min, max, in_min, out_max);
     CHECK_EQ(out.x, -1.f);
-    CHECK_EQ(out.y, -1.f);    
+    CHECK_EQ(out.y, -2.f);    
 }
