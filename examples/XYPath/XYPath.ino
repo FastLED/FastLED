@@ -30,6 +30,8 @@ CRGB leds[NUM_LEDS];
 UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
 
+UICheckbox useWaveFx("Use WaveFX", true);
+UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 UIButton button("Trigger");
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 
@@ -75,7 +77,6 @@ Blend2d fxBlend(xyMap);
 XYPathPtr shape = XYPath::NewCirclePath();
 TimeLinear pointTransition(10000);
 
-UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 
 void setup() {
     Serial.begin(115200);
@@ -102,22 +103,35 @@ void loop() {
     }
 
     // if (pointTransition.isActive(now)) {
+    static uint32_t frame = 0;
+    frame++;
+    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
     if (true) {
-        const CRGB white = CRGB(255, 0, 255);
+        const CRGB purple = CRGB(255, 0, 255);
         float curr_alpha = pointTransition.updatef(now) + transition.value();
-        //float curr_alpha = transition.value();
         SubPixel subpixel = shape->at_subpixel(curr_alpha);
-        // subpixel.draw(white, xyMap, leds);
+        auto origin = subpixel.origin();
+
+        StrStream msg;
+        msg << "frame: " << frame << "\n";
+        msg << "subpixel: \n";
+        msg << "origin: \n";
+        msg << " x: " << (origin.x) << "\n";
+        msg << " y: " << (origin.y) << "\n";
 
         for (int x = 0; x<2; ++x) {
             for (int y = 0; y<2; ++y) {
-                // 
                 uint8_t value = subpixel.at(x, y);
                 // leds[idx] = CRGB(value, value, value);
                 float valuef = value / 255.0f;
-                waveFxLower.addf(subpixel.origin().x + x, subpixel.origin().y + y, valuef);
+                waveFxLower.addf(origin.x + x, origin.y + y, valuef);
+                msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
+                if (!useWaveFx) {
+                    subpixel.draw(purple, xyMap, leds);
+                }
             }
         }
+        FASTLED_WARN(msg.c_str());
     }
 
     int first = xyMap(1, 1);
@@ -125,7 +139,8 @@ void loop() {
 
     leds[first] = CRGB(255, 0, 0);
     leds[last] = CRGB(0, 255, 0);
-
-    fxBlend.draw(Fx::DrawContext(now, leds));
+    if (useWaveFx) {
+        fxBlend.draw(Fx::DrawContext(now, leds));
+    }
     FastLED.show();
 }
