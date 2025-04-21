@@ -4,9 +4,12 @@
 
 #include "fl/force_inline.h"
 #include "fl/math_macros.h"
-#include "fl/point.h"
 
 namespace fl {
+
+template<typename T>
+struct point_xy;
+
 namespace map_range_detail {
 
 // primary template: unchanged
@@ -54,6 +57,7 @@ FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
     return static_cast<uint8_t>(out16);
 }
 
+/////////////// IMPLEMENTATION ////////////////////////////////////
 
 namespace map_range_detail {
 
