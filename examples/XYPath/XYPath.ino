@@ -53,7 +53,7 @@ XYMap xyRect(WIDTH, HEIGHT, false);
 WaveFx
     waveFxLower(xyRect,
                 WaveFx::Args{
-                    .factor = SUPER_SAMPLE_4X,
+                    .factor = SUPER_SAMPLE_2X,
                     .half_duplex = true,
                     .speed = 0.18f,
                     .dampening = 9.0f,
@@ -62,7 +62,7 @@ WaveFx
 
 WaveFx waveFxUpper(
     xyRect, WaveFx::Args{
-                .factor = SUPER_SAMPLE_4X,
+                .factor = SUPER_SAMPLE_2X,
                 .half_duplex = true,
                 .speed = 0.25f,
                 .dampening = 3.0f,
@@ -103,11 +103,21 @@ void loop() {
 
     // if (pointTransition.isActive(now)) {
     if (true) {
-        const CRGB white = CRGB(255, 255, 255);
+        const CRGB white = CRGB(255, 0, 255);
         float curr_alpha = pointTransition.updatef(now) + transition.value();
         //float curr_alpha = transition.value();
         SubPixel subpixel = shape->at_subpixel(curr_alpha);
-        subpixel.draw(white, xyMap, leds);
+        // subpixel.draw(white, xyMap, leds);
+
+        for (int x = 0; x<2; ++x) {
+            for (int y = 0; y<2; ++y) {
+                // 
+                uint8_t value = subpixel.at(x, y);
+                // leds[idx] = CRGB(value, value, value);
+                float valuef = value / 255.0f;
+                waveFxLower.addf(subpixel.origin().x + x, subpixel.origin().y + y, valuef);
+            }
+        }
     }
 
     int first = xyMap(1, 1);
@@ -116,6 +126,6 @@ void loop() {
     leds[first] = CRGB(255, 0, 0);
     leds[last] = CRGB(0, 255, 0);
 
-    //fxBlend.draw(Fx::DrawContext(now, leds));
+    fxBlend.draw(Fx::DrawContext(now, leds));
     FastLED.show();
 }
