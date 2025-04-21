@@ -10,41 +10,8 @@ namespace fl {
 namespace map_range_detail {
 
 // primary template: unchanged
-template <typename T, typename U> struct map_range_t {
-    static U map(T value, T in_min, T in_max, U out_min, U out_max) {
-        if (in_min == in_max)
-            return out_min;
-        return out_min +
-               (value - in_min) * (out_max - out_min) / (in_max - in_min);
-    }
-};
-
-// partial specialization for U = point_xy<V>
-template <typename T, typename V> struct map_range_t<T, point_xy<V>> {
-    static point_xy<V> map(T value, T in_min, T in_max,
-                           point_xy<V> out_min, // <-- now
-                           point_xy<V> out_max) // <-- match call
-    {
-        if (in_min == in_max) {
-            return out_min;
-        }
-        // normalized [0..1]
-        T scale = (value - in_min) / T(in_max - in_min);
-        // deltas
-        V dx = out_max.x - out_min.x;
-        V dy = out_max.y - out_min.y;
-        // lerp each component
-        V x = out_min.x + V(dx * scale);
-        V y = out_min.y + V(dy * scale);
-        return {x, y};
-    }
-};
-
+template <typename T, typename U> struct map_range_t;
 template <typename T> bool equals(T a, T b) { return a == b; }
-
-inline bool equals(float a, float b) { return ALMOST_EQUAL_FLOAT(a, b); }
-
-inline bool equals(double d, double d2) { return ALMOST_EQUAL_DOUBLE(d, d2); }
 
 } // namespace map_range_detail
 
@@ -86,5 +53,45 @@ FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
     }
     return static_cast<uint8_t>(out16);
 }
+
+
+namespace map_range_detail {
+
+// primary template: unchanged
+template <typename T, typename U> struct map_range_t {
+    static U map(T value, T in_min, T in_max, U out_min, U out_max) {
+        if (in_min == in_max)
+            return out_min;
+        return out_min +
+               (value - in_min) * (out_max - out_min) / (in_max - in_min);
+    }
+};
+
+// partial specialization for U = point_xy<V>
+template <typename T, typename V> struct map_range_t<T, point_xy<V>> {
+    static point_xy<V> map(T value, T in_min, T in_max,
+                           point_xy<V> out_min, // <-- now
+                           point_xy<V> out_max) // <-- match call
+    {
+        if (in_min == in_max) {
+            return out_min;
+        }
+        // normalized [0..1]
+        T scale = (value - in_min) / T(in_max - in_min);
+        // deltas
+        V dx = out_max.x - out_min.x;
+        V dy = out_max.y - out_min.y;
+        // lerp each component
+        V x = out_min.x + V(dx * scale);
+        V y = out_min.y + V(dy * scale);
+        return {x, y};
+    }
+};
+
+inline bool equals(float a, float b) { return ALMOST_EQUAL_FLOAT(a, b); }
+inline bool equals(double d, double d2) { return ALMOST_EQUAL_DOUBLE(d, d2); }
+
+} // namespace map_range_detail
+
 
 } // namespace fl
