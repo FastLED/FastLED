@@ -744,6 +744,9 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
+	// Called automatically at the end of show().
+	void onEndFrame();
+
 	/// Clear the leds, wiping the local array of data. Optionally you can also
 	/// send the cleared data to the LEDs.
 	/// @param writeData whether or not to write out to the leds as well

@@ -35,6 +35,9 @@ UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 UIButton button("Trigger");
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 
+UICheckbox advancedFrame("Advanced Frame", true);
+UIButton advancedFrameButton("Advanced Frame Button");
+
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
     32,  0,   0,   70,  // Dark blue
@@ -89,17 +92,38 @@ void setup() {
 }
 
 void loop() {
+
+    FASTLED_WARN("Loop");
+
+    const bool advanceFrame = advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
+    if (!advanceFrame) {
+        auto v1 = static_cast<bool>(advancedFrameButton);
+        auto v2 = static_cast<bool>(advancedFrame);
+
+        FASTLED_WARN("Skipping frame");
+        FASTLED_WARN("v1: " << v1);
+        FASTLED_WARN("v2: " << v2);
+        // delay(500);
+        FastLED.onEndFrame();
+        return;
+    }
+
     // Your code here
     uint32_t now = millis();
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
 
     shape->setScale(scale.value());
 
+    float curr_alpha = pointTransition.updatef(now) + transition.value();
+    static float s_prev_alpha = 0.0f;
+
     // unconditionally apply the circle.
     if (button) {
         // trigger the transition
         pointTransition.trigger(now);
         FASTLED_WARN("Transition triggered");
+        curr_alpha = pointTransition.updatef(now) + transition.value();
+        s_prev_alpha = curr_alpha;
     }
 
     // if (pointTransition.isActive(now)) {
@@ -108,28 +132,35 @@ void loop() {
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
     if (true) {
         const CRGB purple = CRGB(255, 0, 255);
-        float curr_alpha = pointTransition.updatef(now) + transition.value();
+        
 
-        vector_inlined<SubPixel2x2, 8> subpixels;
+        static vector_inlined<SubPixel2x2, 32> subpixels;
+        subpixels.clear();
         // SubPixel2x2 subpixel = ;
-        subpixels.push_back(shape->at_subpixel(curr_alpha));
-        subpixels.push_back(shape->at_subpixel(curr_alpha + .005f));
-        subpixels.push_back(shape->at_subpixel(curr_alpha + .010f));
-        subpixels.push_back(shape->at_subpixel(curr_alpha + .015f));
+        // subpixels.push_back(shape->at_subpixel(curr_alpha));
+        // subpixels.push_back(shape->at_subpixel(curr_alpha + .005f));
+        // subpixels.push_back(shape->at_subpixel(curr_alpha + .010f));
+        // subpixels.push_back(shape->at_subpixel(curr_alpha + .015f));
+
+        // const float step = 0.005f;
+
+        //const float prev_alpha = s_prev_alpha;
+        for (int i = 0; i < 32; ++i) {
+            float a = fl::map_range<float>(i, 0, 32, s_prev_alpha, curr_alpha);
+            SubPixel2x2 subpixel = shape->at_subpixel(a);
+            subpixels.push_back(subpixel);
+        }
+        s_prev_alpha = curr_alpha;
 
         for (int i = 0; i < subpixels.size(); ++i) {
             SubPixel2x2 subpixel = subpixels[i];
-            //drawSubPixel(subpixel, purple, xyMap, leds, frame);
-
             auto origin = subpixel.origin();
-
             StrStream msg;
             msg << "frame: " << frame << "\n";
             msg << "subpixel: \n";
             msg << "origin: \n";
             msg << " x: " << (origin.x) << "\n";
             msg << " y: " << (origin.y) << "\n";
-
             for (int x = 0; x<2; ++x) {
                 for (int y = 0; y<2; ++y) {
                     uint8_t value = subpixel.at(x, y);
@@ -142,7 +173,7 @@ void loop() {
                     }
                 }
             }
-            FASTLED_WARN(msg.c_str());
+            // FASTLED_WARN(msg.c_str());
         }
     }
 

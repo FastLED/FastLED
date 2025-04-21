@@ -112,7 +112,7 @@ class UICheckbox {
     }
     ~UICheckbox() {}
     operator bool() const { return mValue; }
-    operator int() const { return mValue ? 1 : 0; }
+    explicit operator int() const { return mValue ? 1 : 0; }
     UICheckbox &operator=(bool value) {
         setValue(value);
         return *this;

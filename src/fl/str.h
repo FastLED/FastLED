@@ -426,6 +426,14 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const uint32_t& val) { write(val); return *this; }
     Str& append(const int32_t& c) { write(c); return *this; }
 
+    Str& append(const bool& val) {
+        if (val) {
+            return append("true");
+        } else {
+            return append("false");
+        }
+    }
+
     Str& append(const float& val) {
         int32_t i = static_cast<int32_t>(val * 100);
         // append the integer part

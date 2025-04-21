@@ -148,7 +148,11 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
+	onEndFrame();
 	fl::EngineEvents::onEndShowLeds();
+}
+
+void CFastLED::onEndFrame() {
 	fl::EngineEvents::onEndFrame();
 }
 
