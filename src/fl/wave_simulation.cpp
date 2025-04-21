@@ -160,7 +160,22 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             size_t xx = x * mMultiplier + i;
             size_t yy = y * mMultiplier + j;
             if (mSim->has(xx, yy)) {
-                mChangeGrid(xx, yy) = v16;
+                int16_t& pt = mChangeGrid.at(xx, yy);
+                // mChangeGrid(xx, yy) = v16;
+                if (pt == 0) {
+                    pt = v16;
+                } else {
+                    const bool sign_matches = (pt >= 0) == (v16 >= 0);
+                    if (!sign_matches) {
+                        pt = v16;
+                    } else {
+                        uint16_t abs_pt = static_cast<uint16_t>(ABS(pt));
+                        uint16_t abs_v16 = static_cast<uint16_t>(ABS(v16));
+                        if (abs_pt > abs_v16) {
+                            pt = v16;
+                        }
+                    }
+                }
             }
         }
     }
@@ -176,8 +191,8 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 }
 
 void WaveSimulation2D::update() {
-    const point_xy<int32_t> min_max = mChangeGrid.minMax();
-    const bool has_updates = min_max != point_xy<int32_t>(0, 0);
+    const point_xy<int16_t> min_max = mChangeGrid.minMax();
+    const bool has_updates = min_max != point_xy<int16_t>(0, 0);
     for (uint8_t i = 0; i < mExtraFrames+1; ++i) {
         if (has_updates) {
             // apply them

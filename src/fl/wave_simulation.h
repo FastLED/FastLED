@@ -215,7 +215,7 @@ class WaveSimulation2D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
-    fl::Grid<int32_t> mChangeGrid;  // Needed for multiple updates.
+    fl::Grid<int16_t> mChangeGrid;  // Needed for multiple updates.
 };
 
 } // namespace fl
