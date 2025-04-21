@@ -44,6 +44,7 @@ void XYPath::initLutOnce() {
 
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
+    FASTLED_WARN("xy0: " << xy);
     point_xy_float out = tx.transform(xy);
     out = mGridTransform->transform(out);
     return out;
@@ -163,10 +164,10 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
 }
 
 point_xy_float CirclePath::compute(float alpha) {
-    // α in [0,1] → (x,y) on the circle
+    // α in [0,1] → (x,y) on the unit circle [-1, 1]
     float t = alpha * 2.0f * PI;
-    float x = .5f * cosf(t) + .5f;
-    float y = .5f * sinf(t) + .5f;
+    float x = cosf(t);
+    float y = sinf(t);
     return point_xy_float(x, y);
 }
 

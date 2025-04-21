@@ -103,10 +103,11 @@ class XYPath : public Referent {
         if (height > 0) {
           height -= 1;
         }
-        mGridTransform->scale_x = width;
-        mGridTransform->scale_y = height;
-        mGridTransform->x_offset = 0;
-        mGridTransform->y_offset = 0;
+        // map [-1, 1] -> [0, width]
+        mGridTransform->scale_x = width / 2.0f;
+        mGridTransform->scale_y = height / 2.0f;
+        mGridTransform->x_offset = width / 2.0f;
+        mGridTransform->y_offset = height / 2.0f;
         onTransformFloatChanged();
     }
 

@@ -8,6 +8,7 @@
 #include "fl/vector.h"
 #include "fl/namespace.h"
 #include "fl/math_macros.h"
+#include "fl/point.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -441,7 +442,13 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
 
-
+    template<typename T>
+    Str& append(const fl::point_xy<T> &p) {
+        append(p.x);
+        append(",");
+        append(p.y);
+        return *this;
+    }
 };
 
 

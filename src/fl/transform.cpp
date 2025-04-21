@@ -7,15 +7,29 @@
 #include "fl/math_macros.h"
 #include "fl/lut.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 namespace fl {
 
 point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
-    float x = xy.x * scale_x + x_offset;
-    float y = xy.y * scale_y + y_offset;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+    float x = xy.x;
+    float y = xy.y;
+    if (scale_x != 1.0f) {
+        x *= scale_x;
+    }
+    if (scale_y != 1.0f) {
+        y *= scale_y;
+    }
+    // Assume that adding floats is fast when x_offset == 0.0f
+    x += x_offset;
+    y += y_offset;
+
+    // float x = xy.x * scale_x + x_offset;
+    // float y = xy.y * scale_y + y_offset;
+
     const bool has_rotation = (rotation != 0.0f);
-#pragma GCC diagnostic pop
+
     if (has_rotation) {
         float cos_theta = cosf(rotation);
         float sin_theta = sinf(rotation);
@@ -133,3 +147,5 @@ void TransformFloat::set_scale(float scale) {
 }
 
 } // namespace fl
+
+#pragma GCC diagnostic pop
