@@ -141,7 +141,6 @@ bool WaveSimulation2D::has(size_t x, size_t y) const {
 }
 
 void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
-    FASTLED_WARN("WaveSimulation2D::seti16: " << x << ", " << y << " = " << v16);
     if (!has(x, y))
         return;
 
@@ -161,12 +160,7 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             size_t xx = x * mMultiplier + i;
             size_t yy = y * mMultiplier + j;
             if (mSim->has(xx, yy)) {
-                // mSim->seti16(xx, yy, v16);
-                // mChangeGrid[(yy * mMultiplier) + xx] = v16;
-                FASTLED_WARN("Setting: " << xx << ", " << yy << " = " << v16);
                 mChangeGrid(xx, yy) = v16;
-                int16_t v16_check = mChangeGrid(xx, yy);
-                FASTLED_WARN("Round trip: " << xx << ", " << yy << " = " << v16_check);
             }
         }
     }
@@ -178,46 +172,21 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 
     value = fl::clamp(value, 0.0f, 1.0f);
     int16_t v16 = wave_detail::float_to_fixed(value);
-
-    FASTLED_WARN("converting: " << value << " to " << v16);
     seti16(x, y, v16);
 }
 
 void WaveSimulation2D::update() {
-
-    // print out all non zero values
-
-    // for (uint32_t j = 0; j < mChangeGrid.height(); ++j) {
-    //     for (uint32_t i = 0; i < mChangeGrid.width(); ++i) {
-    //         int16_t v16 = mChangeGrid(i, j);
-    //         if (v16 != 0) {
-    //             FASTLED_WARN("Updating: " << i << ", " << j << " = " << v16);
-    //         }
-    //     }
-    // }
-
-    for (uint32_t x = 0; x < mChangeGrid.width(); ++x) {
-        for (uint32_t y = 0; y < mChangeGrid.height(); ++y) {
-            int16_t v16 = mChangeGrid(x, y);
-            if (v16 != 0) {
-                FASTLED_WARN("Found Change: " << x << ", " << y << " = " << v16);
-            }
-        }
-    }
-
     const point_xy<int32_t> min_max = mChangeGrid.minMax();
     const bool has_updates = min_max != point_xy<int32_t>(0, 0);
     for (uint8_t i = 0; i < mExtraFrames+1; ++i) {
         if (has_updates) {
             // apply them
-            FASTLED_WARN("update " << i);
             const uint32_t w = mChangeGrid.width();
             const uint32_t h = mChangeGrid.height();
             for (uint32_t x = 0; x < w; ++x) {
                 for (uint32_t y = 0; y < h; ++y) {
                     int16_t v16 = mChangeGrid(x, y);
                     if (v16 != 0) {
-                        FASTLED_WARN("Updating: " << x << ", " << y << " = " << v16);
                         mSim->seti16(x, y, v16);
                     }
                 }
@@ -226,13 +195,7 @@ void WaveSimulation2D::update() {
         mSim->update();
     }
     // zero out mChangeGrid
-    // memset(mChangeGrid.get(), 0, mOuterWidth * mOuterHeight * sizeof(int16_t));
     mChangeGrid.clear();
-
-    point_xy<int32_t> min_max2 = mChangeGrid.minMax();
-    if (min_max2 != point_xy<int32_t>(0, 0)) {
-        FASTLED_WARN("Expected zero: " << min_max2.x << ", " << min_max2.y);
-    }
 }
 
 uint32_t WaveSimulation2D::getWidth() const { return mOuterWidth; }

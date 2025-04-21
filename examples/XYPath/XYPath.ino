@@ -142,5 +142,9 @@ void loop() {
     if (useWaveFx) {
         fxBlend.draw(Fx::DrawContext(now, leds));
     }
+
+    uint32_t frame_time = millis() - now;
+    FASTLED_WARN("Frame time: " << frame_time << "ms");
+
     FastLED.show();
 }
