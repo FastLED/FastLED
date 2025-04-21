@@ -4,19 +4,38 @@
 
 #include "fl/namespace.h"
 #include "fl/wave_simulation_real.h"
+#include "fl/clamp.h"
 
 namespace fl {
 
 // Define Q15 conversion constants.
-#define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
-#define FIXED_ONE (FIXED_SCALE)
+// #define FIXED_SCALE (1 << 15) // 32768: 1.0 in Q15
+#define INT16_POS (32767) // Maximum value for int16_t
+#define INT16_NEG (-32768) // Minimum value for int16_t
 
 namespace wave_detail { // Anonymous namespace for internal linkage
 // Convert float to fixed Q15.
-int16_t float_to_fixed(float f) { return (int16_t)(f * FIXED_SCALE); }
+// int16_t float_to_fixed(float f) { return (int16_t)(f * FIXED_SCALE); }
+
+int16_t float_to_fixed(float f) {
+    f = fl::clamp(f, -1.0f, 1.0f);
+    if (f < 0.0f) {
+        return (int16_t)(f * INT16_NEG); 
+    } else {
+        return (int16_t)(f * INT16_POS); // Round to nearest
+    }
+}
+
 
 // Convert fixed Q15 to float.
-float fixed_to_float(int16_t f) { return ((float)f) / FIXED_SCALE; }
+float fixed_to_float(int16_t f) {
+    // return ((float)f) / FIXED_SCALE;
+    if (f < 0) {
+        return ((float)f) / INT16_NEG; // Negative values
+    } else {
+        return ((float)f) / INT16_POS; // Positive values
+    }
+}
 
 // // Multiply two Q15 fixed point numbers.
 // int16_t fixed_mul(int16_t a, int16_t b) {

@@ -23,8 +23,10 @@ Based on works and code by Shawn Silverman.
 #include "fl/ptr.h"
 #include "fl/supersample.h"
 #include "fl/xymap.h"
+#include "fl/grid.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
+
 
 namespace fl {
 
@@ -119,6 +121,7 @@ class WaveSimulation1D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation1D_Real> mSim;
+
 };
 
 class WaveSimulation2D {
@@ -212,7 +215,7 @@ class WaveSimulation2D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
-    fl::scoped_array<int16_t> mChangeGrid;  // Needed for multiple updates.
+    fl::Grid<int32_t> mChangeGrid;  // Needed for multiple updates.
 };
 
 } // namespace fl
