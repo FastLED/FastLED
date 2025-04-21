@@ -71,7 +71,8 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = XYPath::NewCirclePath(WIDTH, HEIGHT);
+
+XYPathPtr shape = XYPath::NewLinePath(0, 0, WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 
 void setup() {
