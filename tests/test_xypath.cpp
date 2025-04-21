@@ -59,6 +59,31 @@ TEST_CASE("LinePath simple float sweep") {
     REQUIRE_EQ(xy, point_xy_float(1.f, 1.f));
 }
 
+TEST_CASE("Point at exactly the middle") {
+    // Tests that we can get the correct gaussian values at center point 0,0
+    PointPath point(0.0, 0.0);  // Right in middle.
+    XYPath path(NewPtrNoTracking(point));
+    path.setDrawBounds(2,2);
+    // auto xy = path.at(0);
+    fl::SubPixel sp = path.at_subpixel(0);
+    //MESSAGE_TILE(tile);
+    // REQUIRE_EQ(point_xy_float(0.0f, 0.f), sp);
+    // print out
+    auto origin = sp.origin();
+    MESSAGE("Origin: " << origin.x << ", " << origin.y);
+
+    MESSAGE(sp.at(0, 0));
+    MESSAGE(sp.at(0, 1));
+    MESSAGE(sp.at(1, 0));
+    MESSAGE(sp.at(1, 1));
+
+    // require that all alpha be the same
+    REQUIRE_EQ(sp.at(0, 0), sp.at(0, 1));
+    REQUIRE_EQ(sp.at(0, 0), sp.at(1, 0));
+    REQUIRE_EQ(sp.at(0, 0), sp.at(1, 1));
+    REQUIRE_EQ(sp.at(0, 0), 64);
+}
+
 TEST_CASE("LinePath simple sweep in draw bounds") {
     // Tests that we can get the correct gaussian values at center point 0,0
     LinePath point(-1.f, -1.f, 1.f, -1.f);
