@@ -96,17 +96,17 @@ class XYPath : public Referent {
         return compute_float(alpha, tx);
     }
 
-    void set(uint16_t width, uint16_t height, float scale = 1.0f) {
+    void setDrawBounds(uint16_t width, uint16_t height) {
         if (width > 0) {
           width -= 1;
         }
         if (height > 0) {
           height -= 1;
         }
-        mTransform->scale_x = width * scale;
-        mTransform->scale_y = height * scale;
-        mTransform->x_offset = 0;
-        mTransform->y_offset = 0;
+        mGridTransform->scale_x = width;
+        mGridTransform->scale_y = height;
+        mGridTransform->x_offset = 0;
+        mGridTransform->y_offset = 0;
         onTransformFloatChanged();
     }
 
@@ -122,6 +122,12 @@ class XYPath : public Referent {
 
     TransformFloatPtr transform() {
         return mTransform;
+    }
+
+    void setScale(float scale) {
+        mTransform->scale_x = scale;
+        mTransform->scale_y = scale;
+        onTransformFloatChanged();
     }
 
     point_xy_float compute(float alpha) { 
@@ -150,6 +156,7 @@ class XYPath : public Referent {
         mLut.reset();
     }
 
+#if 0
     // Outputs the path as a series of points in floating poitn. The first and last points are
     // always the start and end points. The middle points are evenly spaced
     // according to the alpha range.
@@ -162,12 +169,15 @@ class XYPath : public Referent {
     void output16(uint16_t alpha_start, uint16_t alpha_end,
                   point_xy<uint16_t> *out, uint16_t out_size,
                   const Transform16 &tx);
+#endif
 
     LUTXY16Ptr getLut() const { return mLut; }
 
   private:
     XYPathGeneratorPtr mPath;
-    TransformFloatPtr mTransform;
+    TransformFloatPtr mTransform = TransformFloat::Identity();
+    TransformFloatPtr mGridTransform = TransformFloat::Identity();
+
 
     uint32_t mSteps = 0;
     LUTXY16Ptr mLut;

@@ -31,6 +31,7 @@ UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
 
 UIButton button("Trigger");
+UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
@@ -80,7 +81,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
-    shape->set(WIDTH, HEIGHT);
+    shape->setDrawBounds(WIDTH, HEIGHT);
 }
 
 void loop() {
@@ -88,6 +89,8 @@ void loop() {
     uint32_t now = millis();
 
     // FASTLED_WARN("Now: " << now);
+
+    shape->setScale(scale.value());
 
     // unconditionally apply the circle.
     if (button) {

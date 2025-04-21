@@ -45,6 +45,7 @@ void XYPath::initLutOnce() {
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
     point_xy_float out = tx.transform(xy);
+    out = mGridTransform->transform(out);
     return out;
 }
 
@@ -78,6 +79,7 @@ void XYPath::buildLut(uint16_t steps) {
     }
 }
 
+#if 0
 void XYPath::output(float alpha_start, float alpha_end, point_xy_float *out,
                     uint16_t out_size, const TransformFloat &tx) {
     if (out_size == 0) {
@@ -141,6 +143,7 @@ void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
     }
     return;
 }
+#endif
 
 LinePath::LinePath(float x0, float y0, float x1, float y1)
     : mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
