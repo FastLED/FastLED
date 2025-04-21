@@ -88,6 +88,14 @@ class XYMap {
         return mapToIndex((uint16_t)x, (uint16_t)y);
     }
 
+    bool has(uint16_t x, uint16_t y) const {
+        return (x < width) && (y < height);
+    }
+
+    bool has(int x, int y) const {
+        return (x >= 0) && (y >= 0) && has((uint16_t)x, (uint16_t)y);
+    }
+
     uint16_t getWidth() const;
     uint16_t getHeight() const;
     uint16_t getTotal() const;

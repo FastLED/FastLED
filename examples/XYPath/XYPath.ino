@@ -86,6 +86,7 @@ void setup() {
 void loop() {
     // Your code here
     uint32_t now = millis();
+    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
 
     // FASTLED_WARN("Now: " << now);
 
@@ -99,6 +100,8 @@ void loop() {
     }
 
     if (pointTransition.isActive(now)) {
+        const CRGB white = CRGB(32, 32, 32);
+        const CRGB black = CRGB(0, 0, 0);
         float curr_alpha = pointTransition.updatef(now);
         Tile3x3<float> tile;
         auto xy = shape->at_gaussian(curr_alpha, &tile);
@@ -117,13 +120,17 @@ void loop() {
                 }
                 float val = tile.at(x, y);
                 FASTLED_WARN("x: " << x << " y: " << y << " val: " << val);
-                waveFxLower.addf(xy.x, xy.y, val);
-                waveFxUpper.addf(xy.x, xy.y, val);
+                // waveFxLower.addf(xy.x, xy.y, val);
+                // waveFxUpper.addf(xy.x, xy.y, val);
+                if (xyMap.has(xx,yy)) {
+                    int idx = xyMap(xx,yy);
+                    CRGB color = white.lerp8(black, val * 255);
+                    leds[idx] = color;
+                }
             }
-            
         }
     }
 
-    fxBlend.draw(Fx::DrawContext(now, leds));
+    //fxBlend.draw(Fx::DrawContext(now, leds));
     FastLED.show();
 }

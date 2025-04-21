@@ -12,6 +12,12 @@
 
 using namespace fl;
 
+#define MESSAGE_TILE(TILE) \
+    MESSAGE("\nTile:\n" \
+            << "  " << TILE.at(0, 0) << " " << TILE.at(1, 0) << " " << TILE.at(2, 0) << "\n" \
+            << "  " << TILE.at(0, 1) << " " << TILE.at(1, 1) << " " << TILE.at(2, 1) << "\n" \
+            << "  " << TILE.at(0, 2) << " " << TILE.at(1, 2) << " " << TILE.at(2, 2) << "\n");
+
 TEST_CASE("LinePath") {
     LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
     point_xy_float xy = path.compute(0.5f);
@@ -34,9 +40,18 @@ TEST_CASE("LinePath at_gaussian") {
     Tile3x3<float> tile;
     point_xy_float xy = path.at_gaussian(0.5f, &tile);
     REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
-    REQUIRE(xy.x == 0.0f);
-    MESSAGE("x: " << xy.x << " y: " << xy.y);
+    MESSAGE_TILE(tile);
 }
+
+// TEST_CASE("LinePath at_gaussian slightly off center") {
+//     // Tests that we can get the correct gaussian values at center point 0,0
+//     PointPath point(0.1f, 0.0f);
+//     XYPath path(NewPtrNoTracking(point));
+//     Tile3x3<float> tile;
+//     point_xy_float xy = path.at_gaussian(0.5f, &tile);
+//     MESSAGE_TILE(tile);
+//     REQUIRE_EQ(xy, point_xy_float(0.f, 0.f));
+// }
 
 
 TEST_CASE("Check complex types") {

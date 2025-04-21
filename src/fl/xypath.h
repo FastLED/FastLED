@@ -123,12 +123,12 @@ class XYPath : public Referent {
     }
 
     void setDrawBounds(uint16_t width, uint16_t height) {
-        if (width > 0) {
-            width -= 1;
-        }
-        if (height > 0) {
-            height -= 1;
-        }
+        // if (width > 0) {
+        //     width -= 1;
+        // }
+        // if (height > 0) {
+        //     height -= 1;
+        // }
         // map [-1, 1] -> [0, width]
         mGridTransform->scale_x = width / 2.0f;
         mGridTransform->scale_y = height / 2.0f;
