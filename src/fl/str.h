@@ -422,7 +422,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
     Str& append(const uint8_t& c) { write(uint16_t(c)); return *this; }
     Str& append(const uint16_t& val) { write(val); return *this; }
-    Str& append(const int16_t& val) { write(uint32_t(val)); return *this; }
+    Str& append(const int16_t& val) { write(int32_t(val)); return *this; }
     Str& append(const uint32_t& val) { write(val); return *this; }
     Str& append(const int32_t& c) { write(c); return *this; }
 
