@@ -853,6 +853,7 @@ FASTLED_NAMESPACE_END
 
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
 #include "fl/assert.h"  // FASTLED_ASSERT(condition, "message");
+#include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
 
 // provides:
 //   fl::vector<T> - Standard heap vector

@@ -140,6 +140,14 @@ public:
         return at(x, y);
     }
 
+    // Add access like slice[y][x]
+    T* operator[](int32_t row) {
+        int32_t parentRow = row + mBottomLeft.y;
+        return mData
+             + parentRow * mDataWidth
+             + mBottomLeft.x;
+    }
+
     T& at(int32_t x, int32_t y) {
         auto parent = getParentCoord(x, y);
         return mData[parent.x + parent.y * mDataWidth];
