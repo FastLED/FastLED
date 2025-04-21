@@ -109,29 +109,41 @@ void loop() {
     if (true) {
         const CRGB purple = CRGB(255, 0, 255);
         float curr_alpha = pointTransition.updatef(now) + transition.value();
-        SubPixel2x2 subpixel = shape->at_subpixel(curr_alpha);
-        auto origin = subpixel.origin();
 
-        StrStream msg;
-        msg << "frame: " << frame << "\n";
-        msg << "subpixel: \n";
-        msg << "origin: \n";
-        msg << " x: " << (origin.x) << "\n";
-        msg << " y: " << (origin.y) << "\n";
+        vector_inlined<SubPixel2x2, 8> subpixels;
+        // SubPixel2x2 subpixel = ;
+        subpixels.push_back(shape->at_subpixel(curr_alpha));
+        subpixels.push_back(shape->at_subpixel(curr_alpha + .005f));
+        subpixels.push_back(shape->at_subpixel(curr_alpha + .010f));
+        subpixels.push_back(shape->at_subpixel(curr_alpha + .015f));
 
-        for (int x = 0; x<2; ++x) {
-            for (int y = 0; y<2; ++y) {
-                uint8_t value = subpixel.at(x, y);
-                // leds[idx] = CRGB(value, value, value);
-                float valuef = value / 255.0f;
-                waveFxLower.addf(origin.x + x, origin.y + y, valuef);
-                msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
-                if (!useWaveFx) {
-                    subpixel.draw(purple, xyMap, leds);
+        for (int i = 0; i < subpixels.size(); ++i) {
+            SubPixel2x2 subpixel = subpixels[i];
+            //drawSubPixel(subpixel, purple, xyMap, leds, frame);
+
+            auto origin = subpixel.origin();
+
+            StrStream msg;
+            msg << "frame: " << frame << "\n";
+            msg << "subpixel: \n";
+            msg << "origin: \n";
+            msg << " x: " << (origin.x) << "\n";
+            msg << " y: " << (origin.y) << "\n";
+
+            for (int x = 0; x<2; ++x) {
+                for (int y = 0; y<2; ++y) {
+                    uint8_t value = subpixel.at(x, y);
+                    // leds[idx] = CRGB(value, value, value);
+                    float valuef = value / 255.0f;
+                    waveFxLower.addf(origin.x + x, origin.y + y, valuef);
+                    msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
+                    if (!useWaveFx) {
+                        subpixel.draw(purple, xyMap, leds);
+                    }
                 }
             }
+            FASTLED_WARN(msg.c_str());
         }
-        FASTLED_WARN(msg.c_str());
     }
 
     int first = xyMap(1, 1);

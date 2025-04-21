@@ -19,6 +19,7 @@ class XYMap;
 class SubPixel2x2 {
 
   public:
+    SubPixel2x2() = default;
     SubPixel2x2(const point_xy<int> &origin) : mOrigin(origin) {}
     SubPixel2x2(const SubPixel2x2 &) = default;
     SubPixel2x2 &operator=(const SubPixel2x2 &) = default;
