@@ -13,7 +13,7 @@ struct point_xy;
 namespace map_range_detail {
 
 // primary template: unchanged
-template <typename T, typename U> struct map_range_t;
+template <typename T, typename U> struct map_range_math;
 template <typename T> bool equals(T a, T b) { return a == b; }
 
 } // namespace map_range_detail
@@ -30,7 +30,7 @@ FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
     if (equals(value, in_max)) {
         return out_max;
     }
-    return map_range_t<T, U>::map(value, in_min, in_max, out_min, out_max);
+    return map_range_math<T, U>::map(value, in_min, in_max, out_min, out_max);
 }
 
 // Promote uint8_t to int16_t for mapping.
@@ -57,12 +57,12 @@ FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
     return static_cast<uint8_t>(out16);
 }
 
-/////////////// IMPLEMENTATION ////////////////////////////////////
+//////////////////////////////////// IMPLEMENTATION ////////////////////////////////////
 
 namespace map_range_detail {
 
 // primary template: unchanged
-template <typename T, typename U> struct map_range_t {
+template <typename T, typename U> struct map_range_math {
     static U map(T value, T in_min, T in_max, U out_min, U out_max) {
         if (in_min == in_max)
             return out_min;
@@ -72,7 +72,7 @@ template <typename T, typename U> struct map_range_t {
 };
 
 // partial specialization for U = point_xy<V>
-template <typename T, typename V> struct map_range_t<T, point_xy<V>> {
+template <typename T, typename V> struct map_range_math<T, point_xy<V>> {
     static point_xy<V> map(T value, T in_min, T in_max,
                            point_xy<V> out_min, // <-- now
                            point_xy<V> out_max) // <-- match call
