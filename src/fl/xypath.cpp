@@ -56,8 +56,8 @@ point_xy_float XYPath::at_gaussian(float alpha, Tile3x3<float>* out) {
     point_xy_float xy = at(alpha);
 
     // 2) find the integer cell containing it
-    int cx = static_cast<int>(std::floor(xy.x));
-    int cy = static_cast<int>(std::floor(xy.y));
+    int cx = static_cast<int>(xy.x);
+    int cy = static_cast<int>(xy.y);
 
     // 3) compute the fractional offsets inside that cell
     float fx = xy.x - cx;

@@ -100,9 +100,28 @@ void loop() {
 
     if (pointTransition.isActive(now)) {
         float curr_alpha = pointTransition.updatef(now);
-        auto xy = shape->at(curr_alpha);
-        waveFxLower.addf(xy.x, xy.y, 1.0f);
-        waveFxUpper.addf(xy.x, xy.y, 1.0f);
+        Tile3x3<float> tile;
+        auto xy = shape->at_gaussian(curr_alpha, &tile);
+        // waveFxLower.addf(xy.x, xy.y, 1.0f);
+        // waveFxUpper.addf(xy.x, xy.y, 1.0f);
+
+        for (int x = 0; x <= 2; ++x) {
+            int xx = xy.x + x - 1;
+            if (xx < 0 || xx >= WIDTH) {
+                continue;
+            }
+            for (int y = 0; y <= 2; ++y) {
+                int yy = xy.y + y -1;
+                if (yy < 0 || yy >= HEIGHT) {
+                    continue;
+                }
+                float val = tile.at(x, y);
+                FASTLED_WARN("x: " << x << " y: " << y << " val: " << val);
+                waveFxLower.addf(xy.x, xy.y, val);
+                waveFxUpper.addf(xy.x, xy.y, val);
+            }
+            
+        }
     }
 
     fxBlend.draw(Fx::DrawContext(now, leds));

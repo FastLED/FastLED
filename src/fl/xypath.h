@@ -21,6 +21,14 @@ namespace fl {
 
 template <typename T> struct Tile3x3 {
     T mTile[3][3] = {};
+
+    T& operator()(int x, int y) {
+      return at(x, y);
+    }
+
+    T& at(int x, int y) {
+      return mTile[y][x];
+    }
 };
 
 // Smart pointers for the XYPath family.
