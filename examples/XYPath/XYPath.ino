@@ -104,9 +104,6 @@ void loop() {
 
     const bool advanceFrame = advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
     if (!advanceFrame) {
-        // auto v1 = static_cast<bool>(advancedFrameButton);
-        // auto v2 = static_cast<bool>(advancedFrame);
-        //FastLED.onEndFrame();
         return;
     }
 
@@ -138,14 +135,6 @@ void loop() {
 
         static vector_inlined<SubPixel2x2, 32> subpixels;
         subpixels.clear();
-        // SubPixel2x2 subpixel = ;
-        // subpixels.push_back(shape->at_subpixel(curr_alpha));
-        // subpixels.push_back(shape->at_subpixel(curr_alpha + .005f));
-        // subpixels.push_back(shape->at_subpixel(curr_alpha + .010f));
-        // subpixels.push_back(shape->at_subpixel(curr_alpha + .015f));
-
-        // const float step = 0.005f;
-
         const int number_of_steps = numberOfSteps.value();
 
         //const float prev_alpha = s_prev_alpha;
