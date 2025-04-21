@@ -31,8 +31,9 @@ point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
     const bool has_rotation = (rotation != 0.0f);
 
     if (has_rotation) {
-        float cos_theta = cosf(rotation);
-        float sin_theta = sinf(rotation);
+        float radians = rotation * 2 * PI;
+        float cos_theta = cosf(radians);
+        float sin_theta = sinf(radians);
         float x_rotated = x * cos_theta - y * sin_theta;
         float y_rotated = x * sin_theta + y * cos_theta;
         return point_xy_float(x_rotated, y_rotated);

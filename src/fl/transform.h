@@ -53,11 +53,11 @@ struct TransformFloat : public Referent {
         return tx;
     }
     TransformFloat() = default;
-    float scale_x = 1.0f;  // 0 -> 1
-    float scale_y = 1.0f;  // 0 -> 1
-    float x_offset = 0.0f; // 0 -> 1
-    float y_offset = 0.0f; // 0 -> 1
-    float rotation = 0.0f; // 0 -> 1
+    float scale_x = 1.0f;
+    float scale_y = 1.0f;
+    float x_offset = 0.0f;
+    float y_offset = 0.0f;
+    float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
     float scale() const;
     void set_scale(float scale);
     point_xy_float transform(const point_xy_float &xy) const;
