@@ -59,6 +59,18 @@ TEST_CASE("LinePath simple float sweep") {
     REQUIRE_EQ(xy, point_xy_float(1.f, 1.f));
 }
 
+TEST_CASE("LinePath simple sweep in draw bounds") {
+    // Tests that we can get the correct gaussian values at center point 0,0
+    LinePath point(-1.f, -1.f, 1.f, -1.f);
+    XYPath path(NewPtrNoTracking(point));
+    int width = 2;
+    path.setDrawBounds(width, width);
+    auto begin = path.at(0);
+    auto end = path.at(1);
+    REQUIRE_EQ(point_xy_float(0.5f, 0.5f), begin);
+    REQUIRE_EQ(point_xy_float(1.5f, 0.5f), end);
+}
+
 // TEST_CASE("LinePath at_gaussian moves x") {
 //     // Tests that we can get the correct gaussian values at center point 0,0
 //     LinePath point(0, 1.f, 1.f, 1.f);

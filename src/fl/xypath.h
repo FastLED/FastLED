@@ -14,22 +14,18 @@
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
 #include "fl/transform.h"
+#include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/unused.h"
 
 namespace fl {
 
 template <typename T> struct Tile3x3 {
     T mTile[3][3] = {};
 
-    T& operator()(int x, int y) {
-      return at(x, y);
-    }
+    T &operator()(int x, int y) { return at(x, y); }
 
-    T& at(int x, int y) {
-      return mTile[y][x];
-    }
+    T &at(int x, int y) { return mTile[y][x]; }
 };
 
 // Smart pointers for the XYPath family.
@@ -54,7 +50,6 @@ class XYPathGenerator : public Referent {
 
 class XYPath : public Referent {
   public:
-
     static XYPathPtr NewPointPath(float x, float y) {
         auto path = PointPathPtr::New(x, y);
         return XYPathPtr::New(path);
@@ -121,19 +116,22 @@ class XYPath : public Referent {
     point_xy_float at(float alpha, const TransformFloat &tx) {
         return compute_float(alpha, tx);
     }
-
     void setDrawBounds(uint16_t width, uint16_t height) {
-        // if (width > 0) {
-        //     width -= 1;
-        // }
-        // if (height > 0) {
-        //     height -= 1;
-        // }
-        // map [-1, 1] -> [0, width]
-        mGridTransform->scale_x = width / 2.0f;
-        mGridTransform->scale_y = height / 2.0f;
-        mGridTransform->x_offset = width / 2.0f;
-        mGridTransform->y_offset = height / 2.0f;
+        auto &tx = *mGridTransform;
+
+        // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
+        //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
+        //    offset_x = (width–0.5 + 0.5) / 2 = width/2
+        tx.scale_x = (width - 1.0f) * 0.5f;
+        tx.x_offset = width * 0.5f;
+
+        // 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]
+        //    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)
+        //    scale_y  = (height–0.5) – 0.5     = height–1
+        //    offset_y = 0.5
+        tx.scale_y = (height - 1.0f) * 0.5f;
+        tx.y_offset = height * 0.5f;
+
         onTransformFloatChanged();
     }
 
@@ -212,22 +210,17 @@ class XYPath : public Referent {
 
 ///////////////// Implementations of common XYPaths ///////////////////
 
-
-class PointPath: public XYPathGenerator {
+class PointPath : public XYPathGenerator {
   public:
-    PointPath(float x, float y): mPoint(x, y) {}
-    PointPath(point_xy_float p): mPoint(p) {}
+    PointPath(float x, float y) : mPoint(x, y) {}
+    PointPath(point_xy_float p) : mPoint(p) {}
     point_xy_float compute(float alpha) override {
-      FASTLED_UNUSED(alpha);
-      return mPoint;
+        FASTLED_UNUSED(alpha);
+        return mPoint;
     }
     const Str name() const override { return "PointPath"; }
-    void set(float x, float y) { 
-      set(point_xy_float(x, y));
-    }
-    void set(point_xy_float p) {
-      mPoint = p;
-    }
+    void set(float x, float y) { set(point_xy_float(x, y)); }
+    void set(point_xy_float p) { mPoint = p; }
 
   private:
     point_xy_float mPoint;
