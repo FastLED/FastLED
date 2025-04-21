@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/point.h"
+#include "fl/clamp.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -101,62 +102,48 @@ template <typename T> class Slice {
     T *mData;
     size_t mSize;
 };
-template<typename T>
-class MatrixSlice {
-public:
+template <typename T> class MatrixSlice {
+  public:
     // represents a window into a matrix
     // bottom-left and top-right corners are passed as plain ints
-    MatrixSlice(T*           data,
-                int32_t      dataWidth,
-                int32_t      dataHeight,
-                int32_t      bottomLeftX,
-                int32_t      bottomLeftY,
-                int32_t      topRightX,
-                int32_t      topRightY)
-      : mData(data)
-      , mDataWidth(dataWidth)
-      , mDataHeight(dataHeight)
-      , mBottomLeft{ bottomLeftX,  bottomLeftY }
-      , mTopRight  { topRightX,     topRightY    }
-    {}
+    MatrixSlice(T *data, int32_t dataWidth, int32_t dataHeight,
+                int32_t bottomLeftX, int32_t bottomLeftY, int32_t topRightX,
+                int32_t topRightY)
+        : mData(data), mDataWidth(dataWidth), mDataHeight(dataHeight),
+          mBottomLeft{bottomLeftX, bottomLeftY},
+          mTopRight{topRightX, topRightY} {}
 
     // outputs a point_xy but takes x,y as inputs
     point_xy<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
-        return { x_local + mBottomLeft.x,
-                 y_local + mBottomLeft.y };
+        return {x_local + mBottomLeft.x, y_local + mBottomLeft.y};
     }
 
     point_xy<int32_t> getLocalCoord(int32_t x_world, int32_t y_world) const {
-        if (x_world < mBottomLeft.x || x_world > mTopRight.x ||
-            y_world < mBottomLeft.y || y_world > mTopRight.y) {
-            return { 0, 0 };
-        }
-        return { x_world - mBottomLeft.x,
-                 y_world - mBottomLeft.y };
+        // clamp to [mBottomLeft, mTopRight]
+        int32_t x_clamped = fl::clamp(x_world, mBottomLeft.x, mTopRight.x);
+        int32_t y_clamped = fl::clamp(y_world, mBottomLeft.y, mTopRight.y);
+        // convert to local
+        return {x_clamped - mBottomLeft.x, y_clamped - mBottomLeft.y};
     }
 
     // element access via (x,y)
-    T& operator()(int32_t x, int32_t y) {
-        return at(x, y);
-    }
+    T &operator()(int32_t x, int32_t y) { return at(x, y); }
 
     // Add access like slice[y][x]
-    T* operator[](int32_t row) {
+    T *operator[](int32_t row) {
         int32_t parentRow = row + mBottomLeft.y;
-        return mData
-             + parentRow * mDataWidth
-             + mBottomLeft.x;
+        return mData + parentRow * mDataWidth + mBottomLeft.x;
     }
 
-    T& at(int32_t x, int32_t y) {
+    T &at(int32_t x, int32_t y) {
         auto parent = getParentCoord(x, y);
         return mData[parent.x + parent.y * mDataWidth];
     }
 
-private:
-    T*                mData;
-    int32_t           mDataWidth;
-    int32_t           mDataHeight;
+  private:
+    T *mData;
+    int32_t mDataWidth;
+    int32_t mDataHeight;
     point_xy<int32_t> mBottomLeft;
     point_xy<int32_t> mTopRight;
 };
