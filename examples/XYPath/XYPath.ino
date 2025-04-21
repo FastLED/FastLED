@@ -106,11 +106,6 @@ void loop() {
     if (!advanceFrame) {
         auto v1 = static_cast<bool>(advancedFrameButton);
         auto v2 = static_cast<bool>(advancedFrame);
-
-        FASTLED_WARN("Skipping frame");
-        FASTLED_WARN("v1: " << v1);
-        FASTLED_WARN("v2: " << v2);
-        // delay(500);
         FastLED.onEndFrame();
         return;
     }
