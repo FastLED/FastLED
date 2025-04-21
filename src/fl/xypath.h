@@ -24,6 +24,7 @@ namespace fl {
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
+FASTLED_SMART_PTR(XYPathGenerator);
 // FASTLED_SMART_PTR(HeartPath);
 // FASTLED_SMART_PTR(LissajousPath);
 // FASTLED_SMART_PTR(ArchimedeanSpiralPath);
@@ -32,15 +33,21 @@ FASTLED_SMART_PTR(CirclePath);
 // FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
+class XYPathGenerator: public Referent {
+   public:
+    virtual const Str name() const = 0;
+    virtual point_xy_float compute(float alpha) = 0;
+};
+
 
 class XYPath : public Referent {
   public:
-    static LinePathPtr NewLinePath(float x0, float y0, float x1, float y1,
-                                    uint16_t steps = 0) {
-        return LinePathPtr::New(x0, y0, x1, y1, steps);
+    static LinePathPtr NewLinePath(float x0, float y0, float x1, float y1) {
+        return LinePathPtr::New(x0, y0, x1, y1);
     }
-    static CirclePathPtr NewCirclePath(uint16_t steps = 0) {
-        return CirclePathPtr::New(steps);
+    static XYPathPtr NewCirclePath() {
+        auto path = CirclePathPtr::New();
+        return XYPathPtr::New(path);
     }
 
 
@@ -76,12 +83,12 @@ class XYPath : public Referent {
     //     return CatmullRomPathPtr::New(steps);
     // }
 
-    XYPath(uint16_t steps = 0); // 0 steps means no LUT.
-    // α in [0,1] → (x,y) on the path, both in [0,1].
+    XYPath(XYPathGeneratorPtr path,
+           TransformFloatPtr transform = TransformFloat::Identity(),
+           uint16_t steps = 0); // 0 steps means no LUT.
 
-    virtual const char *name() const = 0;
 
-    point_xy_float at(float alpha) { return at(alpha, mTransform); }
+    point_xy_float at(float alpha) { return at(alpha, *mTransform); }
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {
@@ -95,10 +102,10 @@ class XYPath : public Referent {
         if (height > 0) {
           height -= 1;
         }
-        mTransform.scale_x = width * scale;
-        mTransform.scale_y = height * scale;
-        mTransform.x_offset = 0;
-        mTransform.y_offset = 0;
+        mTransform->scale_x = width * scale;
+        mTransform->scale_y = height * scale;
+        mTransform->x_offset = 0;
+        mTransform->y_offset = 0;
         onTransformFloatChanged();
     }
 
@@ -106,54 +113,19 @@ class XYPath : public Referent {
         // This is called when the transform changes. We need to clear the LUT
         // so that it will be rebuilt with the new transform.
         clearLut();
-        // mTransform.validate();
+        // mTransform->validate();
         // Just recompute unconditionally. If this is a performance issue,
         // we can add a flag to make it lazy.
-        //mTransform16 = mTransform.toTransform16();
+        //mTransform16 = mTransform->toTransform16();
     }
 
-    void setTransform(const TransformFloat &tx) {
-        mTransform = tx;
-        onTransformFloatChanged();
+    TransformFloatPtr transform() {
+        return mTransform;
     }
 
-    float getScaleX() const { return mTransform.scale_x; }
-    float getScaleY() const { return mTransform.scale_y; }
-    float getXOffset() const { return mTransform.x_offset; }
-    float getYOffset() const { return mTransform.y_offset; }
-    float getRotation() const { return mTransform.rotation; }
-    void setScaleX(float scale_x) { mTransform.scale_x = scale_x; onTransformFloatChanged(); }
-    void setScaleY(float scale_y) { mTransform.scale_y = scale_y; onTransformFloatChanged(); }
-    void setXOffset(float x_offset) { mTransform.x_offset = x_offset; onTransformFloatChanged(); }
-    void setYOffset(float y_offset) { mTransform.y_offset = y_offset; onTransformFloatChanged(); }
-    void setRotation(float rotation) { mTransform.rotation = rotation; onTransformFloatChanged(); }
-
-    void addScaleX(float scale_x) {
-        mTransform.scale_x += scale_x;
-        onTransformFloatChanged();
+    point_xy_float compute(float alpha) { 
+        return compute_float(alpha, *mTransform);
     }
-    void addScaleY(float scale_y) {
-        mTransform.scale_y += scale_y;
-        onTransformFloatChanged();
-    }
-
-    void addXOffset(float x_offset) {
-        mTransform.x_offset += x_offset;
-        onTransformFloatChanged();
-    }
-
-    void addYOffset(float y_offset) {
-        mTransform.y_offset += y_offset;
-        onTransformFloatChanged();
-    }
-
-    void addRotation(float rotation) {
-        mTransform.rotation += rotation;
-        onTransformFloatChanged();
-    }
-
-    // Subclasses must implement this method.
-    virtual point_xy_float compute(float alpha) = 0;
 
     // α in [0,65535] → (x,y) on the path, both in [0,65535].
     // This default implementation will build a LUT if mSteps > 0.
@@ -192,12 +164,13 @@ class XYPath : public Referent {
 
     LUTXY16Ptr getLut() const { return mLut; }
 
-  protected:
-    uint32_t mSteps;
+  private:
+    XYPathGeneratorPtr mPath;
+    TransformFloatPtr mTransform;
+
+    uint32_t mSteps = 0;
     LUTXY16Ptr mLut;
 
-  private:
-    TransformFloat mTransform;
     //Transform16 mTransform16;
     void initLutOnce();
     LUTXY16Ptr generateLUT(uint16_t steps);
@@ -207,16 +180,19 @@ class XYPath : public Referent {
 
 ///////////////// Implementations of common XYPaths ///////////////////
 
-class LinePath : public XYPath {
+
+class LinePath : public XYPathGenerator {
   public:
-    LinePath(float x0, float y0, float x1, float y1, uint16_t steps = 0);
+    LinePath(float x0, float y0, float x1, float y1);
     point_xy_float compute(float alpha) override;
-    const char *name() const override { return "LinePath"; }
+    const Str name() const override { return "LinePath"; }
     void set(float x0, float y0, float x1, float y1);
 
   private:
     float mX0, mY0, mX1, mY1;
 };
+
+#if 0
 
 /// Catmull–Rom spline through arbitrary points.
 /// Simply add control points and compute(α) will smoothly interpolate through them.
@@ -236,12 +212,14 @@ class CatmullRomPath : public XYPath {
   private:
     HeapVector<point_xy_float> mPoints;
 };
+#endif
 
-class CirclePath : public XYPath {
+
+class CirclePath : public XYPathGenerator {
   public:
-    CirclePath(uint16_t steps = 0);
+    CirclePath();
     point_xy_float compute(float alpha) override;
-    const char *name() const override { return "CirclePath"; }
+    const Str name() const override { return "CirclePath"; }
 
   private:
     float mRadius;

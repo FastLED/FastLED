@@ -70,7 +70,7 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = NewPtr<CirclePath>();
+XYPathPtr shape = XYPath::NewCirclePath();
 TimeLinear pointTransition(10000);
 
 void setup() {
@@ -87,10 +87,13 @@ void loop() {
     // Your code here
     uint32_t now = millis();
 
+    // FASTLED_WARN("Now: " << now);
+
     // unconditionally apply the circle.
     if (button) {
         // trigger the transition
         pointTransition.trigger(now);
+        FASTLED_WARN("Transition triggered");
     }
 
     if (pointTransition.isActive(now)) {

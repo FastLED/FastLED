@@ -9,9 +9,12 @@ expensive trig functions are needed. Same with scale and offset.
 #include "lib8tion/types.h"
 #include "fl/lut.h"
 #include "fl/xymap.h"
+#include "fl/ptr.h"
 
 
 namespace fl {
+
+FASTLED_SMART_PTR(TransformFloat);
 
 using alpha16 =
     uint16_t; // fixed point representation of 0->1 in the range [0, 65535]
@@ -45,13 +48,19 @@ struct Transform16 {
 };
 
 // This transform assumes the coordinates are in the range [0,1].
-struct TransformFloat {
+struct TransformFloat: public Referent {
+    static TransformFloatPtr Identity() { 
+        TransformFloatPtr tx = TransformFloatPtr::New();
+        return tx;
+    }
     TransformFloat() = default;
     float scale_x = 1.0f;  // 0 -> 1
     float scale_y = 1.0f;  // 0 -> 1
     float x_offset = 0.0f; // 0 -> 1
     float y_offset = 0.0f; // 0 -> 1
     float rotation = 0.0f; // 0 -> 1
+    float scale() const ;
+    void set_scale(float scale) ;
     point_xy_float transform(const point_xy_float &xy) const;
 };
 

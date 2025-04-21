@@ -14,15 +14,15 @@ using namespace fl;
 
 TEST_CASE("LinePath") {
     LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
-    point_xy_float xy = path.at(0.5f);
+    point_xy_float xy = path.compute(0.5f);
     REQUIRE(xy.x == 0.5f);
     REQUIRE(xy.y == 0.5f);
 
-    xy = path.at(1.0f);
+    xy = path.compute(1.0f);
     REQUIRE(xy.x == 1.0f);
     REQUIRE(xy.y == 1.0f);
 
-    xy = path.at(0.0f);
+    xy = path.compute(0.0f);
     REQUIRE(xy.x == 0.0f);
     REQUIRE(xy.y == 0.0f);
 }
@@ -30,7 +30,8 @@ TEST_CASE("LinePath") {
 
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
-    paths.push_back(CirclePathPtr::New());
+    XYPathPtr circle = XYPath::NewCirclePath();
+    paths.push_back(circle);
 
     
     // paths.push_back(HeartPathPtr::New());
@@ -119,7 +120,7 @@ TEST_CASE("Check complex types") {
     }
 
     SUBCASE("Circle works with LUT") {
-        CirclePathPtr circle = CirclePathPtr::New();
+        XYPathPtr circle = XYPath::NewCirclePath();
         Transform16 tx;
         circle->buildLut(5);  // circle->at16(0) == circle->at16(65535)
         auto lut = circle->getLut();
@@ -194,7 +195,7 @@ TEST_CASE("Check complex types") {
         tx.y_offset = 0;
         tx.rotation = 32768; // rotate by 180 degrees
 
-        CirclePathPtr circle = CirclePathPtr::New();
+        XYPathPtr circle = XYPath::NewCirclePath();
         circle->buildLut(5);  // circle->at16(0) == circle->at16(65535)
         auto lut = circle->getLut();
         REQUIRE_EQ(lut->size(), 5);
@@ -225,7 +226,7 @@ TEST_CASE("Check complex types") {
         tx.x_offset = 0;
         tx.y_offset = 0;
 
-        CirclePathPtr circle = CirclePathPtr::New();
+        XYPathPtr circle = XYPath::NewCirclePath();
         circle->buildLut(5);  // circle->at16(0) == circle->at16(65535)
         auto lut = circle->getLut();
         REQUIRE_EQ(lut->size(), 5);

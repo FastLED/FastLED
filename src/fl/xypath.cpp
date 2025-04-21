@@ -6,11 +6,12 @@
 #include "fl/math_macros.h"
 #include "fl/xypath.h"
 
-
 namespace fl {
 
+XYPath::XYPath(XYPathGeneratorPtr path, TransformFloatPtr transform,
+               uint16_t steps)
+    : mPath(path), mTransform(transform), mSteps(steps) {}
 
-XYPath::XYPath(uint16_t steps) : mSteps(steps) {}
 LUTXY16Ptr XYPath::generateLUT(uint16_t steps) {
     LUTXY16Ptr lut = LUTXY16Ptr::New(steps);
     point_xy<uint16_t> *mutable_data = lut->getDataMutable();
@@ -42,8 +43,9 @@ void XYPath::initLutOnce() {
 }
 
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
-    point_xy_float xy = compute(alpha);
-    return tx.transform(xy);
+    point_xy_float xy = mPath->compute(alpha);
+    point_xy_float out = tx.transform(xy);
+    return out;
 }
 
 point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
@@ -140,9 +142,8 @@ void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
     return;
 }
 
-
-LinePath::LinePath(float x0, float y0, float x1, float y1, uint16_t steps)
-    : XYPath(steps), mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
+LinePath::LinePath(float x0, float y0, float x1, float y1)
+    : mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
 
 point_xy_float LinePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the line
@@ -152,7 +153,6 @@ point_xy_float LinePath::compute(float alpha) {
 }
 
 void LinePath::set(float x0, float y0, float x1, float y1) {
-    XYPath::clearLut();
     mX0 = x0;
     mY0 = y0;
     mX1 = x1;
@@ -167,7 +167,6 @@ point_xy_float CirclePath::compute(float alpha) {
     return point_xy_float(x, y);
 }
 
-CirclePath::CirclePath(uint16_t steps) : XYPath(steps) {}
-
+CirclePath::CirclePath() {}
 
 } // namespace fl

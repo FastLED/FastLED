@@ -119,4 +119,17 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
     return out;
 }
 
+
+
+float TransformFloat::scale() const {
+    return MIN(scale_x, scale_y);
+}
+
+
+
+void TransformFloat::set_scale(float scale) {
+    scale_x = scale;
+    scale_y = scale;
+}
+
 } // namespace fl

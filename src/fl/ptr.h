@@ -133,6 +133,8 @@ template <typename T> class Ptr : public PtrTraits<T> {
     // the refcount reaches 0.
     static Ptr NoTracking(T &referent) { return Ptr(&referent, false); }
 
+    static Ptr Null() { return Ptr<T>(); }
+
 
     // Allow upcasting of Refs.
     template <typename U, typename = fl::is_derived<T, U>>
@@ -141,8 +143,6 @@ template <typename T> class Ptr : public PtrTraits<T> {
             referent_->ref();
         }
     }
-
-    static Ptr<T> Null() { return Ptr<T>(); }
 
     Ptr() : referent_(nullptr) {}
 
