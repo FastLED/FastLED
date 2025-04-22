@@ -86,7 +86,7 @@ SubPixel2x2 XYPath::at_subpixel(float alpha) {
     float w_ur = fx       * fy;        // upper‑right
 
     // 6) build SubPixel2x2 anchored at (cx,cy)
-    SubPixel2x2 out(point_xy<uint16_t>(cx, cy));
+    SubPixel2x2 out(point_xy<int>(cx, cy));
     out.lower_left()  = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
     out.upper_left()  = to_uint8(w_ul);
@@ -244,6 +244,30 @@ point_xy_float HeartPath::compute(float alpha) {
     y *= 1.10f;
 
     y += 0.17f; // Adjust y to fit within the range of [-1, 1]
+    
+    return point_xy_float(x, y);
+}
+
+ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius)
+    : mTurns(turns), mRadius(radius) {}
+
+point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
+    // Parametric equation for an Archimedean spiral
+    // α in [0,1] → (x,y) on the spiral curve
+    
+    // Calculate the angle based on the number of turns
+    float theta = alpha * 2.0f * PI * mTurns;
+    
+    // Calculate the radius at this angle (grows linearly with angle)
+    // Scale by alpha to ensure we start at center and grow outward
+    float r = alpha * mRadius;
+    
+    // Convert polar coordinates (r, theta) to Cartesian (x, y)
+    float x = r * cosf(theta);
+    float y = r * sinf(theta);
+    
+    // Ensure the spiral fits within [-1, 1] range
+    // No additional scaling needed as we control the radius directly
     
     return point_xy_float(x, y);
 }

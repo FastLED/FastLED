@@ -5,7 +5,6 @@
 
 namespace fl {
 
-template<typename T> struct point_xy_math;
 
 template<typename T>
 struct point_xy {
@@ -15,6 +14,10 @@ struct point_xy {
     T y = 0;
     constexpr point_xy() = default;
     constexpr point_xy(T x, T y) : x(x), y(y) {}
+
+    template<typename U>
+    explicit constexpr point_xy(U xy) : x(xy), y(xy) {}
+
     constexpr point_xy(const point_xy& p) : x(p.x), y(p.y) {}
     point_xy& operator*=(const float& f) {
         x *= f;
@@ -22,40 +25,56 @@ struct point_xy {
         return *this;
     }
     point_xy& operator/=(const float& f) {
-        *this = point_xy_math<point_xy>::div(*this, f);
+        // *this = point_xy_math::div(*this, f);
+        x /= f;
+        y /= f;
         return *this;
     }
     point_xy& operator*=(const double& f) {
-        *this = point_xy_math<point_xy>::mul(*this, f);
+        // *this = point_xy_math::mul(*this, f);
+        x *= f;
+        y *= f;
         return *this;
     }
     point_xy& operator/=(const double& f) {
-        *this = point_xy_math<point_xy>::div(*this, f);
+        // *this = point_xy_math::div(*this, f);
+        x /= f;
+        y /= f;
         return *this;
     }
 
     point_xy& operator/=(const uint16_t& d) {
-        *this = point_xy_math<point_xy>::div(*this, d);
+        // *this = point_xy_math::div(*this, d);
+        x /= d;
+        y /= d;
         return *this;
     }
 
     point_xy& operator/=(const int& d) {
-        *this = point_xy_math<point_xy>::div(*this, d);
+        // *this = point_xy_math::div(*this, d);
+        x /= d;
+        y /= d;
         return *this;
     }
 
     point_xy& operator/=(const point_xy& p) {
-        *this = point_xy_math<point_xy>::div(*this, p);
+        // *this = point_xy_math::div(*this, p);
+        x /= p.x;
+        y /= p.y;
         return *this;
     }
 
     point_xy& operator+=(const point_xy& p) {
-        *this = point_xy_math<point_xy>::add(*this, p);
+        //*this = point_xy_math::add(*this, p);
+        x += p.x;
+        y += p.y;
         return *this;
     }
 
     point_xy& operator-=(const point_xy& p) {
-        *this = point_xy_math<point_xy>::sub(*this, p);
+        // *this = point_xy_math::sub(*this, p);
+        x -= p.x;
+        y -= p.y;
         return *this;
     }
 
@@ -66,39 +85,46 @@ struct point_xy {
     }
 
     point_xy operator-(const point_xy& p) const {
-        return point_xy_math<point_xy>::sub(*this, p);
+        return point_xy(x - p.x, y - p.y);
     }
 
     point_xy operator+(const point_xy& p) const {
-        return point_xy_math<point_xy>::add(*this, p);
+        return point_xy(x + p.x, y + p.y);
     }
 
     point_xy operator*(const point_xy& p) const {
-        return point_xy_math<point_xy>::mul(*this, p);
+        return point_xy(x * p.x, y * p.y);
     }
 
     point_xy operator/(const point_xy& p) const {
-        return point_xy_math<point_xy>::div(*this, p);
+        return point_xy(x / p.x, y / p.y);
     }
 
     template<typename NumberT>
     point_xy operator+(const NumberT& p) const {
-        return point_xy_math<point_xy>::add(*this, p);
+        return point_xy(x + p, y + p);
+    }
+
+    template<typename U>
+    point_xy operator+(const point_xy<U>& p) const {
+        return point_xy(x + p.x, y + p.x);
     }
 
     template<typename NumberT>
     point_xy operator-(const NumberT& p) const {
-        return point_xy_math<point_xy>::sub(*this, p);
+        return point_xy(x - p, y - p);
     }
 
     template<typename NumberT>
     point_xy operator*(const NumberT& p) const {
-        return point_xy_math<point_xy>::mul(*this, p);
+        return point_xy(x * p, y * p);
     }
 
     template<typename NumberT>
     point_xy operator/(const NumberT& p) const {
-        return point_xy_math<point_xy>::div(*this, p);
+        T a = x / p;
+        T b = y / p;
+        return point_xy<T>(a, b);
     }
 
     bool operator==(const point_xy& p) const {
@@ -106,6 +132,16 @@ struct point_xy {
     }
 
     bool operator!=(const point_xy& p) const {
+        return (x != p.x || y != p.y);
+    }
+
+    template<typename U>
+    bool operator==(const point_xy<U>& p) const {
+        return (x == p.x && y == p.y);
+    }
+
+    template<typename U>
+    bool operator!=(const point_xy<U>& p) const {
         return (x != p.x || y != p.y);
     }
 };
@@ -123,52 +159,6 @@ struct pair_xy : public point_xy<T> {
     using point_xy<T>::point_xy;
     pair_xy() = default;
     pair_xy(const point_xy<T>& p) : point_xy<T>(p) {}
-};
-
-////////////// point_xy operations //////////////
-
-template<typename T>
-struct point_xy_math {
-    using value_type = typename T::value_type;
-    static constexpr T zero() {
-        return T();
-    }
-
-    static constexpr T add(const T& a, const T& b) {
-        return T(a.x + b.x, a.y + b.y);
-    }
-
-    static constexpr T sub(const T& a, const T& b) {
-        return T(a.x - b.x, a.y - b.y);
-    }
-
-    static constexpr T mul(const T& a, const T& b) {
-        return T(a.x * b.x, a.y * b.y);
-    }
-
-    static constexpr T div(const T& a, const T& b) {
-        return T(a.x / b.x, a.y / b.y);
-    }
-
-    template<typename NumberT>
-    static constexpr T add(const T& a, const NumberT& b) {
-        return T(a.x + b, a.y + b);
-    }
-
-    template<typename NumberT>
-    static constexpr T sub(const T& a, const NumberT& b) {
-        return T(a.x - b, a.y - b);
-    }
-
-    template<typename NumberT>
-    static constexpr T mul(const T& a, const NumberT& b) {
-        return T(a.x * b, a.y * b);
-    }
-
-    template<typename NumberT>
-    static constexpr T div(const T& a, const NumberT& b) {
-        return T(a.x / b, a.y / b);
-    }
 };
 
 template<typename T>
@@ -221,6 +211,16 @@ struct rect_xy {
     }
 
     bool operator!=(const rect_xy& r) const {
+        return !(*this == r);
+    }
+
+    template<typename U>
+    bool operator==(const rect_xy<U>& r) const {
+        return (mMin == r.mMin && mMax == r.mMax);
+    }
+
+    template<typename U>
+    bool operator!=(const rect_xy<U>& r) const {
         return !(*this == r);
     }
 };

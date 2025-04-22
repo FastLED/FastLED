@@ -150,6 +150,45 @@ TEST_CASE("Test HeartPath") {
     REQUIRE(max_y <= 1.0f);
 }
 
+TEST_CASE("Test ArchimedeanSpiralPath") {
+    ArchimedeanSpiralPathPtr spiral = ArchimedeanSpiralPathPtr::New(3, 1.0f);
+    
+    // Track min and max values to help with scaling
+    float min_x = 1.0f;
+    float max_x = -1.0f;
+    float min_y = 1.0f;
+    float max_y = -1.0f;
+    
+    // Sample points along the spiral curve
+    const int num_samples = 100;
+    for (int i = 0; i < num_samples; i++) {
+        float alpha = static_cast<float>(i) / (num_samples - 1);
+        point_xy_float point = spiral->compute(alpha);
+        
+        // Update min/max values
+        min_x = MIN(min_x, point.x);
+        max_x = MAX(max_x, point.x);
+        min_y = MIN(min_y, point.y);
+        max_y = MAX(max_y, point.y);
+        
+        // Print every 10th point for visual inspection
+        if (i % 10 == 0) {
+            MESSAGE("Spiral point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+        }
+    }
+    
+    // Print the min/max values
+    MESSAGE("\nSpiral shape bounds:");
+    MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+    MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+    
+    // Verify the spiral is within the expected bounds
+    REQUIRE(min_x >= -1.0f);
+    REQUIRE(max_x <= 1.0f);
+    REQUIRE(min_y >= -1.0f);
+    REQUIRE(max_y <= 1.0f);
+}
+
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
     XYPathPtr circle = XYPath::NewCirclePath();
@@ -159,8 +198,11 @@ TEST_CASE("Check complex types") {
     XYPathPtr heart = XYPath::NewHeartPath();
     paths.push_back(heart);
     
+    // Add spiral path to the tests
+    XYPathPtr spiral = XYPath::NewArchimedeanSpiralPath();
+    paths.push_back(spiral);
+    
     // paths.push_back(LissajousPathPtr::New());
-    // paths.push_back(ArchimedeanSpiralPathPtr::New());
     // paths.push_back(RosePathPtr::New());
     // paths.push_back(PhyllotaxisPathPtr::New());
     // paths.push_back(GielisCurvePathPtr::New());

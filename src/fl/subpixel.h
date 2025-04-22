@@ -24,7 +24,7 @@ class SubPixel2x2 {
                           Raster *output);
 
     SubPixel2x2() = default;
-    SubPixel2x2(const point_xy<uint16_t> &origin) : mOrigin(origin) {}
+    SubPixel2x2(const point_xy<int> &origin) : mOrigin(origin) {}
     SubPixel2x2(const SubPixel2x2 &) = default;
     SubPixel2x2 &operator=(const SubPixel2x2 &) = default;
     SubPixel2x2(SubPixel2x2 &&) = default;
@@ -38,22 +38,22 @@ class SubPixel2x2 {
     uint8_t &lower_right() { return at(1, 0); }
     uint8_t &upper_right() { return at(1, 1); }
 
-    point_xy<uint16_t> origin() const { return mOrigin; }
+    point_xy<int> origin() const { return mOrigin; }
 
-    rect_xy<uint16_t> bounds() const {
-        point_xy<uint16_t> min = mOrigin;
-        point_xy<uint16_t> max = mOrigin + point_xy<uint16_t>(1, 1);
-        return rect_xy<uint16_t>(min, max);
+    rect_xy<int> bounds() const {
+        point_xy<int> min = mOrigin;
+        point_xy<int> max = mOrigin + point_xy<int>(1, 1);
+        return rect_xy<int>(min, max);
     }
 
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
-
     void draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const ;
 
   private:
     uint8_t mTile[2][2] = {};
-    point_xy<uint16_t> mOrigin;
+    // Subpixels can be rendered outside the viewport so this must be signed.
+    point_xy<int> mOrigin;
 };
 
 } // namespace fl

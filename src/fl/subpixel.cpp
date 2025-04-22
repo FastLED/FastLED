@@ -21,10 +21,12 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
         return;
     }
 
-    auto &first_tile = tiles[0];
-    rect_xy<uint16_t> bounds = first_tile.bounds();
 
+    rect_xy<int> bounds = tiles[0].bounds();
+    //bool first = true;
+    // auto origin = out_raster->origin();
     for (uint16_t i = 1; i < tiles.size(); ++i) {
+        // we have to test if it's within bounds.
         const auto &tile = tiles[i];
         bounds.expand(tile.bounds());
     }
@@ -33,8 +35,8 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
     auto global_origin = out_raster->global_min();
 
     for (const auto &tile : tiles) {
-        const point_xy<uint16_t> &origin = tile.origin();
-        const point_xy<uint16_t> translate = origin - global_origin;
+        const point_xy<int> &origin = tile.origin();
+        const point_xy<int> translate = origin - global_origin;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
                 uint8_t value = tile.at(x, y);
@@ -63,7 +65,7 @@ void SubPixel2x2::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
                 int yy = mOrigin.y + y;
                 if (xymap.has(xx, yy)) {
                     int index = xymap(xx, yy);
-                    visitor->draw(point_xy<uint16_t>(xx, yy), index, value);
+                    visitor->draw(point_xy<int>(xx, yy), index, value);
                 }
             }
         }

@@ -29,8 +29,8 @@ FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(HeartPath);
+FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 // FASTLED_SMART_PTR(LissajousPath);
-// FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 // FASTLED_SMART_PTR(RosePath);
 // FASTLED_SMART_PTR(PhyllotaxisPath);
 // FASTLED_SMART_PTR(GielisCurvePath);
@@ -77,15 +77,23 @@ class XYPath : public Referent {
         return out;
     }
 
+    static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height) {
+        ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
+        XYPathPtr out = XYPathPtr::New(path);
+        out->setDrawBounds(width, height);
+        return out;
+    }
+
+    static XYPathPtr NewArchimedeanSpiralPath() {
+        ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
+        XYPathPtr out = XYPathPtr::New(path);
+        return out;
+    }
+
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
     //                                          float delta, uint16_t steps = 0)
     //                                          {
     //     return LissajousPathPtr::New(a, b, delta, steps);
-    // }
-
-    // static ArchimedeanSpiralPathPtr NewArchimedeanSpiralPath(
-    //     uint8_t turns, float radius, uint16_t steps = 0) {
-    //     return ArchimedeanSpiralPathPtr::New(turns, radius, steps);
     // }
 
     // static RosePathPtr NewRosePath(uint8_t petals, uint16_t steps = 0) {
@@ -283,6 +291,20 @@ class HeartPath : public XYPathGenerator {
     HeartPath();
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "HeartPath"; }
+};
+
+class ArchimedeanSpiralPath : public XYPathGenerator {
+  public:
+    ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 1.0f);
+    point_xy_float compute(float alpha) override;
+    const Str name() const override { return "ArchimedeanSpiralPath"; }
+    
+    void setTurns(uint8_t turns) { mTurns = turns; }
+    void setRadius(float radius) { mRadius = radius; }
+    
+  private:
+    uint8_t mTurns;  // Number of spiral turns
+    float mRadius;   // Maximum radius of the spiral
 };
 
 } // namespace fl

@@ -20,7 +20,7 @@ void Raster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
 void Raster::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
     const uint16_t w = width();
     const uint16_t h = height();
-    const point_xy<uint16_t> origin = this->origin();
+    const point_xy<int> origin = this->origin();
     for (uint16_t x = 0; x < w; ++x) {
         for (uint16_t y = 0; y < h; ++y) {
             uint16_t xx = x + origin.x;
@@ -31,7 +31,7 @@ void Raster::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
             uint32_t index = xymap(xx, yy);
             uint8_t value = at(x, y);
             if (value > 0) {
-                point_xy<uint16_t> pt = {xx, yy};
+                point_xy<int> pt = {xx, yy};
                 visitor->draw(pt, index, value);
             }
         }

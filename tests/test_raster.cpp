@@ -19,11 +19,11 @@ TEST_CASE("Raster simple test") {
     Raster raster;
     SubPixel2x2::Rasterize(Slice<SubPixel2x2>(&subpixel, 1), &raster);
 
-    point_xy<uint16_t> origin = subpixel.origin();
-    point_xy<uint16_t> global_min = raster.global_min();
-    point_xy<uint16_t> global_max = raster.global_max();
+    point_xy<int> origin = subpixel.origin();
+    point_xy<int> global_min = raster.global_min();
+    point_xy<int> global_max = raster.global_max();
     REQUIRE_EQ(global_min, origin);
-    REQUIRE_EQ(global_max, origin + point_xy<uint16_t>(2, 2));
+    REQUIRE_EQ(global_max, origin + point_xy<int>(2, 2));
 
     // now test that each point matches.
     for (int x = 0; x < 2; ++x) {
