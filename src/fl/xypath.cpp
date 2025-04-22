@@ -111,9 +111,9 @@ point_xy<uint16_t> XYPath::at16(uint16_t alpha, const Transform16 &tx) {
     point_xy_float xy = compute(alpha_f);
     // Ensure values are clamped to the target range
     uint16_t x_val =
-        MIN(static_cast<uint16_t>(xy.x * scale_x_f) + tx.x_offset, tx.scale_x);
+        MIN(static_cast<uint16_t>(xy.x * scale_x_f) + tx.offset_x, tx.scale_x);
     uint16_t y_val =
-        MIN(static_cast<uint16_t>(xy.y * scale_y_f) + tx.y_offset, tx.scale_y);
+        MIN(static_cast<uint16_t>(xy.y * scale_y_f) + tx.offset_y, tx.scale_y);
     return point_xy<uint16_t>(x_val, y_val);
 }
 

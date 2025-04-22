@@ -42,8 +42,8 @@ struct Transform16 {
     Transform16() = default;
     alpha16 scale_x = 0xffff;
     alpha16 scale_y = 0xffff;
-    alpha16 x_offset = 0;
-    alpha16 y_offset = 0;
+    alpha16 offset_x = 0;
+    alpha16 offset_y = 0;
     alpha16 rotation = 0;
 
     point_xy<alpha16> transform(const point_xy<alpha16> &xy) const;
@@ -58,8 +58,8 @@ struct TransformFloatImpl : public Referent {
     TransformFloatImpl() = default;
     float scale_x = 1.0f;
     float scale_y = 1.0f;
-    float x_offset = 0.0f;
-    float y_offset = 0.0f;
+    float offset_x = 0.0f;
+    float offset_y = 0.0f;
     float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
     float scale() const;
     void set_scale(float scale);
@@ -73,13 +73,13 @@ struct TransformFloat {
     TransformFloat() = default;
     // float scale_x = 1.0f;
     // float scale_y = 1.0f;
-    // float x_offset = 0.0f;
-    // float y_offset = 0.0f;
+    // float offset_x = 0.0f;
+    // float offset_y = 0.0f;
     // float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
     float scale_x() const { return mImpl->scale_x; }
     float scale_y() const { return mImpl->scale_y; }
-    float x_offset() const { return mImpl->x_offset; }
-    float y_offset() const { return mImpl->y_offset; }
+    float offset_x() const { return mImpl->offset_x; }
+    float offset_y() const { return mImpl->offset_y; }
     float rotation() const { return mImpl->rotation; }
     float scale() const {
         return MIN(scale_x(), scale_y());
@@ -87,7 +87,6 @@ struct TransformFloat {
     void set_scale(float scale) {
         mImpl->set_scale(scale);
     }
-
     void set_scale_x(float scale) {
         mImpl->scale_x = scale;
     }
@@ -95,10 +94,13 @@ struct TransformFloat {
         mImpl->scale_y = scale;
     }
     void set_offset_x(float offset) {
-        mImpl->x_offset = offset;
+        mImpl->offset_x = offset;
     }
     void set_offset_y(float offset) {
-        mImpl->y_offset = offset;
+        mImpl->offset_y = offset;
+    }
+    void set_rotation(float rotation) {
+        mImpl->rotation = rotation;
     }
     point_xy_float transform(const point_xy_float &xy) const { return mImpl->transform(xy); }
     bool is_identity() const { return mImpl->is_identity(); }

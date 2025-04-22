@@ -340,8 +340,8 @@ TEST_CASE("Check complex types") {
         Transform16 tx;
         tx.scale_x = 255;
         tx.scale_y = 255;
-        tx.x_offset = 0;
-        tx.y_offset = 0;
+        tx.offset_x = 0;
+        tx.offset_y = 0;
 
         for (auto &path : paths) {
             for (uint32_t alpha = 0; true; alpha += 10) {
@@ -432,8 +432,8 @@ TEST_CASE("Check complex types") {
         Transform16 tx;
         tx.scale_x = 255;
         tx.scale_y = 255;
-        tx.x_offset = 0;
-        tx.y_offset = 0;
+        tx.offset_x = 0;
+        tx.offset_y = 0;
         tx.rotation = 32768; // rotate by 180 degrees
 
         XYPathPtr circle = XYPath::NewCirclePath();
@@ -464,8 +464,8 @@ TEST_CASE("Check complex types") {
         Transform16 tx;
         tx.scale_x = 255;
         tx.scale_y = 255;
-        tx.x_offset = 0;
-        tx.y_offset = 0;
+        tx.offset_x = 0;
+        tx.offset_y = 0;
 
         XYPathPtr circle = XYPath::NewCirclePath();
         circle->buildLut(5);  // circle->at16(0) == circle->at16(65535)
@@ -496,8 +496,8 @@ TEST_CASE("Check complex types") {
         Transform16 tx;
         tx.scale_x = 255;
         tx.scale_y = 255;
-        tx.x_offset = 0;
-        tx.y_offset = 0;
+        tx.offset_x = 0;
+        tx.offset_y = 0;
 
         for (auto &path : paths) {
             path->clearLut(255);

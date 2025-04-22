@@ -24,9 +24,9 @@ point_xy_float TransformFloatImpl::transform(const point_xy_float &xy) const {
     if (scale_y != 1.0f) {
         y *= scale_y;
     }
-    // Assume that adding floats is fast when x_offset == 0.0f
-    x += x_offset;
-    y += y_offset;
+    // Assume that adding floats is fast when offset_x == 0.0f
+    x += offset_x;
+    y += offset_y;
 
     const bool has_rotation = (rotation != 0.0f);
 
@@ -55,8 +55,8 @@ Transform16 Transform16::ToBounds(alpha16 max_value) {
     }
     tx.scale_x = scale16;
     tx.scale_y = scale16;
-    tx.x_offset = 0;
-    tx.y_offset = 0;
+    tx.offset_x = 0;
+    tx.offset_y = 0;
     tx.rotation = 0;
     return tx;
 }
@@ -85,8 +85,8 @@ Transform16 Transform16::ToBounds(const point_xy<alpha16> &min,
         scale16 = static_cast<alpha16>(scale32);
     }
     tx.scale_y = scale16;
-    tx.x_offset = min.x;
-    tx.y_offset = min.y;
+    tx.offset_x = min.x;
+    tx.offset_y = min.y;
     tx.rotation = rotation;
     return tx;
 }
@@ -126,10 +126,10 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
     }
 
     // 3) Finally translate
-    if (x_offset)
-        out.x = alpha16(out.x + x_offset);
-    if (y_offset)
-        out.y = alpha16(out.y + y_offset);
+    if (offset_x)
+        out.x = alpha16(out.x + offset_x);
+    if (offset_y)
+        out.y = alpha16(out.y + offset_y);
 
     return out;
 }
@@ -150,8 +150,8 @@ void TransformFloatImpl::set_scale(float scale) {
 
 
 bool TransformFloatImpl::is_identity() const {
-    return (scale_x == 1.0f && scale_y == 1.0f && x_offset == 0.0f &&
-            y_offset == 0.0f && rotation == 0.0f);
+    return (scale_x == 1.0f && scale_y == 1.0f && offset_x == 0.0f &&
+            offset_y == 0.0f && rotation == 0.0f);
 }
 
 } // namespace fl
