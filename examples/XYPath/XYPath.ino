@@ -20,7 +20,6 @@ all the UI elements you see below.
 
 // Sketch.
 #include "wave.h"
-#include "ui.h"
 #include "xypaths.h"
 
 using namespace fl;
@@ -141,7 +140,7 @@ void loop() {
         raster.rasterize(subpixels);
         s_prev_alpha = curr_alpha;
         if (useWaveFx) {
-            DrawVisitor draw_wave_fx(&raster, &wave_fx);
+            DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
             raster.draw(xyMap, draw_wave_fx);
         } else {
             raster.draw(purple, xyMap, leds);
