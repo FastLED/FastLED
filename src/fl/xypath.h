@@ -30,8 +30,8 @@ FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
+FASTLED_SMART_PTR(RosePath);
 // FASTLED_SMART_PTR(LissajousPath);
-// FASTLED_SMART_PTR(RosePath);
 // FASTLED_SMART_PTR(PhyllotaxisPath);
 // FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
@@ -90,14 +90,19 @@ class XYPath : public Referent {
         return out;
     }
 
+    static XYPathPtr NewRosePath(uint16_t width = 0, uint16_t height = 0, uint8_t n = 3, uint8_t d = 1) {
+        RosePathPtr path = RosePathPtr::New(n, d);
+        XYPathPtr out = XYPathPtr::New(path);
+        if (width > 0 && height > 0) {
+            out->setDrawBounds(width, height);
+        }
+        return out;
+    }
+
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
     //                                          float delta, uint16_t steps = 0)
     //                                          {
     //     return LissajousPathPtr::New(a, b, delta, steps);
-    // }
-
-    // static RosePathPtr NewRosePath(uint8_t petals, uint16_t steps = 0) {
-    //     return RosePathPtr::New(petals, steps);
     // }
     // static PhyllotaxisPathPtr NewPhyllotaxisPath(uint16_t count, float angle,
     //                                             uint16_t steps = 0) {
@@ -305,6 +310,24 @@ class ArchimedeanSpiralPath : public XYPathGenerator {
   private:
     uint8_t mTurns;  // Number of spiral turns
     float mRadius;   // Maximum radius of the spiral
+};
+
+class RosePath : public XYPathGenerator {
+  public:
+    // n and d determine the shape of the rose curve
+    // For n/d odd: produces n petals
+    // For n/d even: produces 2n petals
+    // For n and d coprime: produces n petals if n is odd, 2n petals if n is even
+    RosePath(uint8_t n = 3, uint8_t d = 1);
+    point_xy_float compute(float alpha) override;
+    const Str name() const override { return "RosePath"; }
+    
+    void setN(uint8_t n) { mN = n; }
+    void setD(uint8_t d) { mD = d; }
+    
+  private:
+    uint8_t mN;  // Numerator parameter (number of petals)
+    uint8_t mD;  // Denominator parameter
 };
 
 } // namespace fl

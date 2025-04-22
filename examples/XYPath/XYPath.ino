@@ -79,7 +79,7 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = XYPath::NewArchimedeanSpiralPath(WIDTH, HEIGHT);
+XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.

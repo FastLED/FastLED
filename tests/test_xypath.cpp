@@ -189,6 +189,77 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
     REQUIRE(max_y <= 1.0f);
 }
 
+TEST_CASE("Test RosePath") {
+    // Test with different petal configurations
+    SUBCASE("3-petal rose") {
+        RosePathPtr rose = RosePathPtr::New(3, 1);
+        
+        // Track min and max values to help with scaling
+        float min_x = 1.0f;
+        float max_x = -1.0f;
+        float min_y = 1.0f;
+        float max_y = -1.0f;
+        
+        // Sample points along the rose curve
+        const int num_samples = 100;
+        for (int i = 0; i < num_samples; i++) {
+            float alpha = static_cast<float>(i) / (num_samples - 1);
+            point_xy_float point = rose->compute(alpha);
+            
+            // Update min/max values
+            min_x = MIN(min_x, point.x);
+            max_x = MAX(max_x, point.x);
+            min_y = MIN(min_y, point.y);
+            max_y = MAX(max_y, point.y);
+            
+            // Print every 10th point for visual inspection
+            if (i % 10 == 0) {
+                MESSAGE("3-petal rose point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+            }
+        }
+        
+        // Print the min/max values
+        MESSAGE("\n3-petal rose shape bounds:");
+        MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+        MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+        
+        // Verify the rose is within the expected bounds
+        REQUIRE(min_x >= -1.0f);
+        REQUIRE(max_x <= 1.0f);
+        REQUIRE(min_y >= -1.0f);
+        REQUIRE(max_y <= 1.0f);
+    }
+    
+    SUBCASE("4-petal rose") {
+        RosePathPtr rose = RosePathPtr::New(2, 1);  // n=2 gives 4 petals
+        
+        // Track min and max values to help with scaling
+        float min_x = 1.0f;
+        float max_x = -1.0f;
+        float min_y = 1.0f;
+        float max_y = -1.0f;
+        
+        // Sample points along the rose curve
+        const int num_samples = 100;
+        for (int i = 0; i < num_samples; i++) {
+            float alpha = static_cast<float>(i) / (num_samples - 1);
+            point_xy_float point = rose->compute(alpha);
+            
+            // Update min/max values
+            min_x = MIN(min_x, point.x);
+            max_x = MAX(max_x, point.x);
+            min_y = MIN(min_y, point.y);
+            max_y = MAX(max_y, point.y);
+        }
+        
+        // Verify the rose is within the expected bounds
+        REQUIRE(min_x >= -1.0f);
+        REQUIRE(max_x <= 1.0f);
+        REQUIRE(min_y >= -1.0f);
+        REQUIRE(max_y <= 1.0f);
+    }
+}
+
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
     XYPathPtr circle = XYPath::NewCirclePath();
@@ -202,8 +273,11 @@ TEST_CASE("Check complex types") {
     XYPathPtr spiral = XYPath::NewArchimedeanSpiralPath();
     paths.push_back(spiral);
     
+    // Add rose path to the tests
+    XYPathPtr rose = XYPath::NewRosePath();
+    paths.push_back(rose);
+    
     // paths.push_back(LissajousPathPtr::New());
-    // paths.push_back(RosePathPtr::New());
     // paths.push_back(PhyllotaxisPathPtr::New());
     // paths.push_back(GielisCurvePathPtr::New());
     // paths.push_back(CatmullRomPathPtr::New());
