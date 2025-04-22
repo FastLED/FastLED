@@ -8,6 +8,7 @@
 #include "fl/point.h"
 #include "fl/raster.h"
 #include "fl/xymap.h"
+#include "fl/subpixel.h"
 
 namespace fl {
 
@@ -35,6 +36,12 @@ void Raster::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
             }
         }
     }
+}
+
+
+
+void Raster::rasterize(const Slice<const SubPixel2x2>& tiles) {
+    SubPixel2x2::Rasterize(tiles, this);
 }
 
 } // namespace fl

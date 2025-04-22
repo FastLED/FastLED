@@ -145,11 +145,8 @@ void loop() {
             SubPixel2x2 subpixel = shape->at_subpixel(a);
             subpixels.push_back(subpixel);
         }
-
-        SubPixel2x2::Rasterize(subpixels, &raster);
-
+        raster.rasterize(subpixels);
         s_prev_alpha = curr_alpha;
-
         if (useWaveFx) {
             auto origin = raster.origin();
             auto width = raster.width();

@@ -6,6 +6,7 @@
 #include "fl/grid.h"
 #include "fl/namespace.h"
 #include "fl/point.h"
+#include "fl/slice.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -15,6 +16,7 @@ namespace fl {
 
 class XYMap;
 class XYDrawUint8Visitor;
+class SubPixel2x2;
 
 class Raster {
   public:
@@ -28,6 +30,11 @@ class Raster {
         mGrid.reset(width, height);
         mOrigin = origin;
     }
+
+    // Renders the subpixel tiles to the raster. Any previous data is cleared.
+    // Memory will only be allocated if the size of the raster increased.
+    void rasterize(const Slice<const SubPixel2x2> &tiles);
+
     uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
     const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x, y); }
 
