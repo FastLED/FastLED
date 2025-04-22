@@ -70,7 +70,7 @@ UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
 UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 
-TimeLinear shapeProgress(TIME_ANIMATION);
+TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
 
 void setup() {

@@ -106,9 +106,9 @@ class TimeRamp: public TimeAlpha {
  *
  *
  */
-class TimeLinear: TimeAlpha {
+class TimeClampedTransition: public TimeAlpha {
   public:
-    TimeLinear(uint32_t duration) : mDuration(duration) {}
+    TimeClampedTransition(uint32_t duration) : mDuration(duration) {}
 
     void trigger(uint32_t now) override {
         mStart = now;
