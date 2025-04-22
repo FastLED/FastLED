@@ -57,14 +57,6 @@ void jsNumberFieldImpl::updateInternal(const FLArduinoJson::JsonVariantConst& va
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-jsNumberFieldImpl::operator double() const {
-    return value();
-}
-
-jsNumberFieldImpl::operator int() const {
-    return static_cast<int>(value());
-}
-
 FASTLED_NAMESPACE_END
 
 #endif // __EMSCRIPTEN__

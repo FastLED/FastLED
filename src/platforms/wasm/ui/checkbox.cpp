@@ -54,13 +54,6 @@ void jsCheckboxImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value
     mValue = value.as<bool>();
 }
 
-jsCheckboxImpl::operator bool() const {
-    return mValue;
-}
-
-jsCheckboxImpl::operator int() const {
-    return mValue;
-}
 
 FASTLED_NAMESPACE_END
 

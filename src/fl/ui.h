@@ -1,6 +1,3 @@
-#pragma once
-
-#include "fl/ui_default.h"
 
 #pragma once
 
@@ -11,6 +8,8 @@
 #include "fl/template_magic.h"
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
+#include "fl/ui_impl.h"
+
 
 namespace fl {
 
@@ -21,12 +20,18 @@ class UISlider : public UISliderImpl {
     using Super = UISliderImpl;
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
-             float max = 255, float step = -1.f)
-        : UISliderImpl(name, value, min, max, step) {}
+             float max = 255, float step = -1.f): UISliderImpl(name, value, min, max, step) {}
     ~UISlider() {}
     float value() const { return Super::value(); }
-    float value_normalized() const { return Super::value_normalized(); }
-    float max_value() const { return Super::max_value(); }
+    float value_normalized() const {
+        float min = Super::min();
+        float max = Super::max();
+        if (ALMOST_EQUAL(max, min, 0.0001f)) {
+            return 0;
+        }
+        return (value() - min) / (max - min);
+    }
+    float max() const { return Super::max(); }
     void setValue(float value) { Super::setValue(value); }
     operator float() const { return Super::value(); }
     operator uint8_t() const { return static_cast<uint8_t>(Super::value()); }

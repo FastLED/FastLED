@@ -58,19 +58,11 @@ class jsSliderImpl {
     void toJson(FLArduinoJson::JsonObject& json) const;
     float value() const;
     float value_normalized() const;
-    float max_value() const { return mMax; }
+    float max() const { return mMax; }
+    float min() const { return mMin; }
     void setValue(float value);
-    operator float() const;
-    operator uint8_t() const;
-    operator uint16_t() const;
-    operator uint32_t() const { return static_cast<uint32_t>(mValue); }
-    operator int() const;
     const fl::Str& groupName() const { return mGroup; }
 
-    template <typename T> bool operator>= (T v) const { return mValue >= static_cast<float>(v); }
-    template <typename T> bool operator<= (T v) const { return mValue <= static_cast<float>(v); }
-    template <typename T> bool operator> (T v) const { return mValue > static_cast<float>(v); }
-    template <typename T> bool operator< (T v) const { return mValue < static_cast<float>(v); }
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
@@ -101,8 +93,6 @@ class jsNumberFieldImpl {
     void toJson(FLArduinoJson::JsonObject& json) const;
     double value() const;
     void setValue(double value);
-    operator double() const;
-    operator int() const;
     const fl::Str& groupName() const { return mGroup; }
 
     jsNumberFieldImpl& operator=(double value) { setValue(value); return *this; }
@@ -133,8 +123,6 @@ class jsCheckboxImpl {
     void toJson(FLArduinoJson::JsonObject& json) const;
     bool value() const;
     void setValue(bool value);
-    operator bool() const;
-    operator int() const;
     const fl::Str& groupName() const { return mGroup; }
 
     jsCheckboxImpl& operator=(bool value) { setValue(value); return *this; }
@@ -162,7 +150,6 @@ class jsButtonImpl {
         return mClickedHappened;
     }
     int clickedCount() const { return mClickedCount; }
-    operator bool() const { return clicked(); }
     const fl::Str& groupName() const { return mGroup; }
 
   private:

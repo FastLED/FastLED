@@ -75,13 +75,6 @@ void jsSliderImpl::setValue(float value) {
     }
 }
 
-jsSliderImpl::operator float() const { return mValue; }
-
-jsSliderImpl::operator uint8_t() const { return static_cast<uint8_t>(mValue); }
-
-jsSliderImpl::operator uint16_t() const { return static_cast<uint8_t>(mValue); }
-
-jsSliderImpl::operator int() const { return static_cast<int>(mValue); }
 
 FASTLED_NAMESPACE_END
 

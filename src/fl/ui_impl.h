@@ -55,13 +55,8 @@ class UISliderImpl {
     }
     ~UISliderImpl() {}
     float value() const { return mValue; }
-    float value_normalized() const {
-        if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
-            return 0;
-        }
-        return (mValue - mMin) / (mMax - mMin);
-    }
-    float max_value() const { return mMax; }
+    float max() const { return mMax; }
+    float min() const { return mMin; }
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
     operator float() const { return mValue; }
     operator uint8_t() const { return static_cast<uint8_t>(mValue); }
@@ -81,6 +76,7 @@ class UISliderImpl {
         setValue(static_cast<float>(value));
         return *this;
     }
+
 
 
   private:
