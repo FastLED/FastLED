@@ -277,8 +277,11 @@ TEST_CASE("Check complex types") {
     XYPathPtr rose = XYPath::NewRosePath();
     paths.push_back(rose);
     
+    // Add phyllotaxis path to the tests
+    XYPathPtr phyllotaxis = XYPath::NewPhyllotaxisPath();
+    paths.push_back(phyllotaxis);
+    
     // paths.push_back(LissajousPathPtr::New());
-    // paths.push_back(PhyllotaxisPathPtr::New());
     // paths.push_back(GielisCurvePathPtr::New());
     // paths.push_back(CatmullRomPathPtr::New());
 

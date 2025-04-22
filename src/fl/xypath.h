@@ -31,8 +31,8 @@ FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 FASTLED_SMART_PTR(RosePath);
+FASTLED_SMART_PTR(PhyllotaxisPath);
 // FASTLED_SMART_PTR(LissajousPath);
-// FASTLED_SMART_PTR(PhyllotaxisPath);
 // FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
@@ -92,6 +92,15 @@ class XYPath : public Referent {
 
     static XYPathPtr NewRosePath(uint16_t width = 0, uint16_t height = 0, uint8_t n = 3, uint8_t d = 1) {
         RosePathPtr path = RosePathPtr::New(n, d);
+        XYPathPtr out = XYPathPtr::New(path);
+        if (width > 0 && height > 0) {
+            out->setDrawBounds(width, height);
+        }
+        return out;
+    }
+    
+    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0, float c = 4.0f, float angle = 137.5f) {
+        PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(c, angle);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
             out->setDrawBounds(width, height);
@@ -328,6 +337,21 @@ class RosePath : public XYPathGenerator {
   private:
     uint8_t mN;  // Numerator parameter (number of petals)
     uint8_t mD;  // Denominator parameter
+};
+
+class PhyllotaxisPath : public XYPathGenerator {
+  public:
+    // c is a scaling factor, angle is the divergence angle in degrees (often 137.5° - the golden angle)
+    PhyllotaxisPath(float c = 4.0f, float angle = 137.5f);
+    point_xy_float compute(float alpha) override;
+    const Str name() const override { return "PhyllotaxisPath"; }
+    
+    void setC(float c) { mC = c; }
+    void setAngle(float angle) { mAngle = angle * PI / 180.0f; }
+    
+  private:
+    float mC;      // Scaling factor
+    float mAngle;  // Angle between consecutive points in radians
 };
 
 } // namespace fl
