@@ -27,10 +27,11 @@ void Raster::draw(const XYMap& xymap, DrawUint8Visitor* visitor) const {
             if (!xymap.has(xx, yy)) {
                 continue;
             }
+            uint32_t index = xymap(xx, yy);
             uint8_t value = at(x, y);
             if (value > 0) {
                 point_xy<uint16_t> pt = {xx, yy};
-                visitor->draw(pt, value);
+                visitor->draw(pt, index, value);
             }
         }
     }
