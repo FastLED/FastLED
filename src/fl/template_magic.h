@@ -108,6 +108,21 @@ struct is_member_function_pointer<Ret (C::*)(A...)>;
 template <typename C, typename Ret, typename... A>
 struct is_member_function_pointer<Ret (C::*)(A...) const>;
 
+template <typename T>
+struct is_member_function_pointer {
+    static constexpr bool value = false;
+};
+
+template <typename C, typename Ret, typename... A>
+struct is_member_function_pointer<Ret (C::*)(A...)> {
+    static constexpr bool value = true;
+};
+
+template <typename C, typename Ret, typename... A>
+struct is_member_function_pointer<Ret (C::*)(A...) const> {
+    static constexpr bool value = true;
+};
+
 // This uses template magic to maybe generate a type for the given condition. If that type
 // doesn't exist then a type will fail to be generated, and the compiler will skip the
 // consideration of a target function. This is useful for enabling template constructors

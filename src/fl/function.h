@@ -1,5 +1,6 @@
 #pragma once
 #include "fl/template_magic.h"
+#include "fl/ptr.h"
 
 namespace fl {
 
@@ -12,9 +13,8 @@ template <typename> class Function;
 template <typename R, typename... Args>
 class Function<R(Args...)> {
 private:
-    struct CallableBase {
+    struct CallableBase : public Referent {
         virtual R invoke(Args... args)      = 0;
-        virtual CallableBase* clone() const = 0;
         virtual ~CallableBase() = default;
     };
 
@@ -26,9 +26,6 @@ private:
         R invoke(Args... args) override {
             return f(args...);
         }
-        CallableBase* clone() const override {
-            return new Callable<F>(f);
-        }
     };
 
     // Wraps a non‑const member function
@@ -39,9 +36,6 @@ private:
         MemCallable(C* o, R (C::*m)(Args...)) : obj(o), mfp(m) {}
         R invoke(Args... args) override {
             return (obj->*mfp)(args...);
-        }
-        CallableBase* clone() const override {
-            return new MemCallable<C>(obj, mfp);
         }
     };
 
@@ -55,37 +49,30 @@ private:
         R invoke(Args... args) override {
             return (obj->*mfp)(args...);
         }
-        CallableBase* clone() const override {
-            // <-- fixed: use mfp, not mf
-            return new ConstMemCallable<C>(obj, mfp);
-        }
     };
 
-    CallableBase* callable_ = nullptr;
+    Ptr<CallableBase> callable_;
 
 public:
     Function() = default;
-    ~Function() { delete callable_; }
+    ~Function()  = default;
 
     Function(const Function& o)
-      : callable_(o.callable_ ? o.callable_->clone() : nullptr) {}
+      : callable_(o.callable_) {}
 
-    Function(Function&& o) noexcept
-      : callable_(o.callable_) {
-        o.callable_ = nullptr;
+    Function(Function&& o) noexcept {
+        callable_.swap(o.callable_);
     }
 
     Function& operator=(const Function& o) {
         if (this != &o) {
-            delete callable_;
-            callable_ = o.callable_ ? o.callable_->clone() : nullptr;
+            callable_ = o.callable_;
         }
         return *this;
     }
 
     Function& operator=(Function&& o) noexcept {
         if (this != &o) {
-            delete callable_;
             callable_ = o.callable_;
             o.callable_ = nullptr;
         }
@@ -96,17 +83,17 @@ public:
     template <typename F,
               typename = enable_if_t<!is_member_function_pointer<F>::value>>
     Function(F f)
-      : callable_(new Callable<F>(f)) {}
+      : callable_(NewPtr<Callable<F>>(f)) {}
 
     // 2) non‑const member function
     template <typename C>
     Function(R (C::*mf)(Args...), C* obj)
-      : callable_(new MemCallable<C>(obj, mf)) {}
+      : callable_(NewPtr<MemCallable<C>>(obj, mf)) {}
 
     // 3) const member function
     template <typename C>
     Function(R (C::*mf)(Args...) const, const C* obj)
-      : callable_(new ConstMemCallable<C>(obj, mf)) {}
+      : callable_(NewPtr<ConstMemCallable<C>>(obj, mf)) {}
 
     // Invocation
     R operator()(Args... args) const {
@@ -116,24 +103,6 @@ public:
     explicit operator bool() const {
         return callable_ != nullptr;
     }
-};
-
-//----------------------------------------------------------------------------
-// trait definitions for is_member_function_pointer
-//----------------------------------------------------------------------------
-template <typename T>
-struct is_member_function_pointer {
-    static constexpr bool value = false;
-};
-
-template <typename C, typename Ret, typename... A>
-struct is_member_function_pointer<Ret (C::*)(A...)> {
-    static constexpr bool value = true;
-};
-
-template <typename C, typename Ret, typename... A>
-struct is_member_function_pointer<Ret (C::*)(A...) const> {
-    static constexpr bool value = true;
 };
 
 } // namespace fl
