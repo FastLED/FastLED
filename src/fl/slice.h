@@ -1,11 +1,23 @@
 #pragma once
 
-#include "fl/point.h"
-#include "fl/clamp.h"
 #include <stddef.h>
 #include <stdint.h>
 
+#include "fl/point.h"
+#include "fl/clamp.h"
+
+
 namespace fl {
+
+template<typename T, size_t INLINED_SIZE>
+class FixedVector;
+
+template<typename T>
+class HeapVector;
+
+template<typename T, size_t INLINED_SIZE>
+class InlinedVector;
+
 
 // Slice<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
@@ -16,8 +28,16 @@ template <typename T> class Slice {
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, size_t size) : mData(data), mSize(size) {}
 
-    template <typename VectorT>
-    Slice(const VectorT &vector)
+    template <typename U>
+    Slice(const HeapVector<U> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <typename U, size_t INLINED_SIZE>
+    Slice(const FixedVector<U, INLINED_SIZE> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <typename U, size_t INLINED_SIZE>
+    Slice(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
