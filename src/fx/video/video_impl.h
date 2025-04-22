@@ -57,7 +57,7 @@ class VideoImpl : public fl::Referent {
     PixelStreamPtr mStream;
     uint32_t mPrevNow = 0;
     FrameInterpolatorPtr mFrameInterpolator;
-    TimeScalePtr mTime;
+    TimeWarpPtr mTime;
     uint32_t mFadeInTime = 1000;
     uint32_t mFadeOutTime = 1000;
     float mTimeScale = 1.0f;

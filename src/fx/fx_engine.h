@@ -113,11 +113,11 @@ class FxEngine {
      * @brief Sets the speed of the fx engine, which will impact the speed of all effects.
      * @param timeScale The new time scale value.
      */
-    void setSpeed(float scale) { mTimeFunction.setScale(scale); }
+    void setSpeed(float scale) { mTimeFunction.setSpeed(scale); }
 
   private:
     int mCounter = 0;
-    TimeScale mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
+    TimeWarp mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect

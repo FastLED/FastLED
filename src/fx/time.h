@@ -9,7 +9,7 @@
 namespace fl {
 
 FASTLED_SMART_PTR(TimeFunction);
-FASTLED_SMART_PTR(TimeScale);
+FASTLED_SMART_PTR(TimeWarp);
 
 
 // Interface for time generation and time manipulation.
@@ -27,11 +27,11 @@ class TimeFunction: public fl::Referent {
 // HANDLES NEGATIVE TIME SCALES!!!
 // Use this to control viusualizers back and forth motion which draw according to a clock value.
 // Clock will never go below 0.
-class TimeScale: public TimeFunction {
+class TimeWarp: public TimeFunction {
   public:
-    TimeScale(uint32_t realTimeNow = 0, float initialTimeScale = 1.0f);
-    ~TimeScale();
-    void setScale(float timeScale);
+    TimeWarp(uint32_t realTimeNow = 0, float initialTimeScale = 1.0f);
+    ~TimeWarp();
+    void setSpeed(float speedScale);
     float scale() const;
     uint32_t update(uint32_t timeNow) override;
     uint32_t time() const override;

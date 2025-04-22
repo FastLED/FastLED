@@ -36,7 +36,7 @@ using namespace fl;
 #define SERPENTINE true
 #define BRIGHTNESS 255
 
-TimeScale timeScale(0, 1.0f);
+TimeWarp timeScale(0, 1.0f);
 
 UISlider scaleXY("Scale", 20, 1, 100, 1);
 UISlider speedY("SpeedY", 1, 1, 6, .1);

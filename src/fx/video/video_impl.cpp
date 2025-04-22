@@ -19,13 +19,13 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
 
 void VideoImpl::pause(uint32_t now) {
     if (!mTime) {
-        mTime = TimeScalePtr::New(now);
+        mTime = TimeWarpPtr::New(now);
     }
     mTime->pause(now);
 }
 void VideoImpl::resume(uint32_t now) {
     if (!mTime) {
-        mTime = TimeScalePtr::New(now);
+        mTime = TimeWarpPtr::New(now);
     }
     mTime->resume(now);
 }
@@ -33,7 +33,7 @@ void VideoImpl::resume(uint32_t now) {
 void VideoImpl::setTimeScale(float timeScale) {
     mTimeScale = timeScale;
     if (mTime) {
-        mTime->setScale(timeScale);
+        mTime->setSpeed(timeScale);
     }
 }
 
@@ -92,8 +92,8 @@ int32_t VideoImpl::durationMicros() const {
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds) {
     if (!mTime) {
-        mTime = TimeScalePtr::New(now);
-        mTime->setScale(mTimeScale);
+        mTime = TimeWarpPtr::New(now);
+        mTime->setSpeed(mTimeScale);
         mTime->reset(now);
     }
     now = mTime->update(now);

@@ -17,6 +17,7 @@ all the UI elements you see below.
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
+#include "fx/time.h"
 
 // Sketch.
 #include "wave.h"
@@ -43,6 +44,8 @@ fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 // A vector for collecting subpixels, with overflow.
 vector_inlined<SubPixel2x2, 32> subpixels;
 
+TimeWarp time_warp;
+
 XYPathPtr getShape(int which) {
     int len = shapes.size();
     which = which % len;
@@ -66,7 +69,7 @@ void setup() {
 //////////////////// UI Section /////////////////////////////
 UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
-UIButton button("Trigger");
+UIButton trigger("Trigger");
 UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
 UICheckbox useWaveFx("Use WaveFX", true);
 UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
@@ -89,20 +92,24 @@ void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
 
 void loop() {
     // Your code here
-    uint32_t now = millis();
-    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
+    clearLeds();
+    time_warp.setSpeed(speed.value());
+    const uint32_t now = millis();
+    const uint32_t now_warped = time_warp.update(now);
+
+
     auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
 
-    float curr_alpha = getAnimationTime(now);
+    float curr_alpha = getAnimationTime(now_warped);
     static float s_prev_alpha = 0.0f;
 
     // unconditionally apply the circle.
-    if (button) {
+    if (trigger) {
         // trigger the transition
         pointTransition.trigger(now);
         FASTLED_WARN("Transition triggered on " << shape->name());
-        curr_alpha = getAnimationTime(now);
+        curr_alpha = getAnimationTime(now_warped);
         s_prev_alpha = curr_alpha;
     }
 
