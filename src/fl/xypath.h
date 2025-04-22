@@ -160,8 +160,8 @@ class XYPath : public Referent {
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height) {
-        //auto &tx = *(mGridTransform.mImpl);
-        auto& tx = mGridTransform;
+        // auto &tx = *(mGridTransform.mImpl);
+        auto &tx = mGridTransform;
 
         // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
         //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
@@ -178,7 +178,7 @@ class XYPath : public Referent {
         // tx.scale_y = (height - 1.0f) * 0.5f;
         // tx.offset_y = height * 0.5f;
 
-        tx.set_scale_y((height - 1.0f) * 0.5f); 
+        tx.set_scale_y((height - 1.0f) * 0.5f);
         tx.set_offset_y(height * 0.5f);
 
         onTransformFloatChanged();
@@ -195,7 +195,7 @@ class XYPath : public Referent {
         // mTransform16 = mTransform.toTransform16();
     }
 
-    TransformFloat& transform() { return mTransform; }
+    TransformFloat &transform() { return mTransform; }
 
     void setScale(float scale) {
         // mTransform.scale_x = scale;
@@ -208,11 +208,14 @@ class XYPath : public Referent {
         return compute_float(alpha, mTransform);
     }
 
+    // Optimizing for LUT transformations is work in progress. There are some
+    // tests on these algorithms so they are kept in the code base to try out.
+
     // α in [0,65535] → (x,y) on the path, both in [0,65535].
     // This default implementation will build a LUT if mSteps > 0.
     // Subclasses may override this to avoid the LUT.
-    virtual point_xy<uint16_t> at16(uint16_t alpha,
-                                    const Transform16 &tx = Transform16());
+    point_xy<uint16_t> at16(uint16_t alpha,
+                            const Transform16 &tx = Transform16());
 
     // optimizes at16(...).
     void buildLut(uint16_t steps);
