@@ -16,3 +16,5 @@ UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 
 UICheckbox advancedFrame("Advanced Frame", true);
 UIButton advancedFrameButton("Advanced Frame Button");
+
+UISlider whichShape("Which Shape", 0.0f, 0.0f, 10.0f, 1.0f);

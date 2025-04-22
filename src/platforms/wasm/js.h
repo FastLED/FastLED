@@ -74,6 +74,8 @@ class jsSlider {
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
+    int as_int() const { return static_cast<int>(mValue); }
+
     jsSlider& operator=(float value) { setValue(value); return *this; }
     jsSlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
 

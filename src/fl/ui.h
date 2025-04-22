@@ -69,6 +69,10 @@ class UISlider {
     operator int() const { return static_cast<int>(mValue); }
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
+    int as_int() const {
+        return static_cast<int>(mValue);
+    }
+
     UISlider &operator=(float value) {
         setValue(value);
         return *this;

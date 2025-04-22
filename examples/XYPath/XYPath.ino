@@ -21,6 +21,7 @@ all the UI elements you see below.
 // Sketch.
 #include "wave.h"
 #include "ui.h"
+#include "xypaths.h"
 
 using namespace fl;
 
@@ -34,13 +35,25 @@ CRGB leds[NUM_LEDS];
 
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
+// XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 Raster raster;
 
 WaveEffect wave_fx;
+
+fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
+
+
+XYPathPtr getShape(int which) {
+    int len = shapes.size();
+    which = which % len;
+    if (which < 0) {
+        which += len;
+    }
+    return shapes[which];
+}
 
 void setup() {
     Serial.begin(115200);
@@ -70,7 +83,7 @@ void loop() {
     // Your code here
     uint32_t now = millis();
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
-
+    auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
 
     float curr_alpha = getAlpha(now);
