@@ -20,11 +20,14 @@ class SubPixel2x2;
 
 class Raster {
   public:
+
+    Raster() = default;
+
     Raster(int width, int height) {
-        mGrid.reset(width, height);
+        //mGrid.reset(width, height);
         mOrigin = point_xy<int>(0, 0);
-        mWidthHeight = point_xy<int>(width, height);
-        mInitialized = true;
+        mWidthHeight = point_xy<int>(width, height);  // constrains the raster to prevent overflow.
+        //mInitialized = true;  // technically we are not initialized yet and the grid still needs to be allocated.
     }
 
     Raster(const Raster &) = delete;
