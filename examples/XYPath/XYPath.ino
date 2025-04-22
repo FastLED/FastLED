@@ -16,8 +16,9 @@ all the UI elements you see below.
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fx/2d/blend.h"
-#include "fx/2d/wave.h"
+
+// Sketch.
+#include "wave.h"
 
 using namespace fl;
 
@@ -41,58 +42,24 @@ UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 UICheckbox advancedFrame("Advanced Frame", true);
 UIButton advancedFrameButton("Advanced Frame Button");
 
-DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
-    0,   0,   0,   0,   // Black
-    32,  0,   0,   70,  // Dark blue
-    128, 20,  57,  255, // Electric blue
-    255, 255, 255, 255  // White
-};
-
-DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
-    0,   0,   0,   0,   // black
-    8,   128, 64,  64,  // green
-    16,  255, 222, 222, // red
-    64,  255, 255, 255, // white
-    255, 255, 255, 255  // white
-};
-
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-XYMap xyRect(WIDTH, HEIGHT, false);
-WaveFx
-    waveFxLower(xyRect,
-                WaveFx::Args{
-                    .factor = SUPER_SAMPLE_2X,
-                    .half_duplex = true,
-                    .speed = 0.18f,
-                    .dampening = 9.0f,
-                    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
-                });
-
-WaveFx waveFxUpper(
-    xyRect, WaveFx::Args{
-                .factor = SUPER_SAMPLE_2X,
-                .half_duplex = true,
-                .speed = 0.25f,
-                .dampening = 3.0f,
-                .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
-            });
-
-Blend2d fxBlend(xyMap);
-
 XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 Raster raster;
 
+WaveEffect wave_fx;
+
 void setup() {
     Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
-    fxBlend.add(waveFxLower);
-    fxBlend.add(waveFxUpper);
-    // shape->setDrawBounds(WIDTH, HEIGHT);
+
+    // Initialize wave simulation. Please don't use static constructors, keep it
+    // in setup().
+    wave_fx = NewWaveSimulation2D(xyMap);
 }
 
 float getAlpha(uint32_t now) {
@@ -160,8 +127,7 @@ void loop() {
                         if (xyMap.has(xx, yy)) {
                             float valuef = value / 255.0f;
                             int idx = xyMap(xx, yy);
-                            waveFxLower.addf(origin.x + x, origin.y + y,
-                                             valuef);
+                            wave_fx.addf(xx, yy, valuef);
                         }
                     }
                 }
@@ -177,7 +143,8 @@ void loop() {
     leds[first] = CRGB(255, 0, 0);
     leds[last] = CRGB(0, 255, 0);
     if (useWaveFx) {
-        fxBlend.draw(Fx::DrawContext(now, leds));
+        // fxBlend.draw(Fx::DrawContext(now, leds));
+        wave_fx.draw(Fx::DrawContext(now, leds));
     }
 
     uint32_t frame_time = millis() - now;

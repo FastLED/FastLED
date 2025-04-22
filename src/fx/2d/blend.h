@@ -25,6 +25,9 @@ struct Blend2dParams {
 };
 
 
+FASTLED_SMART_PTR(Blend2d);
+
+
 class Blend2d : public Fx2d {
   public:
     using Params = Blend2dParams;
