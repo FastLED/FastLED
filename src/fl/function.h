@@ -1,6 +1,5 @@
 #pragma once
 #include "fl/template_magic.h"
-#include "fl/scoped_ptr.h"
 
 namespace fl {
 
@@ -62,17 +61,18 @@ private:
         }
     };
 
-    scoped_ptr<CallableBase> callable_;
+    CallableBase* callable_ = nullptr;
 
 public:
     Function() = default;
-    ~Function() { callable_.reset(); }
+    ~Function() { delete callable_; }
 
     Function(const Function& o)
       : callable_(o.callable_ ? o.callable_->clone() : nullptr) {}
 
     Function(Function&& o) noexcept
-      : callable_(o.callable_.release()) {
+      : callable_(o.callable_) {
+        o.callable_ = nullptr;
     }
 
     Function& operator=(const Function& o) {
@@ -114,7 +114,7 @@ public:
     }
 
     explicit operator bool() const {
-        return callable_.get() != nullptr;
+        return callable_ != nullptr;
     }
 };
 
