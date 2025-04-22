@@ -84,7 +84,9 @@ UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 //////////////////// LOOP SECTION /////////////////////////////
 
 float getAnimationTime(uint32_t now) {
-    return speed.value() * pointTransition.updatef(now) + transition.value();
+    float pointf = pointTransition.updatef(now);
+    FASTLED_WARN("pointf: " << pointf);
+    return pointf + transition.value();
 }
 
 void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
@@ -95,25 +97,29 @@ void loop() {
     clearLeds();
     time_warp.setSpeed(speed.value());
     const uint32_t now = millis();
-    const uint32_t now_warped = time_warp.update(now);
+    uint32_t now_warped = time_warp.update(now);
 
 
     auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
 
     float curr_alpha = getAnimationTime(now_warped);
+    FASTLED_WARN("Alpha: " << curr_alpha);
+    FASTLED_WARN("now_warped: " << now_warped);
     static float s_prev_alpha = 0.0f;
 
     // unconditionally apply the circle.
     if (trigger) {
         // trigger the transition
-        pointTransition.trigger(now);
+        time_warp.reset(now);
+        now_warped = time_warp.update(now);
+        pointTransition.trigger(now_warped);
         FASTLED_WARN("Transition triggered on " << shape->name());
         curr_alpha = getAnimationTime(now_warped);
         s_prev_alpha = curr_alpha;
     }
 
-    const bool is_active = pointTransition.isActive(now);
+    const bool is_active = pointTransition.isActive(now_warped);
 
     // if (pointTransition.isActive(now)) {
     static uint32_t frame = 0;

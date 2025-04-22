@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "fl/warn.h"
+
 namespace fl {
 
 // Use this function to compute the alpha value based on the time elapsed
@@ -13,9 +15,11 @@ uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
 inline float time_alphaf(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
+        FASTLED_WARN("now < start: " << now << " < " << start);
         return 0.0f;
     }
     if (now > end) {
+        FASTLED_WARN("now > end: " << now << " > " << end);
         return 1.0f;
     }
     uint32_t elapsed = now - start;
@@ -147,6 +151,7 @@ class TimeLinear: TimeAlpha {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
             // if we have not started, we are not active
+            FASTLED_WARN("Not active");
             return 0;
         }
         return time_alphaf(now, mStart, mEnd);
