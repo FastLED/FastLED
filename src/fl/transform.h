@@ -67,7 +67,8 @@ struct TransformFloatImpl : public Referent {
     bool is_identity() const;
 };
 
-
+// TransformFloat is a wrapper around the smart ptr. This version allows for
+// easy use and fast / well behaved copy.
 struct TransformFloat {
     TransformFloat() = default;
     // float scale_x = 1.0f;
@@ -86,9 +87,23 @@ struct TransformFloat {
     void set_scale(float scale) {
         mImpl->set_scale(scale);
     }
+
+    void set_scale_x(float scale) {
+        mImpl->scale_x = scale;
+    }
+    void set_scale_y(float scale) {
+        mImpl->scale_y = scale;
+    }
+    void set_offset_x(float offset) {
+        mImpl->x_offset = offset;
+    }
+    void set_offset_y(float offset) {
+        mImpl->y_offset = offset;
+    }
     point_xy_float transform(const point_xy_float &xy) const { return mImpl->transform(xy); }
     bool is_identity() const { return mImpl->is_identity(); }
 
+ private:
     TransformFloatImplPtr mImpl = TransformFloatImpl::Identity();
 };
 

@@ -53,7 +53,7 @@ void XYPath::initLutOnce() {
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
     point_xy_float out = tx.transform(xy);
-    out = mGridTransform.mImpl->transform(out);
+    out = mGridTransform.transform(out);
     return out;
 }
 

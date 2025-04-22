@@ -160,20 +160,26 @@ class XYPath : public Referent {
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height) {
-        auto &tx = *(mGridTransform.mImpl);
+        //auto &tx = *(mGridTransform.mImpl);
+        auto& tx = mGridTransform;
 
         // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
         //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
         //    offset_x = (width–0.5 + 0.5) / 2 = width/2
-        tx.scale_x = (width - 1.0f) * 0.5f;
-        tx.x_offset = width * 0.5f;
+        tx.set_scale_x((width - 1.0f) * 0.5f);
+        // tx.scale_x = (width - 1.0f) * 0.5f;
+        // tx.x_offset = width * 0.5f;
+        tx.set_offset_x(width * 0.5f);
 
         // 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]
         //    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)
         //    scale_y  = (height–0.5) – 0.5     = height–1
         //    offset_y = 0.5
-        tx.scale_y = (height - 1.0f) * 0.5f;
-        tx.y_offset = height * 0.5f;
+        // tx.scale_y = (height - 1.0f) * 0.5f;
+        // tx.y_offset = height * 0.5f;
+
+        tx.set_scale_y((height - 1.0f) * 0.5f); 
+        tx.set_offset_y(height * 0.5f);
 
         onTransformFloatChanged();
         mDrawBoundsSet = true;
