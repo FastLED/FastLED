@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "fl/math_macros.h"
+
 namespace fl {
 
 template<typename T> struct point_xy_math;
@@ -166,6 +168,40 @@ struct point_xy_math {
     template<typename NumberT>
     static constexpr T div(const T& a, const NumberT& b) {
         return T(a.x / b, a.y / b);
+    }
+};
+
+template<typename T>
+struct rect_xy {
+    point_xy<T> mMin;
+    point_xy<T> mMax;
+
+    rect_xy() = default;
+    rect_xy(const point_xy<T>& min, const point_xy<T>& max)
+        : mMin(min), mMax(max) {}
+
+    uint16_t width() const {
+        return mMax.x - mMin.x;
+    }
+
+    uint16_t height() const {
+        return mMax.y - mMin.y;
+    }
+
+    void expand(const point_xy<T>& p) {
+        expand(p.x, p.y);
+    }
+
+    void expand(const rect_xy& r) {
+        expand(r.mMin);
+        expand(r.mMax);
+    }
+
+    void expand(T x, T y) {
+        mMin.x = MIN(mMin.x, x);
+        mMin.y = MIN(mMin.y, y);
+        mMax.x = MAX(mMax.x, x);
+        mMax.y = MAX(mMax.y, y);
     }
 };
 

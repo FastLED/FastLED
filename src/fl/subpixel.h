@@ -39,6 +39,13 @@ class SubPixel2x2 {
 
     point_xy<uint16_t> origin() const { return mOrigin; }
 
+
+    rect_xy<uint16_t> bounds() const {
+        point_xy<uint16_t> min = mOrigin;
+        point_xy<uint16_t> max = mOrigin + point_xy<uint16_t>(1, 1);
+        return rect_xy<uint16_t>(min, max);
+    }
+
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
