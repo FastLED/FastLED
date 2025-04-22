@@ -71,15 +71,11 @@ struct TransformFloatImpl : public Referent {
 // easy use and fast / well behaved copy.
 struct TransformFloat {
     TransformFloat() = default;
-    // float scale_x = 1.0f;
-    // float scale_y = 1.0f;
-    // float offset_x = 0.0f;
-    // float offset_y = 0.0f;
-    // float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
     float scale_x() const { return mImpl->scale_x; }
     float scale_y() const { return mImpl->scale_y; }
     float offset_x() const { return mImpl->offset_x; }
     float offset_y() const { return mImpl->offset_y; }
+    // rotation range is [0,1], not [0,2*PI]!
     float rotation() const { return mImpl->rotation; }
     float scale() const {
         return MIN(scale_x(), scale_y());
