@@ -10,6 +10,14 @@ namespace fl {
 
 
 void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles, Raster* out_raster) {
+    if (tiles.size() == 0) {
+        FASTLED_WARN("Rasterize: no tiles");
+        return;
+    }
+    if (!out_raster) {
+        FASTLED_WARN("Rasterize: no output raster");
+        return;
+    }
     uint16_t min_left = 0xffff;
     uint16_t max_top = 0;
     uint16_t max_right = 0xffff;
