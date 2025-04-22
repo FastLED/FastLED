@@ -225,13 +225,25 @@ point_xy_float HeartPath::compute(float alpha) {
     // α in [0,1] → (x,y) on the heart curve
     float t = alpha * 2.0f * PI;
     
-    // Heart formula based on a modified cardioid
+    // Heart formula based on a modified cardioid with improved aesthetics
     float x = 16.0f * powf(sinf(t), 3);
-    float y = 13.0f * cosf(t) - 5.0f * cosf(2.0f * t) - 2.0f * cosf(3.0f * t) - cosf(4.0f * t);
+    
+    // Modified y formula for a more balanced heart shape
+    // This creates a fuller bottom and more defined top curve
+    float y = -(13.0f * cosf(t) - 5.0f * cosf(2.0f * t) - 2.0f * cosf(3.0f * t) - cosf(4.0f * t));
     
     // Scale to fit in [-1, 1] range
+    // The 16.0f divisor for x ensures x is in [-1, 1]
     x /= 16.0f;
-    y /= 16.0f;  // Negative to orient heart properly
+    
+    // Scale y to ensure it's in [-1, 1]
+    // The 16.0f divisor ensures proper scaling while maintaining proportions
+    y /= -16.0f;
+    
+    // Apply a slight vertical stretch to fill the [-1, 1] range better
+    y *= 0.95f;
+
+    y += 0.05f; // Adjust y to fit within the range of [-1, 1]
     
     return point_xy_float(x, y);
 }
