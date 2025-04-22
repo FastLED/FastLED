@@ -66,17 +66,17 @@ void setup() {
 //////////////////// UI Section /////////////////////////////
 UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
-
+UIButton button("Trigger");
+UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
 UICheckbox useWaveFx("Use WaveFX", true);
 UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
-UIButton button("Trigger");
+
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 UISlider speed("Speed", 1.0f, 0.25f, 20.0f, 0.01f);
 UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 
-UICheckbox advancedFrame("Advanced Frame", true);
-UIButton advancedFrameButton("Advanced Frame Button");
-UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
+
+
 
 //////////////////// LOOP SECTION /////////////////////////////
 
@@ -86,14 +86,8 @@ float getAnimationTime(uint32_t now) {
 
 void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
 
+
 void loop() {
-
-    const bool advanceFrame =
-        advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
-    if (!advanceFrame) {
-        return;
-    }
-
     // Your code here
     uint32_t now = millis();
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
@@ -112,6 +106,8 @@ void loop() {
         s_prev_alpha = curr_alpha;
     }
 
+    const bool is_active = pointTransition.isActive(now);
+
     // if (pointTransition.isActive(now)) {
     static uint32_t frame = 0;
     frame++;
@@ -119,16 +115,29 @@ void loop() {
     const CRGB purple = CRGB(255, 0, 255);
     subpixels.clear();
     const int number_of_steps = numberOfSteps.value();
-    // const float prev_alpha = s_prev_alpha;
+
+    // float factor = s_prev_alpha;  // 0->1.f
+    // factor = MIN(factor/4.0f, 0.05f);
+
+
+    float diff = curr_alpha - s_prev_alpha;
+    diff *= 1.0f;
+    float factor = MAX(s_prev_alpha - diff, 0.f);
+
     for (int i = 0; i < number_of_steps; ++i) {
-        float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
+        float a = fl::map_range<float>(i, 0, number_of_steps-1, factor,
                                        curr_alpha);
+        uint8_t alpha = fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
+        if (!is_active) {
+            alpha = 0;
+        }
         SubPixel2x2 subpixel = shape->at_subpixel(a);
+        subpixel.scale(alpha);
         subpixels.push_back(subpixel);
     }
     s_prev_alpha = curr_alpha;
     raster.rasterize(subpixels);
-    if (useWaveFx) {
+    if (useWaveFx && is_active) {
         DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
         raster.draw(xyMap, draw_wave_fx);
     } else {

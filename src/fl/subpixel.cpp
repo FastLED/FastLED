@@ -65,4 +65,19 @@ void SubPixel2x2::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     draw(xymap, visitor);
 }
 
+
+
+void SubPixel2x2::scale(uint8_t scale) {
+    // scale the tile
+    if (scale == 255) {
+        return;
+    }
+    for (int x = 0; x < 2; ++x) {
+        for (int y = 0; y < 2; ++y) {
+            uint16_t value = at(x, y);
+            at(x, y) = (value * scale) >> 8;
+        }
+    }
+}
+
 }  // namespace fl

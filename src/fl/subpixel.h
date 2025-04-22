@@ -30,6 +30,8 @@ class SubPixel2x2 {
     SubPixel2x2 &operator=(const SubPixel2x2 &) = default;
     SubPixel2x2(SubPixel2x2 &&) = default;
 
+    void scale(uint8_t scale);
+
     uint8_t &operator()(int x, int y) { return at(x, y); }
     uint8_t &at(int x, int y) { return mTile[y][x]; }
     const uint8_t &at(int x, int y) const { return mTile[y][x]; }
