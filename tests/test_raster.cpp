@@ -41,6 +41,10 @@ TEST_CASE("Raster two unit test") {
 
 
     REQUIRE_EQ(point_xy_float(0.0f, 0.0f), path->at(0.f));
+    REQUIRE_EQ(point_xy_float(1.0f, 1.0f), path->at(0.25f));
+    REQUIRE_EQ(point_xy_float(2.0f, 2.0f), path->at(0.5f));
+    REQUIRE_EQ(point_xy_float(3.0f, 3.0f), path->at(0.75f));
+    REQUIRE_EQ(point_xy_float(4.0f, 4.0f), path->at(1.f));
 
     // SubPixel2x2 subpixels[2] = {
     //     path->at_subpixel(0),
