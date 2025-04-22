@@ -38,6 +38,9 @@ class Raster {
         return rect_xy<uint16_t>(min, max);
     }
 
+    uint16_t width() const { return mGrid.width(); }
+    uint16_t height() const { return mGrid.height(); }
+
   private:
     Grid<uint8_t> mGrid;
     point_xy<uint16_t> mOrigin;
