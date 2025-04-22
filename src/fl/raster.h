@@ -76,9 +76,8 @@ class Raster {
 
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
-    // Uses the visitor pattern to abstract away the drawing. The values sent
-    // to the visitor will always be within the valid range as specified
-    // by the xymap.
+    // Inlined, yet customizable drawing access. This will only send you pixels
+    // that are within the bounds of the XYMap.
     template <typename XYVisitor>
     void draw(const XYMap &xymap, XYVisitor& visitor) const {
         const uint16_t w = width();

@@ -50,6 +50,8 @@ class SubPixel2x2 {
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
+    // Inlined, yet customizable drawing access. This will only send you pixels
+    // that are within the bounds of the XYMap.
     template <typename XYVisitor>
     void draw(const XYMap &xymap, XYVisitor& visitor) const {
         for (uint16_t x = 0; x < 2; ++x) {
