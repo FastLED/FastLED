@@ -52,6 +52,12 @@ template <typename T> class Slice {
     Slice(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
+    template <size_t ARRAYSIZE>
+    Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
+
+    template <typename U,size_t ARRAYSIZE>
+    Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
+
     Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
 
     Slice &operator=(const Slice &other) {
