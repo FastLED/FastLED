@@ -61,6 +61,10 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
 
 SubPixel2x2 XYPath::at_subpixel(float alpha) {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
+    if (!mDrawBoundsSet) {
+        FASTLED_WARN("XYPath::at_subpixel: draw bounds not set");
+        return SubPixel2x2();
+    }
     point_xy_float xy = at(alpha);
 
     // 2) shift back so whole‐pixels go 0…W–1, 0…H–1

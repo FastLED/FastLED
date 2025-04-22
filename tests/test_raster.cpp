@@ -36,30 +36,23 @@ TEST_CASE("Raster simple test") {
 }
 
 TEST_CASE("Raster two unit test") {
-    XYPathPtr path = XYPath::NewLinePath(0, 0, 4, 4);
-    // path->setDrawBounds(4, 4);
+    XYPathPtr path = XYPath::NewLinePath(-1, -1, 1, 1);
+    path->setDrawBounds(4, 4);
 
+    CHECK_EQ(point_xy_float(0.5f, 0.5f), path->at(0.f));
+    CHECK_EQ(point_xy_float(2.0f, 2.0f), path->at(0.5f));
+    CHECK_EQ(point_xy_float(3.5f, 3.5f), path->at(1.f));
 
-    REQUIRE_EQ(point_xy_float(0.0f, 0.0f), path->at(0.f));
-    REQUIRE_EQ(point_xy_float(1.0f, 1.0f), path->at(0.25f));
-    REQUIRE_EQ(point_xy_float(2.0f, 2.0f), path->at(0.5f));
-    REQUIRE_EQ(point_xy_float(3.0f, 3.0f), path->at(0.75f));
-    REQUIRE_EQ(point_xy_float(4.0f, 4.0f), path->at(1.f));
+    SubPixel2x2 sp0 = path->at_subpixel(0);
+    SubPixel2x2 sp1 = path->at_subpixel(1);
 
-    // SubPixel2x2 subpixels[2] = {
-    //     path->at_subpixel(0),
-    //     path->at_subpixel(1)
-    // };
+    SubPixel2x2 subpixels[2] = {sp0, sp1};
 
-    // MESSAGE("subpixel[0]: " << subpixels[0]);
-    // MESSAGE("subpixel[1]: " << subpixels[1]);
+    MESSAGE("subpixel[0]: " << subpixels[0]);
+    MESSAGE("subpixel[1]: " << subpixels[1]);
 
+    Raster raster;
+    SubPixel2x2::Rasterize(Slice<SubPixel2x2>(subpixels, 2), &raster);
 
-    // Raster raster;
-    // SubPixel2x2::Rasterize(Slice<SubPixel2x2>(subpixels, 2), &raster);
-
-    // REQUIRE_EQ(
-    //     rect_xy<uint16_t>(0, 0, 2, 2),
-    //     raster.bounds()
-    // );
+    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 4, 4), raster.bounds());
 }

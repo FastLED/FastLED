@@ -32,7 +32,6 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles, Raster* out_r
     auto global_origin = out_raster->global_min();
 
     for (const auto& tile : tiles) {
-        FASTLED_UNUSED(tile);
         const point_xy<uint16_t> &origin = tile.origin();
         const point_xy<uint16_t> translate = origin - global_origin;
         for (int x = 0; x < 2; ++x) {

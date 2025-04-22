@@ -127,6 +127,7 @@ class XYPath : public Referent {
         tx.y_offset = height * 0.5f;
 
         onTransformFloatChanged();
+        mDrawBoundsSet = true;
     }
 
     void onTransformFloatChanged() {
@@ -195,6 +196,7 @@ class XYPath : public Referent {
 
     uint32_t mSteps = 0;
     LUTXY16Ptr mLut;
+    bool mDrawBoundsSet = false;
 
     // Transform16 mTransform16;
     void initLutOnce();

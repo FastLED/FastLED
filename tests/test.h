@@ -8,6 +8,7 @@
 #include "fl/lut.h"
 #include "fl/xypath.h"
 #include "fl/subpixel.h"
+#include "fl/strstream.h"
 
 using namespace fl;
 
@@ -39,10 +40,8 @@ namespace doctest {
 
     template<> struct StringMaker<SubPixel2x2> {
         static String convert(const SubPixel2x2& value) {
-            fl::Str out;
-            out += "SubPixel2x2(";
-            out += value.bounds();
-            out += ")";
+            fl::StrStream out;
+            out << "SubPixel2x2(" << value.origin() << ")";
             return out.c_str();
         }
     };
