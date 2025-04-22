@@ -241,9 +241,9 @@ point_xy_float HeartPath::compute(float alpha) {
     y /= -16.0f;
     
     // Apply a slight vertical stretch to fill the [-1, 1] range better
-    y *= 0.95f;
+    y *= 1.10f;
 
-    y += 0.05f; // Adjust y to fit within the range of [-1, 1]
+    y += 0.17f; // Adjust y to fit within the range of [-1, 1]
     
     return point_xy_float(x, y);
 }

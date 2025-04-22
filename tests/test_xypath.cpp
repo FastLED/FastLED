@@ -111,13 +111,54 @@ TEST_CASE("LinePath at_subpixel moves x") {
 }
 
 
+TEST_CASE("Test HeartPath") {
+    HeartPathPtr heart = HeartPathPtr::New();
+    
+    // Track min and max values to help with scaling
+    float min_x = 1.0f;
+    float max_x = -1.0f;
+    float min_y = 1.0f;
+    float max_y = -1.0f;
+    
+    // Sample points along the heart curve
+    const int num_samples = 100;
+    for (int i = 0; i < num_samples; i++) {
+        float alpha = static_cast<float>(i) / (num_samples - 1);
+        point_xy_float point = heart->compute(alpha);
+        
+        // Update min/max values
+        min_x = MIN(min_x, point.x);
+        max_x = MAX(max_x, point.x);
+        min_y = MIN(min_y, point.y);
+        max_y = MAX(max_y, point.y);
+        
+        // Print every 10th point for visual inspection
+        if (i % 10 == 0) {
+            MESSAGE("Heart point at alpha=" << alpha << ": (" << point.x << ", " << point.y << ")");
+        }
+    }
+    
+    // Print the min/max values
+    MESSAGE("\nHeart shape bounds:");
+    MESSAGE("X range: [" << min_x << ", " << max_x << "]");
+    MESSAGE("Y range: [" << min_y << ", " << max_y << "]");
+    
+    // Verify the heart is within the expected bounds
+    REQUIRE(min_x >= -1.0f);
+    REQUIRE(max_x <= 1.0f);
+    REQUIRE(min_y >= -1.0f);
+    REQUIRE(max_y <= 1.0f);
+}
+
 TEST_CASE("Check complex types") {
     HeapVector<XYPathPtr> paths;
     XYPathPtr circle = XYPath::NewCirclePath();
     paths.push_back(circle);
-
     
-    // paths.push_back(HeartPathPtr::New());
+    // Add heart path to the tests
+    XYPathPtr heart = XYPath::NewHeartPath();
+    paths.push_back(heart);
+    
     // paths.push_back(LissajousPathPtr::New());
     // paths.push_back(ArchimedeanSpiralPathPtr::New());
     // paths.push_back(RosePathPtr::New());
