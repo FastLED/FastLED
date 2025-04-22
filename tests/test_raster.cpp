@@ -47,4 +47,6 @@ TEST_CASE("Raster two unit test") {
     Raster raster;
     SubPixel2x2::Rasterize(subpixels, &raster);
     REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 4, 4), raster.bounds());
+    REQUIRE_EQ(4, raster.width());
+    REQUIRE_EQ(4, raster.height());
 }
