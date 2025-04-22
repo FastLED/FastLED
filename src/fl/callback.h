@@ -33,4 +33,8 @@ private:
     void (*callback)(void* self, Args... args) = nullptr;
 };
 
+using CallbackFloat = Callback<float>;
+using CallbackInt = Callback<int>;
+using CallbackBool = Callback<bool>;
+
 }  // namespace fl

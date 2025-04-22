@@ -3,24 +3,27 @@
 
 #include <stdint.h>
 
+#include "fl/callback.h"
+#include "fl/callback_list.h"
+#include "fl/engine_events.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/template_magic.h"
+#include "fl/ui_impl.h"
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
-#include "fl/ui_impl.h"
-
 
 namespace fl {
 
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : public UISliderImpl {
+class UISlider : public UISliderImpl, protected EngineEvents::Listener {
   public:
     using Super = UISliderImpl;
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
-             float max = 255, float step = -1.f): UISliderImpl(name, value, min, max, step) {}
+             float max = 255, float step = -1.f)
+        : UISliderImpl(name, value, min, max, step) {}
     ~UISlider() {}
     float value() const { return Super::value(); }
     float value_normalized() const {
@@ -32,7 +35,7 @@ class UISlider : public UISliderImpl {
         return (value() - min) / (max - min);
     }
     float max() const { return Super::max(); }
-    void setValue(float value) { Super::setValue(value); }
+    void setValue(float value) ;
     operator float() const { return Super::value(); }
     operator uint8_t() const { return static_cast<uint8_t>(Super::value()); }
     operator uint16_t() const { return static_cast<uint16_t>(Super::value()); }
@@ -51,6 +54,17 @@ class UISlider : public UISliderImpl {
         Super::setValue(static_cast<float>(value));
         return *this;
     }
+
+    void addCallback(CallbackFloat callback) { mCallbacks.add(callback); }
+    void clearCallbacks() { mCallbacks.clear(); }
+
+  protected:
+    void onBeginFrame() override ;
+
+  private:
+    CallbackList<CallbackFloat> mCallbacks;
+    float mLastFrameValue = 0;
+    bool mLastFramevalueValid = false;
 };
 
 // template operator for >= against a jsSliderImpl
