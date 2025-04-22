@@ -29,12 +29,14 @@ using namespace fl;
 #define WIDTH 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
+#define TIME_ANIMATION 10000  // ms
+
 
 CRGB leds[NUM_LEDS];
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 // XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
-TimeLinear pointTransition(10000);
+
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 XYRaster raster;
@@ -55,6 +57,21 @@ XYPathPtr getShape(int which) {
     return shapes[which];
 }
 
+//////////////////// UI Section /////////////////////////////
+UITitle title("XYPath Demo");
+UIDescription description("Use a path on the WaveFx");
+UIButton trigger("Trigger");
+UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
+UICheckbox useWaveFx("Use WaveFX", true);
+UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
+
+UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
+UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
+UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
+
+TimeLinear shapeProgress(TIME_ANIMATION);
+
+
 void setup() {
     Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
@@ -66,25 +83,13 @@ void setup() {
     wave_fx = NewWaveSimulation2D(xyMap);
 }
 
-//////////////////// UI Section /////////////////////////////
-UITitle title("XYPath Demo");
-UIDescription description("Use a path on the WaveFx");
-UIButton trigger("Trigger");
-UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
-UICheckbox useWaveFx("Use WaveFX", true);
-UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
-
-UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
-UISlider speed("Speed", 1.0f, 0.25f, 20.0f, 0.01f);
-UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
-
 
 
 
 //////////////////// LOOP SECTION /////////////////////////////
 
 float getAnimationTime(uint32_t now) {
-    float pointf = pointTransition.updatef(now);
+    float pointf = shapeProgress.updatef(now);
     FASTLED_WARN("pointf: " << pointf);
     return pointf + transition.value();
 }
@@ -113,15 +118,16 @@ void loop() {
         // trigger the transition
         time_warp.reset(now);
         now_warped = time_warp.update(now);
-        pointTransition.trigger(now_warped);
+        shapeProgress.trigger(now_warped);
         FASTLED_WARN("Transition triggered on " << shape->name());
         curr_alpha = getAnimationTime(now_warped);
         s_prev_alpha = curr_alpha;
     }
 
-    const bool is_active = pointTransition.isActive(now_warped);
+    bool is_active = shapeProgress.isActive(now_warped);
+    is_active = true;  // debug
 
-    // if (pointTransition.isActive(now)) {
+    // if (shapeProgress.isActive(now)) {
     static uint32_t frame = 0;
     frame++;
     clearLeds();

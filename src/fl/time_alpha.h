@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "fl/warn.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -15,19 +16,11 @@ uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end);
 
 inline float time_alphaf(uint32_t now, uint32_t start, uint32_t end) {
     if (now < start) {
-        FASTLED_WARN("now < start: " << now << " < " << start);
         return 0.0f;
-    }
-    if (now > end) {
-        FASTLED_WARN("now > end: " << now << " > " << end);
-        return 1.0f;
     }
     uint32_t elapsed = now - start;
     uint32_t total = end - start;
     float out = static_cast<float>(elapsed) / static_cast<float>(total);
-    if (out > 1.0f) {
-        out = 1.0f;
-    }
     return out;
 }
 
@@ -69,6 +62,8 @@ class TimeRamp: public TimeAlpha {
     /// @param risingTime  time to ramp from 0→255 (ms)
     /// @param fallingTime time to ramp from 255→0 (ms)
     TimeRamp(uint32_t risingTime, uint32_t latchMs, uint32_t fallingTime);
+
+
 
     /// Call this when you want to (re)start the ramp cycle.
     void trigger(uint32_t now) override;
@@ -154,13 +149,21 @@ class TimeLinear: TimeAlpha {
             FASTLED_WARN("Not active");
             return 0;
         }
-        return time_alphaf(now, mStart, mEnd);
+        float out = time_alphaf(now, mStart, mEnd);
+        if (mMaxClamp > 0.f) {
+            out = MIN(out, mMaxClamp);
+        }
+    }
+
+    void set_max_clamp(float max) {
+        mMaxClamp = max;
     }
 
   private:
     uint32_t mStart = 0;
     uint32_t mDuration = 0;
     uint32_t mEnd = 0;
+    float mMaxClamp = -1.f;  // default disabled.
 };
 
 } // namespace fl
