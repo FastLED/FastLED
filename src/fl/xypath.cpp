@@ -16,7 +16,7 @@ uint8_t to_uint8(float f) {
 }
 }
 
-XYPath::XYPath(XYPathGeneratorPtr path, TransformFloatPtr transform,
+XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform,
                uint16_t steps)
     : mPath(path), mTransform(transform), mSteps(steps) {}
 
@@ -53,7 +53,7 @@ void XYPath::initLutOnce() {
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
     point_xy_float out = tx.transform(xy);
-    out = mGridTransform->transform(out);
+    out = mGridTransform.mImpl->transform(out);
     return out;
 }
 

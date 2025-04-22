@@ -12,7 +12,7 @@
 
 namespace fl {
 
-point_xy_float TransformFloat::transform(const point_xy_float &xy) const {
+point_xy_float TransformFloatImpl::transform(const point_xy_float &xy) const {
     if (is_identity()) {
         return xy;
     }
@@ -136,20 +136,20 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
 
 
 
-float TransformFloat::scale() const {
+float TransformFloatImpl::scale() const {
     return MIN(scale_x, scale_y);
 }
 
 
 
-void TransformFloat::set_scale(float scale) {
+void TransformFloatImpl::set_scale(float scale) {
     scale_x = scale;
     scale_y = scale;
 }
 
 
 
-bool TransformFloat::is_identity() const {
+bool TransformFloatImpl::is_identity() const {
     return (scale_x == 1.0f && scale_y == 1.0f && x_offset == 0.0f &&
             y_offset == 0.0f && rotation == 0.0f);
 }

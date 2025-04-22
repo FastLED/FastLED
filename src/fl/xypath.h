@@ -143,11 +143,10 @@ class XYPath : public Referent {
     //     return CatmullRomPathPtr::New(steps);
     // }
 
-    XYPath(XYPathGeneratorPtr path,
-           TransformFloatPtr transform = TransformFloat::Identity(),
+    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat(),
            uint16_t steps = 0); // 0 steps means no LUT.
 
-    point_xy_float at(float alpha) { return at(alpha, *mTransform); }
+    point_xy_float at(float alpha) { return at(alpha, mTransform); }
 
     SubPixel2x2 at_subpixel(float alpha);
 
@@ -161,7 +160,7 @@ class XYPath : public Referent {
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height) {
-        auto &tx = *mGridTransform;
+        auto &tx = *(mGridTransform.mImpl);
 
         // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
         //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
@@ -184,22 +183,23 @@ class XYPath : public Referent {
         // This is called when the transform changes. We need to clear the LUT
         // so that it will be rebuilt with the new transform.
         clearLut();
-        // mTransform->validate();
+        // mTransform.validate();
         // Just recompute unconditionally. If this is a performance issue,
         // we can add a flag to make it lazy.
-        // mTransform16 = mTransform->toTransform16();
+        // mTransform16 = mTransform.toTransform16();
     }
 
-    TransformFloatPtr transform() { return mTransform; }
+    TransformFloat& transform() { return mTransform; }
 
     void setScale(float scale) {
-        mTransform->scale_x = scale;
-        mTransform->scale_y = scale;
+        // mTransform.scale_x = scale;
+        // mTransform.scale_y = scale;
+        mTransform.set_scale(scale);
         onTransformFloatChanged();
     }
 
     point_xy_float compute(float alpha) {
-        return compute_float(alpha, *mTransform);
+        return compute_float(alpha, mTransform);
     }
 
     // α in [0,65535] → (x,y) on the path, both in [0,65535].
@@ -241,8 +241,8 @@ class XYPath : public Referent {
 
   private:
     XYPathGeneratorPtr mPath;
-    TransformFloatPtr mTransform = TransformFloat::Identity();
-    TransformFloatPtr mGridTransform = TransformFloat::Identity();
+    TransformFloat mTransform;
+    TransformFloat mGridTransform;
 
     uint32_t mSteps = 0;
     LUTXY16Ptr mLut;

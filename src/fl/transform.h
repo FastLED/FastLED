@@ -12,10 +12,11 @@ expensive trig functions are needed. Same with scale and offset.
 #include "fl/ptr.h"
 #include "fl/xymap.h"
 #include "lib8tion/types.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
-FASTLED_SMART_PTR(TransformFloat);
+FASTLED_SMART_PTR(TransformFloatImpl);
 
 using alpha16 =
     uint16_t; // fixed point representation of 0->1 in the range [0, 65535]
@@ -49,12 +50,12 @@ struct Transform16 {
 };
 
 // This transform assumes the coordinates are in the range [0,1].
-struct TransformFloat : public Referent {
-    static TransformFloatPtr Identity() {
-        TransformFloatPtr tx = TransformFloatPtr::New();
+struct TransformFloatImpl : public Referent {
+    static TransformFloatImplPtr Identity() {
+        TransformFloatImplPtr tx = TransformFloatImplPtr::New();
         return tx;
     }
-    TransformFloat() = default;
+    TransformFloatImpl() = default;
     float scale_x = 1.0f;
     float scale_y = 1.0f;
     float x_offset = 0.0f;
@@ -65,5 +66,31 @@ struct TransformFloat : public Referent {
     point_xy_float transform(const point_xy_float &xy) const;
     bool is_identity() const;
 };
+
+
+struct TransformFloat {
+    TransformFloat() = default;
+    // float scale_x = 1.0f;
+    // float scale_y = 1.0f;
+    // float x_offset = 0.0f;
+    // float y_offset = 0.0f;
+    // float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
+    float scale_x() const { return mImpl->scale_x; }
+    float scale_y() const { return mImpl->scale_y; }
+    float x_offset() const { return mImpl->x_offset; }
+    float y_offset() const { return mImpl->y_offset; }
+    float rotation() const { return mImpl->rotation; }
+    float scale() const {
+        return MIN(scale_x(), scale_y());
+    }
+    void set_scale(float scale) {
+        mImpl->set_scale(scale);
+    }
+    point_xy_float transform(const point_xy_float &xy) const { return mImpl->transform(xy); }
+    bool is_identity() const { return mImpl->is_identity(); }
+
+    TransformFloatImplPtr mImpl = TransformFloatImpl::Identity();
+};
+
 
 } // namespace fl
