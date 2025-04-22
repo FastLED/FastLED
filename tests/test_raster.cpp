@@ -3,7 +3,6 @@
 
 #include "test.h"
 
-
 #include "FastLED.h"
 #include "fl/raster.h"
 #include "fl/subpixel.h"
@@ -12,7 +11,6 @@
 #include "fl/namespace.h"
 
 using namespace fl;
-
 
 TEST_CASE("Raster simple test") {
     XYPathPtr path = XYPath::NewPointPath(0, 0);
@@ -35,4 +33,29 @@ TEST_CASE("Raster simple test") {
             REQUIRE_EQ(v1, v2);
         }
     }
+}
+
+TEST_CASE("Raster two unit test") {
+    XYPathPtr path = XYPath::NewLinePath(0, 0, 4, 4);
+    // path->setDrawBounds(4, 4);
+
+
+    REQUIRE_EQ(point_xy_float(0.0f, 0.0f), path->at(0.f));
+
+    // SubPixel2x2 subpixels[2] = {
+    //     path->at_subpixel(0),
+    //     path->at_subpixel(1)
+    // };
+
+    // MESSAGE("subpixel[0]: " << subpixels[0]);
+    // MESSAGE("subpixel[1]: " << subpixels[1]);
+
+
+    // Raster raster;
+    // SubPixel2x2::Rasterize(Slice<SubPixel2x2>(subpixels, 2), &raster);
+
+    // REQUIRE_EQ(
+    //     rect_xy<uint16_t>(0, 0, 2, 2),
+    //     raster.bounds()
+    // );
 }

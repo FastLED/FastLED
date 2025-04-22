@@ -3,6 +3,7 @@
 #include "fl/xymap.h"
 #include "fl/warn.h"
 #include "fl/raster.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
@@ -18,26 +19,20 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles, Raster* out_r
         FASTLED_WARN("Rasterize: no output raster");
         return;
     }
-    uint16_t min_left = 0xffff;
-    uint16_t max_top = 0;
-    uint16_t max_right = 0xffff;
-    uint16_t min_bottom = 0;
 
-    for (const auto& tile : tiles) {
-        const point_xy<uint16_t> &origin = tile.origin();
-        min_left = MIN(min_left, origin.x);
-        max_top = MAX(max_top, origin.y);
-        max_right = MIN(max_right, origin.x);
-        min_bottom = MIN(min_bottom, origin.y);
+    auto& first_tile = tiles[0];
+    rect_xy<uint16_t> bounds = first_tile.bounds();
+
+    for (uint16_t i = 1; i < tiles.size(); ++i) {
+        const auto& tile = tiles[i];
+        bounds.expand(tile.bounds());
     }
 
-    uint16_t width = max_right - min_left;
-    uint16_t height = max_top - min_bottom;
-    point_xy<uint16_t> global_origin(min_left, max_top);
-
-    out_raster->reset(global_origin, width+1, height+1);
+    out_raster->reset(bounds.mMin, bounds.width(), bounds.height());
+    auto global_origin = out_raster->global_min();
 
     for (const auto& tile : tiles) {
+        FASTLED_UNUSED(tile);
         const point_xy<uint16_t> &origin = tile.origin();
         const point_xy<uint16_t> translate = origin - global_origin;
         for (int x = 0; x < 2; ++x) {

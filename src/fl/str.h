@@ -16,6 +16,9 @@
 
 namespace fl {  // Mandatory namespace for this class since it has name collisions.
 
+template<typename T> class rect_xy;
+template<typename T> class point_xy;
+
 template <size_t N> class StrN;
 
 // A copy on write string class. Fast to copy from another
@@ -434,6 +437,26 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 
+    template<typename T>
+    Str& append(const rect_xy<T> &rect) {
+        append(rect.mMin.x);
+        append(",");
+        append(rect.mMin.y);
+        append(",");
+        append(rect.mMax.x);
+        append(",");
+        append(rect.mMax.y);
+        return *this;
+    }
+
+    template<typename T>
+    Str& append(const point_xy<T> &pt) {
+        append(pt.x);
+        append(",");
+        append(pt.y);
+        return *this;
+    }
+
     Str& append(const float& val) {
         int32_t i = static_cast<int32_t>(val * 100);
         // append the integer part
@@ -449,14 +472,6 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
-
-    template<typename T>
-    Str& append(const fl::point_xy<T> &p) {
-        append(p.x);
-        append(",");
-        append(p.y);
-        return *this;
-    }
 };
 
 

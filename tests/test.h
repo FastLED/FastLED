@@ -41,10 +41,25 @@ namespace doctest {
         static String convert(const SubPixel2x2& value) {
             fl::Str out;
             out += "SubPixel2x2(";
-            out += value.origin().x;
-            out += ", ";
-            out += value.origin().y;
+            out += value.bounds();
             out += ")";
+            return out.c_str();
+        }
+    };
+
+    template<typename T> struct StringMaker<rect_xy<T>> {
+        static String convert(const rect_xy<T>& value) {
+            fl::Str out;
+            out += "rect_xy(";
+            out += " (";
+            out += value.mMin.x;
+            out += ",";
+            out += value.mMin.y;
+            out += "), (";
+            out += value.mMax.x;
+            out += ",";
+            out += value.mMax.y;
+            out += "))";
             return out.c_str();
         }
     };
