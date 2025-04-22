@@ -71,10 +71,11 @@ public:
         return *this;
     }
 
+    // doesn't work with our containers.
     // Function& operator=(Function&& o) noexcept {
     //     if (this != &o) {
     //         callable_ = o.callable_;
-    //         o.callable_ = nullptr;
+    //         o.callable_.reset(nullptr);
     //     }
     //     return *this;
     // }
