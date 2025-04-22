@@ -218,7 +218,22 @@ point_xy_float CirclePath::compute(float alpha) {
 
 CirclePath::CirclePath() {}
 
+HeartPath::HeartPath() {}
 
-
+point_xy_float HeartPath::compute(float alpha) {
+    // Parametric equation for a heart shape
+    // α in [0,1] → (x,y) on the heart curve
+    float t = alpha * 2.0f * PI;
+    
+    // Heart formula based on a modified cardioid
+    float x = 16.0f * powf(sinf(t), 3);
+    float y = 13.0f * cosf(t) - 5.0f * cosf(2.0f * t) - 2.0f * cosf(3.0f * t) - cosf(4.0f * t);
+    
+    // Scale to fit in [-1, 1] range
+    x /= 16.0f;
+    y /= 16.0f;  // Negative to orient heart properly
+    
+    return point_xy_float(x, y);
+}
 
 } // namespace fl

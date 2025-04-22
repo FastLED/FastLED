@@ -79,7 +79,7 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-XYPathPtr shape = XYPath::NewCirclePath();
+XYPathPtr shape = XYPath::NewHeartPath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
@@ -92,7 +92,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
-    shape->setDrawBounds(WIDTH, HEIGHT);
+    // shape->setDrawBounds(WIDTH, HEIGHT);
 }
 
 float getAlpha(uint32_t now) {

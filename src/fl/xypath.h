@@ -28,7 +28,7 @@ FASTLED_SMART_PTR(PointPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
 FASTLED_SMART_PTR(XYPathGenerator);
-// FASTLED_SMART_PTR(HeartPath);
+FASTLED_SMART_PTR(HeartPath);
 // FASTLED_SMART_PTR(LissajousPath);
 // FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 // FASTLED_SMART_PTR(RosePath);
@@ -65,9 +65,17 @@ class XYPath : public Referent {
         return out;
     }
 
-    // static HeartPathPtr NewHeartPath(uint16_t steps = 0) {
-    //     return HeartPathPtr::New(steps);
-    // }
+    static XYPathPtr NewHeartPath() {
+        HeartPathPtr path = HeartPathPtr::New();
+        return XYPathPtr::New(path);
+    }
+
+    static XYPathPtr NewHeartPath(uint16_t width, uint16_t height) {
+        HeartPathPtr path = HeartPathPtr::New();
+        XYPathPtr out = XYPathPtr::New(path);
+        out->setDrawBounds(width, height);
+        return out;
+    }
 
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
     //                                          float delta, uint16_t steps = 0)
@@ -268,6 +276,13 @@ class CirclePath : public XYPathGenerator {
 
   private:
     float mRadius;
+};
+
+class HeartPath : public XYPathGenerator {
+  public:
+    HeartPath();
+    point_xy_float compute(float alpha) override;
+    const Str name() const override { return "HeartPath"; }
 };
 
 } // namespace fl
