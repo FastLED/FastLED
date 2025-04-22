@@ -98,6 +98,16 @@ struct is_pod_v_helper {
     static constexpr bool value = is_pod<T>::value;
 };
 
+//----------------------------------------------------------------------------
+// trait to detect pointer‑to‑member‑function
+// must come before Function so SFINAE sees it
+//----------------------------------------------------------------------------
+template <typename T> struct is_member_function_pointer;
+template <typename C, typename Ret, typename... A>
+struct is_member_function_pointer<Ret (C::*)(A...)>;
+template <typename C, typename Ret, typename... A>
+struct is_member_function_pointer<Ret (C::*)(A...) const>;
+
 // This uses template magic to maybe generate a type for the given condition. If that type
 // doesn't exist then a type will fail to be generated, and the compiler will skip the
 // consideration of a target function. This is useful for enabling template constructors
