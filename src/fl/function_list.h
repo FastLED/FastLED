@@ -29,6 +29,6 @@ public:
             function();
         }
     }
-
+}
 
 } // namespace fl

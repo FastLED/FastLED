@@ -64,6 +64,13 @@ TEST_CASE("Test function with const member function") {
     REQUIRE(fget() == 99);
 }
 
+TEST_CASE("Void free function test") {
+    Function<void(float)> f = [](float) { /* do nothing */ };
+    REQUIRE(f);
+    f(1);
+}
+
+
 TEST_CASE("Copy and move semantics") {
     Function<int(int,int)> orig = [](int a, int b) { return a - b; };
     REQUIRE(orig(10, 4) == 6);
