@@ -12,12 +12,12 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/math_macros.h"
+#include "fl/raster.h"
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
 #include "fx/2d/blend.h"
 #include "fx/2d/wave.h"
-#include "fl/raster.h"
 
 using namespace fl;
 
@@ -79,10 +79,11 @@ WaveFx waveFxUpper(
 
 Blend2d fxBlend(xyMap);
 
-
 XYPathPtr shape = XYPath::NewCirclePath();
 TimeLinear pointTransition(10000);
-
+// Speed up writing to the super sampled waveFx by writing
+// to a raster. This will allow duplicate writes to be removed.
+Raster raster;
 
 void setup() {
     Serial.begin(115200);
@@ -98,12 +99,12 @@ float getAlpha(uint32_t now) {
     return speed.value() * pointTransition.updatef(now) + transition.value();
 }
 
-
 void loop() {
 
     FASTLED_WARN("Loop");
 
-    const bool advanceFrame = advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
+    const bool advanceFrame =
+        advancedFrameButton.clicked() || static_cast<bool>(advancedFrame);
     if (!advanceFrame) {
         return;
     }
@@ -132,49 +133,44 @@ void loop() {
     memset(leds, 0, NUM_LEDS * sizeof(CRGB));
     if (true) {
         const CRGB purple = CRGB(255, 0, 255);
-        
 
         static vector_inlined<SubPixel2x2, 32> subpixels;
         subpixels.clear();
         const int number_of_steps = numberOfSteps.value();
 
-        //const float prev_alpha = s_prev_alpha;
+        // const float prev_alpha = s_prev_alpha;
         for (int i = 0; i < number_of_steps; ++i) {
-            float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha, curr_alpha);
+            float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
+                                           curr_alpha);
             SubPixel2x2 subpixel = shape->at_subpixel(a);
             subpixels.push_back(subpixel);
         }
 
-
-        // static Raster raster;
-
-        // SubPixel2x2::Rasterize(Slice<SubPixel2x2>(subpixels), &raster);
+        SubPixel2x2::Rasterize(subpixels, &raster);
 
         s_prev_alpha = curr_alpha;
 
-        for (int i = 0; i < subpixels.size(); ++i) {
-            SubPixel2x2 subpixel = subpixels[i];
-            auto origin = subpixel.origin();
-            StrStream msg;
-            msg << "frame: " << frame << "\n";
-            msg << "subpixel: \n";
-            msg << "origin: \n";
-            msg << " x: " << (origin.x) << "\n";
-            msg << " y: " << (origin.y) << "\n";
-            for (int x = 0; x<2; ++x) {
-                for (int y = 0; y<2; ++y) {
-                    uint8_t value = subpixel.at(x, y);
-                    // leds[idx] = CRGB(value, value, value);
-                    float valuef = value / 255.0f;
-                    valuef = sqrt(valuef);
-                    waveFxLower.addf(origin.x + x, origin.y + y, valuef);
-                    msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
-                    if (!useWaveFx) {
-                        subpixel.draw(purple, xyMap, leds);
+        if (useWaveFx) {
+            auto origin = raster.origin();
+            auto width = raster.width();
+            auto height = raster.height();
+            for (uint16_t x = 0; x < raster.width(); ++x) {
+                for (uint16_t y = 0; y < raster.height(); ++y) {
+                    uint8_t value = raster.at(x, y);
+                    if (value > 0) {
+                        int xx = x + origin.x;
+                        int yy = y + origin.y;
+                        if (xyMap.has(xx, yy)) {
+                            float valuef = value / 255.0f;
+                            int idx = xyMap(xx, yy);
+                            waveFxLower.addf(origin.x + x, origin.y + y,
+                                             valuef);
+                        }
                     }
                 }
             }
-            FASTLED_WARN(msg.c_str());
+        } else {
+            raster.draw(purple, xyMap, leds);
         }
     }
 

@@ -23,7 +23,7 @@ TEST_CASE("Raster simple test") {
     point_xy<uint16_t> global_min = raster.global_min();
     point_xy<uint16_t> global_max = raster.global_max();
     REQUIRE_EQ(global_min, origin);
-    REQUIRE_EQ(global_max, origin + point_xy<uint16_t>(1, 1));
+    REQUIRE_EQ(global_max, origin + point_xy<uint16_t>(2, 2));
 
     // now test that each point matches.
     for (int x = 0; x < 2; ++x) {
@@ -46,7 +46,7 @@ TEST_CASE("Raster two unit test") {
     SubPixel2x2 subpixels[2] = {sp0, sp1};
     Raster raster;
     SubPixel2x2::Rasterize(subpixels, &raster);
-    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 4, 4), raster.bounds());
-    REQUIRE_EQ(4, raster.width());
-    REQUIRE_EQ(4, raster.height());
+    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 5, 5), raster.bounds());
+    REQUIRE_EQ(5, raster.width());
+    REQUIRE_EQ(5, raster.height());
 }
