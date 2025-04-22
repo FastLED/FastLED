@@ -99,7 +99,7 @@ class XYPath : public Referent {
         return out;
     }
     
-    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0, float c = 4.0f, float angle = 137.5f) {
+    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0, float c = 4.0f, float angle = 1.5f) {
         PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(c, angle);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -356,6 +356,7 @@ class PhyllotaxisPath : public XYPathGenerator {
   private:
     float mC;      // Scaling factor
     float mAngle;  // Angle between consecutive points in radians
+    int mCount = 10;
 };
 
 } // namespace fl

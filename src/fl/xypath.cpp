@@ -304,30 +304,30 @@ point_xy_float RosePath::compute(float alpha) {
 PhyllotaxisPath::PhyllotaxisPath(float c, float angle)
     : mC(c), mAngle(angle * PI / 180.0f) {}
 
+
+
 point_xy_float PhyllotaxisPath::compute(float alpha) {
-    // Phyllotaxis formula: r = c * sqrt(n), theta = n * angle
-    // Where n is the index of the point (using alpha as continuous index)
-    // c is a scaling factor, angle is the angle between consecutive points (often 137.5°)
-    
-    // Scale alpha to get enough points for a good visualization
-    // Using 1000 points gives a nice dense pattern
-    float n = alpha * 1000.0f;
-    
-    // Calculate radius and angle in polar coordinates
-    float r = mC * sqrtf(n);
-    float theta = n * mAngle;
-    
-    // Convert polar coordinates (r, theta) to Cartesian (x, y)
+    // total number of points you want in the pattern
+    const float N = static_cast<float>(mCount);
+
+    // continuous “index” from 0…N
+    float n = alpha * N;
+
+    // use the golden angle in radians:
+    //    π * (3 – √5) ≈ 2.399963229728653
+    constexpr float goldenAngle = PI * (3.0f - 1.6180339887498948f);
+
+    // normalized radius [0…1]: sqrt(n/N) gives uniform point density
+    float r = sqrtf(n / N);
+
+    // spiral angle
+    float theta = n * goldenAngle;
+
+    // polar → Cartesian
     float x = r * cosf(theta);
     float y = r * sinf(theta);
-    
-    // Scale to fit within [-1, 1] range
-    // The maximum radius is mC * sqrt(1000)
-    float maxRadius = mC * sqrtf(1000.0f);
-    x /= maxRadius;
-    y /= maxRadius;
-    
-    return point_xy_float(x, y);
+
+    return point_xy_float{x, y};
 }
 
 } // namespace fl
