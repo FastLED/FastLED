@@ -108,6 +108,10 @@ class XYPath : public Referent {
         return out;
     }
 
+    Str name() {
+        return mPath->name();
+    }
+
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
     //                                          float delta, uint16_t steps = 0)
     //                                          {

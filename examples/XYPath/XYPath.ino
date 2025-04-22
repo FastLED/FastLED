@@ -11,12 +11,12 @@ all the UI elements you see below.
 #include <Arduino.h>
 #include <FastLED.h>
 
+#include "fl/draw_visitor.h"
 #include "fl/math_macros.h"
 #include "fl/raster.h"
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fl/draw_visitor.h"
 
 // Sketch.
 #include "wave.h"
@@ -31,20 +31,17 @@ using namespace fl;
 
 CRGB leds[NUM_LEDS];
 
-
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 // XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 XYRaster raster;
-WaveEffect wave_fx;  // init in setup().
+WaveEffect wave_fx; // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
 // A vector for collecting subpixels, with overflow.
 vector_inlined<SubPixel2x2, 32> subpixels;
-
-
 
 XYPathPtr getShape(int which) {
     int len = shapes.size();
@@ -66,8 +63,6 @@ void setup() {
     wave_fx = NewWaveSimulation2D(xyMap);
 }
 
-
-
 //////////////////// UI Section /////////////////////////////
 UITitle title("XYPath Demo");
 UIDescription description("Use a path on the WaveFx");
@@ -81,20 +76,15 @@ UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 
 UICheckbox advancedFrame("Advanced Frame", true);
 UIButton advancedFrameButton("Advanced Frame Button");
-UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size(), 1.0f);
-
-
+UISlider whichShape("Which Shape", 0.0f, 0.0f, shapes.size() - 1, 1.0f);
 
 //////////////////// LOOP SECTION /////////////////////////////
-
 
 float getAnimationTime(uint32_t now) {
     return speed.value() * pointTransition.updatef(now) + transition.value();
 }
 
-void clearLeds() {
-    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
-}
+void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
 
 void loop() {
 
@@ -117,7 +107,7 @@ void loop() {
     if (button) {
         // trigger the transition
         pointTransition.trigger(now);
-        FASTLED_WARN("Transition triggered");
+        FASTLED_WARN("Transition triggered on " << shape->name());
         curr_alpha = getAnimationTime(now);
         s_prev_alpha = curr_alpha;
     }
@@ -132,7 +122,7 @@ void loop() {
     // const float prev_alpha = s_prev_alpha;
     for (int i = 0; i < number_of_steps; ++i) {
         float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
-                                        curr_alpha);
+                                       curr_alpha);
         SubPixel2x2 subpixel = shape->at_subpixel(a);
         subpixels.push_back(subpixel);
     }
@@ -145,7 +135,6 @@ void loop() {
         raster.draw(purple, xyMap, leds);
     }
 
-
     int first = xyMap(1, 1);
     int last = xyMap(WIDTH - 2, HEIGHT - 2);
 
@@ -156,8 +145,10 @@ void loop() {
         wave_fx.draw(Fx::DrawContext(now, leds));
     }
 
-    uint32_t frame_time = millis() - now;
-    FASTLED_WARN("Frame time: " << frame_time << "ms");
+    EVERY_N_SECONDS(1) {
+        uint32_t frame_time = millis() - now;
+        FASTLED_WARN("Frame time: " << frame_time << "ms");
+    }
 
     FastLED.show();
 }

@@ -15,5 +15,6 @@ fl::vector<XYPathPtr> CreateXYPaths(int width, int height) {
     out.push_back(XYPath::NewCirclePath(width, height));
     out.push_back(XYPath::NewHeartPath(width, height));
     out.push_back(XYPath::NewArchimedeanSpiralPath(width, height));
+    out.push_back(XYPath::NewPhyllotaxisPath(width, height));
     return out;
 }
