@@ -2,6 +2,7 @@
 #include "crgb.h"
 #include "fl/xymap.h"
 #include "fl/warn.h"
+#include "fl/raster.h"
 
 using namespace fl;
 
