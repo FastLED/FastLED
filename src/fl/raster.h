@@ -20,21 +20,45 @@ class SubPixel2x2;
 
 class Raster {
   public:
-    Raster() = default;
-    Raster(const point_xy<int> &origin, uint16_t width, uint16_t height) {
-        reset(origin, width, height);
+    Raster(int width, int height) {
+        mGrid.reset(width, height);
+        mOrigin = point_xy<int>(0, 0);
+        mWidthHeight = point_xy<int>(width, height);
+        mInitialized = true;
+
     }
+    // Raster(uint16_t width, uint16_t height) {
+    //     reset(point_xy<int>(0, 0), width, height);
+    // }
+    // Raster(const point_xy<int> &origin, uint16_t width, uint16_t height) {
+    //     reset(origin, width, height);
+    // }
     Raster(const Raster &) = delete;
     void reset(const point_xy<int> &origin, uint16_t width,
                uint16_t height) {
         mGrid.reset(width, height);
         mOrigin = origin;
+        mInitialized = true;
+    }
+
+    // builder pattern
+    Raster& setOrigin(const point_xy<int> &origin) {
+        mOrigin = origin;
+        return *this;
+    }
+    Raster& setSize(uint16_t width, uint16_t height) {
+        mGrid.reset(width, height);
+        return *this;
+    }
+
+    Raster& reset() {
+        mGrid.reset(width(), height());
+        return *this;
     }
 
     // Renders the subpixel tiles to the raster. Any previous data is cleared.
     // Memory will only be allocated if the size of the raster increased.
     void rasterize(const Slice<const SubPixel2x2> &tiles);
-
     uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
     const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x, y); }
 
@@ -61,8 +85,10 @@ class Raster {
     void draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const;
 
   private:
+    bool mInitialized = false;
     Grid<uint8_t> mGrid;
     point_xy<int> mOrigin;
+    point_xy<int> mWidthHeight;  // 0,0 if unset.
 };
 
 } // namespace fl

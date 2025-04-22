@@ -21,6 +21,7 @@ template <typename T> class Grid {
             mHeight = height;
             // Only re-allocate if the size is now bigger.
             mData.reserve(width * height);
+            // Fill with default objects.
             while (mData.size() < width * height) {
                 mData.push_back(T());
             }

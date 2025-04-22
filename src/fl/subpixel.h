@@ -6,6 +6,7 @@
 #include "fl/namespace.h"
 #include "fl/point.h"
 #include "fl/slice.h"
+#include "fl/point.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -21,7 +22,7 @@ class SubPixel2x2 {
 
   public:
     static void Rasterize(const Slice<const SubPixel2x2> &tiles,
-                          Raster *output);
+                          Raster *output, rect_xy<int> *optional_bounds = nullptr);
 
     SubPixel2x2() = default;
     SubPixel2x2(const point_xy<int> &origin) : mOrigin(origin) {}

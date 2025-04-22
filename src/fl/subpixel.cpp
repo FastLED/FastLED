@@ -11,7 +11,7 @@ using namespace fl;
 namespace fl {
 
 void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
-                            Raster *out_raster) {
+                            Raster *out_raster, rect_xy<int> *optional_bounds) {
     if (tiles.size() == 0) {
         FASTLED_WARN("Rasterize: no tiles");
         return;
@@ -31,6 +31,15 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
         bounds.expand(tile.bounds());
     }
 
+    // Optionally adjust the bounds.
+    // rect_xy<int> *optional_bounds = nullptr;
+    if (optional_bounds) {
+        auto _min = bounds.mMin.max(optional_bounds->mMin);
+        auto _max = bounds.mMax.min(optional_bounds->mMax);
+        bounds = rect_xy<int>(_min, _max);        
+    }
+
+    // Won't reset the mMinMax bounds if this was set.
     out_raster->reset(bounds.mMin, bounds.width(), bounds.height());
     auto global_origin = out_raster->global_min();
 

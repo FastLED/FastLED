@@ -16,7 +16,7 @@ TEST_CASE("Raster simple test") {
     XYPathPtr path = XYPath::NewPointPath(0, 0);
     path->setDrawBounds(2, 2);
     SubPixel2x2 subpixel = path->at_subpixel(0);
-    Raster raster;
+    Raster raster(2, 2);
     SubPixel2x2::Rasterize(Slice<SubPixel2x2>(&subpixel, 1), &raster);
 
     point_xy<int> origin = subpixel.origin();
@@ -44,7 +44,7 @@ TEST_CASE("Raster two unit test") {
     SubPixel2x2 sp0 = path->at_subpixel(0);
     SubPixel2x2 sp1 = path->at_subpixel(1);
     SubPixel2x2 subpixels[2] = {sp0, sp1};
-    Raster raster;
+    Raster raster(4, 4);
     SubPixel2x2::Rasterize(subpixels, &raster);
     REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 5, 5), raster.bounds());
     REQUIRE_EQ(5, raster.width());

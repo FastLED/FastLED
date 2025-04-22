@@ -144,6 +144,34 @@ struct point_xy {
     bool operator!=(const point_xy<U>& p) const {
         return (x != p.x || y != p.y);
     }
+
+    point_xy max(const point_xy& p) const {
+        return point_xy(MAX(x, p.x), MAX(y, p.y));
+    }
+
+    point_xy min(const point_xy& p) const {
+        return point_xy(MIN(x, p.x), MIN(y, p.y));
+    }
+
+    template<typename U>
+    point_xy<U> cast() const {
+        return point_xy<U>(static_cast<U>(x), static_cast<U>(y));
+    }
+
+    template<typename U>
+    point_xy max(const point_xy<U>& p) const {
+        return point_xy<U>(MAX(x, p.x), MAX(y, p.y));
+    }
+
+    template<typename U>
+    point_xy min(const point_xy<U>& p) const {
+        return point_xy<U>(MIN(x, p.x), MIN(y, p.y));
+    }
+
+
+    bool is_zero() const {
+        return (x == 0 && y == 0);
+    }
 };
 
 using point_xy_float = point_xy<float>;  // Full precision but slow.
