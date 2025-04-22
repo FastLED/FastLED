@@ -38,10 +38,11 @@ TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
 Raster raster;
-
-WaveEffect wave_fx;
-
+WaveEffect wave_fx;  // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
+
+// A vector for collecting subpixels, with overflow.
+vector_inlined<SubPixel2x2, 32> subpixels;
 
 
 
@@ -91,7 +92,9 @@ float getAnimationTime(uint32_t now) {
     return speed.value() * pointTransition.updatef(now) + transition.value();
 }
 
-
+void clearLeds() {
+    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
+}
 
 void loop() {
 
@@ -122,14 +125,11 @@ void loop() {
     // if (pointTransition.isActive(now)) {
     static uint32_t frame = 0;
     frame++;
-    memset(leds, 0, NUM_LEDS * sizeof(CRGB));
+    clearLeds();
     if (true) {
         const CRGB purple = CRGB(255, 0, 255);
-
-        static vector_inlined<SubPixel2x2, 32> subpixels;
         subpixels.clear();
         const int number_of_steps = numberOfSteps.value();
-
         // const float prev_alpha = s_prev_alpha;
         for (int i = 0; i < number_of_steps; ++i) {
             float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
@@ -137,8 +137,8 @@ void loop() {
             SubPixel2x2 subpixel = shape->at_subpixel(a);
             subpixels.push_back(subpixel);
         }
-        raster.rasterize(subpixels);
         s_prev_alpha = curr_alpha;
+        raster.rasterize(subpixels);
         if (useWaveFx) {
             DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
             raster.draw(xyMap, draw_wave_fx);
