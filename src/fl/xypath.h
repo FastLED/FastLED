@@ -110,6 +110,11 @@ class XYPath : public Referent {
     point_xy_float at(float alpha, const TransformFloat &tx) {
         return compute_float(alpha, tx);
     }
+
+    // Needed for drawing to the screen. When this called the rendering will
+    // be centered on the width and height such that 0,0 -> maps to .5,.5,
+    // which is convenient for drawing since each float pixel can be truncated
+    // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height) {
         auto &tx = *mGridTransform;
 
