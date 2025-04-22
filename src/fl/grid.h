@@ -1,6 +1,8 @@
 
+#pragma once
 
 #include "fl/vector.h"
+#include "fl/slice.h"
 
 namespace fl {
 
@@ -9,15 +11,23 @@ template <typename T> class Grid {
 
     Grid() = default;
 
-    Grid(uint32_t width, uint32_t height) : mWidth(width), mHeight(height) {
-        mData.resize(width * height);
+    Grid(uint32_t width, uint32_t height) {
+        reset(width, height);
     }
 
     void reset(uint32_t width, uint32_t height) {
         if (width != mWidth || height != mHeight) {
             mWidth = width;
             mHeight = height;
-            mData.resize(width * height);
+            // Only re-allocate if the size is now bigger.
+            mData.reserve(width * height);
+            while (mData.size() < width * height) {
+                mData.push_back(T());
+            }
+            mSlice = fl::MatrixSlice<T>(
+                mData.data(),
+                width, height,
+                0, 0, width - 1, height - 1);
         }
         clear();
     }
@@ -62,14 +72,14 @@ template <typename T> class Grid {
     }
     T& access(uint32_t x, uint32_t y) {
         if (x < mWidth && y < mHeight) {
-            return mData[y * mWidth + x];
+            return mSlice.at(x, y);
         } else {
             return NullValue();  // safe.
         }
     }
     const T& access(uint32_t x, uint32_t y) const {
         if (x < mWidth && y < mHeight) {
-            return mData[y * mWidth + x];
+            return mSlice.at(x, y);
         } else {
             return NullValue();  // safe.
         }
@@ -77,6 +87,7 @@ template <typename T> class Grid {
     fl::vector<T> mData;
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
+    fl::MatrixSlice<T> mSlice;
 };
 
 } // namespace fl

@@ -106,12 +106,16 @@ template <typename T> class MatrixSlice {
   public:
     // represents a window into a matrix
     // bottom-left and top-right corners are passed as plain ints
+    MatrixSlice() = default;
     MatrixSlice(T *data, int32_t dataWidth, int32_t dataHeight,
                 int32_t bottomLeftX, int32_t bottomLeftY, int32_t topRightX,
                 int32_t topRightY)
         : mData(data), mDataWidth(dataWidth), mDataHeight(dataHeight),
           mBottomLeft{bottomLeftX, bottomLeftY},
           mTopRight{topRightX, topRightY} {}
+
+    MatrixSlice(const MatrixSlice &other) = default;
+    MatrixSlice &operator=(const MatrixSlice &other) = default;
 
     // outputs a point_xy but takes x,y as inputs
     point_xy<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
@@ -140,10 +144,15 @@ template <typename T> class MatrixSlice {
         return mData[parent.x + parent.y * mDataWidth];
     }
 
+    const T &at(int32_t x, int32_t y) const {
+        auto parent = getParentCoord(x, y);
+        return mData[parent.x + parent.y * mDataWidth];
+    }
+
   private:
-    T *mData;
-    int32_t mDataWidth;
-    int32_t mDataHeight;
+    T *mData = nullptr;
+    int32_t mDataWidth = 0;
+    int32_t mDataHeight = 0;
     point_xy<int32_t> mBottomLeft;
     point_xy<int32_t> mTopRight;
 };

@@ -43,7 +43,7 @@ TEST_CASE("LinePath at_subpixel") {
     XYPath path(NewPtrNoTracking(line));
     path.setDrawBounds(2,2);
     SubPixel2x2 tile = path.at_subpixel(0);
-    REQUIRE_EQ(point_xy<int>(0, 0), tile.origin());
+    REQUIRE_EQ(point_xy<uint16_t>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
     REQUIRE_EQ(255, tile.at(0, 0));
 }
@@ -103,10 +103,10 @@ TEST_CASE("LinePath at_subpixel moves x") {
     path.setDrawBounds(3, 3);
     SubPixel2x2 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin(), point_xy<int>(0, 0));
+    REQUIRE_EQ(tile.origin(), point_xy<uint16_t>(0, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
     tile = path.at_subpixel(1.0f);
-    REQUIRE_EQ(tile.origin(), point_xy<int>(2, 0));
+    REQUIRE_EQ(tile.origin(), point_xy<uint16_t>(2, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
 }
 

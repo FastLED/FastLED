@@ -82,7 +82,7 @@ SubPixel2x2 XYPath::at_subpixel(float alpha) {
     float w_ur = fx       * fy;        // upper‑right
 
     // 6) build SubPixel2x2 anchored at (cx,cy)
-    SubPixel2x2 out(point_xy<int>(cx, cy));
+    SubPixel2x2 out(point_xy<uint16_t>(cx, cy));
     out.lower_left()  = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
     out.upper_left()  = to_uint8(w_ul);
