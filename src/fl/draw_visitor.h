@@ -10,13 +10,13 @@
 namespace fl {
 
 // A visitor interface for drawing uint8_t values.
-struct DrawUint8Visitor {
-    virtual ~DrawUint8Visitor() = default;
+struct XYDrawUint8Visitor {
+    virtual ~XYDrawUint8Visitor() = default;
     virtual void draw(const point_xy<uint16_t> &pt, uint32_t index, uint8_t value) = 0;
 };
 
-struct DrawComposited: public DrawUint8Visitor {
-    DrawComposited(const CRGB &color, const XYMap &xymap, CRGB *out);
+struct XYDrawComposited: public XYDrawUint8Visitor {
+    XYDrawComposited(const CRGB &color, const XYMap &xymap, CRGB *out);
 
     void draw(const point_xy<uint16_t> &pt, uint32_t index, uint8_t value) override ;
     const CRGB mColor;

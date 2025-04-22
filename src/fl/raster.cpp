@@ -12,11 +12,11 @@
 namespace fl {
 
 void Raster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
-    DrawComposited visitor(color, xymap, out);
+    XYDrawComposited visitor(color, xymap, out);
     draw(xymap, &visitor);
 }
 
-void Raster::draw(const XYMap& xymap, DrawUint8Visitor* visitor) const {
+void Raster::draw(const XYMap& xymap, XYDrawUint8Visitor* visitor) const {
     const uint16_t w = width();
     const uint16_t h = height();
     const point_xy<uint16_t> origin = this->origin();

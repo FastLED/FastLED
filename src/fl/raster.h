@@ -14,7 +14,7 @@ FASTLED_NAMESPACE_END
 namespace fl {
 
 class XYMap;
-class DrawUint8Visitor;
+class XYDrawUint8Visitor;
 
 class Raster {
   public:
@@ -51,7 +51,7 @@ class Raster {
     // Uses the visitor pattern to abstract away the drawing. The values sent
     // to the visitor will always be within the valid range as specified
     // by the xymap.
-    void draw(const XYMap& xymap, DrawUint8Visitor* visitor) const ;
+    void draw(const XYMap& xymap, XYDrawUint8Visitor* visitor) const ;
 
   private:
     Grid<uint8_t> mGrid;
