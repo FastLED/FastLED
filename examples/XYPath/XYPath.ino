@@ -126,24 +126,24 @@ void loop() {
     static uint32_t frame = 0;
     frame++;
     clearLeds();
-        const CRGB purple = CRGB(255, 0, 255);
-        subpixels.clear();
-        const int number_of_steps = numberOfSteps.value();
-        // const float prev_alpha = s_prev_alpha;
-        for (int i = 0; i < number_of_steps; ++i) {
-            float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
-                                           curr_alpha);
-            SubPixel2x2 subpixel = shape->at_subpixel(a);
-            subpixels.push_back(subpixel);
-        }
-        s_prev_alpha = curr_alpha;
-        raster.rasterize(subpixels);
-        if (useWaveFx) {
-            DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
-            raster.draw(xyMap, draw_wave_fx);
-        } else {
-            raster.draw(purple, xyMap, leds);
-        }
+    const CRGB purple = CRGB(255, 0, 255);
+    subpixels.clear();
+    const int number_of_steps = numberOfSteps.value();
+    // const float prev_alpha = s_prev_alpha;
+    for (int i = 0; i < number_of_steps; ++i) {
+        float a = fl::map_range<float>(i, 0, number_of_steps, s_prev_alpha,
+                                        curr_alpha);
+        SubPixel2x2 subpixel = shape->at_subpixel(a);
+        subpixels.push_back(subpixel);
+    }
+    s_prev_alpha = curr_alpha;
+    raster.rasterize(subpixels);
+    if (useWaveFx) {
+        DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
+        raster.draw(xyMap, draw_wave_fx);
+    } else {
+        raster.draw(purple, xyMap, leds);
+    }
 
 
     int first = xyMap(1, 1);
