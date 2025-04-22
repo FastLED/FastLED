@@ -29,7 +29,9 @@ template <typename T> class Slice {
     }
 
     // Automatic promotion to const Slice<const T>
-    operator Slice<const T>() const { return *this; }
+    operator Slice<const T>() const {
+        return Slice<const T>(mData, mSize);
+    }
 
     T &operator[](size_t index) {
         // No bounds checking in embedded environment
