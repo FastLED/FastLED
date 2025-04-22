@@ -25,14 +25,8 @@ class Raster {
         mOrigin = point_xy<int>(0, 0);
         mWidthHeight = point_xy<int>(width, height);
         mInitialized = true;
-
     }
-    // Raster(uint16_t width, uint16_t height) {
-    //     reset(point_xy<int>(0, 0), width, height);
-    // }
-    // Raster(const point_xy<int> &origin, uint16_t width, uint16_t height) {
-    //     reset(origin, width, height);
-    // }
+
     Raster(const Raster &) = delete;
     void reset(const point_xy<int> &origin, uint16_t width,
                uint16_t height) {
