@@ -16,6 +16,7 @@ all the UI elements you see below.
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
+#include "fl/draw_visitor.h"
 
 // Sketch.
 #include "wave.h"
@@ -105,23 +106,8 @@ void loop() {
         raster.rasterize(subpixels);
         s_prev_alpha = curr_alpha;
         if (useWaveFx) {
-            auto origin = raster.origin();
-            auto width = raster.width();
-            auto height = raster.height();
-            for (uint16_t x = 0; x < raster.width(); ++x) {
-                for (uint16_t y = 0; y < raster.height(); ++y) {
-                    uint8_t value = raster.at(x, y);
-                    if (value > 0) {
-                        int xx = x + origin.x;
-                        int yy = y + origin.y;
-                        if (xyMap.has(xx, yy)) {
-                            float valuef = value / 255.0f;
-                            int idx = xyMap(xx, yy);
-                            wave_fx.addf(xx, yy, valuef);
-                        }
-                    }
-                }
-            }
+            DrawVisitor draw_wave_fx(&raster, &wave_fx);
+            raster.draw(xyMap, draw_wave_fx);
         } else {
             raster.draw(purple, xyMap, leds);
         }
