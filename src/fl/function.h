@@ -71,13 +71,13 @@ public:
         return *this;
     }
 
-    Function& operator=(Function&& o) noexcept {
-        if (this != &o) {
-            callable_ = o.callable_;
-            o.callable_ = nullptr;
-        }
-        return *this;
-    }
+    // Function& operator=(Function&& o) noexcept {
+    //     if (this != &o) {
+    //         callable_ = o.callable_;
+    //         o.callable_ = nullptr;
+    //     }
+    //     return *this;
+    // }
 
     // 1) generic constructor for lambdas, free functions, functors
     template <typename F,

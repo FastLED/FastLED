@@ -1,10 +1,14 @@
 #pragma once
 #include "fl/function.h"
+#include "fl/vector.h"
 
 namespace fl {
 
 template<typename T>
 class FunctionList {
+private:
+    fl::vector<Function<T>> mFunctions;
+
 public:
     FunctionList() = default;
     ~FunctionList() = default;
@@ -24,11 +28,12 @@ public:
         mFunctions.clear();
     }
 
-    void invoke() {
+    template<typename... Args>
+    void invoke(Args&&... args) {
         for (const auto &function : mFunctions) {
-            function();
+            function(std::forward<Args>(args)...);
         }
     }
-}
+};
 
 } // namespace fl

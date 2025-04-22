@@ -5,6 +5,7 @@
 
 
 #include "fl/function.h"
+#include "fl/function_list.h"
 
 using namespace fl;
 
@@ -85,4 +86,10 @@ TEST_CASE("Copy and move semantics") {
     REQUIRE(moved);
     REQUIRE(moved(7, 2) == 5);
     REQUIRE(!orig);
+}
+
+TEST_CASE("Function list void float") {
+    FunctionList<void(float)> fl;
+    fl.add([](float) { /* do nothing */ });
+    fl.invoke(1);
 }
