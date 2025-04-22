@@ -29,7 +29,7 @@ using namespace fl;
 #define WIDTH 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
-#define TIME_ANIMATION 10000  // ms
+#define TIME_ANIMATION 1000  // ms
 
 
 CRGB leds[NUM_LEDS];
@@ -68,7 +68,7 @@ UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
 UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
-UISlider maxAnimation("Max Animation", 1.0f, 1.0f, 20.0f, 1.f);
+UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 
 TimeLinear shapeProgress(TIME_ANIMATION);
 
@@ -123,8 +123,10 @@ void loop() {
         s_prev_alpha = curr_alpha;
     }
 
-    bool is_active = shapeProgress.isActive(now_warped);
-    is_active = true;  // debug
+    FASTLED_WARN("Current alpha: " << curr_alpha);
+    FASTLED_WARN("maxAnimation: " << maxAnimation.value());
+
+    const bool is_active = curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
 
     // if (shapeProgress.isActive(now)) {
     static uint32_t frame = 0;
@@ -145,6 +147,10 @@ void loop() {
     for (int i = 0; i < number_of_steps; ++i) {
         float a = fl::map_range<float>(i, 0, number_of_steps-1, factor,
                                        curr_alpha);
+        if (a < .04) {
+            // shorter tails at first.
+            a = map_range<float>(a, 0.0f, .04f, 0.0f, .04f);
+        }
         uint8_t alpha = fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
         if (!is_active) {
             alpha = 0;
