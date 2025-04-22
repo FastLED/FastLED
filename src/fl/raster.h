@@ -18,11 +18,11 @@ class XYMap;
 class XYDrawUint8Visitor;
 class SubPixel2x2;
 
-class Raster {
+class XYRaster {
   public:
-    Raster() = default;
+    XYRaster() = default;
 
-    Raster(int width, int height) {
+    XYRaster(int width, int height) {
         // mGrid.reset(width, height);
         mOrigin = point_xy<int>(0, 0);
         mWidthHeight = point_xy<int>(
@@ -31,7 +31,7 @@ class Raster {
         // the grid still needs to be allocated.
     }
 
-    Raster(const Raster &) = delete;
+    XYRaster(const XYRaster &) = delete;
     void reset(const point_xy<int> &origin, uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         mOrigin = origin;
@@ -39,16 +39,16 @@ class Raster {
     }
 
     // builder pattern
-    Raster &setOrigin(const point_xy<int> &origin) {
+    XYRaster &setOrigin(const point_xy<int> &origin) {
         mOrigin = origin;
         return *this;
     }
-    Raster &setSize(uint16_t width, uint16_t height) {
+    XYRaster &setSize(uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         return *this;
     }
 
-    Raster &reset() {
+    XYRaster &reset() {
         mGrid.reset(width(), height());
         return *this;
     }

@@ -13,13 +13,13 @@
 
 namespace fl {
 
-void Raster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
+void XYRaster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
 
-void Raster::rasterize(const Slice<const SubPixel2x2> &tiles) {    
+void XYRaster::rasterize(const Slice<const SubPixel2x2> &tiles) {    
     rect_xy<int> *optional_bounds  = nullptr;
     rect_xy<int> maybe_bounds;
     if (!mWidthHeight.is_zero()) {

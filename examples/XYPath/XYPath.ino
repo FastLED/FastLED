@@ -37,7 +37,7 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 TimeLinear pointTransition(10000);
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
-Raster raster;
+XYRaster raster;
 WaveEffect wave_fx;  // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
@@ -126,7 +126,6 @@ void loop() {
     static uint32_t frame = 0;
     frame++;
     clearLeds();
-    if (true) {
         const CRGB purple = CRGB(255, 0, 255);
         subpixels.clear();
         const int number_of_steps = numberOfSteps.value();
@@ -145,7 +144,7 @@ void loop() {
         } else {
             raster.draw(purple, xyMap, leds);
         }
-    }
+
 
     int first = xyMap(1, 1);
     int last = xyMap(WIDTH - 2, HEIGHT - 2);

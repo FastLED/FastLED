@@ -21,7 +21,7 @@ struct WaveEffect {
 };
 
 struct DrawRasterToWaveSimulator {
-    DrawRasterToWaveSimulator(Raster *raster, WaveEffect* wave_fx) : mRaster(raster), mWaveFx(wave_fx) {}
+    DrawRasterToWaveSimulator(XYRaster *raster, WaveEffect* wave_fx) : mRaster(raster), mWaveFx(wave_fx) {}
     void draw(const point_xy<int> &pt, uint32_t index, uint8_t value) {
         float valuef = value / 255.0f;
         int xx = pt.x;
@@ -29,7 +29,7 @@ struct DrawRasterToWaveSimulator {
         mWaveFx->addf(xx, yy, valuef);
     }
 
-    Raster *mRaster;
+    XYRaster *mRaster;
     WaveEffect* mWaveFx;
 };
 
