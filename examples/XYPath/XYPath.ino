@@ -20,8 +20,8 @@ all the UI elements you see below.
 #include "fx/time.h"
 
 // Sketch.
-#include "wave.h"
-#include "xypaths.h"
+#include "src/wave.h"
+#include "src/xypaths.h"
 
 using namespace fl;
 
