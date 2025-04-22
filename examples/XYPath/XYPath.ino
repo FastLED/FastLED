@@ -17,6 +17,7 @@ all the UI elements you see below.
 #include "fl/xypath.h"
 #include "fx/2d/blend.h"
 #include "fx/2d/wave.h"
+#include "fl/raster.h"
 
 using namespace fl;
 
@@ -143,32 +144,40 @@ void loop() {
             SubPixel2x2 subpixel = shape->at_subpixel(a);
             subpixels.push_back(subpixel);
         }
+
+
+        static Raster raster;
+
+        SubPixel2x2::Rasterize(Slice<SubPixel2x2>(subpixels), &raster);
+
         s_prev_alpha = curr_alpha;
 
-        for (int i = 0; i < subpixels.size(); ++i) {
-            SubPixel2x2 subpixel = subpixels[i];
-            auto origin = subpixel.origin();
-            StrStream msg;
-            msg << "frame: " << frame << "\n";
-            msg << "subpixel: \n";
-            msg << "origin: \n";
-            msg << " x: " << (origin.x) << "\n";
-            msg << " y: " << (origin.y) << "\n";
-            for (int x = 0; x<2; ++x) {
-                for (int y = 0; y<2; ++y) {
-                    uint8_t value = subpixel.at(x, y);
-                    // leds[idx] = CRGB(value, value, value);
-                    float valuef = value / 255.0f;
-                    valuef = sqrt(valuef);
-                    waveFxLower.addf(origin.x + x, origin.y + y, valuef);
-                    msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
-                    if (!useWaveFx) {
-                        subpixel.draw(purple, xyMap, leds);
-                    }
-                }
-            }
-            FASTLED_WARN(msg.c_str());
-        }
+        // for (int i = 0; i < subpixels.size(); ++i) {
+        //     SubPixel2x2 subpixel = subpixels[i];
+        //     auto origin = subpixel.origin();
+        //     StrStream msg;
+        //     msg << "frame: " << frame << "\n";
+        //     msg << "subpixel: \n";
+        //     msg << "origin: \n";
+        //     msg << " x: " << (origin.x) << "\n";
+        //     msg << " y: " << (origin.y) << "\n";
+        //     for (int x = 0; x<2; ++x) {
+        //         for (int y = 0; y<2; ++y) {
+        //             uint8_t value = subpixel.at(x, y);
+        //             // leds[idx] = CRGB(value, value, value);
+        //             float valuef = value / 255.0f;
+        //             valuef = sqrt(valuef);
+        //             waveFxLower.addf(origin.x + x, origin.y + y, valuef);
+        //             msg << "    at(" << x << ", " << y << ") = " << (int)value << "\n";
+        //             if (!useWaveFx) {
+        //                 subpixel.draw(purple, xyMap, leds);
+        //             }
+        //         }
+        //     }
+        //     FASTLED_WARN(msg.c_str());
+        // }
+
+        for (uint16_t x = )
     }
 
     int first = xyMap(1, 1);

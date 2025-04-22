@@ -10,6 +10,7 @@ namespace fl {
 
 class Raster {
   public:
+    Raster() = default;
     Raster(const point_xy<uint16_t> &origin, uint16_t width, uint16_t height) {
         reset(origin, width, height);
     }

@@ -16,6 +16,10 @@ template <typename T> class Slice {
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, size_t size) : mData(data), mSize(size) {}
 
+    template <typename VectorT>
+    Slice(const VectorT &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
     Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
 
     Slice &operator=(const Slice &other) {

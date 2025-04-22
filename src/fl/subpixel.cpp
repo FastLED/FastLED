@@ -9,7 +9,7 @@ using namespace fl;
 namespace fl {
 
 
-void SubPixel2x2::DrawRaster(const Slice<SubPixel2x2> &tiles, Raster* out_raster) {
+void SubPixel2x2::Rasterize(const Slice<SubPixel2x2> &tiles, Raster* out_raster) {
     uint16_t min_left = 0xffff;
     uint16_t max_top = 0;
     uint16_t max_right = 0xffff;
