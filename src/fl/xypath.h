@@ -13,14 +13,13 @@
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
+#include "fl/subpixel.h"
 #include "fl/transform.h"
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/subpixel.h"
 
 namespace fl {
-
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
@@ -32,8 +31,8 @@ FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 FASTLED_SMART_PTR(RosePath);
 FASTLED_SMART_PTR(PhyllotaxisPath);
+FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(LissajousPath);
-// FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
 class XYPathGenerator : public Referent {
@@ -90,7 +89,8 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr NewRosePath(uint16_t width = 0, uint16_t height = 0, uint8_t n = 3, uint8_t d = 1) {
+    static XYPathPtr NewRosePath(uint16_t width = 0, uint16_t height = 0,
+                                 uint8_t n = 3, uint8_t d = 1) {
         RosePathPtr path = RosePathPtr::New(n, d);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -98,8 +98,9 @@ class XYPath : public Referent {
         }
         return out;
     }
-    
-    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0, float c = 4.0f, float angle = 1.5f) {
+
+    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0,
+                                        float c = 4.0f, float angle = 1.5f) {
         PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(c, angle);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -108,9 +109,19 @@ class XYPath : public Referent {
         return out;
     }
 
-    Str name() {
-        return mPath->name();
+    static XYPathPtr NewGielisCurvePath(uint16_t width = 0, uint16_t height = 0,
+                                        float a = 1.0f, float b = 1.0f,
+                                        float m = 3.0f, float n1 = 1.0f,
+                                        float n2 = 1.0f, float n3 = 1.0f) {
+        GielisCurvePathPtr path = GielisCurvePathPtr::New(a, b, m, n1, n2, n3);
+        XYPathPtr out = XYPathPtr::New(path);
+        if (width > 0 && height > 0) {
+            out->setDrawBounds(width, height);
+        }
+        return out;
     }
+
+    Str name() { return mPath->name(); }
 
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
     //                                          float delta, uint16_t steps = 0)
@@ -316,13 +327,13 @@ class ArchimedeanSpiralPath : public XYPathGenerator {
     ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 1.0f);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "ArchimedeanSpiralPath"; }
-    
+
     void setTurns(uint8_t turns) { mTurns = turns; }
     void setRadius(float radius) { mRadius = radius; }
-    
+
   private:
-    uint8_t mTurns;  // Number of spiral turns
-    float mRadius;   // Maximum radius of the spiral
+    uint8_t mTurns; // Number of spiral turns
+    float mRadius;  // Maximum radius of the spiral
 };
 
 class RosePath : public XYPathGenerator {
@@ -330,33 +341,69 @@ class RosePath : public XYPathGenerator {
     // n and d determine the shape of the rose curve
     // For n/d odd: produces n petals
     // For n/d even: produces 2n petals
-    // For n and d coprime: produces n petals if n is odd, 2n petals if n is even
+    // For n and d coprime: produces n petals if n is odd, 2n petals if n is
+    // even
     RosePath(uint8_t n = 3, uint8_t d = 1);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "RosePath"; }
-    
+
     void setN(uint8_t n) { mN = n; }
     void setD(uint8_t d) { mD = d; }
-    
+
   private:
-    uint8_t mN;  // Numerator parameter (number of petals)
-    uint8_t mD;  // Denominator parameter
+    uint8_t mN; // Numerator parameter (number of petals)
+    uint8_t mD; // Denominator parameter
 };
 
 class PhyllotaxisPath : public XYPathGenerator {
   public:
-    // c is a scaling factor, angle is the divergence angle in degrees (often 137.5° - the golden angle)
+    // c is a scaling factor, angle is the divergence angle in degrees (often
+    // 137.5° - the golden angle)
     PhyllotaxisPath(float c = 4.0f, float angle = 137.5f);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "PhyllotaxisPath"; }
-    
+
     void setC(float c) { mC = c; }
     void setAngle(float angle) { mAngle = angle * PI / 180.0f; }
-    
+
   private:
-    float mC;      // Scaling factor
-    float mAngle;  // Angle between consecutive points in radians
+    float mC;     // Scaling factor
+    float mAngle; // Angle between consecutive points in radians
     int mCount = 10;
+};
+
+class GielisCurvePath : public XYPathGenerator {
+  public:
+    // Gielis superformula parameters:
+    // a, b: scaling parameters
+    // m: symmetry parameter (number of rotational symmetries)
+    // n1, n2, n3: shape parameters
+    GielisCurvePath(float a = 1.0f, float b = 1.0f, float m = 3.0f,
+                    float n1 = 1.0f, float n2 = 1.0f, float n3 = 100.0f) {
+        mA = a;
+        mB = b;
+        mM = m;
+        mN1 = n1;
+        mN2 = n2;
+        mN3 = n3;
+    }
+    point_xy_float compute(float alpha) override;
+    const Str name() const override { return "GielisCurvePath"; }
+
+    void setA(float a) { mA = a; }
+    void setB(float b) { mB = b; }
+    void setM(float m) { mM = m; }
+    void setN1(float n1) { mN1 = n1; }
+    void setN2(float n2) { mN2 = n2; }
+    void setN3(float n3) { mN3 = n3; }
+
+  private:
+    float mA;  // Scaling parameter a
+    float mB;  // Scaling parameter b
+    float mM;  // Symmetry parameter (number of rotational symmetries)
+    float mN1; // Shape parameter n1
+    float mN2; // Shape parameter n2
+    float mN3; // Shape parameter n3
 };
 
 } // namespace fl

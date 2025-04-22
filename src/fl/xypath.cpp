@@ -330,4 +330,35 @@ point_xy_float PhyllotaxisPath::compute(float alpha) {
     return point_xy_float{x, y};
 }
 
+
+point_xy_float GielisCurvePath::compute(float alpha) {
+    // 1) map alpha to angle θ ∈ [0 … 2π)
+    constexpr float TWO_PI = 6.283185307179586f;
+    float theta = alpha * TWO_PI;
+
+    // 2) superformula parameters (members of your path)
+    //    a, b control the “shape scale” (often both = 1)
+    //    m  controls symmetry (integer number of lobes)
+    //    n1,n2,n3 control curvature/sharpness
+    float a  = mA;
+    float b  = mB;
+    float m  = mM;
+    float n1 = mN1;
+    float n2 = mN2;
+    float n3 = mN3;
+
+    // 3) compute radius from superformula
+    float t2 = m * theta / 4.0f;
+    float part1 = powf( fabsf(cosf(t2) / a), n2 );
+    float part2 = powf( fabsf(sinf(t2) / b), n3 );
+    float r     = powf( part1 + part2, -1.0f / n1 );
+
+    // 4) polar → Cartesian in unit circle
+    float x = r * cosf(theta);
+    float y = r * sinf(theta);
+
+    return point_xy_float{x, y};
+}
+
+
 } // namespace fl
