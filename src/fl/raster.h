@@ -15,6 +15,12 @@ namespace fl {
 
 class XYMap;
 
+
+struct DrawUint8Visitor {
+    virtual ~DrawUint8Visitor() = default;
+    virtual void draw(const point_xy<uint16_t> &pt, uint8_t value) = 0;
+};
+
 class Raster {
   public:
     Raster() = default;
@@ -46,6 +52,11 @@ class Raster {
     uint16_t height() const { return mGrid.height(); }
 
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
+
+    // Uses the visitor pattern to abstract away the drawing. The values sent
+    // to the visitor will always be within the valid range as specified
+    // by the xymap.
+    void draw(const XYMap& xymap, DrawUint8Visitor* visitor) const ;
 
   private:
     Grid<uint8_t> mGrid;
