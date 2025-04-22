@@ -40,6 +40,7 @@ template <typename T> class Slice {
         : mData(vector.data()), mSize(vector.size()) {}
 
 
+
     template <typename U>
     Slice(const HeapVector<U> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
@@ -49,7 +50,7 @@ template <typename T> class Slice {
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <typename U, size_t INLINED_SIZE>
-    Slice(const InlinedVector<T, INLINED_SIZE> &vector)
+    Slice(const InlinedVector<U, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <size_t ARRAYSIZE>
