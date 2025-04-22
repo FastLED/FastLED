@@ -184,11 +184,11 @@ struct rect_xy {
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
 
     uint16_t width() const {
-        return mMax.x - mMin.x;
+        return mMax.x - mMin.x + 1;
     }
 
     uint16_t height() const {
-        return mMax.y - mMin.y;
+        return mMax.y - mMin.y + 1;
     }
 
     void expand(const point_xy<T>& p) {
