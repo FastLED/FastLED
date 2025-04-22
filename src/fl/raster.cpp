@@ -7,31 +7,12 @@
 #include "fl/raster.h"
 #include "fl/xymap.h"
 #include "crgb.h"
+#include "fl/draw_visitor.h"
 
 namespace fl {
 
-struct ApplyBlending: public DrawUint8Visitor {
-    ApplyBlending(const CRGB &color, const XYMap &xymap, CRGB *out)
-        : mColor(color), mXYMap(xymap), mOut(out) {}
-
-    void draw(const point_xy<uint16_t> &pt, uint8_t value) override {
-        int x = pt.x;
-        int y = pt.y;
-        if (mXYMap.has(x, y)) {
-            int index = mXYMap(x, y);
-            CRGB& c = mOut[index];
-            CRGB blended = mColor;
-            blended.fadeToBlackBy(255 - value);
-            c = CRGB::blendAlphaMaxChannel(blended, c);
-        }
-    }
-    const CRGB &mColor;
-    const XYMap &mXYMap;
-    CRGB *mOut;
-};
-
 void Raster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
-    ApplyBlending visitor(color, xymap, out);
+    DrawComposited visitor(color, xymap, out);
     draw(xymap, &visitor);
 }
 

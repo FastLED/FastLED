@@ -14,12 +14,7 @@ FASTLED_NAMESPACE_END
 namespace fl {
 
 class XYMap;
-
-
-struct DrawUint8Visitor {
-    virtual ~DrawUint8Visitor() = default;
-    virtual void draw(const point_xy<uint16_t> &pt, uint8_t value) = 0;
-};
+class DrawUint8Visitor;
 
 class Raster {
   public:
