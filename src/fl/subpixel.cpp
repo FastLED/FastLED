@@ -62,23 +62,7 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
 
 void SubPixel2x2::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     XYDrawComposited visitor(color, xymap, out);
-    draw(xymap, &visitor);
-}
-
-void SubPixel2x2::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
-    for (uint16_t x = 0; x < 2; ++x) {
-        for (uint16_t y = 0; y < 2; ++y) {
-            uint8_t value = at(x, y);
-            if (value > 0) {
-                int xx = mOrigin.x + x;
-                int yy = mOrigin.y + y;
-                if (xymap.has(xx, yy)) {
-                    int index = xymap(xx, yy);
-                    visitor->draw(point_xy<int>(xx, yy), index, value);
-                }
-            }
-        }
-    }
+    draw(xymap, visitor);
 }
 
 }  // namespace fl

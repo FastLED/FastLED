@@ -6,7 +6,7 @@
 #include "fl/namespace.h"
 #include "fl/point.h"
 #include "fl/slice.h"
-#include "fl/point.h"
+#include "fl/xymap.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -49,7 +49,23 @@ class SubPixel2x2 {
 
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
-    void draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const ;
+
+    template <typename XYVisitor>
+    void draw(const XYMap &xymap, XYVisitor& visitor) const {
+        for (uint16_t x = 0; x < 2; ++x) {
+            for (uint16_t y = 0; y < 2; ++y) {
+                uint8_t value = at(x, y);
+                if (value > 0) {
+                    int xx = mOrigin.x + x;
+                    int yy = mOrigin.y + y;
+                    if (xymap.has(xx, yy)) {
+                        int index = xymap(xx, yy);
+                        visitor.draw(point_xy<int>(xx, yy), index, value);
+                    }
+                }
+            }
+        }
+    }
 
   private:
     uint8_t mTile[2][2] = {};
