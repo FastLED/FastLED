@@ -28,6 +28,18 @@ template <typename T> class Slice {
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, size_t size) : mData(data), mSize(size) {}
 
+    Slice(const HeapVector<T> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <size_t INLINED_SIZE>
+    Slice(const FixedVector<T, INLINED_SIZE> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+    template <size_t INLINED_SIZE>
+    Slice(const InlinedVector<T, INLINED_SIZE> &vector)
+        : mData(vector.data()), mSize(vector.size()) {}
+
+
     template <typename U>
     Slice(const HeapVector<U> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
