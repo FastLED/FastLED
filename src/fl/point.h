@@ -203,6 +203,15 @@ struct rect_xy {
         mMax.x = MAX(mMax.x, x);
         mMax.y = MAX(mMax.y, y);
     }
+
+    bool contains(const point_xy<T>& p) const {
+        return (p.x >= mMin.x && p.x <= mMax.x && p.y >= mMin.y &&
+                p.y <= mMax.y);
+    }
+
+    bool contains(const T& x, const T& y) const {
+        return contains(point_xy<T>(x, y));
+    }
 };
 
 }  // namespace fl
