@@ -15,9 +15,10 @@ struct XYDrawUint8Visitor {
     virtual void draw(const point_xy<uint16_t> &pt, uint32_t index, uint8_t value) = 0;
 };
 
+
+// Draws a uint8_t value to a CRGB array, blending it with the existing color.
 struct XYDrawComposited: public XYDrawUint8Visitor {
     XYDrawComposited(const CRGB &color, const XYMap &xymap, CRGB *out);
-
     void draw(const point_xy<uint16_t> &pt, uint32_t index, uint8_t value) override ;
     const CRGB mColor;
     const XYMap mXYMap;
