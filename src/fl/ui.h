@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 
-#include "fl/callback.h"
-#include "fl/callback_list.h"
+#include "fl/function_list.h"
 #include "fl/engine_events.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -55,14 +54,14 @@ class UISlider : public UISliderImpl, protected EngineEvents::Listener {
         return *this;
     }
 
-    void addCallback(CallbackFloat callback) { mCallbacks.add(callback); }
+    void addCallback(Function<void(float)> callback) { mCallbacks.add(callback); }
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
     void onBeginFrame() override ;
 
   private:
-    CallbackList<CallbackFloat> mCallbacks;
+    FunctionList<void(float)> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFramevalueValid = false;
 };

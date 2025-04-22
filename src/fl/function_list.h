@@ -18,10 +18,7 @@ public:
     }
 
     void remove(Function<T> function) {
-        auto it = std::remove(mFunctions.begin(), mFunctions.end(), function);
-        if (it != mFunctions.end()) {
-            mFunctions.erase(it, mFunctions.end());
-        }
+        mFunctions.erase(function);
     }
 
     void clear() {
@@ -31,7 +28,8 @@ public:
     template<typename... Args>
     void invoke(Args&&... args) {
         for (const auto &function : mFunctions) {
-            function(std::forward<Args>(args)...);
+            // function(std::forward<Args>(args)...);
+            function(args...);
         }
     }
 };
