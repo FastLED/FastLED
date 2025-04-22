@@ -68,6 +68,7 @@ UISlider transition("Transition", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
 UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
+UISlider maxAnimation("Max Animation", 1.0f, 1.0f, 20.0f, 1.f);
 
 TimeLinear shapeProgress(TIME_ANIMATION);
 
@@ -90,7 +91,6 @@ void setup() {
 
 float getAnimationTime(uint32_t now) {
     float pointf = shapeProgress.updatef(now);
-    FASTLED_WARN("pointf: " << pointf);
     return pointf + transition.value();
 }
 
@@ -103,14 +103,13 @@ void loop() {
     time_warp.setSpeed(speed.value());
     const uint32_t now = millis();
     uint32_t now_warped = time_warp.update(now);
+    shapeProgress.set_max_clamp(maxAnimation.value());
 
 
     auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
 
     float curr_alpha = getAnimationTime(now_warped);
-    FASTLED_WARN("Alpha: " << curr_alpha);
-    FASTLED_WARN("now_warped: " << now_warped);
     static float s_prev_alpha = 0.0f;
 
     // unconditionally apply the circle.

@@ -145,14 +145,13 @@ class TimeLinear: TimeAlpha {
     float updatef(uint32_t now) override {
         bool not_started = (mEnd == 0) && (mStart == 0);
         if (not_started) {
-            // if we have not started, we are not active
-            FASTLED_WARN("Not active");
             return 0;
         }
         float out = time_alphaf(now, mStart, mEnd);
         if (mMaxClamp > 0.f) {
             out = MIN(out, mMaxClamp);
         }
+        return out;
     }
 
     void set_max_clamp(float max) {
