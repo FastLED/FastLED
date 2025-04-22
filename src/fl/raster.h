@@ -21,6 +21,12 @@ class Raster {
         mOrigin = origin;
     }
     uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
+    point_xy<uint16_t> global_min() const {
+        return mOrigin;
+    }
+    point_xy<uint16_t> global_max() const {
+        return mOrigin + point_xy<uint16_t>(mGrid.width(), mGrid.height());
+    }
 
   private:
     Grid<uint8_t> mGrid;

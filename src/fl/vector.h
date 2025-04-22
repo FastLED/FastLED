@@ -673,6 +673,14 @@ public:
         return size() == 0;
     }
 
+    T* data() {
+        return mUsingHeap ? mHeap.data() : mFixed.data();
+    }
+
+    const T* data() const {
+        return mUsingHeap ? mHeap.data() : mFixed.data();
+    }
+
     // Element access
     T& operator[](size_t idx) {
         return mUsingHeap ? mHeap[idx] : mFixed[idx];
