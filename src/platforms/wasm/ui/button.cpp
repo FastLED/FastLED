@@ -10,29 +10,29 @@ using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
-jsButton::jsButton(const Str& name)
+jsButtonImpl::jsButtonImpl(const Str& name)
     : mPressed(false) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& value) {
-        static_cast<jsButton*>(self)->updateInternal(value);
+        static_cast<jsButtonImpl*>(self)->updateInternal(value);
     });
 
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsButton*>(self)->toJson(json);
+        static_cast<jsButtonImpl*>(self)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }
 
-jsButton::~jsButton() {
+jsButtonImpl::~jsButtonImpl() {
     jsUiManager::removeComponent(mInternal);
 }
 
-const Str& jsButton::name() const {
+const Str& jsButtonImpl::name() const {
     return mInternal->name();
 }
 
-void jsButton::toJson(FLArduinoJson::JsonObject& json) const {
+void jsButtonImpl::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["group"] = mGroup.c_str();
     json["type"] = "button";
@@ -40,14 +40,14 @@ void jsButton::toJson(FLArduinoJson::JsonObject& json) const {
     json["pressed"] = mPressed;
 }
 
-bool jsButton::isPressed() const {
+bool jsButtonImpl::isPressed() const {
     // Due to ordering of operations, mPressedLast is always equal to
     // mPressed. So we kind of fudge a little on the isPressed() event
     // here;
     return mPressed || mClickedHappened;
 }
 
-void jsButton::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
+void jsButtonImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     mPressed = value.as<bool>();
 }
 

@@ -8,20 +8,20 @@ using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
-jsTitle::jsTitle(const Str& text) : mText(text) {
+jsTitleImpl::jsTitleImpl(const Str& text) : mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
     jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsTitle*>(self)->toJson(json);
+        static_cast<jsTitleImpl*>(self)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New("title", update_fcn, to_json_fcn);
     jsUiManager::addComponent(mInternal);
 }
 
-jsTitle::~jsTitle() {
+jsTitleImpl::~jsTitleImpl() {
 }
 
 
-void jsTitle::toJson(FLArduinoJson::JsonObject& json) const {
+void jsTitleImpl::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = mInternal->name();
     json["type"] = "title";
     json["group"] = mGroup.c_str();

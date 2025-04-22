@@ -15,27 +15,27 @@ using namespace fl;
 FASTLED_NAMESPACE_BEGIN
 
 
-jsNumberField::jsNumberField(const Str& name, double value, double min, double max)
+jsNumberFieldImpl::jsNumberFieldImpl(const Str& name, double value, double min, double max)
     : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
-        static_cast<jsNumberField*>(self)->updateInternal(json);
+        static_cast<jsNumberFieldImpl*>(self)->updateInternal(json);
     });
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsNumberField*>(self)->toJson(json);
+        static_cast<jsNumberFieldImpl*>(self)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 
-jsNumberField::~jsNumberField() {
+jsNumberFieldImpl::~jsNumberFieldImpl() {
     jsUiManager::removeComponent(mInternal);
 }
 
-const Str& jsNumberField::name() const {
+const Str& jsNumberFieldImpl::name() const {
     return mInternal->name();
 }
 
-void jsNumberField::toJson(FLArduinoJson::JsonObject& json) const {
+void jsNumberFieldImpl::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["group"] = mGroup.c_str();
     json["type"] = "number";
@@ -45,23 +45,23 @@ void jsNumberField::toJson(FLArduinoJson::JsonObject& json) const {
     json["max"] = mMax;
 }
 
-double jsNumberField::value() const {
+double jsNumberFieldImpl::value() const {
     return mValue;
 }
 
-void jsNumberField::setValue(double value) {
+void jsNumberFieldImpl::setValue(double value) {
     mValue = MAX(mMin, MIN(mMax, value));
 }
 
-void jsNumberField::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
+void jsNumberFieldImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-jsNumberField::operator double() const {
+jsNumberFieldImpl::operator double() const {
     return value();
 }
 
-jsNumberField::operator int() const {
+jsNumberFieldImpl::operator int() const {
     return static_cast<int>(value());
 }
 

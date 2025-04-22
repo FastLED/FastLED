@@ -12,28 +12,28 @@ using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
-jsCheckbox::jsCheckbox(const Str& name, bool value)
+jsCheckboxImpl::jsCheckboxImpl(const Str& name, bool value)
     : mValue(value) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
-        static_cast<jsCheckbox*>(self)->updateInternal(json);
+        static_cast<jsCheckboxImpl*>(self)->updateInternal(json);
     });
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsCheckbox*>(self)->toJson(json);
+        static_cast<jsCheckboxImpl*>(self)->toJson(json);
     });
     //mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 
-jsCheckbox::~jsCheckbox() {
+jsCheckboxImpl::~jsCheckboxImpl() {
     jsUiManager::removeComponent(mInternal);
 }
 
-const Str& jsCheckbox::name() const {
+const Str& jsCheckboxImpl::name() const {
     return mInternal->name();
 }
 
-void jsCheckbox::toJson(FLArduinoJson::JsonObject& json) const {
+void jsCheckboxImpl::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["group"] = mGroup.c_str();
     json["type"] = "checkbox";
@@ -41,24 +41,24 @@ void jsCheckbox::toJson(FLArduinoJson::JsonObject& json) const {
     json["value"] = mValue;
 }
 
-bool jsCheckbox::value() const {
+bool jsCheckboxImpl::value() const {
     return mValue;
 }
 
-void jsCheckbox::setValue(bool value) {
+void jsCheckboxImpl::setValue(bool value) {
     mValue = value;
 }
 
-void jsCheckbox::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
+void jsCheckboxImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     // We expect jsonStr to be a boolean value string, so parse it accordingly
     mValue = value.as<bool>();
 }
 
-jsCheckbox::operator bool() const {
+jsCheckboxImpl::operator bool() const {
     return mValue;
 }
 
-jsCheckbox::operator int() const {
+jsCheckboxImpl::operator int() const {
     return mValue;
 }
 

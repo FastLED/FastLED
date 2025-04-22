@@ -47,12 +47,12 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 namespace fl {
 
 
-class jsSlider {
+class jsSliderImpl {
   public:
-    jsSlider(const fl::Str& name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
+    jsSliderImpl(const fl::Str& name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
              float step = -1.f);
-    ~jsSlider();
-    jsSlider& Group(const fl::Str& name) { mGroup = name; return *this; }
+    ~jsSliderImpl();
+    jsSliderImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
 
     const fl::Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
@@ -76,8 +76,8 @@ class jsSlider {
 
     int as_int() const { return static_cast<int>(mValue); }
 
-    jsSlider& operator=(float value) { setValue(value); return *this; }
-    jsSlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
+    jsSliderImpl& operator=(float value) { setValue(value); return *this; }
+    jsSliderImpl& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
@@ -91,11 +91,11 @@ class jsSlider {
 };
 
 
-class jsNumberField {
+class jsNumberFieldImpl {
   public:
-    jsNumberField(const fl::Str&, double value, double min = 0, double max = 100);
-    ~jsNumberField();
-    jsNumberField& Group(const fl::Str& name) { mGroup = name; return *this; }
+    jsNumberFieldImpl(const fl::Str&, double value, double min = 0, double max = 100);
+    ~jsNumberFieldImpl();
+    jsNumberFieldImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
 
     const fl::Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
@@ -105,8 +105,8 @@ class jsNumberField {
     operator int() const;
     const fl::Str& groupName() const { return mGroup; }
 
-    jsNumberField& operator=(double value) { setValue(value); return *this; }
-    jsNumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
+    jsNumberFieldImpl& operator=(double value) { setValue(value); return *this; }
+    jsNumberFieldImpl& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
     bool operator==(double v) const { return value() == v; }
     bool operator==(int v) const { return value() == v; }
     bool operator!=(double v) const { return value() != v; }
@@ -123,11 +123,11 @@ class jsNumberField {
 };
 
 
-class jsCheckbox {
+class jsCheckboxImpl {
   public:
-    jsCheckbox(const fl::Str&, bool value);
-    ~jsCheckbox();
-    jsCheckbox& Group(const fl::Str& name) { mGroup = name; return *this; };
+    jsCheckboxImpl(const fl::Str&, bool value);
+    ~jsCheckboxImpl();
+    jsCheckboxImpl& Group(const fl::Str& name) { mGroup = name; return *this; };
 
     const fl::Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
@@ -137,8 +137,8 @@ class jsCheckbox {
     operator int() const;
     const fl::Str& groupName() const { return mGroup; }
 
-    jsCheckbox& operator=(bool value) { setValue(value); return *this; }
-    jsCheckbox& operator=(int value) { setValue(value != 0); return *this; }
+    jsCheckboxImpl& operator=(bool value) { setValue(value); return *this; }
+    jsCheckboxImpl& operator=(int value) { setValue(value != 0); return *this; }
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
@@ -148,11 +148,11 @@ class jsCheckbox {
     fl::Str mGroup;
 };
 
-class jsButton {
+class jsButtonImpl {
   public:
-    jsButton(const fl::Str& name);
-    ~jsButton();
-    jsButton& Group(const fl::Str& name) { mGroup = name; return *this; }
+    jsButtonImpl(const fl::Str& name);
+    ~jsButtonImpl();
+    jsButtonImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
 
     const fl::Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
@@ -167,7 +167,7 @@ class jsButton {
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(jsButton *owner) {
+        void init(jsButtonImpl *owner) {
             mOwner = owner;
             fl::EngineEvents::addListener(this);
         }
@@ -179,7 +179,7 @@ class jsButton {
                 mOwner->mClickedCount++;
             }
         }
-        jsButton *mOwner = nullptr;
+        jsButtonImpl *mOwner = nullptr;
     };
 
     Updater mUpdater;
@@ -195,11 +195,11 @@ class jsButton {
 };
 
 
-class jsTitle {
+class jsTitleImpl {
   public:
-    jsTitle(const fl::Str& text);
-    ~jsTitle();
-    jsTitle& Group(const fl::Str& name) { mGroup = name; return *this; }
+    jsTitleImpl(const fl::Str& text);
+    ~jsTitleImpl();
+    jsTitleImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
 
     void toJson(FLArduinoJson::JsonObject& json) const;
     const fl::Str& groupName() const { return mGroup; }
@@ -211,11 +211,11 @@ class jsTitle {
     fl::Str mText;
 };
 
-class jsDescription {
+class jsDescriptionImpl {
   public:
-    jsDescription(const fl::Str& text);
-    ~jsDescription();
-    jsDescription& Group(const fl::Str& name) { mGroup = name; return *this; }
+    jsDescriptionImpl(const fl::Str& text);
+    ~jsDescriptionImpl();
+    jsDescriptionImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
 
 
     void toJson(FLArduinoJson::JsonObject& json) const;
@@ -243,12 +243,12 @@ void updateJs(const char* jsonStr);
 #define FASTLED_HAS_UI_TITLE 1
 #define FASTLED_HAS_UI_DESCRIPTION 1
 
-typedef jsNumberField UINumberField;
-typedef jsSlider UISlider;
-typedef jsCheckbox UICheckbox;
-typedef jsButton UIButton;
-typedef jsTitle UITitle;
-typedef jsDescription UIDescription;
+typedef jsNumberFieldImpl UINumberFieldImpl;
+typedef jsSliderImpl UISliderImpl;
+typedef jsCheckboxImpl UICheckboxImpl;
+typedef jsButtonImpl UIButtonImpl;
+typedef jsTitleImpl UITitleImpl;
+typedef jsDescriptionImpl UIDescriptionImpl;
 
 
 }  // namespace fl
