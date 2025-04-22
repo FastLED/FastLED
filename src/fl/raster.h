@@ -20,35 +20,35 @@ class SubPixel2x2;
 
 class Raster {
   public:
-
     Raster() = default;
 
     Raster(int width, int height) {
-        //mGrid.reset(width, height);
+        // mGrid.reset(width, height);
         mOrigin = point_xy<int>(0, 0);
-        mWidthHeight = point_xy<int>(width, height);  // constrains the raster to prevent overflow.
-        //mInitialized = true;  // technically we are not initialized yet and the grid still needs to be allocated.
+        mWidthHeight = point_xy<int>(
+            width, height); // constrains the raster to prevent overflow.
+        // mInitialized = true;  // technically we are not initialized yet and
+        // the grid still needs to be allocated.
     }
 
     Raster(const Raster &) = delete;
-    void reset(const point_xy<int> &origin, uint16_t width,
-               uint16_t height) {
+    void reset(const point_xy<int> &origin, uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         mOrigin = origin;
         mInitialized = true;
     }
 
     // builder pattern
-    Raster& setOrigin(const point_xy<int> &origin) {
+    Raster &setOrigin(const point_xy<int> &origin) {
         mOrigin = origin;
         return *this;
     }
-    Raster& setSize(uint16_t width, uint16_t height) {
+    Raster &setSize(uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         return *this;
     }
 
-    Raster& reset() {
+    Raster &reset() {
         mGrid.reset(width(), height());
         return *this;
     }
@@ -79,13 +79,33 @@ class Raster {
     // Uses the visitor pattern to abstract away the drawing. The values sent
     // to the visitor will always be within the valid range as specified
     // by the xymap.
-    void draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const;
+    template <typename XYVisitor>
+    void draw(const XYMap &xymap, XYVisitor& visitor) const {
+        const uint16_t w = width();
+        const uint16_t h = height();
+        const point_xy<int> origin = this->origin();
+        for (uint16_t x = 0; x < w; ++x) {
+            for (uint16_t y = 0; y < h; ++y) {
+                uint16_t xx = x + origin.x;
+                uint16_t yy = y + origin.y;
+                if (!xymap.has(xx, yy)) {
+                    continue;
+                }
+                uint32_t index = xymap(xx, yy);
+                uint8_t value = at(x, y);
+                if (value > 0) {  // Something wrote here.
+                    point_xy<int> pt = {xx, yy};
+                    visitor.draw(pt, index, value);
+                }
+            }
+        }
+    }
 
   private:
     bool mInitialized = false;
     Grid<uint8_t> mGrid;
     point_xy<int> mOrigin;
-    point_xy<int> mWidthHeight;  // 0,0 if unset.
+    point_xy<int> mWidthHeight; // 0,0 if unset.
 };
 
 } // namespace fl
