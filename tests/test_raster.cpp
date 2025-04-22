@@ -25,6 +25,7 @@ TEST_CASE("Raster simple test") {
     point_xy<uint16_t> global_min = raster.global_min();
     point_xy<uint16_t> global_max = raster.global_max();
     REQUIRE_EQ(global_min, origin);
+    REQUIRE_EQ(global_max, origin + point_xy<uint16_t>(1, 1));
 
     // now test that each point matches.
     for (int x = 0; x < 2; ++x) {
