@@ -1,13 +1,13 @@
 
 #include <stdint.h>
 
-#include "fl/point.h"
-#include "fl/grid.h"
-#include "fl/namespace.h"
-#include "fl/raster.h"
-#include "fl/xymap.h"
 #include "crgb.h"
 #include "fl/draw_visitor.h"
+#include "fl/grid.h"
+#include "fl/namespace.h"
+#include "fl/point.h"
+#include "fl/raster.h"
+#include "fl/xymap.h"
 
 namespace fl {
 
@@ -16,7 +16,7 @@ void Raster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     draw(xymap, &visitor);
 }
 
-void Raster::draw(const XYMap& xymap, XYDrawUint8Visitor* visitor) const {
+void Raster::draw(const XYMap &xymap, XYDrawUint8Visitor *visitor) const {
     const uint16_t w = width();
     const uint16_t h = height();
     const point_xy<uint16_t> origin = this->origin();
