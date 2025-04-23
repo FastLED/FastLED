@@ -348,12 +348,12 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     //    a, b control the “shape scale” (often both = 1)
     //    m  controls symmetry (integer number of lobes)
     //    n1,n2,n3 control curvature/sharpness
-    float a = mParams.a;
-    float b = mParams.b;
-    float m = mParams.m;
-    float n1 = mParams.n1;
-    float n2 = mParams.n2;
-    float n3 = mParams.n3;
+    float a = params().a;
+    float b = params().b;
+    float m = params().m;
+    float n1 = params().n1;
+    float n2 = params().n2;
+    float n3 = params().n3;
 
     // 3) compute radius from superformula
     float t2 = m * theta / 4.0f;

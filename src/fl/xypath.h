@@ -153,7 +153,7 @@ class XYPath : public Referent {
 
     static XYPathPtr
     NewGielisCurvePath(uint16_t width = 0, uint16_t height = 0,
-                       const GielisCurveParams &params = GielisCurveParams()) {
+                       const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>()) {
         GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -437,20 +437,23 @@ class GielisCurvePath : public XYPathGenerator {
     // a, b: scaling parameters
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
-    GielisCurvePath(const GielisCurveParams &p = GielisCurveParams())
+    GielisCurvePath(const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>())
         : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "GielisCurvePath"; }
 
-    void setA(float a) { mParams.a = a; }
-    void setB(float b) { mParams.b = b; }
-    void setM(float m) { mParams.m = m; }
-    void setN1(float n1) { mParams.n1 = n1; }
-    void setN2(float n2) { mParams.n2 = n2; }
-    void setN3(float n3) { mParams.n3 = n3; }
+    GielisCurveParams& params() { return *mParams; }
+    const GielisCurveParams& params() const { return *mParams; }
+
+    void setA(float a) { params().a = a; }
+    void setB(float b) { params().b = b; }
+    void setM(float m) { params().m = m; }
+    void setN1(float n1) { params().n1 = n1; }
+    void setN2(float n2) { params().n2 = n2; }
+    void setN3(float n3) { params().n3 = n3; }
 
   private:
-    GielisCurveParams mParams;
+    Ptr<GielisCurveParams> mParams;
 };
 
 } // namespace fl
