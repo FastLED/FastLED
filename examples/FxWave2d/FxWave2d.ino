@@ -54,7 +54,6 @@ UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);
 UISlider fancyIntensity("Fancy Intensity", 32, 1, 255, 1);
 UISlider fancyParticleSpan("Fancy Particle Span", 0.06f, 0.01f, 0.2f, 0.01f);
 
-
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black
     32,  0,   0,   70,  // Dark blue
@@ -72,24 +71,32 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 XYMap xyRect(WIDTH, HEIGHT, false);
-WaveFx
-    waveFxLower(xyRect,
-                WaveFx::Args{
-                    .factor = SUPER_SAMPLE_4X,
-                    .half_duplex = true,
-                    .speed = 0.18f,
-                    .dampening = 9.0f,
-                    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
-                });
 
-WaveFx waveFxUpper(
-    xyRect, WaveFx::Args{
-                .factor = SUPER_SAMPLE_4X,
-                .half_duplex = true,
-                .speed = 0.25f,
-                .dampening = 3.0f,
-                .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
-            });
+WaveFx::Args CreateArgsLower() {
+    WaveFx::Args out;
+    out.factor = SuperSample::SUPER_SAMPLE_2X;
+    out.half_duplex = true;
+    out.auto_updates = true;
+    out.speed = 0.18f;
+    out.dampening = 9.0f;
+    out.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+    return out;
+}
+
+WaveFx::Args CreateArgsUpper() {
+    WaveFx::Args out;
+    out.factor = SuperSample::SUPER_SAMPLE_2X;
+    out.half_duplex = true;
+    out.auto_updates = true;
+    out.speed = 0.25f;
+    out.dampening = 3.0f;
+    out.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+    return out;
+}
+
+WaveFx waveFxLower(xyRect, CreateArgsLower());
+
+WaveFx waveFxUpper(xyRect, CreateArgsUpper());
 
 Blend2d fxBlend(xyMap);
 
@@ -130,7 +137,8 @@ void triggerRipple() {
 }
 
 void applyFancyEffect(uint32_t now, bool button_active) {
-    uint32_t total = map(fancySpeed.as<uint32_t>(), 0, fancySpeed.max_value(), 1000, 100);
+    uint32_t total =
+        map(fancySpeed.as<uint32_t>(), 0, fancySpeed.getMax(), 1000, 100);
     static TimeRamp pointTransition = TimeRamp(total, 0, 0);
 
     if (button_active) {
