@@ -5,6 +5,14 @@
 #include <FastLED.h>
 #include "fx/1d/demoreel100.h"
 #include "fl/screenmap.h"
+#include "defs.h"  // for NUM_LEDS
+
+
+#if !HAS_ENOUGH_MEMORY
+void setup() {}
+void loop() {}
+#else
+
 
 using namespace fl;
 
@@ -13,6 +21,7 @@ using namespace fl;
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 #define NUM_LEDS    64
+
 CRGB leds[NUM_LEDS];
 
 #define BRIGHTNESS          96
@@ -52,3 +61,4 @@ void loop()
 }
 
 
+#endif // HAS_ENOUGH_MEMORY
