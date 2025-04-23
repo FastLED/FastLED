@@ -3,7 +3,6 @@
 #include <stdint.h>
 
 #include "fl/ptr.h"
-#include "fl/callback.h"
 #include "fl/namespace.h"
 
 namespace fl {
