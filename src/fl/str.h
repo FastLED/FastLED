@@ -20,11 +20,11 @@
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__AVR__)
 #define FASTLED_STR_NEEDS_INT 0
-#elif defined(__GNUC__)
-#define FASTLED_STR_NEEDS_INT 0
 #elif defined(ESP32)
 #include "platforms/esp/esp_version.h"
 #define FASTLED_STR_NEEDS_INT (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0))
+#elif defined(__GNUC__)
+#define FASTLED_STR_NEEDS_INT 0
 #else
 #define FASTLED_STR_NEEDS_INT 1
 #endif
@@ -461,6 +461,29 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template<typename T>
     Str& append(const rect_xy<T> &rect) {
+        append(int32_t(rect.mMin.x));
+        append(",");
+        append(int32_t(rect.mMin.y));
+        append(",");
+        append(int32_t(rect.mMax.x));
+        append(",");
+        append(int32_t(rect.mMax.y));
+        return *this;
+    }
+
+
+    Str& append(const rect_xy<float> &rect) {
+        append(rect.mMin.x);
+        append(",");
+        append(rect.mMin.y);
+        append(",");
+        append(rect.mMax.x);
+        append(",");
+        append(rect.mMax.y);
+        return *this;
+    }
+
+    Str& append(const rect_xy<double> &rect) {
         append(rect.mMin.x);
         append(",");
         append(rect.mMin.y);
