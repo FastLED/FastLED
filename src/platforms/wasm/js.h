@@ -146,11 +146,14 @@ class jsButtonImpl {
     void toJson(FLArduinoJson::JsonObject& json) const;
     bool isPressed() const;
     bool clicked() const {
-        bool clickedHappened = mPressed && (mPressed != mPressedLast);
         return mClickedHappened;
     }
     int clickedCount() const { return mClickedCount; }
     const fl::Str& groupName() const { return mGroup; }
+
+    void click() {
+        mPressed = true;
+    }
 
   private:
     struct Updater : fl::EngineEvents::Listener {

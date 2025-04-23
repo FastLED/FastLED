@@ -99,6 +99,7 @@ class UIButtonImpl {
     bool clicked() const { return false; }
     int clickedCount() const { return 0; }
     operator bool() const { return false; }
+    void click() {}
 };
 
 #endif

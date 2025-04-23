@@ -85,6 +85,7 @@ void setup() {
     setupUiCallbacks();
     // Initialize wave simulation. Please don't use static constructors, keep it
     // in setup().
+    trigger.click();
     wave_fx = NewWaveSimulation2D(xyMap);
 }
 

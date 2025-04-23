@@ -106,6 +106,10 @@ class UIButton : public UIButtonImpl {
     bool clicked() const { return Super::clicked(); }
     int clickedCount() const { return Super::clickedCount(); }
     operator bool() const { return Super::isPressed(); }
+
+    void click() {
+        Super::click();
+    }
 };
 
 class UICheckbox : public UICheckboxImpl {
