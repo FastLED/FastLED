@@ -41,8 +41,16 @@ class XYRasterSparse {
         return *this;
     }
 
-    void add(const point_xy<int> &pt, uint8_t value) {
-        mSparseGrid.insert(pt, value);
+    void rasterize(const point_xy<int> &pt, uint8_t value) {
+        // Turn it into a SubPixel2x2 tile and see if we can cache it.
+        SubPixel2x2 tile = SubPixel2x2(pt);
+        tile.at(0, 0) = value;
+        if (mCache.origin() == tile.origin()) {
+            mCache = SubPixel2x2::Max(mCache, tile);
+            return;
+        }
+        flush();
+        mCache = tile;
     }
 
     void setSize(uint16_t width, uint16_t height) {
@@ -162,6 +170,10 @@ class XYRasterSparse {
                 visitor.draw(pt, index, value);
             }
         }
+    }
+    
+    void write(const point_xy<int> &pt, uint8_t value) {
+        mSparseGrid.insert(pt, value);
     }
 
   private:

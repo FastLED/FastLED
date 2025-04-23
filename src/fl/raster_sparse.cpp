@@ -51,7 +51,6 @@ void XYRasterSparse::rasterize(const Slice<const SubPixel2x2> &tiles) {
 
 void XYRasterSparse::rasterize_internal(const SubPixel2x2 &tile,
                                         const rect_xy<int> *optional_bounds) {
-
     const point_xy<int> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
@@ -67,14 +66,12 @@ void XYRasterSparse::rasterize_internal(const SubPixel2x2 &tile,
             Pair<bool, uint8_t> entry = at(xx, yy);
             if (!entry.first) {
                 // No value yet.
-                add(point_xy<int>(xx, yy), value);
-                FASTLED_WARN("Adding value " << value << " at " << xx << ","
-                                             << yy);
+                write(point_xy<int>(xx, yy), value);
                 continue;
             }
             // Already has a value.
             if (value > entry.second) {
-                add(point_xy<int>(xx, yy), value);
+                write(point_xy<int>(xx, yy), value);
             }
         }
     }
