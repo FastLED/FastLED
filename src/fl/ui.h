@@ -112,6 +112,11 @@ class UIButton : public UIButtonImpl {
         mCallbacks.add(wrapped_cb);
         mListener.addToEngineEventsOnce();
     }
+
+    void addCallbackEx(Function<void(UIButton &)> callback) {
+        mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+    }
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
