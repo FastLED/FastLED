@@ -89,40 +89,34 @@ struct Hash<fl::Str> {
 };
 
 
-template<>
-struct Hash<int> {
-    uint32_t operator()(const int &key) const noexcept {
-        return MurmurHash3_x86_32(&key, sizeof(int));
-    }
-};
+// template<>
+// struct Hash<int> {
+//     uint32_t operator()(const int &key) const noexcept {
+//         return MurmurHash3_x86_32(&key, sizeof(int));
+//     }
+// };
 
+/// Define a Hash<T> for any POD‐style T by hashing its raw bytes.
+/// Usage: FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
+#define FASTLED_DEFINE_POD_HASH_FUNCTION(T)               \
+template<>                                                \
+struct Hash<T> {                                          \
+    uint32_t operator()(const T &key) const noexcept {   \
+        return MurmurHash3_x86_32(&key, sizeof(T));      \
+    }                                                     \
+}
 
-// #define FASTLED_DEFINE_POD_HASH_FUNCTION(T) \
-//   template<> Hash<T> { \
-//     uint32_t operator()(const T &key) const noexcept { \
-//         return MurmurHash3_x86_32(&key, sizeof(T)); \
-//     } \
-//   }
+FASTLED_DEFINE_POD_HASH_FUNCTION(int8_t);
+FASTLED_DEFINE_POD_HASH_FUNCTION(uint8_t);
+FASTLED_DEFINE_POD_HASH_FUNCTION(int16_t);
+FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
+FASTLED_DEFINE_POD_HASH_FUNCTION(int32_t);
+FASTLED_DEFINE_POD_HASH_FUNCTION(uint32_t);
+//FASTLED_DEFINE_POD_HASH_FUNCTION(int);
+FASTLED_DEFINE_POD_HASH_FUNCTION(float);
+FASTLED_DEFINE_POD_HASH_FUNCTION(double);
+FASTLED_DEFINE_POD_HASH_FUNCTION(uint64_t);
 
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint8_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int8_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int16_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint32_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int32_t);
-
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int8_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint8_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int16_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(int32_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint32_t);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(float);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(double);
-// // FASTLED_DEFINE_POD_HASH_FUNCTION(bool);
-// // FASTLED_DEFINE_POD_HASH_FUNCTION(char);
-// FASTLED_DEFINE_POD_HASH_FUNCTION(uint64_t);
 
 
 }  // namespace fl
