@@ -18,11 +18,15 @@
 
 #if defined(__SAM3X8E__)
 #define FASTLED_STR_NEEDS_INT 1
+#elif defined(__AVR__)
+#define FASTLED_STR_NEEDS_INT 0
+#elif defined(__GNUC__)
+#define FASTLED_STR_NEEDS_INT 0
 #elif defined(ESP32)
 #include "platforms/esp/esp_version.h"
 #define FASTLED_STR_NEEDS_INT (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0))
 #else
-#define FASTLED_STR_NEEDS_INT 0
+#define FASTLED_STR_NEEDS_INT 1
 #endif
 #endif  // FASTLED_STR_NEEDS_INT
 
