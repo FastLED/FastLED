@@ -179,7 +179,7 @@ void loop() {
     s_prev_alpha = curr_alpha;
     raster.rasterize(subpixels);
     if (useWaveFx && is_active) {
-        DrawRasterToWaveSimulator draw_wave_fx(&raster, &wave_fx);
+        DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);
         raster.draw(xyMap, draw_wave_fx);
     } else {
         raster.draw(purple, xyMap, leds);
