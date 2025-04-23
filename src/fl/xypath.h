@@ -44,6 +44,13 @@ class XYPathGenerator : public Referent {
     virtual point_xy_float compute(float alpha) = 0;
 };
 
+struct LinePathParams {
+    float x0 = -1.0f;  // Start x coordinate
+    float y0 = 0.0f;   // Start y coordinate
+    float x1 = 1.0f;   // End x coordinate
+    float y1 = 0.0f;   // End y coordinate
+};
+
 struct PhyllotaxisParams {
     float c = 4.0f;       // Scaling factor
     float angle = 137.5f; // Divergence angle in degrees
@@ -66,7 +73,17 @@ class XYPath : public Referent {
     }
 
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
-        auto path = LinePathPtr::New(x0, y0, x1, y1);
+        LinePathParams params;
+        params.x0 = x0;
+        params.y0 = y0;
+        params.x1 = x1;
+        params.y1 = y1;
+        auto path = LinePathPtr::New(params);
+        return XYPathPtr::New(path);
+    }
+    
+    static XYPathPtr NewLinePath(const LinePathParams &params = LinePathParams()) {
+        auto path = LinePathPtr::New(params);
         return XYPathPtr::New(path);
     }
     static XYPathPtr NewCirclePath() {
@@ -304,13 +321,18 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
+    LinePath(const LinePathParams &p = LinePathParams());
     LinePath(float x0, float y0, float x1, float y1);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "LinePath"; }
     void set(float x0, float y0, float x1, float y1);
+    void set(const LinePathParams &p);
+    
+    LinePathParams& params() { return mParams; }
+    const LinePathParams& params() const { return mParams; }
 
   private:
-    float mX0, mY0, mX1, mY1;
+    LinePathParams mParams;
 };
 
 #if 0

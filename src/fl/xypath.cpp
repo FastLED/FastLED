@@ -192,21 +192,32 @@ void XYPath::output16(uint16_t alpha_start, uint16_t alpha_end,
 }
 #endif
 
-LinePath::LinePath(float x0, float y0, float x1, float y1)
-    : mX0(x0), mY0(y0), mX1(x1), mY1(y1) {}
+LinePath::LinePath(const LinePathParams &p)
+    : mParams(p) {}
+
+LinePath::LinePath(float x0, float y0, float x1, float y1) {
+    mParams.x0 = x0;
+    mParams.y0 = y0;
+    mParams.x1 = x1;
+    mParams.y1 = y1;
+}
 
 point_xy_float LinePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the line
-    float x = mX0 + alpha * (mX1 - mX0);
-    float y = mY0 + alpha * (mY1 - mY0);
+    float x = mParams.x0 + alpha * (mParams.x1 - mParams.x0);
+    float y = mParams.y0 + alpha * (mParams.y1 - mParams.y0);
     return {x, y};
 }
 
 void LinePath::set(float x0, float y0, float x1, float y1) {
-    mX0 = x0;
-    mY0 = y0;
-    mX1 = x1;
-    mY1 = y1;
+    mParams.x0 = x0;
+    mParams.y0 = y0;
+    mParams.x1 = x1;
+    mParams.y1 = y1;
+}
+
+void LinePath::set(const LinePathParams &p) {
+    mParams = p;
 }
 
 point_xy_float CirclePath::compute(float alpha) {
