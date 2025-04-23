@@ -29,8 +29,7 @@ using namespace fl;
 #define WIDTH 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
-#define TIME_ANIMATION 1000  // ms
-
+#define TIME_ANIMATION 1000 // ms
 
 CRGB leds[NUM_LEDS];
 
@@ -72,26 +71,19 @@ UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 
 TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
-
 void setup() {
     Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
-    speed.addCallback([](float value) {
-        time_warp.setSpeed(speed.value());
-    });
-    maxAnimation.addCallback([](float value) {
-        shapeProgress.set_max_clamp(maxAnimation.value());
-    });
+    speed.addCallback([](float value) { time_warp.setSpeed(speed.value()); });
+    maxAnimation.addCallback(
+        [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
     // Initialize wave simulation. Please don't use static constructors, keep it
     // in setup().
     wave_fx = NewWaveSimulation2D(xyMap);
 }
-
-
-
 
 //////////////////// LOOP SECTION /////////////////////////////
 
@@ -101,7 +93,6 @@ float getAnimationTime(uint32_t now) {
 }
 
 void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
-
 
 void loop() {
     // Your code here
@@ -129,7 +120,8 @@ void loop() {
     // FASTLED_WARN("Current alpha: " << curr_alpha);
     // FASTLED_WARN("maxAnimation: " << maxAnimation.value());
 
-    const bool is_active = curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
+    const bool is_active =
+        curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
 
     // if (shapeProgress.isActive(now)) {
     static uint32_t frame = 0;
@@ -142,19 +134,19 @@ void loop() {
     // float factor = s_prev_alpha;  // 0->1.f
     // factor = MIN(factor/4.0f, 0.05f);
 
-
     float diff = curr_alpha - s_prev_alpha;
     diff *= 1.0f;
     float factor = MAX(s_prev_alpha - diff, 0.f);
 
     for (int i = 0; i < number_of_steps; ++i) {
-        float a = fl::map_range<float>(i, 0, number_of_steps-1, factor,
-                                       curr_alpha);
+        float a =
+            fl::map_range<float>(i, 0, number_of_steps - 1, factor, curr_alpha);
         if (a < .04) {
             // shorter tails at first.
             a = map_range<float>(a, 0.0f, .04f, 0.0f, .04f);
         }
-        uint8_t alpha = fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
+        uint8_t alpha =
+            fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
         if (!is_active) {
             alpha = 0;
         }
