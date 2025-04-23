@@ -12,12 +12,12 @@ only a small number of pixels are set.
 
 #include "fl/grid.h"
 #include "fl/hash_map.h"
+#include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/point.h"
 #include "fl/slice.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
-#include "fl/map.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -68,14 +68,10 @@ class XYRasterSparse {
     bool empty() const { return mSparseGrid.empty(); }
 
     void rasterize(const Slice<const Tile2x2_u8> &tiles);
-    void rasterize(const Tile2x2_u8 &tile) {
-        rasterize_internal(tile);
-    }
+    void rasterize(const Tile2x2_u8 &tile) { rasterize_internal(tile); }
 
     void rasterize_internal(const Tile2x2_u8 &tile,
-                            const rect_xy<int> *optional_bounds = nullptr) ;
-
-
+                            const rect_xy<int> *optional_bounds = nullptr);
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
@@ -153,13 +149,11 @@ class XYRasterSparse {
         }
     }
 
-
-    
     void write(const point_xy<int> &pt, uint8_t value) {
-        // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
-        // mSparseGrid.insert(pt, value);
+        // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
+        // value); mSparseGrid.insert(pt, value);
 
-        uint8_t** cached = mCache.find(pt);
+        uint8_t **cached = mCache.find(pt);
         if (cached) {
             uint8_t *val = *cached;
             if (*val < value) {
@@ -169,10 +163,11 @@ class XYRasterSparse {
         }
         if (mCache.size() < 4) {
             // cache it.
-            uint8_t* v = mSparseGrid.find(pt);
+            uint8_t *v = mSparseGrid.find(pt);
             if (v == nullptr) {
-                // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
-                mCache.clear();  // We might do a rehash should just dump all.
+                // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: "
+                // << value);
+                mCache.clear(); // We might do a rehash should just dump all.
                 mSparseGrid.insert(pt, value);
                 return;
             }
@@ -193,7 +188,7 @@ class XYRasterSparse {
     using HashMapLarge = fl::HashMap<point_xy<int>, uint8_t>;
     HashMapLarge mSparseGrid;
     // Small cache for the last 4 writes.
-    HashMap<point_xy<int>, uint8_t*> mCache;
+    HashMap<point_xy<int>, uint8_t *, FastHash<point_xy<int>>> mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };

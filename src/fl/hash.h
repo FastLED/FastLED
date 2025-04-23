@@ -5,10 +5,11 @@
 #include "fl/str.h"
 #include "fl/template_magic.h"
 
-
-
-
 namespace fl {
+
+template<typename T>
+struct point_xy;
+
 //-----------------------------------------------------------------------------
 // MurmurHash3 x86 32-bit
 //-----------------------------------------------------------------------------
@@ -77,6 +78,15 @@ static inline uint32_t fast_hash32(uint32_t x) noexcept {
     return x;
 }
 
+// 3) Handy two-word hasher
+static inline uint32_t hash_pair(uint32_t a,
+                                 uint32_t b,
+                                 uint32_t seed = 0) noexcept
+{
+    // mix in 'a', then mix in 'b'
+    uint32_t h = fast_hash32(seed ^ a);
+    return       fast_hash32(h    ^ b);
+}
 
 //-----------------------------------------------------------------------------
 // Functor for hashing arbitrary byte‐ranges to a 32‐bit value
@@ -92,9 +102,47 @@ struct Hash {
 };
 
 template<typename T>
+struct FastHash {
+    static_assert(fl::is_pod<T>::value,
+                  "fl::FastHash<T> only supports POD types (integrals, floats, etc.), you need to define your own hash.");
+    uint32_t operator()(const T &key) const noexcept {
+        return fast_hash32(key);
+    }
+};
+
+template<typename T>
+struct FastHash<point_xy<T>> {
+    uint32_t operator()(const point_xy<T> &key) const noexcept {
+        if (sizeof(T) == sizeof(uint8_t)) {
+            uint32_t x = static_cast<uint32_t>(key.x) + 
+                (static_cast<uint32_t>(key.y) << 8);
+            return fast_hash32(x);
+        }
+        if (sizeof(T) == sizeof(uint16_t)) {
+            uint32_t x = static_cast<uint32_t>(key.x) + 
+                (static_cast<uint32_t>(key.y) << 16);
+            return fast_hash32(x);
+        }
+        if (sizeof(T) == sizeof(uint32_t)) {
+            return hash_pair(key.x, key.y);
+        }
+        return MurmurHash3_x86_32(&key, sizeof(T));
+    }
+};
+
+
+template<typename T>
 struct Hash<T*> {
     uint32_t operator()(const T *key) const noexcept {
         return fast_hash32(key, sizeof(T*));
+    }
+};
+
+template<typename T>
+struct Hash<point_xy<T>> {
+    uint32_t operator()(const point_xy<T> &key) const noexcept {
+        T packed[2] = {key.x, key.y};  // Protect against alignment issues
+        return MurmurHash3_x86_32(packed, sizeof(packed));
     }
 };
 
@@ -137,16 +185,6 @@ struct Hash<fl::Str> {
     }
 };
 
-
-template<typename T>
-struct point_xy;
-
-template<typename T>
-struct Hash<point_xy<T>> {
-    uint32_t operator()(const point_xy<T> &key) const noexcept {
-        return MurmurHash3_x86_32(&key, sizeof(point_xy<T>));
-    }
-};
 
 
 }  // namespace fl
