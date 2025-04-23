@@ -172,7 +172,7 @@ class XYRasterSparse {
                 // << value);
                 if (mSparseGrid.needs_rehash()) {
                     // mSparseGrid is about to rehash, so we need to clear the
-                    // cache.
+                    // small cache because it shares pointers.
                     mCache.clear();
                 }
 

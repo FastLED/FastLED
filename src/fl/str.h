@@ -14,6 +14,14 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+#ifndef FASTLED_STR_NEEDS_INT
+#ifdef ESP32
+#define FASTLED_STR_NEEDS_INT 1
+#else
+#define FASTLED_STR_NEEDS_INT 0
+#endif
+#endif  // FASTLED_STR_NEEDS_INT
+
 namespace fl {  // Mandatory namespace for this class since it has name collisions.
 
 template<typename T> class rect_xy;
@@ -428,6 +436,12 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const int16_t& val) { write(int32_t(val)); return *this; }
     Str& append(const uint32_t& val) { write(val); return *this; }
     Str& append(const int32_t& c) { write(c); return *this; }
+
+
+    #if defined(FASTLED_STR_NEEDS_INT) && FASTLED_STR_NEEDS_INT
+    Str& append(const int& val) { write(int32_t(val)); return *this; }
+    Str& append(const unsigned int& val) { write(uint32_t(val)); return *this; }
+    #endif
 
     Str& append(const bool& val) {
         if (val) {
