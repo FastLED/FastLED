@@ -50,6 +50,7 @@ class XYPathGenerator : public Referent {
 
 class XYPathParams : public Referent {
   public:
+    // Reserved for future use.
     TransformFloat transform;
     float brightness = 1.0f; // 0: off, 1: full brightness
 };
