@@ -10,6 +10,10 @@
 #include "fl/math_macros.h"
 #include "fl/point.h"
 
+enum {
+    kStrIntIsInt32 = fl::is_same<int, int32_t>::value,
+};
+
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
@@ -29,6 +33,8 @@
 #define FASTLED_STR_NEEDS_INT (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0))
 #endif
 // End Arduino family.
+#elif kStrIntIsInt32
+#define FASTLED_STR_NEEDS_INT 0
 #elif defined(__GNUC__)
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(__clang__)
