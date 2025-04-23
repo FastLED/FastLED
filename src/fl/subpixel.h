@@ -49,7 +49,7 @@ class SubPixel2x2 {
 
     rect_xy<int> bounds() const {
         point_xy<int> min = mOrigin;
-        point_xy<int> max = mOrigin + point_xy<int>(1, 1);
+        point_xy<int> max = mOrigin + point_xy<int>(2, 2);
         return rect_xy<int>(min, max);
     }
 

@@ -23,9 +23,10 @@ void XYRasterDense::rasterize(const Slice<const SubPixel2x2> &tiles) {
     rect_xy<int> *optional_bounds = nullptr;
     rect_xy<int> maybe_bounds;
     if (!mWidthHeight.is_zero()) {
-        // optional_bounds = &mWidthHeight;
         maybe_bounds.mMin = point_xy<int>(0, 0);
-        maybe_bounds.mMax = point_xy<int>(mWidthHeight.x, mWidthHeight.y);
+        int w = MAX(0, mWidthHeight.x);
+        int h = MAX(0, mWidthHeight.y);
+        maybe_bounds.mMax = point_xy<int>(w, h);
         optional_bounds = &maybe_bounds;
     }
     SubPixel2x2::Rasterize(tiles, this, optional_bounds);
