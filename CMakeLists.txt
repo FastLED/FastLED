@@ -20,6 +20,6 @@ list(APPEND FastLED_SRCS ${FastLED_FL_SRCS} ${FastLED_SENSORS_SRCS} ${FastLED_FX
 # Register the component with ESP-IDF
 idf_component_register(SRCS ${FastLED_SRCS}
                        INCLUDE_DIRS "src" "src/third_party/espressif/led_strip/src"
-                       REQUIRES arduino-esp32 esp_driver_rmt driver)
+                       REQUIRES arduino-esp32 esp_driver_rmt esp_lcd driver)
 
 project(FastLED)
