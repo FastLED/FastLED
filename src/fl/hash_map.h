@@ -172,6 +172,7 @@ class HashMap {
     }
 
     size_t size() const { return _size; }
+    bool empty() const { return _size == 0; }
 
   private:
     static constexpr size_t npos = size_t(-1);

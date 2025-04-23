@@ -15,16 +15,12 @@ FASTLED_NAMESPACE_END
 namespace fl {
 
 class XYMap;
-class XYRasterDense;
 class XYRasterSparse;
 class XYDrawUint8Visitor;
 
 class SubPixel2x2 {
 
   public:
-    static void Rasterize(const Slice<const SubPixel2x2> &tiles,
-                          XYRasterDense *output, rect_xy<int> *optional_bounds = nullptr);
-
     static void Rasterize(const Slice<const SubPixel2x2> &tiles,
                           XYRasterSparse *output, rect_xy<int> *optional_bounds = nullptr) ;
 

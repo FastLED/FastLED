@@ -38,13 +38,13 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
 // Speed up writing to the super sampled waveFx by writing
 // to a raster. This will allow duplicate writes to be removed.
-XYRaster raster;
+
 WaveEffect wave_fx; // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
 // A vector for collecting subpixels, with overflow.
 vector_inlined<SubPixel2x2, 32> subpixels;
-
+XYRaster raster(WIDTH, HEIGHT);
 TimeWarp time_warp;
 
 XYPathPtr getShape(int which) {
@@ -137,7 +137,7 @@ void loop() {
     // FASTLED_WARN("maxAnimation: " << maxAnimation.value());
 
     const bool is_active =
-        curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
+        true || curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
 
     // if (shapeProgress.isActive(now)) {
     static uint32_t frame = 0;
@@ -176,6 +176,7 @@ void loop() {
         subpixel.scale(alpha);
         subpixels.push_back(subpixel);
     }
+
     s_prev_alpha = curr_alpha;
     raster.rasterize(subpixels);
     if (useWaveFx && is_active) {

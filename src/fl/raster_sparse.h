@@ -1,6 +1,13 @@
 
 #pragma once
 
+/*
+A sparse path through an xy grid. When a value is set != 0, it will get stored in the
+sparse grid. The raster will only store the values that are set, and will not allocate
+memory for the entire grid. This is useful for large grids where only a small number
+of pixels are set.
+*/
+
 #include <stdint.h>
 
 #include "fl/grid.h"
@@ -47,6 +54,16 @@ class XYRasterSparse {
     void setBounds(const rect_xy<int> &bounds) {
         mAbsoluteBounds = bounds;
     }
+
+    using iterator = fl::HashMap<point_xy<int>, uint8_t>::iterator;
+    using const_iterator = fl::HashMap<point_xy<int>, uint8_t>::const_iterator;
+
+    iterator begin() { return mSparseGrid.begin(); }
+    const_iterator begin() const { return mSparseGrid.begin(); }
+    iterator end() { return mSparseGrid.end(); }
+    const_iterator end() const { return mSparseGrid.end(); }
+    size_t size() const { return mSparseGrid.size(); }
+    bool empty() const { return mSparseGrid.empty(); }
 
     void rasterize(const Slice<const SubPixel2x2> &tiles) ;
 
