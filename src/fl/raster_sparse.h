@@ -17,6 +17,7 @@ only a small number of pixels are set.
 #include "fl/slice.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
+#include "fl/map.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -38,6 +39,7 @@ class XYRasterSparse {
 
     XYRasterSparse &reset() {
         mSparseGrid.clear();
+        mCache.clear();
         return *this;
     }
 
@@ -150,23 +152,48 @@ class XYRasterSparse {
             }
         }
     }
+
+
     
     void write(const point_xy<int> &pt, uint8_t value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
         // mSparseGrid.insert(pt, value);
-        uint8_t* val = mSparseGrid.find(pt);
-        if (val != nullptr) {
+
+        uint8_t** cached = mCache.find(pt);
+        if (cached) {
+            uint8_t *val = *cached;
             if (*val < value) {
                 *val = value;
             }
+            return;
+        }
+        if (mCache.size() < 4) {
+            // cache it.
+            uint8_t* v = mSparseGrid.find(pt);
+            if (v == nullptr) {
+                // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
+                mCache.clear();  // We might do a rehash should just dump all.
+                mSparseGrid.insert(pt, value);
+                return;
+            }
+            mCache.insert(pt, v);
+            if (*v < value) {
+                *v = value;
+            }
+            return;
         } else {
+            // overflow, clear cache and write directly.
+            mCache.clear();
             mSparseGrid.insert(pt, value);
+            return;
         }
     }
 
   private:
-    using HashMap = fl::HashMap<point_xy<int>, uint8_t>;
-    HashMap mSparseGrid;
+    using HashMapLarge = fl::HashMap<point_xy<int>, uint8_t>;
+    HashMapLarge mSparseGrid;
+    // Small cache for the last 4 writes.
+    HashMap<point_xy<int>, uint8_t*> mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
