@@ -55,10 +55,8 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
                 int xx = translate.x + x;
                 int yy = translate.y + y;
                 if (!bounds.contains(xx, yy)) {
-                    FASTLED_WARN("skipping pixel at " << xx << ", " << yy);
                     continue;
                 }
-                FASTLED_WARN("adding pixel at " << xx << ", " << yy);
                 auto &pt = out_raster->at(xx, yy);
                 if (value > pt) {
                     pt = value;
