@@ -104,6 +104,14 @@ public:
     explicit operator bool() const {
         return callable_ != nullptr;
     }
+
+    bool operator==(const Function& o) const {
+        return callable_ == o.callable_;
+    }
+
+    bool operator!=(const Function& o) const {
+        return callable_ != o.callable_;
+    }
 };
 
 } // namespace fl

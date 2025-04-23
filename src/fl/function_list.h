@@ -7,17 +7,18 @@ namespace fl {
 template<typename T>
 class FunctionList {
 private:
-    fl::vector<Function<T>> mFunctions;
+    using FunctionType = Function<void(T)>;
+    fl::vector<FunctionType> mFunctions;
 
 public:
     FunctionList() = default;
     ~FunctionList() = default;
 
-    void add(Function<T> function) {
+    void add(FunctionType function) {
         mFunctions.push_back(function);
     }
 
-    void remove(Function<T> function) {
+    void remove(FunctionType function) {
         mFunctions.erase(function);
     }
 
@@ -30,6 +31,36 @@ public:
         for (const auto &function : mFunctions) {
             // function(std::forward<Args>(args)...);
             function(args...);
+        }
+    }
+};
+
+
+class FunctionListVoid {
+private:
+    using FunctionType = Function<void()>;
+    fl::vector<FunctionType> mFunctions;
+
+public:
+    FunctionListVoid() = default;
+    ~FunctionListVoid() = default;
+
+    void add(FunctionType function) {
+        mFunctions.push_back(function);
+    }
+
+    void remove(FunctionType function) {
+        mFunctions.erase(function);
+    }
+
+    void clear() {
+        mFunctions.clear();
+    }
+
+    void invoke() {
+        for (const auto &function : mFunctions) {
+            // function(std::forward<Args>(args)...);
+            function();
         }
     }
 };

@@ -89,7 +89,7 @@ TEST_CASE("Copy and move semantics") {
 }
 
 TEST_CASE("Function list void float") {
-    FunctionList<void(float)> fl;
+    FunctionList<float> fl;
     fl.add([](float) { /* do nothing */ });
     fl.invoke(1);
 }

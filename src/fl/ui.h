@@ -84,7 +84,7 @@ class UISlider : public UISliderImpl {
     };
 
   private:
-    FunctionList<void(float)> mCallbacks;
+    FunctionList<float> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFramevalueValid = false;
     Listener mListener;
@@ -136,7 +136,7 @@ class UIButton : public UIButtonImpl {
     };
 
   private:
-    FunctionList<void()> mCallbacks;
+    FunctionListVoid mCallbacks;
     bool mLastFrameClicked = false;
     Listener mListener;
 };
@@ -186,7 +186,7 @@ class UICheckbox : public UICheckboxImpl {
 
   private:
     Super &impl() { return *this; }
-    FunctionList<void(bool)> mCallbacks;
+    FunctionList<bool> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
