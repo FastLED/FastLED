@@ -1,7 +1,7 @@
 // test.cpp
 // g++ --std=c++11 test.cpp -o test && ./test
 
-#include "fl/hashmap.h"
+#include "fl/hash_map.h"
 #include "fl/str.h"
 #include "test.h"
 
