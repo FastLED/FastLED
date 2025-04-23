@@ -10,15 +10,10 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
-#include "fl/lut.h"
-#include "fl/math_macros.h"
 #include "fl/ptr.h"
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
-#include "fl/unused.h"
-#include "fl/vector.h"
-#include "fl/warn.h"
-#include "fl/xypaths.h"
+#include "fl/xypath_impls.h"
 
 namespace fl {
 

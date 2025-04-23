@@ -1,4 +1,6 @@
 
+#include "fl/xypath_impls.h"
+
 #include <math.h>
 
 #include "fl/assert.h"
@@ -7,7 +9,7 @@
 #include "fl/map_range.h"
 #include "fl/math_macros.h"
 #include "fl/raster.h"
-#include "fl/xypath.h"
+
 #include "fl/xypath_renderer.h"
 
 namespace fl {
