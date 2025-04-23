@@ -24,7 +24,7 @@ void UISlider::Listener::onBeginFrame() {
     }
     float value = owner.value();
     if (value != owner.mLastFrameValue) {
-        owner.mCallbacks.invoke(value);
+        owner.mCallbacks.invoke(*mOwner, value);
         owner.mLastFrameValue = value;
     }
 }

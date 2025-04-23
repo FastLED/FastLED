@@ -54,6 +54,16 @@ class UISlider : public UISliderImpl {
     }
 
     void addCallback(Function<void(float)> callback) {
+        Function<void(UISlider &, float)> wrapped_cb =
+            [callback](UISlider &slider, float value) {
+                FASTLED_UNUSED(slider);
+                callback(value);
+            };
+        mCallbacks.add(wrapped_cb);
+        mListener.addToEngineEventsOnce();
+    }
+
+    void addCallbackEx(Function<void(UISlider &, float)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -84,7 +94,7 @@ class UISlider : public UISliderImpl {
     };
 
   private:
-    FunctionList<float> mCallbacks;
+    FunctionList<UISlider &, float> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFramevalueValid = false;
     Listener mListener;
