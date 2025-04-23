@@ -32,8 +32,8 @@
 
 namespace fl {  // Mandatory namespace for this class since it has name collisions.
 
-template<typename T> class rect_xy;
-template<typename T> class point_xy;
+template<typename T> struct rect_xy;
+template<typename T> struct point_xy;
 
 template <size_t N> class StrN;
 
