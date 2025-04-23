@@ -16,6 +16,9 @@ namespace fl {
 // inserts do not exceed the capacity of the vector, otherwise they will fail.
 // Because of this limitation, this vector is not a drop in replacement for
 // std::vector.
+//
+// UPDATE: Looks like there's some bugs with removing and shifting
+// elements. Please avoid using this class for now until it's fixed.
 template<typename T, size_t N>
 class FixedVector {
 private:
@@ -163,6 +166,10 @@ public:
             // new (pos) T(value);
             // shift all element from pos to end to the right
             for (iterator p = end(); p != pos; --p) {
+                // LOOKS LIKE THERE ARE BUGS AROUND THIS INSERT FUNCTION.
+                // I'VE TRIED TO UPGRADE THE CODE TO USE TEMPORARIES BUT
+                // IT SEEMS TO NOT WORK. IT COULD POSSIBLY DO WITH ALIGNMENT
+                // OF THE DATA. THIS IMPL HAS ISSUES WITH THE NEW PLACE OPERATION.
                 T temp = *(p - 1);
                 (p)->~T();  // Destroy the current element
                 memset(p, 0, sizeof(T)); // Clear the memory
@@ -773,14 +780,19 @@ private:
     HeapVector<T>                mHeap;
 };
 
-template<typename T, size_t INLINED_SIZE>
-using vector_fixed = FixedVector<T, INLINED_SIZE>;
 
 template<typename T>
 using vector = HeapVector<T>;
 
+// these have problems due to the underlying FixedVector
+// implementation.
+#if 1
+template<typename T, size_t INLINED_SIZE>
+using vector_fixed = FixedVector<T, INLINED_SIZE>;
+
 template<typename T, size_t INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
+#endif
 
 
 }  // namespace fl
