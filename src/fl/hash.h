@@ -58,6 +58,19 @@ static inline uint32_t MurmurHash3_x86_32(const void* key, size_t len, uint32_t 
 }
 
 //-----------------------------------------------------------------------------
+// Fast, cheap 32-bit integer hash (Thomas Wang)
+//-----------------------------------------------------------------------------
+static inline uint32_t fast_hash32(uint32_t x) noexcept {
+    x = (x ^ 61u) ^ (x >> 16);
+    x = x + (x << 3);
+    x = x ^ (x >> 4);
+    x = x * 0x27d4eb2dU;
+    x = x ^ (x >> 15);
+    return x;
+}
+
+
+//-----------------------------------------------------------------------------
 // Functor for hashing arbitrary byte‐ranges to a 32‐bit value
 //-----------------------------------------------------------------------------
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
@@ -73,7 +86,7 @@ struct Hash {
 template<typename T>
 struct Hash<T*> {
     uint32_t operator()(const T *key) const noexcept {
-        return MurmurHash3_x86_32(key, sizeof(T*));
+        return fast_hash32(key, sizeof(T*));
     }
 };
 
@@ -84,6 +97,26 @@ struct Hash<Ptr<T>> {
         return hasher(key.get());
     }
 };
+
+#define FASTLED_DEFINE_FAST_HASH(T) \
+template<> \ 
+struct Hash<T> { \
+    uint32_t operator()(const int &key) const noexcept {\
+        return fast_hash32(key);\
+    }\
+};
+
+FASTLED_DEFINE_FAST_HASH(uint8_t)
+FASTLED_DEFINE_FAST_HASH(uint16_t)
+FASTLED_DEFINE_FAST_HASH(uint32_t)
+FASTLED_DEFINE_FAST_HASH(int8_t)
+FASTLED_DEFINE_FAST_HASH(int16_t)
+FASTLED_DEFINE_FAST_HASH(int32_t)
+FASTLED_DEFINE_FAST_HASH(float)
+FASTLED_DEFINE_FAST_HASH(double)
+FASTLED_DEFINE_FAST_HASH(bool)
+// FASTLED_DEFINE_FAST_HASH(int)
+
 
 
 //-----------------------------------------------------------------------------
