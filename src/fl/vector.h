@@ -175,7 +175,9 @@ public:
                 // OF THE DATA. THIS IMPL HAS ISSUES WITH THE NEW PLACE OPERATION.
                 T temp = *(p - 1);
                 (p)->~T();  // Destroy the current element
-                memset(p, 0, sizeof(T)); // Clear the memory
+                // Clear the memory
+                void* vp = static_cast<void*>(p);
+                memset(vp, 0, sizeof(T));
                 new (p) T(temp); // Use copy constructor instead of std::move
                 //(p - 1)->~T();
             }
