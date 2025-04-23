@@ -33,6 +33,11 @@
     class type;                                                                \
     using type##Ptr = fl::Ptr<type>;
 
+#define FASTLED_SMART_PTR_STRUCT(type)                                           \
+    class type;                                                                \
+    using type##Ptr = fl::Ptr<type>;                                           \
+    
+
 #define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::Ptr<type>;
 
 // If you have an interface class that you want to create a smart pointer for,
