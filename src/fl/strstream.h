@@ -4,7 +4,7 @@
 #include "str.h"
 
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
-#if defined(__AVR__) || defined(ESP8266) || defined(ESP32) || defined(__SAM3X8E__)
+#if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
 #define FASTLED_STRSTREAM_USES_SIZE_T 0
 #else
 #define FASTLED_STRSTREAM_USES_SIZE_T 1
