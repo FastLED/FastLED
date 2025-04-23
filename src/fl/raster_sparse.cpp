@@ -50,16 +50,7 @@ void XYRasterSparse::rasterize_internal(const Tile2x2_u8 &tile,
             if (optional_bounds && !optional_bounds->contains(xx, yy)) {
                 continue;
             }
-            Pair<bool, uint8_t> entry = at(xx, yy);
-            if (!entry.first) {
-                // No value yet.
-                write(point_xy<int>(xx, yy), value);
-                continue;
-            }
-            // Already has a value.
-            if (value > entry.second) {
-                write(point_xy<int>(xx, yy), value);
-            }
+            write(point_xy<int>(xx, yy), value);
         }
     }
 }
