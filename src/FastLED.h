@@ -867,6 +867,9 @@ FASTLED_NAMESPACE_END
 //   fl::vector_fixed<T,N> - Stack allocated fixed size vector, elements will fail to add when full.
 #include "fl/vector.h"
 
+// Flexible callbacks in the style of std::function.
+#include "fl/function.h"
+
 #include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
 using fl::UIButton;  // These names are unique enough that we don't need to namespace them
 using fl::UICheckbox;
@@ -876,7 +879,20 @@ using fl::XYMap;
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 
-#endif // FASTLED_INTERNAL
+namespace fl {
+	/// @brief A function that takes a variable number of arguments and returns a value.
+	/// @tparam R The return type of the function.
+	/// @tparam Args The argument types of the function.
+	/// @returns A callable object that can be used as a function.
+	///
+	/// This is a convenience alias for fl::function<R(Args...)> to maintain backwards compatibility.
+	template<typename R, typename... Args>
+	using function = fl::Function<R(Args...)>;
+} // namespace fl
+// templetize fl::function<...> -> fl::Function<...> for backwards compatibility
+
+
+#endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN
 
 // Auto namespace if necessary.
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
