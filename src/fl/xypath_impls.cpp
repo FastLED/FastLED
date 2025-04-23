@@ -259,49 +259,59 @@ GielisCurveParams &GielisCurvePath::params() { return *mParams; }
 const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
 
-CatmullRomPath::CatmullRomPath() {}
+CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {}
 
 void CatmullRomPath::addPoint(point_xy_float p) {
-    mPoints.push_back(p);
+    params().addPoint(p);
 }
 
 void CatmullRomPath::addPoint(float x, float y) {
-    addPoint(point_xy_float(x, y));
+    params().addPoint(x, y);
 }
 
 void CatmullRomPath::clear() {
-    mPoints.clear();
+    params().clear();
 }
 
 size_t CatmullRomPath::size() const {
-    return mPoints.size();
+    return params().size();
+}
+
+CatmullRomParams &CatmullRomPath::params() { 
+    return *mParams; 
+}
+
+const CatmullRomParams &CatmullRomPath::params() const { 
+    return *mParams; 
 }
 
 point_xy_float CatmullRomPath::compute(float alpha) {
+    const auto& points = params().points;
+    
     // Need at least 2 points to define a path
-    if (mPoints.size() < 2) {
+    if (points.size() < 2) {
         // Return origin if not enough points
         return point_xy_float(0.0f, 0.0f);
     }
     
     // If only 2 points, do linear interpolation
-    if (mPoints.size() == 2) {
+    if (points.size() == 2) {
         return point_xy_float(
-            mPoints[0].x + alpha * (mPoints[1].x - mPoints[0].x),
-            mPoints[0].y + alpha * (mPoints[1].y - mPoints[0].y)
+            points[0].x + alpha * (points[1].x - points[0].x),
+            points[0].y + alpha * (points[1].y - points[0].y)
         );
     }
     
     // For Catmull-Rom, we need 4 points to interpolate between the middle two
     // Scale alpha to the number of segments
-    float scaledAlpha = alpha * (mPoints.size() - 1);
+    float scaledAlpha = alpha * (points.size() - 1);
     
     // Determine which segment we're in
     int segment = static_cast<int>(scaledAlpha);
     
     // Clamp to valid range
-    if (segment >= static_cast<int>(mPoints.size()) - 1) {
-        segment = mPoints.size() - 2;
+    if (segment >= static_cast<int>(points.size()) - 1) {
+        segment = points.size() - 2;
         scaledAlpha = static_cast<float>(segment) + 1.0f;
     }
     
@@ -314,22 +324,22 @@ point_xy_float CatmullRomPath::compute(float alpha) {
     // Handle boundary cases
     if (segment == 0) {
         // For the first segment, duplicate the first point
-        p0 = mPoints[0];
-        p1 = mPoints[0];
-        p2 = mPoints[1];
-        p3 = (mPoints.size() > 2) ? mPoints[2] : mPoints[1];
-    } else if (segment == static_cast<int>(mPoints.size()) - 2) {
+        p0 = points[0];
+        p1 = points[0];
+        p2 = points[1];
+        p3 = (points.size() > 2) ? points[2] : points[1];
+    } else if (segment == static_cast<int>(points.size()) - 2) {
         // For the last segment, duplicate the last point
-        p0 = (segment > 0) ? mPoints[segment - 1] : mPoints[0];
-        p1 = mPoints[segment];
-        p2 = mPoints[segment + 1];
-        p3 = mPoints[segment + 1];
+        p0 = (segment > 0) ? points[segment - 1] : points[0];
+        p1 = points[segment];
+        p2 = points[segment + 1];
+        p3 = points[segment + 1];
     } else {
         // Normal case - we have points before and after
-        p0 = mPoints[segment - 1];
-        p1 = mPoints[segment];
-        p2 = mPoints[segment + 1];
-        p3 = mPoints[segment + 2];
+        p0 = points[segment - 1];
+        p1 = points[segment];
+        p2 = points[segment + 1];
+        p3 = points[segment + 2];
     }
     
     // Perform Catmull-Rom interpolation

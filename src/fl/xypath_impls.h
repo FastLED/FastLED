@@ -36,6 +36,7 @@ FASTLED_SMART_PTR(PhyllotaxisPath);
 FASTLED_SMART_PTR(GielisCurvePath);
 FASTLED_SMART_PTR(LinePathParams);
 FASTLED_SMART_PTR(RosePathParams);
+FASTLED_SMART_PTR(CatmullRomParams);
 FASTLED_SMART_PTR(CatmullRomPath);
 
 // FASTLED_SMART_PTR(LissajousPath);
@@ -89,6 +90,34 @@ class GielisCurveParams : public XYPathParams {
     float n1 = 1.0f;   // Shape parameter n1
     float n2 = 1.0f;   // Shape parameter n2
     float n3 = 100.0f; // Shape parameter n3
+};
+
+class CatmullRomParams : public XYPathParams {
+  public:
+    CatmullRomParams() {}
+    
+    // Add a point to the path
+    void addPoint(point_xy_float p) {
+        points.push_back(p);
+    }
+    
+    // Add a point with separate x,y coordinates
+    void addPoint(float x, float y) {
+        points.push_back(point_xy_float(x, y));
+    }
+    
+    // Clear all control points
+    void clear() {
+        points.clear();
+    }
+    
+    // Get the number of control points
+    size_t size() const {
+        return points.size();
+    }
+    
+    // Vector of control points
+    HeapVector<point_xy_float> points;
 };
 
 /////////////////////////////////////////////////
@@ -221,7 +250,7 @@ class GielisCurvePath : public XYPathGenerator {
 /// Simply add control points and compute(α) will smoothly interpolate through them.
 class CatmullRomPath : public XYPathGenerator {
   public:
-    CatmullRomPath();
+    CatmullRomPath(const Ptr<CatmullRomParams> &p = NewPtr<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
     void addPoint(point_xy_float p);
@@ -237,9 +266,12 @@ class CatmullRomPath : public XYPathGenerator {
     
     point_xy_float compute(float alpha) override;
     const Str name() const override;
+    
+    CatmullRomParams &params();
+    const CatmullRomParams &params() const;
 
   private:
-    HeapVector<point_xy_float> mPoints;
+    Ptr<CatmullRomParams> mParams;
     
     // Helper function to interpolate between points using Catmull-Rom spline
     point_xy_float interpolate(const point_xy_float& p0, const point_xy_float& p1, 

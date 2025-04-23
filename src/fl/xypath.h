@@ -53,6 +53,10 @@ class XYPath : public Referent {
         
     // Create a new Catmull-Rom spline path
     static XYPathPtr NewCatmullRomPath(uint16_t width = 0, uint16_t height = 0);
+    
+    // Create a new Catmull-Rom spline path with custom parameters
+    static XYPathPtr NewCatmullRomPath(const Ptr<CatmullRomParams> &params, 
+                                      uint16_t width = 0, uint16_t height = 0);
 
     virtual ~XYPath();
     point_xy_float at(float alpha);
