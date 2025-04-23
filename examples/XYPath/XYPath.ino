@@ -82,7 +82,9 @@ void setup() {
     speed.addCallback([](float value) {
         time_warp.setSpeed(speed.value());
     });
-
+    maxAnimation.addCallback([](float value) {
+        shapeProgress.set_max_clamp(maxAnimation.value());
+    });
     // Initialize wave simulation. Please don't use static constructors, keep it
     // in setup().
     wave_fx = NewWaveSimulation2D(xyMap);
@@ -106,8 +108,6 @@ void loop() {
     clearLeds();
     const uint32_t now = millis();
     uint32_t now_warped = time_warp.update(now);
-    shapeProgress.set_max_clamp(maxAnimation.value());
-
 
     auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
