@@ -37,6 +37,16 @@ class XYRasterSparse {
         mBounds.expand(pt);
     }
 
+    void setSize(uint16_t width, uint16_t height) {
+        setBounds(rect_xy<int>(0, 0, width, height));
+    }
+
+    void setBounds(const rect_xy<int> &bounds) {
+        mAbsoluteBounds = bounds;
+    }
+
+    void rasterize(const Slice<const SubPixel2x2> &tiles) ;
+
     // Renders the subpixel tiles to the raster. Any previous data is cleared.
     // Memory will only be allocated if the size of the raster increased.
     // void rasterize(const Slice<const SubPixel2x2> &tiles);
@@ -44,10 +54,7 @@ class XYRasterSparse {
     // const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x, y); }
 
     Pair<bool, uint8_t> at(uint16_t x, uint16_t y) const {
-        const uint16_t* val = mSparseGrid.find(point_xy<int>(x, y));
-        // if (it != mSparseGrid.end()) {
-        //     return {true, it.second};
-        // }
+        const uint8_t* val = mSparseGrid.find(point_xy<int>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
@@ -89,8 +96,9 @@ class XYRasterSparse {
     }
 
   private:
-    fl::HashMap<point_xy<int>, uint16_t> mSparseGrid;
+    fl::HashMap<point_xy<int>, uint8_t> mSparseGrid;
     fl::rect_xy<int> mBounds;
+    fl::rect_xy<int> mAbsoluteBounds;
 };
 
 } // namespace fl

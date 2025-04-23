@@ -209,6 +209,10 @@ struct rect_xy {
         return mMax.y - mMin.y + 1;
     }
 
+    bool empty() const {
+        return (mMin.x == mMax.x && mMin.y == mMax.y);
+    }
+
     void expand(const point_xy<T>& p) {
         expand(p.x, p.y);
     }

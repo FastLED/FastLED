@@ -5,6 +5,9 @@
 #include "fl/str.h"
 #include "fl/template_magic.h"
 
+
+
+
 namespace fl {
 //-----------------------------------------------------------------------------
 // MurmurHash3 x86 32-bit
@@ -12,6 +15,9 @@ namespace fl {
 // Based on the public‐domain implementation by Austin Appleby:
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
 static inline uint32_t MurmurHash3_x86_32(const void* key, size_t len, uint32_t seed = 0) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
     const uint8_t* data = static_cast<const uint8_t*>(key);
     const int nblocks = int(len / 4);
 
@@ -55,6 +61,8 @@ static inline uint32_t MurmurHash3_x86_32(const void* key, size_t len, uint32_t 
     h1 ^= h1 >> 16;
 
     return h1;
+
+#pragma GCC diagnostic pop
 }
 
 //-----------------------------------------------------------------------------
@@ -99,7 +107,7 @@ struct Hash<Ptr<T>> {
 };
 
 #define FASTLED_DEFINE_FAST_HASH(T) \
-template<> \ 
+template<> \
 struct Hash<T> { \
     uint32_t operator()(const int &key) const noexcept {\
         return fast_hash32(key);\
