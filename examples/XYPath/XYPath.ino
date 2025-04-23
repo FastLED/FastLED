@@ -79,6 +79,10 @@ void setup() {
     screenmap.setDiameter(.2);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
+    speed.addCallback([](float value) {
+         FASTLED_WARN("Speed: " << value);
+    });
+
     // Initialize wave simulation. Please don't use static constructors, keep it
     // in setup().
     wave_fx = NewWaveSimulation2D(xyMap);
@@ -123,8 +127,8 @@ void loop() {
         s_prev_alpha = curr_alpha;
     }
 
-    FASTLED_WARN("Current alpha: " << curr_alpha);
-    FASTLED_WARN("maxAnimation: " << maxAnimation.value());
+    // FASTLED_WARN("Current alpha: " << curr_alpha);
+    // FASTLED_WARN("maxAnimation: " << maxAnimation.value());
 
     const bool is_active = curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
 

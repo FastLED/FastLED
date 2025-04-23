@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "inplacenew.h"
 #include "fl/namespace.h"
@@ -155,12 +156,22 @@ public:
     bool insert(iterator pos, const T& value) {
         if (current_size < N) {
             // shift all elements to the right
+            // for (iterator p = end(); p != pos; --p) {
+            //     new (p) T(*(p - 1)); // Use copy constructor instead of std::move
+            //     (p - 1)->~T();
+            // }
+            // new (pos) T(value);
+            // shift all element from pos to end to the right
             for (iterator p = end(); p != pos; --p) {
-                new (p) T(*(p - 1)); // Use copy constructor instead of std::move
-                (p - 1)->~T();
+                T temp = *(p - 1);
+                (p)->~T();  // Destroy the current element
+                memset(p, 0, sizeof(T)); // Clear the memory
+                new (p) T(temp); // Use copy constructor instead of std::move
+                //(p - 1)->~T();
             }
-            new (pos) T(value);
             ++current_size;
+            // now insert the new value
+            new (pos) T(value);
             return true;
         }
         return false;

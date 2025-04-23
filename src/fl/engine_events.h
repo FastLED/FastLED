@@ -8,9 +8,9 @@
 
 
 
-#ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
-#define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
-#endif
+// #ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
+// #define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
+// #endif
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #ifdef __AVR__
@@ -121,6 +121,9 @@ class EngineEvents {
         #endif
     }
 
+    // Needed by fl::vector<T>
+    EngineEvents() = default;
+
   private:
     // Safe to add a listeners during a callback.
     void _addListener(Listener *listener, int priority);
@@ -135,18 +138,20 @@ class EngineEvents {
     bool _hasListener(Listener *listener);
 #if FASTLED_HAS_ENGINE_EVENTS
     struct Pair {
+        Pair() = default;
         Listener *listener = nullptr;
         int priority = 0;
         Pair(Listener *listener, int priority) : listener(listener), priority(priority) {}
     };
-    typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
-        ListenerList;
+    // typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
+    //     ListenerList;
+    typedef fl::vector<Pair> ListenerList;
     ListenerList mListeners;
 #endif
 
     static EngineEvents *getInstance();
 
-    EngineEvents() = default;
+
     friend class fl::Singleton<EngineEvents>;
 };
 

@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#include "fl/function_list.h"
 #include "fl/engine_events.h"
+#include "fl/function_list.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/template_magic.h"
@@ -16,14 +16,15 @@ namespace fl {
 
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : public UISliderImpl, protected EngineEvents::Listener {
+class UISlider : public UISliderImpl {
   public:
     using Super = UISliderImpl;
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
              float max = 255, float step = -1.f)
-        : UISliderImpl(name, value, min, max, step) {}
-    ~UISlider() {}
+        : UISliderImpl(name, value, min, max, step), mListener(this) {
+        //EngineEvents::addListener(&mListener);
+    }
     float value() const { return Super::value(); }
     float value_normalized() const {
         float min = Super::min();
@@ -34,7 +35,7 @@ class UISlider : public UISliderImpl, protected EngineEvents::Listener {
         return (value() - min) / (max - min);
     }
     float max() const { return Super::max(); }
-    void setValue(float value) ;
+    void setValue(float value);
     operator float() const { return Super::value(); }
     operator uint8_t() const { return static_cast<uint8_t>(Super::value()); }
     operator uint16_t() const { return static_cast<uint16_t>(Super::value()); }
@@ -54,11 +55,39 @@ class UISlider : public UISliderImpl, protected EngineEvents::Listener {
         return *this;
     }
 
-    void addCallback(Function<void(float)> callback) { mCallbacks.add(callback); }
+    void addCallback(Function<void(float)> callback) {
+        mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+    }
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
-    void onBeginFrame() override ;
+    // void onBeginFrame() override;
+
+    struct Listener : public EngineEvents::Listener {
+        Listener(UISlider* owner) : mOwner(owner) {
+            EngineEvents::addListener(this);
+        }
+        ~Listener() {
+            //EngineEvents::removeListener(this);
+            if (added) {
+                EngineEvents::removeListener(this);
+            }
+        }
+        void addToEngineEventsOnce() {
+            if (added) {
+                return;
+            }
+            EngineEvents::addListener(this);
+            added = true;
+        }
+        void onBeginFrame() override;
+        private:
+            UISlider* mOwner;
+            bool added = false;
+    };
+
+    Listener mListener;
 
   private:
     FunctionList<void(float)> mCallbacks;

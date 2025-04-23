@@ -15,16 +15,17 @@ void UISlider::setValue(float value) {
     }
 }
 
-void UISlider::onBeginFrame() {
-    if (!mLastFramevalueValid) {
-        mLastFrameValue = Super::value();
-        mLastFramevalueValid = true;
+void UISlider::Listener::onBeginFrame() {
+    UISlider& owner = *mOwner;
+    if (!owner.mLastFramevalueValid) {
+        owner.mLastFrameValue = owner.value();
+        owner.mLastFramevalueValid = true;
         return;
     }
-    float value = Super::value();
-    if (value != mLastFrameValue) {
-        mCallbacks.invoke(value);
-        mLastFrameValue = value;
+    float value = owner.value();
+    if (value != owner.mLastFrameValue) {
+        owner.mCallbacks.invoke(value);
+        owner.mLastFrameValue = value;
     }
 }
 
