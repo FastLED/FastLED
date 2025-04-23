@@ -10,8 +10,8 @@ FASTLED_NAMESPACE_BEGIN
 
 jsTitleImpl::jsTitleImpl(const Str& text) : mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
-    jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsTitleImpl*>(self)->toJson(json);
+    jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject& json) {
+        static_cast<jsTitleImpl*>(this)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New("title", update_fcn, to_json_fcn);
     jsUiManager::addComponent(mInternal);

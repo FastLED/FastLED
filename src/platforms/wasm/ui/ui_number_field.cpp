@@ -17,11 +17,11 @@ FASTLED_NAMESPACE_BEGIN
 
 jsNumberFieldImpl::jsNumberFieldImpl(const Str& name, double value, double min, double max)
     : mValue(value), mMin(min), mMax(max) {
-    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
-        static_cast<jsNumberFieldImpl*>(self)->updateInternal(json);
+    auto updateFunc = jsUiInternal::UpdateFunction([this](const FLArduinoJson::JsonVariantConst& json) {
+        static_cast<jsNumberFieldImpl*>(this)->updateInternal(json);
     });
-    auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsNumberFieldImpl*>(self)->toJson(json);
+    auto toJsonFunc = jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject& json) {
+        static_cast<jsNumberFieldImpl*>(this)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);

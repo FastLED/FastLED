@@ -20,12 +20,12 @@ jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc = jsUiInternal::UpdateFunction(
-        this, [](void *self, const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsSliderImpl *>(self)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &json) {
+            static_cast<jsSliderImpl *>(this)->updateInternal(json);
         });
     auto toJsonFunc = jsUiInternal::ToJsonFunction(
-        this, [](void *self, FLArduinoJson::JsonObject &json) {
-            static_cast<jsSliderImpl *>(self)->toJson(json);
+        [this](FLArduinoJson::JsonObject &json) {
+            static_cast<jsSliderImpl *>(this)->toJson(json);
         });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
                                      std::move(toJsonFunc));

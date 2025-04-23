@@ -11,8 +11,8 @@ FASTLED_NAMESPACE_BEGIN
 
 jsDescriptionImpl::jsDescriptionImpl(const Str& text) : mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
-    jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsDescriptionImpl*>(self)->toJson(json);
+    jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject& json) {
+        static_cast<jsDescriptionImpl*>(this)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New("description", update_fcn, to_json_fcn);
     jsUiManager::addComponent(mInternal);

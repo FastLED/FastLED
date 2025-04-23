@@ -12,12 +12,12 @@ FASTLED_NAMESPACE_BEGIN
 
 jsButtonImpl::jsButtonImpl(const Str& name)
     : mPressed(false) {
-    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& value) {
-        static_cast<jsButtonImpl*>(self)->updateInternal(value);
+    auto updateFunc = jsUiInternal::UpdateFunction([this](const FLArduinoJson::JsonVariantConst& value) {
+        static_cast<jsButtonImpl*>(this)->updateInternal(value);
     });
 
-    auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsButtonImpl*>(self)->toJson(json);
+    auto toJsonFunc = jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject& json) {
+        static_cast<jsButtonImpl*>(this)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);

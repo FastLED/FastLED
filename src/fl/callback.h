@@ -8,7 +8,7 @@ namespace fl {
 ///        to a non-static member function then self must be none null. If it's a free function then set self to
 ///        nullptr.
 /// @tparam ...Args The types of the arguments to the function.
-/// @example Callback<const char*> callback(this, [](void* self, const char* str) { static_cast<MyClass*>(self)->myFunction(str); });
+/// @example Callback<const char*> callback(this, [self](const char* str) { static_cast<MyClass*>(self)->myFunction(str); });
 template<typename ...Args>
 class Callback {
 public:

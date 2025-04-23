@@ -29,8 +29,8 @@ FASTLED_NAMESPACE_BEGIN
  bool jsUiInternal::clearFunctions() {
     std::lock_guard<std::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
-    mUpdateFunc.clear();
-    mtoJsonFunc.clear();
+    mUpdateFunc = UpdateFunction([](const FLArduinoJson::JsonVariantConst&) {});
+    mtoJsonFunc = ToJsonFunction([](FLArduinoJson::JsonObject&) {});
     return wasCleared;
 }
 

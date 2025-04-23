@@ -14,11 +14,11 @@ FASTLED_NAMESPACE_BEGIN
 
 jsCheckboxImpl::jsCheckboxImpl(const Str& name, bool value)
     : mValue(value) {
-    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
-        static_cast<jsCheckboxImpl*>(self)->updateInternal(json);
+    auto updateFunc = jsUiInternal::UpdateFunction([this](const FLArduinoJson::JsonVariantConst& json) {
+        static_cast<jsCheckboxImpl*>(this)->updateInternal(json);
     });
-    auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
-        static_cast<jsCheckboxImpl*>(self)->toJson(json);
+    auto toJsonFunc = jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject& json) {
+        static_cast<jsCheckboxImpl*>(this)->toJson(json);
     });
     //mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
