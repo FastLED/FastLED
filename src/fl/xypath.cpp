@@ -289,4 +289,229 @@ void XYPathRenderer::rasterize(
     }
 }
 
+const Str CirclePath::name() const { return "CirclePath"; }
+
+point_xy_float PointPath::compute(float alpha) {
+    FASTLED_UNUSED(alpha);
+    return mPoint;
+}
+
+const Str PointPath::name() const { return "PointPath"; }
+
+void PointPath::set(float x, float y) { set(point_xy_float(x, y)); }
+
+void PointPath::set(point_xy_float p) { mPoint = p; }
+
+PointPath::PointPath(float x, float y) : mPoint(x, y) {}
+
+PointPath::PointPath(point_xy_float p) : mPoint(p) {}
+
+
+
+const Str LinePath::name() const { return "LinePath"; }
+
+LinePathParams &LinePath::params() { return *mParams; }
+
+const LinePathParams &LinePath::params() const { return *mParams; }
+
+LinePath::LinePath(const LinePathParamsPtr &params) : mParams(params) {}
+
+const Str HeartPath::name() const { return "HeartPath"; }
+
+const Str ArchimedeanSpiralPath::name() const {
+    return "ArchimedeanSpiralPath";
+}
+
+void ArchimedeanSpiralPath::setTurns(uint8_t turns) { mTurns = turns; }
+
+void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
+
+const Str RosePath::name() const { return "RosePath"; }
+
+void RosePath::setN(uint8_t n) { params().n = n; }
+
+void RosePath::setD(uint8_t d) { params().d = d; }
+
+RosePath::RosePath(const Ptr<RosePathParams> &p) : mParams(p) {}
+
+RosePathParams &RosePath::params() { return *mParams; }
+
+const RosePathParams &RosePath::params() const { return *mParams; }
+
+const Str PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
+
+PhyllotaxisPath::PhyllotaxisPath(const Ptr<PhyllotaxisParams> &p)
+    : mParams(p) {}
+
+PhyllotaxisParams &PhyllotaxisPath::params() { return *mParams; }
+
+const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
+
+GielisCurvePath::GielisCurvePath(
+    const Ptr<GielisCurveParams> &p)
+    : mParams(p) {}
+
+const Str GielisCurvePath::name() const { return "GielisCurvePath"; }
+
+void GielisCurvePath::setA(float a) { params().a = a; }
+
+void GielisCurvePath::setB(float b) { params().b = b; }
+
+void GielisCurvePath::setM(float m) { params().m = m; }
+
+void GielisCurvePath::setN1(float n1) { params().n1 = n1; }
+
+void GielisCurvePath::setN2(float n2) { params().n2 = n2; }
+
+void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
+
+GielisCurveParams &GielisCurvePath::params() { return *mParams; }
+
+const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
+
+void XYPathRenderer::setDrawBounds(uint16_t width, uint16_t height) {
+    // auto &tx = *(mGridTransform.mImpl);
+    auto &tx = mGridTransform;
+
+    // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
+    //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
+    //    offset_x = (width–0.5 + 0.5) / 2 = width/2
+    tx.set_scale_x((width - 1.0f) * 0.5f);
+    // tx.scale_x = (width - 1.0f) * 0.5f;
+    // tx.offset_x = width * 0.5f;
+    tx.set_offset_x(width * 0.5f);
+
+    // 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]
+    //    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)
+    //    scale_y  = (height–0.5) – 0.5     = height–1
+    //    offset_y = 0.5
+    // tx.scale_y = (height - 1.0f) * 0.5f;
+    // tx.offset_y = height * 0.5f;
+
+    tx.set_scale_y((height - 1.0f) * 0.5f);
+    tx.set_offset_y(height * 0.5f);
+
+    onTransformFloatChanged();
+    mDrawBoundsSet = true;
+}
+
+void XYPathRenderer::onTransformFloatChanged() {
+    // Future use to allow recomputing the LUT.
+}
+
+TransformFloat &XYPathRenderer::transform() { return mTransform; }
+
+void XYPathRenderer::setScale(float scale) {
+    // mTransform.scale_x = scale;
+    // mTransform.scale_y = scale;
+    mTransform.set_scale(scale);
+    onTransformFloatChanged();
+}
+
+point_xy_float XYPathRenderer::compute(float alpha) {
+    return compute_float(alpha, mTransform);
+}
+
+point_xy_float XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
+
+point_xy_float XYPathRenderer::at(float alpha, const TransformFloat &tx) {
+    return compute_float(alpha, tx);
+}
+
+XYPathPtr XYPath::NewPointPath(float x, float y) {
+    auto path = PointPathPtr::New(x, y);
+    return XYPathPtr::New(path);
+}
+
+XYPathPtr XYPath::NewLinePath(float x0, float y0, float x1, float y1) {
+    LinePathParamsPtr p = LinePathParamsPtr::New();
+    auto &params = *p;
+    params.x0 = x0;
+    params.y0 = y0;
+    params.x1 = x1;
+    params.y1 = y1;
+    auto path = LinePathPtr::New(p);
+    return XYPathPtr::New(path);
+}
+
+XYPathPtr XYPath::NewLinePath(
+    const Ptr<LinePathParams> &params) {
+    auto path = NewPtr<LinePath>(params);
+    return XYPathPtr::New(path);
+}
+
+XYPathPtr XYPath::NewCirclePath() {
+    auto path = CirclePathPtr::New();
+    return XYPathPtr::New(path);
+}
+
+XYPathPtr XYPath::NewCirclePath(uint16_t width, uint16_t height) {
+    CirclePathPtr path = CirclePathPtr::New();
+    XYPathPtr out = XYPathPtr::New(path);
+    out->setDrawBounds(width, height);
+    return out;
+}
+
+XYPathPtr XYPath::NewHeartPath() {
+    HeartPathPtr path = HeartPathPtr::New();
+    return XYPathPtr::New(path);
+}
+
+XYPathPtr XYPath::NewHeartPath(uint16_t width, uint16_t height) {
+    HeartPathPtr path = HeartPathPtr::New();
+    XYPathPtr out = XYPathPtr::New(path);
+    out->setDrawBounds(width, height);
+    return out;
+}
+
+XYPathPtr XYPath::NewArchimedeanSpiralPath(uint16_t width, uint16_t height) {
+    ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
+    XYPathPtr out = XYPathPtr::New(path);
+    out->setDrawBounds(width, height);
+    return out;
+}
+
+XYPathPtr XYPath::NewArchimedeanSpiralPath() {
+    ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
+    XYPathPtr out = XYPathPtr::New(path);
+    return out;
+}
+
+XYPathPtr XYPath::NewRosePath(
+    uint16_t width, uint16_t height,
+    const Ptr<RosePathParams> &params) {
+    RosePathPtr path = RosePathPtr::New(params);
+    XYPathPtr out = XYPathPtr::New(path);
+    if (width > 0 && height > 0) {
+        out->setDrawBounds(width, height);
+    }
+    return out;
+}
+
+XYPathPtr XYPath::NewPhyllotaxisPath(
+    uint16_t width, uint16_t height,
+    const Ptr<PhyllotaxisParams> &args) {
+    PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
+    XYPathPtr out = XYPathPtr::New(path);
+    if (width > 0 && height > 0) {
+        out->setDrawBounds(width, height);
+    }
+    return out;
+}
+
+XYPathPtr XYPath::NewGielisCurvePath(
+    uint16_t width, uint16_t height,
+    const Ptr<GielisCurveParams> &params) {
+    GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
+    XYPathPtr out = XYPathPtr::New(path);
+    if (width > 0 && height > 0) {
+        out->setDrawBounds(width, height);
+    }
+    return out;
+}
+
+
+
+//Str CatmullRomPath::name() const { return "CatmullRomPath"; }
+
 } // namespace fl

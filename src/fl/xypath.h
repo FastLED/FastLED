@@ -87,96 +87,36 @@ class GielisCurveParams : public XYPathParams {
 
 class XYPath : public Referent {
   public:
-    static XYPathPtr NewPointPath(float x, float y) {
-        auto path = PointPathPtr::New(x, y);
-        return XYPathPtr::New(path);
-    }
+    static XYPathPtr NewPointPath(float x, float y);
 
-    static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
-        LinePathParamsPtr p = LinePathParamsPtr::New();
-        auto &params = *p;
-        params.x0 = x0;
-        params.y0 = y0;
-        params.x1 = x1;
-        params.y1 = y1;
-        auto path = LinePathPtr::New(p);
-        return XYPathPtr::New(path);
-    }
+    static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1);
 
     static XYPathPtr
-    NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>()) {
-        auto path = NewPtr<LinePath>(params);
-        return XYPathPtr::New(path);
-    }
-    static XYPathPtr NewCirclePath() {
-        auto path = CirclePathPtr::New();
-        return XYPathPtr::New(path);
-    }
+    NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>());
 
-    static XYPathPtr NewCirclePath(uint16_t width, uint16_t height) {
-        CirclePathPtr path = CirclePathPtr::New();
-        XYPathPtr out = XYPathPtr::New(path);
-        out->setDrawBounds(width, height);
-        return out;
-    }
+    static XYPathPtr NewCirclePath();
 
-    static XYPathPtr NewHeartPath() {
-        HeartPathPtr path = HeartPathPtr::New();
-        return XYPathPtr::New(path);
-    }
+    static XYPathPtr NewCirclePath(uint16_t width, uint16_t height);
 
-    static XYPathPtr NewHeartPath(uint16_t width, uint16_t height) {
-        HeartPathPtr path = HeartPathPtr::New();
-        XYPathPtr out = XYPathPtr::New(path);
-        out->setDrawBounds(width, height);
-        return out;
-    }
+    static XYPathPtr NewHeartPath();
 
-    static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height) {
-        ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
-        XYPathPtr out = XYPathPtr::New(path);
-        out->setDrawBounds(width, height);
-        return out;
-    }
+    static XYPathPtr NewHeartPath(uint16_t width, uint16_t height);
 
-    static XYPathPtr NewArchimedeanSpiralPath() {
-        ArchimedeanSpiralPathPtr path = ArchimedeanSpiralPathPtr::New();
-        XYPathPtr out = XYPathPtr::New(path);
-        return out;
-    }
+    static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height);
+
+    static XYPathPtr NewArchimedeanSpiralPath();
 
     static XYPathPtr
     NewRosePath(uint16_t width = 0, uint16_t height = 0,
-                const Ptr<RosePathParams> &params = NewPtr<RosePathParams>()) {
-        RosePathPtr path = RosePathPtr::New(params);
-        XYPathPtr out = XYPathPtr::New(path);
-        if (width > 0 && height > 0) {
-            out->setDrawBounds(width, height);
-        }
-        return out;
-    }
+                const Ptr<RosePathParams> &params = NewPtr<RosePathParams>());
 
     static XYPathPtr NewPhyllotaxisPath(
         uint16_t width = 0, uint16_t height = 0,
-        const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>()) {
-        PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
-        XYPathPtr out = XYPathPtr::New(path);
-        if (width > 0 && height > 0) {
-            out->setDrawBounds(width, height);
-        }
-        return out;
-    }
+        const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>());
 
     static XYPathPtr NewGielisCurvePath(
         uint16_t width = 0, uint16_t height = 0,
-        const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>()) {
-        GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
-        XYPathPtr out = XYPathPtr::New(path);
-        if (width > 0 && height > 0) {
-            out->setDrawBounds(width, height);
-        }
-        return out;
-    }
+        const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
 
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
@@ -205,7 +145,7 @@ class XYPathRenderer : public Referent {
   public:
     XYPathRenderer(XYPathGeneratorPtr path,
                    TransformFloat transform = TransformFloat());
-    point_xy_float at(float alpha) { return at(alpha, mTransform); }
+    point_xy_float at(float alpha);
 
     Tile2x2_u8 at_subpixel(float alpha);
 
@@ -213,56 +153,21 @@ class XYPathRenderer : public Referent {
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
     // Overloaded to allow transform to be passed in.
-    point_xy_float at(float alpha, const TransformFloat &tx) {
-        return compute_float(alpha, tx);
-    }
+    point_xy_float at(float alpha, const TransformFloat &tx);
 
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
-    void setDrawBounds(uint16_t width, uint16_t height) {
-        // auto &tx = *(mGridTransform.mImpl);
-        auto &tx = mGridTransform;
+    void setDrawBounds(uint16_t width, uint16_t height);
 
-        // 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]
-        //    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2
-        //    offset_x = (width–0.5 + 0.5) / 2 = width/2
-        tx.set_scale_x((width - 1.0f) * 0.5f);
-        // tx.scale_x = (width - 1.0f) * 0.5f;
-        // tx.offset_x = width * 0.5f;
-        tx.set_offset_x(width * 0.5f);
+    void onTransformFloatChanged();
 
-        // 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]
-        //    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)
-        //    scale_y  = (height–0.5) – 0.5     = height–1
-        //    offset_y = 0.5
-        // tx.scale_y = (height - 1.0f) * 0.5f;
-        // tx.offset_y = height * 0.5f;
+    TransformFloat &transform();
 
-        tx.set_scale_y((height - 1.0f) * 0.5f);
-        tx.set_offset_y(height * 0.5f);
+    void setScale(float scale);
 
-        onTransformFloatChanged();
-        mDrawBoundsSet = true;
-    }
-
-    void onTransformFloatChanged() {
-        // Future use to allow recomputing the LUT.
-    }
-
-    TransformFloat &transform() { return mTransform; }
-
-    void setScale(float scale) {
-        // mTransform.scale_x = scale;
-        // mTransform.scale_y = scale;
-        mTransform.set_scale(scale);
-        onTransformFloatChanged();
-    }
-
-    point_xy_float compute(float alpha) {
-        return compute_float(alpha, mTransform);
-    }
+    point_xy_float compute(float alpha);
 
   private:
     XYPathGeneratorPtr mPath;
@@ -276,15 +181,12 @@ class XYPathRenderer : public Referent {
 
 class PointPath : public XYPathGenerator {
   public:
-    PointPath(float x, float y) : mPoint(x, y) {}
-    PointPath(point_xy_float p) : mPoint(p) {}
-    point_xy_float compute(float alpha) override {
-        FASTLED_UNUSED(alpha);
-        return mPoint;
-    }
-    const Str name() const override { return "PointPath"; }
-    void set(float x, float y) { set(point_xy_float(x, y)); }
-    void set(point_xy_float p) { mPoint = p; }
+    PointPath(float x, float y);
+    PointPath(point_xy_float p);
+    point_xy_float compute(float alpha) override;
+    const Str name() const override;
+    void set(float x, float y);
+    void set(point_xy_float p);
 
   private:
     point_xy_float mPoint;
@@ -292,16 +194,15 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>())
-        : mParams(params) {};
+    LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>());
     LinePath(float x0, float y0, float x1, float y1);
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "LinePath"; }
+    const Str name() const override;
     void set(float x0, float y0, float x1, float y1);
     void set(const LinePathParams &p);
 
-    LinePathParams &params() { return *mParams; }
-    const LinePathParams &params() const { return *mParams; }
+    LinePathParams &params();
+    const LinePathParams &params() const;
 
   private:
     Ptr<LinePathParams> mParams;
@@ -322,7 +223,7 @@ class CatmullRomPath : public XYPathRenderer {
     void addPoint(point_xy_float p);
 
     point_xy_float compute(float alpha) override;
-    const char *name() const override { return "CatmullRomPath"; }
+    const char *name() const override ;
 
   private:
     HeapVector<point_xy_float> mPoints;
@@ -333,24 +234,24 @@ class CirclePath : public XYPathGenerator {
   public:
     CirclePath();
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "CirclePath"; }
+    const Str name() const override;
 };
 
 class HeartPath : public XYPathGenerator {
   public:
     HeartPath();
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "HeartPath"; }
+    const Str name() const override;
 };
 
 class ArchimedeanSpiralPath : public XYPathGenerator {
   public:
     ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 1.0f);
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "ArchimedeanSpiralPath"; }
+    const Str name() const override;
 
-    void setTurns(uint8_t turns) { mTurns = turns; }
-    void setRadius(float radius) { mRadius = radius; }
+    void setTurns(uint8_t turns);
+    void setRadius(float radius);
 
   private:
     uint8_t mTurns; // Number of spiral turns
@@ -364,17 +265,16 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
-    RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>())
-        : mParams(p) {}
+    RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>());
     RosePath(uint8_t n = 3, uint8_t d = 1);
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "RosePath"; }
+    const Str name() const override;
 
-    RosePathParams &params() { return *mParams; }
-    const RosePathParams &params() const { return *mParams; }
+    RosePathParams &params();
+    const RosePathParams &params() const;
 
-    void setN(uint8_t n) { params().n = n; }
-    void setD(uint8_t d) { params().d = d; }
+    void setN(uint8_t n);
+    void setD(uint8_t d);
 
   private:
     Ptr<RosePathParams> mParams;
@@ -385,13 +285,12 @@ class PhyllotaxisPath : public XYPathGenerator {
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
     PhyllotaxisPath(
-        const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>())
-        : mParams(p) {}
+        const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>());
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "PhyllotaxisPath"; }
+    const Str name() const override;
 
-    PhyllotaxisParams &params() { return *mParams; }
-    const PhyllotaxisParams &params() const { return *mParams; }
+    PhyllotaxisParams &params();
+    const PhyllotaxisParams &params() const;
 
   private:
     Ptr<PhyllotaxisParams> mParams;
@@ -404,20 +303,19 @@ class GielisCurvePath : public XYPathGenerator {
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
     GielisCurvePath(
-        const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>())
-        : mParams(p) {}
+        const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>());
     point_xy_float compute(float alpha) override;
-    const Str name() const override { return "GielisCurvePath"; }
+    const Str name() const override;
 
-    GielisCurveParams &params() { return *mParams; }
-    const GielisCurveParams &params() const { return *mParams; }
+    GielisCurveParams &params();
+    const GielisCurveParams &params() const;
 
-    void setA(float a) { params().a = a; }
-    void setB(float b) { params().b = b; }
-    void setM(float m) { params().m = m; }
-    void setN1(float n1) { params().n1 = n1; }
-    void setN2(float n2) { params().n2 = n2; }
-    void setN3(float n3) { params().n3 = n3; }
+    void setA(float a);
+    void setB(float b);
+    void setM(float m);
+    void setN1(float n1);
+    void setN2(float n2);
+    void setN3(float n3);
 
   private:
     Ptr<GielisCurveParams> mParams;
