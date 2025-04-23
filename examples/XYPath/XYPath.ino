@@ -80,7 +80,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
     speed.addCallback([](float value) {
-         FASTLED_WARN("Speed: " << value);
+        time_warp.setSpeed(speed.value());
     });
 
     // Initialize wave simulation. Please don't use static constructors, keep it
@@ -104,7 +104,6 @@ void clearLeds() { memset(leds, 0, NUM_LEDS * sizeof(CRGB)); }
 void loop() {
     // Your code here
     clearLeds();
-    time_warp.setSpeed(speed.value());
     const uint32_t now = millis();
     uint32_t now_warped = time_warp.update(now);
     shapeProgress.set_max_clamp(maxAnimation.value());
