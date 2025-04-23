@@ -62,6 +62,16 @@ public:
         return true;
     }
 
+    bool erase(const Key &key) {
+        return remove(key);
+    }
+
+    void clear() {
+        _buckets.assign(_buckets.size(), Entry{});
+        for (auto &e : _buckets) e.state = EntryState::Empty;
+        _size = _tombstones = 0;
+    }
+
     // find pointer to value or nullptr
     T* find(const Key &key) {
         auto idx = find_index(key);
