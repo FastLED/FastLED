@@ -4,15 +4,15 @@
 
 namespace fl {
 
-template<typename... Args>
-class FunctionList {
-private:
-    using FunctionType = Function<void(Args...)>;
+
+template<typename FunctionType>
+class FunctionListBase {
+protected:
     fl::vector<FunctionType> mFunctions;
 
 public:
-    FunctionList() = default;
-    ~FunctionList() = default;
+    FunctionListBase() = default;
+    ~FunctionListBase() = default;
 
     void add(FunctionType function) {
         mFunctions.push_back(function);
@@ -24,40 +24,27 @@ public:
 
     void clear() {
         mFunctions.clear();
-    }
-    void invoke(Args... args) {
-        for (const auto &function : mFunctions) {
-            // function(std::forward<Args>(args)...);
-            function(args...);
-        }
     }
 };
 
 
-class FunctionListVoid {
-private:
-    using FunctionType = Function<void()>;
-    fl::vector<FunctionType> mFunctions;
-
-public:
-    FunctionListVoid() = default;
-    ~FunctionListVoid() = default;
-
-    void add(FunctionType function) {
-        mFunctions.push_back(function);
-    }
-
-    void remove(FunctionType function) {
-        mFunctions.erase(function);
-    }
-
-    void clear() {
-        mFunctions.clear();
-    }
-
-    void invoke() {
-        for (const auto &function : mFunctions) {
+template<typename... Args>
+class FunctionList : public FunctionListBase<Function<void(Args...)>> {
+    public:
+    void invoke(Args... args) {
+        for (const auto &function : this->mFunctions) {
             // function(std::forward<Args>(args)...);
+            function(args...);
+        }
+    }
+
+};
+
+template<>
+class FunctionList<void> : public FunctionListBase<Function<void()>> {
+    public:
+    void invoke() {
+        for (const auto &function : this->mFunctions) {
             function();
         }
     }
