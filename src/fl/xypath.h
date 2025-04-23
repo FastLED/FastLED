@@ -38,25 +38,31 @@ FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(LissajousPath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
+FASTLED_SMART_PTR(LinePathParams);
+
 class XYPathGenerator : public Referent {
   public:
     virtual const Str name() const = 0;
     virtual point_xy_float compute(float alpha) = 0;
 };
 
-struct LinePathParams {
+struct XYPathParams: public Referent {
+    TransformFloat transform;
+};
+
+struct LinePathParams: public XYPathParams {
     float x0 = -1.0f;  // Start x coordinate
     float y0 = 0.0f;   // Start y coordinate
     float x1 = 1.0f;   // End x coordinate
     float y1 = 0.0f;   // End y coordinate
 };
 
-struct PhyllotaxisParams {
+struct PhyllotaxisParams: public XYPathParams {
     float c = 4.0f;       // Scaling factor
     float angle = 137.5f; // Divergence angle in degrees
 };
 
-struct GielisCurveParams {
+struct GielisCurveParams: public XYPathParams {
     float a = 1.0f;    // Scaling parameter a
     float b = 1.0f;    // Scaling parameter b
     float m = 3.0f;    // Symmetry parameter (number of rotational symmetries)
@@ -73,17 +79,18 @@ class XYPath : public Referent {
     }
 
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
-        LinePathParams params;
+        LinePathParamsPtr p = LinePathParamsPtr::New();
+        auto& params = *p;
         params.x0 = x0;
         params.y0 = y0;
         params.x1 = x1;
         params.y1 = y1;
-        auto path = LinePathPtr::New(params);
+        auto path = LinePathPtr::New(p);
         return XYPathPtr::New(path);
     }
     
-    static XYPathPtr NewLinePath(const LinePathParams &params = LinePathParams()) {
-        auto path = LinePathPtr::New(params);
+    static XYPathPtr NewLinePath(const Ptr<LinePathParams>& params = NewPtr<LinePathParams>()) {
+        auto path = NewPtr<LinePath>(params);
         return XYPathPtr::New(path);
     }
     static XYPathPtr NewCirclePath() {
@@ -321,18 +328,19 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParams &p = LinePathParams());
+    LinePath(const LinePathParamsPtr& params = NewPtr<LinePathParams>())
+        : mParams(params) {};
     LinePath(float x0, float y0, float x1, float y1);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "LinePath"; }
     void set(float x0, float y0, float x1, float y1);
     void set(const LinePathParams &p);
     
-    LinePathParams& params() { return mParams; }
-    const LinePathParams& params() const { return mParams; }
+    LinePathParams& params() { return *mParams; }
+    const LinePathParams& params() const { return *mParams; }
 
   private:
-    LinePathParams mParams;
+    Ptr<LinePathParams> mParams;
 };
 
 #if 0
