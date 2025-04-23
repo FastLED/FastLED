@@ -177,11 +177,10 @@ class XYPath : public Referent {
         return out;
     }
 
-    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat())
-        : mPath(path) {
-        mPathRenderer = XYPathRendererPtr::New(path, transform);
-    }
-    point_xy_float at(float alpha) ;
+    XYPath(XYPathGeneratorPtr path,
+           TransformFloat transform = TransformFloat());
+    virtual ~XYPath();
+    point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
     void rasterize(float from, float to, int steps, XYRasterSparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
@@ -194,6 +193,7 @@ class XYPath : public Referent {
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height);
+    TransformFloat &transform();
 
   private:
     XYPathGeneratorPtr mPath;
@@ -202,28 +202,6 @@ class XYPath : public Referent {
 
 class XYPathRenderer : public Referent {
   public:
-    Str name() { return mPath->name(); }
-
-    // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
-    //                                          float delta, uint16_t steps = 0)
-    //                                          {
-    //     return LissajousPathPtr::New(a, b, delta, steps);
-    // }
-    // static PhyllotaxisPathPtr NewPhyllotaxisPath(uint16_t count, float angle,
-    //                                             uint16_t steps = 0) {
-    //     return PhyllotaxisPathPtr::New(count, angle, steps);
-    // }
-
-    // static GielisCurvePathPtr NewGielisCurvePath(uint8_t m, float a, float b,
-    //                                              float n1, float n2, float
-    //                                              n3, uint16_t steps = 0) {
-    //     return GielisCurvePathPtr::New(m, a, b, n1, n2, n3, steps);
-    // }
-
-    // static CatmullRomPathPtr NewCatmullRomPath(uint16_t steps = 0) {
-    //     return CatmullRomPathPtr::New(steps);
-    // }
-
     XYPathRenderer(XYPathGeneratorPtr path,
                    TransformFloat transform = TransformFloat());
     point_xy_float at(float alpha) { return at(alpha, mTransform); }
@@ -232,7 +210,6 @@ class XYPathRenderer : public Referent {
 
     void rasterize(float from, float to, int steps, XYRasterSparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
-    ;
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {

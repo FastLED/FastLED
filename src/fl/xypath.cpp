@@ -19,6 +19,38 @@ uint8_t to_uint8(float f) {
 }
 } // namespace
 
+point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
+    // return compute_float(alpha, tx);
+    return mPathRenderer->at(alpha, tx);
+}
+
+void XYPath::setDrawBounds(uint16_t width, uint16_t height) {
+    mPathRenderer->setDrawBounds(width, height);
+}
+
+void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
+
+Str XYPath::name() const { return mPath->name(); }
+Tile2x2_u8 XYPath::at_subpixel(float alpha) {
+    return mPathRenderer->at_subpixel(alpha);
+}
+
+void XYPath::rasterize(float from, float to, int steps, XYRasterSparse &raster,
+                       function<uint8_t(float)> *optional_alpha_gen) {
+    mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
+}
+
+point_xy_float XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
+
+TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
+
+XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
+    : mPath(path) {
+    mPathRenderer = XYPathRendererPtr::New(path, transform);
+}
+
+XYPath::~XYPath() {}
+
 XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path,
                                TransformFloat transform)
     : mPath(path), mTransform(transform) {}
@@ -256,28 +288,5 @@ void XYPathRenderer::rasterize(
         raster.rasterize(tile);
     }
 }
-
-point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
-    // return compute_float(alpha, tx);
-    return mPathRenderer->at(alpha, tx);
-}
-
-void XYPath::setDrawBounds(uint16_t width, uint16_t height) {
-    mPathRenderer->setDrawBounds(width, height);
-}
-
-void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
-
-Str XYPath::name() const { return mPath->name(); }
-Tile2x2_u8 XYPath::at_subpixel(float alpha) {
-    return mPathRenderer->at_subpixel(alpha);
-}
-
-void XYPath::rasterize(float from, float to, int steps, XYRasterSparse &raster,
-                       function<uint8_t(float)> *optional_alpha_gen) {
-    mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
-}
-
-point_xy_float XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
 
 } // namespace fl
