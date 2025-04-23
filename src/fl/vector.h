@@ -1,16 +1,48 @@
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 
-#include "inplacenew.h"
+#include "fl/insert_result.h"
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
-#include "fl/insert_result.h"
+#include "inplacenew.h"
 
 namespace fl {
 
+template <typename T, size_t N> struct InlinedMemoryBlock {
+    // using MemoryType = uinptr_t;
+    typedef uint32_t MemoryType;
+    enum {
+        kTotalBytes = N * sizeof(T),
+        kAlign = sizeof(MemoryType),
+        kExtraSize =
+            (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
+    };
+
+    // uint32_t mRaw[N * sizeof(T)/sizeof(MemoryType) + kExtraSize];
+    // align this to the size of MemoryType.
+    // uint32_t mMemoryBlock[kTotalSize] = {0};
+    MemoryType mMemoryBlock[kTotalBytes / sizeof(MemoryType) + kExtraSize] = {
+        0};
+
+    T *memory() {
+        MemoryType *begin = &mMemoryBlock[0];
+        uintptr_t shift_up =
+            reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        MemoryType *raw = begin + shift_up;
+        return reinterpret_cast<T *>(raw);
+    }
+
+    const T *memory() const {
+        const MemoryType *begin = &mMemoryBlock[0];
+        const uintptr_t shift_up =
+            reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        const MemoryType *raw = begin + shift_up;
+        return reinterpret_cast<const T *>(raw);
+    }
+};
 
 // A fixed sized vector. The user is responsible for making sure that the
 // inserts do not exceed the capacity of the vector, otherwise they will fail.
@@ -19,96 +51,60 @@ namespace fl {
 //
 // UPDATE: Looks like there's some bugs with removing and shifting
 // elements. Please avoid using this class for now until it's fixed.
-template<typename T, size_t N>
-class FixedVector {
-private:
+template <typename T, size_t N> class FixedVector {
+  private:
+    InlinedMemoryBlock<T, N> mMemoryBlock;
 
-    using MemoryType = uint32_t;
-    enum {
-        kTotalBytes = N * sizeof(T),
-        kAlign = sizeof(MemoryType),
-        kExtraSize = (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
-    };
+    T *memory() { return mMemoryBlock.memory(); }
 
-    // uint32_t mRaw[N * sizeof(T)/sizeof(MemoryType) + kExtraSize];
-    // align this to the size of MemoryType.
-    // uint32_t mMemoryBlock[kTotalSize] = {0};
-    uint32_t mMemoryBlock[kTotalBytes / sizeof(MemoryType) + kExtraSize] = {0};
-    size_t current_size = 0;
+    const T *memory() const { return mMemoryBlock.memory(); }
 
-    T* memory() {
-        uint32_t* begin = &mMemoryBlock[0];
-        uintptr_t shift_up = reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
-        uint32_t* raw = begin + shift_up;
-        return reinterpret_cast<T*>(raw);
-    }
-
-    const T* memory() const {
-        const uint32_t* begin = &mMemoryBlock[0];
-        const uintptr_t shift_up = reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
-        const uint32_t* raw = begin + shift_up;
-        return reinterpret_cast<const T*>(raw);
-    }
-
-public:
-    typedef T* iterator;
-    typedef const T* const_iterator;
+  public:
+    typedef T *iterator;
+    typedef const T *const_iterator;
     // Constructor
     constexpr FixedVector() : current_size(0) {}
 
-    FixedVector(const T (&values)[N]) : current_size(N) {
-        assign(values, N);
-    }
+    FixedVector(const T (&values)[N]) : current_size(N) { assign(values, N); }
 
-    template<size_t M>
-    FixedVector(const T (&values)[M]) : current_size(M) {
+    template <size_t M> FixedVector(const T (&values)[M]) : current_size(M) {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign(values, M);
     }
 
     // Destructor
-    ~FixedVector() {
-        clear();
-    }
+    ~FixedVector() { clear(); }
 
     // Array subscript operator
-    T& operator[](size_t index) {
-        return memory()[index];
-    }
+    T &operator[](size_t index) { return memory()[index]; }
 
     // Const array subscript operator
-    const T& operator[](size_t index) const {
+    const T &operator[](size_t index) const {
         if (index >= current_size) {
-            const T* out = nullptr;
-            return *out;  // Cause a nullptr dereference
+            const T *out = nullptr;
+            return *out; // Cause a nullptr dereference
         }
         return memory()[index];
     }
 
     // Get the current size of the vector
-    constexpr size_t size() const {
-        return current_size;
-    }
+    constexpr size_t size() const { return current_size; }
 
-    constexpr bool empty() const {
-        return current_size == 0;
-    }
+    constexpr bool empty() const { return current_size == 0; }
 
     // Get the capacity of the vector
-    constexpr size_t capacity() const {
-        return N;
-    }
+    constexpr size_t capacity() const { return N; }
 
     // Add an element to the end of the vector
-    void push_back(const T& value) {
+    void push_back(const T &value) {
         if (current_size < N) {
-            void* mem = &memory()[current_size];
+            void *mem = &memory()[current_size];
             new (mem) T(value);
             ++current_size;
         }
     }
 
-    void assign(const T* values, size_t count) {
+    void assign(const T *values, size_t count) {
         clear();
         for (size_t i = 0; i < count; ++i) {
             push_back(values[i]);
@@ -143,7 +139,8 @@ public:
             pos->~T();
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
-                new (p) T(*(p + 1)); // Use copy constructor instead of std::move
+                new (p)
+                    T(*(p + 1)); // Use copy constructor instead of std::move
                 (p + 1)->~T();
             }
             --current_size;
@@ -151,7 +148,7 @@ public:
         return pos;
     }
 
-    iterator erase(const T& value) {
+    iterator erase(const T &value) {
         iterator it = find(value);
         if (it != end()) {
             erase(it);
@@ -159,7 +156,7 @@ public:
         return it;
     }
 
-    iterator find(const T& value) {
+    iterator find(const T &value) {
         for (iterator it = begin(); it != end(); ++it) {
             if (*it == value) {
                 return it;
@@ -168,8 +165,7 @@ public:
         return end();
     }
 
-    template<typename Predicate>
-    iterator find_if(Predicate pred) {
+    template <typename Predicate> iterator find_if(Predicate pred) {
         for (iterator it = begin(); it != end(); ++it) {
             if (pred(*it)) {
                 return it;
@@ -178,12 +174,12 @@ public:
         return end();
     }
 
-    bool insert(iterator pos, const T& value) {
+    bool insert(iterator pos, const T &value) {
         if (current_size < N) {
             // shift all elements to the right
             // for (iterator p = end(); p != pos; --p) {
-            //     new (p) T(*(p - 1)); // Use copy constructor instead of std::move
-            //     (p - 1)->~T();
+            //     new (p) T(*(p - 1)); // Use copy constructor instead of
+            //     std::move (p - 1)->~T();
             // }
             // new (pos) T(value);
             // shift all element from pos to end to the right
@@ -191,11 +187,12 @@ public:
                 // LOOKS LIKE THERE ARE BUGS AROUND THIS INSERT FUNCTION.
                 // I'VE TRIED TO UPGRADE THE CODE TO USE TEMPORARIES BUT
                 // IT SEEMS TO NOT WORK. IT COULD POSSIBLY DO WITH ALIGNMENT
-                // OF THE DATA. THIS IMPL HAS ISSUES WITH THE NEW PLACE OPERATION.
+                // OF THE DATA. THIS IMPL HAS ISSUES WITH THE NEW PLACE
+                // OPERATION.
                 T temp = *(p - 1);
-                (p)->~T();  // Destroy the current element
+                (p)->~T(); // Destroy the current element
                 // Clear the memory
-                void* vp = static_cast<void*>(p);
+                void *vp = static_cast<void *>(p);
                 memset(vp, 0, sizeof(T));
                 new (p) T(temp); // Use copy constructor instead of std::move
                 //(p - 1)->~T();
@@ -208,7 +205,7 @@ public:
         return false;
     }
 
-    const_iterator find(const T& value) const {
+    const_iterator find(const T &value) const {
         for (const_iterator it = begin(); it != end(); ++it) {
             if (*it == value) {
                 return it;
@@ -217,76 +214,69 @@ public:
         return end();
     }
 
-    iterator data() {
-        return begin();
-    }
+    iterator data() { return begin(); }
 
-    const_iterator data() const {
-        return begin();
-    }
+    const_iterator data() const { return begin(); }
 
-    bool has(const T& value) const {
-        return find(value) != end();
-    }
+    bool has(const T &value) const { return find(value) != end(); }
 
     // Access to first and last elements
-    T& front() {
-        return memory()[0];
-    }
+    T &front() { return memory()[0]; }
 
-    const T& front() const {
-        return memory()[0];
-    }
+    const T &front() const { return memory()[0]; }
 
-    T& back() {
-        return memory()[current_size - 1];
-    }
+    T &back() { return memory()[current_size - 1]; }
 
-    const T& back() const {
-        return memory()[current_size - 1];
-    }
+    const T &back() const { return memory()[current_size - 1]; }
 
     // Iterator support
     iterator begin() { return &memory()[0]; }
     const_iterator begin() const { return &memory()[0]; }
     iterator end() { return &memory()[current_size]; }
     const_iterator end() const { return &memory()[current_size]; }
+
+  private:
+    size_t current_size = 0;
 };
 
-
-template<typename T>
-class HeapVector {
-private:
+template <typename T> class HeapVector {
+  private:
     fl::scoped_array<T> mArray;
-    
+
     size_t mCapacity = 0;
     size_t mSize = 0;
 
-    public:
-    typedef T* iterator;
-    typedef const T* const_iterator;
+  public:
+    typedef T *iterator;
+    typedef const T *const_iterator;
 
     struct reverse_iterator {
         iterator it;
-        reverse_iterator(iterator i): it(i) {}
-        T& operator*() { return *(it - 1); }
-        reverse_iterator& operator++() { --it; return *this; }
-        bool operator!=(const reverse_iterator& other) const { return it != other.it; }
-    }; 
+        reverse_iterator(iterator i) : it(i) {}
+        T &operator*() { return *(it - 1); }
+        reverse_iterator &operator++() {
+            --it;
+            return *this;
+        }
+        bool operator!=(const reverse_iterator &other) const {
+            return it != other.it;
+        }
+    };
 
     // Constructor
-    HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
+    HeapVector(size_t size = 0, const T &value = T()) : mCapacity(size) {
         mArray.reset(new T[mCapacity]());
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
         }
         mSize = size;
     }
-    HeapVector(const HeapVector<T>& other) {
+    HeapVector(const HeapVector<T> &other) {
         reserve(other.size());
         assign(other.begin(), other.end());
     }
-    HeapVector& operator=(const HeapVector<T>& other) { // cppcheck-suppress operatorEqVarError
+    HeapVector &operator=(
+        const HeapVector<T> &other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             assign(other.begin(), other.end());
         }
@@ -294,17 +284,15 @@ private:
     }
 
     // Destructor
-    ~HeapVector() {
-        clear();
-    }
+    ~HeapVector() { clear(); }
 
     void ensure_size(size_t n) {
         if (n > mCapacity) {
-            size_t new_capacity = (3*mCapacity) / 2;
+            size_t new_capacity = (3 * mCapacity) / 2;
             if (new_capacity < n) {
                 new_capacity = n;
             }
-            T* ptr = new T[new_capacity]();
+            T *ptr = new T[new_capacity]();
             fl::scoped_array<T> new_array(ptr);
             for (size_t i = 0; i < mSize; ++i) {
                 new_array[i] = mArray[i];
@@ -333,7 +321,7 @@ private:
         swap(temp);
     }
 
-    void resize(size_t n, const T& value) {
+    void resize(size_t n, const T &value) {
         mArray.reset();
         mArray.reset(new T[n]());
         for (size_t i = 0; i < n; ++i) {
@@ -344,29 +332,19 @@ private:
     }
 
     // Array access operators
-    T& operator[](size_t index) {
-        return mArray[index];
-    }
+    T &operator[](size_t index) { return mArray[index]; }
 
-    const T& operator[](size_t index) const {
-        return mArray[index];
-    }
+    const T &operator[](size_t index) const { return mArray[index]; }
 
     // Capacity and size methods
-    size_t size() const {
-        return mSize;
-    }
+    size_t size() const { return mSize; }
 
-    bool empty() const {
-        return mSize == 0;
-    }
+    bool empty() const { return mSize == 0; }
 
-    size_t capacity() const {
-        return mCapacity;
-    }
+    size_t capacity() const { return mCapacity; }
 
     // Element addition/removal
-    void push_back(const T& value) {
+    void push_back(const T &value) {
         ensure_size(mSize + 1);
         if (mSize < mCapacity) {
             mArray[mSize] = value;
@@ -393,34 +371,21 @@ private:
     iterator end() { return &mArray[mSize]; }
     const_iterator end() const { return &mArray[mSize]; }
 
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
 
-    reverse_iterator rbegin() {
-        return reverse_iterator(end());
-    }
-
-    reverse_iterator rend() {
-        return reverse_iterator(begin());
-    }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
 
     // Element access
-    T& front() {
-        return mArray[0];
-    }
+    T &front() { return mArray[0]; }
 
-    const T& front() const {
-        return mArray[0];
-    }
+    const T &front() const { return mArray[0]; }
 
-    T& back() {
-        return mArray[mSize - 1];
-    }
+    T &back() { return mArray[mSize - 1]; }
 
-    const T& back() const {
-        return mArray[mSize - 1];
-    }
+    const T &back() const { return mArray[mSize - 1]; }
 
     // Search and modification
-    iterator find(const T& value) {
+    iterator find(const T &value) {
         for (iterator it = begin(); it != end(); ++it) {
             if (*it == value) {
                 return it;
@@ -429,7 +394,7 @@ private:
         return end();
     }
 
-    const_iterator find(const T& value) const {
+    const_iterator find(const T &value) const {
         for (const_iterator it = begin(); it != end(); ++it) {
             if (*it == value) {
                 return it;
@@ -438,8 +403,7 @@ private:
         return end();
     }
 
-    template<typename Predicate>
-    iterator find_if(Predicate pred) {
+    template <typename Predicate> iterator find_if(Predicate pred) {
         for (iterator it = begin(); it != end(); ++it) {
             if (pred(*it)) {
                 return it;
@@ -448,11 +412,9 @@ private:
         return end();
     }
 
-    bool has(const T& value) const {
-        return find(value) != end();
-    }
+    bool has(const T &value) const { return find(value) != end(); }
 
-    bool erase(iterator pos, T* out_value = nullptr) {
+    bool erase(iterator pos, T *out_value = nullptr) {
         if (pos == end() || empty()) {
             return false;
         }
@@ -468,18 +430,18 @@ private:
         return true;
     }
 
-    void erase(const T& value) {
+    void erase(const T &value) {
         iterator it = find(value);
         if (it != end()) {
             erase(it);
         }
     }
 
-    void swap(HeapVector<T>& other) {
-        T* temp = mArray.release();
+    void swap(HeapVector<T> &other) {
+        T *temp = mArray.release();
         size_t temp_size = mSize;
         size_t temp_capacity = mCapacity;
-        T* temp2 = other.mArray.release();
+        T *temp2 = other.mArray.release();
         mArray.reset(temp2);
         other.mArray.reset(temp);
         mSize = other.mSize;
@@ -494,17 +456,16 @@ private:
         *b = temp;
     }
 
-    bool full() const {
-        return mSize >= mCapacity;
-    }
+    bool full() const { return mSize >= mCapacity; }
 
-    bool insert(iterator pos, const T& value) {
+    bool insert(iterator pos, const T &value) {
         // TODO: Introduce mMaxSize (and move it from SortedVector to here)
         // push back and swap into place.
         size_t target_idx = pos - begin();
         push_back(value);
         auto last = end() - 1;
-        for (size_t curr_idx = last - begin(); curr_idx > target_idx; --curr_idx) {
+        for (size_t curr_idx = last - begin(); curr_idx > target_idx;
+             --curr_idx) {
             auto first = begin() + curr_idx - 1;
             auto second = begin() + curr_idx;
             swap(first, second);
@@ -521,7 +482,7 @@ private:
     //     assign(values, values + count);
     // }
 
-    void assign(size_t new_cap, const T& value) {
+    void assign(size_t new_cap, const T &value) {
         clear();
         reserve(new_cap);
         while (size() < new_cap) {
@@ -537,15 +498,11 @@ private:
         }
     }
 
-    T* data() {
-        return mArray.get();
-    }
+    T *data() { return mArray.get(); }
 
-    const T* data() const {
-        return mArray.get();
-    }
+    const T *data() const { return mArray.get(); }
 
-    bool operator==(const HeapVector<T>& other) const {
+    bool operator==(const HeapVector<T> &other) const {
         if (size() != other.size()) {
             return false;
         }
@@ -557,24 +514,22 @@ private:
         return true;
     }
 
-    bool operator!=(const HeapVector<T>& other) const {
+    bool operator!=(const HeapVector<T> &other) const {
         return !(*this == other);
     }
 };
 
-
-template <typename T, typename LessThan>
-class SortedHeapVector {
-private:
+template <typename T, typename LessThan> class SortedHeapVector {
+  private:
     HeapVector<T> mArray;
     LessThan mLess;
     size_t mMaxSize = size_t(-1);
 
-public:
+  public:
     typedef typename HeapVector<T>::iterator iterator;
     typedef typename HeapVector<T>::const_iterator const_iterator;
 
-    SortedHeapVector(LessThan less=LessThan()): mLess(less) {}
+    SortedHeapVector(LessThan less = LessThan()) : mLess(less) {}
 
     void setMaxSize(size_t n) {
         if (mMaxSize == n) {
@@ -589,16 +544,12 @@ public:
         }
     }
 
-    ~SortedHeapVector() {
-        mArray.clear();
-    }
+    ~SortedHeapVector() { mArray.clear(); }
 
-    void reserve(size_t n) {
-        mArray.reserve(n);
-    }
+    void reserve(size_t n) { mArray.reserve(n); }
 
     // Insert while maintaining sort order
-    bool insert(const T& value, InsertResult* result = nullptr) {
+    bool insert(const T &value, InsertResult *result = nullptr) {
         // Find insertion point using binary search
         iterator pos = lower_bound(value);
         if (pos != end() && !mLess(value, *pos) && !mLess(*pos, value)) {
@@ -607,7 +558,7 @@ public:
                 // *result = kExists;
                 *result = InsertResult::kExists;
             }
-            
+
             return false;
         }
         if (mArray.size() >= mMaxSize) {
@@ -625,14 +576,15 @@ public:
         return true;
     }
 
-    // Find the first position where we should insert value to maintain sort order
-    iterator lower_bound(const T& value) {
+    // Find the first position where we should insert value to maintain sort
+    // order
+    iterator lower_bound(const T &value) {
         iterator first = mArray.begin();
         iterator last = mArray.end();
-        
+
         while (first != last) {
             iterator mid = first + (last - first) / 2;
-            
+
             if (mLess(*mid, value)) {
                 first = mid + 1;
             } else {
@@ -642,12 +594,12 @@ public:
         return first;
     }
 
-    const_iterator lower_bound(const T& value) const {
-        return const_cast<SortedHeapVector*>(this)->lower_bound(value);
+    const_iterator lower_bound(const T &value) const {
+        return const_cast<SortedHeapVector *>(this)->lower_bound(value);
     }
 
     // Lookup operations
-    iterator find(const T& value) {
+    iterator find(const T &value) {
         iterator pos = lower_bound(value);
         if (pos != end() && !mLess(value, *pos) && !mLess(*pos, value)) {
             return pos;
@@ -655,20 +607,16 @@ public:
         return end();
     }
 
-    void swap(SortedHeapVector& other) {
-        mArray.swap(other.mArray);
+    void swap(SortedHeapVector &other) { mArray.swap(other.mArray); }
+
+    const_iterator find(const T &value) const {
+        return const_cast<SortedHeapVector *>(this)->find(value);
     }
 
-    const_iterator find(const T& value) const {
-        return const_cast<SortedHeapVector*>(this)->find(value);
-    }
-
-    bool has(const T& value) const {
-        return find(value) != end();
-    }
+    bool has(const T &value) const { return find(value) != end(); }
 
     // Removal operations
-    bool erase(const T& value) {
+    bool erase(const T &value) {
         iterator it = find(value);
         if (it != end()) {
             return mArray.erase(it);
@@ -676,9 +624,7 @@ public:
         return false;
     }
 
-    bool erase(iterator pos) {
-        return mArray.erase(pos);
-    }
+    bool erase(iterator pos) { return mArray.erase(pos); }
 
     // Basic container operations
     size_t size() const { return mArray.size(); }
@@ -693,14 +639,14 @@ public:
     }
 
     // Element access
-    T& operator[](size_t index) { return mArray[index]; }
-    const T& operator[](size_t index) const { return mArray[index]; }
-    
-    T& front() { return mArray.front(); }
-    const T& front() const { return mArray.front(); }
-    
-    T& back() { return mArray.back(); }
-    const T& back() const { return mArray.back(); }
+    T &operator[](size_t index) { return mArray[index]; }
+    const T &operator[](size_t index) const { return mArray[index]; }
+
+    T &front() { return mArray.front(); }
+    const T &front() const { return mArray.front(); }
+
+    T &back() { return mArray.back(); }
+    const T &back() const { return mArray.back(); }
 
     // Iterators
     iterator begin() { return mArray.begin(); }
@@ -709,50 +655,37 @@ public:
     const_iterator end() const { return mArray.end(); }
 
     // Raw data access
-    T* data() { return mArray.data(); }
-    const T* data() const { return mArray.data(); }
+    T *data() { return mArray.data(); }
+    const T *data() const { return mArray.data(); }
 };
 
-
-template<typename T, size_t INLINED_SIZE>
-class InlinedVector {
-public:
+template <typename T, size_t INLINED_SIZE> class InlinedVector {
+  public:
     using iterator = typename FixedVector<T, INLINED_SIZE>::iterator;
-    using const_iterator = typename FixedVector<T, INLINED_SIZE>::const_iterator;
+    using const_iterator =
+        typename FixedVector<T, INLINED_SIZE>::const_iterator;
 
     InlinedVector() = default;
 
     // Get current size
-    size_t size() const {
-        return mUsingHeap ? mHeap.size() : mFixed.size();
-    }
+    size_t size() const { return mUsingHeap ? mHeap.size() : mFixed.size(); }
 
-    bool empty() const {
-        return size() == 0;
-    }
+    bool empty() const { return size() == 0; }
 
-    T* data() {
-        return mUsingHeap ? mHeap.data() : mFixed.data();
-    }
+    T *data() { return mUsingHeap ? mHeap.data() : mFixed.data(); }
 
-    const T* data() const {
-        return mUsingHeap ? mHeap.data() : mFixed.data();
-    }
+    const T *data() const { return mUsingHeap ? mHeap.data() : mFixed.data(); }
 
     // Element access
-    T& operator[](size_t idx) {
-        return mUsingHeap ? mHeap[idx] : mFixed[idx];
-    }
-    const T& operator[](size_t idx) const {
+    T &operator[](size_t idx) { return mUsingHeap ? mHeap[idx] : mFixed[idx]; }
+    const T &operator[](size_t idx) const {
         return mUsingHeap ? mHeap[idx] : mFixed[idx];
     }
 
-    bool full() const {
-        return INLINED_SIZE == size();
-    }
+    bool full() const { return INLINED_SIZE == size(); }
 
     // Add an element
-    void push_back(const T& value) {
+    void push_back(const T &value) {
         if (!mUsingHeap) {
             if (mFixed.size() < INLINED_SIZE) {
                 mFixed.push_back(value);
@@ -760,7 +693,7 @@ public:
             }
             // overflow: move inline data into heap
             mHeap.reserve(INLINED_SIZE * 2);
-            for (auto& v : mFixed) {
+            for (auto &v : mFixed) {
                 mHeap.push_back(v);
             }
             mFixed.clear();
@@ -789,12 +722,8 @@ public:
     }
 
     // Iterators
-    iterator begin() {
-        return mUsingHeap ? mHeap.begin() : mFixed.begin();
-    }
-    iterator end() {
-        return mUsingHeap ? mHeap.end() : mFixed.end();
-    }
+    iterator begin() { return mUsingHeap ? mHeap.begin() : mFixed.begin(); }
+    iterator end() { return mUsingHeap ? mHeap.end() : mFixed.end(); }
     const_iterator begin() const {
         return mUsingHeap ? mHeap.begin() : mFixed.begin();
     }
@@ -802,25 +731,22 @@ public:
         return mUsingHeap ? mHeap.end() : mFixed.end();
     }
 
-private:
-    bool                       mUsingHeap = false;
+  private:
+    bool mUsingHeap = false;
     FixedVector<T, INLINED_SIZE> mFixed;
-    HeapVector<T>                mHeap;
+    HeapVector<T> mHeap;
 };
 
-
-template<typename T>
-using vector = HeapVector<T>;
+template <typename T> using vector = HeapVector<T>;
 
 // these have problems due to the underlying FixedVector
 // implementation.
 #if 1
-template<typename T, size_t INLINED_SIZE>
+template <typename T, size_t INLINED_SIZE>
 using vector_fixed = FixedVector<T, INLINED_SIZE>;
 
-template<typename T, size_t INLINED_SIZE = 64>
+template <typename T, size_t INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
 #endif
 
-
-}  // namespace fl
+} // namespace fl
