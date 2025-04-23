@@ -37,6 +37,20 @@ void UIButton::Listener::onBeginFrame() {
     mOwner->mLastFrameClicked = currentClicked;
 }
 
+void UICheckbox::Listener::onBeginFrame() {
+    UICheckbox& owner = *mOwner;
+    if (!owner.mLastFrameValueValid) {
+        owner.mLastFrameValue = owner.value();
+        owner.mLastFrameValueValid = true;
+        return;
+    }
+    bool value = owner.value();
+    if (value != owner.mLastFrameValue) {
+        owner.mCallbacks.invoke(value);
+        owner.mLastFrameValue = value;
+    }
+}
+
 } // end namespace fl
 
 #pragma GCC diagnostic pop

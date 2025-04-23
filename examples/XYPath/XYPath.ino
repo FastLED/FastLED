@@ -75,6 +75,18 @@ void setupUiCallbacks() {
     speed.addCallback([](float value) { time_warp.setSpeed(speed.value()); });
     maxAnimation.addCallback(
         [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
+
+    trigger.addCallback([]() {
+        // shapeProgress.trigger(millis());
+        FASTLED_WARN("Trigger pressed");
+    });
+    useWaveFx.addCallback([](bool on) {
+        if (on) {
+            FASTLED_WARN("WaveFX enabled");
+        } else {
+            FASTLED_WARN("WaveFX disabled");
+        }
+    });
 }
 
 void setup() {

@@ -145,7 +145,7 @@ class UICheckbox : public UICheckboxImpl {
   public:
     using Super = UICheckboxImpl;
     UICheckbox(const char *name, bool value = false)
-        : UICheckboxImpl(name, value) {}
+        : UICheckboxImpl(name, value), mListener(this) {}
     ~UICheckbox() {}
 
     operator bool() const { return value(); }
@@ -155,8 +155,41 @@ class UICheckbox : public UICheckboxImpl {
         return *this;
     }
 
+    void addCallback(Function<void(bool)> callback) {
+        mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+    }
+    void clearCallbacks() { mCallbacks.clear(); }
+
+  protected:
+    struct Listener : public EngineEvents::Listener {
+        Listener(UICheckbox* owner) : mOwner(owner) {
+            EngineEvents::addListener(this);
+        }
+        ~Listener() {
+            if (added) {
+                EngineEvents::removeListener(this);
+            }
+        }
+        void addToEngineEventsOnce() {
+            if (added) {
+                return;
+            }
+            EngineEvents::addListener(this);
+            added = true;
+        }
+        void onBeginFrame() override;
+        private:
+            UICheckbox* mOwner;
+            bool added = false;
+    };
+
   private:
     Super &impl() { return *this; }
+    FunctionList<void(bool)> mCallbacks;
+    bool mLastFrameValue = false;
+    bool mLastFrameValueValid = false;
+    Listener mListener;
 };
 
 class UINumberField : public UINumberFieldImpl {
