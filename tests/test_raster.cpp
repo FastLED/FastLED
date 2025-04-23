@@ -12,11 +12,11 @@
 
 using namespace fl;
 
-TEST_CASE("XYRaster simple test") {
+TEST_CASE("XYRasterDense simple test") {
     XYPathPtr path = XYPath::NewPointPath(0, 0);
     path->setDrawBounds(2, 2);
     SubPixel2x2 subpixel = path->at_subpixel(0);
-    XYRaster raster(2, 2);
+    XYRasterDense raster(2, 2);
     SubPixel2x2::Rasterize(Slice<SubPixel2x2>(&subpixel, 1), &raster);
 
     point_xy<int> origin = subpixel.origin();
@@ -35,7 +35,7 @@ TEST_CASE("XYRaster simple test") {
     }
 }
 
-TEST_CASE("XYRaster two unit test") {
+TEST_CASE("XYRasterDense two unit test") {
     XYPathPtr path = XYPath::NewLinePath(-1, -1, 1, 1);
     path->setDrawBounds(4, 4);
     CHECK_EQ(point_xy_float(0.5f, 0.5f), path->at(0.f));
@@ -44,7 +44,7 @@ TEST_CASE("XYRaster two unit test") {
     SubPixel2x2 sp0 = path->at_subpixel(0);
     SubPixel2x2 sp1 = path->at_subpixel(1);
     SubPixel2x2 subpixels[2] = {sp0, sp1};
-    XYRaster raster(4, 4);
+    XYRasterDense raster(4, 4);
     SubPixel2x2::Rasterize(subpixels, &raster);
     REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 5, 5), raster.bounds());
     REQUIRE_EQ(5, raster.width());

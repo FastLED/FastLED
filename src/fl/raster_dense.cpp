@@ -8,19 +8,19 @@
 #include "fl/point.h"
 #include "fl/raster_dense.h"
 #include "fl/subpixel.h"
-#include "fl/xymap.h"
 #include "fl/warn.h"
+#include "fl/xymap.h"
 
 namespace fl {
 
-void XYRaster::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
+void XYRasterDense::draw(const CRGB &color, const XYMap &xymap,
+                         CRGB *out) const {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
-
-void XYRaster::rasterize(const Slice<const SubPixel2x2> &tiles) {    
-    rect_xy<int> *optional_bounds  = nullptr;
+void XYRasterDense::rasterize(const Slice<const SubPixel2x2> &tiles) {
+    rect_xy<int> *optional_bounds = nullptr;
     rect_xy<int> maybe_bounds;
     if (!mWidthHeight.is_zero()) {
         // optional_bounds = &mWidthHeight;

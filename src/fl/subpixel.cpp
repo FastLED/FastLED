@@ -12,7 +12,7 @@ using namespace fl;
 namespace fl {
 
 void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
-                            XYRaster *out_raster,
+                            XYRasterDense *out_raster,
                             rect_xy<int> *optional_bounds) {
     if (tiles.size() == 0) {
         FASTLED_WARN("Rasterize: no tiles");

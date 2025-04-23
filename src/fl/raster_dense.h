@@ -18,11 +18,11 @@ class XYMap;
 class XYDrawUint8Visitor;
 class SubPixel2x2;
 
-class XYRaster {
+class XYRasterDense {
   public:
-    XYRaster() = default;
+    XYRasterDense() = default;
 
-    XYRaster(int width, int height) {
+    XYRasterDense(int width, int height) {
         // mGrid.reset(width, height);
         mOrigin = point_xy<int>(0, 0);
         mWidthHeight = point_xy<int>(
@@ -31,7 +31,7 @@ class XYRaster {
         // the grid still needs to be allocated.
     }
 
-    XYRaster(const XYRaster &) = delete;
+    XYRasterDense(const XYRasterDense &) = delete;
     void reset(const point_xy<int> &origin, uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         mOrigin = origin;
@@ -39,16 +39,16 @@ class XYRaster {
     }
 
     // builder pattern
-    XYRaster &setOrigin(const point_xy<int> &origin) {
+    XYRasterDense &setOrigin(const point_xy<int> &origin) {
         mOrigin = origin;
         return *this;
     }
-    XYRaster &setSize(uint16_t width, uint16_t height) {
+    XYRasterDense &setSize(uint16_t width, uint16_t height) {
         mGrid.reset(width, height);
         return *this;
     }
 
-    XYRaster &reset() {
+    XYRasterDense &reset() {
         mGrid.reset(width(), height());
         return *this;
     }
@@ -79,7 +79,7 @@ class XYRaster {
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor& visitor) const {
+    void draw(const XYMap &xymap, XYVisitor &visitor) const {
         const uint16_t w = width();
         const uint16_t h = height();
         const point_xy<int> origin = this->origin();
@@ -92,7 +92,7 @@ class XYRaster {
                 }
                 uint32_t index = xymap(xx, yy);
                 uint8_t value = at(x, y);
-                if (value > 0) {  // Something wrote here.
+                if (value > 0) { // Something wrote here.
                     point_xy<int> pt = {int(xx), int(yy)};
                     visitor.draw(pt, index, value);
                 }
