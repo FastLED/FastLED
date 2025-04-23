@@ -92,7 +92,7 @@ class Tile2x2_u8 {
     }
 
   private:
-    uint8_t mTile[2][2] = {};
+    uint8_t mTile[2][2] = {0};
     // Subpixels can be rendered outside the viewport so this must be signed.
     point_xy<int> mOrigin;
 };

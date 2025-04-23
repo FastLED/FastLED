@@ -43,14 +43,7 @@ class XYRasterSparse {
 
     void rasterize(const point_xy<int> &pt, uint8_t value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
-        Tile2x2_u8 tile = Tile2x2_u8(pt);
-        tile.at(0, 0) = value;
-        if (mCache.origin() == tile.origin()) {
-            mCache = Tile2x2_u8::Max(mCache, tile);
-            return;
-        }
-        flush();
-        mCache = tile;
+        write(pt, value);
     }
 
     void setSize(uint16_t width, uint16_t height) {
@@ -74,26 +67,13 @@ class XYRasterSparse {
 
     void rasterize(const Slice<const Tile2x2_u8> &tiles);
     void rasterize(const Tile2x2_u8 &tile) {
-        // Slice<const Tile2x2_u8> tiles(&tile, 1);
-        // rasterize(tiles);
-        if (tile.origin() == mCache.origin()) {
-            // Write to the cache.
-            mCache = Tile2x2_u8::Max(mCache, tile);
-            return;
-        }
-        flush();
-        mCache = tile;
+        rasterize_internal(tile);
     }
 
     void rasterize_internal(const Tile2x2_u8 &tile,
                             const rect_xy<int> *optional_bounds = nullptr) ;
 
-    void flush() {
-        if (mCache.maxValue() > 0) {
-            rasterize(Slice<const Tile2x2_u8>(&mCache, 1));
-            mCache = Tile2x2_u8();
-        }
-    }
+
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
@@ -158,7 +138,6 @@ class XYRasterSparse {
     // pixels that are within the bounds of the XYMap.
     template <typename XYVisitor>
     void draw(const XYMap &xymap, XYVisitor &visitor) {
-        flush();  // Flush the cache.
         for (const auto &it : mSparseGrid) {
             auto pt = it.first;
             if (!xymap.has(pt.x, pt.y)) {
@@ -173,13 +152,12 @@ class XYRasterSparse {
     }
     
     void write(const point_xy<int> &pt, uint8_t value) {
-        FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
+        // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
         mSparseGrid.insert(pt, value);
     }
 
   private:
     using HashMap = fl::HashMap<point_xy<int>, uint8_t>;
-    Tile2x2_u8 mCache;
     HashMap mSparseGrid;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;

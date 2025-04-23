@@ -31,8 +31,6 @@ void XYRasterSparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
         // Rasterize the tile.
         rasterize_internal(tile, optional_bounds);
     }
-    rasterize_internal(mCache, optional_bounds);
-    mCache = Tile2x2_u8();
     return;
 
 
