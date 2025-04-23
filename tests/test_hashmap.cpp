@@ -101,15 +101,15 @@ TEST_CASE("Stress insert & rehash behavior") {
     }
 }
 
-// TEST_CASE("Iterator round-trip (if supported)") {
-//     HashMap<int,int> m;
-//     for(int i = 0; i < 20; ++i) m.insert(i, i+100);
+TEST_CASE("Iterator round-trip (if supported)") {
+    HashMap<int,int> m;
+    for(int i = 0; i < 20; ++i) m.insert(i, i+100);
 
-//     std::size_t count = 0;
-//     for(auto & kv : m) {
-//         // kv is a std::pair<const Key&, Value&>
-//         REQUIRE(kv.second == kv.first + 100);
-//         ++count;
-//     }
-//     REQUIRE_EQ(count, m.size());
-// }
+    std::size_t count = 0;
+    for(auto kv : m) {
+        // kv is a std::pair<const Key&, Value&>
+        REQUIRE(kv.second == kv.first + 100);
+        ++count;
+    }
+    REQUIRE_EQ(count, m.size());
+}
