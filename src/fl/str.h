@@ -17,7 +17,7 @@
 #ifndef FASTLED_STR_NEEDS_INT
 
 #if defined(__SAM3X8E__)
-#define FASTLED_STR_NEEDS_INT 0
+#define FASTLED_STR_NEEDS_INT 1
 #elif defined(ESP32)
 #define FASTLED_STR_NEEDS_INT 0
 #else
