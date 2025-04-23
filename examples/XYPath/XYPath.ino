@@ -71,15 +71,18 @@ UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 
 TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
+void setupUiCallbacks() {
+    speed.addCallback([](float value) { time_warp.setSpeed(speed.value()); });
+    maxAnimation.addCallback(
+        [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
+}
+
 void setup() {
     Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
-
-    speed.addCallback([](float value) { time_warp.setSpeed(speed.value()); });
-    maxAnimation.addCallback(
-        [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
+    setupUiCallbacks();
     // Initialize wave simulation. Please don't use static constructors, keep it
     // in setup().
     wave_fx = NewWaveSimulation2D(xyMap);
@@ -144,6 +147,12 @@ void loop() {
         if (a < .04) {
             // shorter tails at first.
             a = map_range<float>(a, 0.0f, .04f, 0.0f, .04f);
+        }
+        float diff_max_alpha = maxAnimation.value() - curr_alpha;
+        if (diff_max_alpha < 0.94) {
+            // shorter tails at the end.
+            a = map_range<float>(a, curr_alpha, maxAnimation.value(),
+                                 curr_alpha, maxAnimation.value());
         }
         uint8_t alpha =
             fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
