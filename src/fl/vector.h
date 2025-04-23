@@ -24,8 +24,6 @@ class FixedVector {
 private:
 
     using MemoryType = uint32_t;
-
-
     enum {
         kTotalBytes = N * sizeof(T),
         kAlign = sizeof(MemoryType),
