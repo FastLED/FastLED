@@ -22,6 +22,8 @@
 #define ESP_IDF_VERSION  ESP_IDF_VERSION_VAL(ESP_IDF_VERSION_MAJOR, \
                                              ESP_IDF_VERSION_MINOR, \
                                              ESP_IDF_VERSION_PATCH)
+
+
 #endif
 #endif
 

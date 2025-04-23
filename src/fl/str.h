@@ -19,7 +19,8 @@
 #if defined(__SAM3X8E__)
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(ESP32)
-#define FASTLED_STR_NEEDS_INT 0
+#include "platforms/esp/esp_version.h"
+#define FASTLED_STR_NEEDS_INT (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0))
 #else
 #define FASTLED_STR_NEEDS_INT 0
 #endif
