@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "fl/ptr.h"
+#include "fl/deprecated.h"
 #include "fl/namespace.h"
 
 namespace fl {
@@ -31,6 +32,7 @@ class TimeWarp: public TimeFunction {
     TimeWarp(uint32_t realTimeNow = 0, float initialTimeScale = 1.0f);
     ~TimeWarp();
     void setSpeed(float speedScale);
+    void setScale(float speed) FASTLED_DEPRECATED("Use setSpeed(...) instead.");  // Deprecated
     float scale() const;
     uint32_t update(uint32_t timeNow) override;
     uint32_t time() const override;

@@ -110,7 +110,7 @@ void loop() {
     FastLED.setBrightness(brightness);
     CRGBPalette16 myPal = getPalette();
     uint32_t now = millis();
-    timeScale.setScale(speedY);
+    timeScale.setSpeed(speedY);
     uint32_t y_speed = timeScale.update(now);
     for (int width = 0; width < WIDTH; width++) {
         for (int height = 0; height < HEIGHT; height++) {

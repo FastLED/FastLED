@@ -89,4 +89,8 @@ void TimeWarp::applyExact(uint32_t timeNow) {
     mRelativeTime -= abs_diff;
 }
 
+
+
+void TimeWarp::setScale(float speed) { mTimeScale = speed; }
+
 }  // namespace fl
