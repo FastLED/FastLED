@@ -178,48 +178,26 @@ class XYPath : public Referent {
     }
 
     XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat())
-        : mPath(path), mTransform(transform) {
+        : mPath(path) {
         mPathRenderer = XYPathRendererPtr::New(path, transform);
     }
-
-    // XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform =
-    // TransformFloat()) {
-    //     mPath = path;
-    //     mTransform = transform;
-    // }
-    point_xy_float at(float alpha) { return at(alpha, mTransform); }
-
+    point_xy_float at(float alpha) ;
     Tile2x2_u8 at_subpixel(float alpha);
-
     void rasterize(float from, float to, int steps, XYRasterSparse &raster,
-                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr) ;
-
+                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
     void setScale(float scale);
-
     Str name() const;
-
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx);
-
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height);
 
-    // XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform =
-    // TransformFloat()) {
-    //     mPath = path;
-    //     mTransform = transform;
-    // }
-
   private:
     XYPathGeneratorPtr mPath;
     XYPathRendererPtr mPathRenderer;
-    TransformFloat mTransform;
-    TransformFloat mGridTransform;
-    bool mDrawBoundsSet = false;
-    point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
 class XYPathRenderer : public Referent {

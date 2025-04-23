@@ -278,4 +278,6 @@ void XYPath::rasterize(float from, float to, int steps, XYRasterSparse &raster,
     mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
 
+point_xy_float XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
+
 } // namespace fl
