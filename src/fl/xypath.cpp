@@ -373,7 +373,7 @@ point_xy_float GielisCurvePath::compute(float alpha) {
 }
 
 void XYPath::rasterize(float from, float to, int steps, XYRaster &raster, 
-                       fl::Function<uint8_t(float)> *optional_alpha_gen) {
+                       fl::function<uint8_t(float)> *optional_alpha_gen) {
     for (int i = 0; i < steps; ++i) {
         float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
         Tile2x2_u8 tile = at_subpixel(alpha);

@@ -22,7 +22,7 @@
 namespace fl {
 
 class XYRasterSparse;
-template <typename T> class Function;
+template <typename T> class function;
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
@@ -49,6 +49,7 @@ class XYPathGenerator : public Referent {
 
 struct XYPathParams: public Referent {
     TransformFloat transform;
+    float brightness = 1.0f;  // 0: off, 1: full brightness
 };
 
 struct LinePathParams: public XYPathParams {
@@ -200,7 +201,7 @@ class XYPath : public Referent {
     Tile2x2_u8 at_subpixel(float alpha);
 
     void rasterize(float from, float to, int steps, XYRasterSparse &raster,
-                   fl::Function<uint8_t(float)> *optional_alpha_gen = nullptr);
+                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
     ;
 
     // Overloaded to allow transform to be passed in.

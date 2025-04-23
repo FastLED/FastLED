@@ -8,13 +8,14 @@
 namespace fl {
 
 //----------------------------------------------------------------------------
-// Function<R(Args...)>: type‐erasing “std::function” replacement
+// More or less a drop in replacement for std::function
+// function<R(Args...)>: type‐erasing “std::function” replacement
 // Supports free functions, lambdas/functors, member functions (const & non‑const)
 //----------------------------------------------------------------------------
-template <typename> class Function;
+template <typename> class function;
 
 template <typename R, typename... Args>
-class Function<R(Args...)> {
+class function<R(Args...)> {
 private:
     struct CallableBase : public Referent {
         virtual R invoke(Args... args)      = 0;
@@ -57,17 +58,17 @@ private:
     Ptr<CallableBase> callable_;
 
 public:
-    Function() = default;
-    ~Function()  = default;
+    function() = default;
+    ~function()  = default;
 
-    Function(const Function& o)
+    function(const function& o)
       : callable_(o.callable_) {}
 
-    Function(Function&& o) noexcept {
+    function(function&& o) noexcept {
         callable_.swap(o.callable_);
     }
 
-    Function& operator=(const Function& o) {
+    function& operator=(const function& o) {
         if (this != &o) {
             callable_ = o.callable_;
         }
@@ -75,7 +76,7 @@ public:
     }
 
     // doesn't work with our containers.
-    // Function& operator=(Function&& o) noexcept {
+    // function& operator=(function&& o) noexcept {
     //     if (this != &o) {
     //         callable_ = o.callable_;
     //         o.callable_.reset(nullptr);
@@ -86,17 +87,17 @@ public:
     // 1) generic constructor for lambdas, free functions, functors
     template <typename F,
               typename = enable_if_t<!is_member_function_pointer<F>::value>>
-    Function(F f)
+    function(F f)
       : callable_(NewPtr<Callable<F>>(f)) {}
 
     // 2) non‑const member function
     template <typename C>
-    Function(R (C::*mf)(Args...), C* obj)
+    function(R (C::*mf)(Args...), C* obj)
       : callable_(NewPtr<MemCallable<C>>(obj, mf)) {}
 
     // 3) const member function
     template <typename C>
-    Function(R (C::*mf)(Args...) const, const C* obj)
+    function(R (C::*mf)(Args...) const, const C* obj)
       : callable_(NewPtr<ConstMemCallable<C>>(obj, mf)) {}
 
     // Invocation
@@ -108,11 +109,11 @@ public:
         return callable_ != nullptr;
     }
 
-    bool operator==(const Function& o) const {
+    bool operator==(const function& o) const {
         return callable_ == o.callable_;
     }
 
-    bool operator!=(const Function& o) const {
+    bool operator!=(const function& o) const {
         return callable_ != o.callable_;
     }
 };

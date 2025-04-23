@@ -29,7 +29,7 @@ public:
 
 
 template<typename... Args>
-class FunctionList : public FunctionListBase<Function<void(Args...)>> {
+class FunctionList : public FunctionListBase<function<void(Args...)>> {
     public:
     void invoke(Args... args) {
         for (const auto &function : this->mFunctions) {
@@ -41,7 +41,7 @@ class FunctionList : public FunctionListBase<Function<void(Args...)>> {
 };
 
 template<>
-class FunctionList<void> : public FunctionListBase<Function<void()>> {
+class FunctionList<void> : public FunctionListBase<function<void()>> {
     public:
     void invoke() {
         for (const auto &function : this->mFunctions) {

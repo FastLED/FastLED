@@ -879,19 +879,6 @@ using fl::XYMap;
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 
-namespace fl {
-	/// @brief A function that takes a variable number of arguments and returns a value.
-	/// @tparam R The return type of the function.
-	/// @tparam Args The argument types of the function.
-	/// @returns A callable object that can be used as a function.
-	///
-	/// This is a convenience alias for fl::function<R(Args...)> to maintain backwards compatibility.
-	template<typename R, typename... Args>
-	using function = fl::Function<R(Args...)>;
-} // namespace fl
-// templetize fl::function<...> -> fl::Function<...> for backwards compatibility
-
-
 #endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN
 
 // Auto namespace if necessary.

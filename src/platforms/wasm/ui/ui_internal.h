@@ -18,8 +18,8 @@ FASTLED_SMART_PTR(jsUiInternal);
 
 class jsUiInternal : public fl::Referent {
 public:
-    using UpdateFunction = fl::Function<void(const FLArduinoJson::JsonVariantConst&)>;
-    using ToJsonFunction = fl::Function<void(FLArduinoJson::JsonObject&)>;
+    using UpdateFunction = fl::function<void(const FLArduinoJson::JsonVariantConst&)>;
+    using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject&)>;
 
     jsUiInternal(const fl::Str& name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
