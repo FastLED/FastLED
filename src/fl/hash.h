@@ -130,5 +130,15 @@ struct Hash<fl::Str> {
 };
 
 
+template<typename T>
+struct point_xy;
+
+template<typename T>
+struct Hash<point_xy<T>> {
+    uint32_t operator()(const point_xy<T> &key) const noexcept {
+        return MurmurHash3_x86_32(&key, sizeof(point_xy<T>));
+    }
+};
+
 
 }  // namespace fl
