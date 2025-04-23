@@ -10,7 +10,6 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
-
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
@@ -43,6 +42,20 @@ class XYPathGenerator : public Referent {
   public:
     virtual const Str name() const = 0;
     virtual point_xy_float compute(float alpha) = 0;
+};
+
+struct PhyllotaxisParams {
+    float c = 4.0f;       // Scaling factor
+    float angle = 137.5f; // Divergence angle in degrees
+};
+
+struct GielisCurveParams {
+    float a = 1.0f;    // Scaling parameter a
+    float b = 1.0f;    // Scaling parameter b
+    float m = 3.0f;    // Symmetry parameter (number of rotational symmetries)
+    float n1 = 1.0f;   // Shape parameter n1
+    float n2 = 1.0f;   // Shape parameter n2
+    float n3 = 100.0f; // Shape parameter n3
 };
 
 class XYPath : public Referent {
@@ -103,9 +116,10 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0,
-                                        float c = 4.0f, float angle = 1.5f) {
-        PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(c, angle);
+    static XYPathPtr
+    NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0,
+                       const PhyllotaxisParams &args = PhyllotaxisParams()) {
+        PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
             out->setDrawBounds(width, height);
@@ -113,11 +127,10 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr NewGielisCurvePath(uint16_t width = 0, uint16_t height = 0,
-                                        float a = 1.0f, float b = 1.0f,
-                                        float m = 3.0f, float n1 = 1.0f,
-                                        float n2 = 1.0f, float n3 = 1.0f) {
-        GielisCurvePathPtr path = GielisCurvePathPtr::New(a, b, m, n1, n2, n3);
+    static XYPathPtr
+    NewGielisCurvePath(uint16_t width = 0, uint16_t height = 0,
+                       const GielisCurveParams &params = GielisCurveParams()) {
+        GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
             out->setDrawBounds(width, height);
@@ -154,9 +167,8 @@ class XYPath : public Referent {
 
     Tile2x2_u8 at_subpixel(float alpha);
 
-    void
-    rasterize(float from, float to, int steps, XYRasterSparse &raster,
-              fl::Function<uint8_t(float)> *optional_alpha_gen = nullptr);
+    void rasterize(float from, float to, int steps, XYRasterSparse &raster,
+                   fl::Function<uint8_t(float)> *optional_alpha_gen = nullptr);
     ;
 
     // Overloaded to allow transform to be passed in.
@@ -377,17 +389,16 @@ class PhyllotaxisPath : public XYPathGenerator {
   public:
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
-    PhyllotaxisPath(float c = 4.0f, float angle = 137.5f);
+    PhyllotaxisPath(const PhyllotaxisParams &p = PhyllotaxisParams())
+        : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "PhyllotaxisPath"; }
 
-    void setC(float c) { mC = c; }
-    void setAngle(float angle) { mAngle = angle * PI / 180.0f; }
+    PhyllotaxisParams& params() { return mParams; }
+    const PhyllotaxisParams& params() const { return mParams; }
 
   private:
-    float mC;     // Scaling factor
-    float mAngle; // Angle between consecutive points in radians
-    int mCount = 10;
+    PhyllotaxisParams mParams;
 };
 
 class GielisCurvePath : public XYPathGenerator {
@@ -396,32 +407,20 @@ class GielisCurvePath : public XYPathGenerator {
     // a, b: scaling parameters
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
-    GielisCurvePath(float a = 1.0f, float b = 1.0f, float m = 3.0f,
-                    float n1 = 1.0f, float n2 = 1.0f, float n3 = 100.0f) {
-        mA = a;
-        mB = b;
-        mM = m;
-        mN1 = n1;
-        mN2 = n2;
-        mN3 = n3;
-    }
+    GielisCurvePath(const GielisCurveParams &p = GielisCurveParams())
+        : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "GielisCurvePath"; }
 
-    void setA(float a) { mA = a; }
-    void setB(float b) { mB = b; }
-    void setM(float m) { mM = m; }
-    void setN1(float n1) { mN1 = n1; }
-    void setN2(float n2) { mN2 = n2; }
-    void setN3(float n3) { mN3 = n3; }
+    void setA(float a) { mParams.a = a; }
+    void setB(float b) { mParams.b = b; }
+    void setM(float m) { mParams.m = m; }
+    void setN1(float n1) { mParams.n1 = n1; }
+    void setN2(float n2) { mParams.n2 = n2; }
+    void setN3(float n3) { mParams.n3 = n3; }
 
   private:
-    float mA;  // Scaling parameter a
-    float mB;  // Scaling parameter b
-    float mM;  // Symmetry parameter (number of rotational symmetries)
-    float mN1; // Shape parameter n1
-    float mN2; // Shape parameter n2
-    float mN3; // Shape parameter n3
+    GielisCurveParams mParams;
 };
 
 } // namespace fl

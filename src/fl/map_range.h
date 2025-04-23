@@ -37,7 +37,7 @@ FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
     return map_range_math<T, U>::map(value, in_min, in_max, out_min, out_max);
 }
 
-// Promote uint8_t to int16_t for mapping.
+
 FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
                                        uint8_t in_max, uint8_t out_min,
                                        uint8_t out_max) {
@@ -47,12 +47,13 @@ FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
     if (value == in_max) {
         return out_max;
     }
+    // Promote uint8_t to int16_t for mapping.
     int16_t v16 = value;
     int16_t in_min16 = in_min;
     int16_t in_max16 = in_max;
     int16_t out_min16 = out_min;
     int16_t out_max16 = out_max;
-    int16_t out16 = map_range(v16, in_min16, in_max16, out_min16, out_max16);
+    int16_t out16 = map_range<uint16_t, uint16_t>(v16, in_min16, in_max16, out_min16, out_max16);
     if (out16 < 0) {
         out16 = 0;
     } else if (out16 > 255) {

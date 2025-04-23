@@ -303,12 +303,11 @@ point_xy_float RosePath::compute(float alpha) {
     return point_xy_float(x, y);
 }
 
-PhyllotaxisPath::PhyllotaxisPath(float c, float angle)
-    : mC(c), mAngle(angle * PI / 180.0f) {}
+
 
 point_xy_float PhyllotaxisPath::compute(float alpha) {
     // total number of points you want in the pattern
-    const float N = static_cast<float>(mCount);
+    const float N = static_cast<float>(mParams.c);
 
     // continuous “index” from 0…N
     float n = alpha * N;
@@ -339,12 +338,12 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     //    a, b control the “shape scale” (often both = 1)
     //    m  controls symmetry (integer number of lobes)
     //    n1,n2,n3 control curvature/sharpness
-    float a = mA;
-    float b = mB;
-    float m = mM;
-    float n1 = mN1;
-    float n2 = mN2;
-    float n3 = mN3;
+    float a = mParams.a;
+    float b = mParams.b;
+    float m = mParams.m;
+    float n1 = mParams.n1;
+    float n2 = mParams.n2;
+    float n3 = mParams.n3;
 
     // 3) compute radius from superformula
     float t2 = m * theta / 4.0f;
