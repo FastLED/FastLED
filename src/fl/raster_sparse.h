@@ -26,7 +26,7 @@ namespace fl {
 
 class XYMap;
 class XYDrawUint8Visitor;
-class SubPixel2x2;
+class Tile2x2;
 
 class XYRasterSparse {
   public:
@@ -42,11 +42,11 @@ class XYRasterSparse {
     }
 
     void rasterize(const point_xy<int> &pt, uint8_t value) {
-        // Turn it into a SubPixel2x2 tile and see if we can cache it.
-        SubPixel2x2 tile = SubPixel2x2(pt);
+        // Turn it into a Tile2x2 tile and see if we can cache it.
+        Tile2x2 tile = Tile2x2(pt);
         tile.at(0, 0) = value;
         if (mCache.origin() == tile.origin()) {
-            mCache = SubPixel2x2::Max(mCache, tile);
+            mCache = Tile2x2::Max(mCache, tile);
             return;
         }
         flush();
@@ -72,32 +72,32 @@ class XYRasterSparse {
     size_t size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    void rasterize(const Slice<const SubPixel2x2> &tiles);
-    void rasterize(const SubPixel2x2 &tile) {
-        // Slice<const SubPixel2x2> tiles(&tile, 1);
+    void rasterize(const Slice<const Tile2x2> &tiles);
+    void rasterize(const Tile2x2 &tile) {
+        // Slice<const Tile2x2> tiles(&tile, 1);
         // rasterize(tiles);
         if (tile.origin() == mCache.origin()) {
             // Write to the cache.
-            mCache = SubPixel2x2::Max(mCache, tile);
+            mCache = Tile2x2::Max(mCache, tile);
             return;
         }
         flush();
         mCache = tile;
     }
 
-    void rasterize_internal(const SubPixel2x2 &tile,
+    void rasterize_internal(const Tile2x2 &tile,
                             const rect_xy<int> *optional_bounds = nullptr) ;
 
     void flush() {
         if (mCache.maxValue() > 0) {
-            rasterize(Slice<const SubPixel2x2>(&mCache, 1));
-            mCache = SubPixel2x2();
+            rasterize(Slice<const Tile2x2>(&mCache, 1));
+            mCache = Tile2x2();
         }
     }
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
-    // increased. void rasterize(const Slice<const SubPixel2x2> &tiles);
+    // increased. void rasterize(const Slice<const Tile2x2> &tiles);
     // uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
     // const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x,
     // y); }
@@ -178,7 +178,7 @@ class XYRasterSparse {
 
   private:
     using HashMap = fl::HashMap<point_xy<int>, uint8_t>;
-    SubPixel2x2 mCache;
+    Tile2x2 mCache;
     HashMap mSparseGrid;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;

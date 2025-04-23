@@ -18,17 +18,17 @@ class XYMap;
 class XYRasterSparse;
 class XYDrawUint8Visitor;
 
-class SubPixel2x2 {
+class Tile2x2 {
 
   public:
-    static void Rasterize(const Slice<const SubPixel2x2> &tiles,
+    static void Rasterize(const Slice<const Tile2x2> &tiles,
                           XYRasterSparse *output) ;
 
-    SubPixel2x2() = default;
-    SubPixel2x2(const point_xy<int> &origin) : mOrigin(origin) {}
-    SubPixel2x2(const SubPixel2x2 &) = default;
-    SubPixel2x2 &operator=(const SubPixel2x2 &) = default;
-    SubPixel2x2(SubPixel2x2 &&) = default;
+    Tile2x2() = default;
+    Tile2x2(const point_xy<int> &origin) : mOrigin(origin) {}
+    Tile2x2(const Tile2x2 &) = default;
+    Tile2x2 &operator=(const Tile2x2 &) = default;
+    Tile2x2(Tile2x2 &&) = default;
 
     void scale(uint8_t scale);
 
@@ -50,9 +50,9 @@ class SubPixel2x2 {
         return max;
     }
 
-    static SubPixel2x2 Max(const SubPixel2x2 &a,
-                           const SubPixel2x2 &b) {
-        SubPixel2x2 result;
+    static Tile2x2 Max(const Tile2x2 &a,
+                           const Tile2x2 &b) {
+        Tile2x2 result;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
                 result.at(x, y) = MAX(a.at(x, y), b.at(x, y));

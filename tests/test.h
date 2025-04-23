@@ -38,10 +38,10 @@ namespace doctest {
         }
     };
 
-    template<> struct StringMaker<SubPixel2x2> {
-        static String convert(const SubPixel2x2& value) {
+    template<> struct StringMaker<Tile2x2> {
+        static String convert(const Tile2x2& value) {
             fl::StrStream out;
-            out << "SubPixel2x2(" << value.origin() << ")";
+            out << "Tile2x2(" << value.origin() << ")";
             return out.c_str();
         }
     };

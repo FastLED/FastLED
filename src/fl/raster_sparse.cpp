@@ -14,8 +14,8 @@ void XYRasterSparse::draw(const CRGB &color, const XYMap &xymap,
     draw(xymap, visitor);
 }
 
-void XYRasterSparse::rasterize(const Slice<const SubPixel2x2> &tiles) {
-    // SubPixel2x2::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
+void XYRasterSparse::rasterize(const Slice<const Tile2x2> &tiles) {
+    // Tile2x2::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
     if (tiles.size() == 0) {
         FASTLED_WARN("Rasterize: no tiles");
@@ -25,7 +25,7 @@ void XYRasterSparse::rasterize(const Slice<const SubPixel2x2> &tiles) {
         mAbsoluteBoundsSet ? nullptr : &mAbsoluteBounds;
     // Won't reset the mMinMax bounds if this was set.
     // out_raster->reset();
-    SubPixel2x2 cache;
+    Tile2x2 cache;
     if (mCache.maxValue() > 0) {
         cache = mCache;
     }
@@ -33,7 +33,7 @@ void XYRasterSparse::rasterize(const Slice<const SubPixel2x2> &tiles) {
         const point_xy<int> &origin = tile.origin();
         if (cache.origin() == origin) {
             // Write to the cache.
-            cache = SubPixel2x2::Max(cache, tile);
+            cache = Tile2x2::Max(cache, tile);
             continue;
         }
         // Rasterize the tile.
@@ -45,11 +45,11 @@ void XYRasterSparse::rasterize(const Slice<const SubPixel2x2> &tiles) {
 
     if (cache.maxValue() > 0) {
         rasterize_internal(cache, optional_bounds);
-        cache = SubPixel2x2();
+        cache = Tile2x2();
     }
 }
 
-void XYRasterSparse::rasterize_internal(const SubPixel2x2 &tile,
+void XYRasterSparse::rasterize_internal(const Tile2x2 &tile,
                                         const rect_xy<int> *optional_bounds) {
     const point_xy<int> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
