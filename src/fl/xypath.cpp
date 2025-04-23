@@ -196,23 +196,9 @@ XYPathPtr XYPath::NewGielisCurvePath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height) {
-    CatmullRomParamsPtr params = CatmullRomParamsPtr::New();
+XYPathPtr XYPath::NewCatmullRomPath(const Ptr<CatmullRomParams> &params) {
     CatmullRomPathPtr path = CatmullRomPathPtr::New(params);
     XYPathPtr out = XYPathPtr::New(path);
-    if (width > 0 && height > 0) {
-        out->setDrawBounds(width, height);
-    }
-    return out;
-}
-
-XYPathPtr XYPath::NewCatmullRomPath(const Ptr<CatmullRomParams> &params, 
-                                   uint16_t width, uint16_t height) {
-    CatmullRomPathPtr path = CatmullRomPathPtr::New(params);
-    XYPathPtr out = XYPathPtr::New(path);
-    if (width > 0 && height > 0) {
-        out->setDrawBounds(width, height);
-    }
     return out;
 }
 

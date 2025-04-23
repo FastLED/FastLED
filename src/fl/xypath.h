@@ -50,13 +50,10 @@ class XYPath : public Referent {
     static XYPathPtr NewGielisCurvePath(
         uint16_t width = 0, uint16_t height = 0,
         const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
-        
-    // Create a new Catmull-Rom spline path
-    static XYPathPtr NewCatmullRomPath(uint16_t width = 0, uint16_t height = 0);
-    
+
     // Create a new Catmull-Rom spline path with custom parameters
-    static XYPathPtr NewCatmullRomPath(const Ptr<CatmullRomParams> &params, 
-                                      uint16_t width = 0, uint16_t height = 0);
+    static XYPathPtr NewCatmullRomPath(
+        const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
 
     virtual ~XYPath();
     point_xy_float at(float alpha);
@@ -81,6 +78,5 @@ class XYPath : public Referent {
     XYPathGeneratorPtr mPath;
     XYPathRendererPtr mPathRenderer;
 };
-
 
 } // namespace fl
