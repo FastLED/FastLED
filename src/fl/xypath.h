@@ -39,6 +39,7 @@ FASTLED_SMART_PTR(GielisCurvePath);
 // FASTLED_SMART_PTR(CatmullRomPath);
 
 FASTLED_SMART_PTR(LinePathParams);
+FASTLED_SMART_PTR(RosePathParams);
 
 class XYPathGenerator : public Referent {
   public:
@@ -60,6 +61,11 @@ struct LinePathParams: public XYPathParams {
 struct PhyllotaxisParams: public XYPathParams {
     float c = 4.0f;       // Scaling factor
     float angle = 137.5f; // Divergence angle in degrees
+};
+
+struct RosePathParams: public XYPathParams {
+    uint8_t n = 3;     // Numerator parameter (number of petals)
+    uint8_t d = 1;     // Denominator parameter
 };
 
 struct GielisCurveParams: public XYPathParams {
@@ -130,9 +136,11 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr NewRosePath(uint16_t width = 0, uint16_t height = 0,
-                                 uint8_t n = 3, uint8_t d = 1) {
-        RosePathPtr path = RosePathPtr::New(n, d);
+
+    static XYPathPtr
+    NewRosePath(uint16_t width = 0, uint16_t height = 0,
+                const Ptr<RosePathParams> &params = NewPtr<RosePathParams>()) {
+        RosePathPtr path = RosePathPtr::New(params);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
             out->setDrawBounds(width, height);
@@ -403,16 +411,20 @@ class RosePath : public XYPathGenerator {
     // For n/d even: produces 2n petals
     // For n and d coprime: produces n petals if n is odd, 2n petals if n is
     // even
+    RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>())
+        : mParams(p) {}
     RosePath(uint8_t n = 3, uint8_t d = 1);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "RosePath"; }
 
-    void setN(uint8_t n) { mN = n; }
-    void setD(uint8_t d) { mD = d; }
+    RosePathParams& params() { return *mParams; }
+    const RosePathParams& params() const { return *mParams; }
+    
+    void setN(uint8_t n) { params().n = n; }
+    void setD(uint8_t d) { params().d = d; }
 
   private:
-    uint8_t mN; // Numerator parameter (number of petals)
-    uint8_t mD; // Denominator parameter
+    Ptr<RosePathParams> mParams;
 };
 
 class PhyllotaxisPath : public XYPathGenerator {

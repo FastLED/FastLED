@@ -284,7 +284,11 @@ point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
     return point_xy_float(x, y);
 }
 
-RosePath::RosePath(uint8_t n, uint8_t d) : mN(n), mD(d) {}
+RosePath::RosePath(uint8_t n, uint8_t d) {
+    mParams = NewPtr<RosePathParams>();
+    params().n = n;
+    params().d = d;
+}
 
 point_xy_float RosePath::compute(float alpha) {
     // Parametric equation for a rose curve (rhodonea)
@@ -296,11 +300,11 @@ point_xy_float RosePath::compute(float alpha) {
     // - k = 2n if n is even and d is 1
     // - k = n*d if n and d are coprime
     // For simplicity, we'll use 2*PI*n as a good approximation
-    float theta = alpha * 2.0f * PI * mN;
+    float theta = alpha * 2.0f * PI * params().n;
 
     // Calculate the radius using the rose formula: r = cos(n*θ/d)
     // We use cosine for a rose that starts with a petal at theta=0
-    float r = cosf(mN * theta / mD);
+    float r = cosf(params().n * theta / params().d);
 
     // Scale to ensure the rose fits within [-1, 1] range
     // The absolute value ensures we get the proper shape
