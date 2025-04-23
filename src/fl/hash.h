@@ -5,6 +5,8 @@
 #include "fl/str.h"
 #include "fl/template_magic.h"
 
+
+
 namespace fl {
 
 template<typename T>
@@ -141,10 +143,14 @@ struct Hash<T*> {
 template<typename T>
 struct Hash<point_xy<T>> {
     uint32_t operator()(const point_xy<T> &key) const noexcept {
-        T packed[2] = {};
+        // #pragma GCC diagnostic push
+        // #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+        T packed[2];
+        memset(packed, 0, sizeof(packed));
         packed[0] = key.x;
         packed[1] = key.y;  // Protect against alignment issues
         return MurmurHash3_x86_32(packed, sizeof(packed));
+        // #pragma GCC diagnostic pop
     }
 };
 
