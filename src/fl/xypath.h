@@ -240,13 +240,7 @@ class XYPath : public Referent {
     }
 
     void onTransformFloatChanged() {
-        // This is called when the transform changes. We need to clear the LUT
-        // so that it will be rebuilt with the new transform.
-        clearLut();
-        // mTransform.validate();
-        // Just recompute unconditionally. If this is a performance issue,
-        // we can add a flag to make it lazy.
-        // mTransform16 = mTransform.toTransform16();
+        // Future use to allow recomputing the LUT.
     }
 
     TransformFloat &transform() { return mTransform; }
@@ -262,58 +256,14 @@ class XYPath : public Referent {
         return compute_float(alpha, mTransform);
     }
 
-    // Optimizing for LUT transformations is work in progress. There are some
-    // tests on these algorithms so they are kept in the code base to try out.
-
-    // α in [0,65535] → (x,y) on the path, both in [0,65535].
-    // This default implementation will build a LUT if mSteps > 0.
-    // Subclasses may override this to avoid the LUT.
-    point_xy<uint16_t> at16(uint16_t alpha,
-                            const Transform16 &tx = Transform16());
-
-    // optimizes at16(...).
-    void buildLut(uint16_t steps);
-
-    // Called by subclasses when something changes. The LUT will be rebuilt on
-    // the next call to at16(...) if mSteps > 0.
-    void clearLut() { mLut.reset(); }
-
-    // Clears lut and sets new steps. LUT will be rebuilt on next call to
-    // at16(...) if mSteps > 0.
-    void clearLut(uint16_t steps) {
-        mSteps = steps;
-        mLut.reset();
-    }
-
-#if 0
-    // Outputs the path as a series of points in floating poitn. The first and last points are
-    // always the start and end points. The middle points are evenly spaced
-    // according to the alpha range.
-    void output(float alpha_start, float alpha_end, point_xy_float *out,
-                uint16_t out_size, const TransformFloat &tx);
-
-    // Outputs the path as a series of points in uint16_t. The first and last points are
-    // always the start and end points. The middle points are evenly spaced
-    // according to the alpha range.
-    void output16(uint16_t alpha_start, uint16_t alpha_end,
-                  point_xy<uint16_t> *out, uint16_t out_size,
-                  const Transform16 &tx);
-#endif
-
-    LUTXY16Ptr getLut() const { return mLut; }
 
   private:
     XYPathGeneratorPtr mPath;
     TransformFloat mTransform;
     TransformFloat mGridTransform;
-
     uint32_t mSteps = 0;
     LUTXY16Ptr mLut;
     bool mDrawBoundsSet = false;
-
-    // Transform16 mTransform16;
-    void initLutOnce();
-    LUTXY16Ptr generateLUT(uint16_t steps);
     point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
