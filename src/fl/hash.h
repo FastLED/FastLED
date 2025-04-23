@@ -141,7 +141,9 @@ struct Hash<T*> {
 template<typename T>
 struct Hash<point_xy<T>> {
     uint32_t operator()(const point_xy<T> &key) const noexcept {
-        T packed[2] = {key.x, key.y};  // Protect against alignment issues
+        T packed[2] = {};
+        packed[0] = key.x;
+        packed[1] = key.y;  // Protect against alignment issues
         return MurmurHash3_x86_32(packed, sizeof(packed));
     }
 };
