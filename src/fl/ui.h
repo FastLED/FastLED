@@ -95,7 +95,7 @@ class UISlider : public UISliderImpl {
 class UIButton : public UIButtonImpl {
   public:
     using Super = UIButtonImpl;
-    UIButton(const char *name) : UIButtonImpl(name) {}
+    UIButton(const char *name) : UIButtonImpl(name), mListener(this) {}
     ~UIButton() {}
     bool isPressed() const { return Super::isPressed(); }
     bool clicked() const { return Super::clicked(); }
@@ -105,6 +105,40 @@ class UIButton : public UIButtonImpl {
     void click() {
         Super::click();
     }
+
+    void addCallback(Function<void()> callback) {
+        mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+    }
+    void clearCallbacks() { mCallbacks.clear(); }
+
+  protected:
+    struct Listener : public EngineEvents::Listener {
+        Listener(UIButton* owner) : mOwner(owner) {
+            EngineEvents::addListener(this);
+        }
+        ~Listener() {
+            if (added) {
+                EngineEvents::removeListener(this);
+            }
+        }
+        void addToEngineEventsOnce() {
+            if (added) {
+                return;
+            }
+            EngineEvents::addListener(this);
+            added = true;
+        }
+        void onBeginFrame() override;
+        private:
+            UIButton* mOwner;
+            bool added = false;
+    };
+
+  private:
+    FunctionList<void()> mCallbacks;
+    bool mLastFrameClicked = false;
+    Listener mListener;
 };
 
 class UICheckbox : public UICheckboxImpl {

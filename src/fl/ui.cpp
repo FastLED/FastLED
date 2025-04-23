@@ -29,6 +29,14 @@ void UISlider::Listener::onBeginFrame() {
     }
 }
 
+void UIButton::Listener::onBeginFrame() {
+    bool currentClicked = mOwner->clicked();
+    if (currentClicked && !mOwner->mLastFrameClicked) {
+        mOwner->mCallbacks.invoke();
+    }
+    mOwner->mLastFrameClicked = currentClicked;
+}
+
 } // end namespace fl
 
 #pragma GCC diagnostic pop
