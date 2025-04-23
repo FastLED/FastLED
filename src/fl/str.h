@@ -472,6 +472,10 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
     Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
+
+    const char* data() const {
+        return c_str();
+    }
 };
 
 

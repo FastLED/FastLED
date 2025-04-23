@@ -482,6 +482,14 @@ private:
         assign(values, values + count);
     }
 
+    void assign(size_t new_cap, const T& value) {
+        clear();
+        reserve(new_cap);
+        while (size() < new_cap) {
+            push_back(value);
+        }
+    }
+
     void assign(const_iterator begin, const_iterator end) {
         clear();
         reserve(end - begin);
