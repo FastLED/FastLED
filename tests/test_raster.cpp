@@ -13,7 +13,7 @@
 using namespace fl;
 
 
-TEST_CASE("XYRasterSparseTest with empty draw bounds should prevent any elements") {
+TEST_CASE("XYRasterSparseTest should match bounds of pixels draw area") {
     XYPathPtr path = XYPath::NewLinePath(-1, -1, 1, 1);
     path->setDrawBounds(4,4);
     SubPixel2x2 sp0 = path->at_subpixel(0);
@@ -23,9 +23,10 @@ TEST_CASE("XYRasterSparseTest with empty draw bounds should prevent any elements
     MESSAGE("subpixels[0] = " << subpixels[0]);
     MESSAGE("subpixels[1] = " << subpixels[1]);
     XYRasterSparse raster(4, 4);
-    auto bstart = raster.bounds();
-    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 0, 0), bstart);
     raster.rasterize(subpixels);
-    auto b = raster.bounds();
-    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 3, 3), b);
+    auto obligatory_bounds = raster.bounds();
+    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 4, 4), obligatory_bounds);
+
+    auto pixel_bounds = raster.bounds_pixels();
+    REQUIRE_EQ(rect_xy<uint16_t>(0, 0, 4, 4), pixel_bounds);
 }

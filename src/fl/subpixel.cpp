@@ -34,7 +34,6 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
                 int xx = origin.x + x;
                 int yy = origin.y + y;
                 if (optional_bounds && !optional_bounds->contains(xx, yy)) {
-
                     continue;
                 }
                 fl::Pair<bool, uint8_t> entry = out_raster->at(xx, yy);

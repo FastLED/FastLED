@@ -37,14 +37,11 @@ class XYRasterSparse {
 
     XYRasterSparse &reset() {
         mSparseGrid.clear();
-        mBounds.mMin = point_xy<int>(0, 0);
-        mBounds.mMax = point_xy<int>(0, 0);
         return *this;
     }
 
     void add(const point_xy<int> &pt, uint8_t value) {
         mSparseGrid.insert(pt, value);
-        mBounds.expand(pt);
     }
 
     void setSize(uint16_t width, uint16_t height) {
@@ -53,6 +50,7 @@ class XYRasterSparse {
 
     void setBounds(const rect_xy<int> &bounds) {
         mAbsoluteBounds = bounds;
+        mAbsoluteBoundsSet = true;
     }
 
     using iterator = fl::HashMap<point_xy<int>, uint8_t>::iterator;
@@ -66,6 +64,10 @@ class XYRasterSparse {
     bool empty() const { return mSparseGrid.empty(); }
 
     void rasterize(const Slice<const SubPixel2x2> &tiles) ;
+    void rasterize(const SubPixel2x2 &tile) {
+        Slice<const SubPixel2x2> tiles(&tile, 1);
+        rasterize(tiles);
+    }
 
     // Renders the subpixel tiles to the raster. Any previous data is cleared.
     // Memory will only be allocated if the size of the raster increased.
@@ -81,20 +83,49 @@ class XYRasterSparse {
         return {false, 0};
     }
 
-    const point_xy<int> origin() const { return mBounds.mMin; }
-    point_xy<int> global_min() const { return origin(); }
-    point_xy<int> global_max() const {
-        return mBounds.mMax;
-    }
+
 
     rect_xy<int> bounds() const {
-        point_xy<int> min = origin();
-        point_xy<int> max = global_max();
-        return rect_xy<int>(min, max);
+        if (mAbsoluteBoundsSet) {
+            return mAbsoluteBounds;
+        }
+        return bounds_pixels();
+    }
+    
+    rect_xy<int> bounds_pixels() const {
+        int min_x = 0;
+        bool min_x_set = false;
+        int min_y = 0;
+        bool min_y_set = false;
+        int max_x = 0;
+        bool max_x_set = false;
+        int max_y = 0;
+        bool max_y_set = false;
+        for (const auto& it : mSparseGrid) {
+            const point_xy<int>& pt = it.first;
+            if (!min_x_set || pt.x < min_x) {
+                min_x = pt.x;
+                min_x_set = true;
+            }
+            if (!min_y_set || pt.y < min_y) {
+                min_y = pt.y;
+                min_y_set = true;
+            }
+            if (!max_x_set || pt.x > max_x) {
+                max_x = pt.x;
+                max_x_set = true;
+            }
+            if (!max_y_set || pt.y > max_y) {
+                max_y = pt.y;
+                max_y_set = true;
+            }
+        }
+        return rect_xy<int>(min_x, min_y, max_x + 1, max_y + 1);
     }
 
-    uint16_t width() const { return mBounds.width(); }
-    uint16_t height() const { return mBounds.height(); }
+    // Warning! - SLOW.
+    uint16_t width() const { return bounds().width(); }
+    uint16_t height() const { return bounds().height(); }
 
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
@@ -117,8 +148,8 @@ class XYRasterSparse {
 
   private:
     fl::HashMap<point_xy<int>, uint8_t> mSparseGrid;
-    fl::rect_xy<int> mBounds;
     fl::rect_xy<int> mAbsoluteBounds;
+    bool mAbsoluteBoundsSet = false;
 };
 
 } // namespace fl
