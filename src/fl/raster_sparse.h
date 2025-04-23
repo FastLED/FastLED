@@ -15,7 +15,7 @@ only a small number of pixels are set.
 #include "fl/namespace.h"
 #include "fl/point.h"
 #include "fl/slice.h"
-#include "fl/subpixel.h"
+#include "fl/tile2x2.h"
 #include "fl/xymap.h"
 
 FASTLED_NAMESPACE_BEGIN

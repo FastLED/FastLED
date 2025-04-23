@@ -7,7 +7,7 @@
 #include "fl/str.h"
 #include "fl/lut.h"
 #include "fl/xypath.h"
-#include "fl/subpixel.h"
+#include "fl/tile2x2.h"
 #include "fl/strstream.h"
 
 using namespace fl;

@@ -5,7 +5,7 @@
 
 #include "FastLED.h"
 #include "fl/raster.h"
-#include "fl/subpixel.h"
+#include "fl/tile2x2.h"
 #include "fl/xypath.h"
 
 #include "fl/namespace.h"
