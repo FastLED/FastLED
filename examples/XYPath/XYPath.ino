@@ -178,6 +178,7 @@ void loop() {
     }
 
     s_prev_alpha = curr_alpha;
+    raster.reset();
     raster.rasterize(subpixels);
     if (useWaveFx && is_active) {
         DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);

@@ -23,30 +23,19 @@ void XYRasterSparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
     }
     const rect_xy<int> *optional_bounds =
         mAbsoluteBoundsSet ? nullptr : &mAbsoluteBounds;
-    // Won't reset the mMinMax bounds if this was set.
-    // out_raster->reset();
-    Tile2x2_u8 cache;
-    if (mCache.maxValue() > 0) {
-        cache = mCache;
-    }
-    for (const auto &tile : tiles) {
-        const point_xy<int> &origin = tile.origin();
-        if (cache.origin() == origin) {
-            // Write to the cache.
-            cache = Tile2x2_u8::Max(cache, tile);
-            continue;
-        }
-        // Rasterize the tile.
-        if (cache.maxValue() > 0) {
-            rasterize_internal(cache, optional_bounds);
-            cache = tile;
-        }
-    }
 
-    if (cache.maxValue() > 0) {
-        rasterize_internal(cache, optional_bounds);
-        cache = Tile2x2_u8();
+
+    // Check if the bounds are set.
+    // draw all now unconditionally.
+    for (const auto &tile : tiles) {
+        // Rasterize the tile.
+        rasterize_internal(tile, optional_bounds);
     }
+    rasterize_internal(mCache, optional_bounds);
+    mCache = Tile2x2_u8();
+    return;
+
+
 }
 
 void XYRasterSparse::rasterize_internal(const Tile2x2_u8 &tile,

@@ -173,6 +173,7 @@ class XYRasterSparse {
     }
     
     void write(const point_xy<int> &pt, uint8_t value) {
+        FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " << value);
         mSparseGrid.insert(pt, value);
     }
 
