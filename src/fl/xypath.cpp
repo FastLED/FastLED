@@ -2,8 +2,11 @@
 #include <math.h>
 
 #include "fl/assert.h"
+#include "fl/function.h"
 #include "fl/lut.h"
+#include "fl/map_range.h"
 #include "fl/math_macros.h"
+#include "fl/raster.h"
 #include "fl/xypath.h"
 
 namespace fl {
@@ -14,7 +17,7 @@ uint8_t to_uint8(float f) {
     uint8_t i = static_cast<uint8_t>(f * 255.0f + .5f);
     return MIN(i, 255);
 }
-}
+} // namespace
 
 XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform,
                uint16_t steps)
@@ -57,8 +60,6 @@ point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
     return out;
 }
 
-
-
 Tile2x2_u8 XYPath::at_subpixel(float alpha) {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     if (!mDrawBoundsSet) {
@@ -80,16 +81,16 @@ Tile2x2_u8 XYPath::at_subpixel(float alpha) {
     float fy = y - cy;
 
     // 5) bilinear weights
-    float w_ll = (1 - fx) * (1 - fy);  // lower‑left
-    float w_lr = fx       * (1 - fy);  // lower‑right
-    float w_ul = (1 - fx) * fy;        // upper‑left
-    float w_ur = fx       * fy;        // upper‑right
+    float w_ll = (1 - fx) * (1 - fy); // lower‑left
+    float w_lr = fx * (1 - fy);       // lower‑right
+    float w_ul = (1 - fx) * fy;       // upper‑left
+    float w_ur = fx * fy;             // upper‑right
 
     // 6) build Tile2x2_u8 anchored at (cx,cy)
     Tile2x2_u8 out(point_xy<int>(cx, cy));
-    out.lower_left()  = to_uint8(w_ll);
+    out.lower_left() = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
-    out.upper_left()  = to_uint8(w_ul);
+    out.upper_left() = to_uint8(w_ul);
     out.upper_right() = to_uint8(w_ur);
 
     return out;
@@ -224,27 +225,28 @@ point_xy_float HeartPath::compute(float alpha) {
     // Parametric equation for a heart shape
     // α in [0,1] → (x,y) on the heart curve
     float t = alpha * 2.0f * PI;
-    
+
     // Heart formula based on a modified cardioid with improved aesthetics
     float x = 16.0f * powf(sinf(t), 3);
-    
+
     // Modified y formula for a more balanced heart shape
     // This creates a fuller bottom and more defined top curve
-    float y = -(13.0f * cosf(t) - 5.0f * cosf(2.0f * t) - 2.0f * cosf(3.0f * t) - cosf(4.0f * t));
-    
+    float y = -(13.0f * cosf(t) - 5.0f * cosf(2.0f * t) -
+                2.0f * cosf(3.0f * t) - cosf(4.0f * t));
+
     // Scale to fit in [-1, 1] range
     // The 16.0f divisor for x ensures x is in [-1, 1]
     x /= 16.0f;
-    
+
     // Scale y to ensure it's in [-1, 1]
     // The 16.0f divisor ensures proper scaling while maintaining proportions
     y /= -16.0f;
-    
+
     // Apply a slight vertical stretch to fill the [-1, 1] range better
     y *= 1.10f;
 
     y += 0.17f; // Adjust y to fit within the range of [-1, 1]
-    
+
     return point_xy_float(x, y);
 }
 
@@ -254,21 +256,21 @@ ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius)
 point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
     // Parametric equation for an Archimedean spiral
     // α in [0,1] → (x,y) on the spiral curve
-    
+
     // Calculate the angle based on the number of turns
     float theta = alpha * 2.0f * PI * mTurns;
-    
+
     // Calculate the radius at this angle (grows linearly with angle)
     // Scale by alpha to ensure we start at center and grow outward
     float r = alpha * mRadius;
-    
+
     // Convert polar coordinates (r, theta) to Cartesian (x, y)
     float x = r * cosf(theta);
     float y = r * sinf(theta);
-    
+
     // Ensure the spiral fits within [-1, 1] range
     // No additional scaling needed as we control the radius directly
-    
+
     return point_xy_float(x, y);
 }
 
@@ -277,7 +279,7 @@ RosePath::RosePath(uint8_t n, uint8_t d) : mN(n), mD(d) {}
 point_xy_float RosePath::compute(float alpha) {
     // Parametric equation for a rose curve (rhodonea)
     // α in [0,1] → (x,y) on the rose curve
-    
+
     // Map alpha to the full range needed for the rose
     // For a complete rose, we need to go through k*PI radians where k is:
     // - k = n if n is odd and d is 1
@@ -285,26 +287,24 @@ point_xy_float RosePath::compute(float alpha) {
     // - k = n*d if n and d are coprime
     // For simplicity, we'll use 2*PI*n as a good approximation
     float theta = alpha * 2.0f * PI * mN;
-    
+
     // Calculate the radius using the rose formula: r = cos(n*θ/d)
     // We use cosine for a rose that starts with a petal at theta=0
     float r = cosf(mN * theta / mD);
-    
+
     // Scale to ensure the rose fits within [-1, 1] range
     // The absolute value ensures we get the proper shape
     r = fabsf(r);
-    
+
     // Convert polar coordinates (r, theta) to Cartesian (x, y)
     float x = r * cosf(theta);
     float y = r * sinf(theta);
-    
+
     return point_xy_float(x, y);
 }
 
 PhyllotaxisPath::PhyllotaxisPath(float c, float angle)
     : mC(c), mAngle(angle * PI / 180.0f) {}
-
-
 
 point_xy_float PhyllotaxisPath::compute(float alpha) {
     // total number of points you want in the pattern
@@ -330,7 +330,6 @@ point_xy_float PhyllotaxisPath::compute(float alpha) {
     return point_xy_float{x, y};
 }
 
-
 point_xy_float GielisCurvePath::compute(float alpha) {
     // 1) map alpha to angle θ ∈ [0 … 2π)
     constexpr float TWO_PI = 6.283185307179586f;
@@ -340,18 +339,18 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     //    a, b control the “shape scale” (often both = 1)
     //    m  controls symmetry (integer number of lobes)
     //    n1,n2,n3 control curvature/sharpness
-    float a  = mA;
-    float b  = mB;
-    float m  = mM;
+    float a = mA;
+    float b = mB;
+    float m = mM;
     float n1 = mN1;
     float n2 = mN2;
     float n3 = mN3;
 
     // 3) compute radius from superformula
     float t2 = m * theta / 4.0f;
-    float part1 = powf( fabsf(cosf(t2) / a), n2 );
-    float part2 = powf( fabsf(sinf(t2) / b), n3 );
-    float r     = powf( part1 + part2, -1.0f / n1 );
+    float part1 = powf(fabsf(cosf(t2) / a), n2);
+    float part2 = powf(fabsf(sinf(t2) / b), n3);
+    float r = powf(part1 + part2, -1.0f / n1);
 
     // 4) polar → Cartesian in unit circle
     float x = r * cosf(theta);
@@ -360,5 +359,18 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     return point_xy_float{x, y};
 }
 
+void XYPath::rasterize(float from, float to, int steps, XYRaster &raster, 
+                       fl::Function<uint8_t(float)> *optional_alpha_gen) {
+    for (int i = 0; i < steps; ++i) {
+        float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
+        Tile2x2_u8 tile = at_subpixel(alpha);
+        if (optional_alpha_gen) {
+            // Scale the tile based on the alpha value.
+            uint8_t a8 = (*optional_alpha_gen)(alpha);
+            tile.scale(a8);
+        }
+        raster.rasterize(tile);
+    }
+}
 
 } // namespace fl

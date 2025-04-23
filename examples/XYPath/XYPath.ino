@@ -42,8 +42,7 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 WaveEffect wave_fx; // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
-// A vector for collecting subpixels, with overflow.
-vector_inlined<Tile2x2_u8, 32> subpixels;
+
 XYRaster raster(WIDTH, HEIGHT);
 TimeWarp time_warp;
 
@@ -144,9 +143,8 @@ void loop() {
     frame++;
     clearLeds();
     const CRGB purple = CRGB(255, 0, 255);
-    subpixels.clear();
     const int number_of_steps = numberOfSteps.value();
-
+    raster.reset();
     // float factor = s_prev_alpha;  // 0->1.f
     // factor = MIN(factor/4.0f, 0.05f);
 
@@ -174,12 +172,13 @@ void loop() {
         }
         Tile2x2_u8 subpixel = shape->at_subpixel(a);
         subpixel.scale(alpha);
-        subpixels.push_back(subpixel);
+        // subpixels.push_back(subpixel);
+        raster.rasterize(subpixel);
     }
 
     s_prev_alpha = curr_alpha;
-    raster.reset();
-    raster.rasterize(subpixels);
+
+
     if (useWaveFx && is_active) {
         DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);
         raster.draw(xyMap, draw_wave_fx);

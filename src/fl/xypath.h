@@ -10,6 +10,7 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
+
 #include "fl/lut.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"
@@ -20,6 +21,9 @@
 #include "fl/warn.h"
 
 namespace fl {
+
+class XYRasterSparse;
+template <typename T> class Function;
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
@@ -149,6 +153,11 @@ class XYPath : public Referent {
     point_xy_float at(float alpha) { return at(alpha, mTransform); }
 
     Tile2x2_u8 at_subpixel(float alpha);
+
+    void
+    rasterize(float from, float to, int steps, XYRasterSparse &raster,
+              fl::Function<uint8_t(float)> *optional_alpha_gen = nullptr);
+    ;
 
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx) {
