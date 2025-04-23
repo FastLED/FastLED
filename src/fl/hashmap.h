@@ -204,7 +204,6 @@ class HashMap {
         const size_t mask = cap - 1;
         const size_t h = _hash(key) & mask;
         size_t first_tomb = npos;
-
         for (size_t i = 0; i < cap; ++i) {
             const size_t idx = (h + i) & mask;
             auto &e = _buckets[idx];
@@ -221,7 +220,6 @@ class HashMap {
             }
         }
 
-        FASTLED_WARN("HashMap is full");
         return {npos, false};
     }
 
@@ -249,9 +247,11 @@ class HashMap {
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
         // TODO: Make fast, this is not fast at all.
-        fl::HeapVector<Entry> old = _buckets;
-        // _buckets.clear();
-        _buckets = fl::HeapVector<Entry>(new_cap);
+        // fl::HeapVector<Entry> old = _buckets;
+        fl::HeapVector<Entry> old;
+        _buckets.swap(old);
+        _buckets.clear();
+        // _buckets = fl::HeapVector<Entry>(new_cap);
         // old.swap(_buckets);
         _buckets.assign(new_cap, Entry{});
         for (auto &e : _buckets)
