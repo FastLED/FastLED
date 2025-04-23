@@ -16,7 +16,7 @@ void UISlider::setValue(float value) {
 }
 
 void UISlider::Listener::onBeginFrame() {
-    UISlider& owner = *mOwner;
+    UISlider &owner = *mOwner;
     if (!owner.mLastFramevalueValid) {
         owner.mLastFrameValue = owner.value();
         owner.mLastFramevalueValid = true;
@@ -38,7 +38,7 @@ void UIButton::Listener::onBeginFrame() {
 }
 
 void UICheckbox::Listener::onBeginFrame() {
-    UICheckbox& owner = *mOwner;
+    UICheckbox &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();
         owner.mLastFrameValueValid = true;
@@ -51,10 +51,8 @@ void UICheckbox::Listener::onBeginFrame() {
     }
 }
 
-
-
-void UINumberField::Listener::onBeginFrame()  {
-    UINumberField& owner = *mOwner;
+void UINumberField::Listener::onBeginFrame() {
+    UINumberField &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();
         owner.mLastFrameValueValid = true;

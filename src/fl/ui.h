@@ -215,7 +215,7 @@ class UICheckbox : public UICheckboxImpl {
 
   private:
     Super &impl() { return *this; }
-    FunctionList<UICheckbox&, bool> mCallbacks;
+    FunctionList<UICheckbox &, bool> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
@@ -257,9 +257,7 @@ class UINumberField : public UINumberFieldImpl {
     }
     void clearCallbacks() { mCallbacks.clear(); }
 
-
   private:
-
     struct Listener : public EngineEvents::Listener {
         Listener(UINumberField *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
@@ -276,7 +274,7 @@ class UINumberField : public UINumberFieldImpl {
             EngineEvents::addListener(this);
             added = true;
         }
-        void onBeginFrame() override ;
+        void onBeginFrame() override;
 
       private:
         UINumberField *mOwner;
