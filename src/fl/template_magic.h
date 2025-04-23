@@ -98,6 +98,7 @@ struct is_pod_v_helper {
     static constexpr bool value = is_pod<T>::value;
 };
 
+
 //----------------------------------------------------------------------------
 // trait to detect pointer‑to‑member‑function
 // must come before Function so SFINAE sees it

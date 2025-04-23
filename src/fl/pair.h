@@ -9,4 +9,8 @@ struct Pair {
     Pair(const Key& k, const Value& v) : first(k), second(v) {}
 };
 
+// std compatibility
+template<typename Key, typename Value>
+using pair = Pair<Key, Value>;
+
 }  // namespace fl

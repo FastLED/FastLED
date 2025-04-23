@@ -3,6 +3,8 @@
 #include "fl/hash.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
+#include "fl/pair.h"
+#include "fl/warn.h"
 
 namespace fl {
 
@@ -37,7 +39,10 @@ public:
 
         size_t idx;
         bool is_new;
-        std::tie(idx, is_new) = find_slot(key);
+        // fl::tie(idx, is_new) = find_slot(key);
+        fl::pair<size_t,bool> p = find_slot(key);
+        idx = p.first;
+        is_new = p.second;
         if (is_new) {
             _buckets[idx].key   = key;
             _buckets[idx].value = value;
@@ -67,7 +72,11 @@ public:
     T& operator[](const Key &key) {
         size_t idx;
         bool is_new;
-        std::tie(idx, is_new) = find_slot(key);
+
+        // std::tie(idx, is_new) = find_slot(key);
+        fl::pair<size_t,bool> p = find_slot(key);
+        idx = p.first;
+        is_new = p.second;
         if (is_new) {
             _buckets[idx].key   = key;
             _buckets[idx].value = T{};
@@ -97,7 +106,7 @@ private:
     }
 
     // quadratic probe: idx = (h + i + i*i) & (cap-1)
-    std::pair<size_t,bool> find_slot(const Key &key) const {
+    pair<size_t,bool> find_slot(const Key &key) const {
         size_t cap = _buckets.size();
         size_t h   = _hash(key) & (cap - 1);
         size_t first_tomb = npos;
@@ -114,7 +123,9 @@ private:
                 return { idx, false };
             }
         }
-        throw std::overflow_error("HashMap is full");
+        // throw std::overflow_error("HashMap is full");
+        FASTLED_WARN("HashMap is full");  // Do something better here.
+        return { npos, false };
     }
 
     size_t find_index(const Key &key) const {
@@ -132,7 +143,8 @@ private:
 
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
-        fl::HeapVector<Entry> old = std::move(_buckets);
+        fl::HeapVector<Entry> old;
+        old.swap(_buckets);
         _buckets.assign(new_cap, Entry{});
         for (auto &e : _buckets) e.state = EntryState::Empty;
         _size = _tombstones = 0;
