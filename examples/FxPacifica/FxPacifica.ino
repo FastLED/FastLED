@@ -14,6 +14,13 @@
 #include <FastLED.h>
 #include "fx/1d/pacifica.h"
 #include "fl/screenmap.h"
+#include "defs.h"  // for ENABLE_SKETCH
+
+#if !ENABLE_SKETCH
+void setup() {}
+void loop() {}
+#else
+
 
 using namespace fl;
 
@@ -41,3 +48,5 @@ void loop() {
     FastLED.show();
   }
 }
+
+#endif // ENABLE_SKETCH
