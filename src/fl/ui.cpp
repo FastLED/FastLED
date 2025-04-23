@@ -46,7 +46,7 @@ void UICheckbox::Listener::onBeginFrame() {
     }
     bool value = owner.value();
     if (value != owner.mLastFrameValue) {
-        owner.mCallbacks.invoke(value);
+        owner.mCallbacks.invoke(owner, value);
         owner.mLastFrameValue = value;
     }
 }

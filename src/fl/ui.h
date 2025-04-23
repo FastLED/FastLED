@@ -174,6 +174,16 @@ class UICheckbox : public UICheckboxImpl {
     }
 
     void addCallback(Function<void(bool)> callback) {
+        Function<void(UICheckbox &, bool)> wrapped_cb =
+            [callback](UICheckbox &checkbox, bool value) {
+                FASTLED_UNUSED(checkbox);
+                callback(value);
+            };
+        mCallbacks.add(wrapped_cb);
+        mListener.addToEngineEventsOnce();
+    }
+
+    void addCallbackEx(Function<void(UICheckbox &, bool)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -205,7 +215,7 @@ class UICheckbox : public UICheckboxImpl {
 
   private:
     Super &impl() { return *this; }
-    FunctionList<bool> mCallbacks;
+    FunctionList<UICheckbox&, bool> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
