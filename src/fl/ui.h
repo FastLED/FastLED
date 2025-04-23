@@ -22,8 +22,7 @@ class UISlider : public UISliderImpl {
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
              float max = 255, float step = -1.f)
-        : UISliderImpl(name, value, min, max, step), mListener(this) {
-    }
+        : UISliderImpl(name, value, min, max, step), mListener(this) {}
     float value() const { return Super::value(); }
     float value_normalized() const {
         float min = Super::getMin();
@@ -62,7 +61,7 @@ class UISlider : public UISliderImpl {
 
   protected:
     struct Listener : public EngineEvents::Listener {
-        Listener(UISlider* owner) : mOwner(owner) {
+        Listener(UISlider *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
         }
         ~Listener() {
@@ -78,9 +77,10 @@ class UISlider : public UISliderImpl {
             added = true;
         }
         void onBeginFrame() override;
-        private:
-            UISlider* mOwner;
-            bool added = false;
+
+      private:
+        UISlider *mOwner;
+        bool added = false;
     };
 
   private:
@@ -102,19 +102,21 @@ class UIButton : public UIButtonImpl {
     int clickedCount() const { return Super::clickedCount(); }
     operator bool() const { return Super::isPressed(); }
 
-    void click() {
-        Super::click();
-    }
+    void click() { Super::click(); }
 
     void addCallback(Function<void()> callback) {
-        mCallbacks.add(callback);
+        Function<void(UIButton &)> wrapped_cb = [callback](UIButton &button) {
+            FASTLED_UNUSED(button);
+            callback();
+        };
+        mCallbacks.add(wrapped_cb);
         mListener.addToEngineEventsOnce();
     }
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
     struct Listener : public EngineEvents::Listener {
-        Listener(UIButton* owner) : mOwner(owner) {
+        Listener(UIButton *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
         }
         ~Listener() {
@@ -130,13 +132,14 @@ class UIButton : public UIButtonImpl {
             added = true;
         }
         void onBeginFrame() override;
-        private:
-            UIButton* mOwner;
-            bool added = false;
+
+      private:
+        UIButton *mOwner;
+        bool added = false;
     };
 
   private:
-    FunctionList<void> mCallbacks;
+    FunctionList<UIButton &> mCallbacks;
     bool mLastFrameClicked = false;
     Listener mListener;
 };
@@ -163,7 +166,7 @@ class UICheckbox : public UICheckboxImpl {
 
   protected:
     struct Listener : public EngineEvents::Listener {
-        Listener(UICheckbox* owner) : mOwner(owner) {
+        Listener(UICheckbox *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
         }
         ~Listener() {
@@ -179,9 +182,10 @@ class UICheckbox : public UICheckboxImpl {
             added = true;
         }
         void onBeginFrame() override;
-        private:
-            UICheckbox* mOwner;
-            bool added = false;
+
+      private:
+        UICheckbox *mOwner;
+        bool added = false;
     };
 
   private:
