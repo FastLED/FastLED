@@ -41,6 +41,26 @@ class SubPixel2x2 {
     uint8_t &lower_right() { return at(1, 0); }
     uint8_t &upper_right() { return at(1, 1); }
 
+    uint8_t maxValue() const {
+        uint8_t max = 0;
+        max = MAX(max, at(0, 0));
+        max = MAX(max, at(0, 1));
+        max = MAX(max, at(1, 0));
+        max = MAX(max, at(1, 1));
+        return max;
+    }
+
+    static SubPixel2x2 Max(const SubPixel2x2 &a,
+                           const SubPixel2x2 &b) {
+        SubPixel2x2 result;
+        for (int x = 0; x < 2; ++x) {
+            for (int y = 0; y < 2; ++y) {
+                result.at(x, y) = MAX(a.at(x, y), b.at(x, y));
+            }
+        }
+        return result;
+    }
+
     point_xy<int> origin() const { return mOrigin; }
 
     rect_xy<int> bounds() const {

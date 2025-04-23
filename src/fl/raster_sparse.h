@@ -2,21 +2,21 @@
 #pragma once
 
 /*
-A sparse path through an xy grid. When a value is set != 0, it will get stored in the
-sparse grid. The raster will only store the values that are set, and will not allocate
-memory for the entire grid. This is useful for large grids where only a small number
-of pixels are set.
+A sparse path through an xy grid. When a value is set != 0, it will get stored
+in the sparse grid. The raster will only store the values that are set, and will
+not allocate memory for the entire grid. This is useful for large grids where
+only a small number of pixels are set.
 */
 
 #include <stdint.h>
 
 #include "fl/grid.h"
+#include "fl/hash_map.h"
 #include "fl/namespace.h"
 #include "fl/point.h"
 #include "fl/slice.h"
-#include "fl/hash_map.h"
-#include "fl/xymap.h"
 #include "fl/subpixel.h"
+#include "fl/xymap.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -64,27 +64,43 @@ class XYRasterSparse {
     size_t size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    void rasterize(const Slice<const SubPixel2x2> &tiles) ;
+    void rasterize(const Slice<const SubPixel2x2> &tiles);
     void rasterize(const SubPixel2x2 &tile) {
-        Slice<const SubPixel2x2> tiles(&tile, 1);
-        rasterize(tiles);
+        // Slice<const SubPixel2x2> tiles(&tile, 1);
+        // rasterize(tiles);
+        if (tile.origin() == mCache.origin()) {
+            // Write to the cache.
+            mCache = SubPixel2x2::Max(mCache, tile);
+            return;
+        }
+        flush();
+        mCache = tile;
     }
 
-    // Renders the subpixel tiles to the raster. Any previous data is cleared.
-    // Memory will only be allocated if the size of the raster increased.
-    // void rasterize(const Slice<const SubPixel2x2> &tiles);
+    void rasterize_internal(const SubPixel2x2 &tile,
+                            const rect_xy<int> *optional_bounds = nullptr) ;
+
+    void flush() {
+        if (mCache.maxValue() > 0) {
+            rasterize(Slice<const SubPixel2x2>(&mCache, 1));
+            mCache = SubPixel2x2();
+        }
+    }
+
+    // Renders the subpixel tiles to the raster. Any previous data is
+    // cleared. Memory will only be allocated if the size of the raster
+    // increased. void rasterize(const Slice<const SubPixel2x2> &tiles);
     // uint8_t &at(uint16_t x, uint16_t y) { return mGrid.at(x, y); }
-    // const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x, y); }
+    // const uint8_t &at(uint16_t x, uint16_t y) const { return mGrid.at(x,
+    // y); }
 
     Pair<bool, uint8_t> at(uint16_t x, uint16_t y) const {
-        const uint8_t* val = mSparseGrid.find(point_xy<int>(x, y));
+        const uint8_t *val = mSparseGrid.find(point_xy<int>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
         return {false, 0};
     }
-
-
 
     rect_xy<int> bounds() const {
         if (mAbsoluteBoundsSet) {
@@ -92,7 +108,7 @@ class XYRasterSparse {
         }
         return bounds_pixels();
     }
-    
+
     rect_xy<int> bounds_pixels() const {
         int min_x = 0;
         bool min_x_set = false;
@@ -102,8 +118,8 @@ class XYRasterSparse {
         bool max_x_set = false;
         int max_y = 0;
         bool max_y_set = false;
-        for (const auto& it : mSparseGrid) {
-            const point_xy<int>& pt = it.first;
+        for (const auto &it : mSparseGrid) {
+            const point_xy<int> &pt = it.first;
             if (!min_x_set || pt.x < min_x) {
                 min_x = pt.x;
                 min_x_set = true;
@@ -128,20 +144,21 @@ class XYRasterSparse {
     uint16_t width() const { return bounds().width(); }
     uint16_t height() const { return bounds().height(); }
 
-    void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
+    void draw(const CRGB &color, const XYMap &xymap, CRGB *out);
 
-    // Inlined, yet customizable drawing access. This will only send you pixels
-    // that are within the bounds of the XYMap.
+    // Inlined, yet customizable drawing access. This will only send you
+    // pixels that are within the bounds of the XYMap.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor& visitor) const {
-        for (const auto& it : mSparseGrid) {
+    void draw(const XYMap &xymap, XYVisitor &visitor) {
+        flush();  // Flush the cache.
+        for (const auto &it : mSparseGrid) {
             auto pt = it.first;
             if (!xymap.has(pt.x, pt.y)) {
                 continue;
             }
             uint32_t index = xymap(pt.x, pt.y);
             uint8_t value = it.second;
-            if (value > 0) {  // Something wrote here.
+            if (value > 0) { // Something wrote here.
                 visitor.draw(pt, index, value);
             }
         }
