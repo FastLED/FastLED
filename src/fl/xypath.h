@@ -198,9 +198,7 @@ class XYPath : public Referent {
     //     return CatmullRomPathPtr::New(steps);
     // }
 
-    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat(),
-           uint16_t steps = 0); // 0 steps means no LUT.
-
+    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat());
     point_xy_float at(float alpha) { return at(alpha, mTransform); }
 
     Tile2x2_u8 at_subpixel(float alpha);
@@ -266,8 +264,6 @@ class XYPath : public Referent {
     XYPathGeneratorPtr mPath;
     TransformFloat mTransform;
     TransformFloat mGridTransform;
-    uint32_t mSteps = 0;
-    LUTXY16Ptr mLut;
     bool mDrawBoundsSet = false;
     point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };

@@ -19,9 +19,8 @@ uint8_t to_uint8(float f) {
 }
 } // namespace
 
-XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform,
-               uint16_t steps)
-    : mPath(path), mTransform(transform), mSteps(steps) {}
+XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
+    : mPath(path), mTransform(transform) {}
 
 
 point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
