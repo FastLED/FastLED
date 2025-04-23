@@ -88,22 +88,15 @@ class GielisCurveParams : public XYPathParams {
 class XYPath : public Referent {
   public:
     static XYPathPtr NewPointPath(float x, float y);
-
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1);
-
     static XYPathPtr
     NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>());
 
     static XYPathPtr NewCirclePath();
-
     static XYPathPtr NewCirclePath(uint16_t width, uint16_t height);
-
     static XYPathPtr NewHeartPath();
-
     static XYPathPtr NewHeartPath(uint16_t width, uint16_t height);
-
     static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height);
-
     static XYPathPtr NewArchimedeanSpiralPath();
 
     static XYPathPtr
@@ -118,8 +111,6 @@ class XYPath : public Referent {
         uint16_t width = 0, uint16_t height = 0,
         const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
 
-    XYPath(XYPathGeneratorPtr path,
-           TransformFloat transform = TransformFloat());
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
@@ -136,45 +127,12 @@ class XYPath : public Referent {
     void setDrawBounds(uint16_t width, uint16_t height);
     TransformFloat &transform();
 
+    XYPath(XYPathGeneratorPtr path,
+           TransformFloat transform = TransformFloat());
+
   private:
     XYPathGeneratorPtr mPath;
     XYPathRendererPtr mPathRenderer;
-};
-
-class XYPathRenderer : public Referent {
-  public:
-    XYPathRenderer(XYPathGeneratorPtr path,
-                   TransformFloat transform = TransformFloat());
-    point_xy_float at(float alpha);
-
-    Tile2x2_u8 at_subpixel(float alpha);
-
-    void rasterize(float from, float to, int steps, XYRasterSparse &raster,
-                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
-
-    // Overloaded to allow transform to be passed in.
-    point_xy_float at(float alpha, const TransformFloat &tx);
-
-    // Needed for drawing to the screen. When this called the rendering will
-    // be centered on the width and height such that 0,0 -> maps to .5,.5,
-    // which is convenient for drawing since each float pixel can be truncated
-    // to an integer type.
-    void setDrawBounds(uint16_t width, uint16_t height);
-
-    void onTransformFloatChanged();
-
-    TransformFloat &transform();
-
-    void setScale(float scale);
-
-    point_xy_float compute(float alpha);
-
-  private:
-    XYPathGeneratorPtr mPath;
-    TransformFloat mTransform;
-    TransformFloat mGridTransform;
-    bool mDrawBoundsSet = false;
-    point_xy_float compute_float(float alpha, const TransformFloat &tx);
 };
 
 ///////////////// Implementations of common XYPaths ///////////////////
