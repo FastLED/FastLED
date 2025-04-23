@@ -22,14 +22,35 @@ namespace fl {
 template<typename T, size_t N>
 class FixedVector {
 private:
+
+    using MemoryType = uint32_t;
+
+
     enum {
-        kExtraSize = sizeof(T) % 4 ? 1 : 0,
+        kTotalBytes = N * sizeof(T),
+        kAlign = sizeof(MemoryType),
+        kExtraSize = (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
     };
-    union {
-        uint32_t mRaw[N * sizeof(T)/4 + kExtraSize];
-        T mData[N];
-    };
+
+    // uint32_t mRaw[N * sizeof(T)/sizeof(MemoryType) + kExtraSize];
+    // align this to the size of MemoryType.
+    // uint32_t mMemoryBlock[kTotalSize] = {0};
+    uint32_t mMemoryBlock[kTotalBytes / sizeof(MemoryType) + kExtraSize] = {0};
     size_t current_size = 0;
+
+    T* memory() {
+        uint32_t* begin = &mMemoryBlock[0];
+        uintptr_t shift_up = reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        uint32_t* raw = begin + shift_up;
+        return reinterpret_cast<T*>(raw);
+    }
+
+    const T* memory() const {
+        const uint32_t* begin = &mMemoryBlock[0];
+        const uintptr_t shift_up = reinterpret_cast<uintptr_t>(begin) & (sizeof(MemoryType) - 1);
+        const uint32_t* raw = begin + shift_up;
+        return reinterpret_cast<const T*>(raw);
+    }
 
 public:
     typedef T* iterator;
@@ -54,7 +75,7 @@ public:
 
     // Array subscript operator
     T& operator[](size_t index) {
-        return mData[index];
+        return memory()[index];
     }
 
     // Const array subscript operator
@@ -63,7 +84,7 @@ public:
             const T* out = nullptr;
             return *out;  // Cause a nullptr dereference
         }
-        return mData[index];
+        return memory()[index];
     }
 
     // Get the current size of the vector
@@ -83,7 +104,7 @@ public:
     // Add an element to the end of the vector
     void push_back(const T& value) {
         if (current_size < N) {
-            void* mem = &mData[current_size];
+            void* mem = &memory()[current_size];
             new (mem) T(value);
             ++current_size;
         }
@@ -107,7 +128,7 @@ public:
     void pop_back() {
         if (current_size > 0) {
             --current_size;
-            mData[current_size].~T();
+            memory()[current_size].~T();
         }
     }
 
@@ -212,26 +233,26 @@ public:
 
     // Access to first and last elements
     T& front() {
-        return mData[0];
+        return memory()[0];
     }
 
     const T& front() const {
-        return mData[0];
+        return memory()[0];
     }
 
     T& back() {
-        return mData[current_size - 1];
+        return memory()[current_size - 1];
     }
 
     const T& back() const {
-        return mData[current_size - 1];
+        return memory()[current_size - 1];
     }
 
     // Iterator support
-    iterator begin() { return &mData[0]; }
-    const_iterator begin() const { return &mData[0]; }
-    iterator end() { return &mData[current_size]; }
-    const_iterator end() const { return &mData[current_size]; }
+    iterator begin() { return &memory()[0]; }
+    const_iterator begin() const { return &memory()[0]; }
+    iterator end() { return &memory()[current_size]; }
+    const_iterator end() const { return &memory()[current_size]; }
 };
 
 
