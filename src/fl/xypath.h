@@ -330,9 +330,6 @@ class CirclePath : public XYPathGenerator {
     CirclePath();
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "CirclePath"; }
-
-  private:
-    float mRadius;
 };
 
 class HeartPath : public XYPathGenerator {
