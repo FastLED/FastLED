@@ -220,8 +220,8 @@ point_xy_float PhyllotaxisPath::compute(float alpha) {
 
 point_xy_float GielisCurvePath::compute(float alpha) {
     // 1) map alpha to angle θ ∈ [0 … 2π)
-    constexpr float TWO_PI = 6.283185307179586f;
-    float theta = alpha * TWO_PI;
+    constexpr float kTwoPi = 6.283185307179586f;
+    float theta = alpha * kTwoPi;
 
     // 2) superformula parameters (members of your path)
     //    a, b control the “shape scale” (often both = 1)
