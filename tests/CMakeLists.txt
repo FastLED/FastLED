@@ -73,6 +73,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=reorder
     -Werror=sign-compare
     -Werror=float-equal
+    -Werror=mismatched-tags
     #-Werror=conversion
     -Werror=switch-enum
     #-Werror=switch-default
