@@ -4,10 +4,10 @@
 
 namespace fl {
 
-template<typename T>
+template<typename... Args>
 class FunctionList {
 private:
-    using FunctionType = Function<void(T)>;
+    using FunctionType = Function<void(Args...)>;
     fl::vector<FunctionType> mFunctions;
 
 public:
@@ -25,9 +25,7 @@ public:
     void clear() {
         mFunctions.clear();
     }
-
-    template<typename... Args>
-    void invoke(Args&&... args) {
+    void invoke(Args... args) {
         for (const auto &function : mFunctions) {
             // function(std::forward<Args>(args)...);
             function(args...);
