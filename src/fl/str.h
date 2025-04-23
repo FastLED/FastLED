@@ -11,9 +11,11 @@
 #include "fl/point.h"
 
 enum {
+    kStrIntIsInt64 = fl::is_same<int, int64_t>::value,
     kStrIntIsInt32 = fl::is_same<int, int32_t>::value,
     kStrIntIsInt16 = fl::is_same<int, int16_t>::value,
-    kStrIntDefineNeeded = !kStrIntIsInt32 && !kStrIntIsInt16,
+    kStrIntIsInt8 = fl::is_same<int, int8_t>::value,
+    kStrIntDefineNeeded = !kStrIntIsInt64 && !kStrIntIsInt32 && !kStrIntIsInt16 && !kStrIntIsInt8,
 };
 
 #ifndef FASTLED_STR_INLINED_SIZE
@@ -36,7 +38,7 @@ enum {
 // #endif
 // End Arduino family.
 #elif kStrIntDefineNeeded
-#define FASTLED_STR_NEEDS_INT 0
+#define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(__clang__)
