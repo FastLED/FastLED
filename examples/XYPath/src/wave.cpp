@@ -17,37 +17,39 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
     255, 255, 255, 255  // white
 };
 
-WaveFx::Args args_lower = WaveFx::Args{
-    .factor = SUPER_SAMPLE_2X,
-    .half_duplex = true,
-    .speed = 0.18f,
-    .dampening = 9.0f,
-    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
-};
-WaveFx::Args args_upper = WaveFx::Args{
-    .factor = SUPER_SAMPLE_2X,
-    .half_duplex = true,
-    .speed = 0.25f,
-    .dampening = 3.0f,
-    .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
-};
+WaveFx::Args CreateArgsLower() {
+    WaveFx::Args out;
+    out.factor = SuperSample::SUPER_SAMPLE_2X;
+    out.half_duplex = true;
+    out.auto_updates = true;
+    out.speed = 0.18f;
+    out.dampening = 9.0f;
+    out.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+    return out;
+}
 
-
-// struct Scene {
-//     WaveFxPtr wave_fx_low;;
-//     WaveFxPtr wave_fx_high;
-//     Blend2dPtr out_fx;
-// };
-
+WaveFx::Args CreateArgsUpper() {
+    WaveFx::Args out;
+    out.factor = SuperSample::SUPER_SAMPLE_2X;
+    out.half_duplex = true;
+    out.auto_updates = true;
+    out.speed = 0.25f;
+    out.dampening = 3.0f;
+    out.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+    return out;
+}
 
 WaveEffect NewWaveSimulation2D(const XYMap xymap) {
     // only apply complex xymap as the last step after compositiing.
     XYMap xy_rect =
         XYMap::constructRectangularGrid(xymap.getWidth(), xymap.getHeight());
-    Blend2dPtr fxBlend =  NewPtr<Blend2d>(xymap); // Final transformation goes to the blend stack.
+    Blend2dPtr fxBlend =
+        NewPtr<Blend2d>(xymap); // Final transformation goes to the blend stack.
     int width = xymap.getWidth();
     int height = xymap.getHeight();
     XYMap xyRect(width, height, false);
+    WaveFx::Args args_lower = CreateArgsLower();
+    WaveFx::Args args_upper = CreateArgsUpper();
     WaveFxPtr wave_fx_low = NewPtr<WaveFx>(xy_rect, args_lower);
     WaveFxPtr wave_fx_high = NewPtr<WaveFx>(xy_rect, args_upper);
     Blend2dPtr blend_stack = NewPtr<Blend2d>(xymap);

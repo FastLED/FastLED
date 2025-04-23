@@ -145,11 +145,11 @@ struct point_xy {
         return (x != p.x || y != p.y);
     }
 
-    point_xy max(const point_xy& p) const {
+    point_xy getMax(const point_xy& p) const {
         return point_xy(MAX(x, p.x), MAX(y, p.y));
     }
 
-    point_xy min(const point_xy& p) const {
+    point_xy getMin(const point_xy& p) const {
         return point_xy(MIN(x, p.x), MIN(y, p.y));
     }
 
@@ -159,12 +159,12 @@ struct point_xy {
     }
 
     template<typename U>
-    point_xy max(const point_xy<U>& p) const {
+    point_xy getMax(const point_xy<U>& p) const {
         return point_xy<U>(MAX(x, p.x), MAX(y, p.y));
     }
 
     template<typename U>
-    point_xy min(const point_xy<U>& p) const {
+    point_xy getMin(const point_xy<U>& p) const {
         return point_xy<U>(MIN(x, p.x), MIN(y, p.y));
     }
 

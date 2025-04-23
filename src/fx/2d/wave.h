@@ -63,6 +63,13 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
 };
 
 struct WaveFxArgs {
+    WaveFxArgs() = default;
+    WaveFxArgs(SuperSample factor, bool half_duplex, bool auto_updates,
+               float speed, float dampening, WaveCrgbMapPtr crgbMap)
+        : factor(factor), half_duplex(half_duplex), auto_updates(auto_updates),
+          speed(speed), dampening(dampening), crgbMap(crgbMap) {}
+    WaveFxArgs(const WaveFxArgs&) = default;
+    WaveFxArgs& operator=(const WaveFxArgs&) = default;
     SuperSample factor = SuperSample::SUPER_SAMPLE_2X;
     bool half_duplex = true;
     bool auto_updates = true;

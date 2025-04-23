@@ -8,6 +8,9 @@
 #include "crgb.h"
 #include "fl/math_macros.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wshift-count-overflow"
+
 namespace fl {
 
 void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
@@ -78,3 +81,6 @@ void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
 }
 
 } // namespace fl
+
+
+#pragma GCC diagnostic pop

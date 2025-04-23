@@ -27,14 +27,14 @@ class UISlider : public UISliderImpl {
     }
     float value() const { return Super::value(); }
     float value_normalized() const {
-        float min = Super::min();
-        float max = Super::max();
+        float min = Super::getMin();
+        float max = Super::getMax();
         if (ALMOST_EQUAL(max, min, 0.0001f)) {
             return 0;
         }
         return (value() - min) / (max - min);
     }
-    float max() const { return Super::max(); }
+    float getMax() const { return Super::getMax(); }
     void setValue(float value);
     operator float() const { return Super::value(); }
     operator uint8_t() const { return static_cast<uint8_t>(Super::value()); }

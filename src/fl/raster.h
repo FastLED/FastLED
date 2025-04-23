@@ -93,7 +93,7 @@ class XYRaster {
                 uint32_t index = xymap(xx, yy);
                 uint8_t value = at(x, y);
                 if (value > 0) {  // Something wrote here.
-                    point_xy<int> pt = {xx, yy};
+                    point_xy<int> pt = {int(xx), int(yy)};
                     visitor.draw(pt, index, value);
                 }
             }

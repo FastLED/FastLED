@@ -34,8 +34,8 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
     // Optionally adjust the bounds.
     // rect_xy<int> *optional_bounds = nullptr;
     if (optional_bounds) {
-        auto _min = bounds.mMin.max(optional_bounds->mMin);
-        auto _max = bounds.mMax.min(optional_bounds->mMax);
+        auto _min = bounds.mMin.getMax(optional_bounds->mMin);
+        auto _max = bounds.mMax.getMin(optional_bounds->mMax);
         bounds = rect_xy<int>(_min, _max);        
     }
 
