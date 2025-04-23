@@ -147,7 +147,8 @@ class XYRasterSparse {
     }
 
   private:
-    fl::HashMap<point_xy<int>, uint8_t> mSparseGrid;
+    using HashMap = fl::HashMap<point_xy<int>, uint8_t>;
+    HashMap mSparseGrid;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };

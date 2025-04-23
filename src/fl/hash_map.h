@@ -6,6 +6,8 @@
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/clamp.h"
+#include "fl/map_range.h"
 
 namespace fl {
 
@@ -19,9 +21,15 @@ class HashMap {
   public:
     HashMap(size_t initial_capacity = 8, float max_load = 0.5f)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
-          _tombstones(0), _max_load(max_load) {
+          _tombstones(0) {
         for (auto &e : _buckets)
             e.state = EntryState::Empty;
+        setLoadFactor(max_load);
+    }
+
+    void setLoadFactor(float f) {
+        f = fl::clamp(f, 0.f, 1.f);
+        mLoadFactor = fl::map_range<float, uint8_t>(f, 0.f, 1.f, 0, 255);
     }
 
     // Iterator support.
@@ -100,9 +108,20 @@ class HashMap {
     const_iterator begin() const { return const_iterator(this, 0); }
     const_iterator end() const { return const_iterator(this, _buckets.size()); }
 
+
+    // returns true if (size + tombs)/capacity > _max_load/256
+    bool needs_rehash() const {
+        // (size + tombstones) << 8   : multiply numerator by 256
+        // _buckets.size() * _max_load : denominator * threshold
+        uint32_t lhs = ( _size + _tombstones ) << 8;
+        uint32_t rhs = (_buckets.size() * mLoadFactor);
+        return lhs > rhs;
+    }
+
     // insert or overwrite
     void insert(const Key &key, const T &value) {
-        if (float(_size + _tombstones) / _buckets.size() > _max_load) {
+        const bool _needs_rehash = needs_rehash();
+        if (_needs_rehash) {
             rehash(_buckets.size() * 2);
         }
 
@@ -307,7 +326,7 @@ class HashMap {
     fl::HeapVector<Entry> _buckets;
     size_t _size;
     size_t _tombstones;
-    float _max_load;
+    uint8_t mLoadFactor;
     Hash _hash;
     KeyEqual _equal;
 };
