@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/assert.h"
 #include "fl/hash.h"
 #include "fl/pair.h"
 #include "fl/template_magic.h"
@@ -94,15 +95,22 @@ class HashMap {
         }
     };
 
-    iterator       begin()       { return iterator(this,        0); }
-    iterator       end()         { return iterator(this, _buckets.size()); }
-    const_iterator begin() const { return const_iterator(this,        0); }
-    const_iterator end()   const { return const_iterator(this, _buckets.size()); }
+    iterator begin() { return iterator(this, 0); }
+    iterator end() { return iterator(this, _buckets.size()); }
+    const_iterator begin() const { return const_iterator(this, 0); }
+    const_iterator end() const { return const_iterator(this, _buckets.size()); }
 
     // insert or overwrite
     void insert(const Key &key, const T &value) {
-        if (float(_size + _tombstones) / _buckets.size() > _max_load)
+        auto prev_size = _size;
+        if (float(_size + _tombstones) / _buckets.size() > _max_load) {
+            FASTLED_WARN("HashMap rehashing");
             rehash(_buckets.size() * 2);
+        }
+
+        if (_buckets.size() < prev_size) {
+            FASTLED_WARN("HashMap rehashing failed");
+        }
 
         size_t idx;
         bool is_new;
@@ -116,6 +124,8 @@ class HashMap {
             _buckets[idx].state = EntryState::Occupied;
             ++_size;
         } else {
+            FASTLED_ASSERT(idx != npos, "HashMap::insert: invalid index at "
+                                            << idx << " which is " << npos);
             _buckets[idx].value = value;
         }
     }
@@ -142,6 +152,11 @@ class HashMap {
 
     // find pointer to value or nullptr
     T *find(const Key &key) {
+        auto idx = find_index(key);
+        return idx == npos ? nullptr : &_buckets[idx].value;
+    }
+
+    const T *find(const Key &key) const {
         auto idx = find_index(key);
         return idx == npos ? nullptr : &_buckets[idx].value;
     }
@@ -184,15 +199,18 @@ class HashMap {
         return p;
     }
 
-    // quadratic probe: idx = (h + i + i*i) & (cap-1)
     pair<size_t, bool> find_slot(const Key &key) const {
-        size_t cap = _buckets.size();
-        size_t h = _hash(key) & (cap - 1);
+        const size_t cap = _buckets.size();
+        const size_t mask = cap - 1;
+        const size_t h = _hash(key) & mask;
         size_t first_tomb = npos;
+
         for (size_t i = 0; i < cap; ++i) {
-            size_t idx = (h + i + i * i) & (cap - 1);
+            const size_t idx = (h + i) & mask;
             auto &e = _buckets[idx];
+
             if (e.state == EntryState::Empty) {
+                // if we saw a tombstone earlier, reuse it
                 return {first_tomb != npos ? first_tomb : idx, true};
             }
             if (e.state == EntryState::Deleted) {
@@ -202,29 +220,39 @@ class HashMap {
                 return {idx, false};
             }
         }
-        // throw std::overflow_error("HashMap is full");
-        FASTLED_WARN("HashMap is full"); // Do something better here.
+
+        FASTLED_WARN("HashMap is full");
         return {npos, false};
     }
 
     size_t find_index(const Key &key) const {
-        size_t cap = _buckets.size();
-        size_t h = _hash(key) & (cap - 1);
+        const size_t cap = _buckets.size();
+        const size_t mask = cap - 1;
+        const size_t h = _hash(key) & mask;
+
         for (size_t i = 0; i < cap; ++i) {
-            size_t idx = (h + i + i * i) & (cap - 1);
+            const size_t idx = (h + i) & mask;
             auto &e = _buckets[idx];
-            if (e.state == EntryState::Empty)
+
+            if (e.state == EntryState::Empty) {
+                // once we hit an empty slot, key’s not in table
                 return npos;
-            if (e.state == EntryState::Occupied && _equal(e.key, key))
+            }
+            if (e.state == EntryState::Occupied && _equal(e.key, key)) {
                 return idx;
+            }
+            // otherwise keep probing
         }
         return npos;
     }
 
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
-        fl::HeapVector<Entry> old;
-        old.swap(_buckets);
+        // TODO: Make fast, this is not fast at all.
+        fl::HeapVector<Entry> old = _buckets;
+        // _buckets.clear();
+        _buckets = fl::HeapVector<Entry>(new_cap);
+        // old.swap(_buckets);
         _buckets.assign(new_cap, Entry{});
         for (auto &e : _buckets)
             e.state = EntryState::Empty;

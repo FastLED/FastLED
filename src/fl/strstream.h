@@ -57,13 +57,15 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator=(uint16_t n) {
+
+
+    StrStream &operator=(const uint16_t& n) {
         mStr.clear();
         (*this) << n;
         return *this;
     }
 
-    StrStream &operator=(uint8_t n) {
+    StrStream &operator=(const uint8_t& n) {
         mStr.clear();
         (*this) << n;
         return *this;
@@ -98,7 +100,7 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(char c) {
+    StrStream &operator<<(const char& c) {
         if (mTreatCharAsInt) {
             StrStreamHelper<int>::append(mStr, c);
         } else {
@@ -120,7 +122,7 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(uint8_t n) {
+    StrStream &operator<<(const uint8_t& n) {
         if (mTreatCharAsInt) {
             mStr.append(uint16_t(n));
         } else {
@@ -129,22 +131,22 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(uint16_t n) {
+    StrStream &operator<<(const uint16_t& n) {
         mStr.append(n);
         return *this;
     }
 
-    StrStream &operator<<(int16_t n) {
+    StrStream &operator<<(const int16_t& n) {
         mStr.append(n);
         return *this;
     }
 
-    StrStream &operator<<(uint32_t n) {
+    StrStream &operator<<(const uint32_t& n) {
         mStr.append(uint32_t(n));
         return *this;
     }
 
-    StrStream &operator<<(int32_t n) {
+    StrStream &operator<<(const int32_t& n) {
         mStr.append(n);
         return *this;
     }

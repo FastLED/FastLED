@@ -1,30 +1,33 @@
 
 #pragma once
 
-
 #include <stddef.h>
+#include <stdint.h>
 
 #include "fl/namespace.h"
+// #include "fl/warn.h"
 
 namespace fl {
 
+namespace scoped_ptr_detail {
+void LOG_POINTER_DELETE(void *ptr);
+void LOG_POINTER_NEW(void *ptr);
+} // namespace scoped_ptr_detail
 
-template<typename T>
-struct ArrayDeleter {
-    void operator()(T* ptr) {
+template <typename T> struct ArrayDeleter {
+    void operator()(T *ptr) {
+        // uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+        // FASTLED_WARN("Deleting ptr: " << address);
+        scoped_ptr_detail::LOG_POINTER_DELETE(ptr);
         delete[] ptr;
     }
 };
 
-template<typename T>
-struct PointerDeleter {
-    void operator()(T* ptr) {
-        delete ptr;
-    }
+template <typename T> struct PointerDeleter {
+    void operator()(T *ptr) { delete ptr; }
 };
 
-template <typename T, typename Deleter = PointerDeleter<T>>
-class scoped_ptr {
+template <typename T, typename Deleter = PointerDeleter<T>> class scoped_ptr {
   public:
     // Constructor
     explicit scoped_ptr(T *ptr = nullptr, Deleter deleter = Deleter())
@@ -44,16 +47,16 @@ class scoped_ptr {
         other.deleter_ = {};
     }
 
-    // Move assignment operator
-    scoped_ptr &operator=(scoped_ptr &&other) noexcept {
-        if (this != &other) {
-            reset(other.ptr_);
-            deleter_ = other.deleter_;
-            other.ptr_ = nullptr;
-            other.deleter_ = {};
-        }
-        return *this;
-    }
+    // // Move assignment operator
+    // scoped_ptr &operator=(scoped_ptr &&other) noexcept {
+    //     if (this != &other) {
+    //         reset(other.ptr_);
+    //         deleter_ = other.deleter_;
+    //         other.ptr_ = nullptr;
+    //         other.deleter_ = {};
+    //     }
+    //     return *this;
+    // }
 
     // Access the managed object
     T *operator->() const { return ptr_; }
@@ -78,28 +81,32 @@ class scoped_ptr {
         }
     }
 
-    T* release() {
-        T* tmp = ptr_;
+    T *release() {
+        T *tmp = ptr_;
         ptr_ = nullptr;
         return tmp;
     }
 
     void swap(scoped_ptr &other) noexcept {
-        T* tmp = ptr_;
+        T *tmp = ptr_;
         ptr_ = other.ptr_;
         other.ptr_ = tmp;
     }
 
   private:
-    T *ptr_; // Managed pointer
+    T *ptr_;          // Managed pointer
     Deleter deleter_; // Custom deleter
 };
 
-template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
+template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
   public:
     // Constructor
-    explicit scoped_array(T *arr = nullptr) : arr_(arr) {}
-    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {}
+    explicit scoped_array(T *arr = nullptr) : arr_(arr) {
+        scoped_ptr_detail::LOG_POINTER_NEW(arr);
+    }
+    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {
+        scoped_ptr_detail::LOG_POINTER_NEW(arr);
+    }
 
     // Destructor
     ~scoped_array() { deleter_(arr_); }
@@ -109,7 +116,8 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
     scoped_array &operator=(const scoped_array &) = delete;
 
     // Move constructor
-    scoped_array(scoped_array &&other) noexcept : arr_(other.arr_), deleter_(other.deleter_) {
+    scoped_array(scoped_array &&other) noexcept
+        : arr_(other.arr_), deleter_(other.deleter_) {
         other.arr_ = nullptr;
         other.deleter_ = {};
     }
@@ -144,18 +152,16 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
         arr_ = arr;
     }
 
-    void clear() {
-        reset();
-    }
+    void clear() { reset(); }
 
-    T* release() {
-        T* tmp = arr_;
+    T *release() {
+        T *tmp = arr_;
         arr_ = nullptr;
         return tmp;
     }
 
     void swap(scoped_array &other) noexcept {
-        T* tmp = arr_;
+        T *tmp = arr_;
         arr_ = other.arr_;
         other.arr_ = tmp;
     }
@@ -165,5 +171,4 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
     Deleter deleter_ = {};
 };
 
-
-}  // namespace fl
+} // namespace fl

@@ -31,7 +31,7 @@ inline const char* fastled_file_offset(const char* file) {
 #endif
 
 #ifndef FASTLED_DBG_USE_PRINTF
-#if defined(DEBUG) && (defined(__IMXRT1062__) || defined(ESP32))
+#if defined(DEBUG) && (defined(__IMXRT1062__) || defined(ESP32) || defined(FASTLED_TESTING))
 #define FASTLED_DBG_USE_PRINTF 1
 #else
 #define FASTLED_DBG_USE_PRINTF 0

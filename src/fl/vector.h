@@ -245,13 +245,14 @@ private:
 
     // Constructor
     HeapVector(size_t size = 0, const T& value = T()): mCapacity(size) { 
-        mArray.reset(new T[mCapacity]);
+        mArray.reset(new T[mCapacity]());
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
         }
         mSize = size;
     }
-    HeapVector(const HeapVector<T>& other): mSize(other.size()) {
+    HeapVector(const HeapVector<T>& other) {
+        reserve(other.size());
         assign(other.begin(), other.end());
     }
     HeapVector& operator=(const HeapVector<T>& other) { // cppcheck-suppress operatorEqVarError
@@ -272,7 +273,8 @@ private:
             if (new_capacity < n) {
                 new_capacity = n;
             }
-            fl::scoped_array<T> new_array(new T[new_capacity]);
+            T* ptr = new T[new_capacity]();
+            fl::scoped_array<T> new_array(ptr);
             for (size_t i = 0; i < mSize; ++i) {
                 new_array[i] = mArray[i];
             }
@@ -302,11 +304,12 @@ private:
 
     void resize(size_t n, const T& value) {
         mArray.reset();
-        mArray.reset(new T[n]);
+        mArray.reset(new T[n]());
         for (size_t i = 0; i < n; ++i) {
             mArray[i] = value;
         }
         mCapacity = n;
+        mSize = n;
     }
 
     // Array access operators
@@ -478,9 +481,14 @@ private:
         return true;
     }
 
-    void assign(const T* values, size_t count) {
-        assign(values, values + count);
-    }
+    // void assign(const T* values, size_t count) {
+    //     clear();
+    //     if (!mArray) {
+    //         mArray.reset(new T[count]);
+    //     }
+    //     mCapacity = count;
+    //     assign(values, values + count);
+    // }
 
     void assign(size_t new_cap, const T& value) {
         clear();
