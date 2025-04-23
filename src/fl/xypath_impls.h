@@ -36,9 +36,9 @@ FASTLED_SMART_PTR(PhyllotaxisPath);
 FASTLED_SMART_PTR(GielisCurvePath);
 FASTLED_SMART_PTR(LinePathParams);
 FASTLED_SMART_PTR(RosePathParams);
+FASTLED_SMART_PTR(CatmullRomPath);
 
 // FASTLED_SMART_PTR(LissajousPath);
-// FASTLED_SMART_PTR(CatmullRomPath);
 
 // BaseClasses.
 // Controllable parameter base class. Each subtype has a transform and brightness.
@@ -217,26 +217,37 @@ class GielisCurvePath : public XYPathGenerator {
 };
 
 
-#if 0
-
 /// Catmull–Rom spline through arbitrary points.
 /// Simply add control points and compute(α) will smoothly interpolate through them.
-class CatmullRomPath : public XYPathRenderer {
+class CatmullRomPath : public XYPathGenerator {
   public:
-    /**
-     * @param steps  LUT resolution (0 = no LUT)
-     */
-    CatmullRomPath(uint16_t steps = 0);
+    CatmullRomPath();
 
     /// Add a point in [0,1]² to the path
     void addPoint(point_xy_float p);
-
+    
+    /// Add a point with separate x,y coordinates
+    void addPoint(float x, float y);
+    
+    /// Clear all control points
+    void clear();
+    
+    /// Get the number of control points
+    size_t size() const;
+    
     point_xy_float compute(float alpha) override;
-    const char *name() const override ;
+    const Str name() const override;
 
   private:
     HeapVector<point_xy_float> mPoints;
+    
+    // Helper function to interpolate between points using Catmull-Rom spline
+    point_xy_float interpolate(const point_xy_float& p0, const point_xy_float& p1, 
+                              const point_xy_float& p2, const point_xy_float& p3, 
+                              float t) const;
 };
-#endif
+
+// Smart pointer for CatmullRomPath
+FASTLED_SMART_PTR(CatmullRomPath);
 
 } // namespace fl
