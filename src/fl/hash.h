@@ -60,8 +60,15 @@ static inline uint32_t MurmurHash3_x86_32(const void* key, size_t len, uint32_t 
 //-----------------------------------------------------------------------------
 // Functor for hashing arbitrary byte‐ranges to a 32‐bit value
 //-----------------------------------------------------------------------------
+// https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
 template<typename T>
-struct Hash;
+struct Hash {
+    static_assert(fl::is_pod<T>::value,
+                  "fl::Hash<T> only supports POD types (integrals, floats, etc.), you need to define your own hash.");
+    uint32_t operator()(const T &key) const noexcept {
+        return MurmurHash3_x86_32(&key, sizeof(T));
+    }
+};
 
 template<typename T>
 struct Hash<T*> {
@@ -90,25 +97,5 @@ struct Hash<fl::Str> {
 };
 
 
+
 }  // namespace fl
-
-
-/// Define a Hash<T> for any POD‐style T by hashing its raw bytes.
-/// Usage: FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
-#define FASTLED_DEFINE_POD_HASH_FUNCTION(T)               \
-template<>                                                \
-struct fl::Hash<T> {                                      \
-    uint32_t operator()(const T &key) const noexcept {    \
-        return MurmurHash3_x86_32(&key, sizeof(T));       \
-    }                                                     \
-}
-
-FASTLED_DEFINE_POD_HASH_FUNCTION(int8_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(uint8_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(int16_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(uint16_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(int32_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(uint32_t);
-FASTLED_DEFINE_POD_HASH_FUNCTION(float);
-FASTLED_DEFINE_POD_HASH_FUNCTION(double);
-FASTLED_DEFINE_POD_HASH_FUNCTION(uint64_t);

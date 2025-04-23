@@ -10,8 +10,6 @@
 using namespace fl;
 
 
-FASTLED_DEFINE_POD_HASH_FUNCTION(char);   // TODO: move this to fl/hash.h
-
 
 TEST_CASE("Empty map") {
     HashMap<int,int> m;
