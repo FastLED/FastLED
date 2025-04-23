@@ -22,8 +22,11 @@ namespace fl {
 template<typename T, size_t N>
 class FixedVector {
 private:
+    enum {
+        kExtraSize = sizeof(T) % 4 ? 1 : 0,
+    };
     union {
-        char mRaw[N * sizeof(T)];
+        uint32_t mRaw[N * sizeof(T)/4 + kExtraSize];
         T mData[N];
     };
     size_t current_size = 0;
