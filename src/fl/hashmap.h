@@ -246,13 +246,9 @@ class HashMap {
 
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
-        // TODO: Make fast, this is not fast at all.
-        // fl::HeapVector<Entry> old = _buckets;
         fl::HeapVector<Entry> old;
         _buckets.swap(old);
         _buckets.clear();
-        // _buckets = fl::HeapVector<Entry>(new_cap);
-        // old.swap(_buckets);
         _buckets.assign(new_cap, Entry{});
         for (auto &e : _buckets)
             e.state = EntryState::Empty;
