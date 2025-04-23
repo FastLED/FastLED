@@ -196,6 +196,13 @@ XYPathPtr XYPath::NewGielisCurvePath(uint16_t width, uint16_t height,
     return out;
 }
 
-// Str CatmullRomPath::name() const { return "CatmullRomPath"; }
+XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height) {
+    CatmullRomPathPtr path = CatmullRomPathPtr::New();
+    XYPathPtr out = XYPathPtr::New(path);
+    if (width > 0 && height > 0) {
+        out->setDrawBounds(width, height);
+    }
+    return out;
+}
 
 } // namespace fl
