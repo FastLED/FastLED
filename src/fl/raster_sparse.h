@@ -16,6 +16,7 @@ of pixels are set.
 #include "fl/slice.h"
 #include "fl/hash_map.h"
 #include "fl/xymap.h"
+#include "fl/subpixel.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -148,6 +149,7 @@ class XYRasterSparse {
 
   private:
     using HashMap = fl::HashMap<point_xy<int>, uint8_t>;
+    SubPixel2x2 mCache;
     HashMap mSparseGrid;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
