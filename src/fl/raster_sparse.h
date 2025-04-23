@@ -149,6 +149,9 @@ class XYRasterSparse {
         }
     }
 
+
+    static const int kMaxCacheSize = 8;  // Max size for tiny cache.
+
     void write(const point_xy<int> &pt, uint8_t value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
@@ -161,13 +164,18 @@ class XYRasterSparse {
             }
             return;
         }
-        if (mCache.size() < 4) {
+        if (mCache.size() <= kMaxCacheSize) {
             // cache it.
             uint8_t *v = mSparseGrid.find(pt);
             if (v == nullptr) {
                 // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: "
                 // << value);
-                mCache.clear(); // We might do a rehash should just dump all.
+                if (mSparseGrid.needs_rehash()) {
+                    // mSparseGrid is about to rehash, so we need to clear the
+                    // cache.
+                    mCache.clear();
+                }
+
                 mSparseGrid.insert(pt, value);
                 return;
             }
