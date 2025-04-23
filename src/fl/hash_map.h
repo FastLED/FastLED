@@ -159,7 +159,6 @@ class HashMap {
         size_t idx;
         bool is_new;
 
-        // std::tie(idx, is_new) = find_slot(key);
         fl::pair<size_t, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;
@@ -197,19 +196,51 @@ class HashMap {
         const size_t mask = cap - 1;
         const size_t h = _hash(key) & mask;
         size_t first_tomb = npos;
-        for (size_t i = 0; i < cap; ++i) {
-            const size_t idx = (h + i) & mask;
-            auto &e = _buckets[idx];
 
-            if (e.state == EntryState::Empty) {
-                // if we saw a tombstone earlier, reuse it
-                return {first_tomb != npos ? first_tomb : idx, true};
+        if (cap <= 8) {
+            // linear probing
+            for (size_t i = 0; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                auto &e = _buckets[idx];
+
+                if (e.state == EntryState::Empty)
+                    return {first_tomb != npos ? first_tomb : idx, true};
+                if (e.state == EntryState::Deleted) {
+                    if (first_tomb == npos)
+                        first_tomb = idx;
+                } else if (_equal(e.key, key)) {
+                    return {idx, false};
+                }
             }
-            if (e.state == EntryState::Deleted) {
-                if (first_tomb == npos)
-                    first_tomb = idx;
-            } else if (_equal(e.key, key)) {
-                return {idx, false};
+        } else {
+            // quadratic probing up to 8 tries
+            size_t i = 0;
+            for (; i < 8; ++i) {
+                const size_t idx = (h + i + i * i) & mask;
+                auto &e = _buckets[idx];
+
+                if (e.state == EntryState::Empty)
+                    return {first_tomb != npos ? first_tomb : idx, true};
+                if (e.state == EntryState::Deleted) {
+                    if (first_tomb == npos)
+                        first_tomb = idx;
+                } else if (_equal(e.key, key)) {
+                    return {idx, false};
+                }
+            }
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                auto &e = _buckets[idx];
+
+                if (e.state == EntryState::Empty)
+                    return {first_tomb != npos ? first_tomb : idx, true};
+                if (e.state == EntryState::Deleted) {
+                    if (first_tomb == npos)
+                        first_tomb = idx;
+                } else if (_equal(e.key, key)) {
+                    return {idx, false};
+                }
             }
         }
 
@@ -221,19 +252,38 @@ class HashMap {
         const size_t mask = cap - 1;
         const size_t h = _hash(key) & mask;
 
-        for (size_t i = 0; i < cap; ++i) {
-            const size_t idx = (h + i) & mask;
-            auto &e = _buckets[idx];
-
-            if (e.state == EntryState::Empty) {
-                // once we hit an empty slot, key’s not in table
-                return npos;
+        if (cap <= 8) {
+            // linear probing
+            for (size_t i = 0; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                auto &e = _buckets[idx];
+                if (e.state == EntryState::Empty)
+                    return npos;
+                if (e.state == EntryState::Occupied && _equal(e.key, key))
+                    return idx;
             }
-            if (e.state == EntryState::Occupied && _equal(e.key, key)) {
-                return idx;
+        } else {
+            // quadratic probing up to 8 tries
+            size_t i = 0;
+            for (; i < 8; ++i) {
+                const size_t idx = (h + i + i * i) & mask;
+                auto &e = _buckets[idx];
+                if (e.state == EntryState::Empty)
+                    return npos;
+                if (e.state == EntryState::Occupied && _equal(e.key, key))
+                    return idx;
             }
-            // otherwise keep probing
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                auto &e = _buckets[idx];
+                if (e.state == EntryState::Empty)
+                    return npos;
+                if (e.state == EntryState::Occupied && _equal(e.key, key))
+                    return idx;
+            }
         }
+
         return npos;
     }
 
