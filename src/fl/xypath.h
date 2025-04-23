@@ -142,7 +142,7 @@ class XYPath : public Referent {
 
     static XYPathPtr
     NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0,
-                       const PhyllotaxisParams &args = PhyllotaxisParams()) {
+                       const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>()) {
         PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -419,16 +419,16 @@ class PhyllotaxisPath : public XYPathGenerator {
   public:
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
-    PhyllotaxisPath(const PhyllotaxisParams &p = PhyllotaxisParams())
+    PhyllotaxisPath(const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>())
         : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "PhyllotaxisPath"; }
 
-    PhyllotaxisParams& params() { return mParams; }
-    const PhyllotaxisParams& params() const { return mParams; }
+    PhyllotaxisParams& params() { return *mParams; }
+    const PhyllotaxisParams& params() const { return *mParams; }
 
   private:
-    PhyllotaxisParams mParams;
+    Ptr<PhyllotaxisParams> mParams;
 };
 
 class GielisCurvePath : public XYPathGenerator {

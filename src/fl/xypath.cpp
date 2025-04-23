@@ -317,7 +317,7 @@ point_xy_float RosePath::compute(float alpha) {
 
 point_xy_float PhyllotaxisPath::compute(float alpha) {
     // total number of points you want in the pattern
-    const float N = static_cast<float>(mParams.c);
+    const float N = static_cast<float>(params().c);
 
     // continuous “index” from 0…N
     float n = alpha * N;
