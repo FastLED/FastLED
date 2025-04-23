@@ -152,8 +152,8 @@ class EngineEvents {
     typedef fl::vector<Pair> ListenerList;
     #else
     typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS> ListenerList;
-    ListenerList mListeners;
     #endif
+    ListenerList mListeners;
 #endif
 
     static EngineEvents *getInstance();
