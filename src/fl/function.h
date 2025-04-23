@@ -2,6 +2,9 @@
 #include "fl/template_magic.h"
 #include "fl/ptr.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 namespace fl {
 
 //----------------------------------------------------------------------------
@@ -115,3 +118,7 @@ public:
 };
 
 } // namespace fl
+
+
+#pragma GCC diagnostic pop
+

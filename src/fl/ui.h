@@ -226,7 +226,7 @@ class UINumberField : public UINumberFieldImpl {
     using Super = UINumberFieldImpl;
     UINumberField(const char *name, double value, double min = 0,
                   double max = 100)
-        : UINumberFieldImpl(name, value, min, max) {}
+        : UINumberFieldImpl(name, value, min, max), mListener(this) {}
     ~UINumberField() {}
     double value() const { return Super::value(); }
     void setValue(double value) { Super::setValue(value); }
@@ -241,7 +241,53 @@ class UINumberField : public UINumberFieldImpl {
         return *this;
     }
 
+    void addCallback(Function<void(double)> callback) {
+        Function<void(UINumberField &, double)> wrapped_cb =
+            [callback](UINumberField &checkbox, bool value) {
+                FASTLED_UNUSED(checkbox);
+                callback(value);
+            };
+        mCallbacks.add(wrapped_cb);
+        mListener.addToEngineEventsOnce();
+    }
+
+    void addCallbackEx(Function<void(UINumberField &, double)> callback) {
+        mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+    }
+    void clearCallbacks() { mCallbacks.clear(); }
+
+
   private:
+
+    struct Listener : public EngineEvents::Listener {
+        Listener(UINumberField *owner) : mOwner(owner) {
+            EngineEvents::addListener(this);
+        }
+        ~Listener() {
+            if (added) {
+                EngineEvents::removeListener(this);
+            }
+        }
+        void addToEngineEventsOnce() {
+            if (added) {
+                return;
+            }
+            EngineEvents::addListener(this);
+            added = true;
+        }
+        void onBeginFrame() override ;
+
+      private:
+        UINumberField *mOwner;
+        bool added = false;
+    };
+
+    Listener mListener;
+    double mLastFrameValue = 0;
+    bool mLastFrameValueValid = false;
+    FunctionList<UINumberField &, double> mCallbacks;
+
     Super &impl() { return *this; }
 };
 

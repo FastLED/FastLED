@@ -51,6 +51,22 @@ void UICheckbox::Listener::onBeginFrame() {
     }
 }
 
+
+
+void UINumberField::Listener::onBeginFrame()  {
+    UINumberField& owner = *mOwner;
+    if (!owner.mLastFrameValueValid) {
+        owner.mLastFrameValue = owner.value();
+        owner.mLastFrameValueValid = true;
+        return;
+    }
+    double value = owner.value();
+    if (value != owner.mLastFrameValue) {
+        owner.mCallbacks.invoke(owner, value);
+        owner.mLastFrameValue = value;
+    }
+}
+
 } // end namespace fl
 
 #pragma GCC diagnostic pop
