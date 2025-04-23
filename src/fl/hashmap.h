@@ -102,19 +102,12 @@ class HashMap {
 
     // insert or overwrite
     void insert(const Key &key, const T &value) {
-        auto prev_size = _size;
         if (float(_size + _tombstones) / _buckets.size() > _max_load) {
-            FASTLED_WARN("HashMap rehashing");
             rehash(_buckets.size() * 2);
-        }
-
-        if (_buckets.size() < prev_size) {
-            FASTLED_WARN("HashMap rehashing failed");
         }
 
         size_t idx;
         bool is_new;
-        // fl::tie(idx, is_new) = find_slot(key);
         fl::pair<size_t, bool> p = find_slot(key);
         idx = p.first;
         is_new = p.second;

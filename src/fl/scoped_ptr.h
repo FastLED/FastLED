@@ -9,16 +9,8 @@
 
 namespace fl {
 
-namespace scoped_ptr_detail {
-void LOG_POINTER_DELETE(void *ptr);
-void LOG_POINTER_NEW(void *ptr);
-} // namespace scoped_ptr_detail
-
 template <typename T> struct ArrayDeleter {
     void operator()(T *ptr) {
-        // uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
-        // FASTLED_WARN("Deleting ptr: " << address);
-        scoped_ptr_detail::LOG_POINTER_DELETE(ptr);
         delete[] ptr;
     }
 };
@@ -101,12 +93,8 @@ template <typename T, typename Deleter = PointerDeleter<T>> class scoped_ptr {
 template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
   public:
     // Constructor
-    explicit scoped_array(T *arr = nullptr) : arr_(arr) {
-        scoped_ptr_detail::LOG_POINTER_NEW(arr);
-    }
-    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {
-        scoped_ptr_detail::LOG_POINTER_NEW(arr);
-    }
+    explicit scoped_array(T *arr = nullptr) : arr_(arr) {}
+    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {}
 
     // Destructor
     ~scoped_array() { deleter_(arr_); }
