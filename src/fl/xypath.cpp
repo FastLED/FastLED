@@ -19,21 +19,22 @@ uint8_t to_uint8(float f) {
 }
 } // namespace
 
-XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
+XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path,
+                               TransformFloat transform)
     : mPath(path), mTransform(transform) {}
 
-
-point_xy_float XYPath::compute_float(float alpha, const TransformFloat &tx) {
+point_xy_float XYPathRenderer::compute_float(float alpha,
+                                             const TransformFloat &tx) {
     point_xy_float xy = mPath->compute(alpha);
     point_xy_float out = tx.transform(xy);
     out = mGridTransform.transform(out);
     return out;
 }
 
-Tile2x2_u8 XYPath::at_subpixel(float alpha) {
+Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
     // 1) continuous point, in “pixel‐centers” coordinates [0.5 … W–0.5]
     if (!mDrawBoundsSet) {
-        FASTLED_WARN("XYPath::at_subpixel: draw bounds not set");
+        FASTLED_WARN("XYPathRenderer::at_subpixel: draw bounds not set");
         return Tile2x2_u8();
     }
     point_xy_float xy = at(alpha);
@@ -66,8 +67,6 @@ Tile2x2_u8 XYPath::at_subpixel(float alpha) {
     return out;
 }
 
-
-
 LinePath::LinePath(float x0, float y0, float x1, float y1) {
     mParams = NewPtr<LinePathParams>();
     params().x0 = x0;
@@ -90,9 +89,7 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
     params().y1 = y1;
 }
 
-void LinePath::set(const LinePathParams &p) {
-    params() = p;
-}
+void LinePath::set(const LinePathParams &p) { params() = p; }
 
 point_xy_float CirclePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the unit circle [-1, 1]
@@ -192,8 +189,6 @@ point_xy_float RosePath::compute(float alpha) {
     return point_xy_float(x, y);
 }
 
-
-
 point_xy_float PhyllotaxisPath::compute(float alpha) {
     // total number of points you want in the pattern
     const float N = static_cast<float>(params().c);
@@ -247,8 +242,9 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     return point_xy_float{x, y};
 }
 
-void XYPath::rasterize(float from, float to, int steps, XYRaster &raster, 
-                       fl::function<uint8_t(float)> *optional_alpha_gen) {
+void XYPathRenderer::rasterize(
+    float from, float to, int steps, XYRaster &raster,
+    fl::function<uint8_t(float)> *optional_alpha_gen) {
     for (int i = 0; i < steps; ++i) {
         float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
         Tile2x2_u8 tile = at_subpixel(alpha);
@@ -259,6 +255,27 @@ void XYPath::rasterize(float from, float to, int steps, XYRaster &raster,
         }
         raster.rasterize(tile);
     }
+}
+
+point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
+    // return compute_float(alpha, tx);
+    return mPathRenderer->at(alpha, tx);
+}
+
+void XYPath::setDrawBounds(uint16_t width, uint16_t height) {
+    mPathRenderer->setDrawBounds(width, height);
+}
+
+void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
+
+Str XYPath::name() const { return mPath->name(); }
+Tile2x2_u8 XYPath::at_subpixel(float alpha) {
+    return mPathRenderer->at_subpixel(alpha);
+}
+
+void XYPath::rasterize(float from, float to, int steps, XYRasterSparse &raster,
+                       function<uint8_t(float)> *optional_alpha_gen) {
+    mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
 
 } // namespace fl

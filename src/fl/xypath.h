@@ -26,10 +26,11 @@ template <typename T> class function;
 
 // Smart pointers for the XYPath family.
 FASTLED_SMART_PTR(XYPath);
+FASTLED_SMART_PTR(XYPathRenderer);
+FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(PointPath);
 FASTLED_SMART_PTR(LinePath);
 FASTLED_SMART_PTR(CirclePath);
-FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(HeartPath);
 FASTLED_SMART_PTR(ArchimedeanSpiralPath);
 FASTLED_SMART_PTR(RosePath);
@@ -47,33 +48,33 @@ class XYPathGenerator : public Referent {
     virtual point_xy_float compute(float alpha) = 0;
 };
 
-class XYPathParams: public Referent {
+class XYPathParams : public Referent {
   public:
     TransformFloat transform;
-    float brightness = 1.0f;  // 0: off, 1: full brightness
+    float brightness = 1.0f; // 0: off, 1: full brightness
 };
 
-class LinePathParams: public XYPathParams {
+class LinePathParams : public XYPathParams {
   public:
-    float x0 = -1.0f;  // Start x coordinate
-    float y0 = 0.0f;   // Start y coordinate
-    float x1 = 1.0f;   // End x coordinate
-    float y1 = 0.0f;   // End y coordinate
+    float x0 = -1.0f; // Start x coordinate
+    float y0 = 0.0f;  // Start y coordinate
+    float x1 = 1.0f;  // End x coordinate
+    float y1 = 0.0f;  // End y coordinate
 };
 
-class PhyllotaxisParams: public XYPathParams {
+class PhyllotaxisParams : public XYPathParams {
   public:
     float c = 4.0f;       // Scaling factor
     float angle = 137.5f; // Divergence angle in degrees
 };
 
-class RosePathParams: public XYPathParams {
+class RosePathParams : public XYPathParams {
   public:
-    uint8_t n = 3;     // Numerator parameter (number of petals)
-    uint8_t d = 1;     // Denominator parameter
+    uint8_t n = 3; // Numerator parameter (number of petals)
+    uint8_t d = 1; // Denominator parameter
 };
 
-class GielisCurveParams: public XYPathParams {
+class GielisCurveParams : public XYPathParams {
   public:
     float a = 1.0f;    // Scaling parameter a
     float b = 1.0f;    // Scaling parameter b
@@ -92,7 +93,7 @@ class XYPath : public Referent {
 
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1) {
         LinePathParamsPtr p = LinePathParamsPtr::New();
-        auto& params = *p;
+        auto &params = *p;
         params.x0 = x0;
         params.y0 = y0;
         params.x1 = x1;
@@ -100,8 +101,9 @@ class XYPath : public Referent {
         auto path = LinePathPtr::New(p);
         return XYPathPtr::New(path);
     }
-    
-    static XYPathPtr NewLinePath(const Ptr<LinePathParams>& params = NewPtr<LinePathParams>()) {
+
+    static XYPathPtr
+    NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>()) {
         auto path = NewPtr<LinePath>(params);
         return XYPathPtr::New(path);
     }
@@ -142,7 +144,6 @@ class XYPath : public Referent {
         return out;
     }
 
-
     static XYPathPtr
     NewRosePath(uint16_t width = 0, uint16_t height = 0,
                 const Ptr<RosePathParams> &params = NewPtr<RosePathParams>()) {
@@ -154,9 +155,9 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr
-    NewPhyllotaxisPath(uint16_t width = 0, uint16_t height = 0,
-                       const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>()) {
+    static XYPathPtr NewPhyllotaxisPath(
+        uint16_t width = 0, uint16_t height = 0,
+        const Ptr<PhyllotaxisParams> &args = NewPtr<PhyllotaxisParams>()) {
         PhyllotaxisPathPtr path = PhyllotaxisPathPtr::New(args);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -165,9 +166,9 @@ class XYPath : public Referent {
         return out;
     }
 
-    static XYPathPtr
-    NewGielisCurvePath(uint16_t width = 0, uint16_t height = 0,
-                       const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>()) {
+    static XYPathPtr NewGielisCurvePath(
+        uint16_t width = 0, uint16_t height = 0,
+        const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>()) {
         GielisCurvePathPtr path = GielisCurvePathPtr::New(params);
         XYPathPtr out = XYPathPtr::New(path);
         if (width > 0 && height > 0) {
@@ -176,6 +177,53 @@ class XYPath : public Referent {
         return out;
     }
 
+    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat())
+        : mPath(path), mTransform(transform) {
+        mPathRenderer = XYPathRendererPtr::New(path, transform);
+    }
+
+    // XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform =
+    // TransformFloat()) {
+    //     mPath = path;
+    //     mTransform = transform;
+    // }
+    point_xy_float at(float alpha) { return at(alpha, mTransform); }
+
+    Tile2x2_u8 at_subpixel(float alpha);
+
+    void rasterize(float from, float to, int steps, XYRasterSparse &raster,
+                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr) ;
+
+    void setScale(float scale);
+
+    Str name() const;
+
+    // Overloaded to allow transform to be passed in.
+    point_xy_float at(float alpha, const TransformFloat &tx);
+
+    // Needed for drawing to the screen. When this called the rendering will
+    // be centered on the width and height such that 0,0 -> maps to .5,.5,
+    // which is convenient for drawing since each float pixel can be truncated
+    // to an integer type.
+    void setDrawBounds(uint16_t width, uint16_t height);
+
+    // XYPathRenderer(XYPathGeneratorPtr path, TransformFloat transform =
+    // TransformFloat()) {
+    //     mPath = path;
+    //     mTransform = transform;
+    // }
+
+  private:
+    XYPathGeneratorPtr mPath;
+    XYPathRendererPtr mPathRenderer;
+    TransformFloat mTransform;
+    TransformFloat mGridTransform;
+    bool mDrawBoundsSet = false;
+    point_xy_float compute_float(float alpha, const TransformFloat &tx);
+};
+
+class XYPathRenderer : public Referent {
+  public:
     Str name() { return mPath->name(); }
 
     // static LissajousPathPtr NewLissajousPath(uint8_t a, uint8_t b,
@@ -198,7 +246,8 @@ class XYPath : public Referent {
     //     return CatmullRomPathPtr::New(steps);
     // }
 
-    XYPath(XYPathGeneratorPtr path, TransformFloat transform = TransformFloat());
+    XYPathRenderer(XYPathGeneratorPtr path,
+                   TransformFloat transform = TransformFloat());
     point_xy_float at(float alpha) { return at(alpha, mTransform); }
 
     Tile2x2_u8 at_subpixel(float alpha);
@@ -259,7 +308,6 @@ class XYPath : public Referent {
         return compute_float(alpha, mTransform);
     }
 
-
   private:
     XYPathGeneratorPtr mPath;
     TransformFloat mTransform;
@@ -288,16 +336,16 @@ class PointPath : public XYPathGenerator {
 
 class LinePath : public XYPathGenerator {
   public:
-    LinePath(const LinePathParamsPtr& params = NewPtr<LinePathParams>())
+    LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>())
         : mParams(params) {};
     LinePath(float x0, float y0, float x1, float y1);
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "LinePath"; }
     void set(float x0, float y0, float x1, float y1);
     void set(const LinePathParams &p);
-    
-    LinePathParams& params() { return *mParams; }
-    const LinePathParams& params() const { return *mParams; }
+
+    LinePathParams &params() { return *mParams; }
+    const LinePathParams &params() const { return *mParams; }
 
   private:
     Ptr<LinePathParams> mParams;
@@ -307,7 +355,7 @@ class LinePath : public XYPathGenerator {
 
 /// Catmull–Rom spline through arbitrary points.
 /// Simply add control points and compute(α) will smoothly interpolate through them.
-class CatmullRomPath : public XYPath {
+class CatmullRomPath : public XYPathRenderer {
   public:
     /**
      * @param steps  LUT resolution (0 = no LUT)
@@ -366,9 +414,9 @@ class RosePath : public XYPathGenerator {
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "RosePath"; }
 
-    RosePathParams& params() { return *mParams; }
-    const RosePathParams& params() const { return *mParams; }
-    
+    RosePathParams &params() { return *mParams; }
+    const RosePathParams &params() const { return *mParams; }
+
     void setN(uint8_t n) { params().n = n; }
     void setD(uint8_t d) { params().d = d; }
 
@@ -380,13 +428,14 @@ class PhyllotaxisPath : public XYPathGenerator {
   public:
     // c is a scaling factor, angle is the divergence angle in degrees (often
     // 137.5° - the golden angle)
-    PhyllotaxisPath(const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>())
+    PhyllotaxisPath(
+        const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>())
         : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "PhyllotaxisPath"; }
 
-    PhyllotaxisParams& params() { return *mParams; }
-    const PhyllotaxisParams& params() const { return *mParams; }
+    PhyllotaxisParams &params() { return *mParams; }
+    const PhyllotaxisParams &params() const { return *mParams; }
 
   private:
     Ptr<PhyllotaxisParams> mParams;
@@ -398,13 +447,14 @@ class GielisCurvePath : public XYPathGenerator {
     // a, b: scaling parameters
     // m: symmetry parameter (number of rotational symmetries)
     // n1, n2, n3: shape parameters
-    GielisCurvePath(const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>())
+    GielisCurvePath(
+        const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>())
         : mParams(p) {}
     point_xy_float compute(float alpha) override;
     const Str name() const override { return "GielisCurvePath"; }
 
-    GielisCurveParams& params() { return *mParams; }
-    const GielisCurveParams& params() const { return *mParams; }
+    GielisCurveParams &params() { return *mParams; }
+    const GielisCurveParams &params() const { return *mParams; }
 
     void setA(float a) { params().a = a; }
     void setB(float b) { params().b = b; }
