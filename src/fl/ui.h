@@ -23,7 +23,6 @@ class UISlider : public UISliderImpl {
     UISlider(const char *name, float value = 128.0f, float min = 1,
              float max = 255, float step = -1.f)
         : UISliderImpl(name, value, min, max, step), mListener(this) {
-        //EngineEvents::addListener(&mListener);
     }
     float value() const { return Super::value(); }
     float value_normalized() const {
@@ -62,14 +61,11 @@ class UISlider : public UISliderImpl {
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
-    // void onBeginFrame() override;
-
     struct Listener : public EngineEvents::Listener {
         Listener(UISlider* owner) : mOwner(owner) {
             EngineEvents::addListener(this);
         }
         ~Listener() {
-            //EngineEvents::removeListener(this);
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -87,12 +83,11 @@ class UISlider : public UISliderImpl {
             bool added = false;
     };
 
-    Listener mListener;
-
   private:
     FunctionList<void(float)> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFramevalueValid = false;
+    Listener mListener;
 };
 
 // template operator for >= against a jsSliderImpl
