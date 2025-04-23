@@ -141,12 +141,6 @@ set(COMMON_COMPILE_DEFINITIONS
     _GLIBCXX_DEBUG_PEDANTIC
 )
 
-# On Windows+Clang, disable the int overload hack:
-if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    message(STATUS "Using Clang on Windows; setting FASTLED_STR_NEEDS_INT=0")
-    add_compile_definitions(FASTLED_STR_NEEDS_INT=0)
-endif()
-
 
 # Set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib)
