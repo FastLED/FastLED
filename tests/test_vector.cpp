@@ -1,7 +1,7 @@
 
 // g++ --std=c++11 test.cpp
 
-#include "test.h"
+#include <random>
 
 #include "test.h"
 #include "fl/vector.h"
@@ -202,6 +202,40 @@ TEST_CASE("fl::FixedVector construction and destruction") {
             CHECK(live_object_count == 0);  // All objects should be destroyed after clear
         }
         CHECK(live_object_count == 0);
+    }
+
+    SUBCASE("Stress test clear, insert and remove") {
+
+        fl::vector_inlined<TestObject, 20> vec;
+        size_t checked_size = 0;
+        for (int i = 0; i < 1000; ++i) {
+            int random_value = rand() % 4;
+
+            switch (random_value) {
+                case 0:
+                    if (!vec.full()) {
+                        vec.push_back(TestObject(i));
+                        ++checked_size;
+                    } else {
+                        REQUIRE_EQ(20, vec.size());
+                    }
+                    break;
+                case 1:
+                    if (!vec.empty()) {
+                        vec.pop_back();
+                        --checked_size;
+                    } else {
+                        REQUIRE_EQ(0, checked_size);
+                    }
+                    break;
+                case 2:
+                    vec.clear();
+                    checked_size = 0;
+                    REQUIRE_EQ(0, vec.size());
+                    break;
+            }
+
+        }
     }
 }
 

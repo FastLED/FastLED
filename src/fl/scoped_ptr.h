@@ -10,6 +10,7 @@
 namespace fl {
 
 template <typename T> struct ArrayDeleter {
+    ArrayDeleter() = default;
     void operator()(T *ptr) {
         delete[] ptr;
     }

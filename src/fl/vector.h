@@ -726,6 +726,10 @@ public:
         return mUsingHeap ? mHeap[idx] : mFixed[idx];
     }
 
+    bool full() const {
+        return INLINED_SIZE == size();
+    }
+
     // Add an element
     void push_back(const T& value) {
         if (!mUsingHeap) {

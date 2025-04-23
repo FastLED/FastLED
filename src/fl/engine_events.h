@@ -8,9 +8,9 @@
 
 
 
-// #ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
-// #define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
-// #endif
+#ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
+#define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
+#endif
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #ifdef __AVR__
@@ -145,8 +145,15 @@ class EngineEvents {
     };
     // typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
     //     ListenerList;
+
+    #ifdef __EMSCRIPTEN__
+    // Not sure what is going on here, but emscripten seems to have a problem with
+    // FixedVector.
     typedef fl::vector<Pair> ListenerList;
+    #else
+    typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS> ListenerList;
     ListenerList mListeners;
+    #endif
 #endif
 
     static EngineEvents *getInstance();
