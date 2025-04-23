@@ -6,7 +6,7 @@
 #include "fl/grid.h"
 #include "fl/namespace.h"
 #include "fl/point.h"
-#include "fl/raster.h"
+#include "fl/raster_dense.h"
 #include "fl/subpixel.h"
 #include "fl/xymap.h"
 #include "fl/warn.h"
