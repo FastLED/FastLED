@@ -23,6 +23,9 @@ class SubPixel2x2;
 class XYRasterSparse {
   public:
     XYRasterSparse() = default;
+    XYRasterSparse(int width, int height) {
+        setBounds(rect_xy<int>(0, 0, width, height));
+    }
     XYRasterSparse(const XYRasterSparse &) = delete;
 
     XYRasterSparse &reset() {
