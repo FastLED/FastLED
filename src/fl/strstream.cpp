@@ -8,8 +8,8 @@
 
 namespace fl {
 
-StrStream& StrStream::operator<<(const Tile2x2& subpixel) {
-    mStr.append("Tile2x2(");
+StrStream& StrStream::operator<<(const Tile2x2_u8& subpixel) {
+    mStr.append("Tile2x2_u8(");
     mStr.append(subpixel.bounds());
     mStr.append(")");
     return *this;

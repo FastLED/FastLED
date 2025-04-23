@@ -13,17 +13,17 @@ namespace fl {
 
 
 
-void Tile2x2::Rasterize(const Slice<const Tile2x2> &tiles,
+void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
                             XYRasterSparse *out_raster) {
     out_raster->rasterize(tiles);
 }
 
-void Tile2x2::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
+void Tile2x2_u8::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
-void Tile2x2::scale(uint8_t scale) {
+void Tile2x2_u8::scale(uint8_t scale) {
     // scale the tile
     if (scale == 255) {
         return;

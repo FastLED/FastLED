@@ -43,7 +43,7 @@ WaveEffect wave_fx; // init in setup().
 fl::vector<XYPathPtr> shapes = CreateXYPaths(WIDTH, HEIGHT);
 
 // A vector for collecting subpixels, with overflow.
-vector_inlined<Tile2x2, 32> subpixels;
+vector_inlined<Tile2x2_u8, 32> subpixels;
 XYRaster raster(WIDTH, HEIGHT);
 TimeWarp time_warp;
 
@@ -172,7 +172,7 @@ void loop() {
         if (!is_active) {
             alpha = 0;
         }
-        Tile2x2 subpixel = shape->at_subpixel(a);
+        Tile2x2_u8 subpixel = shape->at_subpixel(a);
         subpixel.scale(alpha);
         subpixels.push_back(subpixel);
     }

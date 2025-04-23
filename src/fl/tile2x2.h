@@ -18,17 +18,17 @@ class XYMap;
 class XYRasterSparse;
 class XYDrawUint8Visitor;
 
-class Tile2x2 {
+class Tile2x2_u8 {
 
   public:
-    static void Rasterize(const Slice<const Tile2x2> &tiles,
+    static void Rasterize(const Slice<const Tile2x2_u8> &tiles,
                           XYRasterSparse *output) ;
 
-    Tile2x2() = default;
-    Tile2x2(const point_xy<int> &origin) : mOrigin(origin) {}
-    Tile2x2(const Tile2x2 &) = default;
-    Tile2x2 &operator=(const Tile2x2 &) = default;
-    Tile2x2(Tile2x2 &&) = default;
+    Tile2x2_u8() = default;
+    Tile2x2_u8(const point_xy<int> &origin) : mOrigin(origin) {}
+    Tile2x2_u8(const Tile2x2_u8 &) = default;
+    Tile2x2_u8 &operator=(const Tile2x2_u8 &) = default;
+    Tile2x2_u8(Tile2x2_u8 &&) = default;
 
     void scale(uint8_t scale);
 
@@ -50,9 +50,9 @@ class Tile2x2 {
         return max;
     }
 
-    static Tile2x2 Max(const Tile2x2 &a,
-                           const Tile2x2 &b) {
-        Tile2x2 result;
+    static Tile2x2_u8 Max(const Tile2x2_u8 &a,
+                           const Tile2x2_u8 &b) {
+        Tile2x2_u8 result;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
                 result.at(x, y) = MAX(a.at(x, y), b.at(x, y));

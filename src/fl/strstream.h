@@ -13,7 +13,7 @@
 
 namespace fl {
 
-class Tile2x2;
+class Tile2x2_u8;
 
 template <typename T> struct StrStreamHelper {
     static void append(Str &str, const T &n) { str.append(n); }
@@ -60,7 +60,7 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(const Tile2x2 &subpixel);
+    StrStream &operator<<(const Tile2x2_u8 &subpixel);
 
     StrStream &operator=(const uint16_t &n) {
         mStr.clear();
