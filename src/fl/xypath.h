@@ -47,29 +47,33 @@ class XYPathGenerator : public Referent {
     virtual point_xy_float compute(float alpha) = 0;
 };
 
-struct XYPathParams: public Referent {
+class XYPathParams: public Referent {
     TransformFloat transform;
     float brightness = 1.0f;  // 0: off, 1: full brightness
 };
 
-struct LinePathParams: public XYPathParams {
+class LinePathParams: public XYPathParams {
+  public:
     float x0 = -1.0f;  // Start x coordinate
     float y0 = 0.0f;   // Start y coordinate
     float x1 = 1.0f;   // End x coordinate
     float y1 = 0.0f;   // End y coordinate
 };
 
-struct PhyllotaxisParams: public XYPathParams {
+class PhyllotaxisParams: public XYPathParams {
+  public:
     float c = 4.0f;       // Scaling factor
     float angle = 137.5f; // Divergence angle in degrees
 };
 
-struct RosePathParams: public XYPathParams {
+class RosePathParams: public XYPathParams {
+  public:
     uint8_t n = 3;     // Numerator parameter (number of petals)
     uint8_t d = 1;     // Denominator parameter
 };
 
-struct GielisCurveParams: public XYPathParams {
+class GielisCurveParams: public XYPathParams {
+  public:
     float a = 1.0f;    // Scaling parameter a
     float b = 1.0f;    // Scaling parameter b
     float m = 3.0f;    // Symmetry parameter (number of rotational symmetries)
