@@ -143,14 +143,15 @@ struct Hash<T*> {
 template<typename T>
 struct Hash<point_xy<T>> {
     uint32_t operator()(const point_xy<T> &key) const noexcept {
-        // #pragma GCC diagnostic push
-        // #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         T packed[2];
         memset(packed, 0, sizeof(packed));
         packed[0] = key.x;
         packed[1] = key.y;  // Protect against alignment issues
-        return MurmurHash3_x86_32(packed, sizeof(packed));
-        // #pragma GCC diagnostic pop
+        const void* p = &packed[0];
+        return MurmurHash3_x86_32(p, sizeof(packed));
+        #pragma GCC diagnostic pop
     }
 };
 
