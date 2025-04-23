@@ -202,11 +202,11 @@ struct rect_xy {
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
 
     uint16_t width() const {
-        return mMax.x - mMin.x + 1;
+        return mMax.x - mMin.x;
     }
 
     uint16_t height() const {
-        return mMax.y - mMin.y + 1;
+        return mMax.y - mMin.y;
     }
 
     bool empty() const {
@@ -230,8 +230,8 @@ struct rect_xy {
     }
 
     bool contains(const point_xy<T>& p) const {
-        return (p.x >= mMin.x && p.x <= mMax.x && p.y >= mMin.y &&
-                p.y <= mMax.y);
+        return (p.x >= mMin.x && p.x < mMax.x && p.y >= mMin.y &&
+                p.y < mMax.y);
     }
 
     bool contains(const T& x, const T& y) const {

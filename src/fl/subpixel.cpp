@@ -41,7 +41,9 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
     }
 
     // Won't reset the mMinMax bounds if this was set.
-    out_raster->reset(bounds.mMin, bounds.width(), bounds.height());
+    auto w = bounds.width();
+    auto h = bounds.height();
+    out_raster->reset(bounds.mMin, w, h);
     auto global_origin = out_raster->global_min();
 
     for (const auto &tile : tiles) {
@@ -52,7 +54,7 @@ void SubPixel2x2::Rasterize(const Slice<const SubPixel2x2> &tiles,
                 uint8_t value = tile.at(x, y);
                 int xx = translate.x + x;
                 int yy = translate.y + y;
-                if (optional_bounds && !optional_bounds->contains(xx, yy)) {
+                if (!bounds.contains(xx, yy)) {
                     continue;
                 }
                 auto &pt = out_raster->at(xx, yy);
