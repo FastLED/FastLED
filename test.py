@@ -70,11 +70,16 @@ def main() -> None:
         if args.cpp:
             # Compile and run C++ tests
             start_time = time.time()
+            
+            # Start the compile uno process in parallel
+            compile_uno_proc = RunningProcess('bash compile uno --examples Blink')
+            
             if args.test:
                 # Run specific C++ test
                 proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
+                    compile_uno_proc.kill()  # Kill the parallel process if the main one fails
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
             else:
@@ -82,8 +87,16 @@ def main() -> None:
                 proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
+                    compile_uno_proc.kill()  # Kill the parallel process if the main one fails
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
+            
+            # Wait for the compile uno process to finish
+            compile_uno_proc.wait()
+            if compile_uno_proc.returncode != 0:
+                print(f"Command failed: {compile_uno_proc.command}")
+                sys.exit(compile_uno_proc.returncode)
+                
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
             return
         
