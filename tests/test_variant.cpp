@@ -28,7 +28,7 @@ TEST_CASE("Variant tests") {
     v.emplaceU("hello");
     REQUIRE(v.is<fl::Str>());
     REQUIRE(!v.is<int>());
-    REQUIRE_EQ(*v.get<fl::Str>(), fl::Str("hello"));
+    REQUIRE(v.equals(fl::Str("hello")));
 
     // 5) Copy‐construct preserves the U
     Variant<int, fl::Str> v2(v);

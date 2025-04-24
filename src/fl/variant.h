@@ -169,6 +169,15 @@ template <typename T, typename U> class Variant {
         }
     }
 
+    template<typename TYPE>
+    bool equals(const TYPE& other) const {
+        if (is<TYPE>()) {
+            return *get<TYPE>() == other;
+        } else {
+            return false;
+        }
+    }
+
 
 
     // -- swap ---------------------------------------------------------------
