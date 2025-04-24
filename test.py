@@ -45,7 +45,7 @@ def _make_pio_check_cmd() -> List[str]:
 def make_compile_uno_test_process() -> RunningProcess:
     """Create a process to compile the uno tests"""
     cmd = ['uv', 'run', 'ci/ci-compile.py', 'uno', '--examples', 'Blink', '--no-interactive']
-    return RunningProcess(cmd)
+    return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB)
 
 
 def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp") -> Dict[str, str]:
@@ -208,8 +208,6 @@ def main() -> None:
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
             return
         
-        # Start the compile uno process
-        compile_uno_proc = make_compile_uno_test_process()
         
         cmd_list = _make_pio_check_cmd()
         if not _PIO_CHECK_ENABLED:
@@ -225,7 +223,7 @@ def main() -> None:
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]
         if src_code_change:
             print("Source code changed, running uno tests")
-            tests += [compile_uno_proc]
+            tests += [make_compile_uno_test_process()]
 
         for test in tests:
             sys.stdout.flush()
