@@ -9,7 +9,7 @@ using namespace fl;
 
 TEST_CASE("test bitset") {
     // default‐constructed bitset is empty
-    bitset<10> bs;
+    bitset_fixed<10> bs;
     REQUIRE_EQ(bs.none(), true);
     REQUIRE_EQ(bs.count(), 0);
     REQUIRE_EQ(bs.size(), 10);
@@ -33,7 +33,7 @@ TEST_CASE("test bitset") {
     REQUIRE_EQ(bs.test(2), false);
 
     // flip all bits
-    bitset<5> bs2;
+    bitset_fixed<5> bs2;
     for (size_t i = 0; i < 5; ++i)
         bs2.set(i, (i % 2) == 0);
     auto bs2_flipped = ~bs2;
@@ -41,18 +41,18 @@ TEST_CASE("test bitset") {
         REQUIRE_EQ(bs2_flipped.test(i), !bs2.test(i));
 
     // all() and count()
-    bitset<4> bs3;
+    bitset_fixed<4> bs3;
     for (size_t i = 0; i < 4; ++i)
         bs3.set(i);
     REQUIRE_EQ(bs3.all(), true);
     REQUIRE_EQ(bs3.count(), 4);
 
-    // out‐of‐range ops are no‐ops
+    // check that the count can auto expand
     bs3.set(100);
     REQUIRE_EQ(bs3.count(), 4);
 
     // bitwise AND, OR, XOR
-    bitset<4> a, b;
+    bitset_fixed<4> a, b;
     a.set(0); a.set(2);
     b.set(1); b.set(2);
 
@@ -75,35 +75,35 @@ TEST_CASE("test bitset") {
     a.reset(); b.reset();
     REQUIRE_EQ(a.none(), true);
     
-    // Test expected size of bitset
-    REQUIRE_EQ(bitset<8>().size(), 8);
-    REQUIRE_EQ(bitset<16>().size(), 16);
-    REQUIRE_EQ(bitset<32>().size(), 32);
-    REQUIRE_EQ(bitset<64>().size(), 64);
-    REQUIRE_EQ(bitset<100>().size(), 100);
-    REQUIRE_EQ(bitset<1000>().size(), 1000);
+    // Test expected size of bitset_fixed
+    REQUIRE_EQ(bitset_fixed<8>().size(), 8);
+    REQUIRE_EQ(bitset_fixed<16>().size(), 16);
+    REQUIRE_EQ(bitset_fixed<32>().size(), 32);
+    REQUIRE_EQ(bitset_fixed<64>().size(), 64);
+    REQUIRE_EQ(bitset_fixed<100>().size(), 100);
+    REQUIRE_EQ(bitset_fixed<1000>().size(), 1000);
     
-    // Test memory size of bitset class (sizeof)
-    // For bitset<8>, we expect 1 uint64_t block (8 bytes)
-    REQUIRE_EQ(sizeof(bitset<8>), 8);
+    // Test memory size of bitset_fixed class (sizeof)
+    // For bitset_fixed<8>, we expect 1 uint64_t block (8 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<8>), 8);
     
-    // For bitset<64>, we expect 1 uint64_t block (8 bytes)
-    REQUIRE_EQ(sizeof(bitset<64>), 8);
+    // For bitset_fixed<64>, we expect 1 uint64_t block (8 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<64>), 8);
     
-    // For bitset<65>, we expect 2 uint64_t blocks (16 bytes)
-    REQUIRE_EQ(sizeof(bitset<65>), 16);
+    // For bitset_fixed<65>, we expect 2 uint64_t blocks (16 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<65>), 16);
     
-    // For bitset<128>, we expect 2 uint64_t blocks (16 bytes)
-    REQUIRE_EQ(sizeof(bitset<128>), 16);
+    // For bitset_fixed<128>, we expect 2 uint64_t blocks (16 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<128>), 16);
     
-    // For bitset<129>, we expect 3 uint64_t blocks (24 bytes)
-    REQUIRE_EQ(sizeof(bitset<129>), 24);
+    // For bitset_fixed<129>, we expect 3 uint64_t blocks (24 bytes)
+    REQUIRE_EQ(sizeof(bitset_fixed<129>), 24);
 }
 
 
 TEST_CASE("compare fixed and dynamic bitsets") {
     // Test that fixed and dynamic bitsets behave the same
-    bitset<10> fixed_bs;
+    bitset_fixed<10> fixed_bs;
     fl::bitset_dynamic dynamic_bs(10);
     
     // Set the same bits in both
