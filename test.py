@@ -23,38 +23,6 @@ def run_command(cmd: List[str], **kwargs: Any) -> None:
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
 
-def output_reader(process: subprocess.Popen[str], 
-                 output_queue: queue.Queue[Tuple[str, str]], 
-                 stop_event: threading.Event) -> None:
-    """Read output from process and put it in the queue"""
-    try:
-        assert process.stdout is not None  # for mypy
-        assert process.stderr is not None  # for mypy
-        
-        while not stop_event.is_set():
-            # Use a small timeout so we can check the stop_event regularly
-            if process.stdout.readable():
-                stdout_line = process.stdout.readline()
-                if stdout_line:
-                    output_queue.put(('stdout', stdout_line))
-            if process.stderr.readable():
-                stderr_line = process.stderr.readline()
-                if stderr_line:
-                    output_queue.put(('stderr', stderr_line))
-            
-            # Check if process has ended and all output has been read
-            if process.poll() is not None:
-                # Get any remaining output
-                remaining_out, remaining_err = process.communicate()
-                if remaining_out:
-                    output_queue.put(('stdout', remaining_out))
-                if remaining_err:
-                    output_queue.put(('stderr', remaining_err))
-                break
-    except KeyboardInterrupt:
-        # Interrupt main thread and exit
-        _thread.interrupt_main()
-        return
 
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments"""
