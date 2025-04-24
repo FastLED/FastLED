@@ -19,7 +19,7 @@ TEST_CASE("Variant tests") {
     v = 123;
     REQUIRE(v.is<int>());
     REQUIRE(!v.is<fl::Str>());
-    REQUIRE_EQ(*v.get<int>(), 123);
+    REQUIRE_EQ(*v.ptr<int>(), 123);
 
     // 3) Reset back to empty
     v.reset();
@@ -37,7 +37,7 @@ TEST_CASE("Variant tests") {
     Variant<int, fl::Str> v2(v);
     REQUIRE(v2.is<fl::Str>());
 
-    fl::Str* str_ptr = v2.get<fl::Str>();
+    fl::Str* str_ptr = v2.ptr<fl::Str>();
     REQUIRE_NE(str_ptr, nullptr);
     REQUIRE_EQ(*str_ptr, fl::Str("hello"));
     const bool is_str = v2.is<fl::Str>();

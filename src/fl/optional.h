@@ -16,8 +16,8 @@ template <typename T> class Optional {
     Optional(const T &value) : mValue(value) {}
     ~Optional() { mValue.reset(); }
     bool empty() const { return !mValue.template is<T>(); }
-    T *ptr() { return mValue.template get<T>(); }
-    const T *ptr() const { return mValue.template get<T>(); }
+    T *ptr() { return mValue.template ptr<T>(); }
+    const T *ptr() const { return mValue.template ptr<T>(); }
 
     Optional &operator=(const Optional &other) {
         if (this != &other) {
@@ -63,7 +63,7 @@ template <typename T> class Optional {
         if (other.empty()) {
             return false;
         }
-        return *ptr() == *other.template get<T>();
+        return *ptr() == *other.template ptr<T>();
     }
 
   private:

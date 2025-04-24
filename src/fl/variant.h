@@ -163,7 +163,7 @@ template <typename T, typename U> class Variant {
         }
     }
 
-    template <typename TYPE> TYPE *get() {
+    template <typename TYPE> TYPE *ptr() {
         if (is<TYPE>()) {
             return reinterpret_cast<TYPE *>(&_storage.t);
         } else {
@@ -171,7 +171,7 @@ template <typename T, typename U> class Variant {
         }
     }
 
-    template <typename TYPE> const TYPE *get() const {
+    template <typename TYPE> const TYPE *ptr() const {
         if (is<TYPE>()) {
             return reinterpret_cast<const TYPE *>(&_storage.t);
         } else {
@@ -181,7 +181,7 @@ template <typename T, typename U> class Variant {
 
     template <typename TYPE> bool equals(const TYPE &other) const {
         if (is<TYPE>()) {
-            return *get<TYPE>() == other;
+            return *ptr<TYPE>() == other;
         } else {
             return false;
         }
