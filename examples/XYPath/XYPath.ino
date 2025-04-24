@@ -71,15 +71,15 @@ UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
 TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
 void setupUiCallbacks() {
-    speed.addCallback([](float value) { time_warp.setSpeed(speed.value()); });
-    maxAnimation.addCallback(
+    speed.onChanged([](float value) { time_warp.setSpeed(speed.value()); });
+    maxAnimation.onChanged(
         [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
 
-    trigger.addCallback([]() {
+    trigger.onChanged([]() {
         // shapeProgress.trigger(millis());
         FASTLED_WARN("Trigger pressed");
     });
-    useWaveFx.addCallback([](bool on) {
+    useWaveFx.onChanged([](bool on) {
         if (on) {
             FASTLED_WARN("WaveFX enabled");
         } else {

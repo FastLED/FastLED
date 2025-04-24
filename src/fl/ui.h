@@ -53,7 +53,7 @@ class UISlider : public UISliderImpl {
         return *this;
     }
 
-    void addCallback(function<void(float)> callback) {
+    void onChanged(function<void(float)> callback) {
         function<void(UISlider &, float)> wrapped_cb =
             [callback](UISlider &slider, float value) {
                 FASTLED_UNUSED(slider);
@@ -63,7 +63,7 @@ class UISlider : public UISliderImpl {
         mListener.addToEngineEventsOnce();
     }
 
-    void addCallbackEx(function<void(UISlider &, float)> callback) {
+    void onChangedEx(function<void(UISlider &, float)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -114,7 +114,7 @@ class UIButton : public UIButtonImpl {
 
     void click() { Super::click(); }
 
-    void addCallback(function<void()> callback) {
+    void onChanged(function<void()> callback) {
         function<void(UIButton &)> wrapped_cb = [callback](UIButton &button) {
             FASTLED_UNUSED(button);
             callback();
@@ -123,7 +123,7 @@ class UIButton : public UIButtonImpl {
         mListener.addToEngineEventsOnce();
     }
 
-    void addCallbackEx(function<void(UIButton &)> callback) {
+    void onChangedEx(function<void(UIButton &)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -173,7 +173,7 @@ class UICheckbox : public UICheckboxImpl {
         return *this;
     }
 
-    void addCallback(function<void(bool)> callback) {
+    void onChanged(function<void(bool)> callback) {
         function<void(UICheckbox &, bool)> wrapped_cb =
             [callback](UICheckbox &checkbox, bool value) {
                 FASTLED_UNUSED(checkbox);
@@ -183,7 +183,7 @@ class UICheckbox : public UICheckboxImpl {
         mListener.addToEngineEventsOnce();
     }
 
-    void addCallbackEx(function<void(UICheckbox &, bool)> callback) {
+    void onChangedEx(function<void(UICheckbox &, bool)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -241,7 +241,7 @@ class UINumberField : public UINumberFieldImpl {
         return *this;
     }
 
-    void addCallback(function<void(double)> callback) {
+    void onChanged(function<void(double)> callback) {
         function<void(UINumberField &, double)> wrapped_cb =
             [callback](UINumberField &checkbox, bool value) {
                 FASTLED_UNUSED(checkbox);
@@ -251,7 +251,7 @@ class UINumberField : public UINumberFieldImpl {
         mListener.addToEngineEventsOnce();
     }
 
-    void addCallbackEx(function<void(UINumberField &, double)> callback) {
+    void onChangedEx(function<void(UINumberField &, double)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
