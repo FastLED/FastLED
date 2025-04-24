@@ -3,6 +3,7 @@
 #include "test.h"
 #include "fl/ui.h"
 #include "fl/variant.h"
+#include "fl/optional.h"
 #include "fl/str.h"
 
 using namespace fl;
@@ -68,3 +69,20 @@ TEST_CASE("Variant tests") {
     REQUIRE_EQ(v4.getU(), fl::Str("hello"));
 #endif
 }
+
+
+// TEST_CASE("Optional") {
+//     Optional<int> opt;
+//     REQUIRE(opt.empty());
+
+//     opt = 42;
+//     REQUIRE(!opt.empty());
+//     REQUIRE_EQ(*opt.ptr(), 42);
+
+//     Optional<int> opt2 = opt;
+//     REQUIRE(!opt2.empty());
+//     REQUIRE_EQ(*opt2.ptr(), 42);
+
+//     opt2 = 100;
+//     REQUIRE_EQ(*opt2.ptr(), 100);
+// }

@@ -40,6 +40,17 @@ template <typename T, typename U> class Variant {
         }
     }
 
+    template<typename TT>
+    bool holdsTypeOf() {
+        if (is_same<T, TT>::value) {
+            return true;
+        } else if (is_same<U, TT>::value) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 #ifdef FASTLED_SUPPORTS_STD_MOVE
 
     Variant(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(std::move(t)); }
