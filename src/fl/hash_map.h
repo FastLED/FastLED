@@ -120,23 +120,33 @@ class HashMap {
     const_iterator begin() const { return const_iterator(this, 0); }
     const_iterator end() const { return const_iterator(this, _buckets.size()); }
 
+    static bool NeedsRehash(size_t size, size_t bucket_size,
+                            size_t tombstones,
+                            uint8_t load_factor) {
+        // (size + tombstones) << 8   : multiply numerator by 256
+        // capacity * max_load : denominator * threshold
+        uint32_t lhs = (size + tombstones) << 8;
+        uint32_t rhs = (bucket_size * load_factor);
+        return lhs > rhs;
+    }
+
     // returns true if (size + tombs)/capacity > _max_load/256
     bool needs_rehash() const {
-        // (size + tombstones) << 8   : multiply numerator by 256
-        // _buckets.size() * _max_load : denominator * threshold
-        uint32_t lhs = (_size + _tombstones) << 8;
-        uint32_t rhs = (_buckets.size() * mLoadFactor);
-        return lhs > rhs;
+        return NeedsRehash(
+            _size, _buckets.size(), _tombstones, mLoadFactor);
     }
 
     // insert or overwrite
     void insert(const Key &key, const T &value) {
-        const bool _needs_rehash = needs_rehash();
-        if (_needs_rehash) {
-            const size_t new_size = _buckets.size() * 2;
-            rehash(new_size);
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            // if half the buckets are tombstones, rehash inline
+            if (_tombstones > _size / 2) {
+                rehash_inline_no_resize();
+            } else {
+                rehash(_buckets.size() * 2);
+            }   
         }
-
         size_t idx;
         bool is_new;
         fl::pair<size_t, bool> p = find_slot(key);
@@ -383,7 +393,6 @@ class HashMap {
     void rehash_inline_no_resize() {
         // filter out tompstones and compact
         size_t cap = _buckets.size();
-        size_t new_size = _size - _tombstones;
         // compact
         size_t pos = 0;
         // for (size_t i = 0; i < cap; ++i) {
@@ -420,7 +429,7 @@ class HashMap {
         // use the occupied bitset to track which entries are occupied
         // in the array rather than just copied in.
         fl::optional<Entry> tmp;
-        for (size_t i = 0; i < pos; ++i) {
+        for (size_t i = 0; i < _size; ++i) {
             const bool already_finished = occupied.test(i);
             if (already_finished) {
                 continue;
@@ -438,9 +447,9 @@ class HashMap {
                 return;
             }
             // if idx < pos then we are moving the entry to a new location
-            FASTLED_ASSERT(tmp.has_value() == false,
+            FASTLED_ASSERT(!tmp,
                            "HashMap::rehash_inline_no_resize: invalid tmp");
-            if (idx < pos) {
+            if (idx < _size) {
                 tmp = e;
             }
             occupied.set(idx);
@@ -448,8 +457,9 @@ class HashMap {
             while (!tmp.empty()) {
                 // we have to find a place for temp.
                 // find new position for tmp.
+                auto key = tmp.ptr()->key;
                 size_t new_idx = find_unoccupied_index_using_bitset(
-                    tmp->key, occupied);
+                    key, occupied);
                 if (new_idx == npos) {
                     // no more space
                     FASTLED_ASSERT(
@@ -459,7 +469,7 @@ class HashMap {
                     return;
                 }
                 occupied.set(new_idx);
-                if (new_idx < pos) {
+                if (new_idx < _size) {
                     // we have to swap the entry at new_idx with tmp
                     optional<Entry> tmp2 = _buckets[new_idx];
                     _buckets[new_idx] = *tmp.ptr();

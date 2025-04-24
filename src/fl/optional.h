@@ -15,13 +15,15 @@ struct Empty {};
 template <typename T> class Optional {
 
   public:
-    Optional() : mValue(nullptr) {}
+    Optional() : mValue(Empty()) {}
     Optional(const Optional &other) : mValue(other.mValue) {}
     Optional(const T &value) : mValue(value) {}
     ~Optional() { mValue.reset(); }
     bool empty() const { return !mValue.template is<T>(); }
     T *ptr() { return mValue.template ptr<T>(); }
     const T *ptr() const { return mValue.template ptr<T>(); }
+
+    void reset() { mValue.reset(); }
 
     Optional &operator=(const Optional &other) {
         if (this != &other) {
@@ -36,6 +38,8 @@ template <typename T> class Optional {
     }
 
     bool operator()() const { return !empty(); }
+    bool operator!() const { return empty(); }
+
 
     bool operator==(const Optional &other) const {
         if (empty() && other.empty()) {
