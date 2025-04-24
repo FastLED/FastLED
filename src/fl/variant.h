@@ -1,7 +1,10 @@
 #pragma once
 
-#include <new>     // for placement new
+#include "fl/warn.h"
+
 #include "fl/template_magic.h"
+
+#include "fl/inplacenew.h"
 
 namespace fl {
 
@@ -139,9 +142,15 @@ template <typename T, typename U> class Variant {
     bool isT() const noexcept { return _tag == Tag::IsT; }
     bool isU() const noexcept { return _tag == Tag::IsU; }
 
-    template<typename T1>
-    bool isT() const noexcept {
-        return _tag == Tag::IsT && is_same<T, T1>::value;
+    template<typename TYPE>
+    bool is() const noexcept {
+        if (is_same<T, TYPE>::value) {
+            return isT();
+        } else if (is_same<U, TYPE>::value) {
+            return isU();
+        } else {
+            return false;
+        }
     }
 
     T &getT() { return _storage.t; }

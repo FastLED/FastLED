@@ -34,6 +34,11 @@ TEST_CASE("Variant tests") {
     Variant<int, fl::Str> v2(v);
     REQUIRE(v2.isU());
     REQUIRE_EQ(v2.getU(), fl::Str("hello"));
+    const bool is_str = v2.is<fl::Str>();
+    const bool is_int = v2.is<int>();
+
+    CHECK(is_str);
+    CHECK(!is_int);
 
 #if 0
     // 6) Move‐construct leaves source empty
