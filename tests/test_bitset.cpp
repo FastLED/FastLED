@@ -73,4 +73,28 @@ TEST_CASE("test bitset") {
     // reset and none()
     a.reset(); b.reset();
     REQUIRE_EQ(a.none(), true);
+    
+    // Test expected size of bitset
+    REQUIRE_EQ(bitset<8>().size(), 8);
+    REQUIRE_EQ(bitset<16>().size(), 16);
+    REQUIRE_EQ(bitset<32>().size(), 32);
+    REQUIRE_EQ(bitset<64>().size(), 64);
+    REQUIRE_EQ(bitset<100>().size(), 100);
+    REQUIRE_EQ(bitset<1000>().size(), 1000);
+    
+    // Test memory size of bitset class (sizeof)
+    // For bitset<8>, we expect 1 uint64_t block (8 bytes)
+    REQUIRE_EQ(sizeof(bitset<8>), 8);
+    
+    // For bitset<64>, we expect 1 uint64_t block (8 bytes)
+    REQUIRE_EQ(sizeof(bitset<64>), 8);
+    
+    // For bitset<65>, we expect 2 uint64_t blocks (16 bytes)
+    REQUIRE_EQ(sizeof(bitset<65>), 16);
+    
+    // For bitset<128>, we expect 2 uint64_t blocks (16 bytes)
+    REQUIRE_EQ(sizeof(bitset<128>), 16);
+    
+    // For bitset<129>, we expect 3 uint64_t blocks (24 bytes)
+    REQUIRE_EQ(sizeof(bitset<129>), 24);
 }
