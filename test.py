@@ -61,7 +61,6 @@ def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**
     """
     result = {
         "hash": "",
-        "status": "started"
     }
     
     try:
@@ -95,7 +94,6 @@ def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**
                     hasher.update(f"ERROR:{str(e)}".encode('utf-8'))
         
         result["hash"] = hasher.hexdigest()
-        result["status"] = "all tests pass"
         return result
     except Exception as e:
         result["status"] = f"error: {str(e)}"
@@ -115,21 +113,10 @@ def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
     if root_dir is None:
         root_dir = Path.cwd() / "src"
     
-    msg = "\n#######################################################"
-    msg += f"\n# Fingerprint calculation started for {root_dir}"
-    msg += "\n#######################################################"
-    print(msg)
     start_time = time.time()
-    
     # Compute the fingerprint
     result = fingerprint_code_base(root_dir)
-    
     elapsed_time = time.time() - start_time
-    msg = "\n#######################################################"
-    msg += f"\n# Fingerprint calculation completed in {elapsed_time:.2f} seconds"
-    msg += "\n#######################################################"
-    print(msg)
-    
     # Add timing information to the result
     result["elapsed_seconds"] = f"{elapsed_time:.2f}"
     
@@ -143,18 +130,44 @@ def main() -> None:
         
         # Change to script directory
         os.chdir(Path(__file__).parent)
-        
-        # Calculate fingerprint
-        fingerprint_result = calculate_fingerprint()
-        
-        # Create .cache directory if it doesn't exist
+
         cache_dir = Path('.cache')
         cache_dir.mkdir(exist_ok=True)
-        
-        # Save the fingerprint to a file as JSON
         fingerprint_file = cache_dir / 'fingerprint.json'
-        with open(fingerprint_file, 'w') as f:
-            json.dump(fingerprint_result, f, indent=2)
+
+        def write_fingerprint(fingerprint: Dict[str, str]) -> None:
+            with open(fingerprint_file, 'w') as f:
+                json.dump(fingerprint, f, indent=2)
+
+        def read_fingerprint() -> Dict[str, str] | None:
+            if fingerprint_file.exists():
+                with open(fingerprint_file, 'r') as f:
+                    try:
+                        return json.load(f)
+                    except json.JSONDecodeError:
+                        print("Invalid fingerprint file. Recalculating...")
+            return None
+        
+
+        prev_fingerprint: str | None = read_fingerprint()        
+        # Calculate fingerprint
+        fingerprint_data = calculate_fingerprint()
+        src_code_change: bool
+        if prev_fingerprint is None:
+            src_code_change = True
+        else:
+            try:
+                src_code_change = fingerprint_data["hash"] != prev_fingerprint["hash"]
+            except KeyError:
+                print("Invalid fingerprint file. Recalculating...")
+                src_code_change = True
+        # print(f"Fingerprint: {fingerprint_result['hash']}")
+        
+        # Create .cache directory if it doesn't exist
+
+        # Save the fingerprint to a file as JSON
+
+        write_fingerprint(fingerprint_data)
 
         cmd_list = [
             "uv",
@@ -209,7 +222,10 @@ def main() -> None:
         cpp_test_proc = RunningProcess(cmd_str_cpp)
         compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB)
         pytest_proc = RunningProcess('uv run pytest ci/tests', echo=False)
-        tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process, compile_uno_proc]
+        tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]
+        if src_code_change:
+            print("Source code changed, running uno tests")
+            tests += [compile_uno_proc]
 
         for test in tests:
             sys.stdout.flush()
