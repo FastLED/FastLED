@@ -6,7 +6,6 @@ import time
 import argparse
 import hashlib
 import json
-import signal
 from pathlib import Path
 from typing import List, Any, Dict
 from ci.running_process import RunningProcess
@@ -105,7 +104,7 @@ def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**
 
 def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
     """
-    Calculate the code base fingerprint and save it to a file.
+    Calculate the code base fingerprint.
     
     Args:
         root_dir: The root directory to start scanning from. If None, uses src directory.
@@ -122,10 +121,6 @@ def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
     print(msg)
     start_time = time.time()
     
-    # Create .cache directory if it doesn't exist
-    cache_dir = Path('.cache')
-    cache_dir.mkdir(exist_ok=True)
-    
     # Compute the fingerprint
     result = fingerprint_code_base(root_dir)
     
@@ -137,11 +132,6 @@ def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
     
     # Add timing information to the result
     result["elapsed_seconds"] = f"{elapsed_time:.2f}"
-    
-    # Save the fingerprint to a file as JSON
-    fingerprint_file = cache_dir / 'fingerprint.json'
-    with open(fingerprint_file, 'w') as f:
-        json.dump(result, f, indent=2)
     
     return result
 
@@ -155,13 +145,16 @@ def main() -> None:
         os.chdir(Path(__file__).parent)
         
         # Calculate fingerprint
-        calculate_fingerprint()
+        fingerprint_result = calculate_fingerprint()
         
-        # Set up signal handler for Ctrl+C
-        def signal_handler(sig, frame):
-            sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
-            
-        signal.signal(signal.SIGINT, signal_handler)
+        # Create .cache directory if it doesn't exist
+        cache_dir = Path('.cache')
+        cache_dir.mkdir(exist_ok=True)
+        
+        # Save the fingerprint to a file as JSON
+        fingerprint_file = cache_dir / 'fingerprint.json'
+        with open(fingerprint_file, 'w') as f:
+            json.dump(fingerprint_result, f, indent=2)
 
         cmd_list = [
             "uv",
