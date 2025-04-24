@@ -49,15 +49,16 @@ EOL
 
 # Linting the Python code.
 echo "Running ruff check"
-uvx ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
-UV run ruff check --fix dev/dev.py
+uv run ruff check --fix test.py
+uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+uv run ruff check --fix dev/dev.py
 echo Running black
-uvx black ci --exclude ci/tmp/ --exclude ci/wasm/
-uvx black dev/dev.py
-uvx echo Running isort
-uvx isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
-uvx isort --profile black dev/dev.py
-uvx echo Running pyright ci
+uv run black ci --exclude ci/tmp/ --exclude ci/wasm/
+uv run black dev/dev.py
+uv run echo Running isort
+uv run isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
+uv run isort --profile black dev/dev.py
+uv run echo Running pyright ci
 uv run pyright ci
 
 
@@ -73,7 +74,7 @@ folders=(
 
 for folder in "${folders[@]}"; do
     echo "Running clang-format on $folder"
-    uvx ci/run-clang-format.py -i -r "$folder"
+    uv run ci/run-clang-format.py -i -r "$folder"
 done
 
 # # Wait for ESLint to finish and output its results

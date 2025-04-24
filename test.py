@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 import os
 import sys
-import io
 import subprocess
 import time
-import threading
-import queue
 import argparse
-import _thread
+import hashlib
 from pathlib import Path
-from typing import List, Tuple, Any, Optional
+from typing import List, Any
 from ci.running_process import RunningProcess
 
 _PIO_CHECK_ENABLED = False
@@ -47,6 +44,49 @@ def make_compile_uno_test_process() -> RunningProcess:
     """Create a process to compile the uno tests"""
     cmd = ['uv', 'run', 'ci/ci-compile.py', 'uno', '--examples', 'Blink', '--no-interactive']
     return RunningProcess(cmd)
+
+
+def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**.cpp,**.hpp") -> str:
+    """
+    Create a fingerprint of the code base by hashing file contents.
+    
+    Args:
+        start_directory: The root directory to start scanning from
+        glob: Comma-separated list of glob patterns to match files
+    
+    Returns:
+        A hex digest string representing the fingerprint of the code base
+    """
+    hasher = hashlib.sha256()
+    patterns = glob.split(',')
+    
+    # Get all matching files
+    all_files = []
+    for pattern in patterns:
+        pattern = pattern.strip()
+        all_files.extend(sorted(start_directory.glob(pattern)))
+    
+    # Sort files for consistent ordering
+    all_files.sort()
+    
+    # Process each file
+    for file_path in all_files:
+        if file_path.is_file():
+            # Add the relative path to the hash
+            rel_path = file_path.relative_to(start_directory)
+            hasher.update(str(rel_path).encode('utf-8'))
+            
+            # Add the file content to the hash
+            try:
+                with open(file_path, 'rb') as f:
+                    # Read in chunks to handle large files
+                    for chunk in iter(lambda: f.read(4096), b''):
+                        hasher.update(chunk)
+            except Exception as e:
+                # If we can't read the file, include the error in the hash
+                hasher.update(f"ERROR:{str(e)}".encode('utf-8'))
+    
+    return hasher.hexdigest()
 
 
 
