@@ -1,19 +1,29 @@
 #pragma once
 
 #include "fl/assert.h"
+#include "fl/clamp.h"
 #include "fl/hash.h"
+#include "fl/map_range.h"
 #include "fl/pair.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/clamp.h"
-#include "fl/map_range.h"
 
 namespace fl {
+
+// // begin using declarations for stl compatibility
+// use fl::equal_to;
+// use fl::hash_map;
+// use fl::unordered_map;
+// // end using declarations for stl compatibility
 
 template <typename T> struct EqualTo {
     bool operator()(const T &a, const T &b) const { return a == b; }
 };
+
+
+// -- HashMap class -------------------------------------------------------------
+// Begin HashMap class
 
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = EqualTo<Key>>
@@ -108,12 +118,11 @@ class HashMap {
     const_iterator begin() const { return const_iterator(this, 0); }
     const_iterator end() const { return const_iterator(this, _buckets.size()); }
 
-
     // returns true if (size + tombs)/capacity > _max_load/256
     bool needs_rehash() const {
         // (size + tombstones) << 8   : multiply numerator by 256
         // _buckets.size() * _max_load : denominator * threshold
-        uint32_t lhs = ( _size + _tombstones ) << 8;
+        uint32_t lhs = (_size + _tombstones) << 8;
         uint32_t rhs = (_buckets.size() * mLoadFactor);
         return lhs > rhs;
     }
@@ -330,5 +339,19 @@ class HashMap {
     Hash _hash;
     KeyEqual _equal;
 };
+
+
+
+// begin using declarations for stl compatibility
+template <typename T> using equal_to = EqualTo<T>;
+
+template <typename Key, typename T, typename Hash = Hash<Key>,
+          typename KeyEqual = equal_to<Key>>
+using hash_map = HashMap<Key, T, Hash, KeyEqual>;
+
+template <typename Key, typename T, typename Hash = Hash<Key>,
+          typename KeyEqual = equal_to<Key>>
+using unordered_map = HashMap<Key, T, Hash, KeyEqual>;
+// end using declarations for stl compatibility
 
 } // namespace fl
