@@ -3,12 +3,15 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
+#include <stdint.h>
+
 #include "crgb.h"
 #include "fl/str.h"
 #include "fl/lut.h"
 #include "fl/xypath.h"
 #include "fl/tile2x2.h"
 #include "fl/strstream.h"
+
 
 using namespace fl;
 
