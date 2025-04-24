@@ -13,10 +13,10 @@
 namespace fl {
 
 namespace xypath_detail {
-fl::Str unique_missing_name() {
+fl::Str unique_missing_name(const fl::Str& prefix) {
     static int sUniqueName = 0;
     int id = ++sUniqueName;
-    Str name = "XYCustomPath: ";
+    Str name = prefix;
     name += id;
     return name;
 }

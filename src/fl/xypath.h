@@ -28,7 +28,7 @@ FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(XYPathFunction);
 
 namespace xypath_detail {
-fl::Str unique_missing_name();
+fl::Str unique_missing_name(const fl::Str &prefix = "XYCustomPath: ");
 } // namespace xypath_detail
 
 class XYPath : public Referent {
