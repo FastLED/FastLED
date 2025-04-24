@@ -259,7 +259,8 @@ GielisCurveParams &GielisCurvePath::params() { return *mParams; }
 const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
 
-CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {}
+CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {
+}
 
 void CatmullRomPath::addPoint(point_xy_float p) {
     params().addPoint(p);
