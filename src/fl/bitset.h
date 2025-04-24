@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include "fl/type_traits.h"
+#include "fl/variant.h"
+#include "fl/bitset_dynamic.h"
 
 namespace fl {
 
@@ -128,6 +130,180 @@ public:
     friend bitset operator|(bitset lhs, const bitset& rhs) noexcept { return lhs |= rhs; }
     friend bitset operator^(bitset lhs, const bitset& rhs) noexcept { return lhs ^= rhs; }
     friend bitset operator~(bitset bs) noexcept { return bs.flip(); }
+};
+
+/// A bitset implementation with inline storage that can grow if needed.
+/// T is the storage type (uint8_t, uint16_t, uint32_t, uint64_t)
+/// N is the initial number of bits to store inline
+template <uint32_t N = 256>  // Default size is 256 bits, or 32 bytes
+class bitset_inlined {
+private:    
+    // Either store a fixed bitset<N> or a dynamic bitset
+    using fixed_bitset = bitset<N>;
+    Variant<fixed_bitset, bitset_dynamic> _storage;
+
+public:
+    /// Constructs a bitset with all bits reset.
+    bitset_inlined() : _storage(fixed_bitset()) {}
+
+    /// Resets all bits to zero.
+    void reset() noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            _storage.template ptr<fixed_bitset>()->reset();
+        } else {
+            _storage.template ptr<bitset_dynamic>()->reset();
+        }
+    }
+
+    /// Resizes the bitset if needed
+    void resize(uint32_t new_size) {
+        if (new_size <= N) {
+            // If we're already using the fixed bitset, nothing to do
+            if (_storage.template is<bitset_dynamic>()) {
+                // Convert back to fixed bitset
+                fixed_bitset fixed;
+                bitset_dynamic* dynamic = _storage.template ptr<bitset_dynamic>();
+                
+                // Copy bits from dynamic to fixed
+                for (uint32_t i = 0; i < N && i < dynamic->size(); ++i) {
+                    if (dynamic->test(i)) {
+                        fixed.set(i);
+                    }
+                }
+                
+                _storage = fixed;
+            }
+        } else {
+            // Need to use dynamic bitset
+            if (_storage.template is<fixed_bitset>()) {
+                // Convert from fixed to dynamic
+                bitset_dynamic dynamic(new_size);
+                fixed_bitset* fixed = _storage.template ptr<fixed_bitset>();
+                
+                // Copy bits from fixed to dynamic
+                for (uint32_t i = 0; i < N; ++i) {
+                    if (fixed->test(i)) {
+                        dynamic.set(i);
+                    }
+                }
+                
+                _storage = dynamic;
+            } else {
+                // Already using dynamic, just resize
+                _storage.template ptr<bitset_dynamic>()->resize(new_size);
+            }
+        }
+    }
+
+    /// Sets or clears the bit at position pos.
+    bitset_inlined& set(uint32_t pos, bool value = true) {
+        if (pos >= N && _storage.template is<fixed_bitset>()) {
+            resize(pos + 1);
+        }
+        
+        if (_storage.template is<fixed_bitset>()) {
+            if (pos < N) {
+                _storage.template ptr<fixed_bitset>()->set(pos, value);
+            }
+        } else {
+            if (pos >= _storage.template ptr<bitset_dynamic>()->size()) {
+                _storage.template ptr<bitset_dynamic>()->resize(pos + 1);
+            }
+            _storage.template ptr<bitset_dynamic>()->set(pos, value);
+        }
+        return *this;
+    }
+
+    /// Clears the bit at position pos.
+    bitset_inlined& reset(uint32_t pos) {
+        return set(pos, false);
+    }
+
+    /// Flips (toggles) the bit at position pos.
+    bitset_inlined& flip(uint32_t pos) {
+        if (pos >= N && _storage.template is<fixed_bitset>()) {
+            resize(pos + 1);
+        }
+        
+        if (_storage.template is<fixed_bitset>()) {
+            if (pos < N) {
+                _storage.template ptr<fixed_bitset>()->flip(pos);
+            }
+        } else {
+            if (pos >= _storage.template ptr<bitset_dynamic>()->size()) {
+                _storage.template ptr<bitset_dynamic>()->resize(pos + 1);
+            }
+            _storage.template ptr<bitset_dynamic>()->flip(pos);
+        }
+        return *this;
+    }
+
+    /// Flips all bits.
+    bitset_inlined& flip() noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            _storage.template ptr<fixed_bitset>()->flip();
+        } else {
+            _storage.template ptr<bitset_dynamic>()->flip();
+        }
+        return *this;
+    }
+
+    /// Tests whether the bit at position pos is set.
+    bool test(uint32_t pos) const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return pos < N ? _storage.template ptr<fixed_bitset>()->test(pos) : false;
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->test(pos);
+        }
+    }
+
+    /// Returns the value of the bit at position pos.
+    bool operator[](uint32_t pos) const noexcept {
+        return test(pos);
+    }
+
+    /// Returns the number of set bits.
+    uint32_t count() const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return _storage.template ptr<fixed_bitset>()->count();
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->count();
+        }
+    }
+
+    /// Queries.
+    bool any() const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return _storage.template ptr<fixed_bitset>()->any();
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->any();
+        }
+    }
+    
+    bool none() const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return _storage.template ptr<fixed_bitset>()->none();
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->none();
+        }
+    }
+    
+    bool all() const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return _storage.template ptr<fixed_bitset>()->all();
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->all();
+        }
+    }
+
+    /// Size of the bitset (number of bits).
+    uint32_t size() const noexcept {
+        if (_storage.template is<fixed_bitset>()) {
+            return N;
+        } else {
+            return _storage.template ptr<bitset_dynamic>()->size();
+        }
+    }
 };
 
 } // namespace fl
