@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/assert.h"
+#include "fl/bitset.h"
 #include "fl/clamp.h"
 #include "fl/hash.h"
 #include "fl/map_range.h"
@@ -8,6 +9,7 @@
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/optional.h"
 
 namespace fl {
 
@@ -21,9 +23,9 @@ template <typename T> struct EqualTo {
     bool operator()(const T &a, const T &b) const { return a == b; }
 };
 
-
-// -- HashMap class -------------------------------------------------------------
-// Begin HashMap class
+// -- HashMap class
+// ------------------------------------------------------------- Begin HashMap
+// class
 
 template <typename Key, typename T, typename Hash = Hash<Key>,
           typename KeyEqual = EqualTo<Key>, int INLINED_COUNT = 8>
@@ -322,6 +324,46 @@ class HashMap {
         return npos;
     }
 
+    size_t find_unoccupied_index_using_bitset(
+        const Key &key, const fl::bitset<1024> &occupied_set) const {
+        const size_t cap = _buckets.size();
+        const size_t mask = cap - 1;
+        const size_t h = _hash(key) & mask;
+
+        if (cap <= kLinearProbingOnlySize) {
+            // linear probing
+            for (size_t i = 0; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (!occupied) {
+                    continue;
+                }
+                return idx;
+            }
+        } else {
+            // quadratic probing up to 8 tries
+            size_t i = 0;
+            for (; i < kQuadraticProbingTries; ++i) {
+                const size_t idx = (h + i + i * i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (!occupied) {
+                    continue;
+                }
+                return idx;
+            }
+            // fallback to linear for the rest
+            for (; i < cap; ++i) {
+                const size_t idx = (h + i) & mask;
+                bool occupied = occupied_set.test(idx);
+                if (!occupied) {
+                    continue;
+                }
+                return idx;
+            }
+        }
+        return npos;
+    }
+
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
         fl::vector_inlined<Entry, INLINED_COUNT> old;
@@ -338,6 +380,99 @@ class HashMap {
         }
     }
 
+    void rehash_inline_no_resize() {
+        // filter out tompstones and compact
+        size_t cap = _buckets.size();
+        size_t new_size = _size - _tombstones;
+        // compact
+        size_t pos = 0;
+        // for (size_t i = 0; i < cap; ++i) {
+        //     auto &e = _buckets[i];
+        //     if (e.state == EntryState::Occupied) {
+        //         if (pos != i) {
+        //             _buckets[pos] = e;
+        //             e.state = EntryState::Empty;
+        //         }
+        //         ++pos;
+        //     }
+        // }
+        for (size_t i = 0; i < cap; ++i) {
+            auto &e = _buckets[i];
+            switch (e.state) {
+            case EntryState::Occupied:
+                if (pos != i) {
+                    _buckets[pos] = e;
+                    e.state = EntryState::Empty;
+                }
+                ++pos;
+                break;
+            case EntryState::Deleted:
+                e.state = EntryState::Empty;
+                break;
+            case EntryState::Empty:
+                // empty
+                break;
+            }
+        }
+
+        fl::bitset<1024> occupied;
+        // swap the components, this will happen at most N times,
+        // use the occupied bitset to track which entries are occupied
+        // in the array rather than just copied in.
+        fl::optional<Entry> tmp;
+        for (size_t i = 0; i < pos; ++i) {
+            const bool already_finished = occupied.test(i);
+            if (already_finished) {
+                continue;
+            }
+            auto &e = _buckets[i];
+            FASTLED_ASSERT(e.state == EntryState::Occupied,
+                           "HashMap::rehash_inline_no_resize: invalid state");
+
+            size_t idx = find_unoccupied_index_using_bitset(e.key, occupied);
+            if (idx == npos) {
+                // no more space
+                FASTLED_ASSERT(
+                    false, "HashMap::rehash_inline_no_resize: invalid index at "
+                               << idx << " which is " << npos);
+                return;
+            }
+            // if idx < pos then we are moving the entry to a new location
+            FASTLED_ASSERT(tmp.has_value() == false,
+                           "HashMap::rehash_inline_no_resize: invalid tmp");
+            if (idx < pos) {
+                tmp = e;
+            }
+            occupied.set(idx);
+            _buckets[idx] = *tmp.ptr();
+            while (!tmp.empty()) {
+                // we have to find a place for temp.
+                // find new position for tmp.
+                size_t new_idx = find_unoccupied_index_using_bitset(
+                    tmp->key, occupied);
+                if (new_idx == npos) {
+                    // no more space
+                    FASTLED_ASSERT(
+                        false,
+                        "HashMap::rehash_inline_no_resize: invalid index at "
+                            << new_idx << " which is " << npos);
+                    return;
+                }
+                occupied.set(new_idx);
+                if (new_idx < pos) {
+                    // we have to swap the entry at new_idx with tmp
+                    optional<Entry> tmp2 = _buckets[new_idx];
+                    _buckets[new_idx] = *tmp.ptr();
+                    tmp = tmp2;
+                } else {
+                    // we can just move tmp to new_idx
+                    _buckets[new_idx] = *tmp.ptr();
+                    tmp.reset();
+                }
+            }
+        }
+    }
+
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
     size_t _size;
     size_t _tombstones;
@@ -345,8 +480,6 @@ class HashMap {
     Hash _hash;
     KeyEqual _equal;
 };
-
-
 
 // begin using declarations for stl compatibility
 template <typename T> using equal_to = EqualTo<T>;

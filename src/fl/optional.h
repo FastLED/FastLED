@@ -6,6 +6,10 @@
 
 namespace fl {
 
+template <typename T> class Optional;
+template <typename T>
+using optional = Optional<T>;
+
 struct Empty {};
 
 template <typename T> class Optional {
