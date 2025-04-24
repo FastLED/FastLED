@@ -97,6 +97,31 @@ constexpr typename remove_reference<T>::type&& move(T&& t) noexcept {
     return static_cast<typename remove_reference<T>::type&&>(t);
 }
 
+// Define is_lvalue_reference trait
+template <typename T>
+struct is_lvalue_reference {
+    static constexpr bool value = false;
+};
+
+template <typename T>
+struct is_lvalue_reference<T&> {
+    static constexpr bool value = true;
+};
+
+// Implementation of forward
+template <typename T>
+constexpr T&& forward(typename remove_reference<T>::type& t) noexcept {
+    return static_cast<T&&>(t);
+}
+
+// Overload for rvalue references
+template <typename T>
+constexpr T&& forward(typename remove_reference<T>::type&& t) noexcept {
+    static_assert(!is_lvalue_reference<T>::value,
+                 "Cannot forward an rvalue as an lvalue");
+    return static_cast<T&&>(t);
+}
+
 // Define is_pod trait (basic implementation)
 template <typename T>
 struct is_pod {

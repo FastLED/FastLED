@@ -108,7 +108,7 @@ def main() -> None:
         print(f"Running command (in the background): {cmd_str}")
         pio_process = RunningProcess(cmd_str, echo=False, auto_run=not _IS_GITHUB)
         cpp_test_proc = RunningProcess(cmd_str_cpp)
-        compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False)
+        compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB)
         pytest_proc = RunningProcess('uv run pytest ci/tests', echo=False)
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process, compile_uno_proc]
 
@@ -116,6 +116,7 @@ def main() -> None:
             sys.stdout.flush()
             if not test.auto_run:
                 test.run()
+            print(f"Waiting for command: {test.command}")
             test.wait()
             if not test.echo:
                 for line in test.stdout.splitlines():
