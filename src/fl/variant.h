@@ -1,12 +1,19 @@
 #pragma once
 
-#include "fl/warn.h"
-
+#include "fl/inplacenew.h"
 #include "fl/template_magic.h"
 
-#include "fl/inplacenew.h"
+#ifdef FASTLED_SUPPORTS_STD_MOVE
+#include <utility>
+#include <type_traits>
+#endif 
 
 namespace fl {
+
+template <typename T, typename U> class Variant;
+
+// std like compatibility.
+template <typename T, typename U> using variant = Variant<T, U>;
 
 /// A simple variant that can be Empty, hold a T, or hold a U.
 template <typename T, typename U> class Variant {
@@ -16,15 +23,8 @@ template <typename T, typename U> class Variant {
     // -- ctors/dtor ---------------------------------------------------------
 
     Variant() noexcept : _tag(Tag::Empty) {}
-
     Variant(const T &t) : _tag(Tag::IsT) { new (&_storage.t) T(t); }
-
-    Variant(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(std::move(t)); }
-
     Variant(const U &u) : _tag(Tag::IsU) { new (&_storage.u) U(u); }
-
-    Variant(U &&u) : _tag(Tag::IsU) { new (&_storage.u) U(std::move(u)); }
-
     Variant(const Variant &other) : _tag(Tag::Empty) {
         switch (other._tag) {
         case Tag::IsT:
@@ -41,6 +41,9 @@ template <typename T, typename U> class Variant {
     }
 
 #ifdef FASTLED_SUPPORTS_STD_MOVE
+
+    Variant(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(std::move(t)); }
+    Variant(U &&u) : _tag(Tag::IsU) { new (&_storage.u) U(std::move(u)); }
     Variant(Variant &&other) noexcept : _tag(Tag::Empty) {
         switch (other._tag) {
         case Tag::IsT:
@@ -55,31 +58,6 @@ template <typename T, typename U> class Variant {
             break;
         }
         other.reset();
-    }
-
-    ~Variant() { reset(); }
-#endif
-
-    // -- assignment ---------------------------------------------------------
-
-    Variant &operator=(const Variant &other) {
-        if (this != &other) {
-            reset();
-            switch (other._tag) {
-            case Tag::IsT:
-                new (&_storage.t) T(other._storage.t);
-                _tag = Tag::IsT;
-                break;
-            case Tag::IsU:
-                new (&_storage.u) U(other._storage.u);
-                _tag = Tag::IsU;
-                break;
-            case Tag::Empty:
-                _tag = Tag::Empty;
-                break;
-            }
-        }
-        return *this;
     }
 
     Variant &operator=(Variant &&other) noexcept {
@@ -103,6 +81,45 @@ template <typename T, typename U> class Variant {
         return *this;
     }
 
+    /// Emplace a T in place.
+    template <typename... Args> void emplaceT(Args &&...args) {
+        reset();
+        new (&_storage.t) T(std::forward<Args>(args)...);
+        _tag = Tag::IsT;
+    }
+
+    /// Emplace a U in place.
+    template <typename... Args> void emplaceU(Args &&...args) {
+        reset();
+        new (&_storage.u) U(std::forward<Args>(args)...);
+        _tag = Tag::IsU;
+    }
+
+#endif
+    ~Variant() { reset(); }
+
+    // -- assignment ---------------------------------------------------------
+
+    Variant &operator=(const Variant &other) {
+        if (this != &other) {
+            reset();
+            switch (other._tag) {
+            case Tag::IsT:
+                new (&_storage.t) T(other._storage.t);
+                _tag = Tag::IsT;
+                break;
+            case Tag::IsU:
+                new (&_storage.u) U(other._storage.u);
+                _tag = Tag::IsU;
+                break;
+            case Tag::Empty:
+                _tag = Tag::Empty;
+                break;
+            }
+        }
+        return *this;
+    }
+
     // -- modifiers ----------------------------------------------------------
 
     /// Destroy current content and become empty.
@@ -120,28 +137,12 @@ template <typename T, typename U> class Variant {
         _tag = Tag::Empty;
     }
 
-    /// Emplace a T in place.
-    template <typename... Args> void emplaceT(Args &&...args) {
-        reset();
-        new (&_storage.t) T(std::forward<Args>(args)...);
-        _tag = Tag::IsT;
-    }
-
-    /// Emplace a U in place.
-    template <typename... Args> void emplaceU(Args &&...args) {
-        reset();
-        new (&_storage.u) U(std::forward<Args>(args)...);
-        _tag = Tag::IsU;
-    }
-
     // -- observers ----------------------------------------------------------
 
     Tag tag() const noexcept { return _tag; }
-    bool isEmpty() const noexcept { return _tag == Tag::Empty; }
+    bool empty() const noexcept { return _tag == Tag::Empty; }
 
-
-    template<typename TYPE>
-    bool is() const noexcept {
+    template <typename TYPE> bool is() const noexcept {
         if (is_same<T, TYPE>::value) {
             return isT();
         } else if (is_same<U, TYPE>::value) {
@@ -151,26 +152,23 @@ template <typename T, typename U> class Variant {
         }
     }
 
-    template<typename TYPE>
-    TYPE* get() {
+    template <typename TYPE> TYPE *get() {
         if (is<TYPE>()) {
-            return reinterpret_cast<TYPE*>(&_storage.t);
+            return reinterpret_cast<TYPE *>(&_storage.t);
         } else {
             return nullptr;
         }
     }
 
-    template<typename TYPE>
-    const TYPE* get() const {
+    template <typename TYPE> const TYPE *get() const {
         if (is<TYPE>()) {
-            return reinterpret_cast<const TYPE*>(&_storage.t);
+            return reinterpret_cast<const TYPE *>(&_storage.t);
         } else {
             return nullptr;
         }
     }
 
-    template<typename TYPE>
-    bool equals(const TYPE& other) const {
+    template <typename TYPE> bool equals(const TYPE &other) const {
         if (is<TYPE>()) {
             return *get<TYPE>() == other;
         } else {
@@ -178,27 +176,14 @@ template <typename T, typename U> class Variant {
         }
     }
 
-
-
     // -- swap ---------------------------------------------------------------
-
     void swap(Variant &other) noexcept {
-        if (_tag == other._tag) {
-            // same active member → just swap in place
-            if (_tag == Tag::IsT)
-                fl::swap(_storage.t, other._storage.t);
-            else if (_tag == Tag::IsU)
-                fl::swap(_storage.u, other._storage.u);
-        } else {
-            // different tags → move‐exchange
-            Variant tmp(std::move(other));
-            other = std::move(*this);
-            *this = std::move(tmp);
-        }
+        Variant temp = *this;
+        *this = other;
+        other = temp;
     }
 
   private:
-
     bool isT() const noexcept { return _tag == Tag::IsT; }
     bool isU() const noexcept { return _tag == Tag::IsU; }
     T &getT() { return _storage.t; }

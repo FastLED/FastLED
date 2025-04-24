@@ -10,25 +10,27 @@ using namespace fl;
 TEST_CASE("Variant tests") {
     // 1) Default is empty
     Variant<int, fl::Str> v;
-    REQUIRE(v.isEmpty());
+    REQUIRE(v.empty());
     REQUIRE(!v.is<int>());
     REQUIRE(!v.is<fl::Str>());
 
     // 2) Emplace a T
-    v.emplaceT(123);
+    v = 123;
     REQUIRE(v.is<int>());
     REQUIRE(!v.is<fl::Str>());
     REQUIRE_EQ(*v.get<int>(), 123);
 
     // 3) Reset back to empty
     v.reset();
-    REQUIRE(v.isEmpty());
+    REQUIRE(v.empty());
+
 
     // 4) Emplace a U
-    v.emplaceU("hello");
+    v = fl::Str("hello");
     REQUIRE(v.is<fl::Str>());
     REQUIRE(!v.is<int>());
     REQUIRE(v.equals(fl::Str("hello")));
+
 
     // 5) Copy‐construct preserves the U
     Variant<int, fl::Str> v2(v);
