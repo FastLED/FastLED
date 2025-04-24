@@ -33,10 +33,26 @@ fl::Str unique_missing_name();
 
 class XYPath : public Referent {
   public:
+    /////////////////////////////////////////////
+    // Begin pre-baked paths.
+    // Point
     static XYPathPtr NewPointPath(float x, float y);
+    // Lines and curves
     static XYPathPtr NewLinePath(float x0, float y0, float x1, float y1);
     static XYPathPtr
     NewLinePath(const Ptr<LinePathParams> &params = NewPtr<LinePathParams>());
+    // Cutmull allows for a path to be defined by a set of points. The path will
+    // be a smooth curve through the points.
+    static XYPathPtr NewCatmullRomPath(
+        uint16_t width = 0, uint16_t height = 0,
+        const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
+
+    // Custom path using just a function.
+    static XYPathPtr
+    NewCustomPath(const fl::function<point_xy_float(float)> &path,
+                  const rect_xy<int> &drawbounds = rect_xy<int>(),
+                  const TransformFloat &transform = TransformFloat(),
+                  const Str &name = xypath_detail::unique_missing_name());
 
     static XYPathPtr NewCirclePath();
     static XYPathPtr NewCirclePath(uint16_t width, uint16_t height);
@@ -44,12 +60,6 @@ class XYPath : public Referent {
     static XYPathPtr NewHeartPath(uint16_t width, uint16_t height);
     static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height);
     static XYPathPtr NewArchimedeanSpiralPath();
-
-    static XYPathPtr
-    NewCustomPath(const fl::function<point_xy_float(float)> &path,
-                  const rect_xy<int> &drawbounds = rect_xy<int>(),
-                  const TransformFloat &transform = TransformFloat(),
-                  const Str &name = xypath_detail::unique_missing_name());
 
     static XYPathPtr
     NewRosePath(uint16_t width = 0, uint16_t height = 0,
@@ -62,11 +72,10 @@ class XYPath : public Referent {
     static XYPathPtr NewGielisCurvePath(
         uint16_t width = 0, uint16_t height = 0,
         const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
+    // END pre-baked paths.
+    /////////////////////////////////////////////////////////////
 
     // Create a new Catmull-Rom spline path with custom parameters
-    static XYPathPtr NewCatmullRomPath(
-        uint16_t width = 0, uint16_t height = 0,
-        const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
 
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
