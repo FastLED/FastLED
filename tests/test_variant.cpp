@@ -3,13 +3,13 @@
 #include "test.h"
 #include "fl/ui.h"
 #include "fl/variant.h"
-#include <string>
+#include "fl/str.h"
 
 using namespace fl;
 
 TEST_CASE("Variant tests") {
     // 1) Default is empty
-    Variant<int, std::string> v;
+    Variant<int, fl::Str> v;
     REQUIRE(v.isEmpty());
     REQUIRE(!v.isT());
     REQUIRE(!v.isU());
@@ -28,25 +28,25 @@ TEST_CASE("Variant tests") {
     v.emplaceU("hello");
     REQUIRE(v.isU());
     REQUIRE(!v.isT());
-    REQUIRE_EQ(v.getU(), std::string("hello"));
+    REQUIRE_EQ(v.getU(), fl::Str("hello"));
 
     // 5) Copy‐construct preserves the U
-    Variant<int, std::string> v2(v);
+    Variant<int, fl::Str> v2(v);
     REQUIRE(v2.isU());
-    REQUIRE_EQ(v2.getU(), std::string("hello"));
+    REQUIRE_EQ(v2.getU(), fl::Str("hello"));
 
 #if 0
     // 6) Move‐construct leaves source empty
-    Variant<int, std::string> v3(std::move(v2));
+    Variant<int, fl::Str> v3(std::move(v2));
     REQUIRE(v3.isU());
-    REQUIRE_EQ(v3.getU(), std::string("hello"));
+    REQUIRE_EQ(v3.getU(), fl::Str("hello"));
     REQUIRE(v2.isEmpty());
 
     // 7) Copy‐assign
-    Variant<int, std::string> v4;
+    Variant<int, fl::Str> v4;
     v4 = v3;
     REQUIRE(v4.isU());
-    REQUIRE_EQ(v4.getU(), std::string("hello"));
+    REQUIRE_EQ(v4.getU(), fl::Str("hello"));
 
 
     // 8) Swap two variants
@@ -55,6 +55,6 @@ TEST_CASE("Variant tests") {
     REQUIRE(v3.isT());
     REQUIRE_EQ(v3.getT(), 7);
     REQUIRE(v4.isU());
-    REQUIRE_EQ(v4.getU(), std::string("hello"));
+    REQUIRE_EQ(v4.getU(), fl::Str("hello"));
 #endif
 }

@@ -1,9 +1,7 @@
 #pragma once
 
-#ifndef FASTLED_SUPPORTS_STD_MOVE
 #include <new>     // for placement new
-#include <utility> // for std::swap
-#endif
+#include "fl/template_magic.h"
 
 namespace fl {
 
@@ -41,7 +39,6 @@ template <typename T, typename U> class Variant {
 
 #ifdef FASTLED_SUPPORTS_STD_MOVE
     Variant(Variant &&other) noexcept : _tag(Tag::Empty) {
-
         switch (other._tag) {
         case Tag::IsT:
             new (&_storage.t) T(std::move(other._storage.t));
@@ -142,6 +139,11 @@ template <typename T, typename U> class Variant {
     bool isT() const noexcept { return _tag == Tag::IsT; }
     bool isU() const noexcept { return _tag == Tag::IsU; }
 
+    template<typename T1>
+    bool isT() const noexcept {
+        return _tag == Tag::IsT && is_same<T, T1>::value;
+    }
+
     T &getT() { return _storage.t; }
     const T &getT() const { return _storage.t; }
 
@@ -150,18 +152,13 @@ template <typename T, typename U> class Variant {
 
     // -- swap ---------------------------------------------------------------
 
-#ifdef FASTLED_SUPPORTS_STD_MOVE
-    void swap(Variant &other) noexcept(
-        noexcept(std::declval<T &>().~T()) &&
-        noexcept(std::declval<U &>().~U()) &&
-        noexcept(std::declval<T>() = std::declval<T>()) &&
-        noexcept(std::declval<U>() = std::declval<U>())) {
+    void swap(Variant &other) noexcept {
         if (_tag == other._tag) {
             // same active member → just swap in place
             if (_tag == Tag::IsT)
-                std::swap(_storage.t, other._storage.t);
+                fl::swap(_storage.t, other._storage.t);
             else if (_tag == Tag::IsU)
-                std::swap(_storage.u, other._storage.u);
+                fl::swap(_storage.u, other._storage.u);
         } else {
             // different tags → move‐exchange
             Variant tmp(std::move(other));
@@ -169,7 +166,6 @@ template <typename T, typename U> class Variant {
             *this = std::move(tmp);
         }
     }
-#endif
 
   private:
     Tag _tag;
