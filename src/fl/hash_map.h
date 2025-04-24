@@ -277,12 +277,17 @@ class HashMap {
         return {npos, false};
     }
 
+    enum {
+        kLinearProbingOnlySize = 8,
+        kQuadraticProbingTries = 8,
+    };
+
     size_t find_index(const Key &key) const {
         const size_t cap = _buckets.size();
         const size_t mask = cap - 1;
         const size_t h = _hash(key) & mask;
 
-        if (cap <= 8) {
+        if (cap <= kLinearProbingOnlySize) {
             // linear probing
             for (size_t i = 0; i < cap; ++i) {
                 const size_t idx = (h + i) & mask;
@@ -295,7 +300,7 @@ class HashMap {
         } else {
             // quadratic probing up to 8 tries
             size_t i = 0;
-            for (; i < 8; ++i) {
+            for (; i < kQuadraticProbingTries; ++i) {
                 const size_t idx = (h + i + i * i) & mask;
                 auto &e = _buckets[idx];
                 if (e.state == EntryState::Empty)
