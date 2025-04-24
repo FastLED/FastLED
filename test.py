@@ -5,13 +5,19 @@ import subprocess
 import time
 import argparse
 import hashlib
+import threading
+import signal
 from pathlib import Path
-from typing import List, Any
+from typing import List, Any, Optional
 from ci.running_process import RunningProcess
 
 _PIO_CHECK_ENABLED = False
 
 _IS_GITHUB = os.environ.get('GITHUB_ACTIONS') == 'true'
+
+# Global variable to store the fingerprint thread
+_fingerprint_thread: Optional[threading.Thread] = None
+_stop_fingerprint = threading.Event()
 
 def run_command(cmd: List[str], **kwargs: Any) -> None:
     """Run a command and handle errors"""
@@ -46,13 +52,14 @@ def make_compile_uno_test_process() -> RunningProcess:
     return RunningProcess(cmd)
 
 
-def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**.cpp,**.hpp") -> str:
+def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp", stop_event: Optional[threading.Event] = None) -> str:
     """
     Create a fingerprint of the code base by hashing file contents.
     
     Args:
         start_directory: The root directory to start scanning from
         glob: Comma-separated list of glob patterns to match files
+        stop_event: Event to check for cancellation
     
     Returns:
         A hex digest string representing the fingerprint of the code base
@@ -64,6 +71,8 @@ def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**.cpp,**.
     all_files = []
     for pattern in patterns:
         pattern = pattern.strip()
+        if stop_event and stop_event.is_set():
+            return ""
         all_files.extend(sorted(start_directory.glob(pattern)))
     
     # Sort files for consistent ordering
@@ -71,6 +80,9 @@ def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**.cpp,**.
     
     # Process each file
     for file_path in all_files:
+        if stop_event and stop_event.is_set():
+            return ""
+            
         if file_path.is_file():
             # Add the relative path to the hash
             rel_path = file_path.relative_to(start_directory)
@@ -81,12 +93,66 @@ def _fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**.cpp,**.
                 with open(file_path, 'rb') as f:
                     # Read in chunks to handle large files
                     for chunk in iter(lambda: f.read(4096), b''):
+                        if stop_event and stop_event.is_set():
+                            return ""
                         hasher.update(chunk)
             except Exception as e:
                 # If we can't read the file, include the error in the hash
                 hasher.update(f"ERROR:{str(e)}".encode('utf-8'))
     
     return hasher.hexdigest()
+
+
+def start_fingerprint_thread(root_dir: Path = None) -> None:
+    """
+    Start a daemon thread to compute the code base fingerprint and save it to a file.
+    
+    Args:
+        root_dir: The root directory to start scanning from. If None, uses the current directory.
+    """
+    global _fingerprint_thread, _stop_fingerprint
+    
+    # Reset the stop event
+    _stop_fingerprint.clear()
+    
+    if root_dir is None:
+        root_dir = Path.cwd() / "src"
+    
+    def fingerprint_worker():
+        try:
+            # Create .cache directory if it doesn't exist
+            cache_dir = Path('.cache')
+            cache_dir.mkdir(exist_ok=True)
+            
+            # Compute the fingerprint
+            fingerprint = _fingerprint_code_base(root_dir, stop_event=_stop_fingerprint)
+            
+            # If we were cancelled, don't write the file
+            if _stop_fingerprint.is_set():
+                return
+                
+            # Save the fingerprint to a file
+            fingerprint_file = cache_dir / 'fingerprint'
+            with open(fingerprint_file, 'w') as f:
+                f.write(fingerprint)
+                
+        except Exception as e:
+            print(f"Error in fingerprint thread: {e}", file=sys.stderr)
+    
+    # Create and start the daemon thread
+    _fingerprint_thread = threading.Thread(target=fingerprint_worker, daemon=True)
+    _fingerprint_thread.start()
+
+
+def stop_fingerprint_thread() -> None:
+    """
+    Signal the fingerprint thread to stop and wait for it to finish.
+    """
+    global _fingerprint_thread, _stop_fingerprint
+    
+    if _fingerprint_thread and _fingerprint_thread.is_alive():
+        _stop_fingerprint.set()
+        # We don't join since it's a daemon thread and will be terminated when the program exits
 
 
 
@@ -96,6 +162,16 @@ def main() -> None:
         
         # Change to script directory
         os.chdir(Path(__file__).parent)
+        
+        # Start the fingerprint thread in the background
+        start_fingerprint_thread()
+        
+        # Set up signal handler to stop the fingerprint thread on Ctrl+C
+        def signal_handler(sig, frame):
+            stop_fingerprint_thread()
+            sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
+            
+        signal.signal(signal.SIGINT, signal_handler)
 
         cmd_list = [
             "uv",
@@ -167,8 +243,13 @@ def main() -> None:
                 sys.exit(test.returncode)
 
         print("All tests passed")
+        # Wait a moment for the fingerprint thread to finish if it's still running
+        if _fingerprint_thread and _fingerprint_thread.is_alive():
+            print("Waiting for fingerprint calculation to complete...")
+            _fingerprint_thread.join(timeout=2.0)
         sys.exit(0)
     except KeyboardInterrupt:
+        stop_fingerprint_thread()
         sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
 
 if __name__ == '__main__':

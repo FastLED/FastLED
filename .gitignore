@@ -50,3 +50,4 @@ ignore/
 activate
 temp
 .tools_cache
+.cache
