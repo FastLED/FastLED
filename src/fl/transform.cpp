@@ -154,6 +154,20 @@ bool TransformFloatImpl::is_identity() const {
             offset_y == 0.0f && rotation == 0.0f);
 }
 
+
+
+Matrix3x3f TransformFloat::compile() const {
+    Matrix3x3f out;
+    out.m[0][0] = scale_x() * cosf(rotation() * 2.0f * PI);
+    out.m[0][1] = -scale_y() * sinf(rotation() * 2.0f * PI);
+    out.m[0][2] = offset_x();
+    out.m[1][0] = scale_x() * sinf(rotation() * 2.0f * PI);
+    out.m[1][1] = scale_y() * cosf(rotation() * 2.0f * PI);
+    out.m[1][2] = offset_y();
+    out.m[2][2] = 1.0f;
+    return out;
+}
+
 } // namespace fl
 
 #pragma GCC diagnostic pop

@@ -9,10 +9,10 @@ expensive trig functions are needed. Same with scale and offset.
 */
 
 #include "fl/lut.h"
+#include "fl/math_macros.h"
 #include "fl/ptr.h"
 #include "fl/xymap.h"
 #include "lib8tion/types.h"
-#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -68,6 +68,19 @@ class TransformFloatImpl : public Referent {
     bool is_identity() const;
 };
 
+
+// Future usage.
+struct Matrix3x3f {
+    static Matrix3x3f Identity() {
+        Matrix3x3f m;
+        m.m[0][0] = 1.0f;
+        m.m[1][1] = 1.0f;
+        m.m[2][2] = 1.0f;
+        return m;
+    }
+    float m[3][3] = {0};
+};
+
 // TransformFloat is a wrapper around the smart ptr. This version allows for
 // easy use and fast / well behaved copy.
 struct TransformFloat {
@@ -78,33 +91,24 @@ struct TransformFloat {
     float offset_y() const { return mImpl->offset_y; }
     // rotation range is [0,1], not [0,2*PI]!
     float rotation() const { return mImpl->rotation; }
-    float scale() const {
-        return MIN(scale_x(), scale_y());
+    float scale() const { return MIN(scale_x(), scale_y()); }
+    void set_scale(float scale) { mImpl->set_scale(scale); }
+    void set_scale_x(float scale) { mImpl->scale_x = scale; }
+    void set_scale_y(float scale) { mImpl->scale_y = scale; }
+    void set_offset_x(float offset) { mImpl->offset_x = offset; }
+    void set_offset_y(float offset) { mImpl->offset_y = offset; }
+    void set_rotation(float rotation) { mImpl->rotation = rotation; }
+
+    point_xy_float transform(const point_xy_float &xy) const {
+        return mImpl->transform(xy);
     }
-    void set_scale(float scale) {
-        mImpl->set_scale(scale);
-    }
-    void set_scale_x(float scale) {
-        mImpl->scale_x = scale;
-    }
-    void set_scale_y(float scale) {
-        mImpl->scale_y = scale;
-    }
-    void set_offset_x(float offset) {
-        mImpl->offset_x = offset;
-    }
-    void set_offset_y(float offset) {
-        mImpl->offset_y = offset;
-    }
-    void set_rotation(float rotation) {
-        mImpl->rotation = rotation;
-    }
-    point_xy_float transform(const point_xy_float &xy) const { return mImpl->transform(xy); }
     bool is_identity() const { return mImpl->is_identity(); }
 
- private:
-    TransformFloatImplPtr mImpl = TransformFloatImpl::Identity();
-};
+    Matrix3x3f compile() const ;
 
+  private:
+    TransformFloatImplPtr mImpl = TransformFloatImpl::Identity();
+    // Matrix3x3f mCompiled;  // future use.
+};
 
 } // namespace fl
