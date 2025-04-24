@@ -6,9 +6,7 @@
 #include "fl/vector.h"
 #include "fl/xymap.h"
 
-#ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
-#define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
-#endif
+
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #ifdef __AVR__
@@ -141,12 +139,12 @@ class EngineEvents {
         Pair(Listener *listener, int priority)
             : listener(listener), priority(priority) {}
     };
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) && 0
     // Not sure what is going on here, but emscripten seems to have a problem
     // with FixedVector.
     typedef fl::vector<Pair> ListenerList;
 #else
-    typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
+    typedef fl::vector_inlined<Pair, 16>
         ListenerList;
 #endif
     ListenerList mListeners;

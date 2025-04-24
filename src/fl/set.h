@@ -13,10 +13,6 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-//
-// UPDATE: Looks like there's some bugs with removing and shifting
-// elements, which has to do with the underlying FixedVector implementation.
-// Avoid using this class for now until it's fixed.
 template<typename Key, size_t N>
 class FixedSet {
 public:

@@ -11,21 +11,22 @@
 
 namespace fl {
 
+// Aligned memory block for inlined data structures.
 template <typename T, size_t N> struct InlinedMemoryBlock {
     // using MemoryType = uinptr_t;
-    typedef uint32_t MemoryType;
+    typedef uintptr_t MemoryType;
     enum {
         kTotalBytes = N * sizeof(T),
         kAlign = sizeof(MemoryType),
         kExtraSize =
             (kTotalBytes % kAlign) ? (kAlign - (kTotalBytes % kAlign)) : 0,
+        kBlockSize = kTotalBytes / sizeof(MemoryType) + kExtraSize,
     };
 
     // uint32_t mRaw[N * sizeof(T)/sizeof(MemoryType) + kExtraSize];
     // align this to the size of MemoryType.
     // uint32_t mMemoryBlock[kTotalSize] = {0};
-    MemoryType mMemoryBlock[kTotalBytes / sizeof(MemoryType) + kExtraSize] = {
-        0};
+    MemoryType mMemoryBlock[kBlockSize] = {0};
 
     T *memory() {
         MemoryType *begin = &mMemoryBlock[0];
@@ -47,10 +48,8 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
 // A fixed sized vector. The user is responsible for making sure that the
 // inserts do not exceed the capacity of the vector, otherwise they will fail.
 // Because of this limitation, this vector is not a drop in replacement for
-// std::vector.
-//
-// UPDATE: Looks like there's some bugs with removing and shifting
-// elements. Please avoid using this class for now until it's fixed.
+// std::vector. However it used for vector_inlined<T, N> which allows spill over
+// to a heap vector when size > N.
 template <typename T, size_t N> class FixedVector {
   private:
     InlinedMemoryBlock<T, N> mMemoryBlock;
@@ -721,6 +720,46 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
 
+    template <typename Predicate> iterator find_if(Predicate pred) {
+        for (iterator it = begin(); it != end(); ++it) {
+            if (pred(*it)) {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    void erase(iterator pos) {
+        if (mUsingHeap) {
+            mHeap.erase(pos);
+        } else {
+            mFixed.erase(pos);
+        }
+    }
+
+    bool insert(iterator pos, const T &value) {
+        if (mUsingHeap) {
+            // return insert(pos, value);
+            return mHeap.insert(pos, value);
+        }
+
+        if (mFixed.size() < INLINED_SIZE) {
+            return mFixed.insert(pos, value);
+        }
+
+        // size_t diff = pos - mFixed.begin();
+        // make safe for data that grows down
+        size_t idx = mFixed.end() - pos;
+
+        // overflow: move inline data into heap
+        mHeap.reserve(INLINED_SIZE * 2);
+        for (auto &v : mFixed) {
+            mHeap.push_back(v);
+        }
+        mFixed.clear();
+        return mHeap.insert(mHeap.begin() + idx, value);
+    }
+
     // Iterators
     iterator begin() { return mUsingHeap ? mHeap.begin() : mFixed.begin(); }
     iterator end() { return mUsingHeap ? mHeap.end() : mFixed.end(); }
@@ -739,14 +778,11 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
 
 template <typename T> using vector = HeapVector<T>;
 
-// these have problems due to the underlying FixedVector
-// implementation.
-#if 1
+
 template <typename T, size_t INLINED_SIZE>
 using vector_fixed = FixedVector<T, INLINED_SIZE>;
 
 template <typename T, size_t INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
-#endif
 
 } // namespace fl

@@ -1,6 +1,8 @@
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
 
+#include "fl/warn.h"
+
 
 using namespace fl;
 
@@ -37,6 +39,11 @@ EngineEvents* EngineEvents::getInstance() {
 
 #if FASTLED_HAS_ENGINE_EVENTS
 void EngineEvents::_onPlatformPreLoop() {
+    for (auto& item : mListeners) {
+        uintptr_t ptr = reinterpret_cast<uintptr_t>(item.listener);
+        FASTLED_WARN("EngineEvents: " << ptr);
+    }
+
     for (auto& item : mListeners) {
         auto listener = item.listener;
         listener->onPlatformPreLoop();
