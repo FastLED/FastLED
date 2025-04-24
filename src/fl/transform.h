@@ -78,6 +78,12 @@ struct Matrix3x3f {
         m.m[2][2] = 1.0f;
         return m;
     }
+    point_xy<float> transform(const point_xy<float> &xy) const {
+        point_xy<float> out;
+        out.x = m[0][0] * xy.x + m[0][1] * xy.y + m[0][2];
+        out.y = m[1][0] * xy.x + m[1][1] * xy.y + m[1][2];
+        return out;
+    }
     float m[3][3] = {0};
 };
 
@@ -100,15 +106,26 @@ struct TransformFloat {
     void set_rotation(float rotation) { mImpl->rotation = rotation; }
 
     point_xy_float transform(const point_xy_float &xy) const {
+        // mDirty = true; // always recompile.
+        // compileIfNecessary();
+        // return mCompiled.transform(xy);
         return mImpl->transform(xy);
     }
     bool is_identity() const { return mImpl->is_identity(); }
 
-    Matrix3x3f compile() const ;
+    Matrix3x3f compile() const;
+    void compileIfNecessary() const {
+        // if (mDirty) {
+        //     mCompiled = compile();
+        //     mDirty = false;
+        // }
+    }
 
   private:
     TransformFloatImplPtr mImpl = TransformFloatImpl::Identity();
     // Matrix3x3f mCompiled;  // future use.
+    // mutable bool mDirty = true;   // future use.
+    mutable Matrix3x3f mCompiled; // future use.
 };
 
 } // namespace fl
