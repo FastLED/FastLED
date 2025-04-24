@@ -2,6 +2,7 @@
 import os
 import sys
 import subprocess
+import threading
 import time
 import argparse
 import hashlib
@@ -230,7 +231,20 @@ def main() -> None:
             if not test.auto_run:
                 test.run()
             print(f"Waiting for command: {test.command}")
+            # make a thread that will say waiting for test {test} to finish...<seconds>
+            # and then kill the test if it takes too long (> 120 seconds)
+            event_stopped = threading.Event()
+            def _runner() -> None:
+                start_time = time.time()
+                while not event_stopped.wait(1):
+                    curr_time = time.time()
+                    seconds = int(curr_time - start_time)
+                    print(f"Waiting for command: {test.command} to finish...{seconds} seconds")
+            runner_thread = threading.Thread(target=_runner, daemon=True)
+            runner_thread.start()
             test.wait()
+            event_stopped.set()
+            runner_thread.join(timeout=1)
             if not test.echo:
                 for line in test.stdout.splitlines():
                     print(line)
@@ -246,7 +260,6 @@ def main() -> None:
             time.sleep(1)
             print("Force exit daemon thread invoked")
             os._exit(1)
-        import threading
         daemon_thread = threading.Thread(target=force_exit, daemon=True, name="ForceExitDaemon")
         daemon_thread.start()
         sys.exit(0)
