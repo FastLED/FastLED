@@ -43,6 +43,13 @@ def _make_pio_check_cmd() -> List[str]:
                             '--inline-suppr --enable=all --std=c++17']
 
 
+def make_compile_uno_test_process() -> RunningProcess:
+    """Create a process to compile the uno tests"""
+    cmd = ['uv', 'run', 'ci/ci-compile.py', 'uno', '--examples', 'Blink', '--no-interactive']
+    return RunningProcess(cmd)
+
+
+
 def main() -> None:
     try:
         args = parse_args()
@@ -71,15 +78,11 @@ def main() -> None:
             # Compile and run C++ tests
             start_time = time.time()
             
-            # Start the compile uno process in parallel
-            compile_uno_proc = RunningProcess('bash compile uno --examples Blink')
-            
             if args.test:
                 # Run specific C++ test
                 proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
-                    compile_uno_proc.kill()  # Kill the parallel process if the main one fails
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
             else:
@@ -87,21 +90,15 @@ def main() -> None:
                 proc = RunningProcess(cmd_str_cpp)
                 proc.wait()
                 if proc.returncode != 0:
-                    compile_uno_proc.kill()  # Kill the parallel process if the main one fails
                     print(f"Command failed: {proc.command}")
                     sys.exit(proc.returncode)
-            
-            # Wait for the compile uno process to finish
-            compile_uno_proc.wait()
-            if compile_uno_proc.returncode != 0:
-                print(f"Command failed: {compile_uno_proc.command}")
-                sys.exit(compile_uno_proc.returncode)
                 
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
             return
         
-
-
+        # Start the compile uno process
+        compile_uno_proc = make_compile_uno_test_process()
+        
         cmd_list = _make_pio_check_cmd()
         if not _PIO_CHECK_ENABLED:
             cmd_list = ['echo', 'pio check is disabled']
@@ -113,7 +110,7 @@ def main() -> None:
         cpp_test_proc = RunningProcess(cmd_str_cpp)
         compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False)
         pytest_proc = RunningProcess('uv run pytest ci/tests', echo=False)
-        tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]
+        tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process, compile_uno_proc]
 
         for test in tests:
             sys.stdout.flush()
