@@ -26,7 +26,7 @@ template <typename T> struct EqualTo {
 // Begin HashMap class
 
 template <typename Key, typename T, typename Hash = Hash<Key>,
-          typename KeyEqual = EqualTo<Key>>
+          typename KeyEqual = EqualTo<Key>, int INLINED_COUNT = 8>
 class HashMap {
   public:
     HashMap(size_t initial_capacity = 8, float max_load = 0.5f)
@@ -131,7 +131,8 @@ class HashMap {
     void insert(const Key &key, const T &value) {
         const bool _needs_rehash = needs_rehash();
         if (_needs_rehash) {
-            rehash(_buckets.size() * 2);
+            const size_t new_size = _buckets.size() * 2;
+            rehash(new_size);
         }
 
         size_t idx;
@@ -318,7 +319,7 @@ class HashMap {
 
     void rehash(size_t new_cap) {
         new_cap = next_power_of_two(new_cap);
-        fl::HeapVector<Entry> old;
+        fl::vector_inlined<Entry, INLINED_COUNT> old;
         _buckets.swap(old);
         _buckets.clear();
         _buckets.assign(new_cap, Entry{});
@@ -332,7 +333,7 @@ class HashMap {
         }
     }
 
-    fl::HeapVector<Entry> _buckets;
+    fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
     size_t _size;
     size_t _tombstones;
     uint8_t mLoadFactor;

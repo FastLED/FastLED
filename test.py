@@ -242,6 +242,15 @@ def main() -> None:
                 sys.exit(test.returncode)
 
         print("All tests passed")
+
+        # launch a force exit daemon thread that waits for 1 second until invoking os._exit(0)
+        def force_exit():
+            time.sleep(1)
+            print("Force exit daemon thread invoked")
+            os._exit(1)
+        import threading
+        daemon_thread = threading.Thread(target=force_exit, daemon=True, name="ForceExitDaemon")
+        daemon_thread.start()
         sys.exit(0)
     except KeyboardInterrupt:
         sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)

@@ -10,37 +10,7 @@
 #include "fl/math_macros.h"
 #include "fl/point.h"
 
-enum {
-    kStrIntIsInt64 = fl::is_same<int, int64_t>::value,
-    kStrIntIsInt32 = fl::is_same<int, int32_t>::value,
-    kStrIntIsInt16 = fl::is_same<int, int16_t>::value,
-    kStrIntIsInt8 = fl::is_same<int, int8_t>::value,
-    kStrIntDefineNeeded = !kStrIntIsInt64 && !kStrIntIsInt32 && !kStrIntIsInt16 && !kStrIntIsInt8,
-};
 
-#ifndef FASTLED_STR_INLINED_SIZE
-#define FASTLED_STR_INLINED_SIZE 64
-#endif
-
-#ifndef FASTLED_STR_NEEDS_INT
-
-#if defined(__SAM3X8E__)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__AVR__)
-#define FASTLED_STR_NEEDS_INT 0
-#elif defined(_WIN32) && defined(__clang__)
-  // We're on Windows, compiling with Clang.
-#define FASTLED_STR_NEEDS_INT 0
-#elif kStrIntDefineNeeded
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__GNUC__)
-#define FASTLED_STR_NEEDS_INT 0
-#elif defined(__clang__)
-#define FASTLED_STR_NEEDS_INT 1
-#else
-#define FASTLED_STR_NEEDS_INT 1
-#endif
-#endif  // FASTLED_STR_NEEDS_INT
 
 namespace fl {  // Mandatory namespace for this class since it has name collisions.
 

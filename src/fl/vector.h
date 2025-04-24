@@ -7,6 +7,7 @@
 #include "fl/insert_result.h"
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
+#include "fl/type_traits.h"
 #include "inplacenew.h"
 
 namespace fl {
@@ -64,11 +65,13 @@ template <typename T, size_t N> class FixedVector {
     // Constructor
     constexpr FixedVector() : current_size(0) {}
 
-    FixedVector(const T (&values)[N]) : current_size(N) { assign(values, N); }
+    FixedVector(const T (&values)[N]) : current_size(N) {
+        assign_array(values, N);
+    }
 
     template <size_t M> FixedVector(const T (&values)[M]) : current_size(M) {
         static_assert(M <= N, "Too many elements for FixedVector");
-        assign(values, M);
+        assign_array(values, M);
     }
 
     // Destructor
@@ -84,6 +87,15 @@ template <typename T, size_t N> class FixedVector {
             return *out; // Cause a nullptr dereference
         }
         return memory()[index];
+    }
+
+    void resize(size_t n) {
+        while (current_size < n) {
+            push_back(T());
+        }
+        while (current_size > n) {
+            pop_back();
+        }
     }
 
     // Get the current size of the vector
@@ -103,7 +115,14 @@ template <typename T, size_t N> class FixedVector {
         }
     }
 
-    void assign(const T *values, size_t count) {
+    void reserve(size_t n) {
+        if (n > N) {
+            // This is a no-op for fixed size vectors
+            return;
+        }
+    }
+
+    void assign_array(const T *values, size_t count) {
         clear();
         for (size_t i = 0; i < count; ++i) {
             push_back(values[i]);
@@ -330,6 +349,22 @@ template <typename T> class HeapVector {
         mSize = n;
     }
 
+    template <typename InputIt> void assign(InputIt begin, InputIt end) {
+        clear();
+        reserve(end - begin);
+        for (InputIt it = begin; it != end; ++it) {
+            push_back(*it);
+        }
+    }
+
+    // void assign(size_t new_cap, const T &value) {
+    //     clear();
+    //     reserve(new_cap);
+    //     while (size() < new_cap) {
+    //         push_back(value);
+    //     }
+    // }
+
     // Array access operators
     T &operator[](size_t index) { return mArray[index]; }
 
@@ -481,21 +516,25 @@ template <typename T> class HeapVector {
     //     assign(values, values + count);
     // }
 
-    void assign(size_t new_cap, const T &value) {
-        clear();
-        reserve(new_cap);
-        while (size() < new_cap) {
-            push_back(value);
-        }
-    }
+    // void assign(size_t new_cap, const T &value) {
+    //     clear();
+    //     reserve(new_cap);
+    //     while (size() < new_cap) {
+    //         push_back(value);
+    //     }
+    // }
 
-    void assign(const_iterator begin, const_iterator end) {
-        clear();
-        reserve(end - begin);
-        for (const_iterator it = begin; it != end; ++it) {
-            push_back(*it);
-        }
-    }
+    // 2) the iterator‐range overload, only enabled when InputIt is *not*
+    // integral
+    // template <typename InputIt>
+    // void assign(InputIt begin, InputIt end) {
+    //     clear();
+    //     auto n = static_cast<std::size_t>(end - begin);
+    //     reserve(n);
+    //     for (InputIt it = begin; it != end; ++it) {
+    //         push_back(*it);
+    //     }
+    // }
 
     T *data() { return mArray.get(); }
 
@@ -665,15 +704,85 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         typename FixedVector<T, INLINED_SIZE>::const_iterator;
 
     InlinedVector() = default;
+    InlinedVector(size_t size) : mUsingHeap(false) {
+        if (size > INLINED_SIZE) {
+            mHeap.resize(size);
+            mUsingHeap = true;
+        } else {
+            mFixed.resize(size);
+        }
+    }
+
+    void reserve(size_t size) {
+        if (size > INLINED_SIZE) {
+            if (mUsingHeap) {
+                mHeap.reserve(size);
+            } else {
+                mHeap.reserve(size);
+                for (auto &v : mFixed) {
+                    mHeap.push_back(v);
+                }
+                mFixed.clear();
+                mUsingHeap = true;
+            }
+        } else {
+            if (mUsingHeap) {
+                mFixed.reserve(size);
+                for (auto &v : mHeap) {
+                    mFixed.push_back(v);
+                }
+                mHeap.clear();
+                mUsingHeap = false;
+            } else {
+                mFixed.reserve(size);
+            }
+        }
+    }
 
     // Get current size
     size_t size() const { return mUsingHeap ? mHeap.size() : mFixed.size(); }
-
     bool empty() const { return size() == 0; }
-
     T *data() { return mUsingHeap ? mHeap.data() : mFixed.data(); }
-
     const T *data() const { return mUsingHeap ? mHeap.data() : mFixed.data(); }
+
+    void assign(size_t new_cap, const T &value) {
+        clear();
+        if (INLINED_SIZE > new_cap) {
+            // mFixed.assign(value);
+            while (size() < new_cap) {
+                mFixed.push_back(value);
+            }
+            return;
+        }
+        // mHeap.assign(value);
+        mHeap.reserve(new_cap);
+        mUsingHeap = true;
+        while (size() < new_cap) {
+            mHeap.push_back(value);
+        }
+    }
+
+    template <typename InputIt,
+              typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
+    void assign(InputIt begin, InputIt end) {
+        clear();
+        if (end - begin <= INLINED_SIZE) {
+            mFixed.assign(begin, end);
+            return;
+        }
+        mHeap.assign(begin, end);
+        mUsingHeap = true;
+    }
+
+    // void assign(const_iterator begin, const_iterator end) {
+    //     clear();
+    //     if (end - begin <= INLINED_SIZE) {
+    //         mFixed.assign(begin, end);
+    //         return;
+    //     }
+    //     mHeap.assign(begin, end);
+    //     mUsingHeap = true;
+    // }
 
     // Element access
     T &operator[](size_t idx) { return mUsingHeap ? mHeap[idx] : mFixed[idx]; }
@@ -770,6 +879,13 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         return mUsingHeap ? mHeap.end() : mFixed.end();
     }
 
+    void swap(InlinedVector &other) {
+        // TODO: optimize.
+        InlinedVector temp = *this;
+        *this = other;
+        other = temp;
+    }
+
   private:
     bool mUsingHeap = false;
     FixedVector<T, INLINED_SIZE> mFixed;
@@ -777,7 +893,6 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
 };
 
 template <typename T> using vector = HeapVector<T>;
-
 
 template <typename T, size_t INLINED_SIZE>
 using vector_fixed = FixedVector<T, INLINED_SIZE>;

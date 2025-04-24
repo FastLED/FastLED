@@ -50,7 +50,9 @@ TEST_CASE("Insert duplicate key overwrites without growing") {
 
 TEST_CASE("Multiple distinct inserts & lookups") {
     HashMap<char, int> m;
+    int count = 0;
     for (char c = 'a'; c < 'a' + 10; ++c) {
+        MESSAGE("insert " << count++);
         m.insert(c, c - 'a');
     }
     REQUIRE_EQ(m.size(), 10u);
