@@ -41,6 +41,11 @@ class XYPathRenderer : public Referent {
 
     TransformFloat &transform();
 
+    void setTransform(const TransformFloat &transform) {
+        mTransform = transform;
+        onTransformFloatChanged();
+    }
+
     void setScale(float scale);
 
     point_xy_float compute(float alpha);

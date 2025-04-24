@@ -18,6 +18,7 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/unused.h"
 
 namespace fl {
 
@@ -55,6 +56,11 @@ class XYPathGenerator : public Referent {
   public:
     virtual const Str name() const = 0;
     virtual point_xy_float compute(float alpha) = 0;
+    // No writes when returning false.
+    virtual bool hasDrawBounds(rect_xy<int> *bounds) {
+        FASTLED_UNUSED(bounds);
+        return false;
+    }
 };
 
 

@@ -12,6 +12,16 @@
 
 namespace fl {
 
+namespace xypath_detail {
+fl::Str unique_missing_name() {
+    static int sUniqueName = 0;
+    int id = ++sUniqueName;
+    Str name = "XYCustomPath: ";
+    name += id;
+    return name;
+}
+} // namespace xypath_detail
+
 point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
     // return compute_float(alpha, tx);
     return mPathRenderer->at(alpha, tx);
@@ -196,13 +206,48 @@ XYPathPtr XYPath::NewGielisCurvePath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height, const Ptr<CatmullRomParams> &params) {
+XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height,
+                                    const Ptr<CatmullRomParams> &params) {
     CatmullRomPathPtr path = CatmullRomPathPtr::New(params);
     XYPathPtr out = XYPathPtr::New(path);
     if (width > 0 && height > 0) {
         out->setDrawBounds(width, height);
     }
     return out;
+}
+
+XYPathPtr
+XYPath::NewCustomPath(const fl::function<point_xy_float(float)> &f,
+                      const rect_xy<int> & drawbounds,
+                      const TransformFloat &transform,
+                      const Str &name) {
+
+    XYPathFunctionPtr path = NewPtr<XYPathFunction>(f);
+    path->setName(name);
+    if (!drawbounds.empty()) {
+        path->setDrawBounds(drawbounds);
+
+    }
+    XYPathPtr out = XYPathPtr::New(path);
+    if (!transform.is_identity()) {
+        out->setTransform(transform);
+    }
+    rect_xy<int> bounds;
+    if (path->hasDrawBounds(&bounds)) {
+        if (!bounds.mMin.is_zero()) {
+            // Set the bounds to the path's bounds
+            FASTLED_WARN(
+                "Bounds with an origin other than 0,0 is not supported yet");
+        }
+        auto w = bounds.width();
+        auto h = bounds.height();
+        out->setDrawBounds(w, h);
+    }
+    return out;
+}
+
+void XYPath::setTransform(const TransformFloat &transform) {
+    mPathRenderer->setTransform(transform);
 }
 
 } // namespace fl

@@ -10,6 +10,7 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
+#include "fl/function.h"
 #include "fl/ptr.h"
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
@@ -24,6 +25,11 @@ template <typename T> class function;
 FASTLED_SMART_PTR(XYPath);
 FASTLED_SMART_PTR(XYPathRenderer);
 FASTLED_SMART_PTR(XYPathGenerator);
+FASTLED_SMART_PTR(XYPathFunction);
+
+namespace xypath_detail {
+fl::Str unique_missing_name();
+} // namespace xypath_detail
 
 class XYPath : public Referent {
   public:
@@ -38,6 +44,12 @@ class XYPath : public Referent {
     static XYPathPtr NewHeartPath(uint16_t width, uint16_t height);
     static XYPathPtr NewArchimedeanSpiralPath(uint16_t width, uint16_t height);
     static XYPathPtr NewArchimedeanSpiralPath();
+
+    static XYPathPtr
+    NewCustomPath(const fl::function<point_xy_float(float)> &path,
+                  const rect_xy<int> &drawbounds = rect_xy<int>(),
+                  const TransformFloat &transform = TransformFloat(),
+                  const Str &name = xypath_detail::unique_missing_name());
 
     static XYPathPtr
     NewRosePath(uint16_t width = 0, uint16_t height = 0,
@@ -56,6 +68,9 @@ class XYPath : public Referent {
         uint16_t width = 0, uint16_t height = 0,
         const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
 
+    XYPath(XYPathGeneratorPtr path,
+           TransformFloat transform = TransformFloat());
+
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
@@ -72,12 +87,34 @@ class XYPath : public Referent {
     void setDrawBounds(uint16_t width, uint16_t height);
     TransformFloat &transform();
 
-    XYPath(XYPathGeneratorPtr path,
-           TransformFloat transform = TransformFloat());
+    void setTransform(const TransformFloat &transform);
 
   private:
     XYPathGeneratorPtr mPath;
     XYPathRendererPtr mPathRenderer;
+};
+
+class XYPathFunction : public XYPathGenerator {
+  public:
+    XYPathFunction(fl::function<point_xy_float(float)> f) : mFunction(f) {}
+    point_xy_float compute(float alpha) override { return mFunction(alpha); }
+    const Str name() const override { return mName; }
+    void setName(const Str &name) { mName = name; }
+
+    fl::rect_xy<int> drawBounds() const { return mDrawBounds; }
+    void setDrawBounds(const fl::rect_xy<int> &bounds) { mDrawBounds = bounds; }
+
+    bool hasDrawBounds(fl::rect_xy<int> *bounds) override {
+        if (bounds) {
+            *bounds = mDrawBounds;
+        }
+        return true;
+    }
+
+  private:
+    fl::function<point_xy_float(float)> mFunction;
+    fl::Str mName = "XYPathFunction Unnamed";
+    fl::rect_xy<int> mDrawBounds;
 };
 
 } // namespace fl
