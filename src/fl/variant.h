@@ -137,10 +137,8 @@ template <typename T, typename U> class Variant {
     // -- observers ----------------------------------------------------------
 
     Tag tag() const noexcept { return _tag; }
-
     bool isEmpty() const noexcept { return _tag == Tag::Empty; }
-    bool isT() const noexcept { return _tag == Tag::IsT; }
-    bool isU() const noexcept { return _tag == Tag::IsU; }
+
 
     template<typename TYPE>
     bool is() const noexcept {
@@ -153,11 +151,25 @@ template <typename T, typename U> class Variant {
         }
     }
 
-    T &getT() { return _storage.t; }
-    const T &getT() const { return _storage.t; }
+    template<typename TYPE>
+    TYPE* get() {
+        if (is<TYPE>()) {
+            return reinterpret_cast<TYPE*>(&_storage.t);
+        } else {
+            return nullptr;
+        }
+    }
 
-    U &getU() { return _storage.u; }
-    const U &getU() const { return _storage.u; }
+    template<typename TYPE>
+    const TYPE* get() const {
+        if (is<TYPE>()) {
+            return reinterpret_cast<const TYPE*>(&_storage.t);
+        } else {
+            return nullptr;
+        }
+    }
+
+
 
     // -- swap ---------------------------------------------------------------
 
@@ -177,6 +189,14 @@ template <typename T, typename U> class Variant {
     }
 
   private:
+
+    bool isT() const noexcept { return _tag == Tag::IsT; }
+    bool isU() const noexcept { return _tag == Tag::IsU; }
+    T &getT() { return _storage.t; }
+    const T &getT() const { return _storage.t; }
+
+    U &getU() { return _storage.u; }
+    const U &getU() const { return _storage.u; }
     Tag _tag;
     union Storage {
         T t;
