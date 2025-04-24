@@ -344,7 +344,9 @@ point_xy_float CatmullRomPath::compute(float alpha) {
     }
     
     // Perform Catmull-Rom interpolation
-    return interpolate(p0, p1, p2, p3, t);
+    auto out = interpolate(p0, p1, p2, p3, t);
+    FASTLED_WARN("CatmullRomPath::compute: " << out.x << ", " << out.y);
+    return out;
 }
 
 point_xy_float CatmullRomPath::interpolate(

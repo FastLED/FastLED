@@ -2,6 +2,7 @@
 
 #include "fl/xypath.h"
 #include "fl/vector.h"
+#include "fl/map_range.h"
 
 
 #include "xypaths.h"
@@ -12,11 +13,17 @@ namespace {
     Ptr<CatmullRomParams> make_path(int width, int height) {
         // make a triangle.
         Ptr<CatmullRomParams> params = NewPtr<CatmullRomParams>();
-        params->addPoint(0.0f, 0.0f);
-        params->addPoint(width - 1, height / 2);
-        params->addPoint(width - 1, height - 1);
-        params->addPoint(0.0f, height - 1);
-        params->addPoint(0.0f, 0.0f);
+        vector_inlined<point_xy_float, 5> points;
+        points.push_back(point_xy_float(0.0f, 0.0f));
+        points.push_back(point_xy_float(width / 3, height / 2));
+        points.push_back(point_xy_float(width - 3, height - 1));
+        points.push_back(point_xy_float(0.0f, height - 1));
+        points.push_back(point_xy_float(0.0f, 0.0f));
+        for (auto &p : points) {
+            p.x = map_range<float, float>(p.x, 0.0f, width - 1, -1.0f, 1.0f);
+            p.y = map_range<float, float>(p.y, 0.0f, height - 1, -1.0f, 1.0f);
+            params->addPoint(p);
+        }
         return params;
     }
 }
@@ -29,6 +36,6 @@ fl::vector<XYPathPtr> CreateXYPaths(int width, int height) {
     out.push_back(XYPath::NewArchimedeanSpiralPath(width, height));
     out.push_back(XYPath::NewPhyllotaxisPath(width, height));
     out.push_back(XYPath::NewGielisCurvePath(width, height));
-    out.push_back(XYPath::NewCatmullRomPath(make_path(width, height)));
+    out.push_back(XYPath::NewCatmullRomPath(width, height, make_path(width, height)));
     return out;
 }

@@ -53,6 +53,7 @@ class XYPath : public Referent {
 
     // Create a new Catmull-Rom spline path with custom parameters
     static XYPathPtr NewCatmullRomPath(
+        uint16_t width = 0, uint16_t height = 0,
         const Ptr<CatmullRomParams> &params = NewPtr<CatmullRomParams>());
 
     virtual ~XYPath();
