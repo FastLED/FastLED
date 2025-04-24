@@ -1,7 +1,8 @@
 #pragma once
 
 #include <string.h> // for memcpy
-#include <algorithm> // for std::min
+
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -91,7 +92,7 @@ class bitset_dynamic {
                 // Copy existing data if any
                 if (_blocks && _block_count > 0) {
                     memcpy(new_blocks, _blocks,
-                           std::min(_block_count, new_block_count) *
+                           MIN(_block_count, new_block_count) *
                                sizeof(block_type));
                 }
             }
@@ -256,7 +257,7 @@ class bitset_dynamic {
     // Bitwise AND operator
     bitset_dynamic operator&(const bitset_dynamic &other) const {
         bitset_dynamic result(_size);
-        uint32_t min_blocks = std::min(_block_count, other._block_count);
+        uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] & other._blocks[i];
@@ -268,7 +269,7 @@ class bitset_dynamic {
     // Bitwise OR operator
     bitset_dynamic operator|(const bitset_dynamic &other) const {
         bitset_dynamic result(_size);
-        uint32_t min_blocks = std::min(_block_count, other._block_count);
+        uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] | other._blocks[i];
@@ -286,7 +287,7 @@ class bitset_dynamic {
     // Bitwise XOR operator
     bitset_dynamic operator^(const bitset_dynamic &other) const {
         bitset_dynamic result(_size);
-        uint32_t min_blocks = std::min(_block_count, other._block_count);
+        uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
             result._blocks[i] = _blocks[i] ^ other._blocks[i];
