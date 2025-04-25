@@ -151,6 +151,7 @@ class UIButton : public UIButtonImpl {
       private:
         UIButton *mOwner;
         bool added = false;
+        bool last_frame_clicked = false;
     };
 
   private:

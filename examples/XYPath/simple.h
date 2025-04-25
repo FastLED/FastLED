@@ -22,6 +22,7 @@ all the UI elements you see below.
 // Sketch.
 #include "src/wave.h"
 #include "src/xypaths.h"
+#include "fl/function.h"
 
 using namespace fl;
 
@@ -40,6 +41,18 @@ UIButton trigger("Trigger");
 UISlider pointX("Point X", 0.0f, 0.0f, WIDTH - 1, 1.0f);
 UISlider pointY("Point Y", 0.0f, 0.0f, HEIGHT - 1, 1.0f);
 
+
+int x = 0;
+int y = 0;
+bool triggered = false;
+
+int jobs[] = {
+    fl::bind(pointX, x),
+    fl::bind(pointY, y),
+    fl::bind(trigger, triggered),
+};
+
+
 void setup() {
     Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
@@ -48,10 +61,10 @@ void setup() {
 
 }
 void loop() {
+    if (triggered) {
+        FASTLED_WARN("Triggered");
+    }
     fl::clear(leds);
-    int x = pointX.as_int();
-    int y = pointY.as_int();
-
     leds[xyMap(x, y)] = CRGB(255, 0, 0);
 
     FastLED.show();

@@ -879,16 +879,40 @@ using fl::XYMap;
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
 
-#endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN
 
+// Convenience functions for sketches.
 namespace fl {
+	// Memory safe clear function for CRGB arrays.
 	template<size_t N>
 	inline void clear(CRGB (&arr)[N]) {
 		for (size_t i = 0; i < N; ++i) {
 			arr[i] = CRGB::Black;
 		}
 	}
+
+	// bind will bind the values which are updated once per frame.
+	// Binds a uislider to number value, which is auto updated.
+    template<typename T>
+    int bind(UISlider &slider, T &t) {
+        slider.onChanged([&t](float value) {
+            t = value;
+        });
+        return 0;
+    }
+
+	// Binds a UIButton to an integer-like value.
+    template<typename T>
+    int bind(UIButton& button, T &t) {
+        button.onChanged([button, &t]() {
+            bool clicked = button.clicked();
+            t = clicked;
+        });
+        return 0;
+    }
 }
+
+#endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN
+
 
 // Auto namespace if necessary.
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1

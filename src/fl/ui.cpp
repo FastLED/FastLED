@@ -30,11 +30,7 @@ void UISlider::Listener::onBeginFrame() {
 }
 
 void UIButton::Listener::onBeginFrame() {
-    bool currentClicked = mOwner->clicked();
-    if (currentClicked && !mOwner->mLastFrameClicked) {
-        mOwner->mCallbacks.invoke(*mOwner);
-    }
-    mOwner->mLastFrameClicked = currentClicked;
+    mOwner->mCallbacks.invoke(*mOwner);
 }
 
 void UICheckbox::Listener::onBeginFrame() {
