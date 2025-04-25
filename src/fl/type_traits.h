@@ -96,6 +96,8 @@ enum {
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(NRF52_SERIES)
 #define FASTLED_STR_NEEDS_INT 1
+#elif defined(STM32F1)
+#define FASTLED_STR_NEEDS_INT 1
 #elif kStrIntDefineNeeded
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
