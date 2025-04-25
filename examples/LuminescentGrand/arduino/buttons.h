@@ -100,7 +100,7 @@ typedef MidiShieldButton DigitalButton;
 
 class CountingButton {
  public:
-  explicit CountingButton(int but_pin) : button_(but_pin), curr_val_(0) {
+  explicit CountingButton(int but_pin) : button_(but_pin), curr_val_(0), mButton("Counting UIButton") {
     debounce_timestamp_ = millis();
     on_ = Read();
   }
@@ -141,7 +141,7 @@ class CountingButton {
   bool on_;
   int curr_val_;
   unsigned long debounce_timestamp_;
-  UIButton mButton = UIButton("Counting UIButton");
+  UIButton mButton;
 };
 
 class ColorSelector {
