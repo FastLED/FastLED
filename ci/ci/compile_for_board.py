@@ -20,6 +20,15 @@ def errors_happened() -> bool:
     return ERROR_HAPPENED
 
 
+def _fastled_js_is_parent_directory(p: Path) -> bool:
+    """Check if fastled_js is a parent directory of the given path."""
+    # Check if fastled_js is a parent directory of p
+    try:
+        return p.relative_to(Path("fastled_js"))  # type: ignore
+    except ValueError:
+        return False
+
+
 def compile_for_board_and_example(
     board: Board,
     example: Path,
@@ -51,7 +60,7 @@ def compile_for_board_and_example(
     # Copy all files from the example directory to the "src" directory
     for src_file in example.rglob("*"):
         if src_file.is_file():
-            if src_file.parent.name == "fastled_js":
+            if _fastled_js_is_parent_directory(src_file):
                 # Skip the fastled_js folder, it's not needed for the build.
                 continue
             src_dir = src_file.parent

@@ -82,6 +82,13 @@ enum {
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(__IMXRT1062__)
 #define FASTLED_STR_NEEDS_INT 1
+
+#elif defined(ESP32)
+// #include "platforms/esp/esp_version.h"
+// #if CONFIG_IDF_TARGET_ESP32S3
+#define FASTLED_STR_NEEDS_INT 1
+// #endif
+
 #elif kStrIntDefineNeeded
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
