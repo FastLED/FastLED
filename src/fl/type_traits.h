@@ -92,6 +92,8 @@ enum {
 // #endif
 #elif defined(PICO_RP2350)
 #define FASTLED_STR_NEEDS_INT 1
+#elif defined(NRF52_SERIES)
+#define FASTLED_STR_NEEDS_INT 1
 #elif kStrIntDefineNeeded
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
