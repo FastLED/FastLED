@@ -414,6 +414,16 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+    // Generic integral append: only enabled if T is an integral type. This is needed
+    // because on some platforms type(int) is not one of the integral types like
+    // int8_t, int16_t, int32_t, int64_t etc. In such a has just case the value
+    // to int32_t and then append it.
+    template<typename T, typename = fl::enable_if_t< fl::is_integral<T>::value >>
+    Str& append(const T& val) {
+        write(int32_t(val));
+        return *this;
+    }
+
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     //Str& append(char c) { write(&c, 1); return *this; }
@@ -426,12 +436,6 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const int16_t& val) { write(int32_t(val)); return *this; }
     Str& append(const uint32_t& val) { write(val); return *this; }
     Str& append(const int32_t& c) { write(c); return *this; }
-
-
-    #if defined(FASTLED_STR_NEEDS_INT) && FASTLED_STR_NEEDS_INT
-    Str& append(const int& val) { write(int32_t(val)); return *this; }
-    Str& append(const unsigned int& val) { write(uint32_t(val)); return *this; }
-    #endif
 
     Str& append(const bool& val) {
         if (val) {
