@@ -61,7 +61,6 @@ void setup() {
 
 void loop() {
     // Your code here
-    // memset(leds, 0, NUM_LEDS * sizeof(CRGB));
     fl::clear(leds);
     int x = pointX.as_int();
     int y = pointY.as_int();
