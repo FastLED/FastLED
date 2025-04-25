@@ -239,6 +239,19 @@ class HashMap {
         Key key;
         T value;
         EntryState state;
+        void swap(Entry &other) {
+            Key tkey = key;
+            T tvalue = value;
+            EntryState tstate = state;
+
+            key = other.key;
+            value = other.value;
+            state = other.state;
+
+            other.key = tkey;
+            other.value = tvalue;
+            other.state = tstate;
+        }
     };
 
     static size_t next_power_of_two(size_t n) {

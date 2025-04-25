@@ -261,14 +261,11 @@ struct swap_impl<T, true> {
     }
 };
 
-// non‑POD case (requires T::Swap)
+// non‑POD case (requires T implements swap)
 template<typename T>
 struct swap_impl<T, false> {
     static void apply(T& a, T& b) {
-        // fall back to use copy.
-        T tmp = a;
-        a = b;
-        b = tmp;
+        a.swap(b);
     }
 };
 
@@ -279,6 +276,7 @@ void swap(T& a, T& b) {
     // if T is not a POD, use the T::Swap method.
     swap_impl<T>::apply(a, b);
 }
+
 
 } // namespace fl
 
