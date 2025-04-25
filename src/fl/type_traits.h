@@ -265,7 +265,10 @@ struct swap_impl<T, true> {
 template<typename T>
 struct swap_impl<T, false> {
     static void apply(T& a, T& b) {
-        T::Swap(a, b);
+        // fall back to use copy.
+        T tmp = a;
+        a = b;
+        b = tmp;
     }
 };
 
@@ -277,12 +280,7 @@ void swap(T& a, T& b) {
     swap_impl<T>::apply(a, b);
 }
 
-
-
-
 } // namespace fl
-
-
 
 
 
