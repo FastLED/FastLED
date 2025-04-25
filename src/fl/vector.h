@@ -259,7 +259,7 @@ template <typename T, size_t N> class FixedVector {
         if (this != &other) {
             const int max_size = MAX(current_size, other.current_size);
             for (int i = 0; i < max_size; ++i) {
-                fl::swap(memory()[i], other.memory()[i]);
+                fl::swap_by_copy(memory()[i], other.memory()[i]);
                 // T temp = memory()[i];
                 // memory()[i] = other.memory()[i];
                 // other.memory()[i] = temp;
