@@ -12,12 +12,18 @@
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
 
+#define FL_NO_COPY(CLASS) \
+  CLASS(const CLASS &) = delete; \
+  CLASS &operator=(const CLASS &) = delete;
+
+
 namespace fl {
 
 // If the platform is missing ui components, provide stubs.
 
 class UISlider : public UISliderImpl {
   public:
+    FL_NO_COPY(UISlider)
     using Super = UISliderImpl;
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
@@ -102,8 +108,10 @@ class UISlider : public UISliderImpl {
 
 // template operator for >= against a jsSliderImpl
 
+
 class UIButton : public UIButtonImpl {
   public:
+    FL_NO_COPY(UIButton)
     using Super = UIButtonImpl;
     UIButton(const char *name) : UIButtonImpl(name), mListener(this) {}
     ~UIButton() {}
@@ -151,7 +159,7 @@ class UIButton : public UIButtonImpl {
       private:
         UIButton *mOwner;
         bool added = false;
-        bool last_frame_clicked = false;
+        bool mClickedLastFrame = false;
     };
 
   private:
@@ -162,6 +170,7 @@ class UIButton : public UIButtonImpl {
 
 class UICheckbox : public UICheckboxImpl {
   public:
+    FL_NO_COPY(UICheckbox);
     using Super = UICheckboxImpl;
     UICheckbox(const char *name, bool value = false)
         : UICheckboxImpl(name, value), mListener(this) {}
@@ -224,6 +233,7 @@ class UICheckbox : public UICheckboxImpl {
 
 class UINumberField : public UINumberFieldImpl {
   public:
+    FL_NO_COPY(UINumberField);
     using Super = UINumberFieldImpl;
     UINumberField(const char *name, double value, double min = 0,
                   double max = 100)
@@ -292,12 +302,14 @@ class UINumberField : public UINumberFieldImpl {
 
 class UITitle : public UITitleImpl {
   public:
+    FL_NO_COPY(UITitle);
     UITitle(const char *name) : UITitleImpl(name) {}
     ~UITitle() {}
 };
 
 class UIDescription : public UIDescriptionImpl {
   public:
+    FL_NO_COPY(UIDescription);
     UIDescription(const char *name) : UIDescriptionImpl(name) {}
     ~UIDescription() {}
 };

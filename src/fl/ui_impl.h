@@ -42,7 +42,7 @@ class UISliderImpl {
   public:
     // If step is -1, it will be calculated as (max - min) / 100
     UISliderImpl(const char *name, float value = 128.0f, float min = 1,
-             float max = 255, float step = -1.f)
+                 float max = 255, float step = -1.f)
         : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(step);
@@ -64,9 +64,7 @@ class UISliderImpl {
     operator int() const { return static_cast<int>(mValue); }
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
-    int as_int() const {
-        return static_cast<int>(mValue);
-    }
+    int as_int() const { return static_cast<int>(mValue); }
 
     UISliderImpl &operator=(float value) {
         setValue(value);
@@ -76,8 +74,6 @@ class UISliderImpl {
         setValue(static_cast<float>(value));
         return *this;
     }
-
-
 
   private:
     float mValue;
@@ -100,6 +96,10 @@ class UIButtonImpl {
     int clickedCount() const { return 0; }
     operator bool() const { return false; }
     void click() {}
+    fl::Str name() const { return mName; }
+
+  private:
+    fl::Str mName;
 };
 
 #endif
@@ -136,7 +136,7 @@ class UICheckboxImpl {
 class UINumberFieldImpl {
   public:
     UINumberFieldImpl(const char *name, double value, double min = 0,
-                  double max = 100)
+                      double max = 100)
         : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
         FASTLED_UNUSED(name);
     }
@@ -181,6 +181,5 @@ class UIDescriptionImpl {
 };
 
 #endif
-
 
 } // end namespace fl

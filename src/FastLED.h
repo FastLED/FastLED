@@ -903,11 +903,12 @@ namespace fl {
 	// Binds a UIButton to an integer-like value.
     template<typename T>
     int bind(UIButton& button, T &t) {
-        button.onChanged([button, &t]() {
+        button.onChanged([&button, &t]() {
             bool clicked = button.clicked();
             t = clicked;
         });
-        return 0;
+
+		return 0;
     }
 }
 

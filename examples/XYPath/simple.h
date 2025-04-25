@@ -36,10 +36,12 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
-UIButton trigger("Trigger");
 
+// UIButton trigger("My Trigger");
 UISlider pointX("Point X", 0.0f, 0.0f, WIDTH - 1, 1.0f);
 UISlider pointY("Point Y", 0.0f, 0.0f, HEIGHT - 1, 1.0f);
+
+UIButton button("second trigger");
 
 
 int x = 0;
@@ -49,7 +51,7 @@ bool triggered = false;
 int jobs[] = {
     fl::bind(pointX, x),
     fl::bind(pointY, y),
-    fl::bind(trigger, triggered),
+    fl::bind(button, triggered),
 };
 
 
