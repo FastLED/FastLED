@@ -88,7 +88,8 @@ enum {
 // #if CONFIG_IDF_TARGET_ESP32S3
 #define FASTLED_STR_NEEDS_INT 1
 // #endif
-
+#elif defined(PICO_RP2350)
+#define FASTLED_STR_NEEDS_INT 1
 #elif kStrIntDefineNeeded
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
