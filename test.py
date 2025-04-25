@@ -235,7 +235,10 @@ def main() -> None:
             print("Source code changed, running uno tests")
             tests += [make_compile_uno_test_process()]
 
+        is_first = True
         for test in tests:
+            was_first = is_first
+            is_first = False
             sys.stdout.flush()
             if not test.auto_run:
                 test.run()
@@ -248,7 +251,8 @@ def main() -> None:
                 while not event_stopped.wait(1):
                     curr_time = time.time()
                     seconds = int(curr_time - start_time)
-                    print(f"Waiting for command: {test.command} to finish...{seconds} seconds")
+                    if not was_first:  # skip printing for the first test since it echo's out.
+                        print(f"Waiting for command: {test.command} to finish...{seconds} seconds")
             runner_thread = threading.Thread(target=_runner, daemon=True)
             runner_thread.start()
             test.wait()
