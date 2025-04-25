@@ -323,8 +323,8 @@ template <typename T> class HeapVector {
         reserve(other.size());
         assign(other.begin(), other.end());
     }
-    HeapVector(const HeapVector<T>&& other) {
-        fl::swap(*this, other);
+    HeapVector(HeapVector<T>&& other) {
+        this->swap(other);
         other.clear();
     }
     HeapVector &operator=(
