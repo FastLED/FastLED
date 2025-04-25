@@ -79,6 +79,8 @@ enum {
 #elif defined(_WIN32)
 // We're on Windows.
 #define FASTLED_STR_NEEDS_INT 0
+#elif defined(__APPLE__) && defined(__MACH__) && defined(__GNUC__)
+#define FASTLED_STR_NEEDS_INT 0
 // #elif defined(__IMXRT1062__)
 // #define FASTLED_STR_NEEDS_INT 1
 // #elif defined(__MK20DX128__)
