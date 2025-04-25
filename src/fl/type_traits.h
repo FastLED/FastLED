@@ -73,37 +73,36 @@ enum {
 
 #ifndef FASTLED_STR_NEEDS_INT
 
-#if defined(__SAM3X8E__)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__AVR__)
-#define FASTLED_STR_NEEDS_INT 0
-#elif defined(_WIN32) && defined(__clang__)
-// We're on Windows, compiling with Clang.
-#define FASTLED_STR_NEEDS_INT 0
-#elif defined(__IMXRT1062__)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__MK20DX128__)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__MKL26Z64__)
-#define FASTLED_STR_NEEDS_INT 1
 
-#elif defined(ESP32)
-// #include "platforms/esp/esp_version.h"
-// #if CONFIG_IDF_TARGET_ESP32S3
-#define FASTLED_STR_NEEDS_INT 1
-// #endif
-#elif defined(PICO_RP2350)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(NRF52_SERIES)
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(STM32F1)
-#define FASTLED_STR_NEEDS_INT 1
-#elif kStrIntDefineNeeded
-#define FASTLED_STR_NEEDS_INT 1
-#elif defined(__GNUC__)
+#if defined(__AVR__)
 #define FASTLED_STR_NEEDS_INT 0
-#elif defined(__clang__)
-#define FASTLED_STR_NEEDS_INT 1
+#elif defined(_WIN32)
+// We're on Windows.
+#define FASTLED_STR_NEEDS_INT 0
+// #elif defined(__IMXRT1062__)
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif defined(__MK20DX128__)
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif defined(__MKL26Z64__)
+// #define FASTLED_STR_NEEDS_INT 1
+
+// #elif defined(ESP32)
+// // #include "platforms/esp/esp_version.h"
+// // #if CONFIG_IDF_TARGET_ESP32S3
+// #define FASTLED_STR_NEEDS_INT 1
+// // #endif
+// #elif defined(PICO_RP2350)
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif defined(NRF52_SERIES)
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif defined(STM32F1)
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif kStrIntDefineNeeded
+// #define FASTLED_STR_NEEDS_INT 1
+// #elif defined(__GNUC__)
+// #define FASTLED_STR_NEEDS_INT 0
+// #elif defined(__clang__)
+// #define FASTLED_STR_NEEDS_INT 1
 #else
 #define FASTLED_STR_NEEDS_INT 1
 #endif

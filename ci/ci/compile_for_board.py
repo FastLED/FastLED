@@ -23,10 +23,7 @@ def errors_happened() -> bool:
 def _fastled_js_is_parent_directory(p: Path) -> bool:
     """Check if fastled_js is a parent directory of the given path."""
     # Check if fastled_js is a parent directory of p
-    try:
-        return p.relative_to(Path("fastled_js"))  # type: ignore
-    except ValueError:
-        return False
+    return "fastled_js" in str(p.absolute())
 
 
 def compile_for_board_and_example(
