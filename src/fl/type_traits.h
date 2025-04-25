@@ -80,6 +80,8 @@ enum {
 #elif defined(_WIN32) && defined(__clang__)
 // We're on Windows, compiling with Clang.
 #define FASTLED_STR_NEEDS_INT 0
+#elif defined(__IMXRT1062__)
+#define FASTLED_STR_NEEDS_INT 1
 #elif kStrIntDefineNeeded
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__GNUC__)
