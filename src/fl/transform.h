@@ -73,9 +73,6 @@ class TransformFloatImpl : public Referent {
 struct Matrix3x3f {
     static Matrix3x3f Identity() {
         Matrix3x3f m;
-        m.m[0][0] = 1.0f;
-        m.m[1][1] = 1.0f;
-        m.m[2][2] = 1.0f;
         return m;
     }
     point_xy<float> transform(const point_xy<float> &xy) const {
@@ -84,7 +81,11 @@ struct Matrix3x3f {
         out.y = m[1][0] * xy.x + m[1][1] * xy.y + m[1][2];
         return out;
     }
-    float m[3][3] = {0};
+    float m[3][3] = {
+        {1.0f, 0.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 1.0f},
+    };
 };
 
 // TransformFloat is a wrapper around the smart ptr. This version allows for
