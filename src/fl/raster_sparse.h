@@ -199,13 +199,13 @@ class XYRasterSparse {
   private:
     using Key = point_xy<int>;
     using Value = uint8_t;
-    using Hash = Hash<Key>;
-    using EqualTo = EqualTo<Key>;
-    using FastHash = FastHash<Key>;
-    using HashMapLarge = fl::HashMap<Key, Value, Hash, EqualTo, FASTLED_HASHMAP_INLINED_COUNT>;
+    using HashKey = Hash<Key>;
+    using EqualToKey = EqualTo<Key>;
+    using FastHashKey = FastHash<Key>;
+    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey, FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<point_xy<int>, uint8_t *, FastHash, EqualTo, kMaxCacheSize> mCache;
+    HashMap<point_xy<int>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize> mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
