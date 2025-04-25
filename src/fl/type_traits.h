@@ -64,7 +64,7 @@ enum {
     kStrIntIsInt16 = fl::is_same<int, int16_t>::value,
     kStrIntIsInt8 = fl::is_same<int, int8_t>::value,
     kStrIntIsOfBuiltInType =
-        kStrIntIsInt8 || kStrIntIsInt16 || kStrIntIsInt32 || kStrIntIsInt64,
+        kStrIntIsInt8 | kStrIntIsInt16 | kStrIntIsInt32 | kStrIntIsInt64,
 };
 
 #ifndef FASTLED_STR_INLINED_SIZE

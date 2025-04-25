@@ -13,6 +13,34 @@ void takeLValue(TestClass & obj);
 void takeRValue(TestClass && obj);
 template <typename T> void forwardValue(T && obj);
 
+TEST_CASE("is_integral<T> value") {
+    // Test with integral types
+    REQUIRE(is_integral<bool>::value);
+    REQUIRE(is_integral<char>::value);
+    REQUIRE(is_integral<signed char>::value);
+    REQUIRE(is_integral<unsigned char>::value);
+    REQUIRE(is_integral<int>::value);
+    REQUIRE(is_integral<unsigned int>::value);
+    REQUIRE(is_integral<short>::value);
+    REQUIRE(is_integral<long>::value);
+    REQUIRE(is_integral<long long>::value);
+
+    // Test with sized types
+    REQUIRE(is_integral<int8_t>::value);
+    REQUIRE(is_integral<uint8_t>::value);
+    REQUIRE(is_integral<int16_t>::value);
+    REQUIRE(is_integral<uint16_t>::value);
+    REQUIRE(is_integral<int32_t>::value);
+    REQUIRE(is_integral<uint32_t>::value);
+    REQUIRE(is_integral<int64_t>::value);
+    REQUIRE(is_integral<uint64_t>::value);
+
+    // Test with non-integral types
+    REQUIRE_FALSE(is_integral<float>::value);
+    REQUIRE_FALSE(is_integral<double>::value);
+    REQUIRE_FALSE(is_integral<char *>::value);
+}
+
 TEST_CASE("Test fl::move") {
     // Test with a simple class that tracks move operations
     class MoveTracker {
