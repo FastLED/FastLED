@@ -23,6 +23,10 @@ FASTLED_NAMESPACE_BEGIN
 struct CRGB;
 FASTLED_NAMESPACE_END
 
+#ifndef FASTLED_RASTER_SPARSE_INLINED_COUNT
+#define FASTLED_RASTER_SPARSE_INLINED_COUNT 128
+#endif
+
 namespace fl {
 
 class XYMap;
@@ -193,10 +197,15 @@ class XYRasterSparse {
     }
 
   private:
-    using HashMapLarge = fl::HashMap<point_xy<int>, uint8_t>;
+    using Key = point_xy<int>;
+    using Value = uint8_t;
+    using Hash = Hash<Key>;
+    using EqualTo = EqualTo<Key>;
+    using FastHash = FastHash<Key>;
+    using HashMapLarge = fl::HashMap<Key, Value, Hash, EqualTo, FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last 4 writes.
-    HashMap<point_xy<int>, uint8_t *, FastHash<point_xy<int>>> mCache;
+    HashMap<point_xy<int>, uint8_t *, FastHash, EqualTo, 4> mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };

@@ -1,5 +1,13 @@
 #pragma once
 
+/*
+HashMap that is optimized for embedded devices. The hashmap
+will store upto 8 elements inline, and will spill over to a heap.
+For multiple inserts and deletions, the hashmap will rehash inline
+without having to resize the hashmap. This is useful for embedded devices
+where memory is limited and we want to avoid heap allocations.
+*/
+
 #include "fl/assert.h"
 #include "fl/bitset.h"
 #include "fl/clamp.h"
@@ -27,11 +35,15 @@ template <typename T> struct EqualTo {
 // ------------------------------------------------------------- Begin HashMap
 // class
 
+#ifndef FASTLED_HASHMAP_INLINED_COUNT
+#define FASTLED_HASHMAP_INLINED_COUNT 8
+#endif
+
 template <typename Key, typename T, typename Hash = Hash<Key>,
-          typename KeyEqual = EqualTo<Key>, int INLINED_COUNT = 8>
+          typename KeyEqual = EqualTo<Key>, int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
 class HashMap {
   public:
-    HashMap(size_t initial_capacity = 8, float max_load = 0.5f)
+    HashMap(size_t initial_capacity = FASTLED_HASHMAP_INLINED_COUNT, float max_load = 0.7f)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0) {
         for (auto &e : _buckets)
