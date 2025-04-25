@@ -6,11 +6,13 @@
 
 #include "fl/insert_result.h"
 #include "fl/namespace.h"
+#include "fl/math_macros.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
 #include "inplacenew.h"
 
 namespace fl {
+
 
 // Aligned memory block for inlined data structures.
 template <typename T, size_t N> struct InlinedMemoryBlock {
@@ -252,6 +254,22 @@ template <typename T, size_t N> class FixedVector {
     const_iterator begin() const { return &memory()[0]; }
     iterator end() { return &memory()[current_size]; }
     const_iterator end() const { return &memory()[current_size]; }
+
+    void swap(FixedVector<T, N> &other) {
+        if (this != &other) {
+            const int max_size = MAX(current_size, other.current_size);
+            for (int i = 0; i < max_size; ++i) {
+                // fl::swap(memory()[i], other.memory()[i]);
+                T temp = memory()[i];
+                memory()[i] = other.memory()[i];
+                other.memory()[i] = temp;
+            }
+            // swap the sizes
+            size_t temp_size = current_size;
+            current_size = other.current_size;
+            other.current_size = temp_size;
+        }
+    }
 
   private:
     size_t current_size = 0;
@@ -704,6 +722,18 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         typename FixedVector<T, INLINED_SIZE>::const_iterator;
 
     InlinedVector() = default;
+    InlinedVector(const InlinedVector &other) {
+        if (other.mUsingHeap) {
+            mHeap = other.mHeap;
+            mUsingHeap = true;
+        } else {
+            mFixed = other.mFixed;
+            mUsingHeap = false;
+        }
+    }
+    InlinedVector(InlinedVector &&other) {
+        *this = fl::move(other);
+    }
     InlinedVector(size_t size) : mUsingHeap(false) {
         if (size > INLINED_SIZE) {
             mHeap.resize(size);
@@ -711,6 +741,28 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         } else {
             mFixed.resize(size);
         }
+    }
+
+    InlinedVector& operator=(const InlinedVector &other) {
+        if (this != &other) {
+            assign(other.begin(), other.end());
+        }
+        return *this;
+    }
+
+    InlinedVector& operator=(InlinedVector &&other) {
+        this->clear();
+        if (this != &other) {
+            if (other.mUsingHeap) {
+                mHeap.swap(other.mHeap);
+                mUsingHeap = true;
+            } else {
+                mFixed.swap(other.mFixed);
+                mUsingHeap = false;
+            }
+            other.clear();
+        }
+        return *this;
     }
 
     void reserve(size_t size) {
