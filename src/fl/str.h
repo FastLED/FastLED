@@ -79,7 +79,7 @@ class StringHolder : public fl::Referent {
 };
 
 template <size_t SIZE = 64> class StrN {
-  private:
+  protected:
     size_t mLength = 0;
     char mInlineData[SIZE] = {0};
     StringHolderPtr mHeapData;
@@ -502,6 +502,17 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     const char* data() const {
         return c_str();
+    }
+
+    void swap(Str &other) {
+        if (this != &other) {
+            fl::swap(mLength, other.mLength);
+            char temp[FASTLED_STR_INLINED_SIZE];
+            memcpy(temp, mInlineData, FASTLED_STR_INLINED_SIZE);
+            memcpy(mInlineData, other.mInlineData, FASTLED_STR_INLINED_SIZE);
+            memcpy(other.mInlineData, temp, FASTLED_STR_INLINED_SIZE);
+            fl::swap(mHeapData, other.mHeapData);
+        }
     }
 };
 
