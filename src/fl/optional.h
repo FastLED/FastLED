@@ -74,6 +74,12 @@ template <typename T> class Optional {
         return *ptr() == *other.template ptr<T>();
     }
 
+    void swap(Optional &other) {
+        if (this != &other) {
+            mValue.swap(other.mValue);
+        }
+    }
+
   private:
     variant<T, Empty> mValue;
 };

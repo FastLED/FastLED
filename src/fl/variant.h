@@ -189,9 +189,21 @@ template <typename T, typename U> class Variant {
 
     // -- swap ---------------------------------------------------------------
     void swap(Variant &other) noexcept {
-        Variant temp = *this;
-        *this = other;
-        other = temp;
+        if (this != &other) {
+            if (isT() && other.isT()) {
+                fl::swap(getT(), other.getT());
+            } else if (isU() && other.isU()) {
+                fl::swap(getU(), other.getU());
+            } else if (isT() && other.isU()) {
+                T tmp = getT();
+                getT() = other.getU();
+                other.getU() = tmp;
+            } else if (isU() && other.isT()) {
+                U tmp = getU();
+                getU() = other.getT();
+                other.getT() = tmp;
+            }
+        }
     }
 
   private:
