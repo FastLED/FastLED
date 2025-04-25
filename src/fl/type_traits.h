@@ -83,6 +83,8 @@ enum {
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(__linux__) && defined(__GNUC__)
 #define FASTLED_STR_NEEDS_INT 0
+#elif defined(ESP8266)
+#define FASTLED_STR_NEEDS_INT 0
 #elif kStrIntIsOfBuiltInType
 #define FASTLED_STR_NEEDS_INT 0
 // #elif defined(__IMXRT1062__)
