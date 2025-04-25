@@ -449,29 +449,6 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template<typename T>
     Str& append(const rect_xy<T> &rect) {
-        append(int32_t(rect.mMin.x));
-        append(",");
-        append(int32_t(rect.mMin.y));
-        append(",");
-        append(int32_t(rect.mMax.x));
-        append(",");
-        append(int32_t(rect.mMax.y));
-        return *this;
-    }
-
-
-    Str& append(const rect_xy<float> &rect) {
-        append(rect.mMin.x);
-        append(",");
-        append(rect.mMin.y);
-        append(",");
-        append(rect.mMax.x);
-        append(",");
-        append(rect.mMax.y);
-        return *this;
-    }
-
-    Str& append(const rect_xy<double> &rect) {
         append(rect.mMin.x);
         append(",");
         append(rect.mMin.y);
