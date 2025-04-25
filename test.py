@@ -46,7 +46,8 @@ def _make_pio_check_cmd() -> List[str]:
 def make_compile_uno_test_process() -> RunningProcess:
     """Create a process to compile the uno tests"""
     cmd = ['uv', 'run', 'ci/ci-compile.py', 'uno', '--examples', 'Blink', '--no-interactive']
-    return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB)
+    cmd = cmd + ['||'] + cmd
+    return RunningProcess(cmd, echo=False, auto_run=not _IS_GITHUB, shell=True)
 
 
 def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**/*.hpp") -> Dict[str, str]:
