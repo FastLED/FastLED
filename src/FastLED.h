@@ -881,6 +881,15 @@ using fl::XYMap;
 
 #endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN
 
+namespace fl {
+	template<size_t N>
+	inline void clear(CRGB (&arr)[N]) {
+		for (size_t i = 0; i < N; ++i) {
+			arr[i] = CRGB::Black;
+		}
+	}
+}
+
 // Auto namespace if necessary.
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
 using namespace fl;
