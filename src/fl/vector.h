@@ -70,9 +70,25 @@ template <typename T, size_t N> class FixedVector {
         assign_array(values, N);
     }
 
+    FixedVector(FixedVector &&other) {
+        fl::swap(*this, other);
+        other.clear();
+    }
+
+    FixedVector(const FixedVector &other) : current_size(other.current_size) {
+        assign_array(other.memory(), other.current_size);
+    }
+
     template <size_t M> FixedVector(const T (&values)[M]) : current_size(M) {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
+    }
+
+    FixedVector &operator=(const FixedVector &other) {
+        if (this != &other) {
+            assign_array(other.memory(), other.current_size);
+        }
+        return *this;
     }
 
     // Destructor
@@ -306,6 +322,10 @@ template <typename T> class HeapVector {
     HeapVector(const HeapVector<T> &other) {
         reserve(other.size());
         assign(other.begin(), other.end());
+    }
+    HeapVector(const HeapVector<T>&& other) {
+        fl::swap(other);
+        other.clear();
     }
     HeapVector &operator=(
         const HeapVector<T> &other) { // cppcheck-suppress operatorEqVarError
