@@ -95,7 +95,7 @@ enum {
 #include "platforms/esp/esp_version.h"
 #ifdef CONFIG_IDF_TARGET_ESP32
   // original ESP32 (ESP32-WROOM, ESP32-WROVER, etc.)
-#define FASTLED_STR_NEEDS_INT 0
+#define FASTLED_STR_NEEDS_INT (ESP_IDF_VERSION_4_OR_HIGHER ? 0 : 1)
 #endif
 #elif !kStrIntIsOfBuiltInType
 #define FASTLED_STR_NEEDS_INT 1

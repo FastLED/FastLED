@@ -27,6 +27,8 @@
                                              ESP_IDF_VERSION_MINOR, \
                                              ESP_IDF_VERSION_PATCH)
 
+#define ESP_IDF_VERSION_4_OR_HIGHER \
+    (ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0))
 
 #endif
 #endif
