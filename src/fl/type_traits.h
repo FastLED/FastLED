@@ -58,18 +58,8 @@ template <typename T> struct is_same<T, T> {
     static constexpr bool value = true;
 };
 
-enum {
-    kStrIntIsInt64 = fl::is_same<int, int64_t>::value,
-    kStrIntIsInt32 = fl::is_same<int, int32_t>::value,
-    kStrIntIsInt16 = fl::is_same<int, int16_t>::value,
-    kStrIntIsInt8 = fl::is_same<int, int8_t>::value,
-    kStrIntIsOfBuiltInType =
-        kStrIntIsInt8 | kStrIntIsInt16 | kStrIntIsInt32 | kStrIntIsInt64,
-};
 
-#ifndef FASTLED_STR_INLINED_SIZE
-#define FASTLED_STR_INLINED_SIZE 64
-#endif
+
 
 // Define is_same_v for compatibility with variable templates
 template <typename T, typename U> struct is_same_v_helper {
