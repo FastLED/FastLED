@@ -102,7 +102,7 @@ def fingerprint_code_base(start_directory: Path, glob: str = "**/*.h,**/*.cpp,**
         return result
 
 
-def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
+def calculate_fingerprint(root_dir: Path | None = None) -> Dict[str, str]:
     """
     Calculate the code base fingerprint.
     
@@ -160,7 +160,7 @@ def main() -> None:
             return None
         
 
-        prev_fingerprint: str | None = read_fingerprint()        
+        prev_fingerprint: dict[str, str] | None = read_fingerprint()        
         # Calculate fingerprint
         fingerprint_data = calculate_fingerprint()
         src_code_change: bool
