@@ -194,6 +194,9 @@ public:
     CLEDController& setScreenMap(const fl::XYMap& map) {
         // EngineEvents::onCanvasUiSet(this, map);
         fl::ScreenMap screenmap = map.toScreenMap();
+        if (map.getTotal() <= (64*64)) {
+            screenmap.setDiameter(.2); // Triggers the fancy graphics.
+        }
         fl::EngineEvents::onCanvasUiSet(this, screenmap);
         return *this;
     }

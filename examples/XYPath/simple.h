@@ -32,17 +32,9 @@ using namespace fl;
 #define TIME_ANIMATION 1000 // ms
 
 CRGB leds[NUM_LEDS];
-
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
-// XYPathPtr shape = XYPath::NewRosePath(WIDTH, HEIGHT);
-
-// Speed up writing to the super sampled waveFx by writing
-// to a raster. This will allow duplicate writes to be removed.
-
-
-
 UITitle title("Simple control of an xy path");
-UIDescription description("Use a path on the WaveFx");
+UIDescription description("This is more of a test for new features.");
 UIButton trigger("Trigger");
 
 UISlider pointX("Point X", 0.0f, 0.0f, WIDTH - 1, 1.0f);
@@ -55,12 +47,7 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
 }
-
-//////////////////// LOOP SECTION /////////////////////////////
-
-
 void loop() {
-    // Your code here
     fl::clear(leds);
     int x = pointX.as_int();
     int y = pointY.as_int();
