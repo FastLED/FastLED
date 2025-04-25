@@ -204,8 +204,8 @@ class XYRasterSparse {
     using FastHash = FastHash<Key>;
     using HashMapLarge = fl::HashMap<Key, Value, Hash, EqualTo, FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
-    // Small cache for the last 4 writes.
-    HashMap<point_xy<int>, uint8_t *, FastHash, EqualTo, 4> mCache;
+    // Small cache for the last N writes to help performance.
+    HashMap<point_xy<int>, uint8_t *, FastHash, EqualTo, kMaxCacheSize> mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
