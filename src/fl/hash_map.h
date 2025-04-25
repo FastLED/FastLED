@@ -2,10 +2,11 @@
 
 /*
 HashMap that is optimized for embedded devices. The hashmap
-will store upto 8 elements inline, and will spill over to a heap.
-For multiple inserts and deletions, the hashmap will rehash inline
-without having to resize the hashmap. This is useful for embedded devices
-where memory is limited and we want to avoid heap allocations.
+will store upto N elements inline, and will spill over to a heap.
+This hashmap will try not to grow by detecting during rehash that
+the number of tombstones is greater than the number of elements.
+This will keep the memory from growing during multiple inserts
+and removals.
 */
 
 #include "fl/assert.h"
@@ -152,8 +153,9 @@ class HashMap {
     void insert(const Key &key, const T &value) {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
-            // if half the buckets are tombstones, rehash inline
-            if (_tombstones > _size / 2) {
+            // if half the buckets are tombstones, rehash inline to prevent
+            // memory spill over into the heap.
+            if (_tombstones > _size) {
                 rehash_inline_no_resize();
             } else {
                 rehash(_buckets.size() * 2);

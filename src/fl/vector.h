@@ -880,10 +880,8 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     }
 
     void swap(InlinedVector &other) {
-        // TODO: optimize.
-        InlinedVector temp = *this;
-        *this = other;
-        other = temp;
+        InlinedVector temp = fl::move(*this);
+        other = fl::move(temp);
     }
 
   private:
