@@ -284,8 +284,32 @@ template <> struct is_integral<unsigned long long> {
 template <typename Base, typename Derived>
 using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 
-// primary template: dispatch on is_pod<T>::value
-template <typename T, bool = is_pod<T>::value> struct swap_impl;
+//-----------------------------------------------------------------------------
+// detect whether T has a member void swap(T&)
+//-----------------------------------------------------------------------------
+template<typename T>
+struct has_member_swap {
+private:
+    // must be 1 byte vs. >1 byte for sizeof test
+    typedef uint8_t  yes;
+    typedef uint16_t no;
+
+    // helper<U, &U::swap> is only well-formed if U::swap(T&) exists with that signature
+    template<typename U, void (U::*M)(U&)> struct helper {};
+
+    // picks this overload if helper<U, &U::swap> is valid
+    template<typename U> static yes test(helper<U, &U::swap>*);
+
+    // fallback otherwise
+    template<typename> static no  test(...);
+
+public:
+    static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(yes);
+};
+
+
+// primary template: dispatch on has_member_swap<T>::value
+template <typename T, bool = has_member_swap<T>::value> struct swap_impl;
 
 // POD case
 template <typename T> struct swap_impl<T, true> {
