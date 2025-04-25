@@ -63,8 +63,8 @@ enum {
     kStrIntIsInt32 = fl::is_same<int, int32_t>::value,
     kStrIntIsInt16 = fl::is_same<int, int16_t>::value,
     kStrIntIsInt8 = fl::is_same<int, int8_t>::value,
-    kStrIntDefineNeeded =
-        !kStrIntIsInt64 && !kStrIntIsInt32 && !kStrIntIsInt16 && !kStrIntIsInt8,
+    kStrIntIsOfBuiltInType =
+        kStrIntIsInt8 || kStrIntIsInt16 || kStrIntIsInt32 || kStrIntIsInt64,
 };
 
 #ifndef FASTLED_STR_INLINED_SIZE
@@ -80,6 +80,8 @@ enum {
 // We're on Windows.
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(__APPLE__) && defined(__MACH__) && defined(__GNUC__)
+#define FASTLED_STR_NEEDS_INT 0
+#elif kStrIntIsOfBuiltInType
 #define FASTLED_STR_NEEDS_INT 0
 // #elif defined(__IMXRT1062__)
 // #define FASTLED_STR_NEEDS_INT 1
