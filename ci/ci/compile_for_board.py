@@ -51,6 +51,9 @@ def compile_for_board_and_example(
     # Copy all files from the example directory to the "src" directory
     for src_file in example.rglob("*"):
         if src_file.is_file():
+            if src_file.parent.name == "fastled_js":
+                # Skip the fastled_js folder, it's not needed for the build.
+                continue
             src_dir = src_file.parent
             path = src_dir.relative_to(example)
             dst_dir = srcdir / path
