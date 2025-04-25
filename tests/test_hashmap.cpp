@@ -119,17 +119,8 @@ TEST_CASE("Stress collisions & rehash with small initial capacity") {
     const int N = 100;
     for (int i = 0; i < N; ++i) {
         m.insert(i, i * 3);
-
-        // Now print all the elements in the map
-        for (auto it = m.begin(); it != m.end(); ++it) {
-            auto kv = *it;
-            // printf("Key: %d, Value: %d\n", kv.first, kv.second);
-            FASTLED_WARN("Key: " << kv.first << ", Value: " << kv.second);
-        }
-
         // test that size is increasing
-        REQUIRE_EQ(m.size(), static_cast<std::size_t>(i+1));
-
+        REQUIRE_EQ(m.size(), static_cast<std::size_t>(i + 1));
     }
     REQUIRE_EQ(m.size(), static_cast<std::size_t>(N));
     for (int i = 0; i < N; ++i) {
@@ -170,4 +161,36 @@ TEST_CASE("Remove non-existent returns false, find on const map") {
 
     const HashMap<int, int> cm;
     REQUIRE(!cm.find(0));
+}
+
+TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
+          "rehash") {
+    const static int MAX_CAPACITY = 2;
+    HashMap<int, int> m(8 /*capacity*/);
+    REQUIRE_EQ(8, m.capacity());
+    for (int i = 0; i < 8; ++i) {
+        m.insert(i, i);
+        if (m.size() > MAX_CAPACITY) {
+            m.remove(i);
+        }
+    }
+    size_t new_capacity = m.capacity();
+    // should still be 8
+    REQUIRE_EQ(new_capacity, 8u);
+    std::set<int> found_values;
+
+    for (auto it = m.begin(); it != m.end(); ++it) {
+        auto kv = *it;
+        auto key = kv.first;
+        auto value = kv.second;
+        REQUIRE_EQ(key, value);
+        found_values.insert(kv.second);
+    }
+
+    std::vector<int> found_values_vec(found_values.begin(), found_values.end());
+    REQUIRE_EQ(MAX_CAPACITY, found_values_vec.size());
+    for (int i = 0; i < MAX_CAPACITY; ++i) {
+        auto value = found_values_vec[i];
+        REQUIRE_EQ(value, i);
+    }
 }

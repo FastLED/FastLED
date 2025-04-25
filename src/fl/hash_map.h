@@ -214,6 +214,7 @@ class HashMap {
 
     size_t size() const { return _size; }
     bool empty() const { return _size == 0; }
+    size_t capacity() const { return _buckets.size(); }
 
   private:
     static constexpr size_t npos = size_t(-1);
@@ -345,7 +346,7 @@ class HashMap {
             for (size_t i = 0; i < cap; ++i) {
                 const size_t idx = (h + i) & mask;
                 bool occupied = occupied_set.test(idx);
-                if (!occupied) {
+                if (occupied) {
                     continue;
                 }
                 return idx;
@@ -356,7 +357,7 @@ class HashMap {
             for (; i < kQuadraticProbingTries; ++i) {
                 const size_t idx = (h + i + i * i) & mask;
                 bool occupied = occupied_set.test(idx);
-                if (!occupied) {
+                if (occupied) {
                     continue;
                 }
                 return idx;
@@ -365,7 +366,7 @@ class HashMap {
             for (; i < cap; ++i) {
                 const size_t idx = (h + i) & mask;
                 bool occupied = occupied_set.test(idx);
-                if (!occupied) {
+                if (occupied) {
                     continue;
                 }
                 return idx;
@@ -393,18 +394,8 @@ class HashMap {
     void rehash_inline_no_resize() {
         // filter out tompstones and compact
         size_t cap = _buckets.size();
-        // compact
         size_t pos = 0;
-        // for (size_t i = 0; i < cap; ++i) {
-        //     auto &e = _buckets[i];
-        //     if (e.state == EntryState::Occupied) {
-        //         if (pos != i) {
-        //             _buckets[pos] = e;
-        //             e.state = EntryState::Empty;
-        //         }
-        //         ++pos;
-        //     }
-        // }
+        // compact live elements to the left.
         for (size_t i = 0; i < cap; ++i) {
             auto &e = _buckets[i];
             switch (e.state) {
@@ -424,7 +415,7 @@ class HashMap {
             }
         }
 
-        fl::bitset<1024> occupied;
+        fl::bitset<1024> occupied;  // Preallocate a bitset of size 1024
         // swap the components, this will happen at most N times,
         // use the occupied bitset to track which entries are occupied
         // in the array rather than just copied in.
@@ -449,9 +440,12 @@ class HashMap {
             // if idx < pos then we are moving the entry to a new location
             FASTLED_ASSERT(!tmp,
                            "HashMap::rehash_inline_no_resize: invalid tmp");
-            if (idx < _size) {
-                tmp = e;
+            if (idx >= _size) {
+                // directly copy it now
+                _buckets[idx] = e;
+                continue;
             }
+            tmp = e;
             occupied.set(idx);
             _buckets[idx] = *tmp.ptr();
             while (!tmp.empty()) {
@@ -480,6 +474,12 @@ class HashMap {
                     tmp.reset();
                 }
             }
+            FASTLED_ASSERT(
+                occupied.test(i),
+                "HashMap::rehash_inline_no_resize: invalid occupied at " << i);
+            FASTLED_ASSERT(
+                !tmp,
+                "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
         }
     }
 
