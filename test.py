@@ -127,6 +127,15 @@ def calculate_fingerprint(root_dir: Path = None) -> Dict[str, str]:
 
 def main() -> None:
     try:
+        # Start a watchdog timer to kill the process if it takes too long (10 minutes)
+        def watchdog_timer():
+            time.sleep(600)  # 10 minutes
+            print("Watchdog timer expired after 10 minutes - forcing exit")
+            os._exit(2)  # Exit with error code 2 to indicate timeout
+        
+        watchdog = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")
+        watchdog.start()
+        
         args = parse_args()
         
         # Change to script directory
@@ -255,7 +264,7 @@ def main() -> None:
 
         print("All tests passed")
 
-        # launch a force exit daemon thread that waits for 1 second until invoking os._exit(0)
+        # Launch a force exit daemon thread that waits for 1 second until invoking os._exit(0)
         def force_exit():
             time.sleep(1)
             print("Force exit daemon thread invoked")
