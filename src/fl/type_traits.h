@@ -84,6 +84,8 @@ enum {
 #define FASTLED_STR_NEEDS_INT 1
 #elif defined(__MK20DX128__)
 #define FASTLED_STR_NEEDS_INT 1
+#elif defined(__MKL26Z64__)
+#define FASTLED_STR_NEEDS_INT 1
 
 #elif defined(ESP32)
 // #include "platforms/esp/esp_version.h"
