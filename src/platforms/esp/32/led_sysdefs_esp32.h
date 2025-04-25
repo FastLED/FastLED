@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 #include "sdkconfig.h"
 #ifndef ESP32
 #define ESP32
