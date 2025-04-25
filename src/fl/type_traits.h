@@ -312,7 +312,7 @@ public:
 template <typename T, bool = has_member_swap<T>::value> struct swap_impl;
 
 // POD case
-template <typename T> struct swap_impl<T, true> {
+template <typename T> struct swap_impl<T, false> {
     static void apply(T &a, T &b) {
         T tmp = a;
         a = b;
@@ -321,7 +321,7 @@ template <typename T> struct swap_impl<T, true> {
 };
 
 // non‑POD case (requires T implements swap)
-template <typename T> struct swap_impl<T, false> {
+template <typename T> struct swap_impl<T, true> {
     static void apply(T &a, T &b) { a.swap(b); }
 };
 

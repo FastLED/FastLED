@@ -5,14 +5,13 @@
 #include <string.h>
 
 #include "fl/insert_result.h"
-#include "fl/namespace.h"
 #include "fl/math_macros.h"
+#include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
 #include "inplacenew.h"
 
 namespace fl {
-
 
 // Aligned memory block for inlined data structures.
 template <typename T, size_t N> struct InlinedMemoryBlock {
@@ -729,7 +728,8 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
     InlinedVector(InlinedVector &&other) {
-        *this = fl::move(other);
+        swap(*this, other);
+        other.clear();
     }
     InlinedVector(size_t size) : mUsingHeap(false) {
         if (size > INLINED_SIZE) {
@@ -740,14 +740,14 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
 
-    InlinedVector& operator=(const InlinedVector &other) {
+    InlinedVector &operator=(const InlinedVector &other) {
         if (this != &other) {
             assign(other.begin(), other.end());
         }
         return *this;
     }
 
-    InlinedVector& operator=(InlinedVector &&other) {
+    InlinedVector &operator=(InlinedVector &&other) {
         this->clear();
         if (this != &other) {
             if (other.mUsingHeap) {
@@ -928,9 +928,15 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         return mUsingHeap ? mHeap.end() : mFixed.end();
     }
 
+
+
+
     void swap(InlinedVector &other) {
-        InlinedVector temp = fl::move(*this);
-        other = fl::move(temp);
+        if (this != &other) {
+            fl::swap(mUsingHeap, other.mUsingHeap);
+            fl::swap(mFixed, other.mFixed);
+            fl::swap(mHeap, other.mHeap);
+        }
     }
 
   private:

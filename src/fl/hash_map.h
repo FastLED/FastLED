@@ -14,11 +14,11 @@ and removals.
 #include "fl/clamp.h"
 #include "fl/hash.h"
 #include "fl/map_range.h"
+#include "fl/optional.h"
 #include "fl/pair.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/optional.h"
 
 namespace fl {
 
@@ -41,10 +41,12 @@ template <typename T> struct EqualTo {
 #endif
 
 template <typename Key, typename T, typename Hash = Hash<Key>,
-          typename KeyEqual = EqualTo<Key>, int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
+          typename KeyEqual = EqualTo<Key>,
+          int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
 class HashMap {
   public:
-    HashMap(size_t initial_capacity = FASTLED_HASHMAP_INLINED_COUNT, float max_load = 0.7f)
+    HashMap(size_t initial_capacity = FASTLED_HASHMAP_INLINED_COUNT,
+            float max_load = 0.7f)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0) {
         for (auto &e : _buckets)
@@ -133,8 +135,7 @@ class HashMap {
     const_iterator begin() const { return const_iterator(this, 0); }
     const_iterator end() const { return const_iterator(this, _buckets.size()); }
 
-    static bool NeedsRehash(size_t size, size_t bucket_size,
-                            size_t tombstones,
+    static bool NeedsRehash(size_t size, size_t bucket_size, size_t tombstones,
                             uint8_t load_factor) {
         // (size + tombstones) << 8   : multiply numerator by 256
         // capacity * max_load : denominator * threshold
@@ -145,8 +146,7 @@ class HashMap {
 
     // returns true if (size + tombs)/capacity > _max_load/256
     bool needs_rehash() const {
-        return NeedsRehash(
-            _size, _buckets.size(), _tombstones, mLoadFactor);
+        return NeedsRehash(_size, _buckets.size(), _tombstones, mLoadFactor);
     }
 
     // insert or overwrite
@@ -159,7 +159,7 @@ class HashMap {
                 rehash_inline_no_resize();
             } else {
                 rehash(_buckets.size() * 2);
-            }   
+            }
         }
         size_t idx;
         bool is_new;
@@ -240,17 +240,9 @@ class HashMap {
         T value;
         EntryState state;
         void swap(Entry &other) {
-            Key tkey = key;
-            T tvalue = value;
-            EntryState tstate = state;
-
-            key = other.key;
-            value = other.value;
-            state = other.state;
-
-            other.key = tkey;
-            other.value = tvalue;
-            other.state = tstate;
+            fl::swap(key, other.key);
+            fl::swap(value, other.value);
+            fl::swap(state, other.state);
         }
     };
 
@@ -442,7 +434,7 @@ class HashMap {
             }
         }
 
-        fl::bitset<1024> occupied;  // Preallocate a bitset of size 1024
+        fl::bitset<1024> occupied; // Preallocate a bitset of size 1024
         // swap the components, this will happen at most N times,
         // use the occupied bitset to track which entries are occupied
         // in the array rather than just copied in.
@@ -479,8 +471,8 @@ class HashMap {
                 // we have to find a place for temp.
                 // find new position for tmp.
                 auto key = tmp.ptr()->key;
-                size_t new_idx = find_unoccupied_index_using_bitset(
-                    key, occupied);
+                size_t new_idx =
+                    find_unoccupied_index_using_bitset(key, occupied);
                 if (new_idx == npos) {
                     // no more space
                     FASTLED_ASSERT(
@@ -505,8 +497,7 @@ class HashMap {
                 occupied.test(i),
                 "HashMap::rehash_inline_no_resize: invalid occupied at " << i);
             FASTLED_ASSERT(
-                !tmp,
-                "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
+                !tmp, "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
         }
     }
 
