@@ -164,7 +164,6 @@ class UIButton : public UIButtonImpl {
 
   private:
     FunctionList<UIButton &> mCallbacks;
-    bool mLastFrameClicked = false;
     Listener mListener;
 };
 
