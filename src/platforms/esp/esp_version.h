@@ -4,9 +4,9 @@
 // Older esp toolchains don't have this header, so we define it here.
 
 // TODO - test if this breaks anything.
-// #if __has_include("sdkconfig.h")
-// #include "sdkconfig.h"
-// #endif
+#if __has_include("sdkconfig.h")
+#include "sdkconfig.h"
+#endif
 
 #ifndef ESP_IDF_VERSION_MAJOR
 #define ESP_IDF_VERSION_MAJOR 3

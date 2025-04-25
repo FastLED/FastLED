@@ -71,6 +71,12 @@ enum {
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+// #if kStrIntIsOfBuiltInType
+// #error "is of built in type"
+// #else
+// #error "is not of built in type"
+// #endif
+
 #ifndef FASTLED_STR_NEEDS_INT
 
 
@@ -85,8 +91,15 @@ enum {
 #define FASTLED_STR_NEEDS_INT 0
 #elif defined(ESP8266)
 #define FASTLED_STR_NEEDS_INT 0
-#elif kStrIntIsOfBuiltInType
-#define FASTLED_STR_NEEDS_INT 0
+#elif !kStrIntIsOfBuiltInType
+#define FASTLED_STR_NEEDS_INT 1
+#elif defined(ESP32)
+#include "platforms/esp/esp_version.h"
+#ifdef CONFIG_IDF_TARGET_ESP32
+  // original ESP32 (ESP32-WROOM, ESP32-WROVER, etc.)
+#define FASTLED_STR_NEEDS_INT 1
+#endif
+
 // #elif defined(__IMXRT1062__)
 // #define FASTLED_STR_NEEDS_INT 1
 // #elif defined(__MK20DX128__)
