@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 import warnings
-from os import stat
 from pathlib import Path
 
 from ci.boards import Board  # type: ignore
@@ -77,7 +76,11 @@ def remove_readonly(func, path, _):
     if os.name == "nt":
         os.system(f"attrib -r {path}")
     else:
-        os.chmod(path, stat.S_IWRITE)
+        try:
+            os.chmod(path, 0o777)
+        except Exception:
+            print(f"Error removing readonly attribute from {path}")
+
     func(path)
 
 
