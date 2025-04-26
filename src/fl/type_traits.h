@@ -238,6 +238,18 @@ template <> struct is_integral<unsigned long long> {
     static constexpr bool value = true;
 };
 
+template <typename T> struct is_integral<const T> {
+    static constexpr bool value = is_integral<T>::value;
+};
+
+template <typename T> struct is_integral<volatile T> {
+    static constexpr bool value = is_integral<T>::value;
+};
+
+template <typename T> struct is_integral<T&> {
+    static constexpr bool value = is_integral<T>::value;
+};
+
 // This uses template magic to maybe generate a type for the given condition. If
 // that type doesn't exist then a type will fail to be generated, and the
 // compiler will skip the consideration of a target function. This is useful for

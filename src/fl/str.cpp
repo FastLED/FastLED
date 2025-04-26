@@ -1,8 +1,7 @@
 #include <stdlib.h>
 
-#include "fl/str.h"
 #include "fl/namespace.h"
-
+#include "fl/str.h"
 
 namespace fl {
 
@@ -43,11 +42,11 @@ static int itoa(int value, char *sp, int radix) {
 }
 
 static float atoff(const char *str, size_t len) {
-    float result = 0.0f;    // The resulting number
-    float sign = 1.0f;      // Positive or negative
-    float fraction = 0.0f;  // Fractional part
-    float divisor = 1.0f;   // Divisor for the fractional part
-    int isFractional = 0;   // Whether the current part is fractional
+    float result = 0.0f;   // The resulting number
+    float sign = 1.0f;     // Positive or negative
+    float fraction = 0.0f; // Fractional part
+    float divisor = 1.0f;  // Divisor for the fractional part
+    int isFractional = 0;  // Whether the current part is fractional
 
     size_t pos = 0; // Current position in the string
 
@@ -57,7 +56,9 @@ static float atoff(const char *str, size_t len) {
     }
 
     // Skip leading whitespace (manual check instead of isspace)
-    while (pos < len && (str[pos] == ' ' || str[pos] == '\t' || str[pos] == '\n' || str[pos] == '\r' || str[pos] == '\f' || str[pos] == '\v')) {
+    while (pos < len &&
+           (str[pos] == ' ' || str[pos] == '\t' || str[pos] == '\n' ||
+            str[pos] == '\r' || str[pos] == '\f' || str[pos] == '\v')) {
         pos++;
     }
 
@@ -102,8 +103,8 @@ void StringFormatter::append(int32_t val, StrN<64> *dst) {
     dst->write(buf, strlen(buf));
 }
 StringHolder::StringHolder(const char *str) {
-    mLength = strlen(str);  // Don't include null terminator in length
-    mCapacity = mLength + 1;  // Capacity includes null terminator
+    mLength = strlen(str);   // Don't include null terminator in length
+    mCapacity = mLength + 1; // Capacity includes null terminator
     mData = new char[mCapacity];
     memcpy(mData, str, mLength);
     mData[mLength] = '\0';
@@ -118,7 +119,6 @@ StringHolder::StringHolder(size_t length) {
     }
     mCapacity = mLength;
 }
-
 
 StringHolder::StringHolder(const char *str, size_t length) {
     mData = (char *)malloc(length + 1);
@@ -167,5 +167,58 @@ float StringFormatter::parseFloat(const char *str, size_t len) {
     return string_functions::atoff(str, len);
 }
 
+// typetrait test
+namespace {
+void __compile_test() {
+    static_assert(fl::is_integral<int>::value, "int should be integral");
+    static_assert(fl::is_integral<float>::value == false, "float should not be integral");
+    static_assert(fl::is_integral<bool>::value, "bool should be integral");
+    static_assert(fl::is_integral<char>::value, "char should be integral");
+    static_assert(fl::is_integral<unsigned char>::value, "unsigned char should be integral");
+    static_assert(fl::is_integral<signed char>::value, "signed char should be integral");
+    static_assert(fl::is_integral<short>::value, "short should be integral");
+    static_assert(fl::is_integral<unsigned short>::value, "unsigned short should be integral");
+    static_assert(fl::is_integral<long>::value, "long should be integral");
+    static_assert(fl::is_integral<unsigned long>::value, "unsigned long should be integral");
+    static_assert(fl::is_integral<long long>::value, "long long should be integral");
+    static_assert(fl::is_integral<unsigned long long>::value, "unsigned long long should be integral");
+    static_assert(fl::is_integral<int *>::value == false, "int* should not be integral");
+    static_assert(fl::is_integral<float *>::value == false, "float* should not be integral");
+    static_assert(fl::is_integral<void>::value == false, "void should not be integral");
+    static_assert(fl::is_integral<void *>::value == false, "void* should not be integral");
+    static_assert(fl::is_integral<const int>::value, "const int should be integral");
+    static_assert(fl::is_integral<const float>::value == false, "const float should not be integral");
+    static_assert(fl::is_integral<const char>::value, "const char should be integral");
+    static_assert(fl::is_integral<const unsigned char>::value, "const unsigned char should be integral");
+    static_assert(fl::is_integral<const signed char>::value, "const signed char should be integral");
+    static_assert(fl::is_integral<const short>::value, "const short should be integral");
+    static_assert(fl::is_integral<const unsigned short>::value, "const unsigned short should be integral");
+    static_assert(fl::is_integral<const long>::value, "const long should be integral");
+    static_assert(fl::is_integral<const unsigned long>::value, "const unsigned long should be integral");
+    static_assert(fl::is_integral<const long long>::value, "const long long should be integral");
+    static_assert(fl::is_integral<const unsigned long long>::value, "const unsigned long long should be integral");
+    
+    static_assert(fl::is_integral<volatile int>::value, "volatile int should be integral");
+    static_assert(fl::is_integral<volatile float>::value == false, "volatile float should not be integral");
+    static_assert(fl::is_integral<volatile char>::value, "volatile char should be integral");
 
+
+    // ref
+    static_assert(fl::is_integral<unsigned char&>::value, "unsigned char& should be integral");
+    static_assert(fl::is_integral<const unsigned char&>::value, "const unsigned char& should be integral");
+
+    // width int types
+    static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
+    static_assert(fl::is_integral<uint8_t>::value, "uint8_t should be integral");
+    static_assert(fl::is_integral<int16_t>::value, "int16_t should be integral");
+    static_assert(fl::is_integral<uint16_t>::value, "uint16_t should be integral");
+    static_assert(fl::is_integral<int32_t>::value, "int32_t should be integral");
+    static_assert(fl::is_integral<uint32_t>::value, "uint32_t should be integral");
+    static_assert(fl::is_integral<int64_t>::value, "int64_t should be integral");
+    static_assert(fl::is_integral<uint64_t>::value, "uint64_t should be integral");
+    static_assert(fl::is_integral<int8_t *>::value == false, "int8_t* should not be integral");
+    static_assert(fl::is_integral<uint8_t *>::value == false, "uint8_t* should not be integral");
 }
+} // namespace
+
+} // namespace fl
