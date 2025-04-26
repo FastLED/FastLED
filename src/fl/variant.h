@@ -3,10 +3,8 @@
 #include "fl/inplacenew.h"
 #include "fl/template_magic.h"
 
-#ifdef FASTLED_SUPPORTS_STD_MOVE
-#include <utility>
-#include <type_traits>
-#endif 
+#define FASTLED_SUPPORTS_STD_MOVE
+
 
 namespace fl {
 
@@ -53,16 +51,16 @@ template <typename T, typename U> class Variant {
 
 #ifdef FASTLED_SUPPORTS_STD_MOVE
 
-    Variant(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(std::move(t)); }
-    Variant(U &&u) : _tag(Tag::IsU) { new (&_storage.u) U(std::move(u)); }
+    Variant(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(fl::move(t)); }
+    Variant(U &&u) : _tag(Tag::IsU) { new (&_storage.u) U(fl::move(u)); }
     Variant(Variant &&other) noexcept : _tag(Tag::Empty) {
         switch (other._tag) {
         case Tag::IsT:
-            new (&_storage.t) T(std::move(other._storage.t));
+            new (&_storage.t) T(fl::move(other._storage.t));
             _tag = Tag::IsT;
             break;
         case Tag::IsU:
-            new (&_storage.u) U(std::move(other._storage.u));
+            new (&_storage.u) U(fl::move(other._storage.u));
             _tag = Tag::IsU;
             break;
         case Tag::Empty:
@@ -76,11 +74,11 @@ template <typename T, typename U> class Variant {
             reset();
             switch (other._tag) {
             case Tag::IsT:
-                new (&_storage.t) T(std::move(other._storage.t));
+                new (&_storage.t) T(fl::move(other._storage.t));
                 _tag = Tag::IsT;
                 break;
             case Tag::IsU:
-                new (&_storage.u) U(std::move(other._storage.u));
+                new (&_storage.u) U(fl::move(other._storage.u));
                 _tag = Tag::IsU;
                 break;
             case Tag::Empty:
@@ -95,14 +93,14 @@ template <typename T, typename U> class Variant {
     /// Emplace a T in place.
     template <typename... Args> void emplaceT(Args &&...args) {
         reset();
-        new (&_storage.t) T(std::forward<Args>(args)...);
+        new (&_storage.t) T(fl::forward<Args>(args)...);
         _tag = Tag::IsT;
     }
 
     /// Emplace a U in place.
     template <typename... Args> void emplaceU(Args &&...args) {
         reset();
-        new (&_storage.u) U(std::forward<Args>(args)...);
+        new (&_storage.u) U(fl::forward<Args>(args)...);
         _tag = Tag::IsU;
     }
 

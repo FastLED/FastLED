@@ -66,6 +66,7 @@ public:
 
     function(function&& o) noexcept {
         callable_.swap(o.callable_);
+        o.callable_.reset();
     }
 
     function& operator=(const function& o) {
