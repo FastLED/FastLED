@@ -15,6 +15,7 @@
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
+#include "fl/pair.h"
 
 namespace fl {
 
@@ -80,6 +81,11 @@ class XYPath : public Referent {
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
 
+    // Future work: we don't actually want just the point, but also
+    // it's intensity at that value. Otherwise a seperate class has to
+    // made to also control the intensity and that sucks.
+    using xy_brightness = fl::pair<point_xy_float, uint8_t>;
+
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
@@ -89,6 +95,10 @@ class XYPath : public Referent {
     Str name() const;
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx);
+    xy_brightness at_brightness(float alpha) {
+        point_xy_float p = at(alpha);
+        return xy_brightness(p, 0xff);  // Full brightness for now.
+    }
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
     // which is convenient for drawing since each float pixel can be truncated
