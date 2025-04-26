@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "fl/namespace.h"
-#include "fl/point.h"
+#include "fl/geometry.h"
 #include "fl/slice.h"
 #include "fl/xymap.h"
 

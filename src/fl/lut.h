@@ -10,7 +10,7 @@ LUT - Look up table implementation for various types.
 #include "fl/allocator.h"
 
 #include "fl/namespace.h"
-#include "fl/point.h"
+#include "fl/geometry.h"
 
 namespace fl {
 

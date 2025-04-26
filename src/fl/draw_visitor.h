@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "fl/point.h"
+#include "fl/geometry.h"
 #include "fl/namespace.h"
 #include "fl/xymap.h"
 #include "crgb.h"

@@ -8,7 +8,7 @@
 #include "fl/vector.h"
 #include "fl/namespace.h"
 #include "fl/math_macros.h"
-#include "fl/point.h"
+#include "fl/geometry.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64

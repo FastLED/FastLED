@@ -1,7 +1,7 @@
 // g++ --std=c++11 test.cpp
 
 #include "test.h"
-#include "fl/point.h"
+#include "fl/geometry.h"
 
 using namespace fl;
 
