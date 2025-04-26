@@ -171,20 +171,20 @@ template <typename T> struct pair_xy : public point_xy<T> {
 };
 
 template <typename T> struct line_xy {
-    point_xy<T> mStart;
-    point_xy<T> mEnd;
+    point_xy<T> start;
+    point_xy<T> end;
 
     line_xy() = default;
     line_xy(const point_xy<T> &start, const point_xy<T> &end)
-        : mStart(start), mEnd(end) {}
+        : start(start), end(end) {}
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
-        : mStart(start_x, start_y), mEnd(end_x, end_y) {}
+        : start(start_x, start_y), end(end_x, end_y) {}
 
-    bool empty() const { return (mStart == mEnd); }
+    bool empty() const { return (start == end); }
 
     float distance_to(const point_xy<T> &p, point_xy<T>* out_projected = nullptr) const {
-        return distance_to_line_with_point(p, mStart, mEnd, out_projected);
+        return distance_to_line_with_point(p, start, end, out_projected);
     }
 
   private:
