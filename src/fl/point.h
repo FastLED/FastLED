@@ -175,31 +175,39 @@ template <typename T> struct line_xy {
     point_xy<T> mEnd;
 
     line_xy() = default;
-    line_xy(const point_xy<T> &start, const point_xy<T> &end) : mStart(start), mEnd(end) {}
+    line_xy(const point_xy<T> &start, const point_xy<T> &end)
+        : mStart(start), mEnd(end) {}
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
         : mStart(start_x, start_y), mEnd(end_x, end_y) {}
 
     bool empty() const { return (mStart == mEnd); }
 
-    float distance_to(const point_xy<T> &p) const {
-        return distance_to_line(p, mStart, mEnd);
+    float distance_to(const point_xy<T> &p, point_xy<T>* out_projected = nullptr) const {
+        return distance_to_line_with_point(p, mStart, mEnd, out_projected);
     }
 
   private:
-    // Computes the closest distance from `p` to the line through `a` and `b`.
-    static float distance_to_line(point_xy<T> p, point_xy<T> a, point_xy<T> b) {
-        // make a gcc warning go away -Werror=float-equal
 
+    // Computes the closest distance from `p` to the line through `a` and `b`,
+    // and writes the projected point.
+    static float distance_to_line_with_point(point_xy<T> p, point_xy<T> a,
+                                             point_xy<T> b,
+                                             point_xy<T> *out_projected) {
+        point_xy<T> maybe;
+        point_xy<T> &out_proj = out_projected ? *out_projected : maybe;
         float dx = b.x - a.x;
         float dy = b.y - a.y;
         float len_sq = dx * dx + dy * dy;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
         const bool is_zero = (len_sq == 0.0f);
 #pragma GCC diagnostic pop
+
         if (is_zero) {
             // a == b, the segment is a point
+            out_proj = a;
             dx = p.x - a.x;
             dy = p.y - a.y;
             return sqrt(dx * dx + dy * dy);
@@ -215,11 +223,11 @@ template <typename T> struct line_xy {
             t = 1.0f;
 
         // Find the closest point
-        float closest_x = a.x + t * dx;
-        float closest_y = a.y + t * dy;
+        out_proj.x = a.x + t * dx;
+        out_proj.y = a.y + t * dy;
 
-        dx = p.x - closest_x;
-        dy = p.y - closest_y;
+        dx = p.x - out_proj.x;
+        dy = p.y - out_proj.y;
         return sqrt(dx * dx + dy * dy);
     }
 };
