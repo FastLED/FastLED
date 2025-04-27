@@ -6,6 +6,7 @@ template<typename Key, typename Value>
 struct Pair {
     Key first = Key();
     Value second = Value();
+    Pair() = default;
     Pair(const Key& k, const Value& v) : first(k), second(v) {}
 };
 

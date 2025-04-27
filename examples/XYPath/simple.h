@@ -49,9 +49,9 @@ int y = 0;
 bool triggered = false;
 
 int jobs[] = {
-    fl::bind(pointX, x),
-    fl::bind(pointY, y),
-    fl::bind(button, triggered),
+    fl::bind(pointX, &x),
+    fl::bind(pointY, &y),
+    fl::bind(button, &triggered),
 };
 
 

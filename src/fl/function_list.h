@@ -1,6 +1,7 @@
 #pragma once
 #include "fl/function.h"
 #include "fl/vector.h"
+#include "fl/pair.h"
 
 namespace fl {
 
@@ -8,18 +9,26 @@ namespace fl {
 template<typename FunctionType>
 class FunctionListBase {
 protected:
-    fl::vector<FunctionType> mFunctions;
+    fl::vector<pair<int, FunctionType>> mFunctions;
+    int mCounter = 0;
 
 public:
     FunctionListBase() = default;
     ~FunctionListBase() = default;
 
-    void add(FunctionType function) {
-        mFunctions.push_back(function);
+    int add(FunctionType function) {
+        int id = mCounter++;
+        pair <int, FunctionType> entry(id, function);
+        mFunctions.push_back(entry);
+        return id;
     }
 
-    void remove(FunctionType function) {
-        mFunctions.erase(function);
+    void remove(int id) {
+        for (int i = mFunctions.size() - 1; i >= 0; --i) {
+            if (mFunctions[i].first == id) {
+                mFunctions.erase(mFunctions.begin() + i);
+            }
+        }
     }
 
     void clear() {
@@ -32,8 +41,8 @@ template<typename... Args>
 class FunctionList : public FunctionListBase<function<void(Args...)>> {
     public:
     void invoke(Args... args) {
-        for (const auto &function : this->mFunctions) {
-            // function(std::forward<Args>(args)...);
+        for (const auto &pair : this->mFunctions) {
+            auto& function = pair.second;
             function(args...);
         }
     }
@@ -44,7 +53,8 @@ template<>
 class FunctionList<void> : public FunctionListBase<function<void()>> {
     public:
     void invoke() {
-        for (const auto &function : this->mFunctions) {
+        for (const auto &pair : this->mFunctions) {
+            auto& function = pair.second;
             function();
         }
     }

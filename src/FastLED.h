@@ -871,7 +871,7 @@ FASTLED_NAMESPACE_END
 #include "fl/function.h"
 
 // Binds ui elements to variables and other conveniences.
-// fl::bind(&variable, &ui_element)
+// fl::bind(ui_element, &variable)
 #include "fl/bind.h"
 
 // Clears the led data and other objects.

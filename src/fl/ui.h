@@ -122,18 +122,24 @@ class UIButton : public UIButtonImpl {
 
     void click() { Super::click(); }
 
-    void onChanged(function<void()> callback) {
+    int onChanged(function<void()> callback) {
         function<void(UIButton &)> wrapped_cb = [callback](UIButton &button) {
             FASTLED_UNUSED(button);
             callback();
         };
-        mCallbacks.add(wrapped_cb);
+        int id = mCallbacks.add(wrapped_cb);
         mListener.addToEngineEventsOnce();
+        return id;
     }
 
-    void onChangedEx(function<void(UIButton &)> callback) {
-        mCallbacks.add(callback);
+    int onChangedEx(function<void(UIButton &)> callback) {
+        int id = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
+        return id;
+    }
+
+    void removeCallback(int id) {
+        mCallbacks.remove(id);
     }
     void clearCallbacks() { mCallbacks.clear(); }
 
