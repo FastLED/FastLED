@@ -18,7 +18,9 @@
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/ptr.h"
-#include "active_strip_data.h"
+#include "platforms/wasm/ui/button.h"
+#include "platforms/wasm/ui/checkbox.h"
+#include "platforms/wasm/active_strip_data.h"
 
 
 
@@ -109,78 +111,6 @@ class jsNumberFieldImpl {
     double mValue;
     double mMin;
     double mMax;
-    fl::Str mGroup;
-};
-
-
-class jsCheckboxImpl {
-  public:
-    jsCheckboxImpl(const fl::Str&, bool value);
-    ~jsCheckboxImpl();
-    jsCheckboxImpl& Group(const fl::Str& name) { mGroup = name; return *this; };
-
-    const fl::Str& name() const;
-    void toJson(FLArduinoJson::JsonObject& json) const;
-    bool value() const;
-    void setValue(bool value);
-    const fl::Str& groupName() const { return mGroup; }
-
-    jsCheckboxImpl& operator=(bool value) { setValue(value); return *this; }
-    jsCheckboxImpl& operator=(int value) { setValue(value != 0); return *this; }
-
-  private:
-    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
-
-    jsUiInternalPtr mInternal;
-    bool mValue;
-    fl::Str mGroup;
-};
-
-class jsButtonImpl {
-  public:
-    jsButtonImpl(const fl::Str& name);
-    ~jsButtonImpl();
-    jsButtonImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
-
-    const fl::Str& name() const;
-    void toJson(FLArduinoJson::JsonObject& json) const;
-    bool isPressed() const;
-    bool clicked() const {
-        return mClickedHappened;
-    }
-    int clickedCount() const { return mClickedCount; }
-    const fl::Str& groupName() const { return mGroup; }
-
-    void click() {
-        mPressed = true;
-    }
-
-  private:
-    struct Updater : fl::EngineEvents::Listener {
-        void init(jsButtonImpl *owner) {
-            mOwner = owner;
-            fl::EngineEvents::addListener(this);
-        }
-        ~Updater() { fl::EngineEvents::removeListener(this); }
-        void onPlatformPreLoop2() override {
-            mOwner->mClickedHappened = mOwner->mPressed && (mOwner->mPressed != mOwner->mPressedLast);
-            mOwner->mPressedLast = mOwner->mPressed;
-            if (mOwner->mClickedHappened) {
-                mOwner->mClickedCount++;
-            }
-        }
-        jsButtonImpl *mOwner = nullptr;
-    };
-
-    Updater mUpdater;
-
-    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
-
-    jsUiInternalPtr mInternal;
-    bool mPressed = false;
-    bool mPressedLast = false;
-    bool mClickedHappened = false;
-    int mClickedCount = 0;
     fl::Str mGroup;
 };
 

@@ -2,15 +2,13 @@
 #ifdef __EMSCRIPTEN__
 
 #include <string.h>
-#include "fl/namespace.h"
-
-#include "platforms/wasm/js.h"
 #include "fl/json.h"
-#include "ui_manager.h"
+#include "platforms/wasm/ui/checkbox.h"
+#include "platforms/wasm/ui/ui_manager.h"
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsCheckboxImpl::jsCheckboxImpl(const Str& name, bool value)
     : mValue(value) {
@@ -55,6 +53,6 @@ void jsCheckboxImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value
 }
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif  // __EMSCRIPTEN__

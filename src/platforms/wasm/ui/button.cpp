@@ -2,13 +2,14 @@
 #ifdef __EMSCRIPTEN__
 
 #include "fl/json.h"
-#include "platforms/wasm/js.h"
-#include "ui_manager.h"
 #include "fl/namespace.h"
+
+#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/ui/button.h"
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsButtonImpl::jsButtonImpl(const Str& name)
     : mPressed(false) {
@@ -51,6 +52,6 @@ void jsButtonImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) 
     mPressed = value.as<bool>();
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif  // __EMSCRIPTEN__
