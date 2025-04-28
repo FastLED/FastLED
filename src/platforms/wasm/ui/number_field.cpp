@@ -9,6 +9,7 @@
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
 #include "fl/math_macros.h"
+#include "platforms/wasm/ui/number_field.h"
 
 using namespace fl;
 
