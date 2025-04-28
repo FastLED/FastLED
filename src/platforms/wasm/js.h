@@ -23,9 +23,8 @@
 #include "platforms/wasm/ui/slider.h"
 #include "platforms/wasm/ui/title.h"
 #include "platforms/wasm/ui/number_field.h"
+#include "platforms/wasm/ui/description.h"
 #include "platforms/wasm/active_strip_data.h"
-
-
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -41,8 +40,6 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros();
 EMSCRIPTEN_KEEPALIVE void delay(int ms);
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
@@ -51,33 +48,10 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 
 namespace fl {
 
-
-
-
-class jsDescriptionImpl {
-  public:
-    jsDescriptionImpl(const fl::Str& text);
-    ~jsDescriptionImpl();
-    jsDescriptionImpl& Group(const fl::Str& name) { mGroup = name; return *this; }
-
-
-    void toJson(FLArduinoJson::JsonObject& json) const;
-    const fl::Str& groupName() const { return mGroup; }
-    const fl::Str& text() const { return mText; }
-
-  private:
-    jsUiInternalPtr mInternal;
-    fl::Str mGroup;
-    fl::Str mText;
-};
-
-
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap& screenmap);
 void jsOnFrame(ActiveStripData& active_strips);
 void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
 void updateJs(const char* jsonStr);
-
-
 
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
@@ -92,6 +66,5 @@ typedef jsCheckboxImpl UICheckboxImpl;
 typedef jsButtonImpl UIButtonImpl;
 typedef jsTitleImpl UITitleImpl;
 typedef jsDescriptionImpl UIDescriptionImpl;
-
 
 }  // namespace fl

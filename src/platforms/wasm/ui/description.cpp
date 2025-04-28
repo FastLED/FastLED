@@ -3,6 +3,7 @@
 #include "../js.h"
 #include "ui_internal.h"
 #include "ui_manager.h"
+#include "description.h"
 
 using namespace fl;
 
