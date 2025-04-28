@@ -59,19 +59,21 @@ class UISlider : public UISliderImpl {
         return *this;
     }
 
-    void onChanged(function<void(float)> callback) {
+    int onChanged(function<void(float)> callback) {
         function<void(UISlider &, float)> wrapped_cb =
             [callback](UISlider &slider, float value) {
                 FASTLED_UNUSED(slider);
                 callback(value);
             };
-        mCallbacks.add(wrapped_cb);
+        int out = mCallbacks.add(wrapped_cb);
         mListener.addToEngineEventsOnce();
+        return out;
     }
 
-    void onChangedEx(function<void(UISlider &, float)> callback) {
-        mCallbacks.add(callback);
+    int onChangedEx(function<void(UISlider &, float)> callback) {
+        int out = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
+        return out;
     }
     void clearCallbacks() { mCallbacks.clear(); }
 
