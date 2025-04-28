@@ -120,7 +120,7 @@ class UIButton : public UIButtonImpl {
     bool isPressed() const { return Super::isPressed(); }
     bool clicked() const { return Super::clicked(); }
     int clickedCount() const { return Super::clickedCount(); }
-    operator bool() const { return Super::isPressed(); }
+    operator bool() const { return clicked(); }
 
     void click() { Super::click(); }
 
