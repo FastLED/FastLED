@@ -29,6 +29,10 @@ jsButtonImpl::~jsButtonImpl() {
     jsUiManager::removeComponent(mInternal);
 }
 
+bool jsButtonImpl::clicked() const {
+    return mClickedHappened;
+}
+
 const Str& jsButtonImpl::name() const {
     return mInternal->name();
 }
@@ -51,6 +55,7 @@ bool jsButtonImpl::isPressed() const {
 void jsButtonImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     mPressed = value.as<bool>();
 }
+
 
 }  // namespace fl
 
