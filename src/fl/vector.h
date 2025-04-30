@@ -896,7 +896,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     void clear() {
         if (mUsingHeap) {
             mHeap.clear();
-            mUsingHeap = false;
+            // mUsingHeap = false;
         } else {
             mFixed.clear();
         }
@@ -952,6 +952,16 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         return mUsingHeap ? mHeap.end() : mFixed.end();
     }
 
+    // back, front
+    T &front() { return mUsingHeap ? mHeap.front() : mFixed.front(); }
+    const T &front() const {
+        return mUsingHeap ? mHeap.front() : mFixed.front();
+    }
+
+    T &back() { return mUsingHeap ? mHeap.back() : mFixed.back(); }
+    const T &back() const {
+        return mUsingHeap ? mHeap.back() : mFixed.back();
+    }
 
 
 

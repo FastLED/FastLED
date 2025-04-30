@@ -30,8 +30,7 @@ template <typename FloatT> class LineSimplifier {
         simplifyT(slice, polyline);
     }
 
-    template <typename VectorType>
-    void simplifyInplace(VectorType *polyLine) {
+    template <typename VectorType> void simplifyInplace(VectorType *polyLine) {
         // run the simplification algorithm
         const fl::Slice<Point> slice(polyLine.data(), polyLine.size());
         simplifyT(slice, &polyLine);
@@ -55,9 +54,12 @@ template <typename FloatT> class LineSimplifier {
     // Runs in O(n) allocations: one bool‐array + one index stack + one output
     // vector
     void simplifyInternal(const fl::Slice<Point> &polyLine) {
+        mSimplified.clear();
         int n = polyLine.size();
         if (n < 2) {
-            mSimplified.clear();
+            if (n) {
+                mSimplified.assign(polyLine.data(), polyLine.data() + n);
+            }
             return;
         }
 
@@ -66,7 +68,7 @@ template <typename FloatT> class LineSimplifier {
 
         // explicit stack of (start,end) index pairs
         indexStack.clear();
-        indexStack.reserve(64);
+        // indexStack.reserve(64);
         indexStack.push_back({0, n - 1});
 
         // process segments
@@ -77,20 +79,20 @@ template <typename FloatT> class LineSimplifier {
             indexStack.pop_back();
 
             // find farthest point in [i0+1 .. i1-1]
-            FloatT maxDist = 0;
+            FloatT maxDist2 = 0;
             int split = i0;
             for (int i = i0 + 1; i < i1; ++i) {
                 if (!keep[i])
                     continue;
-                FloatT d = PerpendicularDistance(polyLine[i], polyLine[i0],
-                                                 polyLine[i1]);
-                if (d > maxDist) {
-                    maxDist = d;
+                FloatT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
+                                                   polyLine[i1]);
+                if (d2 > maxDist2) {
+                    maxDist2 = d2;
                     split = i;
                 }
             }
 
-            if (maxDist > mMinDistance) {
+            if (maxDist2 > mMinDistance * mMinDistance) {
                 // need to keep that split point and recurse on both halves
                 indexStack.push_back({i0, split});
                 indexStack.push_back({split, i1});
@@ -115,12 +117,13 @@ template <typename FloatT> class LineSimplifier {
     FloatT mMinDistance;
 
     // workspace buffers
-    fl::vector<char> keep;                     // marks which points survive
-    fl::vector<fl::pair<int, int>> indexStack; // manual recursion stack
-    VectorPoint mSimplified;                   // output buffer
+    fl::vector_inlined<char, 64> keep; // marks which points survive
+    fl::vector_inlined<fl::pair<int, int>, 64>
+        indexStack;          // manual recursion stack
+    VectorPoint mSimplified; // output buffer
 
-    static FloatT PerpendicularDistance(const Point &pt, const Point &a,
-                                        const Point &b) {
+    static FloatT PerpendicularDistance2(const Point &pt, const Point &a,
+                                         const Point &b) {
         FloatT dx = b.x - a.x;
         FloatT dy = b.y - a.y;
         FloatT mag = sqrt(dx * dx + dy * dy);
@@ -135,7 +138,7 @@ template <typename FloatT> class LineSimplifier {
         // subtract projection
         FloatT ux = vx - proj * dx;
         FloatT uy = vy - proj * dy;
-        return sqrt(ux * ux + uy * uy);
+        return ux * ux + uy * uy;
     }
 };
 
