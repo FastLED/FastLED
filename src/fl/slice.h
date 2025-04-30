@@ -59,6 +59,10 @@ template <typename T> class Slice {
     template <typename U,size_t ARRAYSIZE>
     Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
 
+
+    template<typename Iterator>
+    Slice(Iterator begin, Iterator end) : mData(&(*begin)), mSize(end - begin) {}
+
     Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
 
     Slice &operator=(const Slice &other) {
