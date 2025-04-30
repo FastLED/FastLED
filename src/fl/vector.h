@@ -383,7 +383,10 @@ template <typename T> class HeapVector {
         mSize = n;
     }
 
-    template <typename InputIt> void assign(InputIt begin, InputIt end) {
+
+    template <typename InputIt,
+              typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
+    void assign(InputIt begin, InputIt end) {
         clear();
         reserve(end - begin);
         for (InputIt it = begin; it != end; ++it) {
@@ -391,13 +394,14 @@ template <typename T> class HeapVector {
         }
     }
 
-    // void assign(size_t new_cap, const T &value) {
-    //     clear();
-    //     reserve(new_cap);
-    //     while (size() < new_cap) {
-    //         push_back(value);
-    //     }
-    // }
+
+    void assign(size_t new_cap, const T &value) {
+        clear();
+        reserve(new_cap);
+        while (size() < new_cap) {
+            push_back(value);
+        }
+    }
 
     // Array access operators
     T &operator[](size_t index) { return mArray[index]; }

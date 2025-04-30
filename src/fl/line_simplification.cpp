@@ -1,4 +1,3 @@
-#pragma once
 
 /*
 Douglas-Peucker line simplification algorithm.
@@ -8,12 +7,15 @@ Douglas-Peucker line simplification algorithm.
 
 namespace fl {
 
+namespace compiled_test {
+
 // LineSimplifier<float>::LineSimplifier() : epsilon(0.0) {}
 using LineSimplifierF = LineSimplifier<float>;
 using LineSimplifierD = LineSimplifier<double>;
 
 LineSimplifierF s_test;
 LineSimplifierD s_testd;
+}  // namespace compiled_test
 
 }  // namespace fl
 

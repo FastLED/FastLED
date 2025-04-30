@@ -18,7 +18,9 @@ namespace fl {  // Mandatory namespace for this class since it has name collisio
 
 template<typename T> struct rect_xy;
 template<typename T> struct point_xy;
-
+template<typename T> class Slice;
+template<typename T> class HeapVector;
+template<typename T, size_t N> class InlinedVector;
 template <size_t N> class StrN;
 
 // A copy on write string class. Fast to copy from another
@@ -426,6 +428,33 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+    template<typename T>
+    Str& append(const Slice<T> &slice) {
+        append("[");
+        for (size_t i = 0; i < slice.size(); ++i) {
+            if (i > 0) {
+                append(",");
+            }
+            append(slice[i]);
+        }
+        append("]");
+        return *this;
+    }
+
+    template<typename T>
+    Str& append(const fl::HeapVector<T> &vec) {
+        Slice<const T> slice(vec.data(), vec.size());
+        append(slice);
+        return *this;
+    }
+
+    template<typename T, int N>
+    Str& append(const fl::InlinedVector<T, N> &vec) {
+        Slice<const T> slice(vec.data(), vec.size());
+        append(slice);
+        return *this;
+    }
+
     Str& append(const char *str) { write(str, strlen(str)); return *this; }
     Str& append(const char *str, size_t len) { write(str, len); return *this; }
     //Str& append(char c) { write(&c, 1); return *this; }
@@ -461,9 +490,11 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template<typename T>
     Str& append(const point_xy<T> &pt) {
+        append("(");
         append(pt.x);
         append(",");
         append(pt.y);
+        append(")");
         return *this;
     }
 
@@ -471,9 +502,12 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         int32_t i = static_cast<int32_t>(val * 100);
         // append the integer part
         append(i / 100);
-        append(".");
-        // append the decimal part
-        append(i % 100);
+        int32_t rem = i % 100;
+        if (rem > 0) {
+            // append the decimal part
+            append(".");
+            append(rem);
+        }
         return *this;
     }
 
