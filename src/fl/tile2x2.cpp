@@ -14,7 +14,7 @@ namespace fl {
 
 
 void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
-                            XYRasterSparse *out_raster) {
+                            XYRasterU8Sparse *out_raster) {
     out_raster->rasterize(tiles);
 }
 

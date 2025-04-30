@@ -15,14 +15,14 @@ FASTLED_NAMESPACE_END
 namespace fl {
 
 class XYMap;
-class XYRasterSparse;
+class XYRasterU8Sparse;
 class XYDrawUint8Visitor;
 
 class Tile2x2_u8 {
 
   public:
     static void Rasterize(const Slice<const Tile2x2_u8> &tiles,
-                          XYRasterSparse *output) ;
+                          XYRasterU8Sparse *output) ;
 
     Tile2x2_u8() = default;
     Tile2x2_u8(const point_xy<int> &origin) : mOrigin(origin) {}

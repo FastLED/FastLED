@@ -8,13 +8,13 @@
 
 namespace fl {
 
-void XYRasterSparse::draw(const CRGB &color, const XYMap &xymap,
+void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap,
                           CRGB *out) {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
-void XYRasterSparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
+void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
     // Tile2x2_u8::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
     if (tiles.size() == 0) {
@@ -36,7 +36,7 @@ void XYRasterSparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
 
 }
 
-void XYRasterSparse::rasterize_internal(const Tile2x2_u8 &tile,
+void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
                                         const rect_xy<int> *optional_bounds) {
     const point_xy<int> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {

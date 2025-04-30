@@ -33,15 +33,17 @@ class XYMap;
 class XYDrawUint8Visitor;
 class Tile2x2_u8;
 
-class XYRasterSparse {
+// A raster of uint8_t values. This is a sparse raster, meaning that it will only
+// store the values that are set.
+class XYRasterU8Sparse {
   public:
-    XYRasterSparse() = default;
-    XYRasterSparse(int width, int height) {
+    XYRasterU8Sparse() = default;
+    XYRasterU8Sparse(int width, int height) {
         setBounds(rect_xy<int>(0, 0, width, height));
     }
-    XYRasterSparse(const XYRasterSparse &) = delete;
+    XYRasterU8Sparse(const XYRasterU8Sparse &) = delete;
 
-    XYRasterSparse &reset() {
+    XYRasterU8Sparse &reset() {
         mSparseGrid.clear();
         mCache.clear();
         return *this;

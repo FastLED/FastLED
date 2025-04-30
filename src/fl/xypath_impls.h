@@ -22,7 +22,7 @@
 
 namespace fl {
 
-class XYRasterSparse;
+class XYRasterU8Sparse;
 template <typename T> class function;
 
 // Smart pointers for the XYPath family.

@@ -25,7 +25,7 @@ class XYPathRenderer : public Referent {
 
     Tile2x2_u8 at_subpixel(float alpha);
 
-    void rasterize(float from, float to, int steps, XYRasterSparse &raster,
+    void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
     // Overloaded to allow transform to be passed in.

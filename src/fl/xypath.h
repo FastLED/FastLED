@@ -19,7 +19,7 @@
 
 namespace fl {
 
-class XYRasterSparse;
+class XYRasterU8Sparse;
 template <typename T> class function;
 
 // Smart pointers for the XYPath family.
@@ -89,7 +89,7 @@ class XYPath : public Referent {
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
-    void rasterize(float from, float to, int steps, XYRasterSparse &raster,
+    void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
     void setScale(float scale);
     Str name() const;

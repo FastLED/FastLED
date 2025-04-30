@@ -6,6 +6,6 @@
 
 namespace fl {
 
-using XYRaster = XYRasterSparse;
+using XYRaster = XYRasterU8Sparse;
 
 }
