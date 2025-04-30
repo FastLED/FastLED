@@ -24,3 +24,38 @@ TEST_CASE("Test Line Simplification") {
     REQUIRE_EQ(point_xy<float>(4.0f, 4.0f), points[1]);
 }
 
+TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
+    LineSimplifier<float> ls;
+    
+    // Test with a triangle shape - non-collinear points
+    ls.setMinimumDistance(0.5f);
+    fl::vector<point_xy<float>> points1;
+    points1.push_back({0.0f, 0.0f});    // First point of triangle
+    points1.push_back({0.3f, 0.3f});    // Should be filtered out (distance < 0.5)
+    points1.push_back({1.0f, 1.0f});    // Second point of triangle
+    points1.push_back({0.8f, 1.2f});    // Should be filtered out (distance < 0.5)
+    points1.push_back({0.0f, 2.0f});    // Third point of triangle
+    ls.simplifyInplace(&points1);
+    REQUIRE_EQ(3, points1.size());      // Triangle vertices should remain
+    REQUIRE_EQ(point_xy<float>(0.0f, 0.0f), points1[0]);
+    REQUIRE_EQ(point_xy<float>(1.0f, 1.0f), points1[1]);
+    REQUIRE_EQ(point_xy<float>(0.0f, 2.0f), points1[2]);
+
+}
+
+TEST_CASE("Test Line Simplification with Complex Shape") {
+    LineSimplifier<float> ls;
+    // Test with a more complex shape and smaller threshold
+    ls.setMinimumDistance(0.1f);
+    fl::vector<point_xy<float>> points2;
+    points2.push_back({0.0f, 0.0f});    // Start point
+    points2.push_back({0.1f, 0.1f});    // Filtered out
+    points2.push_back({0.0f, 0.3f});    // Filtered out
+    points2.push_back({0.0f, 1.0f});    // Should be kept (distance > 0.2)
+    ls.simplifyInplace(&points2);
+    REQUIRE_EQ(3, points2.size());
+    REQUIRE_EQ(point_xy<float>(0.0f, 0.0f), points2[0]);
+    REQUIRE_EQ(point_xy<float>(0.10f, 0.10f), points2[1]);
+    REQUIRE_EQ(point_xy<float>(0.0f, 1.0f), points2[2]);
+}
+

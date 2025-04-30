@@ -100,7 +100,7 @@ template <typename FloatT> class LineSimplifier {
                 }
             }
 
-            if (maxDist2 > mMinDistance * mMinDistance) {
+            if (maxDist2 >= mMinDistance * mMinDistance) {
                 // need to keep that split point and recurse on both halves
                 indexStack.push_back({i0, split});
                 indexStack.push_back({split, i1});
