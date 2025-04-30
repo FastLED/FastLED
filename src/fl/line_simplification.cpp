@@ -15,6 +15,12 @@ using LineSimplifierD = LineSimplifier<double>;
 
 LineSimplifierF s_test;
 LineSimplifierD s_testd;
+
+void foo() {
+    fl::vector<point_xy<float>> points;
+    s_test.simplifyInplace(&points);
+}
+
 }  // namespace compiled_test
 
 }  // namespace fl

@@ -1,7 +1,11 @@
 #pragma once
 
 /*
- Iterative, in‐place Douglas–Peucker line simplifier with O(n) extra memory.
+
+Line simplification based of an improved Douglas-Peucker algorithm with only O(n) extra
+memory. Memory structures are inlined so that most simplifications can be done with zero heap
+allocations.
+
 */
 
 #include "fl/bitset.h"
@@ -16,29 +20,34 @@ namespace fl {
 
 template <typename FloatT> class LineSimplifier {
   public:
+    // This line simplification algorithm will remove vertices that are close together
+    // upto a distance of mMinDistance. The algorithm is based on the Douglas-Peucker
+    // but with some tweaks for memory efficiency. Most common usage of this class
+    // for small sized inputs (~20) will produce no heap allocations.
     using Point = fl::point_xy<FloatT>;
     using VectorPoint = fl::vector<Point>;
 
     LineSimplifier() : mMinDistance(EPSILON_F) {}
+    LineSimplifier(const LineSimplifier &other) = default;
+    LineSimplifier &operator=(const LineSimplifier &other) = default;
+    LineSimplifier(LineSimplifier &&other) = default;
+    LineSimplifier &operator=(LineSimplifier &&other) = default;
+
     explicit LineSimplifier(FloatT e) : mMinDistance(e) {}
-
     void setMinimumDistance(FloatT eps) { mMinDistance = eps; }
+    
+    // simplifyInPlace.
+    void simplifyInplace(fl::vector<Point> *polyline) { simplifyInplaceT(polyline); }
+    template <typename VectorType> void simplifyInplace(VectorType *polyLine) { simplifyInplaceT(polyLine); }
 
-    void simplifyInplace(fl::vector<Point> *polyline) {
+    // simplify to the output vector.
+    void simplify(const fl::Slice<Point> &polyLine, fl::vector<Point> *out) { simplifyT(polyLine, out); }
+    template <typename VectorType> void simplify(const fl::Slice<Point> &polyLine, VectorType *out) { simplifyInplaceT(polyLine); }
+  private:
+    template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
         // run the simplification algorithm
-        const fl::Slice<Point> slice(polyline->data(), polyline->size());
-        simplifyT(slice, polyline);
-    }
-
-    template <typename VectorType> void simplifyInplace(VectorType *polyLine) {
-        // run the simplification algorithm
-        const fl::Slice<Point> slice(polyLine.data(), polyLine.size());
-        simplifyT(slice, &polyLine);
-    }
-
-    void simplify(const fl::Slice<Point> &polyLine, fl::vector<Point> *out) {
-        // run the simplification algorithm
-        simplifyT(polyLine, out);
+        Slice<Point> slice(polyLine->data(), polyLine->size());
+        simplifyT(slice, polyLine);
     }
 
     template <typename VectorType>
@@ -49,8 +58,6 @@ template <typename FloatT> class LineSimplifier {
         // copy the result to the output slice
         out->assign(mSimplified.begin(), mSimplified.end());
     }
-
-  private:
     // Runs in O(n) allocations: one bool‐array + one index stack + one output
     // vector
     void simplifyInternal(const fl::Slice<Point> &polyLine) {
@@ -74,8 +81,9 @@ template <typename FloatT> class LineSimplifier {
         // process segments
         while (!indexStack.empty()) {
             // auto [i0, i1] = indexStack.back();
-            int i0 = indexStack.back().first;
-            int i1 = indexStack.back().second;
+            auto pair = indexStack.back();
+            int i0 = pair.first;
+            int i1 = pair.second;
             indexStack.pop_back();
 
             // find farthest point in [i0+1 .. i1-1]
@@ -141,5 +149,8 @@ template <typename FloatT> class LineSimplifier {
         return ux * ux + uy * uy;
     }
 };
+
+
+
 
 } // namespace fl
