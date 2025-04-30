@@ -7,7 +7,7 @@ Douglas-Peucker line simplification algorithm.
 
 namespace fl {
 
-namespace compiled_test {
+namespace /*compiled_test*/ {
 
 // LineSimplifier<float>::LineSimplifier() : epsilon(0.0) {}
 using LineSimplifierF = LineSimplifier<float>;
