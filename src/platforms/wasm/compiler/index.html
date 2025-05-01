@@ -19,6 +19,17 @@
     <div class="studio-link">
         <a href="https://ledmapper.com" target="_blank">FastLED Video Mapper</a>
     </div>
+
+
+    <!-- New stuff -->
+    <button id="upload_mp3">upload_mp3</button>
+    <!-- Hidden file input, restricted to MP3 files -->
+    <input type="file" id="file_input" accept="audio/mpeg" style="display:none" />
+    <!-- Audio element, shown once a file is loaded -->
+    <audio id="player" controls style="display:none; margin-top:1em;"></audio>
+
+
+
     <div id="main-container">
         <div id="top-row">
             <div id="canvas-container">
@@ -33,6 +44,31 @@
             <pre id="output">stdout:</pre>
         </div>
     </div>
+
+
+
+    <script>
+        const uploadBtn = document.getElementById('upload_mp3');
+        const fileInput = document.getElementById('file_input');
+        const player    = document.getElementById('player');
+    
+        // When our button is clicked, open the file picker
+        uploadBtn.addEventListener('click', () => {
+          fileInput.click();
+        });
+    
+        // When a file is selected...
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+    
+          // Create a temporary URL & set it on the audio element
+          const url = URL.createObjectURL(file);
+          player.src = url;
+          player.style.display = 'block';  // show the player
+          player.play();                   // start playback
+        });
+      </script>
 
     <script type="importmap">
         {
