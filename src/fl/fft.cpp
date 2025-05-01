@@ -79,23 +79,23 @@ class FFTContext {
         //uint32_t start = millis();
         out->clear();
         // kiss_fft_cpx fft[SAMPLES] = {};
-        FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, SAMPLES);
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, fft,  m_cq_cfg.samples);
         // memset(fft, 0, sizeof(fft));
         kiss_fftr(m_fftr_cfg, buffer, fft);
         // kiss_fft_cpx cq[BANDS] = {};
-        FASTLED_STACK_ARRAY(kiss_fft_cpx, cq, BANDS);
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, cq,  m_cq_cfg.bands);
         // memset(cq, 0, sizeof(cq));
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
         //uint32_t diff = millis() - start;
         // FASTLED_UNUSED(diff);
-        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
+        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) /  m_cq_cfg.bands;
         // char output_str[2048]; // Assuming this size is sufficient. Adjust as
         // necessary.
         // int offset = 0;
         // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
         // "FFT took %u ms. FFT output: ", diff);
         // process output here
-        for (int i = 0; i < BANDS; ++i) {
+        for (int i = 0; i <  m_cq_cfg.bands; ++i) {
             int32_t real = cq[i].r;
             int32_t imag = cq[i].i;
             float r2 = float(real * real);
