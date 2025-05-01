@@ -1,6 +1,8 @@
 
 #ifdef __EMSCRIPTEN__
 
+#include <string>
+
 #include "fl/json.h"
 #include "fl/namespace.h"
 

@@ -24,6 +24,7 @@
 #include "platforms/wasm/ui/title.h"
 #include "platforms/wasm/ui/number_field.h"
 #include "platforms/wasm/ui/description.h"
+#include "platforms/wasm/ui/audio.h"
 #include "platforms/wasm/active_strip_data.h"
 
 // Needed or the wasm compiler will strip them out.
@@ -59,6 +60,7 @@ void updateJs(const char* jsonStr);
 #define FASTLED_HAS_UI_NUMBER_FIELD 1
 #define FASTLED_HAS_UI_TITLE 1
 #define FASTLED_HAS_UI_DESCRIPTION 1
+#define FASTLED_HAS_UI_AUDIO 1
 
 typedef jsNumberFieldImpl UINumberFieldImpl;
 typedef jsSliderImpl UISliderImpl;
@@ -66,5 +68,6 @@ typedef jsCheckboxImpl UICheckboxImpl;
 typedef jsButtonImpl UIButtonImpl;
 typedef jsTitleImpl UITitleImpl;
 typedef jsDescriptionImpl UIDescriptionImpl;
+typedef jsAudioImpl UIAudioImpl;
 
 }  // namespace fl

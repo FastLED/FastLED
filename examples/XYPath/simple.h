@@ -42,7 +42,7 @@ UISlider pointX("Point X", WIDTH / 2.0f, 0.0f, WIDTH - 1, 1.0f);
 UISlider pointY("Point Y", HEIGHT / 2.0f, 0.0f, HEIGHT - 1, 1.0f);
 
 UIButton button("second trigger");
-
+UIAudio audio("Audio");
 
 int x = 0;
 int y = 0;
