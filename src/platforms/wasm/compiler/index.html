@@ -46,104 +46,23 @@
         </div>
     </div>
 
-    <script>
-        const uploadBtn = document.getElementById('upload_mp3');
-        const fileInput = document.getElementById('file_input');
-        const player    = document.getElementById('player');
-    
-        // When our button is clicked, open the file picker
-        uploadBtn.addEventListener('click', () => {
-          fileInput.click();
-        });
-    
-        // When a file is selected...
-        fileInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-    
-          // Create a temporary URL & set it on the audio element
-          const url = URL.createObjectURL(file);
-          player.src = url;
-          player.style.display = 'block';  // show the player
-          
-          // Update button text to show the file name
-          uploadBtn.textContent = file.name.length > 20 
-            ? file.name.substring(0, 17) + '...' 
-            : file.name;
-          
-          // Set up audio analysis
-          setupAudioAnalysis(player);
-            
-          player.play();  // start playback
-        });
+    <script type="module">
+        import { initAudioManager } from './modules/audio_manager.js';
         
-        // Set up audio analysis to print sample size
-        function setupAudioAnalysis(audioElement) {
-          // Create audio context
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          const audioContext = new AudioContext();
-          
-          // Create analyzer
-          const analyzer = audioContext.createAnalyser();
-          analyzer.fftSize = 2048;
-          
-          // Connect audio element to analyzer
-          const source = audioContext.createMediaElementSource(audioElement);
-          source.connect(analyzer);
-          analyzer.connect(audioContext.destination);
-          
-          // Buffer for frequency data
-          const bufferLength = analyzer.frequencyBinCount;
-          const dataArray = new Uint8Array(bufferLength);
-          
-          // Output element
-          const output = document.getElementById('output');
-          
-          // Function to update and display sample data
-          function updateSampleData() {
-            // Get frequency data
-            analyzer.getByteFrequencyData(dataArray);
+        // Initialize the audio manager when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const audioManager = initAudioManager({
+                uploadButtonId: 'upload_mp3',
+                fileInputId: 'file_input',
+                playerId: 'player',
+                canvasLabelId: 'canvas-label',
+                outputId: 'output'
+            });
             
-            // Calculate average amplitude
-            let sum = 0;
-            let nonZeroCount = 0;
-            
-            for (let i = 0; i < bufferLength; i++) {
-              if (dataArray[i] > 0) {
-                sum += dataArray[i];
-                nonZeroCount++;
-              }
-            }
-            
-            // Only update if we have data and audio is playing
-            if (nonZeroCount > 0 && !audioElement.paused) {
-              const average = Math.round(sum / nonZeroCount);
-              const timestamp = (audioElement.currentTime).toFixed(2);
-              
-              // Add to output
-              const message = `[${timestamp}s] Audio sample size: ${bufferLength}, Average amplitude: ${average}`;
-              
-              // Update the canvas label to show the current audio data
-              const label = document.getElementById('canvas-label');
-              label.textContent = `Audio: ${average}`;
-              
-              // Make sure the label is visible
-              if (!label.classList.contains('show-animation')) {
-                label.classList.add('show-animation');
-              }
-              
-              // Also log to console for debugging
-              console.log(message);
-            }
-            
-            // Continue updating
-            requestAnimationFrame(updateSampleData);
-          }
-          
-          // Start updating
-          updateSampleData();
-        }
-      </script>
+            // Make it available globally for debugging if needed
+            window.audioManager = audioManager;
+        });
+    </script>
 
     <script type="importmap">
         {
