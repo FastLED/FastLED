@@ -434,7 +434,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         append("[");
         for (size_t i = 0; i < slice.size(); ++i) {
             if (i > 0) {
-                append(",");
+                append(", ");
             }
             append(slice[i]);
         }
@@ -501,14 +501,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     template<typename T, size_t N>
     Str& append(const fl::FixedVector<T, N>& vec) {
-        append("[");
-        for (size_t i = 0; i < vec.size(); ++i) {
-            if (i > 0) {
-                append(",");
-            }
-            append(vec[i]);
-        }
-        append("]");
+        Slice<const T> slice(vec.data(), vec.size());
+        append(slice);
         return *this;
     }
 
