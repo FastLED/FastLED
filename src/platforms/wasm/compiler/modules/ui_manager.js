@@ -4,22 +4,6 @@
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 
-import { initAudioManager } from './audio_manager.js';
-
-// Initialize the audio manager when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  const audioManager = initAudioManager({
-      uploadButtonId: 'upload_mp3',
-      fileInputId: 'file_input',
-      playerId: 'player',
-      canvasLabelId: 'canvas-label',
-      outputId: 'output'
-  });
-  
-  // Make it available globally for debugging if needed
-  window.audioManager = audioManager;
-});
-
 
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
@@ -45,38 +29,71 @@ function createNumberField(element) {
 
 function createAudioField(element) {
   const controlDiv = document.createElement('div');
-  controlDiv.className = 'ui-control';
+  controlDiv.className = 'ui-control audio-control';
+  
+  const labelValueContainer = document.createElement('div');
+  labelValueContainer.style.display = 'flex';
+  labelValueContainer.style.justifyContent = 'space-between';
+  labelValueContainer.style.width = '100%';
+  
   const label = document.createElement('label');
   label.textContent = element.name;
   label.htmlFor = `audio-${element.id}`;
+  
+  labelValueContainer.appendChild(label);
+  controlDiv.appendChild(labelValueContainer);
+  
+  // Create a custom upload button that matches other UI elements
+  const uploadButton = document.createElement('button');
+  uploadButton.textContent = 'Select Audio File';
+  uploadButton.className = 'audio-upload-button';
+  uploadButton.id = `upload-btn-${element.id}`;
+  
+  // Hidden file input
   const audioInput = document.createElement('input');
   audioInput.type = 'file';
   audioInput.id = `audio-${element.id}`;
   audioInput.accept = 'audio/*';
+  audioInput.style.display = 'none';
+  
+  // Connect button to file input
+  uploadButton.addEventListener('click', () => {
+    audioInput.click();
+  });
+  
   audioInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      const audio = document.createElement('audio');
+      
+      // Update button text to show selected file
+      uploadButton.textContent = file.name.length > 20 
+        ? file.name.substring(0, 17) + '...' 
+        : file.name;
+      
+      // Create or update audio element
+      let audio = controlDiv.querySelector('audio');
+      if (!audio) {
+        audio = document.createElement('audio');
+        audio.controls = true;
+        audio.className = 'audio-player';
+        controlDiv.appendChild(audio);
+      }
+      
       audio.src = url;
-      audio.controls = true;
       audio.autoplay = true;
       audio.loop = true;
-      audio.style.width = '100%';
-      audio.style.marginTop = '10px';
-      controlDiv.appendChild(audio);
-      // Remove the file input after selection
-      audioInput.style.display = 'none';
-      // Create a label for the audio element
-      const audioLabel = document.createElement('label');
-      audioLabel.textContent = `Playing: ${file.name}`;
-      audioLabel.style.display = 'block';
-      audioLabel.style.marginTop = '10px';
-      controlDiv.appendChild(audioLabel);
+      
+      // Set up audio analysis if needed
+      if (typeof window.setupAudioAnalysis === 'function') {
+        window.setupAudioAnalysis(audio);
+      }
     }
   });
-  controlDiv.appendChild(label);
+  
+  controlDiv.appendChild(uploadButton);
   controlDiv.appendChild(audioInput);
+  
   return controlDiv;
 }
 
@@ -219,6 +236,77 @@ function setDescription(descData) {
     console.warn('Invalid description data received:', descData);
   }
 }
+
+// Helper function for audio analysis - make it available globally
+window.setupAudioAnalysis = function(audioElement) {
+  // Create audio context
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioContext = new AudioContext();
+  
+  // Create analyzer
+  const analyzer = audioContext.createAnalyser();
+  analyzer.fftSize = 2048;
+  
+  // Connect audio element to analyzer
+  const source = audioContext.createMediaElementSource(audioElement);
+  source.connect(analyzer);
+  analyzer.connect(audioContext.destination);
+  
+  // Buffer for frequency data
+  const bufferLength = analyzer.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  
+  // Update function for visualization
+  function updateAudioData() {
+    // Get frequency data
+    analyzer.getByteFrequencyData(dataArray);
+    
+    // Calculate average amplitude
+    let sum = 0;
+    let nonZeroCount = 0;
+    
+    for (let i = 0; i < bufferLength; i++) {
+      if (dataArray[i] > 0) {
+        sum += dataArray[i];
+        nonZeroCount++;
+      }
+    }
+    
+    // Only update if we have data and audio is playing
+    if (nonZeroCount > 0 && !audioElement.paused) {
+      const average = Math.round(sum / nonZeroCount);
+      const timestamp = (audioElement.currentTime).toFixed(2);
+      
+      // Update the canvas label to show the current audio data
+      const label = document.getElementById('canvas-label');
+      if (label) {
+        label.textContent = `Audio: ${average}`;
+        
+        // Make sure the label is visible
+        if (!label.classList.contains('show-animation')) {
+          label.classList.add('show-animation');
+        }
+      }
+      
+      // Log to console for debugging
+      console.log(`[${timestamp}s] Audio sample size: ${bufferLength}, Average amplitude: ${average}`);
+    }
+    
+    // Continue updating
+    requestAnimationFrame(updateAudioData);
+  }
+  
+  // Start updating
+  updateAudioData();
+  
+  return {
+    audioContext,
+    analyzer,
+    source,
+    bufferLength,
+    dataArray
+  };
+};
 
 export class UiManager {
   constructor(uiControlsId) {
