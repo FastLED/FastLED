@@ -114,6 +114,7 @@
         "soc_caps.h": "c",
         "format": "cpp",
         "expected": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "math.h": "c"
     }
 }

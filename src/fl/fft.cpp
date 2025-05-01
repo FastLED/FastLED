@@ -18,6 +18,7 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/str.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100

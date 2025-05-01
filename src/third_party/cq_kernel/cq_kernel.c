@@ -13,8 +13,11 @@
 // limitations under the License.
 
 #include <math.h>
-
 #include "cq_kernel.h"
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795
+#endif
 
 
 void _generate_guassian(kiss_fft_scalar window[], int N);
