@@ -10,6 +10,7 @@
 #include "fl/template_magic.h"
 #include "fl/ui_impl.h"
 #include "fl/unused.h"
+#include "fl/audio.h"
 #include "platforms/ui_defs.h"
 
 #define FL_NO_COPY(CLASS) \
@@ -20,6 +21,7 @@
 namespace fl {
 
 // If the platform is missing ui components, provide stubs.
+
 
 class UISlider : public UISliderImpl {
   public:
@@ -320,6 +322,17 @@ class UIDescription : public UIDescriptionImpl {
     UIDescription(const char *name) : UIDescriptionImpl(name) {}
     ~UIDescription() {}
 };
+
+
+class UIAudio: public UIAudioImpl {
+  public:
+    FL_NO_COPY(UIAudio)
+    using Super = UIAudioImpl;
+    UIAudio(const char *name) : UIAudioImpl(name) {}
+    ~UIAudio() {}
+    Ptr<const AudioSample> next() { return Super::next(); }
+};
+
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >=)                       \

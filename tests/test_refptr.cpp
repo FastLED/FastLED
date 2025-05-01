@@ -18,9 +18,9 @@ class MyClass : public fl::Referent {
     ~MyClass() {
         destructor_signal = 0xdeadbeef;
     }
-    virtual void ref() override { Referent::ref(); }
-    virtual void unref() override { Referent::unref(); }
-    virtual void destroy() override { Referent::destroy(); }
+    virtual void ref() const override { Referent::ref(); }
+    virtual void unref() const override { Referent::unref(); }
+    virtual void destroy() const override { Referent::destroy(); }
     uint32_t destructor_signal = 0;
 };
 

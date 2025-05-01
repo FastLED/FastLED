@@ -7,6 +7,7 @@
 #include "fl/template_magic.h"
 #include "fl/unused.h"
 #include "fl/str.h"
+#include "fl/audio.h"
 #include "platforms/ui_defs.h"
 
 
@@ -32,6 +33,10 @@
 
 #ifndef FASTLED_HAS_UI_DESCRIPTION
 #define FASTLED_HAS_UI_DESCRIPTION 0
+#endif
+
+#ifndef FASTLED_HAS_UI_AUDIO
+#define FASTLED_HAS_UI_AUDIO 0
 #endif
 
 namespace fl {
@@ -182,6 +187,19 @@ class UIDescriptionImpl {
     ~UIDescriptionImpl() {}
 };
 
+#endif
+
+#if !FASTLED_HAS_UI_AUDIO
+class UIAudioImpl {
+  public:
+    UIAudioImpl(const char *name) { FASTLED_UNUSED(name); }
+    ~UIAudioImpl() {}
+
+    Ptr<const AudioSample> next() {
+        Ptr<const AudioSample> sample;  // null.
+        return sample;
+    }
+};
 #endif
 
 } // end namespace fl

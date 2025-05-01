@@ -419,9 +419,10 @@ class Referent {
     Referent(Referent &&);
     Referent &operator=(Referent &&);
 
-    virtual void ref();
-    virtual void unref();
-    virtual void destroy();
+    // Lifetime management has to be marked const.
+    virtual void ref() const;
+    virtual void unref() const;
+    virtual void destroy() const;
 
   private:
     friend class WeakReferent;
@@ -431,7 +432,7 @@ class Referent {
         mWeakPtr = weakRefNoCreate;
     }
     mutable int mRefCount;
-    Ptr<WeakReferent> mWeakPtr; // Optional weak reference to this object.
+    mutable Ptr<WeakReferent> mWeakPtr; // Optional weak reference to this object.
 };
 
 template <typename T> inline WeakPtr<T> Ptr<T>::weakRefNoCreate() const {

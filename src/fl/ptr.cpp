@@ -6,11 +6,11 @@ namespace fl {
 
 Referent::Referent() : mRefCount(0) {}
 Referent::~Referent() = default;
-void Referent::ref() { mRefCount++; }
+void Referent::ref() const { mRefCount++; }
 
 int Referent::ref_count() const { return mRefCount; }
 
-void Referent::unref() {
+void Referent::unref() const {
     if (--mRefCount == 0) {
         if (mWeakPtr) {
             mWeakPtr->setReferent(nullptr);
@@ -20,7 +20,7 @@ void Referent::unref() {
     }
 }
 
-void Referent::destroy() { delete this; }
+void Referent::destroy() const { delete this; }
 
 Referent::Referent(const Referent &) = default;
 Referent &Referent::operator=(const Referent &) = default;
