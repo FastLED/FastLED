@@ -73,7 +73,9 @@ class FFTContext {
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
         // uint32_t diff = millis() - start;
         //  FASTLED_UNUSED(diff);
-        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / m_cq_cfg.bands;
+        const float maxf = m_cq_cfg.fmax;
+        const float minf = m_cq_cfg.fmin;
+        const float delta_f = (maxf - minf) / m_cq_cfg.bands;
         // char output_str[2048]; // Assuming this size is sufficient. Adjust as
         // necessary.
         // int offset = 0;
@@ -87,7 +89,7 @@ class FFTContext {
             float i2 = float(imag * imag);
             float magnitude = sqrt(r2 + i2);
             float magnitude_db = 20 * log10(magnitude);
-            float f_start = MIN_FREQUENCY + i * delta_f;
+            float f_start = minf + i * delta_f;
             float f_end = f_start + delta_f;
             FASTLED_UNUSED(f_start);
             FASTLED_UNUSED(f_end);
@@ -101,6 +103,27 @@ class FFTContext {
                 magnitude_db = 0.0f;
             }
         }
+    }
+
+    fl::Str generateHeaderInfo() const {
+        // Calculate frequency delta
+        float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
+
+        // Print header with frequency bands
+        char output_str[2048] = {0}; // Buffer for header text
+        int offset = 0;
+
+        offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+                           "FFT Frequency Bands: ");
+
+        for (int i = 0; i < m_cq_cfg.bands; ++i) {
+            float f_start = m_cq_cfg.fmin + i * delta_f;
+            float f_end = f_start + delta_f;
+            offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+                               "%.2fHz-%.2fHz, ", f_start, f_end);
+        }
+
+        return fl::Str(output_str);
     }
 
   private:
@@ -130,147 +153,13 @@ void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
 }
 
 
-
-// void init_once() {
-//     // if (g_is_fft_initialized) {
-//     //     return;
-//     // }
-//     // FASTLED_WARN("Initializing FFT");
-//     // uint32_t start = millis();
-//     // g_is_fft_initialized = true;
-//     // g_fftr_cfg = kiss_fftr_alloc(SAMPLES, 0, NULL, NULL);
-//     // cq_kernels_t kernels = generate_kernels(g_cq_cfg);
-//     // g_kernels = generate_kernels(g_cq_cfg);
-//     // g_kernels = reallocate_kernels(g_kernels, g_cq_cfg); // optional
-//     // uint32_t diff = millis() - start;
-
-//     // FASTLED_WARN("FFT initialized in " << diff << "ms");
-//     // FASTLED_WARN("kernel: " << kernels);
-// }
-
-
-
-void fft_init() { /* initOnce() */ }
-
-bool fft_is_initialized() { return true; }
-
-void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out) {
-    // Print header information periodically
-#if PRINT_HEADER
-    static int64_t s_frame = 0;
-    int64_t frame = s_frame++;
-    
-    if (frame % 100 == 0) {
-        // Calculate frequency delta
-        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
-        
-        // Print header with frequency bands
-        char output_str[2048] = {0}; // Buffer for header text
-        int offset = 0;
-        
-        offset += snprintf(output_str + offset, sizeof(output_str) - offset, 
-                          "FFT Frequency Bands: ");
-        
-        for (int i = 0; i < BANDS; ++i) {
-            float f_start = MIN_FREQUENCY + i * delta_f;
-            float f_end = f_start + delta_f;
-            offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                              "%.2fHz-%.2fHz, ", f_start, f_end);
-        }
-        
-        FASTLED_WARN(output_str);
+fl::Str FFT::generateHeaderInfo() const {
+    if (mContext) {
+        return mContext->generateHeaderInfo();
+    } else {
+        FASTLED_WARN("FFT context is not initialized");
+        return fl::Str();
     }
-#endif
-
-    static FFTContext fft_context(SAMPLES, BANDS, MIN_FREQUENCY, MAX_FREQUENCY,
-                                  AUDIO_SAMPLE_RATE);
-
-    fft_context.fft_unit_test(buffer, out);
-
-    // uint32_t start = millis();
-    // out->clear();
-    // // init_once();
-    // kiss_fft_cpx fft[SAMPLES] = {};
-    // kiss_fftr(g_fftr_cfg, buffer, fft);
-    // kiss_fft_cpx cq[BANDS] = {};
-    // apply_kernels(fft, cq, g_kernels, g_cq_cfg);
-    // uint32_t diff = millis() - start;
-    // FASTLED_UNUSED(diff);
-
-    // float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
-
-    // char output_str[2048]; // Assuming this size is sufficient. Adjust as
-    //                        // necessary.
-    // int offset = 0;
-    // // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-    // "FFT
-    // // took %u ms. FFT output: ", diff);
-
-#if PRINT_HEADER
-    // static int64_t s_frame = 0;
-    // int64_t frame = s_frame++;
-    
-    if (frame % 100 == 0) {
-        // Calculate frequency delta
-        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
-        
-        // Print header with frequency bands
-        char output_str[2048] = {0}; // Buffer for header text
-        int offset = 0;
-        
-        offset += snprintf(output_str + offset, sizeof(output_str) - offset, 
-                          "FFT Frequency Bands: ");
-        
-        for (int i = 0; i < BANDS; ++i) {
-            float f_start = MIN_FREQUENCY + i * delta_f;
-            float f_end = f_start + delta_f;
-            offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                              "%.2fHz-%.2fHz, ", f_start, f_end);
-        }
-        
-        FASTLED_WARN(output_str);
-    }
-#endif
-
-    // // process output here
-    // for (int i = 0; i < BANDS; ++i) {
-    //     int32_t real = cq[i].r;
-    //     int32_t imag = cq[i].i;
-    //     float r2 = float(real * real);
-    //     float i2 = float(imag * imag);
-    //     float magnitude = sqrt(r2 + i2);
-    //     float magnitude_db = 20 * log10(magnitude);
-    //     float f_start = MIN_FREQUENCY + i * delta_f;
-    //     float f_end = f_start + delta_f;
-    //     FASTLED_UNUSED(f_start);
-    //     FASTLED_UNUSED(f_end);
-    //     FASTLED_UNUSED(magnitude_db);
-
-    //     FASTLED_WARN("magnitude: " << magnitude);
-
-    //     out->push_back(magnitude);
-
-    //     if (magnitude <= 0.0f) {
-    //         magnitude_db = 0.0f;
-    //     }
-
-    //     // char pixel = pixelBrightnessToChar(magnitude_db, 0.0f, 50.0f);
-    //     // // offset += snprintf(output_str + offset, sizeof(output_str) -
-    //     // offset,
-    //     // //                     "%05.2f, ", magnitude_db);
-    //     // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-    //     //                    "%c%c", pixel, pixel);
-    // }
-    // // std::cout << output_str << std::endl
-    // // FASTLED_WARN(output_str);
 }
-
-#if 0
-// Ensure you free resources properly
-void cleanup_fft_resources() {
-  free(g_fftr_cfg);
-  free_kernels(g_kernels, g_cq_cfg);
-}
-#endif
 
 } // namespace fl

@@ -441,7 +441,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T, int N>
+    template <typename T, size_t N>
     Str &append(const fl::InlinedVector<T, N> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);

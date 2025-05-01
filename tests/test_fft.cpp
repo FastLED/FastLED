@@ -31,8 +31,12 @@ TEST_CASE("fft tester") {
         float sin_x = sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
-    fl::vector_fixed<float, 16> out;
-    fft_unit_test(buffer, &out);
+    fl::vector_inlined<float, 16> out;
+    // fft_unit_test(buffer, &out);
+    FFT fft;
+    fft.fft_unit_test(buffer, &out);
+
+
     FASTLED_WARN("FFT output: " << out);
     const float expected_output[16] = {
         3, 2, 2, 6, 6.08, 15.03, 3078.22, 4346.29, 4033.16, 3109, 38.05, 4.47, 4, 2, 1.41, 1.41};
@@ -47,4 +51,8 @@ TEST_CASE("fft tester") {
         }
         CHECK(almost_equal);
     }
+
+    fl::Str info = fft.generateHeaderInfo();
+    FASTLED_WARN("FFT info: " << info);
+    FASTLED_WARN("Done");
 }

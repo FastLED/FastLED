@@ -11,23 +11,12 @@ namespace fl {
 typedef int16_t fft_audio_buffer_t[512];
 // typedef float fft_output[16];
 
-using fft_output_fixed = fl::vector_fixed<float, 16>;
+using fft_output_fixed = fl::vector_inlined<float, 16>;
 
 class FFTContext;
 
 class FFT {
   public:
-    // static FFTContext fft_context(SAMPLES, BANDS, MIN_FREQUENCY,
-    // MAX_FREQUENCY,
-    //                               AUDIO_SAMPLE_RATE);
-    // // #define SAMPLES IS2_AUDIO_BUFFER_LEN
-    // #define AUDIO_SAMPLE_RATE 44100
-    // #define SAMPLES 512
-    // #define BANDS 16
-    // #define SAMPLING_FREQUENCY AUDIO_SAMPLE_RATE
-    // #define MAX_FREQUENCY 4698.3
-    // #define MIN_FREQUENCY 174.6
-    // #define MIN_VAL 5000 // Equivalent to 0.15 in Q15
 
     static int DefaultSamples() { return 512; }
     static int DefaultBands() { return 16; }
@@ -47,6 +36,9 @@ class FFT {
     FFT &operator=(FFT &&) = delete;
 
     void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
+
+    // Info on what the frequency the bins represent
+    fl::Str generateHeaderInfo() const;
 
   private:
     fl::scoped_ptr<FFTContext> mContext;
