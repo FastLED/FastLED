@@ -38,8 +38,8 @@ UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 
 // UIButton trigger("My Trigger");
-UISlider pointX("Point X", 0.0f, 0.0f, WIDTH - 1, 1.0f);
-UISlider pointY("Point Y", 0.0f, 0.0f, HEIGHT - 1, 1.0f);
+UISlider pointX("Point X", WIDTH / 2.0f, 0.0f, WIDTH - 1, 1.0f);
+UISlider pointY("Point Y", HEIGHT / 2.0f, 0.0f, HEIGHT - 1, 1.0f);
 
 UIButton button("second trigger");
 
@@ -47,12 +47,6 @@ UIButton button("second trigger");
 int x = 0;
 int y = 0;
 bool triggered = false;
-
-int jobs[] = {
-    fl::bind(pointX, &x),
-    fl::bind(pointY, &y),
-    fl::bind(button, &triggered),
-};
 
 
 void setup() {
@@ -67,6 +61,9 @@ void loop() {
         FASTLED_WARN("Triggered");
     }
     fl::clear(leds);
+    triggered = button.clicked();
+    x = pointX.as_int();
+    y = pointY.as_int();
     leds[xyMap(x, y)] = CRGB(255, 0, 0);
 
     FastLED.show();

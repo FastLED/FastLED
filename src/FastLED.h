@@ -870,10 +870,6 @@ FASTLED_NAMESPACE_END
 // Flexible callbacks in the style of std::function.
 #include "fl/function.h"
 
-// Binds ui elements to variables and other conveniences.
-// fl::bind(ui_element, &variable)
-#include "fl/bind.h"
-
 // Clears the led data and other objects.
 // CRGB leds[NUM_LEDS];
 // fl::clear(leds)

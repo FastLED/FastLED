@@ -126,6 +126,14 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
     jsFillInMissingScreenMaps(active_strips);
     Str json_str = active_strips.infoJsonString();
     EM_ASM_({
+
+        globalThis.FastLED_sendMessage = globalThis.FastLED_sendMessage || function(msg_tag, json_data_str) {
+            console.log("Missing globalThis.FastLED_sendMessage() function");
+            console.log("Message was mean for tag: " + msg_tag);
+            const json_data = JSON.parse(json_data_str);
+            console.log("Received JSON data:", json_data);
+        };
+
         globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameInfo, callback) {
                 console.log("Missing globalThis.FastLED_onFrame() function");
             //console.log("Received frame data:", frameData);
