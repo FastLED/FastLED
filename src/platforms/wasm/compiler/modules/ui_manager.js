@@ -43,6 +43,43 @@ function createNumberField(element) {
   return controlDiv;
 }
 
+function createAudioField(element) {
+  const controlDiv = document.createElement('div');
+  controlDiv.className = 'ui-control';
+  const label = document.createElement('label');
+  label.textContent = element.name;
+  label.htmlFor = `audio-${element.id}`;
+  const audioInput = document.createElement('input');
+  audioInput.type = 'file';
+  audioInput.id = `audio-${element.id}`;
+  audioInput.accept = 'audio/*';
+  audioInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      const audio = document.createElement('audio');
+      audio.src = url;
+      audio.controls = true;
+      audio.autoplay = true;
+      audio.loop = true;
+      audio.style.width = '100%';
+      audio.style.marginTop = '10px';
+      controlDiv.appendChild(audio);
+      // Remove the file input after selection
+      audioInput.style.display = 'none';
+      // Create a label for the audio element
+      const audioLabel = document.createElement('label');
+      audioLabel.textContent = `Playing: ${file.name}`;
+      audioLabel.style.display = 'block';
+      audioLabel.style.marginTop = '10px';
+      controlDiv.appendChild(audioLabel);
+    }
+  });
+  controlDiv.appendChild(label);
+  controlDiv.appendChild(audioInput);
+  return controlDiv;
+}
+
 function createSlider(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -204,6 +241,9 @@ export class UiManager {
         currentValue = attr === 'true';
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
+      } else if (element.type === 'audio') {
+        // currentValue = element.value;
+        console.error('Audio input not supported yet');
       } else {
         currentValue = parseFloat(element.value);
       }
@@ -248,7 +288,21 @@ export class UiManager {
         control = createButton(data);
       } else if (data.type === 'number') {
         control = createNumberField(data);
+      } else if (data.type === 'audio') {
+        control = createAudioField(data);
       }
+
+      // AI hallucinated this:
+      // if (hasGroup) {
+      //   const groupContainer = document.getElementById(group);
+      //   if (!groupContainer) {
+      //     console.error(`Group ${group} not found in the HTML`);
+      //     return;
+      //   }
+      //   groupContainer.appendChild(control);
+      // } else {
+      //   uiControlsContainer.appendChild(control);
+      // }
 
       if (control) {
         foundUi = true;
