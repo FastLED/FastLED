@@ -15,10 +15,10 @@
 
 #include "fl/array.h"
 #include "fl/fft.h"
+#include "fl/str.h"
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/str.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100
@@ -121,7 +121,8 @@ class FFTContext {
             float f_start = m_cq_cfg.fmin + i * delta_f;
             float f_end = f_start + delta_f;
             offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                               "%.2fHz-%.2fHz, ", f_start, f_end);
+                               "%.2fHz-%.2fHz, ", static_cast<double>(f_start),
+                               static_cast<double>(f_end));
         }
 
         return fl::Str(output_str);
@@ -132,7 +133,6 @@ class FFTContext {
     cq_kernels_t m_kernels;
     cq_kernel_cfg m_cq_cfg;
 };
-
 
 FFT::FFT(int samples, int bands, float fmin, float fmax, int sample_rate)
     : mContext(new FFTContext(samples, bands, fmin, fmax, sample_rate)) {
@@ -152,7 +152,6 @@ void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
         FASTLED_WARN("FFT context is not initialized");
     }
 }
-
 
 fl::Str FFT::generateHeaderInfo() const {
     if (mContext) {
