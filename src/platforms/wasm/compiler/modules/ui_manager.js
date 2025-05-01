@@ -353,15 +353,15 @@ window.setupAudioAnalysis = function(audioElement) {
       const nonZeroCount = Array.from(sampleBuffer).filter(v => v !== 0).length;
       const hasAudioData = nonZeroCount > 0;
       
-      console.log(`Audio processing for ${audioId}:`);
-      console.log(`  Buffer size: ${sampleBuffer.length}`);
-      console.log(`  Non-zero samples: ${nonZeroCount}`);
-      console.log(`  Has audio data: ${hasAudioData}`);
+      // console.log(`Audio processing for ${audioId}:`);
+      // console.log(`  Buffer size: ${sampleBuffer.length}`);
+      // console.log(`  Non-zero samples: ${nonZeroCount}`);
+      // console.log(`  Has audio data: ${hasAudioData}`);
       
-      if (hasAudioData) {
-        // Show a few sample values
-        console.log(`  Sample values (first 5): ${Array.from(sampleBuffer.slice(0, 5))}`);
-      }
+      // if (hasAudioData) {
+      //   // Show a few sample values
+      //   console.log(`  Sample values (first 5): ${Array.from(sampleBuffer.slice(0, 5))}`);
+      // }
     }
     
     // Mark this audio element as having active samples
@@ -415,21 +415,21 @@ export class UiManager {
             // Convert Int16Array to regular array for JSON serialization
             currentValue = Array.from(samples);
             
-            // Print out the audio values being serialized
-            console.log(`Audio data for ${id}:`);
-            console.log(`  Sample count: ${currentValue.length}`);
-            console.log(`  First 5 samples: ${currentValue.slice(0, 5)}`);
-            console.log(`  Last 5 samples: ${currentValue.slice(-5)}`);
+            // // Print out the audio values being serialized
+            // console.log(`Audio data for ${id}:`);
+            // console.log(`  Sample count: ${currentValue.length}`);
+            // console.log(`  First 5 samples: ${currentValue.slice(0, 5)}`);
+            // console.log(`  Last 5 samples: ${currentValue.slice(-5)}`);
             
             // Calculate some statistics
-            const nonZeroCount = currentValue.filter(v => v !== 0).length;
-            const min = Math.min(...currentValue);
-            const max = Math.max(...currentValue);
-            const sum = currentValue.reduce((a, b) => a + Math.abs(b), 0);
-            const avg = sum / currentValue.length;
+            // const nonZeroCount = currentValue.filter(v => v !== 0).length;
+            // const min = Math.min(...currentValue);
+            // const max = Math.max(...currentValue);
+            // const sum = currentValue.reduce((a, b) => a + Math.abs(b), 0);
+            // const avg = sum / currentValue.length;
             
-            console.log(`  Non-zero samples: ${nonZeroCount} (${Math.round(nonZeroCount/currentValue.length*100)}%)`);
-            console.log(`  Range: ${min} to ${max}, Average amplitude: ${avg.toFixed(2)}`);
+            // console.log(`  Non-zero samples: ${nonZeroCount} (${Math.round(nonZeroCount/currentValue.length*100)}%)`);
+            // console.log(`  Range: ${min} to ${max}, Average amplitude: ${avg.toFixed(2)}`);
             
             // Always include audio samples in changes when audio is active
             changes[id] = currentValue;
@@ -458,7 +458,7 @@ export class UiManager {
 
     if (hasChanges) {
       // Log the final JSON that will be sent to FastLED
-      console.log('Sending UI changes to FastLED:');
+      // console.log('Sending UI changes to FastLED:');
       
       // Check if there's audio data in the changes
       const audioKeys = Object.keys(changes).filter(key => 
@@ -471,16 +471,16 @@ export class UiManager {
         // For each audio element, log summary info but not the full array
         audioKeys.forEach(key => {
           const audioData = changes[key];
-          console.log(`  Audio ${key}: ${audioData.length} samples`);
+          //console.log(`  Audio ${key}: ${audioData.length} samples`);
           
           // Create a copy of changes with abbreviated audio data for logging
           const changesCopy = {...changes};
           changesCopy[key] = `[${audioData.length} samples]`;
-          console.log(JSON.stringify(changesCopy, null, 2));
+          //console.log(JSON.stringify(changesCopy, null, 2));
         });
       } else {
         // No audio data, log the full changes object
-        console.log(JSON.stringify(changes, null, 2));
+        //console.log(JSON.stringify(changes, null, 2));
       }
     }
     
