@@ -3,7 +3,11 @@
 
 // FASTLED_STACK_ARRAY
 // An array of variable length that is allocated on the stack using
-// either alloca or a 
+// either alloca or a variable length array (VLA) support built into the
+// the compiler.
+// Example:
+//   Instead of: int array[buff_size];
+//   You'd use: FASTLED_STACK_ARRAY(int, array, buff_size);
 
 #ifndef FASTLED_VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
 #if defined(__clang__) || defined(ARDUINO_GIGA_M7) || defined(ARDUINO_GIGA)
