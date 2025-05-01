@@ -17,7 +17,28 @@ class FFTContext;
 
 class FFT {
   public:
-    FFT(int samples, int bands, float fmin, float fmax, int sample_rate);
+    // static FFTContext fft_context(SAMPLES, BANDS, MIN_FREQUENCY,
+    // MAX_FREQUENCY,
+    //                               AUDIO_SAMPLE_RATE);
+    // // #define SAMPLES IS2_AUDIO_BUFFER_LEN
+    // #define AUDIO_SAMPLE_RATE 44100
+    // #define SAMPLES 512
+    // #define BANDS 16
+    // #define SAMPLING_FREQUENCY AUDIO_SAMPLE_RATE
+    // #define MAX_FREQUENCY 4698.3
+    // #define MIN_FREQUENCY 174.6
+    // #define MIN_VAL 5000 // Equivalent to 0.15 in Q15
+
+    static int DefaultSamples() { return 512; }
+    static int DefaultBands() { return 16; }
+    static float DefaultMinFrequency() { return 174.6f; }
+    static float DefaultMaxFrequency() { return 4698.3f; }
+    static int DefaultSampleRate() { return 44100; }
+
+    // FFT(int samples, int bands, float fmin, float fmax, int sample_rate);
+    FFT(int samples = DefaultSamples(), int bands = DefaultBands(),
+        float fmin = DefaultMinFrequency(), float fmax = DefaultMaxFrequency(),
+        int sample_rate = DefaultSampleRate());
     ~FFT();
 
     FFT(const FFT &) = delete;
@@ -31,9 +52,9 @@ class FFT {
     fl::scoped_ptr<FFTContext> mContext;
 };
 
-
-void fft_init(); // Explicit initialization of FFT, otherwise it will be initialized on first run.
+void fft_init(); // Explicit initialization of FFT, otherwise it will be
+                 // initialized on first run.
 bool fft_is_initialized();
-void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed* out);
+void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
 
 }; // namespace fl
