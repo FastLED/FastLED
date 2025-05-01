@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <math.h>
+
 #include "cq_kernel.h"
+
 
 void _generate_guassian(kiss_fft_scalar window[], int N);
 
