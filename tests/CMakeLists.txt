@@ -204,9 +204,15 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     
     # Set the correct subsystem for Windows
     if(WIN32)
-        set_target_properties(${TEST_NAME} PROPERTIES
-            WIN32_EXECUTABLE FALSE
-            LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+        if(MSVC)
+            set_target_properties(${TEST_NAME} PROPERTIES
+                WIN32_EXECUTABLE FALSE
+                LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+        else()
+            # For MinGW/Clang on Windows
+            set_target_properties(${TEST_NAME} PROPERTIES
+                WIN32_EXECUTABLE FALSE)
+        endif()
     endif()
     # Add C++-specific flags only for C++ files
     target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
