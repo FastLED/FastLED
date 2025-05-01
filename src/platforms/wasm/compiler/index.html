@@ -70,9 +70,79 @@
           uploadBtn.textContent = file.name.length > 20 
             ? file.name.substring(0, 17) + '...' 
             : file.name;
+          
+          // Set up audio analysis
+          setupAudioAnalysis(player);
             
           player.play();  // start playback
         });
+        
+        // Set up audio analysis to print sample size
+        function setupAudioAnalysis(audioElement) {
+          // Create audio context
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          const audioContext = new AudioContext();
+          
+          // Create analyzer
+          const analyzer = audioContext.createAnalyser();
+          analyzer.fftSize = 2048;
+          
+          // Connect audio element to analyzer
+          const source = audioContext.createMediaElementSource(audioElement);
+          source.connect(analyzer);
+          analyzer.connect(audioContext.destination);
+          
+          // Buffer for frequency data
+          const bufferLength = analyzer.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
+          
+          // Output element
+          const output = document.getElementById('output');
+          
+          // Function to update and display sample data
+          function updateSampleData() {
+            // Get frequency data
+            analyzer.getByteFrequencyData(dataArray);
+            
+            // Calculate average amplitude
+            let sum = 0;
+            let nonZeroCount = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+              if (dataArray[i] > 0) {
+                sum += dataArray[i];
+                nonZeroCount++;
+              }
+            }
+            
+            // Only update if we have data and audio is playing
+            if (nonZeroCount > 0 && !audioElement.paused) {
+              const average = Math.round(sum / nonZeroCount);
+              const timestamp = (audioElement.currentTime).toFixed(2);
+              
+              // Add to output
+              const message = `[${timestamp}s] Audio sample size: ${bufferLength}, Average amplitude: ${average}`;
+              
+              // Update the canvas label to show the current audio data
+              const label = document.getElementById('canvas-label');
+              label.textContent = `Audio: ${average}`;
+              
+              // Make sure the label is visible
+              if (!label.classList.contains('show-animation')) {
+                label.classList.add('show-animation');
+              }
+              
+              // Also log to console for debugging
+              console.log(message);
+            }
+            
+            // Continue updating
+            requestAnimationFrame(updateSampleData);
+          }
+          
+          // Start updating
+          updateSampleData();
+        }
       </script>
 
     <script type="importmap">

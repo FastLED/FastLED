@@ -327,14 +327,17 @@ audio::-webkit-media-controls-time-remaining-display {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: rgba(50, 50, 50, .25);
-    color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(50, 50, 50, .5);
+    color: rgba(255, 255, 255, 0.9);
     padding: 5px 10px;
     border-radius: 3px;
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 14px;
     pointer-events: none;
     opacity: 0;  /* Start hidden */
+    z-index: 10;
+    min-width: 80px;
+    text-align: center;
 }
 
 /* Add a new class for when we want to trigger the animation */
