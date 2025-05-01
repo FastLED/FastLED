@@ -2,33 +2,7 @@
 /// Functions to generate and fill arrays with noise.
 
 #include <string.h>
-
-#ifndef VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
-#if defined(__clang__) || defined(ARDUINO_GIGA_M7) || defined(ARDUINO_GIGA)
-// Clang doesn't have variable length arrays. Therefore we need to emulate them using
-// alloca. It's been found that Arduino Giga M7 also doesn't support variable length arrays
-// for some reason so we force it to emulate them as well in this case.
-#define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 1
-#else
-// Else, assume the compiler is gcc, which has variable length arrays
-#define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 0
-#endif
-#endif  // VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
-
-#if !VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
-#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) TYPE NAME[SIZE]
-#elif __has_include(<alloca.h>)
-#include <alloca.h>
-#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
-    TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
-#elif __has_include(<cstdlib>)
-#include <cstdlib>
-#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
-    TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
-#else
-#error "Compiler does not allow variable type arrays."
-#endif
-
+#include "fl/array.h"
 
 
 /// Disables pragma messages and warnings
@@ -880,8 +854,8 @@ void fill_noise8(CRGB *leds, int num_leds,
         const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
 
         if (LedsPer <= 0) continue;
-        VARIABLE_LENGTH_ARRAY(uint8_t, V, LedsPer);
-        VARIABLE_LENGTH_ARRAY(uint8_t, H, LedsPer);
+        FASTLED_STACK_ARRAY(uint8_t, V, LedsPer);
+        FASTLED_STACK_ARRAY(uint8_t, H, LedsPer);
 
         memset(V, 0, LedsPer);
         memset(H, 0, LedsPer);
@@ -906,8 +880,8 @@ void fill_noise16(CRGB *leds, int num_leds,
         const int LedsRemaining = num_leds - j;
         const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
         if (LedsPer <= 0) continue;
-        VARIABLE_LENGTH_ARRAY(uint8_t, V, LedsPer);
-        VARIABLE_LENGTH_ARRAY(uint8_t, H, LedsPer);
+        FASTLED_STACK_ARRAY(uint8_t, V, LedsPer);
+        FASTLED_STACK_ARRAY(uint8_t, H, LedsPer);
 
         memset(V, 0, LedsPer);
         memset(H, 0, LedsPer);
@@ -926,8 +900,8 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time,bool blend) {
   const size_t array_size = (size_t)height * width;
   if (array_size <= 0) return;
-  VARIABLE_LENGTH_ARRAY(uint8_t, V, array_size);
-  VARIABLE_LENGTH_ARRAY(uint8_t, H, array_size);
+  FASTLED_STACK_ARRAY(uint8_t, V, array_size);
+  FASTLED_STACK_ARRAY(uint8_t, H, array_size);
 
   memset(V,0,height*width);
   memset(H,0,height*width);
@@ -965,8 +939,8 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend, uint16_t hue_shift) {
 
-  VARIABLE_LENGTH_ARRAY(uint8_t, V, height*width);
-  VARIABLE_LENGTH_ARRAY(uint8_t, H, height*width);
+  FASTLED_STACK_ARRAY(uint8_t, V, height*width);
+  FASTLED_STACK_ARRAY(uint8_t, H, height*width);
   
   memset(V,0,height*width);
   memset(H,0,height*width);
