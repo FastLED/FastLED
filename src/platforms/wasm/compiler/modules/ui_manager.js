@@ -5,7 +5,7 @@
 /* eslint-disable guard-for-in */
 
 // Audio processing configuration
-const AUDIO_SAMPLE_BLOCK_SIZE = 256;
+const AUDIO_SAMPLE_BLOCK_SIZE = 1024;
 
 
 function createNumberField(element) {
