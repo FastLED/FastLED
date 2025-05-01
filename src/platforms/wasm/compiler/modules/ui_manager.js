@@ -4,6 +4,9 @@
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 
+// Audio processing configuration
+const AUDIO_SAMPLE_BLOCK_SIZE = 256;
+
 
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
@@ -310,10 +313,10 @@ window.setupAudioAnalysis = function(audioElement) {
   // Create script processor node for raw sample access
   // Note: ScriptProcessorNode is deprecated but still widely supported
   // We use it here for simplicity in getting raw audio samples
-  const scriptNode = audioContext.createScriptProcessor(1024, 1, 1);
+  const scriptNode = audioContext.createScriptProcessor(AUDIO_SAMPLE_BLOCK_SIZE, 1, 1);
   
-  // Create a buffer to store the latest 1024 samples as Int16Array
-  const sampleBuffer = new Int16Array(1024);
+  // Create a buffer to store the latest samples as Int16Array
+  const sampleBuffer = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
   
   // Connect audio element to script processor
   const source = audioContext.createMediaElementSource(audioElement);
@@ -407,7 +410,7 @@ export class UiManager {
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
-        // Handle audio input - get the latest 1024 int16 samples
+        // Handle audio input - get the latest int16 samples
         if (window.audioData && window.audioData.audioSamples) {
           const samples = window.audioData.audioSamples[element.id];
           

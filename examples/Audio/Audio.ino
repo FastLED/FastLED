@@ -81,6 +81,7 @@ void loop() {
 
     Ptr<const AudioSample> sample = audio.next();
     if (sample) {
+        FASTLED_WARN("Audio sample size: " << sample->pcm().size());
         soundLevelMeter.processBlock(sample->pcm());
         // FASTLED_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
