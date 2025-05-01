@@ -17,6 +17,7 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/array.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100
@@ -77,9 +78,13 @@ class FFTContext {
                        fft_output_fixed *out) {
         //uint32_t start = millis();
         out->clear();
-        kiss_fft_cpx fft[SAMPLES] = {};
+        // kiss_fft_cpx fft[SAMPLES] = {};
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, SAMPLES);
+        // memset(fft, 0, sizeof(fft));
         kiss_fftr(m_fftr_cfg, buffer, fft);
-        kiss_fft_cpx cq[BANDS] = {};
+        // kiss_fft_cpx cq[BANDS] = {};
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, cq, BANDS);
+        // memset(cq, 0, sizeof(cq));
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
         //uint32_t diff = millis() - start;
         // FASTLED_UNUSED(diff);
