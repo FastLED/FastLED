@@ -77,9 +77,7 @@ bool fft_is_initialized() { return g_is_fft_initialized; }
 
 void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed* out) {
     uint32_t start = millis();
-    // std::cout << "Performing FFT" << std::endl;
-
-
+    out->clear();
     init_once();
     kiss_fft_cpx fft[SAMPLES] = {};
     kiss_fftr(g_fftr_cfg, buffer, fft);
