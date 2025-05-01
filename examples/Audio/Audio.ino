@@ -87,21 +87,23 @@ void loop() {
         auto dbfs = soundLevelMeter.getDBFS();
         FASTLED_WARN("getDBFS: " << dbfs);
 
-        const float mind = -60.0f; // choose your quiet‐floor
-        float anim = (dbfs - mind) / (0.0f - mind);
-        // clamp into [0,1]
-        if (anim < 0.0f)
-            anim = 0.0f;
-        else if (anim > 1.0f)
-            anim = 1.0f;
 
-        // float anim  = powf(10.0f, dbfs * 0.05f);
-        FASTLED_WARN("anim: " << anim);
+        int32_t max = 0;
+
+        for (int i = 0; i < sample->pcm().size(); ++i) {
+            int32_t x = ABS(sample->pcm()[i]);
+            if (x > max) {
+                max = x;
+            }
+        }
+
+        float anim = fl::map_range<float, float>(max, 0.0f, 32768.0f, 0.0f, 1.0f);
+        anim = fl::clamp(anim, 0.0f, 1.0f);
 
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
         FASTLED_WARN("x: " << x);
 
-        FASTLED_WARN("rms: " << rms(sample->pcm()));
+        // FASTLED_WARN("rms: " << rms(sample->pcm()));
     }
 
     leds[xyMap(x, y)] = CRGB(255, 0, 0);
