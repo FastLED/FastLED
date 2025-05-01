@@ -812,6 +812,32 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
 
+    void resize(size_t size) {
+        if (size > INLINED_SIZE) {
+            if (mUsingHeap) {
+                mHeap.resize(size);
+            } else {
+                mHeap.resize(size);
+                for (auto &v : mFixed) {
+                    mHeap.push_back(v);
+                }
+                mFixed.clear();
+                mUsingHeap = true;
+            }
+        } else {
+            if (mUsingHeap) {
+                mFixed.resize(size);
+                for (auto &v : mHeap) {
+                    mFixed.push_back(v);
+                }
+                mHeap.clear();
+                mUsingHeap = false;
+            } else {
+                mFixed.resize(size);
+            }
+        }
+    }
+
     // Get current size
     size_t size() const { return mUsingHeap ? mHeap.size() : mFixed.size(); }
     bool empty() const { return size() == 0; }

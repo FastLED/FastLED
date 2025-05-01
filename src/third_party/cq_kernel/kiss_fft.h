@@ -15,6 +15,10 @@
 #include <math.h>
 #include <string.h>
 
+
+// Always use fixed point.
+#define FIXED_POINT 1
+
 // WROVER and WROOM have 4MB of PSRAM or more.
 #if KISS_FFT_USE_ESP32_PSRAM
 #include "esp_heap_caps.h"

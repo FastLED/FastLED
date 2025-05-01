@@ -9,17 +9,17 @@ namespace fl {
 
 namespace /*compiled_test*/ {
 
-// LineSimplifier<float>::LineSimplifier() : epsilon(0.0) {}
-using LineSimplifierF = LineSimplifier<float>;
-using LineSimplifierD = LineSimplifier<double>;
+// // LineSimplifier<float>::LineSimplifier() : epsilon(0.0) {}
+// using LineSimplifierF = LineSimplifier<float>;
+// using LineSimplifierD = LineSimplifier<double>;
 
-LineSimplifierF s_test;
-LineSimplifierD s_testd;
+// LineSimplifierF s_test;
+// LineSimplifierD s_testd;
 
-void foo() {
-    fl::vector<point_xy<float>> points;
-    s_test.simplifyInplace(&points);
-}
+// void foo() {
+//     fl::vector<point_xy<float>> points;
+//     s_test.simplifyInplace(&points);
+// }
 
 }  // namespace compiled_test
 
