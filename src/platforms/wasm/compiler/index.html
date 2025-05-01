@@ -21,13 +21,6 @@
     </div>
 
 
-    <!-- New stuff -->
-    <button id="upload_mp3">upload_mp3</button>
-    <!-- Hidden file input, restricted to MP3 files -->
-    <input type="file" id="file_input" accept="audio/mpeg" style="display:none" />
-    <!-- Audio element, shown once a file is loaded -->
-    <audio id="player" controls style="display:none; margin-top:1em;"></audio>
-
 
 
     <div id="main-container">
@@ -36,6 +29,14 @@
                 <canvas id="myCanvas" width="16" height="16"></canvas>
                 <div id="canvas-label">stdout</div>
             </div>
+            <div id="audio-controls">
+                <button id="upload_mp3">Upload MP3</button>
+                <!-- Hidden file input, restricted to MP3 files -->
+                <input type="file" id="file_input" accept="audio/mpeg" style="display:none" />
+                <!-- Audio element, shown once a file is loaded -->
+                <audio id="player" controls style="display:none"></audio>
+            </div>
+        
             <div id="ui-controls"></div>
         </div>
         <div id="container"></div>
@@ -44,6 +45,8 @@
             <pre id="output">stdout:</pre>
         </div>
     </div>
+
+
 
 
 
@@ -66,7 +69,13 @@
           const url = URL.createObjectURL(file);
           player.src = url;
           player.style.display = 'block';  // show the player
-          player.play();                   // start playback
+          
+          // Update button text to show the file name
+          uploadBtn.textContent = file.name.length > 20 
+            ? file.name.substring(0, 17) + '...' 
+            : file.name;
+            
+          player.play();  // start playback
         });
       </script>
 
