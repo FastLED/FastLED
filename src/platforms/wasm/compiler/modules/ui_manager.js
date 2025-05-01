@@ -5,7 +5,7 @@
 /* eslint-disable guard-for-in */
 
 // Audio processing configuration
-const AUDIO_SAMPLE_BLOCK_SIZE = 1024;
+const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
 
 
 function createNumberField(element) {
