@@ -37,11 +37,6 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 
-// UIButton trigger("My Trigger");
-UISlider pointX("Point X", WIDTH / 2.0f, 0.0f, WIDTH - 1, 1.0f);
-UISlider pointY("Point Y", HEIGHT / 2.0f, 0.0f, HEIGHT - 1, 1.0f);
-
-UIButton button("second trigger");
 UIAudio audio("Audio");
 
 int x = 0;
@@ -72,15 +67,11 @@ void loop() {
         FASTLED_WARN("Triggered");
     }
     fl::clear(leds);
-
-    // soundLevelMeter.processBlock(audio.next()->pcm().data(),
-    // audio.next()->pcm().size());
-    triggered = button.clicked();
+    
     // x = pointX.as_int();
-    y = pointY.as_int();
+    y = HEIGHT / 2;
 
-    Ptr<const AudioSample> sample = audio.next();
-    if (sample) {
+    while (Ptr<const AudioSample> sample = audio.next()) {
         FASTLED_WARN("Audio sample size: " << sample->pcm().size());
         soundLevelMeter.processBlock(sample->pcm());
         // FASTLED_WARN("")
