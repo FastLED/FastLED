@@ -110,22 +110,26 @@ class FFTContext {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
 
-        // Print header with frequency bands
-        char output_str[2048] = {0}; // Buffer for header text
-        int offset = 0;
+        // // Print header with frequency bands
+        // char output_str[2048] = {0}; // Buffer for header text
+        // int offset = 0;
 
-        offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                           "FFT Frequency Bands: ");
+        // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+        //                    "FFT Frequency Bands: ");
+
+        fl::StrStream ss;
+        ss << "FFT Frequency Bands: ";
 
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             float f_start = m_cq_cfg.fmin + i * delta_f;
             float f_end = f_start + delta_f;
-            offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                               "%.2fHz-%.2fHz, ", static_cast<double>(f_start),
-                               static_cast<double>(f_end));
+            // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+            //                    "%.2fHz-%.2fHz, ", static_cast<double>(f_start),
+            //                    static_cast<double>(f_end));
+            ss << f_start << "Hz-" << f_end << "Hz, ";
         }
 
-        return fl::Str(output_str);
+        return ss.str();
     }
 
   private:
