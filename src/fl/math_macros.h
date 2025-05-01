@@ -36,6 +36,14 @@
 #define ALMOST_EQUAL_DOUBLE(a,b) (ABS((a)-(b))<EPSILON_F)
 #endif
 
+#ifndef INFINITY_DOUBLE
+#define INFINITY_DOUBLE (1.0 / 0.0)
+#endif
+
+#ifndef INFINITY_FLOAT
+#define INFINITY_FLOAT (1.0f / 0.0f)
+#endif
+
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
 #endif

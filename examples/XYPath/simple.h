@@ -64,7 +64,7 @@ void loop() {
     do { 
         auto sample = audio.next();
         if (sample) {
-            FASTLED_WARN("Audio sample size: " << sample->pcm().size());
+            FASTLED_WARN("Audio sample size: " << sample->pcm().size());            
         } else {
             break;
         }
