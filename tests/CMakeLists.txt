@@ -210,8 +210,14 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
                 LINK_FLAGS "/SUBSYSTEM:CONSOLE")
         else()
             # For MinGW/Clang on Windows
-            set_target_properties(${TEST_NAME} PROPERTIES
-                WIN32_EXECUTABLE FALSE)
+            if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                set_target_properties(${TEST_NAME} PROPERTIES
+                    WIN32_EXECUTABLE FALSE
+                    LINK_FLAGS "-Xlinker /subsystem:console")
+            else()
+                set_target_properties(${TEST_NAME} PROPERTIES
+                    WIN32_EXECUTABLE FALSE)
+            endif()
         endif()
     endif()
     # Add C++-specific flags only for C++ files
@@ -225,7 +231,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         CXX_STANDARD_REQUIRED ON
     )
     # Add static linking flags and debug flags for test executables
-    if(NOT APPLE)
+    if(NOT APPLE AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
     target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
