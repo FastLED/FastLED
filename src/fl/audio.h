@@ -5,6 +5,9 @@
 #include <stdint.h>
 
 namespace fl {
+
+FASTLED_SMART_PTR(AudioSample);
+
 class AudioSample : public fl::Referent {
   public:
     using VectorPCM = fl::vector<int16_t>;
