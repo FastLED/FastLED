@@ -94,9 +94,7 @@ function createAudioField(element) {
       audio.src = url;
       
       // Initialize audio analysis before playing
-      console.log(`Setting up audio analysis for ${audioInput.id}`);
       const analysisSetup = window.setupAudioAnalysis(audio);
-      console.log("Audio analysis setup complete:", analysisSetup);
       
       // Now play the audio
       audio.loop = true;
@@ -104,13 +102,31 @@ function createAudioField(element) {
       // Ensure we can play (autoplay policies might block)
       audio.play().then(() => {
         console.log("Audio playback started successfully");
+        
+        // Set up a timer to periodically mark samples as active
+        // This ensures we regularly send audio data to FastLED
+        setInterval(() => {
+          if (!audio.paused) {
+            window.audioData.hasActiveSamples = true;
+          }
+        }, 50); // Send samples approximately 20 times per second
+        
       }).catch(err => {
         console.error("Error starting audio playback:", err);
         // Add a play button as fallback
         const playButton = document.createElement('button');
         playButton.textContent = "Play Audio";
         playButton.className = "audio-play-button";
-        playButton.onclick = () => audio.play();
+        playButton.onclick = () => {
+          audio.play().then(() => {
+            // Set up the timer after successful play
+            setInterval(() => {
+              if (!audio.paused) {
+                window.audioData.hasActiveSamples = true;
+              }
+            }, 50);
+          });
+        };
         controlDiv.appendChild(playButton);
       });
       
@@ -280,7 +296,8 @@ if (!window.audioData) {
   console.log("Initializing global audio data storage");
   window.audioData = {
     audioContexts: {},
-    audioSamples: {}
+    audioSamples: {},
+    hasActiveSamples: false
   };
 }
 
@@ -330,9 +347,25 @@ window.setupAudioAnalysis = function(audioElement) {
       sampleBuffer[i] = Math.floor(inputData[i] * 32767);
     }
     
-    // Debug output to verify we're getting samples
-    const sum = inputData.reduce((acc, val) => acc + Math.abs(val), 0);
-    console.log(`Audio processing: samples=${inputData.length}, avg amplitude=${sum/inputData.length}`);
+    // Log audio processing occasionally (every ~2 seconds to avoid console spam)
+    if (Math.random() < 0.01) {
+      // Calculate some basic stats about the audio data
+      const nonZeroCount = Array.from(sampleBuffer).filter(v => v !== 0).length;
+      const hasAudioData = nonZeroCount > 0;
+      
+      console.log(`Audio processing for ${audioId}:`);
+      console.log(`  Buffer size: ${sampleBuffer.length}`);
+      console.log(`  Non-zero samples: ${nonZeroCount}`);
+      console.log(`  Has audio data: ${hasAudioData}`);
+      
+      if (hasAudioData) {
+        // Show a few sample values
+        console.log(`  Sample values (first 5): ${Array.from(sampleBuffer.slice(0, 5))}`);
+      }
+    }
+    
+    // Mark this audio element as having active samples
+    window.audioData.hasActiveSamples = true;
     
     // Optional: Update UI with a simple indicator that audio is being processed
     const label = document.getElementById('canvas-label');
@@ -364,10 +397,8 @@ export class UiManager {
     const changes = {}; // Json object to store changes.
     let hasChanges = false;
     for (const id in this.uiElements) {
-      // console.log(`Processing UI element with ID: ${id}`);
       const element = this.uiElements[id];
       let currentValue;
-      console.log(`Element ID: ${id}, Type: ${element.type}, Value: ${element.value}`);
       if (element.type === 'checkbox') {
         currentValue = element.checked;
       } else if (element.type === 'submit') {
@@ -377,40 +408,42 @@ export class UiManager {
         currentValue = parseFloat(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
         // Handle audio input - get the latest 1024 int16 samples
-        console.log(`Processing audio element: ${element.id}`);
-        
         if (window.audioData && window.audioData.audioSamples) {
           const samples = window.audioData.audioSamples[element.id];
           
-          if (samples) {
-            console.log(`Found samples for ${element.id}, length: ${samples.length}`);
-            
+          if (samples && window.audioData.hasActiveSamples) {
             // Convert Int16Array to regular array for JSON serialization
             currentValue = Array.from(samples);
             
-            // Always include audio samples in changes
+            // Print out the audio values being serialized
+            console.log(`Audio data for ${id}:`);
+            console.log(`  Sample count: ${currentValue.length}`);
+            console.log(`  First 5 samples: ${currentValue.slice(0, 5)}`);
+            console.log(`  Last 5 samples: ${currentValue.slice(-5)}`);
+            
+            // Calculate some statistics
+            const nonZeroCount = currentValue.filter(v => v !== 0).length;
+            const min = Math.min(...currentValue);
+            const max = Math.max(...currentValue);
+            const sum = currentValue.reduce((a, b) => a + Math.abs(b), 0);
+            const avg = sum / currentValue.length;
+            
+            console.log(`  Non-zero samples: ${nonZeroCount} (${Math.round(nonZeroCount/currentValue.length*100)}%)`);
+            console.log(`  Range: ${min} to ${max}, Average amplitude: ${avg.toFixed(2)}`);
+            
+            // Always include audio samples in changes when audio is active
             changes[id] = currentValue;
             hasChanges = true;
             
-            // Debug output
-            const nonZeroCount = currentValue.filter(v => v !== 0).length;
-            console.log(`Audio samples: ${currentValue.length}, non-zero: ${nonZeroCount}`);
+            // Reset the flag after sending samples
+            window.audioData.hasActiveSamples = false;
             
             continue; // Skip the comparison below for audio
-          } else {
-            console.log(`No samples found for ${element.id}`);
-            currentValue = Array(1024).fill(0); // Return empty array of correct size
-            changes[id] = currentValue;
-            hasChanges = true;
-            continue;
           }
-        } else {
-          console.log("Audio data storage not initialized");
-          currentValue = Array(1024).fill(0);
-          changes[id] = currentValue;
-          hasChanges = true;
-          continue;
         }
+        
+        // If we reach here, either no samples are available or they've already been sent
+        // Don't add to changes object, so we don't spam with empty arrays
       } else {
         currentValue = parseFloat(element.value);
       }
@@ -423,6 +456,34 @@ export class UiManager {
       }
     }
 
+    if (hasChanges) {
+      // Log the final JSON that will be sent to FastLED
+      console.log('Sending UI changes to FastLED:');
+      
+      // Check if there's audio data in the changes
+      const audioKeys = Object.keys(changes).filter(key => 
+        this.uiElements[key] && 
+        this.uiElements[key].type === 'file' && 
+        this.uiElements[key].accept === 'audio/*'
+      );
+      
+      if (audioKeys.length > 0) {
+        // For each audio element, log summary info but not the full array
+        audioKeys.forEach(key => {
+          const audioData = changes[key];
+          console.log(`  Audio ${key}: ${audioData.length} samples`);
+          
+          // Create a copy of changes with abbreviated audio data for logging
+          const changesCopy = {...changes};
+          changesCopy[key] = `[${audioData.length} samples]`;
+          console.log(JSON.stringify(changesCopy, null, 2));
+        });
+      } else {
+        // No audio data, log the full changes object
+        console.log(JSON.stringify(changes, null, 2));
+      }
+    }
+    
     return hasChanges ? changes : null;
   }
 
