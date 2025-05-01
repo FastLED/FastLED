@@ -13,11 +13,11 @@
 #include "third_party/cq_kernel/cq_kernel.h"
 #include "third_party/cq_kernel/kiss_fftr.h"
 
+#include "fl/array.h"
 #include "fl/fft.h"
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/array.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100
@@ -31,21 +31,6 @@
 #define PRINT_HEADER 0
 
 namespace fl {
-namespace {
-// kiss_fftr_cfg g_fftr_cfg = nullptr;
-//cq_kernels_t g_kernels;
-
-cq_kernel_cfg cq_kernel_cfgcq_kernel_cfg_make() {
-    cq_kernel_cfg out;
-    memset(&out, 0, sizeof(cq_kernel_cfg));
-    out.samples = SAMPLES;
-    out.bands = BANDS;
-    out.fmin = MIN_FREQUENCY;
-    out.fmax = MAX_FREQUENCY;
-    out.fs = AUDIO_SAMPLE_RATE;
-    out.min_val = MIN_VAL;
-    return out;
-}
 
 class FFTContext {
   public:
@@ -76,26 +61,26 @@ class FFTContext {
 
     void fft_unit_test(const fft_audio_buffer_t &buffer,
                        fft_output_fixed *out) {
-        //uint32_t start = millis();
+        // uint32_t start = millis();
         out->clear();
         // kiss_fft_cpx fft[SAMPLES] = {};
-        FASTLED_STACK_ARRAY(kiss_fft_cpx, fft,  m_cq_cfg.samples);
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
         // memset(fft, 0, sizeof(fft));
         kiss_fftr(m_fftr_cfg, buffer, fft);
         // kiss_fft_cpx cq[BANDS] = {};
-        FASTLED_STACK_ARRAY(kiss_fft_cpx, cq,  m_cq_cfg.bands);
+        FASTLED_STACK_ARRAY(kiss_fft_cpx, cq, m_cq_cfg.bands);
         // memset(cq, 0, sizeof(cq));
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
-        //uint32_t diff = millis() - start;
-        // FASTLED_UNUSED(diff);
-        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) /  m_cq_cfg.bands;
+        // uint32_t diff = millis() - start;
+        //  FASTLED_UNUSED(diff);
+        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / m_cq_cfg.bands;
         // char output_str[2048]; // Assuming this size is sufficient. Adjust as
         // necessary.
         // int offset = 0;
         // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
         // "FFT took %u ms. FFT output: ", diff);
         // process output here
-        for (int i = 0; i <  m_cq_cfg.bands; ++i) {
+        for (int i = 0; i < m_cq_cfg.bands; ++i) {
             int32_t real = cq[i].r;
             int32_t imag = cq[i].i;
             float r2 = float(real * real);
@@ -124,30 +109,48 @@ class FFTContext {
     cq_kernel_cfg m_cq_cfg;
 };
 
-cq_kernel_cfg g_cq_cfg = cq_kernel_cfgcq_kernel_cfg_make();
 
-// bool g_is_fft_initialized = false;
-
-void init_once() {
-    // if (g_is_fft_initialized) {
-    //     return;
-    // }
-    // FASTLED_WARN("Initializing FFT");
-    // uint32_t start = millis();
-    // g_is_fft_initialized = true;
-    // g_fftr_cfg = kiss_fftr_alloc(SAMPLES, 0, NULL, NULL);
-    // cq_kernels_t kernels = generate_kernels(g_cq_cfg);
-    // g_kernels = generate_kernels(g_cq_cfg);
-    // g_kernels = reallocate_kernels(g_kernels, g_cq_cfg); // optional
-    // uint32_t diff = millis() - start;
-
-    // FASTLED_WARN("FFT initialized in " << diff << "ms");
-    // FASTLED_WARN("kernel: " << kernels);
+FFT::FFT(int samples, int bands, float fmin, float fmax, int sample_rate)
+    : mContext(new FFTContext(samples, bands, fmin, fmax, sample_rate)) {
+    if (!mContext) {
+        FASTLED_WARN("Failed to allocate FFT context");
+    }
 }
 
-} // namespace
+FFT::~FFT() { mContext.reset(); }
 
-void fft_init() { init_once(); }
+void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
+                        fft_output_fixed *out) {
+
+    if (mContext) {
+        mContext->fft_unit_test(buffer, out);
+    } else {
+        FASTLED_WARN("FFT context is not initialized");
+    }
+}
+
+
+
+// void init_once() {
+//     // if (g_is_fft_initialized) {
+//     //     return;
+//     // }
+//     // FASTLED_WARN("Initializing FFT");
+//     // uint32_t start = millis();
+//     // g_is_fft_initialized = true;
+//     // g_fftr_cfg = kiss_fftr_alloc(SAMPLES, 0, NULL, NULL);
+//     // cq_kernels_t kernels = generate_kernels(g_cq_cfg);
+//     // g_kernels = generate_kernels(g_cq_cfg);
+//     // g_kernels = reallocate_kernels(g_kernels, g_cq_cfg); // optional
+//     // uint32_t diff = millis() - start;
+
+//     // FASTLED_WARN("FFT initialized in " << diff << "ms");
+//     // FASTLED_WARN("kernel: " << kernels);
+// }
+
+
+
+void fft_init() { /* initOnce() */ }
 
 bool fft_is_initialized() { return true; }
 

@@ -20,8 +20,9 @@
 using namespace fl;
 
 TEST_CASE("fft tester") {
+    
 
-    fft_init();
+    // fft_init();
     fft_audio_buffer_t buffer = {0};
     // fill in with a sine wave
     for (int i = 0; i < 512; ++i) {
