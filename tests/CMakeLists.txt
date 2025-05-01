@@ -57,7 +57,6 @@ set(COMMON_COMPILE_FLAGS
     -fno-omit-frame-pointer
     -O0
     -fno-inline
-    -Werror=suggest-override
     -Werror=return-type
     -Werror=missing-declarations
     -Werror=redundant-decls
@@ -69,14 +68,6 @@ set(COMMON_COMPILE_FLAGS
     -Werror=implicit-fallthrough
     -Werror=missing-include-dirs
     -Werror=date-time
-    -Werror=non-virtual-dtor
-    -Werror=reorder
-    -Werror=sign-compare
-    -Werror=float-equal
-    -Werror=mismatched-tags
-    #-Werror=conversion
-    -Werror=switch-enum
-    #-Werror=switch-default
     -Werror=unused-parameter
     -Werror=unused-variable
     -Werror=unused-value
@@ -86,8 +77,19 @@ set(COMMON_COMPILE_FLAGS
     -DPROGMEM=
 )
 
+# C++-specific compiler flags
+set(CXX_SPECIFIC_FLAGS
+    -Werror=suggest-override
+    -Werror=non-virtual-dtor
+    -Werror=reorder
+    -Werror=sign-compare
+    -Werror=float-equal
+    -Werror=mismatched-tags
+    -Werror=switch-enum
+)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND COMMON_COMPILE_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field)
+    list(APPEND CXX_SPECIFIC_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field)
 endif()
 
 
@@ -100,7 +102,6 @@ set(UNIT_TEST_COMPILE_FLAGS
     -ggdb
     -fno-omit-frame-pointer
     -O0
-    -Werror=suggest-override
     -Werror=return-type
     -Werror=missing-declarations
     #-Werror=redundant-decls
@@ -112,13 +113,6 @@ set(UNIT_TEST_COMPILE_FLAGS
     #-Werror=implicit-fallthrough
     #-Werror=missing-include-dirs
     -Werror=date-time
-    -Werror=non-virtual-dtor
-    #-Werror=reorder
-    #-Werror=sign-compare
-    #-Werror=float-equal
-    #-Werror=conversion
-    -Werror=switch-enum
-    #-Werror=switch-default
     #-Werror=unused-parameter
     #-Werror=unused-variable
     #-Werror=unused-value
@@ -126,6 +120,16 @@ set(UNIT_TEST_COMPILE_FLAGS
     # Not supported in gcc.
     #-Werror=infinite-recursion
     #-v
+)
+
+set(UNIT_TEST_CXX_FLAGS
+    -Werror=suggest-override
+    -Werror=non-virtual-dtor
+    -Werror=switch-enum
+    #-Werror=reorder
+    #-Werror=sign-compare
+    #-Werror=float-equal
+    #-Werror=conversion
 )
 
 set(COMMON_COMPILE_DEFINITIONS
@@ -190,6 +194,8 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     target_link_libraries(${TEST_NAME} fastled)
+    # Add C++-specific flags only for C++ files
+    target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
     if(USE_LIBUNWIND)
         target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
     endif()
@@ -203,6 +209,10 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
     target_compile_options(${TEST_NAME} PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+    # Add C++-specific flags only for C++ files
+    target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+    # Add C++-specific flags only for C++ files
+    target_compile_options(${TEST_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
     target_compile_definitions(${TEST_NAME} PRIVATE 
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
