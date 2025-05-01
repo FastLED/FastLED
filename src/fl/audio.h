@@ -4,7 +4,7 @@
 #include "fl/vector.h"
 #include <stdint.h>
 #include <math.h>
-#include "fl/math_macros.h"
+#include "fl/math.h"
 
 namespace fl {
 
@@ -52,7 +52,7 @@ public:
 
     /// reset so the next quiet block will re-initialize your floor
     void resetFloor() {
-        dbfs_floor_global_ =  (1.0/0.0);  // infinity<double>
+        dbfs_floor_global_ =  INFINITY_DOUBLE;  // infinity<double>
         offset_            = 0.0;
     }
 
