@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
+#include "fl/audio.h"
 #include "fl/engine_events.h"
 #include "fl/str.h"
-#include "fl/audio.h"
 #include "platforms/wasm/ui/ui_internal.h"
 
 namespace fl {
@@ -22,17 +22,7 @@ class jsAudioImpl {
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::Str &groupName() const { return mGroup; }
 
-    Ptr<const AudioSample> next() {
-        Ptr<const AudioSample> out;
-        if (mAudioSamples.empty()) {
-            return out;
-        }
-        // auto sample = mAudioSamples.back();
-        // mAudioSamples.pop_back();
-        out = mAudioSamples.front();
-        mAudioSamples.erase(mAudioSamples.begin());
-        return out;
-    }
+    Ptr<const AudioSample> next();
 
   private:
     struct Updater : fl::EngineEvents::Listener {
@@ -41,9 +31,7 @@ class jsAudioImpl {
             fl::EngineEvents::addListener(this);
         }
         ~Updater() { fl::EngineEvents::removeListener(this); }
-        void onPlatformPreLoop2() override {
-
-        }
+        void onPlatformPreLoop2() override {}
         jsAudioImpl *mOwner = nullptr;
     };
 

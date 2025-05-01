@@ -196,6 +196,7 @@ class UIAudioImpl {
     ~UIAudioImpl() {}
 
     Ptr<const AudioSample> next() {
+        FASTLED_WARN("Audio sample not implemented");
         Ptr<const AudioSample> sample;  // null.
         return sample;
     }

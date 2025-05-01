@@ -61,6 +61,14 @@ void loop() {
         FASTLED_WARN("Triggered");
     }
     fl::clear(leds);
+    do { 
+        auto sample = audio.next();
+        if (sample) {
+            FASTLED_WARN("Audio sample size: " << sample->pcm().size());
+        } else {
+            break;
+        }
+    } while (true);
     triggered = button.clicked();
     x = pointX.as_int();
     y = pointY.as_int();
