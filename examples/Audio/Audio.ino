@@ -23,8 +23,6 @@ all the UI elements you see below.
 
 // Sketch.
 #include "fl/function.h"
-#include "src/wave.h"
-#include "src/xypaths.h"
 
 using namespace fl;
 
