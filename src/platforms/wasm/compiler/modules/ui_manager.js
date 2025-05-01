@@ -4,6 +4,23 @@
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 
+import { initAudioManager } from './audio_manager.js';
+
+// Initialize the audio manager when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  const audioManager = initAudioManager({
+      uploadButtonId: 'upload_mp3',
+      fileInputId: 'file_input',
+      playerId: 'player',
+      canvasLabelId: 'canvas-label',
+      outputId: 'output'
+  });
+  
+  // Make it available globally for debugging if needed
+  window.audioManager = audioManager;
+});
+
+
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
