@@ -13,7 +13,6 @@ SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
 {}
 
 
-
 void SoundLevelMeter::processBlock(const int16_t* samples, size_t count) {
     // 1) compute block power → dBFS
     double sum_sq = 0.0;

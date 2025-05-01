@@ -183,6 +183,13 @@ endif()
 # Enable testing
 enable_testing()
 
+# Create doctest main library
+add_library(doctest_main STATIC doctest_main.cpp)
+target_include_directories(doctest_main PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_options(doctest_main PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
+target_compile_options(doctest_main PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
+target_compile_definitions(doctest_main PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+
 # Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 
@@ -193,7 +200,14 @@ file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTA
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} fastled)
+    target_link_libraries(${TEST_NAME} fastled doctest_main)
+    
+    # Set the correct subsystem for Windows
+    if(WIN32)
+        set_target_properties(${TEST_NAME} PROPERTIES
+            WIN32_EXECUTABLE FALSE
+            LINK_FLAGS "/SUBSYSTEM:CONSOLE")
+    endif()
     # Add C++-specific flags only for C++ files
     target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
     if(USE_LIBUNWIND)

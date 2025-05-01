@@ -1,9 +1,12 @@
 #pragma once
 
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 
 #include <stdint.h>
+#include <vector>
+#include <set>
+#include <string>
+#include <iostream>
 
 #include "crgb.h"
 #include "fl/str.h"

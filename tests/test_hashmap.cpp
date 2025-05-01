@@ -1,6 +1,9 @@
 // test.cpp
 // g++ --std=c++11 test.cpp -o test && ./test
 
+#include <vector>
+#include <set>
+
 #include "fl/hash_map.h"
 #include "fl/str.h"
 #include "test.h"
