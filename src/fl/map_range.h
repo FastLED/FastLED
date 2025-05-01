@@ -11,8 +11,7 @@
 
 namespace fl {
 
-template<typename T>
-struct point_xy;
+template <typename T> struct point_xy;
 
 namespace map_range_detail {
 
@@ -38,31 +37,8 @@ FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
 }
 
 
-FASTLED_FORCE_INLINE uint8_t map_range(uint8_t value, uint8_t in_min,
-                                       uint8_t in_max, uint8_t out_min,
-                                       uint8_t out_max) {
-    if (value == in_min) {
-        return out_min;
-    }
-    if (value == in_max) {
-        return out_max;
-    }
-    // Promote uint8_t to int16_t for mapping.
-    int16_t v16 = value;
-    int16_t in_min16 = in_min;
-    int16_t in_max16 = in_max;
-    int16_t out_min16 = out_min;
-    int16_t out_max16 = out_max;
-    int16_t out16 = map_range<uint16_t, uint16_t>(v16, in_min16, in_max16, out_min16, out_max16);
-    if (out16 < 0) {
-        out16 = 0;
-    } else if (out16 > 255) {
-        out16 = 255;
-    }
-    return static_cast<uint8_t>(out16);
-}
-
-//////////////////////////////////// IMPLEMENTATION ////////////////////////////////////
+//////////////////////////////////// IMPLEMENTATION
+///////////////////////////////////////
 
 namespace map_range_detail {
 
@@ -73,6 +49,32 @@ template <typename T, typename U> struct map_range_math {
             return out_min;
         return out_min +
                (value - in_min) * (out_max - out_min) / (in_max - in_min);
+    }
+};
+
+template <> struct map_range_math<uint8_t, uint8_t> {
+    static uint8_t map(uint8_t value, uint8_t in_min, uint8_t in_max,
+                       uint8_t out_min, uint8_t out_max) {
+        if (value == in_min) {
+            return out_min;
+        }
+        if (value == in_max) {
+            return out_max;
+        }
+        // Promote uint8_t to int16_t for mapping.
+        int16_t v16 = value;
+        int16_t in_min16 = in_min;
+        int16_t in_max16 = in_max;
+        int16_t out_min16 = out_min;
+        int16_t out_max16 = out_max;
+        int16_t out16 = map_range<uint16_t, uint16_t>(v16, in_min16, in_max16,
+                                                      out_min16, out_max16);
+        if (out16 < 0) {
+            out16 = 0;
+        } else if (out16 > 255) {
+            out16 = 255;
+        }
+        return static_cast<uint8_t>(out16);
     }
 };
 
@@ -101,7 +103,6 @@ inline bool equals(float a, float b) { return ALMOST_EQUAL_FLOAT(a, b); }
 inline bool equals(double d, double d2) { return ALMOST_EQUAL_DOUBLE(d, d2); }
 
 } // namespace map_range_detail
-
 
 } // namespace fl
 
