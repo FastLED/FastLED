@@ -42,7 +42,7 @@ template <typename FloatT> class LineSimplifier {
 
     // simplify to the output vector.
     void simplify(const fl::Slice<Point> &polyLine, fl::vector<Point> *out) { simplifyT(polyLine, out); }
-    template <typename VectorType> void simplify(const fl::Slice<Point> &polyLine, VectorType *out) { simplifyInplaceT(polyLine); }
+    template <typename VectorType> void simplify(const fl::Slice<Point> &polyLine, VectorType *out) {  simplifyT(polyLine, out); }
   private:
     template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
         // run the simplification algorithm
