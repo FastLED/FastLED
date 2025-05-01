@@ -9,6 +9,7 @@
 #include "platforms/wasm/ui/ui_manager.h"
 #include "platforms/wasm/ui/audio.h"
 #include "fl/warn.h"
+#include "fl/json.h"
 
 using namespace fl;
 
@@ -43,8 +44,27 @@ void jsAudioImpl::toJson(FLArduinoJson::JsonObject& json) const {
 }
 
 
+
 void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
+    auto s = value.as<std::string>();
+    // if (jsonStr == nullptr) {
+    //     FASTLED_WARN("jsAudioImpl::updateInternal: jsonStr is null");
+    //     return;
+    // }
+
+    // std::string buff;
+    // value.serializeJson(&buff);
+
+    // // void toJson(const JsonDocument& doc, Str* jsonBuffer);
+    // // Parse the JSON string into a JsonDocument
+
+
+    // // fl::toJson(value, &buff);
+    fl::Str jsonStr;
+    jsonStr.append(s.c_str(), s.size());
+    FASTLED_WARN("jsAudioImpl::updateInternal: jsonStr: " << jsonStr.c_str());
+
 }
 
 
