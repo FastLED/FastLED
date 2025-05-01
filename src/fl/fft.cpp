@@ -123,10 +123,11 @@ void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed* out) {
         float f_end = f_start + delta_f;
         FASTLED_UNUSED(f_start);
         FASTLED_UNUSED(f_end);
+        FASTLED_UNUSED(magnitude_db);
 
         FASTLED_WARN("magnitude: " << magnitude);
 
-        out->push_back(magnitude_db);
+        out->push_back(magnitude);
 
         if (magnitude <= 0.0f) {
             magnitude_db = 0.0f;

@@ -5,17 +5,17 @@
 
 #include "test.h"
 
-#include "fl/math.h"
 #include "fl/fft.h"
+#include "fl/math.h"
 
-// // Proof of concept FFT using KISS FFT. Right now this is fixed sized blocks of 512. But this is
+// // Proof of concept FFT using KISS FFT. Right now this is fixed sized blocks
+// of 512. But this is
 // // intended to change with a C++ wrapper around ot/
 // typedef int16_t fft_audio_buffer_t[512];
 
-// void fft_init(); // Explicit initialization of FFT, otherwise it will be initialized on first run.
-// bool fft_is_initialized();
-// void fft_unit_test(const fft_audio_buffer_t &buffer);
-
+// void fft_init(); // Explicit initialization of FFT, otherwise it will be
+// initialized on first run. bool fft_is_initialized(); void fft_unit_test(const
+// fft_audio_buffer_t &buffer);
 
 using namespace fl;
 
@@ -33,6 +33,17 @@ TEST_CASE("fft tester") {
     fl::vector_fixed<float, 16> out;
     fft_unit_test(buffer, &out);
     FASTLED_WARN("FFT output: " << out);
-    FASTLED_WARN("DONE");
-    
+    const float expected_output[16] = {
+        3, 2, 2, 6, 6.08, 15.03, 3078.22, 4346.29, 4033.16, 3109, 38.05, 4.47, 4, 2, 1.41, 1.41};
+    for (int i = 0; i < 16; ++i) {
+        // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
+        float a = out[i];
+        float b = expected_output[i];
+        bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
+        if (!almost_equal) {
+            FASTLED_WARN("FFT output mismatch at index " << i << ": " << a
+                                                         << " != " << b);
+        }
+        CHECK(almost_equal);
+    }
 }

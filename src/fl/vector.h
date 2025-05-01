@@ -25,10 +25,20 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
         kBlockSize = kTotalBytes / sizeof(MemoryType) + kExtraSize,
     };
 
+    InlinedMemoryBlock() {
+        memset(mMemoryBlock, 0, sizeof(mMemoryBlock));
+        #ifdef FASTLED_TESTING
+        __data = memory();
+        #endif
+    }
+
+    InlinedMemoryBlock(const InlinedMemoryBlock &other) = default;
+    InlinedMemoryBlock(InlinedMemoryBlock &&other) = default;
+
     // uint32_t mRaw[N * sizeof(T)/sizeof(MemoryType) + kExtraSize];
     // align this to the size of MemoryType.
     // uint32_t mMemoryBlock[kTotalSize] = {0};
-    MemoryType mMemoryBlock[kBlockSize] = {0};
+    MemoryType mMemoryBlock[kBlockSize];
 
     T *memory() {
         MemoryType *begin = &mMemoryBlock[0];
@@ -45,6 +55,10 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
         const MemoryType *raw = begin + shift_up;
         return reinterpret_cast<const T *>(raw);
     }
+
+    #ifdef FASTLED_TESTING
+    T* __data = nullptr;
+    #endif
 };
 
 // A fixed sized vector. The user is responsible for making sure that the
@@ -65,6 +79,8 @@ template <typename T, size_t N> class FixedVector {
     typedef const T *const_iterator;
     // Constructor
     constexpr FixedVector() : current_size(0) {}
+
+
 
     FixedVector(const T (&values)[N]) : current_size(N) {
         assign_array(values, N);

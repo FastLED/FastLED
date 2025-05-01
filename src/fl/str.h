@@ -1,27 +1,28 @@
 #pragma once
 
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
+#include "fl/geometry.h"
+#include "fl/math_macros.h"
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/template_magic.h"
 #include "fl/vector.h"
-#include "fl/namespace.h"
-#include "fl/math_macros.h"
-#include "fl/geometry.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-namespace fl {  // Mandatory namespace for this class since it has name collisions.
+namespace fl { // Mandatory namespace for this class since it has name
+               // collisions.
 
-template<typename T> struct rect_xy;
-template<typename T> struct point_xy;
-template<typename T> class Slice;
-template<typename T> class HeapVector;
-template<typename T, size_t N> class InlinedVector;
-template<typename T, size_t N> class FixedVector;
+template <typename T> struct rect_xy;
+template <typename T> struct point_xy;
+template <typename T> class Slice;
+template <typename T> class HeapVector;
+template <typename T, size_t N> class InlinedVector;
+template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
 
 // A copy on write string class. Fast to copy from another
@@ -45,7 +46,9 @@ FASTLED_SMART_PTR(StringHolder);
 class StringFormatter {
   public:
     static void append(int32_t val, StrN<64> *dst);
-    static bool isSpace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+    static bool isSpace(char c) {
+        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+    }
     static float parseFloat(const char *str, size_t len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
 };
@@ -67,7 +70,7 @@ class StringHolder : public fl::Referent {
     size_t length() const { return mLength; }
     size_t capacity() const { return mCapacity; }
     bool copy(const char *str, size_t len) {
-        if ((len+1) > mCapacity) {
+        if ((len + 1) > mCapacity) {
             return false;
         }
         memcpy(mData, str, len);
@@ -75,8 +78,7 @@ class StringHolder : public fl::Referent {
         mLength = len;
         return true;
     }
-    
-    
+
   private:
     char *mData = nullptr;
     size_t mLength = 0;
@@ -97,9 +99,9 @@ template <size_t SIZE = 64> class StrN {
     template <size_t M> StrN(const StrN<M> &other) { copy(other); }
     StrN(const char *str) {
         size_t len = strlen(str);
-        mLength = len;  // Length is without null terminator
-        if (len + 1 <= SIZE) {  // Check capacity including null
-            memcpy(mInlineData, str, len + 1);  // Copy including null
+        mLength = len;         // Length is without null terminator
+        if (len + 1 <= SIZE) { // Check capacity including null
+            memcpy(mInlineData, str, len + 1); // Copy including null
             mHeapData.reset();
         } else {
             mHeapData = StringHolderPtr::New(str);
@@ -123,10 +125,10 @@ template <size_t SIZE = 64> class StrN {
         }
     }
 
-    template<int N> StrN(const char (&str)[N]) {
-        copy(str, N-1);  // Subtract 1 to not count null terminator
+    template <int N> StrN(const char (&str)[N]) {
+        copy(str, N - 1); // Subtract 1 to not count null terminator
     }
-    template<int N> StrN &operator=(const char (&str)[N]) {
+    template <int N> StrN &operator=(const char (&str)[N]) {
         assign(str, N);
         return *this;
     }
@@ -148,7 +150,7 @@ template <size_t SIZE = 64> class StrN {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    void copy(const char* str, size_t len) {
+    void copy(const char *str, size_t len) {
         mLength = len;
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
@@ -173,10 +175,7 @@ template <size_t SIZE = 64> class StrN {
         mLength = len;
     }
 
-    size_t capacity() const {
-        return mHeapData ? mHeapData->capacity() : SIZE;
-    }
-
+    size_t capacity() const { return mHeapData ? mHeapData->capacity() : SIZE; }
 
     size_t write(const uint8_t *data, size_t n) {
         const char *str = reinterpret_cast<const char *>(data);
@@ -221,19 +220,19 @@ template <size_t SIZE = 64> class StrN {
         return write(str, 1);
     }
 
-    size_t write(const uint16_t& n) {
+    size_t write(const uint16_t &n) {
         StrN<64> dst;
         StringFormatter::append(n, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    size_t write(const uint32_t& val) {
+    size_t write(const uint32_t &val) {
         StrN<64> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    size_t write(const int32_t& val) {
+    size_t write(const int32_t &val) {
         StrN<64> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
@@ -241,7 +240,8 @@ template <size_t SIZE = 64> class StrN {
 
     size_t write(const int8_t val) {
         StrN<64> dst;
-        StringFormatter::append(int16_t(val), &dst); // Inlined size should suffice
+        StringFormatter::append(int16_t(val),
+                                &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
@@ -279,12 +279,11 @@ template <size_t SIZE = 64> class StrN {
 
     // Append method
 
-
     bool operator<(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
-    template<size_t M> bool operator<(const StrN<M> &other) const {
+    template <size_t M> bool operator<(const StrN<M> &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
@@ -299,8 +298,10 @@ template <size_t SIZE = 64> class StrN {
             return;
         }
 
-        // If we already have unshared heap data with sufficient capacity, do nothing
-        if (mHeapData && !mHeapData->isShared() && mHeapData->hasCapacity(newCapacity)) {
+        // If we already have unshared heap data with sufficient capacity, do
+        // nothing
+        if (mHeapData && !mHeapData->isShared() &&
+            mHeapData->hasCapacity(newCapacity)) {
             return;
         }
 
@@ -320,8 +321,6 @@ template <size_t SIZE = 64> class StrN {
             mHeapData.reset();
         }
     }
-
-
 
     int16_t find(const char &value) const {
         for (size_t i = 0; i < mLength; ++i) {
@@ -347,8 +346,6 @@ template <size_t SIZE = 64> class StrN {
         return out;
     }
 
-
-
     StrN trim() const {
         StrN out;
         size_t start = 0;
@@ -365,8 +362,6 @@ template <size_t SIZE = 64> class StrN {
     float toFloat() const {
         return StringFormatter::parseFloat(c_str(), mLength);
     }
-
-
 
   private:
     StringHolderPtr mData;
@@ -408,29 +403,27 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    Str& operator+=(const Str &other) {
+    Str &operator+=(const Str &other) {
         append(other.c_str(), other.size());
         return *this;
     }
 
-    template<typename T>
-    Str& operator+=(const T &val) {
+    template <typename T> Str &operator+=(const T &val) {
         append(val);
         return *this;
     }
 
-    // Generic integral append: only enabled if T is an integral type. This is needed
-    // because on some platforms type(int) is not one of the integral types like
-    // int8_t, int16_t, int32_t, int64_t etc. In such a has just case the value
-    // to int32_t and then append it.
-    template<typename T, typename = fl::enable_if_t< fl::is_integral<T>::value >>
-    Str& append(const T& val) {
+    // Generic integral append: only enabled if T is an integral type. This is
+    // needed because on some platforms type(int) is not one of the integral
+    // types like int8_t, int16_t, int32_t, int64_t etc. In such a has just case
+    // the value to int32_t and then append it.
+    template <typename T, typename = fl::enable_if_t<fl::is_integral<T>::value>>
+    Str &append(const T &val) {
         write(int32_t(val));
         return *this;
     }
 
-    template<typename T>
-    Str& append(const Slice<T> &slice) {
+    template <typename T> Str &append(const Slice<T> &slice) {
         append("[");
         for (size_t i = 0; i < slice.size(); ++i) {
             if (i > 0) {
@@ -442,34 +435,55 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template<typename T>
-    Str& append(const fl::HeapVector<T> &vec) {
+    template <typename T> Str &append(const fl::HeapVector<T> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
-    template<typename T, int N>
-    Str& append(const fl::InlinedVector<T, N> &vec) {
+    template <typename T, int N>
+    Str &append(const fl::InlinedVector<T, N> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
-    Str& append(const char *str) { write(str, strlen(str)); return *this; }
-    Str& append(const char *str, size_t len) { write(str, len); return *this; }
-    //Str& append(char c) { write(&c, 1); return *this; }
-    Str& append(const int8_t& c) {
-        const char* str = reinterpret_cast<const char*>(&c);
-        write(str, 1); return *this;
+    Str &append(const char *str) {
+        write(str, strlen(str));
+        return *this;
     }
-    Str& append(const uint8_t& c) { write(uint16_t(c)); return *this; }
-    Str& append(const uint16_t& val) { write(val); return *this; }
-    Str& append(const int16_t& val) { write(int32_t(val)); return *this; }
-    Str& append(const uint32_t& val) { write(val); return *this; }
-    Str& append(const int32_t& c) { write(c); return *this; }
+    Str &append(const char *str, size_t len) {
+        write(str, len);
+        return *this;
+    }
+    // Str& append(char c) { write(&c, 1); return *this; }
+    Str &append(const int8_t &c) {
+        const char *str = reinterpret_cast<const char *>(&c);
+        write(str, 1);
+        return *this;
+    }
+    Str &append(const uint8_t &c) {
+        write(uint16_t(c));
+        return *this;
+    }
+    Str &append(const uint16_t &val) {
+        write(val);
+        return *this;
+    }
+    Str &append(const int16_t &val) {
+        write(int32_t(val));
+        return *this;
+    }
+    Str &append(const uint32_t &val) {
+        write(val);
+        return *this;
+    }
+    Str &append(const int32_t &c) {
+        write(c);
+        return *this;
+    }
 
-    Str& append(const bool& val) {
+    Str &append(const bool &val) {
         if (val) {
             return append("true");
         } else {
@@ -477,8 +491,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 
-    template<typename T>
-    Str& append(const rect_xy<T> &rect) {
+    template <typename T> Str &append(const rect_xy<T> &rect) {
         append(rect.mMin.x);
         append(",");
         append(rect.mMin.y);
@@ -489,8 +502,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template<typename T>
-    Str& append(const point_xy<T> &pt) {
+    template <typename T> Str &append(const point_xy<T> &pt) {
         append("(");
         append(pt.x);
         append(",");
@@ -499,35 +511,47 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template<typename T, size_t N>
-    Str& append(const fl::FixedVector<T, N>& vec) {
+    template <typename T, size_t N>
+    Str &append(const fl::FixedVector<T, N> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
-    Str& append(const float& val) {
-        int32_t i = static_cast<int32_t>(val * 100);
-        // append the integer part
-        append(i / 100);
-        int32_t rem = i % 100;
-        if (rem > 0) {
-            // append the decimal part
-            append(".");
-            append(rem);
+    Str &append(const float &_val) {
+        float val = _val;
+        if (val < 0.0f) {
+            append('-');
+            val = -val;
         }
+
+        // round to nearest hundredth
+        int32_t scaled = static_cast<int32_t>(val * 100.0f + 0.5f);
+
+        int32_t integer = scaled / 100;
+        int32_t frac = scaled % 100; // 0..99
+        append(integer);
+
+        // // only print decimals if non-zero; drop this guard to always show two
+        // // digits
+        if (frac != 0) {
+            append(".");
+            if (frac < 10) // ensure leading zero
+                append("0");
+            append(frac);
+        }
+
         return *this;
     }
 
-    Str& append(const double& val) {
-        return append(float(val));
+    Str &append(const double &val) { return append(float(val)); }
+
+    Str &append(const StrN &str) {
+        write(str.c_str(), str.size());
+        return *this;
     }
 
-    Str& append(const StrN &str) { write(str.c_str(), str.size()); return *this; }
-
-    const char* data() const {
-        return c_str();
-    }
+    const char *data() const { return c_str(); }
 
     void swap(Str &other) {
         if (this != &other) {
@@ -540,7 +564,5 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 };
-
-
 
 } // namespace fl
