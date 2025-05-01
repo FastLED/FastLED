@@ -21,6 +21,7 @@ template<typename T> struct point_xy;
 template<typename T> class Slice;
 template<typename T> class HeapVector;
 template<typename T, size_t N> class InlinedVector;
+template<typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
 
 // A copy on write string class. Fast to copy from another
@@ -495,6 +496,19 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         append(",");
         append(pt.y);
         append(")");
+        return *this;
+    }
+
+    template<typename T, size_t N>
+    Str& append(const fl::FixedVector<T, N>& vec) {
+        append("[");
+        for (size_t i = 0; i < vec.size(); ++i) {
+            if (i > 0) {
+                append(",");
+            }
+            append(vec[i]);
+        }
+        append("]");
         return *this;
     }
 

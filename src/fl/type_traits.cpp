@@ -1,6 +1,9 @@
 
 #include "fl/type_traits.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 
 // Type traits are tricky and can be compiler dependent. We can't rely on
 // unit testing since that runs on the host machine. So to any type trait
@@ -60,3 +63,4 @@ void __compile_test() {
 }
 } // namespace
 
+#pragma GCC diagnostic pop

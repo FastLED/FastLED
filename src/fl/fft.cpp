@@ -67,22 +67,6 @@ void init_once() {
     FASTLED_WARN("kernel: " << kernels);
 }
 
-char pixelBrightnessToChar(float value, float min_value, float max_value) {
-    // Ensure the input is in the expected range
-    if (value < min_value)
-        value = min_value;
-    if (value > max_value)
-        value = max_value;
-
-    const char *gradation = " .:-=+*%@#";
-    size_t levels = strlen(gradation);
-
-    // Determine the index into the gradation string
-    size_t index =
-        (size_t)((value - min_value) / (max_value - min_value) * (levels - 1));
-
-    return gradation[index];
-}
 
 } // namespace
 
@@ -91,9 +75,10 @@ void fft_init() { init_once(); }
 bool fft_is_initialized() { return g_is_fft_initialized; }
 
 
-void fft_unit_test(const fft_audio_buffer_t &buffer) {
+void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed* out) {
     uint32_t start = millis();
     // std::cout << "Performing FFT" << std::endl;
+
 
     init_once();
     kiss_fft_cpx fft[SAMPLES] = {};
@@ -105,11 +90,11 @@ void fft_unit_test(const fft_audio_buffer_t &buffer) {
 
     float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
 
-    char output_str[2048]; // Assuming this size is sufficient. Adjust as
-                           // necessary.
-    int offset = 0;
-    // offset += snprintf(output_str + offset, sizeof(output_str) - offset, "FFT
-    // took %u ms. FFT output: ", diff);
+    // char output_str[2048]; // Assuming this size is sufficient. Adjust as
+    //                        // necessary.
+    // int offset = 0;
+    // // offset += snprintf(output_str + offset, sizeof(output_str) - offset, "FFT
+    // // took %u ms. FFT output: ", diff);
 
 #if PRINT_HEADER
     static int64_t s_frame = 0;
@@ -141,17 +126,22 @@ void fft_unit_test(const fft_audio_buffer_t &buffer) {
         FASTLED_UNUSED(f_start);
         FASTLED_UNUSED(f_end);
 
+        FASTLED_WARN("magnitude: " << magnitude);
+
+        out->push_back(magnitude_db);
+
         if (magnitude <= 0.0f) {
             magnitude_db = 0.0f;
         }
-        char pixel = pixelBrightnessToChar(magnitude_db, 0.0f, 50.0f);
+
+        // char pixel = pixelBrightnessToChar(magnitude_db, 0.0f, 50.0f);
+        // // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+        // //                     "%05.2f, ", magnitude_db);
         // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-        //                     "%05.2f, ", magnitude_db);
-        offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                           "%c%c", pixel, pixel);
+        //                    "%c%c", pixel, pixel);
     }
     // std::cout << output_str << std::endl
-    FASTLED_WARN(output_str);
+    // FASTLED_WARN(output_str);
 }
 
 #if 0
