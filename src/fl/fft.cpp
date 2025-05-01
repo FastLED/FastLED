@@ -28,7 +28,7 @@
 #define MIN_FREQUENCY 174.6
 #define MIN_VAL 5000 // Equivalent to 0.15 in Q15
 
-#define PRINT_HEADER 0
+#define PRINT_HEADER 1
 
 namespace fl {
 
@@ -155,6 +155,32 @@ void fft_init() { /* initOnce() */ }
 bool fft_is_initialized() { return true; }
 
 void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out) {
+    // Print header information periodically
+#if PRINT_HEADER
+    static int64_t s_frame = 0;
+    int64_t frame = s_frame++;
+    
+    if (frame % 100 == 0) {
+        // Calculate frequency delta
+        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
+        
+        // Print header with frequency bands
+        char output_str[2048] = {0}; // Buffer for header text
+        int offset = 0;
+        
+        offset += snprintf(output_str + offset, sizeof(output_str) - offset, 
+                          "FFT Frequency Bands: ");
+        
+        for (int i = 0; i < BANDS; ++i) {
+            float f_start = MIN_FREQUENCY + i * delta_f;
+            float f_end = f_start + delta_f;
+            offset += snprintf(output_str + offset, sizeof(output_str) - offset,
+                              "%.2fHz-%.2fHz, ", f_start, f_end);
+        }
+        
+        FASTLED_WARN(output_str);
+    }
+#endif
 
     static FFTContext fft_context(SAMPLES, BANDS, MIN_FREQUENCY, MAX_FREQUENCY,
                                   AUDIO_SAMPLE_RATE);
@@ -181,19 +207,28 @@ void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out) {
     // // took %u ms. FFT output: ", diff);
 
 #if PRINT_HEADER
-    static int64_t s_frame = 0;
-    int64_t frame = s_frame;
-    s_frame++;
+    // static int64_t s_frame = 0;
+    // int64_t frame = s_frame++;
+    
     if (frame % 100 == 0) {
-        // print header
+        // Calculate frequency delta
+        float delta_f = (MAX_FREQUENCY - MIN_FREQUENCY) / BANDS;
+        
+        // Print header with frequency bands
+        char output_str[2048] = {0}; // Buffer for header text
+        int offset = 0;
+        
+        offset += snprintf(output_str + offset, sizeof(output_str) - offset, 
+                          "FFT Frequency Bands: ");
+        
         for (int i = 0; i < BANDS; ++i) {
             float f_start = MIN_FREQUENCY + i * delta_f;
             float f_end = f_start + delta_f;
             offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-                               "%.2fHz-%.2fHz, ", f_start, f_end);
+                              "%.2fHz-%.2fHz, ", f_start, f_end);
         }
-        offset +=
-            snprintf(output_str + offset, sizeof(output_str) - offset, "\n");
+        
+        FASTLED_WARN(output_str);
     }
 #endif
 
