@@ -44,7 +44,13 @@ kiss_fftr_cfg kiss_fftr_alloc(int nfft,int inverse_fft,void * mem,size_t * lenme
         return NULL;
 
     st->substate = (kiss_fft_cfg) (st + 1); /*just beyond kiss_fftr_state struct */
+
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-align"
+    // This cast alginment might be a problem, kiss_fft_cpx has alignment-2.
     st->tmpbuf = (kiss_fft_cpx *) (((char *) st->substate) + subsize);
+    #pragma GCC diagnostic pop
+
     st->super_twiddles = st->tmpbuf + nfft;
     kiss_fft_alloc(nfft, inverse_fft, st->substate, &subsize);
 
