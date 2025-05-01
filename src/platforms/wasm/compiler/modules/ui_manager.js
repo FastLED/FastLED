@@ -80,14 +80,52 @@ function createAudioField(element) {
         controlDiv.appendChild(audio);
       }
       
+      // Clean up any previous audio context
+      if (window.audioData && window.audioData.audioContexts && 
+          window.audioData.audioContexts[audioInput.id]) {
+        try {
+          window.audioData.audioContexts[audioInput.id].close();
+        } catch (e) {
+          console.warn('Error closing previous audio context:', e);
+        }
+      }
+      
+      // Set source first
       audio.src = url;
-      audio.autoplay = true;
+      
+      // Initialize audio analysis before playing
+      console.log(`Setting up audio analysis for ${audioInput.id}`);
+      const analysisSetup = window.setupAudioAnalysis(audio);
+      console.log("Audio analysis setup complete:", analysisSetup);
+      
+      // Now play the audio
       audio.loop = true;
       
-      // Set up audio analysis if needed
-      if (typeof window.setupAudioAnalysis === 'function') {
-        window.setupAudioAnalysis(audio);
+      // Ensure we can play (autoplay policies might block)
+      audio.play().then(() => {
+        console.log("Audio playback started successfully");
+      }).catch(err => {
+        console.error("Error starting audio playback:", err);
+        // Add a play button as fallback
+        const playButton = document.createElement('button');
+        playButton.textContent = "Play Audio";
+        playButton.className = "audio-play-button";
+        playButton.onclick = () => audio.play();
+        controlDiv.appendChild(playButton);
+      });
+      
+      // Add a small indicator that audio is being processed
+      const audioIndicator = document.createElement('div');
+      audioIndicator.className = 'audio-indicator';
+      audioIndicator.textContent = 'Audio samples ready';
+      
+      // Replace any existing indicator
+      const existingIndicator = controlDiv.querySelector('.audio-indicator');
+      if (existingIndicator) {
+        controlDiv.removeChild(existingIndicator);
       }
+      
+      controlDiv.appendChild(audioIndicator);
     }
   });
   
@@ -237,74 +275,80 @@ function setDescription(descData) {
   }
 }
 
+// Global audio data storage - ensure it's initialized
+if (!window.audioData) {
+  console.log("Initializing global audio data storage");
+  window.audioData = {
+    audioContexts: {},
+    audioSamples: {}
+  };
+}
+
 // Helper function for audio analysis - make it available globally
 window.setupAudioAnalysis = function(audioElement) {
   // Create audio context
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioContext = new AudioContext();
   
-  // Create analyzer
-  const analyzer = audioContext.createAnalyser();
-  analyzer.fftSize = 2048;
+  // Create script processor node for raw sample access
+  // Note: ScriptProcessorNode is deprecated but still widely supported
+  // We use it here for simplicity in getting raw audio samples
+  const scriptNode = audioContext.createScriptProcessor(1024, 1, 1);
   
-  // Connect audio element to analyzer
+  // Create a buffer to store the latest 1024 samples as Int16Array
+  const sampleBuffer = new Int16Array(1024);
+  
+  // Connect audio element to script processor
   const source = audioContext.createMediaElementSource(audioElement);
-  source.connect(analyzer);
-  analyzer.connect(audioContext.destination);
+  source.connect(audioContext.destination); // Connect to output
+  source.connect(scriptNode); // Also connect to script processor
+  scriptNode.connect(audioContext.destination); // Connect script processor to output
   
-  // Buffer for frequency data
-  const bufferLength = analyzer.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
+  // Make sure audio is playing
+  audioElement.play().catch(err => {
+    console.error("Error playing audio:", err);
+  });
   
-  // Update function for visualization
-  function updateAudioData() {
-    // Get frequency data
-    analyzer.getByteFrequencyData(dataArray);
+  // Get the audio element's input ID
+  const audioId = audioElement.parentNode.querySelector('input').id;
+  
+  // Store the audio context and sample buffer in our global object
+  window.audioData.audioContexts[audioId] = audioContext;
+  window.audioData.audioSamples[audioId] = sampleBuffer;
+  
+  // Process audio data
+  scriptNode.onaudioprocess = function(audioProcessingEvent) {
+    // Get the input buffer
+    const inputBuffer = audioProcessingEvent.inputBuffer;
     
-    // Calculate average amplitude
-    let sum = 0;
-    let nonZeroCount = 0;
+    // Get the actual audio data from channel 0 (left channel)
+    const inputData = inputBuffer.getChannelData(0);
     
-    for (let i = 0; i < bufferLength; i++) {
-      if (dataArray[i] > 0) {
-        sum += dataArray[i];
-        nonZeroCount++;
-      }
+    // Convert float32 audio data to int16 range and store in our buffer
+    for (let i = 0; i < inputData.length; i++) {
+      // Convert from float32 (-1.0 to 1.0) to int16 range (-32768 to 32767)
+      sampleBuffer[i] = Math.floor(inputData[i] * 32767);
     }
     
-    // Only update if we have data and audio is playing
-    if (nonZeroCount > 0 && !audioElement.paused) {
-      const average = Math.round(sum / nonZeroCount);
-      const timestamp = (audioElement.currentTime).toFixed(2);
-      
-      // Update the canvas label to show the current audio data
-      const label = document.getElementById('canvas-label');
-      if (label) {
-        label.textContent = `Audio: ${average}`;
-        
-        // Make sure the label is visible
-        if (!label.classList.contains('show-animation')) {
-          label.classList.add('show-animation');
-        }
-      }
-      
-      // Log to console for debugging
-      console.log(`[${timestamp}s] Audio sample size: ${bufferLength}, Average amplitude: ${average}`);
-    }
+    // Debug output to verify we're getting samples
+    const sum = inputData.reduce((acc, val) => acc + Math.abs(val), 0);
+    console.log(`Audio processing: samples=${inputData.length}, avg amplitude=${sum/inputData.length}`);
     
-    // Continue updating
-    requestAnimationFrame(updateAudioData);
-  }
-  
-  // Start updating
-  updateAudioData();
+    // Optional: Update UI with a simple indicator that audio is being processed
+    const label = document.getElementById('canvas-label');
+    if (label && !audioElement.paused) {
+      label.textContent = 'Audio: Processing';
+      if (!label.classList.contains('show-animation')) {
+        label.classList.add('show-animation');
+      }
+    }
+  };
   
   return {
     audioContext,
-    analyzer,
+    scriptNode,
     source,
-    bufferLength,
-    dataArray
+    sampleBuffer
   };
 };
 
@@ -320,8 +364,10 @@ export class UiManager {
     const changes = {}; // Json object to store changes.
     let hasChanges = false;
     for (const id in this.uiElements) {
+      // console.log(`Processing UI element with ID: ${id}`);
       const element = this.uiElements[id];
       let currentValue;
+      console.log(`Element ID: ${id}, Type: ${element.type}, Value: ${element.value}`);
       if (element.type === 'checkbox') {
         currentValue = element.checked;
       } else if (element.type === 'submit') {
@@ -329,12 +375,47 @@ export class UiManager {
         currentValue = attr === 'true';
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
-      } else if (element.type === 'audio') {
-        // currentValue = element.value;
-        console.error('Audio input not supported yet');
+      } else if (element.type === 'file' && element.accept === 'audio/*') {
+        // Handle audio input - get the latest 1024 int16 samples
+        console.log(`Processing audio element: ${element.id}`);
+        
+        if (window.audioData && window.audioData.audioSamples) {
+          const samples = window.audioData.audioSamples[element.id];
+          
+          if (samples) {
+            console.log(`Found samples for ${element.id}, length: ${samples.length}`);
+            
+            // Convert Int16Array to regular array for JSON serialization
+            currentValue = Array.from(samples);
+            
+            // Always include audio samples in changes
+            changes[id] = currentValue;
+            hasChanges = true;
+            
+            // Debug output
+            const nonZeroCount = currentValue.filter(v => v !== 0).length;
+            console.log(`Audio samples: ${currentValue.length}, non-zero: ${nonZeroCount}`);
+            
+            continue; // Skip the comparison below for audio
+          } else {
+            console.log(`No samples found for ${element.id}`);
+            currentValue = Array(1024).fill(0); // Return empty array of correct size
+            changes[id] = currentValue;
+            hasChanges = true;
+            continue;
+          }
+        } else {
+          console.log("Audio data storage not initialized");
+          currentValue = Array(1024).fill(0);
+          changes[id] = currentValue;
+          hasChanges = true;
+          continue;
+        }
       } else {
         currentValue = parseFloat(element.value);
       }
+      
+      // For non-audio elements, only include if changed
       if (this.previousUiState[id] !== currentValue) {
         changes[id] = currentValue;
         hasChanges = true;
