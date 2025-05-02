@@ -13,11 +13,12 @@ typedef int16_t fft_audio_buffer_t[512];
 
 using fft_output_fixed = fl::vector_inlined<float, 16>;
 
+class AudioSample;
+
 class FFTContext;
 
 class FFT {
   public:
-
     static int DefaultSamples() { return 512; }
     static int DefaultBands() { return 16; }
     static float DefaultMinFrequency() { return 174.6f; }
@@ -34,8 +35,11 @@ class FFT {
     FFT &operator=(const FFT &) = delete;
     FFT(FFT &&) = delete;
     FFT &operator=(FFT &&) = delete;
+    size_t sampleSize() const;
 
     void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
+
+    bool run(const AudioSample &sample, fft_output_fixed *out);
 
     // Info on what the frequency the bins represent
     fl::Str info() const;

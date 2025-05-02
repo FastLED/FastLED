@@ -19,6 +19,7 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/audio.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100
@@ -58,6 +59,10 @@ class FFTContext {
         if (m_kernels) {
             free_kernels(m_kernels, m_cq_cfg);
         }
+    }
+
+    size_t sampleSize() const {
+        return m_cq_cfg.samples;
     }
 
     void fft_unit_test(const fft_audio_buffer_t &buffer,
@@ -140,6 +145,31 @@ fl::Str FFT::info() const {
         FASTLED_WARN("FFT context is not initialized");
         return fl::Str();
     }
+}
+
+size_t FFT::sampleSize() const {
+    if (mContext) {
+        return mContext->sampleSize();
+    }
+    return 0;
+}
+
+
+
+bool FFT::run(const AudioSample& sample, fft_output_fixed *out) {
+    if (mContext) {
+        if (sample.size() != mContext->sampleSize()) {
+            FASTLED_WARN("FFT sample size mismatch");
+            return false;
+        }
+        fft_audio_buffer_t buffer = {0};
+        for (size_t i = 0; i < sample.size(); ++i) {
+            buffer[i] = sample[i];
+        }
+        mContext->fft_unit_test(buffer, out);
+        return true;
+    }
+    return false;
 }
 
 } // namespace fl
