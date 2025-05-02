@@ -14,12 +14,12 @@
 #include "third_party/cq_kernel/kiss_fftr.h"
 
 #include "fl/array.h"
+#include "fl/audio.h"
 #include "fl/fft.h"
 #include "fl/str.h"
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/audio.h"
 
 // #define SAMPLES IS2_AUDIO_BUFFER_LEN
 #define AUDIO_SAMPLE_RATE 44100
@@ -61,14 +61,12 @@ class FFTContext {
         }
     }
 
-    size_t sampleSize() const {
-        return m_cq_cfg.samples;
-    }
+    size_t sampleSize() const { return m_cq_cfg.samples; }
 
-    void fft_unit_test(Slice<const int16_t> buffer,
-                       fft_output_fixed *out) {
+    void fft_unit_test(Slice<const int16_t> buffer, fft_output_fixed *out) {
 
-        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
+        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are
+        // still hardcoded to 512");
         out->clear();
         // allocate
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
@@ -130,16 +128,6 @@ FFT::FFT(int samples, int bands, float fmin, float fmax, int sample_rate)
 
 FFT::~FFT() { mContext.reset(); }
 
-// void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
-//                         fft_output_fixed *out) {
-
-//     if (mContext) {
-//         mContext->fft_unit_test(buffer, out);
-//     } else {
-//         FASTLED_WARN("FFT context is not initialized");
-//     }
-// }
-
 fl::Str FFT::info() const {
     if (mContext) {
         return mContext->info();
@@ -156,30 +144,26 @@ size_t FFT::sampleSize() const {
     return 0;
 }
 
-
-
-bool FFT::run(const AudioSample& sample, fft_output_fixed *out) {
-    auto& audio_sample = sample.pcm();
+FFT::Result FFT::run(const AudioSample &sample, fft_output_fixed *out) {
+    auto &audio_sample = sample.pcm();
     Slice<const int16_t> slice(audio_sample);
     return run(slice, out);
 }
 
-
-
-bool FFT::run(Slice<const int16_t> sample, fft_output_fixed *out) {
-    if (mContext) {
-        if (sample.size() != mContext->sampleSize()) {
-            FASTLED_WARN("FFT sample size mismatch");
-            return false;
-        }
-        fft_audio_buffer_t buffer = {0};
-        for (size_t i = 0; i < sample.size(); ++i) {
-            buffer[i] = sample[i];
-        }
-        mContext->fft_unit_test(buffer, out);
-        return true;
+FFT::Result FFT::run(Slice<const int16_t> sample, fft_output_fixed *out) {
+    if (!mContext) {
+        return FFT::Result(false, "FFT context is not initialized");
     }
-    return false;
+    if (sample.size() != mContext->sampleSize()) {
+        FASTLED_WARN("FFT sample size mismatch");
+        return FFT::Result(false, "FFT sample size mismatch");
+    }
+    fft_audio_buffer_t buffer = {0};
+    for (size_t i = 0; i < sample.size(); ++i) {
+        buffer[i] = sample[i];
+    }
+    mContext->fft_unit_test(buffer, out);
+    return FFT::Result(true, "");
 }
 
 } // namespace fl

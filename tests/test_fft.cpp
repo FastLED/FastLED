@@ -56,8 +56,6 @@ TEST_CASE("fft tester 512") {
     FASTLED_WARN("Done");
 }
 
-
-#if 1  // broken right now.
 TEST_CASE("fft tester 256") {
     // fft_audio_buffer_t buffer = {0};
     fl::vector<int16_t> buffer;
@@ -95,4 +93,3 @@ TEST_CASE("fft tester 256") {
     FASTLED_WARN("FFT info: " << info);
     FASTLED_WARN("Done");
 }
-#endif

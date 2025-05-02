@@ -3,6 +3,7 @@
 #include "fl/scoped_ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/pair.h"
 
 namespace fl {
 
@@ -19,6 +20,13 @@ class FFTContext;
 
 class FFT {
   public:
+
+    struct Result {
+      Result(bool ok, const Str& error) : ok(ok), error(error) {}
+      bool ok = false;
+      fl::Str error;
+    };
+
     static int DefaultSamples() { return 512; }
     static int DefaultBands() { return 16; }
     static float DefaultMinFrequency() { return 174.6f; }
@@ -40,8 +48,8 @@ class FFT {
     // void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed
     // *out);
 
-    bool run(const AudioSample &sample, fft_output_fixed *out);
-    bool run(Slice<const int16_t> sample, fft_output_fixed *out);
+    Result run(const AudioSample &sample, fft_output_fixed *out);
+    Result run(Slice<const int16_t> sample, fft_output_fixed *out);
 
     // Info on what the frequency the bins represent
     fl::Str info() const;
