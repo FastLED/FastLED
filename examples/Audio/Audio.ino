@@ -95,9 +95,10 @@ void loop() {
         FASTLED_WARN("x: " << x);
 
         fft.run(sample.pcm(), &fftOut);
-        FASTLED_WARN("FFT output raw: " << fftOut.bins_raw);
-        FASTLED_WARN("FFT output db: " << fftOut.bins_db);
+        FASTLED_WARN("FFT output: " << fftOut);
         // FASTLED_WARN("rms: " << rms(sample->pcm()));
+
+        
     }
 
     leds[xyMap(x, y)] = CRGB(255, 0, 0);
