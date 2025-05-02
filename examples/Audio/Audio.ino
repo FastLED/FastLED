@@ -98,6 +98,28 @@ void loop() {
         FASTLED_WARN("FFT output: " << fftOut);
         // FASTLED_WARN("rms: " << rms(sample->pcm()));
 
+        // for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
+        //     float bin = fftOut.bins_raw[i];
+        //     int32_t y = fl::map_range<float, float>(bin, 0.0f, 32768.0f, 0.0f, HEIGHT - 1);
+        //     FASTLED_WARN("y: " << y);
+        //     if (y > HEIGHT) {
+        //         y = HEIGHT;
+        //     }
+        //     if (y < 0) {
+        //         y = 0;
+        //     }
+        //     leds[xyMap(x, y)] = CRGB(255, 255, 255);
+        // }
+        // just write the first row
+        for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
+            auto x = i;
+            auto v = fftOut.bins_db[i];
+            auto b = fl::map_range<float, float>(v, 30.0f, 140.0f, 0.0f, 255.0f);
+            b = fl::clamp(b, 0.0f, 255.0f);
+            leds[xyMap(x, 4)] = CRGB(b, b, b);
+            FASTLED_WARN("y: " << i << " b: " << b);
+        }
+
         
     }
 
