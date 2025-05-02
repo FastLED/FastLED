@@ -63,7 +63,7 @@ class FFTContext {
 
     size_t sampleSize() const { return m_cq_cfg.samples; }
 
-    void fft_unit_test(Slice<const int16_t> buffer, fft_output_fixed *out) {
+    void fft_unit_test(Slice<const int16_t> buffer, FFT::OutputBins *out) {
 
         // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are
         // still hardcoded to 512");
@@ -144,13 +144,13 @@ size_t FFT::sampleSize() const {
     return 0;
 }
 
-FFT::Result FFT::run(const AudioSample &sample, fft_output_fixed *out) {
+FFT::Result FFT::run(const AudioSample &sample, OutputBins *out) {
     auto &audio_sample = sample.pcm();
     Slice<const int16_t> slice(audio_sample);
     return run(slice, out);
 }
 
-FFT::Result FFT::run(Slice<const int16_t> sample, fft_output_fixed *out) {
+FFT::Result FFT::run(Slice<const int16_t> sample, OutputBins *out) {
     if (!mContext) {
         return FFT::Result(false, "FFT context is not initialized");
     }
@@ -158,11 +158,7 @@ FFT::Result FFT::run(Slice<const int16_t> sample, fft_output_fixed *out) {
         FASTLED_WARN("FFT sample size mismatch");
         return FFT::Result(false, "FFT sample size mismatch");
     }
-    fft_audio_buffer_t buffer = {0};
-    for (size_t i = 0; i < sample.size(); ++i) {
-        buffer[i] = sample[i];
-    }
-    mContext->fft_unit_test(buffer, out);
+    mContext->fft_unit_test(sample, out);
     return FFT::Result(true, "");
 }
 

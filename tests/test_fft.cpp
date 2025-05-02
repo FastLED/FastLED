@@ -21,7 +21,7 @@
 using namespace fl;
 
 TEST_CASE("fft tester 512") {
-    fft_audio_buffer_t buffer = {0};
+    int16_t buffer[512] = {0};
     const int n = 512;
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {

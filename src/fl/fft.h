@@ -7,19 +7,14 @@
 
 namespace fl {
 
-// Proof of concept FFT using KISS FFT. Right now this is fixed sized blocks of
-// 512. But this is intended to change with a C++ wrapper around ot/
-typedef int16_t fft_audio_buffer_t[512];
-// typedef float fft_output[16];
-
-using fft_output_fixed = fl::vector_inlined<float, 16>;
 
 class AudioSample;
-
 class FFTContext;
 
 class FFT {
   public:
+
+    using OutputBins = fl::vector_inlined<float, 16>;
 
     struct Result {
       Result(bool ok, const Str& error) : ok(ok), error(error) {}
@@ -48,8 +43,8 @@ class FFT {
     // void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed
     // *out);
 
-    Result run(const AudioSample &sample, fft_output_fixed *out);
-    Result run(Slice<const int16_t> sample, fft_output_fixed *out);
+    Result run(const AudioSample &sample, OutputBins *out);
+    Result run(Slice<const int16_t> sample, OutputBins *out);
 
     // Info on what the frequency the bins represent
     fl::Str info() const;
