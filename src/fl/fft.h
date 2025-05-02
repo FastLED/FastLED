@@ -38,7 +38,7 @@ class FFT {
     void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
 
     // Info on what the frequency the bins represent
-    fl::Str generateHeaderInfo() const;
+    fl::Str info() const;
 
   private:
     fl::scoped_ptr<FFTContext> mContext;

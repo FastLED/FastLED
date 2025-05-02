@@ -53,7 +53,7 @@ TEST_CASE("fft tester") {
         CHECK(almost_equal);
     }
 
-    fl::Str info = fft.generateHeaderInfo();
+    fl::Str info = fft.info();
     FASTLED_WARN("FFT info: " << info);
     FASTLED_WARN("Done");
 }

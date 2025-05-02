@@ -93,7 +93,7 @@ class FFTContext {
         }
     }
 
-    fl::Str generateHeaderInfo() const {
+    fl::Str info() const {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
         fl::StrStream ss;
@@ -133,9 +133,9 @@ void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
     }
 }
 
-fl::Str FFT::generateHeaderInfo() const {
+fl::Str FFT::info() const {
     if (mContext) {
-        return mContext->generateHeaderInfo();
+        return mContext->info();
     } else {
         FASTLED_WARN("FFT context is not initialized");
         return fl::Str();
