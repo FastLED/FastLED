@@ -25,18 +25,24 @@ class AudioSample {
     AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
     AudioSample &operator=(const AudioSample &other);
     bool isValid() const { return mImpl != nullptr; }
-    const VectorPCM &pcm() const;
+
     size_t size() const;
+    // Raw pcm levels.
+    const VectorPCM &pcm() const;
+    // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
+    // and sounds like cloths rubbing. Useful for sound analysis.
+    float zcr() const;
+
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }
-    const int16_t& at(size_t i) const;
-    const int16_t& operator[](size_t i) const;
+    const int16_t &at(size_t i) const;
+    const int16_t &operator[](size_t i) const;
     operator bool() const { return isValid(); }
     bool operator==(const AudioSample &other) const;
     bool operator!=(const AudioSample &other) const;
 
   private:
-    static const VectorPCM& empty() ;
+    static const VectorPCM &empty();
     AudioSampleImplPtr mImpl;
 };
 
@@ -93,11 +99,45 @@ class AudioSampleImpl : public fl::Referent {
     ~AudioSampleImpl() {}
     template <typename It> void assign(It begin, It end) {
         mSignedPcm.assign(begin, end);
+        // calculate zero crossings
+        initZeroCrossings();
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
 
+    // "Zero crossing factor". High values > .4 indicate hissing
+    // sounds. For example a microphone rubbing against a clothing.
+    // These types of signals indicate the audio should be ignored.
+    // Low zero crossing factors (with loud sound) indicate that there
+    // is organized sound like that coming from music. This is so cheap
+    // to calculate it's done automatically. It should be one of the first
+    // signals to reject or accept a sound signal.
+    //
+    // Returns: a value -> [0.0f, 1.0f)
+    float zcf() const {
+        const size_t n = pcm().size();
+        if (n < 2) {
+            return 0.f;
+        }
+        return float(mZeroCrossings) / (n - 1);
+    }
+
   private:
+    void initZeroCrossings() {
+        mZeroCrossings = 0;
+        if (mSignedPcm.size() > 1) {
+            for (size_t i = 1; i < mSignedPcm.size(); ++i) {
+                const bool crossed =
+                    (mSignedPcm[i - 1] < 0 && mSignedPcm[i] >= 0) ||
+                    (mSignedPcm[i - 1] >= 0 && mSignedPcm[i] < 0);
+                if (crossed) {
+                    ++mZeroCrossings;
+                }
+            }
+        }
+    }
+
     VectorPCM mSignedPcm;
+    int16_t mZeroCrossings = 0;
 };
 
 } // namespace fl

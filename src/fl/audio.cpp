@@ -3,6 +3,65 @@
 
 namespace fl {
 
+const AudioSample::VectorPCM &AudioSample::pcm() const {
+    if (isValid()) {
+        return mImpl->pcm();
+    }
+    static VectorPCM empty;
+    return empty;
+}
+
+AudioSample &AudioSample::operator=(const AudioSample &other) {
+    mImpl = other.mImpl;
+    return *this;
+}
+
+size_t AudioSample::size() const {
+    if (isValid()) {
+        return mImpl->pcm().size();
+    }
+    return 0;
+}
+
+const int16_t &AudioSample::at(size_t i) const {
+    if (i < size()) {
+        return pcm()[i];
+    }
+    return empty()[0];
+}
+
+const int16_t &AudioSample::operator[](size_t i) const { return at(i); }
+
+bool AudioSample::operator==(const AudioSample &other) const {
+    if (mImpl == other.mImpl) {
+        return true;
+    }
+    if (mImpl == nullptr || other.mImpl == nullptr) {
+        return false;
+    }
+    if (mImpl->pcm().size() != other.mImpl->pcm().size()) {
+        return false;
+    }
+    for (size_t i = 0; i < mImpl->pcm().size(); ++i) {
+        if (mImpl->pcm()[i] != other.mImpl->pcm()[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AudioSample::operator!=(const AudioSample &other) const {
+    return !(*this == other);
+}
+
+const AudioSample::VectorPCM &AudioSample::empty() {
+    static int16_t empty_data[1] = {0};
+    static VectorPCM empty(empty_data);
+    return empty;
+}
+
+float AudioSample::zcr() const { return mImpl->zcf(); }
+
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
     : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
       dbfs_floor_global_(INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
@@ -32,73 +91,6 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
 
     // 3) estimate SPL
     current_spl_ = dbfs + offset_;
-}
-
-const AudioSample::VectorPCM &AudioSample::pcm() const {
-    if (isValid()) {
-        return mImpl->pcm();
-    }
-    static VectorPCM empty;
-    return empty;
-}
-
-
-
-AudioSample &AudioSample::operator=(const AudioSample &other) {
-    mImpl = other.mImpl;
-    return *this;
-}
-
-
-
-size_t AudioSample::size() const {
-    if (isValid()) {
-        return mImpl->pcm().size();
-    }
-    return 0;
-}
-
-
-
-const int16_t& AudioSample::at(size_t i) const {
-    if (i < size()) {
-        return pcm()[i];
-    }
-    return empty()[0];
-}
-
-const int16_t& AudioSample::operator[](size_t i) const { return at(i); }
-
-bool AudioSample::operator==(const AudioSample &other) const {
-    if (mImpl == other.mImpl) {
-        return true;
-    }
-    if (mImpl == nullptr || other.mImpl == nullptr) {
-        return false;
-    }
-    if (mImpl->pcm().size() != other.mImpl->pcm().size()) {
-        return false;
-    }
-    for (size_t i = 0; i < mImpl->pcm().size(); ++i) {
-        if (mImpl->pcm()[i] != other.mImpl->pcm()[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-
-bool AudioSample::operator!=(const AudioSample &other) const {
-    return !(*this == other);
-}
-
-
-
-const AudioSample::VectorPCM& AudioSample::empty() {
-    static int16_t empty_data[1] = {0};
-    static VectorPCM empty(empty_data);
-    return empty;
 }
 
 } // namespace fl
