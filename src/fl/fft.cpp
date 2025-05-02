@@ -62,6 +62,8 @@ class FFTContext {
 
     void fft_unit_test(const fft_audio_buffer_t &buffer,
                        fft_output_fixed *out) {
+
+        FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
         // uint32_t start = millis();
         out->clear();
         // kiss_fft_cpx fft[SAMPLES] = {};
