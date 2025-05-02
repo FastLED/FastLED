@@ -40,6 +40,7 @@ UIDescription description("This is more of a test for new features.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
 
 UIAudio audio("Audio");
+UISlider fadeToBlack("Fade to black by", 0, 0, 40, 1);
 
 FFT fft(512, 64);
 FFT::OutputBins fftOut;
@@ -69,7 +70,17 @@ void setup() {
 }
 
 
+
 void shiftUp() {
+
+    // fade each led by 1%
+    for (int y = HEIGHT - 1; y > 0; --y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            auto& c = leds[xyMap(x, y)];
+            c.fadeToBlackBy(fadeToBlack.as_int());
+        }
+    }
+
     for (int y = HEIGHT - 1; y > 0; --y) {
         for (int x = 0; x < WIDTH; ++x) {
             leds[xyMap(x, y)] = leds[xyMap(x, y - 1)];
@@ -91,11 +102,11 @@ void loop() {
 
     while (AudioSample sample = audio.next()) {
         shiftUp();
-        FASTLED_WARN("Audio sample size: " << sample.pcm().size());
+        //FASTLED_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
         // FASTLED_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
-        FASTLED_WARN("getDBFS: " << dbfs);
+        //FASTLED_WARN("getDBFS: " << dbfs);
         int32_t max = 0;
         for (int i = 0; i < sample.pcm().size(); ++i) {
             int32_t x = ABS(sample.pcm()[i]);
@@ -107,10 +118,10 @@ void loop() {
         anim = fl::clamp(anim, 0.0f, 1.0f);
 
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
-        FASTLED_WARN("x: " << x);
+        // FASTLED_WARN("x: " << x);
 
         fft.run(sample.pcm(), &fftOut);
-        FASTLED_WARN("FFT output: " << fftOut);
+        // FASTLED_WARN("FFT output: " << fftOut);
         // FASTLED_WARN("rms: " << rms(sample->pcm()));
 
         // for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
@@ -134,7 +145,7 @@ void loop() {
             v = fl::clamp(v, 0.0f, 1.0f);
             uint8_t heatIndex = fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
 
-            FASTLED_WARN(v);
+            //FASTLED_WARN(v);
             
             // Use FastLED's built-in HeatColors palette
             auto c = ColorFromPalette(HeatColors_p, heatIndex);

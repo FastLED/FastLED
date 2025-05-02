@@ -9,6 +9,10 @@
 
 namespace fl {
 
+enum {
+  kJsAudioSamples = 512,
+};
+
 class jsAudioImpl {
   public:
     jsAudioImpl(const fl::Str &name);
