@@ -72,22 +72,18 @@ void loop() {
     y = HEIGHT / 2;
 
     while (AudioSample sample = audio.next()) {
-        FASTLED_WARN("Audio sample size: " << sample->pcm().size());
-        soundLevelMeter.processBlock(sample->pcm());
+        FASTLED_WARN("Audio sample size: " << sample.pcm().size());
+        soundLevelMeter.processBlock(sample.pcm());
         // FASTLED_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
         FASTLED_WARN("getDBFS: " << dbfs);
-
-
         int32_t max = 0;
-
-        for (int i = 0; i < sample->pcm().size(); ++i) {
-            int32_t x = ABS(sample->pcm()[i]);
+        for (int i = 0; i < sample.pcm().size(); ++i) {
+            int32_t x = ABS(sample.pcm()[i]);
             if (x > max) {
                 max = x;
             }
         }
-
         float anim = fl::map_range<float, float>(max, 0.0f, 32768.0f, 0.0f, 1.0f);
         anim = fl::clamp(anim, 0.0f, 1.0f);
 

@@ -112,8 +112,8 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
 
 
 
-Ptr<const AudioSampleImpl> jsAudioImpl::next() {
-    Ptr<const AudioSampleImpl> out;
+AudioSample jsAudioImpl::next() {
+    Ptr<AudioSampleImpl> out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
         return out;
@@ -123,7 +123,7 @@ Ptr<const AudioSampleImpl> jsAudioImpl::next() {
     out = mAudioSampleImpls.front();
     mAudioSampleImpls.erase(mAudioSampleImpls.begin());
     // FASTLED_WARN("Returning audio sample of size " << out->pcm().size());
-    return out;
+    return AudioSample(out);
 }
 
 }  // namespace fl

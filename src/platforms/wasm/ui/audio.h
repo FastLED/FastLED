@@ -22,7 +22,7 @@ class jsAudioImpl {
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::Str &groupName() const { return mGroup; }
 
-    Ptr<const AudioSampleImpl> next();
+    AudioSample next();
 
   private:
     struct Updater : fl::EngineEvents::Listener {
