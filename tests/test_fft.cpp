@@ -33,7 +33,7 @@ TEST_CASE("fft tester 512") {
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT fft(samples);
-    fft.fft_unit_test(buffer, &out);
+    fft.run(buffer, &out);
 
 
     FASTLED_WARN("FFT output: " << out);

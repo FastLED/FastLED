@@ -65,18 +65,21 @@ class FFTContext {
         return m_cq_cfg.samples;
     }
 
-    void fft_unit_test(const fft_audio_buffer_t &buffer,
+    void fft_unit_test(Slice<const int16_t> buffer,
                        fft_output_fixed *out) {
 
         FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
         out->clear();
+        // allocate
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
-        kiss_fftr(m_fftr_cfg, buffer, fft);
         FASTLED_STACK_ARRAY(kiss_fft_cpx, cq, m_cq_cfg.bands);
+        // initialize
+        kiss_fftr(m_fftr_cfg, buffer.data(), fft);
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
         const float maxf = m_cq_cfg.fmax;
         const float minf = m_cq_cfg.fmin;
         const float delta_f = (maxf - minf) / m_cq_cfg.bands;
+        // begin transform
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             int32_t real = cq[i].r;
             int32_t imag = cq[i].i;
@@ -91,7 +94,6 @@ class FFTContext {
             FASTLED_UNUSED(magnitude_db);
             // FASTLED_WARN("magnitude: " << magnitude);
             out->push_back(magnitude);
-
             if (magnitude <= 0.0f) {
                 magnitude_db = 0.0f;
             }
@@ -128,15 +130,15 @@ FFT::FFT(int samples, int bands, float fmin, float fmax, int sample_rate)
 
 FFT::~FFT() { mContext.reset(); }
 
-void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
-                        fft_output_fixed *out) {
+// void FFT::fft_unit_test(const fft_audio_buffer_t &buffer,
+//                         fft_output_fixed *out) {
 
-    if (mContext) {
-        mContext->fft_unit_test(buffer, out);
-    } else {
-        FASTLED_WARN("FFT context is not initialized");
-    }
-}
+//     if (mContext) {
+//         mContext->fft_unit_test(buffer, out);
+//     } else {
+//         FASTLED_WARN("FFT context is not initialized");
+//     }
+// }
 
 fl::Str FFT::info() const {
     if (mContext) {
@@ -157,6 +159,14 @@ size_t FFT::sampleSize() const {
 
 
 bool FFT::run(const AudioSample& sample, fft_output_fixed *out) {
+    auto& audio_sample = sample.pcm();
+    Slice<const int16_t> slice(audio_sample);
+    return run(slice, out);
+}
+
+
+
+bool FFT::run(Slice<const int16_t> sample, fft_output_fixed *out) {
     if (mContext) {
         if (sample.size() != mContext->sampleSize()) {
             FASTLED_WARN("FFT sample size mismatch");

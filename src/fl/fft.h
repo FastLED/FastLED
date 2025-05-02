@@ -37,9 +37,11 @@ class FFT {
     FFT &operator=(FFT &&) = delete;
     size_t sampleSize() const;
 
-    void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
+    // void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed
+    // *out);
 
     bool run(const AudioSample &sample, fft_output_fixed *out);
+    bool run(Slice<const int16_t> sample, fft_output_fixed *out);
 
     // Info on what the frequency the bins represent
     fl::Str info() const;
@@ -47,10 +49,5 @@ class FFT {
   private:
     fl::scoped_ptr<FFTContext> mContext;
 };
-
-void fft_init(); // Explicit initialization of FFT, otherwise it will be
-                 // initialized on first run.
-bool fft_is_initialized();
-void fft_unit_test(const fft_audio_buffer_t &buffer, fft_output_fixed *out);
 
 }; // namespace fl
