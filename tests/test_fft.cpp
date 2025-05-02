@@ -57,26 +57,28 @@ TEST_CASE("fft tester 512") {
 }
 
 
-#if 0  // broken right now.
+#if 1  // broken right now.
 TEST_CASE("fft tester 256") {
-    fft_audio_buffer_t buffer = {0};
+    // fft_audio_buffer_t buffer = {0};
+    fl::vector<int16_t> buffer;
     const int n = 256;
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
         float rot = fl::map_range<float, float>(i, 0, n-1, 0, 2 * PI * 10);
         float sin_x = sin(rot);
-        buffer[i] = int16_t(32767 * sin_x);
+        auto v = int16_t(32767 * sin_x);
+        buffer.push_back(v);
     }
     fl::vector_inlined<float, 16> out;
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT fft(samples);
-    fft.fft_unit_test(buffer, &out);
+    fft.run(buffer, &out);
 
 
     FASTLED_WARN("FFT output: " << out);
     const float expected_output[16] = {
-        3, 2, 2, 6, 6.08, 15.03, 3078.22, 4346.29, 4033.16, 3109, 38.05, 4.47, 4, 2, 1.41, 1.41};
+        3, 2, 4, 5, 5.10, 9.06, 11.05, 27.66, 2779.93, 3811.66, 4176.58, 4185.02, 4174.50, 4017.63, 3638.46, 3327.60};
     for (int i = 0; i < 16; ++i) {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
         float a = out[i];

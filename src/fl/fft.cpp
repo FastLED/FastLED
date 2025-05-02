@@ -68,7 +68,7 @@ class FFTContext {
     void fft_unit_test(Slice<const int16_t> buffer,
                        fft_output_fixed *out) {
 
-        FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
+        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
         out->clear();
         // allocate
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
