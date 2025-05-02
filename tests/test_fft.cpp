@@ -25,16 +25,17 @@ TEST_CASE("fft tester") {
 
     // fft_init();
     fft_audio_buffer_t buffer = {0};
+    const int n = 512;
     // fill in with a sine wave
-    for (int i = 0; i < 512; ++i) {
-        // buffer[i] = int16_t(32767 * sin(2.0 * M_PI * i / 2));
-        float rot = fl::map_range<float, float>(i, 0, 511, 0, 2 * PI * 10);
+    for (int i = 0; i < n; ++i) {
+        float rot = fl::map_range<float, float>(i, 0, n-1, 0, 2 * PI * 10);
         float sin_x = sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
     fl::vector_inlined<float, 16> out;
     // fft_unit_test(buffer, &out);
-    FFT fft;
+    const int samples = n;
+    FFT fft(samples);
     fft.fft_unit_test(buffer, &out);
 
 
