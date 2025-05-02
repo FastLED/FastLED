@@ -64,27 +64,14 @@ class FFTContext {
                        fft_output_fixed *out) {
 
         FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are still hardcoded to 512");
-        // uint32_t start = millis();
         out->clear();
-        // kiss_fft_cpx fft[SAMPLES] = {};
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
-        // memset(fft, 0, sizeof(fft));
         kiss_fftr(m_fftr_cfg, buffer, fft);
-        // kiss_fft_cpx cq[BANDS] = {};
         FASTLED_STACK_ARRAY(kiss_fft_cpx, cq, m_cq_cfg.bands);
-        // memset(cq, 0, sizeof(cq));
         apply_kernels(fft, cq, m_kernels, m_cq_cfg);
-        // uint32_t diff = millis() - start;
-        //  FASTLED_UNUSED(diff);
         const float maxf = m_cq_cfg.fmax;
         const float minf = m_cq_cfg.fmin;
         const float delta_f = (maxf - minf) / m_cq_cfg.bands;
-        // char output_str[2048]; // Assuming this size is sufficient. Adjust as
-        // necessary.
-        // int offset = 0;
-        // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-        // "FFT took %u ms. FFT output: ", diff);
-        // process output here
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             int32_t real = cq[i].r;
             int32_t imag = cq[i].i;
@@ -97,9 +84,7 @@ class FFTContext {
             FASTLED_UNUSED(f_start);
             FASTLED_UNUSED(f_end);
             FASTLED_UNUSED(magnitude_db);
-
-            FASTLED_WARN("magnitude: " << magnitude);
-
+            // FASTLED_WARN("magnitude: " << magnitude);
             out->push_back(magnitude);
 
             if (magnitude <= 0.0f) {
@@ -111,23 +96,12 @@ class FFTContext {
     fl::Str generateHeaderInfo() const {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
-
-        // // Print header with frequency bands
-        // char output_str[2048] = {0}; // Buffer for header text
-        // int offset = 0;
-
-        // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-        //                    "FFT Frequency Bands: ");
-
         fl::StrStream ss;
         ss << "FFT Frequency Bands: ";
 
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             float f_start = m_cq_cfg.fmin + i * delta_f;
             float f_end = f_start + delta_f;
-            // offset += snprintf(output_str + offset, sizeof(output_str) - offset,
-            //                    "%.2fHz-%.2fHz, ", static_cast<double>(f_start),
-            //                    static_cast<double>(f_end));
             ss << f_start << "Hz-" << f_end << "Hz, ";
         }
 
