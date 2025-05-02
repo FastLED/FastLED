@@ -351,6 +351,14 @@ template <typename T> class HeapVector {
         return *this;
     }
 
+    template<size_t N>
+    HeapVector(T (&values)[N]) {
+        T* begin = &values[0];
+        T* end = &values[N];
+        assign(begin, end);
+    }
+
+
     // Destructor
     ~HeapVector() { clear(); }
 

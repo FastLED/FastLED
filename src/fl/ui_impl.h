@@ -9,6 +9,7 @@
 #include "fl/str.h"
 #include "fl/audio.h"
 #include "platforms/ui_defs.h"
+#include "fl/warn.h"
 
 
 #ifndef FASTLED_HAS_UI_SLIDER
@@ -195,10 +196,9 @@ class UIAudioImpl {
     UIAudioImpl(const char *name) { FASTLED_UNUSED(name); }
     ~UIAudioImpl() {}
 
-    Ptr<const AudioSample> next() {
+    AudioSample next() {
         FASTLED_WARN("Audio sample not implemented");
-        Ptr<const AudioSample> sample;  // null.
-        return sample;
+        return AudioSample();
     }
 };
 #endif

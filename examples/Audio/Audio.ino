@@ -71,7 +71,7 @@ void loop() {
     // x = pointX.as_int();
     y = HEIGHT / 2;
 
-    while (Ptr<const AudioSample> sample = audio.next()) {
+    while (AudioSample sample = audio.next()) {
         FASTLED_WARN("Audio sample size: " << sample->pcm().size());
         soundLevelMeter.processBlock(sample->pcm());
         // FASTLED_WARN("")

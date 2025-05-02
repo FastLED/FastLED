@@ -100,28 +100,28 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     parseJsonStringToInt16Vector(s, &audio_data);
     // FASTLED_WARN("Found data of size " << audio_data.size() << " in jsAudioImpl::updateInternal");
     
-    AudioSamplePtr sample = NewPtr<AudioSample>();
+    AudioSampleImplPtr sample = NewPtr<AudioSampleImpl>();
     sample->assign(audio_data.begin(), audio_data.end());
     // FASTLED_WARN("assigning audio data of size " << audio_data.size());
-    mAudioSamples.push_back(sample);
-    while (mAudioSamples.size() > 10) {
-        mAudioSamples.erase(mAudioSamples.begin());
+    mAudioSampleImpls.push_back(sample);
+    while (mAudioSampleImpls.size() > 10) {
+        mAudioSampleImpls.erase(mAudioSampleImpls.begin());
     }
 }
 
 
 
 
-Ptr<const AudioSample> jsAudioImpl::next() {
-    Ptr<const AudioSample> out;
-    if (mAudioSamples.empty()) {
+Ptr<const AudioSampleImpl> jsAudioImpl::next() {
+    Ptr<const AudioSampleImpl> out;
+    if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
         return out;
     }
-    // auto sample = mAudioSamples.back();
-    // mAudioSamples.pop_back();
-    out = mAudioSamples.front();
-    mAudioSamples.erase(mAudioSamples.begin());
+    // auto sample = mAudioSampleImpls.back();
+    // mAudioSampleImpls.pop_back();
+    out = mAudioSampleImpls.front();
+    mAudioSampleImpls.erase(mAudioSampleImpls.begin());
     // FASTLED_WARN("Returning audio sample of size " << out->pcm().size());
     return out;
 }

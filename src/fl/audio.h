@@ -2,26 +2,42 @@
 
 #include "fl/math.h"
 #include "fl/ptr.h"
-#include "fl/vector.h"
 #include "fl/slice.h"
+#include "fl/vector.h"
 #include <math.h>
 #include <stdint.h>
 
 namespace fl {
 
-FASTLED_SMART_PTR(AudioSample);
+class AudioSampleImpl;
 
-class AudioSample : public fl::Referent {
+FASTLED_SMART_PTR(AudioSampleImpl);
+
+// AudioSample is a wrapper around AudioSampleImpl, hiding the reference
+// counting so that the api object can be simple and have standard object
+// semantics.
+class AudioSample {
   public:
     using VectorPCM = fl::vector<int16_t>;
-    ~AudioSample() {}
-    template <typename It> void assign(It begin, It end) {
-        mSignedPcm.assign(begin, end);
-    }
-    const VectorPCM &pcm() const { return mSignedPcm; }
+    using const_iterator = VectorPCM::const_iterator;
+    AudioSample() {}
+    AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
+    AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
+    AudioSample &operator=(const AudioSample &other);
+    bool isValid() const { return mImpl != nullptr; }
+    const VectorPCM &pcm() const;
+    size_t size() const;
+    const_iterator begin() const { return pcm().begin(); }
+    const_iterator end() const { return pcm().end(); }
+    const int16_t& at(size_t i) const;
+    const int16_t& operator[](size_t i) const;
+    operator bool() const { return isValid(); }
+    bool operator==(const AudioSample &other) const;
+    bool operator!=(const AudioSample &other) const;
 
   private:
-    VectorPCM mSignedPcm;
+    static const VectorPCM& empty() ;
+    AudioSampleImplPtr mImpl;
 };
 
 // Sound level meter is a persistant measuring class that will auto-tune the
@@ -68,6 +84,20 @@ class SoundLevelMeter {
     double offset_;            // spl_floor_ − dbfs_floor_global_
     double current_dbfs_;      // last block’s dBFS
     double current_spl_;       // last block’s estimated SPL
+};
+
+// Implementation details.
+class AudioSampleImpl : public fl::Referent {
+  public:
+    using VectorPCM = fl::vector<int16_t>;
+    ~AudioSampleImpl() {}
+    template <typename It> void assign(It begin, It end) {
+        mSignedPcm.assign(begin, end);
+    }
+    const VectorPCM &pcm() const { return mSignedPcm; }
+
+  private:
+    VectorPCM mSignedPcm;
 };
 
 } // namespace fl

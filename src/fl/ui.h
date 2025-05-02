@@ -330,7 +330,7 @@ class UIAudio: public UIAudioImpl {
     using Super = UIAudioImpl;
     UIAudio(const char *name) : UIAudioImpl(name) {}
     ~UIAudio() {}
-    Ptr<const AudioSample> next() { return Super::next(); }
+    AudioSample next() { return Super::next(); }
 };
 
 
