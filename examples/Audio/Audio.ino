@@ -40,7 +40,7 @@ UIDescription description("This is more of a test for new features.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
 
 UIAudio audio("Audio");
-UISlider fadeToBlack("Fade to black by", 0, 0, 40, 1);
+UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
 
 FFT fft(512, 64);
 FFT::OutputBins fftOut;
