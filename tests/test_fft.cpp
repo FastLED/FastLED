@@ -36,13 +36,14 @@ TEST_CASE("fft tester 512") {
     FFT fft(samples);
     fft.run(buffer, &out);
 
-    FASTLED_WARN("FFT output: " << out);
+    FASTLED_WARN("FFT output raw bins: " << out.bins_raw);
+    FASTLED_WARN("FFT output db bins: " << out.bins_db);
     const float expected_output[16] = {
         3,       2,    2,     6,    6.08, 15.03, 3078.22, 4346.29,
         4033.16, 3109, 38.05, 4.47, 4,    2,     1.41,    1.41};
     for (int i = 0; i < 16; ++i) {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
-        float a = out[i];
+        float a = out.bins_raw[i];
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
@@ -80,7 +81,7 @@ TEST_CASE("fft tester 256") {
         2779.93, 3811.66, 4176.58, 4185.02, 4174.50, 4017.63, 3638.46, 3327.60};
     for (int i = 0; i < 16; ++i) {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
-        float a = out[i];
+        float a = out.bins_raw[i];
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
@@ -125,7 +126,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
         3327.600};
     for (int i = 0; i < 64; ++i) {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
-        float a = out[i];
+        float a = out.bins_raw[i];
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {

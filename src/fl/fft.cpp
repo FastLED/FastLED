@@ -89,12 +89,17 @@ class FFTContext {
             float f_end = f_start + delta_f;
             FASTLED_UNUSED(f_start);
             FASTLED_UNUSED(f_end);
-            FASTLED_UNUSED(magnitude_db);
-            // FASTLED_WARN("magnitude: " << magnitude);
-            out->push_back(magnitude);
+
+
             if (magnitude <= 0.0f) {
                 magnitude_db = 0.0f;
             }
+
+            // FASTLED_UNUSED(magnitude_db);
+            // FASTLED_WARN("magnitude_db: " << magnitude_db);
+            // out->push_back(magnitude_db);
+            out->bins_raw.push_back(magnitude);
+            out->bins_db.push_back(magnitude_db);
         }
     }
 

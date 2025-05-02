@@ -25,6 +25,8 @@ template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
 
+class FFTBins;
+
 // A copy on write string class. Fast to copy from another
 // Str object as read only pointers are shared. If the size
 // of the string is below FASTLED_STR_INLINED_SIZE then the
@@ -550,6 +552,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         write(str.c_str(), str.size());
         return *this;
     }
+
+    Str &append(const FFTBins &str);
 
     const char *data() const { return c_str(); }
 

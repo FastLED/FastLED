@@ -2,6 +2,7 @@
 
 #include "fl/namespace.h"
 #include "fl/str.h"
+#include "fl/fft.h"
 
 namespace fl {
 
@@ -165,6 +166,14 @@ void StringHolder::grow(size_t newLength) {
 
 float StringFormatter::parseFloat(const char *str, size_t len) {
     return string_functions::atoff(str, len);
+}
+
+Str & Str::append(const FFTBins &str) {
+    append("FFT Bins: ");
+    append(str.bins_raw);
+    append(" FFT Bins DB: ");
+    append(str.bins_db);
+    return *this;
 }
 
 } // namespace fl

@@ -20,6 +20,7 @@ all the UI elements you see below.
 #include "fl/ui.h"
 #include "fl/xypath.h"
 #include "fx/time.h"
+#include "fl/fft.h"
 
 // Sketch.
 #include "fl/function.h"
@@ -38,6 +39,9 @@ UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 
 UIAudio audio("Audio");
+
+FFT fft(512, 64);
+FFT::OutputBins fftOut;
 
 int x = 0;
 int y = 0;
@@ -90,6 +94,9 @@ void loop() {
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
         FASTLED_WARN("x: " << x);
 
+        fft.run(sample.pcm(), &fftOut);
+        FASTLED_WARN("FFT output raw: " << fftOut.bins_raw);
+        FASTLED_WARN("FFT output db: " << fftOut.bins_db);
         // FASTLED_WARN("rms: " << rms(sample->pcm()));
     }
 

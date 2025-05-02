@@ -5,11 +5,25 @@
 #include "fl/vector.h"
 #include "fl/pair.h"
 
+
 namespace fl {
 
 
 class AudioSample;
 class FFTContext;
+
+struct FFTBins {
+  public:
+    FFTBins() = default;
+    // The bins are the output of the FFT.
+    fl::vector<float> bins_raw;
+    // The frequency range of the bins.
+    fl::vector<float> bins_db;
+    void clear() {
+      bins_raw.clear();
+      bins_db.clear();
+    }
+};
 
 // Example:
 //   FFT fft(512, 16);
@@ -19,7 +33,10 @@ class FFTContext;
 class FFT {
   public:
     // Output bins for FFT. This is the output when the fft is run.
-    using OutputBins = fl::vector_inlined<float, 16>;
+    // using OutputBins = fl::vector_inlined<float, 16>;
+
+    using OutputBins = FFTBins;
+
     // Result indicating success or failure of the FFT run (in which case there
     // will be an error message).
     struct Result {
