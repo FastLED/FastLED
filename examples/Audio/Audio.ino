@@ -37,6 +37,7 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
+UICheckbox enableVolumeVis("Enable volume visualization", false);
 
 UIAudio audio("Audio");
 
@@ -66,16 +67,30 @@ void setup() {
     screenmap.setDiameter(.2);
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 }
+
+
+void shiftUp() {
+    for (int y = HEIGHT - 1; y > 0; --y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            leds[xyMap(x, y)] = leds[xyMap(x, y - 1)];
+        }
+    }
+    for (int x = 0; x < WIDTH; ++x) {
+        leds[xyMap(x, 0)] = CRGB(0, 0, 0);
+    }
+}
+
 void loop() {
     if (triggered) {
         FASTLED_WARN("Triggered");
     }
-    fl::clear(leds);
+    //fl::clear(leds);
     
     // x = pointX.as_int();
     y = HEIGHT / 2;
 
     while (AudioSample sample = audio.next()) {
+        shiftUp();
         FASTLED_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
         // FASTLED_WARN("")
@@ -123,7 +138,10 @@ void loop() {
         
     }
 
-    leds[xyMap(x, y)] = CRGB(255, 0, 0);
+    if (enableVolumeVis) {
+        leds[xyMap(x, y)] = CRGB(255, 0, 0);
+    }
+
 
     FastLED.show();
 }
