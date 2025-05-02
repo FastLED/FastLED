@@ -129,10 +129,18 @@ void loop() {
         for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
             auto x = i;
             auto v = fftOut.bins_db[i];
-            auto b = fl::map_range<float, float>(v, 30.0f, 140.0f, 0.0f, 255.0f);
-            b = fl::clamp(b, 0.0f, 255.0f);
-            leds[xyMap(x, 4)] = CRGB(b, b, b);
-            FASTLED_WARN("y: " << i << " b: " << b);
+            // Map audio intensity to a position in the heat palette (0-255)
+            v = fl::map_range<float, float>(v, 45, 70, 0, 1.f);
+            v = fl::clamp(v, 0.0f, 1.0f);
+            uint8_t heatIndex = fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
+
+            FASTLED_WARN(v);
+            
+            // Use FastLED's built-in HeatColors palette
+            auto c = ColorFromPalette(HeatColors_p, heatIndex);
+            c.fadeToBlackBy(255 - heatIndex);
+            leds[xyMap(x, 4)] = c;
+            //FASTLED_WARN("y: " << i << " b: " << b);
         }
 
         
