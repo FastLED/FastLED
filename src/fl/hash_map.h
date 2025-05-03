@@ -209,6 +209,16 @@ class HashMap {
         return idx == npos ? nullptr : &_buckets[idx].value;
     }
 
+    const_iterator find_it_const(const Key &key) const {
+        auto idx = find_index(key);
+        return idx == npos ? end() : const_iterator(this, idx);
+    }
+
+    iterator find_it(const Key &key) {
+        auto idx = find_index(key);
+        return idx == npos ? end() : iterator(this, idx);
+    }
+
     // access or default-construct
     T &operator[](const Key &key) {
         size_t idx;
@@ -229,6 +239,7 @@ class HashMap {
     size_t size() const { return _size; }
     bool empty() const { return _size == 0; }
     size_t capacity() const { return _buckets.size(); }
+
 
   private:
     static constexpr size_t npos = size_t(-1);

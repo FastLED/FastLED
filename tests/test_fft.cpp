@@ -110,7 +110,8 @@ TEST_CASE("fft tester 256 with 64 bands") {
     OutputBins out;
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFT fft(samples, 64);
+    FFT_Args args(samples, 64);
+    FFT fft(args);
     fft.run(buffer, &out);
     FASTLED_WARN("FFT output: " << out);
     const float expected_output[64] = {

@@ -124,11 +124,14 @@ class FFTContext {
     cq_kernel_cfg m_cq_cfg;
 };
 
-FFT::FFT(int samples, int bands, float fmin, float fmax, int sample_rate)
-    : mContext(new FFTContext(samples, bands, fmin, fmax, sample_rate)) {
+FFT::FFT(FFT_Args args) {
     if (!mContext) {
         FASTLED_WARN("Failed to allocate FFT context");
     }
+    
+    mContext.reset(
+        new FFTContext(args.samples, args.bands, args.fmin, args.fmax, args.sample_rate)
+    );
 }
 
 FFT::~FFT() { mContext.reset(); }
