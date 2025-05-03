@@ -19,7 +19,6 @@
 
 using namespace fl;
 
-using OutputBins = FFTImpl::OutputBins;
 
 TEST_CASE("fft tester 512") {
     int16_t buffer[512] = {0};
@@ -30,7 +29,7 @@ TEST_CASE("fft tester 512") {
         float sin_x = sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
-    OutputBins out(16);
+    FFTBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFTImpl fft(samples);
@@ -69,7 +68,7 @@ TEST_CASE("fft tester 256") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    OutputBins out(16);
+    FFTBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFTImpl fft(samples);
@@ -107,7 +106,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    OutputBins out(64);
+    FFTBins out(64);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT_Args args(samples, 64);

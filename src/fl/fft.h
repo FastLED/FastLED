@@ -82,11 +82,6 @@ template <> struct Hash<FFT_Args> {
 //   FASTLED_WARN("FFTImpl output: " << out);  // 16 bands of output.
 class FFTImpl : public fl::Referent {
   public:
-    // Output bins for FFTImpl. This is the output when the fft is run.
-    // using OutputBins = fl::vector_inlined<float, 16>;
-
-    using OutputBins = FFTBins;
-
     // Result indicating success or failure of the FFTImpl run (in which case there
     // will be an error message).
     struct Result {
@@ -101,8 +96,8 @@ class FFTImpl : public fl::Referent {
     size_t sampleSize() const;
     // Note that the sample sizes MUST match the samples size passed into the
     // constructor.
-    Result run(const AudioSample &sample, OutputBins *out);
-    Result run(Slice<const int16_t> sample, OutputBins *out);
+    Result run(const AudioSample &sample, FFTBins *out);
+    Result run(Slice<const int16_t> sample, FFTBins *out);
     // Info on what the frequency the bins represent
     fl::Str info() const;
 
@@ -128,7 +123,7 @@ class FlexFFT {
     FlexFFT() = default;
     ~FlexFFT() = default;
 
-    void run(const Slice<const int16_t> &sample, FFTImpl::OutputBins *out,
+    void run(const Slice<const int16_t> &sample, FFTBins *out,
              const FFT_Args &args = FFT_Args()) {
         FFT_Args args2 = args;
         args2.samples = sample.size();
