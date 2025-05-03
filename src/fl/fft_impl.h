@@ -10,7 +10,7 @@ namespace fl {
 
 class AudioSample;
 class FFTContext;
-class FFT_Args;
+struct FFT_Args;
 
 
 

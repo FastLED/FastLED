@@ -16,6 +16,7 @@
 #include "fl/array.h"
 #include "fl/audio.h"
 #include "fl/fft.h"
+#include "fl/fft_impl.h"
 #include "fl/str.h"
 #include "fl/unused.h"
 #include "fl/vector.h"

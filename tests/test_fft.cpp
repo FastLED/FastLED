@@ -6,6 +6,7 @@
 #include "test.h"
 
 #include "fl/fft.h"
+#include "fl/fft_impl.h"
 #include "fl/math.h"
 
 // // Proof of concept FFTImpl using KISS FFTImpl. Right now this is fixed sized blocks
