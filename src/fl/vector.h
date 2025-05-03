@@ -391,11 +391,15 @@ template <typename T> class HeapVector {
         if (mSize == n) {
             return;
         }
-        HeapVector<T> temp(n);
-        for (size_t i = 0; i < n && i < mSize; ++i) {
-            temp.mArray[i] = mArray[i];
+        if (n > mCapacity) {
+            ensure_size(n);
         }
-        swap(temp);
+        while (mSize < n) {
+            push_back(T());
+        }
+        while (mSize > n) {
+            pop_back();
+        }
     }
 
     void resize(size_t n, const T &value) {
@@ -777,7 +781,8 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
     InlinedVector(InlinedVector &&other) {
-        swap(*this, other);
+        //swap(*this, other);
+        fl::swap(*this, other);
         other.clear();
     }
     InlinedVector(size_t size) : mUsingHeap(false) {

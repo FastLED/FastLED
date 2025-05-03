@@ -7,6 +7,7 @@ recently used items when it reaches capacity.
 */
 
 #include "fl/hash_map.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -29,6 +30,12 @@ class HashMapLru {
         : mMaxSize(max_size), mCurrentTime(0) {
         // Ensure max size is at least 1
         if (mMaxSize < 1) mMaxSize = 1;
+    }
+
+    void swap(HashMapLru& other) {
+        fl::swap(mMap, other.mMap);
+        fl::swap(mMaxSize, other.mMaxSize);
+        fl::swap(mCurrentTime, other.mCurrentTime);
     }
     
     // Insert or update a key-value pair

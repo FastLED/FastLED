@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/hash_map.h"
+#include "fl/hash_map_lru.h"
 #include "fl/pair.h"
 #include "fl/scoped_ptr.h"
 #include "fl/slice.h"
@@ -153,8 +153,8 @@ class FlexFFT {
         return *fft;
     }
 
-    using HashMap = fl::hash_map<FFT_Args, Ptr<FFT>>;
-    HashMap mMap;
+    using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFT>>;
+    HashMap mMap = HashMap(8);
 };
 
 }; // namespace fl
