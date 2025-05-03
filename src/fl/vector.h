@@ -9,6 +9,7 @@
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
+#include "fl/functional.h"
 #include "inplacenew.h"
 
 namespace fl {
@@ -619,7 +620,7 @@ template <typename T> class HeapVector {
     }
 };
 
-template <typename T, typename LessThan> class SortedHeapVector {
+template <typename T, typename LessThan = fl::less<T>> class SortedHeapVector {
   private:
     HeapVector<T> mArray;
     LessThan mLess;
