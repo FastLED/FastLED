@@ -25,7 +25,7 @@ template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
 
-class FFTBins;
+struct FFTBins;
 
 // A copy on write string class. Fast to copy from another
 // Str object as read only pointers are shared. If the size

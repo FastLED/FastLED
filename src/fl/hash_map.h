@@ -199,12 +199,12 @@ class HashMap {
     }
 
     // find pointer to value or nullptr
-    T *find(const Key &key) {
+    T *find_value(const Key &key) {
         auto idx = find_index(key);
         return idx == npos ? nullptr : &_buckets[idx].value;
     }
 
-    const T *find(const Key &key) const {
+    const T *find_value(const Key &key) const {
         auto idx = find_index(key);
         return idx == npos ? nullptr : &_buckets[idx].value;
     }

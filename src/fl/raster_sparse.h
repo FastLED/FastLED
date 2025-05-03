@@ -87,7 +87,7 @@ class XYRasterU8Sparse {
     // y); }
 
     Pair<bool, uint8_t> at(uint16_t x, uint16_t y) const {
-        const uint8_t *val = mSparseGrid.find(point_xy<int>(x, y));
+        const uint8_t *val = mSparseGrid.find_value(point_xy<int>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
@@ -162,7 +162,7 @@ class XYRasterU8Sparse {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
 
-        uint8_t **cached = mCache.find(pt);
+        uint8_t **cached = mCache.find_value(pt);
         if (cached) {
             uint8_t *val = *cached;
             if (*val < value) {
@@ -172,7 +172,7 @@ class XYRasterU8Sparse {
         }
         if (mCache.size() <= kMaxCacheSize) {
             // cache it.
-            uint8_t *v = mSparseGrid.find(pt);
+            uint8_t *v = mSparseGrid.find_value(pt);
             if (v == nullptr) {
                 // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: "
                 // << value);

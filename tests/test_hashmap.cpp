@@ -13,7 +13,7 @@ using namespace fl;
 TEST_CASE("Empty map properties") {
     HashMap<int, int> m;
     REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(!m.find(42));
+    REQUIRE(!m.find_value(42));
     // begin()==end() on empty
     REQUIRE(m.begin() == m.end());
 }
@@ -22,7 +22,7 @@ TEST_CASE("Single insert, lookup & operator[]") {
     HashMap<int, int> m;
     m.insert(10, 20);
     REQUIRE_EQ(m.size(), 1u);
-    auto *v = m.find(10);
+    auto *v = m.find_value(10);
     REQUIRE(v);
     REQUIRE_EQ(*v, 20);
 
@@ -32,23 +32,23 @@ TEST_CASE("Single insert, lookup & operator[]") {
     REQUIRE(ref.empty()); // default-constructed
     REQUIRE_EQ(ms.size(), 1u);
     ref = "hello";
-    REQUIRE_EQ(*ms.find(5), "hello");
+    REQUIRE_EQ(*ms.find_value(5), "hello");
 
     // operator[] overwrite existing
     ms[5] = "world";
     REQUIRE_EQ(ms.size(), 1u);
-    REQUIRE_EQ(*ms.find(5), "world");
+    REQUIRE_EQ(*ms.find_value(5), "world");
 }
 
 TEST_CASE("Insert duplicate key overwrites without growing") {
     HashMap<int, Str> m;
     m.insert(1, "foo");
     REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find(1), "foo");
+    REQUIRE_EQ(*m.find_value(1), "foo");
 
     m.insert(1, "bar");
     REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find(1), "bar");
+    REQUIRE_EQ(*m.find_value(1), "bar");
 }
 
 TEST_CASE("Multiple distinct inserts & lookups") {
@@ -60,11 +60,11 @@ TEST_CASE("Multiple distinct inserts & lookups") {
     }
     REQUIRE_EQ(m.size(), 10u);
     for (char c = 'a'; c < 'a' + 10; ++c) {
-        auto *v = m.find(c);
+        auto *v = m.find_value(c);
         REQUIRE(v);
         REQUIRE_EQ(*v, static_cast<int>(c - 'a'));
     }
-    REQUIRE(!m.find('z'));
+    REQUIRE(!m.find_value('z'));
 }
 
 TEST_CASE("Erase and remove behavior") {
@@ -76,7 +76,7 @@ TEST_CASE("Erase and remove behavior") {
     // erase existing
     REQUIRE(m.erase(5));
     REQUIRE_EQ(m.size(), 1u);
-    REQUIRE(!m.find(5));
+    REQUIRE(!m.find_value(5));
 
     // erase non-existent
     REQUIRE(!m.erase(5));
@@ -90,12 +90,12 @@ TEST_CASE("Re-insert after erase reuses slot") {
     HashMap<int, int> m(4);
     m.insert(1, 10);
     REQUIRE(m.erase(1));
-    REQUIRE(!m.find(1));
+    REQUIRE(!m.find_value(1));
     REQUIRE_EQ(m.size(), 0u);
 
     m.insert(1, 20);
-    REQUIRE(m.find(1));
-    REQUIRE_EQ(*m.find(1), 20);
+    REQUIRE(m.find_value(1));
+    REQUIRE_EQ(*m.find_value(1), 20);
     REQUIRE_EQ(m.size(), 1u);
 }
 
@@ -108,13 +108,13 @@ TEST_CASE("Clear resets map and allows fresh inserts") {
 
     m.clear();
     REQUIRE_EQ(m.size(), 0u);
-    REQUIRE(!m.find(0));
-    REQUIRE(!m.find(1));
-    REQUIRE(!m.find(2));
+    REQUIRE(!m.find_value(0));
+    REQUIRE(!m.find_value(1));
+    REQUIRE(!m.find_value(2));
 
     m.insert(5, 50);
     REQUIRE_EQ(m.size(), 1u);
-    REQUIRE_EQ(*m.find(5), 50);
+    REQUIRE_EQ(*m.find_value(5), 50);
 }
 
 TEST_CASE("Stress collisions & rehash with small initial capacity") {
@@ -127,7 +127,7 @@ TEST_CASE("Stress collisions & rehash with small initial capacity") {
     }
     REQUIRE_EQ(m.size(), static_cast<std::size_t>(N));
     for (int i = 0; i < N; ++i) {
-        auto *v = m.find(i);
+        auto *v = m.find_value(i);
         REQUIRE(v);
         REQUIRE_EQ(*v, i * 3);
     }
@@ -163,7 +163,7 @@ TEST_CASE("Remove non-existent returns false, find on const map") {
     REQUIRE(!m.remove(999));
 
     const HashMap<int, int> cm;
-    REQUIRE(!cm.find(0));
+    REQUIRE(!cm.find_value(0));
 }
 
 TEST_CASE("Inserting multiple elements while deleting them will trigger inline "

@@ -142,7 +142,7 @@ class FlexFFT {
   private:
     // Get the FFT for the given arguments.
     FFT &get_or_create(const FFT_Args &args) {
-        Ptr<FFT> *val = mMap.find(args);
+        Ptr<FFT> *val = mMap.find_value(args);
         if (val) {
             // we have it.
             return **val;
