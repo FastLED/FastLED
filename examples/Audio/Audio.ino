@@ -135,7 +135,7 @@ void loop() {
             // Use FastLED's built-in HeatColors palette
             auto c = ColorFromPalette(HeatColors_p, heatIndex);
             c.fadeToBlackBy(255 - heatIndex);
-            leds[xyMap(x, 4)] = c;
+            leds[xyMap(x, 0)] = c;
             //FASTLED_WARN("y: " << i << " b: " << b);
         }
 
@@ -145,6 +145,8 @@ void loop() {
     if (enableVolumeVis) {
         leds[xyMap(x, y)] = CRGB(255, 0, 0);
     }
+
+    //leds[xyMap(WIDTH/2, 0)] = CRGB(0, 255, 0);
 
 
     FastLED.show();
