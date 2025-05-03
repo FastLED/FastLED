@@ -42,7 +42,7 @@ UICheckbox enableVolumeVis("Enable volume visualization", false);
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
 
-FFTImpl::OutputBins fftOut(64);
+FFTBins fftOut(64);
 
 int x = 0;
 int y = 0;
