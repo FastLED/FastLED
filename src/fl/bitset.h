@@ -198,6 +198,25 @@ private:
 public:
     /// Constructs a Bitset with all bits reset.
     BitsetInlined() : _storage(fixed_bitset()) {}
+    BitsetInlined(size_t size) : _storage(fixed_bitset()) {
+        if (size > N) {
+            _storage = bitset_dynamic(size);
+        }
+    }
+    BitsetInlined(const BitsetInlined& other) : _storage(other._storage) {}
+    BitsetInlined(BitsetInlined&& other) noexcept : _storage(fl::move(other._storage)) {}
+    BitsetInlined& operator=(const BitsetInlined& other) {
+        if (this != &other) {
+            _storage = other._storage;
+        }
+        return *this;
+    }
+    BitsetInlined& operator=(BitsetInlined&& other) noexcept {
+        if (this != &other) {
+            _storage = fl::move(other._storage);
+        }
+        return *this;
+    }
 
     /// Resets all bits to zero.
     void reset() noexcept {
