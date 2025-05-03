@@ -1,5 +1,7 @@
 
 #include "fl/fft.h"
+#include "fl/fft_impl.h"
+#include "fl/hash_map_lru.h"
 
 namespace fl {
 
