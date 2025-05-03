@@ -47,7 +47,7 @@ class FFTContext {
         m_cq_cfg.min_val = MIN_VAL;
         m_fftr_cfg = kiss_fftr_alloc(samples, 0, NULL, NULL);
         if (!m_fftr_cfg) {
-            FASTLED_WARN("Failed to allocate FFT context");
+            FASTLED_WARN("Failed to allocate FFTImpl context");
             return;
         }
         m_kernels = generate_kernels(m_cq_cfg);
@@ -63,9 +63,9 @@ class FFTContext {
 
     size_t sampleSize() const { return m_cq_cfg.samples; }
 
-    void fft_unit_test(Slice<const int16_t> buffer, FFT::OutputBins *out) {
+    void fft_unit_test(Slice<const int16_t> buffer, FFTImpl::OutputBins *out) {
 
-        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFT samples mismatch and are
+        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFTImpl samples mismatch and are
         // still hardcoded to 512");
         out->clear();
         // allocate
@@ -107,7 +107,7 @@ class FFTContext {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
         fl::StrStream ss;
-        ss << "FFT Frequency Bands: ";
+        ss << "FFTImpl Frequency Bands: ";
 
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             float f_start = m_cq_cfg.fmin + i * delta_f;
@@ -124,9 +124,9 @@ class FFTContext {
     cq_kernel_cfg m_cq_cfg;
 };
 
-FFT::FFT(FFT_Args args) {
+FFTImpl::FFTImpl(FFT_Args args) {
     if (!mContext) {
-        FASTLED_WARN("Failed to allocate FFT context");
+        FASTLED_WARN("Failed to allocate FFTImpl context");
     }
     
     mContext.reset(
@@ -134,40 +134,40 @@ FFT::FFT(FFT_Args args) {
     );
 }
 
-FFT::~FFT() { mContext.reset(); }
+FFTImpl::~FFTImpl() { mContext.reset(); }
 
-fl::Str FFT::info() const {
+fl::Str FFTImpl::info() const {
     if (mContext) {
         return mContext->info();
     } else {
-        FASTLED_WARN("FFT context is not initialized");
+        FASTLED_WARN("FFTImpl context is not initialized");
         return fl::Str();
     }
 }
 
-size_t FFT::sampleSize() const {
+size_t FFTImpl::sampleSize() const {
     if (mContext) {
         return mContext->sampleSize();
     }
     return 0;
 }
 
-FFT::Result FFT::run(const AudioSample &sample, OutputBins *out) {
+FFTImpl::Result FFTImpl::run(const AudioSample &sample, OutputBins *out) {
     auto &audio_sample = sample.pcm();
     Slice<const int16_t> slice(audio_sample);
     return run(slice, out);
 }
 
-FFT::Result FFT::run(Slice<const int16_t> sample, OutputBins *out) {
+FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, OutputBins *out) {
     if (!mContext) {
-        return FFT::Result(false, "FFT context is not initialized");
+        return FFTImpl::Result(false, "FFTImpl context is not initialized");
     }
     if (sample.size() != mContext->sampleSize()) {
-        FASTLED_WARN("FFT sample size mismatch");
-        return FFT::Result(false, "FFT sample size mismatch");
+        FASTLED_WARN("FFTImpl sample size mismatch");
+        return FFTImpl::Result(false, "FFTImpl sample size mismatch");
     }
     mContext->fft_unit_test(sample, out);
-    return FFT::Result(true, "");
+    return FFTImpl::Result(true, "");
 }
 
 } // namespace fl

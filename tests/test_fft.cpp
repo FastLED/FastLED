@@ -8,18 +8,18 @@
 #include "fl/fft.h"
 #include "fl/math.h"
 
-// // Proof of concept FFT using KISS FFT. Right now this is fixed sized blocks
+// // Proof of concept FFTImpl using KISS FFTImpl. Right now this is fixed sized blocks
 // of 512. But this is
 // // intended to change with a C++ wrapper around ot/
 // typedef int16_t fft_audio_buffer_t[512];
 
-// void fft_init(); // Explicit initialization of FFT, otherwise it will be
+// void fft_init(); // Explicit initialization of FFTImpl, otherwise it will be
 // initialized on first run. bool fft_is_initialized(); void fft_unit_test(const
 // fft_audio_buffer_t &buffer);
 
 using namespace fl;
 
-using OutputBins = FFT::OutputBins;
+using OutputBins = FFTImpl::OutputBins;
 
 TEST_CASE("fft tester 512") {
     int16_t buffer[512] = {0};
@@ -33,11 +33,11 @@ TEST_CASE("fft tester 512") {
     OutputBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFT fft(samples);
+    FFTImpl fft(samples);
     fft.run(buffer, &out);
 
-    FASTLED_WARN("FFT output raw bins: " << out.bins_raw);
-    FASTLED_WARN("FFT output db bins: " << out.bins_db);
+    FASTLED_WARN("FFTImpl output raw bins: " << out.bins_raw);
+    FASTLED_WARN("FFTImpl output db bins: " << out.bins_db);
     const float expected_output[16] = {
         3,       2,    2,     6,    6.08, 15.03, 3078.22, 4346.29,
         4033.16, 3109, 38.05, 4.47, 4,    2,     1.41,    1.41};
@@ -47,14 +47,14 @@ TEST_CASE("fft tester 512") {
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
-            FASTLED_WARN("FFT output mismatch at index " << i << ": " << a
+            FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
         CHECK(almost_equal);
     }
 
     fl::Str info = fft.info();
-    FASTLED_WARN("FFT info: " << info);
+    FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }
 
@@ -72,10 +72,10 @@ TEST_CASE("fft tester 256") {
     OutputBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFT fft(samples);
+    FFTImpl fft(samples);
     fft.run(buffer, &out);
 
-    FASTLED_WARN("FFT output: " << out);
+    FASTLED_WARN("FFTImpl output: " << out);
     const float expected_output[16] = {
         3,       2,       4,       5,       5.10,    9.06,    11.05,   27.66,
         2779.93, 3811.66, 4176.58, 4185.02, 4174.50, 4017.63, 3638.46, 3327.60};
@@ -85,14 +85,14 @@ TEST_CASE("fft tester 256") {
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
-            FASTLED_WARN("FFT output mismatch at index " << i << ": " << a
+            FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
         CHECK(almost_equal);
     }
 
     fl::Str info = fft.info();
-    FASTLED_WARN("FFT info: " << info);
+    FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }
 
@@ -111,9 +111,9 @@ TEST_CASE("fft tester 256 with 64 bands") {
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT_Args args(samples, 64);
-    FFT fft(args);
+    FFTImpl fft(args);
     fft.run(buffer, &out);
-    FASTLED_WARN("FFT output: " << out);
+    FASTLED_WARN("FFTImpl output: " << out);
     const float expected_output[64] = {
         3,       3,       1,       2,       2,       3,       3,
         3,       3,       4,       3,       4,       4,       5,
@@ -131,12 +131,12 @@ TEST_CASE("fft tester 256 with 64 bands") {
         float b = expected_output[i];
         bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
-            FASTLED_WARN("FFT output mismatch at index " << i << ": " << a
+            FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
         }
         CHECK(almost_equal);
     }
     fl::Str info = fft.info();
-    FASTLED_WARN("FFT info: " << info);
+    FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }

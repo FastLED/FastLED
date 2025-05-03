@@ -25,7 +25,7 @@ struct FFTBins {
 
     size_t size() const { return mSize; }
 
-    // The bins are the output of the FFT.
+    // The bins are the output of the FFTImpl.
     fl::vector<float> bins_raw;
     // The frequency range of the bins.
     fl::vector<float> bins_db;
@@ -76,27 +76,27 @@ template <> struct Hash<FFT_Args> {
 };
 
 // Example:
-//   FFT fft(512, 16);
+//   FFTImpl fft(512, 16);
 //   auto sample = SINE WAVE OF 512 SAMPLES
 //   fft.run(buffer, &out);
-//   FASTLED_WARN("FFT output: " << out);  // 16 bands of output.
-class FFT : public fl::Referent {
+//   FASTLED_WARN("FFTImpl output: " << out);  // 16 bands of output.
+class FFTImpl : public fl::Referent {
   public:
-    // Output bins for FFT. This is the output when the fft is run.
+    // Output bins for FFTImpl. This is the output when the fft is run.
     // using OutputBins = fl::vector_inlined<float, 16>;
 
     using OutputBins = FFTBins;
 
-    // Result indicating success or failure of the FFT run (in which case there
+    // Result indicating success or failure of the FFTImpl run (in which case there
     // will be an error message).
     struct Result {
         Result(bool ok, const Str &error) : ok(ok), error(error) {}
         bool ok = false;
         fl::Str error;
     };
-    // Default values for the FFT.
-    FFT(FFT_Args args = FFT_Args());
-    ~FFT();
+    // Default values for the FFTImpl.
+    FFTImpl(FFT_Args args = FFT_Args());
+    ~FFTImpl();
 
     size_t sampleSize() const;
     // Note that the sample sizes MUST match the samples size passed into the
@@ -114,10 +114,10 @@ class FFT : public fl::Referent {
     static int DefaultSampleRate() { return 44100; }
 
     // Disable copy and move constructors and assignment operators
-    FFT(const FFT &) = delete;
-    FFT &operator=(const FFT &) = delete;
-    FFT(FFT &&) = delete;
-    FFT &operator=(FFT &&) = delete;
+    FFTImpl(const FFTImpl &) = delete;
+    FFTImpl &operator=(const FFTImpl &) = delete;
+    FFTImpl(FFTImpl &&) = delete;
+    FFTImpl &operator=(FFTImpl &&) = delete;
 
   private:
     fl::scoped_ptr<FFTContext> mContext;
@@ -128,7 +128,7 @@ class FlexFFT {
     FlexFFT() = default;
     ~FlexFFT() = default;
 
-    void run(const Slice<const int16_t> &sample, FFT::OutputBins *out,
+    void run(const Slice<const int16_t> &sample, FFTImpl::OutputBins *out,
              const FFT_Args &args = FFT_Args()) {
         FFT_Args args2 = args;
         args2.samples = sample.size();
@@ -140,20 +140,20 @@ class FlexFFT {
     size_t size() const { return mMap.size(); }
 
   private:
-    // Get the FFT for the given arguments.
-    FFT &get_or_create(const FFT_Args &args) {
-        Ptr<FFT> *val = mMap.find_value(args);
+    // Get the FFTImpl for the given arguments.
+    FFTImpl &get_or_create(const FFT_Args &args) {
+        Ptr<FFTImpl> *val = mMap.find_value(args);
         if (val) {
             // we have it.
             return **val;
         }
         // else we have to make a new one.
-        Ptr<FFT> fft = NewPtr<FFT>(args);
+        Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
         mMap[args] = fft;
         return *fft;
     }
 
-    using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFT>>;
+    using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>;
     HashMap mMap = HashMap(8);
 };
 

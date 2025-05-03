@@ -169,10 +169,10 @@ float StringFormatter::parseFloat(const char *str, size_t len) {
 }
 
 Str & Str::append(const FFTBins &str) {
-    append("\n FFT Bins:\n  ");
+    append("\n FFTImpl Bins:\n  ");
     append(str.bins_raw);
     append("\n");
-    append(" FFT Bins DB:\n  ");
+    append(" FFTImpl Bins DB:\n  ");
     append(str.bins_db);
     append("\n");
     return *this;
