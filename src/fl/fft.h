@@ -120,19 +120,14 @@ class FFTImpl : public fl::Referent {
 
 class FFT {
   public:
-    FFT() = default;
-    ~FFT() = default;
+    FFT();
+    ~FFT();
 
     void run(const Slice<const int16_t> &sample, FFTBins *out,
-             const FFT_Args &args = FFT_Args()) {
-        FFT_Args args2 = args;
-        args2.samples = sample.size();
-        get_or_create(args2).run(sample, out);
-    }
+             const FFT_Args &args = FFT_Args());
 
-    void clear() { mMap.clear(); }
-
-    size_t size() const { return mMap.size(); }
+    void clear();
+    size_t size() const;
 
   private:
     // Get the FFTImpl for the given arguments.

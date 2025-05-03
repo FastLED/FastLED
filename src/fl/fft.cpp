@@ -65,8 +65,8 @@ class FFTContext {
 
     void fft_unit_test(Slice<const int16_t> buffer, FFTBins *out) {
 
-        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFTImpl samples mismatch and are
-        // still hardcoded to 512");
+        // FASTLED_ASSERT(512 == m_cq_cfg.samples, "FFTImpl samples mismatch and
+        // are still hardcoded to 512");
         out->clear();
         // allocate
         FASTLED_STACK_ARRAY(kiss_fft_cpx, fft, m_cq_cfg.samples);
@@ -89,7 +89,6 @@ class FFTContext {
             float f_end = f_start + delta_f;
             FASTLED_UNUSED(f_start);
             FASTLED_UNUSED(f_end);
-
 
             if (magnitude <= 0.0f) {
                 magnitude_db = 0.0f;
@@ -128,10 +127,9 @@ FFTImpl::FFTImpl(FFT_Args args) {
     if (!mContext) {
         FASTLED_WARN("Failed to allocate FFTImpl context");
     }
-    
-    mContext.reset(
-        new FFTContext(args.samples, args.bands, args.fmin, args.fmax, args.sample_rate)
-    );
+
+    mContext.reset(new FFTContext(args.samples, args.bands, args.fmin,
+                                  args.fmax, args.sample_rate));
 }
 
 FFTImpl::~FFTImpl() { mContext.reset(); }
@@ -170,7 +168,7 @@ FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, FFTBins *out) {
     return FFTImpl::Result(true, "");
 }
 
-FFTImpl & FFT::get_or_create(const FFT_Args &args) {
+FFTImpl &FFT::get_or_create(const FFT_Args &args) {
     Ptr<FFTImpl> *val = mMap.find_value(args);
     if (val) {
         // we have it.
@@ -181,5 +179,19 @@ FFTImpl & FFT::get_or_create(const FFT_Args &args) {
     mMap[args] = fft;
     return *fft;
 }
+
+FFT::FFT() = default;
+FFT::~FFT() = default;
+
+void FFT::run(const Slice<const int16_t> &sample, FFTBins *out,
+              const FFT_Args &args) {
+    FFT_Args args2 = args;
+    args2.samples = sample.size();
+    get_or_create(args2).run(sample, out);
+}
+
+void FFT::clear() { mMap.clear(); }
+
+size_t FFT::size() const { return mMap.size(); }
 
 } // namespace fl
