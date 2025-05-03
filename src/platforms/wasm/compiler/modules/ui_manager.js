@@ -343,18 +343,7 @@ window.setupAudioAnalysis = function(audioElement) {
       window.audioData.hasActiveSamples = true;
     }
     
-    // Log audio processing occasionally (every ~2 seconds to avoid console spam)
-    if (Math.random() < 0.01) {
-      // Calculate some basic stats about the audio data
-      const nonZeroCount = Array.from(sampleBuffer).filter(v => v !== 0).length;
-      const hasAudioData = nonZeroCount > 0;
-      
-      // console.log(`Audio processing for ${audioId}:`);
-      // console.log(`  Buffer size: ${sampleBuffer.length}`);
-      // console.log(`  Non-zero samples: ${nonZeroCount}`);
-      // console.log(`  Has audio data: ${hasAudioData}`);
-      // console.log(`  Accumulated blocks: ${window.audioData.audioBuffers[audioId].length}`);
-    }
+ 
     
     // Optional: Update UI with a simple indicator that audio is being processed
     const label = document.getElementById('canvas-label');

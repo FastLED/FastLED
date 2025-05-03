@@ -98,8 +98,6 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     std::string s = value.as<std::string>();
     std::vector<int16_t> audio_data;
     parseJsonStringToInt16Vector(s, &audio_data);
-    // FASTLED_WARN("Found data of size " << audio_data.size() << " in jsAudioImpl::updateInternal");
-
     // kJsAudioSamples;
     int offset = 0;
     int size = audio_data.size();
@@ -118,9 +116,6 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
             mAudioSampleImpls.erase(mAudioSampleImpls.begin());
         }
     }
-
-
-
 }
 
 
