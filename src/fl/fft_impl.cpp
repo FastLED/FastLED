@@ -123,7 +123,7 @@ class FFTContext {
     cq_kernel_cfg m_cq_cfg;
 };
 
-FFTImpl::FFTImpl(FFT_Args args) {
+FFTImpl::FFTImpl(const FFT_Args& args) {
     if (!mContext) {
         FASTLED_WARN("Failed to allocate FFTImpl context");
     }
