@@ -5,13 +5,18 @@
 
 namespace fl {
 
-struct FFT::HashMap: public fl::HashMapLru<FFT_Args, Ptr<FFTImpl>> {
-    HashMap(size_t max_size) : fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>(max_size) {}
+template <> struct Hash<FFT_Args> {
+    uint32_t operator()(const FFT_Args &key) const noexcept {
+        return MurmurHash3_x86_32(&key, sizeof(FFT_Args));
+    }
 };
 
-FFT::FFT() {
-   mMap.reset(new HashMap(8));
+struct FFT::HashMap : public fl::HashMapLru<FFT_Args, Ptr<FFTImpl>> {
+    HashMap(size_t max_size)
+        : fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>(max_size) {}
 };
+
+FFT::FFT() { mMap.reset(new HashMap(8)); };
 
 FFT::~FFT() = default;
 
@@ -26,9 +31,7 @@ void FFT::clear() { mMap->clear(); }
 
 size_t FFT::size() const { return mMap->size(); }
 
-void FFT::setFFTCacheSize(size_t size) {
-    mMap->setMaxSize(size);
-}
+void FFT::setFFTCacheSize(size_t size) { mMap->setMaxSize(size); }
 
 FFTImpl &FFT::get_or_create(const FFT_Args &args) {
     Ptr<FFTImpl> *val = mMap->find_value(args);

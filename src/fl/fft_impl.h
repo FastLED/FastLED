@@ -69,11 +69,7 @@ struct FFT_Args {
     bool operator!=(const FFT_Args &other) const { return !(*this == other); }
 };
 
-template <> struct Hash<FFT_Args> {
-    uint32_t operator()(const FFT_Args &key) const noexcept {
-        return MurmurHash3_x86_32(&key, sizeof(FFT_Args));
-    }
-};
+
 
 // Example:
 //   FFTImpl fft(512, 16);
@@ -90,7 +86,7 @@ class FFTImpl : public fl::Referent {
         fl::Str error;
     };
     // Default values for the FFTImpl.
-    FFTImpl(FFT_Args args = FFT_Args());
+    FFTImpl(FFT_Args args);
     ~FFTImpl();
 
     size_t sampleSize() const;
