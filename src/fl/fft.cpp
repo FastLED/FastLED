@@ -169,18 +169,21 @@ FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, FFTBins *out) {
 }
 
 FFTImpl &FFT::get_or_create(const FFT_Args &args) {
-    Ptr<FFTImpl> *val = mMap.find_value(args);
+    Ptr<FFTImpl> *val = mMap->find_value(args);
     if (val) {
         // we have it.
         return **val;
     }
     // else we have to make a new one.
     Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
-    mMap[args] = fft;
+    (*mMap)[args] = fft;
     return *fft;
 }
 
-FFT::FFT() = default;
+FFT::FFT() {
+   mMap.reset(new HashMap(8));
+};
+
 FFT::~FFT() = default;
 
 void FFT::run(const Slice<const int16_t> &sample, FFTBins *out,
@@ -190,8 +193,8 @@ void FFT::run(const Slice<const int16_t> &sample, FFTBins *out,
     get_or_create(args2).run(sample, out);
 }
 
-void FFT::clear() { mMap.clear(); }
+void FFT::clear() { mMap->clear(); }
 
-size_t FFT::size() const { return mMap.size(); }
+size_t FFT::size() const { return mMap->size(); }
 
 } // namespace fl

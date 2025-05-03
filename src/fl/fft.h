@@ -134,7 +134,8 @@ class FFT {
     FFTImpl &get_or_create(const FFT_Args &args);
 
     using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>;
-    HashMap mMap = HashMap(8);
+    //HashMap mMap = HashMap(8);
+    scoped_ptr<HashMap> mMap;
 };
 
 }; // namespace fl
