@@ -4,6 +4,7 @@
 #include "fl/ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/fft.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -32,6 +33,8 @@ class AudioSample {
     // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
     // and sounds like cloths rubbing. Useful for sound analysis.
     float zcr() const;
+
+    void fft(FFTBins* out) ;
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }

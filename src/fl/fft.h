@@ -13,15 +13,25 @@ class FFTContext;
 
 struct FFTBins {
   public:
-    FFTBins() = default;
-    // The bins are the output of the FFT.
-    fl::vector<float> bins_raw;
-    // The frequency range of the bins.
-    fl::vector<float> bins_db;
+    FFTBins(size_t n) : mSize(n) {
+        bins_raw.reserve(n);
+        bins_db.reserve(n);
+    }
+
     void clear() {
         bins_raw.clear();
         bins_db.clear();
     }
+
+    size_t size() const { return mSize; }
+
+    // The bins are the output of the FFT.
+    fl::vector<float> bins_raw;
+    // The frequency range of the bins.
+    fl::vector<float> bins_db;
+
+  private:
+    size_t mSize;
 };
 
 struct FFT_Args {
@@ -56,19 +66,14 @@ struct FFT_Args {
                fmin == other.fmin && fmax == other.fmax &&
                sample_rate == other.sample_rate;
     }
-    bool operator!=(const FFT_Args &other) const {
-        return !(*this == other);
-    }
+    bool operator!=(const FFT_Args &other) const { return !(*this == other); }
 };
 
-
-template<>
-struct Hash<FFT_Args> {
-    uint32_t operator()(const FFT_Args& key) const noexcept {
+template <> struct Hash<FFT_Args> {
+    uint32_t operator()(const FFT_Args &key) const noexcept {
         return MurmurHash3_x86_32(&key, sizeof(FFT_Args));
     }
 };
-
 
 // Example:
 //   FFT fft(512, 16);
@@ -123,25 +128,24 @@ class FlexFFT {
     FlexFFT() = default;
     ~FlexFFT() = default;
 
-    void run(const Slice<const int16_t> &sample,
-             FFT::OutputBins *out,
-             const FFT_Args& args = FFT_Args()) {
+    void run(const Slice<const int16_t> &sample, FFT::OutputBins *out,
+             const FFT_Args &args = FFT_Args()) {
         FFT_Args args2 = args;
         args2.samples = sample.size();
         get_or_create(args2).run(sample, out);
     }
 
-    void clear() {
-        mMap.clear();
-    }
+    void clear() { mMap.clear(); }
+
+    size_t size() const { return mMap.size(); }
 
   private:
     // Get the FFT for the given arguments.
-    FFT& get_or_create(const FFT_Args &args) {
-        Ptr<FFT>* val = mMap.find(args);
+    FFT &get_or_create(const FFT_Args &args) {
+        Ptr<FFT> *val = mMap.find(args);
         if (val) {
-          // we have it.
-          return **val;
+            // we have it.
+            return **val;
         }
         // else we have to make a new one.
         Ptr<FFT> fft = NewPtr<FFT>(args);

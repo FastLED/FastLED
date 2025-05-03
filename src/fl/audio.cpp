@@ -93,4 +93,17 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     current_spl_ = dbfs + offset_;
 }
 
+static FlexFFT gFlexFFT;
+
+void AudioSample::fft(FFTBins* out) {
+    fl::Slice<const int16_t> sample = pcm();
+    FFT_Args args;
+    args.samples = sample.size();
+    args.bands = out->size();
+    args.fmin = FFT_Args::DefaultMinFrequency();
+    args.fmax = FFT_Args::DefaultMaxFrequency();
+    args.sample_rate = FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
+    gFlexFFT.run(sample, out, args);
+}
+
 } // namespace fl

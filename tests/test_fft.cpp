@@ -30,7 +30,7 @@ TEST_CASE("fft tester 512") {
         float sin_x = sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
-    OutputBins out;
+    OutputBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT fft(samples);
@@ -69,7 +69,7 @@ TEST_CASE("fft tester 256") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    OutputBins out;
+    OutputBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT fft(samples);
@@ -107,7 +107,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    OutputBins out;
+    OutputBins out(64);
     // fft_unit_test(buffer, &out);
     const int samples = n;
     FFT_Args args(samples, 64);
