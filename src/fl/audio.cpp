@@ -93,7 +93,7 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     current_spl_ = dbfs + offset_;
 }
 
-static FlexFFT gFlexFFT;
+static FFT gFlexFFT;
 
 void AudioSample::fft(FFTBins* out) {
     fl::Slice<const int16_t> sample = pcm();

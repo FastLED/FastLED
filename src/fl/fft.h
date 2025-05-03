@@ -118,10 +118,10 @@ class FFTImpl : public fl::Referent {
     fl::scoped_ptr<FFTContext> mContext;
 };
 
-class FlexFFT {
+class FFT {
   public:
-    FlexFFT() = default;
-    ~FlexFFT() = default;
+    FFT() = default;
+    ~FFT() = default;
 
     void run(const Slice<const int16_t> &sample, FFTBins *out,
              const FFT_Args &args = FFT_Args()) {
