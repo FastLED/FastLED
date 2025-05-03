@@ -267,15 +267,6 @@ class HashMap {
         return idx == npos ? end() : const_iterator(this, idx);
     }
 
-    // Keep old methods for backward compatibility
-    const_iterator find_it_const(const Key &key) const {
-        return find(key);
-    }
-
-    iterator find_it(const Key &key) {
-        return find(key);
-    }
-
     // access or default-construct
     T &operator[](const Key &key) {
         size_t idx;

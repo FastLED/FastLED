@@ -211,4 +211,7 @@ TEST_CASE("HashMap with standard iterator access") {
     REQUIRE_EQ(entry.second, 1);
     ++it;
     REQUIRE(it == m.end());
+
+    auto bad_it = m.find(0);
+    REQUIRE(bad_it == m.end());
 }
