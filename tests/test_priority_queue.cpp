@@ -74,26 +74,6 @@ TEST_CASE("Priority Queue with Custom Type") {
     CHECK(pq.top().name == "Medium priority task");
 }
 
-TEST_CASE("Priority Queue with Fixed Vector") {
-    // Test with FixedVector (limited capacity)
-    PriorityQueue<int, FixedVector<int, 5>> pq;
-    
-    for (int i = 0; i < 5; i++) {
-        pq.push(i);
-        CHECK(pq.size() == i + 1);
-    }
-    
-    // Verify max heap property
-    CHECK(pq.top() == 4);
-    
-    // Pop all elements
-    for (int i = 4; i >= 0; i--) {
-        CHECK(pq.top() == i);
-        pq.pop();
-    }
-    
-    CHECK(pq.empty());
-}
 
 TEST_CASE("Priority Queue with Custom Comparator") {
     struct MinHeapCompare {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/vector.h"
+#include "fl/functional.h"
 
 namespace fl {
 
@@ -63,21 +64,23 @@ void pop_heap(Iterator first, Iterator last) {
     pop_heap(first, last, [](const auto& a, const auto& b) { return a < b; });
 }
 
-template <typename T, typename VectorT = fl::HeapVector<T>>
+template <typename T, typename Compare = fl::less<T>, typename VectorT = fl::HeapVector<T>>
 class PriorityQueue {
   public:
     using value_type = T;
     using size_type = size_t;
+    using compare_type = Compare;
 
     PriorityQueue() = default;
+    explicit PriorityQueue(const Compare& comp) : _comp(comp) {}
 
     void push(const T &value) {
         _data.push_back(value);
-        push_heap(_data.begin(), _data.end());
+        push_heap(_data.begin(), _data.end(), _comp);
     }
 
     void pop() {
-        pop_heap(_data.begin(), _data.end());
+        pop_heap(_data.begin(), _data.end(), _comp);
         _data.pop_back();
     }
 
@@ -85,9 +88,12 @@ class PriorityQueue {
 
     bool empty() const { return _data.size() == 0; }
     size_type size() const { return _data.size(); }
+    
+    const Compare& compare() const { return _comp; }
 
   private:
     VectorT _data;
+    Compare _comp;
 };
 
 }  // namespace fl
