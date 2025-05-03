@@ -136,17 +136,7 @@ class FFT {
 
   private:
     // Get the FFTImpl for the given arguments.
-    FFTImpl &get_or_create(const FFT_Args &args) {
-        Ptr<FFTImpl> *val = mMap.find_value(args);
-        if (val) {
-            // we have it.
-            return **val;
-        }
-        // else we have to make a new one.
-        Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
-        mMap[args] = fft;
-        return *fft;
-    }
+    FFTImpl &get_or_create(const FFT_Args &args);
 
     using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>;
     HashMap mMap = HashMap(8);
