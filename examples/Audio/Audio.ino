@@ -42,8 +42,7 @@ UICheckbox enableVolumeVis("Enable volume visualization", false);
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
 
-FFT fft(512, 64);
-FFT::OutputBins fftOut;
+FFT::OutputBins fftOut(64);
 
 int x = 0;
 int y = 0;
@@ -120,7 +119,8 @@ void loop() {
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
         // FASTLED_WARN("x: " << x);
 
-        fft.run(sample.pcm(), &fftOut);
+        // fft.run(sample.pcm(), &fftOut);
+        sample.fft(&fftOut);
         // FASTLED_WARN("FFT output: " << fftOut);
         // FASTLED_WARN("rms: " << rms(sample->pcm()));
 
