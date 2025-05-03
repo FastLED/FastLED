@@ -197,3 +197,18 @@ TEST_CASE("Inserting multiple elements while deleting them will trigger inline "
         REQUIRE_EQ(value, i);
     }
 }
+
+TEST_CASE("HashMap with standard iterator access") {
+    HashMap<int, int> m;
+    m.insert(1, 1);
+
+    REQUIRE_EQ(m.size(), 1u);
+
+    // standard iterator access
+    auto it = m.begin();
+    auto entry = *it;
+    REQUIRE_EQ(entry.first, 1);
+    REQUIRE_EQ(entry.second, 1);
+    ++it;
+    REQUIRE(it == m.end());
+}
