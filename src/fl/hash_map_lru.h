@@ -32,6 +32,14 @@ class HashMapLru {
         if (mMaxSize < 1) mMaxSize = 1;
     }
 
+    void setMaxSize(size_t max_size) {
+        while (mMaxSize < max_size) {
+            // Evict oldest items until we reach the new max size
+            evictOldest();
+        }
+        mMaxSize = max_size;
+    }
+
     void swap(HashMapLru& other) {
         fl::swap(mMap, other.mMap);
         fl::swap(mMaxSize, other.mMaxSize);

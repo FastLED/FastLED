@@ -168,15 +168,5 @@ FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, FFTBins *out) {
     return FFTImpl::Result(true, "");
 }
 
-FFTImpl &FFT::get_or_create(const FFT_Args &args) {
-    Ptr<FFTImpl> *val = mMap->find_value(args);
-    if (val) {
-        // we have it.
-        return **val;
-    }
-    // else we have to make a new one.
-    Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
-    (*mMap)[args] = fft;
-    return *fft;
-}
+
 } // namespace fl
