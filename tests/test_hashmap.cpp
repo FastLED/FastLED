@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <set>
+#include <unordered_map>
 
 #include "fl/hash_map.h"
 #include "fl/str.h"
@@ -214,4 +215,86 @@ TEST_CASE("HashMap with standard iterator access") {
 
     auto bad_it = m.find(0);
     REQUIRE(bad_it == m.end());
+}
+
+TEST_CASE("HashMap equivalence to std::unordered_map") {
+    // Create both map types with the same operations
+    HashMap<int, fl::Str> custom_map;
+    std::unordered_map<int, fl::Str> std_map;
+    
+    // Test insertion
+    custom_map.insert(1, "one");
+    std_map.insert({1, "one"});
+    
+    custom_map.insert(2, "two");
+    std_map.insert({2, "two"});
+    
+    custom_map.insert(3, "three");
+    std_map.insert({3, "three"});
+    
+    // Test size
+    REQUIRE_EQ(custom_map.size(), std_map.size());
+    
+    // Test lookup
+    REQUIRE(*custom_map.find_value(1) == std_map.at(1));
+    REQUIRE(*custom_map.find_value(2) == std_map.at(2));
+    REQUIRE(*custom_map.find_value(3) == std_map.at(3));
+    
+    // Test non-existent key
+    REQUIRE(!custom_map.find_value(99));
+    bool std_throws = false;
+    try {
+        std_map.at(99);
+    } catch (const std::out_of_range&) {
+        std_throws = true;
+    }
+    REQUIRE(std_throws);
+    
+    // Test overwrite
+    custom_map.insert(2, "TWO");
+    std_map[2] = "TWO";
+    REQUIRE(*custom_map.find_value(2) == std_map.at(2));
+    
+    // Test erase
+    REQUIRE(custom_map.erase(2));
+    std_map.erase(2);
+    REQUIRE_EQ(custom_map.size(), std_map.size());
+    REQUIRE(!custom_map.find_value(2));
+    
+    // Test clear
+    custom_map.clear();
+    std_map.clear();
+    REQUIRE_EQ(custom_map.size(), std_map.size());
+    REQUIRE_EQ(custom_map.size(), 0u);
+    
+    // Test operator[]
+    custom_map[5] = "five";
+    std_map[5] = "five";
+    REQUIRE_EQ(custom_map.size(), std_map.size());
+    REQUIRE(*custom_map.find_value(5) == std_map.at(5));
+    
+    // Test iteration (collect all keys and values)
+    for (int i = 10; i < 20; ++i) {
+        fl::Str val = "val";
+        val.append(i);
+        custom_map.insert(i, val);
+        std_map.insert({i, val});
+    }
+    
+    std::set<int> custom_keys;
+    std::set<fl::Str> custom_values;
+    for (auto kv : custom_map) {
+        custom_keys.insert(kv.first);
+        custom_values.insert(kv.second);
+    }
+    
+    std::set<int> std_keys;
+    std::set<fl::Str> std_values;
+    for (auto& kv : std_map) {
+        std_keys.insert(kv.first);
+        std_values.insert(kv.second);
+    }
+    
+    REQUIRE(custom_keys == std_keys);
+    REQUIRE(custom_values == std_values);
 }
