@@ -105,15 +105,6 @@ function createAudioField(element) {
       // Ensure we can play (autoplay policies might block)
       audio.play().then(() => {
         console.log("Audio playback started successfully");
-        
-        // Set up a timer to periodically mark samples as active
-        // This ensures we regularly send audio data to FastLED
-        setInterval(() => {
-          if (!audio.paused) {
-            window.audioData.hasActiveSamples = true;
-          }
-        }, 50); // Send samples approximately 20 times per second
-        
       }).catch(err => {
         console.error("Error starting audio playback:", err);
         // Add a play button as fallback
@@ -121,14 +112,7 @@ function createAudioField(element) {
         playButton.textContent = "Play Audio";
         playButton.className = "audio-play-button";
         playButton.onclick = () => {
-          audio.play().then(() => {
-            // Set up the timer after successful play
-            setInterval(() => {
-              if (!audio.paused) {
-                window.audioData.hasActiveSamples = true;
-              }
-            }, 50);
-          });
+          audio.play();
         };
         controlDiv.appendChild(playButton);
       });
@@ -300,6 +284,7 @@ if (!window.audioData) {
   window.audioData = {
     audioContexts: {},
     audioSamples: {},
+    audioBuffers: {},
     hasActiveSamples: false
   };
 }
@@ -335,6 +320,7 @@ window.setupAudioAnalysis = function(audioElement) {
   // Store the audio context and sample buffer in our global object
   window.audioData.audioContexts[audioId] = audioContext;
   window.audioData.audioSamples[audioId] = sampleBuffer;
+  window.audioData.audioBuffers[audioId] = [];
   
   // Process audio data
   scriptNode.onaudioprocess = function(audioProcessingEvent) {
@@ -350,6 +336,13 @@ window.setupAudioAnalysis = function(audioElement) {
       sampleBuffer[i] = Math.floor(inputData[i] * 32767);
     }
     
+    // Create a copy of the current sample buffer and add it to our accumulated buffers
+    if (!audioElement.paused) {
+      const bufferCopy = new Int16Array(sampleBuffer);
+      window.audioData.audioBuffers[audioId].push(Array.from(bufferCopy));
+      window.audioData.hasActiveSamples = true;
+    }
+    
     // Log audio processing occasionally (every ~2 seconds to avoid console spam)
     if (Math.random() < 0.01) {
       // Calculate some basic stats about the audio data
@@ -360,15 +353,8 @@ window.setupAudioAnalysis = function(audioElement) {
       // console.log(`  Buffer size: ${sampleBuffer.length}`);
       // console.log(`  Non-zero samples: ${nonZeroCount}`);
       // console.log(`  Has audio data: ${hasAudioData}`);
-      
-      // if (hasAudioData) {
-      //   // Show a few sample values
-      //   console.log(`  Sample values (first 5): ${Array.from(sampleBuffer.slice(0, 5))}`);
-      // }
+      // console.log(`  Accumulated blocks: ${window.audioData.audioBuffers[audioId].length}`);
     }
-    
-    // Mark this audio element as having active samples
-    window.audioData.hasActiveSamples = true;
     
     // Optional: Update UI with a simple indicator that audio is being processed
     const label = document.getElementById('canvas-label');
@@ -410,35 +396,29 @@ export class UiManager {
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
-        // Handle audio input - get the latest int16 samples
-        if (window.audioData && window.audioData.audioSamples) {
-          const samples = window.audioData.audioSamples[element.id];
+        // Handle audio input - get all accumulated sample blocks
+        if (window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples) {
+          const buffers = window.audioData.audioBuffers[element.id];
           
-          if (samples && window.audioData.hasActiveSamples) {
-            // Convert Int16Array to regular array for JSON serialization
-            currentValue = Array.from(samples);
+          if (buffers && buffers.length > 0) {
+            // Concatenate all accumulated sample blocks into one flat array
+            const allSamples = [].concat(...buffers);
             
-            // // Print out the audio values being serialized
-            // console.log(`Audio data for ${id}:`);
-            // console.log(`  Sample count: ${currentValue.length}`);
-            // console.log(`  First 5 samples: ${currentValue.slice(0, 5)}`);
-            // console.log(`  Last 5 samples: ${currentValue.slice(-5)}`);
-            
-            // Calculate some statistics
-            // const nonZeroCount = currentValue.filter(v => v !== 0).length;
-            // const min = Math.min(...currentValue);
-            // const max = Math.max(...currentValue);
-            // const sum = currentValue.reduce((a, b) => a + Math.abs(b), 0);
-            // const avg = sum / currentValue.length;
-            
-            // console.log(`  Non-zero samples: ${nonZeroCount} (${Math.round(nonZeroCount/currentValue.length*100)}%)`);
-            // console.log(`  Range: ${min} to ${max}, Average amplitude: ${avg.toFixed(2)}`);
+            // Log some stats about the accumulated audio data
+            // if (Math.random() < 0.1) {
+            //   console.log(`Audio data for ${id}:`);
+            //   console.log(`  Blocks: ${buffers.length}`);
+            //   console.log(`  Total samples: ${allSamples.length}`);
+            //   console.log(`  First 5 samples: ${allSamples.slice(0, 5)}`);
+            //   console.log(`  Last 5 samples: ${allSamples.slice(-5)}`);
+            // }
             
             // Always include audio samples in changes when audio is active
-            changes[id] = currentValue;
+            changes[id] = allSamples;
             hasChanges = true;
             
-            // Reset the flag after sending samples
+            // Clear the buffer after sending samples
+            window.audioData.audioBuffers[element.id] = [];
             window.audioData.hasActiveSamples = false;
             
             continue; // Skip the comparison below for audio
