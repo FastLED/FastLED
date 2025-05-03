@@ -32,7 +32,7 @@ class AudioSample {
     const VectorPCM &pcm() const;
     // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
     // and sounds like cloths rubbing. Useful for sound analysis.
-    float zcr() const;
+    float zcf() const;
 
     void fft(FFTBins* out) ;
 

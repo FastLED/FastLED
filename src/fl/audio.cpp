@@ -60,7 +60,7 @@ const AudioSample::VectorPCM &AudioSample::empty() {
     return empty;
 }
 
-float AudioSample::zcr() const { return mImpl->zcf(); }
+float AudioSample::zcf() const { return mImpl->zcf(); }
 
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
     : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
