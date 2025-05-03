@@ -9,6 +9,9 @@ This will keep the memory from growing during multiple inserts
 and removals.
 */
 
+// #include <cstddef>
+// #include <iterator>
+
 #include "fl/assert.h"
 #include "fl/bitset.h"
 #include "fl/clamp.h"
@@ -61,8 +64,14 @@ class HashMap {
 
     // Iterator support.
     struct iterator {
-        using value_type = pair<Key, T>;
+        // Standard iterator typedefs
+        // using difference_type = std::ptrdiff_t;
+        using value_type = pair<const Key, T>;
+        using pointer = value_type*;
+        using reference = value_type&;
+        // using iterator_category = std::forward_iterator_tag;
 
+        iterator() : _map(nullptr), _idx(0) {}
         iterator(HashMap *m, size_t idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
@@ -72,10 +81,23 @@ class HashMap {
             return {e.key, e.value};
         }
 
+        pointer operator->() const {
+            static value_type result;
+            auto &e = _map->_buckets[_idx];
+            result = {e.key, e.value};
+            return &result;
+        }
+
         iterator &operator++() {
             ++_idx;
             advance_to_occupied();
             return *this;
+        }
+
+        iterator operator++(int) {
+            iterator tmp = *this;
+            ++(*this);
+            return tmp;
         }
 
         bool operator==(const iterator &o) const {
@@ -88,6 +110,7 @@ class HashMap {
         size_t _idx;
 
         void advance_to_occupied() {
+            if (!_map) return;
             size_t cap = _map->_buckets.size();
             while (_idx < cap &&
                    _map->_buckets[_idx].state != EntryState::Occupied)
@@ -96,21 +119,41 @@ class HashMap {
     };
 
     struct const_iterator {
-        using value_type = pair<Key, T>;
+        // Standard iterator typedefs
+        // using difference_type = std::ptrdiff_t;
+        using value_type = pair<const Key, T>;
+        using pointer = const value_type*;
+        using reference = const value_type&;
+        // using iterator_category = std::forward_iterator_tag;
 
+        const_iterator() : _map(nullptr), _idx(0) {}
         const_iterator(const HashMap *m, size_t idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
+        const_iterator(const iterator& it) : _map(it._map), _idx(it._idx) {}
 
         value_type operator*() const {
             auto &e = _map->_buckets[_idx];
             return {e.key, e.value};
         }
 
+        pointer operator->() const {
+            static value_type result;
+            auto &e = _map->_buckets[_idx];
+            result = {e.key, e.value};
+            return &result;
+        }
+
         const_iterator &operator++() {
             ++_idx;
             advance_to_occupied();
             return *this;
+        }
+
+        const_iterator operator++(int) {
+            const_iterator tmp = *this;
+            ++(*this);
+            return tmp;
         }
 
         bool operator==(const const_iterator &o) const {
@@ -123,17 +166,22 @@ class HashMap {
         size_t _idx;
 
         void advance_to_occupied() {
+            if (!_map) return;
             size_t cap = _map->_buckets.size();
             while (_idx < cap &&
                    _map->_buckets[_idx].state != EntryState::Occupied)
                 ++_idx;
         }
+        
+        friend class HashMap;
     };
 
     iterator begin() { return iterator(this, 0); }
     iterator end() { return iterator(this, _buckets.size()); }
     const_iterator begin() const { return const_iterator(this, 0); }
     const_iterator end() const { return const_iterator(this, _buckets.size()); }
+    const_iterator cbegin() const { return const_iterator(this, 0); }
+    const_iterator cend() const { return const_iterator(this, _buckets.size()); }
 
     static bool NeedsRehash(size_t size, size_t bucket_size, size_t tombstones,
                             uint8_t load_factor) {
@@ -209,14 +257,23 @@ class HashMap {
         return idx == npos ? nullptr : &_buckets[idx].value;
     }
 
-    const_iterator find_it_const(const Key &key) const {
+    iterator find(const Key &key) {
+        auto idx = find_index(key);
+        return idx == npos ? end() : iterator(this, idx);
+    }
+
+    const_iterator find(const Key &key) const {
         auto idx = find_index(key);
         return idx == npos ? end() : const_iterator(this, idx);
     }
 
+    // Keep old methods for backward compatibility
+    const_iterator find_it_const(const Key &key) const {
+        return find(key);
+    }
+
     iterator find_it(const Key &key) {
-        auto idx = find_index(key);
-        return idx == npos ? end() : iterator(this, idx);
+        return find(key);
     }
 
     // access or default-construct
