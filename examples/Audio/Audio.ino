@@ -139,12 +139,14 @@ void loop() {
             //FASTLED_WARN("y: " << i << " b: " << b);
         }
 
+        if (enableVolumeVis) {
+            leds[xyMap(x, y)] = CRGB(255, 0, 0);
+        }
+
         
     }
 
-    if (enableVolumeVis) {
-        leds[xyMap(x, y)] = CRGB(255, 0, 0);
-    }
+
 
     //leds[xyMap(WIDTH/2, 0)] = CRGB(0, 255, 0);
 
