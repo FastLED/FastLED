@@ -38,6 +38,7 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
+UICheckbox enableRMS("Enable RMS visualization", false);
 
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
@@ -140,10 +141,16 @@ void loop() {
         }
 
         if (enableVolumeVis) {
-            leds[xyMap(x, y)] = CRGB(0, 255, 0);
+            leds[xyMap(x, HEIGHT/2)] = CRGB(0, 255, 0);
         }
 
-        
+        if (enableRMS) {
+            float rms = sample.rms();
+            FASTLED_WARN("RMS: " << rms);
+            rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
+            rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
+            leds[xyMap(rms, HEIGHT*3/4)] = CRGB(0, 0, 255);
+        }
     }
 
 

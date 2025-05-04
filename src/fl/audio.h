@@ -33,8 +33,10 @@ class AudioSample {
     // Zero crossing factor between 0.0f -> 1.0f, detects "hiss"
     // and sounds like cloths rubbing. Useful for sound analysis.
     float zcf() const;
+    float rms() const;
 
-    void fft(FFTBins* out) ;
+    void fft(FFTBins* out);
+
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }

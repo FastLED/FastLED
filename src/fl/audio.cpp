@@ -62,6 +62,21 @@ const AudioSample::VectorPCM &AudioSample::empty() {
 
 float AudioSample::zcf() const { return mImpl->zcf(); }
 
+
+float AudioSample::rms() const {
+    if (!isValid()) {
+        return 0.0f;
+    }
+    uint64_t sum_sq = 0;
+    const int N = size();
+    for (int i = 0; i < N; ++i) {
+        int32_t x32 = int32_t(pcm()[i]);
+        sum_sq += x32 * x32;
+    }
+    float rms = sqrtf(float(sum_sq) / N);
+    return rms;
+}
+
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
     : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
       dbfs_floor_global_(INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
