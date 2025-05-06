@@ -147,7 +147,10 @@
 #endif
 
 #define LCD_DRIVER_PSRAM_DATA_ALIGNMENT 64
-#define CLOCKLESS_PIXEL_CLOCK_HZ (24 * 100 * 1000)
+
+#ifndef FASTLED_ESP32S3_I2S_CLOCK_HZ
+#define FASTLED_ESP32S3_I2S_CLOCK_HZ (24 * 100 * 1000)
+#endif
 
 namespace fl {
 
@@ -316,7 +319,7 @@ class I2SClocklessLedDriveresp32S3 {
                   int NUM_LED_PER_STRIP) {
 
         // esp_lcd_panel_io_handle_t init_lcd_driver(unsigned int
-        // CLOCKLESS_PIXEL_CLOCK_HZ, size_t _nb_components) {
+        // FASTLED_ESP32S3_I2S_CLOCK_HZ, size_t _nb_components) {
 
         esp_lcd_i80_bus_handle_t i80_bus = NULL;
 
@@ -354,7 +357,7 @@ class I2SClocklessLedDriveresp32S3 {
         esp_lcd_panel_io_i80_config_t io_config;
 
         io_config.cs_gpio_num = -1;
-        io_config.pclk_hz = CLOCKLESS_PIXEL_CLOCK_HZ;
+        io_config.pclk_hz = FASTLED_ESP32S3_I2S_CLOCK_HZ;
         io_config.trans_queue_depth = 1;
         io_config.dc_levels = {
             .dc_idle_level = 0,
@@ -385,7 +388,7 @@ class I2SClocklessLedDriveresp32S3 {
             I2SClocklessLedDriverS3_sem = xSemaphoreCreateBinary();
         }
         // esp_lcd_panel_io_handle_t init_lcd_driver(unsigned int
-        // CLOCKLESS_PIXEL_CLOCK_HZ, size_t _nb_components) {
+        // FASTLED_ESP32S3_I2S_CLOCK_HZ, size_t _nb_components) {
         led_output = (uint16_t *)heap_caps_aligned_alloc(
             LCD_DRIVER_PSRAM_DATA_ALIGNMENT,
             8 * _nb_components * NUM_LED_PER_STRIP * 3 * 2 + __OFFSET +
