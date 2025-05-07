@@ -148,8 +148,12 @@
 
 #define LCD_DRIVER_PSRAM_DATA_ALIGNMENT 64
 
-#ifdef FASTLED_LED_OVERCLOCK
-#define FASTLED_ESP32S3_I2S_CLOCK_HZ_SCALE (FASTLED_LED_OVERCLOCK)
+// Note: I2S REQUIRES that the FASTLED_OVERCLOCK factor is a a build-level-define and
+// not an include level define. This is easy if you are already using PlatformIO or CMake.
+// If you are using ArduinoIDE you'll have to download FastLED source code and hack the src
+// to make this work.
+#ifdef FASTLED_OVERCLOCK
+#define FASTLED_ESP32S3_I2S_CLOCK_HZ_SCALE (FASTLED_OVERCLOCK)
 #else
 #define FASTLED_ESP32S3_I2S_CLOCK_HZ_SCALE (1)
 #endif
