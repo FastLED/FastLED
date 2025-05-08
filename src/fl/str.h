@@ -14,8 +14,14 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+
+FASTLED_NAMESPACE_BEGIN
+struct CRGB;
+FASTLED_NAMESPACE_END;
+
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
+
 
 template <typename T> struct rect_xy;
 template <typename T> struct point_xy;
@@ -520,6 +526,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         append(slice);
         return *this;
     }
+
+    Str& append(const CRGB& c);
 
     Str &append(const float &_val) {
         float val = _val;

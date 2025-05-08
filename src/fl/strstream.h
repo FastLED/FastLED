@@ -49,16 +49,7 @@ class StrStream {
     const Str &str() const { return mStr; }
     const char *c_str() const { return mStr.c_str(); }
 
-    StrStream &operator<<(const CRGB &rgb) {
-        mStr.append("CRGB(");
-        mStr.append(rgb.r);
-        mStr.append(",");
-        mStr.append(rgb.g);
-        mStr.append(",");
-        mStr.append(rgb.b);
-        mStr.append(")");
-        return *this;
-    }
+    StrStream &operator<<(const CRGB &rgb) { mStr.append(rgb); return *this; }
 
     StrStream &operator<<(const Tile2x2_u8 &subpixel);
 

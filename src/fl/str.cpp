@@ -1,8 +1,10 @@
 #include <stdlib.h>
 
+#include "fl/str.h"
+
+#include "crgb.h"
 #include "fl/fft.h"
 #include "fl/namespace.h"
-#include "fl/str.h"
 #include "fl/xymap.h"
 
 namespace fl {
@@ -205,6 +207,17 @@ void Str::compileTimeAssertions() {
     static_assert(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
                   "If you want to change the FASTLED_STR_INLINED_SIZE, then it "
                   "must be through a build define and not an include define.");
+}
+
+Str &Str::append(const CRGB &rgb) {
+    append("CRGB(");
+    append(rgb.r);
+    append(",");
+    append(rgb.g);
+    append(",");
+    append(rgb.b);
+    append(")");
+    return *this;
 }
 
 } // namespace fl
