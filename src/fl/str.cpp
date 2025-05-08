@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+
 #include "fl/str.h"
 
 #include "crgb.h"
@@ -10,6 +11,44 @@
 namespace fl {
 
 namespace string_functions {
+
+
+static void ftoa(float value, char* buffer, int precision = 2) {
+    // Handle negative values
+    if (value < 0) {
+        *buffer++ = '-';
+        value = -value;
+    }
+
+    // Extract integer part
+    uint32_t intPart = (uint32_t)value;
+
+    // Convert integer part to string (reversed)
+    char intBuf[12];  // Enough for 32-bit integers
+    int i = 0;
+    do {
+        intBuf[i++] = '0' + (intPart % 10);
+        intPart /= 10;
+    } while (intPart);
+
+    // Write integer part in correct order
+    while (i--) {
+        *buffer++ = intBuf[i];
+    }
+
+    *buffer++ = '.';  // Decimal point
+
+    // Extract fractional part
+    float fracPart = value - (uint32_t)value;
+    for (int j = 0; j < precision; ++j) {
+        fracPart *= 10.0f;
+        int digit = (int)fracPart;
+        *buffer++ = '0' + digit;
+        fracPart -= digit;
+    }
+
+    *buffer = '\0';  // Null-terminate
+}
 
 static int itoa(int value, char *sp, int radix) {
     char tmp[16]; // be careful with the length of the buffer
@@ -218,6 +257,12 @@ Str &Str::append(const CRGB &rgb) {
     append(rgb.b);
     append(")");
     return *this;
+}
+
+void StringFormatter::appendFloat(const float& val, StrN<64> *dst) {
+    char buf[64] = {0};
+    string_functions::ftoa(val, buf);
+    dst->write(buf, strlen(buf));
 }
 
 } // namespace fl

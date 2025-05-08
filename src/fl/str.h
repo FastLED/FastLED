@@ -14,7 +14,6 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
 FASTLED_NAMESPACE_END;
@@ -22,10 +21,8 @@ FASTLED_NAMESPACE_END;
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
 
-
 class Str;
-using string = fl::Str;  // std-like string
-
+using string = fl::Str; // std-like string
 
 template <typename T> struct rect_xy;
 template <typename T> struct point_xy;
@@ -35,14 +32,11 @@ template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
 
-template<typename T>
-struct Hash;
+template <typename T> struct Hash;
 
-template<typename T>
-struct EqualTo;
+template <typename T> struct EqualTo;
 
-template <typename Key, typename Hash, typename KeyEqual>
-class HashSet;
+template <typename Key, typename Hash, typename KeyEqual> class HashSet;
 
 class XYMap;
 
@@ -74,6 +68,7 @@ class StringFormatter {
     }
     static float parseFloat(const char *str, size_t len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
+    static void appendFloat(const float& val, StrN<64> *dst);
 };
 
 class StringHolder : public fl::Referent {
@@ -541,35 +536,11 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    Str& append(const CRGB& c);
+    Str &append(const CRGB &c);
 
     Str &append(const float &_val) {
         // round to nearest hundredth
-        int32_t scaled = static_cast<int32_t>(_val * 100.0f + 0.5f);
-        if (scaled == 0) {
-            append("0");
-            return *this;
-        }
-        //float val = _val;
-        if (scaled < 0) {
-            append('-');
-            scaled = -scaled;
-        }
-
-        int32_t integer = scaled / 100;
-        int32_t frac = scaled % 100; // 0..99
-        append(integer);
-
-        // // only print decimals if non-zero; drop this guard to always show
-        // two
-        // // digits
-        if (frac != 0) {
-            append(".");
-            if (frac < 10) // ensure leading zero
-                append("0");
-            append(frac);
-        }
-
+        StringFormatter::appendFloat(_val, this);
         return *this;
     }
 
@@ -585,7 +556,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str &append(const XYMap &map);
 
     template <typename Key, typename Hash, typename KeyEqual>
-    Str& append(const HashSet<Key, Hash, KeyEqual> &set) {
+    Str &append(const HashSet<Key, Hash, KeyEqual> &set) {
         append("{");
         for (auto it = set.begin(); it != set.end(); ++it) {
             if (it != set.begin()) {
@@ -602,15 +573,18 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     void swap(Str &other);
 
- private:
-   enum {
-      // Bake the size into the string class so we can issue a compile time check
-      // to make sure the user doesn't do something funny like try to change the
-      // size of the inlined string via an included defined instead of a build define.
-      kStrInlineSize = FASTLED_STR_INLINED_SIZE,
-   };
+  private:
+    enum {
+        // Bake the size into the string class so we can issue a compile time
+        // check
+        // to make sure the user doesn't do something funny like try to change
+        // the
+        // size of the inlined string via an included defined instead of a build
+        // define.
+        kStrInlineSize = FASTLED_STR_INLINED_SIZE,
+    };
 
-   static void compileTimeAssertions();
+    static void compileTimeAssertions();
 };
 
 } // namespace fl

@@ -2,6 +2,8 @@
 
 #include "test.h"
 
+#include <random>
+
 #include "fl/line_simplification.h"
 #include "fl/warn.h"
 
@@ -135,11 +137,78 @@ TEST_CASE("Binary search the the threshold that gives 3 points") {
     fl::vector<point_xy<float>> out;
 
     ls.simplify(points, &out);
-
-    // REQUIRE(ALMOST_EQUAL(mid, 0.5f, 0.01f));
-    // MESSAGE("mid: " << mid);
-    // MESSAGE("done");
-
     REQUIRE_EQ(3, out.size());
     MESSAGE("Done");
 }
+
+
+TEST_CASE("Known bad") {
+    fl::vector<point_xy<float>> points;
+
+// est_line_simplification.cpp(176): Input point 0: (-3136.43,2546.33)
+// test_line_simplification.cpp(176): Input point 1: (4580.99,-3516.98)
+// test_line_simplification.cpp(176): Input point 2: (-1228.55,-5104.81)
+// test_line_simplification.cpp(176): Input point 3: (-8806.44,3895.10)
+
+
+    points.push_back({-3136.43,2546.33});
+    points.push_back({4580.99,-3516.98});
+    points.push_back({-1228.55,-5104.81});
+    points.push_back({-8806.44,3895.10});
+
+    LineSimplifierExact<float> ls;
+    ls.setCount(3);
+    fl::vector<point_xy<float>> out;
+    ls.simplify(points, &out);
+
+    MESSAGE("Output points: " << out.size());
+    MESSAGE("Output points: " << out);
+
+    REQUIRE_EQ(3, out.size());
+
+}
+
+
+// TEST_CASE("Binary search reduction to 3 points from 5 random points (1000 runs)") {
+//     constexpr int kTrials = 1000;
+//     constexpr int kInputPoints = 5;
+//     constexpr int kTargetPoints = 3;
+
+//     std::mt19937 rng(123); // fixed seed for reproducibility
+//     std::uniform_real_distribution<float> dist(-10000.0f, 10000.0f);
+
+//     for (int trial = 0; trial < kTrials; ++trial) {
+//         LineSimplifierExact<float> ls;
+//         fl::vector<point_xy<float>> points;
+
+//         for (int i = 0; i < kInputPoints; ++i) {
+//             points.push_back({dist(rng), dist(rng)});
+//         }
+
+//         ls.setCount(kTargetPoints);
+
+//         fl::vector<point_xy<float>> out;
+//         ls.simplify(points, &out);
+
+
+//         const bool bad_value = (out.size() != kTargetPoints);
+
+//         if (bad_value) {
+//             INFO("Trial " << trial << ": Input points: " << points.size()
+//                 << ", Output points: " << out.size() << ", " << out);
+
+//             for (size_t i = 0; i < points.size(); ++i) {
+//                 auto p = points[i];
+//                 FASTLED_WARN("Input point " << i << ": " << p);
+//             }
+
+//             // Assert
+//             REQUIRE_EQ(kTargetPoints, out.size());
+//         }
+
+
+
+//     }
+
+//     MESSAGE("Completed 1000 trials of random 5→3 simplification");
+// }

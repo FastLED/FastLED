@@ -15,6 +15,7 @@
 #include "fl/tile2x2.h"
 #include "fl/strstream.h"
 #include "fl/hash_set.h"
+#include "fl/vector.h"
 
 
 using namespace fl;
@@ -73,6 +74,15 @@ namespace doctest {
 
     template<typename Key, typename Hash, typename KeyEqual> struct StringMaker<fl::hash_set<Key, Hash, KeyEqual>> {
         static String convert(const fl::hash_set<Key, Hash, KeyEqual>& value) {
+            fl::Str out;
+            out.append(value);
+            return out.c_str();
+        }
+    };
+
+    template<typename T>
+    struct StringMaker<fl::vector<T>> {
+        static String convert(const fl::vector<T>& value) {
             fl::Str out;
             out.append(value);
             return out.c_str();
