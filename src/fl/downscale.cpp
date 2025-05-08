@@ -15,7 +15,6 @@
 
 namespace fl {
 
-
 void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst) {
     uint16_t dstWidth = srcWidth / 2;
     uint16_t dstHeight = srcHeight / 2;

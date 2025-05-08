@@ -11,20 +11,13 @@ If you use this and find an issue then please report it.
 
 namespace fl {
 
-
 class XYMap;
 
-#if 0
-void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
-                       CRGB *dst, uint16_t dstWidth, uint16_t dstHeight);
-
-void downscaleBilinearMapped(const CRGB* src, const XYMap& srcMap,
-                             CRGB* dst, const XYMap& dstMap);
-#endif
-
-void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst);
-void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
+#ifdef FASTLED_TESTING
+void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst);
+void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
+#endif  // FASTLED_TESTING
 
 } // namespace fl
