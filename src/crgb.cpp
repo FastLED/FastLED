@@ -6,11 +6,11 @@
 #include "FastLED.h"
 #include "fl/xymap.h"
 
-#include "lib8tion/math8.h"
+#include "fl/bilinear_expansion.h"
 #include "fl/downscale.h"
+#include "lib8tion/math8.h"
 
 #include "fl/namespace.h"
-
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -70,8 +70,19 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     return CRGB::blend(upper, lower, amountOf2);
 }
 
-void CRGB::downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY) {
+void CRGB::downscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
+                     const fl::XYMap &dstXY) {
     fl::downscale(src, srcXY, dst, dstXY);
+}
+
+void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
+                   const fl::XYMap &dstXY) {
+    FASTLED_WARN_IF(
+        srcXY.getType() != fl::XYMap::kLineByLine,
+        "Upscaling only works with a src matrix that is rectangular");
+    uint16_t w = srcXY.getWidth();
+    uint16_t h = srcXY.getHeight();
+    fl::bilinearExpand(src, dst, w, h, dstXY);
 }
 
 CRGB &CRGB::nscale8(uint8_t scaledown) {
@@ -97,11 +108,9 @@ CRGB CRGB::lerp8(const CRGB &other, fract8 amountOf2) const {
     return ret;
 }
 
-CRGB& CRGB::fadeToBlackBy (uint8_t fadefactor )
-{
-    nscale8x3( r, g, b, 255 - fadefactor);
+CRGB &CRGB::fadeToBlackBy(uint8_t fadefactor) {
+    nscale8x3(r, g, b, 255 - fadefactor);
     return *this;
 }
-
 
 FASTLED_NAMESPACE_END

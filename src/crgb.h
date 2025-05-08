@@ -81,6 +81,7 @@ struct CRGB {
 
     /// Downscale an CRGB matrix (or strip) to the smaller size.
     static void downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
+    static void upscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
