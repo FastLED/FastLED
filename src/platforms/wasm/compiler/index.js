@@ -240,7 +240,6 @@ function FastLED_onStripUpdate(jsonData) {
   // to the strip state. This is where the ScreenMap will be effectively set.
   // uses global variables.
   console.log('Received strip update:', jsonData);
-
   const { event } = jsonData;
   let width = 0;
   let height = 0;
@@ -258,11 +257,19 @@ function FastLED_onStripUpdate(jsonData) {
     if (isUndefined(stripId)) {
       throw new Error('strip_id is required for set_canvas_map event');
     }
+
+    let diameter = jsonData.diameter;
+    if (diameter === undefined) {
+      const stripId = jsonData.strip_id;
+      console.warn(`Diameter was unset for strip ${stripId}, assuming default value of 2 mm.`);
+      diameter = 0.2;
+    }
+
     screenMap.strips[stripId] = {
       map,
       min,
       max,
-      diameter: jsonData.diameter,
+      diameter: diameter,
     };
     console.log('Screen map updated:', screenMap);
     // iterate through all the screenMaps and get the absolute min and max
