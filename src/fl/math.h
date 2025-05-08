@@ -6,26 +6,29 @@
 #include "fl/map_range.h"
 #include "fl/clamp.h"
 
-// Don't let the math macros interfere with our code.
-#pragma push_macro("abs")
-#pragma push_macro("min")
-#pragma push_macro("max")
-#pragma push_macro("sqrt")
 
+
+#ifndef FASTLED_NO_UNDEF_MATH_MACROS
+#define FASTLED_NO_UNDEF_MATH_MACROS 0
+#endif
+
+#if !FASTLED_NO_UNDEF_MATH_MACROS
+// The c math micros should be classified as a war crime.
 #ifdef abs
-#undef abs
+  #undef abs
 #endif
 
 #ifdef min
-#undef min
+  #undef min
 #endif
 
 #ifdef max
-#undef max
+  #undef max
 #endif
 
 #ifdef sqrt
-#undef sqrt
+  #undef sqrt
+#endif
 #endif
 
 
@@ -63,14 +66,28 @@ inline T max(T a, T b) {
 }
 
 inline float sqrt(float value) {
-    return ::sqrt(value);
+    return ::sqrtf(value);
 }
 
 
 }  // namespace fl
 
-// Restore the math macros
-#pragma pop_macro("abs")
-#pragma pop_macro("min")
-#pragma pop_macro("max")
-#pragma pop_macro("sqrt")
+
+#ifndef FASTLED_NO_FL_USING_MATH_MACROS
+#define FASTLED_NO_FL_USING_MATH_MACROS 0
+#endif
+
+
+
+#if !FASTLED_NO_FL_USING_MATH_MACROS
+
+using fl::floor;
+using fl::ceil;
+using fl::abs;
+using fl::min;
+using fl::max;
+using fl::sqrt;
+
+#endif
+
+
