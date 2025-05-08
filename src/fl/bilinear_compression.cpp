@@ -246,7 +246,14 @@ void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstX
     // Attempt to use the downscaleHalf function if the destination is half the size of the source
     // We don't do this in testing mode so that we can exactly test the bilinear downscaling.
     if (dstWidth * 2 == srcWidth && dstHeight * 2 == srcHeight) {
-        downscaleHalf(src, srcXY, dst, dstXY);
+        const bool both_rectangles = (srcXY.getType() == XYMap::kLineByLine) && (dstXY.getType() == XYMap::kLineByLine);
+        if (both_rectangles) {
+            // If both source and destination are rectangular, we can use the optimized version
+            downscaleHalf(src, srcWidth, srcHeight, dst);
+        } else {
+            // Otherwise, we need to use the mapped version
+            downscaleHalf(src, srcXY, dst, dstXY);
+        }
         return;
     }
     #endif
