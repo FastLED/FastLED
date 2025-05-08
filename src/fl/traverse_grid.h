@@ -12,7 +12,7 @@ namespace fl {
 /// @param visitor called for each cell visited.
 /// @details Fully tested.
 template<typename GridVisitor>
-inline void traverseGridSegment(
+inline void traverseGridSegmentFloat(
     const point_xy_float& start,
     const point_xy_float& end,
     GridVisitor& visitor)
@@ -76,7 +76,7 @@ inline void traverseGridSegment16(
 {
     const int16_t FP_SHIFT = 8;
     const int16_t FP_ONE = 1 << FP_SHIFT;
-    const int16_t FP_MASK = FP_ONE - 1;
+    // const int16_t FP_MASK = FP_ONE - 1;
 
     // Convert to fixed-point (Q8.8), signed
     int16_t startX_fp = static_cast<int16_t>(start.x * FP_ONE);
@@ -154,7 +154,7 @@ inline void traverseGridSegment32(
 {
     const int32_t FP_SHIFT = 8;
     const int32_t FP_ONE = 1 << FP_SHIFT;
-    const int32_t FP_MASK = FP_ONE - 1;
+    // const int32_t FP_MASK = FP_ONE - 1;
 
     // Convert to fixed-point (Q24.8) signed
     int32_t startX_fp = static_cast<int32_t>(start.x * FP_ONE);
@@ -212,6 +212,30 @@ inline void traverseGridSegment32(
 
     if (currentX != x1 || currentY != y1) {
         visitor.visit(x1, y1);
+    }
+}
+
+template<typename GridVisitor>
+inline void traverseGridSegment(
+    const point_xy_float& start,
+    const point_xy_float& end,
+    GridVisitor& visitor)
+{
+    float dx = fl::abs(end.x - start.x);
+    float dy = fl::abs(end.y - start.y);
+    float maxRange = fl::max(dx, dy);
+
+    if (maxRange < 256.0f) {
+        // Use Q8.8 (16-bit signed) if within ±127
+        traverseGridSegment16(start, end, visitor);
+    }
+    else if (maxRange < 16777216.0f) {
+        // Use Q24.8 (32-bit signed) if within ±8 million
+        traverseGridSegment32(start, end, visitor);
+    }
+    else {
+        // Fall back to floating-point
+        traverseGridSegment(start, end, visitor);
     }
 }
 
