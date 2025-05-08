@@ -55,10 +55,10 @@ template <typename NumberT = float> class LineSimplifier {
         simplifyT(polyLine, out);
     }
 
-    template<typename VectorType>
-    static void removeOneLeastError(VectorType* _poly) {
+    template <typename VectorType>
+    static void removeOneLeastError(VectorType *_poly) {
         bitset<256> keep;
-        VectorType& poly  = *_poly;
+        VectorType &poly = *_poly;
         keep.assign(poly.size(), 1);
         const int n = poly.size();
         NumberT bestErr = INFINITY_DOUBLE;
@@ -271,7 +271,29 @@ template <typename NumberT = float> class LineSimplifierExact {
             out->clear();
             mLineSimplifier.setMinimumDistance(mid);
             mLineSimplifier.simplify(polyLine, out);
-            if (done || out->size() == mCount) {
+
+            size_t n = out->size();
+
+            if (n == mCount) {
+                return; // we are done
+            }
+
+            // Handle the last few iterations manually. Often the algo will get
+            // stuck here.
+            if (n == mCount + 1) {
+                // Just one more left, so peel it off.
+                mLineSimplifier.removeOneLeastError(out);
+                return;
+            }
+
+            if (n == mCount + 2) {
+                // Just two more left, so peel them off.
+                mLineSimplifier.removeOneLeastError(out);
+                mLineSimplifier.removeOneLeastError(out);
+                return;
+            }
+
+            if (done) {
                 while (out->size() > mCount) {
                     // we have too many points, so we need to increase the
                     // distance
