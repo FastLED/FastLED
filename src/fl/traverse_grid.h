@@ -74,40 +74,48 @@ inline void traverseGridSegment16(
     const point_xy_float& end,
     GridVisitor& visitor)
 {
-    const uint16_t FP_SHIFT = 8;
-    const uint16_t FP_ONE = 1 << FP_SHIFT;
-    const uint16_t FP_MASK = FP_ONE - 1;
+    const int16_t FP_SHIFT = 8;
+    const int16_t FP_ONE = 1 << FP_SHIFT;
+    const int16_t FP_MASK = FP_ONE - 1;
 
-    // Convert to fixed-point (Q8.8)
-    uint16_t startX_fp = static_cast<uint16_t>(start.x * FP_ONE);
-    uint16_t startY_fp = static_cast<uint16_t>(start.y * FP_ONE);
-    uint16_t endX_fp = static_cast<uint16_t>(end.x * FP_ONE);
-    uint16_t endY_fp = static_cast<uint16_t>(end.y * FP_ONE);
+    // Convert to fixed-point (Q8.8), signed
+    int16_t startX_fp = static_cast<int16_t>(start.x * FP_ONE);
+    int16_t startY_fp = static_cast<int16_t>(start.y * FP_ONE);
+    int16_t endX_fp = static_cast<int16_t>(end.x * FP_ONE);
+    int16_t endY_fp = static_cast<int16_t>(end.y * FP_ONE);
 
-    int x0 = startX_fp >> FP_SHIFT;
-    int y0 = startY_fp >> FP_SHIFT;
-    int x1 = endX_fp >> FP_SHIFT;
-    int y1 = endY_fp >> FP_SHIFT;
+    int16_t x0 = startX_fp >> FP_SHIFT;
+    int16_t y0 = startY_fp >> FP_SHIFT;
+    int16_t x1 = endX_fp >> FP_SHIFT;
+    int16_t y1 = endY_fp >> FP_SHIFT;
 
-    int stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
-    int stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
+    int16_t stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
+    int16_t stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
 
-    int16_t deltaX_fp = static_cast<int16_t>(endX_fp) - static_cast<int16_t>(startX_fp);
-    int16_t deltaY_fp = static_cast<int16_t>(endY_fp) - static_cast<int16_t>(startY_fp);
+    int16_t deltaX_fp = endX_fp - startX_fp;
+    int16_t deltaY_fp = endY_fp - startY_fp;
 
-    uint16_t absDeltaX_fp = (deltaX_fp != 0) ? static_cast<uint16_t>(fl::abs( (int32_t(1) << (FP_SHIFT * 2)) / deltaX_fp )) : UINT16_MAX;
-    uint16_t absDeltaY_fp = (deltaY_fp != 0) ? static_cast<uint16_t>(fl::abs( (int32_t(1) << (FP_SHIFT * 2)) / deltaY_fp )) : UINT16_MAX;
+    uint16_t absDeltaX_fp = (deltaX_fp != 0)
+        ? static_cast<uint16_t>(fl::abs((int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
+        : UINT16_MAX;
+    uint16_t absDeltaY_fp = (deltaY_fp != 0)
+        ? static_cast<uint16_t>(fl::abs((int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
+        : UINT16_MAX;
 
-    uint16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
-    uint16_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
+    int16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
+    int16_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
 
-    uint16_t tMaxX_fp = (deltaX_fp != 0) ? static_cast<uint16_t>(fl::abs( (int32_t(nextX_fp) - startX_fp) * absDeltaX_fp >> FP_SHIFT )) : UINT16_MAX;
-    uint16_t tMaxY_fp = (deltaY_fp != 0) ? static_cast<uint16_t>(fl::abs( (int32_t(nextY_fp) - startY_fp) * absDeltaY_fp >> FP_SHIFT )) : UINT16_MAX;
+    uint16_t tMaxX_fp = (deltaX_fp != 0)
+        ? static_cast<uint16_t>(fl::abs(int32_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
+        : UINT16_MAX;
+    uint16_t tMaxY_fp = (deltaY_fp != 0)
+        ? static_cast<uint16_t>(fl::abs(int32_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
+        : UINT16_MAX;
 
     const uint16_t maxT_fp = FP_ONE;
 
-    int currentX = x0;
-    int currentY = y0;
+    int16_t currentX = x0;
+    int16_t currentY = y0;
 
     while (true) {
         visitor.visit(currentX, currentY);
@@ -131,6 +139,7 @@ inline void traverseGridSegment16(
 }
 
 
+
 // @brief Traverse a grid segment using fixed-point 24.8 arithmetic.
 /// @tparam GridVisitor 
 /// @param start start point
@@ -143,15 +152,15 @@ inline void traverseGridSegment32(
     const point_xy_float& end,
     GridVisitor& visitor)
 {
-    const uint32_t FP_SHIFT = 8;
-    const uint32_t FP_ONE = 1u << FP_SHIFT;
-    const uint32_t FP_MASK = FP_ONE - 1;
+    const int32_t FP_SHIFT = 8;
+    const int32_t FP_ONE = 1 << FP_SHIFT;
+    const int32_t FP_MASK = FP_ONE - 1;
 
-    // Convert to fixed-point (Q24.8)
-    uint32_t startX_fp = static_cast<uint32_t>(start.x * FP_ONE);
-    uint32_t startY_fp = static_cast<uint32_t>(start.y * FP_ONE);
-    uint32_t endX_fp = static_cast<uint32_t>(end.x * FP_ONE);
-    uint32_t endY_fp = static_cast<uint32_t>(end.y * FP_ONE);
+    // Convert to fixed-point (Q24.8) signed
+    int32_t startX_fp = static_cast<int32_t>(start.x * FP_ONE);
+    int32_t startY_fp = static_cast<int32_t>(start.y * FP_ONE);
+    int32_t endX_fp = static_cast<int32_t>(end.x * FP_ONE);
+    int32_t endY_fp = static_cast<int32_t>(end.y * FP_ONE);
 
     int32_t x0 = startX_fp >> FP_SHIFT;
     int32_t y0 = startY_fp >> FP_SHIFT;
@@ -161,8 +170,8 @@ inline void traverseGridSegment32(
     int32_t stepX = (x1 > x0) ? 1 : (x1 < x0) ? -1 : 0;
     int32_t stepY = (y1 > y0) ? 1 : (y1 < y0) ? -1 : 0;
 
-    int32_t deltaX_fp = static_cast<int32_t>(endX_fp) - static_cast<int32_t>(startX_fp);
-    int32_t deltaY_fp = static_cast<int32_t>(endY_fp) - static_cast<int32_t>(startY_fp);
+    int32_t deltaX_fp = endX_fp - startX_fp;
+    int32_t deltaY_fp = endY_fp - startY_fp;
 
     uint32_t absDeltaX_fp = (deltaX_fp != 0)
         ? static_cast<uint32_t>(fl::abs((int64_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
@@ -171,14 +180,14 @@ inline void traverseGridSegment32(
         ? static_cast<uint32_t>(fl::abs((int64_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
         : UINT32_MAX;
 
-    uint32_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
-    uint32_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
+    int32_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
+    int32_t nextY_fp = (stepY > 0) ? ((y0 + 1) << FP_SHIFT) : (y0 << FP_SHIFT);
 
     uint32_t tMaxX_fp = (deltaX_fp != 0)
-        ? static_cast<uint32_t>(fl::abs(int64_t(nextX_fp) - startX_fp) * absDeltaX_fp >> FP_SHIFT)
+        ? static_cast<uint32_t>(fl::abs(int64_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
         : UINT32_MAX;
     uint32_t tMaxY_fp = (deltaY_fp != 0)
-        ? static_cast<uint32_t>(fl::abs(int64_t(nextY_fp) - startY_fp) * absDeltaY_fp >> FP_SHIFT)
+        ? static_cast<uint32_t>(fl::abs(int64_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
         : UINT32_MAX;
 
     const uint32_t maxT_fp = FP_ONE;
@@ -201,7 +210,6 @@ inline void traverseGridSegment32(
         }
     }
 
-    // Ensure the end cell (x1, y1) is visited at least once
     if (currentX != x1 || currentY != y1) {
         visitor.visit(x1, y1);
     }
