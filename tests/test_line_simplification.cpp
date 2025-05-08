@@ -142,32 +142,24 @@ TEST_CASE("Binary search the the threshold that gives 3 points") {
 }
 
 
-// TEST_CASE("Known bad") {
-//     fl::vector<point_xy<float>> points;
-// // test_line_simplification.cpp(202): Input point 0: (-3136.439941,2546.339844)
-// // test_line_simplification.cpp(202): Input point 1: (4580.994141,-3516.982422)
-// // test_line_simplification.cpp(202): Input point 2: (-1228.554688,-5104.814453)
-// // test_line_simplification.cpp(202): Input point 3: (-8806.442383,3895.103516)
-// // test_line_simplification.cpp(202): Input point 4: (-2039.114746,1878.047852)
+TEST_CASE("Known bad") {
+    fl::vector<point_xy<float>> points;
+    points.push_back({-3136.439941f, 2546.339844f});
+    points.push_back({4580.994141f, -3516.982422f});
+    points.push_back({-1228.554688f, -5104.814453f});
+    points.push_back({-8806.442383f, 3895.103516f});
+    points.push_back({-2039.114746f, 1878.047852f});
 
+    LineSimplifierExact<float> ls;
+    ls.setCount(3);
+    fl::vector<point_xy<float>> out;
+    ls.simplify(points, &out);
 
-//     points.push_back({-3136.439941f, 2546.339844f});
-//     points.push_back({4580.994141f, -3516.982422f});
-//     points.push_back({-1228.554688f, -5104.814453f});
-//     points.push_back({-8806.442383f, 3895.103516f});
-//     points.push_back({-2039.114746f, 1878.047852f});
+    MESSAGE("Output points: " << out.size());
+    MESSAGE("Output points: " << out);
 
-//     LineSimplifierExact<float> ls;
-//     ls.setCount(3);
-//     fl::vector<point_xy<float>> out;
-//     ls.simplify(points, &out);
-
-//     MESSAGE("Output points: " << out.size());
-//     MESSAGE("Output points: " << out);
-
-//     REQUIRE_EQ(3, out.size());
-
-// }
+    REQUIRE_EQ(3, out.size());
+}
 
 
 // TEST_CASE("Binary search reduction to 3 points from 5 random points (1000 runs)") {

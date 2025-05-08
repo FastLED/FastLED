@@ -55,6 +55,55 @@ template <typename NumberT = float> class LineSimplifier {
         simplifyT(polyLine, out);
     }
 
+    template<typename VectorType>
+    static void removeOneLeastError(VectorType* _poly) {
+        bitset<256> keep;
+        VectorType& poly  = *_poly;
+        keep.assign(poly.size(), 1);
+        const int n = poly.size();
+        NumberT bestErr = INFINITY_DOUBLE;
+        int bestIdx = -1;
+
+        // scan all interior “alive” points
+        for (int i = 1; i + 1 < n; ++i) {
+            if (!keep[i])
+                continue;
+
+            // find previous alive
+            int L = i - 1;
+            while (L >= 0 && !keep[L])
+                --L;
+            // find next alive
+            int R = i + 1;
+            while (R < n && !keep[R])
+                ++R;
+
+            if (L < 0 || R >= n)
+                continue; // endpoints
+
+            // compute perp‐distance² to the chord L→R
+            NumberT dx = poly[R].x - poly[L].x;
+            NumberT dy = poly[R].y - poly[L].y;
+            NumberT vx = poly[i].x - poly[L].x;
+            NumberT vy = poly[i].y - poly[L].y;
+            NumberT len2 = dx * dx + dy * dy;
+            NumberT err =
+                (len2 > NumberT(0))
+                    ? ((dx * vy - dy * vx) * (dx * vy - dy * vx) / len2)
+                    : (vx * vx + vy * vy);
+
+            if (err < bestErr) {
+                bestErr = err;
+                bestIdx = i;
+            }
+        }
+
+        // now “remove” that one point
+        if (bestIdx >= 0)
+            // keep[bestIdx] = 0;
+            poly.erase(poly.begin() + bestIdx);
+    }
+
   private:
     template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
         // run the simplification algorithm
@@ -217,12 +266,17 @@ template <typename NumberT = float> class LineSimplifierExact {
         NumberT mid = (min + max) / 2.0f;
         while (true) {
             // min < max;
-            auto diff  = max - min;
+            auto diff = max - min;
             const bool done = (diff < 0.01f);
             out->clear();
             mLineSimplifier.setMinimumDistance(mid);
             mLineSimplifier.simplify(polyLine, out);
             if (done || out->size() == mCount) {
+                while (out->size() > mCount) {
+                    // we have too many points, so we need to increase the
+                    // distance
+                    mLineSimplifier.removeOneLeastError(out);
+                }
                 return;
             }
             if (out->size() < mCount) {
