@@ -17,6 +17,7 @@ dependencies = [
     "black",
     "pip",
     "pytest",
+    "pytest-xdist",
     "fpvgcc",
     "uv",
     "ziglang",
@@ -27,6 +28,7 @@ dependencies = [
     "playwright",
     "download",
     "httpx",
+    "pytest-xdist",
 ]
 
 [build-system]

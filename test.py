@@ -232,7 +232,7 @@ def main() -> None:
         pio_process = RunningProcess(cmd_str, echo=False, auto_run=not _IS_GITHUB)
         cpp_test_proc = RunningProcess(cmd_str_cpp)
         compile_native_proc = RunningProcess('uv run ci/ci-compile-native.py', echo=False, auto_run=not _IS_GITHUB)
-        pytest_proc = RunningProcess('uv run pytest ci/tests', echo=False)
+        pytest_proc = RunningProcess('uv run pytest -s ci/tests -xvs -n auto --durations=0', echo=False)
         tests = [cpp_test_proc, compile_native_proc, pytest_proc, pio_process]
         if src_code_change:
             print("Source code changed, running uno tests")
