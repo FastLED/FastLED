@@ -18,7 +18,7 @@ can be done with zero heap allocations.
 
 namespace fl {
 
-template <typename NumberT = float > class LineSimplifier {
+template <typename NumberT = float> class LineSimplifier {
   public:
     // This line simplification algorithm will remove vertices that are close
     // together upto a distance of mMinDistance. The algorithm is based on the
@@ -112,7 +112,7 @@ template <typename NumberT = float > class LineSimplifier {
                 if (!keep[i])
                     continue;
                 NumberT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
-                                                   polyLine[i1]);
+                                                    polyLine[i1]);
 
                 // FASTLED_WARN("Perpendicular distance2 between "
                 //              << polyLine[i] << " and " << polyLine[i0]
@@ -155,7 +155,7 @@ template <typename NumberT = float > class LineSimplifier {
     VectorPoint mSimplified; // output buffer
 
     static NumberT PerpendicularDistance2(const Point &pt, const Point &a,
-                                         const Point &b) {
+                                          const Point &b) {
         // vector AB
         NumberT dx = b.x - a.x;
         NumberT dy = b.y - a.y;
@@ -177,8 +177,7 @@ template <typename NumberT = float > class LineSimplifier {
     }
 };
 
-template<typename NumberT = float>
-class LineSimplifierExact {
+template <typename NumberT = float> class LineSimplifierExact {
   public:
     LineSimplifierExact() = default;
     using Point = point_xy<NumberT>;
@@ -188,8 +187,12 @@ class LineSimplifierExact {
     void setCount(uint32_t count) { mCount = count; }
 
     template <typename VectorType = fl::vector<Point>>
-    void simplify(const fl::Slice<const Point> &polyLine,
-                  VectorType *out) {
+    void simplifyInplace(VectorType *polyLine) {
+        return simplify(*polyLine, polyLine);
+    }
+
+    template <typename VectorType = fl::vector<Point>>
+    void simplify(const fl::Slice<const Point> &polyLine, VectorType *out) {
         if (mCount > polyLine.size()) {
             safeCopy(polyLine, out);
             return;
