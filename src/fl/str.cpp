@@ -6,7 +6,12 @@
 #include "crgb.h"
 #include "fl/fft.h"
 #include "fl/namespace.h"
+#include "fl/unused.h"
 #include "fl/xymap.h"
+
+#ifdef FASTLED_TESTING
+#include <cstdio>  // ok include
+#endif
 
 namespace fl {
 
@@ -14,6 +19,15 @@ namespace string_functions {
 
 
 static void ftoa(float value, char* buffer, int precision = 2) {
+
+    FASTLED_UNUSED(precision);
+
+    #ifdef FASTLED_TESTING
+    // use sprintf during testing
+    sprintf(buffer, "%f", value);
+    return;
+
+    #else
     // Handle negative values
     if (value < 0) {
         *buffer++ = '-';
@@ -48,6 +62,7 @@ static void ftoa(float value, char* buffer, int precision = 2) {
     }
 
     *buffer = '\0';  // Null-terminate
+    #endif
 }
 
 static int itoa(int value, char *sp, int radix) {
