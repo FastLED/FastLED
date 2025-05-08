@@ -81,6 +81,7 @@ template <typename NumberT = float> class LineSimplifier {
             }
             return;
         }
+        const NumberT minDist2 = mMinDistance * mMinDistance;
 
         // mark all points as “kept” initially
         keep.assign(n, 1);
@@ -124,7 +125,7 @@ template <typename NumberT = float> class LineSimplifier {
                 }
             }
 
-            if (maxDist2 >= mMinDistance * mMinDistance) {
+            if (maxDist2 > minDist2) {
                 // need to keep that split point and recurse on both halves
                 indexStack.push_back({i0, split});
                 indexStack.push_back({split, i1});
