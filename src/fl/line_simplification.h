@@ -187,8 +187,9 @@ class LineSimplifierExact {
 
     void setCount(uint32_t count) { mCount = count; }
 
+    template <typename VectorType = fl::vector<Point>>
     void simplify(const fl::Slice<const Point> &polyLine,
-                  fl::vector<Point> *out) {
+                  VectorType *out) {
         if (mCount > polyLine.size()) {
             safeCopy(polyLine, out);
             return;
@@ -239,7 +240,8 @@ class LineSimplifierExact {
         return fl::sqrt(dx * dx + dy * dy);
     }
 
-    void safeCopy(const fl::Slice<const Point> &polyLine, fl::vector<Point> *out) {
+    template <typename VectorType>
+    void safeCopy(const fl::Slice<const Point> &polyLine, VectorType *out) {
         auto *first_out = out->data();
         // auto* last_out = first_out + mCount;
         auto *other_first_out = polyLine.data();
