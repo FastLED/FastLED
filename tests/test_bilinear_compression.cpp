@@ -83,7 +83,7 @@ TEST_CASE("downscale 2x2 to 1x1") {
     SUBCASE("downscale from 2x2 to 1x1") {
         CRGB dst[1];
         XYMap srcMap = XYMap::constructRectangularGrid(2, 2);
-        XYMap dstMap = XYMap::constructSerpentine(1, 1);
+        XYMap dstMap = XYMap::constructRectangularGrid(1, 1);
 
         downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
@@ -93,7 +93,7 @@ TEST_CASE("downscale 2x2 to 1x1") {
         CHECK(dst[0].b == 0);
     }
 
-#if 0
+
     SUBCASE("4x4 rectangle to 2x2 serpentine") {
         // We are going to simulate a 4x4 image with a 2x2 image. The source
         // image is square-cartesian while the dst image is square-serpentine.
@@ -108,7 +108,7 @@ TEST_CASE("downscale 2x2 to 1x1") {
         XYMap srcMap = XYMap::constructRectangularGrid(4, 4);
         XYMap dstMap = XYMap::constructSerpentine(2, 2);
 
-        downscaleBilinearMapped(src, srcMap, dst, dstMap);
+        downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
         INFO("Dst: " << dst);
 
@@ -122,5 +122,5 @@ TEST_CASE("downscale 2x2 to 1x1") {
         REQUIRE(lowerLeft == black);
         REQUIRE(lowerRight == red);
     }
-#endif
+
 }
