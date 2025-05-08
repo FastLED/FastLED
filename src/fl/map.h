@@ -311,6 +311,16 @@ public:
         return it->second;
     }
 
+    // Matches FixedMap<>::get(...).
+    bool get(const Key& key, Value* value) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            *value = it->second;
+            return true;
+        }
+        return false;
+    }
+
     bool has(const Key& key) const {
         return data.has(Pair(key));
     }
