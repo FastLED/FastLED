@@ -123,7 +123,10 @@ class LineSimplifierExact {
   public:
     LineSimplifierExact() = default;
     using Point = point_xy<float>;
+    
     LineSimplifierExact(int count) : mCount(count) {}
+
+    void setCount(uint32_t count) { mCount = count; }
 
     void simplify(const fl::Slice<const point_xy<float>> &polyLine,
                   fl::vector<point_xy<float>> *out) {
@@ -164,7 +167,7 @@ class LineSimplifierExact {
         }
     }
 
-    void setCount(uint32_t count) { mCount = count; }
+
 
 
 
