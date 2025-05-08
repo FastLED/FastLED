@@ -60,3 +60,54 @@ TEST_CASE("downscaleBilinear") {
 }
 
 #endif
+
+TEST_CASE("downscaleHalf") {
+
+    CRGB red = CRGB(255, 0, 0);
+    CRGB black = CRGB(0, 0, 0);
+
+    SUBCASE("2x2 to 1x1") {
+        // We are going to simulate a 4x4 image with a 2x2 image. The source
+        // image is square-cartesian while the dst image is square-serpentine.
+        CRGB src[4] = {black, red, black, red};
+
+        CRGB dst[1];
+        downscaleHalf(src, 2, 2, dst);
+        INFO("Src: " << src);
+        INFO("Dst: " << dst);
+        CHECK(dst[0].r == 128);
+        CHECK(dst[0].g == 0);
+        CHECK(dst[0].b == 0);
+    }
+
+#if 0
+    SUBCASE("4x4 rectangle to 2x2 serpentine") {
+        // We are going to simulate a 4x4 image with a 2x2 image. The source
+        // image is square-cartesian while the dst image is square-serpentine.
+
+        CRGB src[16] = {// Upper left red, lower right red, upper right black,
+                        // lower left black
+                        red,   red,   black, black, red,   red,   black, black,
+                        black, black, red,   red,   black, black, red,   red};
+
+        CRGB dst[4];
+
+        XYMap srcMap = XYMap::constructRectangularGrid(4, 4);
+        XYMap dstMap = XYMap::constructSerpentine(2, 2);
+
+        downscaleBilinearMapped(src, srcMap, dst, dstMap);
+        INFO("Src: " << src);
+        INFO("Dst: " << dst);
+
+        CRGB upperLeft = dst[dstMap.mapToIndex(0, 0)];
+        CRGB upperRight = dst[dstMap.mapToIndex(1, 0)];
+        CRGB lowerLeft = dst[dstMap.mapToIndex(0, 1)];
+        CRGB lowerRight = dst[dstMap.mapToIndex(1, 1)];
+
+        REQUIRE(upperLeft == red);
+        REQUIRE(upperRight == black);
+        REQUIRE(lowerLeft == black);
+        REQUIRE(lowerRight == red);
+    }
+#endif
+}
