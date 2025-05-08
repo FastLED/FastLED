@@ -9,13 +9,12 @@ can be done with zero heap allocations.
 */
 
 #include "fl/bitset.h"
+#include "fl/math.h"
 #include "fl/math_macros.h"
 #include "fl/pair.h"
 #include "fl/point.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
-#include "fl/bitset.h"
-#include "fl/math.h"
 
 namespace fl {
 
@@ -98,6 +97,13 @@ template <typename FloatT> class LineSimplifier {
             int i0 = pair.first;
             int i1 = pair.second;
             indexStack.pop_back();
+            const bool has_interior = (i1 - i0) > 1;
+            if (!has_interior) {
+                // no interior points, just keep the endpoints
+                // keep[i0] = 1;
+                // keep[i1] = 1;
+                continue;
+            }
 
             // find farthest point in [i0+1 .. i1-1]
             FloatT maxDist2 = 0;
@@ -108,9 +114,9 @@ template <typename FloatT> class LineSimplifier {
                 FloatT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
                                                    polyLine[i1]);
 
-                FASTLED_WARN("Perpendicular distance2 between " << polyLine[i]
-                             << " and " << polyLine[i0] << " and "
-                             << polyLine[i1] << " is " << d2);
+                // FASTLED_WARN("Perpendicular distance2 between "
+                //              << polyLine[i] << " and " << polyLine[i0]
+                //              << " and " << polyLine[i1] << " is " << d2);
 
                 if (d2 > maxDist2) {
                     maxDist2 = d2;

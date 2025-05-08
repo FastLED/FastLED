@@ -98,3 +98,25 @@ TEST_CASE("Test Line Simplification with Complex Shape") {
         REQUIRE_EQ(point_xy<float>(0.0f, 1.0f), points3[1]);
     };
 }
+
+
+TEST_CASE("Iteratively find the closest point") {
+    LineSimplifier<float> ls;
+    fl::vector<point_xy<float>> points;
+    points.push_back({0.0f, 0.0f}); // First point of triangle
+    points.push_back({0.5f, 0.5f});
+    points.push_back({0.0f, 1.0f});
+
+
+    float thresh = 0.0;
+    while (true) {
+        ls.setMinimumDistance(thresh);
+        fl::vector<point_xy<float>> output;
+        ls.simplify(points, &output);
+        if (output.size() == 2) {
+            break;
+        }
+        thresh += 0.01f;
+    }
+    REQUIRE(ALMOST_EQUAL(thresh, 0.5f, 0.01f));
+}
