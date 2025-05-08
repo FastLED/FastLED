@@ -6,6 +6,11 @@ Line simplification based of an improved Douglas-Peucker algorithm with only
 O(n) extra memory. Memory structures are inlined so that most simplifications
 can be done with zero heap allocations.
 
+There are two versions here, one that simplifies using a threshold, and another
+version which will simplify to an exact number of points, however the latter is
+expensive since it must re-run the algorithm multiple times to find the right
+threshold. The first version is much faster and should be used in most cases.
+
 */
 
 #include "fl/bitset.h"
