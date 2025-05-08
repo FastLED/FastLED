@@ -240,15 +240,11 @@ template <typename NumberT = float> class LineSimplifierExact {
         if (polyLine.size() < 2)
             return 0;
 
-        NumberT sum = 0;
-        for (size_t i = 1; i < polyLine.size(); ++i) {
-            const Point &p0 = polyLine[i - 1];
-            const Point &p1 = polyLine[i];
-            NumberT dx = p1.x - p0.x;
-            NumberT dy = p1.y - p0.y;
-            sum += fl::sqrt(dx * dx + dy * dy);
-        }
-        return sum / 2.0f;
+        const Point &first = polyLine[0];
+        const Point &last = polyLine[polyLine.size() - 1];
+        NumberT dx = last.x - first.x;
+        NumberT dy = last.y - first.y;
+        return fl::sqrt(dx * dx + dy * dy);
     }
 
     template <typename VectorType>
