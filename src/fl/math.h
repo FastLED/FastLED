@@ -87,7 +87,8 @@ using fl::abs;
 using fl::min;
 using fl::max;
 
-#if !defined(__clang__)
+
+#if !defined(__clang__) || !defined(__APPLE__)
   using fl::sqrt;
 #endif
 
