@@ -42,7 +42,7 @@ UISlider pointX("Point X", WIDTH / 2.0f, 0.0f, WIDTH - 1, 1.0f);
 UISlider pointY("Point Y", HEIGHT / 2.0f, 0.0f, HEIGHT - 1, 1.0f);
 
 UIButton button("second trigger");
-UIAudio audio("Audio");
+
 
 int x = 0;
 int y = 0;
@@ -57,19 +57,11 @@ void setup() {
 
 }
 void loop() {
+    fl::clear(leds);
+    triggered = button.clicked();
     if (triggered) {
         FASTLED_WARN("Triggered");
     }
-    fl::clear(leds);
-    do { 
-        auto sample = audio.next();
-        if (sample) {
-            FASTLED_WARN("Audio sample size: " << sample->pcm().size());            
-        } else {
-            break;
-        }
-    } while (true);
-    triggered = button.clicked();
     x = pointX.as_int();
     y = pointY.as_int();
     leds[xyMap(x, y)] = CRGB(255, 0, 0);
