@@ -6,11 +6,21 @@
 #include "fl/map_range.h"
 #include "fl/clamp.h"
 
-
+// Don't let the math macros interfere with our code.
 #pragma push_macro("abs")
+#pragma push_macro("min")
+#pragma push_macro("max")
 
 #ifdef abs
 #undef abs
+#endif
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
 #endif
 
 
@@ -37,6 +47,19 @@ inline T abs(T value) {
     return (value < 0) ? -value : value;
 }
 
+template <typename T>
+inline T min(T a, T b) {
+    return (a < b) ? a : b;
 }
 
+template <typename T>
+inline T max(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+}  // namespace fl
+
+// Restore the math macros
 #pragma pop_macro("abs")
+#pragma pop_macro("min")
+#pragma pop_macro("max")
