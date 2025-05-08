@@ -86,7 +86,10 @@ using fl::ceil;
 using fl::abs;
 using fl::min;
 using fl::max;
-using fl::sqrt;
+
+#if !defined(__clang__)
+  using fl::sqrt;
+#endif
 
 #endif
 
