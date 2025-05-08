@@ -73,13 +73,18 @@ inline float sqrt(float value) {
 }  // namespace fl
 
 
-#ifndef FASTLED_FL_USING_MATH_MACROS
-#define FASTLED_FL_USING_MATH_MACROS 0
+#ifndef FASTLED_FL_USING_MATH
+#ifdef __SAM3X8E__
+// Needed for __SAM3X8E__ because we just blew away their math macros.
+#define FASTLED_FL_USING_MATH 1
+#else
+#define FASTLED_FL_USING_MATH 0
 #endif
+#endif  // FASTLED_FL_USING_MATH
 
 
 
-#if FASTLED_FL_USING_MATH_MACROS
+#if FASTLED_FL_USING_MATH
 
 using fl::floor;
 using fl::ceil;
@@ -87,4 +92,4 @@ using fl::abs;
 using fl::min;
 using fl::max;
 
-#endif  // FASTLED_FL_USING_MATH_MACROS
+#endif  // FASTLED_FL_USING_MATH
