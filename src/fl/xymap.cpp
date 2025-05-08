@@ -6,6 +6,7 @@
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/xymap.h"
+#include "fl/clamp.h"
 
 using namespace fl;
 
@@ -93,20 +94,22 @@ void XYMap::setRectangularGrid() {
     mLookUpTable.reset();
 }
 
-uint16_t XYMap::mapToIndex(uint16_t x, uint16_t y) const {
+uint16_t XYMap::mapToIndex(const uint16_t& x, const uint16_t& y) const {
     uint16_t index;
     switch (type) {
-    case kSerpentine:
-        x = x % width;
-        y = y % height;
-        index = xy_serpentine(x, y, width, height);
+    case kSerpentine: {
+        uint16_t xx = x % width;
+        uint16_t yy = y % height;
+        index = xy_serpentine(xx, yy, width, height);
         break;
-    case kLineByLine:
-        index = xy_line_by_line(x, y, width, height);
+    }
+    case kLineByLine: {
+        uint16_t xx = x % width;
+        uint16_t yy = y % height;
+        index = xy_line_by_line(xx, yy, width, height);
         break;
+    }
     case kFunction:
-        x = x % width;
-        y = y % height;
         index = xyFunction(x, y, width, height);
         break;
     case kLookUpTable:
@@ -128,5 +131,9 @@ XYMap::XyMapType XYMap::getType() const { return type; }
 
 XYMap::XYMap(uint16_t width, uint16_t height, XyMapType type)
     : type(type), width(width), height(height), mOffset(0) {}
+
+
+
+
 
 } // namespace fl

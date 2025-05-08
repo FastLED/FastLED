@@ -8,6 +8,7 @@
 #include "fl/lut.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"
+#include "fl/clamp.h"
 #include "fl/xmap.h" // Include xmap.h for LUT16
 
 namespace fl {
@@ -73,18 +74,13 @@ class XYMap {
         return mapToIndex(x, y);
     }
 
-    uint16_t mapToIndex(uint16_t x, uint16_t y) const;
-    uint16_t mapToIndex(int x, int y) const {
-        if (x < 0) {
-            x = 0;
-        } else if (uint16_t(x) >= width) {
-            x = width - 1;
-        }
-        if (y < 0) {
-            y = 0;
-        } else if (uint16_t(y) >= height) {
-            y = height - 1;
-        }
+    uint16_t mapToIndex(const uint16_t &x, const uint16_t &y) const;
+
+    template <typename IntType,
+              typename = fl::enable_if_t<!fl::is_integral<IntType>::value>>
+    uint16_t mapToIndex(IntType x, IntType y) const {
+        x = fl::clamp<int>(x, 0, width - 1);
+        y = fl::clamp<int>(y, 0, height - 1);
         return mapToIndex((uint16_t)x, (uint16_t)y);
     }
 

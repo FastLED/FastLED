@@ -200,9 +200,11 @@ void loop() {
         wave_fx.draw(Fx::DrawContext(now, leds));
     }
 
-    downscaleBilinear(leds, WIDTH, HEIGHT, leds_downscaled, WIDTH / 2,
-                      HEIGHT / 2);
-                      
+    // downscaleBilinear(leds, WIDTH, HEIGHT, leds_downscaled, WIDTH / 2,
+    //                   HEIGHT / 2);
+
+    downscaleHalf(leds, xyMap, leds_downscaled, xyMap_Dst);
+
     // Print out the first 10 pixels of the original and downscaled
     fl::vector_inlined<CRGB, 10> downscaled_pixels;
     fl::vector_inlined<CRGB, 10> original_pixels;
