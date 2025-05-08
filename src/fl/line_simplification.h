@@ -14,7 +14,8 @@ can be done with zero heap allocations.
 #include "fl/point.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
-#include "math.h"
+#include "fl/bitset.h"
+#include "fl/math.h"
 
 namespace fl {
 
@@ -142,7 +143,7 @@ template <typename FloatT> class LineSimplifier {
     FloatT mMinDistance;
 
     // workspace buffers
-    fl::vector_inlined<char, 64> keep; // marks which points survive
+    fl::bitset<256> keep; // marks which points survive
     fl::vector_inlined<fl::pair<int, int>, 64>
         indexStack;          // manual recursion stack
     VectorPoint mSimplified; // output buffer

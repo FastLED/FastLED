@@ -76,6 +76,19 @@ class bitset_dynamic {
     // Destructor
     ~bitset_dynamic() { delete[] _blocks; }
 
+    void assign(size_t n, bool val) {
+        if (n > _size) {
+            resize(n);
+        }
+        if (val) {
+            for (uint32_t i = 0; i < _block_count; ++i) {
+                _blocks[i] = ~0;
+            }
+        } else {
+            reset();
+        }
+    }
+
     // Resize the bitset
     void resize(uint32_t new_size) {
         if (new_size == _size)

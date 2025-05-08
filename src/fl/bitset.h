@@ -31,6 +31,27 @@ private:
     block_type _blocks[block_count];
 
 public:
+
+    struct Proxy {
+        Bitset& _bitset;
+        uint32_t _pos;
+
+        Proxy(Bitset& bitset, uint32_t pos) : _bitset(bitset), _pos(pos) {}
+
+        Proxy& operator=(bool value) {
+            _bitset.set(_pos, value);
+            return *this;
+        }
+
+        operator bool() const {
+            return _bitset.test(_pos);
+        }
+    };
+
+    Proxy operator[](uint32_t pos) {
+        return Proxy(*this, pos);
+    }
+
     /// Constructs a Bitset with all bits reset.
     constexpr Bitset() noexcept : _blocks{} {}
 
@@ -53,6 +74,15 @@ public:
             }
         }
         return *this;
+    }
+
+    void assign(size_t n, bool value) {
+        if (n > N) {
+            n = N;
+        }
+        for (size_t i = 0; i < n; ++i) {
+            set(i, value);
+        }
     }
 
     /// Clears the bit at position pos.
@@ -196,6 +226,27 @@ private:
     Variant<fixed_bitset, bitset_dynamic> _storage;
 
 public:
+
+    struct Proxy {
+        BitsetInlined& _bitset;
+        uint32_t _pos;
+
+        Proxy(BitsetInlined& bitset, uint32_t pos) : _bitset(bitset), _pos(pos) {}
+
+        Proxy& operator=(bool value) {
+            _bitset.set(_pos, value);
+            return *this;
+        }
+
+        operator bool() const {
+            return _bitset.test(_pos);
+        }
+    };
+
+    Proxy operator[](uint32_t pos) {
+        return Proxy(*this, pos);
+    }
+
     /// Constructs a Bitset with all bits reset.
     BitsetInlined() : _storage(fixed_bitset()) {}
     BitsetInlined(size_t size) : _storage(fixed_bitset()) {
@@ -224,6 +275,15 @@ public:
             _storage.template ptr<fixed_bitset>()->reset();
         } else {
             _storage.template ptr<bitset_dynamic>()->reset();
+        }
+    }
+
+    void assign(size_t n, bool value) {
+        resize(n);
+        if (_storage.template is<fixed_bitset>()) {
+            _storage.template ptr<fixed_bitset>()->assign(n, value);
+        } else {
+            _storage.template ptr<bitset_dynamic>()->assign(n, value);
         }
     }
 
