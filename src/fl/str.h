@@ -24,6 +24,7 @@ template <typename T> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
+class XYMap;
 
 struct FFTBins;
 
@@ -534,7 +535,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         int32_t frac = scaled % 100; // 0..99
         append(integer);
 
-        // // only print decimals if non-zero; drop this guard to always show two
+        // // only print decimals if non-zero; drop this guard to always show
+        // two
         // // digits
         if (frac != 0) {
             append(".");
@@ -555,18 +557,21 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     Str &append(const FFTBins &str);
 
+    Str &append(const XYMap &map);
+
     const char *data() const { return c_str(); }
 
-    void swap(Str &other) {
-        if (this != &other) {
-            fl::swap(mLength, other.mLength);
-            char temp[FASTLED_STR_INLINED_SIZE];
-            memcpy(temp, mInlineData, FASTLED_STR_INLINED_SIZE);
-            memcpy(mInlineData, other.mInlineData, FASTLED_STR_INLINED_SIZE);
-            memcpy(other.mInlineData, temp, FASTLED_STR_INLINED_SIZE);
-            fl::swap(mHeapData, other.mHeapData);
-        }
-    }
+    void swap(Str &other);
+
+ private:
+   enum {
+      // Bake the size into the string class so we can issue a compile time check
+      // to make sure the user doesn't do something funny like try to change the
+      // size of the inlined string via an included defined instead of a build define.
+      kStrInlineSize = FASTLED_STR_INLINED_SIZE,
+   };
+
+   static void compileTimeAssertions();
 };
 
 } // namespace fl

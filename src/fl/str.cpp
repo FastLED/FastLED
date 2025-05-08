@@ -1,8 +1,9 @@
 #include <stdlib.h>
 
+#include "fl/fft.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
-#include "fl/fft.h"
+#include "fl/xymap.h"
 
 namespace fl {
 
@@ -168,7 +169,7 @@ float StringFormatter::parseFloat(const char *str, size_t len) {
     return string_functions::atoff(str, len);
 }
 
-Str & Str::append(const FFTBins &str) {
+Str &Str::append(const FFTBins &str) {
     append("\n FFTImpl Bins:\n  ");
     append(str.bins_raw);
     append("\n");
@@ -176,6 +177,34 @@ Str & Str::append(const FFTBins &str) {
     append(str.bins_db);
     append("\n");
     return *this;
+}
+
+Str &Str::append(const XYMap &map) {
+    append("XYMap(");
+    append(map.getWidth());
+    append(",");
+    append(map.getHeight());
+    append(")");
+    return *this;
+}
+
+void Str::swap(Str &other) {
+    if (this != &other) {
+        fl::swap(mLength, other.mLength);
+        char temp[FASTLED_STR_INLINED_SIZE];
+        memcpy(temp, mInlineData, FASTLED_STR_INLINED_SIZE);
+        memcpy(mInlineData, other.mInlineData, FASTLED_STR_INLINED_SIZE);
+        memcpy(other.mInlineData, temp, FASTLED_STR_INLINED_SIZE);
+        fl::swap(mHeapData, other.mHeapData);
+    }
+}
+
+void Str::compileTimeAssertions() {
+    static_assert(FASTLED_STR_INLINED_SIZE > 0,
+                  "FASTLED_STR_INLINED_SIZE must be greater than 0");
+    static_assert(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
+                  "If you want to change the FASTLED_STR_INLINED_SIZE, then it "
+                  "must be through a build define and not an include define.");
 }
 
 } // namespace fl
