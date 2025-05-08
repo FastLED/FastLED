@@ -11,17 +11,17 @@ template <uint32_t N>
 class BitsetInlined;
 
 template <uint32_t N>
-class Bitset;
+class BitsetFixed;
 
 template<uint32_t N = 256>
 using bitset = BitsetInlined<N>;  // inlined but can go bigger.
 
 template<uint32_t N>
-using bitset_fixed = Bitset<N>;  // fixed size, no dynamic allocation.
+using bitset_fixed = BitsetFixed<N>;  // fixed size, no dynamic allocation.
 
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <uint32_t N>
-class Bitset {
+class BitsetFixed {
 private:
     static constexpr uint32_t bits_per_block = 8 * sizeof(uint64_t);
     static constexpr uint32_t block_count = (N + bits_per_block - 1) / bits_per_block;
@@ -33,10 +33,10 @@ private:
 public:
 
     struct Proxy {
-        Bitset& _bitset;
+        BitsetFixed& _bitset;
         uint32_t _pos;
 
-        Proxy(Bitset& bitset, uint32_t pos) : _bitset(bitset), _pos(pos) {}
+        Proxy(BitsetFixed& bitset, uint32_t pos) : _bitset(bitset), _pos(pos) {}
 
         Proxy& operator=(bool value) {
             _bitset.set(_pos, value);
@@ -52,8 +52,8 @@ public:
         return Proxy(*this, pos);
     }
 
-    /// Constructs a Bitset with all bits reset.
-    constexpr Bitset() noexcept : _blocks{} {}
+    /// Constructs a BitsetFixed with all bits reset.
+    constexpr BitsetFixed() noexcept : _blocks{} {}
 
     /// Resets all bits to zero.
     void reset() noexcept {
@@ -63,7 +63,7 @@ public:
     }
 
     /// Sets or clears the bit at position pos.
-    Bitset& set(uint32_t pos, bool value = true) {
+    BitsetFixed& set(uint32_t pos, bool value = true) {
         if (pos < N) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
@@ -86,12 +86,12 @@ public:
     }
 
     /// Clears the bit at position pos.
-    Bitset& reset(uint32_t pos) {
+    BitsetFixed& reset(uint32_t pos) {
         return set(pos, false);
     }
 
     /// Flips (toggles) the bit at position pos.
-    Bitset& flip(uint32_t pos) {
+    BitsetFixed& flip(uint32_t pos) {
         if (pos < N) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
@@ -101,7 +101,7 @@ public:
     }
 
     /// Flips all bits.
-    Bitset& flip() noexcept {
+    BitsetFixed& flip() noexcept {
         for (uint32_t i = 0; i < block_count; ++i) {
             _blocks[i] = ~_blocks[i];
         }
@@ -184,35 +184,35 @@ public:
     }
 
     /// Bitwise AND
-    Bitset& operator&=(const Bitset& other) noexcept {
+    BitsetFixed& operator&=(const BitsetFixed& other) noexcept {
         for (uint32_t i = 0; i < block_count; ++i) {
             _blocks[i] &= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise OR
-    Bitset& operator|=(const Bitset& other) noexcept {
+    BitsetFixed& operator|=(const BitsetFixed& other) noexcept {
         for (uint32_t i = 0; i < block_count; ++i) {
             _blocks[i] |= other._blocks[i];
         }
         return *this;
     }
     /// Bitwise XOR
-    Bitset& operator^=(const Bitset& other) noexcept {
+    BitsetFixed& operator^=(const BitsetFixed& other) noexcept {
         for (uint32_t i = 0; i < block_count; ++i) {
             _blocks[i] ^= other._blocks[i];
         }
         return *this;
     }
 
-    /// Size of the Bitset (number of bits).
+    /// Size of the BitsetFixed (number of bits).
     constexpr uint32_t size() const noexcept { return N; }
 
     /// Friend operators for convenience.
-    friend Bitset operator&(Bitset lhs, const Bitset& rhs) noexcept { return lhs &= rhs; }
-    friend Bitset operator|(Bitset lhs, const Bitset& rhs) noexcept { return lhs |= rhs; }
-    friend Bitset operator^(Bitset lhs, const Bitset& rhs) noexcept { return lhs ^= rhs; }
-    friend Bitset operator~(Bitset bs) noexcept { return bs.flip(); }
+    friend BitsetFixed operator&(BitsetFixed lhs, const BitsetFixed& rhs) noexcept { return lhs &= rhs; }
+    friend BitsetFixed operator|(BitsetFixed lhs, const BitsetFixed& rhs) noexcept { return lhs |= rhs; }
+    friend BitsetFixed operator^(BitsetFixed lhs, const BitsetFixed& rhs) noexcept { return lhs ^= rhs; }
+    friend BitsetFixed operator~(BitsetFixed bs) noexcept { return bs.flip(); }
 };
 
 /// A Bitset implementation with inline storage that can grow if needed.
@@ -222,7 +222,7 @@ template <uint32_t N = 256>  // Default size is 256 bits, or 32 bytes
 class BitsetInlined {
 private:    
     // Either store a fixed Bitset<N> or a dynamic Bitset
-    using fixed_bitset = Bitset<N>;
+    using fixed_bitset = BitsetFixed<N>;
     Variant<fixed_bitset, bitset_dynamic> _storage;
 
 public:
