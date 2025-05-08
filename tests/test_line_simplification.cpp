@@ -24,6 +24,28 @@ TEST_CASE("Test Line Simplification") {
     REQUIRE_EQ(point_xy<float>(4.0f, 4.0f), points[1]);
 }
 
+// TEST_CASE("Test simple triangle") {
+//     LineSimplifier<float> ls;
+
+//     fl::vector<point_xy<float>> points;
+//     points.push_back({0.0f, 0.0f}); // First point of triangle
+//     points.push_back({0.5f, 0.5f});
+//     points.push_back({0.0f, 1.0f});
+
+//     float curr_thesh = 1.0f;
+//     while (curr_thesh > 0.0f) {
+//         fl::vector<point_xy<float>> output;
+//         ls.setMinimumDistance(curr_thesh / 2);
+//         ls.simplify(points, &output);
+//         curr_thesh -= 0.1f;
+
+//         FASTLED_WARN("Simplification with threshold: " << curr_thesh << ", "
+//                      << output);
+//     }
+//     MESSAGE("done");
+
+// }
+
 TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
     LineSimplifier<float> ls;
 

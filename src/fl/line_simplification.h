@@ -2,9 +2,9 @@
 
 /*
 
-Line simplification based of an improved Douglas-Peucker algorithm with only O(n) extra
-memory. Memory structures are inlined so that most simplifications can be done with zero heap
-allocations.
+Line simplification based of an improved Douglas-Peucker algorithm with only
+O(n) extra memory. Memory structures are inlined so that most simplifications
+can be done with zero heap allocations.
 
 */
 
@@ -20,10 +20,11 @@ namespace fl {
 
 template <typename FloatT> class LineSimplifier {
   public:
-    // This line simplification algorithm will remove vertices that are close together
-    // upto a distance of mMinDistance. The algorithm is based on the Douglas-Peucker
-    // but with some tweaks for memory efficiency. Most common usage of this class
-    // for small sized inputs (~20) will produce no heap allocations.
+    // This line simplification algorithm will remove vertices that are close
+    // together upto a distance of mMinDistance. The algorithm is based on the
+    // Douglas-Peucker but with some tweaks for memory efficiency. Most common
+    // usage of this class for small sized inputs (~20) will produce no heap
+    // allocations.
     using Point = fl::point_xy<FloatT>;
     using VectorPoint = fl::vector<Point>;
 
@@ -35,14 +36,25 @@ template <typename FloatT> class LineSimplifier {
 
     explicit LineSimplifier(FloatT e) : mMinDistance(e) {}
     void setMinimumDistance(FloatT eps) { mMinDistance = eps; }
-    
+
     // simplifyInPlace.
-    void simplifyInplace(fl::vector<Point> *polyline) { simplifyInplaceT(polyline); }
-    template <typename VectorType> void simplifyInplace(VectorType *polyLine) { simplifyInplaceT(polyLine); }
+    void simplifyInplace(fl::vector<Point> *polyline) {
+        simplifyInplaceT(polyline);
+    }
+    template <typename VectorType> void simplifyInplace(VectorType *polyLine) {
+        simplifyInplaceT(polyLine);
+    }
 
     // simplify to the output vector.
-    void simplify(const fl::Slice<Point> &polyLine, fl::vector<Point> *out) { simplifyT(polyLine, out); }
-    template <typename VectorType> void simplify(const fl::Slice<Point> &polyLine, VectorType *out) {  simplifyT(polyLine, out); }
+    void simplify(const fl::Slice<const Point> &polyLine,
+                  fl::vector<Point> *out) {
+        simplifyT(polyLine, out);
+    }
+    template <typename VectorType>
+    void simplify(const fl::Slice<Point> &polyLine, VectorType *out) {
+        simplifyT(polyLine, out);
+    }
+
   private:
     template <typename VectorType> void simplifyInplaceT(VectorType *polyLine) {
         // run the simplification algorithm
@@ -51,7 +63,7 @@ template <typename FloatT> class LineSimplifier {
     }
 
     template <typename VectorType>
-    void simplifyT(const fl::Slice<Point> &polyLine, VectorType *out) {
+    void simplifyT(const fl::Slice<const Point> &polyLine, VectorType *out) {
         // run the simplification algorithm
         simplifyInternal(polyLine);
 
@@ -60,7 +72,7 @@ template <typename FloatT> class LineSimplifier {
     }
     // Runs in O(n) allocations: one bool‐array + one index stack + one output
     // vector
-    void simplifyInternal(const fl::Slice<Point> &polyLine) {
+    void simplifyInternal(const fl::Slice<const Point> &polyLine) {
         mSimplified.clear();
         int n = polyLine.size();
         if (n < 2) {
@@ -132,25 +144,25 @@ template <typename FloatT> class LineSimplifier {
 
     static FloatT PerpendicularDistance2(const Point &pt, const Point &a,
                                          const Point &b) {
+        // vector AB
         FloatT dx = b.x - a.x;
         FloatT dy = b.y - a.y;
-        FloatT mag = sqrt(dx * dx + dy * dy);
-        if (mag > 0) {
-            dx /= mag;
-            dy /= mag;
-        }
+        // vector AP
         FloatT vx = pt.x - a.x;
         FloatT vy = pt.y - a.y;
-        // project (vx,vy) onto (dx,dy)
-        FloatT proj = dx * vx + dy * vy;
-        // subtract projection
-        FloatT ux = vx - proj * dx;
-        FloatT uy = vy - proj * dy;
-        return ux * ux + uy * uy;
+
+        // squared length of AB
+        FloatT len2 = dx * dx + dy * dy;
+        if (len2 <= FloatT(0)) {
+            // A and B coincide — just return squared dist from A to P
+            return vx * vx + vy * vy;
+        }
+
+        // cross‐product magnitude (AB × AP) in 2D is (dx*vy − dy*vx)
+        FloatT cross = dx * vy - dy * vx;
+        // |cross|/|AB| is the perpendicular distance; we want squared:
+        return (cross * cross) / len2;
     }
 };
-
-
-
 
 } // namespace fl
