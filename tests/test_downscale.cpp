@@ -3,7 +3,7 @@
 
 #include "test.h"
 
-#include "fl/bilinear_compression.h"
+#include "fl/downscale.h"
 #include "fl/dbg.h"
 #include "test.h"
 

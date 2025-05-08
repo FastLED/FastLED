@@ -4,10 +4,13 @@
 #define FASTLED_INTERNAL
 #include "crgb.h"
 #include "FastLED.h"
+#include "fl/xymap.h"
 
 #include "lib8tion/math8.h"
+#include "fl/downscale.h"
 
 #include "fl/namespace.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -65,6 +68,10 @@ CRGB CRGB::blendAlphaMaxChannel(const CRGB &upper, const CRGB &lower) {
     // blend(lower, upper, alpha) → (lower * (255−alpha) + upper * alpha) / 256
     uint8_t amountOf2 = 255 - max_component;
     return CRGB::blend(upper, lower, amountOf2);
+}
+
+void CRGB::downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY) {
+    fl::downscale(src, srcXY, dst, dstXY);
 }
 
 CRGB &CRGB::nscale8(uint8_t scaledown) {

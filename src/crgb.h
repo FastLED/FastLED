@@ -15,6 +15,7 @@
 
 namespace fl {
 class Str;
+class XYMap;
 }
 
 FASTLED_NAMESPACE_BEGIN
@@ -77,6 +78,9 @@ struct CRGB {
 
     static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
     static CRGB blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower);
+
+    /// Downscale an CRGB matrix (or strip) to the smaller size.
+    static void downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)

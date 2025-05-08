@@ -23,9 +23,7 @@ void downscaleBilinearMapped(const CRGB* src, const XYMap& srcMap,
 #endif
 
 void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst);
-
 void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
-
 void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
 

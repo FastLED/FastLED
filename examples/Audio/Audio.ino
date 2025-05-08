@@ -12,7 +12,7 @@ all the UI elements you see below.
 #include <FastLED.h>
 
 #include "fl/audio.h"
-#include "fl/bilinear_compression.h"
+#include "fl/downscale.h"
 #include "fl/draw_visitor.h"
 #include "fl/fft.h"
 #include "fl/math.h"
@@ -199,22 +199,7 @@ void loop() {
     }
 
     // now downscale the framebuffer to the led matrix
-    // downscaleBilinearMapped(framebuffer, xyMap_2X, framebuffer, frameBufferXY);
-    // fl::clear(framebuffer);
-    // downscaleBilinear(framebuffer, WIDTH_2X, HEIGHT_2X, framebuffer, WIDTH,
-    // HEIGHT);
-
-    // framebuffer[frameBufferXY(WIDTH/2, 0)] = CRGB(0, 255, 0);
-
-    // downscaleBilinearMapped(framebuffer, frameBufferXY, leds, ledsXY);
-    downscaleBilinear(framebuffer, WIDTH, HEIGHT, leds, WIDTH / 2,
-                       HEIGHT / 2);
-
-    // void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst)
-
-    downscaleHalf(framebuffer, WIDTH, HEIGHT, leds);
-
-    // printLeds();
+    downscale(framebuffer, frameBufferXY, leds, ledsXY);
 
     FastLED.show();
 }
