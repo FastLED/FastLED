@@ -895,7 +895,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
               typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
     void assign(InputIt begin, InputIt end) {
         clear();
-        if (end - begin <= INLINED_SIZE) {
+        if (uint32_t(end - begin) <= INLINED_SIZE) {
             mFixed.assign(begin, end);
             return;
         }

@@ -18,14 +18,14 @@ can be done with zero heap allocations.
 
 namespace fl {
 
-template <typename FloatT> class LineSimplifier {
+template <typename NumberT = float > class LineSimplifier {
   public:
     // This line simplification algorithm will remove vertices that are close
     // together upto a distance of mMinDistance. The algorithm is based on the
     // Douglas-Peucker but with some tweaks for memory efficiency. Most common
     // usage of this class for small sized inputs (~20) will produce no heap
     // allocations.
-    using Point = fl::point_xy<FloatT>;
+    using Point = fl::point_xy<NumberT>;
     using VectorPoint = fl::vector<Point>;
 
     LineSimplifier() : mMinDistance(EPSILON_F) {}
@@ -34,8 +34,8 @@ template <typename FloatT> class LineSimplifier {
     LineSimplifier(LineSimplifier &&other) = default;
     LineSimplifier &operator=(LineSimplifier &&other) = default;
 
-    explicit LineSimplifier(FloatT e) : mMinDistance(e) {}
-    void setMinimumDistance(FloatT eps) { mMinDistance = eps; }
+    explicit LineSimplifier(NumberT e) : mMinDistance(e) {}
+    void setMinimumDistance(NumberT eps) { mMinDistance = eps; }
 
     // simplifyInPlace.
     void simplifyInplace(fl::vector<Point> *polyline) {
@@ -106,12 +106,12 @@ template <typename FloatT> class LineSimplifier {
             }
 
             // find farthest point in [i0+1 .. i1-1]
-            FloatT maxDist2 = 0;
+            NumberT maxDist2 = 0;
             int split = i0;
             for (int i = i0 + 1; i < i1; ++i) {
                 if (!keep[i])
                     continue;
-                FloatT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
+                NumberT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
                                                    polyLine[i1]);
 
                 // FASTLED_WARN("Perpendicular distance2 between "
@@ -146,7 +146,7 @@ template <typename FloatT> class LineSimplifier {
     }
 
   private:
-    FloatT mMinDistance;
+    NumberT mMinDistance;
 
     // workspace buffers
     fl::bitset<256> keep; // marks which points survive
@@ -154,27 +154,121 @@ template <typename FloatT> class LineSimplifier {
         indexStack;          // manual recursion stack
     VectorPoint mSimplified; // output buffer
 
-    static FloatT PerpendicularDistance2(const Point &pt, const Point &a,
+    static NumberT PerpendicularDistance2(const Point &pt, const Point &a,
                                          const Point &b) {
         // vector AB
-        FloatT dx = b.x - a.x;
-        FloatT dy = b.y - a.y;
+        NumberT dx = b.x - a.x;
+        NumberT dy = b.y - a.y;
         // vector AP
-        FloatT vx = pt.x - a.x;
-        FloatT vy = pt.y - a.y;
+        NumberT vx = pt.x - a.x;
+        NumberT vy = pt.y - a.y;
 
         // squared length of AB
-        FloatT len2 = dx * dx + dy * dy;
-        if (len2 <= FloatT(0)) {
+        NumberT len2 = dx * dx + dy * dy;
+        if (len2 <= NumberT(0)) {
             // A and B coincide — just return squared dist from A to P
             return vx * vx + vy * vy;
         }
 
         // cross‐product magnitude (AB × AP) in 2D is (dx*vy − dy*vx)
-        FloatT cross = dx * vy - dy * vx;
+        NumberT cross = dx * vy - dy * vx;
         // |cross|/|AB| is the perpendicular distance; we want squared:
         return (cross * cross) / len2;
     }
+};
+
+template<typename NumberT = float>
+class LineSimplifierExact {
+  public:
+    LineSimplifierExact() = default;
+    using Point = point_xy<NumberT>;
+
+    LineSimplifierExact(int count) : mCount(count) {}
+
+    void setCount(uint32_t count) { mCount = count; }
+
+    void simplify(const fl::Slice<const Point> &polyLine,
+                  fl::vector<Point> *out) {
+        if (mCount > polyLine.size()) {
+            safeCopy(polyLine, out);
+            return;
+        } else if (mCount == polyLine.size()) {
+            safeCopy(polyLine, out);
+            return;
+        } else if (mCount < 2) {
+            fl::vector_fixed<Point, 2> temp;
+            if (polyLine.size() > 0) {
+                temp.push_back(polyLine[0]);
+            }
+            if (polyLine.size() > 1) {
+                temp.push_back(polyLine[polyLine.size() - 1]);
+            }
+            out->assign(temp.begin(), temp.end());
+            return;
+        }
+        NumberT est_max_dist = estimateMaxDistance(polyLine);
+        NumberT min = 0;
+        NumberT max = est_max_dist;
+        NumberT mid = (min + max) / 2.0f;
+        while (min < max) {
+            out->clear();
+            mLineSimplifier.setMinimumDistance(mid);
+            mLineSimplifier.simplify(polyLine, out);
+            if (out->size() == mCount) {
+                return;
+            }
+            if (out->size() < mCount) {
+                max = mid;
+            } else {
+                min = mid;
+            }
+            mid = (min + max) / 2.0f;
+        }
+    }
+
+  private:
+    static NumberT estimateMaxDistance(const fl::Slice<const Point> &polyLine) {
+        // Rough guess: max distance between endpoints
+        if (polyLine.size() < 2)
+            return 0;
+
+        const Point &first = polyLine[0];
+        const Point &last = polyLine[polyLine.size() - 1];
+        NumberT dx = last.x - first.x;
+        NumberT dy = last.y - first.y;
+        return fl::sqrt(dx * dx + dy * dy);
+    }
+
+    void safeCopy(const fl::Slice<const Point> &polyLine, fl::vector<Point> *out) {
+        auto *first_out = out->data();
+        // auto* last_out = first_out + mCount;
+        auto *other_first_out = polyLine.data();
+        // auto* other_last_out = other_first_out + polyLine.size();
+        const bool is_same = first_out == other_first_out;
+        if (is_same) {
+            return;
+        }
+        auto *last_out = first_out + mCount;
+        auto *other_last_out = other_first_out + polyLine.size();
+
+        const bool is_overlapping =
+            (first_out >= other_first_out && first_out < other_last_out) ||
+            (other_first_out >= first_out && other_first_out < last_out);
+
+        if (!is_overlapping) {
+            out->assign(polyLine.data(), polyLine.data() + polyLine.size());
+            return;
+        }
+
+        // allocate a temporary buffer
+        fl::vector_inlined<Point, 64> temp;
+        temp.assign(polyLine.begin(), polyLine.end());
+        out->assign(temp.begin(), temp.end());
+        return;
+    }
+
+    uint32_t mCount = 10;
+    LineSimplifier<NumberT> mLineSimplifier;
 };
 
 } // namespace fl
