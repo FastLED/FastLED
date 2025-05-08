@@ -44,6 +44,10 @@
 #define INFINITY_FLOAT (1.0f / 0.0f)
 #endif
 
+#ifndef FLT_MAX
+#define FLT_MAX 3.402823466e+38F
+#endif
+
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
 #endif

@@ -4,6 +4,75 @@ FastLED 3.9.17
   * esp-idf v5.4 fixes to include lcd_50
     * https://github.com/FastLED/FastLED/pull/1924
     * Thanks! https://github.com/rommo911
+* datastructures
+  * Bringing in 3rd party code and cool fx has always been an absolute pain for FastLED since these algorithms typically use std datastructures, which simply do not compile on legacy devices like AVR. Also the std:: data structures are wreckless with the heap and produce lots of allocations which will absolutely make a sketch run out of memory via memory fragmentation. To solve this problem in the general case I've created std compatible data structures with inlined variants that will stay on the stack as long as the number of objects stays under a fixed maximum, but allows overflow.
+  * fl::hash_map
+    * open addressing but with inlined rehashing when "tombstones" fill up half the slots.
+  * fl::hash_map_inlined
+  * fl::hash_set
+  * fl::vector
+  * fl::vector_inlined
+  * fl::function<>
+  * fl::bitset
+  * fl::variant<T,U>
+  * fl::optional<T>
+* graphics
+  * CRGB::downscale(...) for downsizing led matrices / strips.
+    * Uses a fastpath when downsizeing from M by N to M/2 by N/2.
+    * Uses fractional downsizing when the destination matrix/strip is any other ratio.
+  * CRGB::upscale(...) for expanding led matrices / strips, uses bilearn expansion.
+  * XYPath:
+    * Create paths that smoothly interpolate in response to animation values => [0, 1.0f]
+    * Still a work in progress.
+  * Subpixel calculations.
+    * Let's face it, low resolution matrices and strips produce bad results with simple pixel rendering in integer space. I've implemented the ability for using floating point x,y coordinates and then splatting that pixel to a 2x2 tile. If a point is dead center on a led then only that led in the tile will light up, but if that point moves then other leds will start to light up in proportion to the overlap. This gives 256 effective steps in the X and Y directions. This **greatly** improves visual quality without having to go to dense pixel displays.
+  * Line Simplification
+    * Take a line with lots of points and selectively remove points that
+      have the least impact on the line, keeping the overall shape. We use and improved Douglas-Peucker algorithm that is memory efficient.
+  * RasterSparse
+    * A memory efficient raster that elements like the XYPath can write to as an intermediate step to writing to the display LEDs. This allows layering: very important for creating things like "particle trails" which require multiple writing to similar pixels destructively and then flushed to the LED display. For example if a particle has a long fade trail with say 30 points of history, then this entire path can be destructively drawn to the raster then composited to the led display as an unified layer.
+    * "Sparse" in "RasterSparse" here means that the x,y values of the pixels being written to are stored in a hash table rather than a spanning grid. This greatly reduces memory usage and improves performance. To prevent excessive computation with hashing, a small 8-unit inlined hash_table with a FastHash function is carefully used to exploit the inherent locality of computing particle and paths.
+    * Right now, RasterSparse is only implemented for uint8_t values and not an entire CRGB pixel, as CRGB values are typically computed via an algorithm during the compositing process. For example a gradient function can take a rasterized particle trail and apply coloring.
+  * LineMath
+    * Take a line A-B and calculate the closest distance from the line to a point P. This is important to optimize rendering if oversampling takes too much CPU.
+  * Putting it all together:
+    * Example 1: XYPath compositing
+      * Define an XYPath (you can use an fl::function that takes in a float [0, 1.0] and produces x,y in floating point space).
+      * Render 30 points of location between the span of X1 -> X2, where 0. <= X1 <= 1.0 and X1 <= X2 <= 1.0. In other words, we want an XYPath that draws a trial.
+      * These 30 points in x,y floating space will then be subpixel rendered to a RasterSparse as a layer.
+      * Composite the RasterSparse to the LED array using a gradient or a use defined drawing function.
+        * The RasterSparse has this logic built in.
+    * Example 2: Fireworks
+      * Generate a Particle that holds float position of the current x,y and velocity vx,vy. There is also a tail of 10 points long and a timer for how long the particle has been active.
+      * On explosion, generate K particles and give them semi random x,y velocities from the center point.
+      * On each frame calculate the new x,y location of each particle given the current velocity and gravity.
+        * This gravity calculation is technically called a "flow field".
+      * On each frame for each particle
+        * copy the current x,y to the front of the tail array (use our CircularArray)
+        * compute the next x,y from the curr x,y and the velocities xv and yv.
+          * x_new, y_new = x + xv, y + yv
+          * Save this as the current x,y
+        * Reduce the particles velocity vector using the exp() function and save it.
+          * calculate the time delta from the last frame, call it dt
+          * rate will be a negative number close to 0, like -0.05, meaning 5% decay for every "time unit"
+          * xv,xy = exp(xv, dt*rate), exp(xy, dt*rate)
+        * Apply gravity to current x,y and the tail list of x,y
+          * Bonus points: use our simplex noise function as a minor secondary field (stable) to simulate randomness from air flow current.
+        * The brightness is proportional to the time value. Bright when t is near 0, and then fading out when t approaches t-max (for example if t-max is one second then the particle will no longer light up after 1 second).
+        * Render this path to the raster
+        * Blend composite the raster using raster.Draw(visitor) using the default alpha less compositing mode (blending alpha value is auto generated from the brightness - YOU WANT THIS).
+          * Do this each pixel and tail so that the entire thing draws
+
+* audio
+  * We now have audio processing.
+    * Raw PCM data
+    * FFT analysis on demand using the blazingly fast kiss FFT library.
+    * zero cross factor to detecting noise like wind, microphone rubbing on shirt etc...
+    * RMS calculations.
+    * WIP: smooth loudness value to use in animations.
+  * Example:
+    * Sound produces an animation value
+    * Animation value is used to position a heart XYPath
 
 
 FastLED 3.9.16
