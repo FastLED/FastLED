@@ -11,7 +11,12 @@ If you use this and find an issue then please report it.
 
 namespace fl {
 
+class XYMap;
+
 void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
                        CRGB *dst, uint16_t dstWidth, uint16_t dstHeight);
+
+void downscaleBilinearMapped(const CRGB* src, const XYMap& srcMap,
+                             CRGB* dst, const XYMap& dstMap);
 
 } // namespace fl
