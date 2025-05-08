@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_COLORPALETTES_H
 #define __INC_COLORPALETTES_H
 

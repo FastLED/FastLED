@@ -1,4 +1,6 @@
 
+#pragma once
+
 /*
 Experimental bilinearn downscaling algorithm. Not tested yet and completely
 "vibe-coded" by ai.

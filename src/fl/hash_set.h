@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "fl/hash_map.h"
 
 namespace fl {

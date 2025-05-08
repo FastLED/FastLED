@@ -1,3 +1,5 @@
+#pragma once
+
 /// @file fastspi.h
 /// Serial peripheral interface (SPI) definitions per platform
 

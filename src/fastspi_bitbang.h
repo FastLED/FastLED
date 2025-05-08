@@ -1,3 +1,5 @@
+#pragma once
+
 /// @file fastspi_bitbang.h
 /// Software SPI (aka bit-banging) support
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_CHIPSETS_H
 #define __INC_CHIPSETS_H
 

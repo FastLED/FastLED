@@ -1,3 +1,5 @@
+#pragma once
+
 /// @file fastspi_ref.h
 /// Example of a hardware SPI support class.
 /// @note Example for developers. Not a functional part of the library.

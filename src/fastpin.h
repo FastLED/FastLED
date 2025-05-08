@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #if defined(__GNUC__)  // GCC or Clang
 #  ifndef FASTLED_DEPRECATED
 #    if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)

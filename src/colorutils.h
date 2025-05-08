@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 

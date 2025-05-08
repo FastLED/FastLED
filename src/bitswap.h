@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_BITSWAP_H
 #define __INC_BITSWAP_H
 

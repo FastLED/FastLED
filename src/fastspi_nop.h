@@ -1,3 +1,5 @@
+#pragma once
+
 /// @file fastspi_nop.h
 /// Example of a NOP/stub class to show the SPI methods required by a chipset implementation
 /// @note Example for developers. Not a functional part of the library.

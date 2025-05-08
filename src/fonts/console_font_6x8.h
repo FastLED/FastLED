@@ -1,4 +1,4 @@
-
+#pragma once
 #include "fastled_progmem.h"
 #include "fl/namespace.h"
 

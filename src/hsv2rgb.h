@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_HSV2RGB_H
 #define __INC_HSV2RGB_H
 

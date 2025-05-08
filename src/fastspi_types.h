@@ -1,3 +1,5 @@
+#pragma once
+
 /// @file fastspi_types.h
 /// Data types and constants used by SPI interfaces
 

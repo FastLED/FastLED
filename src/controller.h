@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef __INC_CONTROLLER_H
 #define __INC_CONTROLLER_H
 
