@@ -544,14 +544,17 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str& append(const CRGB& c);
 
     Str &append(const float &_val) {
-        float val = _val;
-        if (val < 0.0f) {
-            append('-');
-            val = -val;
-        }
-
         // round to nearest hundredth
-        int32_t scaled = static_cast<int32_t>(val * 100.0f + 0.5f);
+        int32_t scaled = static_cast<int32_t>(_val * 100.0f + 0.5f);
+        if (scaled == 0) {
+            append("0");
+            return *this;
+        }
+        //float val = _val;
+        if (scaled < 0) {
+            append('-');
+            scaled = -scaled;
+        }
 
         int32_t integer = scaled / 100;
         int32_t frac = scaled % 100; // 0..99
