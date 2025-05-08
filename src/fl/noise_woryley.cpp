@@ -7,9 +7,9 @@ constexpr int32_t Q15_ONE = 32768; // 1.0 in Q15
 // constexpr int32_t Q15_HALF = Q15_ONE / 2;
 
 // Helper: multiply two Q15 numbers (result in Q15)
-int32_t q15_mul(int32_t a, int32_t b) {
-    return (int32_t)(((int64_t)a * b) >> 15);
-}
+// int32_t q15_mul(int32_t a, int32_t b) {
+//     return (int32_t)(((int64_t)a * b) >> 15);
+// }
 
 // Helper: absolute difference
 int32_t q15_abs(int32_t a) { return a < 0 ? -a : a; }
