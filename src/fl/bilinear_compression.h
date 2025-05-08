@@ -26,4 +26,7 @@ void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB 
 
 void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
+void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
+
+
 } // namespace fl

@@ -233,6 +233,59 @@ void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& 
     }
 }
 
+void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) {
+    uint16_t srcWidth = srcXY.getWidth();
+    uint16_t srcHeight = srcXY.getHeight();
+    uint16_t dstWidth = dstXY.getWidth();
+    uint16_t dstHeight = dstXY.getHeight();
+
+    FASTLED_ASSERT(dstWidth <= srcWidth, "Destination width must be <= source width");
+    FASTLED_ASSERT(dstHeight <= srcHeight, "Destination height must be <= source height");
+
+    #ifndef FASTLED_TESTING
+    // Attempt to use the downscaleHalf function if the destination is half the size of the source
+    // We don't do this in testing mode so that we can exactly test the bilinear downscaling.
+    if (dstWidth * 2 == srcWidth && dstHeight * 2 == srcHeight) {
+        downscaleHalf(src, srcXY, dst, dstXY);
+        return;
+    }
+    #endif
+
+    for (uint16_t dy = 0; dy < dstHeight; ++dy) {
+        // Calculate source region for this destination row
+        uint16_t srcY0 = (dy * srcHeight) / dstHeight;
+        uint16_t srcY1 = ((dy + 1) * srcHeight) / dstHeight;
+        if (srcY1 > srcHeight) srcY1 = srcHeight;
+
+        for (uint16_t dx = 0; dx < dstWidth; ++dx) {
+            // Calculate source region for this destination column
+            uint16_t srcX0 = (dx * srcWidth) / dstWidth;
+            uint16_t srcX1 = ((dx + 1) * srcWidth) / dstWidth;
+            if (srcX1 > srcWidth) srcX1 = srcWidth;
+
+            uint32_t rSum = 0, gSum = 0, bSum = 0;
+            uint16_t count = 0;
+
+            for (uint16_t sy = srcY0; sy < srcY1; ++sy) {
+                for (uint16_t sx = srcX0; sx < srcX1; ++sx) {
+                    const CRGB& p = src[srcXY.mapToIndex(sx, sy)];
+                    rSum += p.r;
+                    gSum += p.g;
+                    bSum += p.b;
+                    ++count;
+                }
+            }
+
+            // Add half the count for rounding
+            uint8_t r = (rSum + count / 2) / count;
+            uint8_t g = (gSum + count / 2) / count;
+            uint8_t b = (bSum + count / 2) / count;
+
+            dst[dstXY.mapToIndex(dx, dy)] = CRGB(r, g, b);
+        }
+    }
+}
+
 } // namespace fl
 
 

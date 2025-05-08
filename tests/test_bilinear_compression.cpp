@@ -61,18 +61,31 @@ TEST_CASE("downscaleBilinear") {
 
 #endif
 
-TEST_CASE("downscaleHalf") {
+TEST_CASE("downscale 2x2 to 1x1") {
 
     CRGB red = CRGB(255, 0, 0);
     CRGB black = CRGB(0, 0, 0);
 
-    SUBCASE("2x2 to 1x1") {
-        // We are going to simulate a 4x4 image with a 2x2 image. The source
-        // image is square-cartesian while the dst image is square-serpentine.
-        CRGB src[4] = {black, red, black, red};
+    // We are going to simulate a 4x4 image with a 2x2 image. The source
+    // image is square-cartesian while the dst image is square-serpentine.
+    CRGB src[4] = {black, red, black, red};
 
+    SUBCASE("downscaleHalf from 2x2 to 1x1") {
         CRGB dst[1];
         downscaleHalf(src, 2, 2, dst);
+        INFO("Src: " << src);
+        INFO("Dst: " << dst);
+        CHECK(dst[0].r == 128);
+        CHECK(dst[0].g == 0);
+        CHECK(dst[0].b == 0);
+    }
+
+    SUBCASE("downscale from 2x2 to 1x1") {
+        CRGB dst[1];
+        XYMap srcMap = XYMap::constructRectangularGrid(2, 2);
+        XYMap dstMap = XYMap::constructSerpentine(1, 1);
+
+        downscale(src, srcMap, dst, dstMap);
         INFO("Src: " << src);
         INFO("Dst: " << dst);
         CHECK(dst[0].r == 128);
