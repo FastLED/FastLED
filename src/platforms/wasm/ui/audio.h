@@ -27,6 +27,7 @@ class jsAudioImpl {
     const fl::Str &groupName() const { return mGroup; }
 
     AudioSample next();
+    bool hasNext() ;
 
   private:
     struct Updater : fl::EngineEvents::Listener {

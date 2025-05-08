@@ -331,6 +331,7 @@ class UIAudio: public UIAudioImpl {
     UIAudio(const char *name) : UIAudioImpl(name) {}
     ~UIAudio() {}
     AudioSample next() { return Super::next(); }
+    bool hasNext() { return Super::hasNext(); }
 };
 
 

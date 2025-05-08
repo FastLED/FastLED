@@ -6,10 +6,9 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"
 
-
 #include "fl/map.h"
-#include "fl/str.h"
 #include "fl/namespace.h"
+#include "fl/str.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
@@ -28,10 +27,12 @@ class JsonDocument;
 class ScreenMap {
   public:
     static ScreenMap Circle(int numLeds, float cm_between_leds = 1.5f,
-                            float cm_led_diameter = 0.5f, float completion = 1.0f);
+                            float cm_led_diameter = 0.5f,
+                            float completion = 1.0f);
 
     static ScreenMap DefaultStrip(int numLeds, float cm_between_leds = 1.5f,
-                                 float cm_led_diameter = 0.2f, float completion = .9f){
+                                  float cm_led_diameter = 0.2f,
+                                  float completion = .9f) {
         return Circle(numLeds, cm_between_leds, cm_led_diameter, completion);
     }
 
@@ -52,6 +53,10 @@ class ScreenMap {
     const point_xy_float &operator[](uint32_t x) const;
 
     void set(uint16_t index, const point_xy_float &p);
+
+    void addOffset(const point_xy_float &p);
+    void addOffsetX(float x);
+    void addOffsetY(float y);
 
     point_xy_float &operator[](uint32_t x);
 
@@ -78,8 +83,7 @@ class ScreenMap {
 
     static void toJsonStr(const FixedMap<Str, ScreenMap, 16> &,
                           Str *jsonBuffer);
-    static void toJson(const FixedMap<Str, ScreenMap, 16> &,
-                       JsonDocument *doc);
+    static void toJson(const FixedMap<Str, ScreenMap, 16> &, JsonDocument *doc);
 
   private:
     static const point_xy_float &empty();

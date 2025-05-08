@@ -200,6 +200,11 @@ class UIAudioImpl {
         FASTLED_WARN("Audio sample not implemented");
         return AudioSample();
     }
+
+    bool hasNext() {
+        FASTLED_WARN("Audio sample not implemented");
+        return false;
+    }
 };
 #endif
 

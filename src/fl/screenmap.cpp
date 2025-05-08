@@ -246,4 +246,16 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
     return *this;
 }
 
+void ScreenMap::addOffset(const point_xy_float &p) {
+    point_xy_float* data = mLookUpTable->getDataMutable();
+    for (uint32_t i = 0; i < length; i++) {
+        point_xy_float &curr = data[i];
+        curr.x += p.x;
+        curr.y += p.y;
+    }
+}
+
+void ScreenMap::addOffsetX(float x) { addOffset({x, 0}); }
+void ScreenMap::addOffsetY(float y) { addOffset({0, y}); }
+
 } // namespace fl

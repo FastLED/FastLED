@@ -135,6 +135,12 @@ AudioSample jsAudioImpl::next() {
     return AudioSample(out);
 }
 
+
+
+bool jsAudioImpl::hasNext() {
+    return !mAudioSampleImpls.empty();
+}
+
 }  // namespace fl
 
 #endif  // __EMSCRIPTEN__
