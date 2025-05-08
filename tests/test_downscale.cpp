@@ -72,3 +72,32 @@ TEST_CASE("downscale 2x2 to 1x1") {
     }
 
 }
+
+TEST_CASE("downscale 3x3 to 2x2") {
+    CRGB red = CRGB(255, 0, 0);
+    CRGB black = CRGB(0, 0, 0);
+
+    // Create a 3x3 checkerboard pattern:
+    CRGB src[9];
+    src[0] = red;
+    src[1] = black;
+    src[2] = red;
+    src[3] = black;
+    src[4] = red;
+    src[5] = black;
+    src[6] = red;
+    src[7] = black;
+    src[8] = red;
+
+    CRGB dst[4];  // 2x2 result
+
+    XYMap srcMap = XYMap::constructRectangularGrid(3, 3);
+    XYMap dstMap = XYMap::constructRectangularGrid(2, 2);
+
+    downscale(src, srcMap, dst, dstMap);
+
+    for (int i = 0; i < 4; ++i) {
+        INFO("Dst[" << i << "]: " << dst[i]);
+        CHECK(dst[i] == CRGB(142, 0, 0));  // Averaged color
+    }
+}

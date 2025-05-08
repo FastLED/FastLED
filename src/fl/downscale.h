@@ -21,5 +21,6 @@ void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstX
 // when the source and destination are half the size of each other.
 void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst);
 void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
+void downscaleArbitrary(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
 } // namespace fl

@@ -48,6 +48,9 @@ inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
     }
 }
 
+
+// These are here for testing purposes and are slow. Their primary use
+// is to test against the fixed integer version above.
 void bilinearExpandFloat(const CRGB *input, CRGB *output,
                                  uint8_t inputWidth, uint8_t inputHeight,
                                  fl::XYMap xyMap);

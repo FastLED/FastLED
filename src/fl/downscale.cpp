@@ -74,6 +74,70 @@ void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& 
     }
 }
 
+
+void downscaleArbitrary(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) {
+    const uint16_t srcWidth = srcXY.getWidth();
+    const uint16_t srcHeight = srcXY.getHeight();
+    const uint16_t dstWidth = dstXY.getWidth();
+    const uint16_t dstHeight = dstXY.getHeight();
+
+    const uint32_t FP_ONE = 256;  // Q8.8 fixed-point multiplier
+
+    FASTLED_ASSERT(dstWidth <= srcWidth, "Destination width must be <= source width");
+    FASTLED_ASSERT(dstHeight <= srcHeight, "Destination height must be <= source height");
+
+    for (uint16_t dy = 0; dy < dstHeight; ++dy) {
+        // Fractional boundaries in Q8.8
+        uint32_t dstY0 = (dy * srcHeight * FP_ONE) / dstHeight;
+        uint32_t dstY1 = ((dy + 1) * srcHeight * FP_ONE) / dstHeight;
+
+        for (uint16_t dx = 0; dx < dstWidth; ++dx) {
+            uint32_t dstX0 = (dx * srcWidth * FP_ONE) / dstWidth;
+            uint32_t dstX1 = ((dx + 1) * srcWidth * FP_ONE) / dstWidth;
+
+            uint64_t rSum = 0, gSum = 0, bSum = 0;
+            uint32_t totalWeight = 0;
+
+            // Find covered source pixels
+            uint16_t srcY_start = dstY0 / FP_ONE;
+            uint16_t srcY_end = (dstY1 + FP_ONE - 1) / FP_ONE;  // ceil
+
+            uint16_t srcX_start = dstX0 / FP_ONE;
+            uint16_t srcX_end = (dstX1 + FP_ONE - 1) / FP_ONE;  // ceil
+
+            for (uint16_t sy = srcY_start; sy < srcY_end; ++sy) {
+                // Calculate vertical overlap in Q8.8
+                uint32_t sy0 = sy * FP_ONE;
+                uint32_t sy1 = (sy + 1) * FP_ONE;
+                uint32_t y_overlap = MIN(dstY1, sy1) - MAX(dstY0, sy0);
+                if (y_overlap == 0) continue;
+
+                for (uint16_t sx = srcX_start; sx < srcX_end; ++sx) {
+                    uint32_t sx0 = sx * FP_ONE;
+                    uint32_t sx1 = (sx + 1) * FP_ONE;
+                    uint32_t x_overlap = MIN(dstX1, sx1) - MAX(dstX0, sx0);
+                    if (x_overlap == 0) continue;
+
+                    uint32_t weight = (x_overlap * y_overlap + (FP_ONE >> 1)) >> 8;  // Q8.8 * Q8.8 → Q16.16 → Q8.8
+
+                    const CRGB& p = src[srcXY.mapToIndex(sx, sy)];
+                    rSum += p.r * weight;
+                    gSum += p.g * weight;
+                    bSum += p.b * weight;
+                    totalWeight += weight;
+                }
+            }
+
+            // Final division, rounding
+            uint8_t r = totalWeight ? (rSum + (totalWeight >> 1)) / totalWeight : 0;
+            uint8_t g = totalWeight ? (gSum + (totalWeight >> 1)) / totalWeight : 0;
+            uint8_t b = totalWeight ? (bSum + (totalWeight >> 1)) / totalWeight : 0;
+
+            dst[dstXY.mapToIndex(dx, dy)] = CRGB(r, g, b);
+        }
+    }
+}
+
 void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY) {
     uint16_t srcWidth = srcXY.getWidth();
     uint16_t srcHeight = srcXY.getHeight();
@@ -82,11 +146,9 @@ void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstX
 
     FASTLED_ASSERT(dstWidth <= srcWidth, "Destination width must be <= source width");
     FASTLED_ASSERT(dstHeight <= srcHeight, "Destination height must be <= source height");
-
-    #ifndef FASTLED_TESTING
-    // Attempt to use the downscaleHalf function if the destination is half the size of the source
-    // We don't do this in testing mode so that we can exactly test the bilinear downscaling.
-    if (dstWidth * 2 == srcWidth && dstHeight * 2 == srcHeight) {
+    const bool destination_is_half_of_source = (dstWidth * 2 == srcWidth) && (dstHeight * 2 == srcHeight);
+    // Attempt to use the downscaleHalf function if the destination is half the size of the source.
+    if (destination_is_half_of_source) {
         const bool both_rectangles = (srcXY.getType() == XYMap::kLineByLine) && (dstXY.getType() == XYMap::kLineByLine);
         if (both_rectangles) {
             // If both source and destination are rectangular, we can use the optimized version
@@ -96,42 +158,9 @@ void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstX
             downscaleHalf(src, srcXY, dst, dstXY);
         }
         return;
-    }
-    #endif
+    } 
 
-    for (uint16_t dy = 0; dy < dstHeight; ++dy) {
-        // Calculate source region for this destination row
-        uint16_t srcY0 = (dy * srcHeight) / dstHeight;
-        uint16_t srcY1 = ((dy + 1) * srcHeight) / dstHeight;
-        if (srcY1 > srcHeight) srcY1 = srcHeight;
-
-        for (uint16_t dx = 0; dx < dstWidth; ++dx) {
-            // Calculate source region for this destination column
-            uint16_t srcX0 = (dx * srcWidth) / dstWidth;
-            uint16_t srcX1 = ((dx + 1) * srcWidth) / dstWidth;
-            if (srcX1 > srcWidth) srcX1 = srcWidth;
-
-            uint32_t rSum = 0, gSum = 0, bSum = 0;
-            uint16_t count = 0;
-
-            for (uint16_t sy = srcY0; sy < srcY1; ++sy) {
-                for (uint16_t sx = srcX0; sx < srcX1; ++sx) {
-                    const CRGB& p = src[srcXY.mapToIndex(sx, sy)];
-                    rSum += p.r;
-                    gSum += p.g;
-                    bSum += p.b;
-                    ++count;
-                }
-            }
-
-            // Add half the count for rounding
-            uint8_t r = (rSum + count / 2) / count;
-            uint8_t g = (gSum + count / 2) / count;
-            uint8_t b = (bSum + count / 2) / count;
-
-            dst[dstXY.mapToIndex(dx, dy)] = CRGB(r, g, b);
-        }
-    }
+    downscaleArbitrary(src, srcXY, dst, dstXY);
 }
 
 } // namespace fl
