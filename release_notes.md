@@ -7,6 +7,8 @@ FastLED 3.9.17
   * esp-idf v5.4 fixes to include lcd_50
     * https://github.com/FastLED/FastLED/pull/1924
     * Thanks! https://github.com/rommo911
+* Noise Functions
+  * 
 * datastructures
   * Bringing in 3rd party code and cool fx has always been an absolute pain for FastLED. These algorithms in open source typically use std datastructures, which simply do not compile on legacy devices like AVR. Also the std:: data structures are not only gigantic, but also wreckless with the heap and produce lots of allocations which will absolutely make a sketch run out of memory via memory fragmentation. To solve this problem in the general case I've created std compatible data structures with inlined variants that will stay on the stack as long as the number of objects stays under a fixed maximum, but allows overflow. Starting with FastLED 3.9.17 an effort is being made to allow std substitutes. For example if you would typically include \<vector\> in a project you can include fl/vector.h instead.
   * fl::hash_map
