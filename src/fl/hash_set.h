@@ -24,4 +24,7 @@ class HashSet : public HashMap<Key, bool, Hash, KeyEqual> {
     iterator find(const Key &key) { return Base::find(key); }
 };
 
+template<typename Key, typename Hash = Hash<Key>, typename KeyEqual = EqualTo<Key>>
+using hash_set = HashSet<Key, Hash, KeyEqual>;
+
 }  // namespace fl

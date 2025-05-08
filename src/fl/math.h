@@ -10,6 +10,7 @@
 #pragma push_macro("abs")
 #pragma push_macro("min")
 #pragma push_macro("max")
+#pragma push_macro("sqrt")
 
 #ifdef abs
 #undef abs
@@ -21,6 +22,10 @@
 
 #ifdef max
 #undef max
+#endif
+
+#ifdef sqrt
+#undef sqrt
 #endif
 
 
@@ -57,9 +62,15 @@ inline T max(T a, T b) {
     return (a > b) ? a : b;
 }
 
+inline float sqrt(float value) {
+    return ::sqrt(value);
+}
+
+
 }  // namespace fl
 
 // Restore the math macros
 #pragma pop_macro("abs")
 #pragma pop_macro("min")
 #pragma pop_macro("max")
+#pragma pop_macro("sqrt")

@@ -34,6 +34,16 @@ template <typename T> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
+
+template<typename T>
+struct Hash;
+
+template<typename T>
+struct EqualTo;
+
+template <typename Key, typename Hash, typename KeyEqual>
+class HashSet;
+
 class XYMap;
 
 struct FFTBins;
@@ -570,6 +580,20 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str &append(const FFTBins &str);
 
     Str &append(const XYMap &map);
+
+    template <typename Key, typename Hash, typename KeyEqual>
+    Str& append(const HashSet<Key, Hash, KeyEqual> &set) {
+        append("{");
+        for (auto it = set.begin(); it != set.end(); ++it) {
+            if (it != set.begin()) {
+                append(", ");
+            }
+            auto p = *it;
+            append(p.first);
+        }
+        append("}");
+        return *this;
+    }
 
     const char *data() const { return c_str(); }
 

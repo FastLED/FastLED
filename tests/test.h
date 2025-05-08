@@ -14,6 +14,7 @@
 #include "fl/xypath.h"
 #include "fl/tile2x2.h"
 #include "fl/strstream.h"
+#include "fl/hash_set.h"
 
 
 using namespace fl;
@@ -65,6 +66,15 @@ namespace doctest {
             out += ",";
             out += value.mMax.y;
             out += "))";
+            return out.c_str();
+        }
+    };
+
+
+    template<typename Key, typename Hash, typename KeyEqual> struct StringMaker<fl::hash_set<Key, Hash, KeyEqual>> {
+        static String convert(const fl::hash_set<Key, Hash, KeyEqual>& value) {
+            fl::Str out;
+            out.append(value);
             return out.c_str();
         }
     };
