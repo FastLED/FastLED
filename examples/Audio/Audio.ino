@@ -28,8 +28,8 @@ all the UI elements you see below.
 
 using namespace fl;
 
-#define HEIGHT 64
-#define WIDTH 64
+#define HEIGHT 128
+#define WIDTH 128
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE false
 #define TIME_ANIMATION 1000 // ms
@@ -44,7 +44,7 @@ UICheckbox freeze("Freeze frame", false);
 UIButton advanceFrame("Advance frame");
 
 UIAudio audio("Audio");
-UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
+UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
 
 
 CRGB framebuffer[NUM_LEDS];
@@ -75,7 +75,7 @@ float rms(Slice<const int16_t> data) {
         int32_t x32 = int32_t(data[i]);
         sumSq += x32 * x32;
     }
-    float rms = sqrt(float(sumSq) / N);
+    float rms = fl::sqrt(float(sumSq) / N);
     return rms;
 }
 
