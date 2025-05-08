@@ -1,11 +1,14 @@
 FastLED 3.9.17
 ==============
+
+
+
 * esp
   * esp-idf v5.4 fixes to include lcd_50
     * https://github.com/FastLED/FastLED/pull/1924
     * Thanks! https://github.com/rommo911
 * datastructures
-  * Bringing in 3rd party code and cool fx has always been an absolute pain for FastLED since these algorithms typically use std datastructures, which simply do not compile on legacy devices like AVR. Also the std:: data structures are wreckless with the heap and produce lots of allocations which will absolutely make a sketch run out of memory via memory fragmentation. To solve this problem in the general case I've created std compatible data structures with inlined variants that will stay on the stack as long as the number of objects stays under a fixed maximum, but allows overflow.
+  * Bringing in 3rd party code and cool fx has always been an absolute pain for FastLED. These algorithms in open source typically use std datastructures, which simply do not compile on legacy devices like AVR. Also the std:: data structures are not only gigantic, but also wreckless with the heap and produce lots of allocations which will absolutely make a sketch run out of memory via memory fragmentation. To solve this problem in the general case I've created std compatible data structures with inlined variants that will stay on the stack as long as the number of objects stays under a fixed maximum, but allows overflow. Starting with FastLED 3.9.17 an effort is being made to allow std substitutes. For example if you would typically include \<vector\> in a project you can include fl/vector.h instead.
   * fl::hash_map
     * open addressing but with inlined rehashing when "tombstones" fill up half the slots.
   * fl::hash_map_inlined
@@ -13,22 +16,40 @@ FastLED 3.9.17
   * fl::vector
   * fl::vector_inlined
   * fl::function<>
-  * fl::bitset
   * fl::variant<T,U>
   * fl::optional<T>
+  * fl::bitset
+    * our version differs from std::bitset as defaults to inlined memory to hold 1024 values without going to the heap. If you need more you can tune it. I **really** love bitsets because they are super compact and allow testing up to 64 entries at a time using integer bit twiddling. They can be used in data structures to test if something exists in the data structure. For example fl::hash_map will use a bitset on the stack (with heap overflow) to determine which buckets are truly occupied during tombstone eviction. This allows an inplace re-hash when the hash table fills up with dead entries, rather than expanding the hashmap unconditionally. This prevents unnecessary heap allocations when a hashmap has rapid inserts + removals. Without this inlined tagging would have to be used which would bloat the data structure with an extra byte of memory per entry on 8-bit machines or 4 extra bytes if the contained data is expected to be aligned (common for 16,32,64-bit machines).
+    * fl::bitset + fl::hash = bloom filter which is an amazing data structure that can optimize retrieval by giving you a signal of whether something is certainly not in a data collection, or might be, though I've never found a use case in FastLED yet.
 * graphics
   * CRGB::downscale(...) for downsizing led matrices / strips.
+    * Essentially pixel averaging.
     * Uses a fastpath when downsizeing from M by N to M/2 by N/2.
-    * Uses fractional downsizing when the destination matrix/strip is any other ratio.
-  * CRGB::upscale(...) for expanding led matrices / strips, uses bilearn expansion.
+    * Uses fixed-integer fractional downsizing when the destination matrix/strip is any other ratio.
+  * CRGB::upscale(...) for expanding led matrices / strips, uses bilinear expansion.
   * XYPath:
     * Create paths that smoothly interpolate in response to animation values => [0, 1.0f]
     * Still a work in progress.
   * Subpixel calculations.
-    * Let's face it, low resolution matrices and strips produce bad results with simple pixel rendering in integer space. I've implemented the ability for using floating point x,y coordinates and then splatting that pixel to a 2x2 tile. If a point is dead center on a led then only that led in the tile will light up, but if that point moves then other leds will start to light up in proportion to the overlap. This gives 256 effective steps in the X and Y directions. This **greatly** improves visual quality without having to go to dense pixel displays.
+    * Let's face it, low resolution matrices and strips produce bad results with simple pixel rendering in integer space. I've implemented the ability for using floating point x,y coordinates and then splatting that pixel to a 2x2 tile. If a point is dead center on a led then only that led in the tile will light up, but if that point moves then other neighboring leds will start to light up in proportion to the overlap. This gives 256 effective steps in the X and Y directions between neightbors. This **greatly** improves visual quality without having to super sample.
   * Line Simplification
     * Take a line with lots of points and selectively remove points that
-      have the least impact on the line, keeping the overall shape. We use and improved Douglas-Peucker algorithm that is memory efficient.
+      have the least impact on the line, keeping the overall shape. We use an improved Douglas-Peucker algorithm that is memory efficient.
+  * RasterSparse: efficient rendering to an intermediate buffer that only allocates x,y points for values actually written, then flush to LED matrix/strip. See below for more information.
+  * traverseGridSegment
+    * Given a line A-B, find all the intersecting cells on a grid.
+    * Essentially 2D ray tracing.
+    * Great for optimization of particle trails and rastering an entire XYPath.
+      * Example:
+        * Full XYPath (e.g. Heart) renders 200 xy points
+        * Use line simplification to reduce this to 50 most significant points -> 49 line segments
+        * For each line segment
+          * traverseGridSegment computes all the intersecting grid points
+            * for each grid point find the closest point on the segment, call it closest-pt
+              * closet-pt generates a tile2x2 of itself plus it's 3 neighbors
+                * for each tile2x2 it will have a uint8_t value representing it's intensity / closeness to center.
+                * tile2x2 list/stream -> raster (RasterSparse)
+                * raster -> composite to LED matrix/strip using a gradient or draw functor.
   * RasterSparse
     * A memory efficient raster that elements like the XYPath can write to as an intermediate step to writing to the display LEDs. This allows layering: very important for creating things like "particle trails" which require multiple writing to similar pixels destructively and then flushed to the LED display. For example if a particle has a long fade trail with say 30 points of history, then this entire path can be destructively drawn to the raster then composited to the led display as an unified layer.
     * "Sparse" in "RasterSparse" here means that the x,y values of the pixels being written to are stored in a hash table rather than a spanning grid. This greatly reduces memory usage and improves performance. To prevent excessive computation with hashing, a small 8-unit inlined hash_table with a FastHash function is carefully used to exploit the inherent locality of computing particle and paths.
