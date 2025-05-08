@@ -26,10 +26,8 @@ typedef fl::Slice<const uint8_t> SliceUint8;
 class ActiveStripData: public fl::EngineEvents::Listener {
 public:
 
-
-    static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
-    typedef fl::FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
-    typedef fl::FixedMap<int, fl::ScreenMap, MAX_STRIPS> ScreenMapMap;
+    typedef fl::SortedHeapMap<int, SliceUint8> StripDataMap;
+    typedef fl::SortedHeapMap<int, fl::ScreenMap> ScreenMapMap;
 
     static ActiveStripData& Instance();
     void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);

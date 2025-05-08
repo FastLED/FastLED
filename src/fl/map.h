@@ -252,7 +252,8 @@ private:
     VectorType data;
 };
 
-
+// Closest data structure to an std::map. Always sorted.
+// O(n + log(n)) for insertions, O(log(n)) for searches, O(n) for iteration.
 template <typename Key, typename Value, typename Less = fl::DefaultLess<Key>>
 class SortedHeapMap {
 private:
