@@ -34,8 +34,7 @@ using namespace fl;
 #define IS_SERPINTINE true
 #define TIME_ANIMATION 1000 // ms
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
+
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
@@ -47,11 +46,16 @@ UIButton advanceFrame("Advance frame");
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
 
+
+CRGB framebuffer[NUM_LEDS];
+XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);
+
+
 FFTBins fftOut(WIDTH); // 2x width due to super sampling.
 
-// CRGB leds[NUM_LEDS];
+// CRGB framebuffer[NUM_LEDS];
 // CRGB framebuffer[WIDTH_2X * HEIGHT_2X];  // 2x super sampling.
-// XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);  // LED output, serpentine as is
+// XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);  // LED output, serpentine as is
 // common for LED matrices. XYMap xyMap_2X(WIDTH_2X, HEIGHT_2X, false);  //
 // Framebuffer is regular rectangle LED matrix.
 
@@ -74,27 +78,27 @@ float rms(Slice<const int16_t> data) {
 
 void setup() {
     Serial.begin(115200);
-    auto screenmap = xyMap.toScreenMap();
+    auto screenmap = frameBufferXY.toScreenMap();
     screenmap.setDiameter(.2);
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
+    FastLED.addLeds<NEOPIXEL, 2>(framebuffer, NUM_LEDS).setScreenMap(screenmap);
 }
 
 void shiftUp() {
     // fade each led by 1%
     for (int y = HEIGHT - 1; y > 0; --y) {
         for (int x = 0; x < WIDTH; ++x) {
-            auto &c = leds[xyMap(x, y)];
+            auto &c = framebuffer[frameBufferXY(x, y)];
             c.fadeToBlackBy(fadeToBlack.as_int());
         }
     }
 
     for (int y = HEIGHT - 1; y > 0; --y) {
         for (int x = 0; x < WIDTH; ++x) {
-            leds[xyMap(x, y)] = leds[xyMap(x, y - 1)];
+            framebuffer[frameBufferXY(x, y)] = framebuffer[frameBufferXY(x, y - 1)];
         }
     }
     for (int x = 0; x < WIDTH; ++x) {
-        leds[xyMap(x, 0)] = CRGB(0, 0, 0);
+        framebuffer[frameBufferXY(x, 0)] = CRGB(0, 0, 0);
     }
 }
 
@@ -112,7 +116,7 @@ void loop() {
     if (triggered) {
         FASTLED_WARN("Triggered");
     }
-    // fl::clear(leds);
+    // fl::clear(framebuffer);
     // fl::clear(framebuffer);
 
     static uint32_t frame = 0;
@@ -169,13 +173,13 @@ void loop() {
                 // Use FastLED's built-in HeatColors palette
                 auto c = ColorFromPalette(HeatColors_p, heatIndex);
                 c.fadeToBlackBy(255 - heatIndex);
-                leds[xyMap(x, 0)] = c;
+                framebuffer[frameBufferXY(x, 0)] = c;
                 // FASTLED_WARN("y: " << i << " b: " << b);
             }
         }
 
         if (enableVolumeVis) {
-            leds[xyMap(x, HEIGHT / 2)] = CRGB(0, 255, 0);
+            framebuffer[frameBufferXY(x, HEIGHT / 2)] = CRGB(0, 255, 0);
         }
 
         if (enableRMS) {
@@ -183,17 +187,17 @@ void loop() {
             FASTLED_WARN("RMS: " << rms);
             rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
-            leds[xyMap(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
+            framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
         }
     }
 
     // now downscale the framebuffer to the led matrix
-    // downscaleBilinearMapped(framebuffer, xyMap_2X, leds, xyMap);
-    // fl::clear(leds);
-    // downscaleBilinear(framebuffer, WIDTH_2X, HEIGHT_2X, leds, WIDTH,
+    // downscaleBilinearMapped(framebuffer, xyMap_2X, framebuffer, frameBufferXY);
+    // fl::clear(framebuffer);
+    // downscaleBilinear(framebuffer, WIDTH_2X, HEIGHT_2X, framebuffer, WIDTH,
     // HEIGHT);
 
-    // leds[xyMap(WIDTH/2, 0)] = CRGB(0, 255, 0);
+    // framebuffer[frameBufferXY(WIDTH/2, 0)] = CRGB(0, 255, 0);
 
     FastLED.show();
 }
