@@ -123,7 +123,7 @@ class LineSimplifierExact {
   public:
     LineSimplifierExact() = default;
     using Point = point_xy<float>;
-    
+
     LineSimplifierExact(int count) : mCount(count) {}
 
     void setCount(uint32_t count) { mCount = count; }
@@ -167,13 +167,8 @@ class LineSimplifierExact {
         }
     }
 
-
-
-
-
   private:
-
-    float estimateMaxDistance(const fl::Slice<const Point> &polyLine) {
+    static float estimateMaxDistance(const fl::Slice<const Point> &polyLine) {
         // Rough guess: max distance between endpoints
         if (polyLine.size() < 2)
             return 0;
@@ -186,7 +181,7 @@ class LineSimplifierExact {
     }
 
     void safeCopy(const fl::Slice<const point_xy<float>> &polyLine,
-                   fl::vector<point_xy<float>> *out) {
+                  fl::vector<point_xy<float>> *out) {
         auto *first_out = out->data();
         // auto* last_out = first_out + mCount;
         auto *other_first_out = polyLine.data();
@@ -208,7 +203,7 @@ class LineSimplifierExact {
         }
 
         // allocate a temporary buffer
-        fl::vector<point_xy<float>> temp;
+        fl::vector_inlined<point_xy<float>, 64> temp;
         temp.assign(polyLine.begin(), polyLine.end());
         out->assign(temp.begin(), temp.end());
         return;
