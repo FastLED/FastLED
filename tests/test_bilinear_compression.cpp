@@ -112,15 +112,15 @@ TEST_CASE("downscale 2x2 to 1x1") {
         INFO("Src: " << src);
         INFO("Dst: " << dst);
 
-        CRGB upperLeft = dst[dstMap.mapToIndex(0, 0)];
-        CRGB upperRight = dst[dstMap.mapToIndex(1, 0)];
-        CRGB lowerLeft = dst[dstMap.mapToIndex(0, 1)];
-        CRGB lowerRight = dst[dstMap.mapToIndex(1, 1)];
+        CRGB lowerLeft = dst[dstMap.mapToIndex(0, 0)];
+        CRGB lowerRight = dst[dstMap.mapToIndex(1, 0)];
+        CRGB upperLeft = dst[dstMap.mapToIndex(0, 1)];
+        CRGB upperRight = dst[dstMap.mapToIndex(1, 1)];
 
-        REQUIRE(upperLeft == red);
-        REQUIRE(upperRight == black);
-        REQUIRE(lowerLeft == black);
-        REQUIRE(lowerRight == red);
+        REQUIRE(lowerLeft == red);
+        REQUIRE(lowerRight == black);
+        REQUIRE(upperLeft == black);
+        REQUIRE(upperRight == red);
     }
 
 }
