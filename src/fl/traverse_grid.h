@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Amanatides–Woo grid traversal algorithm in C++.
 Given a line defined by two points, this algorithm traverses the grid cells intersecting

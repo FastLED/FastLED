@@ -23,6 +23,10 @@ namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
 
 
+class Str;
+using string = fl::Str;  // std-like string
+
+
 template <typename T> struct rect_xy;
 template <typename T> struct point_xy;
 template <typename T> class Slice;
