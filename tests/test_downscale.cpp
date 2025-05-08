@@ -115,13 +115,13 @@ TEST_CASE("downscale 11x11 to 2x2") {
 
     CRGB dst[4];  // 2x2 result
 
-    XYMap srcMap = XYMap::constructRectangularGrid(3, 3);
+    XYMap srcMap = XYMap::constructRectangularGrid(11, 11);
     XYMap dstMap = XYMap::constructRectangularGrid(2, 2);
 
     downscale(src, srcMap, dst, dstMap);
 
     for (int i = 0; i < 4; ++i) {
         INFO("Dst[" << i << "]: " << dst[i]);
-        CHECK(dst[i] == CRGB(142, 0, 0));  // Averaged color
+        CHECK(dst[i] == CRGB(129, 0, 0));  // Averaged color
     }
 }
