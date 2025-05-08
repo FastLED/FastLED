@@ -6,6 +6,14 @@
 #include "fl/map_range.h"
 #include "fl/clamp.h"
 
+
+#pragma push_macro("abs")
+
+#ifdef abs
+#undef abs
+#endif
+
+
 namespace fl {
 
 template <typename T>
@@ -30,3 +38,5 @@ inline T abs(T value) {
 }
 
 }
+
+#pragma pop_macro("abs")

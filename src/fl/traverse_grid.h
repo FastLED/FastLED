@@ -6,21 +6,6 @@
 namespace fl {
 
 
-
-// struct Vec2 {
-//     float x, y;
-// };
-
-// struct GridCell {
-//     int x, y;
-// };
-
-// class GridVisitor {
-// public:
-//     virtual void visit(const GridCell& cell) = 0;
-//     virtual ~GridVisitor() = default;
-// };
-
 template<typename GridVisitor>
 inline void traverseGridSegment(
     const point_xy_float& start,
