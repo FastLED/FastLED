@@ -31,7 +31,7 @@ using namespace fl;
 #define HEIGHT 64
 #define WIDTH 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
-#define IS_SERPINTINE true
+#define IS_SERPINTINE false
 #define TIME_ANIMATION 1000 // ms
 
 
@@ -49,6 +49,9 @@ UISlider fadeToBlack("Fade to black by", 7, 0, 40, 1);
 
 CRGB framebuffer[NUM_LEDS];
 XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);
+
+CRGB leds[NUM_LEDS / 4]; // Downscaled buffer
+XYMap ledsXY(WIDTH / 2, HEIGHT / 2, IS_SERPINTINE); // Framebuffer is regular rectangle LED matrix.
 
 
 FFTBins fftOut(WIDTH); // 2x width due to super sampling.
@@ -78,9 +81,12 @@ float rms(Slice<const int16_t> data) {
 
 void setup() {
     Serial.begin(115200);
-    auto screenmap = frameBufferXY.toScreenMap();
+    //auto screenmap = frameBufferXY.toScreenMap();
+    //screenmap.setDiameter(.2);
+    //FastLED.addLeds<NEOPIXEL, 2>(framebuffer, NUM_LEDS).setScreenMap(screenmap);
+    auto screenmap = ledsXY.toScreenMap();
     screenmap.setDiameter(.2);
-    FastLED.addLeds<NEOPIXEL, 2>(framebuffer, NUM_LEDS).setScreenMap(screenmap);
+    FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal()).setScreenMap(screenmap);
 }
 
 void shiftUp() {
@@ -111,6 +117,7 @@ bool doFrame() {
     }
     return false;
 }
+
 
 void loop() {
     if (triggered) {
@@ -198,6 +205,16 @@ void loop() {
     // HEIGHT);
 
     // framebuffer[frameBufferXY(WIDTH/2, 0)] = CRGB(0, 255, 0);
+
+    // downscaleBilinearMapped(framebuffer, frameBufferXY, leds, ledsXY);
+    downscaleBilinear(framebuffer, WIDTH, HEIGHT, leds, WIDTH / 2,
+                       HEIGHT / 2);
+
+    // void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst)
+
+    downscaleHalf(framebuffer, WIDTH, HEIGHT, leds);
+
+    // printLeds();
 
     FastLED.show();
 }

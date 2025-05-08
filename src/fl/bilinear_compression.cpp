@@ -15,6 +15,8 @@
 
 namespace fl {
 
+#if 0
+
 void downscaleBilinear(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight,
                        CRGB *dst, uint16_t dstWidth, uint16_t dstHeight) {
     // Use 8 bits for fixed-point fractional precision.
@@ -166,6 +168,35 @@ void downscaleBilinearMapped(const CRGB* src, const XYMap& srcMap,
             dst[dstIdx] = CRGB(static_cast<unsigned char>(r),
                                static_cast<unsigned char>(g),
                                static_cast<unsigned char>(b));
+        }
+    }
+}
+#endif
+
+
+void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst) {
+    uint16_t dstWidth = srcWidth / 2;
+    uint16_t dstHeight = srcHeight / 2;
+
+    for (uint16_t y = 0; y < dstHeight; ++y) {
+        for (uint16_t x = 0; x < dstWidth; ++x) {
+            // Map to top-left of the 2x2 block in source
+            uint16_t srcX = x * 2;
+            uint16_t srcY = y * 2;
+
+            // Fetch 2x2 block
+            const CRGB &p00 = src[(srcY) * srcWidth + (srcX)];
+            const CRGB &p10 = src[(srcY) * srcWidth + (srcX + 1)];
+            const CRGB &p01 = src[(srcY + 1) * srcWidth + (srcX)];
+            const CRGB &p11 = src[(srcY + 1) * srcWidth + (srcX + 1)];
+
+            // Average each color channel
+            uint16_t r = (p00.r + p10.r + p01.r + p11.r + 2) / 4; // +2 for rounding
+            uint16_t g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;
+            uint16_t b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;
+
+            // Store result
+            dst[y * dstWidth + x] = CRGB((uint8_t)r, (uint8_t)g, (uint8_t)b);
         }
     }
 }
