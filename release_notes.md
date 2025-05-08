@@ -38,7 +38,7 @@ FastLED 3.9.17
     * Let's face it, low resolution matrices and strips produce bad results with simple pixel rendering in integer space. I've implemented the ability for using floating point x,y coordinates and then splatting that pixel to a 2x2 tile. If a point is dead center on a led then only that led in the tile will light up, but if that point moves then other neighboring leds will start to light up in proportion to the overlap. This gives 256 effective steps in the X and Y directions between neightbors. This **greatly** improves visual quality without having to super sample.
   * Line Simplification
     * Take a line with lots of points and selectively remove points that
-      have the least impact on the line, keeping the overall shape. We use an improved Douglas-Peucker algorithm that is memory efficient.
+      have the least impact on the line, keeping the overall shape. We use an improved Douglas-Peucker algorithm that is memory efficient. We also have a version that is more cpu intensive which will will hit a target number of vertices.
   * RasterSparse: efficient rendering to an intermediate buffer that only allocates x,y points for values actually written, then flush to LED matrix/strip. See below for more information.
   * traverseGridSegment
     * Given a line A-B, find all the intersecting cells on a grid.
