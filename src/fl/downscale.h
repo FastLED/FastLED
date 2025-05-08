@@ -15,9 +15,11 @@ class XYMap;
 
 void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
-#ifdef FASTLED_TESTING
+// Optimized versions for downscaling by 50%. This is here for testing purposes mostly.
+// You should prefer to use downscale(...) instead of calling these functions. It's
+// important to note that downscale(...) will invoke downscaleHalf(...) automatically
+// when the source and destination are half the size of each other.
 void downscaleHalf(const CRGB *src, uint16_t srcWidth, uint16_t srcHeight, CRGB *dst);
 void downscaleHalf(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
-#endif  // FASTLED_TESTING
 
 } // namespace fl
