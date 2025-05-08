@@ -73,13 +73,13 @@ inline float sqrt(float value) {
 }  // namespace fl
 
 
-#ifndef FASTLED_NO_FL_USING_MATH_MACROS
-#define FASTLED_NO_FL_USING_MATH_MACROS 0
+#ifndef FASTLED_FL_USING_MATH_MACROS
+#define FASTLED_FL_USING_MATH_MACROS 0
 #endif
 
 
 
-#if !FASTLED_NO_FL_USING_MATH_MACROS
+#if FASTLED_FL_USING_MATH_MACROS
 
 using fl::floor;
 using fl::ceil;
@@ -87,11 +87,4 @@ using fl::abs;
 using fl::min;
 using fl::max;
 
-
-#if !defined(__clang__) || !defined(__APPLE__)
-  using fl::sqrt;
-#endif
-
-#endif
-
-
+#endif  // FASTLED_FL_USING_MATH_MACROS
