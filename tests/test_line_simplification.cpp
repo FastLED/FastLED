@@ -24,27 +24,29 @@ TEST_CASE("Test Line Simplification") {
     REQUIRE_EQ(point_xy<float>(4.0f, 4.0f), points[1]);
 }
 
-// TEST_CASE("Test simple triangle") {
-//     LineSimplifier<float> ls;
+TEST_CASE("Test simple triangle") {
+    LineSimplifier<float> ls;
 
-//     fl::vector<point_xy<float>> points;
-//     points.push_back({0.0f, 0.0f}); // First point of triangle
-//     points.push_back({0.5f, 0.5f});
-//     points.push_back({0.0f, 1.0f});
+    fl::vector<point_xy<float>> points;
+    points.push_back({0.0f, 0.0f}); // First point of triangle
+    points.push_back({0.5f, 0.5f});
+    points.push_back({0.0f, 1.0f});
+    float exceeds_thresh = 0.49f;
+    float under_thresh = 0.51f;
+    ls.setMinimumDistance(exceeds_thresh);
+    fl::vector<point_xy<float>> output;
+    ls.simplify(points, &output);
+    REQUIRE_EQ(3, output.size());
+    REQUIRE_EQ(point_xy<float>(0.0f, 0.0f), output[0]);
+    REQUIRE_EQ(point_xy<float>(0.5f, 0.5f), output[1]);
+    REQUIRE_EQ(point_xy<float>(0.0f, 1.0f), output[2]);
 
-//     float curr_thesh = 1.0f;
-//     while (curr_thesh > 0.0f) {
-//         fl::vector<point_xy<float>> output;
-//         ls.setMinimumDistance(curr_thesh / 2);
-//         ls.simplify(points, &output);
-//         curr_thesh -= 0.1f;
-
-//         FASTLED_WARN("Simplification with threshold: " << curr_thesh << ", "
-//                      << output);
-//     }
-//     MESSAGE("done");
-
-// }
+    ls.setMinimumDistance(under_thresh);
+    ls.simplify(points, &output);
+    REQUIRE_EQ(2, output.size());
+    REQUIRE_EQ(point_xy<float>(0.0f, 0.0f), output[0]);
+    REQUIRE_EQ(point_xy<float>(0.0f, 1.0f), output[1]);
+}
 
 TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
     LineSimplifier<float> ls;

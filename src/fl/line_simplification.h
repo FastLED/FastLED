@@ -106,6 +106,11 @@ template <typename FloatT> class LineSimplifier {
                     continue;
                 FloatT d2 = PerpendicularDistance2(polyLine[i], polyLine[i0],
                                                    polyLine[i1]);
+
+                FASTLED_WARN("Perpendicular distance2 between " << polyLine[i]
+                             << " and " << polyLine[i0] << " and "
+                             << polyLine[i1] << " is " << d2);
+
                 if (d2 > maxDist2) {
                     maxDist2 = d2;
                     split = i;
