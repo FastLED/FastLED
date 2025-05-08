@@ -50,6 +50,10 @@ class StrStream {
     const char *c_str() const { return mStr.c_str(); }
 
     StrStream &operator<<(const CRGB &rgb) { mStr.append(rgb); return *this; }
+    StrStream &operator<<(const StrStream& strStream) {
+        mStr.append(strStream.str());
+        return *this;
+    }
 
     StrStream &operator<<(const Tile2x2_u8 &subpixel);
 
@@ -160,6 +164,10 @@ class StrStream {
         mStr.clear();
         (*this) << rgb;
         return *this;
+    }
+
+    void clear() {
+        mStr.clear();
     }
 
   private:
