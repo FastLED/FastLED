@@ -46,7 +46,7 @@ Tile2x2_u8 XYPath::at_subpixel(float alpha) {
 
 void XYPath::rasterize(float from, float to, int steps,
                        XYRasterU8Sparse &raster,
-                       function<uint8_t(float)> *optional_alpha_gen) {
+                       XYPath::AlphaFunction *optional_alpha_gen) {
     mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
 
