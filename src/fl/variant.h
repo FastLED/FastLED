@@ -3,9 +3,6 @@
 #include "fl/inplacenew.h"
 #include "fl/template_magic.h"
 
-
-
-
 namespace fl {
 
 template <typename T, typename U> class Variant;
@@ -38,8 +35,7 @@ template <typename T, typename U> class Variant {
         }
     }
 
-    template<typename TT>
-    bool holdsTypeOf() {
+    template <typename TT> bool holdsTypeOf() {
         if (is_same<T, TT>::value) {
             return true;
         } else if (is_same<U, TT>::value) {
@@ -218,7 +214,6 @@ template <typename T, typename U> class Variant {
     } _storage;
 };
 
-
 template <typename T, typename U, typename V> class Variant3 {
   public:
     enum class Tag : uint8_t { Empty, IsT, IsU, IsV };
@@ -248,8 +243,6 @@ template <typename T, typename U, typename V> class Variant3 {
             break;
         }
     }
-
-
 
     Variant3(T &&t) : _tag(Tag::IsT) { new (&_storage.t) T(fl::move(t)); }
     Variant3(U &&u) : _tag(Tag::IsU) { new (&_storage.u) U(fl::move(u)); }
@@ -320,7 +313,6 @@ template <typename T, typename U, typename V> class Variant3 {
         new (&_storage.v) V(fl::forward<Args>(args)...);
         _tag = Tag::IsV;
     }
-
 
     ~Variant3() { reset(); }
 
@@ -393,6 +385,24 @@ template <typename T, typename U, typename V> class Variant3 {
             return nullptr;
         }
     }
+
+    template <typename Visitor> void visit(Visitor &visitor) {
+        switch (_tag) {
+        case Tag::IsT:
+            visitor.accept(getT());
+            break;
+        case Tag::IsU:
+            visitor.accept(getU());
+            break;
+        case Tag::IsV:
+            visitor.accept(getV());
+            break;
+        case Tag::Empty:
+            break;
+        }
+    }
+
+    template <typename TYPE> TYPE *get() { return this->ptr<TYPE>(); }
 
     template <typename TYPE> const TYPE *ptr() const {
         if (is<TYPE>()) {
