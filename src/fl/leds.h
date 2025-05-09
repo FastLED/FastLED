@@ -5,15 +5,18 @@
 
 namespace fl {
 
-class LedGrid {
+// Leds definition.
+// Drawing operations on a block of leds requires information about the layout of.
+// This class provides a way to access the leds.
+class Leds {
   public:
-    LedGrid(CRGB* leds, uint16_t width, uint16_t height);
-    LedGrid(CRGB *leds, const XYMap &xymap);
+    Leds(CRGB *leds, uint16_t width, uint16_t height);
+    Leds(CRGB *leds, const XYMap &xymap);
 
     // Copy constructor and assignment operator.
-    LedGrid(const LedGrid &) = default;
-    LedGrid &operator=(const LedGrid &) = default;
-    LedGrid(LedGrid &&) = default;
+    Leds(const Leds &) = default;
+    Leds &operator=(const Leds &) = default;
+    Leds(Leds &&) = default;
 
     // out of bounds access returns empty() led and is safe to read/write.
     CRGB &operator()(int x, int y);
@@ -41,18 +44,15 @@ class LedGrid {
     CRGB *mLeds;
 };
 
-template <size_t W, size_t H> class LedsXY : public LedGrid {
+template <size_t W, size_t H> class LedsXY : public Leds {
   public:
-    LedsXY(): LedGrid(mLeds, XYMap::constructSerpentine(W, H)) {}
+    LedsXY() : Leds(mLeds, XYMap::constructSerpentine(W, H)) {}
     explicit LedsXY(bool is_serpentine)
-        : LedGrid(mLeds, is_serpentine ? XYMap::constructSerpentine(W, H)
-                                       : XYMap::constructRectangularGrid(W, H)) {
-    }
+        : Leds(mLeds, is_serpentine ? XYMap::constructSerpentine(W, H)
+                                    : XYMap::constructRectangularGrid(W, H)) {}
     LedsXY(const LedsXY &) = default;
     LedsXY &operator=(const LedsXY &) = default;
-    void setXyMap(const XYMap &xymap) {
-        mXyMap = xymap;
-    }
+    void setXyMap(const XYMap &xymap) { mXyMap = xymap; }
     void setSerpentine(bool is_serpentine) {
         mXyMap = is_serpentine ? XYMap::constructSerpentine(W, H)
                                : XYMap::constructRectangularGrid(W, H);

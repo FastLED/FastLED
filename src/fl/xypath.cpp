@@ -255,7 +255,7 @@ void XYPath::setTransform(const TransformFloat &transform) {
     mPathRenderer->setTransform(transform);
 }
 
-void XYPath::draw(const CRGB &color, float from, float to, LedGrid *leds,
+void XYPath::draw(const CRGB &color, float from, float to, Leds *leds,
                   int steps) {
     XYRasterU8Sparse &raster = tls_raster.access();
     raster.clear();

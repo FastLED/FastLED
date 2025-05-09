@@ -11,7 +11,7 @@
 // your animations.
 
 #include "fl/function.h"
-#include "fl/ledgrid.h"
+#include "fl/leds.h"
 #include "fl/pair.h"
 #include "fl/ptr.h"
 #include "fl/tile2x2.h"
@@ -97,7 +97,7 @@ class XYPath : public Referent {
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
-    void draw(const CRGB &color, float from, float to, LedGrid *leds,
+    void draw(const CRGB &color, float from, float to, Leds *leds,
               int steps = -1);
 
     void setScale(float scale);
