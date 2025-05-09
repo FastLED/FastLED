@@ -551,7 +551,7 @@ template <typename... Types> class VariantN {
     // -- Modifiers ----------------------------------------------------------
 
     template <typename T, typename... Args>
-    typename fl::enable_if<contains_type<T, Args...>::value, T &>::type
+    typename fl::enable_if<contains_type<T, Types...>::value, T &>::type
     emplace(Args &&...args) {
         reset();
         construct<T>(fl::forward<Args>(args)...);
