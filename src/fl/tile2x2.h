@@ -16,7 +16,7 @@ namespace fl {
 
 class XYMap;
 class XYRasterU8Sparse;
-class XYDrawUint8Visitor;
+
 
 class Tile2x2_u8 {
 

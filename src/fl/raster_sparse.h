@@ -30,7 +30,7 @@ FASTLED_NAMESPACE_END
 namespace fl {
 
 class XYMap;
-class XYDrawUint8Visitor;
+
 class Tile2x2_u8;
 
 // A raster of uint8_t values. This is a sparse raster, meaning that it will only
