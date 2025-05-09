@@ -4,6 +4,7 @@
 Provides eanble_if and is_derived for compilers before C++14.
 */
 
+#include <stddef.h>
 #include <stdint.h>
 
 #include "fl/namespace.h"
@@ -82,6 +83,92 @@ template <typename T> struct remove_reference<T &&> {
 template <typename T>
 using remove_reference_t = typename remove_reference<T>::type;
 
+// Define conditional trait
+template <bool B, typename T, typename F> struct conditional {
+    using type = T;
+};
+
+template <typename T, typename F> struct conditional<false, T, F> {
+    using type = F;
+};
+
+template <bool B, typename T, typename F>
+using conditional_t = typename conditional<B, T, F>::type;
+
+// Define is_array trait
+template <typename T> struct is_array {
+    static constexpr bool value = false;
+};
+
+template <typename T> struct is_array<T[]> {
+    static constexpr bool value = true;
+};
+
+template <typename T, size_t N> struct is_array<T[N]> {
+    static constexpr bool value = true;
+};
+
+// Define remove_extent trait
+template <typename T> struct remove_extent {
+    using type = T;
+};
+
+template <typename T> struct remove_extent<T[]> {
+    using type = T;
+};
+
+template <typename T, size_t N> struct remove_extent<T[N]> {
+    using type = T;
+};
+
+// Define is_function trait
+template <typename T> struct is_function {
+    static constexpr bool value = false;
+};
+
+template <typename Ret, typename... Args> struct is_function<Ret(Args...)> {
+    static constexpr bool value = true;
+};
+
+template <typename Ret, typename... Args>
+struct is_function<Ret(Args...) const> {
+    static constexpr bool value = true;
+};
+
+template <typename Ret, typename... Args>
+struct is_function<Ret(Args...) volatile> {
+    static constexpr bool value = true;
+};
+
+template <typename Ret, typename... Args>
+struct is_function<Ret(Args...) const volatile> {
+    static constexpr bool value = true;
+};
+
+// Define add_pointer trait
+template <typename T> struct add_pointer {
+    using type = T *;
+};
+
+template <typename T> struct add_pointer<T &> {
+    using type = T *;
+};
+
+template <typename T> struct add_pointer<T &&> {
+    using type = T *;
+};
+
+template <typename T> using add_pointer_t = typename add_pointer<T>::type;
+
+// Define remove_const trait
+template <typename T> struct remove_const {
+    using type = T;
+};
+
+template <typename T> struct remove_const<const T> {
+    using type = T;
+};
+
 // Implementation of move
 template <typename T>
 constexpr typename remove_reference<T>::type &&move(T &&t) noexcept {
@@ -110,6 +197,40 @@ constexpr T &&forward(typename remove_reference<T>::type &&t) noexcept {
                   "Cannot forward an rvalue as an lvalue");
     return static_cast<T &&>(t);
 }
+
+// Define remove_cv trait
+template <typename T> struct remove_cv {
+    using type = T;
+};
+
+template <typename T> struct remove_cv<const T> {
+    using type = T;
+};
+
+template <typename T> struct remove_cv<volatile T> {
+    using type = T;
+};
+
+template <typename T> struct remove_cv<const volatile T> {
+    using type = T;
+};
+
+template <typename T> using remove_cv_t = typename remove_cv<T>::type;
+
+// Define decay trait
+template <typename T> struct decay {
+  private:
+    using U = typename remove_reference<T>::type;
+
+  public:
+    using type = typename conditional<
+        is_array<U>::value, typename remove_extent<U>::type *,
+        typename conditional<is_function<U>::value,
+                             typename add_pointer<U>::type,
+                             typename remove_cv<U>::type>::type>::type;
+};
+
+template <typename T> using decay_t = typename decay<T>::type;
 
 // Define is_pod trait (basic implementation)
 template <typename T> struct is_pod {

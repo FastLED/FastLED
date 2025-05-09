@@ -115,6 +115,7 @@
         "format": "cpp",
         "expected": "cpp",
         "ranges": "cpp",
-        "math.h": "c"
+        "math.h": "c",
+        "__locale": "cpp"
     }
 }
