@@ -19,13 +19,11 @@ class ByteStream : public fl::Referent {
     virtual bool available(size_t) const = 0;
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
     virtual const char *path() const = 0;
-    virtual void close() {}  // default is do nothing on close.
+    virtual void close() {} // default is do nothing on close.
     // convenience functions
     virtual size_t readCRGB(CRGB *dst, size_t n) {
-      return read((uint8_t *)dst, n * 3) / 3;
+        return read((uint8_t *)dst, n * 3) / 3;
     }
 };
 
-
-
-}  // namespace fl
+} // namespace fl

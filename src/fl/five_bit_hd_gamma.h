@@ -5,9 +5,9 @@
 
 #include <stdint.h>
 
-#include "fl/namespace.h"
-#include "fl/force_inline.h"
 #include "crgb.h"
+#include "fl/force_inline.h"
+#include "fl/namespace.h"
 
 namespace fl {
 
@@ -34,36 +34,31 @@ enum FiveBitGammaCorrectionMode {
 //  }
 //  FASTLED_NAMESPACE_END
 
-void __builtin_five_bit_hd_gamma_bitshift(CRGB colors,
-                                          CRGB colors_scale,
+void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                           uint8_t global_brightness,
-                                          CRGB* out_colors,
+                                          CRGB *out_colors,
                                           uint8_t *out_power_5bit);
 
-
 // Exposed for testing.
-uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit);
+uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+                          uint8_t brightness, CRGB *out,
+                          uint8_t *out_power_5bit);
 
 #ifdef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
 // extern here.
-extern void five_bit_hd_gamma_bitshift(CRGB colors,
-                                       CRGB colors_scale,
+extern void five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                        uint8_t global_brightness,
-                                       CRGB* out_colors,
+                                       CRGB *out_colors,
                                        uint8_t *out_power_5bit);
 #else
-FASTLED_FORCE_INLINE void
-five_bit_hd_gamma_bitshift(CRGB colors,
-                           CRGB colors_scale,
-                           uint8_t global_brightness,
-                           CRGB* out_colors,
-                           uint8_t *out_power_5bit) {
-    __builtin_five_bit_hd_gamma_bitshift(colors,
-                                         colors_scale,
-                                         global_brightness,
-                                         out_colors,
-                                         out_power_5bit);
+FASTLED_FORCE_INLINE void five_bit_hd_gamma_bitshift(CRGB colors,
+                                                     CRGB colors_scale,
+                                                     uint8_t global_brightness,
+                                                     CRGB *out_colors,
+                                                     uint8_t *out_power_5bit) {
+    __builtin_five_bit_hd_gamma_bitshift(
+        colors, colors_scale, global_brightness, out_colors, out_power_5bit);
 }
 #endif // FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 
@@ -83,12 +78,11 @@ five_bit_hd_gamma_bitshift(CRGB colors,
 #ifdef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
 // extern here.
-extern void five_bit_hd_gamma_function(CRGB color,
-                                       uint16_t *r16, uint16_t *g16, uint16_t *b16);
+extern void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
+                                       uint16_t *b16);
 #else
-void five_bit_hd_gamma_function(CRGB color,
-                                uint16_t *r16, uint16_t *g16, uint16_t *b16);
+void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
+                                uint16_t *b16);
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
-}  // namespace fl
-
+} // namespace fl

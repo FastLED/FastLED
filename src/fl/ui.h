@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "fl/audio.h"
 #include "fl/engine_events.h"
 #include "fl/function_list.h"
 #include "fl/math_macros.h"
@@ -10,18 +11,15 @@
 #include "fl/template_magic.h"
 #include "fl/ui_impl.h"
 #include "fl/unused.h"
-#include "fl/audio.h"
 #include "platforms/ui_defs.h"
 
-#define FL_NO_COPY(CLASS) \
-  CLASS(const CLASS &) = delete; \
-  CLASS &operator=(const CLASS &) = delete;
-
+#define FL_NO_COPY(CLASS)                                                      \
+    CLASS(const CLASS &) = delete;                                             \
+    CLASS &operator=(const CLASS &) = delete;
 
 namespace fl {
 
 // If the platform is missing ui components, provide stubs.
-
 
 class UISlider : public UISliderImpl {
   public:
@@ -112,7 +110,6 @@ class UISlider : public UISliderImpl {
 
 // template operator for >= against a jsSliderImpl
 
-
 class UIButton : public UIButtonImpl {
   public:
     FL_NO_COPY(UIButton)
@@ -142,9 +139,7 @@ class UIButton : public UIButtonImpl {
         return id;
     }
 
-    void removeCallback(int id) {
-        mCallbacks.remove(id);
-    }
+    void removeCallback(int id) { mCallbacks.remove(id); }
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
@@ -323,8 +318,7 @@ class UIDescription : public UIDescriptionImpl {
     ~UIDescription() {}
 };
 
-
-class UIAudio: public UIAudioImpl {
+class UIAudio : public UIAudioImpl {
   public:
     FL_NO_COPY(UIAudio)
     using Super = UIAudioImpl;
@@ -333,7 +327,6 @@ class UIAudio: public UIAudioImpl {
     AudioSample next() { return Super::next(); }
     bool hasNext() { return Super::hasNext(); }
 };
-
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >=)                       \

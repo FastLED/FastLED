@@ -7,7 +7,8 @@ namespace fl {
 
 // just define a hashset to be a hashmap with a dummy value
 
-template <typename Key, typename Hash = Hash<Key>, typename KeyEqual = EqualTo<Key>>
+template <typename Key, typename Hash = Hash<Key>,
+          typename KeyEqual = EqualTo<Key>>
 class HashSet : public HashMap<Key, bool, Hash, KeyEqual> {
   public:
     using Base = HashMap<Key, bool, Hash, KeyEqual>;
@@ -24,7 +25,8 @@ class HashSet : public HashMap<Key, bool, Hash, KeyEqual> {
     iterator find(const Key &key) { return Base::find(key); }
 };
 
-template<typename Key, typename Hash = Hash<Key>, typename KeyEqual = EqualTo<Key>>
+template <typename Key, typename Hash = Hash<Key>,
+          typename KeyEqual = EqualTo<Key>>
 using hash_set = HashSet<Key, Hash, KeyEqual>;
 
-}  // namespace fl
+} // namespace fl

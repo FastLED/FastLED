@@ -62,7 +62,6 @@ const AudioSample::VectorPCM &AudioSample::empty() {
 
 float AudioSample::zcf() const { return mImpl->zcf(); }
 
-
 float AudioSample::rms() const {
     if (!isValid()) {
         return 0.0f;
@@ -110,14 +109,15 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
 
 static FFT gFlexFFT;
 
-void AudioSample::fft(FFTBins* out) {
+void AudioSample::fft(FFTBins *out) {
     fl::Slice<const int16_t> sample = pcm();
     FFT_Args args;
     args.samples = sample.size();
     args.bands = out->size();
     args.fmin = FFT_Args::DefaultMinFrequency();
     args.fmax = FFT_Args::DefaultMaxFrequency();
-    args.sample_rate = FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
+    args.sample_rate =
+        FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
     gFlexFFT.run(sample, out, args);
 }
 

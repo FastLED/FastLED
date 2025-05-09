@@ -187,12 +187,12 @@ template <typename T> struct line_xy {
 
     bool empty() const { return (start == end); }
 
-    float distance_to(const point_xy<T> &p, point_xy<T>* out_projected = nullptr) const {
+    float distance_to(const point_xy<T> &p,
+                      point_xy<T> *out_projected = nullptr) const {
         return distance_to_line_with_point(p, start, end, out_projected);
     }
 
   private:
-
     // Computes the closest distance from `p` to the line through `a` and `b`,
     // and writes the projected point.
     static float distance_to_line_with_point(point_xy<T> p, point_xy<T> a,

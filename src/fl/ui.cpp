@@ -31,11 +31,11 @@ void UISlider::Listener::onBeginFrame() {
 
 void UIButton::Listener::onBeginFrame() {
     const bool clicked_this_frame = mOwner->clicked();
-    const bool clicked_changed = 
-        (clicked_this_frame != mClickedLastFrame);
+    const bool clicked_changed = (clicked_this_frame != mClickedLastFrame);
     mClickedLastFrame = clicked_this_frame;
     if (clicked_changed) {
-        // FASTLED_WARN("Button: " << mOwner->name() << " clicked: " << mOwner->clicked());
+        // FASTLED_WARN("Button: " << mOwner->name() << " clicked: " <<
+        // mOwner->clicked());
         mOwner->mCallbacks.invoke(*mOwner);
     }
     // mOwner->mCallbacks.invoke(*mOwner);

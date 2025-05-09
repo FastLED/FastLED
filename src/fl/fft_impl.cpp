@@ -124,7 +124,7 @@ class FFTContext {
     cq_kernel_cfg m_cq_cfg;
 };
 
-FFTImpl::FFTImpl(const FFT_Args& args) {
+FFTImpl::FFTImpl(const FFT_Args &args) {
     if (!mContext) {
         FASTLED_WARN("Failed to allocate FFTImpl context");
     }
@@ -168,6 +168,5 @@ FFTImpl::Result FFTImpl::run(Slice<const int16_t> sample, FFTBins *out) {
     mContext->fft_unit_test(sample, out);
     return FFTImpl::Result(true, "");
 }
-
 
 } // namespace fl

@@ -58,9 +58,6 @@ template <typename T> struct is_same<T, T> {
     static constexpr bool value = true;
 };
 
-
-
-
 // Define is_same_v for compatibility with variable templates
 template <typename T, typename U> struct is_same_v_helper {
     static constexpr bool value = is_same<T, U>::value;
@@ -246,7 +243,7 @@ template <typename T> struct is_integral<volatile T> {
     static constexpr bool value = is_integral<T>::value;
 };
 
-template <typename T> struct is_integral<T&> {
+template <typename T> struct is_integral<T &> {
     static constexpr bool value = is_integral<T>::value;
 };
 
@@ -269,26 +266,25 @@ using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 //-----------------------------------------------------------------------------
 // detect whether T has a member void swap(T&)
 //-----------------------------------------------------------------------------
-template<typename T>
-struct has_member_swap {
-private:
+template <typename T> struct has_member_swap {
+  private:
     // must be 1 byte vs. >1 byte for sizeof test
-    typedef uint8_t  yes;
+    typedef uint8_t yes;
     typedef uint16_t no;
 
-    // helper<U, &U::swap> is only well-formed if U::swap(T&) exists with that signature
-    template<typename U, void (U::*M)(U&)> struct helper {};
+    // helper<U, &U::swap> is only well-formed if U::swap(T&) exists with that
+    // signature
+    template <typename U, void (U::*M)(U &)> struct helper {};
 
     // picks this overload if helper<U, &U::swap> is valid
-    template<typename U> static yes test(helper<U, &U::swap>*);
+    template <typename U> static yes test(helper<U, &U::swap> *);
 
     // fallback otherwise
-    template<typename> static no  test(...);
+    template <typename> static no test(...);
 
-public:
+  public:
     static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(yes);
 };
-
 
 // primary template: dispatch on has_member_swap<T>::value
 template <typename T, bool = has_member_swap<T>::value> struct swap_impl;

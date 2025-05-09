@@ -27,4 +27,4 @@ Referent &Referent::operator=(const Referent &) = default;
 Referent::Referent(Referent &&) = default;
 Referent &Referent::operator=(Referent &&) = default;
 
-}  // namespace fl
+} // namespace fl

@@ -44,7 +44,7 @@ class XMap {
     XMap(const XMap &other);
 
     // define the assignment operator
-    XMap &operator=(const XMap &other) ;
+    XMap &operator=(const XMap &other);
 
     void convertToLookUpTable();
 

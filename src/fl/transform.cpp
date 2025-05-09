@@ -1,11 +1,11 @@
 
 #include <math.h>
 
-#include "lib8tion/trig8.h"
-#include "lib8tion/intmap.h"
-#include "fl/transform.h"
-#include "fl/math_macros.h"
 #include "fl/lut.h"
+#include "fl/math_macros.h"
+#include "fl/transform.h"
+#include "lib8tion/intmap.h"
+#include "lib8tion/trig8.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -60,7 +60,6 @@ Transform16 Transform16::ToBounds(alpha16 max_value) {
     tx.rotation = 0;
     return tx;
 }
-
 
 Transform16 Transform16::ToBounds(const point_xy<alpha16> &min,
                                   const point_xy<alpha16> &max,
@@ -134,27 +133,17 @@ point_xy<alpha16> Transform16::transform(const point_xy<alpha16> &xy) const {
     return out;
 }
 
-
-
-float TransformFloatImpl::scale() const {
-    return MIN(scale_x, scale_y);
-}
-
-
+float TransformFloatImpl::scale() const { return MIN(scale_x, scale_y); }
 
 void TransformFloatImpl::set_scale(float scale) {
     scale_x = scale;
     scale_y = scale;
 }
 
-
-
 bool TransformFloatImpl::is_identity() const {
     return (scale_x == 1.0f && scale_y == 1.0f && offset_x == 0.0f &&
             offset_y == 0.0f && rotation == 0.0f);
 }
-
-
 
 Matrix3x3f TransformFloat::compile() const {
     Matrix3x3f out;

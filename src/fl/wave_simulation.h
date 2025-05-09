@@ -20,20 +20,16 @@ Based on works and code by Shawn Silverman.
 #include "fl/warn.h"
 #include "fl/wave_simulation_real.h"
 
+#include "fl/grid.h"
 #include "fl/ptr.h"
 #include "fl/supersample.h"
 #include "fl/xymap.h"
-#include "fl/grid.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
 
-
 namespace fl {
 
-enum U8EasingFunction {
-    WAVE_U8_MODE_LINEAR,
-    WAVE_U8_MODE_SQRT
-};
+enum U8EasingFunction { WAVE_U8_MODE_LINEAR, WAVE_U8_MODE_SQRT };
 
 // -----------------------------------------------------------------------------
 // New supersampled 1D simulation class.
@@ -101,10 +97,7 @@ class WaveSimulation1D {
     // it to the corresponding multiplier cells in the high-res simulation.
     void setf(size_t x, float value);
 
-
-    void setHalfDuplex(bool on) {
-        mSim->setHalfDuplex(on);
-    }
+    void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
 
     // Advance the simulation one time step.
     void update();
@@ -121,7 +114,6 @@ class WaveSimulation1D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation1D_Real> mSim;
-
 };
 
 class WaveSimulation2D {
@@ -139,7 +131,8 @@ class WaveSimulation2D {
                      SuperSample factor = SuperSample::SUPER_SAMPLE_NONE,
                      float speed = 0.16f, float dampening = 6.0f);
 
-    void init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening);
+    void init(uint32_t width, uint32_t height, SuperSample factor, float speed,
+              int dampening);
 
     ~WaveSimulation2D() = default;
 
@@ -194,9 +187,7 @@ class WaveSimulation2D {
 
     void seti16(size_t x, size_t y, int16_t value);
 
-    void setHalfDuplex(bool on) {
-        mSim->setHalfDuplex(on);
-    }
+    void setHalfDuplex(bool on) { mSim->setHalfDuplex(on); }
 
     // Advance the simulation one time step.
     void update();
@@ -215,7 +206,7 @@ class WaveSimulation2D {
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
-    fl::Grid<int16_t> mChangeGrid;  // Needed for multiple updates.
+    fl::Grid<int16_t> mChangeGrid; // Needed for multiple updates.
 };
 
 } // namespace fl

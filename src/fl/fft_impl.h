@@ -12,9 +12,6 @@ class AudioSample;
 class FFTContext;
 struct FFT_Args;
 
-
-
-
 // Example:
 //   FFTImpl fft(512, 16);
 //   auto sample = SINE WAVE OF 512 SAMPLES
@@ -22,15 +19,15 @@ struct FFT_Args;
 //   FASTLED_WARN("FFTImpl output: " << out);  // 16 bands of output.
 class FFTImpl : public fl::Referent {
   public:
-    // Result indicating success or failure of the FFTImpl run (in which case there
-    // will be an error message).
+    // Result indicating success or failure of the FFTImpl run (in which case
+    // there will be an error message).
     struct Result {
         Result(bool ok, const Str &error) : ok(ok), error(error) {}
         bool ok = false;
         fl::Str error;
     };
     // Default values for the FFTImpl.
-    FFTImpl(const FFT_Args& args);
+    FFTImpl(const FFT_Args &args);
     ~FFTImpl();
 
     size_t sampleSize() const;
@@ -57,6 +54,5 @@ class FFTImpl : public fl::Referent {
   private:
     fl::scoped_ptr<FFTContext> mContext;
 };
-
 
 }; // namespace fl

@@ -2,11 +2,11 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "fl/clamp.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/xymap.h"
-#include "fl/clamp.h"
 
 using namespace fl;
 
@@ -94,7 +94,7 @@ void XYMap::setRectangularGrid() {
     mLookUpTable.reset();
 }
 
-uint16_t XYMap::mapToIndex(const uint16_t& x, const uint16_t& y) const {
+uint16_t XYMap::mapToIndex(const uint16_t &x, const uint16_t &y) const {
     uint16_t index;
     switch (type) {
     case kSerpentine: {
@@ -131,9 +131,5 @@ XYMap::XyMapType XYMap::getType() const { return type; }
 
 XYMap::XYMap(uint16_t width, uint16_t height, XyMapType type)
     : type(type), width(width), height(height), mOffset(0) {}
-
-
-
-
 
 } // namespace fl

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "fl/namespace.h"
 #include "fl/vector.h"
@@ -13,9 +13,8 @@ namespace fl {
 // do not exceed the capacity of the set, otherwise they will
 // fail. Because of this limitation, this set is not a drop in
 // replacement for std::set.
-template<typename Key, size_t N>
-class FixedSet {
-public:
+template <typename Key, size_t N> class FixedSet {
+  public:
     typedef FixedVector<Key, N> VectorType;
     typedef typename VectorType::iterator iterator;
     typedef typename VectorType::const_iterator const_iterator;
@@ -23,20 +22,12 @@ public:
     // Constructor
     constexpr FixedSet() = default;
 
-    iterator begin() {
-        return data.begin();
-    }
-    iterator end() {
-        return data.end();
-    }
-    const_iterator begin() const {
-        return data.begin();
-    }
-    const_iterator end() const {
-        return data.end();
-    }
+    iterator begin() { return data.begin(); }
+    iterator end() { return data.end(); }
+    const_iterator begin() const { return data.begin(); }
+    const_iterator end() const { return data.end(); }
 
-    iterator find(const Key& key) {
+    iterator find(const Key &key) {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -45,7 +36,7 @@ public:
         return end();
     }
 
-    const_iterator find(const Key& key) const {
+    const_iterator find(const Key &key) const {
         for (auto it = begin(); it != end(); ++it) {
             if (*it == key) {
                 return it;
@@ -54,7 +45,7 @@ public:
         return end();
     }
 
-    bool insert(const Key& key) {
+    bool insert(const Key &key) {
         if (data.size() < N) {
             auto it = find(key);
             if (it == end()) {
@@ -65,7 +56,7 @@ public:
         return false;
     }
 
-    bool erase(const Key& key) {
+    bool erase(const Key &key) {
         auto it = find(key);
         if (it != end()) {
             data.erase(it);
@@ -82,7 +73,8 @@ public:
         return false;
     }
 
-    bool next(const Key& key, Key* next_key, bool allow_rollover = false) const {
+    bool next(const Key &key, Key *next_key,
+              bool allow_rollover = false) const {
         const_iterator it = find(key);
         if (it != end()) {
             ++it;
@@ -97,7 +89,8 @@ public:
         return false;
     }
 
-    bool prev(const Key& key, Key* prev_key, bool allow_rollover = false) const {
+    bool prev(const Key &key, Key *prev_key,
+              bool allow_rollover = false) const {
         const_iterator it = find(key);
         if (it != end()) {
             if (it != begin()) {
@@ -113,41 +106,26 @@ public:
     }
 
     // Get the current size of the set
-    constexpr size_t size() const {
-        return data.size();
-    }
+    constexpr size_t size() const { return data.size(); }
 
-    constexpr bool empty() const {
-        return data.empty();
-    }
+    constexpr bool empty() const { return data.empty(); }
 
     // Get the capacity of the set
-    constexpr size_t capacity() const {
-        return N;
-    }
+    constexpr size_t capacity() const { return N; }
 
     // Clear the set
-    void clear() {
-        data.clear();
-    }
+    void clear() { data.clear(); }
 
-    bool has(const Key& key) const {
-        return find(key) != end();
-    }
+    bool has(const Key &key) const { return find(key) != end(); }
 
     // Return the first element of the set
-    const Key& front() const {
-        return data.front();
-    }
+    const Key &front() const { return data.front(); }
 
     // Return the last element of the set
-    const Key& back() const {
-        return data.back();
-    }
+    const Key &back() const { return data.back(); }
 
-
-private:
+  private:
     VectorType data;
 };
 
-}  // namespace fl
+} // namespace fl

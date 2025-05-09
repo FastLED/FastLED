@@ -61,7 +61,7 @@ uv run isort --profile black dev/dev.py
 uv run echo Running pyright ci
 uv run pyright ci
 
-
+export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
 # Linting the C++ code.
 folders=(
@@ -71,11 +71,12 @@ folders=(
     #"src/platforms/esp/8266"  # clang-format breaks esp8266
     #"src/platforms/arm" # clang-format breaks arm
     "src/fx"
+    "src/fl"
 )
 
 for folder in "${folders[@]}"; do
-    echo "Running clang-format on $folder"
-    uv run ci/run-clang-format.py -i -r "$folder"
+  echo "Running clang-format on $folder"
+  uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
 done
 
 # # Wait for ESLint to finish and output its results

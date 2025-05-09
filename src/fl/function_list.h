@@ -1,24 +1,22 @@
 #pragma once
 #include "fl/function.h"
-#include "fl/vector.h"
 #include "fl/pair.h"
+#include "fl/vector.h"
 
 namespace fl {
 
-
-template<typename FunctionType>
-class FunctionListBase {
-protected:
+template <typename FunctionType> class FunctionListBase {
+  protected:
     fl::vector<pair<int, FunctionType>> mFunctions;
     int mCounter = 0;
 
-public:
+  public:
     FunctionListBase() = default;
     ~FunctionListBase() = default;
 
     int add(FunctionType function) {
         int id = mCounter++;
-        pair <int, FunctionType> entry(id, function);
+        pair<int, FunctionType> entry(id, function);
         mFunctions.push_back(entry);
         return id;
     }
@@ -31,30 +29,26 @@ public:
         }
     }
 
-    void clear() {
-        mFunctions.clear();
-    }
+    void clear() { mFunctions.clear(); }
 };
 
-
-template<typename... Args>
+template <typename... Args>
 class FunctionList : public FunctionListBase<function<void(Args...)>> {
-    public:
+  public:
     void invoke(Args... args) {
         for (const auto &pair : this->mFunctions) {
-            auto& function = pair.second;
+            auto &function = pair.second;
             function(args...);
         }
     }
-
 };
 
-template<>
+template <>
 class FunctionList<void> : public FunctionListBase<function<void()>> {
-    public:
+  public:
     void invoke() {
         for (const auto &pair : this->mFunctions) {
-            auto& function = pair.second;
+            auto &function = pair.second;
             function();
         }
     }

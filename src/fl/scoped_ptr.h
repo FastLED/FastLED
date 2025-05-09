@@ -11,9 +11,7 @@ namespace fl {
 
 template <typename T> struct ArrayDeleter {
     ArrayDeleter() = default;
-    void operator()(T *ptr) {
-        delete[] ptr;
-    }
+    void operator()(T *ptr) { delete[] ptr; }
 };
 
 template <typename T> struct PointerDeleter {

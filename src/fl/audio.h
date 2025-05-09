@@ -1,10 +1,10 @@
 #pragma once
 
+#include "fl/fft.h"
 #include "fl/math.h"
 #include "fl/ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
-#include "fl/fft.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -35,8 +35,7 @@ class AudioSample {
     float zcf() const;
     float rms() const;
 
-    void fft(FFTBins* out);
-
+    void fft(FFTBins *out);
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }

@@ -19,12 +19,11 @@
 //     * Use `foo->method()` to call methods.
 //   * Instantiate from stack object and disable tracking
 //     * `Foo foo; FooPtr fooPtr = FooPtr::NoTracking(foo);`
-///   
+///
 
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/template_magic.h"
-
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr
 // which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
@@ -33,10 +32,9 @@
     class type;                                                                \
     using type##Ptr = fl::Ptr<type>;
 
-#define FASTLED_SMART_PTR_STRUCT(type)                                           \
+#define FASTLED_SMART_PTR_STRUCT(type)                                         \
     class type;                                                                \
-    using type##Ptr = fl::Ptr<type>;                                           \
-    
+    using type##Ptr = fl::Ptr<type>;
 
 #define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::Ptr<type>;
 
@@ -51,8 +49,6 @@
         }                                                                      \
     };
 
-
-
 namespace fl {
 
 class Referent; // Inherit this if you want your object to be able to go into a
@@ -60,12 +56,9 @@ class Referent; // Inherit this if you want your object to be able to go into a
 template <typename T> class Ptr; // Reference counted smart pointer base class.
 template <typename T> class WeakPtr; // Weak reference smart pointer base class.
 
+template <typename T, typename... Args> Ptr<T> NewPtr(Args... args);
 
-template <typename T, typename... Args>
-Ptr<T> NewPtr(Args... args);
-
-template <typename T, typename... Args>
-Ptr<T> NewPtrNoTracking(Args... args);
+template <typename T, typename... Args> Ptr<T> NewPtrNoTracking(Args... args);
 
 template <typename T> class PtrTraits {
   public:
@@ -140,10 +133,9 @@ template <typename T> class Ptr : public PtrTraits<T> {
 
     static Ptr Null() { return Ptr<T>(); }
 
-
     // Allow upcasting of Refs.
     template <typename U, typename = fl::is_derived<T, U>>
-    Ptr(const Ptr<U>& refptr) : referent_(refptr.get()) {
+    Ptr(const Ptr<U> &refptr) : referent_(refptr.get()) {
         if (referent_ && isOwned()) {
             referent_->ref();
         }
@@ -378,7 +370,7 @@ template <typename T> class WeakPtr {
         if (!mWeakPtr) {
             return Ptr<T>();
         }
-        T* out = static_cast<T*>(mWeakPtr->getReferent());
+        T *out = static_cast<T *>(mWeakPtr->getReferent());
         if (out->ref_count() == 0) {
             // This is a static object, so the refcount is 0.
             return Ptr<T>::NoTracking(*out);
@@ -432,7 +424,8 @@ class Referent {
         mWeakPtr = weakRefNoCreate;
     }
     mutable int mRefCount;
-    mutable Ptr<WeakReferent> mWeakPtr; // Optional weak reference to this object.
+    mutable Ptr<WeakReferent>
+        mWeakPtr; // Optional weak reference to this object.
 };
 
 template <typename T> inline WeakPtr<T> Ptr<T>::weakRefNoCreate() const {
@@ -455,16 +448,12 @@ template <typename T> inline WeakPtr<T> Ptr<T>::weakRefNoCreate() const {
     return out;
 }
 
-
-template <typename T, typename... Args>
-Ptr<T> NewPtr(Args... args) {
+template <typename T, typename... Args> Ptr<T> NewPtr(Args... args) {
     return Ptr<T>::New(args...);
 }
 
-template <typename T>
-Ptr<T> NewPtrNoTracking(T& obj) {
+template <typename T> Ptr<T> NewPtrNoTracking(T &obj) {
     return Ptr<T>::NoTracking(obj);
 }
 
-
-}  // namespace fl
+} // namespace fl

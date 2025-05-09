@@ -1,6 +1,6 @@
 
-#include "crgb.h"
 #include "fl/leds.h"
+#include "crgb.h"
 #include "fl/assert.h"
 #include "fl/xymap.h"
 

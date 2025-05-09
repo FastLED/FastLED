@@ -3,21 +3,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "fl/geometry.h"
 #include "fl/clamp.h"
-
+#include "fl/geometry.h"
 
 namespace fl {
 
-template<typename T, size_t INLINED_SIZE>
-class FixedVector;
+template <typename T, size_t INLINED_SIZE> class FixedVector;
 
-template<typename T>
-class HeapVector;
+template <typename T> class HeapVector;
 
-template<typename T, size_t INLINED_SIZE>
-class InlinedVector;
-
+template <typename T, size_t INLINED_SIZE> class InlinedVector;
 
 // Slice<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
@@ -39,8 +34,6 @@ template <typename T> class Slice {
     Slice(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
-
-
     template <typename U>
     Slice(const HeapVector<U> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
@@ -56,12 +49,12 @@ template <typename T> class Slice {
     template <size_t ARRAYSIZE>
     Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
 
-    template <typename U,size_t ARRAYSIZE>
+    template <typename U, size_t ARRAYSIZE>
     Slice(T (&array)[ARRAYSIZE]) : mData(array), mSize(ARRAYSIZE) {}
 
-
-    template<typename Iterator>
-    Slice(Iterator begin, Iterator end) : mData(&(*begin)), mSize(end - begin) {}
+    template <typename Iterator>
+    Slice(Iterator begin, Iterator end)
+        : mData(&(*begin)), mSize(end - begin) {}
 
     Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
 
@@ -72,9 +65,7 @@ template <typename T> class Slice {
     }
 
     // Automatic promotion to const Slice<const T>
-    operator Slice<const T>() const {
-        return Slice<const T>(mData, mSize);
-    }
+    operator Slice<const T>() const { return Slice<const T>(mData, mSize); }
 
     T &operator[](size_t index) {
         // No bounds checking in embedded environment

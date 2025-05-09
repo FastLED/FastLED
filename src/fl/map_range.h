@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
+#include "fl/clamp.h"
 #include "fl/force_inline.h"
 #include "fl/math_macros.h"
-#include "fl/clamp.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -44,12 +44,11 @@ FASTLED_FORCE_INLINE U map_range_clamped(T value, T in_min, T in_max, U out_min,
     // with uint16_t and you value < in_min.
     using namespace map_range_detail;
     value = clamp(value, in_min, in_max);
-    return map_range<T,U>(value, in_min, in_max, out_min, out_max);
+    return map_range<T, U>(value, in_min, in_max, out_min, out_max);
 }
 
-
-
-//////////////////////////////////// IMPLEMENTATION ///////////////////////////////////////
+//////////////////////////////////// IMPLEMENTATION
+//////////////////////////////////////////
 
 namespace map_range_detail {
 
@@ -91,10 +90,8 @@ template <> struct map_range_math<uint8_t, uint8_t> {
 
 // partial specialization for U = point_xy<V>
 template <typename T, typename V> struct map_range_math<T, point_xy<V>> {
-    static point_xy<V> map(T value, T in_min, T in_max,
-                           point_xy<V> out_min, 
-                           point_xy<V> out_max)
-    {
+    static point_xy<V> map(T value, T in_min, T in_max, point_xy<V> out_min,
+                           point_xy<V> out_max) {
         if (in_min == in_max) {
             return out_min;
         }

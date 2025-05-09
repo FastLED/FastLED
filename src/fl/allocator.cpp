@@ -4,7 +4,6 @@
 #include "fl/allocator.h"
 #include "fl/namespace.h"
 
-
 #ifdef ESP32
 #include "esp_heap_caps.h"
 #include "esp_system.h"
@@ -39,18 +38,14 @@ void SetLargeBlockAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
     Free = free;
 }
 
-void* LargeBlockAllocate(size_t size, bool zero) {
-    void* ptr = Alloc(size);
+void *LargeBlockAllocate(size_t size, bool zero) {
+    void *ptr = Alloc(size);
     if (zero) {
         memset(ptr, 0, size);
     }
     return ptr;
 }
 
-void LargeBlockDeallocate(void* ptr) {
-    Free(ptr);
-}
+void LargeBlockDeallocate(void *ptr) { Free(ptr); }
 
-
-}  // namespace fl
-
+} // namespace fl

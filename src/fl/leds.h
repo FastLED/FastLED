@@ -6,8 +6,8 @@
 namespace fl {
 
 // Leds definition.
-// Drawing operations on a block of leds requires information about the layout of the leds.
-// Hence this class.
+// Drawing operations on a block of leds requires information about the layout
+// of the leds. Hence this class.
 class Leds {
   public:
     Leds(CRGB *leds, uint16_t width, uint16_t height);

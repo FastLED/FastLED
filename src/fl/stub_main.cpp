@@ -4,10 +4,9 @@
  * notable difference between a *.ino file and a *.cpp file is that the *.ino
  * file does not need to include function prototypes, and are instead
  * auto-generated.
-*/
+ */
 
 // This can't be in the namespace fl. It needs to be in the global namespace.
-
 
 #if defined(FASTLED_STUB_MAIN) || defined(FASTLED_STUB_MAIN_INCLUDE_INO)
 
@@ -22,15 +21,15 @@
 #else
 void setup() {}
 void loop() {}
-#endif  // FASTLED_STUB_MAIN_INCLUDE_INO
+#endif // FASTLED_STUB_MAIN_INCLUDE_INO
 
 #include <iostream>
 
 int main() {
     // Super simple main function that just calls the setup and loop functions.
     setup();
-    while(1) {
+    while (1) {
         loop();
     }
 }
-#endif  // FASTLED_STUB_MAIN_INCLUDE_INO
+#endif // FASTLED_STUB_MAIN_INCLUDE_INO

@@ -6,12 +6,11 @@
 #include "FastLED.h"
 
 #include "fastled_progmem.h"
+#include "fl/namespace.h"
+#include "lib8tion/brightness_bitshifter.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/math8.h"
 #include "lib8tion/scale8.h"
-#include "lib8tion/brightness_bitshifter.h"
-#include "fl/namespace.h"
-
 
 // Author: Zach Vorhies
 namespace fl {
@@ -71,7 +70,8 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
 uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
-                          uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
+                          uint8_t brightness, CRGB *out,
+                          uint8_t *out_power_5bit) {
     if (brightness == 0) {
         *out = CRGB(0, 0, 0);
         *out_power_5bit = 0;
@@ -112,13 +112,11 @@ uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         b16 = scale16by8(b16, brightness);
     }
 
-
     // brighten hardware brightness by turning on low order bits
     if (v5 > 1) {
-        // since v5 is a power of two, subtracting one will invert the leading bit
-        // and invert all the bits below it.
-        // Example: 0b00010000 -1 = 0b00001111
-        // So 0b00010000 | 0b00001111 = 0b00011111
+        // since v5 is a power of two, subtracting one will invert the leading
+        // bit and invert all the bits below it. Example: 0b00010000 -1 =
+        // 0b00001111 So 0b00010000 | 0b00001111 = 0b00011111
         v5 = v5 | (v5 - 1);
     }
     // Step 5: Convert back to 8-bit and output.

@@ -18,7 +18,6 @@
 #include "fl/unused.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/unused.h"
 
 namespace fl {
 
@@ -43,7 +42,8 @@ FASTLED_SMART_PTR(CatmullRomPath);
 // FASTLED_SMART_PTR(LissajousPath);
 
 // BaseClasses.
-// Controllable parameter base class. Each subtype has a transform and brightness.
+// Controllable parameter base class. Each subtype has a transform and
+// brightness.
 class XYPathParams : public Referent {
   public:
     // Reserved for future use.
@@ -62,9 +62,6 @@ class XYPathGenerator : public Referent {
         return false;
     }
 };
-
-
-
 
 /////////////////////////////////////////////////
 // Begin parameter classes.
@@ -101,34 +98,25 @@ class GielisCurveParams : public XYPathParams {
 class CatmullRomParams : public XYPathParams {
   public:
     CatmullRomParams() {}
-    
+
     // Add a point to the path
-    void addPoint(point_xy_float p) {
-        points.push_back(p);
-    }
-    
+    void addPoint(point_xy_float p) { points.push_back(p); }
+
     // Add a point with separate x,y coordinates
-    void addPoint(float x, float y) {
-        points.push_back(point_xy_float(x, y));
-    }
-    
+    void addPoint(float x, float y) { points.push_back(point_xy_float(x, y)); }
+
     // Clear all control points
-    void clear() {
-        points.clear();
-    }
-    
+    void clear() { points.clear(); }
+
     // Get the number of control points
-    size_t size() const {
-        return points.size();
-    }
-    
+    size_t size() const { return points.size(); }
+
     // Vector of control points
     HeapVector<point_xy_float> points;
 };
 
 /////////////////////////////////////////////////
 // Begin implementations of common XYPaths
-
 
 class PointPath : public XYPathGenerator {
   public:
@@ -158,7 +146,6 @@ class LinePath : public XYPathGenerator {
   private:
     Ptr<LinePathParams> mParams;
 };
-
 
 class CirclePath : public XYPathGenerator {
   public:
@@ -251,38 +238,39 @@ class GielisCurvePath : public XYPathGenerator {
     Ptr<GielisCurveParams> mParams;
 };
 
-
 /// Catmull–Rom spline through arbitrary points.
-/// Simply add control points and compute(α) will smoothly interpolate through them.
+/// Simply add control points and compute(α) will smoothly interpolate through
+/// them.
 class CatmullRomPath : public XYPathGenerator {
   public:
     CatmullRomPath(const Ptr<CatmullRomParams> &p = NewPtr<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
     void addPoint(point_xy_float p);
-    
+
     /// Add a point with separate x,y coordinates
     void addPoint(float x, float y);
-    
+
     /// Clear all control points
     void clear();
-    
+
     /// Get the number of control points
     size_t size() const;
-    
+
     point_xy_float compute(float alpha) override;
     const Str name() const override;
-    
+
     CatmullRomParams &params();
     const CatmullRomParams &params() const;
 
   private:
     Ptr<CatmullRomParams> mParams;
-    
+
     // Helper function to interpolate between points using Catmull-Rom spline
-    point_xy_float interpolate(const point_xy_float& p0, const point_xy_float& p1, 
-                              const point_xy_float& p2, const point_xy_float& p3, 
-                              float t) const;
+    point_xy_float interpolate(const point_xy_float &p0,
+                               const point_xy_float &p1,
+                               const point_xy_float &p2,
+                               const point_xy_float &p3, float t) const;
 };
 
 // Smart pointer for CatmullRomPath

@@ -4,23 +4,20 @@
 
 namespace fl {
 
-
-
-
 CRGB Gradient::at(uint8_t index) const {
     struct Visitor {
         Visitor(uint8_t index) : index(index) {}
-        void accept(const CRGBPalette16* palette) {
+        void accept(const CRGBPalette16 *palette) {
             CRGB c = ColorFromPalette(*palette, index);
             return_val = c;
         }
 
-        void accept(const CRGBPalette32* palette) {
+        void accept(const CRGBPalette32 *palette) {
             CRGB c = ColorFromPalette(*palette, index);
             return_val = c;
         }
 
-        void accept(const CRGBPalette256* palette) {
+        void accept(const CRGBPalette256 *palette) {
             CRGB c = ColorFromPalette(*palette, index);
             return_val = c;
         }

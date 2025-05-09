@@ -258,70 +258,55 @@ void GielisCurvePath::setN3(float n3) { params().n3 = n3; }
 GielisCurveParams &GielisCurvePath::params() { return *mParams; }
 const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
+CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {}
 
-CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {
-}
+void CatmullRomPath::addPoint(point_xy_float p) { params().addPoint(p); }
 
-void CatmullRomPath::addPoint(point_xy_float p) {
-    params().addPoint(p);
-}
+void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
 
-void CatmullRomPath::addPoint(float x, float y) {
-    params().addPoint(x, y);
-}
+void CatmullRomPath::clear() { params().clear(); }
 
-void CatmullRomPath::clear() {
-    params().clear();
-}
+size_t CatmullRomPath::size() const { return params().size(); }
 
-size_t CatmullRomPath::size() const {
-    return params().size();
-}
+CatmullRomParams &CatmullRomPath::params() { return *mParams; }
 
-CatmullRomParams &CatmullRomPath::params() { 
-    return *mParams; 
-}
-
-const CatmullRomParams &CatmullRomPath::params() const { 
-    return *mParams; 
-}
+const CatmullRomParams &CatmullRomPath::params() const { return *mParams; }
 
 point_xy_float CatmullRomPath::compute(float alpha) {
-    const auto& points = params().points;
-    
+    const auto &points = params().points;
+
     // Need at least 2 points to define a path
     if (points.size() < 2) {
         // Return origin if not enough points
         return point_xy_float(0.0f, 0.0f);
     }
-    
+
     // If only 2 points, do linear interpolation
     if (points.size() == 2) {
-        return point_xy_float(
-            points[0].x + alpha * (points[1].x - points[0].x),
-            points[0].y + alpha * (points[1].y - points[0].y)
-        );
+        return point_xy_float(points[0].x + alpha * (points[1].x - points[0].x),
+                              points[0].y +
+                                  alpha * (points[1].y - points[0].y));
     }
-    
+
     // For Catmull-Rom, we need 4 points to interpolate between the middle two
     // Scale alpha to the number of segments
     float scaledAlpha = alpha * (points.size() - 1);
-    
+
     // Determine which segment we're in
     int segment = static_cast<int>(scaledAlpha);
-    
+
     // Clamp to valid range
     if (segment >= static_cast<int>(points.size()) - 1) {
         segment = points.size() - 2;
         scaledAlpha = static_cast<float>(segment) + 1.0f;
     }
-    
+
     // Get local alpha within this segment [0,1]
     float t = scaledAlpha - static_cast<float>(segment);
-    
+
     // Get the four points needed for interpolation
     point_xy_float p0, p1, p2, p3;
-    
+
     // Handle boundary cases
     if (segment == 0) {
         // For the first segment, duplicate the first point
@@ -342,42 +327,41 @@ point_xy_float CatmullRomPath::compute(float alpha) {
         p2 = points[segment + 1];
         p3 = points[segment + 2];
     }
-    
+
     // Perform Catmull-Rom interpolation
     auto out = interpolate(p0, p1, p2, p3, t);
     return out;
 }
 
-point_xy_float CatmullRomPath::interpolate(
-    const point_xy_float& p0, const point_xy_float& p1,
-    const point_xy_float& p2, const point_xy_float& p3,
-    float t) const {
-    
+point_xy_float CatmullRomPath::interpolate(const point_xy_float &p0,
+                                           const point_xy_float &p1,
+                                           const point_xy_float &p2,
+                                           const point_xy_float &p3,
+                                           float t) const {
+
     // Catmull-Rom interpolation formula
     // Using alpha=0.5 for the "tension" parameter (standard Catmull-Rom)
     float t2 = t * t;
     float t3 = t2 * t;
-    
+
     // Coefficients for x and y
     float a = -0.5f * p0.x + 1.5f * p1.x - 1.5f * p2.x + 0.5f * p3.x;
     float b = p0.x - 2.5f * p1.x + 2.0f * p2.x - 0.5f * p3.x;
     float c = -0.5f * p0.x + 0.5f * p2.x;
     float d = p1.x;
-    
+
     float x = a * t3 + b * t2 + c * t + d;
-    
+
     a = -0.5f * p0.y + 1.5f * p1.y - 1.5f * p2.y + 0.5f * p3.y;
     b = p0.y - 2.5f * p1.y + 2.0f * p2.y - 0.5f * p3.y;
     c = -0.5f * p0.y + 0.5f * p2.y;
     d = p1.y;
-    
+
     float y = a * t3 + b * t2 + c * t + d;
-    
+
     return point_xy_float(x, y);
 }
 
-const Str CatmullRomPath::name() const { 
-    return "CatmullRomPath"; 
-}
+const Str CatmullRomPath::name() const { return "CatmullRomPath"; }
 
 } // namespace fl

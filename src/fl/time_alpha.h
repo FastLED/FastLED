@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#include "fl/warn.h"
 #include "fl/math_macros.h"
+#include "fl/warn.h"
 
 namespace fl {
 
@@ -24,7 +24,6 @@ inline float time_alphaf(uint32_t now, uint32_t start, uint32_t end) {
     return out;
 }
 
-
 class TimeAlpha {
   public:
     virtual ~TimeAlpha() = default;
@@ -38,7 +37,6 @@ class TimeAlpha {
     }
     virtual bool isActive(uint32_t now) const = 0;
 };
-
 
 /*
  *                       amplitude
@@ -54,16 +52,12 @@ class TimeAlpha {
  *
  *
  */
-class TimeRamp: public TimeAlpha {
+class TimeRamp : public TimeAlpha {
   public:
-    
-
     /// @param latchMs     total active time (ms)
     /// @param risingTime  time to ramp from 0→255 (ms)
     /// @param fallingTime time to ramp from 255→0 (ms)
     TimeRamp(uint32_t risingTime, uint32_t latchMs, uint32_t fallingTime);
-
-
 
     /// Call this when you want to (re)start the ramp cycle.
     void trigger(uint32_t now) override;
@@ -91,22 +85,21 @@ class TimeRamp: public TimeAlpha {
     uint8_t mLastValue = 0;
 };
 
-
 /*
  *                       amplitude
  *                          ^
  *  255 ──────────────────────────────────────
- *                     /         
- *                    /           
- *                   /             
- *                  /               
+ *                     /
+ *                    /
+ *                   /
+ *                  /
  *    0 ────────────┴                       --> time (ms)
  *                  t0   t1
  *
  *
  *
  */
-class TimeClampedTransition: public TimeAlpha {
+class TimeClampedTransition : public TimeAlpha {
   public:
     TimeClampedTransition(uint32_t duration) : mDuration(duration) {}
 
@@ -154,15 +147,13 @@ class TimeClampedTransition: public TimeAlpha {
         return out;
     }
 
-    void set_max_clamp(float max) {
-        mMaxClamp = max;
-    }
+    void set_max_clamp(float max) { mMaxClamp = max; }
 
   private:
     uint32_t mStart = 0;
     uint32_t mDuration = 0;
     uint32_t mEnd = 0;
-    float mMaxClamp = -1.f;  // default disabled.
+    float mMaxClamp = -1.f; // default disabled.
 };
 
 } // namespace fl

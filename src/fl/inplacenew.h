@@ -1,8 +1,9 @@
 #pragma once
 
-#include <stdint.h>
 #include <stddef.h>
-// This file must not be in the fl namespace, it must be in the global namespace.
+#include <stdint.h>
+// This file must not be in the fl namespace, it must be in the global
+// namespace.
 
 #if (defined(__AVR__) || !defined(__has_include)) && (!defined(FASTLED_HAS_NEW))
 #ifndef __has_include
@@ -10,9 +11,7 @@
 #else
 #define _NO_EXCEPT noexcept
 #endif
-inline void* operator new(size_t, void* ptr) _NO_EXCEPT {
-    return ptr;
-}
+inline void *operator new(size_t, void *ptr) _NO_EXCEPT { return ptr; }
 #elif __has_include(<new>)
 #include <new>
 #elif __has_include(<new.h>)
@@ -20,4 +19,3 @@ inline void* operator new(size_t, void* ptr) _NO_EXCEPT {
 #elif __has_include("new.h")
 #include "new.h"
 #endif
-

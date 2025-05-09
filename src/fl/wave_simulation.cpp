@@ -2,37 +2,34 @@
 
 #include <stdint.h>
 
+#include "fl/clamp.h"
 #include "fl/namespace.h"
 #include "fl/wave_simulation.h"
-#include "fl/clamp.h"
-
 
 namespace {
 
 uint8_t half_duplex_blend_sqrt_q15(uint16_t x) {
-    x = MIN(x, 32767);  // Q15
-    const int   Q = 15;
-    uint32_t    X = (uint32_t)x << Q;   // promote to Q30
-    uint32_t    y = (1u << Q);          // start at “1.0” in Q15
+    x = MIN(x, 32767); // Q15
+    const int Q = 15;
+    uint32_t X = (uint32_t)x << Q; // promote to Q30
+    uint32_t y = (1u << Q);        // start at “1.0” in Q15
 
     // 3–4 iterations is plenty for 15‑bit precision:
     for (int i = 0; i < 4; i++) {
-        y = ( y + (X / y) ) >> 1;
+        y = (y + (X / y)) >> 1;
     }
     return static_cast<int16_t>(y) >> 8;
 }
 
 uint8_t half_duplex_blend_linear(uint16_t x) {
-    x = MIN(x, 32767);  // Q15
+    x = MIN(x, 32767); // Q15
     x *= 2;
     return x >> 8;
 }
 
-}  // namespace
-
+} // namespace
 
 namespace fl {
-
 
 void WaveSimulation2D::setSpeed(float speed) { mSim->setSpeed(speed); }
 
@@ -41,11 +38,12 @@ WaveSimulation2D::WaveSimulation2D(uint32_t W, uint32_t H, SuperSample factor,
     init(W, H, factor, speed, dampening);
 }
 
-void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor, float speed, int dampening) {
+void WaveSimulation2D::init(uint32_t width, uint32_t height, SuperSample factor,
+                            float speed, int dampening) {
     mOuterWidth = width;
     mOuterHeight = height;
     mMultiplier = static_cast<uint32_t>(factor);
-    mSim.reset();  // clear out memory first.
+    mSim.reset(); // clear out memory first.
     uint32_t w = width * mMultiplier;
     uint32_t h = height * mMultiplier;
     mSim.reset(new WaveSimulation2D_Real(w, h, speed, dampening));
@@ -84,7 +82,7 @@ int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
             int32_t pt = mSim->geti16(xx, yy);
             // int32_t ch_pt = mChangeGrid[(yy * mMultiplier) + xx];
             int32_t ch_pt = mChangeGrid(xx, yy);
-            if (ch_pt != 0) {  // we got a hit.
+            if (ch_pt != 0) { // we got a hit.
                 sum += ch_pt;
             } else {
                 sum += pt;
@@ -101,7 +99,8 @@ int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     int32_t sum = 0;
     for (uint32_t j = 0; j < mMultiplier; ++j) {
         for (uint32_t i = 0; i < mMultiplier; ++i) {
-            sum += mSim->geti16Previous(x * mMultiplier + i, y * mMultiplier + j);
+            sum +=
+                mSim->geti16Previous(x * mMultiplier + i, y * mMultiplier + j);
         }
     }
     int16_t out = static_cast<int16_t>(sum / (mMultiplier * mMultiplier));
@@ -127,10 +126,10 @@ uint8_t WaveSimulation2D::getu8(size_t x, size_t y) const {
     if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
         switch (mU8Mode) {
-            case WAVE_U8_MODE_LINEAR:
-                return half_duplex_blend_linear(v2);
-            case WAVE_U8_MODE_SQRT:
-                return half_duplex_blend_sqrt_q15(v2);
+        case WAVE_U8_MODE_LINEAR:
+            return half_duplex_blend_linear(v2);
+        case WAVE_U8_MODE_SQRT:
+            return half_duplex_blend_sqrt_q15(v2);
         }
     }
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
@@ -159,7 +158,7 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             size_t xx = x * mMultiplier + i;
             size_t yy = y * mMultiplier + j;
             if (mSim->has(xx, yy)) {
-                int16_t& pt = mChangeGrid.at(xx, yy);
+                int16_t &pt = mChangeGrid.at(xx, yy);
                 if (pt == 0) {
                     // not set yet so set unconditionally.
                     pt = v16;
@@ -195,7 +194,7 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 void WaveSimulation2D::update() {
     const point_xy<int16_t> min_max = mChangeGrid.minMax();
     const bool has_updates = min_max != point_xy<int16_t>(0, 0);
-    for (uint8_t i = 0; i < mExtraFrames+1; ++i) {
+    for (uint8_t i = 0; i < mExtraFrames + 1; ++i) {
         if (has_updates) {
             // apply them
             const uint32_t w = mChangeGrid.width();
@@ -225,12 +224,13 @@ WaveSimulation1D::WaveSimulation1D(uint32_t length, SuperSample factor,
     init(length, factor, speed, dampening);
 }
 
-void WaveSimulation1D::init(uint32_t length, SuperSample factor,
-                            float speed, int dampening) {
+void WaveSimulation1D::init(uint32_t length, SuperSample factor, float speed,
+                            int dampening) {
     mOuterLength = length;
     mMultiplier = static_cast<uint32_t>(factor);
-    mSim.reset();  // clear out memory first.
-    mSim.reset(new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
+    mSim.reset(); // clear out memory first.
+    mSim.reset(
+        new WaveSimulation1D_Real(length * mMultiplier, speed, dampening));
     // Extra updates (frames) are applied because the simulation slows down in
     // proportion to the supersampling factor.
     mExtraFrames = static_cast<uint8_t>(factor) - 1;
@@ -301,7 +301,8 @@ int8_t WaveSimulation1D::geti8(size_t x) const {
 //                 return half_duplex_blend_sqrt_q15(v2);
 //         }
 //     }
-//     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);
+//     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >>
+//     8);
 // }
 
 uint8_t WaveSimulation1D::getu8(size_t x) const {
@@ -309,10 +310,10 @@ uint8_t WaveSimulation1D::getu8(size_t x) const {
     if (mSim->getHalfDuplex()) {
         uint16_t v2 = static_cast<uint16_t>(value);
         switch (mU8Mode) {
-            case WAVE_U8_MODE_LINEAR:
-                return half_duplex_blend_linear(v2);
-            case WAVE_U8_MODE_SQRT:
-                return half_duplex_blend_sqrt_q15(v2);
+        case WAVE_U8_MODE_LINEAR:
+            return half_duplex_blend_linear(v2);
+        case WAVE_U8_MODE_SQRT:
+            return half_duplex_blend_sqrt_q15(v2);
         }
     }
     return static_cast<uint8_t>(((static_cast<uint16_t>(value) + 32768)) >> 8);

@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-#include "fl/namespace.h"
 #include "fl/geometry.h"
+#include "fl/namespace.h"
 #include "fl/slice.h"
 #include "fl/xymap.h"
 
@@ -17,12 +17,11 @@ namespace fl {
 class XYMap;
 class XYRasterU8Sparse;
 
-
 class Tile2x2_u8 {
 
   public:
     static void Rasterize(const Slice<const Tile2x2_u8> &tiles,
-                          XYRasterU8Sparse *output) ;
+                          XYRasterU8Sparse *output);
 
     Tile2x2_u8() = default;
     Tile2x2_u8(const point_xy<int> &origin) : mOrigin(origin) {}
@@ -50,8 +49,7 @@ class Tile2x2_u8 {
         return max;
     }
 
-    static Tile2x2_u8 Max(const Tile2x2_u8 &a,
-                           const Tile2x2_u8 &b) {
+    static Tile2x2_u8 Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
         Tile2x2_u8 result;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
@@ -75,7 +73,7 @@ class Tile2x2_u8 {
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.
     template <typename XYVisitor>
-    void draw(const XYMap &xymap, XYVisitor& visitor) const {
+    void draw(const XYMap &xymap, XYVisitor &visitor) const {
         for (uint16_t x = 0; x < 2; ++x) {
             for (uint16_t y = 0; y < 2; ++y) {
                 uint8_t value = at(x, y);

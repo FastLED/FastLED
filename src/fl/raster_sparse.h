@@ -10,11 +10,11 @@ only a small number of pixels are set.
 
 #include <stdint.h>
 
+#include "fl/geometry.h"
 #include "fl/grid.h"
 #include "fl/hash_map.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
-#include "fl/geometry.h"
 #include "fl/slice.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
@@ -33,8 +33,8 @@ class XYMap;
 
 class Tile2x2_u8;
 
-// A raster of uint8_t values. This is a sparse raster, meaning that it will only
-// store the values that are set.
+// A raster of uint8_t values. This is a sparse raster, meaning that it will
+// only store the values that are set.
 class XYRasterU8Sparse {
   public:
     XYRasterU8Sparse() = default;
@@ -157,8 +157,7 @@ class XYRasterU8Sparse {
         }
     }
 
-
-    static const int kMaxCacheSize = 8;  // Max size for tiny cache.
+    static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
     void write(const point_xy<int> &pt, uint8_t value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
@@ -206,10 +205,12 @@ class XYRasterU8Sparse {
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
-    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey, FASTLED_HASHMAP_INLINED_COUNT>;
+    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey,
+                                     FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<point_xy<int>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize> mCache;
+    HashMap<point_xy<int>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
+        mCache;
     fl::rect_xy<int> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };

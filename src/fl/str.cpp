@@ -1,6 +1,5 @@
 #include <stdlib.h>
 
-
 #include "fl/str.h"
 
 #include "crgb.h"
@@ -10,24 +9,23 @@
 #include "fl/xymap.h"
 
 #ifdef FASTLED_TESTING
-#include <cstdio>  // ok include
+#include <cstdio> // ok include
 #endif
 
 namespace fl {
 
 namespace string_functions {
 
-
-static void ftoa(float value, char* buffer, int precision = 2) {
+static void ftoa(float value, char *buffer, int precision = 2) {
 
     FASTLED_UNUSED(precision);
 
-    #ifdef FASTLED_TESTING
+#ifdef FASTLED_TESTING
     // use sprintf during testing
     sprintf(buffer, "%f", value);
     return;
 
-    #else
+#else
     // Handle negative values
     if (value < 0) {
         *buffer++ = '-';
@@ -38,7 +36,7 @@ static void ftoa(float value, char* buffer, int precision = 2) {
     uint32_t intPart = (uint32_t)value;
 
     // Convert integer part to string (reversed)
-    char intBuf[12];  // Enough for 32-bit integers
+    char intBuf[12]; // Enough for 32-bit integers
     int i = 0;
     do {
         intBuf[i++] = '0' + (intPart % 10);
@@ -50,7 +48,7 @@ static void ftoa(float value, char* buffer, int precision = 2) {
         *buffer++ = intBuf[i];
     }
 
-    *buffer++ = '.';  // Decimal point
+    *buffer++ = '.'; // Decimal point
 
     // Extract fractional part
     float fracPart = value - (uint32_t)value;
@@ -61,8 +59,8 @@ static void ftoa(float value, char* buffer, int precision = 2) {
         fracPart -= digit;
     }
 
-    *buffer = '\0';  // Null-terminate
-    #endif
+    *buffer = '\0'; // Null-terminate
+#endif
 }
 
 static int itoa(int value, char *sp, int radix) {
@@ -274,7 +272,7 @@ Str &Str::append(const CRGB &rgb) {
     return *this;
 }
 
-void StringFormatter::appendFloat(const float& val, StrN<64> *dst) {
+void StringFormatter::appendFloat(const float &val, StrN<64> *dst) {
     char buf[64] = {0};
     string_functions::ftoa(val, buf);
     dst->write(buf, strlen(buf));

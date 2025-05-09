@@ -11,10 +11,8 @@ using namespace fl;
 
 namespace fl {
 
-
-
 void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
-                            XYRasterU8Sparse *out_raster) {
+                           XYRasterU8Sparse *out_raster) {
     out_raster->rasterize(tiles);
 }
 
@@ -35,7 +33,5 @@ void Tile2x2_u8::scale(uint8_t scale) {
         }
     }
 }
-
-
 
 } // namespace fl

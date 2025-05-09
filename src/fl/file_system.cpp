@@ -1,21 +1,18 @@
 #include "fl/file_system.h"
-#include "fl/warn.h"
 #include "fl/unused.h"
-
+#include "fl/warn.h"
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
 #elif __has_include(<SD.h>)
 // work in progress.
-//#include "platforms/fs_sdcard_arduino.hpp"
+// #include "platforms/fs_sdcard_arduino.hpp"
 #endif
 
-#include "fl/namespace.h"
 #include "fl/json.h"
-#include "fl/unused.h"
+#include "fl/namespace.h"
 #include "fl/screenmap.h"
-
-
+#include "fl/unused.h"
 
 namespace fl {
 
@@ -32,9 +29,7 @@ class NullFileHandle : public FileHandle {
         return 0;
     }
     size_t pos() const override { return 0; }
-    const char *path() const override {
-        return "NULL FILE HANDLE";
-    }
+    const char *path() const override { return "NULL FILE HANDLE"; }
     bool seek(size_t pos) override {
         FASTLED_UNUSED(pos);
         return false;
@@ -51,7 +46,8 @@ using namespace fl;
 class NullFileSystem : public FsImpl {
   public:
     NullFileSystem() {
-        FASTLED_WARN("NullFileSystem instantiated as a placeholder, please implement a file system for your platform.");
+        FASTLED_WARN("NullFileSystem instantiated as a placeholder, please "
+                     "implement a file system for your platform.");
     }
     ~NullFileSystem() override {}
 
@@ -70,8 +66,6 @@ class NullFileSystem : public FsImpl {
         return out;
     }
 };
-
-
 
 bool FileSystem::beginSd(int cs_pin) {
     mFs = make_sdcard_filesystem(cs_pin);
@@ -95,14 +89,13 @@ size_t FileHandle::bytesLeft() const { return size() - pos(); }
 
 FileSystem::FileSystem() : mFs() {}
 
-
 void FileSystem::end() {
     if (mFs) {
         mFs->end();
     }
 }
 
-bool FileSystem::readJson(const char *path, JsonDocument* doc) {
+bool FileSystem::readJson(const char *path, JsonDocument *doc) {
     Str text;
     if (!readText(path, &text)) {
         return false;
@@ -110,7 +103,8 @@ bool FileSystem::readJson(const char *path, JsonDocument* doc) {
     return parseJson(text.c_str(), doc);
 }
 
-bool FileSystem::readScreenMaps(const char *path, FixedMap<Str, ScreenMap, 16>* out, Str* error) {
+bool FileSystem::readScreenMaps(const char *path,
+                                FixedMap<Str, ScreenMap, 16> *out, Str *error) {
     Str text;
     if (!readText(path, &text)) {
         FASTLED_WARN("Failed to read file: " << path);
@@ -130,7 +124,8 @@ bool FileSystem::readScreenMaps(const char *path, FixedMap<Str, ScreenMap, 16>* 
     return true;
 }
 
-bool FileSystem::readScreenMap(const char *path, const char* name, ScreenMap* out, Str* error) {
+bool FileSystem::readScreenMap(const char *path, const char *name,
+                               ScreenMap *out, Str *error) {
     Str text;
     if (!readText(path, &text)) {
         FASTLED_WARN("Failed to read file: " << path);
@@ -152,8 +147,11 @@ bool FileSystem::readScreenMap(const char *path, const char* name, ScreenMap* ou
 
 void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
 
-FileHandlePtr FileSystem::openRead(const char *path) { return mFs->openRead(path); }
-Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, size_t nFrameHistory) {
+FileHandlePtr FileSystem::openRead(const char *path) {
+    return mFs->openRead(path);
+}
+Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps,
+                            size_t nFrameHistory) {
     Video video(pixelsPerFrame, fps, nFrameHistory);
     FileHandlePtr file = openRead(path);
     if (!file) {
@@ -164,7 +162,7 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
     return video;
 }
 
-bool FileSystem::readText(const char *path, fl::Str* out) {
+bool FileSystem::readText(const char *path, fl::Str *out) {
     FileHandlePtr file = openRead(path);
     if (!file) {
         FASTLED_WARN("Failed to open file: " << path);
@@ -177,14 +175,14 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
         uint8_t buf[64];
         size_t n = file->read(buf, sizeof(buf));
         // out->append(buf, n);
-        out->append((const char*)buf, n);
+        out->append((const char *)buf, n);
         wrote = true;
     }
     file->close();
     FASTLED_DBG_IF(!wrote, "Failed to write any data to the output string.");
     return wrote;
 }
-}  // namespace fl
+} // namespace fl
 
 namespace fl {
 __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
@@ -193,5 +191,4 @@ __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
     return out;
 }
 
-}  // namespace fl
-
+} // namespace fl

@@ -6,8 +6,6 @@
 #include "fl/vector.h"
 #include "fl/xymap.h"
 
-
-
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #ifdef __AVR__
 #define FASTLED_HAS_ENGINE_EVENTS 0
@@ -144,8 +142,7 @@ class EngineEvents {
     // with FixedVector.
     typedef fl::vector<Pair> ListenerList;
 #else
-    typedef fl::vector_inlined<Pair, 16>
-        ListenerList;
+    typedef fl::vector_inlined<Pair, 16> ListenerList;
 #endif
     ListenerList mListeners;
 #endif

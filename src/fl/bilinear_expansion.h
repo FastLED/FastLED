@@ -10,7 +10,6 @@
 #include "fl/namespace.h"
 #include "fl/xymap.h"
 
-
 namespace fl {
 
 /// @brief Performs bilinear interpolation for upscaling an image.
@@ -31,29 +30,30 @@ void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
 /// @param inputHeight The height of the input grid.
 /// @param xyMap The XYMap to use to determine where to write the pixel. If the
 /// pixel is mapped outside of the range then it is clipped.
-void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth, uint8_t inputHeight, fl::XYMap xyMap);
+void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
+                            uint8_t inputHeight, fl::XYMap xyMap);
 
-// 
+//
 inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
                            uint16_t inputHeight, fl::XYMap xyMap) {
     uint16_t outputWidth = xyMap.getWidth();
     uint16_t outputHeight = xyMap.getHeight();
-    const bool wontFit = (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight());
+    const bool wontFit =
+        (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight());
     // if the input dimensions are not a power of 2 then we can't use the
     // optimized version.
-    if (wontFit || (inputWidth & (inputWidth - 1)) || (inputHeight & (inputHeight - 1))) {
+    if (wontFit || (inputWidth & (inputWidth - 1)) ||
+        (inputHeight & (inputHeight - 1))) {
         bilinearExpandArbitrary(input, output, inputWidth, inputHeight, xyMap);
     } else {
         bilinearExpandPowerOf2(input, output, inputWidth, inputHeight, xyMap);
     }
 }
 
-
 // These are here for testing purposes and are slow. Their primary use
 // is to test against the fixed integer version above.
-void bilinearExpandFloat(const CRGB *input, CRGB *output,
-                                 uint8_t inputWidth, uint8_t inputHeight,
-                                 fl::XYMap xyMap);
+void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
+                         uint8_t inputHeight, fl::XYMap xyMap);
 
 void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
                                   uint16_t inputWidth, uint16_t inputHeight,

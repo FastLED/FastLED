@@ -21,10 +21,6 @@ namespace /*compiled_test*/ {
 //     s_test.simplifyInplace(&points);
 // }
 
-}  // namespace compiled_test
+} // namespace
 
-}  // namespace fl
-
-
-
-
+} // namespace fl

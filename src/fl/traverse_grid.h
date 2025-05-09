@@ -2,20 +2,19 @@
 
 /*
 Amanatides–Woo grid traversal algorithm in C++.
-Given a line defined by two points, this algorithm traverses the grid cells intersecting
-the line and calls a visitor function for each cell.
+Given a line defined by two points, this algorithm traverses the grid cells
+intersecting the line and calls a visitor function for each cell.
 */
-
 
 #include "fl/math.h"
 #include "fl/point.h"
 
 namespace fl {
 
-/// @brief Traverse a grid segment by selecting the cells that are crossed. This version
-/// will select the fastest integer implementation based on the length of the segment. Most
-/// of the time it will call traverseGridSegment16() since segment spans are typically
-/// < 256 pixels.
+/// @brief Traverse a grid segment by selecting the cells that are crossed. This
+/// version will select the fastest integer implementation based on the length
+/// of the segment. Most of the time it will call traverseGridSegment16() since
+/// segment spans are typically < 256 pixels.
 /// @tparam GridVisitor
 /// @param start start point
 /// @param end  end point
@@ -24,7 +23,6 @@ namespace fl {
 template <typename GridVisitor>
 void traverseGridSegment(const point_xy_float &start, const point_xy_float &end,
                          GridVisitor &visitor);
-
 
 /// @brief Traverse a grid segment using fixed-point 8.8 arithmetic.
 /// @tparam GridVisitor
@@ -46,8 +44,8 @@ template <typename GridVisitor>
 void traverseGridSegment32(const point_xy_float &start,
                            const point_xy_float &end, GridVisitor &visitor);
 
-
-/// @brief Traverse a grid segment using floating point arithmetic. Useful for testing.
+/// @brief Traverse a grid segment using floating point arithmetic. Useful for
+/// testing.
 /// @tparam GridVisitor
 /// @param start start point
 /// @param end  end point
@@ -57,9 +55,7 @@ template <typename GridVisitor>
 void traverseGridSegmentFloat(const point_xy_float &start,
                               const point_xy_float &end, GridVisitor &visitor);
 
-
 ////////////////////////// IMPLEMENTATION DETAILS //////////////////////////
-
 
 /// @brief Traverse a grid segment using fixed-point 8.8 arithmetic.
 /// @tparam GridVisitor
@@ -69,7 +65,8 @@ void traverseGridSegmentFloat(const point_xy_float &start,
 /// @details Fully tested.
 template <typename GridVisitor>
 inline void traverseGridSegmentFloat(const point_xy_float &start,
-                              const point_xy_float &end, GridVisitor &visitor) {
+                                     const point_xy_float &end,
+                                     GridVisitor &visitor) {
     int x0 = static_cast<int>(fl::floor(start.x));
     int y0 = static_cast<int>(fl::floor(start.y));
     int x1 = static_cast<int>(fl::floor(end.x));
@@ -148,12 +145,12 @@ inline void traverseGridSegment16(const point_xy_float &start,
     int16_t deltaY_fp = endY_fp - startY_fp;
 
     uint16_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint16_t>(ABS(
-                               (int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
+        (deltaX_fp != 0) ? static_cast<uint16_t>(
+                               ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT16_MAX;
     uint16_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint16_t>(ABS(
-                               (int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
+        (deltaY_fp != 0) ? static_cast<uint16_t>(
+                               ABS((int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT16_MAX;
 
     int16_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -161,15 +158,13 @@ inline void traverseGridSegment16(const point_xy_float &start,
 
     uint16_t tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint16_t>(ABS(int32_t(nextX_fp - startX_fp)) *
-                                        absDeltaX_fp >>
-                                    FP_SHIFT)
+            ? static_cast<uint16_t>(
+                  ABS(int32_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT16_MAX;
     uint16_t tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint16_t>(ABS(int32_t(nextY_fp - startY_fp)) *
-                                        absDeltaY_fp >>
-                                    FP_SHIFT)
+            ? static_cast<uint16_t>(
+                  ABS(int32_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT16_MAX;
 
     const uint16_t maxT_fp = FP_ONE;
@@ -231,12 +226,12 @@ inline void traverseGridSegment32(const point_xy_float &start,
     int32_t deltaY_fp = endY_fp - startY_fp;
 
     uint32_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint32_t>(ABS(
-                               (int64_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
+        (deltaX_fp != 0) ? static_cast<uint32_t>(
+                               ABS((int64_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT32_MAX;
     uint32_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint32_t>(ABS(
-                               (int64_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
+        (deltaY_fp != 0) ? static_cast<uint32_t>(
+                               ABS((int64_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT32_MAX;
 
     int32_t nextX_fp = (stepX > 0) ? ((x0 + 1) << FP_SHIFT) : (x0 << FP_SHIFT);
@@ -244,15 +239,13 @@ inline void traverseGridSegment32(const point_xy_float &start,
 
     uint32_t tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint32_t>(ABS(int64_t(nextX_fp - startX_fp)) *
-                                        absDeltaX_fp >>
-                                    FP_SHIFT)
+            ? static_cast<uint32_t>(
+                  ABS(int64_t(nextX_fp - startX_fp)) * absDeltaX_fp >> FP_SHIFT)
             : UINT32_MAX;
     uint32_t tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint32_t>(ABS(int64_t(nextY_fp - startY_fp)) *
-                                        absDeltaY_fp >>
-                                    FP_SHIFT)
+            ? static_cast<uint32_t>(
+                  ABS(int64_t(nextY_fp - startY_fp)) * absDeltaY_fp >> FP_SHIFT)
             : UINT32_MAX;
 
     const uint32_t maxT_fp = FP_ONE;

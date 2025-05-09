@@ -68,7 +68,7 @@ class StringFormatter {
     }
     static float parseFloat(const char *str, size_t len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
-    static void appendFloat(const float& val, StrN<64> *dst);
+    static void appendFloat(const float &val, StrN<64> *dst);
 };
 
 class StringHolder : public fl::Referent {

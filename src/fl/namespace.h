@@ -3,7 +3,8 @@
 
 #pragma once
 
-#if defined(FASTLED_FORCE_NAMESPACE) && !defined(FASTLED_IS_USING_NAMESPACE) && !defined(FASTLED_NAMESPACE)
+#if defined(FASTLED_FORCE_NAMESPACE) &&                                        \
+    !defined(FASTLED_IS_USING_NAMESPACE) && !defined(FASTLED_NAMESPACE)
 #define FASTLED_NAMESPACE fl
 #define FASTLED_IS_USING_NAMESPACE 1
 #endif
@@ -28,4 +29,3 @@ FASTLED_NAMESPACE_END
 
 #define FASTLED_USING_NAMESPACE using namespace FASTLED_NAMESPACE;
 #endif
-

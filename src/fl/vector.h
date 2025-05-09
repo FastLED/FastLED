@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "fl/functional.h"
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
-#include "fl/functional.h"
 #include "inplacenew.h"
 
 namespace fl {
@@ -28,9 +28,9 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
 
     InlinedMemoryBlock() {
         memset(mMemoryBlock, 0, sizeof(mMemoryBlock));
-        #ifdef FASTLED_TESTING
+#ifdef FASTLED_TESTING
         __data = memory();
-        #endif
+#endif
     }
 
     InlinedMemoryBlock(const InlinedMemoryBlock &other) = default;
@@ -57,9 +57,9 @@ template <typename T, size_t N> struct InlinedMemoryBlock {
         return reinterpret_cast<const T *>(raw);
     }
 
-    #ifdef FASTLED_TESTING
-    T* __data = nullptr;
-    #endif
+#ifdef FASTLED_TESTING
+    T *__data = nullptr;
+#endif
 };
 
 // A fixed sized vector. The user is responsible for making sure that the
@@ -80,8 +80,6 @@ template <typename T, size_t N> class FixedVector {
     typedef const T *const_iterator;
     // Constructor
     constexpr FixedVector() : current_size(0) {}
-
-
 
     FixedVector(const T (&values)[N]) : current_size(N) {
         assign_array(values, N);
@@ -340,7 +338,7 @@ template <typename T> class HeapVector {
         reserve(other.size());
         assign(other.begin(), other.end());
     }
-    HeapVector(HeapVector<T>&& other) {
+    HeapVector(HeapVector<T> &&other) {
         this->swap(other);
         other.clear();
     }
@@ -352,13 +350,11 @@ template <typename T> class HeapVector {
         return *this;
     }
 
-    template<size_t N>
-    HeapVector(T (&values)[N]) {
-        T* begin = &values[0];
-        T* end = &values[N];
+    template <size_t N> HeapVector(T (&values)[N]) {
+        T *begin = &values[0];
+        T *end = &values[N];
         assign(begin, end);
     }
-
 
     // Destructor
     ~HeapVector() { clear(); }
@@ -412,7 +408,6 @@ template <typename T> class HeapVector {
         mSize = n;
     }
 
-
     template <typename InputIt,
               typename = fl::enable_if_t<!fl::is_integral<InputIt>::value>>
     void assign(InputIt begin, InputIt end) {
@@ -422,7 +417,6 @@ template <typename T> class HeapVector {
             push_back(*it);
         }
     }
-
 
     void assign(size_t new_cap, const T &value) {
         clear();
@@ -781,7 +775,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
     InlinedVector(InlinedVector &&other) {
-        //swap(*this, other);
+        // swap(*this, other);
         fl::swap(*this, other);
         other.clear();
     }
@@ -1015,11 +1009,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     }
 
     T &back() { return mUsingHeap ? mHeap.back() : mFixed.back(); }
-    const T &back() const {
-        return mUsingHeap ? mHeap.back() : mFixed.back();
-    }
-
-
+    const T &back() const { return mUsingHeap ? mHeap.back() : mFixed.back(); }
 
     void swap(InlinedVector &other) {
         if (this != &other) {

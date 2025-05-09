@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <string.h> // for memcpy
 
 #include "fl/math_macros.h"

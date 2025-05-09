@@ -2,9 +2,6 @@
 
 namespace fl {
 
-enum DrawMode {
-    DRAW_MODE_OVERWRITE,
-    DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS
-};
+enum DrawMode { DRAW_MODE_OVERWRITE, DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS };
 
 } // namespace fl

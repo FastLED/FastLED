@@ -68,7 +68,6 @@ class TransformFloatImpl : public Referent {
     bool is_identity() const;
 };
 
-
 // Future usage.
 struct Matrix3x3f {
     static Matrix3x3f Identity() {

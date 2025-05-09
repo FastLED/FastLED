@@ -8,8 +8,7 @@
 
 namespace fl {
 
-void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap,
-                          CRGB *out) {
+void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, CRGB *out) {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
@@ -24,7 +23,6 @@ void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
     const rect_xy<int> *optional_bounds =
         mAbsoluteBoundsSet ? nullptr : &mAbsoluteBounds;
 
-
     // Check if the bounds are set.
     // draw all now unconditionally.
     for (const auto &tile : tiles) {
@@ -32,12 +30,10 @@ void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
         rasterize_internal(tile, optional_bounds);
     }
     return;
-
-
 }
 
 void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
-                                        const rect_xy<int> *optional_bounds) {
+                                          const rect_xy<int> *optional_bounds) {
     const point_xy<int> &origin = tile.origin();
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
