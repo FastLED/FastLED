@@ -10,10 +10,16 @@
 #include "fl/xypath.h"
 #include "fl/xypath_renderer.h"
 
+#include "fl/thread_local.h"
+
 namespace fl {
 
+namespace {  // anonymous namespace
+ThreadLocal<XYRasterU8Sparse> tls_raster;
+} // namespace
+
 namespace xypath_detail {
-fl::Str unique_missing_name(const fl::Str& prefix) {
+fl::Str unique_missing_name(const fl::Str &prefix) {
     static int sUniqueName = 0;
     int id = ++sUniqueName;
     Str name = prefix;
@@ -38,7 +44,8 @@ Tile2x2_u8 XYPath::at_subpixel(float alpha) {
     return mPathRenderer->at_subpixel(alpha);
 }
 
-void XYPath::rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
+void XYPath::rasterize(float from, float to, int steps,
+                       XYRasterU8Sparse &raster,
                        function<uint8_t(float)> *optional_alpha_gen) {
     mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
@@ -216,17 +223,15 @@ XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr
-XYPath::NewCustomPath(const fl::function<point_xy_float(float)> &f,
-                      const rect_xy<int> & drawbounds,
-                      const TransformFloat &transform,
-                      const Str &name) {
+XYPathPtr XYPath::NewCustomPath(const fl::function<point_xy_float(float)> &f,
+                                const rect_xy<int> &drawbounds,
+                                const TransformFloat &transform,
+                                const Str &name) {
 
     XYPathFunctionPtr path = NewPtr<XYPathFunction>(f);
     path->setName(name);
     if (!drawbounds.empty()) {
         path->setDrawBounds(drawbounds);
-
     }
     XYPathPtr out = XYPathPtr::New(path);
     if (!transform.is_identity()) {
@@ -250,18 +255,33 @@ void XYPath::setTransform(const TransformFloat &transform) {
     mPathRenderer->setTransform(transform);
 }
 
+void XYPath::draw(const CRGB &color, float from, float to, LedGrid *leds,
+                  int steps) {
+    XYRasterU8Sparse &raster = tls_raster.access();
+    raster.clear();
+    steps = steps > 0 ? steps : calculateSteps(from, to);
+    rasterize(0.0f, 1.0f, steps, raster);
+    raster.draw(color, leds->xymap(), leds->rgb());
+}
 
 
-void XYPath::draw(const CRGB &color, const XYMap &xyMap, CRGB *leds) {
-    XYRaster raster;
-    // // Using full range [0.0, 1.0] with a reasonable number of steps
-    constexpr int kSteps = 100;
-    rasterize(0.0f, 1.0f, kSteps, raster);
-    
-    // // Draw the raster to the LEDs using the XYDrawComposited visitor
-    // XYDrawComposited visitor(color, xyMap, leds);
-    // raster.visit(visitor);
-    raster.draw(color, xyMap, leds);
+int XYPath::calculateSteps(float from, float to) {
+    if (!hasDrawBounds()) {
+        // TODO: come up with a better heuristic for steps when bounds are not set.
+        return 100;
+    }
+    // Since the draw bounds is set, assume we are in pixel space.
+    point_xy <float> start = at(from);
+    point_xy <float> end = at(to);
+    float distance = start.distance(end);
+    int steps = ceil(distance * 2);
+    return steps;
+}
+
+
+
+bool XYPath::hasDrawBounds() const {
+    return mPathRenderer->hasDrawBounds();
 }
 
 } // namespace fl

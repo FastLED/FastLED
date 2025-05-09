@@ -1,9 +1,7 @@
 
 #pragma once
 
-#include <math.h>
-
-#include "fl/math_macros.h"
+#include "fl/math.h"
 
 namespace fl {
 
@@ -151,6 +149,12 @@ template <typename T> struct point_xy {
 
     template <typename U> point_xy getMin(const point_xy<U> &p) const {
         return point_xy<U>(MIN(x, p.x), MIN(y, p.y));
+    }
+
+    T distance(const point_xy &p) const {
+        T dx = x - p.x;
+        T dy = y - p.y;
+        return sqrt(dx * dx + dy * dy);
     }
 
     bool is_zero() const { return (x == 0 && y == 0); }

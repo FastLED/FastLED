@@ -36,6 +36,7 @@ class XYPathRenderer : public Referent {
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height);
+    bool hasDrawBounds() const { return mDrawBoundsSet; }
 
     void onTransformFloatChanged();
 

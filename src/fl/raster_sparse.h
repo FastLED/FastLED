@@ -49,6 +49,8 @@ class XYRasterU8Sparse {
         return *this;
     }
 
+    XYRasterU8Sparse &clear() { return reset(); }
+
     void rasterize(const point_xy<int> &pt, uint8_t value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);

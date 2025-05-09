@@ -11,11 +11,12 @@
 // your animations.
 
 #include "fl/function.h"
+#include "fl/ledgrid.h"
+#include "fl/pair.h"
 #include "fl/ptr.h"
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
-#include "fl/pair.h"
 
 namespace fl {
 
@@ -86,33 +87,48 @@ class XYPath : public Referent {
     // made to also control the intensity and that sucks.
     using xy_brightness = fl::pair<point_xy_float, uint8_t>;
 
+    // Takes in a float at time [0, 1] and returns alpha values
+    // for that point in time.
+    using AlphaFunction = fl::function<uint8_t(float)>;
+
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
-    void draw(const CRGB &color, const XYMap &xyMap, CRGB *leds) ;
+    void draw(const CRGB &color, float from, float to, LedGrid *leds,
+              int steps = -1);
+
     void setScale(float scale);
     Str name() const;
     // Overloaded to allow transform to be passed in.
     point_xy_float at(float alpha, const TransformFloat &tx);
     xy_brightness at_brightness(float alpha) {
         point_xy_float p = at(alpha);
-        return xy_brightness(p, 0xff);  // Full brightness for now.
+        return xy_brightness(p, 0xff); // Full brightness for now.
     }
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
     // which is convenient for drawing since each float pixel can be truncated
     // to an integer type.
     void setDrawBounds(uint16_t width, uint16_t height);
+    bool hasDrawBounds() const;
     TransformFloat &transform();
 
     void setTransform(const TransformFloat &transform);
 
   private:
+    int calculateSteps(float from, float to);
+
     XYPathGeneratorPtr mPath;
     XYPathRendererPtr mPathRenderer;
+
+    // By default the XYPath will use a shared raster. This is a problem on
+    // multi threaded apps. Since there isn't an easy way to check for multi
+    // threading, give the api user the ability to turn this off and use a local
+    // raster.
+    scoped_ptr<XYRasterU8Sparse> mOptionalRaster;
 };
 
 class XYPathFunction : public XYPathGenerator {
