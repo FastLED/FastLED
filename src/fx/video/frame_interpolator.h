@@ -1,10 +1,10 @@
 #pragma once
 
 #include "fl/map.h"
-#include "fx/video/pixel_stream.h"
+#include "fl/namespace.h"
 #include "fx/frame.h"
 #include "fx/video/frame_tracker.h"
-#include "fl/namespace.h"
+#include "fx/video/pixel_stream.h"
 
 namespace fl {
 
@@ -99,10 +99,9 @@ class FrameInterpolator : public fl::Referent {
 
     FrameTracker &getFrameTracker() { return mFrameTracker; }
 
-
   private:
     FrameBuffer mFrames;
     FrameTracker mFrameTracker;
 };
 
-}  // namespace fl
+} // namespace fl

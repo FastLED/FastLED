@@ -48,4 +48,4 @@ uint32_t FrameTracker::get_exact_timestamp_ms(uint32_t frameNumber) const {
     return static_cast<uint32_t>(microseconds / 1000) + mStartTime;
 }
 
-}  // namespace fl
+} // namespace fl

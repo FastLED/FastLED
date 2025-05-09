@@ -1,17 +1,17 @@
 #pragma once
 
-#include <stdint.h>
 #include "fl/bytestream.h"
-#include "fx/video/pixel_stream.h"
-#include "fx/video/frame_interpolator.h"
 #include "fl/file_system.h"
+#include "fx/video/frame_interpolator.h"
+#include "fx/video/pixel_stream.h"
+#include <stdint.h>
 
 #include "fl/namespace.h"
 
 namespace fl {
 FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
-}
+} // namespace fl
 
 namespace fl {
 
@@ -46,8 +46,7 @@ class VideoImpl : public fl::Referent {
     void pause(uint32_t now);
     void resume(uint32_t now);
     bool needsFrame(uint32_t now) const;
-    int32_t durationMicros() const;  // -1 if this is a stream.
-
+    int32_t durationMicros() const; // -1 if this is a stream.
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
@@ -63,4 +62,4 @@ class VideoImpl : public fl::Referent {
     float mTimeScale = 1.0f;
 };
 
-}  // namespace fl
+} // namespace fl

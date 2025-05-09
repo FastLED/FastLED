@@ -1,12 +1,9 @@
 #pragma once
 
-
-#include "fl/fill.h"
-#include "fl/blur.h"
-
-// Color utils is a beast and should be declared last here.
+/*
+Legacy header. Prefer to use fl/colorutils.h instead since
+*/
 #include "fl/colorutils.h"
-
 
 
 using fl::fadeToBlackBy;
@@ -47,6 +44,11 @@ using fl::blur1d;
 using fl::blur2d;
 using fl::nblend;
 using fl::blend;
+
+// TBlendType values.
+using fl::NOBLEND;
+using fl::LINEARBLEND;        ///< Linear interpolation between palette entries, with wrap-around from end to the beginning again
+using fl::LINEARBLEND_NOWRAP;
 
 
 /// Defines a static RGB palette very compactly using a series

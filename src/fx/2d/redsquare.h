@@ -3,8 +3,8 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx2d.h"
 #include "fl/ptr.h"
+#include "fx/fx2d.h"
 
 namespace fl {
 
@@ -43,4 +43,4 @@ class RedSquare : public Fx2d {
     fl::Str fxName() const override { return "red_square"; }
 };
 
-}  // namespace fl
+} // namespace fl

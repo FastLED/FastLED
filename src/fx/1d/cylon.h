@@ -1,8 +1,8 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
 #include "fl/namespace.h"
+#include "fx/fx1d.h"
 
 namespace fl {
 
@@ -15,7 +15,6 @@ class Cylon : public Fx1d {
     uint8_t delay_ms;
     Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10)
         : Fx1d(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
-
 
     void draw(DrawContext context) override {
         if (context.leds == nullptr || mNumLeds == 0) {
@@ -59,4 +58,4 @@ class Cylon : public Fx1d {
     int16_t position = 0;
 };
 
-}  // namespace fl
+} // namespace fl

@@ -11,10 +11,10 @@
 
 #include "fl/bilinear_expansion.h"
 #include "fl/ptr.h"
+#include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
-#include "fl/xymap.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if

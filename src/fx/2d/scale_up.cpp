@@ -5,14 +5,13 @@
 #include "FastLED.h"
 #include "fl/bilinear_expansion.h"
 #include "fl/ptr.h"
+#include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
-#include "fl/xymap.h"
 
 // Include here so that #define PI used in Arduino.h does not produce a warning.
 #include "scale_up.h"
-
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if

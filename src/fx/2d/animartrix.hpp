@@ -7,14 +7,13 @@
 // For details on the animartrix library and licensing information, see
 // fx/aninamtrix_detail.hpp
 
-
 #include "crgb.h"
-#include "fx/fx2d.h"
+#include "fl/dbg.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/scoped_ptr.h"
-#include "fl/dbg.h"
 #include "fl/xymap.h"
+#include "fx/fx2d.h"
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
@@ -78,8 +77,6 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
-
-
 class FastLEDANIMartRIX;
 class Animartrix : public Fx2d {
   public:
@@ -94,9 +91,7 @@ class Animartrix : public Fx2d {
     int fxNum() const { return NUM_ANIMATIONS; }
     void fxSet(int fx);
     int fxGet() const { return static_cast<int>(current_animation); }
-    Str fxName() const override {
-        return "Animartrix:";
-    }
+    Str fxName() const override { return "Animartrix:"; }
     void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
 
   private:
@@ -114,14 +109,11 @@ void AnimartrixLoop(Animartrix &self, uint32_t now);
 /// ##################################################
 /// Details with the implementation of Animartrix
 
-
 struct AnimartrixEntry {
     AnimartrixAnim anim;
-    const char* name;
+    const char *name;
     void (FastLEDANIMartRIX::*func)();
 };
-
-
 
 class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
     Animartrix *data = nullptr;
@@ -135,7 +127,8 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
     void setPixelColor(int x, int y, CRGB pixel) {
         data->leds[xyMap(x, y)] = pixel;
     }
-    void setPixelColorInternal(int x, int y, animartrix_detail::rgb pixel) override {
+    void setPixelColorInternal(int x, int y,
+                               animartrix_detail::rgb pixel) override {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
@@ -193,30 +186,47 @@ static const AnimartrixEntry ANIMATION_TABLE[] = {
     {CALEIDO3, "CALEIDO3", &FastLEDANIMartRIX::Caleido3},
     {CALEIDO2, "CALEIDO2", &FastLEDANIMartRIX::Caleido2},
     {CALEIDO1, "CALEIDO1", &FastLEDANIMartRIX::Caleido1},
-    {DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT", &FastLEDANIMartRIX::Distance_Experiment},
+    {DISTANCE_EXPERIMENT, "DISTANCE_EXPERIMENT",
+     &FastLEDANIMartRIX::Distance_Experiment},
     {CENTER_FIELD, "CENTER_FIELD", &FastLEDANIMartRIX::Center_Field},
     {WAVES, "WAVES", &FastLEDANIMartRIX::Waves},
     {CHASING_SPIRALS, "CHASING_SPIRALS", &FastLEDANIMartRIX::Chasing_Spirals},
     {ROTATING_BLOB, "ROTATING_BLOB", &FastLEDANIMartRIX::Rotating_Blob},
     {RINGS, "RINGS", &FastLEDANIMartRIX::Rings},
     {COMPLEX_KALEIDO, "COMPLEX_KALEIDO", &FastLEDANIMartRIX::Complex_Kaleido},
-    {COMPLEX_KALEIDO_2, "COMPLEX_KALEIDO_2", &FastLEDANIMartRIX::Complex_Kaleido_2},
-    {COMPLEX_KALEIDO_3, "COMPLEX_KALEIDO_3", &FastLEDANIMartRIX::Complex_Kaleido_3},
-    {COMPLEX_KALEIDO_4, "COMPLEX_KALEIDO_4", &FastLEDANIMartRIX::Complex_Kaleido_4},
-    {COMPLEX_KALEIDO_5, "COMPLEX_KALEIDO_5", &FastLEDANIMartRIX::Complex_Kaleido_5},
-    {COMPLEX_KALEIDO_6, "COMPLEX_KALEIDO_6", &FastLEDANIMartRIX::Complex_Kaleido_6},
+    {COMPLEX_KALEIDO_2, "COMPLEX_KALEIDO_2",
+     &FastLEDANIMartRIX::Complex_Kaleido_2},
+    {COMPLEX_KALEIDO_3, "COMPLEX_KALEIDO_3",
+     &FastLEDANIMartRIX::Complex_Kaleido_3},
+    {COMPLEX_KALEIDO_4, "COMPLEX_KALEIDO_4",
+     &FastLEDANIMartRIX::Complex_Kaleido_4},
+    {COMPLEX_KALEIDO_5, "COMPLEX_KALEIDO_5",
+     &FastLEDANIMartRIX::Complex_Kaleido_5},
+    {COMPLEX_KALEIDO_6, "COMPLEX_KALEIDO_6",
+     &FastLEDANIMartRIX::Complex_Kaleido_6},
     {WATER, "WATER", &FastLEDANIMartRIX::Water},
-    {PARAMETRIC_WATER, "PARAMETRIC_WATER", &FastLEDANIMartRIX::Parametric_Water},
-    {MODULE_EXPERIMENT1, "MODULE_EXPERIMENT1", &FastLEDANIMartRIX::Module_Experiment1},
-    {MODULE_EXPERIMENT2, "MODULE_EXPERIMENT2", &FastLEDANIMartRIX::Module_Experiment2},
-    {MODULE_EXPERIMENT3, "MODULE_EXPERIMENT3", &FastLEDANIMartRIX::Module_Experiment3},
-    {MODULE_EXPERIMENT4, "MODULE_EXPERIMENT4", &FastLEDANIMartRIX::Module_Experiment4},
-    {MODULE_EXPERIMENT5, "MODULE_EXPERIMENT5", &FastLEDANIMartRIX::Module_Experiment5},
-    {MODULE_EXPERIMENT6, "MODULE_EXPERIMENT6", &FastLEDANIMartRIX::Module_Experiment6},
-    {MODULE_EXPERIMENT7, "MODULE_EXPERIMENT7", &FastLEDANIMartRIX::Module_Experiment7},
-    {MODULE_EXPERIMENT8, "MODULE_EXPERIMENT8", &FastLEDANIMartRIX::Module_Experiment8},
-    {MODULE_EXPERIMENT9, "MODULE_EXPERIMENT9", &FastLEDANIMartRIX::Module_Experiment9},
-    {MODULE_EXPERIMENT10, "MODULE_EXPERIMENT10", &FastLEDANIMartRIX::Module_Experiment10},
+    {PARAMETRIC_WATER, "PARAMETRIC_WATER",
+     &FastLEDANIMartRIX::Parametric_Water},
+    {MODULE_EXPERIMENT1, "MODULE_EXPERIMENT1",
+     &FastLEDANIMartRIX::Module_Experiment1},
+    {MODULE_EXPERIMENT2, "MODULE_EXPERIMENT2",
+     &FastLEDANIMartRIX::Module_Experiment2},
+    {MODULE_EXPERIMENT3, "MODULE_EXPERIMENT3",
+     &FastLEDANIMartRIX::Module_Experiment3},
+    {MODULE_EXPERIMENT4, "MODULE_EXPERIMENT4",
+     &FastLEDANIMartRIX::Module_Experiment4},
+    {MODULE_EXPERIMENT5, "MODULE_EXPERIMENT5",
+     &FastLEDANIMartRIX::Module_Experiment5},
+    {MODULE_EXPERIMENT6, "MODULE_EXPERIMENT6",
+     &FastLEDANIMartRIX::Module_Experiment6},
+    {MODULE_EXPERIMENT7, "MODULE_EXPERIMENT7",
+     &FastLEDANIMartRIX::Module_Experiment7},
+    {MODULE_EXPERIMENT8, "MODULE_EXPERIMENT8",
+     &FastLEDANIMartRIX::Module_Experiment8},
+    {MODULE_EXPERIMENT9, "MODULE_EXPERIMENT9",
+     &FastLEDANIMartRIX::Module_Experiment9},
+    {MODULE_EXPERIMENT10, "MODULE_EXPERIMENT10",
+     &FastLEDANIMartRIX::Module_Experiment10},
     {MODULE_EXPERIMENT_SM1, "MODULE_EXPERIMENT_SM1", &FastLEDANIMartRIX::SM1},
     {MODULE_EXPERIMENT_SM2, "MODULE_EXPERIMENT_SM2", &FastLEDANIMartRIX::SM2},
     {MODULE_EXPERIMENT_SM3, "MODULE_EXPERIMENT_SM3", &FastLEDANIMartRIX::SM3},
@@ -225,11 +235,12 @@ static const AnimartrixEntry ANIMATION_TABLE[] = {
     {MODULE_EXPERIMENT_SM6, "MODULE_EXPERIMENT_SM6", &FastLEDANIMartRIX::SM6},
     {MODULE_EXPERIMENT_SM8, "MODULE_EXPERIMENT_SM8", &FastLEDANIMartRIX::SM8},
     {MODULE_EXPERIMENT_SM9, "MODULE_EXPERIMENT_SM9", &FastLEDANIMartRIX::SM9},
-    {MODULE_EXPERIMENT_SM10, "MODULE_EXPERIMENT_SM10", &FastLEDANIMartRIX::SM10},
+    {MODULE_EXPERIMENT_SM10, "MODULE_EXPERIMENT_SM10",
+     &FastLEDANIMartRIX::SM10},
 };
 
 void FastLEDANIMartRIX::loop() {
-    for (const auto& entry : ANIMATION_TABLE) {
+    for (const auto &entry : ANIMATION_TABLE) {
         if (entry.anim == data->current_animation) {
             (this->*entry.func)();
             return;
@@ -239,8 +250,8 @@ void FastLEDANIMartRIX::loop() {
     FASTLED_DBG("Animation not found for " << int(data->current_animation));
 }
 
-const char* Animartrix::getAnimationName(AnimartrixAnim animation) {
-    for (const auto& entry : ANIMATION_TABLE) {
+const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
+    for (const auto &entry : ANIMATION_TABLE) {
         if (entry.anim == animation) {
             return entry.name;
         }
@@ -255,4 +266,4 @@ void Animartrix::draw(DrawContext ctx) {
     this->leds = nullptr;
 }
 
-}  // namespace fl
+} // namespace fl

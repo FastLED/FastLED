@@ -1,11 +1,10 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
 #include "fl/namespace.h"
+#include "fx/fx1d.h"
 
 namespace fl {
-
 
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
@@ -26,8 +25,8 @@ namespace fl {
 // This simulation scales it self a bit depending on NUM_LEDS; it should look
 // "OK" on anywhere from 20 to 100 LEDs without too much tweaking.
 //
-// I recommend running this simulation at anywhere from 30-100 frames per second,
-// meaning an interframe delay of about 10-35 milliseconds.
+// I recommend running this simulation at anywhere from 30-100 frames per
+// second, meaning an interframe delay of about 10-35 milliseconds.
 //
 // Looks best on a high-density LED setup (60+ pixels/meter).
 //
@@ -50,7 +49,7 @@ class Fire2012 : public Fx1d {
   public:
     Fire2012(uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120,
              bool reverse_direction = false,
-             const CRGBPalette16 &palette = (const CRGBPalette16&)HeatColors_p)
+             const CRGBPalette16 &palette = (const CRGBPalette16 &)HeatColors_p)
         : Fx1d(num_leds), cooling(cooling), sparking(sparking),
           reverse_direction(reverse_direction), palette(palette) {
         heat.reset(new uint8_t[num_leds]()); // Initialize to zero
@@ -107,4 +106,4 @@ class Fire2012 : public Fx1d {
     CRGBPalette16 palette;
 };
 
-}  // namespace fl
+} // namespace fl

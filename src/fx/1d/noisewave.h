@@ -1,8 +1,8 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
 #include "fl/namespace.h"
+#include "fx/fx1d.h"
 #include "noisegen.h"
 
 namespace fl {
@@ -41,4 +41,4 @@ class NoiseWave : public Fx1d {
     uint32_t start_time = 0;
 };
 
-}  // namespace fl
+} // namespace fl

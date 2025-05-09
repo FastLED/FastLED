@@ -1,16 +1,15 @@
 
 
-
 #include <stdint.h>
 
 #define FASTLED_INTERNAL
 
 #include "FastLED.h"
+#include "fl/ptr.h"
+#include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
-#include "fl/ptr.h"
-#include "fl/xymap.h"
 
 #include "noisepalette.h"
 
@@ -36,7 +35,7 @@ NoisePalette::NoisePalette(XYMap xyMap, float fps)
     noise = scoped_array<uint8_t>(new uint8_t[width * height]);
 }
 
-void NoisePalette::setPalettePreset(int paletteIndex) { 
+void NoisePalette::setPalettePreset(int paletteIndex) {
     currentPaletteIndex = paletteIndex % 12; // Ensure the index wraps around
     switch (currentPaletteIndex) {
     case 0:
@@ -193,8 +192,4 @@ uint8_t NoisePalette::changeToRandomPalette() {
     }
 }
 
-
-
-
-
-}  // namespace fl
+} // namespace fl

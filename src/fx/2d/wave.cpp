@@ -2,6 +2,4 @@
 
 #include "fl/namespace.h"
 
-namespace fl {
-
-}
+namespace fl {}

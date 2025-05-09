@@ -1,13 +1,11 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
-#include "fl/str.h"
 #include "fl/namespace.h"
+#include "fl/str.h"
+#include "fx/fx1d.h"
 
 namespace fl {
-
-
 
 /// @file    TwinkleFox.hpp
 /// @brief   Twinkling "holiday" lights that fade in and out.
@@ -305,4 +303,4 @@ void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
     pal = *(ActivePaletteList[whichPalette]);
 }
 
-}  // namespace fl
+} // namespace fl

@@ -1,12 +1,10 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
 #include "fl/namespace.h"
+#include "fx/fx1d.h"
 
 namespace fl {
-
-
 
 /// @file    pride2015.hpp
 /// @brief   Animated, ever-changing rainbows (Pride2015 effect)
@@ -73,4 +71,4 @@ void Pride2015::draw(Fx::DrawContext ctx) {
     }
 }
 
-}  // namespace fl
+} // namespace fl

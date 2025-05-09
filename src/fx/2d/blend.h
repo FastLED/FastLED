@@ -24,9 +24,7 @@ struct Blend2dParams {
     uint8_t blur_passes = 1;
 };
 
-
 FASTLED_SMART_PTR(Blend2d);
-
 
 class Blend2d : public Fx2d {
   public:
@@ -35,8 +33,8 @@ class Blend2d : public Fx2d {
     // Fx2d layers that are added should be rectangular.
     Blend2d(const XYMap &xymap);
     fl::Str fxName() const override;
-    void add(Fx2dPtr layer, const Params& p = Params());
-    void add(Fx2d &layer, const Params& p = Params());
+    void add(Fx2dPtr layer, const Params &p = Params());
+    void add(Fx2d &layer, const Params &p = Params());
     void draw(DrawContext context) override;
     void clear();
     void setGlobalBlurAmount(uint8_t blur_amount) {
@@ -45,16 +43,16 @@ class Blend2d : public Fx2d {
     void setGlobalBlurPasses(uint8_t blur_passes) {
         mGlobalBlurPasses = blur_passes;
     }
-    bool setParams(Fx2dPtr fx, const Params& p);
-    bool setParams(Fx2d &fx, const Params& p);
+    bool setParams(Fx2dPtr fx, const Params &p);
+    bool setParams(Fx2d &fx, const Params &p);
+
   protected:
     struct Entry {
         Fx2dPtr fx;
         uint8_t blur_amount = 0;
         uint8_t blur_passes = 1;
         Entry() = default;
-        Entry(Fx2dPtr fx, uint8_t blur_amount,
-              uint8_t blur_passes)
+        Entry(Fx2dPtr fx, uint8_t blur_amount, uint8_t blur_passes)
             : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };
     HeapVector<Entry> mLayers;

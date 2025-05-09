@@ -1,8 +1,8 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx1d.h"
 #include "fl/namespace.h"
+#include "fx/fx1d.h"
 
 namespace fl {
 
@@ -36,7 +36,7 @@ class Pacifica : public Fx1d {
                                         0x000E39, 0x001040, 0x001450, 0x001860,
                                         0x001C70, 0x002080, 0x1040BF, 0x2060FF};
 
-    void pacifica_one_layer(CRGB* leds, CRGBPalette16 &p, uint16_t cistart,
+    void pacifica_one_layer(CRGB *leds, CRGBPalette16 &p, uint16_t cistart,
                             uint16_t wavescale, uint8_t bri, uint16_t ioff);
     void pacifica_add_whitecaps(CRGB *leds);
     void pacifica_deepen_colors(CRGB *leds);
@@ -87,9 +87,9 @@ void Pacifica::draw(DrawContext ctx) {
 }
 
 // Add one layer of waves into the led array
-void Pacifica::pacifica_one_layer(CRGB* leds, CRGBPalette16 &p, uint16_t cistart,
-                                  uint16_t wavescale, uint8_t bri,
-                                  uint16_t ioff) {
+void Pacifica::pacifica_one_layer(CRGB *leds, CRGBPalette16 &p,
+                                  uint16_t cistart, uint16_t wavescale,
+                                  uint8_t bri, uint16_t ioff) {
     uint16_t ci = cistart;
     uint16_t waveangle = ioff;
     uint16_t wavescale_half = (wavescale / 2) + 20;
@@ -132,4 +132,4 @@ void Pacifica::pacifica_deepen_colors(CRGB *leds) {
     }
 }
 
-}  // namespace fl
+} // namespace fl

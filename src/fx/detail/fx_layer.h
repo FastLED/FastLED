@@ -4,14 +4,14 @@
 #include <string.h>
 
 #include "crgb.h"
-#include "fl/vector.h"
-#include "fx/fx.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"
-#include "fx/frame.h"
+#include "fl/vector.h"
 #include "fl/warn.h"
+#include "fx/frame.h"
+#include "fx/fx.h"
 
-//#include <assert.h>
+// #include <assert.h>
 
 namespace fl {
 
@@ -26,7 +26,7 @@ class FxLayer : public fl::Referent {
     }
 
     void draw(uint32_t now) {
-        //assert(fx);
+        // assert(fx);
         if (!frame) {
             frame = FramePtr::New(fx->getNumLeds());
         }
@@ -63,4 +63,4 @@ class FxLayer : public fl::Referent {
     bool running = false;
 };
 
-}  // namespace fl
+} // namespace fl

@@ -1,7 +1,7 @@
 
 #include "fx/video/pixel_stream.h"
-#include "fl/namespace.h"
 #include "fl/dbg.h"
+#include "fl/namespace.h"
 
 #ifndef INT32_MAX
 #define INT32_MAX 0x7fffffff
@@ -9,17 +9,15 @@
 
 #define DBG FASTLED_DBG
 
-using fl::FileHandlePtr;
 using fl::ByteStreamPtr;
+using fl::FileHandlePtr;
 
 namespace fl {
 
-PixelStream::PixelStream(int bytes_per_frame) : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
-}
+PixelStream::PixelStream(int bytes_per_frame)
+    : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {}
 
-PixelStream::~PixelStream() {
-    close();
-}
+PixelStream::~PixelStream() { close(); }
 
 bool PixelStream::begin(FileHandlePtr h) {
     close();
@@ -43,15 +41,15 @@ void PixelStream::close() {
     mFileHandle.reset();
 }
 
-int32_t PixelStream::bytesPerFrame() {
-    return mbytesPerFrame;
-}
+int32_t PixelStream::bytesPerFrame() { return mbytesPerFrame; }
 
-bool PixelStream::readPixel(CRGB* dst) {
+bool PixelStream::readPixel(CRGB *dst) {
     if (mUsingByteStream) {
-        return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) && mByteStream->read(&dst->b, 1);
+        return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) &&
+               mByteStream->read(&dst->b, 1);
     } else {
-        return mFileHandle->read(&dst->r, 1) && mFileHandle->read(&dst->g, 1) && mFileHandle->read(&dst->b, 1);
+        return mFileHandle->read(&dst->r, 1) && mFileHandle->read(&dst->g, 1) &&
+               mFileHandle->read(&dst->b, 1);
     }
 }
 
@@ -71,7 +69,7 @@ bool PixelStream::atEnd() const {
     }
 }
 
-bool PixelStream::readFrame(Frame* frame) {
+bool PixelStream::readFrame(Frame *frame) {
     if (!frame) {
         return false;
     }
@@ -81,10 +79,10 @@ bool PixelStream::readFrame(Frame* frame) {
         }
         size_t n = mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3);
         DBG("pos: " << mFileHandle->pos());
-        return n*3 == size_t(mbytesPerFrame);
+        return n * 3 == size_t(mbytesPerFrame);
     }
     size_t n = mByteStream->readCRGB(frame->rgb(), mbytesPerFrame / 3);
-    return n*3 == size_t(mbytesPerFrame);
+    return n * 3 == size_t(mbytesPerFrame);
 }
 
 bool PixelStream::hasFrame(uint32_t frameNumber) {
@@ -98,7 +96,7 @@ bool PixelStream::hasFrame(uint32_t frameNumber) {
     }
 }
 
-bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
+bool PixelStream::readFrameAt(uint32_t frameNumber, Frame *frame) {
     // DBG("read frame at " << frameNumber);
     if (mUsingByteStream) {
         // ByteStream doesn't support seeking
@@ -110,20 +108,24 @@ bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
         if (mFileHandle->bytesLeft() == 0) {
             return false;
         }
-        size_t read = mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3) * 3;
+        size_t read =
+            mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3) * 3;
         // DBG("read: " << read);
         // DBG("pos: " << mFileHandle->Position());
 
         bool ok = int(read) == mbytesPerFrame;
         if (!ok) {
-            DBG("readFrameAt failed - read: " << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:" << frameNumber << ", left: " << mFileHandle->bytesLeft());
+            DBG("readFrameAt failed - read: "
+                << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:"
+                << frameNumber << ", left: " << mFileHandle->bytesLeft());
         }
         return ok;
     }
 }
 
 int32_t PixelStream::framesRemaining() const {
-    if (mbytesPerFrame == 0) return 0;
+    if (mbytesPerFrame == 0)
+        return 0;
     int32_t bytes_left = bytesRemaining();
     if (bytes_left <= 0) {
         return 0;
@@ -133,7 +135,8 @@ int32_t PixelStream::framesRemaining() const {
 
 int32_t PixelStream::framesDisplayed() const {
     if (mUsingByteStream) {
-        // ByteStream doesn't have a concept of total size, so we can't calculate this
+        // ByteStream doesn't have a concept of total size, so we can't
+        // calculate this
         return -1;
     } else {
         int32_t bytes_played = mFileHandle->pos();
@@ -167,7 +170,7 @@ PixelStream::Type PixelStream::getType() const {
     return mUsingByteStream ? Type::kStreaming : Type::kFile;
 }
 
-size_t PixelStream::readBytes(uint8_t* dst, size_t len) {
+size_t PixelStream::readBytes(uint8_t *dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {
         while (bytesRead < len && mByteStream->available(len)) {
@@ -190,4 +193,4 @@ size_t PixelStream::readBytes(uint8_t* dst, size_t len) {
     return bytesRead;
 }
 
-}  // namespace fl
+} // namespace fl

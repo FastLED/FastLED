@@ -84,10 +84,11 @@ int32_t VideoImpl::durationMicros() const {
     }
     int32_t frames = mStream->framesRemaining();
     if (frames < 0) {
-        return -1;  // Stream case, duration unknown
+        return -1; // Stream case, duration unknown
     }
-    uint32_t micros_per_frame = mFrameInterpolator->getFrameTracker().microsecondsPerFrame();
-    return (frames * micros_per_frame);  // Convert to milliseconds
+    uint32_t micros_per_frame =
+        mFrameInterpolator->getFrameTracker().microsecondsPerFrame();
+    return (frames * micros_per_frame); // Convert to milliseconds
 }
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds) {

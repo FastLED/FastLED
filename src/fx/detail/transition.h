@@ -1,13 +1,13 @@
 #pragma once
 
-#include <stdint.h>
 #include "fl/namespace.h"
+#include <stdint.h>
 
 namespace fl {
 
 // Logic to control the progression of a transition over time.
 class Transition {
-public:
+  public:
     Transition() : mStart(0), mDuration(0), mNotStarted(true) {}
     ~Transition() {}
 
@@ -30,23 +30,19 @@ public:
         mDuration = duration;
     }
 
-    void end() {
-        mNotStarted = true;
-    }
+    void end() { mNotStarted = true; }
 
     bool isTransitioning(uint32_t now) {
         if (mNotStarted) {
             return false;
-        }   
+        }
         return now >= mStart && now < mStart + mDuration;
     }
 
-private:
+  private:
     uint32_t mStart;
     uint32_t mDuration;
     bool mNotStarted;
 };
 
-
-}  // namespace fl
-
+} // namespace fl

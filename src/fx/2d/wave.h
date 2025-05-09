@@ -4,13 +4,13 @@
 
 #include "fl/warn.h"
 
+#include "fl/colorutils.h"
 #include "fl/ptr.h"
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
 #include "pixelset.h"
-#include "fl/colorutils.h"
 
 namespace fl {
 
@@ -19,17 +19,19 @@ FASTLED_SMART_PTR(WaveCrgbMap);
 FASTLED_SMART_PTR(WaveCrgbMapDefault);
 FASTLED_SMART_PTR(WaveCrgbGradientMap);
 
-class WaveCrgbMap: public Referent {
+class WaveCrgbMap : public Referent {
   public:
     virtual ~WaveCrgbMap() = default;
-    virtual void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) = 0;
+    virtual void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
+                               CRGB *leds) = 0;
 };
 
 // A great deafult for the wave rendering. It will draw black and then the
 // amplitude of the wave will be more white.
 class WaveCrgbMapDefault : public WaveCrgbMap {
   public:
-    void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) override {
+    void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
+                       CRGB *leds) override {
         const uint32_t width = waveSim.getWidth();
         const uint32_t height = waveSim.getHeight();
         for (uint32_t y = 0; y < height; y++) {
@@ -46,7 +48,8 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
   public:
     WaveCrgbGradientMap(CRGBPalette16 palette) : mPalette(palette) {}
 
-    void mapWaveToLEDs(const XYMap& xymap, WaveSimulation2D &waveSim, CRGB *leds) override {
+    void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
+                       CRGB *leds) override {
         const uint32_t width = waveSim.getWidth();
         const uint32_t height = waveSim.getHeight();
         for (uint32_t y = 0; y < height; y++) {
@@ -68,8 +71,8 @@ struct WaveFxArgs {
                float speed, float dampening, WaveCrgbMapPtr crgbMap)
         : factor(factor), half_duplex(half_duplex), auto_updates(auto_updates),
           speed(speed), dampening(dampening), crgbMap(crgbMap) {}
-    WaveFxArgs(const WaveFxArgs&) = default;
-    WaveFxArgs& operator=(const WaveFxArgs&) = default;
+    WaveFxArgs(const WaveFxArgs &) = default;
+    WaveFxArgs &operator=(const WaveFxArgs &) = default;
     SuperSample factor = SuperSample::SUPER_SAMPLE_2X;
     bool half_duplex = true;
     bool auto_updates = true;
@@ -78,15 +81,14 @@ struct WaveFxArgs {
     WaveCrgbMapPtr crgbMap;
 };
 
-
 // Uses bilearn filtering to double the size of the grid.
 class WaveFx : public Fx2d {
   public:
     using Args = WaveFxArgs;
 
     WaveFx(XYMap xymap, Args args = Args())
-        : Fx2d(xymap), mWaveSim(xymap.getWidth(), xymap.getHeight(), args.factor,
-                                args.speed, args.dampening) {
+        : Fx2d(xymap), mWaveSim(xymap.getWidth(), xymap.getHeight(),
+                                args.factor, args.speed, args.dampening) {
         // Initialize the wave simulation with the given parameters.
         if (args.crgbMap == nullptr) {
             // Use the default CRGB mapping function.
@@ -130,7 +132,7 @@ class WaveFx : public Fx2d {
 
     void addf(size_t x, size_t y, float value) {
         // Add a value at the given coordinates in the wave simulation.
-        float sum = value + mWaveSim.getf(x, y);        
+        float sum = value + mWaveSim.getf(x, y);
         mWaveSim.setf(x, y, MIN(1.0f, sum));
     }
 
