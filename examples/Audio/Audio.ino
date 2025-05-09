@@ -22,6 +22,7 @@ all the UI elements you see below.
 #include "fl/ui.h"
 #include "fl/xypath.h"
 #include "fx/time.h"
+#include "fx.h"
 
 // Sketch.
 #include "fl/function.h"
@@ -42,9 +43,14 @@ UICheckbox enableRMS("Enable RMS visualization", false);
 UICheckbox enableFFT("Enable FFT visualization", true);
 UICheckbox freeze("Freeze frame", false);
 UIButton advanceFrame("Advance frame");
+UISlider decayTimeSeconds("Fade time Seconds", .5, .1, 4, .1);
+UISlider attackTimeSeconds("Attack time Seconds", .5, .1, 4, .1);
+UISlider outputTimeSec("outputTimeSec", .5, 0, 2, .01);
 
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
+
+MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(), decayTimeSeconds.value(), outputTimeSec.value(), 44100);
 
 
 CRGB framebuffer[NUM_LEDS];
@@ -86,6 +92,22 @@ void setup() {
     //FastLED.addLeds<NEOPIXEL, 2>(framebuffer, NUM_LEDS).setScreenMap(screenmap);
     auto screenmap = ledsXY.toScreenMap();
     screenmap.setDiameter(.2);
+
+    decayTimeSeconds.onChanged(
+        [](float value) {
+            audioFadeTracker.setDecayTime(value);
+            FASTLED_WARN("Fade time seconds: " << value);
+        });
+    attackTimeSeconds.onChanged(
+        [](float value) {
+            audioFadeTracker.setAttackTime(value);
+            FASTLED_WARN("Attack time seconds: " << value);
+        });
+    outputTimeSec.onChanged(
+        [](float value) {
+            audioFadeTracker.setOutputTime(value);
+            FASTLED_WARN("Output time seconds: " << value);
+        });
     FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal()).setScreenMap(screenmap);
 }
 
@@ -137,6 +159,8 @@ void loop() {
         if (!do_frame) {
             continue;
         }
+        float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
+        FASTLED_WARN("Fade: " << fade);
         shiftUp();
         // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
@@ -195,6 +219,14 @@ void loop() {
             rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
             framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
+        }
+        if (true) {
+            uint16_t fade_width = fade * (WIDTH - 1);
+            uint16_t h = HEIGHT / 4;
+            // yellow
+            int index = frameBufferXY(fade_width, h);
+            auto c = CRGB(255, 255, 0);
+            framebuffer[index] = c;
         }
     }
 
