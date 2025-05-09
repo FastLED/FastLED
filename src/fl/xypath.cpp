@@ -14,7 +14,7 @@
 
 namespace fl {
 
-namespace {  // anonymous namespace
+namespace { // anonymous namespace
 ThreadLocal<XYRasterU8Sparse> tls_raster;
 } // namespace
 
@@ -255,8 +255,8 @@ void XYPath::setTransform(const TransformFloat &transform) {
     mPathRenderer->setTransform(transform);
 }
 
-void XYPath::draw(const CRGB &color, float from, float to, Leds *leds,
-                  int steps) {
+void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
+                       int steps) {
     XYRasterU8Sparse &raster = tls_raster.access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
@@ -264,24 +264,20 @@ void XYPath::draw(const CRGB &color, float from, float to, Leds *leds,
     raster.draw(color, leds->xymap(), leds->rgb());
 }
 
-
 int XYPath::calculateSteps(float from, float to) {
     if (!hasDrawBounds()) {
-        // TODO: come up with a better heuristic for steps when bounds are not set.
+        // TODO: come up with a better heuristic for steps when bounds are not
+        // set.
         return 100;
     }
     // Since the draw bounds is set, assume we are in pixel space.
-    point_xy <float> start = at(from);
-    point_xy <float> end = at(to);
+    point_xy<float> start = at(from);
+    point_xy<float> end = at(to);
     float distance = start.distance(end);
     int steps = ceil(distance * 2);
     return steps;
 }
 
-
-
-bool XYPath::hasDrawBounds() const {
-    return mPathRenderer->hasDrawBounds();
-}
+bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
 
 } // namespace fl

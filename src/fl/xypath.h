@@ -90,14 +90,13 @@ class XYPath : public Referent {
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
 
-
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
 
     // Rasterizes and draws to the leds.
-    void draw(const CRGB &color, float from, float to, Leds *leds,
-              int steps = -1);
+    void drawColor(const CRGB &color, float from, float to, Leds *leds,
+                   int steps = -1);
 
     // Low level draw function.
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
