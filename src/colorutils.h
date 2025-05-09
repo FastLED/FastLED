@@ -94,6 +94,9 @@ using fl::blend;
 /// `DEFINE_GRADIENT_PALETTE` macro, this is taken of automatically.
 ///
 /// TProgmemRGBGradientPalette_byte must remain in the global namespace.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #define DEFINE_GRADIENT_PALETTE(X) \
   FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
@@ -102,3 +105,5 @@ using fl::blend;
 #define DECLARE_GRADIENT_PALETTE(X) \
   FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
+
+#pragma GCC diagnostic pop
