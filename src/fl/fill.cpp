@@ -146,4 +146,33 @@ void fill_gradient_RGB( CRGB* leds,
     }
 }
 
+
+
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
+{
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds, 0, c1, last, c2);
+}
+
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
+{
+    uint16_t half = (numLeds / 2);
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds,    0, c1, half, c2);
+    fill_gradient_RGB( leds, half, c2, last, c3);
+}
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+{
+    uint16_t onethird = (numLeds / 3);
+    uint16_t twothirds = ((numLeds * 2) / 3);
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds,         0, c1,  onethird, c2);
+    fill_gradient_RGB( leds,  onethird, c2, twothirds, c3);
+    fill_gradient_RGB( leds, twothirds, c3,      last, c4);
+}
+
+
 }  // namespace fl
