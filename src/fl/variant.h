@@ -386,6 +386,22 @@ template <typename T, typename U, typename V> class Variant3 {
         }
     }
 
+    template <typename Visitor> void visit(Visitor &visitor) const {
+        switch (_tag) {
+        case Tag::IsT:
+            visitor.accept(getT());
+            break;
+        case Tag::IsU:
+            visitor.accept(getU());
+            break;
+        case Tag::IsV:
+            visitor.accept(getV());
+            break;
+        case Tag::Empty:
+            break;
+        }
+    }
+
     template <typename Visitor> void visit(Visitor &visitor) {
         switch (_tag) {
         case Tag::IsT:

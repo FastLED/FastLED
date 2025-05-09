@@ -11,15 +11,20 @@
 
 #include <stddef.h>
 
-#include "FastLED.h"
+#include "lib8tion/intmap.h"
+
 #include "rgbw.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
+#include "lib8tion/scale8.h"
 #include "fl/namespace.h"
 #include "eorder.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
+
+
+#include "FastLED.h"  // Problematic.
 
 FASTLED_NAMESPACE_BEGIN
 

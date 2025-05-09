@@ -10,7 +10,7 @@
 #include "fx/fx.h"
 #include "fx/fx2d.h"
 #include "pixelset.h"
-#include "colorutils.h"
+#include "fl/colorutils.h"
 
 namespace fl {
 

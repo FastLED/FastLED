@@ -1,9 +1,53 @@
 #pragma once
 
+
+#include "fl/fill.h"
+#include "fl/blur.h"
+
+// Color utils is a beast and should be declared last here.
 #include "fl/colorutils.h"
 
 
-#if 0
+
+
+using fl::CRGBPalette16;
+using fl::CRGBPalette32;
+using fl::CRGBPalette256;
+using fl::CHSVPalette16;
+using fl::CHSVPalette32;
+using fl::CHSVPalette256;
+// using fl::TProgmemRGBPalette16;
+// using fl::TProgmemHSVPalette16;
+using fl::HeatColor;
+using fl::TRGBGradientPaletteEntryUnion;
+using fl::TDynamicRGBGradientPalette_byte;
+using fl::TDynamicRGBGradientPalette_bytes;
+// using fl::TProgmemRGBGradientPalette_bytes;
+// using fl::TProgmemRGBGradientPalette_byte;
+// using fl::TProgmemRGBPalette16;
+// using fl::TProgmemRGBGradientPaletteRef;
+
+
+using fl::TDynamicRGBGradientPaletteRef;
+using fl::TGradientDirectionCode;
+using fl::TBlendType;
+using fl::ColorFromPalette;
+using fl::ColorFromPaletteExtended;
+using fl::fill_palette;
+using fl::fill_gradient;
+using fl::fill_rainbow;
+using fl::fill_solid;
+using fl::fill_palette_circular;
+using fl::map_data_into_colors_through_palette;
+using fl::nblendPaletteTowardPalette;
+using fl::napplyGamma_video;
+using fl::blurColumns;
+using fl::blurRows;
+using fl::blur1d;
+using fl::blur2d;
+using fl::nblend;
+using fl::blend;
+
 
 /// Defines a static RGB palette very compactly using a series
 /// of connected color gradients.
@@ -52,49 +96,9 @@
 /// TProgmemRGBGradientPalette_byte must remain in the global namespace.
 #define DEFINE_GRADIENT_PALETTE(X) \
   FL_ALIGN_PROGMEM \
-  extern const fl::TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
+  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
 /// Forward-declaration macro for DEFINE_GRADIENT_PALETTE(X)
 #define DECLARE_GRADIENT_PALETTE(X) \
   FL_ALIGN_PROGMEM \
-  extern const fl::TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
-
-#endif
-
-using fl::CRGBPalette16;
-using fl::CRGBPalette32;
-using fl::CRGBPalette256;
-using fl::CHSVPalette16;
-using fl::CHSVPalette32;
-using fl::CHSVPalette256;
-using fl::TProgmemRGBPalette16;
-using fl::TProgmemHSVPalette16;
-using fl::HeatColor;
-using fl::TRGBGradientPaletteEntryUnion;
-using fl::TDynamicRGBGradientPalette_byte;
-using fl::TDynamicRGBGradientPalette_bytes;
-using fl::TProgmemRGBGradientPalette_bytes;
-using fl::TProgmemRGBGradientPalette_byte;
-using fl::TProgmemRGBPalette16;
-using fl::TProgmemRGBGradientPaletteRef;
-
-
-using fl::TDynamicRGBGradientPaletteRef;
-using fl::TGradientDirectionCode;
-using fl::TBlendType;
-using fl::ColorFromPalette;
-using fl::ColorFromPaletteExtended;
-using fl::fill_palette;
-using fl::fill_gradient;
-using fl::fill_rainbow;
-using fl::fill_solid;
-using fl::fill_palette_circular;
-using fl::map_data_into_colors_through_palette;
-using fl::nblendPaletteTowardPalette;
-using fl::napplyGamma_video;
-using fl::blurColumns;
-using fl::blurRows;
-using fl::blur1d;
-using fl::blur2d;
-using fl::nblend;
-using fl::blend;
+  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM

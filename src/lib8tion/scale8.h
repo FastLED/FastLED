@@ -3,6 +3,12 @@
 #include "lib8static.h"
 #include "crgb.h"
 #include "fl/namespace.h"
+#include "fastled_config.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -745,3 +751,5 @@ LIB8STATIC uint8_t brighten8_lin(uint8_t x) {
 /// @} lib8tion
 
 FASTLED_NAMESPACE_END
+
+#pragma GCC diagnostic pop
