@@ -260,7 +260,7 @@ void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
     XYRasterU8Sparse &raster = tls_raster.access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
-    rasterize(0.0f, 1.0f, steps, raster);
+    rasterize(from, to, steps, raster);
     raster.draw(color, leds->xymap(), leds->rgb());
 }
 
