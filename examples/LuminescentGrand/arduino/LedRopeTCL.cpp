@@ -161,7 +161,7 @@ void LedRopeTCL::DrawRepeat(const int* value_array, int array_length) {
   
   // Make sure that the number of colors to repeat does not exceed the length
   // of the rope.
-  const int len = fl::min(array_length, frame_buffer_.length());
+  const int len = MIN(array_length, frame_buffer_.length());
 
   for (int i = 0; i < len; ++i) {
      const Color3i* cur_color = GetIterator(i);  // Current color.

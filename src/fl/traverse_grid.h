@@ -81,14 +81,14 @@ inline void traverseGridSegmentFloat(const point_xy_float &start,
     float dx = end.x - start.x;
     float dy = end.y - start.y;
 
-    float tDeltaX = (dx != 0.0f) ? fl::abs(1.0f / dx) : FLT_MAX;
-    float tDeltaY = (dy != 0.0f) ? fl::abs(1.0f / dy) : FLT_MAX;
+    float tDeltaX = (dx != 0.0f) ? ABS(1.0f / dx) : FLT_MAX;
+    float tDeltaY = (dy != 0.0f) ? ABS(1.0f / dy) : FLT_MAX;
 
     float nextX = (stepX > 0) ? (fl::floor(start.x) + 1) : fl::floor(start.x);
     float nextY = (stepY > 0) ? (fl::floor(start.y) + 1) : fl::floor(start.y);
 
-    float tMaxX = (dx != 0.0f) ? fl::abs((nextX - start.x) / dx) : FLT_MAX;
-    float tMaxY = (dy != 0.0f) ? fl::abs((nextY - start.y) / dy) : FLT_MAX;
+    float tMaxX = (dx != 0.0f) ? ABS((nextX - start.x) / dx) : FLT_MAX;
+    float tMaxY = (dy != 0.0f) ? ABS((nextY - start.y) / dy) : FLT_MAX;
 
     float maxT = 1.0f;
 
@@ -148,11 +148,11 @@ inline void traverseGridSegment16(const point_xy_float &start,
     int16_t deltaY_fp = endY_fp - startY_fp;
 
     uint16_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint16_t>(fl::abs(
+        (deltaX_fp != 0) ? static_cast<uint16_t>(ABS(
                                (int32_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT16_MAX;
     uint16_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint16_t>(fl::abs(
+        (deltaY_fp != 0) ? static_cast<uint16_t>(ABS(
                                (int32_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT16_MAX;
 
@@ -161,13 +161,13 @@ inline void traverseGridSegment16(const point_xy_float &start,
 
     uint16_t tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint16_t>(fl::abs(int32_t(nextX_fp - startX_fp)) *
+            ? static_cast<uint16_t>(ABS(int32_t(nextX_fp - startX_fp)) *
                                         absDeltaX_fp >>
                                     FP_SHIFT)
             : UINT16_MAX;
     uint16_t tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint16_t>(fl::abs(int32_t(nextY_fp - startY_fp)) *
+            ? static_cast<uint16_t>(ABS(int32_t(nextY_fp - startY_fp)) *
                                         absDeltaY_fp >>
                                     FP_SHIFT)
             : UINT16_MAX;
@@ -231,11 +231,11 @@ inline void traverseGridSegment32(const point_xy_float &start,
     int32_t deltaY_fp = endY_fp - startY_fp;
 
     uint32_t absDeltaX_fp =
-        (deltaX_fp != 0) ? static_cast<uint32_t>(fl::abs(
+        (deltaX_fp != 0) ? static_cast<uint32_t>(ABS(
                                (int64_t(FP_ONE) << FP_SHIFT) / deltaX_fp))
                          : UINT32_MAX;
     uint32_t absDeltaY_fp =
-        (deltaY_fp != 0) ? static_cast<uint32_t>(fl::abs(
+        (deltaY_fp != 0) ? static_cast<uint32_t>(ABS(
                                (int64_t(FP_ONE) << FP_SHIFT) / deltaY_fp))
                          : UINT32_MAX;
 
@@ -244,13 +244,13 @@ inline void traverseGridSegment32(const point_xy_float &start,
 
     uint32_t tMaxX_fp =
         (deltaX_fp != 0)
-            ? static_cast<uint32_t>(fl::abs(int64_t(nextX_fp - startX_fp)) *
+            ? static_cast<uint32_t>(ABS(int64_t(nextX_fp - startX_fp)) *
                                         absDeltaX_fp >>
                                     FP_SHIFT)
             : UINT32_MAX;
     uint32_t tMaxY_fp =
         (deltaY_fp != 0)
-            ? static_cast<uint32_t>(fl::abs(int64_t(nextY_fp - startY_fp)) *
+            ? static_cast<uint32_t>(ABS(int64_t(nextY_fp - startY_fp)) *
                                         absDeltaY_fp >>
                                     FP_SHIFT)
             : UINT32_MAX;
@@ -285,9 +285,9 @@ template <typename GridVisitor>
 inline void traverseGridSegment(const point_xy_float &start,
                                 const point_xy_float &end,
                                 GridVisitor &visitor) {
-    float dx = fl::abs(end.x - start.x);
-    float dy = fl::abs(end.y - start.y);
-    float maxRange = fl::max(dx, dy);
+    float dx = ABS(end.x - start.x);
+    float dy = ABS(end.y - start.y);
+    float maxRange = MAX(dx, dy);
 
     // if (maxRange < 256.0f) {
     //     // Use Q8.8 (16-bit signed) if within ±127
