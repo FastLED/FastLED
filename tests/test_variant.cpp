@@ -70,30 +70,30 @@ TEST_CASE("Variant tests") {
 #endif
 }
 
-TEST_CASE("VariantN") {
+TEST_CASE("Variant") {
     // 1) Default is empty
-    VariantN<int, fl::Str, double> v;
+    Variant<int, fl::Str, double> v;
     REQUIRE(v.empty());
     REQUIRE(!v.is<int>());
     REQUIRE(!v.is<fl::Str>());
     REQUIRE(!v.is<double>());
 
     // 2) Construct with a value
-    VariantN<int, fl::Str, double> v1(123);
+    Variant<int, fl::Str, double> v1(123);
     REQUIRE(v1.is<int>());
     REQUIRE(!v1.is<fl::Str>());
     REQUIRE(!v1.is<double>());
     REQUIRE_EQ(*v1.ptr<int>(), 123);
 
     // 3) Construct with a different type
-    VariantN<int, fl::Str, double> v2(fl::Str("hello"));
+    Variant<int, fl::Str, double> v2(fl::Str("hello"));
     REQUIRE(!v2.is<int>());
     REQUIRE(v2.is<fl::Str>());
     REQUIRE(!v2.is<double>());
     REQUIRE_EQ(*v2.ptr<fl::Str>(), fl::Str("hello"));
 
     // 4) Copy construction
-    VariantN<int, fl::Str, double> v3(v2);
+    Variant<int, fl::Str, double> v3(v2);
     REQUIRE(v3.is<fl::Str>());
     REQUIRE_EQ(v3.get<fl::Str>(), fl::Str("hello"));
 

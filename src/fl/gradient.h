@@ -34,8 +34,8 @@ class Gradient {
 
   private:
     using PalletteVariant =
-        Variant3<const CRGBPalette16 *, const CRGBPalette32 *,
-                 const CRGBPalette256 *>;
+        Variant<const CRGBPalette16 *, const CRGBPalette32 *,
+                const CRGBPalette256 *>;
     PalletteVariant mVariant;
 };
 

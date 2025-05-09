@@ -79,7 +79,7 @@ template <typename T> class Optional {
     }
 
   private:
-    variant<T, Empty> mValue;
+    fl::Variant<T, Empty> mValue;
 };
 
 } // namespace fl
