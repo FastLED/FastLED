@@ -253,20 +253,15 @@ void XYPath::setTransform(const TransformFloat &transform) {
 
 
 void XYPath::draw(const CRGB &color, const XYMap &xyMap, CRGB *leds) {
-    FASTLED_UNUSED(leds);
-    FASTLED_UNUSED(xyMap);
-    FASTLED_UNUSED(color);
-    // // Create a raster on the stack
-    // XYRaster raster;
-    
-    // // Rasterize the path into the raster
+    XYRaster raster;
     // // Using full range [0.0, 1.0] with a reasonable number of steps
-    // constexpr int kSteps = 100;
-    // rasterize(0.0f, 1.0f, kSteps, raster);
+    constexpr int kSteps = 100;
+    rasterize(0.0f, 1.0f, kSteps, raster);
     
     // // Draw the raster to the LEDs using the XYDrawComposited visitor
     // XYDrawComposited visitor(color, xyMap, leds);
     // raster.visit(visitor);
+    raster.draw(color, xyMap, leds);
 }
 
 } // namespace fl
