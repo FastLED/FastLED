@@ -10,3 +10,6 @@ scope and other libraries can #include them by mistake.
 This has happened so many times that I've just gone ahead and migrated all
 the new code to this directory, to prevent name collisions.
 
+# When to put stuff in `fl` and not `fx`
+
+If it's a visualizer, put it in the `fx` fodler. If it it's something to help to build a visualizer then you put it here.

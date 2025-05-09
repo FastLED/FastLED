@@ -21,7 +21,7 @@ class ByteStream : public fl::Referent {
     virtual const char *path() const = 0;
     virtual void close() {}  // default is do nothing on close.
     // convenience functions
-    size_t readCRGB(CRGB *dst, size_t n) {
+    virtual size_t readCRGB(CRGB *dst, size_t n) {
       return read((uint8_t *)dst, n * 3) / 3;
     }
 };

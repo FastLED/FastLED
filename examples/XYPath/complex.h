@@ -166,7 +166,7 @@ void loop() {
                                  curr_alpha, maxAnimation.value());
         }
         uint8_t alpha =
-            fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
+            fl::map_range<float>(i, 0.0f, number_of_steps - 1, 64, 255);
         if (!is_active) {
             alpha = 0;
         }
