@@ -75,30 +75,33 @@ class XYPath : public Referent {
         uint16_t width = 0, uint16_t height = 0,
         const Ptr<GielisCurveParams> &params = NewPtr<GielisCurveParams>());
     // END pre-baked paths.
-    /////////////////////////////////////////////////////////////
 
-    // Create a new Catmull-Rom spline path with custom parameters
-
-    XYPath(XYPathGeneratorPtr path,
-           TransformFloat transform = TransformFloat());
+    // Takes in a float at time [0, 1] and returns alpha values
+    // for that point in time.
+    using AlphaFunction = fl::function<uint8_t(float)>;
 
     // Future work: we don't actually want just the point, but also
     // it's intensity at that value. Otherwise a seperate class has to
     // made to also control the intensity and that sucks.
     using xy_brightness = fl::pair<point_xy_float, uint8_t>;
 
-    // Takes in a float at time [0, 1] and returns alpha values
-    // for that point in time.
-    using AlphaFunction = fl::function<uint8_t(float)>;
+    /////////////////////////////////////////////////////////////
+    // Create a new Catmull-Rom spline path with custom parameters
+    XYPath(XYPathGeneratorPtr path,
+           TransformFloat transform = TransformFloat());
+
 
     virtual ~XYPath();
     point_xy_float at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
-    void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
-                   fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
+    // Rasterizes and draws to the leds.
     void draw(const CRGB &color, float from, float to, Leds *leds,
               int steps = -1);
+
+    // Low level draw function.
+    void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
+                   AlphaFunction *optional_alpha_gen = nullptr);
 
     void setScale(float scale);
     Str name() const;
