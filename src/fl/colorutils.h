@@ -1533,7 +1533,8 @@ CRGB ColorFromPalette(const CRGBPalette256 &pal, uint8_t index,
 
 // @author https://github.com/generalelectrix
 CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, uint16_t index,
-                              uint8_t brightness, TBlendType blendType);
+                              uint8_t brightness = 255,
+                              TBlendType blendType = LINEARBLEND);
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, uint8_t, uint8_t,
 /// TBlendType)

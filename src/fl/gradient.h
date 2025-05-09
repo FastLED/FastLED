@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/colorutils.h"
+#include "fl/function.h"
 #include "fl/type_traits.h"
 #include "fl/variant.h"
 
@@ -12,31 +13,28 @@ class CRGBPalette256;
 
 class Gradient {
   public:
+    using GradientFunction = fl::function<CRGB(uint8_t index)>;
     Gradient() = default;
 
-    template <typename T> Gradient(T *palette) { set(palette); }
-    Gradient(const Gradient &other) : mVariant(other.mVariant) {}
-    Gradient &operator=(const Gradient &other) {
-        if (this != &other) {
-            mVariant = other.mVariant;
-        }
-        return *this;
-    }
+    template <typename T> Gradient(T *palette);
+    Gradient(const Gradient &other);
+    Gradient &operator=(const Gradient &other);
 
-    Gradient(Gradient &&other) noexcept : mVariant(fl::move(other.mVariant)) {}
+    Gradient(Gradient &&other) noexcept;
 
     // non template allows carefull control of what can be set.
-    void set(const CRGBPalette16 *palette) { mVariant = palette; }
-    void set(const CRGBPalette32 *palette) { mVariant = palette; }
-    void set(const CRGBPalette256 *palette) { mVariant = palette; }
+    void set(const CRGBPalette16 *palette);
+    void set(const CRGBPalette32 *palette);
+    void set(const CRGBPalette256 *palette);
+    void set(const GradientFunction &func);
 
-    CRGB at(uint8_t index) const;
+    CRGB colorAt(uint8_t index) const;
 
   private:
-    using PalletteVariant =
+    using GradientVariant =
         Variant<const CRGBPalette16 *, const CRGBPalette32 *,
-                const CRGBPalette256 *>;
-    PalletteVariant mVariant;
+                const CRGBPalette256 *, GradientFunction>;
+    GradientVariant mVariant;
 };
 
 } // namespace fl
