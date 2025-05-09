@@ -6,27 +6,29 @@
 #include "fl/map_range.h"
 #include "fl/clamp.h"
 
-
-
 #ifndef FASTLED_NO_UNDEF_MATH_MACROS
 #define FASTLED_NO_UNDEF_MATH_MACROS 0
 #endif
 
 #if !FASTLED_NO_UNDEF_MATH_MACROS
-// The c math micros should be classified as a war crime.
+// Save the original macro definitions if they exist
 #ifdef abs
+  #define FASTLED_MACRO_SAVE_ABS abs
   #undef abs
 #endif
 
 #ifdef min
+  #define FASTLED_MACRO_SAVE_MIN min
   #undef min
 #endif
 
 #ifdef max
+  #define FASTLED_MACRO_SAVE_MAX max
   #undef max
 #endif
 
 #ifdef sqrt
+  #define FASTLED_MACRO_SAVE_SQRT sqrt
   #undef sqrt
 #endif
 #endif
@@ -73,23 +75,27 @@ inline float sqrt(float value) {
 }  // namespace fl
 
 
-#ifndef FASTLED_FL_USING_MATH
-#ifdef __SAM3X8E__
-// Needed for __SAM3X8E__ because we just blew away their math macros.
-#define FASTLED_FL_USING_MATH 1
-#else
-#define FASTLED_FL_USING_MATH 0
+
+
+// Restore the original macro definitions if we saved them
+#if !FASTLED_NO_UNDEF_MATH_MACROS
+#ifdef FASTLED_MACRO_SAVE_ABS
+  #define abs FASTLED_MACRO_SAVE_ABS
+  #undef FASTLED_MACRO_SAVE_ABS
 #endif
-#endif  // FASTLED_FL_USING_MATH
 
+#ifdef FASTLED_MACRO_SAVE_MIN
+  #define min FASTLED_MACRO_SAVE_MIN
+  #undef FASTLED_MACRO_SAVE_MIN
+#endif
 
+#ifdef FASTLED_MACRO_SAVE_MAX
+  #define max FASTLED_MACRO_SAVE_MAX
+  #undef FASTLED_MACRO_SAVE_MAX
+#endif
 
-#if FASTLED_FL_USING_MATH
-
-using fl::floor;
-using fl::ceil;
-using fl::abs;
-using fl::min;
-using fl::max;
-
-#endif  // FASTLED_FL_USING_MATH
+#ifdef FASTLED_MACRO_SAVE_SQRT
+  #define sqrt FASTLED_MACRO_SAVE_SQRT
+  #undef FASTLED_MACRO_SAVE_SQRT
+#endif
+#endif
