@@ -250,4 +250,14 @@ void XYPath::setTransform(const TransformFloat &transform) {
     mPathRenderer->setTransform(transform);
 }
 
+
+
+void XYPath::draw(const CRGB &color, const XYMap &xyMap, CRGB *leds) {
+    FASTLED_UNUSED(color);
+    FASTLED_UNUSED(xyMap);
+    FASTLED_UNUSED(leds);
+  
+    // mPathRenderer->draw(color, xyMap, leds);
+}
+
 } // namespace fl

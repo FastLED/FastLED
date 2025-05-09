@@ -91,6 +91,8 @@ class XYPath : public Referent {
     Tile2x2_u8 at_subpixel(float alpha);
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
+
+    void draw(const CRGB &color, const XYMap &xyMap, CRGB *leds) ;
     void setScale(float scale);
     Str name() const;
     // Overloaded to allow transform to be passed in.
