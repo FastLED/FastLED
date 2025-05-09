@@ -11,14 +11,9 @@
 #include "FastLED.h"
 #include "fl/xymap.h"
 #include "fl/unused.h"
+#include "fl/colorutils.h"
+#include "fl/assert.h"
 
-#if __has_include(<assert.h>) && !defined(__AVR__)
-#include <assert.h>
-#else
-#define assert(x) ((void)0)
-#endif
-
-using namespace fl;
 
 // Legacy XY function. This is a weak symbol that can be overridden by the user.
 uint16_t XY(uint8_t x, uint8_t y) __attribute__((weak));
@@ -26,11 +21,11 @@ uint16_t XY(uint8_t x, uint8_t y) __attribute__((weak));
 __attribute__((weak)) uint16_t XY(uint8_t x, uint8_t y) {
     FASTLED_UNUSED(x);
     FASTLED_UNUSED(y);
-    assert(false);  // The user didn't provide an XY function, so we'll assert here.
+    FASTLED_ASSERT(false, "the user didn't provide an XY function");
     return 0;
 }
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 // uint16_t XY(uint8_t x, uint8_t y) {
@@ -1450,4 +1445,5 @@ void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gamm
 }
 
 
-FASTLED_NAMESPACE_END
+} // namespace fl
+

@@ -2,34 +2,22 @@
 
 #include "FastLED.h"
 #include "fl/force_inline.h"
+#include "fl/namespace.h"
 #include "fl/unused.h"
 
 
-#if FASTLED_IS_USING_NAMESPACE
-#define FUNCTION_FILL_RAINBOW(a,b,c,d) FASTLED_NAMESPACE::fill_rainbow(a,b,c,d)
-#define FUNCTION_NAPPLY_GAMMA(a,b,c) FASTLED_NAMESPACE::napplyGamma_video(a,b,c)
-#define FUNCTION_NAPPLY_GAMMA_RGB(a,b,c,d,e) FASTLED_NAMESPACE::napplyGamma_video(a,b,c,d,e)
-#define FUNCTION_BLUR1D(a,b,c) FASTLED_NAMESPACE::blur1d(a,b,c)
-#define FUNCTION_FILL_GRADIENT(a,b,c,d,e) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e)
-#define FUNCTION_FILL_GRADIENT3(a,b,c,d,e,f) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e,f)
-#define FUNCTION_FILL_GRADIENT4(a,b,c,d,e,f,g) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e,f,g)
-#define FUNCTION_NBLEND(a,b,c) FASTLED_NAMESPACE::nblend(a,b,c)
-#define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d)
-#define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d,e)
-#define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d,e,f)
-#else
-#define FUNCTION_FILL_RAINBOW(a,b,c,d) ::fill_rainbow(a,b,c,d)
-#define FUNCTION_NAPPLY_GAMMA(a,b,c) ::napplyGamma_video(a,b,c)
-#define FUNCTION_NAPPLY_GAMMA_RGB(a,b,c,d,e) ::napplyGamma_video(a,b,c,d,e)
-#define FUNCTION_BLUR1D(a,b,c) ::blur1d(a,b,c)
-#define FUNCTION_FILL_GRADIENT(a,b,c,d,e) ::fill_gradient(a,b,c,d,e)
-#define FUNCTION_FILL_GRADIENT3(a,b,c,d,e,f) ::fill_gradient(a,b,c,d,e,f)
-#define FUNCTION_FILL_GRADIENT4(a,b,c,d,e,f,g) ::fill_gradient(a,b,c,d,e,f,g)
-#define FUNCTION_NBLEND(a,b,c) ::nblend(a,b,c)
-#define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) ::fill_gradient_RGB(a,b,c,d)
-#define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) ::fill_gradient_RGB(a,b,c,d,e)
-#define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) ::fill_gradient_RGB(a,b,c,d,e,f)
-#endif
+
+#define FUNCTION_FILL_RAINBOW(a,b,c,d) fl::fill_rainbow(a,b,c,d)
+#define FUNCTION_NAPPLY_GAMMA(a,b,c) fl::napplyGamma_video(a,b,c)
+#define FUNCTION_NAPPLY_GAMMA_RGB(a,b,c,d,e) fl::napplyGamma_video(a,b,c,d,e)
+#define FUNCTION_BLUR1D(a,b,c) fl::blur1d(a,b,c)
+#define FUNCTION_FILL_GRADIENT(a,b,c,d,e) fl::fill_gradient(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT3(a,b,c,d,e,f) fl::fill_gradient(a,b,c,d,e,f)
+#define FUNCTION_FILL_GRADIENT4(a,b,c,d,e,f,g) fl::fill_gradient(a,b,c,d,e,f,g)
+#define FUNCTION_NBLEND(a,b,c) fl::nblend(a,b,c)
+#define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) fl::fill_gradient_RGB(a,b,c,d)
+#define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) fl::fill_gradient_RGB(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) fl::fill_gradient_RGB(a,b,c,d,e,f)
 
 #ifndef abs
 #include <stdlib.h>
@@ -266,7 +254,7 @@ public:
     /// @param endcolor the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, TGradientDirectionCode)
-    inline CPixelView & fill_gradient(const CHSV & startcolor, const CHSV & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
+    inline CPixelView & fill_gradient(const CHSV & startcolor, const CHSV & endcolor, TGradientDirectionCode directionCode  = fl::SHORTEST_HUES) {
         if(dir >= 0) {
             FUNCTION_FILL_GRADIENT(leds,len,startcolor, endcolor, directionCode);
         } else {
@@ -281,7 +269,7 @@ public:
     /// @param c3 the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, const CHSV&, TGradientDirectionCode)
-    inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV &  c3, TGradientDirectionCode directionCode = SHORTEST_HUES) {
+    inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV &  c3, TGradientDirectionCode directionCode = fl::SHORTEST_HUES) {
         if(dir >= 0) {
             FUNCTION_FILL_GRADIENT3(leds, len, c1, c2, c3, directionCode);
         } else {
@@ -297,7 +285,7 @@ public:
     /// @param c4 the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, const CHSV&, const CHSV&, TGradientDirectionCode)
-    inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV & c3, const CHSV & c4, TGradientDirectionCode directionCode = SHORTEST_HUES) {
+    inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV & c3, const CHSV & c4, TGradientDirectionCode directionCode = fl::SHORTEST_HUES) {
         if(dir >= 0) {
             FUNCTION_FILL_GRADIENT4(leds, len, c1, c2, c3, c4, directionCode);
         } else {
@@ -311,7 +299,7 @@ public:
     /// @param endcolor the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
     /// @see ::fill_gradient_RGB(CRGB*, uint16_t, const CRGB&, const CRGB&)
-    inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
+    inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = fl::SHORTEST_HUES) {
         FASTLED_UNUSED(directionCode); // TODO: why is this not used?
         if(dir >= 0) {
             FUNCTION_FILL_GRADIENT_RGB(leds,len,startcolor, endcolor);
