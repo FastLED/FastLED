@@ -1,22 +1,12 @@
 #pragma once
 
-#include "fl/warn.h"
-#include "fl/has_define.h"
+#include "esp_check.h"
+#include "esp_log.h"
 
-#ifdef ESP32
-#include "platforms/esp/esp_assert.h"
-#else
-#if __has_include("assert.h")
-#include <assert.h>  // ok include.
-#else
-#define assert(x) ((void)0)
-#endif
-
-#define FASTLED_ASSERT(x, MSG)         \
-    {                                  \
-        if (!(x)) {                    \
-            FASTLED_WARN(MSG);         \
-            assert(false);             \
-        }                              \
+#define FASTLED_ASSERT(x, MSG)                                                 \
+    {                                                                          \
+        if (!(x)) {                                                            \
+            ESP_LOGE("#### FastLED", "%s", (fl::StrStream() << MSG).c_str());  \
+            ESP_ERROR_CHECK(ESP_FAIL);                                         \
+        }                                                                      \
     }
-#endif
