@@ -373,10 +373,10 @@ export class GraphicsManagerThreeJS {
     const BufferGeometryUtils = this.threeJsModules.BufferGeometryUtils;
     const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils && !DISABLE_MERGE_GEOMETRIES;
 
-
-
     if (!canMergeGeometries) {
       console.error('BufferGeometryUtils not available, falling back to individual LEDs');
+    } else {
+      console.error('Using merged geometries for better performance');
     }
     
     // Create template geometries for reuse
@@ -477,8 +477,17 @@ export class GraphicsManagerThreeJS {
           // Merge geometries for this strip
           const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
           
-          // Create material and mesh
-          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+          // Create material and mesh with vertex colors
+          const material = new THREE.MeshBasicMaterial({ 
+            color: 0xffffff,
+            vertexColors: true 
+          });
+          
+          // Create color attribute for the merged geometry
+          const colorCount = mergedGeometry.attributes.position.count;
+          const colorArray = new Float32Array(colorCount * 3);
+          mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+          
           const mesh = new THREE.Mesh(mergedGeometry, material);
           this.scene.add(mesh);
           this.mergedMeshes.push(mesh);
@@ -645,12 +654,17 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _updateLedVisuals(positionMap, screenMap) {
+    const { THREE } = this.threeJsModules;
+    
     // Calculate normalized coordinates
     const min_x = screenMap.absMin[0];
     const min_y = screenMap.absMin[1];
     const width = screenMap.absMax[0] - min_x;
     const height = screenMap.absMax[1] - min_y;
 
+    // Track which merged meshes need updates
+    const mergedMeshUpdates = new Map();
+    
     // Update LED positions and colors
     let ledIndex = 0;
     for (const [_, ledData] of positionMap) {  // eslint-disable-line
@@ -669,9 +683,20 @@ export class GraphicsManagerThreeJS {
 
       // Update LED position and color
       if (led._isMerged) {
-        // For merged geometries, just update the color data
+        // For merged geometries, track color updates
         led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
         led.position.set(normalizedX, normalizedY, z);
+        
+        // Track which parent mesh needs updating
+        if (led._parentMesh) {
+          if (!mergedMeshUpdates.has(led._parentMesh)) {
+            mergedMeshUpdates.set(led._parentMesh, []);
+          }
+          mergedMeshUpdates.get(led._parentMesh).push({
+            index: led._mergedIndex,
+            color: new THREE.Color(ledData.r, ledData.g, ledData.b)
+          });
+        }
       } else {
         // For individual LEDs, update position and color directly
         led.position.set(normalizedX, normalizedY, z);
@@ -681,8 +706,56 @@ export class GraphicsManagerThreeJS {
       ledIndex++;
     }
 
+    // Update merged meshes with instance colors
+    this._updateMergedMeshes(mergedMeshUpdates);
+    
     // Clear any remaining LEDs
     this._clearUnusedLeds(ledIndex);
+  }
+  
+  /**
+   * Updates merged meshes with new colors
+   * @private
+   */
+  _updateMergedMeshes(mergedMeshUpdates) {
+    const { THREE } = this.threeJsModules;
+    
+    // Process each mesh that needs updates
+    for (const [mesh, updates] of mergedMeshUpdates.entries()) {
+      if (!mesh.geometry || !mesh.material) continue;
+      
+      // Create or update the color attribute if needed
+      if (!mesh.geometry.attributes.color) {
+        // Create a new color attribute
+        const count = mesh.geometry.attributes.position.count;
+        const colorArray = new Float32Array(count * 3);
+        mesh.geometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        
+        // Update material to use vertex colors
+        mesh.material.vertexColors = true;
+      }
+      
+      // Get the color attribute
+      const colorAttribute = mesh.geometry.attributes.color;
+      
+      // Update colors for each LED
+      updates.forEach(update => {
+        const { index, color } = update;
+        const baseIndex = index * 3;
+        
+        // Each vertex of the geometry needs the color
+        const verticesPerInstance = mesh.geometry.attributes.position.count / this.leds.length;
+        for (let v = 0; v < verticesPerInstance; v++) {
+          const i = (index * verticesPerInstance + v) * 3;
+          colorAttribute.array[i] = color.r;
+          colorAttribute.array[i + 1] = color.g;
+          colorAttribute.array[i + 2] = color.b;
+        }
+      });
+      
+      // Mark the attribute as needing an update
+      colorAttribute.needsUpdate = true;
+    }
   }
   
   /**
@@ -702,6 +775,10 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _clearUnusedLeds(startIndex) {
+    // Track which merged meshes need updates for clearing
+    const mergedMeshUpdates = new Map();
+    const { THREE } = this.threeJsModules;
+    
     for (let i = startIndex; i < this.leds.length; i++) {
       const led = this.leds[i];
       led.material.color.setRGB(0, 0, 0);
@@ -710,7 +787,21 @@ export class GraphicsManagerThreeJS {
         led.position.set(-1000, -1000, 0); // Move offscreen
       } else {
         led.position.set(-1000, -1000, 0); // Update tracking position
+        
+        // Track which parent mesh needs clearing
+        if (led._parentMesh) {
+          if (!mergedMeshUpdates.has(led._parentMesh)) {
+            mergedMeshUpdates.set(led._parentMesh, []);
+          }
+          mergedMeshUpdates.get(led._parentMesh).push({
+            index: led._mergedIndex,
+            color: new THREE.Color(0, 0, 0)
+          });
+        }
       }
     }
+    
+    // Update merged meshes with cleared colors
+    this._updateMergedMeshes(mergedMeshUpdates);
   }
 }
