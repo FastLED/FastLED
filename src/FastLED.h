@@ -903,3 +903,22 @@ using fl::XYMap;
 #if defined(FASTLED_FORCE_USE_NAMESPACE) && FASTLED_FORCE_USE_NAMESPACE==1
 using namespace fl;
 #endif
+
+// Experimental: loop() hijacking.
+//
+// EngineEvents requires that FastLED.show() be invoked.
+// If the user skips that then certain updates will be skipped.
+//
+// Right now this isn't a big deal, but in the future it could be.
+//
+// Therefore this experiment is done so that this loop() hijack trick
+// can be used to insert code at the start of every loop(), such as a
+// scoped object that forces a begin and end frame event.
+//
+// It's possible to hijack the loop() via a macro so that
+// extra code can be injected at the start of every frame.
+// 
+// #define loop() \
+//     real_loop(); \
+//     void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
+//     void real_loop()
