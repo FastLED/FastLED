@@ -38,6 +38,15 @@ class Leds {
 
     const XYMap &xymap() const { return mXyMap; }
 
+    operator CRGB *() { return mLeds; }
+    operator const CRGB *() const { return mLeds; }
+
+    void fill(const CRGB &color) {
+        for (size_t i = 0; i < mXyMap.getTotal(); ++i) {
+            mLeds[i] = color;
+        }
+    }
+
   protected:
     static CRGB &empty(); // Allows safe out of bounds access.
     XYMap mXyMap;

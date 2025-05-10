@@ -84,6 +84,8 @@
 #include "chipsets.h"
 #include "fl/engine_events.h"
 
+#include "fl/leds.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 // Backdoor to get the size of the CLedController object. The one place
@@ -539,6 +541,12 @@ public:
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	template<template<uint8_t DATA_PIN> class CHIPSET, uint8_t DATA_PIN>
+	static CLEDController &addLeds(class fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		CRGB* rgb = leds;
+		return addLeds<CHIPSET, DATA_PIN>(rgb, nLedsOrOffset, nLedsIfOffset);
+	}
+
 #if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
 	template<uint8_t NUM_LANES, template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
 	static CLEDController &addLeds(struct CRGB *data, int nLeds) {
@@ -874,6 +882,9 @@ FASTLED_NAMESPACE_END
 // CRGB leds[NUM_LEDS];
 // fl::clear(leds)
 #include "fl/clear.h"
+
+// Leds has a CRGB block and an XYMap
+#include "fl/leds.h"
 
 #include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
 using fl::UIButton;  // These names are unique enough that we don't need to namespace them

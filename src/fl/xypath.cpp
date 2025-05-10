@@ -65,6 +65,9 @@ XYPath::~XYPath() {}
 void XYPathRenderer::rasterize(
     float from, float to, int steps, XYRaster &raster,
     fl::function<uint8_t(float)> *optional_alpha_gen) {
+
+    FASTLED_WARN("Rasterizing from " << from << " to " << to << " with "
+                                     << steps << " steps");
     for (int i = 0; i < steps; ++i) {
         float alpha = fl::map_range<int, float>(i, 0, steps - 1, from, to);
         Tile2x2_u8 tile = at_subpixel(alpha);
@@ -73,6 +76,7 @@ void XYPathRenderer::rasterize(
             uint8_t a8 = (*optional_alpha_gen)(alpha);
             tile.scale(a8);
         }
+        FASTLED_WARN("Rasterizing tile" << tile);
         raster.rasterize(tile);
     }
 }
@@ -258,6 +262,7 @@ void XYPath::setTransform(const TransformFloat &transform) {
 
 void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
                        int steps) {
+    FASTLED_WARN("Drawing color with steps: " << steps);
     XYRasterU8Sparse &raster = tls_raster.access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
@@ -275,17 +280,8 @@ void XYPath::drawGradient(const Gradient &gradient, float from, float to,
 }
 
 int XYPath::calculateSteps(float from, float to) {
-    if (!hasDrawBounds()) {
-        // TODO: come up with a better heuristic for steps when bounds are not
-        // set.
-        return 100;
-    }
-    // Since the draw bounds is set, assume we are in pixel space.
-    point_xy<float> start = at(from);
-    point_xy<float> end = at(to);
-    float distance = start.distance(end);
-    int steps = ceil(distance * 2);
-    return steps;
+    float diff = fl::clamp(ABS(to - from), 0.0f, 1.0f);
+    return MAX(1, 20 * diff);
 }
 
 bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
