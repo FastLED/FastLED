@@ -28,6 +28,12 @@ struct Visitor {
         return_val = c;
     }
 
+    template <typename T> void accept(const T &obj) {
+        // This should never be called, but we need to provide a default
+        // implementation to avoid compilation errors.
+        accept(&obj);
+    }
+
     CRGB return_val;
     uint8_t index;
 };
@@ -62,6 +68,12 @@ struct VisitorFill {
         for (size_t i = 0; i < n; ++i) {
             output[i] = func(indices[i]);
         }
+    }
+
+    template <typename T> void accept(const T &obj) {
+        // This should never be called, but we need to provide a default
+        // implementation to avoid compilation errors.
+        accept(&obj);
     }
 
     Slice<CRGB> output;
@@ -100,6 +112,17 @@ Gradient &Gradient::operator=(const Gradient &other) {
 }
 
 void Gradient::fill(Slice<const uint8_t> input, Slice<CRGB> output) const {
+    VisitorFill visitor(input, output);
+    mVariant.visit(visitor);
+}
+
+CRGB GradientInlined::colorAt(uint8_t index) const {
+    Visitor visitor(index);
+    mVariant.visit(visitor);
+    return visitor.return_val;
+}
+void GradientInlined::fill(Slice<const uint8_t> input,
+                           Slice<CRGB> output) const {
     VisitorFill visitor(input, output);
     mVariant.visit(visitor);
 }

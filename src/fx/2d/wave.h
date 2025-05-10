@@ -5,6 +5,7 @@
 #include "fl/warn.h"
 
 #include "fl/colorutils.h"
+#include "fl/gradient.h"
 #include "fl/ptr.h"
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
@@ -46,7 +47,7 @@ class WaveCrgbMapDefault : public WaveCrgbMap {
 
 class WaveCrgbGradientMap : public WaveCrgbMap {
   public:
-    WaveCrgbGradientMap(CRGBPalette16 palette) : mPalette(palette) {}
+    WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
 
     void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
                        CRGB *leds) override {
@@ -56,13 +57,14 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
             for (uint32_t x = 0; x < width; x++) {
                 uint32_t idx = xymap(x, y);
                 uint8_t value8 = waveSim.getu8(x, y);
-                leds[idx] = ColorFromPalette(mPalette, value8);
+                CRGB c = mGradient.colorAt(value8);
+                leds[idx] = c;
             }
         }
     }
 
   private:
-    CRGBPalette16 mPalette;
+    fl::GradientInlined mGradient;
 };
 
 struct WaveFxArgs {

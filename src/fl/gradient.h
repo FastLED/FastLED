@@ -39,4 +39,27 @@ class Gradient {
     GradientVariant mVariant;
 };
 
+class GradientInlined {
+  public:
+    using GradientFunction = fl::function<CRGB(uint8_t index)>;
+    GradientInlined() = default;
+
+    template <typename T> GradientInlined(const T &palette) { set(palette); }
+
+    GradientInlined(const GradientInlined &other) : mVariant(other.mVariant) {}
+
+    void set(const CRGBPalette16 &palette) { mVariant = palette; }
+    void set(const CRGBPalette32 &palette) { mVariant = palette; }
+    void set(const CRGBPalette256 &palette) { mVariant = palette; }
+    void set(const GradientFunction &func) { mVariant = func; }
+
+    CRGB colorAt(uint8_t index) const;
+    void fill(Slice<const uint8_t> input, Slice<CRGB> output) const;
+
+  private:
+    using GradientVariant =
+        Variant<CRGBPalette16, CRGBPalette32, CRGBPalette256, GradientFunction>;
+    GradientVariant mVariant;
+};
+
 } // namespace fl
