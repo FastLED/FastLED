@@ -13,6 +13,8 @@
 
 import { isDenseGrid } from './graphics_utils.js';
 
+const DISABLE_MERGE_GEOMETRIES = false;
+
 // Helper function to group LEDs by material properties
 function groupLedsByMaterial(leds) {
   const groups = new Map();
@@ -421,7 +423,7 @@ export class GraphicsManagerThreeJS {
     const { THREE } = this.threeJsModules;
     const { screenMap } = frameData;
 
-    const DISABLE_MERGE_GEOMETRIES = true;
+
     
     // If BufferGeometryUtils is not available, fall back to individual LEDs
     const BufferGeometryUtils = this.threeJsModules.BufferGeometryUtils;
