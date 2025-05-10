@@ -1,29 +1,99 @@
 #pragma once
 
-#include "fl/inplacenew.h"
-#include "fl/template_magic.h"
+#include "fl/inplacenew.h"  // for fl::move, fl::forward, in‐place new
+#include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
+
+// Type traits for variant implementation
+namespace fl {
+
+// Helper to check if a type is in a list of types
+template <typename T, typename... Types> struct contains_type;
+
+template <typename T> struct contains_type<T> {
+    static constexpr bool value = false;
+};
+
+template <typename T, typename U, typename... Rest>
+struct contains_type<T, U, Rest...> {
+    static constexpr bool value =
+        fl::is_same<T, U>::value || contains_type<T, Rest...>::value;
+};
+
+// Helper to get maximum size of types
+template <typename... Types> struct max_size;
+
+template <> struct max_size<> {
+    static constexpr size_t value = 0;
+};
+
+template <typename T, typename... Rest> struct max_size<T, Rest...> {
+    static constexpr size_t value = (sizeof(T) > max_size<Rest...>::value)
+                                        ? sizeof(T)
+                                        : max_size<Rest...>::value;
+};
+
+// Helper to get maximum alignment of types
+template <typename... Types> struct max_align;
+
+template <> struct max_align<> {
+    static constexpr size_t value = 1;
+};
+
+template <typename T, typename... Rest> struct max_align<T, Rest...> {
+    static constexpr size_t value = (alignof(T) > max_align<Rest...>::value)
+                                        ? alignof(T)
+                                        : max_align<Rest...>::value;
+};
+
+} // namespace fl
+
+// AI INSTRUCTIONS, impliment a table dispatch like this:
+// template<typename... Types>
+// class Variant {
+//   // … all your existing stuff …
+
+//   public:
+//     template <typename Visitor>
+//     void visit(Visitor &visitor) {
+//       if (_tag == Empty) return;
+
+//       // Fn is “a pointer to function taking (void* storage, Visitor&)”
+//       using Fn = void(*)(void*, Visitor&);
+
+//       // Build a constexpr array of one thunk per type in Types...
+//       // Each thunk casts the storage back to the right T* and calls
+//       visitor.accept static constexpr std::array<Fn, sizeof...(Types)> table
+//       = {
+//         &Variant::template visit_fn<Types, Visitor>...
+//       };
+
+//       // _tag is 1-based, so dispatch in O(1) via one indirect call:
+//       table[_tag - 1](&_storage, visitor);
+//     }
+
+//   private:
+//     // This is the little helper each table-entry points at:
+//     template <typename T, typename Visitor>
+//     static void visit_fn(void *storage, Visitor &v) {
+//       // unsafe_cast is OK here because we know _tag matched T
+//       v.accept(*reinterpret_cast<T*>(storage));
+//     }
+
+//     // your storage + tag…
+//     alignas(max_align<Types...>::value)
+//     char _storage[max_size<Types...>::value];
+//     Tag _tag;
+// };
 
 namespace fl {
 
 // A variant that can hold any of N different types
 template <typename... Types> class Variant {
   public:
-    // -- Type definitions ---------------------------------------------------
     using Tag = uint8_t;
     static constexpr Tag Empty = 0;
 
-    // Helper to check if a type is in the variant's type list
-    template <typename T, typename First, typename... Rest>
-    struct contains_type {
-        static constexpr bool value =
-            is_same<T, First>::value || contains_type<T, Rest...>::value;
-    };
-
-    template <typename T, typename Last> struct contains_type<T, Last> {
-        static constexpr bool value = is_same<T, Last>::value;
-    };
-
-    // -- Constructors/Destructor --------------------------------------------
+    // –– ctors/dtors/assign as before …
 
     Variant() noexcept : _tag(Empty) {}
 
@@ -53,8 +123,6 @@ template <typename... Types> class Variant {
     }
 
     ~Variant() { reset(); }
-
-    // -- Assignment operators -----------------------------------------------
 
     Variant &operator=(const Variant &other) {
         if (this != &other) {
@@ -93,7 +161,7 @@ template <typename... Types> class Variant {
         return *this;
     }
 
-    // -- Modifiers ----------------------------------------------------------
+    // –– modifiers, observers, ptr/get, etc. unchanged …
 
     template <typename T, typename... Args>
     typename fl::enable_if<contains_type<T, Types...>::value, T &>::type
@@ -110,205 +178,164 @@ template <typename... Types> class Variant {
         }
     }
 
-    // -- Observers ----------------------------------------------------------
-
     Tag tag() const noexcept { return _tag; }
     bool empty() const noexcept { return _tag == Empty; }
-
-    template <typename T> bool equals(const T &value) const {
-        if (empty()) {
-            return false;
-        }
-        if (!is<T>()) {
-            return false;
-        }
-        return *ptr<T>() == value;
-    }
 
     template <typename T> bool is() const noexcept {
         return _tag == type_to_tag<T>();
     }
 
     template <typename T> T *ptr() {
-        if (is<T>()) {
-            return reinterpret_cast<T *>(&_storage);
-        }
-        return nullptr;
+        return is<T>() ? reinterpret_cast<T *>(&_storage) : nullptr;
     }
 
     template <typename T> const T *ptr() const {
-        if (is<T>()) {
-            return reinterpret_cast<const T *>(&_storage);
-        }
-        return nullptr;
+        return is<T>() ? reinterpret_cast<const T *>(&_storage) : nullptr;
     }
 
     template <typename T> T &get() {
-        T *p = ptr<T>();
-        if (!p) {
-            // Handle error - in a minimal implementation we could just assert
-            // but for now we'll use a static T as a fallback
-            static T dummy;
-            return dummy;
-        }
-        return *p;
+        if (auto p = ptr<T>())
+            return *p;
+        static T dummy;
+        return dummy;
     }
 
     template <typename T> const T &get() const {
-        const T *p = ptr<T>();
-        if (!p) {
-            static const T dummy;
-            return dummy;
-        }
-        return *p;
+        if (auto p = ptr<T>())
+            return *p;
+        static const T dummy{};
+        return dummy;
     }
 
+    template <typename T> bool equals(const T &other) const {
+        if (auto p = ptr<T>()) {
+            return *p == other;
+        }
+        return false;
+    }
+
+    // –– visitor using O(1) function‐pointer table
     template <typename Visitor> void visit(Visitor &visitor) {
-        if (empty())
+        if (_tag == Empty)
             return;
 
-        visit_impl<0, Types...>(visitor);
+        // Fn is "a pointer to function taking (void* storage, Visitor&)"
+        using Fn = void (*)(void *, Visitor &);
+
+        // Build a constexpr array of one thunk per type in Types...
+        // Each thunk casts the storage back to the right T* and calls
+        // visitor.accept
+        static constexpr Fn table[] = {
+            &Variant::template visit_fn<Types, Visitor>...};
+
+        // _tag is 1-based, so dispatch in O(1) via one indirect call:
+        table[_tag - 1](&_storage, visitor);
     }
 
     template <typename Visitor> void visit(Visitor &visitor) const {
-        if (empty())
+        if (_tag == Empty)
             return;
 
-        visit_impl<0, Types...>(visitor);
+        // Fn is "a pointer to function taking (const void* storage, Visitor&)"
+        using Fn = void (*)(const void *, Visitor &);
+
+        // Build a constexpr array of one thunk per type in Types...
+        static constexpr Fn table[] = {
+            &Variant::template visit_fn_const<Types, Visitor>...};
+
+        // _tag is 1-based, so dispatch in O(1) via one indirect call:
+        table[_tag - 1](&_storage, visitor);
     }
 
   private:
-    // -- Type traits helpers ------------------------------------------------
+    // –– helper for the visit table
+    template <typename T, typename Visitor>
+    static void visit_fn(void *storage, Visitor &v) {
+        // unsafe_cast is OK here because we know _tag matched T
+        v.accept(*reinterpret_cast<T *>(storage));
+    }
 
-    // Helper to get the maximum size of all types
-    template <typename... Ts> struct max_size;
+    template <typename T, typename Visitor>
+    static void visit_fn_const(const void *storage, Visitor &v) {
+        // unsafe_cast is OK here because we know _tag matched T
+        v.accept(*reinterpret_cast<const T *>(storage));
+    }
 
-    template <typename T> struct max_size<T> {
-        static constexpr size_t value = sizeof(T);
-    };
+    // –– destroy via table
+    void destroy_current() noexcept {
+        using Fn = void (*)(void *);
+        static constexpr Fn table[] = {&Variant::template destroy_fn<Types>...};
+        if (_tag != Empty) {
+            table[_tag - 1](&_storage);
+        }
+    }
 
-    template <typename First, typename... Rest>
-    struct max_size<First, Rest...> {
-        static constexpr size_t value = sizeof(First) > max_size<Rest...>::value
-                                            ? sizeof(First)
-                                            : max_size<Rest...>::value;
-    };
+    template <typename T> static void destroy_fn(void *storage) {
+        reinterpret_cast<T *>(storage)->~T();
+    }
 
-    // Helper to get the maximum alignment of all types
-    template <typename... Ts> struct max_align;
+    // –– copy‐construct via table
+    void copy_construct_from(const Variant &other) {
+        using Fn = void (*)(void *, const Variant &);
+        static constexpr Fn table[] = {&Variant::template copy_fn<Types>...};
+        table[other._tag - 1](&_storage, other);
+        _tag = other._tag;
+    }
 
-    template <typename T> struct max_align<T> {
-        static constexpr size_t value = alignof(T);
-    };
+    template <typename T>
+    static void copy_fn(void *storage, const Variant &other) {
+        new (storage) T(*reinterpret_cast<const T *>(&other._storage));
+    }
 
-    template <typename First, typename... Rest>
-    struct max_align<First, Rest...> {
-        static constexpr size_t value = alignof(First) >
-                                                max_align<Rest...>::value
-                                            ? alignof(First)
-                                            : max_align<Rest...>::value;
-    };
+    // –– move‐construct via table
+    void move_construct_from(Variant &other) noexcept {
+        using Fn = void (*)(void *, Variant &);
+        static constexpr Fn table[] = {&Variant::template move_fn<Types>...};
+        table[other._tag - 1](&_storage, other);
+        _tag = other._tag;
+        other.reset();
+    }
 
-    // -- Type to tag conversion ---------------------------------------------
+    template <typename T> static void move_fn(void *storage, Variant &other) {
+        new (storage) T(fl::move(*reinterpret_cast<T *>(&other._storage)));
+    }
 
-    // Convert a type to its corresponding tag value (1-based index)
-    template <typename T, typename... Ts> struct type_to_tag_impl;
+    // –– everything below here (type_traits, construct<T>, type_to_tag,
+    // storage)
+    //    stays exactly as you wrote it:
 
-    template <typename T, typename First, typename... Rest>
-    struct type_to_tag_impl<T, First, Rest...> {
-        static constexpr Tag value =
-            is_same<T, First>::value ? 1
-                                     : 1 + type_to_tag_impl<T, Rest...>::value;
-    };
+    // … max_size, max_align, contains_type, type_to_tag_impl, etc. …
 
-    template <typename T, typename Last> struct type_to_tag_impl<T, Last> {
-        static constexpr Tag value = is_same<T, Last>::value ? 1 : 0;
-    };
-
+    // Helper to map a type to its tag value
     template <typename T> static constexpr Tag type_to_tag() {
         return type_to_tag_impl<T, Types...>::value;
     }
 
-    // -- Implementation details ---------------------------------------------
+    // Implementation details for type_to_tag
+    template <typename T, typename... Ts> struct type_to_tag_impl;
 
-    // Construct a value of type T in the storage
+    template <typename T> struct type_to_tag_impl<T> {
+        static constexpr Tag value = 0; // Not found
+    };
+
+    template <typename T, typename U, typename... Rest>
+    struct type_to_tag_impl<T, U, Rest...> {
+        static constexpr Tag value =
+            fl::is_same<T, U>::value
+                ? 1
+                : (type_to_tag_impl<T, Rest...>::value == 0
+                       ? 0
+                       : type_to_tag_impl<T, Rest...>::value + 1);
+    };
+
     template <typename T, typename... Args> void construct(Args &&...args) {
         new (&_storage) T(fl::forward<Args>(args)...);
         _tag = type_to_tag<T>();
     }
 
-    // Destroy the current value
-    void destroy_current() { visit_destroy<0, Types...>(); }
-
-    // Helper to copy construct from another variant
-    void copy_construct_from(const Variant &other) {
-        copy_construct_impl<0, Types...>(other);
-    }
-
-    // Helper to move construct from another variant
-    void move_construct_from(Variant &other) {
-        move_construct_impl<0, Types...>(other);
-    }
-
-    // Implementation of copy construction
-    template <size_t I, typename First, typename... Rest>
-    void copy_construct_impl(const Variant &other) {
-        if (other._tag == I + 1) {
-            new (&_storage)
-                First(*reinterpret_cast<const First *>(&other._storage));
-            _tag = I + 1;
-        } else if constexpr (sizeof...(Rest) > 0) {
-            copy_construct_impl<I + 1, Rest...>(other);
-        }
-    }
-
-    // Implementation of move construction
-    template <size_t I, typename First, typename... Rest>
-    void move_construct_impl(Variant &other) {
-        if (other._tag == I + 1) {
-            new (&_storage)
-                First(fl::move(*reinterpret_cast<First *>(&other._storage)));
-            _tag = I + 1;
-        } else if constexpr (sizeof...(Rest) > 0) {
-            move_construct_impl<I + 1, Rest...>(other);
-        }
-    }
-
-    // Implementation of destruction
-    template <size_t I, typename First, typename... Rest> void visit_destroy() {
-        if (_tag == I + 1) {
-            reinterpret_cast<First *>(&_storage)->~First();
-        } else if constexpr (sizeof...(Rest) > 0) {
-            visit_destroy<I + 1, Rest...>();
-        }
-    }
-
-    // Implementation of visitor pattern
-    template <size_t I, typename First, typename... Rest, typename Visitor>
-    void visit_impl(Visitor &visitor) {
-        if (_tag == I + 1) {
-            visitor.accept(*reinterpret_cast<First *>(&_storage));
-        } else if constexpr (sizeof...(Rest) > 0) {
-            visit_impl<I + 1, Rest...>(visitor);
-        }
-    }
-
-    template <size_t I, typename First, typename... Rest, typename Visitor>
-    void visit_impl(Visitor &visitor) const {
-        if (_tag == I + 1) {
-            visitor.accept(*reinterpret_cast<const First *>(&_storage));
-        } else if constexpr (sizeof...(Rest) > 0) {
-            visit_impl<I + 1, Rest...>(visitor);
-        }
-    }
-
-    // -- Data members -------------------------------------------------------
-
-    // Storage for the variant, sized to fit the largest type
     alignas(
         max_align<Types...>::value) char _storage[max_size<Types...>::value];
 
-    // Current type tag (0 = empty, 1+ = index into Types...)
     Tag _tag;
 };
 

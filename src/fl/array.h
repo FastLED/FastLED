@@ -3,6 +3,146 @@
 #include <string.h>
 
 #include "fl/inplacenew.h"
+#include "fl/type_traits.h"
+
+namespace fl {
+
+/**
+ * @brief A fixed-size array implementation similar to std::array
+ *
+ * This class provides a thin wrapper around a C-style array with
+ * STL container-like interface.
+ *
+ * @tparam T The type of elements
+ * @tparam N The number of elements
+ */
+template <typename T, size_t N> class array {
+  public:
+    // Standard container type definitions
+    using value_type = T;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using reference = value_type &;
+    using const_reference = const value_type &;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using iterator = pointer;
+    using const_iterator = const_pointer;
+
+    // Default constructor - elements are default-initialized
+    array() = default;
+
+    // Fill constructor
+    explicit array(const T &value) {
+        // std::fill_n(begin(), N, value);
+        fill_n(data_, N, value);
+    }
+
+    // Copy constructor
+    array(const array &) = default;
+
+    // Move constructor
+    array(array &&) = default;
+
+    // Copy assignment
+    array &operator=(const array &) = default;
+
+    // Move assignment
+    array &operator=(array &&) = default;
+
+    // Element access
+    T &at(size_type pos) {
+        if (pos >= N) {
+            return error_value();
+        }
+        return data_[pos];
+    }
+
+    const T &at(size_type pos) const {
+        if (pos >= N) {
+            return error_value();
+        }
+        return data_[pos];
+    }
+
+    T &operator[](size_type pos) { return data_[pos]; }
+
+    const_reference operator[](size_type pos) const { return data_[pos]; }
+
+    T &front() { return data_[0]; }
+
+    const T &front() const { return data_[0]; }
+
+    T &back() { return data_[N - 1]; }
+
+    const T &back() const { return data_[N - 1]; }
+
+    pointer data() noexcept { return data_; }
+
+    const_pointer data() const noexcept { return data_; }
+
+    // Iterators
+    iterator begin() noexcept { return data_; }
+
+    const_iterator begin() const noexcept { return data_; }
+
+    const_iterator cbegin() const noexcept { return data_; }
+
+    iterator end() noexcept { return data_ + N; }
+
+    const_iterator end() const noexcept { return data_ + N; }
+
+    // Capacity
+    bool empty() const noexcept { return N == 0; }
+
+    size_type size() const noexcept { return N; }
+
+    size_type max_size() const noexcept { return N; }
+
+    // Operations
+    void fill(const T &value) {
+        for (size_type i = 0; i < N; ++i) {
+            data_[i] = value;
+        }
+    }
+
+    void swap(array &other) {
+        for (size_type i = 0; i < N; ++i) {
+            fl::swap(data_[i], other.data_[i]);
+        }
+    }
+
+  private:
+    static T &error_value() {
+        static T empty_value;
+        return empty_value;
+    }
+    T data_[N];
+};
+
+// Non-member functions
+template <typename T, size_t N>
+bool operator==(const array<T, N> &lhs, const array<T, N> &rhs) {
+    // return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    for (size_t i = 0; i < N; ++i) {
+        if (lhs[i] != rhs[i]) {
+            return false;
+        }
+    }
+}
+
+template <typename T, size_t N>
+bool operator!=(const array<T, N> &lhs, const array<T, N> &rhs) {
+    return !(lhs == rhs);
+}
+
+template <typename T, size_t N>
+void swap(array<T, N> &lhs,
+          array<T, N> &rhs) noexcept(noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
+}
+
+} // namespace fl
 
 // FASTLED_STACK_ARRAY
 // An array of variable length that is allocated on the stack using
