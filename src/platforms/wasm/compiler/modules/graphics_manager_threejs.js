@@ -366,10 +366,18 @@ export class GraphicsManagerThreeJS {
   ) {
     const { THREE } = this.threeJsModules;
     const { screenMap } = frameData;
+
+    const DISABLE_MERGE_GEOMETRIES = true;
     
     // If BufferGeometryUtils is not available, fall back to individual LEDs
     const BufferGeometryUtils = this.threeJsModules.BufferGeometryUtils;
-    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils;
+    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils && !DISABLE_MERGE_GEOMETRIES;
+
+
+
+    if (!canMergeGeometries) {
+      console.error('BufferGeometryUtils not available, falling back to individual LEDs');
+    }
     
     // Create template geometries for reuse
     let circleGeometry, planeGeometry;
@@ -467,7 +475,7 @@ export class GraphicsManagerThreeJS {
         
         try {
           // Merge geometries for this strip
-          const mergedGeometry = BufferGeometryUtils.mergeBufferGeometries(geometries);
+          const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
           
           // Create material and mesh
           const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -489,6 +497,7 @@ export class GraphicsManagerThreeJS {
             this.leds.push(dummyObj);
           }
         } catch (e) {
+          console.log(BufferGeometryUtils);
           console.error(`Failed to merge geometries for strip ${stripId}:`, e);
           
           // Fallback to individual geometries
