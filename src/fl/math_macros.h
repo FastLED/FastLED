@@ -1,5 +1,12 @@
 #pragma once
 
+namespace fl {
+// This is needed for math macro ABS to work optimally.
+template <typename T> inline T fl_abs(T value) {
+    return value < 0 ? -value : value;
+}
+} // namespace fl
+
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -9,7 +16,7 @@
 #endif
 
 #ifndef ABS
-#define ABS(x) ((x) > 0 ? (x) : -(x))
+#define ABS(x) fl::fl_abs(x)
 #endif
 
 #ifndef EPSILON_F
