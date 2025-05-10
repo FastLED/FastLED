@@ -374,9 +374,9 @@ export class GraphicsManagerThreeJS {
     const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils && !DISABLE_MERGE_GEOMETRIES;
 
     if (!canMergeGeometries) {
-      console.error('BufferGeometryUtils not available, falling back to individual LEDs');
+      console.log('BufferGeometryUtils not available, falling back to individual LEDs');
     } else {
-      console.error('Using merged geometries for better performance');
+      console.log('Using merged geometries for better performance');
     }
     
     // Create template geometries for reuse
