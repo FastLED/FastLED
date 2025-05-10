@@ -258,7 +258,6 @@ void XYPath::setTransform(const TransformFloat &transform) {
 
 void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
                        int steps) {
-    FASTLED_WARN("Drawing color with steps: " << steps);
     XYRasterU8Sparse &raster = tls_raster.access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
@@ -277,7 +276,7 @@ void XYPath::drawGradient(const Gradient &gradient, float from, float to,
 
 int XYPath::calculateSteps(float from, float to) {
     float diff = fl::clamp(ABS(to - from), 0.0f, 1.0f);
-    return MAX(1, 20 * diff);
+    return MAX(1, 200 * diff);
 }
 
 bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }

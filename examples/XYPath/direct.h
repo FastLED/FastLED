@@ -44,6 +44,8 @@ UIDescription description("This is more of a test for new features.");
 
 // UIButton trigger("My Trigger");
 UISlider offset("Offset", 0.0f, 0.0f, 1.0f, 0.01f);
+UISlider steps("Steps", 100.0f, 1.0f, 200.0f, 1.0f);
+UISlider length("Length", 1.0f, 0.0f, 1.0f, 0.01f);
 
 
 XYPathPtr heartPath = XYPath::NewHeartPath(WIDTH, HEIGHT);
@@ -63,9 +65,9 @@ void loop() {
 
     // leds(x,y) = CRGB(255, 0, 0);
     float from = offset;
-    float to = 1.0f + offset.value();
+    float to = length.value() + offset.value();
 
-    heartPath->drawColor(CRGB(255, 0, 0), from, to, &leds);
+    heartPath->drawColor(CRGB(255, 0, 0), from, to, &leds, steps.as_int());
     
 
     FastLED.show();
