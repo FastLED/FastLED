@@ -13,6 +13,12 @@ void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, CRGB *out) {
     draw(xymap, visitor);
 }
 
+void XYRasterU8Sparse::drawGradient(const Gradient &gradient,
+                                    const XYMap &xymap, CRGB *out) {
+    XYDrawGradient visitor(gradient, xymap, out);
+    draw(xymap, visitor);
+}
+
 void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
     // Tile2x2_u8::Rasterize(tiles, this, mAbsoluteBoundsSet ? &mAbsoluteBounds
     // : nullptr);
