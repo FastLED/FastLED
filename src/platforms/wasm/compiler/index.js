@@ -347,7 +347,8 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
   }
   if (frameData.length === 0) {
     console.warn('Received empty frame data, skipping update');
-    return;
+    // New experiment try to run anyway.
+    // return;
   }
   frameData.screenMap = screenMap; // eslint-disable-line no-param-reassign
   updateCanvas(frameData);

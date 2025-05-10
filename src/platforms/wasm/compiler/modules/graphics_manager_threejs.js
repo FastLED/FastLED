@@ -596,8 +596,9 @@ export class GraphicsManagerThreeJS {
    */
   updateCanvas(frameData) {
     if (frameData.length === 0) {
+      // New experiment try to run anyway
       console.warn('Received empty frame data, skipping update');
-      return;
+      // return;
     }
     
     // Check if we need to initialize or reinitialize the scene
@@ -648,7 +649,7 @@ export class GraphicsManagerThreeJS {
       const { strip_id } = strip;
       if (!(strip_id in screenMap.strips)) {
         console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
-        return;
+        // return;
       }
 
       const stripData = screenMap.strips[strip_id];
