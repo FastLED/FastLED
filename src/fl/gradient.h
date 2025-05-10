@@ -2,6 +2,7 @@
 
 #include "fl/colorutils.h"
 #include "fl/function.h"
+#include "fl/slice.h"
 #include "fl/type_traits.h"
 #include "fl/variant.h"
 
@@ -29,6 +30,7 @@ class Gradient {
     void set(const GradientFunction &func);
 
     CRGB colorAt(uint8_t index) const;
+    void fill(Slice<const uint8_t> input, Slice<CRGB> output) const;
 
   private:
     using GradientVariant =

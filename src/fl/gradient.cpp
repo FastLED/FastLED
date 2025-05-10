@@ -1,36 +1,77 @@
 
 #include "fl/gradient.h"
+#include "fl/assert.h"
 #include "fl/colorutils.h"
 
 namespace fl {
 
+namespace {
+struct Visitor {
+    Visitor(uint8_t index) : index(index) {}
+    void accept(const CRGBPalette16 *palette) {
+        CRGB c = ColorFromPalette(*palette, index);
+        return_val = c;
+    }
+
+    void accept(const CRGBPalette32 *palette) {
+        CRGB c = ColorFromPalette(*palette, index);
+        return_val = c;
+    }
+
+    void accept(const CRGBPalette256 *palette) {
+        CRGB c = ColorFromPaletteExtended(*palette, index);
+        return_val = c;
+    }
+
+    void accept(const Gradient::GradientFunction &func) {
+        CRGB c = func(index);
+        return_val = c;
+    }
+
+    CRGB return_val;
+    uint8_t index;
+};
+
+struct VisitorFill {
+    VisitorFill(Slice<const uint8_t> indices, Slice<CRGB> output)
+        : output(output), indices(indices) {
+        FASTLED_ASSERT(
+            indices.size() == output.size(),
+            "Gradient::fill: indices and output must be the same size");
+        n = MIN(indices.size(), output.size());
+    }
+    void accept(const CRGBPalette16 *palette) {
+        for (size_t i = 0; i < n; ++i) {
+            output[i] = ColorFromPalette(*palette, indices[i]);
+        }
+    }
+
+    void accept(const CRGBPalette32 *palette) {
+        for (size_t i = 0; i < n; ++i) {
+            output[i] = ColorFromPalette(*palette, indices[i]);
+        }
+    }
+
+    void accept(const CRGBPalette256 *palette) {
+        for (size_t i = 0; i < n; ++i) {
+            output[i] = ColorFromPaletteExtended(*palette, indices[i]);
+        }
+    }
+
+    void accept(const Gradient::GradientFunction &func) {
+        for (size_t i = 0; i < n; ++i) {
+            output[i] = func(indices[i]);
+        }
+    }
+
+    Slice<CRGB> output;
+    Slice<const uint8_t> indices;
+    uint8_t n = 0;
+};
+
+} // namespace
+
 CRGB Gradient::colorAt(uint8_t index) const {
-    struct Visitor {
-        Visitor(uint8_t index) : index(index) {}
-        void accept(const CRGBPalette16 *palette) {
-            CRGB c = ColorFromPalette(*palette, index);
-            return_val = c;
-        }
-
-        void accept(const CRGBPalette32 *palette) {
-            CRGB c = ColorFromPalette(*palette, index);
-            return_val = c;
-        }
-
-        void accept(const CRGBPalette256 *palette) {
-            CRGB c = ColorFromPaletteExtended(*palette, index);
-            return_val = c;
-        }
-
-        void accept(const GradientFunction &func) {
-            CRGB c = func(index);
-            return_val = c;
-        }
-
-        CRGB return_val;
-        uint8_t index;
-    };
-
     Visitor visitor(index);
     mVariant.visit(visitor);
     return visitor.return_val;
@@ -56,6 +97,11 @@ Gradient &Gradient::operator=(const Gradient &other) {
         mVariant = other.mVariant;
     }
     return *this;
+}
+
+void Gradient::fill(Slice<const uint8_t> input, Slice<CRGB> output) const {
+    VisitorFill visitor(input, output);
+    mVariant.visit(visitor);
 }
 
 } // namespace fl
