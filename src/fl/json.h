@@ -22,7 +22,10 @@ class JsonDocument {};
 class JsonDocument : public ::FLArduinoJson::JsonDocument {};
 #endif
 
+// Parses a JSON string into a JsonDocument.
 bool parseJson(const char *json, JsonDocument *doc, Str *error = nullptr);
+
+// Serializes a JsonDocument to a string.
 void toJson(const JsonDocument &doc, Str *jsonBuffer);
 
 } // namespace fl

@@ -6,6 +6,8 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
+#include <string>
+#include <vector>
 
 namespace fl {
 
@@ -47,6 +49,8 @@ class jsAudioImpl {
     jsUiInternalPtr mInternal;
     fl::Str mGroup;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
+    std::string mSerializeBuffer;
+    std::vector<int16_t> mAudioDataBuffer;
 };
 
 } // namespace fl

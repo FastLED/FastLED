@@ -13,10 +13,13 @@
 #include "platforms/wasm/ui/audio.h"
 #include "fl/warn.h"
 #include "fl/json.h"
+#include "fl/thread_local.h"
 
 using namespace fl;
 
 namespace fl {
+
+
 
 jsAudioImpl::jsAudioImpl(const Str& name) {
     auto updateFunc = jsUiInternal::UpdateFunction([this](const FLArduinoJson::JsonVariantConst& value) {
@@ -95,22 +98,19 @@ static void parseJsonStringToInt16Vector(
 
 void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
-    std::string s = value.as<std::string>();
-    std::vector<int16_t> audio_data;
-    parseJsonStringToInt16Vector(s, &audio_data);
+    //std::string s = value.as<std::string>();
+    mSerializeBuffer.clear();
+    serializeJson(value, mSerializeBuffer);
+    // std::vector<int16_t> audio_data;
+    mAudioDataBuffer.clear();
+    parseJsonStringToInt16Vector(mSerializeBuffer, &mAudioDataBuffer);
     // kJsAudioSamples;
     int offset = 0;
-    int size = audio_data.size();
+    int size = mAudioDataBuffer.size();
     // take in the data and break it up into chunks of kJsAudioSamples
     for (int i = 0; i < size; i += kJsAudioSamples) {
         AudioSampleImplPtr sample = NewPtr<AudioSampleImpl>();
-        sample->assign(audio_data.begin() + i, audio_data.begin() + MIN(i + kJsAudioSamples, size));
-        // sample->assign(audio_data.begin(), audio_data.end());
-        // // FASTLED_WARN("assigning audio data of size " << audio_data.size());
-        // mAudioSampleImpls.push_back(sample);
-        // while (mAudioSampleImpls.size() > 10) {
-        //     mAudioSampleImpls.erase(mAudioSampleImpls.begin());
-        // }
+        sample->assign(mAudioDataBuffer.begin() + i, mAudioDataBuffer.begin() + MIN(i + kJsAudioSamples, size));
         mAudioSampleImpls.push_back(sample);
         while (mAudioSampleImpls.size() > 10) {
             mAudioSampleImpls.erase(mAudioSampleImpls.begin());
