@@ -11,7 +11,7 @@
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
-import { isDenseGrid, makePositionCalculators } from './graphics_utils.js';
+import { isDenseGrid } from './graphics_utils.js';
 
 // Helper function to group LEDs by material properties
 function groupLedsByMaterial(leds) {
@@ -26,6 +26,22 @@ function groupLedsByMaterial(leds) {
   });
   
   return groups;
+}
+
+function makePositionCalculators(frameData, screenWidth, screenHeight) {
+  const { screenMap } = frameData;
+  const width = screenMap.absMax[0] - screenMap.absMin[0];
+  const height = screenMap.absMax[1] - screenMap.absMin[1];
+
+  return {
+    calcXPosition: (x) => {
+      return (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
+    },
+    calcYPosition: (y) => {
+      const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
+      return negY; // Remove negative sign to fix Y-axis orientation
+    }
+  };
 }
 
 /**
