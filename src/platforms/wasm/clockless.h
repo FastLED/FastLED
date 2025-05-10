@@ -33,6 +33,7 @@ public:
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		FASTLED_WARN("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\nshowPixels\n\n");
 		mRgb.clear();
 		ActiveStripData& ch_data = fl::Singleton<ActiveStripData>::instance();
 		pixels.disableColorAdjustment();

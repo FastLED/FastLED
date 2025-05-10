@@ -8,6 +8,7 @@
 #include "./Keyboard.h"
 #include "fl/math_macros.h"
 #include <math.h>
+#include "fl/warn.h"
 
 namespace {
 
@@ -164,6 +165,9 @@ void Painter::PaintVuNotes(uint32_t /*now_ms*/,
                            const KeyboardState& keyboard,
                            const int* led_column_table, int led_column_table_length,
                            LedRopeInterface* led_rope) {
+
+
+ FASTLED_WARN("\n\n############## VU NOTES ################\n\n");
  
  led_rope->RawBeginDraw();
                      
@@ -229,6 +233,9 @@ void Painter::PaintVuMidNotesFade(uint32_t /*delta_ms*/,
                                   const KeyboardState& keyboard,
                                   const int* led_column_table, int led_column_table_length,
                                   LedRopeInterface* led_rope) {
+
+  FASTLED_WARN("\n\n############## VU MID NOTES FADE ################\n\n");
+
   struct DrawPoints {
     int n_black0;
     int n_fade0;

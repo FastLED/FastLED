@@ -107,7 +107,6 @@ class CountingButton {
   
   void Update(uint32_t time_now) {
     bool clicked = mButton.clicked();
-    FASTLED_DBG("clicked: " << clicked);
     bool val = Read() || mButton.clicked();
     bool changed = val != on_;
 

@@ -98,12 +98,14 @@ void LedRopeTCL::set_draw_offset(int val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 void LedRopeTCL::RawCommitDraw() {
+  FASTLED_WARN("\n\n############## COMMIT DRAW ################\n\n");
   if (!controller_added_) {
     controller_added_ = true;
     CRGB* leds = led_buffer_.data();
     size_t n_leds = led_buffer_.size();
     FastLED.addLeds<APA102, PIN_DATA, PIN_CLOCK>(leds, n_leds).setScreenMap(mScreenMap);
   }
+  FASTLED_WARN("FastLED.show");
   FastLED.show();
 }
 
