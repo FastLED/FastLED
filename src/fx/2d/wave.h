@@ -47,24 +47,14 @@ class WaveCrgbMapDefault : public WaveCrgbMap {
 
 class WaveCrgbGradientMap : public WaveCrgbMap {
   public:
+    using Gradient = fl::GradientInlined;
     WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
 
     void mapWaveToLEDs(const XYMap &xymap, WaveSimulation2D &waveSim,
-                       CRGB *leds) override {
-        const uint32_t width = waveSim.getWidth();
-        const uint32_t height = waveSim.getHeight();
-        for (uint32_t y = 0; y < height; y++) {
-            for (uint32_t x = 0; x < width; x++) {
-                uint32_t idx = xymap(x, y);
-                uint8_t value8 = waveSim.getu8(x, y);
-                CRGB c = mGradient.colorAt(value8);
-                leds[idx] = c;
-            }
-        }
-    }
+                       CRGB *leds) override;
 
   private:
-    fl::GradientInlined mGradient;
+    Gradient mGradient;
 };
 
 struct WaveFxArgs {
