@@ -125,10 +125,6 @@ class FFTContext {
 };
 
 FFTImpl::FFTImpl(const FFT_Args &args) {
-    if (!mContext) {
-        FASTLED_WARN("Failed to allocate FFTImpl context");
-    }
-
     mContext.reset(new FFTContext(args.samples, args.bands, args.fmin,
                                   args.fmax, args.sample_rate));
 }
