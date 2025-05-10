@@ -160,7 +160,6 @@ void loop() {
             continue;
         }
         float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
-        FASTLED_WARN("Fade: " << fade);
         shiftUp();
         // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
@@ -189,7 +188,6 @@ void loop() {
 
         if (enableFFT) {
             auto max_x = fftOut.bins_raw.size() - 1;
-            FASTLED_WARN("max_x: " << max_x);
             for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
                 auto x = i;
                 auto v = fftOut.bins_db[i];

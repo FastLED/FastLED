@@ -11,7 +11,8 @@
 
 import { UiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
-import { GraphicsManagerThreeJS, isDenseGrid } from './modules/graphics_manager_threejs.js';
+import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
+import { isDenseGrid } from './modules/graphics_utils.js';
 
 const urlParams = new URLSearchParams(window.location.search);
 const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
