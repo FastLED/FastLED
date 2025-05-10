@@ -4,48 +4,7 @@
 #include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
 
 // Type traits for variant implementation
-namespace fl {
-
-// Helper to check if a type is in a list of types
-template <typename T, typename... Types> struct contains_type;
-
-template <typename T> struct contains_type<T> {
-    static constexpr bool value = false;
-};
-
-template <typename T, typename U, typename... Rest>
-struct contains_type<T, U, Rest...> {
-    static constexpr bool value =
-        fl::is_same<T, U>::value || contains_type<T, Rest...>::value;
-};
-
-// Helper to get maximum size of types
-template <typename... Types> struct max_size;
-
-template <> struct max_size<> {
-    static constexpr size_t value = 0;
-};
-
-template <typename T, typename... Rest> struct max_size<T, Rest...> {
-    static constexpr size_t value = (sizeof(T) > max_size<Rest...>::value)
-                                        ? sizeof(T)
-                                        : max_size<Rest...>::value;
-};
-
-// Helper to get maximum alignment of types
-template <typename... Types> struct max_align;
-
-template <> struct max_align<> {
-    static constexpr size_t value = 1;
-};
-
-template <typename T, typename... Rest> struct max_align<T, Rest...> {
-    static constexpr size_t value = (alignof(T) > max_align<Rest...>::value)
-                                        ? alignof(T)
-                                        : max_align<Rest...>::value;
-};
-
-} // namespace fl
+namespace fl {} // namespace fl
 
 // AI INSTRUCTIONS, impliment a table dispatch like this:
 // template<typename... Types>
