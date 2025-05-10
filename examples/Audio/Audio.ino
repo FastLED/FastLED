@@ -21,8 +21,8 @@ all the UI elements you see below.
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fx/time.h"
 #include "fx.h"
+#include "fx/time.h"
 
 // Sketch.
 #include "fl/function.h"
@@ -34,7 +34,6 @@ using namespace fl;
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE false
 #define TIME_ANIMATION 1000 // ms
-
 
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
@@ -50,22 +49,23 @@ UISlider outputTimeSec("outputTimeSec", .5, 0, 2, .01);
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
 
-MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(), decayTimeSeconds.value(), outputTimeSec.value(), 44100);
-
+MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(),
+                                decayTimeSeconds.value(), outputTimeSec.value(),
+                                44100);
 
 CRGB framebuffer[NUM_LEDS];
 XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);
 
 CRGB leds[NUM_LEDS / 4]; // Downscaled buffer
-XYMap ledsXY(WIDTH / 2, HEIGHT / 2, IS_SERPINTINE); // Framebuffer is regular rectangle LED matrix.
-
+XYMap ledsXY(WIDTH / 2, HEIGHT / 2,
+             IS_SERPINTINE); // Framebuffer is regular rectangle LED matrix.
 
 FFTBins fftOut(WIDTH); // 2x width due to super sampling.
 
 // CRGB framebuffer[NUM_LEDS];
 // CRGB framebuffer[WIDTH_2X * HEIGHT_2X];  // 2x super sampling.
-// XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);  // LED output, serpentine as is
-// common for LED matrices. XYMap xyMap_2X(WIDTH_2X, HEIGHT_2X, false);  //
+// XYMap frameBufferXY(WIDTH, HEIGHT, IS_SERPINTINE);  // LED output, serpentine
+// as is common for LED matrices. XYMap xyMap_2X(WIDTH_2X, HEIGHT_2X, false); //
 // Framebuffer is regular rectangle LED matrix.
 
 int x = 0;
@@ -87,51 +87,48 @@ float rms(Slice<const int16_t> data) {
 
 void setup() {
     Serial.begin(115200);
-    //auto screenmap = frameBufferXY.toScreenMap();
-    //screenmap.setDiameter(.2);
-    //FastLED.addLeds<NEOPIXEL, 2>(framebuffer, NUM_LEDS).setScreenMap(screenmap);
+    // auto screenmap = frameBufferXY.toScreenMap();
+    // screenmap.setDiameter(.2);
+    // FastLED.addLeds<NEOPIXEL, 2>(framebuffer,
+    // NUM_LEDS).setScreenMap(screenmap);
     auto screenmap = ledsXY.toScreenMap();
     screenmap.setDiameter(.2);
 
-    decayTimeSeconds.onChanged(
-        [](float value) {
-            audioFadeTracker.setDecayTime(value);
-            FASTLED_WARN("Fade time seconds: " << value);
-        });
-    attackTimeSeconds.onChanged(
-        [](float value) {
-            audioFadeTracker.setAttackTime(value);
-            FASTLED_WARN("Attack time seconds: " << value);
-        });
-    outputTimeSec.onChanged(
-        [](float value) {
-            audioFadeTracker.setOutputTime(value);
-            FASTLED_WARN("Output time seconds: " << value);
-        });
-    FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal()).setScreenMap(screenmap);
+    decayTimeSeconds.onChanged([](float value) {
+        audioFadeTracker.setDecayTime(value);
+        FASTLED_WARN("Fade time seconds: " << value);
+    });
+    attackTimeSeconds.onChanged([](float value) {
+        audioFadeTracker.setAttackTime(value);
+        FASTLED_WARN("Attack time seconds: " << value);
+    });
+    outputTimeSec.onChanged([](float value) {
+        audioFadeTracker.setOutputTime(value);
+        FASTLED_WARN("Output time seconds: " << value);
+    });
+    FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal())
+        .setScreenMap(screenmap);
 }
 
 void shiftUp() {
     // fade each led by 1%
     if (fadeToBlack.as_int()) {
-    for (int y = HEIGHT - 1; y > 0; --y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            auto &c = framebuffer[frameBufferXY(x, y)];
+
+        for (int i = 0; i < NUM_LEDS; ++i) {
+            auto &c = framebuffer[i];
             c.fadeToBlackBy(fadeToBlack.as_int());
         }
     }
-    }
-
 
     for (int y = HEIGHT - 1; y > 0; --y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            framebuffer[frameBufferXY(x, y)] = framebuffer[frameBufferXY(x, y - 1)];
-        }
+        CRGB* row1 = &framebuffer[frameBufferXY(0, y)];
+        CRGB* row2 = &framebuffer[frameBufferXY(0, y - 1)];
+        memcpy(row1, row2, WIDTH * sizeof(CRGB));
     }
-    for (int x = 0; x < WIDTH; ++x) {
-        framebuffer[frameBufferXY(x, 0)] = CRGB(0, 0, 0);
-    }
+    CRGB* row = &framebuffer[frameBufferXY(0, 0)];
+    memset(row, 0, sizeof(CRGB) * WIDTH);
 }
+
 
 bool doFrame() {
     if (!freeze) {
@@ -142,7 +139,6 @@ bool doFrame() {
     }
     return false;
 }
-
 
 void loop() {
     if (triggered) {
