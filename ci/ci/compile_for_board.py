@@ -50,7 +50,7 @@ def compile_for_board_and_example(
     # Remove the previous *.ino file if it exists, everything else is recycled
     # to speed up the next build.
     if srcdir.exists():
-        subprocess.run(["rm", "-rf", srcdir.as_posix()], check=True)
+        shutil.rmtree(srcdir, ignore_errors=False)
     locked_print(f"*** Building example {example} for board {board_name} ***")
     cwd: str | None = None
     shell: bool = False
