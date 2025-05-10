@@ -20,6 +20,8 @@
 
 namespace fl {
 
+class Gradient;
+
 class XYRasterU8Sparse;
 template <typename T> class function;
 
@@ -97,6 +99,9 @@ class XYPath : public Referent {
     // Rasterizes and draws to the leds.
     void drawColor(const CRGB &color, float from, float to, Leds *leds,
                    int steps = -1);
+
+    void drawGradient(const Gradient &gradient, float from, float to,
+                      Leds *leds, int steps = -1);
 
     // Low level draw function.
     void rasterize(float from, float to, int steps, XYRasterU8Sparse &raster,

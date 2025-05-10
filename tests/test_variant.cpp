@@ -95,12 +95,12 @@ TEST_CASE("Variant") {
     // 4) Copy construction
     Variant<int, fl::Str, double> v3(v2);
     REQUIRE(v3.is<fl::Str>());
-    REQUIRE_EQ(v3.get<fl::Str>(), fl::Str("hello"));
+    REQUIRE(v3.equals(fl::Str("hello")));
 
     // 5) Assignment
     v = v1;
     REQUIRE(v.is<int>());
-    REQUIRE_EQ(v.get<int>(), 123);
+    REQUIRE_EQ(*v.ptr<int>(), 123);
 
     // 6) Reset
     v.reset();
@@ -109,7 +109,8 @@ TEST_CASE("Variant") {
     // 7) Assignment of a value
     v = 3.14;
     REQUIRE(v.is<double>());
-    REQUIRE_EQ(v.get<double>(), 3.14);
+    // REQUIRE_EQ(v.get<double>(), 3.14);
+    REQUIRE_EQ(*v.ptr<double>(), 3.14);
 
     // 8) Visitor pattern
     struct TestVisitor {

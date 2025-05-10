@@ -127,4 +127,18 @@ void GradientInlined::fill(Slice<const uint8_t> input,
     mVariant.visit(visitor);
 }
 
+Gradient::Gradient(const GradientInlined &other) {
+    // Visitor is cumbersome but guarantees all paths are handled.
+    struct Copy {
+        Copy(Gradient &owner) : mOwner(owner) {}
+        void accept(const CRGBPalette16 &palette) { mOwner.set(&palette); }
+        void accept(const CRGBPalette32 &palette) { mOwner.set(&palette); }
+        void accept(const CRGBPalette256 &palette) { mOwner.set(&palette); }
+        void accept(const GradientFunction &func) { mOwner.set(func); }
+        Gradient &mOwner;
+    };
+    Copy copy_to_self(*this);
+    other.variant().visit(copy_to_self);
+}
+
 } // namespace fl

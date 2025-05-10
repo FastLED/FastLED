@@ -86,7 +86,7 @@ template <typename... Types> class Variant {
     emplace(Args &&...args) {
         reset();
         construct<T>(fl::forward<Args>(args)...);
-        return *get<T>();
+        return ptr<T>();
     }
 
     void reset() noexcept {
@@ -111,19 +111,19 @@ template <typename... Types> class Variant {
         return is<T>() ? reinterpret_cast<const T *>(&_storage) : nullptr;
     }
 
-    template <typename T> T &get() {
-        if (auto p = ptr<T>())
-            return *p;
-        static T dummy;
-        return dummy;
-    }
+    // template <typename T> T &get() {
+    //     if (auto p = ptr<T>())
+    //         return *p;
+    //     static T dummy;
+    //     return dummy;
+    // }
 
-    template <typename T> const T &get() const {
-        if (auto p = ptr<T>())
-            return *p;
-        static const T dummy{};
-        return dummy;
-    }
+    // template <typename T> const T &get() const {
+    //     if (auto p = ptr<T>())
+    //         return *p;
+    //     static const T dummy{};
+    //     return dummy;
+    // }
 
     template <typename T> bool equals(const T &other) const {
         if (auto p = ptr<T>()) {
