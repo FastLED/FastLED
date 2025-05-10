@@ -12,7 +12,7 @@
 
 namespace fl {
 
-template <typename T> struct point_xy;
+template <typename T> struct vec2;
 
 namespace map_range_detail {
 
@@ -88,10 +88,10 @@ template <> struct map_range_math<uint8_t, uint8_t> {
     }
 };
 
-// partial specialization for U = point_xy<V>
-template <typename T, typename V> struct map_range_math<T, point_xy<V>> {
-    static point_xy<V> map(T value, T in_min, T in_max, point_xy<V> out_min,
-                           point_xy<V> out_max) {
+// partial specialization for U = vec2<V>
+template <typename T, typename V> struct map_range_math<T, vec2<V>> {
+    static vec2<V> map(T value, T in_min, T in_max, vec2<V> out_min,
+                       vec2<V> out_max) {
         if (in_min == in_max) {
             return out_min;
         }

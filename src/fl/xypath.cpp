@@ -29,7 +29,7 @@ fl::Str unique_missing_name(const fl::Str &prefix) {
 }
 } // namespace xypath_detail
 
-point_xy_float XYPath::at(float alpha, const TransformFloat &tx) {
+vec2f XYPath::at(float alpha, const TransformFloat &tx) {
     // return compute_float(alpha, tx);
     return mPathRenderer->at(alpha, tx);
 }
@@ -51,7 +51,7 @@ void XYPath::rasterize(float from, float to, int steps,
     mPathRenderer->rasterize(from, to, steps, raster, optional_alpha_gen);
 }
 
-point_xy_float XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
+vec2f XYPath::at(float alpha) { return mPathRenderer->at(alpha); }
 
 TransformFloat &XYPath::transform() { return mPathRenderer->transform(); }
 
@@ -116,13 +116,13 @@ void XYPathRenderer::setScale(float scale) {
     onTransformFloatChanged();
 }
 
-point_xy_float XYPathRenderer::compute(float alpha) {
+vec2f XYPathRenderer::compute(float alpha) {
     return compute_float(alpha, mTransform);
 }
 
-point_xy_float XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
+vec2f XYPathRenderer::at(float alpha) { return at(alpha, mTransform); }
 
-point_xy_float XYPathRenderer::at(float alpha, const TransformFloat &tx) {
+vec2f XYPathRenderer::at(float alpha, const TransformFloat &tx) {
     return compute_float(alpha, tx);
 }
 
@@ -224,8 +224,8 @@ XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height,
     return out;
 }
 
-XYPathPtr XYPath::NewCustomPath(const fl::function<point_xy_float(float)> &f,
-                                const rect_xy<int> &drawbounds,
+XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
+                                const rect<int> &drawbounds,
                                 const TransformFloat &transform,
                                 const Str &name) {
 
@@ -238,7 +238,7 @@ XYPathPtr XYPath::NewCustomPath(const fl::function<point_xy_float(float)> &f,
     if (!transform.is_identity()) {
         out->setTransform(transform);
     }
-    rect_xy<int> bounds;
+    rect<int> bounds;
     if (path->hasDrawBounds(&bounds)) {
         if (!bounds.mMin.is_zero()) {
             // Set the bounds to the path's bounds

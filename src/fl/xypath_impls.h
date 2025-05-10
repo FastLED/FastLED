@@ -55,9 +55,9 @@ class XYPathParams : public Referent {
 class XYPathGenerator : public Referent {
   public:
     virtual const Str name() const = 0;
-    virtual point_xy_float compute(float alpha) = 0;
+    virtual vec2f compute(float alpha) = 0;
     // No writes when returning false.
-    virtual bool hasDrawBounds(rect_xy<int> *bounds) {
+    virtual bool hasDrawBounds(rect<int> *bounds) {
         FASTLED_UNUSED(bounds);
         return false;
     }
@@ -100,10 +100,10 @@ class CatmullRomParams : public XYPathParams {
     CatmullRomParams() {}
 
     // Add a point to the path
-    void addPoint(point_xy_float p) { points.push_back(p); }
+    void addPoint(vec2f p) { points.push_back(p); }
 
     // Add a point with separate x,y coordinates
-    void addPoint(float x, float y) { points.push_back(point_xy_float(x, y)); }
+    void addPoint(float x, float y) { points.push_back(vec2f(x, y)); }
 
     // Clear all control points
     void clear() { points.clear(); }
@@ -112,7 +112,7 @@ class CatmullRomParams : public XYPathParams {
     size_t size() const { return points.size(); }
 
     // Vector of control points
-    HeapVector<point_xy_float> points;
+    HeapVector<vec2f> points;
 };
 
 /////////////////////////////////////////////////
@@ -121,21 +121,21 @@ class CatmullRomParams : public XYPathParams {
 class PointPath : public XYPathGenerator {
   public:
     PointPath(float x, float y);
-    PointPath(point_xy_float p);
-    point_xy_float compute(float alpha) override;
+    PointPath(vec2f p);
+    vec2f compute(float alpha) override;
     const Str name() const override;
     void set(float x, float y);
-    void set(point_xy_float p);
+    void set(vec2f p);
 
   private:
-    point_xy_float mPoint;
+    vec2f mPoint;
 };
 
 class LinePath : public XYPathGenerator {
   public:
     LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>());
     LinePath(float x0, float y0, float x1, float y1);
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
     void set(float x0, float y0, float x1, float y1);
     void set(const LinePathParams &p);
@@ -150,21 +150,21 @@ class LinePath : public XYPathGenerator {
 class CirclePath : public XYPathGenerator {
   public:
     CirclePath();
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 };
 
 class HeartPath : public XYPathGenerator {
   public:
     HeartPath();
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 };
 
 class ArchimedeanSpiralPath : public XYPathGenerator {
   public:
     ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 1.0f);
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 
     void setTurns(uint8_t turns);
@@ -184,7 +184,7 @@ class RosePath : public XYPathGenerator {
     // even
     RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>());
     RosePath(uint8_t n = 3, uint8_t d = 1);
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 
     RosePathParams &params();
@@ -203,7 +203,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     // 137.5° - the golden angle)
     PhyllotaxisPath(
         const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>());
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 
     PhyllotaxisParams &params();
@@ -221,7 +221,7 @@ class GielisCurvePath : public XYPathGenerator {
     // n1, n2, n3: shape parameters
     GielisCurvePath(
         const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>());
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 
     GielisCurveParams &params();
@@ -246,7 +246,7 @@ class CatmullRomPath : public XYPathGenerator {
     CatmullRomPath(const Ptr<CatmullRomParams> &p = NewPtr<CatmullRomParams>());
 
     /// Add a point in [0,1]² to the path
-    void addPoint(point_xy_float p);
+    void addPoint(vec2f p);
 
     /// Add a point with separate x,y coordinates
     void addPoint(float x, float y);
@@ -257,7 +257,7 @@ class CatmullRomPath : public XYPathGenerator {
     /// Get the number of control points
     size_t size() const;
 
-    point_xy_float compute(float alpha) override;
+    vec2f compute(float alpha) override;
     const Str name() const override;
 
     CatmullRomParams &params();
@@ -267,10 +267,8 @@ class CatmullRomPath : public XYPathGenerator {
     Ptr<CatmullRomParams> mParams;
 
     // Helper function to interpolate between points using Catmull-Rom spline
-    point_xy_float interpolate(const point_xy_float &p0,
-                               const point_xy_float &p1,
-                               const point_xy_float &p2,
-                               const point_xy_float &p3, float t) const;
+    vec2f interpolate(const vec2f &p0, const vec2f &p1, const vec2f &p2,
+                      const vec2f &p3, float t) const;
 };
 
 // Smart pointer for CatmullRomPath

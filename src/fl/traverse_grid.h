@@ -21,7 +21,7 @@ namespace fl {
 /// @param visitor called for each cell visited.
 /// @details Fully tested.
 template <typename GridVisitor>
-void traverseGridSegment(const point_xy_float &start, const point_xy_float &end,
+void traverseGridSegment(const vec2f &start, const vec2f &end,
                          GridVisitor &visitor);
 
 /// @brief Traverse a grid segment using fixed-point 8.8 arithmetic.
@@ -31,8 +31,8 @@ void traverseGridSegment(const point_xy_float &start, const point_xy_float &end,
 /// @param visitor called for each cell visited.
 /// @details UNTESTED!!!!
 template <typename GridVisitor>
-void traverseGridSegment16(const point_xy_float &start,
-                           const point_xy_float &end, GridVisitor &visitor);
+void traverseGridSegment16(const vec2f &start, const vec2f &end,
+                           GridVisitor &visitor);
 
 // @brief Traverse a grid segment using fixed-point 24.8 arithmetic.
 /// @tparam GridVisitor
@@ -41,8 +41,8 @@ void traverseGridSegment16(const point_xy_float &start,
 /// @param visitor called for each cell visited.
 /// @details UNTESTED!!!!
 template <typename GridVisitor>
-void traverseGridSegment32(const point_xy_float &start,
-                           const point_xy_float &end, GridVisitor &visitor);
+void traverseGridSegment32(const vec2f &start, const vec2f &end,
+                           GridVisitor &visitor);
 
 /// @brief Traverse a grid segment using floating point arithmetic. Useful for
 /// testing.
@@ -52,8 +52,8 @@ void traverseGridSegment32(const point_xy_float &start,
 /// @param visitor called for each cell visited.
 /// @details Fully tested.
 template <typename GridVisitor>
-void traverseGridSegmentFloat(const point_xy_float &start,
-                              const point_xy_float &end, GridVisitor &visitor);
+void traverseGridSegmentFloat(const vec2f &start, const vec2f &end,
+                              GridVisitor &visitor);
 
 ////////////////////////// IMPLEMENTATION DETAILS //////////////////////////
 
@@ -64,8 +64,7 @@ void traverseGridSegmentFloat(const point_xy_float &start,
 /// @param visitor called for each cell visited.
 /// @details Fully tested.
 template <typename GridVisitor>
-inline void traverseGridSegmentFloat(const point_xy_float &start,
-                                     const point_xy_float &end,
+inline void traverseGridSegmentFloat(const vec2f &start, const vec2f &end,
                                      GridVisitor &visitor) {
     int x0 = static_cast<int>(fl::floor(start.x));
     int y0 = static_cast<int>(fl::floor(start.y));
@@ -120,8 +119,7 @@ inline void traverseGridSegmentFloat(const point_xy_float &start,
 /// @param visitor called for each cell visited.
 /// @details UNTESTED!!!!
 template <typename GridVisitor>
-inline void traverseGridSegment16(const point_xy_float &start,
-                                  const point_xy_float &end,
+inline void traverseGridSegment16(const vec2f &start, const vec2f &end,
                                   GridVisitor &visitor) {
     const int16_t FP_SHIFT = 8;
     const int16_t FP_ONE = 1 << FP_SHIFT;
@@ -201,8 +199,7 @@ inline void traverseGridSegment16(const point_xy_float &start,
 /// @param visitor called for each cell visited.
 /// @details UNTESTED!!!!
 template <typename GridVisitor>
-inline void traverseGridSegment32(const point_xy_float &start,
-                                  const point_xy_float &end,
+inline void traverseGridSegment32(const vec2f &start, const vec2f &end,
                                   GridVisitor &visitor) {
     const int32_t FP_SHIFT = 8;
     const int32_t FP_ONE = 1 << FP_SHIFT;
@@ -275,8 +272,7 @@ inline void traverseGridSegment32(const point_xy_float &start,
 }
 
 template <typename GridVisitor>
-inline void traverseGridSegment(const point_xy_float &start,
-                                const point_xy_float &end,
+inline void traverseGridSegment(const vec2f &start, const vec2f &end,
                                 GridVisitor &visitor) {
     float dx = ABS(end.x - start.x);
     float dy = ABS(end.y - start.y);

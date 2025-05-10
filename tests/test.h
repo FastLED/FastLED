@@ -34,10 +34,10 @@ namespace doctest {
         }
     };
 
-    template<typename T> struct StringMaker<point_xy<T>> {
-        static String convert(const point_xy<T>& value) {
+    template<typename T> struct StringMaker<vec2<T>> {
+        static String convert(const vec2<T>& value) {
             fl::Str out;
-            out += "point_xy(";
+            out += "vec2(";
             out += value.x;
             out += ", ";
             out += value.y;
@@ -54,10 +54,10 @@ namespace doctest {
         }
     };
 
-    template<typename T> struct StringMaker<rect_xy<T>> {
-        static String convert(const rect_xy<T>& value) {
+    template<typename T> struct StringMaker<rect<T>> {
+        static String convert(const rect<T>& value) {
             fl::Str out;
-            out += "rect_xy(";
+            out += "rect(";
             out += " (";
             out += value.mMin.x;
             out += ",";

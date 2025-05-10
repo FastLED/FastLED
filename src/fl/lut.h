@@ -21,8 +21,8 @@ namespace fl {
 template <typename T> class LUT;
 
 typedef LUT<uint16_t> LUT16;
-typedef LUT<point_xy<uint16_t>> LUTXY16;
-typedef LUT<point_xy_float> LUTXYFLOAT;
+typedef LUT<vec2<uint16_t>> LUTXY16;
+typedef LUT<vec2f> LUTXYFLOAT;
 
 FASTLED_SMART_PTR_NO_FWD(LUT16);
 FASTLED_SMART_PTR_NO_FWD(LUTXYFLOAT);

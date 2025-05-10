@@ -83,7 +83,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         auto n = x.size();
         ScreenMap segment_map(n, diameter);
         for (uint16_t j = 0; j < n; j++) {
-            segment_map.set(j, point_xy_float{x[j], y[j]});
+            segment_map.set(j, vec2f{x[j], y[j]});
         }
         segmentMaps->insert(kv.key().c_str(), segment_map);
     }
@@ -135,7 +135,7 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
         auto x_array = segment["x"].to<FLArduinoJson::JsonArray>();
         auto y_array = segment["y"].to<FLArduinoJson::JsonArray>();
         for (uint16_t i = 0; i < kv.second.getLength(); i++) {
-            const point_xy_float &xy = kv.second[i];
+            const vec2f &xy = kv.second[i];
             x_array.add(xy.x);
             y_array.add(xy.y);
         }
@@ -165,17 +165,17 @@ ScreenMap::ScreenMap(uint32_t length, float mDiameter)
     : length(length), mDiameter(mDiameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut = *mLookUpTable.get();
-    point_xy_float *data = lut.getDataMutable();
+    vec2f *data = lut.getDataMutable();
     for (uint32_t x = 0; x < length; x++) {
         data[x] = {0, 0};
     }
 }
 
-ScreenMap::ScreenMap(const point_xy_float *lut, uint32_t length, float diameter)
+ScreenMap::ScreenMap(const vec2f *lut, uint32_t length, float diameter)
     : length(length), mDiameter(diameter) {
     mLookUpTable = LUTXYFLOATPtr::New(length);
     LUTXYFLOAT &lut16xy = *mLookUpTable.get();
-    point_xy_float *data = lut16xy.getDataMutable();
+    vec2f *data = lut16xy.getDataMutable();
     for (uint32_t x = 0; x < length; x++) {
         data[x] = lut[x];
     }
@@ -187,7 +187,7 @@ ScreenMap::ScreenMap(const ScreenMap &other) {
     mLookUpTable = other.mLookUpTable;
 }
 
-void ScreenMap::set(uint16_t index, const point_xy_float &p) {
+void ScreenMap::set(uint16_t index, const vec2f &p) {
     if (mLookUpTable) {
         LUTXYFLOAT &lut = *mLookUpTable.get();
         auto *data = lut.getDataMutable();
@@ -197,12 +197,12 @@ void ScreenMap::set(uint16_t index, const point_xy_float &p) {
 
 void ScreenMap::setDiameter(float diameter) { mDiameter = diameter; }
 
-point_xy_float ScreenMap::mapToIndex(uint32_t x) const {
+vec2f ScreenMap::mapToIndex(uint32_t x) const {
     if (x >= length || !mLookUpTable) {
         return {0, 0};
     }
     LUTXYFLOAT &lut = *mLookUpTable.get();
-    point_xy_float screen_coords = lut[x];
+    vec2f screen_coords = lut[x];
     return screen_coords;
 }
 
@@ -210,12 +210,12 @@ uint32_t ScreenMap::getLength() const { return length; }
 
 float ScreenMap::getDiameter() const { return mDiameter; }
 
-const point_xy_float &ScreenMap::empty() {
-    static const point_xy_float s_empty = point_xy_float(0, 0);
+const vec2f &ScreenMap::empty() {
+    static const vec2f s_empty = vec2f(0, 0);
     return s_empty;
 }
 
-const point_xy_float &ScreenMap::operator[](uint32_t x) const {
+const vec2f &ScreenMap::operator[](uint32_t x) const {
     if (x >= length || !mLookUpTable) {
         return empty(); // better than crashing.
     }
@@ -223,9 +223,9 @@ const point_xy_float &ScreenMap::operator[](uint32_t x) const {
     return lut[x];
 }
 
-point_xy_float &ScreenMap::operator[](uint32_t x) {
+vec2f &ScreenMap::operator[](uint32_t x) {
     if (x >= length || !mLookUpTable) {
-        return const_cast<point_xy_float &>(empty()); // better than crashing.
+        return const_cast<vec2f &>(empty()); // better than crashing.
     }
     LUTXYFLOAT &lut = *mLookUpTable.get();
     auto *data = lut.getDataMutable();
@@ -241,10 +241,10 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
     return *this;
 }
 
-void ScreenMap::addOffset(const point_xy_float &p) {
-    point_xy_float *data = mLookUpTable->getDataMutable();
+void ScreenMap::addOffset(const vec2f &p) {
+    vec2f *data = mLookUpTable->getDataMutable();
     for (uint32_t i = 0; i < length; i++) {
-        point_xy_float &curr = data[i];
+        vec2f &curr = data[i];
         curr.x += p.x;
         curr.y += p.y;
     }

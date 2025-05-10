@@ -24,8 +24,8 @@ namespace fl { // Mandatory namespace for this class since it has name
 class Str;
 using string = fl::Str; // std-like string
 
-template <typename T> struct rect_xy;
-template <typename T> struct point_xy;
+template <typename T> struct rect;
+template <typename T> struct vec2;
 template <typename T> class Slice;
 template <typename T> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
@@ -509,7 +509,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 
-    template <typename T> Str &append(const rect_xy<T> &rect) {
+    template <typename T> Str &append(const rect<T> &rect) {
         append(rect.mMin.x);
         append(",");
         append(rect.mMin.y);
@@ -520,7 +520,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> Str &append(const point_xy<T> &pt) {
+    template <typename T> Str &append(const vec2<T> &pt) {
         append("(");
         append(pt.x);
         append(",");

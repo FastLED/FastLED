@@ -22,7 +22,7 @@ LinePath::LinePath(float x0, float y0, float x1, float y1) {
     params().y1 = y1;
 }
 
-point_xy_float LinePath::compute(float alpha) {
+vec2f LinePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the line
     float x = params().x0 + alpha * (params().x1 - params().x0);
     float y = params().y0 + alpha * (params().y1 - params().y0);
@@ -38,19 +38,19 @@ void LinePath::set(float x0, float y0, float x1, float y1) {
 
 void LinePath::set(const LinePathParams &p) { params() = p; }
 
-point_xy_float CirclePath::compute(float alpha) {
+vec2f CirclePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the unit circle [-1, 1]
     float t = alpha * 2.0f * PI;
     float x = cosf(t);
     float y = sinf(t);
-    return point_xy_float(x, y);
+    return vec2f(x, y);
 }
 
 CirclePath::CirclePath() {}
 
 HeartPath::HeartPath() {}
 
-point_xy_float HeartPath::compute(float alpha) {
+vec2f HeartPath::compute(float alpha) {
     // Parametric equation for a heart shape
     // α in [0,1] → (x,y) on the heart curve
     float t = alpha * 2.0f * PI;
@@ -76,13 +76,13 @@ point_xy_float HeartPath::compute(float alpha) {
 
     y += 0.17f; // Adjust y to fit within the range of [-1, 1]
 
-    return point_xy_float(x, y);
+    return vec2f(x, y);
 }
 
 ArchimedeanSpiralPath::ArchimedeanSpiralPath(uint8_t turns, float radius)
     : mTurns(turns), mRadius(radius) {}
 
-point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
+vec2f ArchimedeanSpiralPath::compute(float alpha) {
     // Parametric equation for an Archimedean spiral
     // α in [0,1] → (x,y) on the spiral curve
 
@@ -100,7 +100,7 @@ point_xy_float ArchimedeanSpiralPath::compute(float alpha) {
     // Ensure the spiral fits within [-1, 1] range
     // No additional scaling needed as we control the radius directly
 
-    return point_xy_float(x, y);
+    return vec2f(x, y);
 }
 
 RosePath::RosePath(uint8_t n, uint8_t d) {
@@ -109,7 +109,7 @@ RosePath::RosePath(uint8_t n, uint8_t d) {
     params().d = d;
 }
 
-point_xy_float RosePath::compute(float alpha) {
+vec2f RosePath::compute(float alpha) {
     // Parametric equation for a rose curve (rhodonea)
     // α in [0,1] → (x,y) on the rose curve
 
@@ -133,10 +133,10 @@ point_xy_float RosePath::compute(float alpha) {
     float x = r * cosf(theta);
     float y = r * sinf(theta);
 
-    return point_xy_float(x, y);
+    return vec2f(x, y);
 }
 
-point_xy_float PhyllotaxisPath::compute(float alpha) {
+vec2f PhyllotaxisPath::compute(float alpha) {
     // total number of points you want in the pattern
     const float N = static_cast<float>(params().c);
 
@@ -157,10 +157,10 @@ point_xy_float PhyllotaxisPath::compute(float alpha) {
     float x = r * cosf(theta);
     float y = r * sinf(theta);
 
-    return point_xy_float{x, y};
+    return vec2f{x, y};
 }
 
-point_xy_float GielisCurvePath::compute(float alpha) {
+vec2f GielisCurvePath::compute(float alpha) {
     // 1) map alpha to angle θ ∈ [0 … 2π)
     constexpr float kTwoPi = 6.283185307179586f;
     float theta = alpha * kTwoPi;
@@ -186,25 +186,25 @@ point_xy_float GielisCurvePath::compute(float alpha) {
     float x = r * cosf(theta);
     float y = r * sinf(theta);
 
-    return point_xy_float{x, y};
+    return vec2f{x, y};
 }
 
 const Str CirclePath::name() const { return "CirclePath"; }
 
-point_xy_float PointPath::compute(float alpha) {
+vec2f PointPath::compute(float alpha) {
     FASTLED_UNUSED(alpha);
     return mPoint;
 }
 
 const Str PointPath::name() const { return "PointPath"; }
 
-void PointPath::set(float x, float y) { set(point_xy_float(x, y)); }
+void PointPath::set(float x, float y) { set(vec2f(x, y)); }
 
-void PointPath::set(point_xy_float p) { mPoint = p; }
+void PointPath::set(vec2f p) { mPoint = p; }
 
 PointPath::PointPath(float x, float y) : mPoint(x, y) {}
 
-PointPath::PointPath(point_xy_float p) : mPoint(p) {}
+PointPath::PointPath(vec2f p) : mPoint(p) {}
 
 const Str LinePath::name() const { return "LinePath"; }
 
@@ -260,7 +260,7 @@ const GielisCurveParams &GielisCurvePath::params() const { return *mParams; }
 
 CatmullRomPath::CatmullRomPath(const Ptr<CatmullRomParams> &p) : mParams(p) {}
 
-void CatmullRomPath::addPoint(point_xy_float p) { params().addPoint(p); }
+void CatmullRomPath::addPoint(vec2f p) { params().addPoint(p); }
 
 void CatmullRomPath::addPoint(float x, float y) { params().addPoint(x, y); }
 
@@ -272,20 +272,19 @@ CatmullRomParams &CatmullRomPath::params() { return *mParams; }
 
 const CatmullRomParams &CatmullRomPath::params() const { return *mParams; }
 
-point_xy_float CatmullRomPath::compute(float alpha) {
+vec2f CatmullRomPath::compute(float alpha) {
     const auto &points = params().points;
 
     // Need at least 2 points to define a path
     if (points.size() < 2) {
         // Return origin if not enough points
-        return point_xy_float(0.0f, 0.0f);
+        return vec2f(0.0f, 0.0f);
     }
 
     // If only 2 points, do linear interpolation
     if (points.size() == 2) {
-        return point_xy_float(points[0].x + alpha * (points[1].x - points[0].x),
-                              points[0].y +
-                                  alpha * (points[1].y - points[0].y));
+        return vec2f(points[0].x + alpha * (points[1].x - points[0].x),
+                     points[0].y + alpha * (points[1].y - points[0].y));
     }
 
     // For Catmull-Rom, we need 4 points to interpolate between the middle two
@@ -305,7 +304,7 @@ point_xy_float CatmullRomPath::compute(float alpha) {
     float t = scaledAlpha - static_cast<float>(segment);
 
     // Get the four points needed for interpolation
-    point_xy_float p0, p1, p2, p3;
+    vec2f p0, p1, p2, p3;
 
     // Handle boundary cases
     if (segment == 0) {
@@ -333,11 +332,9 @@ point_xy_float CatmullRomPath::compute(float alpha) {
     return out;
 }
 
-point_xy_float CatmullRomPath::interpolate(const point_xy_float &p0,
-                                           const point_xy_float &p1,
-                                           const point_xy_float &p2,
-                                           const point_xy_float &p3,
-                                           float t) const {
+vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1,
+                                  const vec2f &p2, const vec2f &p3,
+                                  float t) const {
 
     // Catmull-Rom interpolation formula
     // Using alpha=0.5 for the "tension" parameter (standard Catmull-Rom)
@@ -359,7 +356,7 @@ point_xy_float CatmullRomPath::interpolate(const point_xy_float &p0,
 
     float y = a * t3 + b * t2 + c * t + d;
 
-    return point_xy_float(x, y);
+    return vec2f(x, y);
 }
 
 const Str CatmullRomPath::name() const { return "CatmullRomPath"; }

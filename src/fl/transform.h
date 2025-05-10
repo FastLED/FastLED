@@ -26,13 +26,12 @@ struct Transform16 {
     // Make a transform that maps a rectangle to the given bounds from
     // (0,0) to (max_value,max_value), inclusive.
     static Transform16 ToBounds(alpha16 max_value);
-    static Transform16 ToBounds(const point_xy<alpha16> &min,
-                                const point_xy<alpha16> &max,
-                                alpha16 rotation = 0);
+    static Transform16 ToBounds(const vec2<alpha16> &min,
+                                const vec2<alpha16> &max, alpha16 rotation = 0);
 
     static Transform16 From(uint16_t width, uint16_t height) {
-        point_xy<alpha16> min = point_xy<alpha16>(0, 0);
-        point_xy<alpha16> max = point_xy<alpha16>(width, height);
+        vec2<alpha16> min = vec2<alpha16>(0, 0);
+        vec2<alpha16> max = vec2<alpha16>(width, height);
         return Transform16::ToBounds(min, max);
     }
 
@@ -46,7 +45,7 @@ struct Transform16 {
     alpha16 offset_y = 0;
     alpha16 rotation = 0;
 
-    point_xy<alpha16> transform(const point_xy<alpha16> &xy) const;
+    vec2<alpha16> transform(const vec2<alpha16> &xy) const;
 };
 
 // This transform assumes the coordinates are in the range [0,1].
@@ -64,7 +63,7 @@ class TransformFloatImpl : public Referent {
     float rotation = 0.0f; // rotation range is [0,1], not [0,2*PI]!
     float scale() const;
     void set_scale(float scale);
-    point_xy_float transform(const point_xy_float &xy) const;
+    vec2f transform(const vec2f &xy) const;
     bool is_identity() const;
 };
 
@@ -74,8 +73,8 @@ struct Matrix3x3f {
         Matrix3x3f m;
         return m;
     }
-    point_xy<float> transform(const point_xy<float> &xy) const {
-        point_xy<float> out;
+    vec2<float> transform(const vec2<float> &xy) const {
+        vec2<float> out;
         out.x = m[0][0] * xy.x + m[0][1] * xy.y + m[0][2];
         out.y = m[1][0] * xy.x + m[1][1] * xy.y + m[1][2];
         return out;
@@ -105,7 +104,7 @@ struct TransformFloat {
     void set_offset_y(float offset) { mImpl->offset_y = offset; }
     void set_rotation(float rotation) { mImpl->rotation = rotation; }
 
-    point_xy_float transform(const point_xy_float &xy) const {
+    vec2f transform(const vec2f &xy) const {
         // mDirty = true; // always recompile.
         // compileIfNecessary();
         // return mCompiled.transform(xy);

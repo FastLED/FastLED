@@ -21,7 +21,7 @@ class XYPathRenderer : public Referent {
   public:
     XYPathRenderer(XYPathGeneratorPtr path,
                    TransformFloat transform = TransformFloat());
-    point_xy_float at(float alpha);
+    vec2f at(float alpha);
 
     Tile2x2_u8 at_subpixel(float alpha);
 
@@ -29,7 +29,7 @@ class XYPathRenderer : public Referent {
                    fl::function<uint8_t(float)> *optional_alpha_gen = nullptr);
 
     // Overloaded to allow transform to be passed in.
-    point_xy_float at(float alpha, const TransformFloat &tx);
+    vec2f at(float alpha, const TransformFloat &tx);
 
     // Needed for drawing to the screen. When this called the rendering will
     // be centered on the width and height such that 0,0 -> maps to .5,.5,
@@ -49,14 +49,14 @@ class XYPathRenderer : public Referent {
 
     void setScale(float scale);
 
-    point_xy_float compute(float alpha);
+    vec2f compute(float alpha);
 
   private:
     XYPathGeneratorPtr mPath;
     TransformFloat mTransform;
     TransformFloat mGridTransform;
     bool mDrawBoundsSet = false;
-    point_xy_float compute_float(float alpha, const TransformFloat &tx);
+    vec2f compute_float(float alpha, const TransformFloat &tx);
 };
 
 } // namespace fl

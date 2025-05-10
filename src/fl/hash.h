@@ -8,7 +8,7 @@
 
 namespace fl {
 
-template <typename T> struct point_xy;
+template <typename T> struct vec2;
 
 //-----------------------------------------------------------------------------
 // MurmurHash3 x86 32-bit
@@ -112,8 +112,8 @@ template <typename T> struct FastHash {
     }
 };
 
-template <typename T> struct FastHash<point_xy<T>> {
-    uint32_t operator()(const point_xy<T> &key) const noexcept {
+template <typename T> struct FastHash<vec2<T>> {
+    uint32_t operator()(const vec2<T> &key) const noexcept {
         if (sizeof(T) == sizeof(uint8_t)) {
             uint32_t x = static_cast<uint32_t>(key.x) +
                          (static_cast<uint32_t>(key.y) << 8);
@@ -137,8 +137,8 @@ template <typename T> struct Hash<T *> {
     }
 };
 
-template <typename T> struct Hash<point_xy<T>> {
-    uint32_t operator()(const point_xy<T> &key) const noexcept {
+template <typename T> struct Hash<vec2<T>> {
+    uint32_t operator()(const vec2<T> &key) const noexcept {
 #ifndef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"

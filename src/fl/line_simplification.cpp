@@ -17,7 +17,7 @@ namespace /*compiled_test*/ {
 // LineSimplifierD s_testd;
 
 // void foo() {
-//     fl::vector<point_xy<float>> points;
+//     fl::vector<vec2<float>> points;
 //     s_test.simplifyInplace(&points);
 // }
 

@@ -5,153 +5,141 @@
 
 namespace fl {
 
-template <typename T> struct point_xy {
+template <typename T> struct vec2 {
     // value_type
     using value_type = T;
     T x = 0;
     T y = 0;
-    constexpr point_xy() = default;
-    constexpr point_xy(T x, T y) : x(x), y(y) {}
+    constexpr vec2() = default;
+    constexpr vec2(T x, T y) : x(x), y(y) {}
 
-    template <typename U> explicit constexpr point_xy(U xy) : x(xy), y(xy) {}
+    template <typename U> explicit constexpr vec2(U xy) : x(xy), y(xy) {}
 
-    constexpr point_xy(const point_xy &p) : x(p.x), y(p.y) {}
-    point_xy &operator*=(const float &f) {
+    constexpr vec2(const vec2 &p) : x(p.x), y(p.y) {}
+    vec2 &operator*=(const float &f) {
         x *= f;
         y *= f;
         return *this;
     }
-    point_xy &operator/=(const float &f) {
+    vec2 &operator/=(const float &f) {
         // *this = point_xy_math::div(*this, f);
         x /= f;
         y /= f;
         return *this;
     }
-    point_xy &operator*=(const double &f) {
+    vec2 &operator*=(const double &f) {
         // *this = point_xy_math::mul(*this, f);
         x *= f;
         y *= f;
         return *this;
     }
-    point_xy &operator/=(const double &f) {
+    vec2 &operator/=(const double &f) {
         // *this = point_xy_math::div(*this, f);
         x /= f;
         y /= f;
         return *this;
     }
 
-    point_xy &operator/=(const uint16_t &d) {
+    vec2 &operator/=(const uint16_t &d) {
         // *this = point_xy_math::div(*this, d);
         x /= d;
         y /= d;
         return *this;
     }
 
-    point_xy &operator/=(const int &d) {
+    vec2 &operator/=(const int &d) {
         // *this = point_xy_math::div(*this, d);
         x /= d;
         y /= d;
         return *this;
     }
 
-    point_xy &operator/=(const point_xy &p) {
+    vec2 &operator/=(const vec2 &p) {
         // *this = point_xy_math::div(*this, p);
         x /= p.x;
         y /= p.y;
         return *this;
     }
 
-    point_xy &operator+=(const point_xy &p) {
+    vec2 &operator+=(const vec2 &p) {
         //*this = point_xy_math::add(*this, p);
         x += p.x;
         y += p.y;
         return *this;
     }
 
-    point_xy &operator-=(const point_xy &p) {
+    vec2 &operator-=(const vec2 &p) {
         // *this = point_xy_math::sub(*this, p);
         x -= p.x;
         y -= p.y;
         return *this;
     }
 
-    point_xy &operator=(const point_xy &p) {
+    vec2 &operator=(const vec2 &p) {
         x = p.x;
         y = p.y;
         return *this;
     }
 
-    point_xy operator-(const point_xy &p) const {
-        return point_xy(x - p.x, y - p.y);
+    vec2 operator-(const vec2 &p) const { return vec2(x - p.x, y - p.y); }
+
+    vec2 operator+(const vec2 &p) const { return vec2(x + p.x, y + p.y); }
+
+    vec2 operator*(const vec2 &p) const { return vec2(x * p.x, y * p.y); }
+
+    vec2 operator/(const vec2 &p) const { return vec2(x / p.x, y / p.y); }
+
+    template <typename NumberT> vec2 operator+(const NumberT &p) const {
+        return vec2(x + p, y + p);
     }
 
-    point_xy operator+(const point_xy &p) const {
-        return point_xy(x + p.x, y + p.y);
+    template <typename U> vec2 operator+(const vec2<U> &p) const {
+        return vec2(x + p.x, y + p.x);
     }
 
-    point_xy operator*(const point_xy &p) const {
-        return point_xy(x * p.x, y * p.y);
+    template <typename NumberT> vec2 operator-(const NumberT &p) const {
+        return vec2(x - p, y - p);
     }
 
-    point_xy operator/(const point_xy &p) const {
-        return point_xy(x / p.x, y / p.y);
+    template <typename NumberT> vec2 operator*(const NumberT &p) const {
+        return vec2(x * p, y * p);
     }
 
-    template <typename NumberT> point_xy operator+(const NumberT &p) const {
-        return point_xy(x + p, y + p);
-    }
-
-    template <typename U> point_xy operator+(const point_xy<U> &p) const {
-        return point_xy(x + p.x, y + p.x);
-    }
-
-    template <typename NumberT> point_xy operator-(const NumberT &p) const {
-        return point_xy(x - p, y - p);
-    }
-
-    template <typename NumberT> point_xy operator*(const NumberT &p) const {
-        return point_xy(x * p, y * p);
-    }
-
-    template <typename NumberT> point_xy operator/(const NumberT &p) const {
+    template <typename NumberT> vec2 operator/(const NumberT &p) const {
         T a = x / p;
         T b = y / p;
-        return point_xy<T>(a, b);
+        return vec2<T>(a, b);
     }
 
-    bool operator==(const point_xy &p) const { return (x == p.x && y == p.y); }
+    bool operator==(const vec2 &p) const { return (x == p.x && y == p.y); }
 
-    bool operator!=(const point_xy &p) const { return (x != p.x || y != p.y); }
+    bool operator!=(const vec2 &p) const { return (x != p.x || y != p.y); }
 
-    template <typename U> bool operator==(const point_xy<U> &p) const {
+    template <typename U> bool operator==(const vec2<U> &p) const {
         return (x == p.x && y == p.y);
     }
 
-    template <typename U> bool operator!=(const point_xy<U> &p) const {
+    template <typename U> bool operator!=(const vec2<U> &p) const {
         return (x != p.x || y != p.y);
     }
 
-    point_xy getMax(const point_xy &p) const {
-        return point_xy(MAX(x, p.x), MAX(y, p.y));
+    vec2 getMax(const vec2 &p) const { return vec2(MAX(x, p.x), MAX(y, p.y)); }
+
+    vec2 getMin(const vec2 &p) const { return vec2(MIN(x, p.x), MIN(y, p.y)); }
+
+    template <typename U> vec2<U> cast() const {
+        return vec2<U>(static_cast<U>(x), static_cast<U>(y));
     }
 
-    point_xy getMin(const point_xy &p) const {
-        return point_xy(MIN(x, p.x), MIN(y, p.y));
+    template <typename U> vec2 getMax(const vec2<U> &p) const {
+        return vec2<U>(MAX(x, p.x), MAX(y, p.y));
     }
 
-    template <typename U> point_xy<U> cast() const {
-        return point_xy<U>(static_cast<U>(x), static_cast<U>(y));
+    template <typename U> vec2 getMin(const vec2<U> &p) const {
+        return vec2<U>(MIN(x, p.x), MIN(y, p.y));
     }
 
-    template <typename U> point_xy getMax(const point_xy<U> &p) const {
-        return point_xy<U>(MAX(x, p.x), MAX(y, p.y));
-    }
-
-    template <typename U> point_xy getMin(const point_xy<U> &p) const {
-        return point_xy<U>(MIN(x, p.x), MIN(y, p.y));
-    }
-
-    T distance(const point_xy &p) const {
+    T distance(const vec2 &p) const {
         T dx = x - p.x;
         T dy = y - p.y;
         return sqrt(dx * dx + dy * dy);
@@ -160,26 +148,26 @@ template <typename T> struct point_xy {
     bool is_zero() const { return (x == 0 && y == 0); }
 };
 
-using point_xy_float = point_xy<float>; // Full precision but slow.
+using vec2f = vec2<float>; // Full precision but slow.
 
 // Legacy support
 
-using pair_xy_float = point_xy<float>; // Legacy name for point_xy_float
+using pair_xy_float = vec2<float>; // Legacy name for vec2f
 
-// pair_xy<T> is the legacy name for point_xy<T>
-template <typename T> struct pair_xy : public point_xy<T> {
+// pair_xy<T> is the legacy name for vec2<T>
+template <typename T> struct pair_xy : public vec2<T> {
     using value_type = T;
-    using point_xy<T>::point_xy;
+    using vec2<T>::vec2;
     pair_xy() = default;
-    pair_xy(const point_xy<T> &p) : point_xy<T>(p) {}
+    pair_xy(const vec2<T> &p) : vec2<T>(p) {}
 };
 
 template <typename T> struct line_xy {
-    point_xy<T> start;
-    point_xy<T> end;
+    vec2<T> start;
+    vec2<T> end;
 
     line_xy() = default;
-    line_xy(const point_xy<T> &start, const point_xy<T> &end)
+    line_xy(const vec2<T> &start, const vec2<T> &end)
         : start(start), end(end) {}
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
@@ -187,19 +175,18 @@ template <typename T> struct line_xy {
 
     bool empty() const { return (start == end); }
 
-    float distance_to(const point_xy<T> &p,
-                      point_xy<T> *out_projected = nullptr) const {
+    float distance_to(const vec2<T> &p,
+                      vec2<T> *out_projected = nullptr) const {
         return distance_to_line_with_point(p, start, end, out_projected);
     }
 
   private:
     // Computes the closest distance from `p` to the line through `a` and `b`,
     // and writes the projected point.
-    static float distance_to_line_with_point(point_xy<T> p, point_xy<T> a,
-                                             point_xy<T> b,
-                                             point_xy<T> *out_projected) {
-        point_xy<T> maybe;
-        point_xy<T> &out_proj = out_projected ? *out_projected : maybe;
+    static float distance_to_line_with_point(vec2<T> p, vec2<T> a, vec2<T> b,
+                                             vec2<T> *out_projected) {
+        vec2<T> maybe;
+        vec2<T> &out_proj = out_projected ? *out_projected : maybe;
         float dx = b.x - a.x;
         float dy = b.y - a.y;
         float len_sq = dx * dx + dy * dy;
@@ -236,15 +223,14 @@ template <typename T> struct line_xy {
     }
 };
 
-template <typename T> struct rect_xy {
-    point_xy<T> mMin;
-    point_xy<T> mMax;
+template <typename T> struct rect {
+    vec2<T> mMin;
+    vec2<T> mMax;
 
-    rect_xy() = default;
-    rect_xy(const point_xy<T> &min, const point_xy<T> &max)
-        : mMin(min), mMax(max) {}
+    rect() = default;
+    rect(const vec2<T> &min, const vec2<T> &max) : mMin(min), mMax(max) {}
 
-    rect_xy(T min_x, T min_y, T max_x, T max_y)
+    rect(T min_x, T min_y, T max_x, T max_y)
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
 
     uint16_t width() const { return mMax.x - mMin.x; }
@@ -253,9 +239,9 @@ template <typename T> struct rect_xy {
 
     bool empty() const { return (mMin.x == mMax.x && mMin.y == mMax.y); }
 
-    void expand(const point_xy<T> &p) { expand(p.x, p.y); }
+    void expand(const vec2<T> &p) { expand(p.x, p.y); }
 
-    void expand(const rect_xy &r) {
+    void expand(const rect &r) {
         expand(r.mMin);
         expand(r.mMax);
     }
@@ -267,25 +253,25 @@ template <typename T> struct rect_xy {
         mMax.y = MAX(mMax.y, y);
     }
 
-    bool contains(const point_xy<T> &p) const {
+    bool contains(const vec2<T> &p) const {
         return (p.x >= mMin.x && p.x < mMax.x && p.y >= mMin.y && p.y < mMax.y);
     }
 
     bool contains(const T &x, const T &y) const {
-        return contains(point_xy<T>(x, y));
+        return contains(vec2<T>(x, y));
     }
 
-    bool operator==(const rect_xy &r) const {
+    bool operator==(const rect &r) const {
         return (mMin == r.mMin && mMax == r.mMax);
     }
 
-    bool operator!=(const rect_xy &r) const { return !(*this == r); }
+    bool operator!=(const rect &r) const { return !(*this == r); }
 
-    template <typename U> bool operator==(const rect_xy<U> &r) const {
+    template <typename U> bool operator==(const rect<U> &r) const {
         return (mMin == r.mMin && mMax == r.mMax);
     }
 
-    template <typename U> bool operator!=(const rect_xy<U> &r) const {
+    template <typename U> bool operator!=(const rect<U> &r) const {
         return !(*this == r);
     }
 };

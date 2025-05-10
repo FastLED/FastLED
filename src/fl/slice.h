@@ -157,12 +157,12 @@ template <typename T> class MatrixSlice {
     MatrixSlice(const MatrixSlice &other) = default;
     MatrixSlice &operator=(const MatrixSlice &other) = default;
 
-    // outputs a point_xy but takes x,y as inputs
-    point_xy<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
+    // outputs a vec2 but takes x,y as inputs
+    vec2<int32_t> getParentCoord(int32_t x_local, int32_t y_local) const {
         return {x_local + mBottomLeft.x, y_local + mBottomLeft.y};
     }
 
-    point_xy<int32_t> getLocalCoord(int32_t x_world, int32_t y_world) const {
+    vec2<int32_t> getLocalCoord(int32_t x_world, int32_t y_world) const {
         // clamp to [mBottomLeft, mTopRight]
         int32_t x_clamped = fl::clamp(x_world, mBottomLeft.x, mTopRight.x);
         int32_t y_clamped = fl::clamp(y_world, mBottomLeft.y, mTopRight.y);
@@ -193,8 +193,8 @@ template <typename T> class MatrixSlice {
     T *mData = nullptr;
     int32_t mDataWidth = 0;
     int32_t mDataHeight = 0;
-    point_xy<int32_t> mBottomLeft;
-    point_xy<int32_t> mTopRight;
+    vec2<int32_t> mBottomLeft;
+    vec2<int32_t> mTopRight;
 };
 
 } // namespace fl

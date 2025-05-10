@@ -41,24 +41,23 @@ class ScreenMap {
     // is_reverse is false by default for linear layout
     ScreenMap(uint32_t length, float mDiameter = -1.0f);
 
-    ScreenMap(const point_xy_float *lut, uint32_t length,
-              float diameter = -1.0);
+    ScreenMap(const vec2f *lut, uint32_t length, float diameter = -1.0);
 
     template <uint32_t N>
-    ScreenMap(const point_xy_float (&lut)[N], float diameter = -1.0)
+    ScreenMap(const vec2f (&lut)[N], float diameter = -1.0)
         : ScreenMap(lut, N, diameter) {}
 
     ScreenMap(const ScreenMap &other);
 
-    const point_xy_float &operator[](uint32_t x) const;
+    const vec2f &operator[](uint32_t x) const;
 
-    void set(uint16_t index, const point_xy_float &p);
+    void set(uint16_t index, const vec2f &p);
 
-    void addOffset(const point_xy_float &p);
+    void addOffset(const vec2f &p);
     void addOffsetX(float x);
     void addOffsetY(float y);
 
-    point_xy_float &operator[](uint32_t x);
+    vec2f &operator[](uint32_t x);
 
     // TODO: change this name to setDiameterLed. Default should be .5f
     // for 5 mm ws lense.
@@ -67,7 +66,7 @@ class ScreenMap {
     // define the assignment operator
     ScreenMap &operator=(const ScreenMap &other);
 
-    point_xy_float mapToIndex(uint32_t x) const;
+    vec2f mapToIndex(uint32_t x) const;
 
     uint32_t getLength() const;
     // The diameter each point represents.
@@ -86,7 +85,7 @@ class ScreenMap {
     static void toJson(const FixedMap<Str, ScreenMap, 16> &, JsonDocument *doc);
 
   private:
-    static const point_xy_float &empty();
+    static const vec2f &empty();
     uint32_t length = 0;
     float mDiameter = -1.0f; // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;

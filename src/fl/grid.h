@@ -34,7 +34,7 @@ template <typename T> class Grid {
         }
     }
 
-    point_xy<T> minMax() const {
+    vec2<T> minMax() const {
         T minValue = mData[0];
         T maxValue = mData[0];
         for (uint32_t i = 1; i < mWidth * mHeight; ++i) {
@@ -47,7 +47,7 @@ template <typename T> class Grid {
         }
         // *min = minValue;
         // *max = maxValue;
-        point_xy<T> out(minValue, maxValue);
+        vec2<T> out(minValue, maxValue);
         return out;
     }
 

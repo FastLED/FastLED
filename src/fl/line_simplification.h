@@ -30,7 +30,7 @@ template <typename NumberT = float> class LineSimplifier {
     // Douglas-Peucker but with some tweaks for memory efficiency. Most common
     // usage of this class for small sized inputs (~20) will produce no heap
     // allocations.
-    using Point = fl::point_xy<NumberT>;
+    using Point = fl::vec2<NumberT>;
     using VectorPoint = fl::vector<Point>;
 
     LineSimplifier() : mMinDistance(EPSILON_F) {}
@@ -235,7 +235,7 @@ template <typename NumberT = float> class LineSimplifier {
 template <typename NumberT = float> class LineSimplifierExact {
   public:
     LineSimplifierExact() = default;
-    using Point = point_xy<NumberT>;
+    using Point = vec2<NumberT>;
 
     LineSimplifierExact(int count) : mCount(count) {}
 

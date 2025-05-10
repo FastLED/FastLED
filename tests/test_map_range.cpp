@@ -37,13 +37,13 @@ TEST_CASE("map_range<float>") {
     CHECK_EQ(map_range<float>(2.5f, -1.5f, 2.5f, -10.5f, -20.5f), -20.5f);
 }
 
-TEST_CASE("map_range<float, point_xy<float>") {
+TEST_CASE("map_range<float, vec2<float>") {
     float min = 0.0f;
     float max = 1.0f;
-    point_xy<float> in_min(0.0f, 0.0f);
-    point_xy<float> out_max(1.0f, 2.0f);
+    vec2<float> in_min(0.0f, 0.0f);
+    vec2<float> out_max(1.0f, 2.0f);
 
-    point_xy<float> out = map_range(.5f, min, max, in_min, out_max);
+    vec2<float> out = map_range(.5f, min, max, in_min, out_max);
     CHECK_EQ(out.x, 0.5f);
     CHECK_EQ(out.y, 1.f);
 

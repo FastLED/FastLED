@@ -114,10 +114,10 @@ void loop() {
 }
 
 ScreenMap makeScreenMap() {
-    fl::HeapVector<point_xy_float> lut;
+    fl::HeapVector<vec2f> lut;
     for (uint16_t y = 0; y < WIDTH; y++) {
         for (uint16_t x = 0; x < HEIGHT; x++) {
-            point_xy_float xy = {float(x) * 3, float(y) * 20};
+            vec2f xy = {float(x) * 3, float(y) * 20};
             lut.push_back(xy);
         }
     }

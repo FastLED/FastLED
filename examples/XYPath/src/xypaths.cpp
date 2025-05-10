@@ -13,12 +13,12 @@ namespace {
     Ptr<CatmullRomParams> make_path(int width, int height) {
         // make a triangle.
         Ptr<CatmullRomParams> params = NewPtr<CatmullRomParams>();
-        vector_inlined<point_xy_float, 5> points;
-        points.push_back(point_xy_float(0.0f, 0.0f));
-        points.push_back(point_xy_float(width / 3, height / 2));
-        points.push_back(point_xy_float(width - 3, height - 1));
-        points.push_back(point_xy_float(0.0f, height - 1));
-        points.push_back(point_xy_float(0.0f, 0.0f));
+        vector_inlined<vec2f, 5> points;
+        points.push_back(vec2f(0.0f, 0.0f));
+        points.push_back(vec2f(width / 3, height / 2));
+        points.push_back(vec2f(width - 3, height - 1));
+        points.push_back(vec2f(0.0f, height - 1));
+        points.push_back(vec2f(0.0f, 0.0f));
         for (auto &p : points) {
             p.x = map_range<float, float>(p.x, 0.0f, width - 1, -1.0f, 1.0f);
             p.y = map_range<float, float>(p.y, 0.0f, height - 1, -1.0f, 1.0f);

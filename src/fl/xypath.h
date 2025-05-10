@@ -53,8 +53,8 @@ class XYPath : public Referent {
 
     // Custom path using just a function.
     static XYPathPtr
-    NewCustomPath(const fl::function<point_xy_float(float)> &path,
-                  const rect_xy<int> &drawbounds = rect_xy<int>(),
+    NewCustomPath(const fl::function<vec2f(float)> &path,
+                  const rect<int> &drawbounds = rect<int>(),
                   const TransformFloat &transform = TransformFloat(),
                   const Str &name = xypath_detail::unique_missing_name());
 
@@ -85,7 +85,7 @@ class XYPath : public Referent {
     // Future work: we don't actually want just the point, but also
     // it's intensity at that value. Otherwise a seperate class has to
     // made to also control the intensity and that sucks.
-    using xy_brightness = fl::pair<point_xy_float, uint8_t>;
+    using xy_brightness = fl::pair<vec2f, uint8_t>;
 
     /////////////////////////////////////////////////////////////
     // Create a new Catmull-Rom spline path with custom parameters
@@ -93,7 +93,7 @@ class XYPath : public Referent {
            TransformFloat transform = TransformFloat());
 
     virtual ~XYPath();
-    point_xy_float at(float alpha);
+    vec2f at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
 
     // Rasterizes and draws to the leds.
@@ -110,9 +110,9 @@ class XYPath : public Referent {
     void setScale(float scale);
     Str name() const;
     // Overloaded to allow transform to be passed in.
-    point_xy_float at(float alpha, const TransformFloat &tx);
+    vec2f at(float alpha, const TransformFloat &tx);
     xy_brightness at_brightness(float alpha) {
-        point_xy_float p = at(alpha);
+        vec2f p = at(alpha);
         return xy_brightness(p, 0xff); // Full brightness for now.
     }
     // Needed for drawing to the screen. When this called the rendering will
@@ -140,15 +140,15 @@ class XYPath : public Referent {
 
 class XYPathFunction : public XYPathGenerator {
   public:
-    XYPathFunction(fl::function<point_xy_float(float)> f) : mFunction(f) {}
-    point_xy_float compute(float alpha) override { return mFunction(alpha); }
+    XYPathFunction(fl::function<vec2f(float)> f) : mFunction(f) {}
+    vec2f compute(float alpha) override { return mFunction(alpha); }
     const Str name() const override { return mName; }
     void setName(const Str &name) { mName = name; }
 
-    fl::rect_xy<int> drawBounds() const { return mDrawBounds; }
-    void setDrawBounds(const fl::rect_xy<int> &bounds) { mDrawBounds = bounds; }
+    fl::rect<int> drawBounds() const { return mDrawBounds; }
+    void setDrawBounds(const fl::rect<int> &bounds) { mDrawBounds = bounds; }
 
-    bool hasDrawBounds(fl::rect_xy<int> *bounds) override {
+    bool hasDrawBounds(fl::rect<int> *bounds) override {
         if (bounds) {
             *bounds = mDrawBounds;
         }
@@ -156,9 +156,9 @@ class XYPathFunction : public XYPathGenerator {
     }
 
   private:
-    fl::function<point_xy_float(float)> mFunction;
+    fl::function<vec2f(float)> mFunction;
     fl::Str mName = "XYPathFunction Unnamed";
-    fl::rect_xy<int> mDrawBounds;
+    fl::rect<int> mDrawBounds;
 };
 
 } // namespace fl

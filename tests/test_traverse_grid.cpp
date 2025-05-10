@@ -19,8 +19,8 @@ struct CollectingVisitor {
 
 TEST_CASE("Traverse grid") {
     SUBCASE("Horizontal line") {
-        point_xy_float start{1.2f, 2.5f};
-        point_xy_float end{5.7f, 2.5f};
+        vec2f start{1.2f, 2.5f};
+        vec2f end{5.7f, 2.5f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -32,8 +32,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Vertical line") {
-        point_xy_float start{3.4f, 1.1f};
-        point_xy_float end{3.4f, 4.9f};
+        vec2f start{3.4f, 1.1f};
+        vec2f end{3.4f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -46,8 +46,8 @@ TEST_CASE("Traverse grid") {
 
 
     SUBCASE("Forward diagonal") {
-        point_xy_float start{1.1f, 1.1f};
-        point_xy_float end{4.9f, 4.9f};
+        vec2f start{1.1f, 1.1f};
+        vec2f end{4.9f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -63,8 +63,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Backward diagonal") {
-        point_xy_float start{4.9f, 1.1f};
-        point_xy_float end{1.1f, 4.9f};
+        vec2f start{4.9f, 1.1f};
+        vec2f end{1.1f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -80,8 +80,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Single cell") {
-        point_xy_float start{2.2f, 3.3f};
-        point_xy_float end{2.2f, 3.3f};
+        vec2f start{2.2f, 3.3f};
+        vec2f end{2.2f, 3.3f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);

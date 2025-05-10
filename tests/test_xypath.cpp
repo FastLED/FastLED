@@ -24,7 +24,7 @@ using namespace fl;
 
 TEST_CASE("LinePath") {
     LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
-    point_xy_float xy = path.compute(0.5f);
+    vec2f xy = path.compute(0.5f);
     REQUIRE(xy.x == 0.5f);
     REQUIRE(xy.y == 0.5f);
 
@@ -43,7 +43,7 @@ TEST_CASE("LinePath at_subpixel") {
     XYPath path(NewPtrNoTracking(line));
     path.setDrawBounds(2,2);
     Tile2x2_u8 tile = path.at_subpixel(0);
-    REQUIRE_EQ(point_xy<uint16_t>(0, 0), tile.origin());
+    REQUIRE_EQ(vec2<uint16_t>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
     REQUIRE_EQ(255, tile.at(0, 0));
 }
@@ -54,9 +54,9 @@ TEST_CASE("LinePath simple float sweep") {
     XYPath path(NewPtrNoTracking(point));
     auto xy = path.at(0);
     //MESSAGE_TILE(tile);
-    REQUIRE_EQ(xy, point_xy_float(0.0f, 1.f));
+    REQUIRE_EQ(xy, vec2f(0.0f, 1.f));
     xy = path.at(1);
-    REQUIRE_EQ(xy, point_xy_float(1.f, 1.f));
+    REQUIRE_EQ(xy, vec2f(1.f, 1.f));
 }
 
 TEST_CASE("Point at exactly the middle") {
@@ -67,7 +67,7 @@ TEST_CASE("Point at exactly the middle") {
     // auto xy = path.at(0);
     fl::Tile2x2_u8 sp = path.at_subpixel(0);
     //MESSAGE_TILE(tile);
-    // REQUIRE_EQ(point_xy_float(0.0f, 0.f), sp);
+    // REQUIRE_EQ(vec2f(0.0f, 0.f), sp);
     // print out
     auto origin = sp.origin();
     MESSAGE("Origin: " << origin.x << ", " << origin.y);
@@ -92,8 +92,8 @@ TEST_CASE("LinePath simple sweep in draw bounds") {
     path.setDrawBounds(width, width);
     auto begin = path.at(0);
     auto end = path.at(1);
-    REQUIRE_EQ(point_xy_float(0.5f, 0.5f), begin);
-    REQUIRE_EQ(point_xy_float(1.5f, 0.5f), end);
+    REQUIRE_EQ(vec2f(0.5f, 0.5f), begin);
+    REQUIRE_EQ(vec2f(1.5f, 0.5f), end);
 }
 
 TEST_CASE("LinePath at_subpixel moves x") {
@@ -103,10 +103,10 @@ TEST_CASE("LinePath at_subpixel moves x") {
     path.setDrawBounds(3, 3);
     Tile2x2_u8 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin(), point_xy<uint16_t>(0, 0));
+    REQUIRE_EQ(tile.origin(), vec2<uint16_t>(0, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
     tile = path.at_subpixel(1.0f);
-    REQUIRE_EQ(tile.origin(), point_xy<uint16_t>(2, 0));
+    REQUIRE_EQ(tile.origin(), vec2<uint16_t>(2, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
 }
 
@@ -124,7 +124,7 @@ TEST_CASE("Test HeartPath") {
     const int num_samples = 100;
     for (int i = 0; i < num_samples; i++) {
         float alpha = static_cast<float>(i) / (num_samples - 1);
-        point_xy_float point = heart->compute(alpha);
+        vec2f point = heart->compute(alpha);
         
         // Update min/max values
         min_x = MIN(min_x, point.x);
@@ -163,7 +163,7 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
     const int num_samples = 100;
     for (int i = 0; i < num_samples; i++) {
         float alpha = static_cast<float>(i) / (num_samples - 1);
-        point_xy_float point = spiral->compute(alpha);
+        vec2f point = spiral->compute(alpha);
         
         // Update min/max values
         min_x = MIN(min_x, point.x);
@@ -204,7 +204,7 @@ TEST_CASE("Test RosePath") {
         const int num_samples = 100;
         for (int i = 0; i < num_samples; i++) {
             float alpha = static_cast<float>(i) / (num_samples - 1);
-            point_xy_float point = rose->compute(alpha);
+            vec2f point = rose->compute(alpha);
             
             // Update min/max values
             min_x = MIN(min_x, point.x);
@@ -243,7 +243,7 @@ TEST_CASE("Test RosePath") {
         const int num_samples = 100;
         for (int i = 0; i < num_samples; i++) {
             float alpha = static_cast<float>(i) / (num_samples - 1);
-            point_xy_float point = rose->compute(alpha);
+            vec2f point = rose->compute(alpha);
             
             // Update min/max values
             min_x = MIN(min_x, point.x);
@@ -289,7 +289,7 @@ TEST_CASE("Check complex types") {
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = MIN(1.f, alpha);
-                point_xy_float xy = path->at(alpha);
+                vec2f xy = path->at(alpha);
                 REQUIRE(xy.x >= -1.0f);
                 REQUIRE(xy.x <= 1.0f);
                 REQUIRE(xy.y >= -1.0f);
@@ -308,7 +308,7 @@ TEST_CASE("Check complex types") {
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = MIN(1.f, alpha);
-                point_xy_float xy = path->at(alpha, tx);
+                vec2f xy = path->at(alpha, tx);
                 REQUIRE_GE(xy.x, -4.0f);
                 REQUIRE_LE(xy.x, 4.0f);
                 REQUIRE_GE(xy.y, -4.0f);

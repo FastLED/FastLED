@@ -192,8 +192,8 @@ void WaveSimulation2D::setf(size_t x, size_t y, float value) {
 }
 
 void WaveSimulation2D::update() {
-    const point_xy<int16_t> min_max = mChangeGrid.minMax();
-    const bool has_updates = min_max != point_xy<int16_t>(0, 0);
+    const vec2<int16_t> min_max = mChangeGrid.minMax();
+    const bool has_updates = min_max != vec2<int16_t>(0, 0);
     for (uint8_t i = 0; i < mExtraFrames + 1; ++i) {
         if (has_updates) {
             // apply them

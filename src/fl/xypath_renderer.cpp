@@ -21,10 +21,9 @@ XYPathRenderer::XYPathRenderer(XYPathGeneratorPtr path,
                                TransformFloat transform)
     : mPath(path), mTransform(transform) {}
 
-point_xy_float XYPathRenderer::compute_float(float alpha,
-                                             const TransformFloat &tx) {
-    point_xy_float xy = mPath->compute(alpha);
-    point_xy_float out = tx.transform(xy);
+vec2f XYPathRenderer::compute_float(float alpha, const TransformFloat &tx) {
+    vec2f xy = mPath->compute(alpha);
+    vec2f out = tx.transform(xy);
     out = mGridTransform.transform(out);
     return out;
 }
@@ -35,7 +34,7 @@ Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
         FASTLED_WARN("XYPathRenderer::at_subpixel: draw bounds not set");
         return Tile2x2_u8();
     }
-    point_xy_float xy = at(alpha);
+    vec2f xy = at(alpha);
 
     // 2) shift back so whole‐pixels go 0…W–1, 0…H–1
     float x = xy.x - 0.5f;
@@ -56,7 +55,7 @@ Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
     float w_ur = fx * fy;             // upper‑right
 
     // 6) build Tile2x2_u8 anchored at (cx,cy)
-    Tile2x2_u8 out(point_xy<int>(cx, cy));
+    Tile2x2_u8 out(vec2<int>(cx, cy));
     out.lower_left() = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
     out.upper_left() = to_uint8(w_ul);
