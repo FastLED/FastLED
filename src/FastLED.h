@@ -904,6 +904,10 @@ using fl::XYMap;
 using namespace fl;
 #endif
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 // Experimental: loop() hijacking.
 //
 // EngineEvents requires that FastLED.show() be invoked.
@@ -922,3 +926,5 @@ using namespace fl;
 //     real_loop(); \
 //     void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
 //     void real_loop()
+
+#pragma GCC diagnostic pop
