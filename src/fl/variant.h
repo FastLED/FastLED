@@ -3,47 +3,6 @@
 #include "fl/inplacenew.h"  // for fl::move, fl::forward, in‐place new
 #include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
 
-// Type traits for variant implementation
-namespace fl {} // namespace fl
-
-// AI INSTRUCTIONS, impliment a table dispatch like this:
-// template<typename... Types>
-// class Variant {
-//   // … all your existing stuff …
-
-//   public:
-//     template <typename Visitor>
-//     void visit(Visitor &visitor) {
-//       if (_tag == Empty) return;
-
-//       // Fn is “a pointer to function taking (void* storage, Visitor&)”
-//       using Fn = void(*)(void*, Visitor&);
-
-//       // Build a constexpr array of one thunk per type in Types...
-//       // Each thunk casts the storage back to the right T* and calls
-//       visitor.accept static constexpr std::array<Fn, sizeof...(Types)> table
-//       = {
-//         &Variant::template visit_fn<Types, Visitor>...
-//       };
-
-//       // _tag is 1-based, so dispatch in O(1) via one indirect call:
-//       table[_tag - 1](&_storage, visitor);
-//     }
-
-//   private:
-//     // This is the little helper each table-entry points at:
-//     template <typename T, typename Visitor>
-//     static void visit_fn(void *storage, Visitor &v) {
-//       // unsafe_cast is OK here because we know _tag matched T
-//       v.accept(*reinterpret_cast<T*>(storage));
-//     }
-
-//     // your storage + tag…
-//     alignas(max_align<Types...>::value)
-//     char _storage[max_size<Types...>::value];
-//     Tag _tag;
-// };
-
 namespace fl {
 
 // A variant that can hold any of N different types
