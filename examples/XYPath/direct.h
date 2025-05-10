@@ -43,16 +43,11 @@ UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
 
 // UIButton trigger("My Trigger");
-UISlider pointX("Point X", WIDTH / 2.0f, 0.0f, WIDTH - 1, 1.0f);
-UISlider pointY("Point Y", HEIGHT / 2.0f, 0.0f, HEIGHT - 1, 1.0f);
+UISlider offset("Offset", 0.0f, 0.0f, 1.0f, 0.01f);
 
-UIButton button("second trigger");
 
 XYPathPtr heartPath = XYPath::NewHeartPath(WIDTH, HEIGHT);
 
-int x = 0;
-int y = 0;
-bool triggered = false;
 
 
 void setup() {
@@ -64,15 +59,13 @@ void setup() {
 }
 void loop() {
     fl::clear(leds);
-    triggered = button.clicked();
-    if (triggered) {
-        FASTLED_WARN("Triggered");
-    }
-    x = pointX.as_int();
-    y = pointY.as_int();
-    // leds(x,y) = CRGB(255, 0, 0);
 
-    heartPath->drawColor(CRGB(255, 0, 0), 0.0f, 1.0f, &leds);
+
+    // leds(x,y) = CRGB(255, 0, 0);
+    float from = offset;
+    float to = 1.0f + offset.value();
+
+    heartPath->drawColor(CRGB(255, 0, 0), from, to, &leds);
     
 
     FastLED.show();
