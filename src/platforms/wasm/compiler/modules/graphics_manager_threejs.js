@@ -161,23 +161,45 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _setupScene(frameData) {
-    const FOV = 45;
-    const margin = 1.05; // Add a small margin around the screen
     const { THREE } = this.threeJsModules;
     
+    // Create the scene
     this.scene = new THREE.Scene();
-
-    // Calculate camera position
-    const circleRadius = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * 0.5;
-    const cameraZ = (circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2))) * margin;
     
-    // Use perspective camera with narrower FOV for less distortion
+    // Camera configuration
+    this._setupCamera();
+  }
+  
+  /**
+   * Sets up the camera with proper positioning
+   * @private
+   */
+  _setupCamera() {
+    const { THREE } = this.threeJsModules;
+    
+    // Camera parameters
+    const FOV = 45;
+    const NEAR_PLANE = 0.1;
+    const FAR_PLANE = 5000;
+    const MARGIN = 1.05; // Add a small margin around the screen
+    
+    // Calculate aspect ratio
     const aspectRatio = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
-    this.camera = new THREE.PerspectiveCamera(FOV, aspectRatio, 0.1, 5000);
     
-    // Adjust camera position to ensure the circle fits within the view
-    this.camera.position.z = cameraZ;
-    this.camera.position.y = 0;
+    // Create perspective camera
+    this.camera = new THREE.PerspectiveCamera(
+      FOV,
+      aspectRatio,
+      NEAR_PLANE,
+      FAR_PLANE
+    );
+    
+    // Calculate optimal camera distance to fit the entire scene
+    const circleRadius = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * 0.5;
+    const cameraZ = (circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2))) * MARGIN;
+    
+    // Position the camera
+    this.camera.position.set(0, 0, cameraZ);
   }
 
   /**
