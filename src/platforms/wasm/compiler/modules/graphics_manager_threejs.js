@@ -137,6 +137,12 @@ export class GraphicsManagerThreeJS {
     this._setupScene(frameData);
     this._setupRenderer();
     this._setupRenderPasses(frameData);
+    
+    // For orthographic camera, we need to update the projection matrix
+    // after all setup is complete
+    if (this.camera) {
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   /**
@@ -170,6 +176,16 @@ export class GraphicsManagerThreeJS {
     canvas.style.height = `${targetHeight}px`;
     canvas.style.maxWidth = `${targetWidth}px`;
     canvas.style.maxHeight = `${targetHeight}px`;
+    
+    // Store the bounds for orthographic camera calculations
+    this.screenBounds = {
+      width: screenMapWidth,
+      height: screenMapHeight,
+      minX: screenMap.absMin[0],
+      minY: screenMap.absMin[1],
+      maxX: screenMap.absMax[0],
+      maxY: screenMap.absMax[1]
+    };
   }
 
   /**
@@ -194,28 +210,28 @@ export class GraphicsManagerThreeJS {
     const { THREE } = this.threeJsModules;
     
     // Camera parameters
-    const FOV = 45;
     const NEAR_PLANE = 0.1;
     const FAR_PLANE = 5000;
     const MARGIN = 1.05; // Add a small margin around the screen
     
-    // Calculate aspect ratio
-    const aspectRatio = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
+    // Calculate half width and height for orthographic camera
+    const halfWidth = this.SCREEN_WIDTH / 2;
+    const halfHeight = this.SCREEN_HEIGHT / 2;
     
-    // Create perspective camera
-    this.camera = new THREE.PerspectiveCamera(
-      FOV,
-      aspectRatio,
+    // Create orthographic camera
+    this.camera = new THREE.OrthographicCamera(
+      -halfWidth * MARGIN,  // left
+      halfWidth * MARGIN,   // right
+      halfHeight * MARGIN,  // top
+      -halfHeight * MARGIN, // bottom
       NEAR_PLANE,
       FAR_PLANE
     );
     
-    // Calculate optimal camera distance to fit the entire scene
-    const circleRadius = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * 0.5;
-    const cameraZ = (circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2))) * MARGIN;
-    
-    // Position the camera
-    this.camera.position.set(0, 0, cameraZ);
+    // Position the camera at a fixed distance
+    this.camera.position.set(0, 0, 1000);
+    this.camera.zoom = 1.0;
+    this.camera.updateProjectionMatrix();
   }
 
   /**
@@ -694,11 +710,11 @@ export class GraphicsManagerThreeJS {
   _updateLedVisuals(positionMap, screenMap) {
     const { THREE } = this.threeJsModules;
     
-    // Calculate normalized coordinates
-    const min_x = screenMap.absMin[0];
-    const min_y = screenMap.absMin[1];
-    const width = screenMap.absMax[0] - min_x;
-    const height = screenMap.absMax[1] - min_y;
+    // Use the stored bounds from setup
+    const min_x = this.screenBounds.minX;
+    const min_y = this.screenBounds.minY;
+    const width = this.screenBounds.width;
+    const height = this.screenBounds.height;
 
     // Track which merged meshes need updates
     const mergedMeshUpdates = new Map();
@@ -710,13 +726,13 @@ export class GraphicsManagerThreeJS {
 
       const led = this.leds[ledIndex];
       
-      // Calculate normalized position
+      // Calculate normalized position for orthographic view
       const x = ledData.x - min_x;
       const y = ledData.y - min_y;
       const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
       const normalizedY = (y / height) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT / 2;
 
-      // Add subtle depth effect based on distance from center
+      // Get z position (fixed for orthographic camera)
       const z = this._calculateDepthEffect(normalizedX, normalizedY);
 
       // Update LED position and color
@@ -801,11 +817,9 @@ export class GraphicsManagerThreeJS {
    * @private
    */
   _calculateDepthEffect(x, y) {
-    const distFromCenter = Math.sqrt(x ** 2 + y ** 2);
-    const maxDist = Math.sqrt(
-      (this.SCREEN_WIDTH / 2) ** 2 + (this.SCREEN_HEIGHT / 2) ** 2
-    );
-    return (distFromCenter / maxDist) * 100; // Max depth of 100 units
+    // With orthographic camera, we don't need a depth effect based on distance
+    // But we can still use a small z-offset to prevent z-fighting
+    return 0; // Fixed z position for orthographic view
   }
   
   /**
