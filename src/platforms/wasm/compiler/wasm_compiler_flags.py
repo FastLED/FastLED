@@ -90,9 +90,11 @@ debug_compile_flags = [
 debug_link_flags = [
     "--emit-symbol-map",
     f"-gseparate-dwarf={wasm_name}",
-    f"-sSEPARATE_DWARF_URL=file://{wasm_path}",
+    f"-sSEPARATE_DWARF_URL=file://{wasm_path}.dwarf", 
     "-sSTACK_OVERFLOW_CHECK=2",
     "-sASSERTIONS=1",
+    "-fsanitize=address",
+    "-fsanitize=undefined",
 ]
 
 # Adjust for QUICK_BUILD or DEBUG
@@ -102,7 +104,7 @@ elif DEBUG:
     # strip default optimization levels
     compile_flags = _remove_flags(compile_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
     compile_flags += debug_compile_flags
-    link_flags += debug_link_flags + ["-fsanitize=address", "-fsanitize=undefined"]
+    link_flags += debug_link_flags
 
 # Optimize for RELEASE
 if OPTIMIZED:
@@ -146,7 +148,7 @@ else:
         ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
     )
     fastled_compile_cc_flags += debug_compile_flags
-    fastled_compile_link_flags += debug_link_flags + ["-fsanitize=address", "-fsanitize=undefined"]
+    fastled_compile_link_flags += debug_link_flags
 
 # Apply to library builders
 for lb in env.GetLibBuilders():
