@@ -208,4 +208,7 @@ for f in link_flags:
 print_banner("FastLED Library Flags:")
 for f in fastled_compile_link_flags:
     print(f"  {f}")
-print_banner("End of Flags")
+
+
+    
+print_banner("End of Flags\nBegin compile/link using PlatformIO")
