@@ -109,19 +109,10 @@ def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
             curr_flags.remove(flag)
     return curr_flags
 
+wasm_name = "fastled.wasm"
+wasm_path = f"{BUILD_DIR}/{wasm_name}"
 
-
-if QUICK_BUILD:
-    sketch_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
-elif DEBUG:
-    # Remove -Oz flag
-    sketch_flags = _remove_flags(sketch_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
-    # Keep in mind this project doesn't name opt/release/debug builds, they all have the same name.
-    # Define the WASM file name
-    wasm_name = "fastled.wasm"
-    wasm_path = f"{BUILD_DIR}/{wasm_name}"
-    
-    sketch_flags += [
+DEBUG_FLAGS = [
         "-g3",
         "-gsource-map",
         "--emit-symbol-map",
@@ -132,7 +123,17 @@ elif DEBUG:
         "-fsanitize=address",
         "-fsanitize=undefined",
         "-fno-inline",  # Helps with debugging by not inlining functions
-    ]
+]
+
+
+if QUICK_BUILD:
+    sketch_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
+elif DEBUG:
+    # Remove -Oz flag
+    sketch_flags = _remove_flags(sketch_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
+    # Keep in mind this project doesn't name opt/release/debug builds, they all have the same name.
+    # Define the WASM file name
+    sketch_flags += DEBUG_FLAGS
 
 
 sketch_flags += [
@@ -175,7 +176,7 @@ fastled_compile_cc_flags = [
     "-Werror=cast-function-type",
     # "-fno-exceptions",
     # "-fno-rtti",
-    build_mode,
+    # build_mode,
     # "-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0",
     # "-fno-exceptions",
     # "-sDISABLE_EXCEPTION_CATCHING=1",
@@ -191,6 +192,17 @@ fastled_compile_link_flags = [
 ]
 
 
+if not DEBUG:
+    fastled_compile_cc_flags += [build_mode]
+else:
+    # Remove -Oz flag
+    fastled_compile_cc_flags = _remove_flags(fastled_compile_cc_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
+    # Add debug flags
+    fastled_compile_cc_flags += DEBUG_FLAGS
+
+
+
+
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
     lb.env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
@@ -198,3 +210,46 @@ for lb in env.GetLibBuilders():
     # for final linking.
     lb.env.Append(CCFLAGS=fastled_compile_cc_flags)
     lb.env.Append(LINKFLAGS=fastled_compile_link_flags)
+
+
+def banner(s: str) -> str:
+    """
+    Print a banner with the given string.
+    """
+    # find the max width
+    lines = s.split("\n")
+    max_width = max(len(line) for line in lines)
+    # take in "mesage" and output
+    # ###########
+    # # message #
+    # ###########
+    out: list[str] = []
+    out.append("#" * (max_width + 4))
+    for line in lines:
+        # out.append(f"# {line} #")
+        # now we want this left justfied and filled
+        # with spaces to the right
+        out.append(f"# {line:<{max_width}} #")
+    out.append("#" * (max_width + 4))
+    return "\n".join(out)
+
+def print_banner(s: str) -> None:
+    """
+    Print a banner with the given string.
+    """
+    s = banner(s)
+    print(s)
+
+
+
+print_banner("C++/C Compiler Flags:")
+
+# now print the status of the flags
+print("WASM Compiler Flags:")
+for flag in sketch_flags:
+    print(f"  {flag}")
+print("FastLED Compiler Flags:")
+for flag in fastled_compile_cc_flags:
+    print(f"  {flag}")
+
+print_banner("Linker flags:")
