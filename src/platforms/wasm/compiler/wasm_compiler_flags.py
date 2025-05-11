@@ -121,8 +121,8 @@ if export_name:
         f"-sEXPORT_NAME={export_name}",
         "-o", output_js,
     ]
-    #if DEBUG:
-    #    link_flags.append("--source-map-base=http://localhost:8000/")
+    if DEBUG:
+        link_flags.append("--source-map-base=http://localhost:8000/")
 
 # Append flags to environment
 env.Append(CCFLAGS=compile_flags)

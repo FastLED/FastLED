@@ -64,8 +64,6 @@ void setup() {
 void loop() {
     fl::clear(leds);
 
-    assert(false);
-
 
     // leds(x,y) = CRGB(255, 0, 0);
     float from = offset;
