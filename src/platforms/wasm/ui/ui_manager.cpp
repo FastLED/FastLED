@@ -5,13 +5,10 @@
 #include <sstream>
 #include <vector>
 
-
-
-#include "ui_manager.h"
-#include "fl/map.h"
 #include "fl/json.h"
+#include "fl/map.h"
 #include "fl/namespace.h"
-
+#include "ui_manager.h"
 
 #include <emscripten.h>
 #include <sstream>

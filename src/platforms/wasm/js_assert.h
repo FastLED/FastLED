@@ -1,7 +1,7 @@
 #pragma once
 
-#include <emscripten.h>
 #include "fl/warn.h"
+#include <emscripten.h>
 
 #define FASTLED_ASSERT(x, MSG)                                                 \
     {                                                                          \

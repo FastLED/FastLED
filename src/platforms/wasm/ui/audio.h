@@ -12,7 +12,7 @@
 namespace fl {
 
 enum {
-  kJsAudioSamples = 512,
+    kJsAudioSamples = 512,
 };
 
 class jsAudioImpl {
@@ -29,7 +29,7 @@ class jsAudioImpl {
     const fl::Str &groupName() const { return mGroup; }
 
     AudioSample next();
-    bool hasNext() ;
+    bool hasNext();
 
   private:
     struct Updater : fl::EngineEvents::Listener {

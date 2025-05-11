@@ -1,21 +1,20 @@
 #pragma once
 
+#include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
-#include <memory>
-#include <map>
 
-#include "platforms/wasm/engine_listener.h"
 #include "fl/singleton.h"
+#include "platforms/wasm/engine_listener.h"
 
-
-#include "fl/set.h"
 #include "fl/map.h"
 #include "fl/ptr.h"
+#include "fl/set.h"
 
-#include "platforms/wasm/js.h"
 #include "fl/json.h"
+#include "platforms/wasm/js.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -27,20 +26,18 @@ class jsUiManager : fl::EngineEvents::Listener {
     static void removeComponent(fl::WeakPtr<jsUiInternal> component);
 
     // Called from the JS engine.
-    static void jsUpdateUiComponents(const std::string& jsonStr) { updateUiComponents(jsonStr.c_str()); }
+    static void jsUpdateUiComponents(const std::string &jsonStr) {
+        updateUiComponents(jsonStr.c_str());
+    }
     // Internal representation.
-    static void updateUiComponents(const char* jsonStr) ;
+    static void updateUiComponents(const char *jsonStr);
 
   private:
-    static void executeUiUpdates(const FLArduinoJson::JsonDocument& doc);
+    static void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
     typedef fl::FixedSet<fl::WeakPtr<jsUiInternal>, 64> jsUIRefSet;
     friend class fl::Singleton<jsUiManager>;
-    jsUiManager() {
-        fl::EngineEvents::addListener(this);
-    }
-    ~jsUiManager() {
-        fl::EngineEvents::removeListener(this);
-    }
+    jsUiManager() { fl::EngineEvents::addListener(this); }
+    ~jsUiManager() { fl::EngineEvents::removeListener(this); }
 
     void onPlatformPreLoop() override {
         if (!mHasPendingUpdate) {
@@ -55,7 +52,8 @@ class jsUiManager : fl::EngineEvents::Listener {
         if (mItemsAdded) {
             // std::string jsonStr = toJsonStr();
             FLArduinoJson::JsonDocument doc;
-            FLArduinoJson::JsonArray jarray = doc.to<FLArduinoJson::JsonArray>();
+            FLArduinoJson::JsonArray jarray =
+                doc.to<FLArduinoJson::JsonArray>();
             toJson(jarray);
             fl::Str buff;
             FLArduinoJson::serializeJson(doc, buff);
@@ -65,7 +63,7 @@ class jsUiManager : fl::EngineEvents::Listener {
     }
 
     std::vector<jsUiInternalPtr> getComponents();
-    void toJson(FLArduinoJson::JsonArray& json);
+    void toJson(FLArduinoJson::JsonArray &json);
 
     jsUIRefSet mComponents;
     std::mutex mMutex;

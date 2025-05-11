@@ -6,19 +6,18 @@
 
 #include <stdint.h>
 
-#include <vector>
 #include <stdio.h>
+#include <vector>
 
-
-#include "fl/namespace.h"
 #include "active_strip_data.h"
+#include "fl/namespace.h"
 #include "fl/singleton.h"
 // #include "ui/events.h"
+#include "crgb.h"
+#include "dither_mode.h"
+#include "pixel_controller.h"
 #include "platforms/wasm/engine_listener.h"
 #include "platforms/wasm/strip_id_map.h"
-#include "crgb.h"
-#include "pixel_controller.h"
-#include "dither_mode.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -26,36 +25,31 @@ extern uint8_t get_brightness();
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
+class WasmSpiOutput : public fl::EngineEvents::Listener {
+  public:
+    WasmSpiOutput() { fl::EngineEvents::addListener(this); }
 
-class WasmSpiOutput: public fl::EngineEvents::Listener {
-public:
-    WasmSpiOutput() {
-        fl::EngineEvents::addListener(this);
-    }
+    ~WasmSpiOutput() { fl::EngineEvents::removeListener(this); }
 
-    ~WasmSpiOutput() {
-        fl::EngineEvents::removeListener(this);
-    }
-
-
-    CLEDController* tryFindOwner() {
+    CLEDController *tryFindOwner() {
         if (mId == -1) {
-            mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));
+            mId = StripIdMap::getOrFindByAddress(
+                reinterpret_cast<uint32_t>(this));
         }
         if (mId == -1) {
             return nullptr;
         }
         return StripIdMap::getOwner(mId);
-
     }
 
     void onEndShowLeds() override {
-        // Get the led data and send it to the JavaScript side. This is tricky because we
-        // have to find the owner of this pointer, which will be inlined in a CLEDController
-        // subclass. Therefore we are going to do address lookup to get the CLEDController
-        // for all CLEDController instances that exist and select the one in which this SpiOutput
-        // class would be inlined into.
-        CLEDController* owner = tryFindOwner();
+        // Get the led data and send it to the JavaScript side. This is tricky
+        // because we have to find the owner of this pointer, which will be
+        // inlined in a CLEDController subclass. Therefore we are going to do
+        // address lookup to get the CLEDController for all CLEDController
+        // instances that exist and select the one in which this SpiOutput class
+        // would be inlined into.
+        CLEDController *owner = tryFindOwner();
         if (owner == nullptr) {
             return;
         }
@@ -65,8 +59,10 @@ public:
                 mId = new_id;
             }
         }
-        ColorAdjustment color_adjustment = owner->getAdjustmentData(get_brightness());
-        PixelController<RGB> pixels(owner->leds(), owner->size(), color_adjustment, DISABLE_DITHER);
+        ColorAdjustment color_adjustment =
+            owner->getAdjustmentData(get_brightness());
+        PixelController<RGB> pixels(owner->leds(), owner->size(),
+                                    color_adjustment, DISABLE_DITHER);
         pixels.disableColorAdjustment();
         mRgb.clear();
         while (pixels.has(1)) {
@@ -77,8 +73,9 @@ public:
             mRgb.push_back(b);
             pixels.advanceData();
         }
-		ActiveStripData& active_strips = fl::Singleton<ActiveStripData>::instance();
-		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
+        ActiveStripData &active_strips =
+            fl::Singleton<ActiveStripData>::instance();
+        active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
     }
 
     void select() {}
@@ -86,16 +83,15 @@ public:
     void waitFully() {}
     void release() {}
 
-    void writeByte(uint8_t byte) {
-    }
+    void writeByte(uint8_t byte) {}
 
     void writeWord(uint16_t word) {
         writeByte(word >> 8);
         writeByte(word & 0xFF);
     }
 
-private:
-    int mId = -1;  // Deferred initialization
+  private:
+    int mId = -1; // Deferred initialization
     std::vector<uint8_t> mRgb;
 };
 

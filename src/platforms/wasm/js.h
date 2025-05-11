@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
@@ -9,23 +8,20 @@
 #include <stdio.h>
 #include <string>
 
-
-
-#include "fl/str.h"
-#include "ui/ui_internal.h"
-#include "fl/str.h"
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
-#include "fl/screenmap.h"
 #include "fl/ptr.h"
+#include "fl/screenmap.h"
+#include "fl/str.h"
+#include "platforms/wasm/active_strip_data.h"
+#include "platforms/wasm/ui/audio.h"
 #include "platforms/wasm/ui/button.h"
 #include "platforms/wasm/ui/checkbox.h"
+#include "platforms/wasm/ui/description.h"
+#include "platforms/wasm/ui/number_field.h"
 #include "platforms/wasm/ui/slider.h"
 #include "platforms/wasm/ui/title.h"
-#include "platforms/wasm/ui/number_field.h"
-#include "platforms/wasm/ui/description.h"
-#include "platforms/wasm/ui/audio.h"
-#include "platforms/wasm/active_strip_data.h"
+#include "ui/ui_internal.h"
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -46,13 +42,12 @@ EMSCRIPTEN_KEEPALIVE void delay(int ms);
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 
-
 namespace fl {
 
-void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap& screenmap);
-void jsOnFrame(ActiveStripData& active_strips);
+void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap);
+void jsOnFrame(ActiveStripData &active_strips);
 void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
-void updateJs(const char* jsonStr);
+void updateJs(const char *jsonStr);
 
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
@@ -70,4 +65,4 @@ typedef jsTitleImpl UITitleImpl;
 typedef jsDescriptionImpl UIDescriptionImpl;
 typedef jsAudioImpl UIAudioImpl;
 
-}  // namespace fl
+} // namespace fl

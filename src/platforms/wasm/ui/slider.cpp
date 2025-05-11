@@ -14,7 +14,7 @@ using namespace fl;
 FASTLED_NAMESPACE_BEGIN
 
 jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
-                   float step)
+                           float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     if (mStep == -1.f) {
         mStep = (mMax - mMin) / 100.0f;
@@ -23,8 +23,8 @@ jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
         [this](const FLArduinoJson::JsonVariantConst &json) {
             static_cast<jsSliderImpl *>(this)->updateInternal(json);
         });
-    auto toJsonFunc = jsUiInternal::ToJsonFunction(
-        [this](FLArduinoJson::JsonObject &json) {
+    auto toJsonFunc =
+        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsSliderImpl *>(this)->toJson(json);
         });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
@@ -56,7 +56,8 @@ float jsSliderImpl::value_normalized() const {
     return (mValue - mMin) / (mMax - mMin);
 }
 
-void jsSliderImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
+void jsSliderImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
     // We expect jsonStr to actually be a value string, so simply parse it.
     float v = value.as<float>();
     setValue(v);
@@ -74,7 +75,6 @@ void jsSliderImpl::setValue(float value) {
                name.c_str(), id, value, mMin, mMax, mValue);
     }
 }
-
 
 FASTLED_NAMESPACE_END
 

@@ -13,19 +13,18 @@ FASTLED_NAMESPACE_BEGIN
 
 class CLEDController;
 
-
-class EngineListener: public fl::EngineEvents::Listener {
-public:
+class EngineListener : public fl::EngineEvents::Listener {
+  public:
     friend class fl::Singleton<EngineListener>;
     static void Init();
 
-private:
+  private:
     void onEndFrame() override;
-    void onStripAdded(CLEDController* strip, uint32_t num_leds) override;
-    void onCanvasUiSet(CLEDController* strip, const fl::ScreenMap& screenmap) override;
+    void onStripAdded(CLEDController *strip, uint32_t num_leds) override;
+    void onCanvasUiSet(CLEDController *strip,
+                       const fl::ScreenMap &screenmap) override;
     EngineListener();
     ~EngineListener();
 };
-
 
 FASTLED_NAMESPACE_END

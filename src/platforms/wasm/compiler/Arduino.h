@@ -17,7 +17,6 @@ FASTLED_USING_NAMESPACE
 using std::max;
 using std::min;
 
-
 namespace fl {
 class Str;
 inline long map(long x, long in_min, long in_max, long out_min, long out_max) {
@@ -36,10 +35,8 @@ template <typename T> T constrain(T x, T a, T b) {
 }
 } // namespace fl
 
-
-using fl::map;
 using fl::constrain;
-
+using fl::map;
 
 inline long random(long min, long max) {
     if (min == max) {
@@ -53,7 +50,6 @@ inline long random(long min, long max) {
     std::uniform_int_distribution<> dis(min, max - 1);
     return dis(gen);
 }
-
 
 inline int analogRead(int) { return random(0, 1023); }
 
@@ -99,7 +95,8 @@ DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
 DEFINE_PRINT_HELPER_EXT(fl::Str, "%s", val.c_str());
 
 #ifdef __EMSCRIPTEN__
-DEFINE_PRINT_HELPER(unsigned long, "%lu");  // Not sure why this is needed in emscripten
+DEFINE_PRINT_HELPER(unsigned long,
+                    "%lu"); // Not sure why this is needed in emscripten
 #endif
 
 #define A0 0
@@ -108,7 +105,6 @@ DEFINE_PRINT_HELPER(unsigned long, "%lu");  // Not sure why this is needed in em
 #define A3 3
 #define A4 4
 #define A5 5
-
 
 // gcc pop options
 #pragma GCC diagnostic pop
@@ -135,7 +131,6 @@ struct SerialEmulation {
 #define INPUT 0
 #define OUTPUT 1
 #define INPUT_PULLUP 2
-
 
 inline void digitalWrite(int, int) {}
 inline void analogWrite(int, int) {}

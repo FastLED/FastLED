@@ -72,6 +72,7 @@ folders=(
     #"src/platforms/arm" # clang-format breaks arm
     "src/fx"
     "src/fl"
+    "src/platforms/wasm"
 )
 
 for folder in "${folders[@]}"; do

@@ -1,28 +1,25 @@
 
 #ifdef __EMSCRIPTEN__
 
-
 #include <emscripten.h>
+#include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
-#include <emscripten/bind.h>
 #include <emscripten/val.h>
-
 
 #include <map>
 #include <mutex>
-#include <vector>
 #include <stdio.h>
+#include <vector>
 
-
+#include "fl/dbg.h"
 #include "fl/file_system.h"
+#include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/str.h"
-#include "fl/json.h"
 #include "fl/warn.h"
-#include "fl/dbg.h"
 #include "platforms/wasm/js.h"
 
 using namespace fl;
@@ -38,11 +35,7 @@ FASTLED_SMART_PTR(FileData);
 
 class FileData : public fl::Referent {
   public:
-
-    FileData(size_t capacity) : mCapacity(capacity) 
-    {
-        mData.reserve(capacity);
-    }
+    FileData(size_t capacity) : mCapacity(capacity) { mData.reserve(capacity); }
     FileData(const std::vector<uint8_t> &data, size_t len)
         : mData(data), mCapacity(len) {}
     FileData() = default;
@@ -80,7 +73,8 @@ class FileData : public fl::Referent {
         std::lock_guard<std::mutex> lock(mMutex);
         return mCapacity;
     }
-private:
+
+  private:
     std::vector<uint8_t> mData;
     size_t mCapacity = 0;
     mutable std::mutex mMutex;
@@ -93,7 +87,6 @@ static FileMap gFileMap;
 // need to protect the map itself for thread safety. The values in the map are
 // safe to access without a lock.
 static std::mutex gFileMapMutex;
-
 
 class WasmFileHandle : public fl::FileHandle {
   private:
@@ -112,7 +105,9 @@ class WasmFileHandle : public fl::FileHandle {
             return false;
         }
         if (!mData->ready(mPos)) {
-            FASTLED_WARN("File is not ready yet. This is a major error because FastLED-wasm does not support async yet, the file will fail to read.");
+            FASTLED_WARN("File is not ready yet. This is a major error because "
+                         "FastLED-wasm does not support async yet, the file "
+                         "will fail to read.");
             return false;
         }
         return true;
@@ -125,7 +120,6 @@ class WasmFileHandle : public fl::FileHandle {
     }
     size_t size() const override { return mData->capacity(); }
 
-
     size_t read(uint8_t *dst, size_t bytesToRead) override {
         if (mPos >= mData->capacity()) {
             return 0;
@@ -134,11 +128,13 @@ class WasmFileHandle : public fl::FileHandle {
             bytesToRead = mData->capacity() - mPos;
         }
         if (!mData->ready(mPos)) {
-            FASTLED_WARN("File is not ready yet. This is a major error because FastLED-wasmdoes not support async yet, the file will fail to read.");
+            FASTLED_WARN("File is not ready yet. This is a major error because "
+                         "FastLED-wasmdoes not support async yet, the file "
+                         "will fail to read.");
             return 0;
         }
-        // We do not have async so a delay will actually block the entire wasm main thread.
-        // while (!mData->ready(mPos)) {
+        // We do not have async so a delay will actually block the entire wasm
+        // main thread. while (!mData->ready(mPos)) {
         //     delay(1);
         // }
         size_t bytesRead = mData->read(mPos, dst, bytesToRead);
@@ -161,7 +157,9 @@ class WasmFileHandle : public fl::FileHandle {
         // No need to do anything for in-memory files
     }
 
-    bool valid() const override { return true; }  // always valid if we can open a file.
+    bool valid() const override {
+        return true;
+    } // always valid if we can open a file.
 };
 
 class FsImplWasm : public fl::FsImpl {
@@ -180,7 +178,7 @@ class FsImplWasm : public fl::FsImpl {
     }
 
     fl::FileHandlePtr openRead(const char *_path) override {
-        //FASTLED_DBG("Opening file: " << _path);
+        // FASTLED_DBG("Opening file: " << _path);
         Str path(_path);
         FileHandlePtr out;
         {
@@ -188,22 +186,19 @@ class FsImplWasm : public fl::FsImpl {
             auto it = gFileMap.find(path);
             if (it != gFileMap.end()) {
                 auto &data = it->second;
-                out =
-                    WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(path, data));
-                //FASTLED_DBG("Opened file: " << _path);
+                out = WasmFileHandlePtr::TakeOwnership(
+                    new WasmFileHandle(path, data));
+                // FASTLED_DBG("Opened file: " << _path);
             } else {
                 out = fl::FileHandlePtr::Null();
                 FASTLED_DBG("File not found: " << _path);
             }
-
         }
         return out;
     }
 };
 
-
-
-FileDataPtr _findIfExists(const Str& path) {
+FileDataPtr _findIfExists(const Str &path) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -212,7 +207,7 @@ FileDataPtr _findIfExists(const Str& path) {
     return FileDataPtr::Null();
 }
 
-FileDataPtr _findOrCreate(const Str& path, size_t len) {
+FileDataPtr _findOrCreate(const Str &path, size_t len) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -223,7 +218,7 @@ FileDataPtr _findOrCreate(const Str& path, size_t len) {
     return entry;
 }
 
-FileDataPtr _createIfNotExists(const Str& path, size_t len) {
+FileDataPtr _createIfNotExists(const Str &path, size_t len) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
@@ -236,13 +231,9 @@ FileDataPtr _createIfNotExists(const Str& path, size_t len) {
 
 FASTLED_NAMESPACE_END
 
-
 FASTLED_USING_NAMESPACE
 
-
-
 extern "C" {
-
 
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
                                        size_t len) {
@@ -277,7 +268,6 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     return true;
 }
 
-
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
     fl::JsonDocument doc;
     fl::parseJson(jsonStr.c_str(), &doc);
@@ -300,31 +290,26 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
         if (path_obj.isNull()) {
             continue;
         }
-        printf("Declaring file %s with size %d. These will become available as File system paths within the app.\n", path_obj.as<const char*>(), size);
-        jsDeclareFile(path_obj.as<const char*>(), size);
+        printf("Declaring file %s with size %d. These will become available as "
+               "File system paths within the app.\n",
+               path_obj.as<const char *>(), size);
+        jsDeclareFile(path_obj.as<const char *>(), size);
     }
 }
 
-
-
 } // extern "C"
-
-
-
 
 EMSCRIPTEN_BINDINGS(_fastled_declare_files) {
     emscripten::function("_fastled_declare_files", &fastled_declare_files);
-    //emscripten::function("jsAppendFile", emscripten::select_overload<bool(const char*, const uint8_t*, size_t)>(&jsAppendFile), emscripten::allow_raw_pointer<arg<0>, arg<1>>());
+    // emscripten::function("jsAppendFile",
+    // emscripten::select_overload<bool(const char*, const uint8_t*,
+    // size_t)>(&jsAppendFile), emscripten::allow_raw_pointer<arg<0>,
+    // arg<1>>());
 };
 
 namespace fl {
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin) {
-    return FsImplWasmPtr::New();
-}
-}
-
-
-
+FsImplPtr make_sdcard_filesystem(int cs_pin) { return FsImplWasmPtr::New(); }
+} // namespace fl
 
 #endif // __EMSCRIPTEN__
