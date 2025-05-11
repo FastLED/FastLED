@@ -27,6 +27,8 @@ all the UI elements you see below.
 #include "src/xypaths.h"
 #include "fl/function.h"
 
+#include <assert.h>
+
 using namespace fl;
 
 #define HEIGHT 64
@@ -61,6 +63,8 @@ void setup() {
 }
 void loop() {
     fl::clear(leds);
+
+    assert(false);
 
 
     // leds(x,y) = CRGB(255, 0, 0);

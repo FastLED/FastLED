@@ -87,10 +87,13 @@ debug_compile_flags = [
     "-fsanitize=undefined",
     "-fno-inline",
 ]
+
 debug_link_flags = [
     "--emit-symbol-map",
-    f"-gseparate-dwarf={wasm_name}",
-    f"-sSEPARATE_DWARF_URL=file://{wasm_path}.dwarf", 
+    # tell LLVM to write out the .dwarf file alongside fastled.wasm
+    f"-gseparate-dwarf={BUILD_DIR}/{wasm_name}.dwarf",
+    # tell the JS loader where to fetch that .dwarf from at runtime
+    f"-sSEPARATE_DWARF_URL=file://{wasm_name}.dwarf",
     "-sSTACK_OVERFLOW_CHECK=2",
     "-sASSERTIONS=1",
     "-fsanitize=address",
