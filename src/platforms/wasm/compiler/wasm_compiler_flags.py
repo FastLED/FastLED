@@ -16,7 +16,8 @@ SOURCE_MAP_BASE = f"--source-map-base={SRC_SERVER_HOST}"
 
 
 # Determine whether to use ccache
-USE_CCACHE = "NO_CCACHE" not in os.environ
+# USE_CCACHE = "NO_CCACHE" not in os.environ
+USE_CCACHE = True
 
 # Get build mode from environment variable, default to QUICK if not set
 BUILD_MODE = os.environ.get("BUILD_MODE", "QUICK").upper()
@@ -93,7 +94,9 @@ link_flags = [
 # Debug-specific flags
 debug_compile_flags = [
     "-g3",
-    "-gsource-map",
+    "-gsource-map=inline",
+    #"-sSOURCE_MAP_PREFIXES=/js=/mypath",  # TODO: Remove this once we have a better source map
+    "-ffile-prefix-map=/js=/itworked"
     "-fsanitize=address",
     "-fsanitize=undefined",
     "-fno-inline",
