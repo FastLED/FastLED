@@ -96,7 +96,7 @@ debug_compile_flags = [
     "-g3",
     "-gsource-map=inline",
     #"-sSOURCE_MAP_PREFIXES=/js=/mypath",  # TODO: Remove this once we have a better source map
-    "-ffile-prefix-map=/js=itworked",
+    "-ffile-prefix-map=/js=static",
     "-fsanitize=address",
     "-fsanitize=undefined",
     "-fno-inline",
