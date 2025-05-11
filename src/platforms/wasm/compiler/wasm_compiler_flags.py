@@ -75,6 +75,7 @@ compile_flags = [
     "-Wnon-c-typedef-for-linkage",
     "-Werror=bad-function-cast",
     "-Werror=cast-function-type",
+    "-sERROR_ON_WASM_CHANGES_AFTER_LINK",
     "-I", "src",
     "-I/js/fastled/src/platforms/wasm/compiler",
 ]
@@ -88,12 +89,14 @@ link_flags = [
     "-sINITIAL_MEMORY=134217728",                  # start with 128 MB heap
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
+    "-sWASM_BIGINT",
     "--no-entry",
 ]
 
 # Debug-specific flags
 debug_compile_flags = [
-    "-g3",
+    "-g",
+    "-O0",
     "-gsource-map=inline",
     # Files are mapped to drawfsource when compiled, this allows us to use a
     # relative rather than absolute path which for some reason means it's
@@ -119,9 +122,7 @@ debug_link_flags = [
 ]
 
 # Adjust for QUICK_BUILD or DEBUG
-if QUICK_BUILD:
-    link_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK"]
-elif DEBUG:
+if DEBUG:
     # strip default optimization levels
     compile_flags = _remove_flags(compile_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
     compile_flags += debug_compile_flags
@@ -196,6 +197,11 @@ print_banner("C++/C Compiler Flags:")
 print("CC/CXX flags:")
 for f in compile_flags:
     print(f"  {f}")
+print("FastLED Library CC flags:")
+for f in fastled_compile_cc_flags:
+    print(f"  {f}")
+print("Sketch CC flags:")
+
 print_banner("Linker Flags:")
 for f in link_flags:
     print(f"  {f}")
