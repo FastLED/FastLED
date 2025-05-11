@@ -49,6 +49,14 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
 
+# Expected build directory is:
+# /js/.pio/build
+# emcc -g temp.c -o temp.html \
+#      -O3 -fno-inline \
+#      -gseparate-dwarf=temp.debug.wasm \
+#      -s SEPARATE_DWARF_URL=file://[local path to temp.debug.wasm]
+#
+
 sketch_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
@@ -80,14 +88,23 @@ sketch_flags = [
     "-I/js/fastled/src/platforms/wasm/compiler",
 ]
 
+def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
+    """
+    Remove specified flags from a list of arguments.
+    """
+    # Remove flags from the list
+    for flag in remove_flags:
+        if flag in curr_flags:
+            curr_flags.remove(flag)
+    return curr_flags
+
+
+
 if QUICK_BUILD:
     sketch_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
 elif DEBUG:
     # Remove -Oz flag
-    opt_flags = ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
-    for opt in opt_flags:
-        if opt in sketch_flags:
-            sketch_flags.remove(opt)
+    sketch_flags = _remove_flags(sketch_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
     sketch_flags += [
         "-g3",
         "-gsource-map",
