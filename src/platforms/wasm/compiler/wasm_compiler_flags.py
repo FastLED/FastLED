@@ -40,7 +40,6 @@ projenv.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 
 # Helper to strip out optimization flags
-
 def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
     for flag in remove_flags:
         if flag in curr_flags:
@@ -51,22 +50,17 @@ def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
 wasm_name = "fastled.wasm"
 wasm_path = f"{BUILD_DIR}/{wasm_name}"
 
-# Base compile flags (CCFLAGS)
+# Base compile flags (CCFLAGS/CXXFLAGS)
 compile_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
-    "-sALLOW_MEMORY_GROWTH=0",
     build_mode,
-    "--bind",  # needed for embind registrations at compile time
     "-DUSE_OFFSET_CONVERTER=0",
-    "-sINITIAL_MEMORY=134217728",
     "-std=gnu++17",
     "-fpermissive",
     "-Wno-constant-logical-operand",
     "-Wnon-c-typedef-for-linkage",
-    f"-sWASM={USE_WASM}",
-    "-fuse-ld=lld",
     "-Werror=bad-function-cast",
     "-Werror=cast-function-type",
     "-I", "src",
@@ -75,7 +69,11 @@ compile_flags = [
 
 # Base link flags (LINKFLAGS)
 link_flags = [
-    "--bind",  # ensure embind runtime support is linked in
+    "--bind",                                      # ensure embind runtime support is linked in
+    "-fuse-ld=lld",                                # use LLD at link time
+    f"-sWASM={USE_WASM}",                          # Wasm vs asm.js
+    "-sALLOW_MEMORY_GROWTH=1",                     # enable dynamic heap growth
+    "-sINITIAL_MEMORY=134217728",                  # start with 128 MB heap
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
     "--no-entry",
@@ -99,10 +97,10 @@ debug_link_flags = [
 
 # Adjust for QUICK_BUILD or DEBUG
 if QUICK_BUILD:
-    link_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
+    link_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK"]
 elif DEBUG:
     # strip default optimization levels
-    compile_flags = _remove_flags(compile_flags, ["-Oz","-Os","-O0","-O1","-O2","-O3"])
+    compile_flags = _remove_flags(compile_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
     compile_flags += debug_compile_flags
     link_flags += debug_link_flags + ["-fsanitize=address", "-fsanitize=undefined"]
 
@@ -143,7 +141,10 @@ fastled_compile_link_flags = [
 if not DEBUG:
     fastled_compile_cc_flags.append(build_mode)
 else:
-    fastled_compile_cc_flags = _remove_flags(fastled_compile_cc_flags, ["-Oz","-Os","-O0","-O1","-O2","-O3"])
+    fastled_compile_cc_flags = _remove_flags(
+        fastled_compile_cc_flags,
+        ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
+    )
     fastled_compile_cc_flags += debug_compile_flags
     fastled_compile_link_flags += debug_link_flags + ["-fsanitize=address", "-fsanitize=undefined"]
 
@@ -154,7 +155,6 @@ for lb in env.GetLibBuilders():
     lb.env.Append(LINKFLAGS=fastled_compile_link_flags)
 
 # Banner utilities
-
 def banner(s: str) -> str:
     lines = s.split("\n")
     widest = max(len(l) for l in lines)
