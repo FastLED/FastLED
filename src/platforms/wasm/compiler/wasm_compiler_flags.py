@@ -31,6 +31,9 @@ build_mode = "-O1" if QUICK_BUILD else "-Oz"
 
 Import("env", "projenv")
 
+# Set the build directory constant
+BUILD_DIR = env.subst('$BUILD_DIR')
+
 # projenv is used for compiling individual files, env for linking
 # libraries have their own env in env.GetLibBuilders()
 
@@ -49,13 +52,21 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
 
+# Instructions for AI: You are an emscripten and C++ compiler expert.
+# You will integrate this seperate-dwarf feature into the build process.
+#
 # Expected build directory is:
 # /js/.pio/build
+#
+# Example command:
 # emcc -g temp.c -o temp.html \
 #      -O3 -fno-inline \
 #      -gseparate-dwarf=temp.debug.wasm \
 #      -s SEPARATE_DWARF_URL=file://[local path to temp.debug.wasm]
 #
+# Open questions:
+#   - temp.debug.wasm should be renamed to fastled.wasm
+#   - figure out the correct path to the wasm file
 
 sketch_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
@@ -105,14 +116,22 @@ if QUICK_BUILD:
 elif DEBUG:
     # Remove -Oz flag
     sketch_flags = _remove_flags(sketch_flags, ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"])
+    # Keep in mind this project doesn't name opt/release/debug builds, they all have the same name.
+    # Define the WASM file name
+    wasm_name = "fastled.wasm"
+    wasm_path = f"{BUILD_DIR}/{wasm_name}"
+    
     sketch_flags += [
         "-g3",
         "-gsource-map",
         "--emit-symbol-map",
+        f"-gseparate-dwarf={wasm_name}",
+        f"-sSEPARATE_DWARF_URL=file://{wasm_path}",
         "-sSTACK_OVERFLOW_CHECK=2",
         "-ASSERTIONS=1",
         "-fsanitize=address",
         "-fsanitize=undefined",
+        "-fno-inline",  # Helps with debugging by not inlining functions
     ]
 
 
@@ -132,14 +151,21 @@ if OPTIMIZED:
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
 if export_name:
+    output_js = f"{BUILD_DIR}/{export_name}.js"
     sketch_flags += [
         "-s",
         "MODULARIZE=1",
         "-s",
         f"EXPORT_NAME='{export_name}'",
         "-o",
-        f"{env.subst('$BUILD_DIR')}/{export_name}.js",
+        output_js,
     ]
+    
+    # Add source map URL for better debugging
+    if DEBUG:
+        sketch_flags += [
+            f"--source-map-base=file://{BUILD_DIR}/",
+        ]
 
 env.Append(LINKFLAGS=sketch_flags)
 
