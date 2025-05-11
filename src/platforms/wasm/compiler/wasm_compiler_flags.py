@@ -231,7 +231,8 @@ def banner(s: str) -> str:
         # with spaces to the right
         out.append(f"# {line:<{max_width}} #")
     out.append("#" * (max_width + 4))
-    return "\n".join(out)
+    out = "\n".join(out)
+    return f"\n{out}\n"  # add new lines to the top and bottom
 
 def print_banner(s: str) -> None:
     """
@@ -248,8 +249,15 @@ print_banner("C++/C Compiler Flags:")
 print("WASM Compiler Flags:")
 for flag in sketch_flags:
     print(f"  {flag}")
-print("FastLED Compiler Flags:")
+print("\nFastLED Compiler Flags:")
 for flag in fastled_compile_cc_flags:
     print(f"  {flag}")
 
+
 print_banner("Linker flags:")
+print("FastLED Linker Flags:")
+for flag in fastled_compile_link_flags:
+    print(f"  {flag}")
+
+print_banner("End of Compiler Flags")
+print()
