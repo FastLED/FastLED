@@ -95,8 +95,11 @@ link_flags = [
 debug_compile_flags = [
     "-g3",
     "-gsource-map=inline",
-    #"-sSOURCE_MAP_PREFIXES=/js=/mypath",  # TODO: Remove this once we have a better source map
-    "-ffile-prefix-map=/=static/",
+    # Files are mapped to drawfsource when compiled, this allows us to use a
+    # relative rather than absolute path which for some reason means it's
+    # a network request instead of a disk request.
+    # This enables the use of step through debugging.
+    "-ffile-prefix-map=/=drawfsource/",
     "-fsanitize=address",
     "-fsanitize=undefined",
     "-fno-inline",
