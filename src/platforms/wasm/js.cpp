@@ -1,4 +1,6 @@
 #ifdef __EMSCRIPTEN__
+// DO NOT clang-format this file!! It will destroy the EM_ASM_ macros.
+// clang-format off
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
