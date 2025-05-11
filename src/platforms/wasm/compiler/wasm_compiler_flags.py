@@ -5,6 +5,16 @@
 import os
 from SCons.Script import Import
 
+# For drawf support it needs a file server running at this point.
+# TODO: Emite this information as a src-map.json file to hold this
+# port and other information.
+SRC_SERVER_PORT = 8123
+SRC_SERVER_HOST = f"http://localhost:{SRC_SERVER_PORT}"
+SOURCE_MAP_BASE = f"--source-map-base={SRC_SERVER_HOST}"
+
+
+
+
 # Determine whether to use ccache
 USE_CCACHE = "NO_CCACHE" not in os.environ
 
@@ -31,6 +41,8 @@ Import("env", "projenv")
 
 # Build directory
 BUILD_DIR = env.subst('$BUILD_DIR')
+PROGRAM_NAME = "fastled"
+OUTPUT_JS = f"{BUILD_DIR}/{PROGRAM_NAME}.js"
 
 # Toolchain overrides to use Emscripten
 CC = "ccache emcc" if USE_CCACHE else "emcc"
@@ -47,7 +59,7 @@ def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
     return curr_flags
 
 # Paths for DWARF split
-wasm_name = "fastled.wasm"
+wasm_name = f"{PROGRAM_NAME}.wasm"
 
 # Base compile flags (CCFLAGS/CXXFLAGS)
 compile_flags = [
@@ -93,6 +105,7 @@ debug_link_flags = [
     f"-gseparate-dwarf={BUILD_DIR}/{wasm_name}.dwarf",
     # tell the JS loader where to fetch that .dwarf from at runtime (over HTTP)
     f"-sSEPARATE_DWARF_URL={wasm_name}.dwarf",
+    # SOURCE_MAP_BASE,
     "-sSTACK_OVERFLOW_CHECK=2",
     "-sASSERTIONS=1",
     "-fsanitize=address",
@@ -181,6 +194,6 @@ print_banner("Linker Flags:")
 for f in link_flags:
     print(f"  {f}")
 print_banner("FastLED Library Flags:")
-for f in fastled_compile_cc_flags:
+for f in fastled_compile_link_flags:
     print(f"  {f}")
 print_banner("End of Flags")
