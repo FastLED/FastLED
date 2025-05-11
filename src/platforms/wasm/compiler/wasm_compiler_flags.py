@@ -48,7 +48,6 @@ def _remove_flags(curr_flags: list[str], remove_flags: list[str]) -> list[str]:
 
 # Paths for DWARF split
 wasm_name = "fastled.wasm"
-wasm_path = f"{BUILD_DIR}/{wasm_name}"
 
 # Base compile flags (CCFLAGS/CXXFLAGS)
 compile_flags = [
@@ -90,10 +89,10 @@ debug_compile_flags = [
 
 debug_link_flags = [
     "--emit-symbol-map",
-    # tell LLVM to write out the .dwarf file alongside fastled.wasm
+    # write out the .dwarf file next to fastled.wasm
     f"-gseparate-dwarf={BUILD_DIR}/{wasm_name}.dwarf",
-    # tell the JS loader where to fetch that .dwarf from at runtime
-    f"-sSEPARATE_DWARF_URL=file://{wasm_name}.dwarf",
+    # tell the JS loader where to fetch that .dwarf from at runtime (over HTTP)
+    f"-sSEPARATE_DWARF_URL={wasm_name}.dwarf",
     "-sSTACK_OVERFLOW_CHECK=2",
     "-sASSERTIONS=1",
     "-fsanitize=address",
@@ -118,12 +117,12 @@ export_name = env.GetProjectOption("custom_wasm_export_name", "")
 if export_name:
     output_js = f"{BUILD_DIR}/{export_name}.js"
     link_flags += [
-        "-s", "MODULARIZE=1",
-        "-s", f"EXPORT_NAME='{export_name}'",
+        f"-sMODULARIZE=1",
+        f"-sEXPORT_NAME={export_name}",
         "-o", output_js,
     ]
-    if DEBUG:
-        link_flags.append(f"--source-map-base=file://{BUILD_DIR}/")
+    #if DEBUG:
+    #    link_flags.append("--source-map-base=http://localhost:8000/")
 
 # Append flags to environment
 env.Append(CCFLAGS=compile_flags)
