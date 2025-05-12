@@ -35,7 +35,7 @@ if DEBUG or QUICK_BUILD:
     USE_WASM = 1
 
 # Optimization level
-build_mode = "-O1" if QUICK_BUILD else "-Oz"
+# build_mode = "-O1" if QUICK_BUILD else "-Oz"
 
 # Import environments
 Import("env", "projenv")
@@ -89,15 +89,14 @@ link_flags = [
     "-sINITIAL_MEMORY=134217728",                  # start with 128 MB heap
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
-    "-sWASM_BIGINT",
     "--no-entry",
 ]
 
 # Debug-specific flags
 debug_compile_flags = [
-    "-g",
+    "-g3",
     "-O0",
-    "-gsource-map=inline",
+    "-gsource-map",
     # Files are mapped to drawfsource when compiled, this allows us to use a
     # relative rather than absolute path which for some reason means it's
     # a network request instead of a disk request.
@@ -106,6 +105,7 @@ debug_compile_flags = [
     "-fsanitize=address",
     "-fsanitize=undefined",
     "-fno-inline",
+    "-O0",
 ]
 
 debug_link_flags = [
@@ -130,7 +130,10 @@ if DEBUG:
 
 # Optimize for RELEASE
 if OPTIMIZED:
-    compile_flags += ["-flto"]
+    compile_flags += ["-flto", "-Oz"]
+
+if QUICK_BUILD:
+    compile_flags += ["-Oz"]
 
 # Handle custom export name
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
