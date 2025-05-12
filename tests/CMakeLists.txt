@@ -51,7 +51,6 @@ set(COMMON_COMPILE_FLAGS
     -Wall
     -Wextra 
     #-Wpedantic
-    -Wno-comment
     -funwind-tables
     -g3
     -ggdb
@@ -98,7 +97,6 @@ set(UNIT_TEST_COMPILE_FLAGS
     -Wall
     #-Wextra 
     #-Wpedantic
-    -Wno-comment
     -funwind-tables
     -g3
     -ggdb
