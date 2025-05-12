@@ -1,5 +1,10 @@
 #pragma once
 
+#include "fl/strstream.h"
+#include "fl/warn.h"
+
+#include <assert.h>
+
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js_assert.h"
 #elif defined(ESP32)
@@ -17,14 +22,12 @@
 
 #if FASTLED_USES_SYSTEM_ASSERT
 #include <assert.h>
-#include "fl/warn.h"
 #define FASTLED_ASSERT(x, MSG)                                                 \
     {                                                                          \
         FASTLED_WARN_IF(!(x), MSG);                                            \
         assert(x);                                                             \
     }
 #else
-#include "fl/warn.h"
 #define FASTLED_ASSERT(x, MSG) FASTLED_WARN_IF(!(x), MSG)
 #endif
 #endif
