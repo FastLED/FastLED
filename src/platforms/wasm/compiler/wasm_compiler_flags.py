@@ -67,7 +67,6 @@ compile_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
-    build_mode,
     "-DUSE_OFFSET_CONVERTER=0",
     "-std=gnu++17",
     "-fpermissive",
@@ -165,9 +164,8 @@ fastled_compile_link_flags = [
     "-Werror=cast-function-type",
 ]
 
-if not DEBUG:
-    fastled_compile_cc_flags.append(build_mode)
-else:
+
+if DEBUG:
     fastled_compile_cc_flags = _remove_flags(
         fastled_compile_cc_flags,
         ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
