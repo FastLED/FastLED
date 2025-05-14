@@ -36,6 +36,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js.h"
+#include "platforms/wasm/led_sysdefs_wasm.h"
 #include "platforms/wasm/compiler/Arduino.h"
 #endif
 
