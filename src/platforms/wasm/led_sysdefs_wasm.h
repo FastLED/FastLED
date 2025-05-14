@@ -30,7 +30,7 @@
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
-// extern "C" {
+extern "C" {
 
 // #ifndef SKETCH_COMPILE
 // void pinMode(uint8_t pin, uint8_t mode);
@@ -39,6 +39,6 @@ typedef volatile uint32_t RwReg;
 // uint32_t millis(void);
 // uint32_t micros(void);
 
-// void delay(int ms);
-// void yield(void);
-// }
+void delay(int ms);
+void yield(void);
+}
