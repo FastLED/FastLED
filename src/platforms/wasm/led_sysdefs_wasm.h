@@ -5,6 +5,7 @@
 #endif
 
 #include <stdint.h>
+#include "Arduino.h"  // fake Arduino.h
 
 #ifndef F_CPU
 #define F_CPU 1000000000
@@ -29,15 +30,15 @@
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
-extern "C" {
+// extern "C" {
 
-#ifndef SKETCH_COMPILE
-void pinMode(uint8_t pin, uint8_t mode);
-#endif
+// #ifndef SKETCH_COMPILE
+// void pinMode(uint8_t pin, uint8_t mode);
+// #endif
 
-uint32_t millis(void);
-uint32_t micros(void);
+// uint32_t millis(void);
+// uint32_t micros(void);
 
-void delay(int ms);
-void yield(void);
-}
+// void delay(int ms);
+// void yield(void);
+// }
