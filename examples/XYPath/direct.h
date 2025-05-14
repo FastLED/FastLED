@@ -61,9 +61,13 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
 
 }
+
+char name[] = "dfdfjkjkjdsd";
+
 void loop() {
     fl::clear(leds);
 
+    FASTLED_ASSERT(false, "This is a test");
 
     // leds(x,y) = CRGB(255, 0, 0);
     float from = offset;
