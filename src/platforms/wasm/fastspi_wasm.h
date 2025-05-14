@@ -18,6 +18,7 @@
 #include "pixel_controller.h"
 #include "platforms/wasm/engine_listener.h"
 #include "platforms/wasm/strip_id_map.h"
+#include "platforms/wasm/js.h"
 
 FASTLED_NAMESPACE_BEGIN
 
