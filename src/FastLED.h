@@ -34,6 +34,11 @@
 #define __PROG_TYPES_COMPAT__
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include "platforms/wasm/js.h"
+#include "platforms/wasm/compiler/Arduino.h"
+#endif
+
 #ifdef SmartMatrix_h
 #include <SmartMatrix.h>
 #endif
