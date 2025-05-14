@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include "platforms/wasm/compiler/Arduino.h"
+
 #include "crgb.h"
 #include "eorder.h"
 #include "fl/namespace.h"
