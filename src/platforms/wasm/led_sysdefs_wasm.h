@@ -4,8 +4,8 @@
 #define FASTLED_STUB_IMPL
 #endif
 
-#include <stdint.h>
 #include "platforms/wasm/compiler/Arduino.h"
+#include <stdint.h>
 
 #ifndef F_CPU
 #define F_CPU 1000000000
