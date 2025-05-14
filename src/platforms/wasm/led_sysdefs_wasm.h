@@ -5,7 +5,7 @@
 #endif
 
 #include <stdint.h>
-#include "Arduino.h"  // fake Arduino.h
+#include "platforms/wasm/compiler/Arduino.h"
 
 #ifndef F_CPU
 #define F_CPU 1000000000
