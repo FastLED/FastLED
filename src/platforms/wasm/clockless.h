@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "platforms/wasm/compiler/Arduino.h"
+#include "platforms/wasm/js.h"
 
 #include "crgb.h"
 #include "eorder.h"
