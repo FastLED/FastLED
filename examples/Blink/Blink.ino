@@ -17,6 +17,8 @@
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
+char buff[10];
+
 void setup() { 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
