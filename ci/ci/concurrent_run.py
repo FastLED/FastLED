@@ -16,6 +16,19 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 )
 
 
+def _banner_print(msg: str) -> None:
+    """Print a banner message."""
+    # will produce
+    #######
+    # msg #
+    #######
+    lines = msg.splitlines()
+    for line in lines:
+        print("#" * (len(line) + 4))
+        print(f"# {line} #")
+        print("#" * (len(line) + 4))
+
+
 @dataclass
 class ConcurrentRunArgs:
     projects: list[Board]
@@ -54,6 +67,8 @@ def concurrent_run(
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
         os.chdir(cwd)
+
+    start_time = time.time()
     create_build_dir(
         board=first_project,
         defines=defines,
@@ -64,6 +79,11 @@ def concurrent_run(
         build_flags=args.build_flags,
         extra_scripts=extra_scripts,
     )
+    diff = time.time() - start_time
+
+    msg = f"Build directory created in {diff:.2f} seconds for board"
+    locked_print(msg)
+
     verbose = args.verbose
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
