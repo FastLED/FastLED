@@ -62,12 +62,12 @@ void setup() {
 
 }
 
-char name[] = "dfdfj   kjkjdsd";
+char name[] = "dfdfj   kjdsd";
 
 void loop() {
     fl::clear(leds);
 
-    FASTLED_ASSERT(false, "This is a test");
+    // FASTLED_ASSERT(false, "This is a test");
 
     // leds(x,y) = CRGB(255, 0, 0);
     float from = offset;
