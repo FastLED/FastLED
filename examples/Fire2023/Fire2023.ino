@@ -13,6 +13,8 @@ a link to a helpful page for this.
 
 @repo https://github.com/Anderas2/Fire2023
 @author https://github.com/Anderas2
+
+Demo: https://www.youtube.com/shorts/a_Wr0q9YQs4
 */
 
 
@@ -114,7 +116,7 @@ void loop() {
 }
 
 ScreenMap makeScreenMap() {
-    fl::HeapVector<vec2f> lut;
+    fl::vector<vec2f> lut;
     for (uint16_t y = 0; y < WIDTH; y++) {
         for (uint16_t x = 0; x < HEIGHT; x++) {
             vec2f xy = {float(x) * 3, float(y) * 20};
