@@ -298,7 +298,7 @@ https://github.com/FastLED/PlatformIO-Starter
 
 Some of the new processors can drive many many WS2812 strips in parallel. 
 
-## Stock Setups
+# Leader Boards: Stock Setups
 
 ### Teensy 4.0/4.1
 
