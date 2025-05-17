@@ -56,7 +56,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
         .resolution_hz = LED_STRIP_RMT_RES_HZ,     // RMT counter clock frequency
         .mem_block_symbols = memory_block_symbols, // the memory size of each RMT channel, in words (4 bytes)
         .flags = {
-            .with_dma = false, // DMA feature is available on chips like ESP32-S3/P4
+            .with_dma = with_dma, // DMA feature is available on chips like ESP32-S3/P4
         },
         .interrupt_priority = interrupt_priority, // RMT interrupt priority
     };
