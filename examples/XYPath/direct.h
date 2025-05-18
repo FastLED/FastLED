@@ -62,7 +62,6 @@ void setup() {
 
 }
 
-char name[] = "dfdfj   kjdsd";
 
 void loop() {
     fl::clear(leds);
