@@ -42,9 +42,9 @@ UICheckbox enableRMS("Enable RMS visualization", false);
 UICheckbox enableFFT("Enable FFT visualization", true);
 UICheckbox freeze("Freeze frame", false);
 UIButton advanceFrame("Advance frame");
-UISlider decayTimeSeconds("Fade time Seconds", .5, .1, 4, .1);
-UISlider attackTimeSeconds("Attack time Seconds", .5, .1, 4, .1);
-UISlider outputTimeSec("outputTimeSec", .5, 0, 2, .01);
+UISlider decayTimeSeconds("Fade time Seconds", .1, 0, 4, .02);
+UISlider attackTimeSeconds("Attack time Seconds", .1, 0, 4, .02);
+UISlider outputTimeSec("outputTimeSec", .17, 0, 2, .01);
 
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
