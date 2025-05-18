@@ -39,6 +39,4 @@ template <typename T> inline T ceil(T value) {
 //     return (a > b) ? a : b;
 // }
 
-inline float sqrt(float value) { return ::sqrtf(value); }
-
 } // namespace fl

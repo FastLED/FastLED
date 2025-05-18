@@ -81,7 +81,7 @@ float rms(Slice<const int16_t> data) {
         int32_t x32 = int32_t(data[i]);
         sumSq += x32 * x32;
     }
-    float rms = fl::sqrt(float(sumSq) / N);
+    float rms = sqrt(float(sumSq) / N);
     return rms;
 }
 

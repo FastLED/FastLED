@@ -325,7 +325,7 @@ template <typename NumberT = float> class LineSimplifierExact {
         const Point &last = polyLine[polyLine.size() - 1];
         NumberT dx = last.x - first.x;
         NumberT dy = last.y - first.y;
-        return fl::sqrt(dx * dx + dy * dy);
+        return sqrt(dx * dx + dy * dy);
     }
 
     template <typename VectorType>
