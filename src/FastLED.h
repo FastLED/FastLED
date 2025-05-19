@@ -912,7 +912,7 @@ using namespace fl;
 
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wcomment"
 
 // Experimental: loop() hijacking.
 //
