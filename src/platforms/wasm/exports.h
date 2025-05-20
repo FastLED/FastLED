@@ -18,3 +18,8 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 // code on the backend decode the json string and figure out who the message is
 // for.
 EMSCRIPTEN_KEEPALIVE extern "C" bool extern_post_message(const char *jstStr);
+
+extern "C" {
+    const uint8_t* getPixelData_Uint8_C(int stripIndex);
+    size_t getPixelDataSize_C(int stripIndex);
+}
