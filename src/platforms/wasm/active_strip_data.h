@@ -26,8 +26,8 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     static ActiveStripData &Instance();
     void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
     void updateScreenMap(int id, const fl::ScreenMap &screenmap);
-    size_t ActiveStripData::getPixelDataSize_C(int stripIndex);
-    const uint8_t *ActiveStripData::getPixelData_Uint8_C(int stripIndex);
+    size_t getPixelDataSize_C(int stripIndex);
+    const uint8_t *getPixelData_Uint8_C(int stripIndex);
     fl::Str infoJsonString();
 
     const StripDataMap &getData() const { return mStripMap; }
