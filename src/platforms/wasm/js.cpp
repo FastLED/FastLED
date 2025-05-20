@@ -5,10 +5,6 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
-#include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-#include <emscripten/html5.h>
-
 #include <memory>
 #include <stdint.h>
 #include <stdio.h>
@@ -160,7 +156,7 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
             var jsonData = JSON.parse(jsonStr);
             for (var i = 0; i < jsonData.length; i++) {
                 var stripData = jsonData[i];
-            var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
+                var pixelData = activeStrips.getPixelData_Uint8_C(stripData.strip_id);
                 jsonData[i].pixel_data = pixelData;
             }
 
