@@ -1,6 +1,10 @@
 #ifdef __EMSCRIPTEN__
 
 #include <emscripten.h>
+#include <emscripten/bind.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+#include <emscripten/val.h>
 
 #include <sstream>
 #include <vector>
