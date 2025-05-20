@@ -29,6 +29,6 @@ void jsDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["text"] = text();
 }
 
-}   // namespace fl
+} // namespace fl
 
 #endif

@@ -57,4 +57,4 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     ScreenMapMap mScreenMap;
 };
 
-}
+} // namespace fl

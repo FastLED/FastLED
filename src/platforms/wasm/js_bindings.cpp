@@ -4,23 +4,27 @@
 
 #include "js_bindings.h"
 
-
 namespace fl {
 
-
-static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
+static void jsSetCanvasSizeJson(const char *jsonString, size_t jsonSize) {
     FASTLED_DBG("jsSetCanvasSize1");
-    EM_ASM_({
-        globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
-            console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
-        };
-        var jsonStr = UTF8ToString($0, $1);  // Convert C string to JavaScript string with length
-        var jsonData = JSON.parse(jsonStr);
-        globalThis.FastLED_onStripUpdate(jsonData);
-    }, jsonString, jsonSize);
+    EM_ASM_(
+        {
+            globalThis.FastLED_onStripUpdate =
+                globalThis.FastLED_onStripUpdate || function(jsonStr) {
+                console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) "
+                            "function");
+            };
+            var jsonStr = UTF8ToString(
+                $0, $1); // Convert C string to JavaScript string with length
+            var jsonData = JSON.parse(jsonStr);
+            globalThis.FastLED_onStripUpdate(jsonData);
+        },
+        jsonString, jsonSize);
 }
 
-static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
+static void _jsSetCanvasSize(int cledcontoller_id,
+                             const fl::ScreenMap &screenmap) {
     FASTLED_DBG("Begin jsSetCanvasSize json serialization");
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
@@ -45,12 +49,12 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
     jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
-
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     _jsSetCanvasSize(cledcontoller_id, screenmap);
 }
 
-EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
+EMSCRIPTEN_KEEPALIVE void
+jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
     struct Function {
         static bool isSquare(int num) {
             int root = sqrt(num);
@@ -75,10 +79,8 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
                 for (uint16_t i = 0; i < side; i++) {
                     for (uint16_t j = 0; j < side; j++) {
                         uint16_t index = i * side + j;
-                        vec2f p = {
-                            static_cast<float>(i),
-                            static_cast<float>(j)
-                        };
+                        vec2f p = {static_cast<float>(i),
+                                   static_cast<float>(j)};
                         screenmap.set(index, p);
                     }
                 }
@@ -101,66 +103,88 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
     }
 }
 
-EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
+EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData &active_strips) {
     jsFillInMissingScreenMaps(active_strips);
     Str json_str = active_strips.infoJsonString();
-    EM_ASM_({
+    EM_ASM_(
+        {
+            globalThis.FastLED_sendMessage = globalThis.FastLED_sendMessage ||
+                                             function(msg_tag, json_data_str) {
+                console.log(
+                    "Missing globalThis.FastLED_sendMessage() function");
+                console.log("Message was mean for tag: " + msg_tag);
+                const json_data = JSON.parse(json_data_str);
+                console.log("Received JSON data:", json_data);
+            };
 
-        globalThis.FastLED_sendMessage = globalThis.FastLED_sendMessage || function(msg_tag, json_data_str) {
-            console.log("Missing globalThis.FastLED_sendMessage() function");
-            console.log("Message was mean for tag: " + msg_tag);
-            const json_data = JSON.parse(json_data_str);
-            console.log("Received JSON data:", json_data);
-        };
-
-        globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameInfo, callback) {
+            globalThis.FastLED_onFrame =
+                globalThis.FastLED_onFrame || function(frameInfo, callback) {
                 console.log("Missing globalThis.FastLED_onFrame() function");
-            //console.log("Received frame data:", frameData);
-            if (typeof callback === 'function') {
+                // console.log("Received frame data:", frameData);
+                if (typeof callback == = 'function') {
                     callback();
                 } else {
-                console.error("Callback function is not a function but is of type " + typeof callback);
+                    console.error(
+                        "Callback function is not a function but is of type " +
+                        typeof callback);
                 }
             };
-        globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
-            if (typeof jsonString === 'string' && jsonString !== null) {
+            globalThis.onFastLedUiUpdateFunction =
+                globalThis.onFastLedUiUpdateFunction || function(jsonString) {
+                if (typeof jsonString == = 'string' &&jsonString != = null) {
                     Module._jsUiManager_updateUiComponents(jsonString);
                 } else {
-                console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
+                    console.error(
+                        "Invalid jsonData received:", jsonString,
+                        "expected string but instead got:", typeof jsonString);
                 }
             };
 
-       globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
+            globalThis.FastLED_onFrameData =
+                globalThis.FastLED_onFrameData || new Module.ActiveStripData();
             var activeStrips = globalThis.FastLED_onFrameData;
 
             var jsonStr = UTF8ToString($0);
             var jsonData = JSON.parse(jsonStr);
             for (var i = 0; i < jsonData.length; i++) {
                 var stripData = jsonData[i];
-            var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
+                var pixelData =
+                    activeStrips.getPixelData_Uint8(stripData.strip_id);
                 jsonData[i].pixel_data = pixelData;
             }
 
-        globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);
-    }, json_str.c_str());
+            globalThis.FastLED_onFrame(jsonData,
+                                       globalThis.onFastLedUiUpdateFunction);
+        },
+        json_str.c_str());
 }
 
 EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
-    EM_ASM_({
-        globalThis.FastLED_onStripAdded = globalThis.FastLED_onStripAdded || function() {
-            console.log("Missing globalThis.FastLED_onStripAdded(id, length) function");
-            console.log("Added strip id: " + arguments[0] + " with length: " + arguments[1]);
+    EM_ASM_(
+        {
+            globalThis.FastLED_onStripAdded =
+                globalThis.FastLED_onStripAdded || function() {
+                console.log("Missing globalThis.FastLED_onStripAdded(id, "
+                            "length) function");
+                console.log("Added strip id: " + arguments[0] +
+                            " with length: " + arguments[1]);
             };
             globalThis.FastLED_onStripAdded($0, $1);
-    }, strip, num_leds);
+        },
+        strip, num_leds);
 }
 
-EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
+EMSCRIPTEN_KEEPALIVE void updateJs(const char *jsonStr) {
     printf("updateJs: %s\n", jsonStr);
-    EM_ASM_({
-            globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {
+    EM_ASM_(
+        {
+            globalThis.FastLED_onUiElementsAdded =
+                globalThis.FastLED_onUiElementsAdded ||
+                function(jsonData, updateFunc) {
                 console.log(new Date().toLocaleTimeString());
-            console.log("Missing globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
+                console.log(
+                    "Missing globalThis.FastLED_onUiElementsAdded(jsonData, "
+                    "updateFunc) function");
                 console.log("Added ui elements:", jsonData);
             };
             var jsonStr = UTF8ToString($0);
@@ -177,9 +201,8 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
             } else {
                 console.error("Internal error, data is null");
             }
-
-    }, jsonStr);
+        },
+        jsonStr);
 }
 
-
-}  // namespace fl
+} // namespace fl

@@ -229,7 +229,7 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
     return entry;
 }
 
-}   // namespace fl
+} // namespace fl
 
 FASTLED_USING_NAMESPACE
 

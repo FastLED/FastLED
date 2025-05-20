@@ -43,6 +43,6 @@ int jsUiInternal::nextId() {
 
 std::atomic<uint32_t> jsUiInternal::sNextId(0);
 
-}   // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

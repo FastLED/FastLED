@@ -99,4 +99,4 @@ class WasmSpiOutput : public fl::EngineEvents::Listener {
 // Compatibility alias
 typedef WasmSpiOutput StubSPIOutput;
 
-}   // namespace fl
+} // namespace fl

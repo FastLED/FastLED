@@ -13,7 +13,6 @@
 
 #include "platforms/wasm/js.h"
 
-
 namespace fl {
 
 // Note: Having trouble getting this into a cpp file.
@@ -38,6 +37,6 @@ void EngineListener::onCanvasUiSet(CLEDController *strip,
     jsSetCanvasSize(controller_id, screenmap);
 }
 
-}  // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

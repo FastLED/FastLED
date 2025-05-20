@@ -102,6 +102,6 @@ EMSCRIPTEN_BINDINGS(js_interface) {
                          &jsUiManager::jsUpdateUiComponents);
 }
 
-}  // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

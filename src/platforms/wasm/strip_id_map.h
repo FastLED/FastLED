@@ -124,4 +124,4 @@ class StripIdMap {
     int mCounter = 0;
 };
 
-}   // namespace fl
+} // namespace fl

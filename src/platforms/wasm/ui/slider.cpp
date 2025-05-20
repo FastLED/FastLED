@@ -76,6 +76,6 @@ void jsSliderImpl::setValue(float value) {
     }
 }
 
-}   // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

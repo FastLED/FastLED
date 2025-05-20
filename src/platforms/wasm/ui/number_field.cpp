@@ -58,6 +58,6 @@ void jsNumberFieldImpl::updateInternal(
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-}   // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

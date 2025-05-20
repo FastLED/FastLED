@@ -51,4 +51,4 @@ class jsUiInternal : public fl::Referent {
     mutable std::mutex mMutex;
 };
 
-}   // namespace fl
+} // namespace fl

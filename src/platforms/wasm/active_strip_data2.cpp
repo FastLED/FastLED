@@ -11,7 +11,7 @@
 #include "fl/namespace.h"
 #include "fl/str.h"
 
-#include "active_strip_data.h"
+#include "active_strip_data2.h"
 #include "js.h"
 #include "platforms/wasm/engine_listener.h"
 
@@ -69,6 +69,6 @@ __attribute__((constructor)) void __init_ActiveStripData2() {
     ActiveStripData2::Instance();
 }
 
-}   // namespace fl
+} // namespace fl
 
 #endif // __EMSCRIPTEN__

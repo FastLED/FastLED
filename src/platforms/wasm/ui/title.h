@@ -5,7 +5,7 @@
 #include "platforms/wasm/ui/ui_internal.h"
 
 namespace fl {
-  
+
 class jsTitleImpl {
   public:
     jsTitleImpl(const fl::Str &text);

@@ -74,5 +74,4 @@ class jsUiManager : fl::EngineEvents::Listener {
     bool mHasPendingUpdate = false;
 };
 
-}  // namespace fl
-
+} // namespace fl

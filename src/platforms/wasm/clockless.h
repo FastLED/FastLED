@@ -57,4 +57,4 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     std::vector<uint8_t> mRgb;
 };
 
-}   // namespace fl
+} // namespace fl

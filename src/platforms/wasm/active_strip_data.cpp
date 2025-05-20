@@ -21,7 +21,6 @@
 #include "js.h"
 #include "platforms/wasm/engine_listener.h"
 
-
 namespace fl {
 
 ActiveStripData &ActiveStripData::Instance() {
@@ -82,6 +81,6 @@ __attribute__((constructor)) void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
 
-}  // namespace fl
+} // namespace fl
 
 #endif
