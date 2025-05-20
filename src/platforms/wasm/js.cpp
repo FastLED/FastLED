@@ -1,6 +1,4 @@
 #ifdef __EMSCRIPTEN__
-// DO NOT clang-format this file!! It will destroy the EM_ASM_ macros.
-// clang-format off
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
@@ -11,23 +9,21 @@
 #include <stdio.h>
 #include <string>
 
-#include "ui/ui_internal.h"
-#include "fl/str.h"
 #include "active_strip_data.h"
-#include "js.h"
-#include "fl/str.h"
-#include "fl/namespace.h"
-#include "fl/screenmap.h"
-#include "fl/map.h"
 #include "engine_listener.h"
 #include "fl/dbg.h"
+#include "fl/map.h"
+#include "fl/namespace.h"
+#include "fl/screenmap.h"
+#include "fl/str.h"
+#include "js.h"
+#include "ui/ui_internal.h"
 
 // extern setup and loop which will be supplied by the sketch.
 extern void setup();
 extern void loop();
 
 namespace fl {
-
 
 struct EndFrameListener : public fl::EngineEvents::Listener {
     EndFrameListener() = default;
@@ -47,7 +43,6 @@ struct EndFrameListener : public fl::EngineEvents::Listener {
 };
 
 EndFrameListener gEndFrameListener;
-
 
 inline void setup_once() {
     static bool g_setup_called = false;
@@ -69,20 +64,21 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     setup_once();
-    //fastled_resume_timer();
+    // fastled_resume_timer();
     fl::EngineEvents::onPlatformPreLoop();
     loop();
 
     if (!gEndFrameListener.endFrameHappened()) {
         // UI needs to pump the event loop.
         // This happens if the sketch fails to call FastLED.show().
-        // This is a problem because the UI will not update, so we manually pump it here.
+        // This is a problem because the UI will not update, so we manually pump
+        // it here.
         fl::EngineEvents::onEndFrame();
     }
-    //fastled_pause_timer();
+    // fastled_pause_timer();
     return 0;
 }
 
-}  // namespace fl
+} // namespace fl
 
-#endif  // __EMSCRIPTEN__
+#endif // __EMSCRIPTEN__

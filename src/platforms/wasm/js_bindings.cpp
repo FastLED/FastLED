@@ -1,8 +1,19 @@
+#ifdef __EMSCRIPTEN__
+
+// DO NOT clang-format this file!! It will destroy the EM_ASM_ macros.
+// clang-format off
+
+
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
 #include "js_bindings.h"
+
+#include "active_strip_data.h"
+#include "fl/dbg.h"
+#include "fl/math.h"
+#include "fl/screenmap.h"
 
 namespace fl {
 
@@ -206,3 +217,5 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char *jsonStr) {
 }
 
 } // namespace fl
+
+#endif // __EMSCRIPTEN__

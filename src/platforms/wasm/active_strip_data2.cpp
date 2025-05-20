@@ -63,11 +63,11 @@ Str ActiveStripData2::infoJsonString() {
     return jsonBuffer;
 }
 
-// gcc constructor to get the
-// ActiveStripData2 instance created.
-__attribute__((constructor)) void __init_ActiveStripData2() {
-    ActiveStripData2::Instance();
-}
+// // gcc constructor to get the
+// // ActiveStripData2 instance created.
+// __attribute__((constructor)) void __init_ActiveStripData2() {
+//     ActiveStripData2::Instance();
+// }
 
 } // namespace fl
 
