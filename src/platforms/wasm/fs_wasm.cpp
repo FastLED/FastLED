@@ -24,7 +24,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(FsImplWasm);
 FASTLED_SMART_PTR(WasmFileHandle);
@@ -229,7 +229,7 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
     return entry;
 }
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 FASTLED_USING_NAMESPACE
 

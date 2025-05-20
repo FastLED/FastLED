@@ -21,9 +21,8 @@
 #include "js.h"
 #include "platforms/wasm/engine_listener.h"
 
-using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 ActiveStripData &ActiveStripData::Instance() {
     return fl::Singleton<ActiveStripData>::instance();
@@ -83,6 +82,6 @@ __attribute__((constructor)) void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif

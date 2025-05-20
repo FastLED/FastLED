@@ -10,7 +10,7 @@
 
 // Define a reasonable maximum number of strips
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 class CLEDController;
 extern uint16_t cled_contoller_size();
@@ -124,4 +124,4 @@ class StripIdMap {
     int mCounter = 0;
 };
 
-FASTLED_NAMESPACE_END
+}   // namespace fl

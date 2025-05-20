@@ -9,7 +9,7 @@ namespace fl {
 class ScreenMap;
 }
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 class CLEDController;
 
@@ -27,4 +27,4 @@ class EngineListener : public fl::EngineEvents::Listener {
     ~EngineListener();
 };
 
-FASTLED_NAMESPACE_END
+}   // namespace fl

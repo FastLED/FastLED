@@ -20,7 +20,7 @@
 #include "platforms/wasm/js.h"
 #include "platforms/wasm/strip_id_map.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 extern uint8_t get_brightness();
 
@@ -99,4 +99,4 @@ class WasmSpiOutput : public fl::EngineEvents::Listener {
 // Compatibility alias
 typedef WasmSpiOutput StubSPIOutput;
 
-FASTLED_NAMESPACE_END
+}   // namespace fl

@@ -16,7 +16,7 @@
 #include "fl/json.h"
 #include "platforms/wasm/js.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 class jsUiInternal;
 
@@ -74,4 +74,5 @@ class jsUiManager : fl::EngineEvents::Listener {
     bool mHasPendingUpdate = false;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
+

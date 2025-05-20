@@ -13,7 +13,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double value, double min,
                                      double max)
@@ -58,6 +58,6 @@ void jsNumberFieldImpl::updateInternal(
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 #endif // __EMSCRIPTEN__

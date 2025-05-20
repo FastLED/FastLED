@@ -7,7 +7,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsDescriptionImpl::jsDescriptionImpl(const Str &text) : mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
@@ -29,6 +29,6 @@ void jsDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["text"] = text();
 }
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 #endif

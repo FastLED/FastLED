@@ -16,7 +16,7 @@
 #include "fl/slice.h"
 #include "strip_id_map.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 typedef fl::Slice<const uint8_t> SliceUint8;
 
@@ -57,4 +57,4 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     ScreenMapMap mScreenMap;
 };
 
-FASTLED_NAMESPACE_END
+}

@@ -18,7 +18,7 @@
 #include "exports.h"
 #include "strip_id_map.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #define FASTLED_HAS_CLOCKLESS 1
 
@@ -57,4 +57,4 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     std::vector<uint8_t> mRgb;
 };
 
-FASTLED_NAMESPACE_END
+}   // namespace fl

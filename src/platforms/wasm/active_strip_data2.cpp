@@ -17,7 +17,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 ActiveStripData2 &ActiveStripData2::Instance() {
     return fl::Singleton<ActiveStripData2>::instance();
@@ -69,6 +69,6 @@ __attribute__((constructor)) void __init_ActiveStripData2() {
     ActiveStripData2::Instance();
 }
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 #endif // __EMSCRIPTEN__

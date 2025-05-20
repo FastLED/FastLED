@@ -11,7 +11,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
                            float step)
@@ -76,6 +76,6 @@ void jsSliderImpl::setValue(float value) {
     }
 }
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 #endif // __EMSCRIPTEN__

@@ -6,7 +6,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc)
@@ -43,6 +43,6 @@ int jsUiInternal::nextId() {
 
 std::atomic<uint32_t> jsUiInternal::sNextId(0);
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
 
 #endif // __EMSCRIPTEN__

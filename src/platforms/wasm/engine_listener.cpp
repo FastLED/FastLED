@@ -13,9 +13,8 @@
 
 #include "platforms/wasm/js.h"
 
-using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // Note: Having trouble getting this into a cpp file.
 void EngineListener::Init() { Singleton<EngineListener>::instance(); }
@@ -39,6 +38,6 @@ void EngineListener::onCanvasUiSet(CLEDController *strip,
     jsSetCanvasSize(controller_id, screenmap);
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif // __EMSCRIPTEN__

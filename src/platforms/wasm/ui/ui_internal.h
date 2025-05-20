@@ -12,7 +12,7 @@
 #include "fl/ptr.h"
 #include "fl/str.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(jsUiInternal);
 
@@ -51,4 +51,4 @@ class jsUiInternal : public fl::Referent {
     mutable std::mutex mMutex;
 };
 
-FASTLED_NAMESPACE_END
+}   // namespace fl
