@@ -14,6 +14,7 @@
 #include "fl/dbg.h"
 #include "fl/math.h"
 #include "fl/screenmap.h"
+#include "fl/json.h"
 
 namespace fl {
 
