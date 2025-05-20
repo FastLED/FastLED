@@ -7,6 +7,9 @@ FastLED 3.9.17
   * esp-idf v5.4 fixes to include lcd_50
     * https://github.com/FastLED/FastLED/pull/1924
     * Thanks! https://github.com/rommo911
+  * RMT5 will now respect DMA_MODE=DMA_ENABLED
+    * Default is still off.
+    * https://github.com/FastLED/FastLED/pull/1927
 * Noise Functions
   * Woryley noise has been added.
   * TODO: Add example.
