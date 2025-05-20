@@ -8,12 +8,6 @@
 #include <stdio.h>
 #include <string>
 
-#include "fl/engine_events.h"
-#include "fl/namespace.h"
-#include "fl/ptr.h"
-#include "fl/screenmap.h"
-#include "fl/str.h"
-#include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/ui/audio.h"
 #include "platforms/wasm/ui/button.h"
 #include "platforms/wasm/ui/checkbox.h"
@@ -21,7 +15,9 @@
 #include "platforms/wasm/ui/number_field.h"
 #include "platforms/wasm/ui/slider.h"
 #include "platforms/wasm/ui/title.h"
-#include "ui/ui_internal.h"
+
+#include "fl/math.h"
+#include "fl/str.h"
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -43,6 +39,9 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 
 namespace fl {
+
+class ScreenMap;
+class ActiveStripData;
 
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap);
 void jsOnFrame(ActiveStripData &active_strips);
