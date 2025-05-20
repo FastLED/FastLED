@@ -11,6 +11,7 @@
 #include "engine_listener.h"
 #include "fl/namespace.h"
 
+#include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/js.h"
 
 namespace fl {
