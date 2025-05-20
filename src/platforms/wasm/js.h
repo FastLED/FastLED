@@ -3,11 +3,9 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
-#include <memory>
-#include <stdint.h>
-#include <stdio.h>
-#include <string>
+#include "fl/stdint.h"
 
+#include "platforms/wasm/js_bindings.h"
 #include "platforms/wasm/ui/audio.h"
 #include "platforms/wasm/ui/button.h"
 #include "platforms/wasm/ui/checkbox.h"
@@ -15,9 +13,6 @@
 #include "platforms/wasm/ui/number_field.h"
 #include "platforms/wasm/ui/slider.h"
 #include "platforms/wasm/ui/title.h"
-
-#include "fl/math.h"
-#include "fl/str.h"
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -39,14 +34,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 
 namespace fl {
-
-class ScreenMap;
-class ActiveStripData;
-
-void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap);
-void jsOnFrame(ActiveStripData &active_strips);
-void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
-void updateJs(const char *jsonStr);
 
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
