@@ -1,3 +1,5 @@
+#ifdef __EMSCRIPTEN__
+
 #include <memory>
 #include <stdio.h>
 
@@ -5,10 +7,11 @@
 #include "fl/singleton.h"
 #include "fl/slice.h"
 
-#include "active_strip_data.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
+
+#include "active_strip_data.h"
 #include "js.h"
 #include "platforms/wasm/engine_listener.h"
 
@@ -29,7 +32,7 @@ void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
     mScreenMap.update(id, screenmap);
 }
 
-const uint8_t* ActiveStripData::getPixelData_Uint8_C(int stripIndex) {
+const uint8_t *ActiveStripData::getPixelData_Uint8_C(int stripIndex) {
     SliceUint8 stripData;
     if (mStripMap.get(stripIndex, &stripData)) {
         return stripData.data();
@@ -67,3 +70,5 @@ __attribute__((constructor)) void __init_ActiveStripData() {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif // __EMSCRIPTEN__
