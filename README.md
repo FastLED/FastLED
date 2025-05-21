@@ -108,10 +108,14 @@ Lots of improvements in this release, read the full [change list here](https://g
 
 ![perpetualmaniac_an_led_display_in_a_room_lots_of_refaction_of_t_eb7c170a-7b2c-404a-b114-d33794b4954b](https://github.com/user-attachments/assets/982571fc-9b8d-4e58-93be-5bed76a0c53d)
 
-*Note some users find that newer versions of the ESP32 arduino core (3.10) don't work very well, but older versions do, see [issue 1903](https://github.com/FastLED/FastLED/issues/1903)
+*Note some users find that newer versions of the ESP32 Arduino core (3.10) don't work very well, but older versions do, see [issue 1903](https://github.com/FastLED/FastLED/issues/1903)
 
 ## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
+
 ![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
+
+  * *Teensy 4.1: 50 pins*
+  * *Teensy 4.0: 42 pins*
 
 
 ## New in 3.9.2 - Overclocking of WS2812
