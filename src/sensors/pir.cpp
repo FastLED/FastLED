@@ -4,6 +4,7 @@
 #include "fastpin.h"
 #include "fl/strstream.h"
 #include "fl/warn.h"
+#include "fl/assert.h"
 #include "sensors/pir.h"
 
 namespace fl {
@@ -24,18 +25,21 @@ Str getButtonName(const char *button_name) {
 }
 } // namespace
 
-Pir::Pir(int pin, const char* button_name): mButton(getButtonName(button_name).c_str()), mPin(pin) {
+Pir::Pir(int pin): mPin(pin) {
     mPin.setPinMode(DigitalPin::kInput);
 }
 
 bool Pir::detect() {
-    return mPin.high() || mButton.clicked();
+    return mPin.high();
 }
 
 
 PirAdvanced::PirAdvanced(int pin, uint32_t latchMs, uint32_t risingTime,
-                         uint32_t fallingTime)
-    : mPir(pin), mRamp(risingTime, latchMs, fallingTime) {
+                         uint32_t fallingTime, const char* button_name)
+    : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
+    mButton.onChanged([this]() {
+        this->mRamp.trigger(millis());
+    });
 }
 
 bool PirAdvanced::detect(uint32_t now) {

@@ -18,12 +18,12 @@ namespace fl {
 // compiling using the FastLED web compiler.
 class Pir {
   public:
-    Pir(int pin, const char* button_name = nullptr);
+    Pir(int pin);
     bool detect();
     operator bool() { return detect(); }
 
   private:
-    UIButton mButton;
+
     DigitalPin mPin;
 };
 
@@ -48,7 +48,8 @@ public:
     PirAdvanced(int pin,
                 uint32_t latchMs     = 5000,
                 uint32_t risingTime  = 1000,
-                uint32_t fallingTime = 1000);
+                uint32_t fallingTime = 1000,
+                const char* button_name = nullptr);
 
     /// Returns true if the PIR is “latched on” (within latchMs of last trigger).
     bool detect(uint32_t now);
@@ -67,6 +68,9 @@ private:
     Pir        mPir;
     TimeRamp  mRamp;
     bool       mLastState = false;
+    UIButton mButton;
+    bool mResetState = false;
+    
 };
 
 } // namespace fl
