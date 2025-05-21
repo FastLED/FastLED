@@ -112,10 +112,12 @@ Lots of improvements in this release, read the full [change list here](https://g
 
 ## New in 3.9.8 - Massive Teensy 4.1 & 4.0 LED output
 
+  * *Teensy 4.1: 50 parallel pins Driving WS2812*
+  * *Teensy 4.0: 42 parallel pins Driving WS2812*
+
 ![New Project](https://github.com/user-attachments/assets/79dc2801-5161-4d5a-90a2-0126403e215f)
 
-  * *Teensy 4.1: 50 pins*
-  * *Teensy 4.0: 42 pins*
+
 
 
 ## New in 3.9.2 - Overclocking of WS2812
