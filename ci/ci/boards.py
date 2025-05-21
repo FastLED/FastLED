@@ -104,6 +104,7 @@ DUE = Board(
 SPARKFUN_XRP_CONTROLLER_2350B = Board(
     board_name="sparkfun_xrp_controller",
     platform="https://github.com/maxgerhardt/platform-raspberrypi",
+    platform_needs_install=True,
 )
 
 APOLLO3_RED_BOARD = Board(
@@ -291,7 +292,6 @@ ESP32S3_RMT51 = Board(
         "FASTLED_RMT5=1",
     ],
 )
-
 
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
