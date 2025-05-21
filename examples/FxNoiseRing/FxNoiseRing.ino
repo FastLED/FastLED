@@ -50,18 +50,6 @@ float current_brightness = 0;
 
 CLEDController* controller = nullptr;
 
-void handleSerialDither() {
-    if (Serial.available()) {
-        char input = Serial.read();
-        if (input == '0') {
-            useDither = false;
-        } else if (input == '1') {
-            useDither = true;
-        } else {
-            FASTLED_WARN("Invalid dither input. Use 0 or 1");
-        }
-    }
-}
 
 void setup() {
     Serial.begin(115200);
@@ -97,7 +85,6 @@ void draw(uint32_t now) {
 }
 
 void loop() {
-    handleSerialDither();  // Add this line at start of loop()
     
     controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
     EVERY_N_SECONDS(1) {

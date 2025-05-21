@@ -14,5 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-
-#include "../examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino"
+#include "../examples/FxNoiseRing/FxNoiseRing.ino"
