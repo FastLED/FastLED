@@ -59,6 +59,7 @@ DEFAULT_BOARDS_NAMES = [
     "bluepill",
     "esp32rmt_51",
     "giga_r1",
+    "sparkfun_xrp_controller",
 ]
 
 OTHER_BOARDS_NAMES = [

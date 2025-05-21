@@ -22,6 +22,8 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Old fork that we were using
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
+_ALL_BOARDS_2: list["Board"] = []
+
 
 @dataclass
 class Board:
@@ -40,6 +42,9 @@ class Board:
     build_flags: list[str] | None = None  # Reserved for future use.
     defines: list[str] | None = None
     board_partitions: str | None = None  # Reserved for future use.
+
+    def __post_init__(self) -> None:
+        _ALL_BOARDS_2.append(self)
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
@@ -79,6 +84,13 @@ class Board:
         return hash(data_str)
 
 
+# [env:sparkfun_xrp_controller]
+# platform = https://github.com/maxgerhardt/platform-raspberrypi
+# board = sparkfun_xrp_controller
+# framework = arduino
+# lib_deps = fastled/FastLED @ ^3.9.16
+
+
 WEBTARGET = Board(
     board_name="web",
 )
@@ -86,6 +98,12 @@ WEBTARGET = Board(
 DUE = Board(
     board_name="due",
     platform="atmelsam",
+)
+
+
+SPARKFUN_XRP_CONTROLLER_2350B = Board(
+    board_name="sparkfun_xrp_controller",
+    platform="https://github.com/maxgerhardt/platform-raspberrypi",
 )
 
 APOLLO3_RED_BOARD = Board(
@@ -303,6 +321,7 @@ ALL: list[Board] = [
     MAPLE_MINI,
     NRF52840,
     GIGA_R1,
+    SPARKFUN_XRP_CONTROLLER_2350B,
 ]
 
 
