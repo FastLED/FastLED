@@ -1483,6 +1483,7 @@ class CRGBPalette256 {
 /// Color interpolation options for palette
 typedef enum {
     NOBLEND = 0,     ///< No interpolation between palette entries
+    BLEND = 1,       ///< Legacy
     LINEARBLEND = 1, ///< Linear interpolation between palette entries, with
                      ///< wrap-around from end to the beginning again
     LINEARBLEND_NOWRAP =
