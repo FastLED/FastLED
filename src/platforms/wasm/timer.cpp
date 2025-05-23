@@ -47,7 +47,6 @@ EMSCRIPTEN_KEEPALIVE void delay(int ms) {
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-
 EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros) {
     // Keep in mind this is NOT ASYNC as of 2024-12, and will block the main
     // thread. If you do delay(10000) it will result in a 10 second block on the
