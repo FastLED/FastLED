@@ -1,7 +1,9 @@
 #pragma once
 
-#ifndef __INC_FL_PROGMEM_H
-#define __INC_FL_PROGMEM_H
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
+#include "platforms/null_progmem.h"
+#else
+
 
 #include "fl/namespace.h"
 
@@ -78,11 +80,7 @@
 // If FASTLED_USE_PROGMEM is 0 or undefined,
 // we'll use regular memory (RAM) access.
 
-//empty PROGMEM simulation
-#define FL_PROGMEM
-#define FL_PGM_READ_BYTE_NEAR(x)  (*((const  uint8_t*)(x)))
-#define FL_PGM_READ_WORD_NEAR(x)  (*((const uint16_t*)(x)))
-#define FL_PGM_READ_DWORD_NEAR(x) (*((const uint32_t*)(x)))
+#include "platforms/null_progmem.h"
 
 #endif
 
@@ -102,4 +100,4 @@
 #define FL_ALIGN_PROGMEM
 #endif
 
-#endif
+#endif  // defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

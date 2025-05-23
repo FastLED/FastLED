@@ -45,7 +45,7 @@ TODO:
  for creating one- and twodimensional LED effects.
  
  Dedicated to the users of the FastLED v2.1 library
- by Daniel Garcia and Mark Kriegsmann.
+ by Daniel Garcia and Mark Kriegsmann. 
  
  Provides basic and advanced helper functions.
  Contains many examples how to creatively combine them.
@@ -54,7 +54,7 @@ TODO:
  anything else with less than 4kB RAM)
  */
 
-#include <FastLED.h>
+#include "FastLED.h"
 
 #if defined(__EMSCRIPTEN__)
 #ifdef PROGMEM

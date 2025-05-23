@@ -5,6 +5,7 @@
 
 // #include "FastLED.h"
 #include "fl/colorutils.h"
+#include "fastled_progmem.h"
 
 /// @file colorpalettes.h
 /// Declarations for the predefined color palettes supplied by FastLED.
