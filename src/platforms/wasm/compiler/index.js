@@ -285,6 +285,16 @@ function FastLED_onStripUpdate(jsonData) {
       absMin[1] = Math.min(absMin[1], stripData.min[1]);
       absMax[0] = Math.max(absMax[0], stripData.max[0]);
       absMax[1] = Math.max(absMax[1], stripData.max[1]);
+      // if diff x = 0, expand by one on each direction.
+      if (absMin[0] === absMax[0]) {
+        absMin[0] = absMin[0] - 1;
+        absMax[0] = absMax[0] + 1;
+      }
+      // if diff y = 0, expand by one on each direction.
+      if (absMin[1] === absMax[1]) {
+        absMin[1] = absMin[1] - 1;
+        absMax[1] = absMax[1] + 1;
+      }
       setAtLeastOnce = true;
     }
     if (!setAtLeastOnce) {
