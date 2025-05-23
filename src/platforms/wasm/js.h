@@ -26,6 +26,7 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros();
 
 // Replacement for 'delay' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void delay(int ms);
+EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros);
 }
 
 //////////////////////////////////////////////////////////////////////////
