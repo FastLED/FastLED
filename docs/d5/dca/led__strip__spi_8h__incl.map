@@ -1,12 +1,15 @@
 <map id="third_party/espressif/led_strip/src/led_strip_spi.h" name="third_party/espressif/led_strip/src/led_strip_spi.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="33,5,236,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="142,167,212,192"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="142,167,212,192"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,48,45,61,21,78,9,97,9,106,14,117,37,140,66,156,98,167,128,172,127,178,97,172,64,161,34,145,9,120,4,108,4,95,17,74,42,57,72,43"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="24,93,106,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="120,47,87,84,83,81,116,44"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="130,93,277,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="153,44,186,81,182,84,149,47"/>
-<area shape="rect" id="Node000005" href="$d4/d88/led__strip__types_8h.html" title=" " alt="" coords="301,93,434,119"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="191,43,321,86,320,91,189,48"/>
-<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="338,121,222,164,220,159,336,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="24,93,106,119"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="120,47,87,84,83,81,116,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="130,93,277,119"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="153,44,186,81,182,84,149,47"/>
+<area shape="rect" id="Node000006" href="$d4/d88/led__strip__types_8h.html" title=" " alt="" coords="301,93,434,119"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="191,43,321,86,320,91,189,48"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="205,164,228,165,236,171,239,180,233,191,219,195,218,190,230,187,234,179,232,174,226,170,205,169"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="140,240,214,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="180,192,180,226,174,226,174,192"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="338,121,222,164,220,159,336,116"/>
 </map>

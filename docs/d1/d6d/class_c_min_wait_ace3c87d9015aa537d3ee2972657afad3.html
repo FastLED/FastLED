@@ -127,17 +127,17 @@ template&lt;int WAIT&gt; </div>
 
 <p>Blocking delay until WAIT time since <a class="el" href="../../d1/d6d/class_c_min_wait_a9e1941c949810958262ff98f7b591b96.html#a9e1941c949810958262ff98f7b591b96" title="Reset the timestamp that marks the start of the wait period.">mark()</a> has passed. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00027">27</a> of file <a class="el" href="../../d0/da8/fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   27</span>                {</div>
-<div class="line"><span class="lineno">   28</span>        <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">uint16_t</a> <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a>;</div>
-<div class="line"><span class="lineno">   29</span>        <span class="keywordflow">do</span> {</div>
-<div class="line"><span class="lineno">   30</span>            <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a> = (<a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">micros</a>() &amp; 0xFFFF) - <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0.html#a89344ca415c072fe7b18cd5218ee3aa0">mLastMicros</a>;</div>
-<div class="line"><span class="lineno">   31</span>        } <span class="keywordflow">while</span>(<a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a> &lt; <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">WAIT</a>);</div>
-<div class="line"><span class="lineno">   32</span>    }</div>
-<div class="ttc" id="aclass_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0_html_a89344ca415c072fe7b18cd5218ee3aa0"><div class="ttname"><a href="../../d1/d6d/class_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0.html#a89344ca415c072fe7b18cd5218ee3aa0">CMinWait::mLastMicros</a></div><div class="ttdeci">uint16_t mLastMicros</div><div class="ttdoc">Timestamp of the last time this was run, in microseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/da8/fastled__delay_8h_source.html#l00020">fastled_delay.h:20</a></div></div>
-<div class="ttc" id="aclass_c_min_wait_html"><div class="ttname"><a href="../../d1/d6d/class_c_min_wait.html">CMinWait</a></div><div class="ttdoc">Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e...</div><div class="ttdef"><b>Definition</b> <a href="../../d0/da8/fastled__delay_8h_source.html#l00018">fastled_delay.h:18</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00029">29</a> of file <a class="el" href="../../d0/da8/fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   29</span>                {</div>
+<div class="line"><span class="lineno">   30</span>        <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">uint16_t</a> <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a>;</div>
+<div class="line"><span class="lineno">   31</span>        <span class="keywordflow">do</span> {</div>
+<div class="line"><span class="lineno">   32</span>            <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a> = (<a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">micros</a>() &amp; 0xFFFF) - <a class="code hl_variable" href="../../d1/d6d/class_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0.html#a89344ca415c072fe7b18cd5218ee3aa0">mLastMicros</a>;</div>
+<div class="line"><span class="lineno">   33</span>        } <span class="keywordflow">while</span>(<a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">diff</a> &lt; <a class="code hl_class" href="../../d1/d6d/class_c_min_wait.html">WAIT</a>);</div>
+<div class="line"><span class="lineno">   34</span>    }</div>
+<div class="ttc" id="aclass_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0_html_a89344ca415c072fe7b18cd5218ee3aa0"><div class="ttname"><a href="../../d1/d6d/class_c_min_wait_a89344ca415c072fe7b18cd5218ee3aa0.html#a89344ca415c072fe7b18cd5218ee3aa0">CMinWait::mLastMicros</a></div><div class="ttdeci">uint16_t mLastMicros</div><div class="ttdoc">Timestamp of the last time this was run, in microseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/da8/fastled__delay_8h_source.html#l00022">fastled_delay.h:22</a></div></div>
+<div class="ttc" id="aclass_c_min_wait_html"><div class="ttname"><a href="../../d1/d6d/class_c_min_wait.html">CMinWait</a></div><div class="ttdoc">Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e...</div><div class="ttdef"><b>Definition</b> <a href="../../d0/da8/fastled__delay_8h_source.html#l00020">fastled_delay.h:20</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00020">mLastMicros</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00022">mLastMicros</a>.</p>
 
 </div>
 </div>
@@ -148,7 +148,7 @@ template&lt;int WAIT&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/d6d/class_c_min_wait.html">CMinWait</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

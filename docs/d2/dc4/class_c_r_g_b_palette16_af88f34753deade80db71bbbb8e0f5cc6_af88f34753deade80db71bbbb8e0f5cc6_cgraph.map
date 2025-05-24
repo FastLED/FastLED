@@ -1,7 +1,0 @@
-<map id="CRGBPalette16::operator=" name="CRGBPalette16::operator=">
-<area shape="rect" id="Node000001" title="Creates a palette from a gradient palette in PROGMEM." alt="" coords="5,31,200,56"/>
-<area shape="rect" id="Node000002" href="$d2/dc4/class_c_r_g_b_palette16_af3a6a06fddf749622ffe099e2d39302f.html#af3a6a06fddf749622ffe099e2d39302f" title="Default constructor." alt="" coords="248,5,475,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,31,234,28,235,33,200,36"/>
-<area shape="rect" id="Node000003" href="$da/de3/group___color_fills_ga6afaa1f712186a4b67445f69871cad88.html#ga6afaa1f712186a4b67445f69871cad88" title="Fill a range of LEDs with a smooth RGB gradient between two RGB colors." alt="" coords="294,55,429,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,50,281,57,280,63,200,55"/>
-</map>

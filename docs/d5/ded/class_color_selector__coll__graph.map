@@ -1,9 +1,16 @@
 <map id="ColorSelector" name="ColorSelector">
-<area shape="rect" id="Node000001" title=" " alt="" coords="87,181,196,207"/>
-<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="80,93,203,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,133,144,181,139,181,139,133"/>
-<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="5,5,139,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,40,134,91,130,94,88,43"/>
-<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="163,5,258,31"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="195,43,173,71,153,95,149,91,169,68,191,40"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="63,284,172,309"/>
+<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="56,196,179,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,235,120,283,115,283,115,235"/>
+<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="5,108,139,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="71,147,76,171,85,183,98,194,94,198,81,187,71,173,66,148"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="201,108,295,133"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="209,141,176,160,131,198,127,194,173,155,206,137"/>
+<area shape="rect" id="Node000029" href="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html" title=" " alt="" coords="209,196,364,221"/>
+<area shape="poly" id="edge7_Node000029_Node000004" title=" " alt="" coords="244,147,246,171,256,184,268,194,264,198,252,187,242,173,238,148"/>
+<area shape="rect" id="Node000005" href="$d6/d8d/classfl_1_1_u_i_button_impl.html" title=" " alt="" coords="109,13,233,38"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="191,47,240,106,236,110,187,50"/>
+<area shape="rect" id="Node000009" href="$d1/d5d/classfl_1_1_function_list.html" title=" " alt="" coords="257,5,396,45"/>
+<area shape="poly" id="edge5_Node000004_Node000009" title=" " alt="" coords="304,57,260,109,256,106,300,54"/>
+<area shape="poly" id="edge6_Node000004_Node000029" title=" " alt="" coords="304,184,309,171,307,158,296,146,280,136,283,131,299,141,312,156,314,171,309,186"/>
 </map>

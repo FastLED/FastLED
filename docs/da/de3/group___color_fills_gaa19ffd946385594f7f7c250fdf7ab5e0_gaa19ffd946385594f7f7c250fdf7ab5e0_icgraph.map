@@ -1,0 +1,9 @@
+<map id="fl::fill_gradient_RGB" name="fl::fill_gradient_RGB">
+<area shape="rect" id="Node000001" title="Fill a range of LEDs with a smooth RGB gradient between two RGB colors." alt="" coords="204,55,355,80"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills_ga2208a25b55c3fc52acd7fb6432037c9b.html#ga2208a25b55c3fc52acd7fb6432037c9b" title="Fill a range of LEDs with a smooth RGB gradient between two RGB colors." alt="" coords="5,5,156,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,54,132,33,133,28,215,49"/>
+<area shape="rect" id="Node000003" href="$da/de3/group___color_fills_gaab5902d2f093f50ebf574c5f80791a6a.html#gaab5902d2f093f50ebf574c5f80791a6a" title="Fill a range of LEDs with a smooth RGB gradient between three RGB colors." alt="" coords="5,55,156,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,70,156,70,156,65,191,65"/>
+<area shape="rect" id="Node000004" href="$da/de3/group___color_fills_ga816ef9be8af71b604d85fbe32670defc.html#ga816ef9be8af71b604d85fbe32670defc" title="Fill a range of LEDs with a smooth RGB gradient between four RGB colors." alt="" coords="5,104,156,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,86,133,107,132,101,214,81"/>
+</map>

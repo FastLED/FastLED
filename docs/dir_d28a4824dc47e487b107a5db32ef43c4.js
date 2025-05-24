@@ -4,6 +4,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Apa102", "dir_4af27665149ddc88916f90164a94ed56.html", "dir_4af27665149ddc88916f90164a94ed56" ],
     [ "Apa102HD", "dir_444f6549ff4d6964f399c8619651b3db.html", "dir_444f6549ff4d6964f399c8619651b3db" ],
     [ "Apa102HDOverride", "dir_f0d66018db171d7886189b7326773e15.html", "dir_f0d66018db171d7886189b7326773e15" ],
+    [ "BilinearCompression", "dir_0c53b031131b51ab79944bb15407f73b.html", "dir_0c53b031131b51ab79944bb15407f73b" ],
     [ "Blink", "dir_05dd8b05715c4ed4a1c3d13c1176049b.html", "dir_05dd8b05715c4ed4a1c3d13c1176049b" ],
     [ "BlinkParallel", "dir_ff1c3822ae637bf2e9e5f215088a4795.html", "dir_ff1c3822ae637bf2e9e5f215088a4795" ],
     [ "Blur", "dir_8d73e606324e4fbff2f96470c407a792.html", "dir_8d73e606324e4fbff2f96470c407a792" ],

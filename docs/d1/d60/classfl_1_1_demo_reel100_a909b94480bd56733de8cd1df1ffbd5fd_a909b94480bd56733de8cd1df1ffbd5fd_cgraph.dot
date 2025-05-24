@@ -8,5 +8,5 @@ digraph "fl::DemoReel100::rainbow"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::DemoReel100::rainbow",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_ga0fef54ded2e4748869f1796603433b6b.html#ga0fef54ded2e4748869f1796603433b6b",tooltip="Fill a range of LEDs with a rainbow of colors."];
+  Node2 [id="Node000002",label="fl::fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_ga9736b17688566f11258bfc4f7550937f.html#ga9736b17688566f11258bfc4f7550937f",tooltip="Fill a range of LEDs with a rainbow of colors."];
 }

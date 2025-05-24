@@ -107,7 +107,7 @@ $(function(){initNavTree('de/ded/bitswap_8h_a1f5a74d0ea3b3bfd42f0dd9c6d833873.ht
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void swapbits8 </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void swapbits8 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="../../de/ded/bitswap_8h.html#d6/d93/unionbitswap__type">bitswap_type</a></td>          <td class="paramname"><span class="paramname"><em>in</em></span>, </td>
         </tr>
@@ -121,59 +121,59 @@ $(function(){initNavTree('de/ded/bitswap_8h_a1f5a74d0ea3b3bfd42f0dd9c6d833873.ht
 
 <p>Do an 8-byte by 8-bit rotation. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/ded/bitswap_8h_source.html#l00112">112</a> of file <a class="el" href="../../de/ded/bitswap_8h_source.html">bitswap.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  112</span>                                                                         {</div>
-<div class="line"><span class="lineno">  113</span> </div>
-<div class="line"><span class="lineno">  114</span>  <span class="comment">// SWAPS(a.a,7);</span></div>
-<div class="line"><span class="lineno">  115</span>  <span class="comment">// SWAPS(a.b,6);</span></div>
-<div class="line"><span class="lineno">  116</span>  <span class="comment">// SWAPS(a.c,5);</span></div>
-<div class="line"><span class="lineno">  117</span>  <span class="comment">// SWAPS(a.d,4);</span></div>
-<div class="line"><span class="lineno">  118</span>  <span class="comment">// SWAPS(b.a,3);</span></div>
-<div class="line"><span class="lineno">  119</span>  <span class="comment">// SWAPS(b.b,2);</span></div>
-<div class="line"><span class="lineno">  120</span>  <span class="comment">// SWAPS(b.c,1);</span></div>
-<div class="line"><span class="lineno">  121</span>  <span class="comment">// SWAPS(b.d,0);</span></div>
-<div class="line"><span class="lineno">  122</span> </div>
-<div class="line"><span class="lineno">  123</span>  <span class="comment">// SWAPSA(a.a,7);</span></div>
-<div class="line"><span class="lineno">  124</span>  <span class="comment">// SWAPSA(a.b,6);</span></div>
-<div class="line"><span class="lineno">  125</span>  <span class="comment">// SWAPSA(a.c,5);</span></div>
-<div class="line"><span class="lineno">  126</span>  <span class="comment">// SWAPSA(a.d,4);</span></div>
-<div class="line"><span class="lineno">  127</span>  <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  128</span>  <span class="comment">// SWAPSB(a.a,7);</span></div>
-<div class="line"><span class="lineno">  129</span>  <span class="comment">// SWAPSB(a.b,6);</span></div>
-<div class="line"><span class="lineno">  130</span>  <span class="comment">// SWAPSB(a.c,5);</span></div>
-<div class="line"><span class="lineno">  131</span>  <span class="comment">// SWAPSB(a.d,4);</span></div>
-<div class="line"><span class="lineno">  132</span>  <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  133</span>  <span class="comment">// SWAPSA(b.a,3);</span></div>
-<div class="line"><span class="lineno">  134</span>  <span class="comment">// SWAPSA(b.b,2);</span></div>
-<div class="line"><span class="lineno">  135</span>  <span class="comment">// SWAPSA(b.c,1);</span></div>
-<div class="line"><span class="lineno">  136</span>  <span class="comment">// SWAPSA(b.d,0);</span></div>
-<div class="line"><span class="lineno">  137</span>  <span class="comment">// //</span></div>
-<div class="line"><span class="lineno">  138</span>  <span class="comment">// SWAPSB(b.a,3);</span></div>
-<div class="line"><span class="lineno">  139</span>  <span class="comment">// SWAPSB(b.b,2);</span></div>
-<div class="line"><span class="lineno">  140</span>  <span class="comment">// SWAPSB(b.c,1);</span></div>
-<div class="line"><span class="lineno">  141</span>  <span class="comment">// SWAPSB(b.d,0);</span></div>
-<div class="line"><span class="lineno">  142</span> </div>
-<div class="line"><span class="lineno">  143</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; 8; ++i) {</div>
-<div class="line"><span class="lineno">  144</span>    <a class="code hl_union" href="../../de/ded/bitswap_8h.html#d3/d06/unionjust8bits">just8bits</a> work;</div>
-<div class="line"><span class="lineno">  145</span>    work.a3 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 31;</div>
-<div class="line"><span class="lineno">  146</span>    work.a2 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 23;</div>
-<div class="line"><span class="lineno">  147</span>    work.a1 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 15;</div>
-<div class="line"><span class="lineno">  148</span>    work.a0 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 7;</div>
-<div class="line"><span class="lineno">  149</span>    in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  150</span>    work.a7 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 31;</div>
-<div class="line"><span class="lineno">  151</span>    work.a6 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 23;</div>
-<div class="line"><span class="lineno">  152</span>    work.a5 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 15;</div>
-<div class="line"><span class="lineno">  153</span>    work.a4 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 7;</div>
-<div class="line"><span class="lineno">  154</span>    in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &lt;&lt;= 1;</div>
-<div class="line"><span class="lineno">  155</span>    out.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#aabab33af46370b5de438c01670d0e2cb">bytes</a>[i] = work.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#abec3634476280a30569fd77b6d80be31">raw</a>;</div>
-<div class="line"><span class="lineno">  156</span>  }</div>
-<div class="line"><span class="lineno">  157</span>}</div>
-<div class="ttc" id="abitswap_8h_html_a2d1f4e8932378c4519158248150d11b8"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">bitswap_type::word</a></div><div class="ttdeci">uint32_t word[2]</div><div class="ttdoc">two 32-bit values to load for swapping</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00067">bitswap.h:67</a></div></div>
-<div class="ttc" id="abitswap_8h_html_aabab33af46370b5de438c01670d0e2cb"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#aabab33af46370b5de438c01670d0e2cb">bitswap_type::bytes</a></div><div class="ttdeci">uint8_t bytes[8]</div><div class="ttdoc">eight 8-bit values to load for swapping</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00068">bitswap.h:68</a></div></div>
-<div class="ttc" id="abitswap_8h_html_abec3634476280a30569fd77b6d80be31"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#abec3634476280a30569fd77b6d80be31">just8bits::raw</a></div><div class="ttdeci">uint8_t raw</div><div class="ttdoc">the entire byte</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00016">bitswap.h:16</a></div></div>
-<div class="ttc" id="abitswap_8h_html_d3/d06/unionjust8bits"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#d3/d06/unionjust8bits">just8bits</a></div><div class="ttdoc">Structure representing 8 bits of access.</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00015">bitswap.h:15</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/ded/bitswap_8h_source.html#l00114">114</a> of file <a class="el" href="../../de/ded/bitswap_8h_source.html">bitswap.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  114</span>                                                                         {</div>
+<div class="line"><span class="lineno">  115</span> </div>
+<div class="line"><span class="lineno">  116</span>  <span class="comment">// SWAPS(a.a,7);</span></div>
+<div class="line"><span class="lineno">  117</span>  <span class="comment">// SWAPS(a.b,6);</span></div>
+<div class="line"><span class="lineno">  118</span>  <span class="comment">// SWAPS(a.c,5);</span></div>
+<div class="line"><span class="lineno">  119</span>  <span class="comment">// SWAPS(a.d,4);</span></div>
+<div class="line"><span class="lineno">  120</span>  <span class="comment">// SWAPS(b.a,3);</span></div>
+<div class="line"><span class="lineno">  121</span>  <span class="comment">// SWAPS(b.b,2);</span></div>
+<div class="line"><span class="lineno">  122</span>  <span class="comment">// SWAPS(b.c,1);</span></div>
+<div class="line"><span class="lineno">  123</span>  <span class="comment">// SWAPS(b.d,0);</span></div>
+<div class="line"><span class="lineno">  124</span> </div>
+<div class="line"><span class="lineno">  125</span>  <span class="comment">// SWAPSA(a.a,7);</span></div>
+<div class="line"><span class="lineno">  126</span>  <span class="comment">// SWAPSA(a.b,6);</span></div>
+<div class="line"><span class="lineno">  127</span>  <span class="comment">// SWAPSA(a.c,5);</span></div>
+<div class="line"><span class="lineno">  128</span>  <span class="comment">// SWAPSA(a.d,4);</span></div>
+<div class="line"><span class="lineno">  129</span>  <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  130</span>  <span class="comment">// SWAPSB(a.a,7);</span></div>
+<div class="line"><span class="lineno">  131</span>  <span class="comment">// SWAPSB(a.b,6);</span></div>
+<div class="line"><span class="lineno">  132</span>  <span class="comment">// SWAPSB(a.c,5);</span></div>
+<div class="line"><span class="lineno">  133</span>  <span class="comment">// SWAPSB(a.d,4);</span></div>
+<div class="line"><span class="lineno">  134</span>  <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  135</span>  <span class="comment">// SWAPSA(b.a,3);</span></div>
+<div class="line"><span class="lineno">  136</span>  <span class="comment">// SWAPSA(b.b,2);</span></div>
+<div class="line"><span class="lineno">  137</span>  <span class="comment">// SWAPSA(b.c,1);</span></div>
+<div class="line"><span class="lineno">  138</span>  <span class="comment">// SWAPSA(b.d,0);</span></div>
+<div class="line"><span class="lineno">  139</span>  <span class="comment">// //</span></div>
+<div class="line"><span class="lineno">  140</span>  <span class="comment">// SWAPSB(b.a,3);</span></div>
+<div class="line"><span class="lineno">  141</span>  <span class="comment">// SWAPSB(b.b,2);</span></div>
+<div class="line"><span class="lineno">  142</span>  <span class="comment">// SWAPSB(b.c,1);</span></div>
+<div class="line"><span class="lineno">  143</span>  <span class="comment">// SWAPSB(b.d,0);</span></div>
+<div class="line"><span class="lineno">  144</span> </div>
+<div class="line"><span class="lineno">  145</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; 8; ++i) {</div>
+<div class="line"><span class="lineno">  146</span>    <a class="code hl_union" href="../../de/ded/bitswap_8h.html#d3/d06/unionjust8bits">just8bits</a> work;</div>
+<div class="line"><span class="lineno">  147</span>    work.a3 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 31;</div>
+<div class="line"><span class="lineno">  148</span>    work.a2 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 23;</div>
+<div class="line"><span class="lineno">  149</span>    work.a1 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 15;</div>
+<div class="line"><span class="lineno">  150</span>    work.a0 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &gt;&gt; 7;</div>
+<div class="line"><span class="lineno">  151</span>    in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[0] &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  152</span>    work.a7 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 31;</div>
+<div class="line"><span class="lineno">  153</span>    work.a6 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 23;</div>
+<div class="line"><span class="lineno">  154</span>    work.a5 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 15;</div>
+<div class="line"><span class="lineno">  155</span>    work.a4 = in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &gt;&gt; 7;</div>
+<div class="line"><span class="lineno">  156</span>    in.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">word</a>[1] &lt;&lt;= 1;</div>
+<div class="line"><span class="lineno">  157</span>    out.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#aabab33af46370b5de438c01670d0e2cb">bytes</a>[i] = work.<a class="code hl_variable" href="../../de/ded/bitswap_8h.html#abec3634476280a30569fd77b6d80be31">raw</a>;</div>
+<div class="line"><span class="lineno">  158</span>  }</div>
+<div class="line"><span class="lineno">  159</span>}</div>
+<div class="ttc" id="abitswap_8h_html_a2d1f4e8932378c4519158248150d11b8"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#a2d1f4e8932378c4519158248150d11b8">bitswap_type::word</a></div><div class="ttdeci">uint32_t word[2]</div><div class="ttdoc">two 32-bit values to load for swapping</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00069">bitswap.h:69</a></div></div>
+<div class="ttc" id="abitswap_8h_html_aabab33af46370b5de438c01670d0e2cb"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#aabab33af46370b5de438c01670d0e2cb">bitswap_type::bytes</a></div><div class="ttdeci">uint8_t bytes[8]</div><div class="ttdoc">eight 8-bit values to load for swapping</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00070">bitswap.h:70</a></div></div>
+<div class="ttc" id="abitswap_8h_html_abec3634476280a30569fd77b6d80be31"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#abec3634476280a30569fd77b6d80be31">just8bits::raw</a></div><div class="ttdeci">uint8_t raw</div><div class="ttdoc">the entire byte</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00018">bitswap.h:18</a></div></div>
+<div class="ttc" id="abitswap_8h_html_d3/d06/unionjust8bits"><div class="ttname"><a href="../../de/ded/bitswap_8h.html#d3/d06/unionjust8bits">just8bits</a></div><div class="ttdoc">Structure representing 8 bits of access.</div><div class="ttdef"><b>Definition</b> <a href="../../de/ded/bitswap_8h_source.html#l00017">bitswap.h:17</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/ded/bitswap_8h_source.html#l00068">bitswap_type::bytes</a>, <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, <a class="el" href="../../de/ded/bitswap_8h_source.html#l00016">just8bits::raw</a>, and <a class="el" href="../../de/ded/bitswap_8h_source.html#l00067">bitswap_type::word</a>.</p>
+<p class="reference">References <a class="el" href="../../de/ded/bitswap_8h_source.html#l00070">bitswap_type::bytes</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, <a class="el" href="../../de/ded/bitswap_8h_source.html#l00018">just8bits::raw</a>, and <a class="el" href="../../de/ded/bitswap_8h_source.html#l00069">bitswap_type::word</a>.</p>
 
 </div>
 </div>
@@ -184,7 +184,7 @@ $(function(){initNavTree('de/ded/bitswap_8h_a1f5a74d0ea3b3bfd42f0dd9c6d833873.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/ded/bitswap_8h.html">bitswap.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

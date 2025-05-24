@@ -117,17 +117,17 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97
 
 <p>Returns the current time-since-boot in "binary seconds", which are actually 1024/1000 of a second long. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01065">1065</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1066</span>{</div>
-<div class="line"><span class="lineno"> 1067</span>    uint32_t ms = <a class="code hl_define" href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a>();</div>
-<div class="line"><span class="lineno"> 1068</span>    uint16_t s16;</div>
-<div class="line"><span class="lineno"> 1069</span>    s16 = <a class="code hl_function" href="../../d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e">div1024_32_16</a>( ms);</div>
-<div class="line"><span class="lineno"> 1070</span>    <span class="keywordflow">return</span> s16;</div>
-<div class="line"><span class="lineno"> 1071</span>}</div>
-<div class="ttc" id="agroup___timekeeping_ga5c6228cce9ecb06616c040c8e8265853_html_ga5c6228cce9ecb06616c040c8e8265853"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a></div><div class="ttdeci">#define GET_MILLIS</div><div class="ttdoc">The a number of functions need access to a millisecond counter in order to keep time.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00837">lib8tion.h:837</a></div></div>
-<div class="ttc" id="agroup___timekeeping_ga5f95d6e55b4986bd88f662528cef717e_html_ga5f95d6e55b4986bd88f662528cef717e"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e">div1024_32_16</a></div><div class="ttdeci">LIB8STATIC uint16_t div1024_32_16(uint32_t in32)</div><div class="ttdoc">Helper routine to divide a 32-bit value by 1024, returning only the low 16 bits.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l01040">lib8tion.h:1040</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01047">1047</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1048</span>{</div>
+<div class="line"><span class="lineno"> 1049</span>    uint32_t ms = <a class="code hl_define" href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a>();</div>
+<div class="line"><span class="lineno"> 1050</span>    uint16_t s16;</div>
+<div class="line"><span class="lineno"> 1051</span>    s16 = <a class="code hl_function" href="../../d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e">div1024_32_16</a>( ms);</div>
+<div class="line"><span class="lineno"> 1052</span>    <span class="keywordflow">return</span> s16;</div>
+<div class="line"><span class="lineno"> 1053</span>}</div>
+<div class="ttc" id="agroup___timekeeping_ga5c6228cce9ecb06616c040c8e8265853_html_ga5c6228cce9ecb06616c040c8e8265853"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a></div><div class="ttdeci">#define GET_MILLIS</div><div class="ttdoc">The a number of functions need access to a millisecond counter in order to keep time.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00819">lib8tion.h:819</a></div></div>
+<div class="ttc" id="agroup___timekeeping_ga5f95d6e55b4986bd88f662528cef717e_html_ga5f95d6e55b4986bd88f662528cef717e"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5f95d6e55b4986bd88f662528cef717e.html#ga5f95d6e55b4986bd88f662528cef717e">div1024_32_16</a></div><div class="ttdeci">LIB8STATIC uint16_t div1024_32_16(uint32_t in32)</div><div class="ttdoc">Helper routine to divide a 32-bit value by 1024, returning only the low 16 bits.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l01022">lib8tion.h:1022</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01040">div1024_32_16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00837">GET_MILLIS</a>, and <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01022">div1024_32_16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00819">GET_MILLIS</a>, and <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d5/df2/group___timekeeping_gad9813d2fd3ed9e61acacda3ccf2f6bd4.html#gad9813d2fd3ed9e61acacda3ccf2f6bd4">INSTANTIATE_EVERY_N_TIME_PERIODS()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -154,7 +154,7 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/df2/group___timekeeping.html">Timekeeping Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

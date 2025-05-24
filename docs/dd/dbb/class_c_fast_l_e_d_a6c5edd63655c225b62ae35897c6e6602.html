@@ -101,7 +101,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a6c5edd63655c225b62ae35897c6
 
 <div class="contents">
 <a id="a6c5edd63655c225b62ae35897c6e6602" name="a6c5edd63655c225b62ae35897c6e6602"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6c5edd63655c225b62ae35897c6e6602">&#9670;&#160;</a></span>addLeds() <span class="overload">[2/15]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c5edd63655c225b62ae35897c6e6602">&#9670;&#160;</a></span>addLeds() <span class="overload">[3/16]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -136,17 +136,17 @@ template&lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1
 
 <p>Add an SPI based <a class="el" href="../../d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller.">CLEDController</a> instance to the world. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00453">453</a> of file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  453</span>                                                                                                                                                                                                        {</div>
-<div class="line"><span class="lineno">  454</span>        <span class="comment">// Instantiate the controller using ClockedChipsetHelper</span></div>
-<div class="line"><span class="lineno">  455</span>        <span class="keyword">typedef</span> <a class="code hl_struct" href="../../d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html">ClockedChipsetHelper&lt;CHIPSET, DATA_PIN, CLOCK_PIN&gt;</a> CHIP;</div>
-<div class="line"><span class="lineno">  456</span>        <span class="keyword">typedef</span> <span class="keyword">typename</span> CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ&lt;RGB_ORDER, SPI_DATA_RATE&gt;::ControllerType ControllerTypeWithFreq;</div>
-<div class="line"><span class="lineno">  457</span>        <span class="keyword">static_assert</span>(CHIP::IS_VALID, <span class="stringliteral">&quot;Unsupported chipset&quot;</span>);</div>
-<div class="line"><span class="lineno">  458</span>        <span class="keyword">static</span> ControllerTypeWithFreq c;</div>
-<div class="line"><span class="lineno">  459</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>(&amp;c, data, nLedsOrOffset, nLedsIfOffset);</div>
-<div class="line"><span class="lineno">  460</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00461">461</a> of file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  461</span>                                                                                                                                                                                                        {</div>
+<div class="line"><span class="lineno">  462</span>        <span class="comment">// Instantiate the controller using ClockedChipsetHelper</span></div>
+<div class="line"><span class="lineno">  463</span>        <span class="keyword">typedef</span> <a class="code hl_struct" href="../../d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html">ClockedChipsetHelper&lt;CHIPSET, DATA_PIN, CLOCK_PIN&gt;</a> CHIP;</div>
+<div class="line"><span class="lineno">  464</span>        <span class="keyword">typedef</span> <span class="keyword">typename</span> CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ&lt;RGB_ORDER, SPI_DATA_RATE&gt;::ControllerType ControllerTypeWithFreq;</div>
+<div class="line"><span class="lineno">  465</span>        <span class="keyword">static_assert</span>(CHIP::IS_VALID, <span class="stringliteral">&quot;Unsupported chipset&quot;</span>);</div>
+<div class="line"><span class="lineno">  466</span>        <span class="keyword">static</span> ControllerTypeWithFreq c;</div>
+<div class="line"><span class="lineno">  467</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>(&amp;c, data, nLedsOrOffset, nLedsIfOffset);</div>
+<div class="line"><span class="lineno">  468</span>    }</div>
 <div class="ttc" id="aclass_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00092">FastLED.cpp:92</a></div></div>
-<div class="ttc" id="astruct_c_fast_l_e_d_1_1_clocked_chipset_helper_html"><div class="ttname"><a href="../../d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html">CFastLED::ClockedChipsetHelper</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00405">FastLED.h:405</a></div></div>
+<div class="ttc" id="astruct_c_fast_l_e_d_1_1_clocked_chipset_helper_html"><div class="ttname"><a href="../../d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html">CFastLED::ClockedChipsetHelper</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00413">FastLED.h:413</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00092">addLeds()</a>, <a class="el" href="../../d7/d22/_color_temperature_8ino_source.html#l00011">CHIPSET</a>, <a class="el" href="../../d0/dc3/_blink_8ino_source.html#l00015">CLOCK_PIN</a>, and <a class="el" href="../../d0/dc3/_blink_8ino_source.html#l00014">DATA_PIN</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -166,7 +166,7 @@ template&lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

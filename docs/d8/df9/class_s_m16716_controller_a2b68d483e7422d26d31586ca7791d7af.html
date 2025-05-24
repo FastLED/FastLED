@@ -133,19 +133,19 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="../../db/d0
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d66/chipsets_8h_source.html#l00717">717</a> of file <a class="el" href="../../db/d66/chipsets_8h_source.html">chipsets.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  717</span>                                                                 {</div>
-<div class="line"><span class="lineno">  718</span>        <span class="comment">// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start</span></div>
-<div class="line"><span class="lineno">  719</span>        <span class="comment">// of each triplet of bytes for rgb data</span></div>
-<div class="line"><span class="lineno">  720</span>        <span class="comment">// writeHeader();</span></div>
-<div class="line"><span class="lineno">  721</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writePixels&lt;FLAG_START_BIT, DATA_NOP, RGB_ORDER&gt;</a>(<a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">pixels</a>, <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">NULL</a>);</div>
-<div class="line"><span class="lineno">  722</span>        <a class="code hl_function" href="../../d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9.html#a3e9e62e92d3f9e175b43e28dbb2254e9">writeHeader</a>();</div>
-<div class="line"><span class="lineno">  723</span>    }</div>
-<div class="ttc" id="aclass_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9_html_a3e9e62e92d3f9e175b43e28dbb2254e9"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9.html#a3e9e62e92d3f9e175b43e28dbb2254e9">SM16716Controller::writeHeader</a></div><div class="ttdeci">void writeHeader()</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00693">chipsets.h:693</a></div></div>
-<div class="ttc" id="aclass_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424_html_ab3140509cb864482e6b624cf0efa0424"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">SM16716Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00691">chipsets.h:691</a></div></div>
-<div class="ttc" id="aclass_s_m16716_controller_html"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></div><div class="ttdoc">SM16716 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00689">chipsets.h:689</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d66/chipsets_8h_source.html#l00719">719</a> of file <a class="el" href="../../db/d66/chipsets_8h_source.html">chipsets.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  719</span>                                                                 {</div>
+<div class="line"><span class="lineno">  720</span>        <span class="comment">// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start</span></div>
+<div class="line"><span class="lineno">  721</span>        <span class="comment">// of each triplet of bytes for rgb data</span></div>
+<div class="line"><span class="lineno">  722</span>        <span class="comment">// writeHeader();</span></div>
+<div class="line"><span class="lineno">  723</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writePixels&lt;FLAG_START_BIT, DATA_NOP, RGB_ORDER&gt;</a>(<a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">pixels</a>, <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">NULL</a>);</div>
+<div class="line"><span class="lineno">  724</span>        <a class="code hl_function" href="../../d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9.html#a3e9e62e92d3f9e175b43e28dbb2254e9">writeHeader</a>();</div>
+<div class="line"><span class="lineno">  725</span>    }</div>
+<div class="ttc" id="aclass_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9_html_a3e9e62e92d3f9e175b43e28dbb2254e9"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43e28dbb2254e9.html#a3e9e62e92d3f9e175b43e28dbb2254e9">SM16716Controller::writeHeader</a></div><div class="ttdeci">void writeHeader()</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00695">chipsets.h:695</a></div></div>
+<div class="ttc" id="aclass_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424_html_ab3140509cb864482e6b624cf0efa0424"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">SM16716Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00693">chipsets.h:693</a></div></div>
+<div class="ttc" id="aclass_s_m16716_controller_html"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></div><div class="ttdoc">SM16716 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00691">chipsets.h:691</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d66/chipsets_8h_source.html#l00691">mSPI</a>, and <a class="el" href="../../db/d66/chipsets_8h_source.html#l00693">writeHeader()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d66/chipsets_8h_source.html#l00693">mSPI</a>, and <a class="el" href="../../db/d66/chipsets_8h_source.html#l00695">writeHeader()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="../../db/d0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

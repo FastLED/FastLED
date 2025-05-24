@@ -38,9 +38,9 @@
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../d2/d73/group___palette_colors_ga361799a4ba193694ad974079c980430c.html#ga361799a4ba193694ad974079c980430c" target="_top" xlink:title="Alter one palette by making it slightly more like a &quot;target palette&quot;.">
-<polygon fill="white" stroke="#666666" points="308.5,-163 156.5,-163 156.5,-144 308.5,-144 308.5,-163"/>
-<text text-anchor="middle" x="232.5" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">nblendPaletteTowardPalette</text>
+<g id="a_Node000021"><a xlink:href="../../d4/d36/namespacefl_a95a41ac33135f9b0658d2de39ef63526.html#a95a41ac33135f9b0658d2de39ef63526" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="314.5,-163 150.5,-163 150.5,-144 314.5,-144 314.5,-163"/>
+<text text-anchor="middle" x="232.5" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">fl::nblendPaletteTowardPalette</text>
 </a>
 </g>
 </g>
@@ -48,17 +48,17 @@
 <g id="edge20_Node000001_Node000021" class="edge">
 <title>Node1&#45;&gt;Node21</title>
 <g id="a_edge20_Node000001_Node000021"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M113.03,-165.76C123.73,-164.65 135.15,-163.47 146.53,-162.29"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="146.91,-165.77 156.5,-161.26 146.19,-158.81 146.91,-165.77"/>
+<path fill="none" stroke="#63b8ff" d="M113.03,-165.76C121.8,-164.85 131.05,-163.89 140.38,-162.93"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="140.91,-166.39 150.49,-161.88 140.19,-159.43 140.91,-166.39"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" target="_top" xlink:title="Computes a new color blended some fraction of the way between two other colors.">
-<polygon fill="white" stroke="#666666" points="796,-109 752,-109 752,-90 796,-90 796,-109"/>
-<text text-anchor="middle" x="774" y="-97" font-family="Helvetica,sans-Serif" font-size="10.00">blend</text>
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="802,-109 746,-109 746,-90 802,-90 802,-109"/>
+<text text-anchor="middle" x="774" y="-97" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blend</text>
 </a>
 </g>
 </g>
@@ -129,9 +129,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" target="_top" xlink:title="Destructively modifies one color, blending in a given fraction of an overlay color.">
-<polygon fill="#fff0f0" stroke="red" points="949,-109 899,-109 899,-90 949,-90 949,-109"/>
-<text text-anchor="middle" x="924" y="-97" font-family="Helvetica,sans-Serif" font-size="10.00">nblend</text>
+<g id="a_Node000004"><a xlink:href="../../d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="955,-109 893,-109 893,-90 955,-90 955,-109"/>
+<text text-anchor="middle" x="924" y="-97" font-family="Helvetica,sans-Serif" font-size="10.00">fl::nblend</text>
 </a>
 </g>
 </g>
@@ -139,8 +139,8 @@
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M796.2,-99.5C820.3,-99.5 859.98,-99.5 888.54,-99.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="888.89,-103 898.89,-99.5 888.89,-96 888.89,-103"/>
+<path fill="none" stroke="#63b8ff" d="M802.15,-99.5C824.74,-99.5 857.22,-99.5 882.83,-99.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="882.97,-103 892.97,-99.5 882.97,-96 882.97,-103"/>
 </a>
 </g>
 </g>
@@ -157,8 +157,8 @@
 <g id="edge4_Node000004_Node000006" class="edge">
 <title>Node4&#45;&gt;Node6</title>
 <g id="a_edge4_Node000004_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M949.35,-96.82C975.83,-93.9 1018.77,-89.17 1051.61,-85.55"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1052.34,-89 1061.89,-84.42 1051.57,-82.04 1052.34,-89"/>
+<path fill="none" stroke="#63b8ff" d="M955.05,-96.19C981.76,-93.25 1021.21,-88.9 1051.82,-85.53"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1052.28,-89 1061.84,-84.43 1051.51,-82.04 1052.28,-89"/>
 </a>
 </g>
 </g>
@@ -175,8 +175,8 @@
 <g id="edge5_Node000004_Node000007" class="edge">
 <title>Node4&#45;&gt;Node7</title>
 <g id="a_edge5_Node000004_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M949.35,-104.86C973.9,-110.27 1012.6,-118.8 1044.29,-125.78"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1043.79,-129.25 1054.31,-127.99 1045.29,-122.42 1043.79,-129.25"/>
+<path fill="none" stroke="#63b8ff" d="M955.05,-106.12C979.57,-111.52 1014.83,-119.29 1044.13,-125.74"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1043.7,-129.23 1054.22,-127.97 1045.21,-122.4 1043.7,-129.23"/>
 </a>
 </g>
 </g>
@@ -202,9 +202,9 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" target="_top" xlink:title="Get a color from a palette.">
-<polygon fill="#fff0f0" stroke="red" points="664.5,-89 563.5,-89 563.5,-70 664.5,-70 664.5,-89"/>
-<text text-anchor="middle" x="614" y="-77" font-family="Helvetica,sans-Serif" font-size="10.00">ColorFromPalette</text>
+<g id="a_Node000010"><a xlink:href="../../d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="670.5,-89 557.5,-89 557.5,-70 670.5,-70 670.5,-89"/>
+<text text-anchor="middle" x="614" y="-77" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ColorFromPalette</text>
 </a>
 </g>
 </g>
@@ -240,8 +240,8 @@
 <g id="edge9_Node000010_Node000003" class="edge">
 <title>Node10&#45;&gt;Node3</title>
 <g id="a_edge9_Node000010_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M664.56,-85.77C689.76,-88.96 719.62,-92.74 741.62,-95.53"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="741.37,-99.02 751.74,-96.81 742.25,-92.08 741.37,-99.02"/>
+<path fill="none" stroke="#63b8ff" d="M670.7,-86.55C692.24,-89.28 716.32,-92.33 735.7,-94.78"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="735.29,-98.25 745.65,-96.04 736.17,-91.31 735.29,-98.25"/>
 </a>
 </g>
 </g>
@@ -249,8 +249,8 @@
 <g id="edge10_Node000010_Node000006" class="edge">
 <title>Node10&#45;&gt;Node6</title>
 <g id="a_edge10_Node000010_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M664.82,-79.6C758.74,-79.8 960.68,-80.22 1051.54,-80.4"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1051.79,-83.91 1061.8,-80.43 1051.81,-76.91 1051.79,-83.91"/>
+<path fill="none" stroke="#63b8ff" d="M670.82,-79.62C767.22,-79.82 963.09,-80.22 1051.9,-80.41"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1051.92,-83.91 1061.93,-80.43 1051.94,-76.91 1051.92,-83.91"/>
 </a>
 </g>
 </g>

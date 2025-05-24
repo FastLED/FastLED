@@ -139,9 +139,9 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
-<polygon fill="white" stroke="#666666" points="225.5,-170 168.5,-170 168.5,-151 225.5,-151 225.5,-170"/>
-<text text-anchor="middle" x="197" y="-158" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
+<g id="a_Node000010"><a xlink:href="../../da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<polygon fill="white" stroke="#666666" points="231.5,-170 162.5,-170 162.5,-151 231.5,-151 231.5,-170"/>
+<text text-anchor="middle" x="197" y="-158" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fill_solid</text>
 </a>
 </g>
 </g>
@@ -149,8 +149,8 @@ var sectionId = 'dynsection-0';
 <g id="edge13_Node000001_Node000010" class="edge">
 <title>Node1&#45;&gt;Node10</title>
 <g id="a_edge13_Node000001_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M95.17,-173.49C115.39,-170.88 138.77,-167.87 157.93,-165.4"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="158.61,-168.85 168.08,-164.1 157.72,-161.9 158.61,-168.85"/>
+<path fill="none" stroke="#63b8ff" d="M95.17,-173.49C113.46,-171.13 134.33,-168.44 152.31,-166.13"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="152.78,-169.6 162.25,-164.85 151.89,-162.65 152.78,-169.6"/>
 </a>
 </g>
 </g>
@@ -383,9 +383,9 @@ var sectionId = 'dynsection-0';
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" target="_top" xlink:title="Get a color from a palette.">
-<polygon fill="white" stroke="#666666" points="414.5,-267 313.5,-267 313.5,-248 414.5,-248 414.5,-267"/>
-<text text-anchor="middle" x="364" y="-255" font-family="Helvetica,sans-Serif" font-size="10.00">ColorFromPalette</text>
+<g id="a_Node000015"><a xlink:href="../../d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="420.5,-267 307.5,-267 307.5,-248 420.5,-248 420.5,-267"/>
+<text text-anchor="middle" x="364" y="-255" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ColorFromPalette</text>
 </a>
 </g>
 </g>
@@ -393,17 +393,17 @@ var sectionId = 'dynsection-0';
 <g id="edge22_Node000014_Node000015" class="edge">
 <title>Node14&#45;&gt;Node15</title>
 <g id="a_edge22_Node000014_Node000015"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M251.57,-255.47C268.01,-255.77 286.21,-256.1 303.05,-256.41"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="303.27,-259.91 313.33,-256.6 303.4,-252.92 303.27,-259.91"/>
+<path fill="none" stroke="#63b8ff" d="M251.57,-255.47C266.1,-255.74 281.99,-256.03 297.11,-256.3"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="297.37,-259.81 307.43,-256.49 297.5,-252.81 297.37,-259.81"/>
 </a>
 </g>
 </g>
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="../../dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" target="_top" xlink:title="Computes a new color blended some fraction of the way between two other colors.">
-<polygon fill="#fff0f0" stroke="red" points="560.5,-357 516.5,-357 516.5,-338 560.5,-338 560.5,-357"/>
-<text text-anchor="middle" x="538.5" y="-345" font-family="Helvetica,sans-Serif" font-size="10.00">blend</text>
+<g id="a_Node000016"><a xlink:href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="566.5,-357 510.5,-357 510.5,-338 566.5,-338 566.5,-357"/>
+<text text-anchor="middle" x="538.5" y="-345" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blend</text>
 </a>
 </g>
 </g>
@@ -411,8 +411,8 @@ var sectionId = 'dynsection-0';
 <g id="edge23_Node000015_Node000016" class="edge">
 <title>Node15&#45;&gt;Node16</title>
 <g id="a_edge23_Node000015_Node000016"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M405.13,-267.06C413.5,-270.18 421.93,-274.25 429,-279.5 450.98,-295.83 442.32,-314.15 465,-329.5 477.15,-337.73 492.73,-342.2 506.32,-344.63"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="505.84,-348.09 516.25,-346.11 506.88,-341.17 505.84,-348.09"/>
+<path fill="none" stroke="#63b8ff" d="M405.13,-267.06C413.5,-270.18 421.93,-274.25 429,-279.5 450.98,-295.83 442.32,-314.15 465,-329.5 475.3,-336.47 488.06,-340.75 499.99,-343.37"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="499.7,-346.87 510.17,-345.27 500.99,-339.99 499.7,-346.87"/>
 </a>
 </g>
 </g>
@@ -437,9 +437,9 @@ var sectionId = 'dynsection-0';
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" target="_top" xlink:title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s.">
-<polygon fill="white" stroke="#666666" points="559,-283 518,-283 518,-264 559,-264 559,-283"/>
-<text text-anchor="middle" x="538.5" y="-271" font-family="Helvetica,sans-Serif" font-size="10.00">lsrX4</text>
+<g id="a_Node000021"><a xlink:href="../../d4/d36/namespacefl_a8ef00cea89dd1023f79e4d6d33883a40.html#a8ef00cea89dd1023f79e4d6d33883a40" target="_top" xlink:title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s.">
+<polygon fill="white" stroke="#666666" points="565,-283 512,-283 512,-264 565,-264 565,-283"/>
+<text text-anchor="middle" x="538.5" y="-271" font-family="Helvetica,sans-Serif" font-size="10.00">fl::lsrX4</text>
 </a>
 </g>
 </g>
@@ -447,8 +447,8 @@ var sectionId = 'dynsection-0';
 <g id="edge25_Node000015_Node000021" class="edge">
 <title>Node15&#45;&gt;Node21</title>
 <g id="a_edge25_Node000015_Node000021"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M414.89,-262.13C444.84,-264.91 481.95,-268.35 507.45,-270.71"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="507.34,-274.22 517.62,-271.66 507.98,-267.25 507.34,-274.22"/>
+<path fill="none" stroke="#63b8ff" d="M420.53,-262.65C447.18,-265.12 478.33,-268.01 501.78,-270.19"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="501.69,-273.69 511.97,-271.13 502.33,-266.72 501.69,-273.69"/>
 </a>
 </g>
 </g>
@@ -483,8 +483,8 @@ var sectionId = 'dynsection-0';
 <g id="edge28_Node000015_Node000020" class="edge">
 <title>Node15&#45;&gt;Node20</title>
 <g id="a_edge28_Node000015_Node000020"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M414.89,-251.43C427.47,-249.9 441.3,-248.21 455,-246.54"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="455.44,-250.02 464.94,-245.33 454.59,-243.07 455.44,-250.02"/>
+<path fill="none" stroke="#63b8ff" d="M420.53,-250.74C431.42,-249.41 443.07,-248 454.63,-246.59"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="455.25,-250.04 464.75,-245.36 454.4,-243.09 455.25,-250.04"/>
 </a>
 </g>
 </g>

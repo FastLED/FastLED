@@ -101,14 +101,14 @@ $(function(){initNavTree('d1/d8f/_fx_demo_reel100_8ino.html','../../'); initResi
 
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">FxDemoReel100.ino File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/dc0/demoreel100_8h_source.html">fx/1d/demoreel100.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/screenmap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d39/_fx_demo_reel100_2defs_8h_source.html">defs.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for FxDemoReel100.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -119,38 +119,12 @@ $(function(){initNavTree('d1/d8f/_fx_demo_reel100_8ino.html','../../'); initResi
 </div>
 <p><a href="../../d1/d8f/_fx_demo_reel100_8ino_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:accd116060cc3445af11c45ec44fd69d9" id="r_accd116060cc3445af11c45ec44fd69d9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_accd116060cc3445af11c45ec44fd69d9.html#accd116060cc3445af11c45ec44fd69d9">BRIGHTNESS</a>&#160;&#160;&#160;96</td></tr>
-<tr class="separator:accd116060cc3445af11c45ec44fd69d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00c9e5e8fdc981fc21a1e82e722980b2" id="r_a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2">COLOR_ORDER</a>&#160;&#160;&#160;<a class="el" href="../../db/d07/eorder_8h_a3c26d076773aa0f331d3066b46dbc6a4.html#a3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98">GRB</a></td></tr>
-<tr class="separator:a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adad67fe595ea440c8f8247ec2cddf070" id="r_adad67fe595ea440c8f8247ec2cddf070"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>&#160;&#160;&#160;3</td></tr>
-<tr class="separator:adad67fe595ea440c8f8247ec2cddf070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85f9d29551f1bf30f03229da27cb532f" id="r_a85f9d29551f1bf30f03229da27cb532f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f">FRAMES_PER_SECOND</a>&#160;&#160;&#160;120</td></tr>
-<tr class="separator:a85f9d29551f1bf30f03229da27cb532f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a364dc046543d8ab7d4214120afc9c814" id="r_a364dc046543d8ab7d4214120afc9c814"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a364dc046543d8ab7d4214120afc9c814.html#a364dc046543d8ab7d4214120afc9c814">LED_TYPE</a>&#160;&#160;&#160;<a class="el" href="../../d4/de9/class_w_s2811.html">WS2811</a></td></tr>
-<tr class="separator:a364dc046543d8ab7d4214120afc9c814"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c4ae9a4146ce8d6a5debc90300d9abd" id="r_a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>&#160;&#160;&#160;64</td></tr>
-<tr class="separator:a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af91efecd6b2daefa8fd08d12421071a4" id="r_af91efecd6b2daefa8fd08d12421071a4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_af91efecd6b2daefa8fd08d12421071a4.html#af91efecd6b2daefa8fd08d12421071a4">USES_RGBW</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:af91efecd6b2daefa8fd08d12421071a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f" id="r_afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a73c67d97c15370582f060a148b448b0c" id="r_a73c67d97c15370582f060a148b448b0c"><td class="memItemLeft" align="right" valign="top">DemoReel100Ptr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a73c67d97c15370582f060a148b448b0c.html#a73c67d97c15370582f060a148b448b0c">demoReel</a> = DemoReel100Ptr::New(<a class="el" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>)</td></tr>
-<tr class="separator:a73c67d97c15370582f060a148b448b0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
-<tr class="separator:a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4008cb64c6c947b355bdeb9178a5c518" id="r_a4008cb64c6c947b355bdeb9178a5c518"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../db/d74/struct_rgbw.html">Rgbw</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino_a4008cb64c6c947b355bdeb9178a5c518.html#a4008cb64c6c947b355bdeb9178a5c518">rgbwMode</a> = <a class="el" href="../../d3/dbb/struct_rgbw_invalid.html">RgbwInvalid</a>()</td></tr>
-<tr class="separator:a4008cb64c6c947b355bdeb9178a5c518"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -159,7 +133,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_a5ef1113d2f4afb5ddb3ebba1f868be7.html">FxDemoReel100</a></li><li class="navelem"><a class="el" href="../../d1/d8f/_fx_demo_reel100_8ino.html">FxDemoReel100.ino</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

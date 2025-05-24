@@ -109,26 +109,26 @@ $(function(){initNavTree('de/db5/classfl_1_1_twinkle_fox_a57e332626c55ed1dcd58b8
         <tr>
           <td class="memname">void fl::TwinkleFox::chooseNextColorPalette </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d2/dc4/class_c_r_g_b_palette16.html">CRGBPalette16</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>pal</em></span></td><td>)</td>
+          <td class="paramtype">CRGBPalette16 &amp;</td>          <td class="paramname"><span class="paramname"><em>pal</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00300">300</a> of file <a class="el" href="../../d1/df6/twinklefox_8h_source.html">twinklefox.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  300</span>                                                          {</div>
-<div class="line"><span class="lineno">  301</span>    <span class="keyword">const</span> uint8_t numberOfPalettes =</div>
-<div class="line"><span class="lineno">  302</span>        <span class="keyword">sizeof</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>) / <span class="keyword">sizeof</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>[0]);</div>
-<div class="line"><span class="lineno">  303</span>    <span class="keyword">static</span> uint8_t whichPalette = -1;</div>
-<div class="line"><span class="lineno">  304</span>    whichPalette = <a class="code hl_function" href="../../d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7">addmod8</a>(whichPalette, 1, numberOfPalettes);</div>
-<div class="line"><span class="lineno">  305</span>    pal = *(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>[whichPalette]);</div>
-<div class="line"><span class="lineno">  306</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00298">298</a> of file <a class="el" href="../../d1/df6/twinklefox_8h_source.html">twinklefox.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  298</span>                                                          {</div>
+<div class="line"><span class="lineno">  299</span>    <span class="keyword">const</span> uint8_t numberOfPalettes =</div>
+<div class="line"><span class="lineno">  300</span>        <span class="keyword">sizeof</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>) / <span class="keyword">sizeof</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>[0]);</div>
+<div class="line"><span class="lineno">  301</span>    <span class="keyword">static</span> uint8_t whichPalette = -1;</div>
+<div class="line"><span class="lineno">  302</span>    whichPalette = <a class="code hl_function" href="../../d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7">addmod8</a>(whichPalette, 1, numberOfPalettes);</div>
+<div class="line"><span class="lineno">  303</span>    pal = *(<a class="code hl_variable" href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">ActivePaletteList</a>[whichPalette]);</div>
+<div class="line"><span class="lineno">  304</span>}</div>
 <div class="ttc" id="agroup___math_ga2bcd51c47538dbc933999382e272a7a7_html_ga2bcd51c47538dbc933999382e272a7a7"><div class="ttname"><a href="../../d5/d98/group___math_ga2bcd51c47538dbc933999382e272a7a7.html#ga2bcd51c47538dbc933999382e272a7a7">addmod8</a></div><div class="ttdeci">LIB8STATIC uint8_t addmod8(uint8_t a, uint8_t b, uint8_t m)</div><div class="ttdoc">Add two numbers, and calculate the modulo of the sum and a third number, M.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd1/math8_8h_source.html#l00392">math8.h:392</a></div></div>
-<div class="ttc" id="anamespacefl_a16c648b4d07bce4f754cb0d57e8a75b5_html_a16c648b4d07bce4f754cb0d57e8a75b5"><div class="ttname"><a href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">fl::ActivePaletteList</a></div><div class="ttdeci">const TProgmemRGBPalette16 * ActivePaletteList[]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df6/twinklefox_8h_source.html#l00295">twinklefox.h:295</a></div></div>
+<div class="ttc" id="anamespacefl_a16c648b4d07bce4f754cb0d57e8a75b5_html_a16c648b4d07bce4f754cb0d57e8a75b5"><div class="ttname"><a href="../../d4/d36/namespacefl_a16c648b4d07bce4f754cb0d57e8a75b5.html#a16c648b4d07bce4f754cb0d57e8a75b5">fl::ActivePaletteList</a></div><div class="ttdeci">const TProgmemRGBPalette16 * ActivePaletteList[]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/df6/twinklefox_8h_source.html#l00293">twinklefox.h:293</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00295">fl::ActivePaletteList</a>, and <a class="el" href="../../d5/dd1/math8_8h_source.html#l00392">addmod8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00293">fl::ActivePaletteList</a>, and <a class="el" href="../../d5/dd1/math8_8h_source.html#l00392">addmod8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00117">TwinkleFox()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/df6/twinklefox_8h_source.html#l00115">TwinkleFox()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -153,7 +153,7 @@ $(function(){initNavTree('de/db5/classfl_1_1_twinkle_fox_a57e332626c55ed1dcd58b8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/db5/classfl_1_1_twinkle_fox.html">TwinkleFox</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -20,9 +20,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d54/classfl_1_1_time_scale.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="87.5,-19 7.5,-19 7.5,0 87.5,0 87.5,-19"/>
-<text text-anchor="middle" x="47.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeScale</text>
+<g id="a_Node000003"><a xlink:href="../../d4/d3d/classfl_1_1_time_warp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="86.5,-19 8.5,-19 8.5,0 86.5,0 86.5,-19"/>
+<text text-anchor="middle" x="47.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeWarp</text>
 </a>
 </g>
 </g>

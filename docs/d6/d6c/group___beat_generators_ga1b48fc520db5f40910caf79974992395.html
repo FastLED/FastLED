@@ -129,23 +129,23 @@ $(function(){initNavTree('d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf
 </dl>
 <dl class="section warning"><dt>Warning</dt><dd>The BPM parameter <b>MUST</b> be provided in Q8.8 format! E.g. for 120 BPM it would be 120*256 = 30720. If you just want to specify "120", use <a class="el" href="../../d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16-bit &quot;sawtooth&quot; wave at a given BPM.">beat16()</a> or <a class="el" href="../../d6/d6c/group___beat_generators_ga12014943214a72eec31433d9682d4ebe.html#ga12014943214a72eec31433d9682d4ebe" title="Generates an 8-bit &quot;sawtooth&quot; wave at a given BPM.">beat8()</a>. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00897">897</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  898</span>{</div>
-<div class="line"><span class="lineno">  899</span>    <span class="comment">// BPM is &#39;beats per minute&#39;, or &#39;beats per 60000ms&#39;.</span></div>
-<div class="line"><span class="lineno">  900</span>    <span class="comment">// To avoid using the (slower) division operator, we</span></div>
-<div class="line"><span class="lineno">  901</span>    <span class="comment">// want to convert &#39;beats per 60000ms&#39; to &#39;beats per 65536ms&#39;,</span></div>
-<div class="line"><span class="lineno">  902</span>    <span class="comment">// and then use a simple, fast bit-shift to divide by 65536.</span></div>
-<div class="line"><span class="lineno">  903</span>    <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  904</span>    <span class="comment">// The ratio 65536:60000 is 279.620266667:256; we&#39;ll call it 280:256.</span></div>
-<div class="line"><span class="lineno">  905</span>    <span class="comment">// The conversion is accurate to about 0.05%, more or less,</span></div>
-<div class="line"><span class="lineno">  906</span>    <span class="comment">// e.g. if you ask for &quot;120 BPM&quot;, you&#39;ll get about &quot;119.93&quot;.</span></div>
-<div class="line"><span class="lineno">  907</span>    <span class="keywordflow">return</span> (((<a class="code hl_define" href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a>()) - timebase) * beats_per_minute_88 * 280) &gt;&gt; 16;</div>
-<div class="line"><span class="lineno">  908</span>}</div>
-<div class="ttc" id="agroup___timekeeping_ga5c6228cce9ecb06616c040c8e8265853_html_ga5c6228cce9ecb06616c040c8e8265853"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a></div><div class="ttdeci">#define GET_MILLIS</div><div class="ttdoc">The a number of functions need access to a millisecond counter in order to keep time.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00837">lib8tion.h:837</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00879">879</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  880</span>{</div>
+<div class="line"><span class="lineno">  881</span>    <span class="comment">// BPM is &#39;beats per minute&#39;, or &#39;beats per 60000ms&#39;.</span></div>
+<div class="line"><span class="lineno">  882</span>    <span class="comment">// To avoid using the (slower) division operator, we</span></div>
+<div class="line"><span class="lineno">  883</span>    <span class="comment">// want to convert &#39;beats per 60000ms&#39; to &#39;beats per 65536ms&#39;,</span></div>
+<div class="line"><span class="lineno">  884</span>    <span class="comment">// and then use a simple, fast bit-shift to divide by 65536.</span></div>
+<div class="line"><span class="lineno">  885</span>    <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  886</span>    <span class="comment">// The ratio 65536:60000 is 279.620266667:256; we&#39;ll call it 280:256.</span></div>
+<div class="line"><span class="lineno">  887</span>    <span class="comment">// The conversion is accurate to about 0.05%, more or less,</span></div>
+<div class="line"><span class="lineno">  888</span>    <span class="comment">// e.g. if you ask for &quot;120 BPM&quot;, you&#39;ll get about &quot;119.93&quot;.</span></div>
+<div class="line"><span class="lineno">  889</span>    <span class="keywordflow">return</span> (((<a class="code hl_define" href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a>()) - timebase) * beats_per_minute_88 * 280) &gt;&gt; 16;</div>
+<div class="line"><span class="lineno">  890</span>}</div>
+<div class="ttc" id="agroup___timekeeping_ga5c6228cce9ecb06616c040c8e8265853_html_ga5c6228cce9ecb06616c040c8e8265853"><div class="ttname"><a href="../../d5/df2/group___timekeeping_ga5c6228cce9ecb06616c040c8e8265853.html#ga5c6228cce9ecb06616c040c8e8265853">GET_MILLIS</a></div><div class="ttdeci">#define GET_MILLIS</div><div class="ttdoc">The a number of functions need access to a millisecond counter in order to keep time.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00819">lib8tion.h:819</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00837">GET_MILLIS</a>, and <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00819">GET_MILLIS</a>, and <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00913">beat16()</a>, and <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00939">beatsin88()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00895">beat16()</a>, and <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00921">beatsin88()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ $(function(){initNavTree('d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/d6c/group___beat_generators.html">Waveform Beat Generators</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::ScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
 }

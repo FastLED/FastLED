@@ -139,27 +139,27 @@ $(function(){initNavTree('d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00159">159</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  160</span>                                                                  {</div>
-<div class="line"><span class="lineno">  161</span>    <span class="keywordtype">float</span> dx_inv = 1.0f - dx;</div>
-<div class="line"><span class="lineno">  162</span>    <span class="keywordtype">float</span> dy_inv = 1.0f - dy;</div>
-<div class="line"><span class="lineno">  163</span> </div>
-<div class="line"><span class="lineno">  164</span>    <span class="comment">// Calculate the weights for each corner</span></div>
-<div class="line"><span class="lineno">  165</span>    <span class="keywordtype">float</span> w00 = dx_inv * dy_inv;</div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordtype">float</span> w10 = dx * dy_inv;</div>
-<div class="line"><span class="lineno">  167</span>    <span class="keywordtype">float</span> w01 = dx_inv * dy;</div>
-<div class="line"><span class="lineno">  168</span>    <span class="keywordtype">float</span> w11 = dx * dy;</div>
-<div class="line"><span class="lineno">  169</span> </div>
-<div class="line"><span class="lineno">  170</span>    <span class="comment">// Compute the weighted sum</span></div>
-<div class="line"><span class="lineno">  171</span>    <span class="keywordtype">float</span> sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
-<div class="line"><span class="lineno">  172</span> </div>
-<div class="line"><span class="lineno">  173</span>    <span class="comment">// Clamp the result to [0, 255] and round</span></div>
-<div class="line"><span class="lineno">  174</span>    uint8_t result = <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(sum + 0.5f);</div>
-<div class="line"><span class="lineno">  175</span> </div>
-<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  177</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00161">161</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  162</span>                                                                  {</div>
+<div class="line"><span class="lineno">  163</span>    <span class="keywordtype">float</span> dx_inv = 1.0f - dx;</div>
+<div class="line"><span class="lineno">  164</span>    <span class="keywordtype">float</span> dy_inv = 1.0f - dy;</div>
+<div class="line"><span class="lineno">  165</span> </div>
+<div class="line"><span class="lineno">  166</span>    <span class="comment">// Calculate the weights for each corner</span></div>
+<div class="line"><span class="lineno">  167</span>    <span class="keywordtype">float</span> w00 = dx_inv * dy_inv;</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordtype">float</span> w10 = dx * dy_inv;</div>
+<div class="line"><span class="lineno">  169</span>    <span class="keywordtype">float</span> w01 = dx_inv * dy;</div>
+<div class="line"><span class="lineno">  170</span>    <span class="keywordtype">float</span> w11 = dx * dy;</div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>    <span class="comment">// Compute the weighted sum</span></div>
+<div class="line"><span class="lineno">  173</span>    <span class="keywordtype">float</span> sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
+<div class="line"><span class="lineno">  174</span> </div>
+<div class="line"><span class="lineno">  175</span>    <span class="comment">// Clamp the result to [0, 255] and round</span></div>
+<div class="line"><span class="lineno">  176</span>    uint8_t result = <span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(sum + 0.5f);</div>
+<div class="line"><span class="lineno">  177</span> </div>
+<div class="line"><span class="lineno">  178</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  179</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00180">bilinearExpandArbitraryFloat()</a>, and <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00225">bilinearExpandFloat()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00182">bilinearExpandArbitraryFloat()</a>, and <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00232">bilinearExpandFloat()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -177,7 +177,7 @@ $(function(){initNavTree('d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

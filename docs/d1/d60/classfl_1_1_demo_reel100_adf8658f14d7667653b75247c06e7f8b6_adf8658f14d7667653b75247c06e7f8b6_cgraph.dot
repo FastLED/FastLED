@@ -16,5 +16,5 @@ digraph "fl::DemoReel100::rainbowWithGlitter"
   Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db",tooltip=" "];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_ga0fef54ded2e4748869f1796603433b6b.html#ga0fef54ded2e4748869f1796603433b6b",tooltip="Fill a range of LEDs with a rainbow of colors."];
+  Node6 [id="Node000006",label="fill_rainbow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c5977efde754.html#a7a96d6e71a7754105104c5977efde754",tooltip=" "];
 }

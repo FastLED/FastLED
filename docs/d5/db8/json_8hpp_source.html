@@ -391,7 +391,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="keyword">class </span>InvalidConversion;  <span class="comment">// Error here? See https://arduinojson.org/v7/invalid-conversion/</span></div>
 <div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>ARDUINOJSON_END_PRIVATE_NAMESPACE</div>
 <div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span><span class="preprocessor">#include &lt;<a class="code" href="../../df/dd8/stdint_8h.html">stdint.h</a>&gt;</span></div>
 <div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
 <div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE</div>
 <div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="keyword">class </span>Allocator {</div>
@@ -502,7 +502,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    ARDUINOJSON_ASSERT(<span class="keywordtype">id</span> &lt; usage_);</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>    <span class="keywordflow">return</span> slots_ + id;</div>
 <div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>  }</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  <span class="keywordtype">void</span> clear() {</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() {</div>
 <div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>    usage_ = 0;</div>
 <div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>  }</div>
 <div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>  <span class="keywordtype">void</span> shrinkToFit(Allocator* allocator) {</div>
@@ -536,7 +536,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>  <span class="keyword">typedef</span> FalseType type;</div>
 <div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>};</div>
 <div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span><span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> Condition, <span class="keyword">class</span> TrueType, <span class="keyword">class</span> FalseType&gt;</div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="keyword">using </span>conditional_t =</div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span><span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a17879c4438ab164dc0c325b11032ad57.html#a17879c4438ab164dc0c325b11032ad57">conditional_t</a> =</div>
 <div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    <span class="keyword">typename</span> conditional&lt;Condition, TrueType, FalseType&gt;::type;</div>
 <div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span><span class="keyword">template</span> &lt;<span class="keywordtype">bool</span> Condition, <span class="keyword">typename</span> T = <span class="keywordtype">void</span>&gt;</div>
 <div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span><span class="keyword">struct </span>enable_if {};</div>
@@ -580,7 +580,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>  <span class="keyword">typedef</span> T type;</div>
 <div class="line"><a id="l00476" name="l00476"></a><span class="lineno">  476</span>};</div>
 <div class="line"><a id="l00477" name="l00477"></a><span class="lineno">  477</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span><span class="keyword">using </span>remove_reference_t = <span class="keyword">typename</span> remove_reference&lt;T&gt;::type;</div>
+<div class="line"><a id="l00478" name="l00478"></a><span class="lineno">  478</span><span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">remove_reference_t</a> = <span class="keyword">typename</span> remove_reference&lt;T&gt;::type;</div>
 <div class="line"><a id="l00479" name="l00479"></a><span class="lineno">  479</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> TBase, <span class="keyword">typename</span> TDerived&gt;</div>
 <div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span><span class="keyword">class </span>is_base_of {</div>
 <div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span> <span class="keyword">protected</span>:  <span class="comment">// &lt;- to avoid GCC&#39;s &quot;all member functions in class are private&quot;</span></div>
@@ -654,7 +654,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>  <span class="keyword">typedef</span> T type;</div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>};</div>
 <div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span><span class="keyword">using </span>remove_cv_t = <span class="keyword">typename</span> remove_cv&lt;T&gt;::type;</div>
+<div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span><span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a224aeeea66bd4aa24c94d9d7dcad75cd.html#a224aeeea66bd4aa24c94d9d7dcad75cd">remove_cv_t</a> = <span class="keyword">typename</span> remove_cv&lt;T&gt;::type;</div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span><span class="keyword">struct </span>is_floating_point</div>
 <div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>    : integral_constant&lt;bool,  <span class="comment">//</span></div>
@@ -750,21 +750,21 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span><span class="keyword">using </span>void_t = <span class="keyword">typename</span> make_void&lt;Args...&gt;::type;</div>
 <div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span><span class="keyword">using </span>nullptr_t = <span class="keyword">decltype</span>(<span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>T&amp;&amp; forward(remove_reference_t&lt;T&gt;&amp; t) <span class="keyword">noexcept</span> {</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>T&amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">forward</a>(remove_reference_t&lt;T&gt;&amp; t) <span class="keyword">noexcept</span> {</div>
 <div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span>  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>T&amp;&amp;<span class="keyword">&gt;</span>(t);</div>
 <div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span>}</div>
 <div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>remove_reference_t&lt;T&gt;&amp;&amp; move(T&amp;&amp; t) {</div>
+<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>remove_reference_t&lt;T&gt;&amp;&amp; <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>(T&amp;&amp; t) {</div>
 <div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>  <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>remove_reference_t&lt;T&gt;&amp;&amp;<span class="keyword">&gt;</span>(t);</div>
 <div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span>}</div>
 <div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
 <div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span><span class="keywordtype">void</span> swap_(T&amp; a, T&amp; b) {</div>
-<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>  T tmp = move(a);</div>
-<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>  a = move(b);</div>
-<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>  b = move(tmp);</div>
+<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>  T tmp = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>(a);</div>
+<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>  a = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>(b);</div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>  b = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>(tmp);</div>
 <div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>}</div>
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>ARDUINOJSON_END_PRIVATE_NAMESPACE</div>
-<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span><span class="preprocessor">#include &lt;<a class="code" href="../../da/d66/string_8h.html">string.h</a>&gt;</span></div>
 <div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE</div>
 <div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span><span class="keyword">using </span>PoolCount = SlotId;</div>
 <div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -779,7 +779,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>  ~MemoryPoolList() {</div>
 <div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>    ARDUINOJSON_ASSERT(count_ == 0);</div>
 <div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>  }</div>
-<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> swap(MemoryPoolList&amp; a, MemoryPoolList&amp; b) {</div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(MemoryPoolList&amp; a, MemoryPoolList&amp; b) {</div>
 <div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>    <span class="keywordtype">bool</span> aUsedPreallocated = a.pools_ == a.preallocatedPools_;</div>
 <div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>    <span class="keywordtype">bool</span> bUsedPreallocated = b.pools_ == b.preallocatedPools_;</div>
 <div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>    <span class="keywordflow">if</span> (aUsedPreallocated &amp;&amp; bUsedPreallocated) {</div>
@@ -844,7 +844,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span>    ARDUINOJSON_ASSERT(poolIndex &lt; count_);</div>
 <div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span>    <span class="keywordflow">return</span> pools_[poolIndex].getSlot(indexInPool);</div>
 <div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span>  }</div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>  <span class="keywordtype">void</span> clear(Allocator* allocator) {</div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(Allocator* allocator) {</div>
 <div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>    <span class="keywordflow">for</span> (PoolCount i = 0; i &lt; count_; i++)</div>
 <div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span>      pools_[i].destroy(allocator);</div>
 <div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span>    count_ = 0;</div>
@@ -1535,10 +1535,10 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l01430" name="l01430"></a><span class="lineno"> 1430</span>  ~StringPool() {</div>
 <div class="line"><a id="l01431" name="l01431"></a><span class="lineno"> 1431</span>    ARDUINOJSON_ASSERT(strings_ == <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l01432" name="l01432"></a><span class="lineno"> 1432</span>  }</div>
-<div class="line"><a id="l01433" name="l01433"></a><span class="lineno"> 1433</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> swap(StringPool&amp; a, StringPool&amp; b) {</div>
+<div class="line"><a id="l01433" name="l01433"></a><span class="lineno"> 1433</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(StringPool&amp; a, StringPool&amp; b) {</div>
 <div class="line"><a id="l01434" name="l01434"></a><span class="lineno"> 1434</span>    swap_(a.strings_, b.strings_);</div>
 <div class="line"><a id="l01435" name="l01435"></a><span class="lineno"> 1435</span>  }</div>
-<div class="line"><a id="l01436" name="l01436"></a><span class="lineno"> 1436</span>  <span class="keywordtype">void</span> clear(Allocator* allocator) {</div>
+<div class="line"><a id="l01436" name="l01436"></a><span class="lineno"> 1436</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(Allocator* allocator) {</div>
 <div class="line"><a id="l01437" name="l01437"></a><span class="lineno"> 1437</span>    <span class="keywordflow">while</span> (strings_) {</div>
 <div class="line"><a id="l01438" name="l01438"></a><span class="lineno"> 1438</span>      <span class="keyword">auto</span> node = strings_;</div>
 <div class="line"><a id="l01439" name="l01439"></a><span class="lineno"> 1439</span>      strings_ = node-&gt;next;</div>
@@ -2035,8 +2035,8 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l01930" name="l01930"></a><span class="lineno"> 1930</span>  iterator createIterator(<span class="keyword">const</span> ResourceManager* resources) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l01931" name="l01931"></a><span class="lineno"> 1931</span>  <span class="keywordtype">size_t</span> size(<span class="keyword">const</span> ResourceManager*) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l01932" name="l01932"></a><span class="lineno"> 1932</span>  <span class="keywordtype">size_t</span> nesting(<span class="keyword">const</span> ResourceManager*) <span class="keyword">const</span>;</div>
-<div class="line"><a id="l01933" name="l01933"></a><span class="lineno"> 1933</span>  <span class="keywordtype">void</span> clear(ResourceManager* resources);</div>
-<div class="line"><a id="l01934" name="l01934"></a><span class="lineno"> 1934</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> clear(CollectionData* collection, ResourceManager* resources) {</div>
+<div class="line"><a id="l01933" name="l01933"></a><span class="lineno"> 1933</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(ResourceManager* resources);</div>
+<div class="line"><a id="l01934" name="l01934"></a><span class="lineno"> 1934</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(CollectionData* collection, ResourceManager* resources) {</div>
 <div class="line"><a id="l01935" name="l01935"></a><span class="lineno"> 1935</span>    <span class="keywordflow">if</span> (!collection)</div>
 <div class="line"><a id="l01936" name="l01936"></a><span class="lineno"> 1936</span>      <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l01937" name="l01937"></a><span class="lineno"> 1937</span>    collection-&gt;clear(resources);</div>
@@ -2674,8 +2674,8 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l02569" name="l02569"></a><span class="lineno"> 2569</span>  VariantType type()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l02570" name="l02570"></a><span class="lineno"> 2570</span>    <span class="keywordflow">return</span> type_;</div>
 <div class="line"><a id="l02571" name="l02571"></a><span class="lineno"> 2571</span>  }</div>
-<div class="line"><a id="l02572" name="l02572"></a><span class="lineno"> 2572</span>  <span class="keywordtype">void</span> clear(ResourceManager* resources);</div>
-<div class="line"><a id="l02573" name="l02573"></a><span class="lineno"> 2573</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> clear(VariantData* var, ResourceManager* resources) {</div>
+<div class="line"><a id="l02572" name="l02572"></a><span class="lineno"> 2572</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(ResourceManager* resources);</div>
+<div class="line"><a id="l02573" name="l02573"></a><span class="lineno"> 2573</span>  <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>(VariantData* var, ResourceManager* resources) {</div>
 <div class="line"><a id="l02574" name="l02574"></a><span class="lineno"> 2574</span>    <span class="keywordflow">if</span> (!var)</div>
 <div class="line"><a id="l02575" name="l02575"></a><span class="lineno"> 2575</span>      <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l02576" name="l02576"></a><span class="lineno"> 2576</span>    var-&gt;clear(resources);</div>
@@ -2700,9 +2700,9 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l02595" name="l02595"></a><span class="lineno"> 2595</span>  }</div>
 <div class="line"><a id="l02596" name="l02596"></a><span class="lineno"> 2596</span>  ResourceManager(<span class="keyword">const</span> ResourceManager&amp;) = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l02597" name="l02597"></a><span class="lineno"> 2597</span>  ResourceManager&amp; operator=(<span class="keyword">const</span> ResourceManager&amp; src) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l02598" name="l02598"></a><span class="lineno"> 2598</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> swap(ResourceManager&amp; a, ResourceManager&amp; b) {</div>
-<div class="line"><a id="l02599" name="l02599"></a><span class="lineno"> 2599</span>    swap(a.stringPool_, b.stringPool_);</div>
-<div class="line"><a id="l02600" name="l02600"></a><span class="lineno"> 2600</span>    swap(a.variantPools_, b.variantPools_);</div>
+<div class="line"><a id="l02598" name="l02598"></a><span class="lineno"> 2598</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(ResourceManager&amp; a, ResourceManager&amp; b) {</div>
+<div class="line"><a id="l02599" name="l02599"></a><span class="lineno"> 2599</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(a.stringPool_, b.stringPool_);</div>
+<div class="line"><a id="l02600" name="l02600"></a><span class="lineno"> 2600</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(a.variantPools_, b.variantPools_);</div>
 <div class="line"><a id="l02601" name="l02601"></a><span class="lineno"> 2601</span>    swap_(a.allocator_, b.allocator_);</div>
 <div class="line"><a id="l02602" name="l02602"></a><span class="lineno"> 2602</span>    swap_(a.overflowed_, b.overflowed_);</div>
 <div class="line"><a id="l02603" name="l02603"></a><span class="lineno"> 2603</span>  }</div>
@@ -2757,7 +2757,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l02652" name="l02652"></a><span class="lineno"> 2652</span>  <span class="keywordtype">void</span> dereferenceString(<span class="keyword">const</span> <span class="keywordtype">char</span>* s) {</div>
 <div class="line"><a id="l02653" name="l02653"></a><span class="lineno"> 2653</span>    stringPool_.dereference(s, allocator_);</div>
 <div class="line"><a id="l02654" name="l02654"></a><span class="lineno"> 2654</span>  }</div>
-<div class="line"><a id="l02655" name="l02655"></a><span class="lineno"> 2655</span>  <span class="keywordtype">void</span> clear() {</div>
+<div class="line"><a id="l02655" name="l02655"></a><span class="lineno"> 2655</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() {</div>
 <div class="line"><a id="l02656" name="l02656"></a><span class="lineno"> 2656</span>    variantPools_.clear(allocator_);</div>
 <div class="line"><a id="l02657" name="l02657"></a><span class="lineno"> 2657</span>    overflowed_ = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l02658" name="l02658"></a><span class="lineno"> 2658</span>    stringPool_.clear(allocator_);</div>
@@ -3168,7 +3168,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l03063" name="l03063"></a><span class="lineno"> 3063</span><span class="keyword">class </span>VariantRefBase : <span class="keyword">public</span> VariantTag {</div>
 <div class="line"><a id="l03064" name="l03064"></a><span class="lineno"> 3064</span>  <span class="keyword">friend</span> <span class="keyword">class </span>VariantAttorney;</div>
 <div class="line"><a id="l03065" name="l03065"></a><span class="lineno"> 3065</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l03066" name="l03066"></a><span class="lineno"> 3066</span>  <span class="keywordtype">void</span> clear()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l03066" name="l03066"></a><span class="lineno"> 3066</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l03067" name="l03067"></a><span class="lineno"> 3067</span>    VariantData::clear(getOrCreateData(), getResourceManager());</div>
 <div class="line"><a id="l03068" name="l03068"></a><span class="lineno"> 3068</span>  }</div>
 <div class="line"><a id="l03069" name="l03069"></a><span class="lineno"> 3069</span>  <span class="keywordtype">bool</span> isNull()<span class="keyword"> const </span>{</div>
@@ -3620,7 +3620,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l03515" name="l03515"></a><span class="lineno"> 3515</span>  <span class="keywordtype">bool</span> set(JsonArrayConst src)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l03516" name="l03516"></a><span class="lineno"> 3516</span>    <span class="keywordflow">if</span> (!data_)</div>
 <div class="line"><a id="l03517" name="l03517"></a><span class="lineno"> 3517</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l03518" name="l03518"></a><span class="lineno"> 3518</span>    clear();</div>
+<div class="line"><a id="l03518" name="l03518"></a><span class="lineno"> 3518</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>();</div>
 <div class="line"><a id="l03519" name="l03519"></a><span class="lineno"> 3519</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> element : src) {</div>
 <div class="line"><a id="l03520" name="l03520"></a><span class="lineno"> 3520</span>      <span class="keywordflow">if</span> (!add(element))</div>
 <div class="line"><a id="l03521" name="l03521"></a><span class="lineno"> 3521</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
@@ -3639,7 +3639,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l03534" name="l03534"></a><span class="lineno"> 3534</span>    <span class="keywordflow">if</span> (variant.template is&lt;size_t&gt;())</div>
 <div class="line"><a id="l03535" name="l03535"></a><span class="lineno"> 3535</span>      remove(variant.template as&lt;size_t&gt;());</div>
 <div class="line"><a id="l03536" name="l03536"></a><span class="lineno"> 3536</span>  }</div>
-<div class="line"><a id="l03537" name="l03537"></a><span class="lineno"> 3537</span>  <span class="keywordtype">void</span> clear()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l03537" name="l03537"></a><span class="lineno"> 3537</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l03538" name="l03538"></a><span class="lineno"> 3538</span>    detail::ArrayData::clear(data_, resources_);</div>
 <div class="line"><a id="l03539" name="l03539"></a><span class="lineno"> 3539</span>  }</div>
 <div class="line"><a id="l03540" name="l03540"></a><span class="lineno"> 3540</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -3982,13 +3982,13 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l03877" name="l03877"></a><span class="lineno"> 3877</span>  iterator end()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l03878" name="l03878"></a><span class="lineno"> 3878</span>    <span class="keywordflow">return</span> iterator();</div>
 <div class="line"><a id="l03879" name="l03879"></a><span class="lineno"> 3879</span>  }</div>
-<div class="line"><a id="l03880" name="l03880"></a><span class="lineno"> 3880</span>  <span class="keywordtype">void</span> clear()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l03880" name="l03880"></a><span class="lineno"> 3880</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l03881" name="l03881"></a><span class="lineno"> 3881</span>    detail::ObjectData::clear(data_, resources_);</div>
 <div class="line"><a id="l03882" name="l03882"></a><span class="lineno"> 3882</span>  }</div>
 <div class="line"><a id="l03883" name="l03883"></a><span class="lineno"> 3883</span>  <span class="keywordtype">bool</span> set(JsonObjectConst src) {</div>
 <div class="line"><a id="l03884" name="l03884"></a><span class="lineno"> 3884</span>    <span class="keywordflow">if</span> (!data_ || !src.data_)</div>
 <div class="line"><a id="l03885" name="l03885"></a><span class="lineno"> 3885</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l03886" name="l03886"></a><span class="lineno"> 3886</span>    clear();</div>
+<div class="line"><a id="l03886" name="l03886"></a><span class="lineno"> 3886</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>();</div>
 <div class="line"><a id="l03887" name="l03887"></a><span class="lineno"> 3887</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> kvp : src) {</div>
 <div class="line"><a id="l03888" name="l03888"></a><span class="lineno"> 3888</span>      <span class="keywordflow">if</span> (!<span class="keyword">operator</span>[](kvp.key()).set(kvp.value()))</div>
 <div class="line"><a id="l03889" name="l03889"></a><span class="lineno"> 3889</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
@@ -4103,7 +4103,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l03998" name="l03998"></a><span class="lineno"> 3998</span>  }</div>
 <div class="line"><a id="l03999" name="l03999"></a><span class="lineno"> 3999</span>  JsonDocument(JsonDocument&amp;&amp; src)</div>
 <div class="line"><a id="l04000" name="l04000"></a><span class="lineno"> 4000</span>      : JsonDocument(detail::DefaultAllocator::instance()) {</div>
-<div class="line"><a id="l04001" name="l04001"></a><span class="lineno"> 4001</span>    swap(*<span class="keyword">this</span>, src);</div>
+<div class="line"><a id="l04001" name="l04001"></a><span class="lineno"> 4001</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(*<span class="keyword">this</span>, src);</div>
 <div class="line"><a id="l04002" name="l04002"></a><span class="lineno"> 4002</span>  }</div>
 <div class="line"><a id="l04003" name="l04003"></a><span class="lineno"> 4003</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a id="l04004" name="l04004"></a><span class="lineno"> 4004</span>  JsonDocument(</div>
@@ -4117,7 +4117,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l04012" name="l04012"></a><span class="lineno"> 4012</span>    set(src);</div>
 <div class="line"><a id="l04013" name="l04013"></a><span class="lineno"> 4013</span>  }</div>
 <div class="line"><a id="l04014" name="l04014"></a><span class="lineno"> 4014</span>  JsonDocument&amp; operator=(JsonDocument src) {</div>
-<div class="line"><a id="l04015" name="l04015"></a><span class="lineno"> 4015</span>    swap(*<span class="keyword">this</span>, src);</div>
+<div class="line"><a id="l04015" name="l04015"></a><span class="lineno"> 4015</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(*<span class="keyword">this</span>, src);</div>
 <div class="line"><a id="l04016" name="l04016"></a><span class="lineno"> 4016</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><a id="l04017" name="l04017"></a><span class="lineno"> 4017</span>  }</div>
 <div class="line"><a id="l04018" name="l04018"></a><span class="lineno"> 4018</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
@@ -4139,7 +4139,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l04034" name="l04034"></a><span class="lineno"> 4034</span>  T as()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l04035" name="l04035"></a><span class="lineno"> 4035</span>    <span class="keywordflow">return</span> getVariant().template as&lt;T&gt;();</div>
 <div class="line"><a id="l04036" name="l04036"></a><span class="lineno"> 4036</span>  }</div>
-<div class="line"><a id="l04037" name="l04037"></a><span class="lineno"> 4037</span>  <span class="keywordtype">void</span> clear() {</div>
+<div class="line"><a id="l04037" name="l04037"></a><span class="lineno"> 4037</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() {</div>
 <div class="line"><a id="l04038" name="l04038"></a><span class="lineno"> 4038</span>    resources_.clear();</div>
 <div class="line"><a id="l04039" name="l04039"></a><span class="lineno"> 4039</span>    data_.reset();</div>
 <div class="line"><a id="l04040" name="l04040"></a><span class="lineno"> 4040</span>  }</div>
@@ -4173,7 +4173,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l04068" name="l04068"></a><span class="lineno"> 4068</span>  }</div>
 <div class="line"><a id="l04069" name="l04069"></a><span class="lineno"> 4069</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a id="l04070" name="l04070"></a><span class="lineno"> 4070</span>  <span class="keyword">typename</span> detail::VariantTo&lt;T&gt;::type to() {</div>
-<div class="line"><a id="l04071" name="l04071"></a><span class="lineno"> 4071</span>    clear();</div>
+<div class="line"><a id="l04071" name="l04071"></a><span class="lineno"> 4071</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>();</div>
 <div class="line"><a id="l04072" name="l04072"></a><span class="lineno"> 4072</span>    <span class="keywordflow">return</span> getVariant().template to&lt;T&gt;();</div>
 <div class="line"><a id="l04073" name="l04073"></a><span class="lineno"> 4073</span>  }</div>
 <div class="line"><a id="l04074" name="l04074"></a><span class="lineno"> 4074</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TChar&gt;</div>
@@ -4281,8 +4281,8 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l04176" name="l04176"></a><span class="lineno"> 4176</span>  <span class="keyword">operator</span> JsonVariantConst()<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l04177" name="l04177"></a><span class="lineno"> 4177</span>    <span class="keywordflow">return</span> getVariant();</div>
 <div class="line"><a id="l04178" name="l04178"></a><span class="lineno"> 4178</span>  }</div>
-<div class="line"><a id="l04179" name="l04179"></a><span class="lineno"> 4179</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> swap(JsonDocument&amp; a, JsonDocument&amp; b) {</div>
-<div class="line"><a id="l04180" name="l04180"></a><span class="lineno"> 4180</span>    swap(a.resources_, b.resources_);</div>
+<div class="line"><a id="l04179" name="l04179"></a><span class="lineno"> 4179</span>  <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(JsonDocument&amp; a, JsonDocument&amp; b) {</div>
+<div class="line"><a id="l04180" name="l04180"></a><span class="lineno"> 4180</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">swap</a>(a.resources_, b.resources_);</div>
 <div class="line"><a id="l04181" name="l04181"></a><span class="lineno"> 4181</span>    swap_(a.data_, b.data_);</div>
 <div class="line"><a id="l04182" name="l04182"></a><span class="lineno"> 4182</span>  }</div>
 <div class="line"><a id="l04183" name="l04183"></a><span class="lineno"> 4183</span>  ARDUINOJSON_DEPRECATED(<span class="stringliteral">&quot;use add&lt;JsonVariant&gt;() instead&quot;</span>)</div>
@@ -6496,7 +6496,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06391" name="l06391"></a><span class="lineno"> 6391</span>    ended_ = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l06392" name="l06392"></a><span class="lineno"> 6392</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l06393" name="l06393"></a><span class="lineno"> 6393</span>  }</div>
-<div class="line"><a id="l06394" name="l06394"></a><span class="lineno"> 6394</span>  <span class="keywordtype">void</span> clear() {</div>
+<div class="line"><a id="l06394" name="l06394"></a><span class="lineno"> 6394</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() {</div>
 <div class="line"><a id="l06395" name="l06395"></a><span class="lineno"> 6395</span>    loaded_ = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l06396" name="l06396"></a><span class="lineno"> 6396</span>  }</div>
 <div class="line"><a id="l06397" name="l06397"></a><span class="lineno"> 6397</span>  <span class="keywordtype">int</span> last()<span class="keyword"> const </span>{</div>
@@ -6611,7 +6611,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06506" name="l06506"></a><span class="lineno"> 6506</span>  <span class="keywordflow">return</span> <span class="charliteral">&#39;-&#39;</span> == c || c == <span class="charliteral">&#39;+&#39;</span>;</div>
 <div class="line"><a id="l06507" name="l06507"></a><span class="lineno"> 6507</span>}</div>
 <div class="line"><a id="l06508" name="l06508"></a><span class="lineno"> 6508</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> A, <span class="keyword">typename</span> B&gt;</div>
-<div class="line"><a id="l06509" name="l06509"></a><span class="lineno"> 6509</span><span class="keyword">using </span>largest_type = conditional_t&lt;(<span class="keyword">sizeof</span>(A) &gt; <span class="keyword">sizeof</span>(B)), A, B&gt;;</div>
+<div class="line"><a id="l06509" name="l06509"></a><span class="lineno"> 6509</span><span class="keyword">using </span>largest_type = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a17879c4438ab164dc0c325b11032ad57.html#a17879c4438ab164dc0c325b11032ad57">conditional_t</a>&lt;(<span class="keyword">sizeof</span>(A) &gt; <span class="keyword">sizeof</span>(B)), A, B&gt;;</div>
 <div class="line"><a id="l06510" name="l06510"></a><span class="lineno"> 6510</span><span class="keyword">enum class</span> NumberType : uint8_t {</div>
 <div class="line"><a id="l06511" name="l06511"></a><span class="lineno"> 6511</span>  Invalid,</div>
 <div class="line"><a id="l06512" name="l06512"></a><span class="lineno"> 6512</span>  Float,</div>
@@ -6821,13 +6821,13 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06716" name="l06716"></a><span class="lineno"> 6716</span>  <span class="keywordtype">char</span> current() {</div>
 <div class="line"><a id="l06717" name="l06717"></a><span class="lineno"> 6717</span>    <span class="keywordflow">return</span> latch_.current();</div>
 <div class="line"><a id="l06718" name="l06718"></a><span class="lineno"> 6718</span>  }</div>
-<div class="line"><a id="l06719" name="l06719"></a><span class="lineno"> 6719</span>  <span class="keywordtype">void</span> move() {</div>
+<div class="line"><a id="l06719" name="l06719"></a><span class="lineno"> 6719</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>() {</div>
 <div class="line"><a id="l06720" name="l06720"></a><span class="lineno"> 6720</span>    latch_.clear();</div>
 <div class="line"><a id="l06721" name="l06721"></a><span class="lineno"> 6721</span>  }</div>
 <div class="line"><a id="l06722" name="l06722"></a><span class="lineno"> 6722</span>  <span class="keywordtype">bool</span> eat(<span class="keywordtype">char</span> charToSkip) {</div>
 <div class="line"><a id="l06723" name="l06723"></a><span class="lineno"> 6723</span>    <span class="keywordflow">if</span> (current() != charToSkip)</div>
 <div class="line"><a id="l06724" name="l06724"></a><span class="lineno"> 6724</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l06725" name="l06725"></a><span class="lineno"> 6725</span>    move();</div>
+<div class="line"><a id="l06725" name="l06725"></a><span class="lineno"> 6725</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06726" name="l06726"></a><span class="lineno"> 6726</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a id="l06727" name="l06727"></a><span class="lineno"> 6727</span>  }</div>
 <div class="line"><a id="l06728" name="l06728"></a><span class="lineno"> 6728</span>  <span class="keyword">template</span> &lt;<span class="keyword">typename</span> TFilter&gt;</div>
@@ -6904,7 +6904,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06799" name="l06799"></a><span class="lineno"> 6799</span>    <span class="keywordflow">if</span> (nestingLimit.reached())</div>
 <div class="line"><a id="l06800" name="l06800"></a><span class="lineno"> 6800</span>      <span class="keywordflow">return</span> DeserializationError::TooDeep;</div>
 <div class="line"><a id="l06801" name="l06801"></a><span class="lineno"> 6801</span>    ARDUINOJSON_ASSERT(current() == <span class="charliteral">&#39;[&#39;</span>);</div>
-<div class="line"><a id="l06802" name="l06802"></a><span class="lineno"> 6802</span>    move();</div>
+<div class="line"><a id="l06802" name="l06802"></a><span class="lineno"> 6802</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06803" name="l06803"></a><span class="lineno"> 6803</span>    err = skipSpacesAndComments();</div>
 <div class="line"><a id="l06804" name="l06804"></a><span class="lineno"> 6804</span>    <span class="keywordflow">if</span> (err)</div>
 <div class="line"><a id="l06805" name="l06805"></a><span class="lineno"> 6805</span>      <span class="keywordflow">return</span> err;</div>
@@ -6939,7 +6939,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06834" name="l06834"></a><span class="lineno"> 6834</span>    <span class="keywordflow">if</span> (nestingLimit.reached())</div>
 <div class="line"><a id="l06835" name="l06835"></a><span class="lineno"> 6835</span>      <span class="keywordflow">return</span> DeserializationError::TooDeep;</div>
 <div class="line"><a id="l06836" name="l06836"></a><span class="lineno"> 6836</span>    ARDUINOJSON_ASSERT(current() == <span class="charliteral">&#39;[&#39;</span>);</div>
-<div class="line"><a id="l06837" name="l06837"></a><span class="lineno"> 6837</span>    move();</div>
+<div class="line"><a id="l06837" name="l06837"></a><span class="lineno"> 6837</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06838" name="l06838"></a><span class="lineno"> 6838</span>    <span class="keywordflow">for</span> (;;) {</div>
 <div class="line"><a id="l06839" name="l06839"></a><span class="lineno"> 6839</span>      err = skipVariant(nestingLimit.decrement());</div>
 <div class="line"><a id="l06840" name="l06840"></a><span class="lineno"> 6840</span>      <span class="keywordflow">if</span> (err)</div>
@@ -6961,7 +6961,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06856" name="l06856"></a><span class="lineno"> 6856</span>    <span class="keywordflow">if</span> (nestingLimit.reached())</div>
 <div class="line"><a id="l06857" name="l06857"></a><span class="lineno"> 6857</span>      <span class="keywordflow">return</span> DeserializationError::TooDeep;</div>
 <div class="line"><a id="l06858" name="l06858"></a><span class="lineno"> 6858</span>    ARDUINOJSON_ASSERT(current() == <span class="charliteral">&#39;{&#39;</span>);</div>
-<div class="line"><a id="l06859" name="l06859"></a><span class="lineno"> 6859</span>    move();</div>
+<div class="line"><a id="l06859" name="l06859"></a><span class="lineno"> 6859</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06860" name="l06860"></a><span class="lineno"> 6860</span>    err = skipSpacesAndComments();</div>
 <div class="line"><a id="l06861" name="l06861"></a><span class="lineno"> 6861</span>    <span class="keywordflow">if</span> (err)</div>
 <div class="line"><a id="l06862" name="l06862"></a><span class="lineno"> 6862</span>      <span class="keywordflow">return</span> err;</div>
@@ -7014,7 +7014,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06909" name="l06909"></a><span class="lineno"> 6909</span>    <span class="keywordflow">if</span> (nestingLimit.reached())</div>
 <div class="line"><a id="l06910" name="l06910"></a><span class="lineno"> 6910</span>      <span class="keywordflow">return</span> DeserializationError::TooDeep;</div>
 <div class="line"><a id="l06911" name="l06911"></a><span class="lineno"> 6911</span>    ARDUINOJSON_ASSERT(current() == <span class="charliteral">&#39;{&#39;</span>);</div>
-<div class="line"><a id="l06912" name="l06912"></a><span class="lineno"> 6912</span>    move();</div>
+<div class="line"><a id="l06912" name="l06912"></a><span class="lineno"> 6912</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06913" name="l06913"></a><span class="lineno"> 6913</span>    err = skipSpacesAndComments();</div>
 <div class="line"><a id="l06914" name="l06914"></a><span class="lineno"> 6914</span>    <span class="keywordflow">if</span> (err)</div>
 <div class="line"><a id="l06915" name="l06915"></a><span class="lineno"> 6915</span>      <span class="keywordflow">return</span> err;</div>
@@ -7067,10 +7067,10 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06962" name="l06962"></a><span class="lineno"> 6962</span>    DeserializationError::Code err;</div>
 <div class="line"><a id="l06963" name="l06963"></a><span class="lineno"> 6963</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l06964" name="l06964"></a><span class="lineno"> 6964</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> stopChar = current();</div>
-<div class="line"><a id="l06965" name="l06965"></a><span class="lineno"> 6965</span>    move();</div>
+<div class="line"><a id="l06965" name="l06965"></a><span class="lineno"> 6965</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06966" name="l06966"></a><span class="lineno"> 6966</span>    <span class="keywordflow">for</span> (;;) {</div>
 <div class="line"><a id="l06967" name="l06967"></a><span class="lineno"> 6967</span>      <span class="keywordtype">char</span> c = current();</div>
-<div class="line"><a id="l06968" name="l06968"></a><span class="lineno"> 6968</span>      move();</div>
+<div class="line"><a id="l06968" name="l06968"></a><span class="lineno"> 6968</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06969" name="l06969"></a><span class="lineno"> 6969</span>      <span class="keywordflow">if</span> (c == stopChar)</div>
 <div class="line"><a id="l06970" name="l06970"></a><span class="lineno"> 6970</span>        <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l06971" name="l06971"></a><span class="lineno"> 6971</span>      <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\0&#39;</span>)</div>
@@ -7081,7 +7081,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06976" name="l06976"></a><span class="lineno"> 6976</span>          <span class="keywordflow">return</span> DeserializationError::IncompleteInput;</div>
 <div class="line"><a id="l06977" name="l06977"></a><span class="lineno"> 6977</span>        <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;u&#39;</span>) {</div>
 <div class="line"><a id="l06978" name="l06978"></a><span class="lineno"> 6978</span><span class="preprocessor">#if ARDUINOJSON_DECODE_UNICODE</span></div>
-<div class="line"><a id="l06979" name="l06979"></a><span class="lineno"> 6979</span>          move();</div>
+<div class="line"><a id="l06979" name="l06979"></a><span class="lineno"> 6979</span>          <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06980" name="l06980"></a><span class="lineno"> 6980</span>          uint16_t codeunit;</div>
 <div class="line"><a id="l06981" name="l06981"></a><span class="lineno"> 6981</span>          err = parseHex4(codeunit);</div>
 <div class="line"><a id="l06982" name="l06982"></a><span class="lineno"> 6982</span>          <span class="keywordflow">if</span> (err)</div>
@@ -7096,7 +7096,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l06991" name="l06991"></a><span class="lineno"> 6991</span>        c = EscapeSequence::unescapeChar(c);</div>
 <div class="line"><a id="l06992" name="l06992"></a><span class="lineno"> 6992</span>        <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\0&#39;</span>)</div>
 <div class="line"><a id="l06993" name="l06993"></a><span class="lineno"> 6993</span>          <span class="keywordflow">return</span> DeserializationError::InvalidInput;</div>
-<div class="line"><a id="l06994" name="l06994"></a><span class="lineno"> 6994</span>        move();</div>
+<div class="line"><a id="l06994" name="l06994"></a><span class="lineno"> 6994</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l06995" name="l06995"></a><span class="lineno"> 6995</span>      }</div>
 <div class="line"><a id="l06996" name="l06996"></a><span class="lineno"> 6996</span>      stringBuilder_.append(c);</div>
 <div class="line"><a id="l06997" name="l06997"></a><span class="lineno"> 6997</span>    }</div>
@@ -7109,7 +7109,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07004" name="l07004"></a><span class="lineno"> 7004</span>    ARDUINOJSON_ASSERT(c);</div>
 <div class="line"><a id="l07005" name="l07005"></a><span class="lineno"> 7005</span>    <span class="keywordflow">if</span> (canBeInNonQuotedString(c)) {  <span class="comment">// no quotes</span></div>
 <div class="line"><a id="l07006" name="l07006"></a><span class="lineno"> 7006</span>      <span class="keywordflow">do</span> {</div>
-<div class="line"><a id="l07007" name="l07007"></a><span class="lineno"> 7007</span>        move();</div>
+<div class="line"><a id="l07007" name="l07007"></a><span class="lineno"> 7007</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07008" name="l07008"></a><span class="lineno"> 7008</span>        stringBuilder_.append(c);</div>
 <div class="line"><a id="l07009" name="l07009"></a><span class="lineno"> 7009</span>        c = current();</div>
 <div class="line"><a id="l07010" name="l07010"></a><span class="lineno"> 7010</span>      } <span class="keywordflow">while</span> (canBeInNonQuotedString(c));</div>
@@ -7129,17 +7129,17 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07024" name="l07024"></a><span class="lineno"> 7024</span>  }</div>
 <div class="line"><a id="l07025" name="l07025"></a><span class="lineno"> 7025</span>  DeserializationError::Code skipQuotedString() {</div>
 <div class="line"><a id="l07026" name="l07026"></a><span class="lineno"> 7026</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> stopChar = current();</div>
-<div class="line"><a id="l07027" name="l07027"></a><span class="lineno"> 7027</span>    move();</div>
+<div class="line"><a id="l07027" name="l07027"></a><span class="lineno"> 7027</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07028" name="l07028"></a><span class="lineno"> 7028</span>    <span class="keywordflow">for</span> (;;) {</div>
 <div class="line"><a id="l07029" name="l07029"></a><span class="lineno"> 7029</span>      <span class="keywordtype">char</span> c = current();</div>
-<div class="line"><a id="l07030" name="l07030"></a><span class="lineno"> 7030</span>      move();</div>
+<div class="line"><a id="l07030" name="l07030"></a><span class="lineno"> 7030</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07031" name="l07031"></a><span class="lineno"> 7031</span>      <span class="keywordflow">if</span> (c == stopChar)</div>
 <div class="line"><a id="l07032" name="l07032"></a><span class="lineno"> 7032</span>        <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l07033" name="l07033"></a><span class="lineno"> 7033</span>      <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\0&#39;</span>)</div>
 <div class="line"><a id="l07034" name="l07034"></a><span class="lineno"> 7034</span>        <span class="keywordflow">return</span> DeserializationError::IncompleteInput;</div>
 <div class="line"><a id="l07035" name="l07035"></a><span class="lineno"> 7035</span>      <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\\&#39;</span>) {</div>
 <div class="line"><a id="l07036" name="l07036"></a><span class="lineno"> 7036</span>        <span class="keywordflow">if</span> (current() != <span class="charliteral">&#39;\0&#39;</span>)</div>
-<div class="line"><a id="l07037" name="l07037"></a><span class="lineno"> 7037</span>          move();</div>
+<div class="line"><a id="l07037" name="l07037"></a><span class="lineno"> 7037</span>          <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07038" name="l07038"></a><span class="lineno"> 7038</span>      }</div>
 <div class="line"><a id="l07039" name="l07039"></a><span class="lineno"> 7039</span>    }</div>
 <div class="line"><a id="l07040" name="l07040"></a><span class="lineno"> 7040</span>    <span class="keywordflow">return</span> DeserializationError::Ok;</div>
@@ -7147,7 +7147,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07042" name="l07042"></a><span class="lineno"> 7042</span>  DeserializationError::Code skipNonQuotedString() {</div>
 <div class="line"><a id="l07043" name="l07043"></a><span class="lineno"> 7043</span>    <span class="keywordtype">char</span> c = current();</div>
 <div class="line"><a id="l07044" name="l07044"></a><span class="lineno"> 7044</span>    <span class="keywordflow">while</span> (canBeInNonQuotedString(c)) {</div>
-<div class="line"><a id="l07045" name="l07045"></a><span class="lineno"> 7045</span>      move();</div>
+<div class="line"><a id="l07045" name="l07045"></a><span class="lineno"> 7045</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07046" name="l07046"></a><span class="lineno"> 7046</span>      c = current();</div>
 <div class="line"><a id="l07047" name="l07047"></a><span class="lineno"> 7047</span>    }</div>
 <div class="line"><a id="l07048" name="l07048"></a><span class="lineno"> 7048</span>    <span class="keywordflow">return</span> DeserializationError::Ok;</div>
@@ -7156,7 +7156,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07051" name="l07051"></a><span class="lineno"> 7051</span>    uint8_t n = 0;</div>
 <div class="line"><a id="l07052" name="l07052"></a><span class="lineno"> 7052</span>    <span class="keywordtype">char</span> c = current();</div>
 <div class="line"><a id="l07053" name="l07053"></a><span class="lineno"> 7053</span>    <span class="keywordflow">while</span> (canBeInNumber(c) &amp;&amp; n &lt; 63) {</div>
-<div class="line"><a id="l07054" name="l07054"></a><span class="lineno"> 7054</span>      move();</div>
+<div class="line"><a id="l07054" name="l07054"></a><span class="lineno"> 7054</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07055" name="l07055"></a><span class="lineno"> 7055</span>      buffer_[n++] = c;</div>
 <div class="line"><a id="l07056" name="l07056"></a><span class="lineno"> 7056</span>      c = current();</div>
 <div class="line"><a id="l07057" name="l07057"></a><span class="lineno"> 7057</span>    }</div>
@@ -7192,7 +7192,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07087" name="l07087"></a><span class="lineno"> 7087</span>  DeserializationError::Code skipNumericValue() {</div>
 <div class="line"><a id="l07088" name="l07088"></a><span class="lineno"> 7088</span>    <span class="keywordtype">char</span> c = current();</div>
 <div class="line"><a id="l07089" name="l07089"></a><span class="lineno"> 7089</span>    <span class="keywordflow">while</span> (canBeInNumber(c)) {</div>
-<div class="line"><a id="l07090" name="l07090"></a><span class="lineno"> 7090</span>      move();</div>
+<div class="line"><a id="l07090" name="l07090"></a><span class="lineno"> 7090</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07091" name="l07091"></a><span class="lineno"> 7091</span>      c = current();</div>
 <div class="line"><a id="l07092" name="l07092"></a><span class="lineno"> 7092</span>    }</div>
 <div class="line"><a id="l07093" name="l07093"></a><span class="lineno"> 7093</span>    <span class="keywordflow">return</span> DeserializationError::Ok;</div>
@@ -7207,7 +7207,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07102" name="l07102"></a><span class="lineno"> 7102</span>      <span class="keywordflow">if</span> (value &gt; 0x0F)</div>
 <div class="line"><a id="l07103" name="l07103"></a><span class="lineno"> 7103</span>        <span class="keywordflow">return</span> DeserializationError::InvalidInput;</div>
 <div class="line"><a id="l07104" name="l07104"></a><span class="lineno"> 7104</span>      result = uint16_t((result &lt;&lt; 4) | value);</div>
-<div class="line"><a id="l07105" name="l07105"></a><span class="lineno"> 7105</span>      move();</div>
+<div class="line"><a id="l07105" name="l07105"></a><span class="lineno"> 7105</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07106" name="l07106"></a><span class="lineno"> 7106</span>    }</div>
 <div class="line"><a id="l07107" name="l07107"></a><span class="lineno"> 7107</span>    <span class="keywordflow">return</span> DeserializationError::Ok;</div>
 <div class="line"><a id="l07108" name="l07108"></a><span class="lineno"> 7108</span>  }</div>
@@ -7245,31 +7245,31 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07140" name="l07140"></a><span class="lineno"> 7140</span>        <span class="keywordflow">case</span> <span class="charliteral">&#39;\t&#39;</span>:</div>
 <div class="line"><a id="l07141" name="l07141"></a><span class="lineno"> 7141</span>        <span class="keywordflow">case</span> <span class="charliteral">&#39;\r&#39;</span>:</div>
 <div class="line"><a id="l07142" name="l07142"></a><span class="lineno"> 7142</span>        <span class="keywordflow">case</span> <span class="charliteral">&#39;\n&#39;</span>:</div>
-<div class="line"><a id="l07143" name="l07143"></a><span class="lineno"> 7143</span>          move();</div>
+<div class="line"><a id="l07143" name="l07143"></a><span class="lineno"> 7143</span>          <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07144" name="l07144"></a><span class="lineno"> 7144</span>          <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l07145" name="l07145"></a><span class="lineno"> 7145</span><span class="preprocessor">#if ARDUINOJSON_ENABLE_COMMENTS</span></div>
 <div class="line"><a id="l07146" name="l07146"></a><span class="lineno"> 7146</span>        <span class="keywordflow">case</span> <span class="charliteral">&#39;/&#39;</span>:</div>
-<div class="line"><a id="l07147" name="l07147"></a><span class="lineno"> 7147</span>          move();  <span class="comment">// skip &#39;/&#39;</span></div>
+<div class="line"><a id="l07147" name="l07147"></a><span class="lineno"> 7147</span>          <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();  <span class="comment">// skip &#39;/&#39;</span></div>
 <div class="line"><a id="l07148" name="l07148"></a><span class="lineno"> 7148</span>          <span class="keywordflow">switch</span> (current()) {</div>
 <div class="line"><a id="l07149" name="l07149"></a><span class="lineno"> 7149</span>            <span class="keywordflow">case</span> <span class="charliteral">&#39;*&#39;</span>: {</div>
-<div class="line"><a id="l07150" name="l07150"></a><span class="lineno"> 7150</span>              move();  <span class="comment">// skip &#39;*&#39;</span></div>
+<div class="line"><a id="l07150" name="l07150"></a><span class="lineno"> 7150</span>              <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();  <span class="comment">// skip &#39;*&#39;</span></div>
 <div class="line"><a id="l07151" name="l07151"></a><span class="lineno"> 7151</span>              <span class="keywordtype">bool</span> wasStar = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l07152" name="l07152"></a><span class="lineno"> 7152</span>              <span class="keywordflow">for</span> (;;) {</div>
 <div class="line"><a id="l07153" name="l07153"></a><span class="lineno"> 7153</span>                <span class="keywordtype">char</span> c = current();</div>
 <div class="line"><a id="l07154" name="l07154"></a><span class="lineno"> 7154</span>                <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\0&#39;</span>)</div>
 <div class="line"><a id="l07155" name="l07155"></a><span class="lineno"> 7155</span>                  <span class="keywordflow">return</span> DeserializationError::IncompleteInput;</div>
 <div class="line"><a id="l07156" name="l07156"></a><span class="lineno"> 7156</span>                <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;/&#39;</span> &amp;&amp; wasStar) {</div>
-<div class="line"><a id="l07157" name="l07157"></a><span class="lineno"> 7157</span>                  move();</div>
+<div class="line"><a id="l07157" name="l07157"></a><span class="lineno"> 7157</span>                  <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07158" name="l07158"></a><span class="lineno"> 7158</span>                  <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l07159" name="l07159"></a><span class="lineno"> 7159</span>                }</div>
 <div class="line"><a id="l07160" name="l07160"></a><span class="lineno"> 7160</span>                wasStar = c == <span class="charliteral">&#39;*&#39;</span>;</div>
-<div class="line"><a id="l07161" name="l07161"></a><span class="lineno"> 7161</span>                move();</div>
+<div class="line"><a id="l07161" name="l07161"></a><span class="lineno"> 7161</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07162" name="l07162"></a><span class="lineno"> 7162</span>              }</div>
 <div class="line"><a id="l07163" name="l07163"></a><span class="lineno"> 7163</span>              <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l07164" name="l07164"></a><span class="lineno"> 7164</span>            }</div>
 <div class="line"><a id="l07165" name="l07165"></a><span class="lineno"> 7165</span>            <span class="keywordflow">case</span> <span class="charliteral">&#39;/&#39;</span>:</div>
 <div class="line"><a id="l07166" name="l07166"></a><span class="lineno"> 7166</span>              <span class="keywordflow">for</span> (;;) {</div>
-<div class="line"><a id="l07167" name="l07167"></a><span class="lineno"> 7167</span>                move();</div>
+<div class="line"><a id="l07167" name="l07167"></a><span class="lineno"> 7167</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07168" name="l07168"></a><span class="lineno"> 7168</span>                <span class="keywordtype">char</span> c = current();</div>
 <div class="line"><a id="l07169" name="l07169"></a><span class="lineno"> 7169</span>                <span class="keywordflow">if</span> (c == <span class="charliteral">&#39;\0&#39;</span>)</div>
 <div class="line"><a id="l07170" name="l07170"></a><span class="lineno"> 7170</span>                  <span class="keywordflow">return</span> DeserializationError::IncompleteInput;</div>
@@ -7296,7 +7296,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l07191" name="l07191"></a><span class="lineno"> 7191</span>      <span class="keywordflow">if</span> (*s != c)</div>
 <div class="line"><a id="l07192" name="l07192"></a><span class="lineno"> 7192</span>        <span class="keywordflow">return</span> DeserializationError::InvalidInput;</div>
 <div class="line"><a id="l07193" name="l07193"></a><span class="lineno"> 7193</span>      ++s;</div>
-<div class="line"><a id="l07194" name="l07194"></a><span class="lineno"> 7194</span>      move();</div>
+<div class="line"><a id="l07194" name="l07194"></a><span class="lineno"> 7194</span>      <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>();</div>
 <div class="line"><a id="l07195" name="l07195"></a><span class="lineno"> 7195</span>    }</div>
 <div class="line"><a id="l07196" name="l07196"></a><span class="lineno"> 7196</span>    <span class="keywordflow">return</span> DeserializationError::Ok;</div>
 <div class="line"><a id="l07197" name="l07197"></a><span class="lineno"> 7197</span>  }</div>
@@ -8325,20 +8325,29 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div class="line"><a id="l08220" name="l08220"></a><span class="lineno"> 8220</span><span class="preprocessor">#error ArduinoJson requires a C++ compiler, please change file extension to .cc or .cpp</span></div>
 <div class="line"><a id="l08221" name="l08221"></a><span class="lineno"> 8221</span> </div>
 <div class="line"><a id="l08222" name="l08222"></a><span class="lineno"> 8222</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
 <div class="ttc" id="aassert_8h_html"><div class="ttname"><a href="../../dc/da7/assert_8h.html">assert.h</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga19fe40faf567a840c117aa10ed9542d2_html_ga19fe40faf567a840c117aa10ed9542d2"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga19fe40faf567a840c117aa10ed9542d2.html#ga19fe40faf567a840c117aa10ed9542d2">operator!=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator!=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects do not have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00660">crgb.h:660</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga1de0f5277d29ec5632ec187c04e447b8_html_ga1de0f5277d29ec5632ec187c04e447b8"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga1de0f5277d29ec5632ec187c04e447b8.html#ga1de0f5277d29ec5632ec187c04e447b8">operator&lt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00705">crgb.h:705</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga26d453dd63264efc07c23ce640205858_html_ga26d453dd63264efc07c23ce640205858"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga26d453dd63264efc07c23ce640205858.html#ga26d453dd63264efc07c23ce640205858">operator==</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator==(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00654">crgb.h:654</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga7f9951a2dbcee1172518377966f1f9d2_html_ga7f9951a2dbcee1172518377966f1f9d2"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga7f9951a2dbcee1172518377966f1f9d2.html#ga7f9951a2dbcee1172518377966f1f9d2">operator&lt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00678">crgb.h:678</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga8a5083bb351fad245f328ae8066134ae_html_ga8a5083bb351fad245f328ae8066134ae"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga8a5083bb351fad245f328ae8066134ae.html#ga8a5083bb351fad245f328ae8066134ae">operator|</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator|(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the largest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00731">crgb.h:731</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga8a80cf207f08b95b7e6d5775ec02ac4b_html_ga8a80cf207f08b95b7e6d5775ec02ac4b"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga8a80cf207f08b95b7e6d5775ec02ac4b.html#ga8a80cf207f08b95b7e6d5775ec02ac4b">operator&amp;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator&amp;(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the smallest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00723">crgb.h:723</a></div></div>
-<div class="ttc" id="agroup___pixel_types_ga9dd25b2710606daf2b439ca93a346893_html_ga9dd25b2710606daf2b439ca93a346893"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga9dd25b2710606daf2b439ca93a346893.html#ga9dd25b2710606daf2b439ca93a346893">operator&gt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00687">crgb.h:687</a></div></div>
-<div class="ttc" id="agroup___pixel_types_gacfcbe699840b65178159536545397252_html_gacfcbe699840b65178159536545397252"><div class="ttname"><a href="../../db/d87/group___pixel_types_gacfcbe699840b65178159536545397252.html#gacfcbe699840b65178159536545397252">operator&gt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00696">crgb.h:696</a></div></div>
-<div class="ttc" id="agroup___pixel_types_gaeda6b694068cd82be2563b7c748d26e9_html_gaeda6b694068cd82be2563b7c748d26e9"><div class="ttname"><a href="../../db/d87/group___pixel_types_gaeda6b694068cd82be2563b7c748d26e9.html#gaeda6b694068cd82be2563b7c748d26e9">operator*</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator*(const CRGB &amp;p1, uint8_t d)</div><div class="ttdoc">Multiply each of the channels by a constant, saturating each channel at 0xFF.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00216">crgb.hpp:216</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga19fe40faf567a840c117aa10ed9542d2_html_ga19fe40faf567a840c117aa10ed9542d2"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga19fe40faf567a840c117aa10ed9542d2.html#ga19fe40faf567a840c117aa10ed9542d2">operator!=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator!=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects do not have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00665">crgb.h:665</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga1de0f5277d29ec5632ec187c04e447b8_html_ga1de0f5277d29ec5632ec187c04e447b8"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga1de0f5277d29ec5632ec187c04e447b8.html#ga1de0f5277d29ec5632ec187c04e447b8">operator&lt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00710">crgb.h:710</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga26d453dd63264efc07c23ce640205858_html_ga26d453dd63264efc07c23ce640205858"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga26d453dd63264efc07c23ce640205858.html#ga26d453dd63264efc07c23ce640205858">operator==</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator==(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00659">crgb.h:659</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga7f9951a2dbcee1172518377966f1f9d2_html_ga7f9951a2dbcee1172518377966f1f9d2"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga7f9951a2dbcee1172518377966f1f9d2.html#ga7f9951a2dbcee1172518377966f1f9d2">operator&lt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00683">crgb.h:683</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga8a5083bb351fad245f328ae8066134ae_html_ga8a5083bb351fad245f328ae8066134ae"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga8a5083bb351fad245f328ae8066134ae.html#ga8a5083bb351fad245f328ae8066134ae">operator|</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator|(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the largest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00736">crgb.h:736</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga8a80cf207f08b95b7e6d5775ec02ac4b_html_ga8a80cf207f08b95b7e6d5775ec02ac4b"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga8a80cf207f08b95b7e6d5775ec02ac4b.html#ga8a80cf207f08b95b7e6d5775ec02ac4b">operator&amp;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator&amp;(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the smallest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00728">crgb.h:728</a></div></div>
+<div class="ttc" id="agroup___pixel_types_ga9dd25b2710606daf2b439ca93a346893_html_ga9dd25b2710606daf2b439ca93a346893"><div class="ttname"><a href="../../db/d87/group___pixel_types_ga9dd25b2710606daf2b439ca93a346893.html#ga9dd25b2710606daf2b439ca93a346893">operator&gt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00692">crgb.h:692</a></div></div>
+<div class="ttc" id="agroup___pixel_types_gacfcbe699840b65178159536545397252_html_gacfcbe699840b65178159536545397252"><div class="ttname"><a href="../../db/d87/group___pixel_types_gacfcbe699840b65178159536545397252.html#gacfcbe699840b65178159536545397252">operator&gt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00701">crgb.h:701</a></div></div>
+<div class="ttc" id="agroup___pixel_types_gaeda6b694068cd82be2563b7c748d26e9_html_gaeda6b694068cd82be2563b7c748d26e9"><div class="ttname"><a href="../../db/d87/group___pixel_types_gaeda6b694068cd82be2563b7c748d26e9.html#gaeda6b694068cd82be2563b7c748d26e9">operator*</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator*(const CRGB &amp;p1, uint8_t d)</div><div class="ttdoc">Multiply each of the channels by a constant, saturating each channel at 0xFF.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00193">crgb.hpp:193</a></div></div>
+<div class="ttc" id="anamespacefl_a0445ddcae69ac4e524ec18098eb84dbf_html_a0445ddcae69ac4e524ec18098eb84dbf"><div class="ttname"><a href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00174">type_traits.h:174</a></div></div>
+<div class="ttc" id="anamespacefl_a17879c4438ab164dc0c325b11032ad57_html_a17879c4438ab164dc0c325b11032ad57"><div class="ttname"><a href="../../d4/d36/namespacefl_a17879c4438ab164dc0c325b11032ad57.html#a17879c4438ab164dc0c325b11032ad57">fl::conditional_t</a></div><div class="ttdeci">typename conditional&lt; B, T, F &gt;::type conditional_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00096">type_traits.h:96</a></div></div>
+<div class="ttc" id="anamespacefl_a1d899b704a244b75b314311218852cf7_html_a1d899b704a244b75b314311218852cf7"><div class="ttname"><a href="../../d4/d36/namespacefl_a1d899b704a244b75b314311218852cf7.html#a1d899b704a244b75b314311218852cf7">fl::swap</a></div><div class="ttdeci">void swap(array&lt; T, N &gt; &amp;lhs, array&lt; T, N &gt; &amp;rhs) noexcept(noexcept(lhs.swap(rhs)))</div><div class="ttdef"><b>Definition</b> <a href="../../db/d63/array_8h_source.html#l00140">array.h:140</a></div></div>
+<div class="ttc" id="anamespacefl_a224aeeea66bd4aa24c94d9d7dcad75cd_html_a224aeeea66bd4aa24c94d9d7dcad75cd"><div class="ttname"><a href="../../d4/d36/namespacefl_a224aeeea66bd4aa24c94d9d7dcad75cd.html#a224aeeea66bd4aa24c94d9d7dcad75cd">fl::remove_cv_t</a></div><div class="ttdeci">typename remove_cv&lt; T &gt;::type remove_cv_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00218">type_traits.h:218</a></div></div>
+<div class="ttc" id="anamespacefl_a29022c57817c486135e4939abce404d6_html_a29022c57817c486135e4939abce404d6"><div class="ttname"><a href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">fl::clear</a></div><div class="ttdeci">void clear(CRGB(&amp;arr)[N])</div><div class="ttdef"><b>Definition</b> <a href="../../df/db0/clear_8h_source.html#l00008">clear.h:8</a></div></div>
 <div class="ttc" id="anamespacefl_a966e65a21faacfa6fe6c00989a2f505c_html_a966e65a21faacfa6fe6c00989a2f505c"><div class="ttname"><a href="../../d4/d36/namespacefl_a966e65a21faacfa6fe6c00989a2f505c.html#a966e65a21faacfa6fe6c00989a2f505c">fl::toJson</a></div><div class="ttdeci">void toJson(const fl::JsonDocument &amp;doc, Str *jsonBuffer)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d55/json_8cpp_source.html#l00024">json.cpp:24</a></div></div>
-<div class="ttc" id="anamespacefl_ae4063344291567fafa1980062d8fe798_html_ae4063344291567fafa1980062d8fe798"><div class="ttname"><a href="../../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798">fl::enable_if_t</a></div><div class="ttdeci">typename enable_if&lt; Condition, T &gt;::type enable_if_t</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d0c/template__magic_8h_source.html#l00029">template_magic.h:29</a></div></div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00056">noise.cpp:56</a></div></div>
+<div class="ttc" id="anamespacefl_ae4063344291567fafa1980062d8fe798_html_ae4063344291567fafa1980062d8fe798"><div class="ttname"><a href="../../d4/d36/namespacefl_ae4063344291567fafa1980062d8fe798.html#ae4063344291567fafa1980062d8fe798">fl::enable_if_t</a></div><div class="ttdeci">typename enable_if&lt; Condition, T &gt;::type enable_if_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00029">type_traits.h:29</a></div></div>
+<div class="ttc" id="anamespacefl_aed7245c077ae6f226d13c9ea795694a8_html_aed7245c077ae6f226d13c9ea795694a8"><div class="ttname"><a href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00189">type_traits.h:189</a></div></div>
+<div class="ttc" id="anamespacefl_af8200623e7db9cc2e7ea600693a0bfa5_html_af8200623e7db9cc2e7ea600693a0bfa5"><div class="ttname"><a href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">fl::remove_reference_t</a></div><div class="ttdeci">typename remove_reference&lt; T &gt;::type remove_reference_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00084">type_traits.h:84</a></div></div>
+<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
+<div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
+<div class="ttc" id="astring_8h_html"><div class="ttname"><a href="../../da/d66/string_8h.html">string.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -8346,7 +8355,7 @@ $(function(){initNavTree('d5/db8/json_8hpp_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_99054eaaf1ec2d970c78e0cd41436977.html">arduinojson</a></li><li class="navelem"><a class="el" href="../../d5/db8/json_8hpp.html">json.hpp</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

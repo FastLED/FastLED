@@ -8,11 +8,11 @@ digraph "ChangePaletteAndSettingsPeriodically"
   rankdir="LR";
   Node1 [id="Node000001",label="ChangePaletteAndSettings\lPeriodically",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="SetupBlackAndWhiteStriped\lPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc5/_color_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26",tooltip=" "];
+  Node2 [id="Node000002",label="SetupBlackAndWhiteStriped\lPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d",tooltip="Fill a range of LEDs with a solid color."];
+  Node3 [id="Node000003",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7",tooltip="Fill a range of LEDs with a solid color."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="SetupPurpleAndGreenPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dc5/_color_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46",tooltip=" "];
+  Node4 [id="Node000004",label="SetupPurpleAndGreenPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="SetupRandomPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_af5f045646a260d2cf4131fcdd548901f.html#af5f045646a260d2cf4131fcdd548901f",tooltip=" "];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];

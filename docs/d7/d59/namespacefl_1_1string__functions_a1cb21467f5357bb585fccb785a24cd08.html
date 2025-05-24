@@ -127,63 +127,65 @@ $(function(){initNavTree('d7/d59/namespacefl_1_1string__functions_a1cb21467f5357
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00045">45</a> of file <a class="el" href="../../d1/d1f/str_8cpp_source.html">str.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   45</span>                                                {</div>
-<div class="line"><span class="lineno">   46</span>    <span class="keywordtype">float</span> result = 0.0f;    <span class="comment">// The resulting number</span></div>
-<div class="line"><span class="lineno">   47</span>    <span class="keywordtype">float</span> sign = 1.0f;      <span class="comment">// Positive or negative</span></div>
-<div class="line"><span class="lineno">   48</span>    <span class="keywordtype">float</span> fraction = 0.0f;  <span class="comment">// Fractional part</span></div>
-<div class="line"><span class="lineno">   49</span>    <span class="keywordtype">float</span> divisor = 1.0f;   <span class="comment">// Divisor for the fractional part</span></div>
-<div class="line"><span class="lineno">   50</span>    <span class="keywordtype">int</span> isFractional = 0;   <span class="comment">// Whether the current part is fractional</span></div>
-<div class="line"><span class="lineno">   51</span> </div>
-<div class="line"><span class="lineno">   52</span>    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> = 0; <span class="comment">// Current position in the string</span></div>
-<div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>    <span class="comment">// Handle empty input</span></div>
-<div class="line"><span class="lineno">   55</span>    <span class="keywordflow">if</span> (len == 0) {</div>
-<div class="line"><span class="lineno">   56</span>        <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">   57</span>    }</div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>    <span class="comment">// Skip leading whitespace (manual check instead of isspace)</span></div>
-<div class="line"><span class="lineno">   60</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp; (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39; &#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\t&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\n&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\r&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\f&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\v&#39;</span>)) {</div>
-<div class="line"><span class="lineno">   61</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
-<div class="line"><span class="lineno">   62</span>    }</div>
-<div class="line"><span class="lineno">   63</span> </div>
-<div class="line"><span class="lineno">   64</span>    <span class="comment">// Handle optional sign</span></div>
-<div class="line"><span class="lineno">   65</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;-&#39;</span>) {</div>
-<div class="line"><span class="lineno">   66</span>        sign = -1.0f;</div>
-<div class="line"><span class="lineno">   67</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
-<div class="line"><span class="lineno">   68</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;+&#39;</span>) {</div>
-<div class="line"><span class="lineno">   69</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
-<div class="line"><span class="lineno">   70</span>    }</div>
-<div class="line"><span class="lineno">   71</span> </div>
-<div class="line"><span class="lineno">   72</span>    <span class="comment">// Main parsing loop</span></div>
-<div class="line"><span class="lineno">   73</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len) {</div>
-<div class="line"><span class="lineno">   74</span>        <span class="keywordflow">if</span> (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
-<div class="line"><span class="lineno">   75</span>            <span class="keywordflow">if</span> (isFractional) {</div>
-<div class="line"><span class="lineno">   76</span>                divisor *= 10.0f;</div>
-<div class="line"><span class="lineno">   77</span>                fraction += (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] - <span class="charliteral">&#39;0&#39;</span>) / divisor;</div>
-<div class="line"><span class="lineno">   78</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   79</span>                result = result * 10.0f + (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] - <span class="charliteral">&#39;0&#39;</span>);</div>
-<div class="line"><span class="lineno">   80</span>            }</div>
-<div class="line"><span class="lineno">   81</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;.&#39;</span> &amp;&amp; !isFractional) {</div>
-<div class="line"><span class="lineno">   82</span>            isFractional = 1;</div>
-<div class="line"><span class="lineno">   83</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   84</span>            <span class="comment">// Stop parsing at invalid characters</span></div>
-<div class="line"><span class="lineno">   85</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">   86</span>        }</div>
-<div class="line"><span class="lineno">   87</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
-<div class="line"><span class="lineno">   88</span>    }</div>
-<div class="line"><span class="lineno">   89</span> </div>
-<div class="line"><span class="lineno">   90</span>    <span class="comment">// Combine integer and fractional parts</span></div>
-<div class="line"><span class="lineno">   91</span>    result = result + fraction;</div>
-<div class="line"><span class="lineno">   92</span> </div>
-<div class="line"><span class="lineno">   93</span>    <span class="comment">// Apply the sign</span></div>
-<div class="line"><span class="lineno">   94</span>    <span class="keywordflow">return</span> sign * result;</div>
-<div class="line"><span class="lineno">   95</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00100">100</a> of file <a class="el" href="../../d1/d1f/str_8cpp_source.html">str.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  100</span>                                                {</div>
+<div class="line"><span class="lineno">  101</span>    <span class="keywordtype">float</span> result = 0.0f;   <span class="comment">// The resulting number</span></div>
+<div class="line"><span class="lineno">  102</span>    <span class="keywordtype">float</span> sign = 1.0f;     <span class="comment">// Positive or negative</span></div>
+<div class="line"><span class="lineno">  103</span>    <span class="keywordtype">float</span> fraction = 0.0f; <span class="comment">// Fractional part</span></div>
+<div class="line"><span class="lineno">  104</span>    <span class="keywordtype">float</span> divisor = 1.0f;  <span class="comment">// Divisor for the fractional part</span></div>
+<div class="line"><span class="lineno">  105</span>    <span class="keywordtype">int</span> isFractional = 0;  <span class="comment">// Whether the current part is fractional</span></div>
+<div class="line"><span class="lineno">  106</span> </div>
+<div class="line"><span class="lineno">  107</span>    <span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> = 0; <span class="comment">// Current position in the string</span></div>
+<div class="line"><span class="lineno">  108</span> </div>
+<div class="line"><span class="lineno">  109</span>    <span class="comment">// Handle empty input</span></div>
+<div class="line"><span class="lineno">  110</span>    <span class="keywordflow">if</span> (len == 0) {</div>
+<div class="line"><span class="lineno">  111</span>        <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  112</span>    }</div>
+<div class="line"><span class="lineno">  113</span> </div>
+<div class="line"><span class="lineno">  114</span>    <span class="comment">// Skip leading whitespace (manual check instead of isspace)</span></div>
+<div class="line"><span class="lineno">  115</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp;</div>
+<div class="line"><span class="lineno">  116</span>           (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39; &#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\t&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\n&#39;</span> ||</div>
+<div class="line"><span class="lineno">  117</span>            str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\r&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\f&#39;</span> || str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;\v&#39;</span>)) {</div>
+<div class="line"><span class="lineno">  118</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
+<div class="line"><span class="lineno">  119</span>    }</div>
+<div class="line"><span class="lineno">  120</span> </div>
+<div class="line"><span class="lineno">  121</span>    <span class="comment">// Handle optional sign</span></div>
+<div class="line"><span class="lineno">  122</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;-&#39;</span>) {</div>
+<div class="line"><span class="lineno">  123</span>        sign = -1.0f;</div>
+<div class="line"><span class="lineno">  124</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
+<div class="line"><span class="lineno">  125</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">  126</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
+<div class="line"><span class="lineno">  127</span>    }</div>
+<div class="line"><span class="lineno">  128</span> </div>
+<div class="line"><span class="lineno">  129</span>    <span class="comment">// Main parsing loop</span></div>
+<div class="line"><span class="lineno">  130</span>    <span class="keywordflow">while</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; len) {</div>
+<div class="line"><span class="lineno">  131</span>        <span class="keywordflow">if</span> (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] &gt;= <span class="charliteral">&#39;0&#39;</span> &amp;&amp; str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] &lt;= <span class="charliteral">&#39;9&#39;</span>) {</div>
+<div class="line"><span class="lineno">  132</span>            <span class="keywordflow">if</span> (isFractional) {</div>
+<div class="line"><span class="lineno">  133</span>                divisor *= 10.0f;</div>
+<div class="line"><span class="lineno">  134</span>                fraction += (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] - <span class="charliteral">&#39;0&#39;</span>) / divisor;</div>
+<div class="line"><span class="lineno">  135</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  136</span>                result = result * 10.0f + (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] - <span class="charliteral">&#39;0&#39;</span>);</div>
+<div class="line"><span class="lineno">  137</span>            }</div>
+<div class="line"><span class="lineno">  138</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (str[<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>] == <span class="charliteral">&#39;.&#39;</span> &amp;&amp; !isFractional) {</div>
+<div class="line"><span class="lineno">  139</span>            isFractional = 1;</div>
+<div class="line"><span class="lineno">  140</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  141</span>            <span class="comment">// Stop parsing at invalid characters</span></div>
+<div class="line"><span class="lineno">  142</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  143</span>        }</div>
+<div class="line"><span class="lineno">  144</span>        <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>++;</div>
+<div class="line"><span class="lineno">  145</span>    }</div>
+<div class="line"><span class="lineno">  146</span> </div>
+<div class="line"><span class="lineno">  147</span>    <span class="comment">// Combine integer and fractional parts</span></div>
+<div class="line"><span class="lineno">  148</span>    result = result + fraction;</div>
+<div class="line"><span class="lineno">  149</span> </div>
+<div class="line"><span class="lineno">  150</span>    <span class="comment">// Apply the sign</span></div>
+<div class="line"><span class="lineno">  151</span>    <span class="keywordflow">return</span> sign * result;</div>
+<div class="line"><span class="lineno">  152</span>}</div>
 <div class="ttc" id="a_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae_html_a29716abd4f651ba9d6f1476ea79fa7ae"><div class="ttname"><a href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a></div><div class="ttdeci">uint8_t pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0c/_blur_8ino_source.html#l00011">Blur.ino:11</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00011">pos</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00166">fl::StringFormatter::parseFloat()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/d1f/str_8cpp_source.html#l00222">fl::StringFormatter::parseFloat()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -201,7 +203,7 @@ $(function(){initNavTree('d7/d59/namespacefl_1_1string__functions_a1cb21467f5357
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d59/namespacefl_1_1string__functions.html">string_functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

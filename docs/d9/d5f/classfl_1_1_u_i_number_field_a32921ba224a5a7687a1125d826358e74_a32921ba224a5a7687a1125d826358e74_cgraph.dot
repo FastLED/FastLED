@@ -10,9 +10,17 @@ digraph "fl::UINumberField::operator="
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::UINumberField::\lUINumberField",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f.html#aa9fd991cb3abb114bf6c578f92324d3f",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UINumberField::\lvalue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838",tooltip=" "];
-  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::UINumberField::\lsetValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_ae3eb39add980947e8f91b380c29ec46b.html#ae3eb39add980947e8f91b380c29ec46b",tooltip=" "];
-  Node4 -> Node3 [id="edge4_Node000004_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node3 [id="edge5_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UINumberFieldImpl\l::UINumberFieldImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_a9e5638528b2953f385b55c17daf589b3.html#a9e5638528b2953f385b55c17daf589b3",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::UINumberFieldImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::UINumberField::\lvalue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838",tooltip=" "];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::UINumberField::\lsetValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_ae3eb39add980947e8f91b380c29ec46b.html#ae3eb39add980947e8f91b380c29ec46b",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::UINumberFieldImpl\l::setValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_ad9a88b405197eaf2369e1fde9194d2f3.html#ad9a88b405197eaf2369e1fde9194d2f3",tooltip=" "];
+  Node7 -> Node4 [id="edge8_Node000007_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node5 [id="edge9_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge10_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
 }

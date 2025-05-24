@@ -105,19 +105,18 @@ $(function(){initNavTree('d7/da1/fl_2types_8h_source.html','../../'); initResiza
 <div class="contents">
 <a href="../../d7/da1/fl_2types_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a>&quot;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d2a/namespace_8h.html">fl/namespace.h</a>&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d2a/namespace_8h.html">fl/namespace.h</a>&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a>&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#if defined(__AVR__)</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">typedef</span> <span class="keywordtype">int</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">cycle_t</a>;  </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">typedef</span> <span class="keywordtype">int</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">cycle_t</a>; </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">   11</a></span><span class="keyword">typedef</span> int64_t <a class="code hl_typedef" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">cycle_t</a>;  </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">   11</a></span><span class="keyword">typedef</span> int64_t <a class="code hl_typedef" href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">cycle_t</a>; </div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>} <span class="comment">// namespace fl</span></div>
 <div class="ttc" id="aled__sysdefs_8h_html"><div class="ttname"><a href="../../d9/d3e/led__sysdefs_8h.html">led_sysdefs.h</a></div><div class="ttdoc">Determines which platform system definitions to include.</div></div>
 <div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
 <div class="ttc" id="anamespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8_html_a6754328c4b1ad5e8e46ddbc6eaa638a8"><div class="ttname"><a href="../../d4/d36/namespacefl_a6754328c4b1ad5e8e46ddbc6eaa638a8.html#a6754328c4b1ad5e8e46ddbc6eaa638a8">fl::cycle_t</a></div><div class="ttdeci">int64_t cycle_t</div><div class="ttdoc">8.8 fixed point (signed) value</div><div class="ttdef"><b>Definition</b> <a href="#l00011">types.h:11</a></div></div>
@@ -129,7 +128,7 @@ $(function(){initNavTree('d7/da1/fl_2types_8h_source.html','../../'); initResiza
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/da1/fl_2types_8h.html">types.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

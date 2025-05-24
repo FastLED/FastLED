@@ -28,7 +28,7 @@ digraph "fl::Pacifica::draw"
   Node9 -> Node3 [id="edge11_Node000009_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node9 -> Node5 [id="edge12_Node000009_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node10 [id="edge13_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d",tooltip="Fill a range of LEDs with a solid color."];
+  Node10 [id="Node000010",label="fl::fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7",tooltip="Fill a range of LEDs with a solid color."];
   Node1 -> Node11 [id="edge14_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="pacifica_add_whitecaps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26",tooltip=" "];
   Node11 -> Node7 [id="edge15_Node000011_Node000007",color="steelblue1",style="solid",tooltip=" "];
@@ -42,13 +42,13 @@ digraph "fl::Pacifica::draw"
   Node1 -> Node14 [id="edge21_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl::Pacifica::pacifica\l_one_layer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1_pacifica_ac949d5e9a88b724a060954658b892ebc.html#ac949d5e9a88b724a060954658b892ebc",tooltip=" "];
   Node14 -> Node15 [id="edge22_Node000014_Node000015",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd",tooltip="Get a color from a palette."];
+  Node15 [id="Node000015",label="fl::ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090",tooltip=" "];
   Node15 -> Node16 [id="edge23_Node000015_Node000016",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="blend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c",tooltip="Computes a new color blended some fraction of the way between two other colors."];
+  Node16 [id="Node000016",label="fl::blend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805",tooltip=" "];
   Node15 -> Node19 [id="edge24_Node000015_Node000019",color="steelblue1",style="solid",tooltip=" "];
   Node19 [id="Node000019",label="cleanup_R1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79",tooltip="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls."];
   Node15 -> Node21 [id="edge25_Node000015_Node000021",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="lsrX4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170",tooltip="Helper function to divide a number by 16, aka four logical shift right (LSR)'s."];
+  Node21 [id="Node000021",label="fl::lsrX4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8ef00cea89dd1023f79e4d6d33883a40.html#a8ef00cea89dd1023f79e4d6d33883a40",tooltip="Helper function to divide a number by 16, aka four logical shift right (LSR)'s."];
   Node15 -> Node22 [id="edge26_Node000015_Node000022",color="steelblue1",style="solid",tooltip=" "];
   Node22 [id="Node000022",label="map8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d",tooltip="Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues."];
   Node22 -> Node8 [id="edge27_Node000022_Node000008",color="steelblue1",style="solid",tooltip=" "];

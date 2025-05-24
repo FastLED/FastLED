@@ -10,5 +10,9 @@ digraph "fl::EngineEvents::_onEndFrame"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::EngineEvents::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_ab7d24c4783214392de84947cd7df5570.html#ab7d24c4783214392de84947cd7df5570",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="CFastLED::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b",tooltip="Update all our controllers with the current led colors, using the passed in brightness."];
+  Node3 [id="Node000003",label="CFastLED::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a0f2e873e64e881bd843e188d92cd8caa.html#a0f2e873e64e881bd843e188d92cd8caa",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CFastLED::show",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a83afdd1e2a21f33ac4f8d2610d6e331b.html#a83afdd1e2a21f33ac4f8d2610d6e331b",tooltip="Update all our controllers with the current led colors, using the passed in brightness."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CFastLED::showColor",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a7315b060d295bad5fbd32e50eaaf02b0.html#a7315b060d295bad5fbd32e50eaaf02b0",tooltip="Set all leds on all controllers to the given color/scale."];
 }

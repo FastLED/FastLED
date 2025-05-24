@@ -123,19 +123,26 @@ $(function(){initNavTree('dd/d47/classfl_1_1_u_i_slider_af3080baea698595d0df8fe2
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d3b/ui_8h_source.html#l00058">58</a> of file <a class="el" href="../../d9/d3b/ui_8h_source.html">ui.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   58</span>                                   {</div>
-<div class="line"><span class="lineno">   59</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d0/d19/fl_2math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2.html#a1f8698fec915b202346cc2bae8b36dc2">ALMOST_EQUAL</a>(<a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_aae3141b5219ac60c13a5114bb122cb8f.html#aae3141b5219ac60c13a5114bb122cb8f">mMax</a>, <a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8.html#a5202696b04b99b8b000b5204fea172a8">mMin</a>, 0.0001f)) {</div>
-<div class="line"><span class="lineno">   60</span>            <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   61</span>        }</div>
-<div class="line"><span class="lineno">   62</span>        <span class="keywordflow">return</span> (<a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_aedb0df0fdfc80c5542049d21e61e6930.html#aedb0df0fdfc80c5542049d21e61e6930">mValue</a> - <a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8.html#a5202696b04b99b8b000b5204fea172a8">mMin</a>) / (<a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_aae3141b5219ac60c13a5114bb122cb8f.html#aae3141b5219ac60c13a5114bb122cb8f">mMax</a> - <a class="code hl_variable" href="../../dd/d47/classfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8.html#a5202696b04b99b8b000b5204fea172a8">mMin</a>);</div>
-<div class="line"><span class="lineno">   63</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8_html_a5202696b04b99b8b000b5204fea172a8"><div class="ttname"><a href="../../dd/d47/classfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8.html#a5202696b04b99b8b000b5204fea172a8">fl::UISlider::mMin</a></div><div class="ttdeci">float mMin</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00084">ui.h:84</a></div></div>
-<div class="ttc" id="aclassfl_1_1_u_i_slider_aae3141b5219ac60c13a5114bb122cb8f_html_aae3141b5219ac60c13a5114bb122cb8f"><div class="ttname"><a href="../../dd/d47/classfl_1_1_u_i_slider_aae3141b5219ac60c13a5114bb122cb8f.html#aae3141b5219ac60c13a5114bb122cb8f">fl::UISlider::mMax</a></div><div class="ttdeci">float mMax</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00085">ui.h:85</a></div></div>
-<div class="ttc" id="aclassfl_1_1_u_i_slider_aedb0df0fdfc80c5542049d21e61e6930_html_aedb0df0fdfc80c5542049d21e61e6930"><div class="ttname"><a href="../../dd/d47/classfl_1_1_u_i_slider_aedb0df0fdfc80c5542049d21e61e6930.html#aedb0df0fdfc80c5542049d21e61e6930">fl::UISlider::mValue</a></div><div class="ttdeci">float mValue</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00083">ui.h:83</a></div></div>
-<div class="ttc" id="afl_2math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2_html_a1f8698fec915b202346cc2bae8b36dc2"><div class="ttname"><a href="../../d0/d19/fl_2math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2.html#a1f8698fec915b202346cc2bae8b36dc2">ALMOST_EQUAL</a></div><div class="ttdeci">#define ALMOST_EQUAL(a, b, small)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d19/fl_2math__macros_8h_source.html#l00016">math_macros.h:16</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d3b/ui_8h_source.html#l00033">33</a> of file <a class="el" href="../../d9/d3b/ui_8h_source.html">ui.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   33</span>                                   {</div>
+<div class="line"><span class="lineno">   34</span>        <span class="keywordtype">float</span> min = Super::getMin();</div>
+<div class="line"><span class="lineno">   35</span>        <span class="keywordtype">float</span> max = Super::getMax();</div>
+<div class="line"><span class="lineno">   36</span>        <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d8/db8/math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2.html#a1f8698fec915b202346cc2bae8b36dc2">ALMOST_EQUAL</a>(max, min, 0.0001f)) {</div>
+<div class="line"><span class="lineno">   37</span>            <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   38</span>        }</div>
+<div class="line"><span class="lineno">   39</span>        <span class="keywordflow">return</span> (<a class="code hl_function" href="../../dd/d47/classfl_1_1_u_i_slider_aff1715a175e32318236c637d2b607662.html#aff1715a175e32318236c637d2b607662">value</a>() - min) / (max - min);</div>
+<div class="line"><span class="lineno">   40</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_u_i_slider_aff1715a175e32318236c637d2b607662_html_aff1715a175e32318236c637d2b607662"><div class="ttname"><a href="../../dd/d47/classfl_1_1_u_i_slider_aff1715a175e32318236c637d2b607662.html#aff1715a175e32318236c637d2b607662">fl::UISlider::value</a></div><div class="ttdeci">float value() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00032">ui.h:32</a></div></div>
+<div class="ttc" id="amath__macros_8h_a1f8698fec915b202346cc2bae8b36dc2_html_a1f8698fec915b202346cc2bae8b36dc2"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2.html#a1f8698fec915b202346cc2bae8b36dc2">ALMOST_EQUAL</a></div><div class="ttdeci">#define ALMOST_EQUAL(a, b, small)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00033">math_macros.h:33</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/d19/fl_2math__macros_8h_source.html#l00016">ALMOST_EQUAL</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00085">mMax</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00084">mMin</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00083">mValue</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00033">ALMOST_EQUAL</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00032">value()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d47/classfl_1_1_u_i_slider_af3080baea698595d0df8fe2f8c3ad2f9_af3080baea698595d0df8fe2f8c3ad2f9_cgraph.svg" width="326" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -146,7 +153,7 @@ $(function(){initNavTree('dd/d47/classfl_1_1_u_i_slider_af3080baea698595d0df8fe2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d47/classfl_1_1_u_i_slider.html">UISlider</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

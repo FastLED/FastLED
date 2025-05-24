@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$df/d79/class_color_selector.html" title=" " alt="" coords="5,5,115,31"/>
+<area shape="rect" id="Node000000" href="$db/df7/class_c_pixel_view.html" title=" " alt="" coords="5,5,167,31"/>
+<area shape="rect" id="Node000001" href="$d4/dc4/class_c_r_g_b_array.html" title="A version of CPixelView&lt;CRGB&gt; with an included array of CRGB LEDs." alt="" coords="215,5,368,31"/>
+<area shape="poly" id="edge125_Node000000_Node000001" title=" " alt="" coords="180,15,214,15,214,21,180,21"/>
 </map>

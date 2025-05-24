@@ -119,25 +119,24 @@ $(function(){initNavTree('de/d10/classfl_1_1_rectangular_draw_buffer_ad2a4686bb9
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html#l00017">17</a> of file <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html">rectangular_draw_buffer.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   17</span>                                                                                            {</div>
-<div class="line"><span class="lineno">   18</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">mPinToLedSegment</a>.find(pin);</div>
-<div class="line"><span class="lineno">   19</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">mPinToLedSegment</a>.end()) {</div>
-<div class="line"><span class="lineno">   20</span>        <a class="code hl_define" href="../../dc/da7/assert_8h_a15e259a2d9e8ef087ca225a31ff81ec2.html#a15e259a2d9e8ef087ca225a31ff81ec2">FASTLED_ASSERT</a>(<span class="keyword">false</span>, <span class="stringliteral">&quot;Pin not found in RectangularDrawBuffer&quot;</span>);</div>
-<div class="line"><span class="lineno">   21</span>        <span class="keywordflow">return</span> fl::Slice&lt;uint8_t&gt;();</div>
-<div class="line"><span class="lineno">   22</span>    }</div>
-<div class="line"><span class="lineno">   23</span>    fl::Slice&lt;uint8_t&gt; slice = it-&gt;second;</div>
-<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">if</span> (clear_first) {</div>
-<div class="line"><span class="lineno">   25</span>        memset(slice.<a class="code hl_function" href="../../d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe">data</a>(), 0, slice.<a class="code hl_function" href="../../d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe">size</a>() * <span class="keyword">sizeof</span>(slice[0]));</div>
-<div class="line"><span class="lineno">   26</span>    }</div>
-<div class="line"><span class="lineno">   27</span>    <span class="keywordflow">return</span> slice;</div>
-<div class="line"><span class="lineno">   28</span>}</div>
-<div class="ttc" id="aassert_8h_a15e259a2d9e8ef087ca225a31ff81ec2_html_a15e259a2d9e8ef087ca225a31ff81ec2"><div class="ttname"><a href="../../dc/da7/assert_8h_a15e259a2d9e8ef087ca225a31ff81ec2.html#a15e259a2d9e8ef087ca225a31ff81ec2">FASTLED_ASSERT</a></div><div class="ttdeci">#define FASTLED_ASSERT(x, MSG)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da7/assert_8h_source.html#l00009">assert.h:9</a></div></div>
-<div class="ttc" id="aclassfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd_html_adb6c1c4abe0380f60dc608baa7e7b8cd"><div class="ttname"><a href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">fl::RectangularDrawBuffer::mPinToLedSegment</a></div><div class="ttdeci">fl::FixedMap&lt; uint8_t, fl::Slice&lt; uint8_t &gt;, 50 &gt; mPinToLedSegment</div><div class="ttdef"><b>Definition</b> <a href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00040">rectangular_draw_buffer.h:40</a></div></div>
-<div class="ttc" id="aclassfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe_html_ab1d9efdc701eec91c7b89910cab46afe"><div class="ttname"><a href="../../d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe">fl::Slice::data</a></div><div class="ttdeci">const T * data() const</div><div class="ttdef"><b>Definition</b> <a href="../../db/d37/fl_2slice_8h_source.html#l00054">slice.h:54</a></div></div>
-<div class="ttc" id="aclassfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe_html_ac58f0072a72c9466170b3bf931473dbe"><div class="ttname"><a href="../../d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe">fl::Slice::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="../../db/d37/fl_2slice_8h_source.html#l00062">slice.h:62</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html#l00018">18</a> of file <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html">rectangular_draw_buffer.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   18</span>                                                                             {</div>
+<div class="line"><span class="lineno">   19</span>    <span class="keyword">auto</span> it = <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">mPinToLedSegment</a>.find(pin);</div>
+<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">if</span> (it == <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">mPinToLedSegment</a>.end()) {</div>
+<div class="line"><span class="lineno">   21</span>        FASTLED_ASSERT(<span class="keyword">false</span>, <span class="stringliteral">&quot;Pin not found in RectangularDrawBuffer&quot;</span>);</div>
+<div class="line"><span class="lineno">   22</span>        <span class="keywordflow">return</span> fl::Slice&lt;uint8_t&gt;();</div>
+<div class="line"><span class="lineno">   23</span>    }</div>
+<div class="line"><span class="lineno">   24</span>    fl::Slice&lt;uint8_t&gt; slice = it-&gt;second;</div>
+<div class="line"><span class="lineno">   25</span>    <span class="keywordflow">if</span> (clear_first) {</div>
+<div class="line"><span class="lineno">   26</span>        memset(slice.<a class="code hl_function" href="../../d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe">data</a>(), 0, slice.<a class="code hl_function" href="../../d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe">size</a>() * <span class="keyword">sizeof</span>(slice[0]));</div>
+<div class="line"><span class="lineno">   27</span>    }</div>
+<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">return</span> slice;</div>
+<div class="line"><span class="lineno">   29</span>}</div>
+<div class="ttc" id="aclassfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd_html_adb6c1c4abe0380f60dc608baa7e7b8cd"><div class="ttname"><a href="../../de/d10/classfl_1_1_rectangular_draw_buffer_adb6c1c4abe0380f60dc608baa7e7b8cd.html#adb6c1c4abe0380f60dc608baa7e7b8cd">fl::RectangularDrawBuffer::mPinToLedSegment</a></div><div class="ttdeci">fl::FixedMap&lt; uint8_t, fl::Slice&lt; uint8_t &gt;, 50 &gt; mPinToLedSegment</div><div class="ttdef"><b>Definition</b> <a href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00041">rectangular_draw_buffer.h:41</a></div></div>
+<div class="ttc" id="aclassfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe_html_ab1d9efdc701eec91c7b89910cab46afe"><div class="ttname"><a href="../../d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe">fl::Slice::data</a></div><div class="ttdeci">const T * data() const</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d48/slice_8h_source.html#l00086">slice.h:86</a></div></div>
+<div class="ttc" id="aclassfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe_html_ac58f0072a72c9466170b3bf931473dbe"><div class="ttname"><a href="../../d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe">fl::Slice::size</a></div><div class="ttdeci">size_t size() const</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d48/slice_8h_source.html#l00090">slice.h:90</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d37/fl_2slice_8h_source.html#l00054">fl::Slice&lt; T &gt;::data()</a>, <a class="el" href="../../dc/da7/assert_8h_source.html#l00009">FASTLED_ASSERT</a>, <a class="el" href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00040">mPinToLedSegment</a>, and <a class="el" href="../../db/d37/fl_2slice_8h_source.html#l00062">fl::Slice&lt; T &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d48/slice_8h_source.html#l00086">fl::Slice&lt; T &gt;::data()</a>, <a class="el" href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00041">mPinToLedSegment</a>, and <a class="el" href="../../d0/d48/slice_8h_source.html#l00090">fl::Slice&lt; T &gt;::size()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -155,7 +154,7 @@ $(function(){initNavTree('de/d10/classfl_1_1_rectangular_draw_buffer_ad2a4686bb9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d10/classfl_1_1_rectangular_draw_buffer.html">RectangularDrawBuffer</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

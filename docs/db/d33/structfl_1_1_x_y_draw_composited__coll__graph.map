@@ -1,0 +1,7 @@
+<map id="fl::XYDrawComposited" name="fl::XYDrawComposited">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,172,133"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="13,5,71,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,44,50,64,58,83,77,106,73,110,53,85,45,65,41,45"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="95,5,178,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,44,110,85,97,109,93,106,105,83,124,42"/>
+</map>

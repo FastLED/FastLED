@@ -8,9 +8,9 @@ digraph "fl::time_alpha8"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::time_alpha8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::TimeLinear::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d86/classfl_1_1_time_linear_ab5da3dd38a658ecd3c8531fac99b1481.html#ab5da3dd38a658ecd3c8531fac99b1481",tooltip=" "];
+  Node2 [id="Node000002",label="fl::TimeClampedTransition\l::update8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d62/classfl_1_1_time_clamped_transition_a5b7eeb214cf644e38a7d385825aa82ef.html#a5b7eeb214cf644e38a7d385825aa82ef",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::TimeRamp::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a17b1376b4c537c669912cef12d9f211d.html#a17b1376b4c537c669912cef12d9f211d",tooltip="Compute current 0–255 output based on how much time has elapsed since trigger()."];
+  Node3 [id="Node000003",label="fl::TimeRamp::update8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0",tooltip="Compute current 0–255 output based on how much time has elapsed since trigger()."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="applyFancyEffect",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];

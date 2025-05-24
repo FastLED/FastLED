@@ -125,32 +125,32 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_af9962ef739bdb3b590ee6
 
 <p>Reimplemented in <a class="el" href="../../d5/d83/class_r_g_b_w_emulated_controller_a460b948159965c26b3d6eabb58311c36.html#a460b948159965c26b3d6eabb58311c36">RGBWEmulatedController&lt; CONTROLLER, RGB_ORDER &gt;</a>, <a class="el" href="../../dd/dbc/class_w_s2816_controller_a707a38914723165e02e6866743b67a6b.html#a707a38914723165e02e6866743b67a6b">WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;</a>, and <a class="el" href="../../dd/dbc/class_w_s2816_controller_a707a38914723165e02e6866743b67a6b.html#a707a38914723165e02e6866743b67a6b">WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00214">214</a> of file <a class="el" href="../../db/d6d/cled__controller_8h_source.html">cled_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  214</span>                                          {</div>
-<div class="line"><span class="lineno">  215</span>        <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(<a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e">size</a>);</div>
-<div class="line"><span class="lineno">  216</span>        <span class="comment">// By default, emit an integer. This integer will, by default, be passed back.</span></div>
-<div class="line"><span class="lineno">  217</span>        <span class="comment">// If you override beginShowLeds() then</span></div>
-<div class="line"><span class="lineno">  218</span>        <span class="comment">// you should also override endShowLeds() to match the return state.</span></div>
-<div class="line"><span class="lineno">  219</span>        <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  220</span>        <span class="comment">// For async led controllers this should be used as a sync point to block</span></div>
-<div class="line"><span class="lineno">  221</span>        <span class="comment">// the caller until the leds from the last draw frame have completed drawing.</span></div>
-<div class="line"><span class="lineno">  222</span>        <span class="comment">// for each controller:</span></div>
-<div class="line"><span class="lineno">  223</span>        <span class="comment">//   beginShowLeds();</span></div>
-<div class="line"><span class="lineno">  224</span>        <span class="comment">// for each controller:</span></div>
-<div class="line"><span class="lineno">  225</span>        <span class="comment">//   showLeds();</span></div>
-<div class="line"><span class="lineno">  226</span>        <span class="comment">// for each controller:</span></div>
-<div class="line"><span class="lineno">  227</span>        <span class="comment">//   endShowLeds();</span></div>
-<div class="line"><span class="lineno">  228</span>        uintptr_t d = <a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7">getDither</a>();</div>
-<div class="line"><span class="lineno">  229</span>        <span class="keywordtype">void</span>* out = <span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(d);</div>
-<div class="line"><span class="lineno">  230</span>        <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  231</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00220">220</a> of file <a class="el" href="../../db/d6d/cled__controller_8h_source.html">cled_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  220</span>                                          {</div>
+<div class="line"><span class="lineno">  221</span>        <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(<a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e">size</a>);</div>
+<div class="line"><span class="lineno">  222</span>        <span class="comment">// By default, emit an integer. This integer will, by default, be passed back.</span></div>
+<div class="line"><span class="lineno">  223</span>        <span class="comment">// If you override beginShowLeds() then</span></div>
+<div class="line"><span class="lineno">  224</span>        <span class="comment">// you should also override endShowLeds() to match the return state.</span></div>
+<div class="line"><span class="lineno">  225</span>        <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  226</span>        <span class="comment">// For async led controllers this should be used as a sync point to block</span></div>
+<div class="line"><span class="lineno">  227</span>        <span class="comment">// the caller until the leds from the last draw frame have completed drawing.</span></div>
+<div class="line"><span class="lineno">  228</span>        <span class="comment">// for each controller:</span></div>
+<div class="line"><span class="lineno">  229</span>        <span class="comment">//   beginShowLeds();</span></div>
+<div class="line"><span class="lineno">  230</span>        <span class="comment">// for each controller:</span></div>
+<div class="line"><span class="lineno">  231</span>        <span class="comment">//   showLeds();</span></div>
+<div class="line"><span class="lineno">  232</span>        <span class="comment">// for each controller:</span></div>
+<div class="line"><span class="lineno">  233</span>        <span class="comment">//   endShowLeds();</span></div>
+<div class="line"><span class="lineno">  234</span>        uintptr_t d = <a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7">getDither</a>();</div>
+<div class="line"><span class="lineno">  235</span>        <span class="keywordtype">void</span>* out = <span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(d);</div>
+<div class="line"><span class="lineno">  236</span>        <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  237</span>    }</div>
 <div class="ttc" id="aclass_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e_html_a63f75cf7e55cf8da46db5fd27110bb3e"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a63f75cf7e55cf8da46db5fd27110bb3e.html#a63f75cf7e55cf8da46db5fd27110bb3e">CLEDController::size</a></div><div class="ttdeci">virtual int size()</div><div class="ttdoc">How many LEDs does this controller manage?</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00174">cled_controller.h:174</a></div></div>
-<div class="ttc" id="aclass_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7_html_a676f705adf93898739a405b85150a3e7"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7">CLEDController::getDither</a></div><div class="ttdeci">uint8_t getDither()</div><div class="ttdoc">Get the dithering option currently set for this controller.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00212">cled_controller.h:212</a></div></div>
+<div class="ttc" id="aclass_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7_html_a676f705adf93898739a405b85150a3e7"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a676f705adf93898739a405b85150a3e7.html#a676f705adf93898739a405b85150a3e7">CLEDController::getDither</a></div><div class="ttdeci">uint8_t getDither()</div><div class="ttdoc">Get the dithering option currently set for this controller.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00218">cled_controller.h:218</a></div></div>
 <div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00003">unused.h:3</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d4b/unused_8h_source.html#l00003">FASTLED_UNUSED</a>, <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00212">getDither()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00174">size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d4b/unused_8h_source.html#l00003">FASTLED_UNUSED</a>, <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00218">getDither()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00174">size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00107">CFastLED::show()</a>, <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00177">CFastLED::showColor()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00098">showLeds()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00107">CFastLED::show()</a>, <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00181">CFastLED::showColor()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00098">showLeds()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -175,7 +175,7 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_af9962ef739bdb3b590ee6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/d2c/class_c_l_e_d_controller.html">CLEDController</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

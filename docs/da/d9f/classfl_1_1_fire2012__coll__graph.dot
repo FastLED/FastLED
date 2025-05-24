@@ -22,8 +22,4 @@ digraph "fl::Fire2012"
   Node14 [id="Node000014",label="fl::ArrayDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
   Node15 -> Node12 [id="edge8_Node000012_Node000015",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t \>",fontcolor="grey" ];
   Node15 [id="Node000015",label="fl::scoped_array\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
-  Node16 -> Node1 [id="edge9_Node000001_Node000016",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" palette",fontcolor="grey" ];
-  Node16 [id="Node000016",label="CRGBPalette16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/dc4/class_c_r_g_b_palette16.html",tooltip="RGB color palette with 16 discrete values."];
-  Node17 -> Node16 [id="edge10_Node000016_Node000017",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" entries",fontcolor="grey" ];
-  Node17 [id="Node000017",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
 }

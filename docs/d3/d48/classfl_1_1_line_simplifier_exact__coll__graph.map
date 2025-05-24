@@ -1,0 +1,21 @@
+<map id="fl::LineSimplifierExact&lt; NumberT &gt;" name="fl::LineSimplifierExact&lt; NumberT &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1111,151,1273,191"/>
+<area shape="rect" id="Node000002" href="$dc/d4a/classfl_1_1_line_simplifier.html" title=" " alt="" coords="829,151,956,191"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="970,169,1110,169,1110,174,970,174"/>
+<area shape="rect" id="Node000003" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title=" " alt="" coords="333,209,463,249"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="477,228,591,227,717,215,775,204,829,189,831,194,776,209,718,221,591,232,477,234"/>
+<area shape="rect" id="Node000025" href="$dc/d4a/classfl_1_1_line_simplifier.html" title=" " alt="" coords="591,151,717,191"/>
+<area shape="poly" id="edge9_Node000025_Node000003" title=" " alt="" coords="476,208,590,183,591,188,478,214"/>
+<area shape="rect" id="Node000004" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title=" " alt="" coords="5,216,165,241"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="179,226,332,226,332,231,179,231"/>
+<area shape="rect" id="Node000008" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="331,77,465,132"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="480,108,631,123,806,149,830,154,828,159,805,154,631,128,479,113"/>
+<area shape="poly" id="edge10_Node000025_Node000008" title=" " alt="" coords="479,131,490,134,591,158,590,163,489,139,477,136"/>
+<area shape="rect" id="Node000009" href="$d3/d73/classfl_1_1_fixed_vector.html" title=" " alt="" coords="17,5,153,60"/>
+<area shape="poly" id="edge5_Node000008_Node000009" title=" " alt="" coords="167,49,331,87,330,92,166,54"/>
+<area shape="rect" id="Node000013" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="15,85,156,125"/>
+<area shape="poly" id="edge6_Node000008_Node000013" title=" " alt="" coords="170,102,331,102,331,107,170,107"/>
+<area shape="rect" id="Node000023" href="$da/d18/classfl_1_1_inlined_vector.html" title=" " alt="" coords="12,149,159,189"/>
+<area shape="poly" id="edge7_Node000008_Node000023" title=" " alt="" coords="172,159,238,151,306,137,330,129,332,135,307,142,239,156,173,165"/>
+<area shape="poly" id="edge8_Node000002_Node000025" title=" " alt="" coords="731,169,829,169,829,174,731,174"/>
+</map>

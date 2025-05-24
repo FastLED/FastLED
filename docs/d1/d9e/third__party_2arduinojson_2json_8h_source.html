@@ -130,44 +130,50 @@ $(function(){initNavTree('d1/d9e/third__party_2arduinojson_2json_8h_source.html'
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_STD_STRING</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_STD_STRING</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_af5b2b6b4e14c101382c65f3ca93f0014.html#af5b2b6b4e14c101382c65f3ca93f0014">   28</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_STD_STRING 0</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_STRING</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_STRING</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a8c1d882322eba89f78249dab4d1f8d5f.html#a8c1d882322eba89f78249dab4d1f8d5f">   33</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#ifdef __EMSCRIPTEN__</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#define ARDUINOJSON_ENABLE_STD_STRING 1</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_af5b2b6b4e14c101382c65f3ca93f0014.html#af5b2b6b4e14c101382c65f3ca93f0014">   32</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_STD_STRING 0</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_STREAM</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_STREAM</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_STRING</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_STRING</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_ac26a2848a7b385e044949610607595c9.html#ac26a2848a7b385e044949610607595c9">   38</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a8c1d882322eba89f78249dab4d1f8d5f.html#a8c1d882322eba89f78249dab4d1f8d5f">   38</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_PRINT</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_PRINT</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_STREAM</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_STREAM</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a3cc662620cc0feb39673691e8ef50ede.html#a3cc662620cc0feb39673691e8ef50ede">   43</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_ac26a2848a7b385e044949610607595c9.html#ac26a2848a7b385e044949610607595c9">   43</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_PROGMEM</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_PROGMEM</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_ARDUINO_PRINT</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_ARDUINO_PRINT</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a17ff353e6e213cb064a3b71b549a8859.html#a17ff353e6e213cb064a3b71b549a8859">   48</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_PROGMEM 0</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a3cc662620cc0feb39673691e8ef50ede.html#a3cc662620cc0feb39673691e8ef50ede">   48</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#ifdef ARDUINO</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#undef ARDUINO</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#ifdef ARDUINOJSON_ENABLE_PROGMEM</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#undef ARDUINOJSON_ENABLE_PROGMEM</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a2b4a696ef150f9316129e724c721a297.html#a2b4a696ef150f9316129e724c721a297">   54</a></span><span class="preprocessor">#define FASTLED_JSON_GUARD</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/db8/json_8hpp.html">json.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#undef FASTLED_JSON_GUARD</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_PROGMEM&quot;)</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_PRINT&quot;)</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_STREAM&quot;)</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_STRING&quot;)</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STD_STRING&quot;)</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STRING_VIEW&quot;)</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STD_STREAM&quot;)</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINO&quot;)</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a17ff353e6e213cb064a3b71b549a8859.html#a17ff353e6e213cb064a3b71b549a8859">   53</a></span><span class="preprocessor">#define ARDUINOJSON_ENABLE_PROGMEM 0</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#ifdef ARDUINO</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#undef ARDUINO</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d1/d9e/third__party_2arduinojson_2json_8h_a2b4a696ef150f9316129e724c721a297.html#a2b4a696ef150f9316129e724c721a297">   60</a></span><span class="preprocessor">#define FASTLED_JSON_GUARD</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#include &quot;<a class="code" href="../../d5/db8/json_8hpp.html">json.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#undef FASTLED_JSON_GUARD</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_PROGMEM&quot;)</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_PRINT&quot;)</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_STREAM&quot;)</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_ARDUINO_STRING&quot;)</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STD_STRING&quot;)</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STRING_VIEW&quot;)</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINOJSON_ENABLE_STD_STREAM&quot;)</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#pragma pop_macro(&quot;ARDUINO&quot;)</span></div>
 <div class="ttc" id="ajson_8hpp_html"><div class="ttname"><a href="../../d5/db8/json_8hpp.html">json.hpp</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -176,7 +182,7 @@ $(function(){initNavTree('d1/d9e/third__party_2arduinojson_2json_8h_source.html'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_99054eaaf1ec2d970c78e0cd41436977.html">arduinojson</a></li><li class="navelem"><a class="el" href="../../d1/d9e/third__party_2arduinojson_2json_8h.html">json.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

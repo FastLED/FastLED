@@ -1,15 +1,17 @@
 <map id="CRGB::blend" name="CRGB::blend">
-<area shape="rect" id="Node000001" title=" " alt="" coords="661,86,764,111"/>
-<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601" title=" " alt="" coords="392,37,613,62"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="650,85,613,76,563,65,564,59,614,71,651,80"/>
-<area shape="rect" id="Node000006" href="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96" title=" " alt="" coords="418,86,587,111"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="648,101,588,101,588,96,648,96"/>
-<area shape="rect" id="Node000007" href="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115" title=" " alt="" coords="423,135,582,161"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="651,117,614,127,564,138,563,133,613,121,650,112"/>
-<area shape="rect" id="Node000003" href="$d1/de0/classfl_1_1_frame_a1efadd6e06cd79c0342c9cd8c391539a.html#a1efadd6e06cd79c0342c9cd8c391539a" title=" " alt="" coords="217,13,335,38"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,39,335,34,336,29,379,34"/>
-<area shape="rect" id="Node000005" href="$d1/de0/classfl_1_1_frame_af228b83cd52447b2416893f39d0753df.html#af228b83cd52447b2416893f39d0753df" title=" " alt="" coords="208,62,344,87"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="379,66,345,70,344,64,378,61"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="692,119,795,145"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601" title=" " alt="" coords="423,70,644,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="681,118,643,109,594,98,595,93,645,104,682,113"/>
+<area shape="rect" id="Node000007" href="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96" title=" " alt="" coords="449,119,618,145"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="678,135,618,135,618,129,678,129"/>
+<area shape="rect" id="Node000008" href="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115" title=" " alt="" coords="454,169,613,194"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="682,151,645,160,595,171,594,166,643,155,681,146"/>
+<area shape="rect" id="Node000003" href="$d1/de0/classfl_1_1_frame_a1efadd6e06cd79c0342c9cd8c391539a.html#a1efadd6e06cd79c0342c9cd8c391539a" title=" " alt="" coords="232,13,351,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="465,69,345,41,346,35,467,64"/>
+<area shape="rect" id="Node000005" href="$d2/dba/structfl_1_1_x_y_draw_composited_a9be77bdd88ae485e4f08f13b734cce4d.html#a9be77bdd88ae485e4f08f13b734cce4d" title=" " alt="" coords="208,63,375,103"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="409,85,375,85,375,80,409,80"/>
+<area shape="rect" id="Node000006" href="$d1/de0/classfl_1_1_frame_af228b83cd52447b2416893f39d0753df.html#af228b83cd52447b2416893f39d0753df" title=" " alt="" coords="223,127,359,153"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="460,101,423,109,341,130,340,125,422,104,459,96"/>
 <area shape="rect" id="Node000004" href="$d8/d94/classfl_1_1_frame_interpolator_a681dd7d646b6b2b75c4035678693206a.html#a681dd7d646b6b2b75c4035678693206a" title=" " alt="" coords="5,5,160,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="203,28,160,28,160,23,203,23"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,28,160,28,160,23,218,23"/>
 </map>

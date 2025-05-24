@@ -1,5 +1,8 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/color.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/color.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,276,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="105,108,176,133"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="105,108,176,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,60,143,94,138,94,138,60"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="169,105,191,107,199,112,203,121,197,132,183,137,181,131,193,128,197,120,195,115,190,112,169,111"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="103,181,178,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,134,143,168,138,168,138,134"/>
 </map>

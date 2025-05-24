@@ -1,0 +1,13 @@
+<map id="fl::LineSimplifier::PerpendicularDistance2" name="fl::LineSimplifier::PerpendicularDistance2">
+<area shape="rect" id="Node000001" title=" " alt="" coords="545,69,729,109"/>
+<area shape="rect" id="Node000002" href="$dc/d4a/classfl_1_1_line_simplifier_a2536fb35718c3aebc8274b305b407dee.html#a2536fb35718c3aebc8274b305b407dee" title=" " alt="" coords="365,69,497,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="531,92,497,92,497,87,531,87"/>
+<area shape="rect" id="Node000003" href="$dc/d4a/classfl_1_1_line_simplifier_ab2ceacbb40ab8270441755fdcdd4e5e0.html#ab2ceacbb40ab8270441755fdcdd4e5e0" title=" " alt="" coords="191,69,317,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="351,92,318,92,318,87,351,87"/>
+<area shape="rect" id="Node000004" href="$dc/d4a/classfl_1_1_line_simplifier_aa83e414cacc8d5536b8d148acfcd731c.html#aa83e414cacc8d5536b8d148acfcd731c" title=" " alt="" coords="11,5,137,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,67,130,48,132,43,185,62"/>
+<area shape="rect" id="Node000005" href="$dc/d4a/classfl_1_1_line_simplifier_a201de7097fbafc8d15a883b6715ab21b.html#a201de7097fbafc8d15a883b6715ab21b" title=" " alt="" coords="11,69,137,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="177,92,138,92,138,87,177,87"/>
+<area shape="rect" id="Node000006" href="$dc/d4a/classfl_1_1_line_simplifier_a5ede8373d86a97315503c19f738c4c74.html#a5ede8373d86a97315503c19f738c4c74" title=" " alt="" coords="5,133,143,173"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="185,116,132,136,130,131,183,111"/>
+</map>

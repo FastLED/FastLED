@@ -1,0 +1,10 @@
+<map id="fl::LedsXY&lt; W, H &gt;" name="fl::LedsXY&lt; W, H &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="93,168,240,193"/>
+<area shape="rect" id="Node000002" href="$d9/d06/classfl_1_1_leds.html" title=" " alt="" coords="91,93,159,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,130,162,166,158,169,137,132"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="5,5,88,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="55,43,69,68,83,81,100,91,97,95,80,85,65,71,51,45"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="145,5,204,31"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="189,43,192,54,194,87,190,119,174,168,169,167,184,118,189,87,187,55,184,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="154,43,144,56,130,94,125,92,139,53,149,39"/>
+</map>

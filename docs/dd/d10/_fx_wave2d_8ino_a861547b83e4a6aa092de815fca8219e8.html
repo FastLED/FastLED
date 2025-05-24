@@ -115,40 +115,40 @@ $(function(){initNavTree('dd/d10/_fx_wave2d_8ino_a861547b83e4a6aa092de815fca8219
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00226">226</a> of file <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html">FxWave2d.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  226</span>                                      {</div>
-<div class="line"><span class="lineno">  227</span>    <span class="keyword">static</span> uint32_t nextTrigger = 0;</div>
-<div class="line"><span class="lineno">  228</span>    uint32_t trigger_delta = nextTrigger - now;</div>
-<div class="line"><span class="lineno">  229</span>    <span class="keywordflow">if</span> (trigger_delta &gt; 10000) {</div>
-<div class="line"><span class="lineno">  230</span>        <span class="comment">// rolled over!</span></div>
-<div class="line"><span class="lineno">  231</span>        trigger_delta = 0;</div>
-<div class="line"><span class="lineno">  232</span>    }</div>
-<div class="line"><span class="lineno">  233</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc">autoTrigger</a>) {</div>
-<div class="line"><span class="lineno">  234</span>        <span class="keywordflow">if</span> (now &gt;= nextTrigger) {</div>
-<div class="line"><span class="lineno">  235</span>            <a class="code hl_function" href="../../dd/d10/_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653">triggerRipple</a>();</div>
-<div class="line"><span class="lineno">  236</span>            <span class="keywordtype">float</span> <a class="code hl_variable" href="../../d6/d9d/_noise_8ino_a12633132d07532aac2bd05fa1d5c8a72.html#a12633132d07532aac2bd05fa1d5c8a72">speed</a> = 1.0f - <a class="code hl_variable" href="../../dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86">triggerSpeed</a>.value();</div>
-<div class="line"><span class="lineno">  237</span>            uint32_t min_rand = 400 * <a class="code hl_variable" href="../../d6/d9d/_noise_8ino_a12633132d07532aac2bd05fa1d5c8a72.html#a12633132d07532aac2bd05fa1d5c8a72">speed</a>;</div>
-<div class="line"><span class="lineno">  238</span>            uint32_t max_rand = 2000 * <a class="code hl_variable" href="../../d6/d9d/_noise_8ino_a12633132d07532aac2bd05fa1d5c8a72.html#a12633132d07532aac2bd05fa1d5c8a72">speed</a>;</div>
-<div class="line"><span class="lineno">  239</span> </div>
-<div class="line"><span class="lineno">  240</span>            uint32_t min = <a class="code hl_define" href="../../d0/d19/fl_2math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a>(min_rand, max_rand);</div>
-<div class="line"><span class="lineno">  241</span>            uint32_t max = <a class="code hl_define" href="../../d0/d19/fl_2math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(min_rand, max_rand);</div>
-<div class="line"><span class="lineno">  242</span>            <span class="keywordflow">if</span> (min == max) {</div>
-<div class="line"><span class="lineno">  243</span>                max += 1;</div>
-<div class="line"><span class="lineno">  244</span>            }</div>
-<div class="line"><span class="lineno">  245</span>            nextTrigger = now + random(min, max);</div>
-<div class="line"><span class="lineno">  246</span>        }</div>
-<div class="line"><span class="lineno">  247</span>    }</div>
-<div class="line"><span class="lineno">  248</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00234">234</a> of file <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html">FxWave2d.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  234</span>                                      {</div>
+<div class="line"><span class="lineno">  235</span>    <span class="keyword">static</span> uint32_t nextTrigger = 0;</div>
+<div class="line"><span class="lineno">  236</span>    uint32_t trigger_delta = nextTrigger - now;</div>
+<div class="line"><span class="lineno">  237</span>    <span class="keywordflow">if</span> (trigger_delta &gt; 10000) {</div>
+<div class="line"><span class="lineno">  238</span>        <span class="comment">// rolled over!</span></div>
+<div class="line"><span class="lineno">  239</span>        trigger_delta = 0;</div>
+<div class="line"><span class="lineno">  240</span>    }</div>
+<div class="line"><span class="lineno">  241</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc">autoTrigger</a>) {</div>
+<div class="line"><span class="lineno">  242</span>        <span class="keywordflow">if</span> (now &gt;= nextTrigger) {</div>
+<div class="line"><span class="lineno">  243</span>            <a class="code hl_function" href="../../dd/d10/_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653">triggerRipple</a>();</div>
+<div class="line"><span class="lineno">  244</span>            <span class="keywordtype">float</span> <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> = 1.0f - <a class="code hl_variable" href="../../dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86">triggerSpeed</a>.value();</div>
+<div class="line"><span class="lineno">  245</span>            uint32_t min_rand = 400 * <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>;</div>
+<div class="line"><span class="lineno">  246</span>            uint32_t max_rand = 2000 * <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>;</div>
+<div class="line"><span class="lineno">  247</span> </div>
+<div class="line"><span class="lineno">  248</span>            uint32_t min = <a class="code hl_define" href="../../d8/db8/math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a>(min_rand, max_rand);</div>
+<div class="line"><span class="lineno">  249</span>            uint32_t max = <a class="code hl_define" href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(min_rand, max_rand);</div>
+<div class="line"><span class="lineno">  250</span>            <span class="keywordflow">if</span> (min == max) {</div>
+<div class="line"><span class="lineno">  251</span>                max += 1;</div>
+<div class="line"><span class="lineno">  252</span>            }</div>
+<div class="line"><span class="lineno">  253</span>            nextTrigger = now + random(min, max);</div>
+<div class="line"><span class="lineno">  254</span>        }</div>
+<div class="line"><span class="lineno">  255</span>    }</div>
+<div class="line"><span class="lineno">  256</span>}</div>
+<div class="ttc" id="a_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14_html_a5035fda839d1069fa13897b1739f5a14"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a></div><div class="ttdeci">UISlider speed(&quot;Speed&quot;, 1.0f, -20.0f, 20.0f, 0.01f)</div></div>
 <div class="ttc" id="a_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc_html_a39cffc8e27523584e5fd04236dac73bc"><div class="ttname"><a href="../../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc">autoTrigger</a></div><div class="ttdeci">UICheckbox autoTrigger(&quot;Auto Trigger&quot;, true)</div></div>
 <div class="ttc" id="a_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86_html_abc5da8af03933051c0b6f48718711f86"><div class="ttname"><a href="../../dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86">triggerSpeed</a></div><div class="ttdeci">UISlider triggerSpeed(&quot;Trigger Speed&quot;,.5f, 0.0f, 1.0f, 0.01f)</div></div>
-<div class="ttc" id="a_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653_html_ad5a517cd7a477ee7bc57296f99607653"><div class="ttname"><a href="../../dd/d10/_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653">triggerRipple</a></div><div class="ttdeci">void triggerRipple()</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d10/_fx_wave2d_8ino_source.html#l00120">FxWave2d.ino:120</a></div></div>
-<div class="ttc" id="a_noise_8ino_a12633132d07532aac2bd05fa1d5c8a72_html_a12633132d07532aac2bd05fa1d5c8a72"><div class="ttname"><a href="../../d6/d9d/_noise_8ino_a12633132d07532aac2bd05fa1d5c8a72.html#a12633132d07532aac2bd05fa1d5c8a72">speed</a></div><div class="ttdeci">uint16_t speed</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/_noise_8ino_source.html#l00063">Noise.ino:63</a></div></div>
-<div class="ttc" id="afl_2math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f_html_a3acffbd305ee72dcd4593c0d8af64a4f"><div class="ttname"><a href="../../d0/d19/fl_2math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a></div><div class="ttdeci">#define MIN(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d19/fl_2math__macros_8h_source.html#l00008">math_macros.h:8</a></div></div>
-<div class="ttc" id="afl_2math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f_html_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><div class="ttname"><a href="../../d0/d19/fl_2math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a></div><div class="ttdeci">#define MAX(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d19/fl_2math__macros_8h_source.html#l00004">math_macros.h:4</a></div></div>
+<div class="ttc" id="a_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653_html_ad5a517cd7a477ee7bc57296f99607653"><div class="ttname"><a href="../../dd/d10/_fx_wave2d_8ino_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653">triggerRipple</a></div><div class="ttdeci">void triggerRipple()</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d10/_fx_wave2d_8ino_source.html#l00127">FxWave2d.ino:127</a></div></div>
+<div class="ttc" id="amath__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f_html_a3acffbd305ee72dcd4593c0d8af64a4f"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a3acffbd305ee72dcd4593c0d8af64a4f.html#a3acffbd305ee72dcd4593c0d8af64a4f">MIN</a></div><div class="ttdeci">#define MIN(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00015">math_macros.h:15</a></div></div>
+<div class="ttc" id="amath__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f_html_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><div class="ttname"><a href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a></div><div class="ttdeci">#define MAX(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00011">math_macros.h:11</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc">autoTrigger</a>, <a class="el" href="../../d0/d19/fl_2math__macros_8h_source.html#l00004">MAX</a>, <a class="el" href="../../d0/d19/fl_2math__macros_8h_source.html#l00008">MIN</a>, <a class="el" href="../../d6/d9d/_noise_8ino_source.html#l00063">speed</a>, <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00120">triggerRipple()</a>, and <a class="el" href="../../dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86">triggerSpeed</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d10/_fx_wave2d_8ino_a39cffc8e27523584e5fd04236dac73bc.html#a39cffc8e27523584e5fd04236dac73bc">autoTrigger</a>, <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00011">MAX</a>, <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00015">MIN</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>, <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00127">triggerRipple()</a>, and <a class="el" href="../../dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86">triggerSpeed</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00250">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d10/_fx_wave2d_8ino_source.html#l00258">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -173,7 +173,7 @@ $(function(){initNavTree('dd/d10/_fx_wave2d_8ino_a861547b83e4a6aa092de815fca8219
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_47eec6d0c0bc604dac9aa356a4226313.html">FxWave2d</a></li><li class="navelem"><a class="el" href="../../dd/d10/_fx_wave2d_8ino.html">FxWave2d.ino</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

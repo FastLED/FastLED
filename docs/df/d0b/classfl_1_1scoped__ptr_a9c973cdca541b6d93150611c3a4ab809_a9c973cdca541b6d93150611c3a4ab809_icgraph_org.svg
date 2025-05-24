@@ -74,9 +74,9 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr_a4ac3c35763cd13b72c771272505ab5ca.html#a4ac3c35763cd13b72c771272505ab5ca" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="139,-19 2,-19 2,0 139,0 139,-19"/>
-<text text-anchor="middle" x="70.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::scoped_ptr::operator=</text>
+<g id="a_Node000005"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr_a6a5efac14765cce4f0797926a0eff304.html#a6a5efac14765cce4f0797926a0eff304" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="127,-19 14,-19 14,0 127,0 127,-19"/>
+<text text-anchor="middle" x="70.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::scoped_ptr::swap</text>
 </a>
 </g>
 </g>

@@ -1,0 +1,5 @@
+<map id="DrawRasterToWaveSimulator" name="DrawRasterToWaveSimulator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,216,119"/>
+<area shape="rect" id="Node000002" href="$d6/def/struct_wave_effect.html" title=" " alt="" coords="63,5,158,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,45,113,93,108,93,108,45"/>
+</map>

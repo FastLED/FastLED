@@ -114,13 +114,13 @@ $(function(){initNavTree('d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/dd5/_demo_reel100_8ino-example.html#a22">DemoReel100.ino</a>.</dd>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../db/dd5/_demo_reel100_8ino-example.html#a21">DemoReel100.ino</a>.</dd>
 </dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00116">116</a> of file <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html">DemoReel100.ino</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  116</span>              {</div>
 <div class="line"><span class="lineno">  117</span>  <span class="comment">// eight colored dots, weaving in and out of sync with each other</span></div>
-<div class="line"><span class="lineno">  118</span>  <a class="code hl_function" href="../../d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98">fadeToBlackBy</a>( <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>, <a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>, 20);</div>
+<div class="line"><span class="lineno">  118</span>  <a class="code hl_function" href="../../d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490">fadeToBlackBy</a>( <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>, <a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>, 20);</div>
 <div class="line"><span class="lineno">  119</span>  uint8_t dothue = 0;</div>
 <div class="line"><span class="lineno">  120</span>  <span class="keywordflow">for</span>( <span class="keywordtype">int</span> i = 0; i &lt; 8; i++) {</div>
 <div class="line"><span class="lineno">  121</span>    <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[<a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b">beatsin16</a>( i+7, 0, <a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>-1 )] |= <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a>(dothue, 200, 255);</div>
@@ -129,19 +129,19 @@ $(function(){initNavTree('d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9
 <div class="line"><span class="lineno">  124</span>}</div>
 <div class="ttc" id="a_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00011">Apa102.ino:11</a></div></div>
 <div class="ttc" id="a_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00006">Apa102.ino:6</a></div></div>
-<div class="ttc" id="agroup___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b_html_gaa46e5de1c4c27833359e7a97a18c839b"><div class="ttname"><a href="../../d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b">beatsin16</a></div><div class="ttdeci">LIB8STATIC uint16_t beatsin16(accum88 beats_per_minute, uint16_t lowest=0, uint16_t highest=65535, uint32_t timebase=0, uint16_t phase_offset=0)</div><div class="ttdoc">Generates a 16-bit sine wave at a given BPM that oscillates within a given range.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00957">lib8tion.h:957</a></div></div>
-<div class="ttc" id="agroup___color_fades_ga404d163d8a422cee2df2baac4151ca98_html_ga404d163d8a422cee2df2baac4151ca98"><div class="ttname"><a href="../../d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98">fadeToBlackBy</a></div><div class="ttdeci">void fadeToBlackBy(CRGB *leds, uint16_t num_leds, uint8_t fadeBy)</div><div class="ttdoc">Reduce the brightness of an array of pixels all at once.</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00270">colorutils.cpp:270</a></div></div>
+<div class="ttc" id="acolorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490_html_a90ef14e5ef0cc07c435a39eca3ddc490"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490">fadeToBlackBy</a></div><div class="ttdeci">void fadeToBlackBy(CRGB *leds, uint16_t num_leds, uint8_t fadeBy)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00161">colorutils.cpp:161</a></div></div>
+<div class="ttc" id="agroup___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b_html_gaa46e5de1c4c27833359e7a97a18c839b"><div class="ttname"><a href="../../d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b">beatsin16</a></div><div class="ttdeci">LIB8STATIC uint16_t beatsin16(accum88 beats_per_minute, uint16_t lowest=0, uint16_t highest=65535, uint32_t timebase=0, uint16_t phase_offset=0)</div><div class="ttdoc">Generates a 16-bit sine wave at a given BPM that oscillates within a given range.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00939">lib8tion.h:939</a></div></div>
 <div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="../../dc/d53/struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00016">chsv.h:16</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00957">beatsin16()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00270">fadeToBlackBy()</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, and <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00006">NUM_LEDS</a>.</p>
+<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00939">beatsin16()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00161">fadeToBlackBy()</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, and <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00006">NUM_LEDS</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/dc0/demoreel100_8h_source.html#l00058">fl::DemoReel100::runPattern()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/dc0/demoreel100_8h_source.html#l00056">fl::DemoReel100::runPattern()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1_a4cf4b428065fac16dc28a16e2f9004e1_cgraph.svg" width="475" height="135"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1_a4cf4b428065fac16dc28a16e2f9004e1_cgraph.svg" width="475" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -160,7 +160,7 @@ $(function(){initNavTree('d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_16996705dca5e5845caca64f4257e696.html">DemoReel100</a></li><li class="navelem"><a class="el" href="../../d5/d25/_demo_reel100_8ino.html">DemoReel100.ino</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

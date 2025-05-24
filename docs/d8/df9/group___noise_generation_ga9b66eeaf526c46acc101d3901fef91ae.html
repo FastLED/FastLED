@@ -137,92 +137,92 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga9b66eeaf526c46acc101
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00387">387</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  387</span>                                                                     {</div>
-<div class="line"><span class="lineno">  388</span>    <span class="comment">// 1. Extract the integer (grid) parts.</span></div>
-<div class="line"><span class="lineno">  389</span>    uint8_t X = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &gt;&gt; 16) &amp; 0xFF;</div>
-<div class="line"><span class="lineno">  390</span>    uint8_t Y = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &gt;&gt; 16) &amp; 0xFF;</div>
-<div class="line"><span class="lineno">  391</span>    uint8_t Z = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &gt;&gt; 16) &amp; 0xFF;</div>
-<div class="line"><span class="lineno">  392</span>    uint8_t T = (t &gt;&gt; 16) &amp; 0xFF;</div>
-<div class="line"><span class="lineno">  393</span> </div>
-<div class="line"><span class="lineno">  394</span>    <span class="comment">// 2. Extract the fractional parts.</span></div>
-<div class="line"><span class="lineno">  395</span>    uint16_t u = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  396</span>    uint16_t v = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  397</span>    uint16_t w = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  398</span>    uint16_t s = t &amp; 0xFFFF;</div>
-<div class="line"><span class="lineno">  399</span> </div>
-<div class="line"><span class="lineno">  400</span>    <span class="comment">// 3. Easing of the fractional parts.</span></div>
-<div class="line"><span class="lineno">  401</span>    u = EASE16(u);</div>
-<div class="line"><span class="lineno">  402</span>    v = EASE16(v);</div>
-<div class="line"><span class="lineno">  403</span>    w = EASE16(w);</div>
-<div class="line"><span class="lineno">  404</span>    s = EASE16(s);</div>
-<div class="line"><span class="lineno">  405</span> </div>
-<div class="line"><span class="lineno">  406</span>    uint16_t N = 0x8000L; <span class="comment">// fixed-point half-scale</span></div>
-<div class="line"><span class="lineno">  407</span> </div>
-<div class="line"><span class="lineno">  408</span>    <span class="comment">// 4. Precompute fixed-point versions for the gradient evaluations.</span></div>
-<div class="line"><span class="lineno">  409</span>    int16_t xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  410</span>    int16_t yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  411</span>    int16_t zz = (w &gt;&gt; 1) &amp; 0x7FFF;</div>
-<div class="line"><span class="lineno">  412</span> </div>
-<div class="line"><span class="lineno">  413</span>    <span class="comment">// 5. Hash the 3D cube corners (the “base” for both t slices).</span></div>
-<div class="line"><span class="lineno">  414</span>    uint8_t A = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X) + Y;</div>
-<div class="line"><span class="lineno">  415</span>    uint8_t AA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A) + Z;</div>
-<div class="line"><span class="lineno">  416</span>    uint8_t AB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A + 1) + Z;</div>
-<div class="line"><span class="lineno">  417</span>    uint8_t B = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X + 1) + Y;</div>
-<div class="line"><span class="lineno">  418</span>    uint8_t BA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B) + Z;</div>
-<div class="line"><span class="lineno">  419</span>    uint8_t BB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B + 1) + Z;</div>
-<div class="line"><span class="lineno">  420</span> </div>
-<div class="line"><span class="lineno">  421</span>    <span class="comment">// 6. --- Lower t Slice (using T) ---</span></div>
-<div class="line"><span class="lineno">  422</span>    uint8_t AAA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA) + T;</div>
-<div class="line"><span class="lineno">  423</span>    uint8_t AAB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA + 1) + T;</div>
-<div class="line"><span class="lineno">  424</span>    uint8_t ABA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB) + T;</div>
-<div class="line"><span class="lineno">  425</span>    uint8_t ABB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB + 1) + T;</div>
-<div class="line"><span class="lineno">  426</span>    uint8_t BAA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA) + T;</div>
-<div class="line"><span class="lineno">  427</span>    uint8_t BAB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA + 1) + T;</div>
-<div class="line"><span class="lineno">  428</span>    uint8_t BBA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB) + T;</div>
-<div class="line"><span class="lineno">  429</span>    uint8_t BBB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB + 1) + T;</div>
-<div class="line"><span class="lineno">  430</span> </div>
-<div class="line"><span class="lineno">  431</span>    int16_t L1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAA, xx, yy, zz),     <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAA, xx - N, yy, zz), u);</div>
-<div class="line"><span class="lineno">  432</span>    int16_t L2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABA, xx, yy - N, zz),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBA, xx - N, yy - N, zz), u);</div>
-<div class="line"><span class="lineno">  433</span>    int16_t L3 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAB, xx, yy, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAB, xx - N, yy, zz - N), u);</div>
-<div class="line"><span class="lineno">  434</span>    int16_t L4 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABB, xx, yy - N, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBB, xx - N, yy - N, zz - N), u);</div>
-<div class="line"><span class="lineno">  435</span> </div>
-<div class="line"><span class="lineno">  436</span>    int16_t Y1 = LERP(L1, L2, v);</div>
-<div class="line"><span class="lineno">  437</span>    int16_t Y2 = LERP(L3, L4, v);</div>
-<div class="line"><span class="lineno">  438</span>    int16_t noise_lower = LERP(Y1, Y2, w);</div>
-<div class="line"><span class="lineno">  439</span> </div>
-<div class="line"><span class="lineno">  440</span>    <span class="comment">// 7. --- Upper t Slice (using T+1) ---</span></div>
-<div class="line"><span class="lineno">  441</span>    uint8_t Tupper = T + 1;</div>
-<div class="line"><span class="lineno">  442</span>    uint8_t AAA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA) + Tupper;</div>
-<div class="line"><span class="lineno">  443</span>    uint8_t AAB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA + 1) + Tupper;</div>
-<div class="line"><span class="lineno">  444</span>    uint8_t ABA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB) + Tupper;</div>
-<div class="line"><span class="lineno">  445</span>    uint8_t ABB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB + 1) + Tupper;</div>
-<div class="line"><span class="lineno">  446</span>    uint8_t BAA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA) + Tupper;</div>
-<div class="line"><span class="lineno">  447</span>    uint8_t BAB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA + 1) + Tupper;</div>
-<div class="line"><span class="lineno">  448</span>    uint8_t BBA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB) + Tupper;</div>
-<div class="line"><span class="lineno">  449</span>    uint8_t BBB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB + 1) + Tupper;</div>
-<div class="line"><span class="lineno">  450</span> </div>
-<div class="line"><span class="lineno">  451</span>    int16_t U1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAA_u, xx, yy, zz),     <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAA_u, xx - N, yy, zz), u);</div>
-<div class="line"><span class="lineno">  452</span>    int16_t U2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABA_u, xx, yy - N, zz),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBA_u, xx - N, yy - N, zz), u);</div>
-<div class="line"><span class="lineno">  453</span>    int16_t U3 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAB_u, xx, yy, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAB_u, xx - N, yy, zz - N), u);</div>
-<div class="line"><span class="lineno">  454</span>    int16_t U4 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABB_u, xx, yy - N, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBB_u, xx - N, yy - N, zz - N), u);</div>
-<div class="line"><span class="lineno">  455</span> </div>
-<div class="line"><span class="lineno">  456</span>    int16_t V1 = LERP(U1, U2, v);</div>
-<div class="line"><span class="lineno">  457</span>    int16_t V2 = LERP(U3, U4, v);</div>
-<div class="line"><span class="lineno">  458</span>    int16_t noise_upper = LERP(V1, V2, w);</div>
-<div class="line"><span class="lineno">  459</span> </div>
-<div class="line"><span class="lineno">  460</span>    <span class="comment">// 8. Final interpolation in the t dimension.</span></div>
-<div class="line"><span class="lineno">  461</span>    int16_t noise4d = LERP(noise_lower, noise_upper, s);</div>
-<div class="line"><span class="lineno">  462</span> </div>
-<div class="line"><span class="lineno">  463</span>    <span class="keywordflow">return</span> noise4d;</div>
-<div class="line"><span class="lineno">  464</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a_html_a4e48336126ecdad27c0411a91b14bf5a"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a></div><div class="ttdeci">uint32_t z[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
-<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
-<div class="ttc" id="anoise_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdoc">Reads a single byte from the p array.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00051">noise.cpp:51</a></div></div>
-<div class="ttc" id="anoise_8cpp_a24cd7f7232e48b10b8bba34614a168b5_html_a24cd7f7232e48b10b8bba34614a168b5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a></div><div class="ttdeci">static int16_t grad16(uint8_t hash, int16_t x, int16_t y, int16_t z)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00133">noise.cpp:133</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00361">361</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  361</span>                                                                     {</div>
+<div class="line"><span class="lineno">  362</span>    <span class="comment">// 1. Extract the integer (grid) parts.</span></div>
+<div class="line"><span class="lineno">  363</span>    uint8_t X = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &gt;&gt; 16) &amp; 0xFF;</div>
+<div class="line"><span class="lineno">  364</span>    uint8_t Y = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &gt;&gt; 16) &amp; 0xFF;</div>
+<div class="line"><span class="lineno">  365</span>    uint8_t Z = (<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &gt;&gt; 16) &amp; 0xFF;</div>
+<div class="line"><span class="lineno">  366</span>    uint8_t T = (t &gt;&gt; 16) &amp; 0xFF;</div>
+<div class="line"><span class="lineno">  367</span> </div>
+<div class="line"><span class="lineno">  368</span>    <span class="comment">// 2. Extract the fractional parts.</span></div>
+<div class="line"><span class="lineno">  369</span>    uint16_t u = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  370</span>    uint16_t v = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  371</span>    uint16_t w = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  372</span>    uint16_t s = t &amp; 0xFFFF;</div>
+<div class="line"><span class="lineno">  373</span> </div>
+<div class="line"><span class="lineno">  374</span>    <span class="comment">// 3. Easing of the fractional parts.</span></div>
+<div class="line"><span class="lineno">  375</span>    u = EASE16(u);</div>
+<div class="line"><span class="lineno">  376</span>    v = EASE16(v);</div>
+<div class="line"><span class="lineno">  377</span>    w = EASE16(w);</div>
+<div class="line"><span class="lineno">  378</span>    s = EASE16(s);</div>
+<div class="line"><span class="lineno">  379</span> </div>
+<div class="line"><span class="lineno">  380</span>    uint16_t N = 0x8000L; <span class="comment">// fixed-point half-scale</span></div>
+<div class="line"><span class="lineno">  381</span> </div>
+<div class="line"><span class="lineno">  382</span>    <span class="comment">// 4. Precompute fixed-point versions for the gradient evaluations.</span></div>
+<div class="line"><span class="lineno">  383</span>    int16_t xx = (u &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  384</span>    int16_t yy = (v &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  385</span>    int16_t zz = (w &gt;&gt; 1) &amp; 0x7FFF;</div>
+<div class="line"><span class="lineno">  386</span> </div>
+<div class="line"><span class="lineno">  387</span>    <span class="comment">// 5. Hash the 3D cube corners (the “base” for both t slices).</span></div>
+<div class="line"><span class="lineno">  388</span>    uint8_t A = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X) + Y;</div>
+<div class="line"><span class="lineno">  389</span>    uint8_t AA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A) + Z;</div>
+<div class="line"><span class="lineno">  390</span>    uint8_t AB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(A + 1) + Z;</div>
+<div class="line"><span class="lineno">  391</span>    uint8_t B = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(X + 1) + Y;</div>
+<div class="line"><span class="lineno">  392</span>    uint8_t BA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B) + Z;</div>
+<div class="line"><span class="lineno">  393</span>    uint8_t BB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(B + 1) + Z;</div>
+<div class="line"><span class="lineno">  394</span> </div>
+<div class="line"><span class="lineno">  395</span>    <span class="comment">// 6. --- Lower t Slice (using T) ---</span></div>
+<div class="line"><span class="lineno">  396</span>    uint8_t AAA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA) + T;</div>
+<div class="line"><span class="lineno">  397</span>    uint8_t AAB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA + 1) + T;</div>
+<div class="line"><span class="lineno">  398</span>    uint8_t ABA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB) + T;</div>
+<div class="line"><span class="lineno">  399</span>    uint8_t ABB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB + 1) + T;</div>
+<div class="line"><span class="lineno">  400</span>    uint8_t BAA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA) + T;</div>
+<div class="line"><span class="lineno">  401</span>    uint8_t BAB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA + 1) + T;</div>
+<div class="line"><span class="lineno">  402</span>    uint8_t BBA = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB) + T;</div>
+<div class="line"><span class="lineno">  403</span>    uint8_t BBB = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB + 1) + T;</div>
+<div class="line"><span class="lineno">  404</span> </div>
+<div class="line"><span class="lineno">  405</span>    int16_t L1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAA, xx, yy, zz),     <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAA, xx - N, yy, zz), u);</div>
+<div class="line"><span class="lineno">  406</span>    int16_t L2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABA, xx, yy - N, zz),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBA, xx - N, yy - N, zz), u);</div>
+<div class="line"><span class="lineno">  407</span>    int16_t L3 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAB, xx, yy, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAB, xx - N, yy, zz - N), u);</div>
+<div class="line"><span class="lineno">  408</span>    int16_t L4 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABB, xx, yy - N, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBB, xx - N, yy - N, zz - N), u);</div>
+<div class="line"><span class="lineno">  409</span> </div>
+<div class="line"><span class="lineno">  410</span>    int16_t Y1 = LERP(L1, L2, v);</div>
+<div class="line"><span class="lineno">  411</span>    int16_t Y2 = LERP(L3, L4, v);</div>
+<div class="line"><span class="lineno">  412</span>    int16_t noise_lower = LERP(Y1, Y2, w);</div>
+<div class="line"><span class="lineno">  413</span> </div>
+<div class="line"><span class="lineno">  414</span>    <span class="comment">// 7. --- Upper t Slice (using T+1) ---</span></div>
+<div class="line"><span class="lineno">  415</span>    uint8_t Tupper = T + 1;</div>
+<div class="line"><span class="lineno">  416</span>    uint8_t AAA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA) + Tupper;</div>
+<div class="line"><span class="lineno">  417</span>    uint8_t AAB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AA + 1) + Tupper;</div>
+<div class="line"><span class="lineno">  418</span>    uint8_t ABA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB) + Tupper;</div>
+<div class="line"><span class="lineno">  419</span>    uint8_t ABB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(AB + 1) + Tupper;</div>
+<div class="line"><span class="lineno">  420</span>    uint8_t BAA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA) + Tupper;</div>
+<div class="line"><span class="lineno">  421</span>    uint8_t BAB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BA + 1) + Tupper;</div>
+<div class="line"><span class="lineno">  422</span>    uint8_t BBA_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB) + Tupper;</div>
+<div class="line"><span class="lineno">  423</span>    uint8_t BBB_u = <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(BB + 1) + Tupper;</div>
+<div class="line"><span class="lineno">  424</span> </div>
+<div class="line"><span class="lineno">  425</span>    int16_t U1 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAA_u, xx, yy, zz),     <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAA_u, xx - N, yy, zz), u);</div>
+<div class="line"><span class="lineno">  426</span>    int16_t U2 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABA_u, xx, yy - N, zz),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBA_u, xx - N, yy - N, zz), u);</div>
+<div class="line"><span class="lineno">  427</span>    int16_t U3 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(AAB_u, xx, yy, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BAB_u, xx - N, yy, zz - N), u);</div>
+<div class="line"><span class="lineno">  428</span>    int16_t U4 = LERP(<a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(ABB_u, xx, yy - N, zz - N),  <a class="code hl_function" href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a>(BBB_u, xx - N, yy - N, zz - N), u);</div>
+<div class="line"><span class="lineno">  429</span> </div>
+<div class="line"><span class="lineno">  430</span>    int16_t V1 = LERP(U1, U2, v);</div>
+<div class="line"><span class="lineno">  431</span>    int16_t V2 = LERP(U3, U4, v);</div>
+<div class="line"><span class="lineno">  432</span>    int16_t noise_upper = LERP(V1, V2, w);</div>
+<div class="line"><span class="lineno">  433</span> </div>
+<div class="line"><span class="lineno">  434</span>    <span class="comment">// 8. Final interpolation in the t dimension.</span></div>
+<div class="line"><span class="lineno">  435</span>    int16_t noise4d = LERP(noise_lower, noise_upper, s);</div>
+<div class="line"><span class="lineno">  436</span> </div>
+<div class="line"><span class="lineno">  437</span>    <span class="keywordflow">return</span> noise4d;</div>
+<div class="line"><span class="lineno">  438</span>}</div>
+<div class="ttc" id="a_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a_html_a4e48336126ecdad27c0411a91b14bf5a"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a></div><div class="ttdeci">uint32_t z[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00084">Fire2023.ino:84</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00083">Fire2023.ino:83</a></div></div>
+<div class="ttc" id="anoise_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdoc">Reads a single byte from the p array.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00025">noise.cpp:25</a></div></div>
+<div class="ttc" id="anoise_8cpp_a24cd7f7232e48b10b8bba34614a168b5_html_a24cd7f7232e48b10b8bba34614a168b5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5">grad16</a></div><div class="ttdeci">static int16_t grad16(uint8_t hash, int16_t x, int16_t y, int16_t z)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00107">noise.cpp:107</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00133">grad16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00051">P</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">z</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00107">grad16()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00025">P</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00083">y</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00084">z</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -240,7 +240,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga9b66eeaf526c46acc101
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/group___noise_generation.html">Noise Generation Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

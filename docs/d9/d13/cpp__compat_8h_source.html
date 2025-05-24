@@ -103,29 +103,30 @@ $(function(){initNavTree('d9/d13/cpp__compat_8h_source.html','../../'); initResi
   <div class="headertitle"><div class="title">cpp_compat.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d9/d13/cpp__compat_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#ifndef __INC_CPP_COMPAT_H</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#define __INC_CPP_COMPAT_H</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a>&quot;</span></div>
+<a href="../../d9/d13/cpp__compat_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifndef __INC_CPP_COMPAT_H</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../d9/d13/cpp__compat_8h_aca00213e9afbcb627917c97f3b257e37.html#aca00213e9afbcb627917c97f3b257e37">    7</a></span><span class="preprocessor">#define __INC_CPP_COMPAT_H</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#if __cplusplus &lt;= 199711L</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d9/d13/cpp__compat_8h_a92da053d05db23c922b5f4184f22bff3.html#a92da053d05db23c922b5f4184f22bff3">   13</a></span><span class="preprocessor">#define static_assert(expression, message)</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">   17</a></span><span class="preprocessor">#define constexpr const</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#if __cplusplus &lt;= 199711L</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../d9/d13/cpp__compat_8h_a92da053d05db23c922b5f4184f22bff3.html#a92da053d05db23c922b5f4184f22bff3">   15</a></span><span class="preprocessor">#define static_assert(expression, message)</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">   19</a></span><span class="preprocessor">#define constexpr const</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// things that we can turn on if we&#39;re in a C++11 environment</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/dc1/fl_2register_8h.html">fl/register.h</a>&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// things that we can turn on if we&#39;re in a C++11 environment</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d80/register_8h.html">fl/register.h</a>&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
-<div class="ttc" id="afl_2register_8h_html"><div class="ttname"><a href="../../d8/dc1/fl_2register_8h.html">register.h</a></div></div>
+<div class="ttc" id="aregister_8h_html"><div class="ttname"><a href="../../df/d80/register_8h.html">register.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -133,7 +134,7 @@ $(function(){initNavTree('d9/d13/cpp__compat_8h_source.html','../../'); initResi
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d9/d13/cpp__compat_8h.html">cpp_compat.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

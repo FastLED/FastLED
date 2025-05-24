@@ -1,0 +1,23 @@
+digraph "kiss_fft_stride"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="kiss_fft_stride",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="kf_work",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a96e4f47862a2df7183ae9e8caaf7a866.html#a96e4f47862a2df7183ae9e8caaf7a866",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="kf_bfly2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a1d97d74ec66398db90ac4e6ae08ffa80.html#a1d97d74ec66398db90ac4e6ae08ffa80",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="kf_bfly3",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a6b2ff941baf8c5dc00828591927ce4d6.html#a6b2ff941baf8c5dc00828591927ce4d6",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="kf_bfly4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a0976fd89e0c02bf44e5df3b689dfe115.html#a0976fd89e0c02bf44e5df3b689dfe115",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="kf_bfly5",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_afae5a86498c64fc9a8ccc4032de62ee0.html#afae5a86498c64fc9a8ccc4032de62ee0",tooltip=" "];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="kf_bfly_generic",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a43383279ff41679c7ae47bc163d7050c.html#a43383279ff41679c7ae47bc163d7050c",tooltip=" "];
+  Node2 -> Node2 [id="edge7_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+}

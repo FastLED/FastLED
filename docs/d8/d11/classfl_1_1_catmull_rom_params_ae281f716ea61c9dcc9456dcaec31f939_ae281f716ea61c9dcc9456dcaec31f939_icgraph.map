@@ -1,0 +1,7 @@
+<map id="fl::CatmullRomParams::addPoint" name="fl::CatmullRomParams::addPoint">
+<area shape="rect" id="Node000001" title=" " alt="" coords="200,37,367,77"/>
+<area shape="rect" id="Node000002" href="$d2/d1f/classfl_1_1_catmull_rom_path_addee00da85048c6e6613e752e5f2fc22.html#addee00da85048c6e6613e752e5f2fc22" title="Add a point with separate x,y coordinates." alt="" coords="5,5,152,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,45,152,39,153,34,187,40"/>
+<area shape="rect" id="Node000003" href="$d2/d1f/classfl_1_1_catmull_rom_path_ae5bc34153257d7cb49ca32008f3109db.html#ae5bc34153257d7cb49ca32008f3109db" title="Add a point in [0,1]² to the path." alt="" coords="5,69,152,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,75,153,81,152,75,186,70"/>
+</map>

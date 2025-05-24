@@ -1,5 +1,8 @@
 <map id="third_party/espressif/led_strip/src/led_strip_types.h" name="third_party/espressif/led_strip/src/led_strip_types.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,171,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="53,108,123,133"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="53,108,123,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,60,91,94,85,94,85,60"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="116,105,139,107,147,112,150,121,144,132,130,137,129,131,141,128,145,120,143,115,137,112,116,111"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="51,181,125,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,134,91,168,85,168,85,134"/>
 </map>

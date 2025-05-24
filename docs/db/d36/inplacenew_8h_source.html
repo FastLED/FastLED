@@ -105,28 +105,27 @@ $(function(){initNavTree('db/d36/inplacenew_8h_source.html','../../'); initResiz
 <div class="contents">
 <a href="../../db/d36/inplacenew_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">// This file must not be in the fl namespace, it must be in the global namespace.</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#if (defined(__AVR__) || !defined(__has_include)) &amp;&amp; (!defined(FASTLED_HAS_NEW))</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#ifndef __has_include</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">    7</a></span><span class="preprocessor">#define _NO_EXCEPT</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#define _NO_EXCEPT noexcept</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#endif</span></div>
-<div class="foldopen" id="foldopen00011" data-start="{" data-end="}">
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../db/d36/inplacenew_8h_adbf3933aba3543a77cf8e12a4dc6cd29.html#adbf3933aba3543a77cf8e12a4dc6cd29">   11</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span>* <span class="keyword">operator</span> <span class="keyword">new</span>(size_t, <span class="keywordtype">void</span>* ptr) <a class="code hl_define" href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">_NO_EXCEPT</a> {</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordflow">return</span> ptr;</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>}</div>
-</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#elif __has_include(&lt;new&gt;)</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;new&gt;</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#elif __has_include(&lt;new.h&gt;)</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;new.h&gt;</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#elif __has_include(&quot;new.h&quot;)</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &quot;new.h&quot;</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="ttc" id="ainplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97_html_a210b692758cdfe9f17ef5f8e5d11fd97"><div class="ttname"><a href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">_NO_EXCEPT</a></div><div class="ttdeci">#define _NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00007">inplacenew.h:7</a></div></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;<a class="code" href="../../df/dd8/stdint_8h.html">stdint.h</a>&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// This file must not be in the fl namespace, it must be in the global</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// namespace.</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#if (defined(__AVR__) || !defined(__has_include)) &amp;&amp; (!defined(FASTLED_HAS_NEW))</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#ifndef __has_include</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno"><a class="line" href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">   10</a></span><span class="preprocessor">#define _NO_EXCEPT</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#define _NO_EXCEPT noexcept</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../db/d36/inplacenew_8h_adbf3933aba3543a77cf8e12a4dc6cd29.html#adbf3933aba3543a77cf8e12a4dc6cd29">   14</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> *<span class="keyword">operator</span> <span class="keyword">new</span>(size_t, <span class="keywordtype">void</span> *ptr) <a class="code hl_define" href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">_NO_EXCEPT</a> { <span class="keywordflow">return</span> ptr; }</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#elif __has_include(&lt;new&gt;)</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;new&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#elif __has_include(&lt;new.h&gt;)</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;new.h&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#elif __has_include(&quot;new.h&quot;)</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;new.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="ainplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97_html_a210b692758cdfe9f17ef5f8e5d11fd97"><div class="ttname"><a href="../../db/d36/inplacenew_8h_a210b692758cdfe9f17ef5f8e5d11fd97.html#a210b692758cdfe9f17ef5f8e5d11fd97">_NO_EXCEPT</a></div><div class="ttdeci">#define _NO_EXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00010">inplacenew.h:10</a></div></div>
+<div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -134,7 +133,7 @@ $(function(){initNavTree('db/d36/inplacenew_8h_source.html','../../'); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d36/inplacenew_8h.html">inplacenew.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

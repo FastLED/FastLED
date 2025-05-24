@@ -1,0 +1,15 @@
+<map id="fl::blend" name="fl::blend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,80,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="128,29,203,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,39,114,39,114,45,80,45"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="251,29,333,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="203,39,237,39,237,45,203,45"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="381,29,448,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="334,39,368,39,368,45,334,45"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="545,5,643,31"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="328,27,381,14,459,9,531,10,531,16,459,14,382,19,329,32"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="496,55,692,80"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="329,52,382,65,432,69,482,70,482,76,431,75,381,70,328,57"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="448,35,531,24,532,29,449,40"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="449,44,491,50,490,55,448,49"/>
+</map>

@@ -2,8 +2,6 @@ var noise_8cpp =
 [
     [ "FASTLED_INTERNAL", "d6/de8/noise_8cpp_a2d8dda85477a00deab830effc5159d33.html#a2d8dda85477a00deab830effc5159d33", null ],
     [ "P", "d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81", null ],
-    [ "VARIABLE_LENGTH_ARRAY", "d6/de8/noise_8cpp_a1b28aa01597d88d7ed5ba102f0a5d715.html#a1b28aa01597d88d7ed5ba102f0a5d715", null ],
-    [ "VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION", "d6/de8/noise_8cpp_ab5b4c2d72829d5f696ef2b9c9537e01c.html#ab5b4c2d72829d5f696ef2b9c9537e01c", null ],
     [ "fill_2dnoise16", "de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc", null ],
     [ "fill_2dnoise8", "de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1", null ],
     [ "fill_noise16", "de/da4/group___noise_fill_ga8bf5ab0f87a6bb79204754ef2a62f960.html#ga8bf5ab0f87a6bb79204754ef2a62f960", null ],

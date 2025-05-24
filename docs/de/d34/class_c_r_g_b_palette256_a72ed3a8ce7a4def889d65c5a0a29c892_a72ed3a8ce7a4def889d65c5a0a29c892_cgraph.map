@@ -1,7 +1,0 @@
-<map id="CRGBPalette256::operator=" name="CRGBPalette256::operator=">
-<area shape="rect" id="Node000001" title="Copy constructor." alt="" coords="5,31,208,56"/>
-<area shape="rect" id="Node000002" href="$de/d34/class_c_r_g_b_palette256_ad8b2cfa7c9fbbecc4407d48cc2c240b7.html#ad8b2cfa7c9fbbecc4407d48cc2c240b7" title="Default constructor." alt="" coords="256,5,499,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,31,242,28,242,33,208,37"/>
-<area shape="rect" id="Node000003" href="$d6/de6/group___fast_memory_gaf5537d0243691002376d6a49566a47d4.html#gaf5537d0243691002376d6a49566a47d4" title="Faster alternative to memmove() on AVR." alt="" coords="327,55,428,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,50,313,59,313,64,208,55"/>
-</map>

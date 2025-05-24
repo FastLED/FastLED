@@ -9,4 +9,6 @@ digraph "fl::HeapVector::pop_back"
   Node1 [id="Node000001",label="fl::HeapVector::pop_back",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::HeapVector\< DrawItem\l \>::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a6ba2193ee3a2e6f0e8c819bb4c16cc39.html#a6ba2193ee3a2e6f0e8c819bb4c16cc39",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::HeapVector\< DrawItem\l \>::resize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a9fae0dadbb1a36e82e295fb70175a63a.html#a9fae0dadbb1a36e82e295fb70175a63a",tooltip=" "];
 }

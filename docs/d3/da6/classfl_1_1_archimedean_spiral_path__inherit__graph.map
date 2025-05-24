@@ -1,0 +1,7 @@
+<map id="fl::ArchimedeanSpiralPath" name="fl::ArchimedeanSpiralPath">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,195,177"/>
+<area shape="rect" id="Node000002" href="$d9/d43/classfl_1_1_x_y_path_generator.html" title=" " alt="" coords="26,79,174,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,118,103,152,97,152,97,118"/>
+<area shape="rect" id="Node000003" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="53,5,147,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,44,103,79,97,79,97,44"/>
+</map>

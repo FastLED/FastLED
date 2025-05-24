@@ -1,6 +1,5 @@
 var examples =
 [
-    [ "Callback", "d4/d55/_callback-example.html", null ],
     [ "Pacifica.ino", "d6/d86/_pacifica_8ino-example.html", null ],
     [ "Pride2015.ino", "d4/d87/_pride2015_8ino-example.html", null ],
     [ "TwinkleFox.ino", "df/d61/_twinkle_fox_8ino-example.html", null ],

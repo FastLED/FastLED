@@ -8,5 +8,5 @@ digraph "setup"
   rankdir="LR";
   Node1 [id="Node000001",label="setup",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="make_map",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4d/_wasm_screen_coords_8ino_a370d6bfaa540cdf2cef41cc1857ab62a.html#a370d6bfaa540cdf2cef41cc1857ab62a",tooltip=" "];
+  Node2 [id="Node000002",label="make_map",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4d/_wasm_screen_coords_8ino_a7812b673b56d9a15e54c2fc2d9542f1e.html#a7812b673b56d9a15e54c2fc2d9542f1e",tooltip=" "];
 }

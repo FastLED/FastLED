@@ -119,20 +119,20 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b4
 <div class="line">                                  (<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;32) + \</div>
 <div class="line">                                  (<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;64) + \</div>
 <div class="line">                                  (<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;128) )</div>
-<div class="ttc" id="apixel__controller_8h_aebfff45adc514fa6fee761623598df59_html_aebfff45adc514fa6fee761623598df59"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a></div><div class="ttdeci">#define UPDATES_PER_FULL_DITHER_CYCLE</div><div class="ttdoc">The number of updates in a single dither cycle.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00195">pixel_controller.h:195</a></div></div>
+<div class="ttc" id="apixel__controller_8h_aebfff45adc514fa6fee761623598df59_html_aebfff45adc514fa6fee761623598df59"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_aebfff45adc514fa6fee761623598df59.html#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a></div><div class="ttdeci">#define UPDATES_PER_FULL_DITHER_CYCLE</div><div class="ttdoc">The number of updates in a single dither cycle.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00200">pixel_controller.h:200</a></div></div>
 </div><!-- fragment -->
 <p>Set "virtual bits" of dithering to the highest level that is not likely to cause excessive flickering at low brightness levels + low update rates. </p>
-<p>These pre-set values are a little ambitious, since a 400Hz update rate for WS2811-family LEDs is only possible with 85 pixels or fewer. Once we have a "number of milliseconds since last update" value available here, we can quickly calculate the correct number of "virtual bits" on the fly with a couple of "if" statements &ndash; no division required. At this point, the division is done at compile time, so there's no runtime cost, but the values are still hard-coded. </p><dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000027">Todo</a></b></dt><dd>Can these macros be replaced with constants scoped to <a class="el" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd></dl>
+<p>These pre-set values are a little ambitious, since a 400Hz update rate for WS2811-family LEDs is only possible with 85 pixels or fewer. Once we have a "number of milliseconds since last update" value available here, we can quickly calculate the correct number of "virtual bits" on the fly with a couple of "if" statements &ndash; no division required. At this point, the division is done at compile time, so there's no runtime cost, but the values are still hard-coded. </p><dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000028">Todo</a></b></dt><dd>Can these macros be replaced with constants scoped to <a class="el" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00210">210</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  210</span><span class="preprocessor">#define RECOMMENDED_VIRTUAL_BITS ((UPDATES_PER_FULL_DITHER_CYCLE&gt;1) + \</span></div>
-<div class="line"><span class="lineno">  211</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;2) + \</span></div>
-<div class="line"><span class="lineno">  212</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;4) + \</span></div>
-<div class="line"><span class="lineno">  213</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;8) + \</span></div>
-<div class="line"><span class="lineno">  214</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;16) + \</span></div>
-<div class="line"><span class="lineno">  215</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;32) + \</span></div>
-<div class="line"><span class="lineno">  216</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;64) + \</span></div>
-<div class="line"><span class="lineno">  217</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;128) )</span></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00215">215</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  215</span><span class="preprocessor">#define RECOMMENDED_VIRTUAL_BITS ((UPDATES_PER_FULL_DITHER_CYCLE&gt;1) + \</span></div>
+<div class="line"><span class="lineno">  216</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;2) + \</span></div>
+<div class="line"><span class="lineno">  217</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;4) + \</span></div>
+<div class="line"><span class="lineno">  218</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;8) + \</span></div>
+<div class="line"><span class="lineno">  219</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;16) + \</span></div>
+<div class="line"><span class="lineno">  220</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;32) + \</span></div>
+<div class="line"><span class="lineno">  221</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;64) + \</span></div>
+<div class="line"><span class="lineno">  222</span><span class="preprocessor">                                  (UPDATES_PER_FULL_DITHER_CYCLE&gt;128) )</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -143,7 +143,7 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d4d/pixel__controller_8h.html">pixel_controller.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

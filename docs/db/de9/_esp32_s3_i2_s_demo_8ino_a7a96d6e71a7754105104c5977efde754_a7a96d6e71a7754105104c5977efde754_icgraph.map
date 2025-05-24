@@ -1,5 +1,14 @@
 <map id="fill_rainbow" name="fill_rainbow">
-<area shape="rect" id="Node000001" title=" " alt="" coords="104,5,201,31"/>
-<area shape="rect" id="Node000002" href="$db/de9/_esp32_s3_i2_s_demo_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="620,46,717,71"/>
+<area shape="rect" id="Node000002" href="$d7/d22/_color_temperature_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="509,21,560,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="606,50,560,41,561,35,607,44"/>
+<area shape="rect" id="Node000003" href="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db" title=" " alt="" coords="497,70,572,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="607,72,573,79,572,73,606,67"/>
+<area shape="rect" id="Node000004" href="$d1/d60/classfl_1_1_demo_reel100_adf8658f14d7667653b75247c06e7f8b6.html#adf8658f14d7667653b75247c06e7f8b6" title=" " alt="" coords="259,5,449,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="484,69,417,48,418,43,485,64"/>
+<area shape="rect" id="Node000005" href="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24" title=" " alt="" coords="281,70,427,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="484,85,427,85,427,80,484,80"/>
+<area shape="rect" id="Node000006" href="$d1/d60/classfl_1_1_demo_reel100_aad4b41d93c1a9f7acecea8b49cda7078.html#aad4b41d93c1a9f7acecea8b49cda7078" title=" " alt="" coords="5,95,211,121"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="485,102,450,109,326,119,211,118,211,112,326,113,449,104,484,97"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="268,94,211,100,210,95,267,89"/>
 </map>

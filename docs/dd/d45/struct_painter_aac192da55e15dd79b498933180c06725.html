@@ -142,143 +142,147 @@ $(function(){initNavTree('dd/d45/struct_painter_aac192da55e15dd79b498933180c0672
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00228">228</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  231</span>                                                              {</div>
-<div class="line"><span class="lineno">  232</span>  <span class="keyword">struct </span>DrawPoints {</div>
-<div class="line"><span class="lineno">  233</span>    <span class="keywordtype">int</span> n_black0;</div>
-<div class="line"><span class="lineno">  234</span>    <span class="keywordtype">int</span> n_fade0;</div>
-<div class="line"><span class="lineno">  235</span>    <span class="keywordtype">int</span> n_fill;</div>
-<div class="line"><span class="lineno">  236</span>    <span class="keywordtype">int</span> n_fade1;</div>
-<div class="line"><span class="lineno">  237</span>    <span class="keywordtype">int</span> n_black1;</div>
-<div class="line"><span class="lineno">  238</span>    <span class="keywordtype">float</span> fade_factor;  <span class="comment">// 0-&gt;1.0</span></div>
-<div class="line"><span class="lineno">  239</span> </div>
-<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">float</span> SumBrightness()<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  241</span>      <span class="keywordtype">float</span> out = 0;</div>
-<div class="line"><span class="lineno">  242</span>      out += n_fill;</div>
-<div class="line"><span class="lineno">  243</span>      out += (fade_factor * n_fade0);</div>
-<div class="line"><span class="lineno">  244</span>      out += (fade_factor * n_fade1);</div>
-<div class="line"><span class="lineno">  245</span>      <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  246</span>    }</div>
-<div class="line"><span class="lineno">  247</span>  };</div>
-<div class="line"><span class="lineno">  248</span> </div>
-<div class="line"><span class="lineno">  249</span>  <span class="comment">// Generator for the DrawPoints struct above.</span></div>
-<div class="line"><span class="lineno">  250</span>  <span class="comment">//  n_led: How many led&#39;s there are in total.</span></div>
-<div class="line"><span class="lineno">  251</span>  <span class="comment">//  factor: 0-&gt;1, indicates % of led&#39;s &quot;on&quot;.</span></div>
-<div class="line"><span class="lineno">  252</span>  <span class="keyword">struct </span>F {</div>
-<div class="line"><span class="lineno">  253</span>    <span class="keyword">static</span> DrawPoints Generate(<span class="keywordtype">int</span> n_led, <span class="keywordtype">float</span> factor) {</div>
-<div class="line"><span class="lineno">  254</span>      DrawPoints out;</div>
-<div class="line"><span class="lineno">  255</span>      memset(&amp;out, 0, <span class="keyword">sizeof</span>(out));</div>
-<div class="line"><span class="lineno">  256</span>      <span class="keywordflow">if</span> (n_led == 0 || factor == 0.0f) {</div>
-<div class="line"><span class="lineno">  257</span>        out.n_black0 = n_led;</div>
-<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  259</span>      }</div>
-<div class="line"><span class="lineno">  260</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> is_odd = (n_led % 2);</div>
-<div class="line"><span class="lineno">  261</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> n_half_lights = n_led / 2 + is_odd;</div>
-<div class="line"><span class="lineno">  262</span>      <span class="keyword">const</span> <span class="keywordtype">float</span> f_half_fill = n_half_lights * factor;</div>
-<div class="line"><span class="lineno">  263</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> n_half_fill = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(f_half_fill);  <span class="comment">// Truncates float.</span></div>
-<div class="line"><span class="lineno">  264</span>      </div>
-<div class="line"><span class="lineno">  265</span>      <span class="keywordtype">float</span> fade_pix_perc = f_half_fill - <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(n_half_fill);</div>
-<div class="line"><span class="lineno">  266</span>      <span class="keywordtype">int</span> n_fade_pix = fade_pix_perc &lt; 1.0f;</div>
-<div class="line"><span class="lineno">  267</span>      <span class="keywordflow">if</span> (n_half_fill == 0) {</div>
-<div class="line"><span class="lineno">  268</span>        n_fade_pix = 1;</div>
-<div class="line"><span class="lineno">  269</span>      }</div>
-<div class="line"><span class="lineno">  270</span>      <span class="keywordtype">int</span> n_half_black = n_half_lights - n_half_fill - n_fade_pix;</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00232">232</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  235</span>                                                              {</div>
+<div class="line"><span class="lineno">  236</span> </div>
+<div class="line"><span class="lineno">  237</span>  <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;\n\n############## VU MID NOTES FADE ################\n\n&quot;</span>);</div>
+<div class="line"><span class="lineno">  238</span> </div>
+<div class="line"><span class="lineno">  239</span>  <span class="keyword">struct </span>DrawPoints {</div>
+<div class="line"><span class="lineno">  240</span>    <span class="keywordtype">int</span> n_black0;</div>
+<div class="line"><span class="lineno">  241</span>    <span class="keywordtype">int</span> n_fade0;</div>
+<div class="line"><span class="lineno">  242</span>    <span class="keywordtype">int</span> n_fill;</div>
+<div class="line"><span class="lineno">  243</span>    <span class="keywordtype">int</span> n_fade1;</div>
+<div class="line"><span class="lineno">  244</span>    <span class="keywordtype">int</span> n_black1;</div>
+<div class="line"><span class="lineno">  245</span>    <span class="keywordtype">float</span> fade_factor;  <span class="comment">// 0-&gt;1.0</span></div>
+<div class="line"><span class="lineno">  246</span> </div>
+<div class="line"><span class="lineno">  247</span>    <span class="keywordtype">float</span> SumBrightness()<span class="keyword"> const </span>{</div>
+<div class="line"><span class="lineno">  248</span>      <span class="keywordtype">float</span> out = 0;</div>
+<div class="line"><span class="lineno">  249</span>      out += n_fill;</div>
+<div class="line"><span class="lineno">  250</span>      out += (fade_factor * n_fade0);</div>
+<div class="line"><span class="lineno">  251</span>      out += (fade_factor * n_fade1);</div>
+<div class="line"><span class="lineno">  252</span>      <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  253</span>    }</div>
+<div class="line"><span class="lineno">  254</span>  };</div>
+<div class="line"><span class="lineno">  255</span> </div>
+<div class="line"><span class="lineno">  256</span>  <span class="comment">// Generator for the DrawPoints struct above.</span></div>
+<div class="line"><span class="lineno">  257</span>  <span class="comment">//  n_led: How many led&#39;s there are in total.</span></div>
+<div class="line"><span class="lineno">  258</span>  <span class="comment">//  factor: 0-&gt;1, indicates % of led&#39;s &quot;on&quot;.</span></div>
+<div class="line"><span class="lineno">  259</span>  <span class="keyword">struct </span>F {</div>
+<div class="line"><span class="lineno">  260</span>    <span class="keyword">static</span> DrawPoints Generate(<span class="keywordtype">int</span> n_led, <span class="keywordtype">float</span> factor) {</div>
+<div class="line"><span class="lineno">  261</span>      DrawPoints out;</div>
+<div class="line"><span class="lineno">  262</span>      memset(&amp;out, 0, <span class="keyword">sizeof</span>(out));</div>
+<div class="line"><span class="lineno">  263</span>      <span class="keywordflow">if</span> (n_led == 0 || factor == 0.0f) {</div>
+<div class="line"><span class="lineno">  264</span>        out.n_black0 = n_led;</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  266</span>      }</div>
+<div class="line"><span class="lineno">  267</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> is_odd = (n_led % 2);</div>
+<div class="line"><span class="lineno">  268</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> n_half_lights = n_led / 2 + is_odd;</div>
+<div class="line"><span class="lineno">  269</span>      <span class="keyword">const</span> <span class="keywordtype">float</span> f_half_fill = n_half_lights * factor;</div>
+<div class="line"><span class="lineno">  270</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> n_half_fill = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(f_half_fill);  <span class="comment">// Truncates float.</span></div>
 <div class="line"><span class="lineno">  271</span>      </div>
-<div class="line"><span class="lineno">  272</span>      <span class="keywordtype">int</span> n_fill_pix = 0;</div>
-<div class="line"><span class="lineno">  273</span>      <span class="keywordflow">if</span> (n_half_fill &gt; 0) {</div>
-<div class="line"><span class="lineno">  274</span>        n_fill_pix = n_half_fill * 2 + (is_odd ? -1 : 0);  </div>
-<div class="line"><span class="lineno">  275</span>      }</div>
-<div class="line"><span class="lineno">  276</span>      </div>
-<div class="line"><span class="lineno">  277</span>      out.n_black0 = n_half_black;</div>
-<div class="line"><span class="lineno">  278</span>      out.n_fade0 = n_fade_pix;</div>
-<div class="line"><span class="lineno">  279</span>      out.n_fill = n_fill_pix;</div>
-<div class="line"><span class="lineno">  280</span>      out.n_fade1 = n_fade_pix;</div>
-<div class="line"><span class="lineno">  281</span>      <span class="keywordflow">if</span> (!n_fill_pix &amp;&amp; is_odd) {</div>
-<div class="line"><span class="lineno">  282</span>        out.n_fade1 = 0;</div>
-<div class="line"><span class="lineno">  283</span>      }</div>
-<div class="line"><span class="lineno">  284</span>      out.n_black1 = n_half_black;</div>
-<div class="line"><span class="lineno">  285</span>      out.fade_factor = fade_pix_perc;</div>
-<div class="line"><span class="lineno">  286</span>      <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">  287</span>    }</div>
-<div class="line"><span class="lineno">  288</span> };</div>
-<div class="line"><span class="lineno">  289</span>                                  </div>
-<div class="line"><span class="lineno">  290</span> </div>
-<div class="line"><span class="lineno">  291</span> led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">RawBeginDraw</a>();</div>
-<div class="line"><span class="lineno">  292</span>                           </div>
-<div class="line"><span class="lineno">  293</span> <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
-<div class="line"><span class="lineno">  294</span>    <span class="keyword">const</span> Key&amp; key = keyboard.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i];</div>
-<div class="line"><span class="lineno">  295</span> </div>
-<div class="line"><span class="lineno">  296</span>    <span class="keywordtype">float</span> active_lights_factor = key.<a class="code hl_function" href="../../db/d42/struct_key_a80119f0782ef8806dff00e21fcf71125.html#a80119f0782ef8806dff00e21fcf71125">IntensityFactor</a>();</div>
+<div class="line"><span class="lineno">  272</span>      <span class="keywordtype">float</span> fade_pix_perc = f_half_fill - <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(n_half_fill);</div>
+<div class="line"><span class="lineno">  273</span>      <span class="keywordtype">int</span> n_fade_pix = fade_pix_perc &lt; 1.0f;</div>
+<div class="line"><span class="lineno">  274</span>      <span class="keywordflow">if</span> (n_half_fill == 0) {</div>
+<div class="line"><span class="lineno">  275</span>        n_fade_pix = 1;</div>
+<div class="line"><span class="lineno">  276</span>      }</div>
+<div class="line"><span class="lineno">  277</span>      <span class="keywordtype">int</span> n_half_black = n_half_lights - n_half_fill - n_fade_pix;</div>
+<div class="line"><span class="lineno">  278</span>      </div>
+<div class="line"><span class="lineno">  279</span>      <span class="keywordtype">int</span> n_fill_pix = 0;</div>
+<div class="line"><span class="lineno">  280</span>      <span class="keywordflow">if</span> (n_half_fill &gt; 0) {</div>
+<div class="line"><span class="lineno">  281</span>        n_fill_pix = n_half_fill * 2 + (is_odd ? -1 : 0);  </div>
+<div class="line"><span class="lineno">  282</span>      }</div>
+<div class="line"><span class="lineno">  283</span>      </div>
+<div class="line"><span class="lineno">  284</span>      out.n_black0 = n_half_black;</div>
+<div class="line"><span class="lineno">  285</span>      out.n_fade0 = n_fade_pix;</div>
+<div class="line"><span class="lineno">  286</span>      out.n_fill = n_fill_pix;</div>
+<div class="line"><span class="lineno">  287</span>      out.n_fade1 = n_fade_pix;</div>
+<div class="line"><span class="lineno">  288</span>      <span class="keywordflow">if</span> (!n_fill_pix &amp;&amp; is_odd) {</div>
+<div class="line"><span class="lineno">  289</span>        out.n_fade1 = 0;</div>
+<div class="line"><span class="lineno">  290</span>      }</div>
+<div class="line"><span class="lineno">  291</span>      out.n_black1 = n_half_black;</div>
+<div class="line"><span class="lineno">  292</span>      out.fade_factor = fade_pix_perc;</div>
+<div class="line"><span class="lineno">  293</span>      <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">  294</span>    }</div>
+<div class="line"><span class="lineno">  295</span> };</div>
+<div class="line"><span class="lineno">  296</span>                                  </div>
 <div class="line"><span class="lineno">  297</span> </div>
-<div class="line"><span class="lineno">  298</span>    <span class="comment">//if (key.curr_color_.v_ &lt;= 0.f) {</span></div>
-<div class="line"><span class="lineno">  299</span>    <span class="comment">//  active_lights_factor = 0.0;</span></div>
-<div class="line"><span class="lineno">  300</span>    <span class="comment">//}</span></div>
-<div class="line"><span class="lineno">  301</span> </div>
-<div class="line"><span class="lineno">  302</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_led = led_column_table[i];</div>
-<div class="line"><span class="lineno">  303</span> </div>
-<div class="line"><span class="lineno">  304</span>    <span class="keywordflow">if</span> (active_lights_factor &gt; 0.0f) {</div>
-<div class="line"><span class="lineno">  305</span>      DrawPoints dp = F::Generate(n_led, active_lights_factor);</div>
-<div class="line"><span class="lineno">  306</span>      </div>
-<div class="line"><span class="lineno">  307</span>      ColorHSV hsv = key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>;</div>
-<div class="line"><span class="lineno">  308</span>      hsv.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> = 1.0;</div>
-<div class="line"><span class="lineno">  309</span>      Color3i color = hsv.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
-<div class="line"><span class="lineno">  310</span>      <span class="comment">// Now figure out optional fade color</span></div>
-<div class="line"><span class="lineno">  311</span>      Color3i fade_col;</div>
-<div class="line"><span class="lineno">  312</span>      ColorHSV c = key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>;</div>
-<div class="line"><span class="lineno">  313</span>      c.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> = dp.fade_factor;</div>
-<div class="line"><span class="lineno">  314</span>      fade_col = c.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
-<div class="line"><span class="lineno">  315</span>      </div>
-<div class="line"><span class="lineno">  316</span>      <span class="comment">// Output to graphics.</span></div>
-<div class="line"><span class="lineno">  317</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), dp.n_black0);</div>
-<div class="line"><span class="lineno">  318</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(fade_col, dp.n_fade0);</div>
-<div class="line"><span class="lineno">  319</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(color, dp.n_fill);</div>
-<div class="line"><span class="lineno">  320</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(fade_col, dp.n_fade1);</div>
-<div class="line"><span class="lineno">  321</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), dp.n_black1);</div>
-<div class="line"><span class="lineno">  322</span> </div>
-<div class="line"><span class="lineno">  323</span><span class="preprocessor">#ifdef DEBUG_PAINTER</span></div>
-<div class="line"><span class="lineno">  324</span>      <span class="keywordflow">if</span> (active_lights_factor &gt; 0.0) {</div>
-<div class="line"><span class="lineno">  325</span>        <span class="keywordtype">int</span> total_lights_on = dp.SumBrightness();</div>
-<div class="line"><span class="lineno">  326</span>        <span class="comment">//dprint(&quot;total_lights_on: &quot;); dprint(total_lights_on);</span></div>
-<div class="line"><span class="lineno">  327</span>        <span class="comment">//dprint(&quot;, total lights written: &quot;); dprintln(total_lights_on + dp.n_black0 + dp.n_black1);</span></div>
-<div class="line"><span class="lineno">  328</span> </div>
-<div class="line"><span class="lineno">  329</span>        <span class="comment">//float total = (dp.n_fade0 * dp.fade_factor) + (dp.n_fade1 * dp.fade_factor) + static_cast&lt;float&gt;(dp.n_fill);</span></div>
-<div class="line"><span class="lineno">  330</span><span class="preprocessor">        #define P(X) dprint(&quot;, &quot;#X &quot;: &quot;); dprint(X);</span></div>
-<div class="line"><span class="lineno">  331</span> </div>
-<div class="line"><span class="lineno">  332</span>        <span class="comment">//dprint(&quot;active_lights_factor: &quot;); dprintln(active_lights_factor);</span></div>
-<div class="line"><span class="lineno">  333</span> </div>
-<div class="line"><span class="lineno">  334</span>        <span class="comment">//P(dp.n_black0); P(dp.n_fade0); P(dp.n_fill); P(dp.n_fade1); P(dp.n_black1); P(dp.fade_factor);</span></div>
-<div class="line"><span class="lineno">  335</span>        <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(total_lights_on);</div>
-<div class="line"><span class="lineno">  336</span>        <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(active_lights_factor);</div>
-<div class="line"><span class="lineno">  337</span>        <span class="comment">//P(total);</span></div>
-<div class="line"><span class="lineno">  338</span>        <a class="code hl_define" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a>(<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><span class="lineno">  339</span>      }</div>
-<div class="line"><span class="lineno">  340</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  341</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  342</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), n_led);</div>
-<div class="line"><span class="lineno">  343</span>    }</div>
-<div class="line"><span class="lineno">  344</span> </div>
-<div class="line"><span class="lineno">  345</span> </div>
-<div class="line"><span class="lineno">  346</span> </div>
-<div class="line"><span class="lineno">  347</span>  }</div>
-<div class="line"><span class="lineno">  348</span> </div>
-<div class="line"><span class="lineno">  349</span>  </div>
-<div class="line"><span class="lineno">  350</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">RawCommitDraw</a>();</div>
-<div class="line"><span class="lineno">  351</span>}</div>
+<div class="line"><span class="lineno">  298</span> led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">RawBeginDraw</a>();</div>
+<div class="line"><span class="lineno">  299</span>                           </div>
+<div class="line"><span class="lineno">  300</span> <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
+<div class="line"><span class="lineno">  301</span>    <span class="keyword">const</span> Key&amp; key = keyboard.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i];</div>
+<div class="line"><span class="lineno">  302</span> </div>
+<div class="line"><span class="lineno">  303</span>    <span class="keywordtype">float</span> active_lights_factor = key.<a class="code hl_function" href="../../db/d42/struct_key_a80119f0782ef8806dff00e21fcf71125.html#a80119f0782ef8806dff00e21fcf71125">IntensityFactor</a>();</div>
+<div class="line"><span class="lineno">  304</span> </div>
+<div class="line"><span class="lineno">  305</span>    <span class="comment">//if (key.curr_color_.v_ &lt;= 0.f) {</span></div>
+<div class="line"><span class="lineno">  306</span>    <span class="comment">//  active_lights_factor = 0.0;</span></div>
+<div class="line"><span class="lineno">  307</span>    <span class="comment">//}</span></div>
+<div class="line"><span class="lineno">  308</span> </div>
+<div class="line"><span class="lineno">  309</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n_led = led_column_table[i];</div>
+<div class="line"><span class="lineno">  310</span> </div>
+<div class="line"><span class="lineno">  311</span>    <span class="keywordflow">if</span> (active_lights_factor &gt; 0.0f) {</div>
+<div class="line"><span class="lineno">  312</span>      DrawPoints dp = F::Generate(n_led, active_lights_factor);</div>
+<div class="line"><span class="lineno">  313</span>      </div>
+<div class="line"><span class="lineno">  314</span>      ColorHSV hsv = key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>;</div>
+<div class="line"><span class="lineno">  315</span>      hsv.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> = 1.0;</div>
+<div class="line"><span class="lineno">  316</span>      Color3i color = hsv.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
+<div class="line"><span class="lineno">  317</span>      <span class="comment">// Now figure out optional fade color</span></div>
+<div class="line"><span class="lineno">  318</span>      Color3i fade_col;</div>
+<div class="line"><span class="lineno">  319</span>      ColorHSV c = key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>;</div>
+<div class="line"><span class="lineno">  320</span>      c.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> = dp.fade_factor;</div>
+<div class="line"><span class="lineno">  321</span>      fade_col = c.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
+<div class="line"><span class="lineno">  322</span>      </div>
+<div class="line"><span class="lineno">  323</span>      <span class="comment">// Output to graphics.</span></div>
+<div class="line"><span class="lineno">  324</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), dp.n_black0);</div>
+<div class="line"><span class="lineno">  325</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(fade_col, dp.n_fade0);</div>
+<div class="line"><span class="lineno">  326</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(color, dp.n_fill);</div>
+<div class="line"><span class="lineno">  327</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(fade_col, dp.n_fade1);</div>
+<div class="line"><span class="lineno">  328</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), dp.n_black1);</div>
+<div class="line"><span class="lineno">  329</span> </div>
+<div class="line"><span class="lineno">  330</span><span class="preprocessor">#ifdef DEBUG_PAINTER</span></div>
+<div class="line"><span class="lineno">  331</span>      <span class="keywordflow">if</span> (active_lights_factor &gt; 0.0) {</div>
+<div class="line"><span class="lineno">  332</span>        <span class="keywordtype">int</span> total_lights_on = dp.SumBrightness();</div>
+<div class="line"><span class="lineno">  333</span>        <span class="comment">//dprint(&quot;total_lights_on: &quot;); dprint(total_lights_on);</span></div>
+<div class="line"><span class="lineno">  334</span>        <span class="comment">//dprint(&quot;, total lights written: &quot;); dprintln(total_lights_on + dp.n_black0 + dp.n_black1);</span></div>
+<div class="line"><span class="lineno">  335</span> </div>
+<div class="line"><span class="lineno">  336</span>        <span class="comment">//float total = (dp.n_fade0 * dp.fade_factor) + (dp.n_fade1 * dp.fade_factor) + static_cast&lt;float&gt;(dp.n_fill);</span></div>
+<div class="line"><span class="lineno">  337</span><span class="preprocessor">        #define P(X) dprint(&quot;, &quot;#X &quot;: &quot;); dprint(X);</span></div>
+<div class="line"><span class="lineno">  338</span> </div>
+<div class="line"><span class="lineno">  339</span>        <span class="comment">//dprint(&quot;active_lights_factor: &quot;); dprintln(active_lights_factor);</span></div>
+<div class="line"><span class="lineno">  340</span> </div>
+<div class="line"><span class="lineno">  341</span>        <span class="comment">//P(dp.n_black0); P(dp.n_fade0); P(dp.n_fill); P(dp.n_fade1); P(dp.n_black1); P(dp.fade_factor);</span></div>
+<div class="line"><span class="lineno">  342</span>        <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(total_lights_on);</div>
+<div class="line"><span class="lineno">  343</span>        <a class="code hl_define" href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a>(active_lights_factor);</div>
+<div class="line"><span class="lineno">  344</span>        <span class="comment">//P(total);</span></div>
+<div class="line"><span class="lineno">  345</span>        <a class="code hl_define" href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a>(<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><span class="lineno">  346</span>      }</div>
+<div class="line"><span class="lineno">  347</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  348</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  349</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">RawDrawPixels</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>(), n_led);</div>
+<div class="line"><span class="lineno">  350</span>    }</div>
+<div class="line"><span class="lineno">  351</span> </div>
+<div class="line"><span class="lineno">  352</span> </div>
+<div class="line"><span class="lineno">  353</span> </div>
+<div class="line"><span class="lineno">  354</span>  }</div>
+<div class="line"><span class="lineno">  355</span> </div>
+<div class="line"><span class="lineno">  356</span>  </div>
+<div class="line"><span class="lineno">  357</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">RawCommitDraw</a>();</div>
+<div class="line"><span class="lineno">  358</span>}</div>
 <div class="ttc" id="aclass_keyboard_state_ab1438e70fd677a21c3601343ac5664f3_html_ab1438e70fd677a21c3601343ac5664f3"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">KeyboardState::keys_</a></div><div class="ttdeci">Key keys_[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
 <div class="ttc" id="aclass_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a_html_a4655ae1b8e1b02b5604bf2303a367e4a"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw</a></div><div class="ttdeci">virtual void RawCommitDraw()=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac_html_aabd7b16e96dfbbcf2dac2b21f389d0ac"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw</a></div><div class="ttdeci">virtual void RawBeginDraw()=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999_html_ab3a55e66c3238e90adf4a0889ea4a999"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">LedRopeInterface::RawDrawPixels</a></div><div class="ttdeci">virtual void RawDrawPixels(const Color3i &amp;c, int n)=0</div></div>
 <div class="ttc" id="adprint_8h_a841cac3f63b25edb3183df5bed0d94d3_html_a841cac3f63b25edb3183df5bed0d94d3"><div class="ttname"><a href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a></div><div class="ttdeci">#define dprintln(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00012">dprint.h:12</a></div></div>
-<div class="ttc" id="anoise_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdoc">Reads a single byte from the p array.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00051">noise.cpp:51</a></div></div>
+<div class="ttc" id="anoise_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d6/de8/noise_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdoc">Reads a single byte from the p array.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00025">noise.cpp:25</a></div></div>
 <div class="ttc" id="astruct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9_html_af5a85a3006c2ec7d3f4c4132b120e7b9"><div class="ttname"><a href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a></div><div class="ttdeci">static Color3i Black()</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00009">color.h:9</a></div></div>
 <div class="ttc" id="astruct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b_html_a0096a4003cbc683bc1ed7e675c5c029b"><div class="ttname"><a href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">ColorHSV::v_</a></div><div class="ttdeci">float v_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00098">color.h:98</a></div></div>
 <div class="ttc" id="astruct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5_html_a46c2d7fa61b17ef44d98e7c64798ffe5"><div class="ttname"><a href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ColorHSV::ToRGB</a></div><div class="ttdeci">Color3i ToRGB() const</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d03/color_8cpp_source.html#l00128">color.cpp:128</a></div></div>
 <div class="ttc" id="astruct_key_a80119f0782ef8806dff00e21fcf71125_html_a80119f0782ef8806dff00e21fcf71125"><div class="ttname"><a href="../../db/d42/struct_key_a80119f0782ef8806dff00e21fcf71125.html#a80119f0782ef8806dff00e21fcf71125">Key::IntensityFactor</a></div><div class="ttdeci">float IntensityFactor() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d5c/_keyboard_8cpp_source.html#l00067">Keyboard.cpp:67</a></div></div>
 <div class="ttc" id="astruct_key_a9f67c53a51f8b33667c327f79c6782dc_html_a9f67c53a51f8b33667c327f79c6782dc"><div class="ttname"><a href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">Key::curr_color_</a></div><div class="ttdeci">ColorHSV curr_color_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
+<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00009">Color3i::Black()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">Key::curr_color_</a>, <a class="el" href="../../df/d29/dprint_8h_source.html#l00012">dprintln</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00067">Key::IntensityFactor()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">KeyboardState::keys_</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00051">P</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">LedRopeInterface::RawDrawPixels()</a>, <a class="el" href="../../d3/d03/color_8cpp_source.html#l00128">ColorHSV::ToRGB()</a>, and <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00098">ColorHSV::v_</a>.</p>
+<p class="reference">References <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00009">Color3i::Black()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">Key::curr_color_</a>, <a class="el" href="../../df/d29/dprint_8h_source.html#l00012">dprintln</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00067">Key::IntensityFactor()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">KeyboardState::keys_</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00025">P</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_ab3a55e66c3238e90adf4a0889ea4a999.html#ab3a55e66c3238e90adf4a0889ea4a999">LedRopeInterface::RawDrawPixels()</a>, <a class="el" href="../../d3/d03/color_8cpp_source.html#l00128">ColorHSV::ToRGB()</a>, and <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00098">ColorHSV::v_</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00097">Paint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00098">Paint()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -303,7 +307,7 @@ $(function(){initNavTree('dd/d45/struct_painter_aac192da55e15dd79b498933180c0672
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/d45/struct_painter.html">Painter</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

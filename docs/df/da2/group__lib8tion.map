@@ -1,16 +1,15 @@
 <map id="Fast Math Functions" name="Fast Math Functions">
-<area shape="rect" id="Node000013" href="$d6/d6c/group___beat_generators.html" title="Waveform generators that reset at a given number of &quot;beats per minute&quot; (BPM)." alt="" coords="207,5,405,31"/>
+<area shape="rect" id="Node000012" href="$d6/d6c/group___beat_generators.html" title="Waveform generators that reset at a given number of &quot;beats per minute&quot; (BPM)." alt="" coords="207,5,405,31"/>
 <area shape="rect" id="Node000003" href="$dc/d3e/group___dimming.html" title="Functions to dim or brighten data." alt="" coords="211,55,401,95"/>
 <area shape="rect" id="Node000004" href="$d4/dfe/group___easing.html" title="Specify the rate of change of a parameter over time." alt="" coords="241,120,371,145"/>
-<area shape="rect" id="Node000005" href="$d6/de6/group___fast_memory.html" title="Alternatives to memmove, memcpy, and memset that are faster on AVR than standard avr&#45;libc 1...." alt="" coords="220,170,392,210"/>
-<area shape="rect" id="Node000009" href="$d5/d66/group___float_conversions.html" title="Functions to convert between floating point and fixed point types." alt="" coords="206,234,406,274"/>
-<area shape="rect" id="Node000008" href="$db/d58/group___fractional_types.html" title="Types for storing fractional data." alt="" coords="225,298,387,338"/>
-<area shape="rect" id="Node000011" href="$d6/d19/group___linear_interpolation.html" title="Fast linear interpolation functions, such as could be used for Perlin noise, etc." alt="" coords="231,363,381,388"/>
-<area shape="rect" id="Node000002" href="$d5/d98/group___math.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="221,412,391,437"/>
-<area shape="rect" id="Node000006" href="$d2/d0d/group___random.html" title="Fast 8&#45;bit and 16&#45;bit unsigned random number generators." alt="" coords="225,462,387,502"/>
-<area shape="rect" id="Node000012" href="$d0/da8/group___scaling.html" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming." alt="" coords="239,527,373,552"/>
-<area shape="rect" id="Node000007" href="$d1/ddc/group___trig.html" title="Fast 8&#45;bit and 16&#45;bit approximations of sin(x) and cos(x)." alt="" coords="204,576,408,601"/>
-<area shape="rect" id="Node000014" href="$d1/d7a/group___waveform_generators.html" title="General purpose wave generator functions." alt="" coords="223,625,389,651"/>
-<area shape="rect" id="Node000010" href="$d1/d12/group__intmap.html" title="Maps a scalar from one integer size to another." alt="" coords="209,675,403,700"/>
-<area shape="rect" id="Node000001" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="5,363,156,388"/>
+<area shape="rect" id="Node000008" href="$d5/d66/group___float_conversions.html" title="Functions to convert between floating point and fixed point types." alt="" coords="206,170,406,210"/>
+<area shape="rect" id="Node000007" href="$db/d58/group___fractional_types.html" title="Types for storing fractional data." alt="" coords="225,234,387,274"/>
+<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation.html" title="Fast linear interpolation functions, such as could be used for Perlin noise, etc." alt="" coords="231,299,381,324"/>
+<area shape="rect" id="Node000002" href="$d5/d98/group___math.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="221,348,391,373"/>
+<area shape="rect" id="Node000005" href="$d2/d0d/group___random.html" title="Fast 8&#45;bit and 16&#45;bit unsigned random number generators." alt="" coords="225,398,387,438"/>
+<area shape="rect" id="Node000011" href="$d0/da8/group___scaling.html" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming." alt="" coords="239,463,373,488"/>
+<area shape="rect" id="Node000006" href="$d1/ddc/group___trig.html" title="Fast 8&#45;bit and 16&#45;bit approximations of sin(x) and cos(x)." alt="" coords="204,512,408,537"/>
+<area shape="rect" id="Node000013" href="$d1/d7a/group___waveform_generators.html" title="General purpose wave generator functions." alt="" coords="223,561,389,587"/>
+<area shape="rect" id="Node000009" href="$d1/d12/group__intmap.html" title="Maps a scalar from one integer size to another." alt="" coords="209,611,403,636"/>
+<area shape="rect" id="Node000001" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="5,324,156,349"/>
 </map>

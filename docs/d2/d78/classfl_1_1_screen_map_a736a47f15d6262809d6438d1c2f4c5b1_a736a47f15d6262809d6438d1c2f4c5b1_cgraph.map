@@ -1,0 +1,8 @@
+<map id="fl::ScreenMap::DefaultStrip" name="fl::ScreenMap::DefaultStrip">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,201,31"/>
+<area shape="rect" id="Node000002" href="$d2/d78/classfl_1_1_screen_map_a8875dd841783ec4816257ed74bd2afa0.html#a8875dd841783ec4816257ed74bd2afa0" title=" " alt="" coords="452,5,643,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,15,438,15,438,21,202,21"/>
+<area shape="rect" id="Node000003" href="$d2/d78/classfl_1_1_screen_map_a4e85c9cd6a6488bd83cfcf01190b137d.html#a4e85c9cd6a6488bd83cfcf01190b137d" title=" " alt="" coords="249,31,404,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="202,26,236,30,235,36,201,32"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="404,32,438,28,439,33,405,37"/>
+</map>

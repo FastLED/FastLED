@@ -1,0 +1,4 @@
+<map id="fl::Tile2x2_u8::draw" name="fl::Tile2x2_u8::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,155,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="105,18,98,11,80,8,65,10,57,15,55,20,60,28,55,31,50,21,53,11,63,5,80,3,100,6,109,15"/>
+</map>

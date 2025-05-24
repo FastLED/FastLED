@@ -115,36 +115,36 @@ $(function(){initNavTree('dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_0
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00014">14</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   14</span>                                 {</div>
-<div class="line"><span class="lineno">   15</span>  <span class="keyword">typedef</span> <a class="code hl_struct" href="../../d0/de2/struct_interp_data.html">InterpData&lt;float, float&gt;</a> Datum;</div>
-<div class="line"><span class="lineno">   16</span>  <span class="keyword">static</span> <span class="keyword">const</span> Datum kData[] = {</div>
-<div class="line"><span class="lineno">   17</span>    Datum(0,  0),</div>
-<div class="line"><span class="lineno">   18</span>    Datum(1,  0),</div>
-<div class="line"><span class="lineno">   19</span>    Datum(10, 0),</div>
-<div class="line"><span class="lineno">   20</span>    Datum(47, 60),</div>
-<div class="line"><span class="lineno">   21</span>    Datum(120, 100),</div>
-<div class="line"><span class="lineno">   22</span>    Datum(230, 160),</div>
-<div class="line"><span class="lineno">   23</span>    Datum(250, 255),</div>
-<div class="line"><span class="lineno">   24</span>    Datum(254, 255),</div>
-<div class="line"><span class="lineno">   25</span>    Datum(255, 64), </div>
-<div class="line"><span class="lineno">   26</span>  };</div>
-<div class="line"><span class="lineno">   27</span>  </div>
-<div class="line"><span class="lineno">   28</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> key = time * 255.f;</div>
-<div class="line"><span class="lineno">   29</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> n = <span class="keyword">sizeof</span>(kData) / <span class="keyword">sizeof</span>(kData[0]);    </div>
-<div class="line"><span class="lineno">   30</span>  <span class="keywordtype">float</span> approx_val = <a class="code hl_function" href="../../d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e">Interp</a>(key, kData, n);</div>
-<div class="line"><span class="lineno">   31</span>  </div>
-<div class="line"><span class="lineno">   32</span> </div>
-<div class="line"><span class="lineno">   33</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> k = (1.0f / 255.f);</div>
-<div class="line"><span class="lineno">   34</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> out = approx_val * k;    </div>
-<div class="line"><span class="lineno">   35</span>  <span class="keywordflow">return</span> out;</div>
-<div class="line"><span class="lineno">   36</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00015">15</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   15</span>                                 {</div>
+<div class="line"><span class="lineno">   16</span>  <span class="keyword">typedef</span> <a class="code hl_struct" href="../../d0/de2/struct_interp_data.html">InterpData&lt;float, float&gt;</a> Datum;</div>
+<div class="line"><span class="lineno">   17</span>  <span class="keyword">static</span> <span class="keyword">const</span> Datum kData[] = {</div>
+<div class="line"><span class="lineno">   18</span>    Datum(0,  0),</div>
+<div class="line"><span class="lineno">   19</span>    Datum(1,  0),</div>
+<div class="line"><span class="lineno">   20</span>    Datum(10, 0),</div>
+<div class="line"><span class="lineno">   21</span>    Datum(47, 60),</div>
+<div class="line"><span class="lineno">   22</span>    Datum(120, 100),</div>
+<div class="line"><span class="lineno">   23</span>    Datum(230, 160),</div>
+<div class="line"><span class="lineno">   24</span>    Datum(250, 255),</div>
+<div class="line"><span class="lineno">   25</span>    Datum(254, 255),</div>
+<div class="line"><span class="lineno">   26</span>    Datum(255, 64), </div>
+<div class="line"><span class="lineno">   27</span>  };</div>
+<div class="line"><span class="lineno">   28</span>  </div>
+<div class="line"><span class="lineno">   29</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> key = time * 255.f;</div>
+<div class="line"><span class="lineno">   30</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> n = <span class="keyword">sizeof</span>(kData) / <span class="keyword">sizeof</span>(kData[0]);    </div>
+<div class="line"><span class="lineno">   31</span>  <span class="keywordtype">float</span> approx_val = <a class="code hl_function" href="../../d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e">Interp</a>(key, kData, n);</div>
+<div class="line"><span class="lineno">   32</span>  </div>
+<div class="line"><span class="lineno">   33</span> </div>
+<div class="line"><span class="lineno">   34</span>  <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">float</span> k = (1.0f / 255.f);</div>
+<div class="line"><span class="lineno">   35</span>  <span class="keyword">const</span> <span class="keywordtype">float</span> out = approx_val * k;    </div>
+<div class="line"><span class="lineno">   36</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">   37</span>}</div>
 <div class="ttc" id="a_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e_html_a5b61be736266623d9b4da9a66be9fa8e"><div class="ttname"><a href="../../d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e">Interp</a></div><div class="ttdeci">ValT Interp(const KeyT &amp;k, const InterpData&lt; KeyT, ValT &gt; *array, const int n)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd8/_approximating_function_8h_source.html#l00054">ApproximatingFunction.h:54</a></div></div>
 <div class="ttc" id="astruct_interp_data_html"><div class="ttname"><a href="../../d0/de2/struct_interp_data.html">InterpData</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/dd8/_approximating_function_8h_source.html#l00018">ApproximatingFunction.h:18</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d7/dd8/_approximating_function_8h_source.html#l00054">Interp()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00038">CalcLuminance()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00039">CalcLuminance()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -169,7 +169,7 @@ $(function(){initNavTree('dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_0
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_03.html">anonymous_namespace{Painter.cpp}</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

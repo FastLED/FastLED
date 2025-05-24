@@ -139,32 +139,32 @@ $(function(){initNavTree('d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00067">67</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   68</span>                                                      {</div>
-<div class="line"><span class="lineno">   69</span>    uint16_t dx_inv = 256 - dx;</div>
-<div class="line"><span class="lineno">   70</span>    uint16_t dy_inv = 256 - dy;</div>
-<div class="line"><span class="lineno">   71</span> </div>
-<div class="line"><span class="lineno">   72</span>    uint32_t w00 = (uint32_t)dx_inv * dy_inv;</div>
-<div class="line"><span class="lineno">   73</span>    uint32_t w10 = (uint32_t)dx * dy_inv;</div>
-<div class="line"><span class="lineno">   74</span>    uint32_t w01 = (uint32_t)dx_inv * dy;</div>
-<div class="line"><span class="lineno">   75</span>    uint32_t w11 = (uint32_t)dx * dy;</div>
-<div class="line"><span class="lineno">   76</span> </div>
-<div class="line"><span class="lineno">   77</span>    uint32_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
-<div class="line"><span class="lineno">   78</span> </div>
-<div class="line"><span class="lineno">   79</span>    <span class="comment">// Normalize the result by dividing by 65536 (shift right by 16 bits),</span></div>
-<div class="line"><span class="lineno">   80</span>    <span class="comment">// with rounding</span></div>
-<div class="line"><span class="lineno">   81</span>    uint8_t result = (uint8_t)((sum + 32768) &gt;&gt; 16);</div>
-<div class="line"><span class="lineno">   82</span> </div>
-<div class="line"><span class="lineno">   83</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">   84</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00066">66</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   67</span>                                                      {</div>
+<div class="line"><span class="lineno">   68</span>    uint16_t dx_inv = 256 - dx;</div>
+<div class="line"><span class="lineno">   69</span>    uint16_t dy_inv = 256 - dy;</div>
+<div class="line"><span class="lineno">   70</span> </div>
+<div class="line"><span class="lineno">   71</span>    uint32_t w00 = (uint32_t)dx_inv * dy_inv;</div>
+<div class="line"><span class="lineno">   72</span>    uint32_t w10 = (uint32_t)dx * dy_inv;</div>
+<div class="line"><span class="lineno">   73</span>    uint32_t w01 = (uint32_t)dx_inv * dy;</div>
+<div class="line"><span class="lineno">   74</span>    uint32_t w11 = (uint32_t)dx * dy;</div>
+<div class="line"><span class="lineno">   75</span> </div>
+<div class="line"><span class="lineno">   76</span>    uint32_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
+<div class="line"><span class="lineno">   77</span> </div>
+<div class="line"><span class="lineno">   78</span>    <span class="comment">// Normalize the result by dividing by 65536 (shift right by 16 bits),</span></div>
+<div class="line"><span class="lineno">   79</span>    <span class="comment">// with rounding</span></div>
+<div class="line"><span class="lineno">   80</span>    uint8_t result = (uint8_t)((sum + 32768) &gt;&gt; 16);</div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">   83</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00022">bilinearExpandArbitrary()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00020">bilinearExpandArbitrary()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8_a2e4fe67035df871b23df6b907ca338c8_icgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8_a2e4fe67035df871b23df6b907ca338c8_icgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -176,7 +176,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

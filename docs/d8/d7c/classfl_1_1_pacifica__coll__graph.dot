@@ -14,8 +14,4 @@ digraph "fl::Pacifica"
   Node4 [id="Node000004",label="fl::Referent",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d16/classfl_1_1_referent.html",tooltip=" "];
   Node11 -> Node2 [id="edge4_Node000002_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mXMap",fontcolor="grey" ];
   Node11 [id="Node000011",label="fl::XMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d6c/classfl_1_1_x_map.html",tooltip=" "];
-  Node12 -> Node1 [id="edge5_Node000001_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" pacifica_palette_1\npacifica_palette_2\npacifica_palette_3",fontcolor="grey" ];
-  Node12 [id="Node000012",label="CRGBPalette16",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/dc4/class_c_r_g_b_palette16.html",tooltip="RGB color palette with 16 discrete values."];
-  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" entries",fontcolor="grey" ];
-  Node13 [id="Node000013",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
 }

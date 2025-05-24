@@ -117,7 +117,7 @@ $(function(){initNavTree('d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075
 
 <p>Fast 16-bit approximation of cos(x). </p>
 <p>This approximation never varies more than 0.69% from the floating point value you'd get by doing </p><div class="fragment"><div class="line"><span class="keywordtype">float</span> s = cos(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>) * 32767.0;</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">theta</td><td>input angle from 0-65535 </td></tr>
@@ -128,19 +128,19 @@ $(function(){initNavTree('d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../da/d42/_x_y_matrix_8ino-example.html#a8">XYMatrix.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/db9/trig8_8h_source.html#l00143">143</a> of file <a class="el" href="../../d3/db9/trig8_8h_source.html">trig8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  143</span>{ <span class="keywordflow">return</span> <a class="code hl_define" href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a>(theta + 16384); }</div>
-<div class="ttc" id="agroup___trig_gace4cc675280eecec1eeb83da47406409_html_gace4cc675280eecec1eeb83da47406409"><div class="ttname"><a href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a></div><div class="ttdeci">#define sin16</div><div class="ttdoc">Platform-independent alias of the fast sin implementation.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/db9/trig8_8h_source.html#l00098">trig8.h:98</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/db9/trig8_8h_source.html#l00148">148</a> of file <a class="el" href="../../d3/db9/trig8_8h_source.html">trig8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  148</span>{ <span class="keywordflow">return</span> <a class="code hl_define" href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a>(theta + 16384); }</div>
+<div class="ttc" id="agroup___trig_gace4cc675280eecec1eeb83da47406409_html_gace4cc675280eecec1eeb83da47406409"><div class="ttname"><a href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a></div><div class="ttdeci">#define sin16</div><div class="ttdoc">Platform-independent alias of the fast sin implementation.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/db9/trig8_8h_source.html#l00103">trig8.h:103</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d3/db9/trig8_8h_source.html#l00098">sin16</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d3/db9/trig8_8h_source.html#l00103">sin16</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/de4/_x_y_matrix_8ino_source.html#l00203">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/de4/_x_y_matrix_8ino_source.html#l00203">loop()</a>, and <a class="el" href="../../d8/d8c/transform_8cpp_source.html#l00092">fl::Transform16::transform()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075_ga056952ebed39f55880bb353857b47075_icgraph.svg" width="170" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075_ga056952ebed39f55880bb353857b47075_icgraph.svg" width="310" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -152,7 +152,7 @@ $(function(){initNavTree('d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/ddc/group___trig.html">Fast Trigonometry Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

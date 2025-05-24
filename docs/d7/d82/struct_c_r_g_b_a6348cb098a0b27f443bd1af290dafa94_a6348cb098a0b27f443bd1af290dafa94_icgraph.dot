@@ -14,9 +14,11 @@ digraph "CRGB::blend"
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::FrameInterpolator\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d94/classfl_1_1_frame_interpolator_a681dd7d646b6b2b75c4035678693206a.html#a681dd7d646b6b2b75c4035678693206a",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::Frame::drawXY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_af228b83cd52447b2416893f39d0753df.html#af228b83cd52447b2416893f39d0753df",tooltip=" "];
-  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::FxCompositor::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96",tooltip=" "];
+  Node5 [id="Node000005",label="fl::XYDrawComposited\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dba/structfl_1_1_x_y_draw_composited_a9be77bdd88ae485e4f08f13b734cce4d.html#a9be77bdd88ae485e4f08f13b734cce4d",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Frame::drawXY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_af228b83cd52447b2416893f39d0753df.html#af228b83cd52447b2416893f39d0753df",tooltip=" "];
   Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115",tooltip=" "];
+  Node7 [id="Node000007",label="fl::FxCompositor::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/df1/classfl_1_1_fx_compositor_aade5cf1a5c03eb71c39f8ed58c981e96.html#aade5cf1a5c03eb71c39f8ed58c981e96",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115",tooltip=" "];
 }

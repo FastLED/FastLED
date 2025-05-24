@@ -1,0 +1,18 @@
+digraph "fl::Slice::begin"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::Slice::begin",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Slice::Slice",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de4/classfl_1_1_slice_a04915e7ffcbcfca160f1a39e45593e6d.html#a04915e7ffcbcfca160f1a39e45593e6d",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::LineSimplifierExact\l::safeCopy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d32/classfl_1_1_line_simplifier_exact_ab45b65bd5653cb34e2420e3306d98425.html#ab45b65bd5653cb34e2420e3306d98425",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::LineSimplifierExact\l::simplify",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d32/classfl_1_1_line_simplifier_exact_abe0036297edb6a0641c42943d7c2ab57.html#abe0036297edb6a0641c42943d7c2ab57",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::LineSimplifierExact\l::simplifyInplace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d32/classfl_1_1_line_simplifier_exact_a3a4114a5aebc06310711d2fcc2643d67.html#a3a4114a5aebc06310711d2fcc2643d67",tooltip=" "];
+}

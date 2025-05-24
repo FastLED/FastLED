@@ -10,7 +10,7 @@
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="451,221,446,217,320,108,324,104,450,213,455,217"/>
 <area shape="rect" id="Node000010" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="247,203,366,228"/>
 <area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="434,236,366,226,367,221,435,231"/>
-<area shape="rect" id="Node000013" href="$d6/d9d/_noise_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="266,252,347,277"/>
+<area shape="rect" id="Node000013" href="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="266,252,347,277"/>
 <area shape="poly" id="edge12_Node000004_Node000013" title=" " alt="" coords="435,250,348,262,347,257,434,245"/>
 <area shape="rect" id="Node000015" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="213,301,400,327"/>
 <area shape="poly" id="edge14_Node000004_Node000015" title=" " alt="" coords="452,263,401,291,364,304,362,299,399,286,450,259"/>
@@ -25,7 +25,7 @@
 <area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="235,202,133,179,134,174,236,197"/>
 <area shape="rect" id="Node000012" href="$de/da4/group___noise_fill_ga7967fd7b1a7230a0f7428347c70dac3e.html#ga7967fd7b1a7230a0f7428347c70dac3e" title="Fill an LED array with random colors, using 8&#45;bit noise." alt="" coords="41,203,129,228"/>
 <area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="234,218,129,218,129,213,234,213"/>
-<area shape="rect" id="Node000014" href="$d6/d9d/_noise_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="60,252,111,277"/>
+<area shape="rect" id="Node000014" href="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="60,252,111,277"/>
 <area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="252,267,111,267,111,262,252,262"/>
 <area shape="rect" id="Node000016" href="$d9/d41/classfl_1_1_noise_palette_afc6cd594830dfdd146c45e7ab1d1905d.html#afc6cd594830dfdd146c45e7ab1d1905d" title=" " alt="" coords="5,301,165,327"/>
 <area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="200,317,166,317,166,311,200,311"/>

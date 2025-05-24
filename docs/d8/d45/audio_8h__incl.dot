@@ -1,0 +1,68 @@
+digraph "fl/audio.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/audio.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/fft.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d76/fft_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/scoped_ptr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d44/scoped__ptr_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="stddef.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="stdint.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node5 [id="edge6_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node6 [id="edge7_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
+  Node2 -> Node7 [id="edge8_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/slice.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d48/slice_8h.html",tooltip=" "];
+  Node7 -> Node4 [id="edge9_Node000007_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node5 [id="edge10_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge11_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/clamp.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/dd3/clamp_8h.html",tooltip=" "];
+  Node8 -> Node5 [id="edge12_Node000008_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node10 [id="edge13_Node000007_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl/geometry.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d67/geometry_8h.html",tooltip=" "];
+  Node10 -> Node11 [id="edge14_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/math.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/db1/math_8h.html",tooltip=" "];
+  Node11 -> Node8 [id="edge15_Node000011_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node13 [id="edge16_Node000011_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl/math_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/db8/math__macros_8h.html",tooltip=" "];
+  Node11 -> Node11 [id="edge17_Node000011_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node14 [id="edge18_Node000002_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl/vector.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d68/vector_8h.html",tooltip=" "];
+  Node14 -> Node4 [id="edge19_Node000014_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node5 [id="edge20_Node000014_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node15 [id="edge21_Node000014_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node14 -> Node20 [id="edge22_Node000014_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/functional.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/dea/functional_8h.html",tooltip=" "];
+  Node20 -> Node17 [id="edge23_Node000020_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d98/ptr_8h.html",tooltip=" "];
+  Node17 -> Node4 [id="edge24_Node000017_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node6 [id="edge25_Node000017_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node3 [id="edge26_Node000017_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node21 [id="edge27_Node000014_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl/insert_result.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d22/insert__result_8h.html",tooltip=" "];
+  Node14 -> Node13 [id="edge28_Node000014_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node6 [id="edge29_Node000014_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node3 [id="edge30_Node000014_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node19 [id="edge31_Node000014_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/type_traits.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d63/type__traits_8h.html",tooltip=" "];
+  Node19 -> Node4 [id="edge32_Node000019_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node5 [id="edge33_Node000019_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node6 [id="edge34_Node000019_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node22 [id="edge35_Node000014_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="inplacenew.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d36/inplacenew_8h.html",tooltip=" "];
+  Node22 -> Node4 [id="edge36_Node000022_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node22 -> Node5 [id="edge37_Node000022_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge38_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node17 [id="edge39_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge40_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge41_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge42_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+}

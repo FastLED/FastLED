@@ -112,11 +112,14 @@ $(function(){initNavTree('d4/d46/pixelset_8h.html','../../'); initResizable(true
 <div class="textblock"><p>Declares classes for managing logical groups of LEDs. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
-<code>#include &lt;stdlib.h&gt;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/df9/fl_2colorutils_8h_source.html">fl/colorutils.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d78/fill_8h_source.html">fl/fill.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/df5/blur_8h_source.html">fl/blur.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &lt;stdlib.h&gt;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for pixelset.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -179,7 +182,7 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga07378b5cb6c73b8e56e8e3d445422af8" id="r_ga07378b5cb6c73b8e56e8e3d445422af8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d64/group___pixel_set_ga07378b5cb6c73b8e56e8e3d445422af8.html#ga07378b5cb6c73b8e56e8e3d445422af8">operator+</a> (const <a class="el" href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667">CRGBSet</a> &amp;pixels, int offset)</td></tr>
+<tr class="memitem:ga07378b5cb6c73b8e56e8e3d445422af8" id="r_ga07378b5cb6c73b8e56e8e3d445422af8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d64/group___pixel_set_ga07378b5cb6c73b8e56e8e3d445422af8.html#ga07378b5cb6c73b8e56e8e3d445422af8">operator+</a> (const <a class="el" href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667">CRGBSet</a> &amp;pixels, int offset)</td></tr>
 <tr class="memdesc:ga07378b5cb6c73b8e56e8e3d445422af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve a pointer to a <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> array, using a <a class="el" href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667" title="CPixelView for CRGB arrays.">CRGBSet</a> and an LED offset.  <br /></td></tr>
 <tr class="separator:ga07378b5cb6c73b8e56e8e3d445422af8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -190,7 +193,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d46/pixelset_8h.html">pixelset.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

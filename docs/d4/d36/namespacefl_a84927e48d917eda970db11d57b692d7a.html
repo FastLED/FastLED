@@ -134,55 +134,60 @@ $(function(){initNavTree('d4/d36/namespacefl_a84927e48d917eda970db11d57b692d7a.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00180">180</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  182</span>                                               {</div>
-<div class="line"><span class="lineno">  183</span>    uint16_t n = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>.getTotal();</div>
-<div class="line"><span class="lineno">  184</span>    uint16_t outputWidth = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>.getWidth();</div>
-<div class="line"><span class="lineno">  185</span>    uint16_t outputHeight = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>.getHeight();</div>
-<div class="line"><span class="lineno">  186</span> </div>
-<div class="line"><span class="lineno">  187</span>    <span class="keywordflow">for</span> (uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = 0; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &lt; outputHeight; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>++) {</div>
-<div class="line"><span class="lineno">  188</span>        <span class="keywordflow">for</span> (uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> = 0; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &lt; outputWidth; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>++) {</div>
-<div class="line"><span class="lineno">  189</span>            <span class="comment">// Map output pixel to input grid position</span></div>
-<div class="line"><span class="lineno">  190</span>            <span class="keywordtype">float</span> fx = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>) * (inputWidth - 1) / (outputWidth - 1);</div>
-<div class="line"><span class="lineno">  191</span>            <span class="keywordtype">float</span> fy = <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>) * (inputHeight - 1) / (outputHeight - 1);</div>
-<div class="line"><span class="lineno">  192</span> </div>
-<div class="line"><span class="lineno">  193</span>            uint16_t ix = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(fx);</div>
-<div class="line"><span class="lineno">  194</span>            uint16_t iy = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(fy);</div>
-<div class="line"><span class="lineno">  195</span>            <span class="keywordtype">float</span> dx = fx - ix;</div>
-<div class="line"><span class="lineno">  196</span>            <span class="keywordtype">float</span> dy = fy - iy;</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>            uint16_t ix1 = (ix + 1 &lt; inputWidth) ? ix + 1 : ix;</div>
-<div class="line"><span class="lineno">  199</span>            uint16_t iy1 = (iy + 1 &lt; inputHeight) ? iy + 1 : iy;</div>
-<div class="line"><span class="lineno">  200</span> </div>
-<div class="line"><span class="lineno">  201</span>            uint16_t i00 = iy * inputWidth + ix;</div>
-<div class="line"><span class="lineno">  202</span>            uint16_t i10 = iy * inputWidth + ix1;</div>
-<div class="line"><span class="lineno">  203</span>            uint16_t i01 = iy1 * inputWidth + ix;</div>
-<div class="line"><span class="lineno">  204</span>            uint16_t i11 = iy1 * inputWidth + ix1;</div>
-<div class="line"><span class="lineno">  205</span> </div>
-<div class="line"><span class="lineno">  206</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c00 = input[i00];</div>
-<div class="line"><span class="lineno">  207</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c10 = input[i10];</div>
-<div class="line"><span class="lineno">  208</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c01 = input[i01];</div>
-<div class="line"><span class="lineno">  209</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c11 = input[i11];</div>
-<div class="line"><span class="lineno">  210</span> </div>
-<div class="line"><span class="lineno">  211</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> result;</div>
-<div class="line"><span class="lineno">  212</span>            result.r = <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.r, c10.r, c01.r, c11.r, dx, dy);</div>
-<div class="line"><span class="lineno">  213</span>            result.g = <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.g, c10.g, c01.g, c11.g, dx, dy);</div>
-<div class="line"><span class="lineno">  214</span>            result.b = <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.b, c10.b, c01.b, c11.b, dx, dy);</div>
-<div class="line"><span class="lineno">  215</span> </div>
-<div class="line"><span class="lineno">  216</span>            uint16_t idx = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>.mapToIndex(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>);</div>
-<div class="line"><span class="lineno">  217</span>            <span class="keywordflow">if</span> (idx &lt; n) {</div>
-<div class="line"><span class="lineno">  218</span>                output[idx] = result;</div>
-<div class="line"><span class="lineno">  219</span>            }</div>
-<div class="line"><span class="lineno">  220</span>        }</div>
-<div class="line"><span class="lineno">  221</span>    }</div>
-<div class="line"><span class="lineno">  222</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
-<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
-<div class="ttc" id="a_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f_html_a5a57e9bb79d3e5010378f232c677e27f"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a></div><div class="ttdeci">XYMap xyMap(HEIGHT, WIDTH, SERPENTINE)</div></div>
-<div class="ttc" id="anamespacefl_adc9d7b1babde9b079710372109bd3ffb_html_adc9d7b1babde9b079710372109bd3ffb"><div class="ttname"><a href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">fl::bilinearInterpolateFloat</a></div><div class="ttdeci">uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11, float dx, float dy)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d80/bilinear__expansion_8cpp_source.html#l00159">bilinear_expansion.cpp:159</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00054">crgb.h:54</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00182">182</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  184</span>                                               {</div>
+<div class="line"><span class="lineno">  185</span>    uint16_t n = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a>.getTotal();</div>
+<div class="line"><span class="lineno">  186</span>    uint16_t outputWidth = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a>.getWidth();</div>
+<div class="line"><span class="lineno">  187</span>    uint16_t outputHeight = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a>.getHeight();</div>
+<div class="line"><span class="lineno">  188</span> </div>
+<div class="line"><span class="lineno">  189</span>    <span class="keywordflow">for</span> (uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = 0; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> &lt; outputHeight; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>++) {</div>
+<div class="line"><span class="lineno">  190</span>        <span class="keywordflow">for</span> (uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> = 0; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &lt; outputWidth; <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>++) {</div>
+<div class="line"><span class="lineno">  191</span>            <span class="comment">// Map output pixel to input grid position</span></div>
+<div class="line"><span class="lineno">  192</span>            <span class="keywordtype">float</span> fx =</div>
+<div class="line"><span class="lineno">  193</span>                <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>) * (inputWidth - 1) / (outputWidth - 1);</div>
+<div class="line"><span class="lineno">  194</span>            <span class="keywordtype">float</span> fy =</div>
+<div class="line"><span class="lineno">  195</span>                <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>) * (inputHeight - 1) / (outputHeight - 1);</div>
+<div class="line"><span class="lineno">  196</span> </div>
+<div class="line"><span class="lineno">  197</span>            uint16_t ix = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(fx);</div>
+<div class="line"><span class="lineno">  198</span>            uint16_t iy = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(fy);</div>
+<div class="line"><span class="lineno">  199</span>            <span class="keywordtype">float</span> dx = fx - ix;</div>
+<div class="line"><span class="lineno">  200</span>            <span class="keywordtype">float</span> dy = fy - iy;</div>
+<div class="line"><span class="lineno">  201</span> </div>
+<div class="line"><span class="lineno">  202</span>            uint16_t ix1 = (ix + 1 &lt; inputWidth) ? ix + 1 : ix;</div>
+<div class="line"><span class="lineno">  203</span>            uint16_t iy1 = (iy + 1 &lt; inputHeight) ? iy + 1 : iy;</div>
+<div class="line"><span class="lineno">  204</span> </div>
+<div class="line"><span class="lineno">  205</span>            uint16_t i00 = iy * inputWidth + ix;</div>
+<div class="line"><span class="lineno">  206</span>            uint16_t i10 = iy * inputWidth + ix1;</div>
+<div class="line"><span class="lineno">  207</span>            uint16_t i01 = iy1 * inputWidth + ix;</div>
+<div class="line"><span class="lineno">  208</span>            uint16_t i11 = iy1 * inputWidth + ix1;</div>
+<div class="line"><span class="lineno">  209</span> </div>
+<div class="line"><span class="lineno">  210</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c00 = input[i00];</div>
+<div class="line"><span class="lineno">  211</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c10 = input[i10];</div>
+<div class="line"><span class="lineno">  212</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c01 = input[i01];</div>
+<div class="line"><span class="lineno">  213</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c11 = input[i11];</div>
+<div class="line"><span class="lineno">  214</span> </div>
+<div class="line"><span class="lineno">  215</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> result;</div>
+<div class="line"><span class="lineno">  216</span>            result.r =</div>
+<div class="line"><span class="lineno">  217</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.r, c10.r, c01.r, c11.r, dx, dy);</div>
+<div class="line"><span class="lineno">  218</span>            result.g =</div>
+<div class="line"><span class="lineno">  219</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.g, c10.g, c01.g, c11.g, dx, dy);</div>
+<div class="line"><span class="lineno">  220</span>            result.b =</div>
+<div class="line"><span class="lineno">  221</span>                <a class="code hl_function" href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">bilinearInterpolateFloat</a>(c00.b, c10.b, c01.b, c11.b, dx, dy);</div>
+<div class="line"><span class="lineno">  222</span> </div>
+<div class="line"><span class="lineno">  223</span>            uint16_t idx = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a>.mapToIndex(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>);</div>
+<div class="line"><span class="lineno">  224</span>            <span class="keywordflow">if</span> (idx &lt; n) {</div>
+<div class="line"><span class="lineno">  225</span>                output[idx] = result;</div>
+<div class="line"><span class="lineno">  226</span>            }</div>
+<div class="line"><span class="lineno">  227</span>        }</div>
+<div class="line"><span class="lineno">  228</span>    }</div>
+<div class="line"><span class="lineno">  229</span>}</div>
+<div class="ttc" id="a_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6_html_a7a4ca4a38ae83998fc8a79fb33a3a7e6"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a></div><div class="ttdeci">XYMap xyMap(WIDTH, HEIGHT, false)</div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00083">Fire2023.ino:83</a></div></div>
+<div class="ttc" id="anamespacefl_adc9d7b1babde9b079710372109bd3ffb_html_adc9d7b1babde9b079710372109bd3ffb"><div class="ttname"><a href="../../d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb">fl::bilinearInterpolateFloat</a></div><div class="ttdeci">uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11, float dx, float dy)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d80/bilinear__expansion_8cpp_source.html#l00161">bilinear_expansion.cpp:161</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00055">crgb.h:55</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00159">bilinearInterpolateFloat()</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00161">bilinearInterpolateFloat()</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a7a4ca4a38ae83998fc8a79fb33a3a7e6.html#a7a4ca4a38ae83998fc8a79fb33a3a7e6">xyMap</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00083">y</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -200,7 +205,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a84927e48d917eda970db11d57b692d7a.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

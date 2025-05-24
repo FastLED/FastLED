@@ -14,4 +14,6 @@ digraph "fl::Ptr::NoTracking"
   Node3 [id="Node000003",label="fl::WeakPtr::lock",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d77/classfl_1_1_weak_ptr_ac52bc006cef9fef0774e23023aa5d9f2.html#ac52bc006cef9fef0774e23023aa5d9f2",tooltip=" "];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::WeakPtr::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d77/classfl_1_1_weak_ptr_a0e8a300bcc2b04d7f60b0ad7265f23da.html#a0e8a300bcc2b04d7f60b0ad7265f23da",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::NewPtrNoTracking",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a755f6bf38632d39e6a94a23adeed2736.html#a755f6bf38632d39e6a94a23adeed2736",tooltip=" "];
 }

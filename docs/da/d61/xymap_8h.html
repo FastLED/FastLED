@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: xymap.h File Reference</title>
+<title>FastLED: fl/xymap.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -100,10 +100,23 @@ $(function(){initNavTree('da/d61/xymap_8h.html','../../'); initResizable(true); 
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">xymap.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/dc9/fl_2xymap_8h_source.html">fl/xymap.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/dd3/clamp_8h_source.html">fl/clamp.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d54/lut_8h_source.html">fl/lut.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d98/ptr_8h_source.html">fl/ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/dcc/xmap_8h_source.html">fl/xmap.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for xymap.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -111,16 +124,47 @@ $(function(){initNavTree('da/d61/xymap_8h.html','../../'); initResizable(true); 
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d7/d79/xymap_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d25/xymap_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
 </div>
 <p><a href="../../da/d61/xymap_8h_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dce/classfl_1_1_x_y_map.html">fl::XYMap</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ae3308eb4251155b4a671ddf501856531" id="r_ae3308eb4251155b4a671ddf501856531"><td class="memItemLeft" align="right" valign="top">typedef uint16_t(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae3308eb4251155b4a671ddf501856531.html#ae3308eb4251155b4a671ddf501856531">fl::XYFunction</a>) (uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>, uint16_t width, uint16_t height)</td></tr>
+<tr class="separator:ae3308eb4251155b4a671ddf501856531"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aabd143143924c6bddbe62e4b21688e76" id="r_aabd143143924c6bddbe62e4b21688e76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aabd143143924c6bddbe62e4b21688e76.html#aabd143143924c6bddbe62e4b21688e76">fl::xy_line_by_line</a> (uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>, uint16_t width, uint16_t height)</td></tr>
+<tr class="separator:aabd143143924c6bddbe62e4b21688e76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44d29156c0decceaf2ff1970ddbdde7c" id="r_a44d29156c0decceaf2ff1970ddbdde7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a44d29156c0decceaf2ff1970ddbdde7c.html#a44d29156c0decceaf2ff1970ddbdde7c">fl::xy_serpentine</a> (uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, uint16_t <a class="el" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>, uint16_t width, uint16_t height)</td></tr>
+<tr class="separator:a44d29156c0decceaf2ff1970ddbdde7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../da/d61/xymap_8h.html">xymap.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d61/xymap_8h.html">xymap.h</a></li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

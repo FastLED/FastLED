@@ -125,27 +125,28 @@ $(function(){initNavTree('d4/d36/namespacefl_ae8e0626219073ef6b24d63a749af3283.h
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d01/dbg_8h_source.html#l00008">8</a> of file <a class="el" href="../../d6/d01/dbg_8h_source.html">dbg.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">    8</span>                                                         {</div>
-<div class="line"><span class="lineno">    9</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = file;</div>
-<div class="line"><span class="lineno">   10</span>  <span class="keyword">const</span> <span class="keywordtype">char</span>* last_slash = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">   11</span>  </div>
-<div class="line"><span class="lineno">   12</span>  <span class="keywordflow">while</span> (*<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>) {</div>
-<div class="line"><span class="lineno">   13</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[0] == <span class="charliteral">&#39;s&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[1] == <span class="charliteral">&#39;r&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[2] == <span class="charliteral">&#39;c&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[3] == <span class="charliteral">&#39;/&#39;</span>) {</div>
-<div class="line"><span class="lineno">   14</span>      <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>;  <span class="comment">// Skip past &quot;src/&quot;</span></div>
-<div class="line"><span class="lineno">   15</span>    }</div>
-<div class="line"><span class="lineno">   16</span>    <span class="keywordflow">if</span> (*<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> == <span class="charliteral">&#39;/&#39;</span>) {  <span class="comment">// fallback to using last slash</span></div>
-<div class="line"><span class="lineno">   17</span>      last_slash = <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>;</div>
-<div class="line"><span class="lineno">   18</span>    }</div>
-<div class="line"><span class="lineno">   19</span>    <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++;</div>
-<div class="line"><span class="lineno">   20</span>  }</div>
-<div class="line"><span class="lineno">   21</span>  <span class="comment">// If &quot;src/&quot; not found but we found at least one slash, return after the last slash</span></div>
-<div class="line"><span class="lineno">   22</span>  <span class="keywordflow">if</span> (last_slash) {</div>
-<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">return</span> last_slash + 1;</div>
-<div class="line"><span class="lineno">   24</span>  }</div>
-<div class="line"><span class="lineno">   25</span>  <span class="keywordflow">return</span> file;  <span class="comment">// If no slashes found at all, return original path</span></div>
-<div class="line"><span class="lineno">   26</span>}</div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00056">noise.cpp:56</a></div></div>
+<div class="line"><span class="lineno">    9</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = file;</div>
+<div class="line"><span class="lineno">   10</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> *last_slash = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">   11</span> </div>
+<div class="line"><span class="lineno">   12</span>    <span class="keywordflow">while</span> (*<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>) {</div>
+<div class="line"><span class="lineno">   13</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[0] == <span class="charliteral">&#39;s&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[1] == <span class="charliteral">&#39;r&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[2] == <span class="charliteral">&#39;c&#39;</span> &amp;&amp; <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>[3] == <span class="charliteral">&#39;/&#39;</span>) {</div>
+<div class="line"><span class="lineno">   14</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>; <span class="comment">// Skip past &quot;src/&quot;</span></div>
+<div class="line"><span class="lineno">   15</span>        }</div>
+<div class="line"><span class="lineno">   16</span>        <span class="keywordflow">if</span> (*<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> == <span class="charliteral">&#39;/&#39;</span>) { <span class="comment">// fallback to using last slash</span></div>
+<div class="line"><span class="lineno">   17</span>            last_slash = <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>;</div>
+<div class="line"><span class="lineno">   18</span>        }</div>
+<div class="line"><span class="lineno">   19</span>        <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++;</div>
+<div class="line"><span class="lineno">   20</span>    }</div>
+<div class="line"><span class="lineno">   21</span>    <span class="comment">// If &quot;src/&quot; not found but we found at least one slash, return after the</span></div>
+<div class="line"><span class="lineno">   22</span>    <span class="comment">// last slash</span></div>
+<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">if</span> (last_slash) {</div>
+<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">return</span> last_slash + 1;</div>
+<div class="line"><span class="lineno">   25</span>    }</div>
+<div class="line"><span class="lineno">   26</span>    <span class="keywordflow">return</span> file; <span class="comment">// If no slashes found at all, return original path</span></div>
+<div class="line"><span class="lineno">   27</span>}</div>
+<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00056">p</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00030">p</a>.</p>
 
 </div>
 </div>
@@ -156,7 +157,7 @@ $(function(){initNavTree('d4/d36/namespacefl_ae8e0626219073ef6b24d63a749af3283.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

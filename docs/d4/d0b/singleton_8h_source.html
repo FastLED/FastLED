@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: singleton.h Source File</title>
+<title>FastLED: fl/singleton.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -105,18 +105,48 @@ $(function(){initNavTree('d4/d0b/singleton_8h_source.html','../../'); initResiza
 <div class="contents">
 <a href="../../d4/d0b/singleton_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#warning &quot;This header is deprecated. Please use singleton.h, this header will go away in the version 4.0.&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d2a/namespace_8h.html">fl/namespace.h</a>&quot;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="../../d0/dae/fl_2singleton_8h.html">fl/singleton.h</a>&quot;</span></div>
-<div class="ttc" id="afl_2singleton_8h_html"><div class="ttname"><a href="../../d0/dae/fl_2singleton_8h.html">singleton.h</a></div></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// A templated singleton class, parameterized by the type of the singleton and</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// an optional integer.</span></div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton.html">    9</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">int</span> N = 0&gt; <span class="keyword">class </span><a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">Singleton</a> {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>  <span class="keyword">public</span>:</div>
+<div class="foldopen" id="foldopen00011" data-start="{" data-end="}">
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">   11</a></span>    <span class="keyword">static</span> T &amp;<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">instance</a>() {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>        <span class="keyword">static</span> T <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">instance</a>;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">instance</a>;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    }</div>
+</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_a49a566d80175a2bb489b18927d97bc68.html#a49a566d80175a2bb489b18927d97bc68">   15</a></span>    <span class="keyword">static</span> T *<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a49a566d80175a2bb489b18927d97bc68.html#a49a566d80175a2bb489b18927d97bc68">instanceRef</a>() { <span class="keywordflow">return</span> &amp;<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">instance</a>(); }</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">   16</a></span>    <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">Singleton</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">Singleton</a> &amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_a8ad847df235828cdd348c5ccea8f91c7.html#a8ad847df235828cdd348c5ccea8f91c7">   17</a></span>    <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">Singleton</a> &amp;<a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a8ad847df235828cdd348c5ccea8f91c7.html#a8ad847df235828cdd348c5ccea8f91c7">operator=</a>(<span class="keyword">const</span> <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">Singleton</a> &amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_a9385dd1f2766d7bf40f320e4afe7562e.html#a9385dd1f2766d7bf40f320e4afe7562e">   20</a></span>    <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a9385dd1f2766d7bf40f320e4afe7562e.html#a9385dd1f2766d7bf40f320e4afe7562e">Singleton</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../d9/d5b/classfl_1_1_singleton_ac5b679e18b2f213a947babbc63351027.html#ac5b679e18b2f213a947babbc63351027">   21</a></span>    <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_ac5b679e18b2f213a947babbc63351027.html#ac5b679e18b2f213a947babbc63351027">~Singleton</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>};</div>
+</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="aclassfl_1_1_singleton_a49a566d80175a2bb489b18927d97bc68_html_a49a566d80175a2bb489b18927d97bc68"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a49a566d80175a2bb489b18927d97bc68.html#a49a566d80175a2bb489b18927d97bc68">fl::Singleton::instanceRef</a></div><div class="ttdeci">static T * instanceRef()</div><div class="ttdef"><b>Definition</b> <a href="#l00015">singleton.h:15</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb_html_a7e65fe8dee6b2a23a8b6138fa2c274cb"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance()</div><div class="ttdef"><b>Definition</b> <a href="#l00011">singleton.h:11</a></div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_a8ad847df235828cdd348c5ccea8f91c7_html_a8ad847df235828cdd348c5ccea8f91c7"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a8ad847df235828cdd348c5ccea8f91c7.html#a8ad847df235828cdd348c5ccea8f91c7">fl::Singleton::operator=</a></div><div class="ttdeci">Singleton &amp; operator=(const Singleton &amp;)=delete</div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_a9385dd1f2766d7bf40f320e4afe7562e_html_a9385dd1f2766d7bf40f320e4afe7562e"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a9385dd1f2766d7bf40f320e4afe7562e.html#a9385dd1f2766d7bf40f320e4afe7562e">fl::Singleton::Singleton</a></div><div class="ttdeci">Singleton()=default</div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_ac5b679e18b2f213a947babbc63351027_html_ac5b679e18b2f213a947babbc63351027"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_ac5b679e18b2f213a947babbc63351027.html#ac5b679e18b2f213a947babbc63351027">fl::Singleton::~Singleton</a></div><div class="ttdeci">~Singleton()=default</div></div>
+<div class="ttc" id="aclassfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc_html_aed43031a42dbb7f7953ba4d54a70e7fc"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc">fl::Singleton::Singleton</a></div><div class="ttdeci">Singleton(const Singleton &amp;)=delete</div></div>
+<div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
+<div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Implements a simple red square effect for 2D LED grids.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00016">crgb.h:16</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../d4/d0b/singleton_8h.html">singleton.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d0b/singleton_8h.html">singleton.h</a></li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

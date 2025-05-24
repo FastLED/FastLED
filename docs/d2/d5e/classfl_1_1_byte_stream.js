@@ -5,5 +5,5 @@ var classfl_1_1_byte_stream =
     [ "close", "d2/d5e/classfl_1_1_byte_stream_ab7dd7c75ac8e22f0b44e08421422c217.html#ab7dd7c75ac8e22f0b44e08421422c217", null ],
     [ "path", "d2/d5e/classfl_1_1_byte_stream_ac80e8e1f35d11c867f44737cad6277d3.html#ac80e8e1f35d11c867f44737cad6277d3", null ],
     [ "read", "d2/d5e/classfl_1_1_byte_stream_ae00ff3338045b5813543c055c0254196.html#ae00ff3338045b5813543c055c0254196", null ],
-    [ "readCRGB", "d2/d5e/classfl_1_1_byte_stream_ae162f4b96476e86d4a9ed572d7f313bc.html#ae162f4b96476e86d4a9ed572d7f313bc", null ]
+    [ "readCRGB", "d2/d5e/classfl_1_1_byte_stream_a7d5b70591d0d3f0d286369b08faab51a.html#a7d5b70591d0d3f0d286369b08faab51a", null ]
 ];

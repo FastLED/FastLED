@@ -125,25 +125,25 @@ $(function(){initNavTree('d4/df6/class_led_rope_t_c_l_a90f6e3d74b585d37be799107d
 
 <p>Implements <a class="el" href="../../d2/d84/class_led_rope_interface_ad19c0274cfe19053dfca7c72696cbe2e.html#ad19c0274cfe19053dfca7c72696cbe2e">LedRopeInterface</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00139">139</a> of file <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html">LedRopeTCL.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  139</span>                                                {</div>
-<div class="line"><span class="lineno">  140</span>  <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">RawBeginDraw</a>();</div>
-<div class="line"><span class="lineno">  141</span> </div>
-<div class="line"><span class="lineno">  142</span>  <span class="keyword">const</span> Color3i* begin = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(0);</div>
-<div class="line"><span class="lineno">  143</span>  <span class="keyword">const</span> Color3i* middle = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(<a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_aa8e5d82e6414004d1103aebf8cfbeca4.html#aa8e5d82e6414004d1103aebf8cfbeca4">draw_offset_</a>);</div>
-<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> Color3i* end = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a82a6589500d1934733920c133cdf6710.html#a82a6589500d1934733920c133cdf6710">length</a>());</div>
-<div class="line"><span class="lineno">  145</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> Color3i* it = middle; it != end; ++it) {</div>
-<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; repeat; ++i) {</div>
-<div class="line"><span class="lineno">  147</span>      <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">RawDrawPixel</a>(it-&gt;r_, it-&gt;g_, it-&gt;b_);</div>
-<div class="line"><span class="lineno">  148</span>    }</div>
-<div class="line"><span class="lineno">  149</span>  }</div>
-<div class="line"><span class="lineno">  150</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> Color3i* it = begin; it != middle; ++it) {</div>
-<div class="line"><span class="lineno">  151</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; repeat; ++i) {</div>
-<div class="line"><span class="lineno">  152</span>      <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">RawDrawPixel</a>(it-&gt;r_, it-&gt;g_, it-&gt;b_);</div>
-<div class="line"><span class="lineno">  153</span>    }</div>
-<div class="line"><span class="lineno">  154</span>  }</div>
-<div class="line"><span class="lineno">  155</span>  <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">RawCommitDraw</a>();</div>
-<div class="line"><span class="lineno">  156</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00141">141</a> of file <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html">LedRopeTCL.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  141</span>                                                {</div>
+<div class="line"><span class="lineno">  142</span>  <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">RawBeginDraw</a>();</div>
+<div class="line"><span class="lineno">  143</span> </div>
+<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> Color3i* begin = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(0);</div>
+<div class="line"><span class="lineno">  145</span>  <span class="keyword">const</span> Color3i* middle = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(<a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_aa8e5d82e6414004d1103aebf8cfbeca4.html#aa8e5d82e6414004d1103aebf8cfbeca4">draw_offset_</a>);</div>
+<div class="line"><span class="lineno">  146</span>  <span class="keyword">const</span> Color3i* end = <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">GetIterator</a>(<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a82a6589500d1934733920c133cdf6710.html#a82a6589500d1934733920c133cdf6710">length</a>());</div>
+<div class="line"><span class="lineno">  147</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> Color3i* it = middle; it != end; ++it) {</div>
+<div class="line"><span class="lineno">  148</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; repeat; ++i) {</div>
+<div class="line"><span class="lineno">  149</span>      <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">RawDrawPixel</a>(it-&gt;r_, it-&gt;g_, it-&gt;b_);</div>
+<div class="line"><span class="lineno">  150</span>    }</div>
+<div class="line"><span class="lineno">  151</span>  }</div>
+<div class="line"><span class="lineno">  152</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> Color3i* it = begin; it != middle; ++it) {</div>
+<div class="line"><span class="lineno">  153</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; repeat; ++i) {</div>
+<div class="line"><span class="lineno">  154</span>      <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">RawDrawPixel</a>(it-&gt;r_, it-&gt;g_, it-&gt;b_);</div>
+<div class="line"><span class="lineno">  155</span>    }</div>
+<div class="line"><span class="lineno">  156</span>  }</div>
+<div class="line"><span class="lineno">  157</span>  <a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">RawCommitDraw</a>();</div>
+<div class="line"><span class="lineno">  158</span>}</div>
 <div class="ttc" id="aclass_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454_html_a2c5c772faf24596d5be70d96581e7454"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">LedRopeTCL::RawCommitDraw</a></div><div class="ttdeci">void RawCommitDraw()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00100">LedRopeTCL.cpp:100</a></div></div>
 <div class="ttc" id="aclass_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed_html_a44e74c392ae8f3e56d58000912d38aed"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">LedRopeTCL::RawDrawPixel</a></div><div class="ttdeci">void RawDrawPixel(const Color3i &amp;c)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00068">LedRopeTCL.cpp:68</a></div></div>
 <div class="ttc" id="aclass_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464_html_a79ccaade09b2a2ac734abb010107a464"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464">LedRopeTCL::GetIterator</a></div><div class="ttdeci">Color3i * GetIterator(int i)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00059">LedRopeTCL.h:59</a></div></div>
@@ -169,7 +169,7 @@ $(function(){initNavTree('d4/df6/class_led_rope_t_c_l_a90f6e3d74b585d37be799107d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/df6/class_led_rope_t_c_l.html">LedRopeTCL</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::SortedHeapMap\<\l Key, Value, Less \>::Pair",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d3f/structfl_1_1_sorted_heap_map_1_1_pair.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::is_array\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/structfl_1_1is__array.html",tooltip=" "];
 }

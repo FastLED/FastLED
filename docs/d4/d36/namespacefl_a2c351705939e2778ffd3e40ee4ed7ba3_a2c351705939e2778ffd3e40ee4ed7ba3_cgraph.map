@@ -1,0 +1,13 @@
+<map id="fl::nblend" name="fl::nblend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,88,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="136,29,219,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,39,122,39,122,45,88,45"/>
+<area shape="rect" id="Node000003" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="267,29,333,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,39,253,39,253,45,219,45"/>
+<area shape="rect" id="Node000004" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="431,5,528,31"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="214,27,266,14,344,9,417,10,417,16,345,14,267,19,215,32"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="381,55,577,80"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="215,52,267,65,317,69,367,70,367,76,317,75,266,70,214,57"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="333,35,417,24,417,29,334,40"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="334,44,376,50,376,55,333,49"/>
+</map>

@@ -123,19 +123,28 @@ $(function(){initNavTree('d2/d4a/classfl_1_1_time_alpha_a0a7b1856a9a9d34cf2b1135
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d87/time__alpha_8h_source.html#l00020">20</a> of file <a class="el" href="../../d0/d87/time__alpha_8h_source.html">time_alpha.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   20</span>                                            {</div>
-<div class="line"><span class="lineno">   21</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d2/d4a/classfl_1_1_time_alpha_ae2c860fd857e7bc3b57268647c0887cf.html#ae2c860fd857e7bc3b57268647c0887cf">update</a>(now) &lt;&lt; 8);</div>
-<div class="line"><span class="lineno">   22</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_time_alpha_ae2c860fd857e7bc3b57268647c0887cf_html_ae2c860fd857e7bc3b57268647c0887cf"><div class="ttname"><a href="../../d2/d4a/classfl_1_1_time_alpha_ae2c860fd857e7bc3b57268647c0887cf.html#ae2c860fd857e7bc3b57268647c0887cf">fl::TimeAlpha::update</a></div><div class="ttdeci">virtual uint8_t update(uint32_t now)=0</div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d87/time__alpha_8h_source.html#l00032">32</a> of file <a class="el" href="../../d0/d87/time__alpha_8h_source.html">time_alpha.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   32</span>                                            {</div>
+<div class="line"><span class="lineno">   33</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d2/d4a/classfl_1_1_time_alpha_a6d3cfe0669d061889c8383fa2de7f1e5.html#a6d3cfe0669d061889c8383fa2de7f1e5">update8</a>(now) &lt;&lt; 8) + 0xFF;</div>
+<div class="line"><span class="lineno">   34</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_time_alpha_a6d3cfe0669d061889c8383fa2de7f1e5_html_a6d3cfe0669d061889c8383fa2de7f1e5"><div class="ttname"><a href="../../d2/d4a/classfl_1_1_time_alpha_a6d3cfe0669d061889c8383fa2de7f1e5.html#a6d3cfe0669d061889c8383fa2de7f1e5">fl::TimeAlpha::update8</a></div><div class="ttdeci">virtual uint8_t update8(uint32_t now)=0</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/d4a/classfl_1_1_time_alpha_ae2c860fd857e7bc3b57268647c0887cf.html#ae2c860fd857e7bc3b57268647c0887cf">update()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d4a/classfl_1_1_time_alpha_a6d3cfe0669d061889c8383fa2de7f1e5.html#a6d3cfe0669d061889c8383fa2de7f1e5">update8()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/d87/time__alpha_8h_source.html#l00035">updatef()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d4a/classfl_1_1_time_alpha_a0a7b1856a9a9d34cf2b1135553ece0b2_a0a7b1856a9a9d34cf2b1135553ece0b2_cgraph.svg" width="398" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d4a/classfl_1_1_time_alpha_a0a7b1856a9a9d34cf2b1135553ece0b2_a0a7b1856a9a9d34cf2b1135553ece0b2_cgraph.svg" width="406" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/d4a/classfl_1_1_time_alpha_a0a7b1856a9a9d34cf2b1135553ece0b2_a0a7b1856a9a9d34cf2b1135553ece0b2_icgraph.svg" width="403" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -147,7 +156,7 @@ $(function(){initNavTree('d2/d4a/classfl_1_1_time_alpha_a0a7b1856a9a9d34cf2b1135
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/d4a/classfl_1_1_time_alpha.html">TimeAlpha</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

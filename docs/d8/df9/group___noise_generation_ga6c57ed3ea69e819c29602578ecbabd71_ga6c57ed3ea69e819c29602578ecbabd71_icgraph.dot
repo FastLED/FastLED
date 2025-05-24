@@ -29,9 +29,9 @@ digraph "inoise8_raw"
   Node10 -> Node12 [id="edge11_Node000010_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fill_noise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga7967fd7b1a7230a0f7428347c70dac3e.html#ga7967fd7b1a7230a0f7428347c70dac3e",tooltip="Fill an LED array with random colors, using 8-bit noise."];
   Node4 -> Node13 [id="edge12_Node000004_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9d/_noise_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
+  Node13 [id="Node000013",label="fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
   Node13 -> Node14 [id="edge13_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9d/_noise_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node14 [id="Node000014",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node4 -> Node15 [id="edge14_Node000004_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node15 [id="Node000015",label="fl::NoisePalette::fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738",tooltip=" "];
   Node15 -> Node16 [id="edge15_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];

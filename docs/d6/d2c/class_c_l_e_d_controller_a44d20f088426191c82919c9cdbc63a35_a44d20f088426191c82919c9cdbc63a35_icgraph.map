@@ -1,7 +1,9 @@
 <map id="CLEDController::getMaxRefreshRate" name="CLEDController::getMaxRefreshRate">
-<area shape="rect" id="Node000001" title="Gets the maximum possible refresh rate of the strip." alt="" coords="389,5,647,31"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f" title="Add a CLEDController instance to the world." alt="" coords="197,5,341,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="376,21,341,21,341,15,376,15"/>
-<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a6c5edd63655c225b62ae35897c6e6602.html#a6c5edd63655c225b62ae35897c6e6602" title="Add an SPI based CLEDController instance to the world." alt="" coords="5,5,149,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,21,149,21,149,15,183,15"/>
+<area shape="rect" id="Node000001" title="Gets the maximum possible refresh rate of the strip." alt="" coords="389,31,647,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f" title="Add a CLEDController instance to the world." alt="" coords="197,31,341,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="376,46,341,46,341,41,376,41"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aeffbd36cb0acc8be314b72d6b2272ce3.html#aeffbd36cb0acc8be314b72d6b2272ce3" title=" " alt="" coords="5,5,149,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,35,149,30,150,25,184,29"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a6c5edd63655c225b62ae35897c6e6602.html#a6c5edd63655c225b62ae35897c6e6602" title="Add an SPI based CLEDController instance to the world." alt="" coords="5,55,149,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="184,57,150,61,149,56,183,51"/>
 </map>

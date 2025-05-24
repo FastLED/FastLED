@@ -1,0 +1,7 @@
+<map id="fl::ColorFromPalette" name="fl::ColorFromPalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,156,60"/>
+<area shape="rect" id="Node000002" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="241,5,338,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,34,226,24,227,29,157,39"/>
+<area shape="rect" id="Node000003" href="$d0/da5/group___scaling_dirty_gaf8e0821f34434cd6bfed4a16a895da23.html#gaf8e0821f34434cd6bfed4a16a895da23" title="This version of scale8_video() does not clean up the R1 register on AVR." alt="" coords="204,55,375,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,55,191,59,190,65,156,60"/>
+</map>

@@ -122,29 +122,32 @@ $(function(){initNavTree('d1/dc0/classfl_1_1_byte_stream_memory_a74090719c21547a
 <p class="definition">Definition at line <a class="el" href="../../de/d95/bytestreammemory_8cpp_source.html#l00043">43</a> of file <a class="el" href="../../de/d95/bytestreammemory_8cpp_source.html">bytestreammemory.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   43</span>                                                           {</div>
 <div class="line"><span class="lineno">   44</span>    <span class="keywordflow">if</span> (src == <span class="keyword">nullptr</span> || <a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.capacity() == 0) {</div>
-<div class="line"><span class="lineno">   45</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(src == <span class="keyword">nullptr</span>, <span class="stringliteral">&quot;ByteStreamMemory::write: src == nullptr&quot;</span>);</div>
-<div class="line"><span class="lineno">   46</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(<a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.capacity() == 0, <span class="stringliteral">&quot;ByteStreamMemory::write: mReadBuffer.capacity() == 0&quot;</span>);</div>
-<div class="line"><span class="lineno">   47</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">   48</span>    }</div>
-<div class="line"><span class="lineno">   49</span> </div>
-<div class="line"><span class="lineno">   50</span>    <span class="keywordtype">size_t</span> written = 0;</div>
-<div class="line"><span class="lineno">   51</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">   52</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.full()) {</div>
-<div class="line"><span class="lineno">   53</span>            <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;ByteStreamMemory::write: mReadBuffer.full(): &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.size());</div>
-<div class="line"><span class="lineno">   54</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">   55</span>        }</div>
-<div class="line"><span class="lineno">   56</span>        <a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.push_back(src[i]);</div>
-<div class="line"><span class="lineno">   57</span>        ++written;</div>
-<div class="line"><span class="lineno">   58</span>    }</div>
-<div class="line"><span class="lineno">   59</span>    <span class="keywordflow">return</span> written;</div>
-<div class="line"><span class="lineno">   60</span>}</div>
-<div class="ttc" id="aclassfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e_html_a88fe636945e50a6c062bdf0d54afeb6e"><div class="ttname"><a href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">fl::ByteStreamMemory::mReadBuffer</a></div><div class="ttdeci">CircularBuffer&lt; uint8_t &gt; mReadBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d24/bytestreammemory_8h_source.html#l00030">bytestreammemory.h:30</a></div></div>
+<div class="line"><span class="lineno">   45</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(src == <span class="keyword">nullptr</span>,</div>
+<div class="line"><span class="lineno">   46</span>                        <span class="stringliteral">&quot;ByteStreamMemory::write: src == nullptr&quot;</span>);</div>
+<div class="line"><span class="lineno">   47</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(<a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.capacity() == 0,</div>
+<div class="line"><span class="lineno">   48</span>                        <span class="stringliteral">&quot;ByteStreamMemory::write: mReadBuffer.capacity() == 0&quot;</span>);</div>
+<div class="line"><span class="lineno">   49</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">   50</span>    }</div>
+<div class="line"><span class="lineno">   51</span> </div>
+<div class="line"><span class="lineno">   52</span>    <span class="keywordtype">size_t</span> written = 0;</div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i) {</div>
+<div class="line"><span class="lineno">   54</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.full()) {</div>
+<div class="line"><span class="lineno">   55</span>            <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;ByteStreamMemory::write: mReadBuffer.full(): &quot;</span></div>
+<div class="line"><span class="lineno">   56</span>                         &lt;&lt; <a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.size());</div>
+<div class="line"><span class="lineno">   57</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">   58</span>        }</div>
+<div class="line"><span class="lineno">   59</span>        <a class="code hl_variable" href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">mReadBuffer</a>.push_back(src[i]);</div>
+<div class="line"><span class="lineno">   60</span>        ++written;</div>
+<div class="line"><span class="lineno">   61</span>    }</div>
+<div class="line"><span class="lineno">   62</span>    <span class="keywordflow">return</span> written;</div>
+<div class="line"><span class="lineno">   63</span>}</div>
+<div class="ttc" id="aclassfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e_html_a88fe636945e50a6c062bdf0d54afeb6e"><div class="ttname"><a href="../../d1/dc0/classfl_1_1_byte_stream_memory_a88fe636945e50a6c062bdf0d54afeb6e.html#a88fe636945e50a6c062bdf0d54afeb6e">fl::ByteStreamMemory::mReadBuffer</a></div><div class="ttdeci">CircularBuffer&lt; uint8_t &gt; mReadBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d24/bytestreammemory_8h_source.html#l00028">bytestreammemory.h:28</a></div></div>
 <div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
 <div class="ttc" id="awarn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765_html_a62d512e6c3e6c7342ac28ffbcb8ad765"><div class="ttname"><a href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a></div><div class="ttdeci">#define FASTLED_WARN_IF</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00008">warn.h:8</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN_IF</a>, and <a class="el" href="../../d1/d24/bytestreammemory_8h_source.html#l00030">mReadBuffer</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN_IF</a>, and <a class="el" href="../../d1/d24/bytestreammemory_8h_source.html#l00028">mReadBuffer</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d95/bytestreammemory_8cpp_source.html#l00062">writeCRGB()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d95/bytestreammemory_8cpp_source.html#l00065">writeCRGB()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +165,7 @@ $(function(){initNavTree('d1/dc0/classfl_1_1_byte_stream_memory_a74090719c21547a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/dc0/classfl_1_1_byte_stream_memory.html">ByteStreamMemory</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -127,21 +127,29 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed
 <div class="fragment"><div class="line"><span class="lineno">  194</span>                                                     {</div>
 <div class="line"><span class="lineno">  195</span>        <span class="comment">// EngineEvents::onCanvasUiSet(this, map);</span></div>
 <div class="line"><span class="lineno">  196</span>        fl::ScreenMap screenmap = <a class="code hl_function" href="../../d0/d70/namespacefl_1_1anonymous__namespace_02frame__tracker_8cpp_03_adad099becebb046ffbb5aa73473c0ff2.html#adad099becebb046ffbb5aa73473c0ff2">map</a>.toScreenMap();</div>
-<div class="line"><span class="lineno">  197</span>        <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726">fl::EngineEvents::onCanvasUiSet</a>(<span class="keyword">this</span>, screenmap);</div>
-<div class="line"><span class="lineno">  198</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  199</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_engine_events_aeb85848268614982b022006bd41a2726_html_aeb85848268614982b022006bd41a2726"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726">fl::EngineEvents::onCanvasUiSet</a></div><div class="ttdeci">static void onCanvasUiSet(CLEDController *strip, const ScreenMap &amp;xymap)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/dd9/fl_2engine__events_8h_source.html#l00109">engine_events.h:109</a></div></div>
+<div class="line"><span class="lineno">  197</span>        <span class="keywordflow">if</span> (screenmap.<a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_af9b06074ecc088fef30300f87650d2f5.html#af9b06074ecc088fef30300f87650d2f5">getDiameter</a>() &lt;= 0.0f) {</div>
+<div class="line"><span class="lineno">  198</span>            <span class="comment">// screen map was not set.</span></div>
+<div class="line"><span class="lineno">  199</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d0/d70/namespacefl_1_1anonymous__namespace_02frame__tracker_8cpp_03_adad099becebb046ffbb5aa73473c0ff2.html#adad099becebb046ffbb5aa73473c0ff2">map</a>.getTotal() &lt;= (64*64)) {</div>
+<div class="line"><span class="lineno">  200</span>                screenmap.<a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_a0f7699554fd9fe34cd58b5d781203405.html#a0f7699554fd9fe34cd58b5d781203405">setDiameter</a>(.2); <span class="comment">// Assume small matrix is being used.</span></div>
+<div class="line"><span class="lineno">  201</span>            }</div>
+<div class="line"><span class="lineno">  202</span>        }</div>
+<div class="line"><span class="lineno">  203</span>        <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726">fl::EngineEvents::onCanvasUiSet</a>(<span class="keyword">this</span>, screenmap);</div>
+<div class="line"><span class="lineno">  204</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  205</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_engine_events_aeb85848268614982b022006bd41a2726_html_aeb85848268614982b022006bd41a2726"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726">fl::EngineEvents::onCanvasUiSet</a></div><div class="ttdeci">static void onCanvasUiSet(CLEDController *strip, const ScreenMap &amp;xymap)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00102">engine_events.h:102</a></div></div>
+<div class="ttc" id="aclassfl_1_1_screen_map_a0f7699554fd9fe34cd58b5d781203405_html_a0f7699554fd9fe34cd58b5d781203405"><div class="ttname"><a href="../../d2/d78/classfl_1_1_screen_map_a0f7699554fd9fe34cd58b5d781203405.html#a0f7699554fd9fe34cd58b5d781203405">fl::ScreenMap::setDiameter</a></div><div class="ttdeci">void setDiameter(float diameter)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d6f/screenmap_8cpp_source.html#l00198">screenmap.cpp:198</a></div></div>
+<div class="ttc" id="aclassfl_1_1_screen_map_af9b06074ecc088fef30300f87650d2f5_html_af9b06074ecc088fef30300f87650d2f5"><div class="ttname"><a href="../../d2/d78/classfl_1_1_screen_map_af9b06074ecc088fef30300f87650d2f5.html#af9b06074ecc088fef30300f87650d2f5">fl::ScreenMap::getDiameter</a></div><div class="ttdeci">float getDiameter() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d6f/screenmap_8cpp_source.html#l00211">screenmap.cpp:211</a></div></div>
 <div class="ttc" id="anamespacefl_1_1anonymous__namespace_02frame__tracker_8cpp_03_adad099becebb046ffbb5aa73473c0ff2_html_adad099becebb046ffbb5aa73473c0ff2"><div class="ttname"><a href="../../d0/d70/namespacefl_1_1anonymous__namespace_02frame__tracker_8cpp_03_adad099becebb046ffbb5aa73473c0ff2.html#adad099becebb046ffbb5aa73473c0ff2">fl::anonymous_namespace{frame_tracker.cpp}::map</a></div><div class="ttdeci">long map(long x, long in_min, long in_max, long out_min, long out_max)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/def/frame__tracker_8cpp_source.html#l00006">frame_tracker.cpp:6</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/dd8/cled__controller_8cpp_source.html#l00014">CLEDController()</a>, and <a class="el" href="../../dc/dd9/fl_2engine__events_8h_source.html#l00109">fl::EngineEvents::onCanvasUiSet()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/dd8/cled__controller_8cpp_source.html#l00014">CLEDController()</a>, <a class="el" href="../../d9/d6f/screenmap_8cpp_source.html#l00211">fl::ScreenMap::getDiameter()</a>, <a class="el" href="../../db/dc0/engine__events_8h_source.html#l00102">fl::EngineEvents::onCanvasUiSet()</a>, and <a class="el" href="../../d9/d6f/screenmap_8cpp_source.html#l00198">fl::ScreenMap::setDiameter()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00206">setScreenMap()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00212">setScreenMap()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a_a34a490a6be2f618ffe6ed7d60be5590a_cgraph.svg" width="100%" height="421"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a_a34a490a6be2f618ffe6ed7d60be5590a_cgraph.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -160,7 +168,7 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/d2c/class_c_l_e_d_controller.html">CLEDController</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

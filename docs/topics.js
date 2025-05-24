@@ -1,10 +1,11 @@
 var topics =
 [
+    [ "Color Blurring Functions", "d5/d3d/group___color_blurs.html", "d5/d3d/group___color_blurs" ],
     [ "Color Correction/Temperature", "d0/d89/group___color_enums.html", "d0/d89/group___color_enums" ],
-    [ "Color Palettes", "d4/d98/group___color_palettes.html", "d4/d98/group___color_palettes" ],
     [ "Color Utility Functions", "d9/da8/group___color_utils.html", "d9/da8/group___color_utils" ],
+    [ "ColorPalettes", "d4/d98/group___color_palettes.html", "d4/d98/group___color_palettes" ],
     [ "Fast Math Functions", "df/da2/group__lib8tion.html", "df/da2/group__lib8tion" ],
-    [ "Gamma Adjustment Functions", "da/dd2/group___gamma_funcs.html", "da/dd2/group___gamma_funcs" ],
+    [ "Fast Memory Functions for AVR", "d6/de6/group___fast_memory.html", "d6/de6/group___fast_memory" ],
     [ "HSV to RGB Conversion Functions", "dd/dc7/group___h_s_v2_r_g_b.html", "dd/dc7/group___h_s_v2_r_g_b" ],
     [ "Input", "dc/df1/group__input.html", "dc/df1/group__input" ],
     [ "LED Chipset Controllers", "d4/d28/group___chipsets.html", "d4/d28/group___chipsets" ],

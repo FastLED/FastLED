@@ -1,0 +1,7 @@
+<map id="fl::Transform16::ToBounds" name="fl::Transform16::ToBounds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,195,56"/>
+<area shape="rect" id="Node000002" href="$d0/dfa/structfl_1_1_transform16_a0ebc1a78d8c8bd14f8c2ba540b2558da.html#a0ebc1a78d8c8bd14f8c2ba540b2558da" title=" " alt="" coords="243,5,451,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,31,229,27,229,33,195,36"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="311,55,383,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,50,297,60,296,65,195,55"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="fl/variant.h" name="fl/variant.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="89,5,181,31"/>
+<area shape="rect" id="Node000002" href="$db/d36/inplacenew_8h.html" title=" " alt="" coords="5,79,124,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,33,88,71,84,67,122,29"/>
+<area shape="rect" id="Node000005" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="148,79,264,104"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="149,29,187,67,183,71,145,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="71,225,146,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="64,104,59,138,59,157,63,176,73,196,87,213,83,217,69,199,58,178,54,158,54,137,59,104"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="73,152,144,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="74,103,97,139,92,142,70,106"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="111,178,111,212,106,212,106,178"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="137,149,159,151,167,156,171,165,165,176,151,181,149,175,161,172,165,164,163,159,158,156,137,155"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="207,105,199,140,182,179,162,201,140,219,137,215,158,198,177,176,194,138,202,104"/>
+<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="192,106,137,146,134,141,189,102"/>
+<area shape="rect" id="Node000006" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="244,152,365,177"/>
+<area shape="poly" id="edge9_Node000005_Node000006" title=" " alt="" coords="223,102,279,142,276,146,220,106"/>
+</map>

@@ -105,92 +105,94 @@ $(function(){initNavTree('d3/d84/sin32_8h_source.html','../../'); initResizable(
 <div class="contents">
 <a href="../../d3/d84/sin32_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="../../df/dd8/stdint_8h.html">stdint.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d64/force__inline_8h.html">force_inline.h</a>&quot;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d2a/namespace_8h.html">namespace.h</a>&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d2d/fl_2force__inline_8h.html">force_inline.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// fast and accurate sin and cos approximations</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// they differ only 0.01 % from actual sinf and cosf funtions</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// sin32 and cos32 use 24 bit unsigned integer arguments</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// 0 to 16777216 is one cycle</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// they output an integer between -2147418112 and 2147418112</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// that&#39;s 32767 * 65536</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// this is because I use int16_t look up table to interpolate the results</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">//</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// sin16 and cos16 are faster and more accurate funtions that take uint16_t as arguments</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// and return int16_t as output</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// they can replace the older implementation and are 62 times more accurate and twice as fast</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// the downside with these funtions is that they use 640 bytes for the look up table</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">// thats a lot for old microcontrollers but nothing for modern ones</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">//</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// sin32 and cos32 take about 13 cyces to execute on an esp32</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// they&#39;re 32 times faster than sinf and cosf</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// you can use choose to use these new by writing</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// #define USE_SIN_32 before #include &quot;FastLED.h&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="keyword">extern</span> <span class="keyword">const</span> int16_t *<a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">extern</span> <span class="keyword">const</span> int16_t *<a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// 0 to 16777216 is a full circle</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="comment">// output is between -2147418112 and 2147418112</span></div>
-<div class="foldopen" id="foldopen00036" data-start="{" data-end="}">
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">   36</a></span><a class="code hl_define" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">sin32</a>(uint32_t angle)</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>{</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    uint8_t angle256 = angle / 65536;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    int32_t subAngle = angle % 65536;</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256] * (65536 - subAngle) + <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256 + 1] * subAngle;</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>}</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// fast and accurate sin and cos approximations</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// they differ only 0.01 % from actual sinf and cosf funtions</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// sin32 and cos32 use 24 bit unsigned integer arguments</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// 0 to 16777216 is one cycle</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// they output an integer between -2147418112 and 2147418112</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// that&#39;s 32767 * 65536</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// this is because I use int16_t look up table to interpolate the results</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">//</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// sin16 and cos16 are faster and more accurate funtions that take uint16_t as</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// arguments and return int16_t as output they can replace the older</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// implementation and are 62 times more accurate and twice as fast the downside</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// with these funtions is that they use 640 bytes for the look up table thats a</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// lot for old microcontrollers but nothing for modern ones</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">//</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="comment">// sin32 and cos32 take about 13 cyces to execute on an esp32</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// they&#39;re 32 times faster than sinf and cosf</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// you can use choose to use these new by writing</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="comment">// #define USE_SIN_32 before #include &quot;FastLED.h&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="keyword">extern</span> <span class="keyword">const</span> int16_t *<a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">extern</span> <span class="keyword">const</span> int16_t *<a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// 0 to 16777216 is a full circle</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="comment">// output is between -2147418112 and 2147418112</span></div>
+<div class="foldopen" id="foldopen00035" data-start="{" data-end="}">
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">   35</a></span><a class="code hl_define" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">sin32</a>(uint32_t angle) {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    uint8_t angle256 = angle / 65536;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    int32_t subAngle = angle % 65536;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256] * (65536 - subAngle) +</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>           <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256 + 1] * subAngle;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>}</div>
 </div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// 0 to 16777216 is a full circle</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment">// output is between -2147418112 and 2147418112</span></div>
-<div class="foldopen" id="foldopen00045" data-start="{" data-end="}">
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">   45</a></span><a class="code hl_define" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">cos32</a>(uint32_t angle)</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>{</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    uint8_t angle256 = angle / 65536;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    int32_t subAngle = angle % 65536;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256] * (65536 - subAngle) + <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256 + 1] * subAngle;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>}</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// 0 to 16777216 is a full circle</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment">// output is between -2147418112 and 2147418112</span></div>
+<div class="foldopen" id="foldopen00044" data-start="{" data-end="}">
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">   44</a></span><a class="code hl_define" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">cos32</a>(uint32_t angle) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    uint8_t angle256 = angle / 65536;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    int32_t subAngle = angle % 65536;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256] * (65536 - subAngle) +</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>           <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256 + 1] * subAngle;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}</div>
 </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// 0 to 65536 is a full circle</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// output is between -32767 and 32767</span></div>
-<div class="foldopen" id="foldopen00054" data-start="{" data-end="}">
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">   54</a></span><a class="code hl_define" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int16_t <a class="code hl_function" href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">sin16lut</a>(uint16_t angle)</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    uint8_t angle256 = angle / 256;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    int32_t subAngle = angle % 256;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256] * (256 - subAngle) + <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256 + 1] * subAngle) / 256;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment">// 0 to 65536 is a full circle</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// output is between -32767 and 32767</span></div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">   53</a></span><a class="code hl_define" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int16_t <a class="code hl_function" href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">sin16lut</a>(uint16_t angle) {</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    uint8_t angle256 = angle / 256;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    int32_t subAngle = angle % 256;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256] * (256 - subAngle) +</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            <a class="code hl_variable" href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">sinArray</a>[angle256 + 1] * subAngle) /</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>           256;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}</div>
 </div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="comment">// 0 to 65536 is a full circle</span></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="comment">// output is between -32767 and 32767</span></div>
 <div class="foldopen" id="foldopen00063" data-start="{" data-end="}">
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb">   63</a></span><a class="code hl_define" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int16_t <a class="code hl_function" href="../../d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb">cos16lut</a>(uint16_t angle)</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>{</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    uint8_t angle256 = angle / 256;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    int32_t subAngle = angle % 256;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256] * (256 - subAngle) + <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256 + 1] * subAngle) / 256;</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>}</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb">   63</a></span><a class="code hl_define" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <span class="keyword">static</span> int16_t <a class="code hl_function" href="../../d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb">cos16lut</a>(uint16_t angle) {</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    uint8_t angle256 = angle / 256;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    int32_t subAngle = angle % 256;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">return</span> (<a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256] * (256 - subAngle) +</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <a class="code hl_variable" href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">cosArray</a>[angle256 + 1] * subAngle) /</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>           256;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>}</div>
 </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>}  <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="afl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7_html_a2f767b53d92c9d761d9f8d28a35d80c7"><div class="ttname"><a href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a></div><div class="ttdeci">#define FASTLED_FORCE_INLINE</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">force_inline.h:7</a></div></div>
-<div class="ttc" id="afl_2force__inline_8h_html"><div class="ttname"><a href="../../d8/d2d/fl_2force__inline_8h.html">force_inline.h</a></div></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="aforce__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7_html_a2f767b53d92c9d761d9f8d28a35d80c7"><div class="ttname"><a href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a></div><div class="ttdeci">#define FASTLED_FORCE_INLINE</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d64/force__inline_8h_source.html#l00006">force_inline.h:6</a></div></div>
+<div class="ttc" id="aforce__inline_8h_html"><div class="ttname"><a href="../../d4/d64/force__inline_8h.html">force_inline.h</a></div></div>
 <div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
-<div class="ttc" id="anamespacefl_a045c2be46c30d93d95d3c10dc580e6b0_html_a045c2be46c30d93d95d3c10dc580e6b0"><div class="ttname"><a href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">fl::cos32</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int32_t cos32(uint32_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00045">sin32.h:45</a></div></div>
-<div class="ttc" id="anamespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1_html_a5edb1a027a7c40d46b3739ccb22a3ec1"><div class="ttname"><a href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">fl::sin16lut</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int16_t sin16lut(uint16_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00054">sin32.h:54</a></div></div>
-<div class="ttc" id="anamespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd_html_a7994d6cefe593c1a7bf93a7bc29e29dd"><div class="ttname"><a href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">fl::sin32</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int32_t sin32(uint32_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00036">sin32.h:36</a></div></div>
+<div class="ttc" id="anamespacefl_a045c2be46c30d93d95d3c10dc580e6b0_html_a045c2be46c30d93d95d3c10dc580e6b0"><div class="ttname"><a href="../../d4/d36/namespacefl_a045c2be46c30d93d95d3c10dc580e6b0.html#a045c2be46c30d93d95d3c10dc580e6b0">fl::cos32</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int32_t cos32(uint32_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00044">sin32.h:44</a></div></div>
+<div class="ttc" id="anamespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1_html_a5edb1a027a7c40d46b3739ccb22a3ec1"><div class="ttname"><a href="../../d4/d36/namespacefl_a5edb1a027a7c40d46b3739ccb22a3ec1.html#a5edb1a027a7c40d46b3739ccb22a3ec1">fl::sin16lut</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int16_t sin16lut(uint16_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00053">sin32.h:53</a></div></div>
+<div class="ttc" id="anamespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd_html_a7994d6cefe593c1a7bf93a7bc29e29dd"><div class="ttname"><a href="../../d4/d36/namespacefl_a7994d6cefe593c1a7bf93a7bc29e29dd.html#a7994d6cefe593c1a7bf93a7bc29e29dd">fl::sin32</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int32_t sin32(uint32_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00035">sin32.h:35</a></div></div>
 <div class="ttc" id="anamespacefl_accbb7a465d6239c3e29e7c5569224ebb_html_accbb7a465d6239c3e29e7c5569224ebb"><div class="ttname"><a href="../../d4/d36/namespacefl_accbb7a465d6239c3e29e7c5569224ebb.html#accbb7a465d6239c3e29e7c5569224ebb">fl::cos16lut</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE int16_t cos16lut(uint16_t angle)</div><div class="ttdef"><b>Definition</b> <a href="#l00063">sin32.h:63</a></div></div>
-<div class="ttc" id="anamespacefl_ad9861f1a541e870bef58542b0ddd6d20_html_ad9861f1a541e870bef58542b0ddd6d20"><div class="ttname"><a href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">fl::sinArray</a></div><div class="ttdeci">const int16_t * sinArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d49/sin32_8cpp_source.html#l00031">sin32.cpp:31</a></div></div>
-<div class="ttc" id="anamespacefl_ada273a8d1bfc0a5d3fe2971b142d0089_html_ada273a8d1bfc0a5d3fe2971b142d0089"><div class="ttname"><a href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">fl::cosArray</a></div><div class="ttdeci">const int16_t * cosArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d49/sin32_8cpp_source.html#l00033">sin32.cpp:33</a></div></div>
+<div class="ttc" id="anamespacefl_ad9861f1a541e870bef58542b0ddd6d20_html_ad9861f1a541e870bef58542b0ddd6d20"><div class="ttname"><a href="../../d4/d36/namespacefl_ad9861f1a541e870bef58542b0ddd6d20.html#ad9861f1a541e870bef58542b0ddd6d20">fl::sinArray</a></div><div class="ttdeci">const int16_t * sinArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d49/sin32_8cpp_source.html#l00045">sin32.cpp:45</a></div></div>
+<div class="ttc" id="anamespacefl_ada273a8d1bfc0a5d3fe2971b142d0089_html_ada273a8d1bfc0a5d3fe2971b142d0089"><div class="ttname"><a href="../../d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089">fl::cosArray</a></div><div class="ttdeci">const int16_t * cosArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d49/sin32_8cpp_source.html#l00047">sin32.cpp:47</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Implements a simple red square effect for 2D LED grids.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00016">crgb.h:16</a></div></div>
+<div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -198,7 +200,7 @@ $(function(){initNavTree('d3/d84/sin32_8h_source.html','../../'); initResizable(
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d84/sin32_8h.html">sin32.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

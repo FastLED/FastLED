@@ -1,5 +1,6 @@
 var trig8_8h =
 [
+    [ "__INC_LIB8TION_TRIG_H", "d3/db9/trig8_8h_a8637a715ff3c6508a9f334902716030f.html#a8637a715ff3c6508a9f334902716030f", null ],
     [ "sin16", "d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409", null ],
     [ "sin8", "d1/ddc/group___trig_gaec8c5c0ed079727baa3b40184354ce41.html#gaec8c5c0ed079727baa3b40184354ce41", null ],
     [ "cos16", "d1/ddc/group___trig_ga056952ebed39f55880bb353857b47075.html#ga056952ebed39f55880bb353857b47075", null ],

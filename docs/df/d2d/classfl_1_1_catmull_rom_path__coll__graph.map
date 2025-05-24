@@ -1,0 +1,25 @@
+<map id="fl::CatmullRomPath" name="fl::CatmullRomPath">
+<area shape="rect" id="Node000001" title="Catmull–Rom spline through arbitrary points." alt="" coords="1915,33,2061,59"/>
+<area shape="rect" id="Node000002" href="$d9/d43/classfl_1_1_x_y_path_generator.html" title=" " alt="" coords="1104,5,1252,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1266,18,1914,41,1914,46,1265,24"/>
+<area shape="rect" id="Node000003" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="605,171,700,196"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="683,161,788,99,856,67,927,41,972,30,1018,23,1103,16,1104,21,1019,28,973,35,929,46,858,72,790,104,686,165"/>
+<area shape="rect" id="Node000013" href="$da/d32/classfl_1_1_x_y_path_params.html" title=" " alt="" coords="931,171,1061,196"/>
+<area shape="poly" id="edge10_Node000013_Node000003" title=" " alt="" coords="714,181,930,181,930,186,714,186"/>
+<area shape="rect" id="Node000004" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="291,171,485,196"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="499,181,605,181,605,186,499,186"/>
+<area shape="rect" id="Node000008" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="5,200,100,225"/>
+<area shape="poly" id="edge4_Node000004_Node000008" title=" " alt="" coords="114,205,290,189,291,194,114,210"/>
+<area shape="rect" id="Node000010" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="1571,96,1801,121"/>
+<area shape="poly" id="edge12_Node000010_Node000008" title=" " alt="" coords="114,216,239,226,387,231,1377,231,1421,228,1465,218,1548,187,1618,150,1666,119,1668,124,1620,155,1550,192,1466,224,1422,233,1377,237,387,237,239,231,114,221"/>
+<area shape="poly" id="edge5_Node000001_Node000010" title=" " alt="" coords="1761,91,1925,56,1926,61,1762,96"/>
+<area shape="rect" id="Node000011" href="$da/d84/classfl_1_1_ptr_traits.html" title=" " alt="" coords="1292,55,1459,95"/>
+<area shape="poly" id="edge6_Node000010_Node000011" title=" " alt="" coords="1473,83,1571,94,1570,99,1472,88"/>
+<area shape="rect" id="Node000006" href="$da/d84/classfl_1_1_ptr_traits.html" title=" " alt="" coords="931,56,1061,81"/>
+<area shape="poly" id="edge7_Node000011_Node000006" title=" " alt="" coords="1074,67,1292,71,1292,77,1074,73"/>
+<area shape="rect" id="Node000012" href="$d8/d11/classfl_1_1_catmull_rom_params.html" title=" " alt="" coords="1292,120,1459,145"/>
+<area shape="poly" id="edge8_Node000010_Node000012" title=" " alt="" coords="1472,123,1570,115,1571,120,1473,128"/>
+<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="1075,170,1291,141,1292,146,1076,176"/>
+<area shape="rect" id="Node000016" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="928,106,1064,146"/>
+<area shape="poly" id="edge11_Node000012_Node000016" title=" " alt="" coords="1078,125,1292,129,1292,134,1078,130"/>
+</map>

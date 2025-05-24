@@ -1,9 +1,26 @@
 var searchData=
 [
-  ['_5fdirection_0',['_direction',['../df/d0f/classfl_1_1_pixels_a6425fddce6bd22bd2390ccdc285e285e.html#a6425fddce6bd22bd2390ccdc285e285e',1,'fl::Pixels']]],
-  ['_5fframe_5fcnt_1',['_frame_cnt',['../d6/dda/_fast_l_e_d_8cpp_adbe81f5b70be627e9eaf78633b81e936.html#adbe81f5b70be627e9eaf78633b81e936',1,'FastLED.cpp']]],
-  ['_5fnum_5fstrips_2',['_num_strips',['../df/d0f/classfl_1_1_pixels_a9ecb7d6486f8ab614ea1525639078a24.html#a9ecb7d6486f8ab614ea1525639078a24',1,'fl::Pixels']]],
-  ['_5fretry_5fcnt_3',['_retry_cnt',['../d6/dda/_fast_l_e_d_8cpp_a0093621cbfc137ce372b755bc2dde85d.html#a0093621cbfc137ce372b755bc2dde85d',1,'FastLED.cpp']]],
-  ['_5fsize_4',['_size',['../df/d0f/classfl_1_1_pixels_ac00d2c1e3ec214c8da7b4b3ef3cb711d.html#ac00d2c1e3ec214c8da7b4b3ef3cb711d',1,'fl::Pixels']]],
-  ['_5fsizes_5',['_sizes',['../df/d0f/classfl_1_1_pixels_ab923633a8b86847b15e0406dd2bb103a.html#ab923633a8b86847b15e0406dd2bb103a',1,'fl::Pixels']]]
+  ['_5fbitset_0',['_bitset',['../da/d6b/structfl_1_1_bitset_fixed_1_1_proxy_acabb345af74478733ed79de61a421e24.html#acabb345af74478733ed79de61a421e24',1,'fl::BitsetFixed::Proxy::_bitset'],['../d3/d83/structfl_1_1_bitset_inlined_1_1_proxy_a10b2b0d00769c1441dd93c3b7f4ec57f.html#a10b2b0d00769c1441dd93c3b7f4ec57f',1,'fl::BitsetInlined::Proxy::_bitset']]],
+  ['_5fblock_5fcount_1',['_block_count',['../d3/d56/classfl_1_1bitset__dynamic_aa0b569459adb6a83cc80121b44d3b670.html#aa0b569459adb6a83cc80121b44d3b670',1,'fl::bitset_dynamic']]],
+  ['_5fblocks_2',['_blocks',['../dd/d03/classfl_1_1_bitset_fixed_a3066727fe5c6559c1a54baeaa47adf59.html#a3066727fe5c6559c1a54baeaa47adf59',1,'fl::BitsetFixed::_blocks'],['../d3/d56/classfl_1_1bitset__dynamic_ab23303175082f7fb14ab4c64e0c93271.html#ab23303175082f7fb14ab4c64e0c93271',1,'fl::bitset_dynamic::_blocks']]],
+  ['_5fbuckets_3',['_buckets',['../dc/de6/classfl_1_1_hash_map_ab491f658ae42144dd255d1d208b862cc.html#ab491f658ae42144dd255d1d208b862cc',1,'fl::HashMap']]],
+  ['_5fcached_5fvalue_4',['_cached_value',['../db/d61/structfl_1_1_hash_map_1_1iterator_a7cf195d8effc9fed36fdc1d211d77c9b.html#a7cf195d8effc9fed36fdc1d211d77c9b',1,'fl::HashMap::iterator::_cached_value'],['../d2/d92/structfl_1_1_hash_map_1_1const__iterator_a131291d43b0e2323f7d5504c010d4cbb.html#a131291d43b0e2323f7d5504c010d4cbb',1,'fl::HashMap::const_iterator::_cached_value']]],
+  ['_5fcomp_5',['_comp',['../df/d91/classfl_1_1_priority_queue_af238f4026f4e93c48a0ac6b7e514df65.html#af238f4026f4e93c48a0ac6b7e514df65',1,'fl::PriorityQueue']]],
+  ['_5fdata_6',['_data',['../df/d91/classfl_1_1_priority_queue_a47275afbe28158a64bd9f36b3a74035b.html#a47275afbe28158a64bd9f36b3a74035b',1,'fl::PriorityQueue']]],
+  ['_5fdeleted_7',['_deleted',['../dc/de6/classfl_1_1_hash_map_a7bf7fb3217609fdb7f402dab6a8b62e8.html#a7bf7fb3217609fdb7f402dab6a8b62e8',1,'fl::HashMap']]],
+  ['_5fdirection_8',['_direction',['../df/d0f/classfl_1_1_pixels_a6425fddce6bd22bd2390ccdc285e285e.html#a6425fddce6bd22bd2390ccdc285e285e',1,'fl::Pixels']]],
+  ['_5fequal_9',['_equal',['../dc/de6/classfl_1_1_hash_map_a582925cb0e1f252a18280b032d08b442.html#a582925cb0e1f252a18280b032d08b442',1,'fl::HashMap']]],
+  ['_5fframe_5fcnt_10',['_frame_cnt',['../d6/dda/_fast_l_e_d_8cpp_adbe81f5b70be627e9eaf78633b81e936.html#adbe81f5b70be627e9eaf78633b81e936',1,'FastLED.cpp']]],
+  ['_5fhash_11',['_hash',['../dc/de6/classfl_1_1_hash_map_af77d1b4628ba41dceafd7762026a4637.html#af77d1b4628ba41dceafd7762026a4637',1,'fl::HashMap']]],
+  ['_5fidx_12',['_idx',['../db/d61/structfl_1_1_hash_map_1_1iterator_a9647a46eded65b29f325093e540254af.html#a9647a46eded65b29f325093e540254af',1,'fl::HashMap::iterator::_idx'],['../d2/d92/structfl_1_1_hash_map_1_1const__iterator_ae2f959cbf3f5dc7472df0721d2fb4c40.html#ae2f959cbf3f5dc7472df0721d2fb4c40',1,'fl::HashMap::const_iterator::_idx']]],
+  ['_5fmap_13',['_map',['../db/d61/structfl_1_1_hash_map_1_1iterator_adb6482edfd7cd56df12bcd78ba0936d5.html#adb6482edfd7cd56df12bcd78ba0936d5',1,'fl::HashMap::iterator::_map'],['../d2/d92/structfl_1_1_hash_map_1_1const__iterator_a416f63239375336ec2105ba070a375e2.html#a416f63239375336ec2105ba070a375e2',1,'fl::HashMap::const_iterator::_map']]],
+  ['_5fnum_5fstrips_14',['_num_strips',['../df/d0f/classfl_1_1_pixels_a9ecb7d6486f8ab614ea1525639078a24.html#a9ecb7d6486f8ab614ea1525639078a24',1,'fl::Pixels']]],
+  ['_5foccupied_15',['_occupied',['../dc/de6/classfl_1_1_hash_map_aaf13d1059808efabafb1aab5ddabfdc4.html#aaf13d1059808efabafb1aab5ddabfdc4',1,'fl::HashMap']]],
+  ['_5fpos_16',['_pos',['../da/d6b/structfl_1_1_bitset_fixed_1_1_proxy_ac4b06c8699471446f0b8668242aa6aca.html#ac4b06c8699471446f0b8668242aa6aca',1,'fl::BitsetFixed::Proxy::_pos'],['../d3/d83/structfl_1_1_bitset_inlined_1_1_proxy_a525d906d9ddab792658c3dab4e72e2b4.html#a525d906d9ddab792658c3dab4e72e2b4',1,'fl::BitsetInlined::Proxy::_pos']]],
+  ['_5fretry_5fcnt_17',['_retry_cnt',['../d6/dda/_fast_l_e_d_8cpp_a0093621cbfc137ce372b755bc2dde85d.html#a0093621cbfc137ce372b755bc2dde85d',1,'FastLED.cpp']]],
+  ['_5fsize_18',['_size',['../d3/d56/classfl_1_1bitset__dynamic_a44290fbab21c4917e04614469e29a40e.html#a44290fbab21c4917e04614469e29a40e',1,'fl::bitset_dynamic::_size'],['../dc/de6/classfl_1_1_hash_map_a002965105f02aba791ee34b6342952c9.html#a002965105f02aba791ee34b6342952c9',1,'fl::HashMap::_size'],['../df/d0f/classfl_1_1_pixels_ac00d2c1e3ec214c8da7b4b3ef3cb711d.html#ac00d2c1e3ec214c8da7b4b3ef3cb711d',1,'fl::Pixels::_size']]],
+  ['_5fsizes_19',['_sizes',['../df/d0f/classfl_1_1_pixels_ab923633a8b86847b15e0406dd2bb103a.html#ab923633a8b86847b15e0406dd2bb103a',1,'fl::Pixels']]],
+  ['_5fstorage_20',['_storage',['../d6/d6a/classfl_1_1_bitset_inlined_ad507cf716a21577c5b2c41fb68eeaa3a.html#ad507cf716a21577c5b2c41fb68eeaa3a',1,'fl::BitsetInlined::_storage'],['../de/d60/classfl_1_1_variant_a04b9d09d770d8a676ab61e278494d567.html#a04b9d09d770d8a676ab61e278494d567',1,'fl::Variant::_storage']]],
+  ['_5ftag_21',['_tag',['../de/d60/classfl_1_1_variant_aba2cfaa10d99b8369e663a379e5b68e2.html#aba2cfaa10d99b8369e663a379e5b68e2',1,'fl::Variant']]],
+  ['_5ftombstones_22',['_tombstones',['../dc/de6/classfl_1_1_hash_map_a75cfb63683a9858a28296991e3a43ed5.html#a75cfb63683a9858a28296991e3a43ed5',1,'fl::HashMap']]]
 ];

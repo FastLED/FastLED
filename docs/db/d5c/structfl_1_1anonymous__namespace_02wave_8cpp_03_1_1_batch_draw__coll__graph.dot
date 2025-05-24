@@ -1,0 +1,25 @@
+digraph "fl::anonymous_namespace{wave.cpp}::BatchDraw"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::anonymous_namespace\l\{wave.cpp\}::BatchDraw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mIndices",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::FixedVector\< uint32\l_t, kMaxBatchSize \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d73/classfl_1_1_fixed_vector.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint32_t, kMaxBatchSize \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::FixedVector\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d73/classfl_1_1_fixed_vector.html",tooltip=" "];
+  Node4 -> Node1 [id="edge3_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAlphas",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::FixedVector\< uint8\l_t, kMaxBatchSize \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d73/classfl_1_1_fixed_vector.html",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000004_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t, kMaxBatchSize \>",fontcolor="grey" ];
+  Node5 -> Node1 [id="edge5_Node000001_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLeds",fontcolor="grey" ];
+  Node5 [id="Node000005",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
+  Node6 -> Node1 [id="edge6_Node000001_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mGradient",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::GradientInlined",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined.html",tooltip=" "];
+  Node7 -> Node6 [id="edge7_Node000006_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mVariant",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::Variant\< CRGBPalette16,\l CRGBPalette32, CRGBPalette256,\l GradientFunction \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
+  Node8 -> Node7 [id="edge8_Node000007_Node000008",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< CRGBPalette16, CRGBPalette32,\l CRGBPalette256, GradientFunction \>",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::Variant\< Types \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
+}

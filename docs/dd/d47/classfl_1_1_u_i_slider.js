@@ -1,9 +1,14 @@
 var classfl_1_1_u_i_slider =
 [
+    [ "Listener", "da/df8/structfl_1_1_u_i_slider_1_1_listener.html", "da/df8/structfl_1_1_u_i_slider_1_1_listener" ],
     [ "UISlider", "dd/d47/classfl_1_1_u_i_slider_a3fa7147a83e2c1afeeb3f3adde98030b.html#a3fa7147a83e2c1afeeb3f3adde98030b", null ],
-    [ "~UISlider", "dd/d47/classfl_1_1_u_i_slider_a5e54cd1e4cb515c61e2356d0dc36f7df.html#a5e54cd1e4cb515c61e2356d0dc36f7df", null ],
     [ "as", "dd/d47/classfl_1_1_u_i_slider_a3fbca6b191052088752fcae1e8d40f06.html#a3fbca6b191052088752fcae1e8d40f06", null ],
-    [ "max_value", "dd/d47/classfl_1_1_u_i_slider_af754b63ff71af4215b4e46ef6d43148d.html#af754b63ff71af4215b4e46ef6d43148d", null ],
+    [ "as_int", "dd/d47/classfl_1_1_u_i_slider_ad0c1a2e2b58c26d819feb748220d7c83.html#ad0c1a2e2b58c26d819feb748220d7c83", null ],
+    [ "clearCallbacks", "dd/d47/classfl_1_1_u_i_slider_a55e2da9493d5260cbfa9bccbf858a86d.html#a55e2da9493d5260cbfa9bccbf858a86d", null ],
+    [ "FL_NO_COPY", "dd/d47/classfl_1_1_u_i_slider_a92ce707160af7db837a01ffc56ab7065.html#a92ce707160af7db837a01ffc56ab7065", null ],
+    [ "getMax", "dd/d47/classfl_1_1_u_i_slider_a8ee94f2709e7f39d60b61bdfe5a95979.html#a8ee94f2709e7f39d60b61bdfe5a95979", null ],
+    [ "onChanged", "dd/d47/classfl_1_1_u_i_slider_a987a25e173cd3f7e48b838e8aac40f05.html#a987a25e173cd3f7e48b838e8aac40f05", null ],
+    [ "onChangedEx", "dd/d47/classfl_1_1_u_i_slider_aaf6bab0353a878f14b5ef280e39ffe8d.html#aaf6bab0353a878f14b5ef280e39ffe8d", null ],
     [ "operator float", "dd/d47/classfl_1_1_u_i_slider_abc4489390adcd3fc780650e1397385e6.html#abc4489390adcd3fc780650e1397385e6", null ],
     [ "operator int", "dd/d47/classfl_1_1_u_i_slider_ac998a3b3b4e68371fc37de3a65d21e1c.html#ac998a3b3b4e68371fc37de3a65d21e1c", null ],
     [ "operator uint16_t", "dd/d47/classfl_1_1_u_i_slider_a904490313443f12eca54f633deca0c38.html#a904490313443f12eca54f633deca0c38", null ],
@@ -13,7 +18,8 @@ var classfl_1_1_u_i_slider =
     [ "setValue", "dd/d47/classfl_1_1_u_i_slider_aa9c9b1937aaa69f312affee87f192d9d.html#aa9c9b1937aaa69f312affee87f192d9d", null ],
     [ "value", "dd/d47/classfl_1_1_u_i_slider_aff1715a175e32318236c637d2b607662.html#aff1715a175e32318236c637d2b607662", null ],
     [ "value_normalized", "dd/d47/classfl_1_1_u_i_slider_af3080baea698595d0df8fe2f8c3ad2f9.html#af3080baea698595d0df8fe2f8c3ad2f9", null ],
-    [ "mMax", "dd/d47/classfl_1_1_u_i_slider_aae3141b5219ac60c13a5114bb122cb8f.html#aae3141b5219ac60c13a5114bb122cb8f", null ],
-    [ "mMin", "dd/d47/classfl_1_1_u_i_slider_a5202696b04b99b8b000b5204fea172a8.html#a5202696b04b99b8b000b5204fea172a8", null ],
-    [ "mValue", "dd/d47/classfl_1_1_u_i_slider_aedb0df0fdfc80c5542049d21e61e6930.html#aedb0df0fdfc80c5542049d21e61e6930", null ]
+    [ "mCallbacks", "dd/d47/classfl_1_1_u_i_slider_a3680c98b3123cc963820b0fd32a8667e.html#a3680c98b3123cc963820b0fd32a8667e", null ],
+    [ "mLastFrameValue", "dd/d47/classfl_1_1_u_i_slider_aa6449d3568abdac6af2f485599d1f6c1.html#aa6449d3568abdac6af2f485599d1f6c1", null ],
+    [ "mLastFramevalueValid", "dd/d47/classfl_1_1_u_i_slider_a1d5197bb2cbdebcdda1d424b0da601a5.html#a1d5197bb2cbdebcdda1d424b0da601a5", null ],
+    [ "mListener", "dd/d47/classfl_1_1_u_i_slider_a0d827b9a402c7bf26c2e606faacd9d13.html#a0d827b9a402c7bf26c2e606faacd9d13", null ]
 ];

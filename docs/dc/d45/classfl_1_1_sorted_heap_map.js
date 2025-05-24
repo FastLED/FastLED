@@ -24,6 +24,7 @@ var classfl_1_1_sorted_heap_map =
     [ "front", "dc/d45/classfl_1_1_sorted_heap_map_aa46eeea1ad3fdf6b1a0da0bc344cdece.html#aa46eeea1ad3fdf6b1a0da0bc344cdece", null ],
     [ "front", "dc/d45/classfl_1_1_sorted_heap_map_ac7891b9c46ec7a036b252b0d7b65992e.html#ac7891b9c46ec7a036b252b0d7b65992e", null ],
     [ "full", "dc/d45/classfl_1_1_sorted_heap_map_a067e216eb1fda3d1907cc813abc013bb.html#a067e216eb1fda3d1907cc813abc013bb", null ],
+    [ "get", "dc/d45/classfl_1_1_sorted_heap_map_a819b1b0aaf9f3d0e1f8c5eefd5a5dc6b.html#a819b1b0aaf9f3d0e1f8c5eefd5a5dc6b", null ],
     [ "has", "dc/d45/classfl_1_1_sorted_heap_map_a0d32564de9839a97d3e3792ba89cd6c1.html#a0d32564de9839a97d3e3792ba89cd6c1", null ],
     [ "insert", "dc/d45/classfl_1_1_sorted_heap_map_a9077273ac8591a31f73c00f0540abae7.html#a9077273ac8591a31f73c00f0540abae7", null ],
     [ "lower_bound", "dc/d45/classfl_1_1_sorted_heap_map_a60666484d2439fb2fb38e92379405852.html#a60666484d2439fb2fb38e92379405852", null ],

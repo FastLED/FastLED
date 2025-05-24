@@ -1,5 +1,8 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/timer.h" name="/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/timer.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,236,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="85,108,156,133"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="85,108,156,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,60,123,94,118,94,118,60"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="149,105,171,107,179,112,183,121,177,132,163,137,161,131,173,128,177,120,175,115,170,112,149,111"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="83,181,158,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,134,123,168,118,168,118,134"/>
 </map>

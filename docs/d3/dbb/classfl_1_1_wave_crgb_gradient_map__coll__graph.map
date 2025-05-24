@@ -1,13 +1,15 @@
 <map id="fl::WaveCrgbGradientMap" name="fl::WaveCrgbGradientMap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="83,269,271,295"/>
-<area shape="rect" id="Node000002" href="$dc/dce/classfl_1_1_wave_crgb_map.html" title=" " alt="" coords="37,181,169,207"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,215,169,267,165,271,120,219"/>
-<area shape="rect" id="Node000003" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="55,93,150,119"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,133,105,181,100,181,100,133"/>
-<area shape="rect" id="Node000004" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="5,5,200,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="105,45,105,93,100,93,100,45"/>
-<area shape="rect" id="Node000010" href="$d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values." alt="" coords="193,181,313,207"/>
-<area shape="poly" id="edge4_Node000001_Node000010" title=" " alt="" coords="236,219,190,271,186,267,232,215"/>
-<area shape="rect" id="Node000011" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="224,93,283,119"/>
-<area shape="poly" id="edge5_Node000010_Node000011" title=" " alt="" coords="256,133,256,181,251,181,251,133"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1108,37,1296,62"/>
+<area shape="rect" id="Node000002" href="$dc/dce/classfl_1_1_wave_crgb_map.html" title=" " alt="" coords="851,10,983,35"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="997,27,1108,38,1108,43,996,33"/>
+<area shape="rect" id="Node000003" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="567,7,662,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="676,18,851,19,851,25,676,23"/>
+<area shape="rect" id="Node000004" href="$d1/d56/classfl_1_1_ptr.html" title=" " alt="" coords="5,7,200,33"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,17,567,17,567,23,214,23"/>
+<area shape="rect" id="Node000010" href="$d0/db5/classfl_1_1_gradient_inlined.html" title=" " alt="" coords="848,61,987,86"/>
+<area shape="poly" id="edge4_Node000001_Node000010" title=" " alt="" coords="1000,65,1084,59,1107,56,1108,62,1084,64,1001,71"/>
+<area shape="rect" id="Node000011" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="493,57,736,111"/>
+<area shape="poly" id="edge5_Node000010_Node000011" title=" " alt="" coords="750,77,848,73,848,78,750,82"/>
+<area shape="rect" id="Node000012" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="27,71,178,97"/>
+<area shape="poly" id="edge6_Node000011_Node000012" title=" " alt="" coords="192,81,493,81,493,87,192,87"/>
 </map>

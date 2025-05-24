@@ -126,25 +126,25 @@ $(function(){initNavTree('d6/d19/group___linear_interpolation_ga7c02960d0f26e900
 
 <p>Linear interpolation between two unsigned 16-bit values, with 16-bit fraction. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00472">472</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  473</span>{</div>
-<div class="line"><span class="lineno">  474</span>    uint16_t result;</div>
-<div class="line"><span class="lineno">  475</span>    <span class="keywordflow">if</span>( b &gt; a ) {</div>
-<div class="line"><span class="lineno">  476</span>        uint16_t delta = b - a;</div>
-<div class="line"><span class="lineno">  477</span>        uint16_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>(delta, frac);</div>
-<div class="line"><span class="lineno">  478</span>        result = a + scaled;</div>
-<div class="line"><span class="lineno">  479</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  480</span>        uint16_t delta = a - b;</div>
-<div class="line"><span class="lineno">  481</span>        uint16_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( delta, frac);</div>
-<div class="line"><span class="lineno">  482</span>        result = a - scaled;</div>
-<div class="line"><span class="lineno">  483</span>    }</div>
-<div class="line"><span class="lineno">  484</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  485</span>}</div>
-<div class="ttc" id="agroup___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00540">scale8.h:540</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00454">454</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  455</span>{</div>
+<div class="line"><span class="lineno">  456</span>    uint16_t result;</div>
+<div class="line"><span class="lineno">  457</span>    <span class="keywordflow">if</span>( b &gt; a ) {</div>
+<div class="line"><span class="lineno">  458</span>        uint16_t delta = b - a;</div>
+<div class="line"><span class="lineno">  459</span>        uint16_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>(delta, frac);</div>
+<div class="line"><span class="lineno">  460</span>        result = a + scaled;</div>
+<div class="line"><span class="lineno">  461</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  462</span>        uint16_t delta = a - b;</div>
+<div class="line"><span class="lineno">  463</span>        uint16_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( delta, frac);</div>
+<div class="line"><span class="lineno">  464</span>        result = a - scaled;</div>
+<div class="line"><span class="lineno">  465</span>    }</div>
+<div class="line"><span class="lineno">  466</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  467</span>}</div>
+<div class="ttc" id="agroup___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00546">scale8.h:546</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00540">scale16()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00546">scale16()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00187">CRGB::lerp16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00164">CRGB::lerp16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -169,7 +169,7 @@ $(function(){initNavTree('d6/d19/group___linear_interpolation_ga7c02960d0f26e900
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/d19/group___linear_interpolation.html">Linear Interpolation</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

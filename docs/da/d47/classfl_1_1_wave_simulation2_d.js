@@ -24,10 +24,11 @@ var classfl_1_1_wave_simulation2_d =
     [ "setSpeed", "da/d47/classfl_1_1_wave_simulation2_d_a614a159f66c77408c1cfedbd8644784c.html#a614a159f66c77408c1cfedbd8644784c", null ],
     [ "setSuperSample", "da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9", null ],
     [ "update", "da/d47/classfl_1_1_wave_simulation2_d_a1b5867a9c2a54dc64ea1e57e2d07dc04.html#a1b5867a9c2a54dc64ea1e57e2d07dc04", null ],
-    [ "extraFrames", "da/d47/classfl_1_1_wave_simulation2_d_af50f45f3d507e67980291fff6a3e723b.html#af50f45f3d507e67980291fff6a3e723b", null ],
-    [ "mU8Mode", "da/d47/classfl_1_1_wave_simulation2_d_abf0e654a7bc0f43e2d64f40a5bc1454a.html#abf0e654a7bc0f43e2d64f40a5bc1454a", null ],
-    [ "multiplier", "da/d47/classfl_1_1_wave_simulation2_d_ae93ed5720547357d8c16c4fc076371b9.html#ae93ed5720547357d8c16c4fc076371b9", null ],
-    [ "outerHeight", "da/d47/classfl_1_1_wave_simulation2_d_a64f6560c145a1c591ad8801af63c95fb.html#a64f6560c145a1c591ad8801af63c95fb", null ],
-    [ "outerWidth", "da/d47/classfl_1_1_wave_simulation2_d_a0e1f03a751dbaa29acbc342710f8e60b.html#a0e1f03a751dbaa29acbc342710f8e60b", null ],
-    [ "sim", "da/d47/classfl_1_1_wave_simulation2_d_aa782ca3f9416d791b2fb5a7a53720d20.html#aa782ca3f9416d791b2fb5a7a53720d20", null ]
+    [ "mChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a", null ],
+    [ "mExtraFrames", "da/d47/classfl_1_1_wave_simulation2_d_a1ede875fe1fde38487bb1e8d6a12c201.html#a1ede875fe1fde38487bb1e8d6a12c201", null ],
+    [ "mMultiplier", "da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94", null ],
+    [ "mOuterHeight", "da/d47/classfl_1_1_wave_simulation2_d_a50233faa7ffe25dfb45bff2ab8a2c28f.html#a50233faa7ffe25dfb45bff2ab8a2c28f", null ],
+    [ "mOuterWidth", "da/d47/classfl_1_1_wave_simulation2_d_ae4c272daa9301ba6c2ed573a2a846cf7.html#ae4c272daa9301ba6c2ed573a2a846cf7", null ],
+    [ "mSim", "da/d47/classfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718.html#a548d8bfa0fada000e64a8d7dfba93718", null ],
+    [ "mU8Mode", "da/d47/classfl_1_1_wave_simulation2_d_abf0e654a7bc0f43e2d64f40a5bc1454a.html#abf0e654a7bc0f43e2d64f40a5bc1454a", null ]
 ];

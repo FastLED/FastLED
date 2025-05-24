@@ -136,30 +136,30 @@ $(function(){initNavTree('d0/da8/group___scaling_ga6f419761a744efed4bae8875ac07a
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00417">417</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  417</span>                                                                {</div>
-<div class="line"><span class="lineno">  418</span><span class="preprocessor">#if SCALE8_C == 1</span></div>
-<div class="line"><span class="lineno">  419</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
-<div class="line"><span class="lineno">  420</span>    uint16_t scale_fixed = <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a> + 1;</div>
-<div class="line"><span class="lineno">  421</span>    i = (((uint16_t)i) * scale_fixed) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  422</span>    j = (((uint16_t)j) * scale_fixed) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  423</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  424</span>    i = ((uint16_t)i * (uint16_t)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  425</span>    j = ((uint16_t)j * (uint16_t)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  426</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  427</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  428</span>    i = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(i, <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>);</div>
-<div class="line"><span class="lineno">  429</span>    j = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(j, <a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>);</div>
-<div class="line"><span class="lineno">  430</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
-<div class="line"><span class="lineno">  431</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  432</span><span class="preprocessor">#error &quot;No implementation for nscale8x2 available.&quot;</span></div>
-<div class="line"><span class="lineno">  433</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  434</span>}</div>
-<div class="ttc" id="a_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6_html_a257d57e60e0e43b50d9c9a8b77a432e6"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
-<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00333">scale8.h:333</a></div></div>
-<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00170">scale8.h:170</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00423">423</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  423</span>                                                                {</div>
+<div class="line"><span class="lineno">  424</span><span class="preprocessor">#if SCALE8_C == 1</span></div>
+<div class="line"><span class="lineno">  425</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
+<div class="line"><span class="lineno">  426</span>    uint16_t scale_fixed = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> + 1;</div>
+<div class="line"><span class="lineno">  427</span>    i = (((uint16_t)i) * scale_fixed) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  428</span>    j = (((uint16_t)j) * scale_fixed) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  429</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  430</span>    i = ((uint16_t)i * (uint16_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  431</span>    j = ((uint16_t)j * (uint16_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  432</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  433</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  434</span>    i = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(i, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
+<div class="line"><span class="lineno">  435</span>    j = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(j, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
+<div class="line"><span class="lineno">  436</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
+<div class="line"><span class="lineno">  437</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  438</span><span class="preprocessor">#error &quot;No implementation for nscale8x2 available.&quot;</span></div>
+<div class="line"><span class="lineno">  439</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  440</span>}</div>
+<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
+<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00333">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00170">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -177,7 +177,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga6f419761a744efed4bae8875ac07a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/group___scaling.html">Scaling Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

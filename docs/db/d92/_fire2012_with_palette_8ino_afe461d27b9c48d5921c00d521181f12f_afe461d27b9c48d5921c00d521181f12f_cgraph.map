@@ -1,28 +1,17 @@
 <map id="loop" name="loop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,329,56,355"/>
-<area shape="rect" id="Node000002" href="$db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89" title=" " alt="" coords="115,304,269,329"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,336,101,328,102,334,57,341"/>
-<area shape="rect" id="Node000015" href="$d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d" title="Add entropy into the random number generator." alt="" coords="104,353,280,379"/>
-<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="56,343,94,349,93,354,56,348"/>
-<area shape="rect" id="Node000003" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="328,128,463,153"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="207,301,367,161,371,165,210,305"/>
-<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="755,204,819,229"/>
-<area shape="poly" id="edge12_Node000002_Node000011" title=" " alt="" coords="261,301,328,290,434,276,518,268,601,258,706,238,741,229,743,234,707,243,602,263,518,273,435,281,328,295,262,307"/>
-<area shape="rect" id="Node000012" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="364,304,427,329"/>
-<area shape="poly" id="edge9_Node000002_Node000012" title=" " alt="" coords="269,314,350,314,350,319,269,319"/>
-<area shape="rect" id="Node000013" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="365,353,426,379"/>
-<area shape="poly" id="edge10_Node000002_Node000013" title=" " alt="" coords="246,327,352,353,351,358,244,332"/>
-<area shape="rect" id="Node000014" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="355,403,435,428"/>
-<area shape="poly" id="edge11_Node000002_Node000014" title=" " alt="" coords="254,327,281,340,297,352,306,365,315,377,330,389,344,397,341,402,326,394,311,381,302,368,293,356,279,344,251,332"/>
-<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="579,5,638,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="406,126,448,84,477,60,509,40,537,28,565,21,566,27,539,34,512,44,480,64,452,87,409,130"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="560,55,657,80"/>
-<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="422,125,510,89,546,78,547,83,512,94,424,130"/>
-<area shape="rect" id="Node000009" href="$da/d2d/colorutils_8cpp_ab445fd8641e95a3bbd1417d9783f6170.html#ab445fd8641e95a3bbd1417d9783f6170" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="581,104,636,129"/>
-<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="462,130,567,119,568,124,463,136"/>
-<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="579,153,638,179"/>
-<area shape="poly" id="edge6_Node000003_Node000010" title=" " alt="" coords="463,146,566,158,565,164,462,151"/>
-<area shape="rect" id="Node000008" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="511,203,707,228"/>
-<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="424,151,512,187,540,196,539,202,510,193,422,156"/>
-<area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="639,170,707,187,743,199,741,204,706,193,637,175"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,129,56,155"/>
+<area shape="rect" id="Node000002" href="$db/d92/_fire2012_with_palette_8ino_af5890ba18cb2066c5a24a358de991a89.html#af5890ba18cb2066c5a24a358de991a89" title=" " alt="" coords="115,104,269,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,136,101,128,102,134,57,141"/>
+<area shape="rect" id="Node000008" href="$d2/d0d/group___random_ga1078b2029a50e86c93ccf4e3e1d85e7d.html#ga1078b2029a50e86c93ccf4e3e1d85e7d" title="Add entropy into the random number generator." alt="" coords="104,153,280,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="56,143,94,149,93,154,56,148"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="328,5,463,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="212,102,264,72,327,40,342,33,344,38,329,44,266,77,215,106"/>
+<area shape="rect" id="Node000004" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="364,55,427,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="244,101,350,75,351,81,246,107"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="365,104,426,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="269,114,351,114,351,119,269,119"/>
+<area shape="rect" id="Node000006" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="355,153,435,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="246,127,343,151,341,156,244,132"/>
+<area shape="rect" id="Node000007" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="363,203,427,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="256,127,281,138,297,151,306,163,315,176,330,188,352,199,349,204,326,192,311,179,302,166,293,154,279,143,254,132"/>
 </map>

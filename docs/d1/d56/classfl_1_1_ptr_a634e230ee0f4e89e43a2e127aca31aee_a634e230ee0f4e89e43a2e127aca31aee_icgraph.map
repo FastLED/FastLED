@@ -1,10 +1,12 @@
 <map id="fl::Ptr::NoTracking" name="fl::Ptr::NoTracking">
-<area shape="rect" id="Node000001" title=" " alt="" coords="425,55,561,80"/>
-<area shape="rect" id="Node000002" href="$d4/d60/classfl_1_1_fx_engine_ae7fcd8e1299e27e323cb96069321200b.html#ae7fcd8e1299e27e323cb96069321200b" title="Adds a new effect to the engine." alt="" coords="231,29,377,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="412,59,377,54,378,49,412,54"/>
-<area shape="rect" id="Node000003" href="$db/d77/classfl_1_1_weak_ptr_ac52bc006cef9fef0774e23023aa5d9f2.html#ac52bc006cef9fef0774e23023aa5d9f2" title=" " alt="" coords="241,79,367,104"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="412,80,368,86,367,81,411,75"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="338,19,328,11,304,8,284,10,273,15,271,20,277,28,273,31,266,21,270,11,283,5,304,3,330,6,341,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="436,79,572,104"/>
+<area shape="rect" id="Node000002" href="$d4/d60/classfl_1_1_fx_engine_ae7fcd8e1299e27e323cb96069321200b.html#ae7fcd8e1299e27e323cb96069321200b" title="Adds a new effect to the engine." alt="" coords="236,29,383,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="439,78,360,57,361,52,441,73"/>
+<area shape="rect" id="Node000003" href="$db/d77/classfl_1_1_weak_ptr_ac52bc006cef9fef0774e23023aa5d9f2.html#ac52bc006cef9fef0774e23023aa5d9f2" title=" " alt="" coords="246,79,373,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="422,94,373,94,373,89,422,89"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a755f6bf38632d39e6a94a23adeed2736.html#a755f6bf38632d39e6a94a23adeed2736" title=" " alt="" coords="231,128,388,153"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="441,110,361,130,360,125,439,105"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="344,19,334,11,309,8,289,10,278,15,276,20,281,28,277,31,270,21,274,11,287,5,309,3,336,6,347,15"/>
 <area shape="rect" id="Node000004" href="$db/d77/classfl_1_1_weak_ptr_a0e8a300bcc2b04d7f60b0ad7265f23da.html#a0e8a300bcc2b04d7f60b0ad7265f23da" title=" " alt="" coords="5,79,183,104"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="227,94,183,94,183,89,227,89"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="232,94,183,94,183,89,232,89"/>
 </map>

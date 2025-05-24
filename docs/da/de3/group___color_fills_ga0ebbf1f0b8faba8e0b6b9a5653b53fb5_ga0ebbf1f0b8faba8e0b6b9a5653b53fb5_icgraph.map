@@ -1,0 +1,9 @@
+<map id="fl::fill_gradient" name="fl::fill_gradient">
+<area shape="rect" id="Node000001" title="Fill a range of LEDs with a smooth HSV gradient between two HSV colors." alt="" coords="168,55,283,80"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills_ga0d5a821a8bbd80a9c6b32901de141e8e.html#ga0d5a821a8bbd80a9c6b32901de141e8e" title="Fill a range of LEDs with a smooth HSV gradient between four HSV colors." alt="" coords="5,5,120,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,53,105,33,106,28,170,48"/>
+<area shape="rect" id="Node000003" href="$da/de3/group___color_fills_ga674276bc09cd84aed85b8ce458fc2b3e.html#ga674276bc09cd84aed85b8ce458fc2b3e" title="Fill a range of LEDs with a smooth HSV gradient between three HSV colors." alt="" coords="5,55,120,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,70,120,70,120,65,154,65"/>
+<area shape="rect" id="Node000004" href="$da/de3/group___color_fills_ga2ecb44481d66bd5e7054f0bdda5b8f39.html#ga2ecb44481d66bd5e7054f0bdda5b8f39" title="Fill a range of LEDs with a smooth HSV gradient between two HSV colors." alt="" coords="5,104,120,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="170,87,106,106,105,101,169,82"/>
+</map>

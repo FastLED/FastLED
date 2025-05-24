@@ -7,7 +7,7 @@
 <area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a8ec266f9f7b35b9174d331cb6c338d80.html#a8ec266f9f7b35b9174d331cb6c338d80" title=" " alt="" coords="236,105,416,145"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="150,102,223,110,222,116,150,107"/>
 <area shape="rect" id="Node000009" href="$d6/d2c/class_c_l_e_d_controller_a6c8e2157d244ce8b1b878947ca7695d9.html#a6c8e2157d244ce8b1b878947ca7695d9" title="Set the default array of LEDs to be used by this controller." alt="" coords="237,169,415,195"/>
-<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="101,107,145,131,198,154,231,164,230,169,196,159,143,136,98,112"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="101,107,145,131,198,154,231,164,230,169,196,159,143,136,98,112"/>
 <area shape="rect" id="Node000005" href="$de/dca/classfl_1_1_engine_events_a006e1f01b766436e0eec2e406b4512d5.html#a006e1f01b766436e0eec2e406b4512d5" title=" " alt="" coords="549,51,683,91"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="416,106,535,83,536,89,417,111"/>
 <area shape="rect" id="Node000006" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="511,116,721,141"/>
@@ -15,9 +15,8 @@
 <area shape="rect" id="Node000007" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="777,69,956,109"/>
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="696,113,764,102,764,108,697,119"/>
 <area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="785,157,948,183"/>
-<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="694,139,776,152,775,158,693,144"/>
-<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="820,69,817,59,825,50,841,44,867,42,896,45,912,52,909,57,894,50,867,47,842,49,828,54,822,60,825,68"/>
-<area shape="poly" id="edge9_Node000008_Node000008" title=" " alt="" coords="826,159,817,149,822,139,839,133,867,131,902,135,912,139,916,145,911,148,909,143,901,140,867,136,840,138,825,143,823,148,830,155"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="694,139,776,152,775,158,693,144"/>
+<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="826,159,817,149,822,139,839,133,867,131,902,135,912,139,916,145,911,148,909,143,901,140,867,136,840,138,825,143,823,148,830,155"/>
 <area shape="rect" id="Node000010" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="503,169,729,195"/>
-<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="415,179,489,179,489,185,415,185"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="415,179,489,179,489,185,415,185"/>
 </map>

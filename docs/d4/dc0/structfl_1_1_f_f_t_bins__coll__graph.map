@@ -1,0 +1,13 @@
+<map id="fl::FFTBins" name="fl::FFTBins">
+<area shape="rect" id="Node000001" title=" " alt="" coords="241,299,331,324"/>
+<area shape="rect" id="Node000002" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="200,196,372,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,235,289,299,283,299,283,235"/>
+<area shape="rect" id="Node000003" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="98,108,282,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="215,140,274,193,271,197,211,144"/>
+<area shape="rect" id="Node000004" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="5,13,185,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="118,46,180,106,176,110,115,49"/>
+<area shape="rect" id="Node000006" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="210,5,362,45"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="259,57,204,110,200,106,255,53"/>
+<area shape="rect" id="Node000007" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="307,108,457,133"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="361,144,301,197,298,193,357,140"/>
+</map>

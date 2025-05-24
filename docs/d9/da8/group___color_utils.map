@@ -1,7 +1,4 @@
 <map id="Color Utility Functions" name="Color Utility Functions">
-<area shape="rect" id="Node000002" href="$dc/db8/group___color_blends.html" title="Functions for blending colors together." alt="" coords="220,5,403,31"/>
-<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs.html" title="Functions for blurring colors." alt="" coords="223,55,400,80"/>
-<area shape="rect" id="Node000004" href="$d3/d1c/group___color_fades.html" title="Functions for fading LED arrays." alt="" coords="233,104,389,129"/>
-<area shape="rect" id="Node000005" href="$da/de3/group___color_fills.html" title="Functions for filling LED arrays with colors and gradients." alt="" coords="239,153,384,179"/>
-<area shape="rect" id="Node000001" title="A variety of functions for working with color, palettes, and leds." alt="" coords="5,80,172,105"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills.html" title="Functions for filling LED arrays with colors and gradients." alt="" coords="220,5,365,31"/>
+<area shape="rect" id="Node000001" title="A variety of functions for working with color, palettes, and leds." alt="" coords="5,5,172,31"/>
 </map>

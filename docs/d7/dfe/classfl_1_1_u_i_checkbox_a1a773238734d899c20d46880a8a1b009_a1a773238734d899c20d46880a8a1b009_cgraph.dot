@@ -9,6 +9,12 @@ digraph "fl::UICheckbox::operator="
   Node1 [id="Node000001",label="fl::UICheckbox::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::UICheckbox::UICheckbox",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_af76f946adbb7b46a4f8636cef8933271.html#af76f946adbb7b46a4f8636cef8933271",tooltip=" "];
-  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UICheckbox::setValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_a0377cc6b2035f1bef0679c1e041fc4e2.html#a0377cc6b2035f1bef0679c1e041fc4e2",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UICheckboxImpl\l::UICheckboxImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ad67db98e127fee84a13a9e26731373cf.html#ad67db98e127fee84a13a9e26731373cf",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::UICheckboxImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ac636a695e20dcb53580c27f99b279eea.html#ac636a695e20dcb53580c27f99b279eea",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::UICheckbox::impl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_a57de00f2b82708eaa61a2a2354f672e8.html#a57de00f2b82708eaa61a2a2354f672e8",tooltip=" "];
+  Node1 -> Node4 [id="edge6_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
 }

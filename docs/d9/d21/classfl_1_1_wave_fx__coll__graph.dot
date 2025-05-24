@@ -17,7 +17,7 @@ digraph "fl::WaveFx"
   Node11 [id="Node000011",label="fl::XYMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map.html",tooltip=" "];
   Node12 -> Node1 [id="edge5_Node000001_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mWaveSim",fontcolor="grey" ];
   Node12 [id="Node000012",label="fl::WaveSimulation2D",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d47/classfl_1_1_wave_simulation2_d.html",tooltip=" "];
-  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" sim",fontcolor="grey" ];
+  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSim",fontcolor="grey" ];
   Node13 [id="Node000013",label="fl::scoped_ptr\< fl\l::WaveSimulation2D_Real \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
   Node14 -> Node13 [id="edge7_Node000013_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" ptr_",fontcolor="grey" ];
   Node14 [id="Node000014",label="fl::WaveSimulation2D_Real",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d94/classfl_1_1_wave_simulation2_d___real.html",tooltip=" "];
@@ -25,4 +25,12 @@ digraph "fl::WaveFx"
   Node19 [id="Node000019",label="fl::PointerDeleter\l\< fl::WaveSimulation2D\l_Real \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
   Node21 -> Node13 [id="edge9_Node000013_Node000021",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::WaveSimulation2D\l_Real \>",fontcolor="grey" ];
   Node21 [id="Node000021",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node22 -> Node12 [id="edge10_Node000012_Node000022",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mChangeGrid",fontcolor="grey" ];
+  Node22 [id="Node000022",label="fl::Grid\< int16_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/db9/classfl_1_1_grid.html",tooltip=" "];
+  Node23 -> Node22 [id="edge11_Node000022_Node000023",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mData",fontcolor="grey" ];
+  Node23 [id="Node000023",label="fl::HeapVector\< int16_t \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node25 -> Node22 [id="edge12_Node000022_Node000025",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSlice",fontcolor="grey" ];
+  Node25 [id="Node000025",label="fl::MatrixSlice\< int16_t \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/da3/classfl_1_1_matrix_slice.html",tooltip=" "];
+  Node29 -> Node22 [id="edge13_Node000022_Node000029",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int16_t \>",fontcolor="grey" ];
+  Node29 [id="Node000029",label="fl::Grid\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/db9/classfl_1_1_grid.html",tooltip=" "];
 }

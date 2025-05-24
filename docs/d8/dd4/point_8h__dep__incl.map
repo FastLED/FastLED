@@ -1,0 +1,9 @@
+<map id="fl/point.h" name="fl/point.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="143,5,221,31"/>
+<area shape="rect" id="Node000002" href="$d8/da7/line__simplification_8h.html" title=" " alt="" coords="13,79,178,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,41,111,81,108,76,156,37"/>
+<area shape="rect" id="Node000004" href="$d9/d42/traverse__grid_8h.html" title=" " alt="" coords="203,79,335,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="208,37,256,76,253,81,205,41"/>
+<area shape="rect" id="Node000003" href="$de/ddb/line__simplification_8cpp.html" title=" " alt="" coords="5,152,185,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,118,98,152,93,152,93,118"/>
+</map>

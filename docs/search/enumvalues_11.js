@@ -9,7 +9,7 @@ var searchData=
   ['seashell_6',['Seashell',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a29620709e3d00ae9244d761ac7b2cb05',1,'CRGB']]],
   ['selecttuningbank_7',['SelectTuningBank',['../dc/d44/struct_r_p_n_a8204295a9a411a3b0687f9301cd9f292.html#a8204295a9a411a3b0687f9301cd9f292aa13cc875d2ad45f33f87b7f64c2af3db',1,'RPN']]],
   ['selecttuningprogram_8',['SelectTuningProgram',['../dc/d44/struct_r_p_n_a8204295a9a411a3b0687f9301cd9f292.html#a8204295a9a411a3b0687f9301cd9f292aff67508f9ba09930d7569034bd52b07d',1,'RPN']]],
-  ['shortest_5fhues_9',['SHORTEST_HUES',['../da/de3/group___color_fills_ga097bfc6a8459d95e8afa8a16b9e6476a.html#gga097bfc6a8459d95e8afa8a16b9e6476aadc8aca2a3622de4cab05ca49cb740d03',1,'colorutils.h']]],
+  ['shortest_5fhues_9',['SHORTEST_HUES',['../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2d88d70c631fdecd19f0e5537c019d5c',1,'fl']]],
   ['sienna_10',['Sienna',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a020b9f869e5279a46ba83c4b109848ee',1,'CRGB']]],
   ['silver_11',['Silver',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a3b48c8058f1b90d745a5c94bdb38fc23',1,'CRGB']]],
   ['sk9822_12',['SK9822',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926a4084a8d1074bd46a82ca4a5fabf982cb',1,'FastLED.h']]],

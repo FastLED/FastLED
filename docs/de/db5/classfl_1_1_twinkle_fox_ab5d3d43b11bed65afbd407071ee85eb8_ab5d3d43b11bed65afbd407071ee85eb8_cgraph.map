@@ -2,9 +2,9 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,97,156,122"/>
 <area shape="rect" id="Node000002" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="204,72,427,97"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,99,190,95,191,101,156,104"/>
-<area shape="rect" id="Node000021" href="$d2/d73/group___palette_colors_ga361799a4ba193694ad974079c980430c.html#ga361799a4ba193694ad974079c980430c" title="Alter one palette by making it slightly more like a &quot;target palette&quot;." alt="" coords="214,121,417,146"/>
-<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="156,115,201,119,200,125,156,120"/>
-<area shape="rect" id="Node000003" href="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c" title="Computes a new color blended some fraction of the way between two other colors." alt="" coords="1008,193,1067,218"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a95a41ac33135f9b0658d2de39ef63526.html#a95a41ac33135f9b0658d2de39ef63526" title=" " alt="" coords="206,121,425,146"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="156,115,193,119,192,124,156,120"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="1000,193,1075,218"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,69,466,47,535,37,610,30,689,29,770,35,849,50,925,77,958,98,986,125,1025,180,1021,183,982,128,955,102,923,82,848,55,769,40,689,34,610,35,535,42,467,52,363,74"/>
 <area shape="rect" id="Node000008" href="$de/db5/classfl_1_1_twinkle_fox_a39614750a1a87e8a8be19c36f6c48677.html#a39614750a1a87e8a8be19c36f6c48677" title=" " alt="" coords="475,124,676,164"/>
 <area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="377,95,427,106,481,119,479,124,426,111,376,100"/>
@@ -12,20 +12,20 @@
 <area shape="poly" id="edge13_Node000002_Node000016" title=" " alt="" coords="339,69,399,42,436,29,474,19,575,6,679,3,782,8,881,20,974,35,1057,53,1183,85,1182,91,1056,58,973,40,880,25,781,14,679,9,576,11,475,24,438,34,401,47,342,74"/>
 <area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="495,269,655,294"/>
 <area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="406,95,428,106,446,122,456,138,464,155,477,175,553,257,549,261,473,178,459,158,451,141,442,125,425,111,403,100"/>
-<area shape="rect" id="Node000004" href="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e" title="Destructively modifies one color, blending in a given fraction of an overlay color." alt="" coords="1204,193,1271,218"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1067,203,1190,203,1190,208,1067,208"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="1196,193,1279,218"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1075,203,1182,203,1182,208,1075,208"/>
 <area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="1421,218,1519,244"/>
-<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="1271,207,1408,222,1407,227,1271,212"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="1279,208,1408,222,1407,227,1278,213"/>
 <area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="1372,142,1568,168"/>
-<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="1271,196,1397,168,1398,173,1272,201"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="1278,194,1397,168,1398,173,1279,200"/>
 <area shape="rect" id="Node000009" href="$de/db5/classfl_1_1_twinkle_fox_a4fe4a588d8419d38c454e35b863a7672.html#a4fe4a588d8419d38c454e35b863a7672" title=" " alt="" coords="724,155,924,195"/>
 <area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="676,154,711,159,710,164,676,160"/>
-<area shape="rect" id="Node000010" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="757,220,891,245"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="749,220,899,245"/>
 <area shape="poly" id="edge8_Node000008_Node000010" title=" " alt="" coords="620,162,725,205,755,214,753,219,723,210,618,167"/>
 <area shape="rect" id="Node000014" href="$de/db5/classfl_1_1_twinkle_fox_aff3c7b29001c2e1f4f6516e14000b22a.html#aff3c7b29001c2e1f4f6516e14000b22a" title=" " alt="" coords="739,91,909,131"/>
 <area shape="poly" id="edge12_Node000008_Node000014" title=" " alt="" coords="676,128,725,122,725,127,676,134"/>
-<area shape="poly" id="edge9_Node000010_Node000003" title=" " alt="" coords="891,221,994,208,994,214,892,227"/>
-<area shape="poly" id="edge10_Node000010_Node000006" title=" " alt="" coords="892,230,1407,229,1407,234,892,235"/>
+<area shape="poly" id="edge9_Node000010_Node000003" title=" " alt="" coords="899,220,986,209,987,215,900,226"/>
+<area shape="poly" id="edge10_Node000010_Node000006" title=" " alt="" coords="900,230,1408,229,1408,234,900,235"/>
 <area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="884,217,923,205,946,191,971,178,1072,156,1175,145,1273,142,1358,144,1358,149,1273,148,1175,151,1073,162,973,183,949,195,925,210,886,222"/>
 <area shape="poly" id="edge14_Node000016_Node000006" title=" " alt="" coords="1263,115,1373,177,1434,210,1432,214,1371,181,1260,120"/>
 <area shape="poly" id="edge15_Node000016_Node000007" title=" " alt="" coords="1297,115,1399,137,1397,142,1296,120"/>

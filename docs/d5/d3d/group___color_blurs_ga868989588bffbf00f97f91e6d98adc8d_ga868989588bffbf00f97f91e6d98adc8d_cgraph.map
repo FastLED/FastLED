@@ -1,0 +1,14 @@
+<map id="fl::blur2d" name="fl::blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="5,31,84,56"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="132,5,252,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,34,118,28,119,33,84,39"/>
+<area shape="rect" id="Node000008" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="143,55,241,80"/>
+<area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="84,47,130,55,129,60,84,52"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="300,31,417,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="252,24,287,30,286,35,252,30"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="465,5,569,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="417,31,451,26,452,31,418,37"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="473,55,561,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="418,50,460,56,459,61,417,55"/>
+<area shape="poly" id="edge6_Node000008_Node000003" title=" " alt="" coords="241,58,286,51,286,56,242,63"/>
+</map>

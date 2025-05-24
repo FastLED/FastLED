@@ -124,27 +124,27 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_acb1a08ee3735bf9269d8a603
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the removed effect, or nullptr if the index was invalid. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00056">56</a> of file <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html">fx_engine.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   56</span>                                  {</div>
-<div class="line"><span class="lineno">   57</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.has(index)) {</div>
-<div class="line"><span class="lineno">   58</span>        <span class="keywordflow">return</span> FxPtr();</div>
-<div class="line"><span class="lineno">   59</span>    }</div>
-<div class="line"><span class="lineno">   60</span>    </div>
-<div class="line"><span class="lineno">   61</span>    FxPtr removedFx;</div>
-<div class="line"><span class="lineno">   62</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.get(index, &amp;removedFx);</div>
-<div class="line"><span class="lineno">   63</span>    <span class="keywordflow">if</span> (!ok) {</div>
-<div class="line"><span class="lineno">   64</span>        <span class="keywordflow">return</span> FxPtr();</div>
-<div class="line"><span class="lineno">   65</span>    }</div>
-<div class="line"><span class="lineno">   66</span>    </div>
-<div class="line"><span class="lineno">   67</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a> == index) {</div>
-<div class="line"><span class="lineno">   68</span>        <span class="comment">// If we&#39;re removing the current effect, switch to the next one</span></div>
-<div class="line"><span class="lineno">   69</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.next(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, &amp;<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, <span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">   70</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a54aedd0f435868539dc887f6c7d75097.html#a54aedd0f435868539dc887f6c7d75097">mDurationSet</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   71</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_abceb211dfee9393dbb0be4b69183f5af.html#abceb211dfee9393dbb0be4b69183f5af">mDuration</a> = 0; <span class="comment">// Instant transition</span></div>
-<div class="line"><span class="lineno">   72</span>    }</div>
-<div class="line"><span class="lineno">   73</span>    </div>
-<div class="line"><span class="lineno">   74</span>    <span class="keywordflow">return</span> removedFx;</div>
-<div class="line"><span class="lineno">   75</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00052">52</a> of file <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html">fx_engine.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   52</span>                                  {</div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.has(index)) {</div>
+<div class="line"><span class="lineno">   54</span>        <span class="keywordflow">return</span> FxPtr();</div>
+<div class="line"><span class="lineno">   55</span>    }</div>
+<div class="line"><span class="lineno">   56</span> </div>
+<div class="line"><span class="lineno">   57</span>    FxPtr removedFx;</div>
+<div class="line"><span class="lineno">   58</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.get(index, &amp;removedFx);</div>
+<div class="line"><span class="lineno">   59</span>    <span class="keywordflow">if</span> (!ok) {</div>
+<div class="line"><span class="lineno">   60</span>        <span class="keywordflow">return</span> FxPtr();</div>
+<div class="line"><span class="lineno">   61</span>    }</div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a> == index) {</div>
+<div class="line"><span class="lineno">   64</span>        <span class="comment">// If we&#39;re removing the current effect, switch to the next one</span></div>
+<div class="line"><span class="lineno">   65</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.next(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, &amp;<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, <span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">   66</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a54aedd0f435868539dc887f6c7d75097.html#a54aedd0f435868539dc887f6c7d75097">mDurationSet</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   67</span>        <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_abceb211dfee9393dbb0be4b69183f5af.html#abceb211dfee9393dbb0be4b69183f5af">mDuration</a> = 0; <span class="comment">// Instant transition</span></div>
+<div class="line"><span class="lineno">   68</span>    }</div>
+<div class="line"><span class="lineno">   69</span> </div>
+<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">return</span> removedFx;</div>
+<div class="line"><span class="lineno">   71</span>}</div>
 <div class="ttc" id="aclassfl_1_1_fx_engine_a54aedd0f435868539dc887f6c7d75097_html_a54aedd0f435868539dc887f6c7d75097"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a54aedd0f435868539dc887f6c7d75097.html#a54aedd0f435868539dc887f6c7d75097">fl::FxEngine::mDurationSet</a></div><div class="ttdeci">bool mDurationSet</div><div class="ttdoc">Flag indicating if a new transition has been set.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3c/fx__engine_8h_source.html#l00125">fx_engine.h:125</a></div></div>
 <div class="ttc" id="aclassfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7_html_a8439102707d508286481ab8c06ddceb7"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">fl::FxEngine::mCurrId</a></div><div class="ttdeci">int mCurrId</div><div class="ttdoc">Id of the current effect.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3c/fx__engine_8h_source.html#l00123">fx_engine.h:123</a></div></div>
 <div class="ttc" id="aclassfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255_html_aa36ca65e51638c5c609bcd3f7976a255"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">fl::FxEngine::mEffects</a></div><div class="ttdeci">IntFxMap mEffects</div><div class="ttdoc">Collection of effects.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3c/fx__engine_8h_source.html#l00121">fx_engine.h:121</a></div></div>
@@ -161,7 +161,7 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_acb1a08ee3735bf9269d8a603
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d60/classfl_1_1_fx_engine.html">FxEngine</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -12,6 +12,6 @@ digraph "fl/warn.h"
   Node3 [id="Node000003",label="fl/strstream.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d00/strstream_8h.html",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="crgb.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd1/crgb_8h.html",tooltip="Defines the red, green, and blue (RGB) pixel struct."];
-  Node3 -> Node12 [id="edge4_Node000003_Node000012",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="str.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d0e/fl_2str_8h.html",tooltip=" "];
+  Node3 -> Node14 [id="edge4_Node000003_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="str.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d93/str_8h.html",tooltip=" "];
 }

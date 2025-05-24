@@ -1,15 +1,13 @@
 <map id="juggle" name="juggle">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,68,105"/>
-<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="132,55,219,80"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,84,118,75,119,80,69,90"/>
-<area shape="rect" id="Node000006" href="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98" title="Reduce the brightness of an array of pixels all at once." alt="" coords="116,104,235,129"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="69,95,103,101,102,107,68,101"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,68,80"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="132,29,219,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="68,59,118,50,119,55,69,64"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="116,79,235,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="69,70,103,76,102,81,68,75"/>
 <area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="285,5,352,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="212,52,271,31,273,36,214,57"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,32,271,23,272,28,219,37"/>
 <area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="283,55,355,80"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="219,65,269,65,269,70,219,70"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="219,47,270,56,269,61,218,52"/>
 <area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="403,5,469,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="353,15,389,15,389,21,353,21"/>
-<area shape="rect" id="Node000007" href="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b" title="Scale the brightness of an array of pixels all at once." alt="" coords="283,104,355,129"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="235,114,269,114,269,119,235,119"/>
 </map>

@@ -1,23 +1,19 @@
 <map id="fl::NoisePalette" name="fl::NoisePalette">
-<area shape="rect" id="Node000001" title=" " alt="" coords="358,284,478,309"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="167,284,287,309"/>
 <area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="111,196,181,221"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,223,382,281,381,286,194,228"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,230,218,282,214,285,164,233"/>
 <area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="25,101,80,126"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="75,134,136,194,133,198,72,137"/>
 <area shape="rect" id="Node000004" href="$d6/d16/classfl_1_1_referent.html" title=" " alt="" coords="5,5,100,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,44,55,101,50,101,50,44"/>
 <area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="105,101,187,126"/>
 <area shape="poly" id="edge4_Node000002_Node000011" title=" " alt="" coords="149,140,149,196,143,196,143,140"/>
-<area shape="rect" id="Node000012" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="318,196,518,221"/>
-<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="421,235,421,283,415,283,415,235"/>
+<area shape="rect" id="Node000012" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="210,196,410,221"/>
+<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="291,233,241,285,237,282,287,230"/>
 <area shape="rect" id="Node000013" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="212,101,408,126"/>
-<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="335,133,406,194,403,198,332,137"/>
+<area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="313,140,313,196,307,196,307,140"/>
 <area shape="rect" id="Node000014" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="231,5,389,31"/>
 <area shape="poly" id="edge7_Node000013_Node000014" title=" " alt="" coords="313,44,313,101,307,101,307,44"/>
 <area shape="rect" id="Node000015" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="433,93,585,133"/>
-<area shape="poly" id="edge8_Node000012_Node000015" title=" " alt="" coords="483,145,431,198,428,194,479,141"/>
-<area shape="rect" id="Node000016" href="$d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values." alt="" coords="561,196,681,221"/>
-<area shape="poly" id="edge9_Node000001_Node000016" title=" " alt="" coords="582,229,447,286,445,281,580,224"/>
-<area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="609,101,667,126"/>
-<area shape="poly" id="edge10_Node000016_Node000017" title=" " alt="" coords="636,140,625,196,620,195,631,139"/>
+<area shape="poly" id="edge8_Node000012_Node000015" title=" " alt="" coords="457,142,336,198,333,193,455,137"/>
 </map>

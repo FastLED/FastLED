@@ -14,5 +14,5 @@ digraph "fl::scoped_ptr::scoped_ptr"
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::scoped_ptr::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr_aa401ddf3247fb558f368fde543a81bed.html#aa401ddf3247fb558f368fde543a81bed",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::scoped_ptr::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr_a4ac3c35763cd13b72c771272505ab5ca.html#a4ac3c35763cd13b72c771272505ab5ca",tooltip=" "];
+  Node5 [id="Node000005",label="fl::scoped_ptr::swap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr_a6a5efac14765cce4f0797926a0eff304.html#a6a5efac14765cce4f0797926a0eff304",tooltip=" "];
 }

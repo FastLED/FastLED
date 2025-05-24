@@ -117,7 +117,7 @@ $(function(){initNavTree('d1/ddc/group___trig_ga0890962cb06b267617f4b06d7e9be5eb
 
 <p>Fast 16-bit approximation of sin(x). </p>
 <p>This approximation never varies more than 0.69% from the floating point value you'd get by doing </p><div class="fragment"><div class="line"><span class="keywordtype">float</span> s = sin(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>) * 32767.0;</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
 </div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">theta</td><td>input angle from 0-65535 </td></tr>
@@ -126,33 +126,33 @@ $(function(){initNavTree('d1/ddc/group___trig_ga0890962cb06b267617f4b06d7e9be5eb
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>sin of theta, value between -32767 to 32767. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d3/db9/trig8_8h_source.html#l00108">108</a> of file <a class="el" href="../../d3/db9/trig8_8h_source.html">trig8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  108</span>                                           {</div>
-<div class="line"><span class="lineno">  109</span>    <span class="keyword">static</span> <span class="keyword">const</span> uint16_t base[] = {0,     6393,  12539, 18204,</div>
-<div class="line"><span class="lineno">  110</span>                                    23170, 27245, 30273, 32137};</div>
-<div class="line"><span class="lineno">  111</span>    <span class="keyword">static</span> <span class="keyword">const</span> uint8_t slope[] = {49, 48, 44, 38, 31, 23, 14, 4};</div>
-<div class="line"><span class="lineno">  112</span> </div>
-<div class="line"><span class="lineno">  113</span>    uint16_t offset = (theta &amp; 0x3FFF) &gt;&gt; 3; <span class="comment">// 0..2047</span></div>
-<div class="line"><span class="lineno">  114</span>    <span class="keywordflow">if</span> (theta &amp; 0x4000)</div>
-<div class="line"><span class="lineno">  115</span>        offset = 2047 - offset;</div>
-<div class="line"><span class="lineno">  116</span> </div>
-<div class="line"><span class="lineno">  117</span>    uint8_t section = offset / 256; <span class="comment">// 0..7</span></div>
-<div class="line"><span class="lineno">  118</span>    uint16_t b = base[section];</div>
-<div class="line"><span class="lineno">  119</span>    uint8_t m = slope[section];</div>
-<div class="line"><span class="lineno">  120</span> </div>
-<div class="line"><span class="lineno">  121</span>    uint8_t secoffset8 = (uint8_t)(offset) / 2;</div>
-<div class="line"><span class="lineno">  122</span> </div>
-<div class="line"><span class="lineno">  123</span>    uint16_t mx = m * secoffset8;</div>
-<div class="line"><span class="lineno">  124</span>    int16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = mx + b;</div>
+<p class="definition">Definition at line <a class="el" href="../../d3/db9/trig8_8h_source.html#l00113">113</a> of file <a class="el" href="../../d3/db9/trig8_8h_source.html">trig8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  113</span>                                           {</div>
+<div class="line"><span class="lineno">  114</span>    <span class="keyword">static</span> <span class="keyword">const</span> uint16_t base[] = {0,     6393,  12539, 18204,</div>
+<div class="line"><span class="lineno">  115</span>                                    23170, 27245, 30273, 32137};</div>
+<div class="line"><span class="lineno">  116</span>    <span class="keyword">static</span> <span class="keyword">const</span> uint8_t slope[] = {49, 48, 44, 38, 31, 23, 14, 4};</div>
+<div class="line"><span class="lineno">  117</span> </div>
+<div class="line"><span class="lineno">  118</span>    uint16_t offset = (theta &amp; 0x3FFF) &gt;&gt; 3; <span class="comment">// 0..2047</span></div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">if</span> (theta &amp; 0x4000)</div>
+<div class="line"><span class="lineno">  120</span>        offset = 2047 - offset;</div>
+<div class="line"><span class="lineno">  121</span> </div>
+<div class="line"><span class="lineno">  122</span>    uint8_t section = offset / 256; <span class="comment">// 0..7</span></div>
+<div class="line"><span class="lineno">  123</span>    uint16_t b = base[section];</div>
+<div class="line"><span class="lineno">  124</span>    uint8_t m = slope[section];</div>
 <div class="line"><span class="lineno">  125</span> </div>
-<div class="line"><span class="lineno">  126</span>    <span class="keywordflow">if</span> (theta &amp; 0x8000)</div>
-<div class="line"><span class="lineno">  127</span>        <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = -<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>;</div>
-<div class="line"><span class="lineno">  128</span> </div>
-<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>;</div>
-<div class="line"><span class="lineno">  130</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
+<div class="line"><span class="lineno">  126</span>    uint8_t secoffset8 = (uint8_t)(offset) / 2;</div>
+<div class="line"><span class="lineno">  127</span> </div>
+<div class="line"><span class="lineno">  128</span>    uint16_t mx = m * secoffset8;</div>
+<div class="line"><span class="lineno">  129</span>    int16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = mx + b;</div>
+<div class="line"><span class="lineno">  130</span> </div>
+<div class="line"><span class="lineno">  131</span>    <span class="keywordflow">if</span> (theta &amp; 0x8000)</div>
+<div class="line"><span class="lineno">  132</span>        <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = -<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>;</div>
+<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  134</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>;</div>
+<div class="line"><span class="lineno">  135</span>}</div>
+<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00083">Fire2023.ino:83</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00083">y</a>.</p>
 
 </div>
 </div>
@@ -163,7 +163,7 @@ $(function(){initNavTree('d1/ddc/group___trig_ga0890962cb06b267617f4b06d7e9be5eb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/ddc/group___trig.html">Fast Trigonometry Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

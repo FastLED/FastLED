@@ -1,10 +1,5 @@
 <map id="fl/assert.h" name="fl/assert.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="40,5,127,31"/>
-<area shape="rect" id="Node000002" href="$de/d77/warn_8h.html" title=" " alt="" coords="5,79,84,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,32,60,68,55,65,75,30"/>
-<area shape="rect" id="Node000004" href="$d8/d00/strstream_8h.html" title=" " alt="" coords="29,225,138,251"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="89,30,99,78,101,122,98,178,92,212,87,211,93,177,95,122,94,79,84,32"/>
-<area shape="rect" id="Node000003" href="$d6/d01/dbg_8h.html" title=" " alt="" coords="12,152,83,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="48,104,49,138,44,139,42,104"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="56,176,74,212,69,214,51,179"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="50,5,137,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,181,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,31,96,65,91,65,91,31"/>
 </map>

@@ -9,4 +9,6 @@ digraph "fl::WaveSimulation1D_Real::set"
   Node1 [id="Node000001",label="fl::WaveSimulation1D\l_Real::set",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::wave_detail::float\l_to_fixed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108.html#a9ca9a055f84e9653e43a239c491d5108",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::clamp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355",tooltip=" "];
 }

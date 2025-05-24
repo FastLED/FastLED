@@ -1,0 +1,5 @@
+<map id="fl::SoundLevelMeter::processBlock" name="fl::SoundLevelMeter::processBlock">
+<area shape="rect" id="Node000001" title="Process a block of int16 PCM samples." alt="" coords="204,5,355,45"/>
+<area shape="rect" id="Node000002" href="$d9/d68/classfl_1_1_sound_level_meter_a91731e72146bd4dbec97eee1dc752238.html#a91731e72146bd4dbec97eee1dc752238" title=" " alt="" coords="5,5,156,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,28,156,28,156,23,191,23"/>
+</map>

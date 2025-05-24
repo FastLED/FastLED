@@ -123,33 +123,35 @@ $(function(){initNavTree('db/da2/classfl_1_1_engine_events_1_1_listener_a02910c2
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html#l00014">14</a> of file <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html">engine_events.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   14</span>                                {</div>
-<div class="line"><span class="lineno">   15</span><span class="preprocessor">    #if FASTLED_HAS_ENGINE_EVENTS</span></div>
-<div class="line"><span class="lineno">   16</span>    <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec">EngineEvents</a>* ptr = <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b">EngineEvents::getInstance</a>();</div>
-<div class="line"><span class="lineno">   17</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> has_listener = ptr &amp;&amp; ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3.html#a74d83de35ce045734d42bab135251dd3">_hasListener</a>(<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">   18</span>    <span class="keywordflow">if</span> (has_listener) {</div>
-<div class="line"><span class="lineno">   19</span>        <span class="comment">// Warning, the listener should be removed by the subclass. If we are here</span></div>
-<div class="line"><span class="lineno">   20</span>        <span class="comment">// then the subclass did not remove the listener and we are now in a partial</span></div>
-<div class="line"><span class="lineno">   21</span>        <span class="comment">// state of destruction and the results may be undefined for multithreaded</span></div>
-<div class="line"><span class="lineno">   22</span>        <span class="comment">// applications. However, for single threaded (the only option as of 2024, October)</span></div>
-<div class="line"><span class="lineno">   23</span>        <span class="comment">// this will be ok.</span></div>
-<div class="line"><span class="lineno">   24</span>        ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9.html#a0519b23500034d96739c3aac766693b9">_removeListener</a>(<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">   25</span>    }</div>
-<div class="line"><span class="lineno">   26</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   27</span>}</div>
+<p>Reimplemented in <a class="el" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_acfc40eaa4e2956695a7e6059b8b49a7e.html#acfc40eaa4e2956695a7e6059b8b49a7e">fl::UIButton::Listener</a>, <a class="el" href="../../de/d6f/structfl_1_1_u_i_checkbox_1_1_listener_a42026b4e5798b052f4fee382ff9df726.html#a42026b4e5798b052f4fee382ff9df726">fl::UICheckbox::Listener</a>, <a class="el" href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a6b9d65d3204a91e4bb56a14c90d94f74.html#a6b9d65d3204a91e4bb56a14c90d94f74">fl::UINumberField::Listener</a>, <a class="el" href="../../da/df8/structfl_1_1_u_i_slider_1_1_listener_a8e528d410b1b204d71fb4bf6ecdf6dcd.html#a8e528d410b1b204d71fb4bf6ecdf6dcd">fl::UISlider::Listener</a>, <a class="el" href="../../d5/de9/struct_u_i_button_1_1_listener_acfc40eaa4e2956695a7e6059b8b49a7e.html#acfc40eaa4e2956695a7e6059b8b49a7e">UIButton::Listener</a>, <a class="el" href="../../d2/d5c/struct_u_i_checkbox_1_1_listener_a42026b4e5798b052f4fee382ff9df726.html#a42026b4e5798b052f4fee382ff9df726">UICheckbox::Listener</a>, <a class="el" href="../../d0/d56/struct_u_i_number_field_1_1_listener_a6b9d65d3204a91e4bb56a14c90d94f74.html#a6b9d65d3204a91e4bb56a14c90d94f74">UINumberField::Listener</a>, and <a class="el" href="../../db/db3/struct_u_i_slider_1_1_listener_a8e528d410b1b204d71fb4bf6ecdf6dcd.html#a8e528d410b1b204d71fb4bf6ecdf6dcd">UISlider::Listener</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html#l00010">10</a> of file <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html">engine_events.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   10</span>                                {</div>
+<div class="line"><span class="lineno">   11</span><span class="preprocessor">#if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><span class="lineno">   12</span>    <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec">EngineEvents</a> *ptr = <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b">EngineEvents::getInstance</a>();</div>
+<div class="line"><span class="lineno">   13</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> has_listener = ptr &amp;&amp; ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3.html#a74d83de35ce045734d42bab135251dd3">_hasListener</a>(<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">   14</span>    <span class="keywordflow">if</span> (has_listener) {</div>
+<div class="line"><span class="lineno">   15</span>        <span class="comment">// Warning, the listener should be removed by the subclass. If we are</span></div>
+<div class="line"><span class="lineno">   16</span>        <span class="comment">// here then the subclass did not remove the listener and we are now in</span></div>
+<div class="line"><span class="lineno">   17</span>        <span class="comment">// a partial state of destruction and the results may be undefined for</span></div>
+<div class="line"><span class="lineno">   18</span>        <span class="comment">// multithreaded applications. However, for single threaded (the only</span></div>
+<div class="line"><span class="lineno">   19</span>        <span class="comment">// option as of 2024, October) this will be ok.</span></div>
+<div class="line"><span class="lineno">   20</span>        ptr-&gt;<a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9.html#a0519b23500034d96739c3aac766693b9">_removeListener</a>(<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">   21</span>    }</div>
+<div class="line"><span class="lineno">   22</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   23</span>}</div>
 <div class="ttc" id="aclassfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9_html_a0519b23500034d96739c3aac766693b9"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9.html#a0519b23500034d96739c3aac766693b9">fl::EngineEvents::_removeListener</a></div><div class="ttdeci">void _removeListener(Listener *listener)</div></div>
 <div class="ttc" id="aclassfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec_html_a0d7527af75982eb6037525e670aa26ec"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec">fl::EngineEvents::EngineEvents</a></div><div class="ttdeci">EngineEvents()=default</div></div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b_html_a34a4625c4fbcf754f70820bc4f0e418b"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b">fl::EngineEvents::getInstance</a></div><div class="ttdeci">static EngineEvents * getInstance()</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d7d/engine__events_8cpp_source.html#l00029">engine_events.cpp:29</a></div></div>
+<div class="ttc" id="aclassfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b_html_a34a4625c4fbcf754f70820bc4f0e418b"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b">fl::EngineEvents::getInstance</a></div><div class="ttdeci">static EngineEvents * getInstance()</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d7d/engine__events_8cpp_source.html#l00025">engine_events.cpp:25</a></div></div>
 <div class="ttc" id="aclassfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3_html_a74d83de35ce045734d42bab135251dd3"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3.html#a74d83de35ce045734d42bab135251dd3">fl::EngineEvents::_hasListener</a></div><div class="ttdeci">bool _hasListener(Listener *listener)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec">fl::EngineEvents::EngineEvents()</a>, <a class="el" href="../../de/dca/classfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3.html#a74d83de35ce045734d42bab135251dd3">fl::EngineEvents::_hasListener()</a>, <a class="el" href="../../de/dca/classfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9.html#a0519b23500034d96739c3aac766693b9">fl::EngineEvents::_removeListener()</a>, and <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html#l00029">fl::EngineEvents::getInstance()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec">fl::EngineEvents::EngineEvents()</a>, <a class="el" href="../../de/dca/classfl_1_1_engine_events_a74d83de35ce045734d42bab135251dd3.html#a74d83de35ce045734d42bab135251dd3">fl::EngineEvents::_hasListener()</a>, <a class="el" href="../../de/dca/classfl_1_1_engine_events_a0519b23500034d96739c3aac766693b9.html#a0519b23500034d96739c3aac766693b9">fl::EngineEvents::_removeListener()</a>, and <a class="el" href="../../d5/d7d/engine__events_8cpp_source.html#l00025">fl::EngineEvents::getInstance()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/da2/classfl_1_1_engine_events_1_1_listener_a02910c2cce73f7d39e39a6db29bb9ba4_a02910c2cce73f7d39e39a6db29bb9ba4_cgraph.svg" width="100%" height="448"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/da2/classfl_1_1_engine_events_1_1_listener_a02910c2cce73f7d39e39a6db29bb9ba4_a02910c2cce73f7d39e39a6db29bb9ba4_cgraph.svg" width="100%" height="440"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -161,7 +163,7 @@ $(function(){initNavTree('db/da2/classfl_1_1_engine_events_1_1_listener_a02910c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/dca/classfl_1_1_engine_events.html">EngineEvents</a></li><li class="navelem"><a class="el" href="../../db/da2/classfl_1_1_engine_events_1_1_listener.html">Listener</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

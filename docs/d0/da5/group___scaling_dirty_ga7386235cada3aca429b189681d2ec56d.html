@@ -131,48 +131,48 @@ $(function(){initNavTree('d0/da5/group___scaling_dirty_ga7386235cada3aca429b1896
 <dl class="section return"><dt>Returns</dt><dd>scaled value </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...">scale8()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00170">170</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  171</span>                                                                       {</div>
-<div class="line"><span class="lineno">  172</span><span class="preprocessor">#if SCALE8_C == 1</span></div>
-<div class="line"><span class="lineno">  173</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  174</span>    <span class="keywordflow">return</span> (((uint16_t)i) * ((uint16_t)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>) + 1)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  175</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">return</span> ((<span class="keywordtype">int</span>)i * (<span class="keywordtype">int</span>)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  177</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  178</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  179</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  180</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  181</span>        <span class="comment">// Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0</span></div>
-<div class="line"><span class="lineno">  182</span>        <span class="stringliteral">&quot;mul %0, %1          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  183</span>        <span class="comment">// Add i to r0, possibly setting the carry flag</span></div>
-<div class="line"><span class="lineno">  184</span>        <span class="stringliteral">&quot;add r0, %0         \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  185</span>        <span class="comment">// load the immediate 0 into i (note, this does _not_ touch any flags)</span></div>
-<div class="line"><span class="lineno">  186</span>        <span class="stringliteral">&quot;ldi %0, 0x00       \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  187</span>        <span class="comment">// walk and chew gum at the same time</span></div>
-<div class="line"><span class="lineno">  188</span>        <span class="stringliteral">&quot;adc %0, r1          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  189</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  190</span>        <span class="comment">/* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */</span></div>
-<div class="line"><span class="lineno">  191</span>        <span class="stringliteral">&quot;mul %0, %1    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  192</span>        <span class="comment">/* Move the high 8-bits of the product (r1) back to i */</span></div>
-<div class="line"><span class="lineno">  193</span>        <span class="stringliteral">&quot;mov %0, r1    \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  194</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  195</span>        <span class="comment">/* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */</span></div>
-<div class="line"><span class="lineno">  196</span>        <span class="comment">/* &quot;clr __zero_reg__    \n\t&quot; */</span></div>
-<div class="line"><span class="lineno">  197</span>        : <span class="stringliteral">&quot;+d&quot;</span>(i)    <span class="comment">/* writes to i; r16-r31, restricted by ldi */</span></div>
-<div class="line"><span class="lineno">  198</span>        : <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>) <span class="comment">/* uses scale */</span></div>
-<div class="line"><span class="lineno">  199</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span> <span class="comment">/* clobbers r0, r1 */</span></div>
-<div class="line"><span class="lineno">  200</span>    );</div>
-<div class="line"><span class="lineno">  201</span>    <span class="comment">// Return the result</span></div>
-<div class="line"><span class="lineno">  202</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  203</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  204</span><span class="preprocessor">#error &quot;No implementation for scale8_LEAVING_R1_DIRTY available.&quot;</span></div>
-<div class="line"><span class="lineno">  205</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  206</span>}</div>
-<div class="ttc" id="a_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6_html_a257d57e60e0e43b50d9c9a8b77a432e6"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">176</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  177</span>                                                                       {</div>
+<div class="line"><span class="lineno">  178</span><span class="preprocessor">#if SCALE8_C == 1</span></div>
+<div class="line"><span class="lineno">  179</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED == 1)</span></div>
+<div class="line"><span class="lineno">  180</span>    <span class="keywordflow">return</span> (((uint16_t)i) * ((uint16_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>) + 1)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  181</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  182</span>    <span class="keywordflow">return</span> ((<span class="keywordtype">int</span>)i * (<span class="keywordtype">int</span>)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  183</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  184</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  185</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  186</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED == 1)</span></div>
+<div class="line"><span class="lineno">  187</span>        <span class="comment">// Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0</span></div>
+<div class="line"><span class="lineno">  188</span>        <span class="stringliteral">&quot;mul %0, %1          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  189</span>        <span class="comment">// Add i to r0, possibly setting the carry flag</span></div>
+<div class="line"><span class="lineno">  190</span>        <span class="stringliteral">&quot;add r0, %0         \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  191</span>        <span class="comment">// load the immediate 0 into i (note, this does _not_ touch any flags)</span></div>
+<div class="line"><span class="lineno">  192</span>        <span class="stringliteral">&quot;ldi %0, 0x00       \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  193</span>        <span class="comment">// walk and chew gum at the same time</span></div>
+<div class="line"><span class="lineno">  194</span>        <span class="stringliteral">&quot;adc %0, r1          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  195</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  196</span>        <span class="comment">/* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */</span></div>
+<div class="line"><span class="lineno">  197</span>        <span class="stringliteral">&quot;mul %0, %1    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  198</span>        <span class="comment">/* Move the high 8-bits of the product (r1) back to i */</span></div>
+<div class="line"><span class="lineno">  199</span>        <span class="stringliteral">&quot;mov %0, r1    \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  200</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  201</span>        <span class="comment">/* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */</span></div>
+<div class="line"><span class="lineno">  202</span>        <span class="comment">/* &quot;clr __zero_reg__    \n\t&quot; */</span></div>
+<div class="line"><span class="lineno">  203</span>        : <span class="stringliteral">&quot;+d&quot;</span>(i)    <span class="comment">/* writes to i; r16-r31, restricted by ldi */</span></div>
+<div class="line"><span class="lineno">  204</span>        : <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>) <span class="comment">/* uses scale */</span></div>
+<div class="line"><span class="lineno">  205</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span> <span class="comment">/* clobbers r0, r1 */</span></div>
+<div class="line"><span class="lineno">  206</span>    );</div>
+<div class="line"><span class="lineno">  207</span>    <span class="comment">// Return the result</span></div>
+<div class="line"><span class="lineno">  208</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  209</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  210</span><span class="preprocessor">#error &quot;No implementation for scale8_LEAVING_R1_DIRTY available.&quot;</span></div>
+<div class="line"><span class="lineno">  211</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  212</span>}</div>
+<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/dd1/math8_8h_source.html#l00667">blend8()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l01113">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l01201">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00644">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00862">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00779">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00957">ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00733">ColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l01065">ColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00599">ColorFromPaletteExtended()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00642">ease8InOutCubic()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00288">fadeUsingColor()</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00163">CRGB::getAverageLight()</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00152">CRGB::getLuma()</a>, <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00251">hsv2rgb_rainbow()</a>, <a class="el" href="../../dd/d61/_fx_water_8ino_source.html#l00030">MyColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00364">nblend()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00303">nblend()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00417">nscale8x2()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00357">nscale8x3()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/dd1/math8_8h_source.html#l00667">blend8()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00771">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00858">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00299">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00520">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00437">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00615">fl::ColorFromPalette()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00389">fl::ColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00723">fl::ColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00252">fl::ColorFromPaletteExtended()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00624">ease8InOutCubic()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00175">fl::fadeUsingColor()</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00149">CRGB::getAverageLight()</a>, <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00138">CRGB::getLuma()</a>, <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00251">hsv2rgb_rainbow()</a>, <a class="el" href="../../dd/d61/_fx_water_8ino_source.html#l00030">MyColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00074">fl::nblend()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00019">fl::nblend()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00423">nscale8x2()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00363">nscale8x3()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -190,7 +190,7 @@ $(function(){initNavTree('d0/da5/group___scaling_dirty_ga7386235cada3aca429b1896
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da5/group___scaling_dirty.html">Scaling Functions that Leave R1 Dirty</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

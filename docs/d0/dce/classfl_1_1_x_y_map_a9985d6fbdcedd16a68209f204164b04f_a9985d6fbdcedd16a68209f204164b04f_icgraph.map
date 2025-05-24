@@ -1,21 +1,27 @@
 <map id="fl::XYMap::XYMap" name="fl::XYMap::XYMap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="577,133,713,159"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="577,156,713,181"/>
 <area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_a66320ff898a584bf26e3783607c2cc5e.html#a66320ff898a584bf26e3783607c2cc5e" title=" " alt="" coords="333,5,469,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="623,124,582,82,556,62,528,44,499,33,469,26,471,21,501,28,531,40,559,57,586,78,627,120"/>
-<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" title=" " alt="" coords="273,55,529,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="609,129,571,111,529,94,486,83,487,77,530,89,573,106,611,124"/>
-<area shape="rect" id="Node000006" href="$d0/dce/classfl_1_1_x_y_map_a29454fe0a5380af96f921085bbf34b87.html#a29454fe0a5380af96f921085bbf34b87" title=" " alt="" coords="291,104,512,129"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="563,139,507,132,507,127,564,134"/>
-<area shape="rect" id="Node000007" href="$d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9.html#a2193220fbe218947fdd4fd2aba56f6a9" title=" " alt="" coords="311,154,492,194"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="563,158,492,166,492,161,563,153"/>
-<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7" title=" " alt="" coords="311,218,492,258"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="613,168,574,189,530,208,493,221,491,216,528,204,572,184,610,163"/>
-<area shape="rect" id="Node000010" href="$d0/dce/classfl_1_1_x_y_map_aec5d1603b088412e6f19ffe9fb9fd5e7.html#aec5d1603b088412e6f19ffe9fb9fd5e7" title=" " alt="" coords="323,283,480,308"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="631,172,590,224,562,250,531,272,507,283,481,290,480,285,505,278,528,268,559,246,586,220,626,169"/>
-<area shape="rect" id="Node000004" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="50,31,181,56"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="259,58,181,51,181,46,260,53"/>
-<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" title=" " alt="" coords="5,80,225,105"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="260,83,226,86,225,80,260,77"/>
-<area shape="rect" id="Node000009" href="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba" title=" " alt="" coords="84,225,147,251"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="297,241,147,241,147,235,297,235"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="625,147,585,98,558,73,528,52,499,39,469,30,471,25,501,34,531,48,561,69,588,94,630,143"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" title=" " alt="" coords="273,107,529,132"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="574,156,529,146,471,135,472,129,530,141,575,150"/>
+<area shape="rect" id="Node000005" href="$d0/dce/classfl_1_1_x_y_map_abbb31c081f6a2701b7999371375edfdf.html#abbb31c081f6a2701b7999371375edfdf" title=" " alt="" coords="45,32,186,57"/>
+<area shape="poly" id="edge12_Node000001_Node000005" title=" " alt="" coords="617,150,577,121,528,96,438,71,346,56,259,48,186,46,186,41,259,43,346,51,439,66,530,92,580,116,620,145"/>
+<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_a29454fe0a5380af96f921085bbf34b87.html#a29454fe0a5380af96f921085bbf34b87" title=" " alt="" coords="291,156,512,181"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="563,171,512,171,512,166,563,166"/>
+<area shape="rect" id="Node000009" href="$d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9.html#a2193220fbe218947fdd4fd2aba56f6a9" title=" " alt="" coords="311,206,492,246"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="578,187,488,209,486,203,577,182"/>
+<area shape="rect" id="Node000010" href="$d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7" title=" " alt="" coords="311,270,492,310"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="623,193,582,228,531,260,493,275,491,270,528,256,579,224,619,189"/>
+<area shape="rect" id="Node000012" href="$d0/dce/classfl_1_1_x_y_map_aec5d1603b088412e6f19ffe9fb9fd5e7.html#aec5d1603b088412e6f19ffe9fb9fd5e7" title=" " alt="" coords="323,335,480,360"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="635,195,595,261,566,295,531,324,507,336,481,344,480,338,505,331,528,320,562,292,591,257,630,192"/>
+<area shape="rect" id="Node000004" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="50,81,181,107"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="259,109,181,102,181,97,260,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="329,106,272,90,225,71,181,60,183,55,226,66,274,85,331,101"/>
+<area shape="rect" id="Node000006" href="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" title=" " alt="" coords="5,131,225,156"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="260,134,226,137,225,131,260,129"/>
+<area shape="rect" id="Node000007" href="$de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" title=" " alt="" coords="25,180,206,205"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="303,138,274,146,250,158,226,170,183,183,182,177,224,165,248,153,272,141,302,132"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="277,182,206,188,206,182,276,176"/>
+<area shape="rect" id="Node000011" href="$d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="76,277,155,303"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="297,293,155,293,155,287,297,287"/>
 </map>

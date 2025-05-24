@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d7/d82/struct_c_r_g_b_a858435ed102057edaa676bd6d3d1e9cf.html#a858435ed102057edaa676bd6d3d1e9cf" target="_top" xlink:title="Return a new CRGB object after performing a linear interpolation between this object and the passed i...">
+<g id="a_Node000002"><a xlink:href="../../d7/d82/struct_c_r_g_b_a8a98be5bfc312d334327001625ef3acc.html#a8a98be5bfc312d334327001625ef3acc" target="_top" xlink:title="Return a new CRGB object after performing a linear interpolation between this object and the passed i...">
 <polygon fill="white" stroke="#666666" points="75,-19 0,-19 0,0 75,0 75,-19"/>
 <text text-anchor="middle" x="37.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::lerp8</text>
 </a>

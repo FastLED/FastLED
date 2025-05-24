@@ -1,0 +1,13 @@
+<map id="fl::fill_solid" name="fl::fill_solid">
+<area shape="rect" id="Node000001" title="Fill a range of LEDs with a solid color." alt="" coords="755,35,847,60"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="543,5,669,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="740,41,669,30,670,25,741,36"/>
+<area shape="rect" id="Node000003" href="$d9/d41/classfl_1_1_noise_palette_a3edcb0dfbc5280fffcd9776bc59f6899.html#a3edcb0dfbc5280fffcd9776bc59f6899" title=" " alt="" coords="505,55,707,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="741,58,707,63,707,58,741,53"/>
+<area shape="rect" id="Node000004" href="$d9/d41/classfl_1_1_noise_palette_ae6488d109988a70f949dba4dd8f3d2ed.html#ae6488d109988a70f949dba4dd8f3d2ed" title=" " alt="" coords="264,55,457,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="492,78,458,78,458,73,492,73"/>
+<area shape="rect" id="Node000005" href="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244" title=" " alt="" coords="5,33,216,59"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="250,65,216,61,217,56,250,60"/>
+<area shape="rect" id="Node000006" href="$d9/d41/classfl_1_1_noise_palette_a42d01b57f572eeb194742aef96d9c755.html#a42d01b57f572eeb194742aef96d9c755" title=" " alt="" coords="23,83,198,123"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="251,90,198,96,198,91,250,85"/>
+</map>

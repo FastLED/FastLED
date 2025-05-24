@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared"
   dir_82c6f96b5a39b3aa6c2c41086d3f3d73 [label="shared", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_82c6f96b5a39b3aa6c2c41086d3f3d73.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_82c6f96b5a39b3aa6c2c41086d3f3d73->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000075_000029.html" href="dir_000075_000029.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_82c6f96b5a39b3aa6c2c41086d3f3d73->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000077_000031.html" href="dir_000077_000031.html" color="steelblue1" fontcolor="steelblue1"];
 }

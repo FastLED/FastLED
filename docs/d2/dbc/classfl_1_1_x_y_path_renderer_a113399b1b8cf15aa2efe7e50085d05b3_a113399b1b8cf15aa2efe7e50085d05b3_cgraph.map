@@ -1,0 +1,10 @@
+<map id="fl::XYPathRenderer::compute" name="fl::XYPathRenderer::compute">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,148,75"/>
+<area shape="rect" id="Node000002" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a5dda50a57be1f2ba7e9d1083bbaec75a.html#a5dda50a57be1f2ba7e9d1083bbaec75a" title=" " alt="" coords="196,35,339,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,52,183,52,183,57,148,57"/>
+<area shape="rect" id="Node000003" href="$d9/dd3/structfl_1_1_transform_float_a76b44f621a9fc753da79cd41daac19f0.html#a76b44f621a9fc753da79cd41daac19f0" title=" " alt="" coords="387,5,523,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="339,41,372,36,373,41,339,46"/>
+<area shape="rect" id="Node000004" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="571,42,609,67"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="339,54,523,55,556,54,557,59,523,60,339,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="523,37,558,45,557,50,522,43"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="fl::CatmullRomPath::params" name="fl::CatmullRomPath::params">
+<area shape="rect" id="Node000001" title=" " alt="" coords="200,133,347,173"/>
+<area shape="rect" id="Node000002" href="$d2/d1f/classfl_1_1_catmull_rom_path_addee00da85048c6e6613e752e5f2fc22.html#addee00da85048c6e6613e752e5f2fc22" title="Add a point with separate x,y coordinates." alt="" coords="5,5,152,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,126,198,93,151,60,128,48,131,43,153,55,201,88,242,122"/>
+<area shape="rect" id="Node000003" href="$d2/d1f/classfl_1_1_catmull_rom_path_ae5bc34153257d7cb49ca32008f3109db.html#ae5bc34153257d7cb49ca32008f3109db" title="Add a point in [0,1]² to the path." alt="" coords="5,69,152,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,131,139,112,141,107,199,126"/>
+<area shape="rect" id="Node000004" href="$d2/d1f/classfl_1_1_catmull_rom_path_a35e222a045a5623383e64bf700004b23.html#a35e222a045a5623383e64bf700004b23" title="Clear all control points." alt="" coords="5,133,152,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="186,156,152,156,152,151,186,151"/>
+<area shape="rect" id="Node000005" href="$d2/d1f/classfl_1_1_catmull_rom_path_a6e5d18d26fcbf7bd8bf962b804626bed.html#a6e5d18d26fcbf7bd8bf962b804626bed" title=" " alt="" coords="5,197,152,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="199,180,141,200,139,195,198,175"/>
+<area shape="rect" id="Node000006" href="$d2/d1f/classfl_1_1_catmull_rom_path_aa242066ce688915cbf97cfa212e817b5.html#aa242066ce688915cbf97cfa212e817b5" title="Get the number of control points." alt="" coords="5,261,152,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="242,184,201,218,153,252,131,264,128,259,151,247,198,214,239,180"/>
+</map>

@@ -1,9 +1,0 @@
-<map id="fx/2d/wave.h" name="fx/2d/wave.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="294,5,401,31"/>
-<area shape="rect" id="Node000002" href="$dd/d10/_fx_wave2d_8ino.html" title=" " alt="" coords="5,79,223,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,38,186,81,184,76,302,33"/>
-<area shape="rect" id="Node000003" href="$dd/d44/_wave2d_8ino.html" title=" " alt="" coords="247,79,448,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="350,44,350,79,345,79,345,44"/>
-<area shape="rect" id="Node000004" href="$d2/d7d/wave_8cpp.html" title=" " alt="" coords="472,93,593,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="386,34,509,91,506,95,384,39"/>
-</map>

@@ -117,16 +117,16 @@ $(function(){initNavTree('d6/d4d/classfl_1_1_pir_advanced_ab0e0d72fb81d80cfe9b66
 
 <p>Returns a 0–255 ramp value: • ramps 0→255 over risingTime • holds 255 until latchMs–fallingTime • ramps 255→0 over fallingTime Outside latch period returns 0. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00050">50</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   50</span>                                            {</div>
-<div class="line"><span class="lineno">   51</span>    <span class="comment">// ensure detect() logic runs so we trigger on edges</span></div>
-<div class="line"><span class="lineno">   52</span>    <a class="code hl_function" href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11">detect</a>(now);</div>
-<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">mRamp</a>.update(now);</div>
-<div class="line"><span class="lineno">   54</span>}</div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a_html_a8e958be6de640010148ff2f54b202e0a"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">fl::PirAdvanced::mRamp</a></div><div class="ttdeci">TimeRamp mRamp</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00068">pir.h:68</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11_html_aef122ef37ba5707909cd04d06a1d5c11"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11">fl::PirAdvanced::detect</a></div><div class="ttdeci">bool detect(uint32_t now)</div><div class="ttdoc">Returns true if the PIR is “latched on” (within latchMs of last trigger).</div><div class="ttdef"><b>Definition</b> <a href="../../d2/da7/pir_8cpp_source.html#l00041">pir.cpp:41</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00054">54</a> of file <a class="el" href="../../d2/da7/pir_8cpp_source.html">pir.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   54</span>                                            {</div>
+<div class="line"><span class="lineno">   55</span>    <span class="comment">// ensure detect() logic runs so we trigger on edges</span></div>
+<div class="line"><span class="lineno">   56</span>    <a class="code hl_function" href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11">detect</a>(now);</div>
+<div class="line"><span class="lineno">   57</span>    <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">mRamp</a>.update8(now);</div>
+<div class="line"><span class="lineno">   58</span>}</div>
+<div class="ttc" id="aclassfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a_html_a8e958be6de640010148ff2f54b202e0a"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_a8e958be6de640010148ff2f54b202e0a.html#a8e958be6de640010148ff2f54b202e0a">fl::PirAdvanced::mRamp</a></div><div class="ttdeci">TimeRamp mRamp</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dd3/pir_8h_source.html#l00069">pir.h:69</a></div></div>
+<div class="ttc" id="aclassfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11_html_aef122ef37ba5707909cd04d06a1d5c11"><div class="ttname"><a href="../../d6/d4d/classfl_1_1_pir_advanced_aef122ef37ba5707909cd04d06a1d5c11.html#aef122ef37ba5707909cd04d06a1d5c11">fl::PirAdvanced::detect</a></div><div class="ttdeci">bool detect(uint32_t now)</div><div class="ttdoc">Returns true if the PIR is “latched on” (within latchMs of last trigger).</div><div class="ttdef"><b>Definition</b> <a href="../../d2/da7/pir_8cpp_source.html#l00045">pir.cpp:45</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00041">detect()</a>, and <a class="el" href="../../d9/dd3/pir_8h_source.html#l00068">mRamp</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/da7/pir_8cpp_source.html#l00045">detect()</a>, and <a class="el" href="../../d9/dd3/pir_8h_source.html#l00069">mRamp</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -144,7 +144,7 @@ $(function(){initNavTree('d6/d4d/classfl_1_1_pir_advanced_ab0e0d72fb81d80cfe9b66
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d4d/classfl_1_1_pir_advanced.html">PirAdvanced</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

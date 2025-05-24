@@ -13,5 +13,7 @@ digraph "fl::bilinearInterpolatePowerOf2"
   Node3 [id="Node000003",label="fl::bilinearExpand",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::ScaleUp::expand",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066",tooltip=" "];
-  Node2 -> Node4 [id="edge4_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node6 [id="edge4_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1",tooltip=" "];
+  Node2 -> Node4 [id="edge5_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

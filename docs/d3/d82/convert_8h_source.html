@@ -105,20 +105,22 @@ $(function(){initNavTree('d3/d82/convert_8h_source.html','../../'); initResizabl
 <div class="contents">
 <a href="../../d3/d82/convert_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;stdint.h&gt;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="../../df/dd8/stdint_8h.html">stdint.h</a>&gt;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Conversion from FastLED timings to the type found in datasheets.</span></div>
 <div class="foldopen" id="foldopen00006" data-start="{" data-end="}">
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="../../d3/d82/convert_8h_a463a9f6b18aa504dfe0131b8a78e3df5.html#a463a9f6b18aa504dfe0131b8a78e3df5">    6</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d82/convert_8h_a463a9f6b18aa504dfe0131b8a78e3df5.html#a463a9f6b18aa504dfe0131b8a78e3df5">convert_fastled_timings_to_timedeltas</a>(</div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    uint16_t T1, uint16_t T2, uint16_t T3,</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    uint16_t* T0H, uint16_t* T0L, uint16_t* T1H, uint16_t* T1L) {</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    *T0H = T1;</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    *T0L = T2 + T3;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    *T1H = T1 + T2;</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    *T1L = T3;</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>}</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno"><a class="line" href="../../d3/d82/convert_8h_a463a9f6b18aa504dfe0131b8a78e3df5.html#a463a9f6b18aa504dfe0131b8a78e3df5">    6</a></span><span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d82/convert_8h_a463a9f6b18aa504dfe0131b8a78e3df5.html#a463a9f6b18aa504dfe0131b8a78e3df5">convert_fastled_timings_to_timedeltas</a>(uint16_t T1, uint16_t T2,</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>                                                  uint16_t T3, uint16_t *T0H,</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>                                                  uint16_t *T0L, uint16_t *T1H,</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>                                                  uint16_t *T1L) {</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    *T0H = T1;</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    *T0L = T2 + T3;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    *T1H = T1 + T2;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    *T1L = T3;</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}</div>
 </div>
 <div class="ttc" id="aconvert_8h_a463a9f6b18aa504dfe0131b8a78e3df5_html_a463a9f6b18aa504dfe0131b8a78e3df5"><div class="ttname"><a href="../../d3/d82/convert_8h_a463a9f6b18aa504dfe0131b8a78e3df5.html#a463a9f6b18aa504dfe0131b8a78e3df5">convert_fastled_timings_to_timedeltas</a></div><div class="ttdeci">void convert_fastled_timings_to_timedeltas(uint16_t T1, uint16_t T2, uint16_t T3, uint16_t *T0H, uint16_t *T0L, uint16_t *T1H, uint16_t *T1L)</div><div class="ttdef"><b>Definition</b> <a href="#l00006">convert.h:6</a></div></div>
+<div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -126,7 +128,7 @@ $(function(){initNavTree('d3/d82/convert_8h_source.html','../../'); initResizabl
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d82/convert_8h.html">convert.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,13 @@
+<map id="fl::XYDrawGradient" name="fl::XYDrawGradient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="975,101,1120,126"/>
+<area shape="rect" id="Node000002" href="$d0/d6b/classfl_1_1_gradient.html" title=" " alt="" coords="759,51,853,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="867,74,985,98,984,103,866,79"/>
+<area shape="rect" id="Node000003" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="369,29,647,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="661,61,759,61,759,67,661,67"/>
+<area shape="rect" id="Node000004" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="5,51,156,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="170,61,369,61,369,67,170,67"/>
+<area shape="rect" id="Node000005" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="765,101,847,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="861,111,974,111,974,116,861,116"/>
+<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="777,150,835,175"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="848,152,950,131,985,123,986,129,951,136,849,157"/>
+</map>

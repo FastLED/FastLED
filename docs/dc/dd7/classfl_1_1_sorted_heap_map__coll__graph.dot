@@ -19,4 +19,6 @@ digraph "fl::SortedHeapMap&lt; Key, Value, Less &gt;"
   Node12 [id="Node000012",label="fl::SortedHeapMap\<\l Key, Value, Less \>\l::PairLess",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d53/structfl_1_1_sorted_heap_map_1_1_pair_less.html",tooltip=" "];
   Node13 -> Node2 [id="edge6_Node000002_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::SortedHeapMap\l::Pair, fl::SortedHeapMap\l::PairLess \>",fontcolor="grey" ];
   Node13 [id="Node000013",label="fl::SortedHeapVector\l\< T, LessThan \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d5c/classfl_1_1_sorted_heap_vector.html",tooltip=" "];
+  Node14 -> Node13 [id="edge7_Node000013_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLess",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::less\< T \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d07/structfl_1_1less.html",tooltip=" "];
 }

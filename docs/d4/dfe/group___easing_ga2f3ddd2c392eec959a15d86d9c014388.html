@@ -118,25 +118,25 @@ $(function(){initNavTree('d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c0143
 <p>Fast, rough 8-bit ease-in/ease-out function. </p>
 <p>Shaped approximately like <a class="el" href="../../d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d568.html#ga3fa6d71702477e71d7c0dd864eb1d568" title="8-bit cubic ease-in / ease-out function.">ease8InOutCubic()</a>, it's never off by more than a couple of percent from the actual cubic S-curve, and it executes more than twice as fast. Use when the cycles are more important than visual smoothness. Asm version takes around 7 cycles on AVR. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00671">671</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  672</span>{</div>
-<div class="line"><span class="lineno">  673</span>    <span class="keywordflow">if</span>( i &lt; 64) {</div>
-<div class="line"><span class="lineno">  674</span>        <span class="comment">// start with slope 0.5</span></div>
-<div class="line"><span class="lineno">  675</span>        i /= 2;</div>
-<div class="line"><span class="lineno">  676</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( i &gt; (255 - 64)) {</div>
-<div class="line"><span class="lineno">  677</span>        <span class="comment">// end with slope 0.5</span></div>
-<div class="line"><span class="lineno">  678</span>        i = 255 - i;</div>
-<div class="line"><span class="lineno">  679</span>        i /= 2;</div>
-<div class="line"><span class="lineno">  680</span>        i = 255 - i;</div>
-<div class="line"><span class="lineno">  681</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  682</span>        <span class="comment">// in the middle, use slope 192/128 = 1.5</span></div>
-<div class="line"><span class="lineno">  683</span>        i -= 64;</div>
-<div class="line"><span class="lineno">  684</span>        i += (i / 2);</div>
-<div class="line"><span class="lineno">  685</span>        i += 32;</div>
-<div class="line"><span class="lineno">  686</span>    }</div>
-<div class="line"><span class="lineno">  687</span> </div>
-<div class="line"><span class="lineno">  688</span>    <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  689</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00653">653</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  654</span>{</div>
+<div class="line"><span class="lineno">  655</span>    <span class="keywordflow">if</span>( i &lt; 64) {</div>
+<div class="line"><span class="lineno">  656</span>        <span class="comment">// start with slope 0.5</span></div>
+<div class="line"><span class="lineno">  657</span>        i /= 2;</div>
+<div class="line"><span class="lineno">  658</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>( i &gt; (255 - 64)) {</div>
+<div class="line"><span class="lineno">  659</span>        <span class="comment">// end with slope 0.5</span></div>
+<div class="line"><span class="lineno">  660</span>        i = 255 - i;</div>
+<div class="line"><span class="lineno">  661</span>        i /= 2;</div>
+<div class="line"><span class="lineno">  662</span>        i = 255 - i;</div>
+<div class="line"><span class="lineno">  663</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  664</span>        <span class="comment">// in the middle, use slope 192/128 = 1.5</span></div>
+<div class="line"><span class="lineno">  665</span>        i -= 64;</div>
+<div class="line"><span class="lineno">  666</span>        i += (i / 2);</div>
+<div class="line"><span class="lineno">  667</span>        i += 32;</div>
+<div class="line"><span class="lineno">  668</span>    }</div>
+<div class="line"><span class="lineno">  669</span> </div>
+<div class="line"><span class="lineno">  670</span>    <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  671</span>}</div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>.</p>
 
@@ -149,7 +149,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga2f3ddd2c392eec959a15d86d9c0143
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

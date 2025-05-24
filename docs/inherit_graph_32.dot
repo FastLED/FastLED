@@ -6,7 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CONTROLLER",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node0 -> Node1 [id="edge124_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="RGBWEmulatedController\l\< CONTROLLER, RGB_ORDER\l \>::ControllerT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t.html",tooltip=" "];
+  Node0 [id="Node000000",label="CPixelView\< PIXEL_TYPE \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df7/class_c_pixel_view.html",tooltip="Represents a set of LED objects."];
 }

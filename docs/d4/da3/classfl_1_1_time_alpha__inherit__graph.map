@@ -1,7 +1,7 @@
 <map id="fl::TimeAlpha" name="fl::TimeAlpha">
-<area shape="rect" id="Node000001" title=" " alt="" coords="73,5,181,31"/>
-<area shape="rect" id="Node000002" href="$df/d86/classfl_1_1_time_linear.html" title=" " alt="" coords="5,79,116,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,43,73,80,70,77,105,39"/>
-<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp.html" title=" " alt="" coords="141,79,250,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="150,39,186,77,182,80,146,42"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="134,5,242,31"/>
+<area shape="rect" id="Node000002" href="$d8/d62/classfl_1_1_time_clamped_transition.html" title=" " alt="" coords="5,79,197,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,41,117,81,114,76,162,37"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp.html" title=" " alt="" coords="221,79,331,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,37,263,76,260,81,211,41"/>
 </map>

@@ -107,7 +107,7 @@ $(function(){initNavTree('de/ded/bitswap_8h_a7c0838cd90f3f7d303fbba2c771a2716.ht
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void slowswap </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void slowswap </td>
           <td>(</td>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
         </tr>
@@ -121,35 +121,35 @@ $(function(){initNavTree('de/ded/bitswap_8h_a7c0838cd90f3f7d303fbba2c771a2716.ht
 
 <p>Slow version of the 8 byte by 8 bit rotation. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/ded/bitswap_8h_source.html#l00160">160</a> of file <a class="el" href="../../de/ded/bitswap_8h_source.html">bitswap.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  160</span>                                                                       {</div>
-<div class="line"><span class="lineno">  161</span> </div>
-<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> row = 0; row &lt; 7; ++row) {</div>
-<div class="line"><span class="lineno">  163</span>    uint8_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> = A[row];</div>
-<div class="line"><span class="lineno">  164</span> </div>
-<div class="line"><span class="lineno">  165</span>    uint8_t bit = (1&lt;&lt;row);</div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = B;</div>
-<div class="line"><span class="lineno">  167</span>    <span class="keywordflow">for</span>(uint32_t mask = 1&lt;&lt;7 ; mask ; mask &gt;&gt;= 1) {</div>
-<div class="line"><span class="lineno">  168</span>      <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; mask) {</div>
-<div class="line"><span class="lineno">  169</span>        *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++ |= bit;</div>
-<div class="line"><span class="lineno">  170</span>      } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  171</span>        *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++ &amp;= ~bit;</div>
-<div class="line"><span class="lineno">  172</span>      }</div>
-<div class="line"><span class="lineno">  173</span>    }</div>
-<div class="line"><span class="lineno">  174</span>    <span class="comment">// B[7] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  175</span>    <span class="comment">// B[6] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  176</span>    <span class="comment">// B[5] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  177</span>    <span class="comment">// B[4] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  178</span>    <span class="comment">// B[3] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  179</span>    <span class="comment">// B[2] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  180</span>    <span class="comment">// B[1] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  181</span>    <span class="comment">// B[0] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
-<div class="line"><span class="lineno">  182</span>  }</div>
-<div class="line"><span class="lineno">  183</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
-<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00056">noise.cpp:56</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/ded/bitswap_8h_source.html#l00162">162</a> of file <a class="el" href="../../de/ded/bitswap_8h_source.html">bitswap.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  162</span>                                                                       {</div>
+<div class="line"><span class="lineno">  163</span> </div>
+<div class="line"><span class="lineno">  164</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> row = 0; row &lt; 7; ++row) {</div>
+<div class="line"><span class="lineno">  165</span>    uint8_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> = A[row];</div>
+<div class="line"><span class="lineno">  166</span> </div>
+<div class="line"><span class="lineno">  167</span>    uint8_t bit = (1&lt;&lt;row);</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = B;</div>
+<div class="line"><span class="lineno">  169</span>    <span class="keywordflow">for</span>(uint32_t mask = 1&lt;&lt;7 ; mask ; mask &gt;&gt;= 1) {</div>
+<div class="line"><span class="lineno">  170</span>      <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; mask) {</div>
+<div class="line"><span class="lineno">  171</span>        *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++ |= bit;</div>
+<div class="line"><span class="lineno">  172</span>      } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  173</span>        *<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a>++ &amp;= ~bit;</div>
+<div class="line"><span class="lineno">  174</span>      }</div>
+<div class="line"><span class="lineno">  175</span>    }</div>
+<div class="line"><span class="lineno">  176</span>    <span class="comment">// B[7] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  177</span>    <span class="comment">// B[6] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  178</span>    <span class="comment">// B[5] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  179</span>    <span class="comment">// B[4] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  180</span>    <span class="comment">// B[3] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  181</span>    <span class="comment">// B[2] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  182</span>    <span class="comment">// B[1] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  183</span>    <span class="comment">// B[0] |= (x &amp; 0x01) &lt;&lt; row; x &gt;&gt;= 1;</span></div>
+<div class="line"><span class="lineno">  184</span>  }</div>
+<div class="line"><span class="lineno">  185</span>}</div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
+<div class="ttc" id="anoise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5_html_ad4f390ff52b49f726bfdf77302fbd4d5"><div class="ttname"><a href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a></div><div class="ttdeci">static FASTLED_NAMESPACE_BEGIN uint8_t const p[]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/de8/noise_8cpp_source.html#l00030">noise.cpp:30</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00056">p</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00030">p</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>.</p>
 
 </div>
 </div>
@@ -160,7 +160,7 @@ $(function(){initNavTree('de/ded/bitswap_8h_a7c0838cd90f3f7d303fbba2c771a2716.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../de/ded/bitswap_8h.html">bitswap.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

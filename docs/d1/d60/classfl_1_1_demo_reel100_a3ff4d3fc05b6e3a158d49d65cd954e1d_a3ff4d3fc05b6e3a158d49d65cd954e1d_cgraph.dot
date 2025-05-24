@@ -16,7 +16,7 @@ digraph "fl::DemoReel100::sinelon"
   Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="scale16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145",tooltip="Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who..."];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98",tooltip="Reduce the brightness of an array of pixels all at once."];
+  Node6 [id="Node000006",label="fl::fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b",tooltip="Scale the brightness of an array of pixels all at once."];
+  Node7 [id="Node000007",label="fl::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab90db73f2d846755d0b084e4af7af072.html#ab90db73f2d846755d0b084e4af7af072",tooltip=" "];
 }

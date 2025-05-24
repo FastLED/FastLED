@@ -1,0 +1,19 @@
+<map id="fl/optional.h" name="fl/optional.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="86,5,185,31"/>
+<area shape="rect" id="Node000002" href="$d6/d10/variant_8h.html" title=" " alt="" coords="89,79,181,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,31,138,65,133,65,133,31"/>
+<area shape="rect" id="Node000003" href="$db/d36/inplacenew_8h.html" title=" " alt="" coords="5,152,124,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="126,106,88,144,84,140,122,102"/>
+<area shape="rect" id="Node000006" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="148,152,264,177"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="149,102,187,140,183,144,145,106"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="71,299,146,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="64,178,59,211,59,231,63,250,73,269,87,287,83,290,69,272,58,252,54,231,54,211,59,177"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="73,225,144,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="74,176,97,212,92,215,70,179"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="111,251,111,285,106,285,106,251"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="137,223,159,224,167,229,171,238,165,249,151,254,149,249,161,245,165,238,163,233,158,229,137,228"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="207,178,199,213,182,252,162,275,140,293,137,289,158,271,177,249,194,211,202,177"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="192,180,137,219,134,215,189,175"/>
+<area shape="rect" id="Node000007" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="244,225,365,251"/>
+<area shape="poly" id="edge10_Node000006_Node000007" title=" " alt="" coords="223,175,279,215,276,219,220,180"/>
+</map>

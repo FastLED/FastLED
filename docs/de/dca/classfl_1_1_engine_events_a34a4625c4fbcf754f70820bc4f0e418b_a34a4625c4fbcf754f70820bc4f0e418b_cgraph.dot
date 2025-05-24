@@ -9,8 +9,7 @@ digraph "fl::EngineEvents::getInstance"
   Node1 [id="Node000001",label="fl::EngineEvents::getInstance",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::EngineEvents::Engine\lEvents",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec",tooltip=" "];
-  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb",tooltip=" "];
-  Node3 -> Node3 [id="edge4_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

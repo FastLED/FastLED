@@ -1,7 +1,7 @@
 var searchData=
 [
   ['backward_0',['BACKWARD',['../d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359a6377b4908ae38f9a57fe9120cf179eb1',1,'fl']]],
-  ['backward_5fhues_1',['BACKWARD_HUES',['../da/de3/group___color_fills_ga097bfc6a8459d95e8afa8a16b9e6476a.html#gga097bfc6a8459d95e8afa8a16b9e6476aaeafbd6b84aa73f663c8ab89f53875306',1,'colorutils.h']]],
+  ['backward_5fhues_1',['BACKWARD_HUES',['../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849aca95836d9983c3070f877ba1b80d95c6',1,'fl']]],
   ['balance_2',['Balance',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a5dbc35c72252e48e38e11a93fab41655',1,'midi_Defs.h']]],
   ['bankselect_3',['BankSelect',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263ad35194f91f02370bc6a3370a8038cecf',1,'midi_Defs.h']]],
   ['beige_4',['Beige',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a435829f3208f8961c3241c56a9326268',1,'CRGB']]],

@@ -137,27 +137,28 @@ $(function(){initNavTree('d6/de8/noise_8cpp_a7e9b66e76fd89c94ccb6f26fd713bdca.ht
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00190">190</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  190</span>                                                                                                                              {</div>
-<div class="line"><span class="lineno">  191</span>    int8_t result;</div>
-<div class="line"><span class="lineno">  192</span><span class="preprocessor">#if !defined(__AVR__)</span></div>
-<div class="line"><span class="lineno">  193</span>    result = (hash &amp; (1&lt;&lt;bitnumber)) ? a : b;</div>
-<div class="line"><span class="lineno">  194</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  195</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  196</span>        <span class="stringliteral">&quot;mov %[result],%[a]          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  197</span>        <span class="stringliteral">&quot;sbrs %[hash],%[bitnumber]   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  198</span>        <span class="stringliteral">&quot;mov %[result],%[b]          \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  199</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span> (result)</div>
-<div class="line"><span class="lineno">  200</span>        : [hash] <span class="stringliteral">&quot;r&quot;</span> (hash),</div>
-<div class="line"><span class="lineno">  201</span>          [bitnumber] <span class="stringliteral">&quot;M&quot;</span> (bitnumber),</div>
-<div class="line"><span class="lineno">  202</span>          [a] <span class="stringliteral">&quot;r&quot;</span> (a),</div>
-<div class="line"><span class="lineno">  203</span>          [b] <span class="stringliteral">&quot;r&quot;</span> (b)</div>
-<div class="line"><span class="lineno">  204</span>        );</div>
-<div class="line"><span class="lineno">  205</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  206</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  207</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00164">164</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  164</span>                                                                                                                              {</div>
+<div class="line"><span class="lineno">  165</span>    int8_t result;</div>
+<div class="line"><span class="lineno">  166</span><span class="preprocessor">#if !defined(__AVR__)</span></div>
+<div class="line"><span class="lineno">  167</span>    result = (<a class="code hl_function" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">hash</a> &amp; (1&lt;&lt;bitnumber)) ? a : b;</div>
+<div class="line"><span class="lineno">  168</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  169</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  170</span>        <span class="stringliteral">&quot;mov %[result],%[a]          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  171</span>        <span class="stringliteral">&quot;sbrs %[hash],%[bitnumber]   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  172</span>        <span class="stringliteral">&quot;mov %[result],%[b]          \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  173</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span> (result)</div>
+<div class="line"><span class="lineno">  174</span>        : [<a class="code hl_function" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">hash</a>] <span class="stringliteral">&quot;r&quot;</span> (<a class="code hl_function" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">hash</a>),</div>
+<div class="line"><span class="lineno">  175</span>          [bitnumber] <span class="stringliteral">&quot;M&quot;</span> (bitnumber),</div>
+<div class="line"><span class="lineno">  176</span>          [a] <span class="stringliteral">&quot;r&quot;</span> (a),</div>
+<div class="line"><span class="lineno">  177</span>          [b] <span class="stringliteral">&quot;r&quot;</span> (b)</div>
+<div class="line"><span class="lineno">  178</span>        );</div>
+<div class="line"><span class="lineno">  179</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  180</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  181</span>}</div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d_html_aaa7388df65cacb4afe70894edfff3a6d"><div class="ttname"><a href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">fl::anonymous_namespace{noise_woryley.cpp}::hash</a></div><div class="ttdeci">uint16_t hash(int32_t x, int32_t y)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d13/noise__woryley_8cpp_source.html#l00018">noise_woryley.cpp:18</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00209">grad8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00183">grad8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -175,7 +176,7 @@ $(function(){initNavTree('d6/de8/noise_8cpp_a7e9b66e76fd89c94ccb6f26fd713bdca.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/de8/noise_8cpp.html">noise.cpp</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

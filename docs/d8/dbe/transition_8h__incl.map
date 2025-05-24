@@ -1,7 +1,10 @@
 <map id="fx/detail/transition.h" name="fx/detail/transition.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="23,5,178,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,33,61,70,57,66,89,29"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="100,79,221,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="113,29,144,66,140,70,109,33"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="49,5,203,31"/>
+<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,33,87,70,82,66,114,29"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="151,79,221,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,29,170,66,165,70,134,33"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="214,76,237,77,245,83,248,92,242,103,228,107,227,102,239,99,243,91,241,86,235,82,214,81"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="149,152,223,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="189,104,189,138,183,138,183,104"/>
 </map>

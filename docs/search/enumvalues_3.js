@@ -34,6 +34,6 @@ var searchData=
   ['dodgerblue_31',['DodgerBlue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a4d4b1fe189751d43e1912bd090a1af76',1,'CRGB']]],
   ['dotstar_32',['DOTSTAR',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3',1,'FastLED.h']]],
   ['dotstarhd_33',['DOTSTARHD',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281',1,'FastLED.h']]],
-  ['draw_5fmode_5fblend_5fby_5fblack_34',['DRAW_MODE_BLEND_BY_BLACK',['../d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2a94666c10126a90d9bb73fdb9f2b984df',1,'fl']]],
+  ['draw_5fmode_5fblend_5fby_5fmax_5fbrightness_34',['DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS',['../d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2ac1d733044d99e0be7ef8b708d75e3f25',1,'fl']]],
   ['draw_5fmode_5foverwrite_35',['DRAW_MODE_OVERWRITE',['../d4/d36/namespacefl_aab6ed0b359875688b3da1f727f781ae2.html#aab6ed0b359875688b3da1f727f781ae2ac448cafd3e2853b07896a817491d5b7e',1,'fl']]]
 ];

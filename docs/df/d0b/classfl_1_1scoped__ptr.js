@@ -10,9 +10,9 @@ var classfl_1_1scoped__ptr =
     [ "operator*", "df/d0b/classfl_1_1scoped__ptr_a47650e0498118f659c211c2156bb2da7.html#a47650e0498118f659c211c2156bb2da7", null ],
     [ "operator->", "df/d0b/classfl_1_1scoped__ptr_a8515c6da01f47f97b4e2b15d22d426f2.html#a8515c6da01f47f97b4e2b15d22d426f2", null ],
     [ "operator=", "df/d0b/classfl_1_1scoped__ptr_aa401ddf3247fb558f368fde543a81bed.html#aa401ddf3247fb558f368fde543a81bed", null ],
-    [ "operator=", "df/d0b/classfl_1_1scoped__ptr_a4ac3c35763cd13b72c771272505ab5ca.html#a4ac3c35763cd13b72c771272505ab5ca", null ],
     [ "release", "df/d0b/classfl_1_1scoped__ptr_a62fd5340320b1f79aa5eb3eb0473b703.html#a62fd5340320b1f79aa5eb3eb0473b703", null ],
     [ "reset", "df/d0b/classfl_1_1scoped__ptr_ae4f9318461c16025489851a203872493.html#ae4f9318461c16025489851a203872493", null ],
+    [ "swap", "df/d0b/classfl_1_1scoped__ptr_a6a5efac14765cce4f0797926a0eff304.html#a6a5efac14765cce4f0797926a0eff304", null ],
     [ "deleter_", "df/d0b/classfl_1_1scoped__ptr_af328b646db2edb1df9a266c9e52eb6b6.html#af328b646db2edb1df9a266c9e52eb6b6", null ],
     [ "ptr_", "df/d0b/classfl_1_1scoped__ptr_a484d804eaa93e23ac1d9dca980e902fc.html#a484d804eaa93e23ac1d9dca980e902fc", null ]
 ];

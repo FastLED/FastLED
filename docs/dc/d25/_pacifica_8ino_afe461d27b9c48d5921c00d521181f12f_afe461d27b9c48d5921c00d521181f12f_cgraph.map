@@ -10,7 +10,7 @@
 <area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="179,223,215,243,259,259,328,268,398,267,462,259,516,248,517,254,463,264,398,272,328,273,258,264,213,248,177,228"/>
 <area shape="rect" id="Node000010" href="$d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="303,24,390,49"/>
 <area shape="poly" id="edge11_Node000002_Node000010" title=" " alt="" coords="161,198,194,132,222,92,257,58,289,43,291,48,260,63,226,95,198,134,166,201"/>
-<area shape="rect" id="Node000011" href="$da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" title="Fill a range of LEDs with a solid color." alt="" coords="309,225,385,250"/>
+<area shape="rect" id="Node000011" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="309,225,385,250"/>
 <area shape="poly" id="edge14_Node000002_Node000011" title=" " alt="" coords="212,217,296,228,295,234,211,222"/>
 <area shape="rect" id="Node000012" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="259,326,435,352"/>
 <area shape="poly" id="edge15_Node000002_Node000012" title=" " alt="" coords="171,223,208,263,260,305,289,319,287,324,257,309,204,267,167,227"/>
@@ -37,6 +37,6 @@
 <area shape="poly" id="edge18_Node000012_Node000013" title=" " alt="" coords="435,336,524,336,524,342,435,342"/>
 <area shape="poly" id="edge21_Node000014_Node000009" title=" " alt="" coords="611,425,690,401,692,406,613,430"/>
 <area shape="poly" id="edge24_Node000015_Node000006" title=" " alt="" coords="404,70,519,45,520,50,405,76"/>
-<area shape="rect" id="Node000016" href="$d2/d73/group___palette_colors_gac46e65aff3dd6519b33e27f0998f17cd.html#gac46e65aff3dd6519b33e27f0998f17cd" title="Get a color from a palette." alt="" coords="502,73,637,98"/>
+<area shape="rect" id="Node000016" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="502,73,637,98"/>
 <area shape="poly" id="edge23_Node000015_Node000016" title=" " alt="" coords="418,83,488,83,488,88,418,88"/>
 </map>

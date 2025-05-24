@@ -1,23 +1,21 @@
 <map id="nscale8_video_LEAVING_R1_DIRTY" name="nscale8_video_LEAVING_R1_DIRTY">
-<area shape="rect" id="Node000001" title="In place modifying version of scale8_video() that does not clean up the R1 register on AVR." alt="" coords="697,49,876,89"/>
-<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_ga4204edd4a3f8aac7124a10f1f5cfccfe.html#ga4204edd4a3f8aac7124a10f1f5cfccfe" title="Scale two one&#45;byte values by a third one, which is treated as the numerator of a fraction whose demom..." alt="" coords="519,31,649,56"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="683,58,649,54,650,49,684,53"/>
-<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="519,80,649,105"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="684,84,650,88,649,82,683,78"/>
-<area shape="rect" id="Node000004" href="$d2/d73/group___palette_colors_ga59c2f3e8a12b9eef789c37ae4d5f0182.html#ga59c2f3e8a12b9eef789c37ae4d5f0182" title="Same as ColorFromPalette, but higher precision." alt="" coords="276,5,471,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="535,77,517,70,494,56,470,44,434,33,436,28,472,40,496,52,520,65,537,72"/>
-<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a3b098899b112c2c9a7ad7490992e0d84.html#a3b098899b112c2c9a7ad7490992e0d84" title="fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale" alt="" coords="301,55,446,80"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="505,86,446,79,446,73,505,81"/>
-<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="293,104,453,129"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="506,104,454,110,453,105,505,99"/>
-<area shape="rect" id="Node000013" href="$d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97" title="%= is a synonym for nscale8_video()." alt="" coords="300,153,447,179"/>
-<area shape="poly" id="edge10_Node000003_Node000013" title=" " alt="" coords="545,114,472,143,429,156,428,151,470,138,543,109"/>
-<area shape="rect" id="Node000007" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="5,25,228,51"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="299,103,275,94,251,79,227,64,192,53,193,48,229,60,253,74,277,89,301,98"/>
-<area shape="rect" id="Node000009" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="61,75,172,100"/>
-<area shape="poly" id="edge7_Node000006_Node000009" title=" " alt="" coords="279,109,172,96,173,91,280,103"/>
-<area shape="rect" id="Node000011" href="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f" title="Maps an array of palette color indexes into an array of LED colors." alt="" coords="34,125,199,165"/>
-<area shape="poly" id="edge8_Node000006_Node000011" title=" " alt="" coords="280,130,200,138,199,133,279,124"/>
-<area shape="rect" id="Node000012" href="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465" title="Scale using CRGB::nscale8_video()" alt="" coords="71,189,162,215"/>
-<area shape="poly" id="edge9_Node000006_Node000012" title=" " alt="" coords="294,136,277,143,263,152,254,161,244,170,229,179,196,191,163,199,162,194,194,186,227,174,241,166,250,157,260,147,275,138,292,131"/>
+<area shape="rect" id="Node000001" title="In place modifying version of scale8_video() that does not clean up the R1 register on AVR." alt="" coords="713,49,892,89"/>
+<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_ga4204edd4a3f8aac7124a10f1f5cfccfe.html#ga4204edd4a3f8aac7124a10f1f5cfccfe" title="Scale two one&#45;byte values by a third one, which is treated as the numerator of a fraction whose demom..." alt="" coords="535,31,665,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="699,58,665,54,666,49,700,53"/>
+<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="535,80,665,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="700,84,666,88,665,82,699,78"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a572c01969570d8ea54fa4eabf297d7bb.html#a572c01969570d8ea54fa4eabf297d7bb" title=" " alt="" coords="276,5,487,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="551,77,533,70,510,56,486,44,449,33,450,28,488,40,512,52,536,65,553,72"/>
+<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a3b098899b112c2c9a7ad7490992e0d84.html#a3b098899b112c2c9a7ad7490992e0d84" title="fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale" alt="" coords="309,55,454,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="521,86,454,78,455,73,521,81"/>
+<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="301,104,461,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="521,104,462,111,461,105,520,99"/>
+<area shape="rect" id="Node000012" href="$d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97" title="%= is a synonym for nscale8_video()." alt="" coords="308,153,455,179"/>
+<area shape="poly" id="edge9_Node000003_Node000012" title=" " alt="" coords="561,114,488,143,443,156,442,151,486,138,559,109"/>
+<area shape="rect" id="Node000007" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="5,55,228,80"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="299,104,185,83,186,77,300,99"/>
+<area shape="rect" id="Node000009" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="61,104,172,129"/>
+<area shape="poly" id="edge7_Node000006_Node000009" title=" " alt="" coords="288,119,172,119,172,114,288,114"/>
+<area shape="rect" id="Node000011" href="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465" title="Scale using CRGB::nscale8_video()" alt="" coords="71,153,162,179"/>
+<area shape="poly" id="edge8_Node000006_Node000011" title=" " alt="" coords="299,135,163,160,162,155,298,129"/>
 </map>

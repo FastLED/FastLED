@@ -22,9 +22,9 @@ var classfl_1_1_wave_simulation1_d =
     [ "setSpeed", "d8/dc1/classfl_1_1_wave_simulation1_d_a781f25200cd526c8496e748e3b0266a3.html#a781f25200cd526c8496e748e3b0266a3", null ],
     [ "setSuperSample", "d8/dc1/classfl_1_1_wave_simulation1_d_a960e0ff2b90bd9f22d0641c6c78e14f0.html#a960e0ff2b90bd9f22d0641c6c78e14f0", null ],
     [ "update", "d8/dc1/classfl_1_1_wave_simulation1_d_ae382bb82e01a03168520f65be704c4fc.html#ae382bb82e01a03168520f65be704c4fc", null ],
-    [ "extraFrames", "d8/dc1/classfl_1_1_wave_simulation1_d_add09a59bdf4487d6f7f62a7f5803d4e9.html#add09a59bdf4487d6f7f62a7f5803d4e9", null ],
-    [ "mU8Mode", "d8/dc1/classfl_1_1_wave_simulation1_d_a802a7acdf5e9fc8ebba342c7e4912db4.html#a802a7acdf5e9fc8ebba342c7e4912db4", null ],
-    [ "multiplier", "d8/dc1/classfl_1_1_wave_simulation1_d_a295463e2034a94f440715e7f98e68451.html#a295463e2034a94f440715e7f98e68451", null ],
-    [ "outerLength", "d8/dc1/classfl_1_1_wave_simulation1_d_ab7d52153630aa84000fe8e90014b7cdf.html#ab7d52153630aa84000fe8e90014b7cdf", null ],
-    [ "sim", "d8/dc1/classfl_1_1_wave_simulation1_d_ab10c18ae301b0158bedf4c97044548f4.html#ab10c18ae301b0158bedf4c97044548f4", null ]
+    [ "mExtraFrames", "d8/dc1/classfl_1_1_wave_simulation1_d_a475e91a1760f0054a8cb9418ce00992d.html#a475e91a1760f0054a8cb9418ce00992d", null ],
+    [ "mMultiplier", "d8/dc1/classfl_1_1_wave_simulation1_d_a7f96d1c9fa734c262e66e10aa445f816.html#a7f96d1c9fa734c262e66e10aa445f816", null ],
+    [ "mOuterLength", "d8/dc1/classfl_1_1_wave_simulation1_d_a2ddc13f339f2dd7f667bfa955a76143a.html#a2ddc13f339f2dd7f667bfa955a76143a", null ],
+    [ "mSim", "d8/dc1/classfl_1_1_wave_simulation1_d_a1c3301bccb241965b6fea96237965883.html#a1c3301bccb241965b6fea96237965883", null ],
+    [ "mU8Mode", "d8/dc1/classfl_1_1_wave_simulation1_d_a802a7acdf5e9fc8ebba342c7e4912db4.html#a802a7acdf5e9fc8ebba342c7e4912db4", null ]
 ];

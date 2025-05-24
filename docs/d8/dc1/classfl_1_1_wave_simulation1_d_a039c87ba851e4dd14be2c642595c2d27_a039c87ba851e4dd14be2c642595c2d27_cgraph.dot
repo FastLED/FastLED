@@ -8,5 +8,7 @@ digraph "fl::WaveSimulation1D::setf"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::WaveSimulation1D\l::setf",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WaveSimulation1D::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dc1/classfl_1_1_wave_simulation1_d_a5eb16fd8f12dc3dec13375a5b382bd56.html#a5eb16fd8f12dc3dec13375a5b382bd56",tooltip=" "];
+  Node2 [id="Node000002",label="fl::clamp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::WaveSimulation1D::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dc1/classfl_1_1_wave_simulation1_d_a5eb16fd8f12dc3dec13375a5b382bd56.html#a5eb16fd8f12dc3dec13375a5b382bd56",tooltip=" "];
 }

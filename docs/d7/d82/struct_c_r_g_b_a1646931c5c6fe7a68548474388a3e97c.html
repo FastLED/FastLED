@@ -107,7 +107,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a1646931c5c6fe7a68548474388a3e97
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint8_t CRGB::getLuma </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint8_t CRGB::getLuma </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -118,21 +118,21 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a1646931c5c6fe7a68548474388a3e97
 <p>Get the "luma" of a <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object. </p>
 <p>In other words, roughly how much light the <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> pixel is putting out (from 0 to 255). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00152">152</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  152</span>                                                   {</div>
-<div class="line"><span class="lineno">  153</span>    <span class="comment">//Y&#39; = 0.2126 R&#39; + 0.7152 G&#39; + 0.0722 B&#39;</span></div>
-<div class="line"><span class="lineno">  154</span>    <span class="comment">//     54            183       18 (!)</span></div>
-<div class="line"><span class="lineno">  155</span> </div>
-<div class="line"><span class="lineno">  156</span>    uint8_t luma = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>( r, 54) + \</div>
-<div class="line"><span class="lineno">  157</span>    scale8_LEAVING_R1_DIRTY( g, 183) + \</div>
-<div class="line"><span class="lineno">  158</span>    scale8_LEAVING_R1_DIRTY( b, 18);</div>
-<div class="line"><span class="lineno">  159</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
-<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">return</span> luma;</div>
-<div class="line"><span class="lineno">  161</span>}</div>
-<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00333">scale8.h:333</a></div></div>
-<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00170">scale8.h:170</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00138">138</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  138</span>                                                   {</div>
+<div class="line"><span class="lineno">  139</span>    <span class="comment">//Y&#39; = 0.2126 R&#39; + 0.7152 G&#39; + 0.0722 B&#39;</span></div>
+<div class="line"><span class="lineno">  140</span>    <span class="comment">//     54            183       18 (!)</span></div>
+<div class="line"><span class="lineno">  141</span> </div>
+<div class="line"><span class="lineno">  142</span>    uint8_t luma = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>( r, 54) + \</div>
+<div class="line"><span class="lineno">  143</span>    scale8_LEAVING_R1_DIRTY( g, 183) + \</div>
+<div class="line"><span class="lineno">  144</span>    scale8_LEAVING_R1_DIRTY( b, 18);</div>
+<div class="line"><span class="lineno">  145</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
+<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">return</span> luma;</div>
+<div class="line"><span class="lineno">  147</span>}</div>
+<div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
+<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00333">cleanup_R1()</a>, <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00170">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -150,7 +150,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a1646931c5c6fe7a68548474388a3e97
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

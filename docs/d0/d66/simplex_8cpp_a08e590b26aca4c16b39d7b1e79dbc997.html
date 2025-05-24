@@ -134,15 +134,16 @@ $(function(){initNavTree('d0/d66/simplex_8cpp_a08e590b26aca4c16b39d7b1e79dbc997.
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00079">79</a> of file <a class="el" href="../../d0/d66/simplex_8cpp_source.html">simplex.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   79</span>                                                        {</div>
-<div class="line"><span class="lineno">   80</span>    uint8_t h = hash &amp; 7;      <span class="comment">// Convert low 3 bits of hash code</span></div>
+<div class="line"><span class="lineno">   80</span>    uint8_t h = <a class="code hl_function" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">hash</a> &amp; 7;      <span class="comment">// Convert low 3 bits of hash code</span></div>
 <div class="line"><span class="lineno">   81</span>    int32_t u = h &lt; 4 ? <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> : <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>; <span class="comment">// into 8 simple gradient directions,</span></div>
 <div class="line"><span class="lineno">   82</span>    int32_t v = h &lt; 4 ? <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> : <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>; <span class="comment">// and compute the dot product with (x,y).</span></div>
 <div class="line"><span class="lineno">   83</span>    <span class="keywordflow">return</span> ((h&amp;1) != 0 ? -u : u) + ((h&amp;2) != 0 ? -2*v : 2*v);</div>
 <div class="line"><span class="lineno">   84</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
-<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00081">Fire2023.ino:81</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00083">Fire2023.ino:83</a></div></div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d_html_aaa7388df65cacb4afe70894edfff3a6d"><div class="ttname"><a href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">fl::anonymous_namespace{noise_woryley.cpp}::hash</a></div><div class="ttdeci">uint16_t hash(int32_t x, int32_t y)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d13/noise__woryley_8cpp_source.html#l00018">noise_woryley.cpp:18</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00081">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00083">y</a>.</p>
 
 </div>
 </div>
@@ -153,7 +154,7 @@ $(function(){initNavTree('d0/d66/simplex_8cpp_a08e590b26aca4c16b39d7b1e79dbc997.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/d66/simplex_8cpp.html">simplex.cpp</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

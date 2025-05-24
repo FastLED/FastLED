@@ -1,0 +1,8 @@
+<map id="fl::UICheckbox::UICheckbox" name="fl::UICheckbox::UICheckbox">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,42,208,67"/>
+<area shape="rect" id="Node000002" href="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ad67db98e127fee84a13a9e26731373cf.html#ad67db98e127fee84a13a9e26731373cf" title=" " alt="" coords="256,5,401,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,39,241,34,242,39,203,45"/>
+<area shape="rect" id="Node000003" href="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ac636a695e20dcb53580c27f99b279eea.html#ac636a695e20dcb53580c27f99b279eea" title=" " alt="" coords="449,35,595,75"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="208,54,256,55,401,55,435,54,435,59,401,60,256,60,208,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="402,34,436,39,435,44,401,39"/>
+</map>

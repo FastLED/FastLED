@@ -1,7 +1,7 @@
 <map id="fl::WaveSimulation1D" name="fl::WaveSimulation1D">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1103,86,1265,111"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1116,86,1279,111"/>
 <area shape="rect" id="Node000002" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="820,79,1025,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1039,96,1103,96,1103,101,1039,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1039,96,1116,96,1116,101,1039,101"/>
 <area shape="rect" id="Node000003" href="$da/df9/classfl_1_1_wave_simulation1_d___real.html" title=" " alt="" coords="413,22,612,47"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="610,47,796,76,820,80,819,85,796,81,609,52"/>
 <area shape="rect" id="Node000004" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="5,22,205,47"/>

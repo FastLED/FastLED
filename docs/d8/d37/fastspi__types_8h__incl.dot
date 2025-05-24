@@ -7,7 +7,7 @@ digraph "fastspi_types.h"
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   Node1 [id="Node000001",label="fastspi_types.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Data types and constants used by SPI interfaces."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl/force_inline.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d2d/fl_2force__inline_8h.html",tooltip=" "];
+  Node2 [id="Node000002",label="fl/force_inline.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d64/force__inline_8h.html",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];

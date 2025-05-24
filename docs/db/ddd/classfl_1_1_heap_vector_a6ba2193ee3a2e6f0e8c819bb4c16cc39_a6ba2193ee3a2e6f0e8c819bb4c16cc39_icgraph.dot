@@ -10,5 +10,7 @@ digraph "fl::HeapVector::clear"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::HeapVector\< DrawItem\l \>::~HeapVector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_ad0c6db9d37089df2cd936614e31d0114.html#ad0c6db9d37089df2cd936614e31d0114",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::HeapVector\< DrawItem\l \>::assign",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_afa10dffb342cb026d6c378e0cab57d14.html#afa10dffb342cb026d6c378e0cab57d14",tooltip=" "];
+  Node3 [id="Node000003",label="fl::HeapVector\< DrawItem\l \>::assign",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a356f77b569cbbc2eaa5178a450cf2ab4.html#a356f77b569cbbc2eaa5178a450cf2ab4",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::HeapVector\< DrawItem\l \>::assign",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a5b5960cb27392c8baac6b5456f19b46b.html#a5b5960cb27392c8baac6b5456f19b46b",tooltip=" "];
 }

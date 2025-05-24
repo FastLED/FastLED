@@ -106,7 +106,7 @@ $(function(){initNavTree('d0/d5c/classfl_1_1_sorted_heap_vector_a227f79bc7eb5d95
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, typename LessThan&gt; </div>
+template&lt;typename T, typename LessThan = fl::less&lt;T&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,28 +125,28 @@ template&lt;typename T, typename LessThan&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00571">571</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  571</span>                                         {</div>
-<div class="line"><span class="lineno">  572</span>        <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.begin();</div>
-<div class="line"><span class="lineno">  573</span>        <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.end();</div>
-<div class="line"><span class="lineno">  574</span>        </div>
-<div class="line"><span class="lineno">  575</span>        <span class="keywordflow">while</span> (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> != <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a>) {</div>
-<div class="line"><span class="lineno">  576</span>            <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> + (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> - <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a>) / 2;</div>
-<div class="line"><span class="lineno">  577</span>            </div>
-<div class="line"><span class="lineno">  578</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf.html#aa29487087df53a5b27fb379ffd0567bf">mLess</a>(*<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a>, <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">value</a>)) {</div>
-<div class="line"><span class="lineno">  579</span>                <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a> + 1;</div>
-<div class="line"><span class="lineno">  580</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  581</span>                <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a>;</div>
-<div class="line"><span class="lineno">  582</span>            }</div>
-<div class="line"><span class="lineno">  583</span>        }</div>
-<div class="line"><span class="lineno">  584</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a>;</div>
-<div class="line"><span class="lineno">  585</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb_html_a2914668fe2a66c96aea20305662a53eb"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">fl::SortedHeapVector::mArray</a></div><div class="ttdeci">HeapVector&lt; T &gt; mArray</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00511">vector.h:511</a></div></div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf_html_aa29487087df53a5b27fb379ffd0567bf"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf.html#aa29487087df53a5b27fb379ffd0567bf">fl::SortedHeapVector::mLess</a></div><div class="ttdeci">LessThan mLess</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00512">vector.h:512</a></div></div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378_html_acd0429c2e4e92fe1428d340663834378"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">fl::SortedHeapVector::iterator</a></div><div class="ttdeci">HeapVector&lt; T &gt;::iterator iterator</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00516">vector.h:516</a></div></div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_html"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">fl::SortedHeapVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00509">vector.h:509</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00680">680</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  680</span>                                         {</div>
+<div class="line"><span class="lineno">  681</span>        <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.begin();</div>
+<div class="line"><span class="lineno">  682</span>        <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.end();</div>
+<div class="line"><span class="lineno">  683</span> </div>
+<div class="line"><span class="lineno">  684</span>        <span class="keywordflow">while</span> (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> != <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a>) {</div>
+<div class="line"><span class="lineno">  685</span>            <a class="code hl_typedef" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">iterator</a> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> + (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> - <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a>) / 2;</div>
+<div class="line"><span class="lineno">  686</span> </div>
+<div class="line"><span class="lineno">  687</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf.html#aa29487087df53a5b27fb379ffd0567bf">mLess</a>(*<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a>, <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">value</a>)) {</div>
+<div class="line"><span class="lineno">  688</span>                <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a> + 1;</div>
+<div class="line"><span class="lineno">  689</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  690</span>                <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">last</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">mid</a>;</div>
+<div class="line"><span class="lineno">  691</span>            }</div>
+<div class="line"><span class="lineno">  692</span>        }</div>
+<div class="line"><span class="lineno">  693</span>        <span class="keywordflow">return</span> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">first</a>;</div>
+<div class="line"><span class="lineno">  694</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb_html_a2914668fe2a66c96aea20305662a53eb"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">fl::SortedHeapVector::mArray</a></div><div class="ttdeci">HeapVector&lt; T &gt; mArray</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00623">vector.h:623</a></div></div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf_html_aa29487087df53a5b27fb379ffd0567bf"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_aa29487087df53a5b27fb379ffd0567bf.html#aa29487087df53a5b27fb379ffd0567bf">fl::SortedHeapVector::mLess</a></div><div class="ttdeci">LessThan mLess</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378_html_acd0429c2e4e92fe1428d340663834378"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_acd0429c2e4e92fe1428d340663834378.html#acd0429c2e4e92fe1428d340663834378">fl::SortedHeapVector::iterator</a></div><div class="ttdeci">HeapVector&lt; T &gt;::iterator iterator</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00628">vector.h:628</a></div></div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_html"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">fl::SortedHeapVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00621">vector.h:621</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00592">fl::iterator&lt; Pair, PairLess &gt;::find()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00543">fl::iterator&lt; Pair, PairLess &gt;::insert()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00587">fl::iterator&lt; Pair, PairLess &gt;::lower_bound()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d68/vector_8h_source.html#l00701">fl::iterator&lt; Pair, PairLess &gt;::find()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00651">fl::iterator&lt; Pair, PairLess &gt;::insert()</a>, and <a class="el" href="../../d6/d68/vector_8h_source.html#l00696">fl::iterator&lt; Pair, PairLess &gt;::lower_bound()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -164,7 +164,7 @@ template&lt;typename T, typename LessThan&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">SortedHeapVector</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

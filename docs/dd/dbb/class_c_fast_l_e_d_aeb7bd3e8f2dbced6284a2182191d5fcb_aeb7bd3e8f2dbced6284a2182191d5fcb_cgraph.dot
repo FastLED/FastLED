@@ -37,10 +37,14 @@ digraph "CFastLED::clear"
   Node14 [id="Node000014",label="CLEDController::getEnabled",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a6bd253f670640ea4d1bd0d71b8029f2a.html#a6bd253f670640ea4d1bd0d71b8029f2a",tooltip=" "];
   Node7 -> Node4 [id="edge16_Node000007_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node6 [id="edge17_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node7 -> Node13 [id="edge18_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node7 -> Node15 [id="edge19_Node000007_Node000015",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="CLEDController::showColor\lInternal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_ac3eef15a3a7f8e26ce8c47b64bfb4ed7.html#ac3eef15a3a7f8e26ce8c47b64bfb4ed7",tooltip=" "];
-  Node15 -> Node16 [id="edge20_Node000015_Node000016",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="CLEDController::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_af4376e36319823c1c2fc1204189f8b57.html#af4376e36319823c1c2fc1204189f8b57",tooltip="Set all the LEDs to a given color."];
-  Node7 -> Node10 [id="edge21_Node000007_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node15 [id="edge18_Node000007_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="CFastLED::onEndFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a0f2e873e64e881bd843e188d92cd8caa.html#a0f2e873e64e881bd843e188d92cd8caa",tooltip=" "];
+  Node15 -> Node16 [id="edge19_Node000015_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::EngineEvents::onEndFrame",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/dca/classfl_1_1_engine_events_ab7d24c4783214392de84947cd7df5570.html#ab7d24c4783214392de84947cd7df5570",tooltip=" "];
+  Node7 -> Node13 [id="edge20_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node21 [id="edge21_Node000007_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="CLEDController::showColor\lInternal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_ac3eef15a3a7f8e26ce8c47b64bfb4ed7.html#ac3eef15a3a7f8e26ce8c47b64bfb4ed7",tooltip=" "];
+  Node21 -> Node22 [id="edge22_Node000021_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="CLEDController::showColor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_af4376e36319823c1c2fc1204189f8b57.html#af4376e36319823c1c2fc1204189f8b57",tooltip="Set all the LEDs to a given color."];
+  Node7 -> Node10 [id="edge23_Node000007_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

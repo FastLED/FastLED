@@ -1,0 +1,21 @@
+<map id="CRGB::upscale" name="CRGB::upscale">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,123,129"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="196,5,300,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,102,118,71,169,40,184,33,187,38,172,44,121,76,82,106"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6" title=" " alt="" coords="181,55,315,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="111,101,186,81,187,86,113,107"/>
+<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_abcc25dd0cecf6ebc8a7a97ddaf96e798.html#abcc25dd0cecf6ebc8a7a97ddaf96e798" title=" " alt="" coords="171,104,325,129"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="123,114,157,114,157,119,123,119"/>
+<area shape="rect" id="Node000009" href="$d0/dce/classfl_1_1_x_y_map_a048a78fc8643785f1a5ef68a4b46272e.html#a048a78fc8643785f1a5ef68a4b46272e" title=" " alt="" coords="177,153,319,179"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="113,127,187,147,186,152,111,132"/>
+<area shape="rect" id="Node000010" href="$d0/dce/classfl_1_1_x_y_map_a3a8ae645192828b625d3beb40672e9b8.html#a3a8ae645192828b625d3beb40672e9b8" title=" " alt="" coords="173,203,323,228"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="82,127,122,157,172,188,190,195,188,200,169,192,119,161,79,131"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aed039daa2110de9add4bdbeea4052a57.html#aed039daa2110de9add4bdbeea4052a57" title="Performs bilinear interpolation for upscaling an image." alt="" coords="377,31,569,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="315,58,363,52,363,58,316,63"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_af0b8ea13c33c033aa6bf8ede489a5c2a.html#af0b8ea13c33c033aa6bf8ede489a5c2a" title="Performs bilinear interpolation for upscaling an image." alt="" coords="373,80,572,105"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="316,72,360,77,359,83,315,78"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.html#a2e4fe67035df871b23df6b907ca338c8" title=" " alt="" coords="651,31,810,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="569,41,637,41,637,46,569,46"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.html#a31d30c7ed12b05422e7aa7f03c25fb07" title=" " alt="" coords="620,80,841,105"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="572,90,607,90,607,95,572,95"/>
+</map>

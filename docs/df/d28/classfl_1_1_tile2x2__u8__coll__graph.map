@@ -1,0 +1,7 @@
+<map id="fl::Tile2x2_u8" name="fl::Tile2x2_u8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="9,181,118,207"/>
+<area shape="rect" id="Node000002" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="5,93,121,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="66,133,66,181,61,181,61,133"/>
+<area shape="rect" id="Node000003" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="10,5,117,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="66,45,66,93,61,93,61,45"/>
+</map>

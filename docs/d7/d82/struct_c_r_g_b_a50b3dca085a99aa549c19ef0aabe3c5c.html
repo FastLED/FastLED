@@ -107,7 +107,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a50b3dca085a99aa549c19ef0aabe3c5
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> CRGB::lerp16 </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> CRGB::lerp16 </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>other</em></span>, </td>
         </tr>
@@ -121,20 +121,20 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a50b3dca085a99aa549c19ef0aabe3c5
 
 <p>Return a new <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object after performing a linear interpolation between this object and the passed in object.    </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00187">187</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  188</span>{</div>
-<div class="line"><span class="lineno">  189</span>    <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB</a> ret;</div>
-<div class="line"><span class="lineno">  190</span> </div>
-<div class="line"><span class="lineno">  191</span>    ret.r = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(r&lt;&lt;8,other.r&lt;&lt;8,frac)&gt;&gt;8;</div>
-<div class="line"><span class="lineno">  192</span>    ret.g = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(g&lt;&lt;8,other.g&lt;&lt;8,frac)&gt;&gt;8;</div>
-<div class="line"><span class="lineno">  193</span>    ret.b = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(b&lt;&lt;8,other.b&lt;&lt;8,frac)&gt;&gt;8;</div>
-<div class="line"><span class="lineno">  194</span> </div>
-<div class="line"><span class="lineno">  195</span>    <span class="keywordflow">return</span> ret;</div>
-<div class="line"><span class="lineno">  196</span>}</div>
-<div class="ttc" id="agroup___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3_html_ga7c02960d0f26e90054c7312e5f9a55b3"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a></div><div class="ttdeci">LIB8STATIC uint16_t lerp16by16(uint16_t a, uint16_t b, fract16 frac)</div><div class="ttdoc">Linear interpolation between two unsigned 16-bit values, with 16-bit fraction.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00472">lib8tion.h:472</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00164">164</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  165</span>{</div>
+<div class="line"><span class="lineno">  166</span>    <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB</a> ret;</div>
+<div class="line"><span class="lineno">  167</span> </div>
+<div class="line"><span class="lineno">  168</span>    ret.r = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(r&lt;&lt;8,other.r&lt;&lt;8,frac)&gt;&gt;8;</div>
+<div class="line"><span class="lineno">  169</span>    ret.g = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(g&lt;&lt;8,other.g&lt;&lt;8,frac)&gt;&gt;8;</div>
+<div class="line"><span class="lineno">  170</span>    ret.b = <a class="code hl_function" href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a>(b&lt;&lt;8,other.b&lt;&lt;8,frac)&gt;&gt;8;</div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>    <span class="keywordflow">return</span> ret;</div>
+<div class="line"><span class="lineno">  173</span>}</div>
+<div class="ttc" id="agroup___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3_html_ga7c02960d0f26e90054c7312e5f9a55b3"><div class="ttname"><a href="../../d6/d19/group___linear_interpolation_ga7c02960d0f26e90054c7312e5f9a55b3.html#ga7c02960d0f26e90054c7312e5f9a55b3">lerp16by16</a></div><div class="ttdeci">LIB8STATIC uint16_t lerp16by16(uint16_t a, uint16_t b, fract16 frac)</div><div class="ttdoc">Linear interpolation between two unsigned 16-bit values, with 16-bit fraction.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00454">lib8tion.h:454</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa_html_a08d8e05a3fcdb88dedb886cad9cbd3fa"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB::CRGB</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB()=default</div><div class="ttdoc">Default constructor.</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00472">lerp16by16()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00454">lerp16by16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -152,7 +152,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a50b3dca085a99aa549c19ef0aabe3c5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,9 +1,8 @@
 <map id="fl::EngineEvents::getInstance" name="fl::EngineEvents::getInstance">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,78,216,103"/>
-<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="264,29,443,69"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,75,250,64,251,69,186,81"/>
-<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="272,118,435,143"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="189,101,263,113,262,118,188,106"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="308,30,305,20,313,10,329,5,353,3,382,6,397,13,395,18,380,11,353,8,330,10,316,15,311,21,313,28"/>
-<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="314,120,305,110,310,100,326,94,353,91,388,95,397,100,401,106,397,109,394,104,386,100,353,97,327,99,313,104,311,109,318,116"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,54,216,79"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="264,5,443,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,51,250,40,251,45,186,57"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="272,94,435,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,77,263,89,262,94,188,82"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="314,96,305,86,310,76,326,70,353,67,388,71,397,76,401,82,397,85,394,80,386,76,353,73,327,75,313,80,311,85,318,92"/>
 </map>

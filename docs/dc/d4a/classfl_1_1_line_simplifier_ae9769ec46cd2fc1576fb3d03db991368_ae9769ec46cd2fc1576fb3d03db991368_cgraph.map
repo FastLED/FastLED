@@ -1,0 +1,9 @@
+<map id="fl::LineSimplifier::simplifyInplace" name="fl::LineSimplifier::simplifyInplace">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,135,45"/>
+<area shape="rect" id="Node000002" href="$dc/d4a/classfl_1_1_line_simplifier_a5ede8373d86a97315503c19f738c4c74.html#a5ede8373d86a97315503c19f738c4c74" title=" " alt="" coords="183,5,320,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,23,169,23,169,28,135,28"/>
+<area shape="rect" id="Node000003" href="$dc/d4a/classfl_1_1_line_simplifier_ab2ceacbb40ab8270441755fdcdd4e5e0.html#ab2ceacbb40ab8270441755fdcdd4e5e0" title=" " alt="" coords="368,5,495,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="320,23,354,23,354,28,320,28"/>
+<area shape="rect" id="Node000004" href="$dc/d4a/classfl_1_1_line_simplifier_a2536fb35718c3aebc8274b305b407dee.html#a2536fb35718c3aebc8274b305b407dee" title=" " alt="" coords="543,5,675,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="495,23,529,23,529,28,495,28"/>
+</map>

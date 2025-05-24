@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000002"><a xlink:href="../../d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="246,-24.5 189,-24.5 189,-5.5 246,-5.5 246,-24.5"/>
 <text text-anchor="middle" x="217.5" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
 </a>

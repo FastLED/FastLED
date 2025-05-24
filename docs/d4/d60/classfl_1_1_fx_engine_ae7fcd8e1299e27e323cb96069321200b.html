@@ -126,14 +126,14 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_ae7fcd8e1299e27e323cb9606
 <p>Adds a new effect to the engine. </p>
 <p>Allocate from static memory. This is not reference tracked and an object passed in must never be deleted, as the engine will use a non tracking <a class="el" href="../../d1/d56/classfl_1_1_ptr.html">Ptr</a> which may outlive a call to <a class="el" href="../../d4/d60/classfl_1_1_fx_engine_acb1a08ee3735bf9269d8a60370b02315.html#acb1a08ee3735bf9269d8a60370b02315" title="Requests removal of an effect from the engine, which might not happen immediately (for example the Fx...">removeFx()</a> and the engine will thefore not know that an object has been deleted. But if it's a static object that's then the object probably wasn't going to be deleted anyway. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00068">68</a> of file <a class="el" href="../../d9/d3c/fx__engine_8h_source.html">fx_engine.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   68</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d60/classfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642.html#a1e840a27e09686190e44844b3f062642">addFx</a>(<a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr&lt;Fx&gt;::NoTracking</a>(effect)); }</div>
-<div class="ttc" id="aclassfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642_html_a1e840a27e09686190e44844b3f062642"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642.html#a1e840a27e09686190e44844b3f062642">fl::FxEngine::addFx</a></div><div class="ttdeci">int addFx(FxPtr effect)</div><div class="ttdoc">Adds a new effect to the engine.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d8e/fx__engine_8cpp_source.html#l00016">fx_engine.cpp:16</a></div></div>
-<div class="ttc" id="aclassfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee_html_a634e230ee0f4e89e43a2e127aca31aee"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr::NoTracking</a></div><div class="ttdeci">static Ptr NoTracking(T &amp;referent)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/df1/fl_2ptr_8h_source.html#l00116">ptr.h:116</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00066">66</a> of file <a class="el" href="../../d9/d3c/fx__engine_8h_source.html">fx_engine.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   66</span>{ <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d60/classfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642.html#a1e840a27e09686190e44844b3f062642">addFx</a>(<a class="code hl_function" href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr&lt;Fx&gt;::NoTracking</a>(effect)); }</div>
+<div class="ttc" id="aclassfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642_html_a1e840a27e09686190e44844b3f062642"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642.html#a1e840a27e09686190e44844b3f062642">fl::FxEngine::addFx</a></div><div class="ttdeci">int addFx(FxPtr effect)</div><div class="ttdoc">Adds a new effect to the engine.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d8e/fx__engine_8cpp_source.html#l00012">fx_engine.cpp:12</a></div></div>
+<div class="ttc" id="aclassfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee_html_a634e230ee0f4e89e43a2e127aca31aee"><div class="ttname"><a href="../../d1/d56/classfl_1_1_ptr_a634e230ee0f4e89e43a2e127aca31aee.html#a634e230ee0f4e89e43a2e127aca31aee">fl::Ptr::NoTracking</a></div><div class="ttdeci">static Ptr NoTracking(T &amp;referent)</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d98/ptr_8h_source.html#l00132">ptr.h:132</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00068">addFx()</a>, and <a class="el" href="../../d7/df1/fl_2ptr_8h_source.html#l00116">fl::Ptr&lt; T &gt;::NoTracking()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00066">addFx()</a>, and <a class="el" href="../../dd/d98/ptr_8h_source.html#l00132">fl::Ptr&lt; T &gt;::NoTracking()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00068">addFx()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00066">addFx()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +158,7 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_ae7fcd8e1299e27e323cb9606
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d60/classfl_1_1_fx_engine.html">FxEngine</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

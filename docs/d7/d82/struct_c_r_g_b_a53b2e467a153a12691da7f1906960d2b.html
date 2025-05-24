@@ -107,7 +107,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp; CRGB::operator-= </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp; CRGB::operator-= </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rhs</em></span></td><td>)</td>
           <td></td>
@@ -117,16 +117,16 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2
 
 <p>Subtract one <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> from another, saturating at 0x00 for each channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00039">39</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   40</span>{</div>
-<div class="line"><span class="lineno">   41</span>    r = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( r, rhs.r);</div>
-<div class="line"><span class="lineno">   42</span>    g = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( g, rhs.g);</div>
-<div class="line"><span class="lineno">   43</span>    b = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( b, rhs.b);</div>
-<div class="line"><span class="lineno">   44</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">   45</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00030">30</a> of file <a class="el" href="../../d0/d4b/crgb_8hpp_source.html">crgb.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   31</span>{</div>
+<div class="line"><span class="lineno">   32</span>    r = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( r, rhs.r);</div>
+<div class="line"><span class="lineno">   33</span>    g = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( g, rhs.g);</div>
+<div class="line"><span class="lineno">   34</span>    b = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>( b, rhs.b);</div>
+<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">   36</span>}</div>
 <div class="ttc" id="agroup___math_gae261576a4c8155d6c0ba8615b2d2ecb3_html_gae261576a4c8155d6c0ba8615b2d2ecb3"><div class="ttname"><a href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j)</div><div class="ttdoc">Subtract one byte from another, saturating at 0x00.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd1/math8_8h_source.html#l00103">math8.h:103</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/dd1/math8_8h_source.html#l00103">qsub8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/dd1/math8_8h_source.html#l00103">qsub8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -144,7 +144,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

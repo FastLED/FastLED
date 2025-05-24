@@ -1,0 +1,13 @@
+<map id="fl::downscaleHalf" name="fl::downscaleHalf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,140,80"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_abcc25dd0cecf6ebc8a7a97ddaf96e798.html#abcc25dd0cecf6ebc8a7a97ddaf96e798" title=" " alt="" coords="196,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,52,207,31,208,37,126,57"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_a3a8ae645192828b625d3beb40672e9b8.html#a3a8ae645192828b625d3beb40672e9b8" title=" " alt="" coords="198,55,349,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,65,184,65,184,70,140,70"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map_a4c1c74f924f2e4c6e88b27965f6530d4.html#a4c1c74f924f2e4c6e88b27965f6530d4" title=" " alt="" coords="188,104,359,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="126,77,208,98,207,103,124,83"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aabd143143924c6bddbe62e4b21688e76.html#aabd143143924c6bddbe62e4b21688e76" title=" " alt="" coords="407,79,545,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="359,103,392,99,393,104,359,109"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a44d29156c0decceaf2ff1970ddbdde7c.html#a44d29156c0decceaf2ff1970ddbdde7c" title=" " alt="" coords="411,128,541,153"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="359,124,398,129,397,134,359,129"/>
+</map>

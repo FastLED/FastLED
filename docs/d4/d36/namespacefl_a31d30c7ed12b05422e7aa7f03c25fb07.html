@@ -139,36 +139,36 @@ $(function(){initNavTree('d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00134">134</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  135</span>                                                                         {</div>
-<div class="line"><span class="lineno">  136</span>    uint16_t dx_inv = 256 - dx;  <span class="comment">// 0 to 256</span></div>
-<div class="line"><span class="lineno">  137</span>    uint16_t dy_inv = 256 - dy;  <span class="comment">// 0 to 256</span></div>
-<div class="line"><span class="lineno">  138</span> </div>
-<div class="line"><span class="lineno">  139</span>    <span class="comment">// Scale down weights to fit into uint16_t</span></div>
-<div class="line"><span class="lineno">  140</span>    uint16_t w00 = (dx_inv * dy_inv) &gt;&gt; 8; <span class="comment">// Max value 256</span></div>
-<div class="line"><span class="lineno">  141</span>    uint16_t w10 = (dx * dy_inv) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  142</span>    uint16_t w01 = (dx_inv * dy) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  143</span>    uint16_t w11 = (dx * dy) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  144</span> </div>
-<div class="line"><span class="lineno">  145</span>    <span class="comment">// Sum of weights should be approximately 256</span></div>
-<div class="line"><span class="lineno">  146</span>    uint16_t weight_sum = w00 + w10 + w01 + w11;</div>
+<p class="definition">Definition at line <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00137">137</a> of file <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html">bilinear_expansion.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  138</span>                                                                         {</div>
+<div class="line"><span class="lineno">  139</span>    uint16_t dx_inv = 256 - dx; <span class="comment">// 0 to 256</span></div>
+<div class="line"><span class="lineno">  140</span>    uint16_t dy_inv = 256 - dy; <span class="comment">// 0 to 256</span></div>
+<div class="line"><span class="lineno">  141</span> </div>
+<div class="line"><span class="lineno">  142</span>    <span class="comment">// Scale down weights to fit into uint16_t</span></div>
+<div class="line"><span class="lineno">  143</span>    uint16_t w00 = (dx_inv * dy_inv) &gt;&gt; 8; <span class="comment">// Max value 256</span></div>
+<div class="line"><span class="lineno">  144</span>    uint16_t w10 = (dx * dy_inv) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  145</span>    uint16_t w01 = (dx_inv * dy) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  146</span>    uint16_t w11 = (dx * dy) &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  147</span> </div>
-<div class="line"><span class="lineno">  148</span>    <span class="comment">// Compute the weighted sum of pixel values</span></div>
-<div class="line"><span class="lineno">  149</span>    uint16_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
+<div class="line"><span class="lineno">  148</span>    <span class="comment">// Sum of weights should be approximately 256</span></div>
+<div class="line"><span class="lineno">  149</span>    uint16_t weight_sum = w00 + w10 + w01 + w11;</div>
 <div class="line"><span class="lineno">  150</span> </div>
-<div class="line"><span class="lineno">  151</span>    <span class="comment">// Normalize the result</span></div>
-<div class="line"><span class="lineno">  152</span>    uint8_t result = (sum + (weight_sum &gt;&gt; 1)) / weight_sum;</div>
+<div class="line"><span class="lineno">  151</span>    <span class="comment">// Compute the weighted sum of pixel values</span></div>
+<div class="line"><span class="lineno">  152</span>    uint16_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;</div>
 <div class="line"><span class="lineno">  153</span> </div>
-<div class="line"><span class="lineno">  154</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  155</span>}</div>
+<div class="line"><span class="lineno">  154</span>    <span class="comment">// Normalize the result</span></div>
+<div class="line"><span class="lineno">  155</span>    uint8_t result = (sum + (weight_sum &gt;&gt; 1)) / weight_sum;</div>
+<div class="line"><span class="lineno">  156</span> </div>
+<div class="line"><span class="lineno">  157</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  158</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00086">bilinearExpandPowerOf2()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d80/bilinear__expansion_8cpp_source.html#l00085">bilinearExpandPowerOf2()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07_a31d30c7ed12b05422e7aa7f03c25fb07_icgraph.svg" width="100%" height="300"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07_a31d30c7ed12b05422e7aa7f03c25fb07_icgraph.svg" width="100%" height="364"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -180,7 +180,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

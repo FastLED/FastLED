@@ -1,7 +1,5 @@
-<map id="singleton.h" name="singleton.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="19,5,113,31"/>
-<area shape="rect" id="Node000002" href="$d0/dae/fl_2singleton_8h.html" title=" " alt="" coords="13,79,119,104"/>
+<map id="fl/singleton.h" name="fl/singleton.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="13,5,119,31"/>
+<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,31,69,65,63,65,63,31"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,152,127,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="69,104,69,138,63,138,63,104"/>
 </map>

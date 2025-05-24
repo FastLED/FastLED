@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/WasmScreenCoords"
   dir_75afe82a44c9d3274eef9e58c545822a [label="WasmScreenCoords", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_75afe82a44c9d3274eef9e58c545822a.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_75afe82a44c9d3274eef9e58c545822a->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="4", labeldistance=1.5 headhref="dir_000086_000029.html" href="dir_000086_000029.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_75afe82a44c9d3274eef9e58c545822a->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="4", labeldistance=1.5 headhref="dir_000089_000031.html" href="dir_000089_000031.html" color="steelblue1" fontcolor="steelblue1"];
 }

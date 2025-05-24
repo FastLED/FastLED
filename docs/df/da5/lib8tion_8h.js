@@ -1,5 +1,6 @@
 var lib8tion_8h =
 [
+    [ "__INC_LIB8TION_H", "df/da5/lib8tion_8h_a1670322f243f73f79e2f31671e2a6c2c.html#a1670322f243f73f79e2f31671e2a6c2c", null ],
     [ "CEveryNMilliseconds", "d5/df2/group___timekeeping_ga0158aafd34145d29ecdce57c0a5ef908.html#ga0158aafd34145d29ecdce57c0a5ef908", null ],
     [ "EVERY_N_BSECONDS", "d5/df2/group___timekeeping_ga860bac35464e2c83c313e92a59e0e39a.html#ga860bac35464e2c83c313e92a59e0e39a", null ],
     [ "EVERY_N_BSECONDS_I", "d5/df2/group___timekeeping_ga8057578b51f0a5cff337fb2fd5521de7.html#ga8057578b51f0a5cff337fb2fd5521de7", null ],
@@ -46,9 +47,6 @@ var lib8tion_8h =
     [ "lerp16by8", "d6/d19/group___linear_interpolation_ga8c8f06da86c5d7cf13f55c3a5bfdf251.html#ga8c8f06da86c5d7cf13f55c3a5bfdf251", null ],
     [ "lerp8by8", "d6/d19/group___linear_interpolation_ga62ed4425400bc4140902347dc54ffb72.html#ga62ed4425400bc4140902347dc54ffb72", null ],
     [ "map8", "d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d", null ],
-    [ "memcpy8", "d6/de6/group___fast_memory_ga391de93a4b6ccee545531826515f3fc3.html#ga391de93a4b6ccee545531826515f3fc3", null ],
-    [ "memmove8", "d6/de6/group___fast_memory_gaf5537d0243691002376d6a49566a47d4.html#gaf5537d0243691002376d6a49566a47d4", null ],
-    [ "memset8", "d6/de6/group___fast_memory_ga78fd4f882354956108ebaf92f74abd42.html#ga78fd4f882354956108ebaf92f74abd42", null ],
     [ "minutes16", "d5/df2/group___timekeeping_ga223820399921e32ddf018a90223ff336.html#ga223820399921e32ddf018a90223ff336", null ],
     [ "quadwave8", "d1/d7a/group___waveform_generators_ga209d6cbdb109cc3139e7bb1e46c6228f.html#ga209d6cbdb109cc3139e7bb1e46c6228f", null ],
     [ "seconds16", "d5/df2/group___timekeeping_gaa2abcee2fe76fafd7f3a2aeab03e3b69.html#gaa2abcee2fe76fafd7f3a2aeab03e3b69", null ],

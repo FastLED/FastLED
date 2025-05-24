@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d7/d82/struct_c_r_g_b_a971eb811b79c5748d02a0abc2162a223.html#a971eb811b79c5748d02a0abc2162a223" target="_top" xlink:title="Add a constant to each channel, saturating at 0xFF.">
+<g id="a_Node000003"><a xlink:href="../../d7/d82/struct_c_r_g_b_a0843d694f3aa4961ff61640e97e00a20.html#a0843d694f3aa4961ff61640e97e00a20" target="_top" xlink:title="Add a constant to each channel, saturating at 0xFF.">
 <polygon fill="white" stroke="#666666" points="244,-19 144,-19 144,0 244,0 244,-19"/>
 <text text-anchor="middle" x="194" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::addToRGB</text>
 </a>

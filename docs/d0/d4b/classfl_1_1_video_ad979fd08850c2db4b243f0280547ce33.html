@@ -119,26 +119,26 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_ad979fd08850c2db4b243f0280547
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d05/video_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../d0/d05/video_8cpp_source.html">video.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   85</span>                                         {</div>
-<div class="line"><span class="lineno">   86</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
-<div class="line"><span class="lineno">   87</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.empty(), <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.c_str());</div>
-<div class="line"><span class="lineno">   88</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   89</span>    }</div>
-<div class="line"><span class="lineno">   90</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;draw(now, <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>);</div>
-<div class="line"><span class="lineno">   91</span>    <span class="keywordflow">if</span> (!ok) {</div>
-<div class="line"><span class="lineno">   92</span>        <span class="comment">// Interpret not being able to draw as a finished signal.</span></div>
-<div class="line"><span class="lineno">   93</span>        <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece.html#a60e37cfde893f5fc9ddaa3f3e9fddece">mFinished</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   94</span>    }</div>
-<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">return</span> ok;</div>
-<div class="line"><span class="lineno">   96</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d05/video_8cpp_source.html#l00081">81</a> of file <a class="el" href="../../d0/d05/video_8cpp_source.html">video.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   81</span>                                         {</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
+<div class="line"><span class="lineno">   83</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.empty(), <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.c_str());</div>
+<div class="line"><span class="lineno">   84</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   85</span>    }</div>
+<div class="line"><span class="lineno">   86</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;draw(now, <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>);</div>
+<div class="line"><span class="lineno">   87</span>    <span class="keywordflow">if</span> (!ok) {</div>
+<div class="line"><span class="lineno">   88</span>        <span class="comment">// Interpret not being able to draw as a finished signal.</span></div>
+<div class="line"><span class="lineno">   89</span>        <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece.html#a60e37cfde893f5fc9ddaa3f3e9fddece">mFinished</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   90</span>    }</div>
+<div class="line"><span class="lineno">   91</span>    <span class="keywordflow">return</span> ok;</div>
+<div class="line"><span class="lineno">   92</span>}</div>
 <div class="ttc" id="a_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00011">Apa102.ino:11</a></div></div>
-<div class="ttc" id="aclassfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece_html_a60e37cfde893f5fc9ddaa3f3e9fddece"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece.html#a60e37cfde893f5fc9ddaa3f3e9fddece">fl::Video::mFinished</a></div><div class="ttdeci">bool mFinished</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00075">video.h:75</a></div></div>
-<div class="ttc" id="aclassfl_1_1_video_a7b5a521ac418c057e246458bf764da7f_html_a7b5a521ac418c057e246458bf764da7f"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">fl::Video::mError</a></div><div class="ttdeci">Str mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00077">video.h:77</a></div></div>
-<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00076">video.h:76</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece_html_a60e37cfde893f5fc9ddaa3f3e9fddece"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a60e37cfde893f5fc9ddaa3f3e9fddece.html#a60e37cfde893f5fc9ddaa3f3e9fddece">fl::Video::mFinished</a></div><div class="ttdeci">bool mFinished</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00078">video.h:78</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_a7b5a521ac418c057e246458bf764da7f_html_a7b5a521ac418c057e246458bf764da7f"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">fl::Video::mError</a></div><div class="ttdeci">Str mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00080">video.h:80</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00079">video.h:79</a></div></div>
 <div class="ttc" id="awarn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765_html_a62d512e6c3e6c7342ac28ffbcb8ad765"><div class="ttname"><a href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a></div><div class="ttdeci">#define FASTLED_WARN_IF</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00008">warn.h:8</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN_IF</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00077">mError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00075">mFinished</a>, and <a class="el" href="../../dd/d78/video_8h_source.html#l00076">mImpl</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN_IF</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00080">mError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00078">mFinished</a>, and <a class="el" href="../../dd/d78/video_8h_source.html#l00079">mImpl</a>.</p>
 
 </div>
 </div>
@@ -149,7 +149,7 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_ad979fd08850c2db4b243f0280547
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">Video</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

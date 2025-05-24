@@ -1,6 +1,6 @@
 <map id="fastspi_types.h" name="fastspi_types.h">
 <area shape="rect" id="Node000001" title="Data types and constants used by SPI interfaces." alt="" coords="153,5,274,31"/>
-<area shape="rect" id="Node000002" href="$d8/d2d/fl_2force__inline_8h.html" title=" " alt="" coords="5,79,128,104"/>
+<area shape="rect" id="Node000002" href="$d4/d64/force__inline_8h.html" title=" " alt="" coords="5,79,128,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,33,104,75,102,70,189,28"/>
 <area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="153,79,274,104"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,31,216,65,211,65,211,31"/>

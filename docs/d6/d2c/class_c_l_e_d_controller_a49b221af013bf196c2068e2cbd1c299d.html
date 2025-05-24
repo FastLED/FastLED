@@ -125,19 +125,19 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_a49b221af013bf196c2068
 
 <p>Reimplemented in <a class="el" href="../../d5/d83/class_r_g_b_w_emulated_controller_a93570259976cb94dbd0b0cc335a1281e.html#a93570259976cb94dbd0b0cc335a1281e">RGBWEmulatedController&lt; CONTROLLER, RGB_ORDER &gt;</a>, <a class="el" href="../../dd/dbc/class_w_s2816_controller_adc6467bc7fcfd44d8fb2008105382da8.html#adc6467bc7fcfd44d8fb2008105382da8">WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;</a>, and <a class="el" href="../../dd/dbc/class_w_s2816_controller_adc6467bc7fcfd44d8fb2008105382da8.html#adc6467bc7fcfd44d8fb2008105382da8">WS2816Controller&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00233">233</a> of file <a class="el" href="../../db/d6d/cled__controller_8h_source.html">cled_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  233</span>                                         {</div>
-<div class="line"><span class="lineno">  234</span>        <span class="comment">// By default recieves the integer that beginShowLeds() emitted.</span></div>
-<div class="line"><span class="lineno">  235</span>        <span class="comment">//For async controllers this should be used to signal the controller</span></div>
-<div class="line"><span class="lineno">  236</span>        <span class="comment">// to begin transmitting the current frame to the leds.</span></div>
-<div class="line"><span class="lineno">  237</span>        uintptr_t d = <span class="keyword">reinterpret_cast&lt;</span>uintptr_t<span class="keyword">&gt;</span>(data);</div>
-<div class="line"><span class="lineno">  238</span>        <a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279">setDither</a>(<span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(d));</div>
-<div class="line"><span class="lineno">  239</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00239">239</a> of file <a class="el" href="../../db/d6d/cled__controller_8h_source.html">cled_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  239</span>                                         {</div>
+<div class="line"><span class="lineno">  240</span>        <span class="comment">// By default recieves the integer that beginShowLeds() emitted.</span></div>
+<div class="line"><span class="lineno">  241</span>        <span class="comment">//For async controllers this should be used to signal the controller</span></div>
+<div class="line"><span class="lineno">  242</span>        <span class="comment">// to begin transmitting the current frame to the leds.</span></div>
+<div class="line"><span class="lineno">  243</span>        uintptr_t d = <span class="keyword">reinterpret_cast&lt;</span>uintptr_t<span class="keyword">&gt;</span>(data);</div>
+<div class="line"><span class="lineno">  244</span>        <a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279">setDither</a>(<span class="keyword">static_cast&lt;</span>uint8_t<span class="keyword">&gt;</span>(d));</div>
+<div class="line"><span class="lineno">  245</span>    }</div>
 <div class="ttc" id="aclass_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279_html_a2a231accbeb00e6a6080a7e55274a279"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a2a231accbeb00e6a6080a7e55274a279.html#a2a231accbeb00e6a6080a7e55274a279">CLEDController::setDither</a></div><div class="ttdeci">CLEDController &amp; setDither(uint8_t ditherMode=BINARY_DITHER)</div><div class="ttdoc">Set the dithering mode for this controller to use.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00192">cled_controller.h:192</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00192">setDither()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00107">CFastLED::show()</a>, <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00177">CFastLED::showColor()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00098">showLeds()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00107">CFastLED::show()</a>, <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00181">CFastLED::showColor()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00098">showLeds()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +162,7 @@ $(function(){initNavTree('d6/d2c/class_c_l_e_d_controller_a49b221af013bf196c2068
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/d2c/class_c_l_e_d_controller.html">CLEDController</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

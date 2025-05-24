@@ -1,0 +1,31 @@
+<map id="fl::LineSimplifierExact::simplifyInplace" name="fl::LineSimplifierExact::simplifyInplace">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,134,168,174"/>
+<area shape="rect" id="Node000002" href="$d5/d32/classfl_1_1_line_simplifier_exact_abe0036297edb6a0641c42943d7c2ab57.html#abe0036297edb6a0641c42943d7c2ab57" title=" " alt="" coords="216,134,379,174"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,151,202,151,202,157,168,157"/>
+<area shape="rect" id="Node000003" href="$d3/d73/classfl_1_1_fixed_vector_a7ae4440fe977cc6495819cac64b7ad1a.html#a7ae4440fe977cc6495819cac64b7ad1a" title=" " alt="" coords="443,5,601,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="314,132,361,85,392,61,425,40,440,33,443,38,428,44,395,65,365,89,318,136"/>
+<area shape="rect" id="Node000004" href="$d3/d73/classfl_1_1_fixed_vector_af8f3eb485dff77110efec26993f206c4.html#af8f3eb485dff77110efec26993f206c4" title=" " alt="" coords="449,55,595,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="335,131,426,90,452,81,454,86,428,95,337,136"/>
+<area shape="rect" id="Node000005" href="$d5/d32/classfl_1_1_line_simplifier_exact_ab0e06d72d53d02d836883f5195496d3c.html#ab0e06d72d53d02d836883f5195496d3c" title=" " alt="" coords="435,105,609,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="378,141,421,135,422,140,379,146"/>
+<area shape="rect" id="Node000006" href="$d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe" title=" " alt="" coords="691,112,794,137"/>
+<area shape="poly" id="edge15_Node000002_Node000006" title=" " alt="" coords="379,158,492,161,555,159,617,154,689,139,690,144,618,159,555,165,492,167,379,163"/>
+<area shape="rect" id="Node000007" href="$d3/d73/classfl_1_1_fixed_vector_ad54b97a02650df09aee087d758e0352a.html#ad54b97a02650df09aee087d758e0352a" title=" " alt="" coords="427,220,617,245"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="354,172,428,198,471,213,469,218,426,203,352,177"/>
+<area shape="rect" id="Node000008" href="$d5/d32/classfl_1_1_line_simplifier_exact_ab45b65bd5653cb34e2420e3306d98425.html#ab45b65bd5653cb34e2420e3306d98425" title=" " alt="" coords="441,277,603,317"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="322,172,369,213,428,254,455,268,452,273,425,259,366,217,318,176"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="609,122,678,122,678,127,609,127"/>
+<area shape="poly" id="edge14_Node000008_Node000006" title=" " alt="" coords="587,274,616,255,626,242,633,229,638,202,644,175,652,162,664,148,677,138,680,143,667,152,656,165,649,177,643,203,638,230,631,245,619,259,590,279"/>
+<area shape="rect" id="Node000009" href="$da/d18/classfl_1_1_inlined_vector_a8fa29fd5512026e11a213df04fbf2c60.html#a8fa29fd5512026e11a213df04fbf2c60" title=" " alt="" coords="677,162,808,202"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="578,274,616,254,640,233,664,212,674,206,677,210,667,216,643,237,619,259,580,279"/>
+<area shape="rect" id="Node000012" href="$da/d18/classfl_1_1_inlined_vector_a744b7b8d412ed4537a9268ec624a67f3.html#a744b7b8d412ed4537a9268ec624a67f3" title=" " alt="" coords="677,226,808,266"/>
+<area shape="poly" id="edge9_Node000008_Node000012" title=" " alt="" coords="603,275,663,261,664,267,604,281"/>
+<area shape="rect" id="Node000013" href="$d8/de4/classfl_1_1_slice_a5643e1458d6fef0c8ae288c826c753f7.html#a5643e1458d6fef0c8ae288c826c753f7" title=" " alt="" coords="686,291,799,316"/>
+<area shape="poly" id="edge10_Node000008_Node000013" title=" " alt="" coords="604,296,672,299,672,304,604,302"/>
+<area shape="rect" id="Node000014" href="$d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe" title=" " alt="" coords="689,340,796,365"/>
+<area shape="poly" id="edge11_Node000008_Node000014" title=" " alt="" coords="602,314,679,334,678,339,601,319"/>
+<area shape="rect" id="Node000015" href="$da/d18/classfl_1_1_inlined_vector_a011314e11fddc6ffc67253a523879eaf.html#a011314e11fddc6ffc67253a523879eaf" title=" " alt="" coords="665,389,820,415"/>
+<area shape="poly" id="edge12_Node000008_Node000015" title=" " alt="" coords="555,314,606,345,666,376,683,382,682,387,664,380,604,350,553,319"/>
+<area shape="rect" id="Node000016" href="$d8/de4/classfl_1_1_slice_ad996524d051049afcd7b58f90e13902f.html#ad996524d051049afcd7b58f90e13902f" title=" " alt="" coords="692,439,793,464"/>
+<area shape="poly" id="edge13_Node000008_Node000016" title=" " alt="" coords="542,315,594,370,629,399,667,425,680,432,678,437,664,430,626,404,591,373,538,319"/>
+</map>

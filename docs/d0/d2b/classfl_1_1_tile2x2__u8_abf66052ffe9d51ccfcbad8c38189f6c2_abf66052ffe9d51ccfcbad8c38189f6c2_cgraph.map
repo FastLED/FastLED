@@ -1,0 +1,10 @@
+<map id="fl::Tile2x2_u8::Tile2x2_u8" name="fl::Tile2x2_u8::Tile2x2_u8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,43,193,68"/>
+<area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_afb1909069b64b353746728e101881cfc.html#afb1909069b64b353746728e101881cfc" title=" " alt="" coords="241,5,429,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,40,241,30,241,36,181,45"/>
+<area shape="rect" id="Node000003" href="$d0/d2b/classfl_1_1_tile2x2__u8_a02023f50d81942d83875712733e8c3b8.html#a02023f50d81942d83875712733e8c3b8" title=" " alt="" coords="260,79,411,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,65,247,75,246,80,183,71"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="302,80,294,70,298,60,312,54,335,52,364,56,375,65,372,69,362,61,335,57,313,59,302,64,300,70,306,77"/>
+<area shape="rect" id="Node000004" href="$d0/d2b/classfl_1_1_tile2x2__u8_aec08d4bb9cae61bb1f6926ce1a1d9b9c.html#aec08d4bb9cae61bb1f6926ce1a1d9b9c" title=" " alt="" coords="477,79,608,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="411,89,463,89,463,94,411,94"/>
+</map>

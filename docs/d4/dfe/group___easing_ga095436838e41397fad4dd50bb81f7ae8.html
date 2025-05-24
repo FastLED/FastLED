@@ -118,22 +118,22 @@ $(function(){initNavTree('d4/dfe/group___easing_ga095436838e41397fad4dd50bb81f7a
 <p>16-bit quadratic ease-in / ease-out function. </p>
 <p>C implementation at this point. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00625">625</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  626</span>{</div>
-<div class="line"><span class="lineno">  627</span>    uint16_t j = i;</div>
-<div class="line"><span class="lineno">  628</span>    <span class="keywordflow">if</span>( j &amp; 0x8000 ) {</div>
-<div class="line"><span class="lineno">  629</span>        j = 65535 - j;</div>
-<div class="line"><span class="lineno">  630</span>    }</div>
-<div class="line"><span class="lineno">  631</span>    uint16_t jj  = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( j, j);</div>
-<div class="line"><span class="lineno">  632</span>    uint16_t jj2 = jj &lt;&lt; 1;</div>
-<div class="line"><span class="lineno">  633</span>    <span class="keywordflow">if</span>( i &amp; 0x8000 ) {</div>
-<div class="line"><span class="lineno">  634</span>        jj2 = 65535 - jj2;</div>
-<div class="line"><span class="lineno">  635</span>    }</div>
-<div class="line"><span class="lineno">  636</span>    <span class="keywordflow">return</span> jj2;</div>
-<div class="line"><span class="lineno">  637</span>}</div>
-<div class="ttc" id="agroup___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00540">scale8.h:540</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00607">607</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  608</span>{</div>
+<div class="line"><span class="lineno">  609</span>    uint16_t j = i;</div>
+<div class="line"><span class="lineno">  610</span>    <span class="keywordflow">if</span>( j &amp; 0x8000 ) {</div>
+<div class="line"><span class="lineno">  611</span>        j = 65535 - j;</div>
+<div class="line"><span class="lineno">  612</span>    }</div>
+<div class="line"><span class="lineno">  613</span>    uint16_t jj  = <a class="code hl_function" href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( j, j);</div>
+<div class="line"><span class="lineno">  614</span>    uint16_t jj2 = jj &lt;&lt; 1;</div>
+<div class="line"><span class="lineno">  615</span>    <span class="keywordflow">if</span>( i &amp; 0x8000 ) {</div>
+<div class="line"><span class="lineno">  616</span>        jj2 = 65535 - jj2;</div>
+<div class="line"><span class="lineno">  617</span>    }</div>
+<div class="line"><span class="lineno">  618</span>    <span class="keywordflow">return</span> jj2;</div>
+<div class="line"><span class="lineno">  619</span>}</div>
+<div class="ttc" id="agroup___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="../../d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">Scale a 16-bit unsigned value by an 16-bit value, which is treated as the numerator of a fraction who...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00546">scale8.h:546</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00540">scale16()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00546">scale16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -151,7 +151,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga095436838e41397fad4dd50bb81f7a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

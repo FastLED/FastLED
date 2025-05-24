@@ -143,5 +143,24 @@
 <text text-anchor="start" x="431" y="-48" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::Pair, fl::SortedHeapMap</text>
 <text text-anchor="middle" x="491.5" y="-37" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">::PairLess &gt;</text>
 </g>
+<!-- Node14 -->
+<g id="Node000014" class="node">
+<title>Node14</title>
+<g id="a_Node000014"><a xlink:href="../../d6/d07/structfl_1_1less.html" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="106.5,-24.5 29.5,-24.5 29.5,-5.5 106.5,-5.5 106.5,-24.5"/>
+<text text-anchor="middle" x="68" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::less&lt; T &gt;</text>
+</a>
+</g>
+</g>
+<!-- Node14&#45;&gt;Node13 -->
+<g id="edge7_Node000013_Node000014" class="edge">
+<title>Node14&#45;&gt;Node13</title>
+<g id="a_edge7_Node000013_Node000014"><a xlink:title=" ">
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M116.95,-15C164.3,-15 236.71,-15 286.98,-15"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="116.66,-11.5 106.66,-15 116.66,-18.5 116.66,-11.5"/>
+</a>
+</g>
+<text text-anchor="middle" x="206.5" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mLess</text>
+</g>
 </g>
 </svg>

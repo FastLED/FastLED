@@ -1,5 +1,13 @@
 <map id="fl::Slice::end" name="fl::Slice::end">
-<area shape="rect" id="Node000001" title=" " alt="" coords="160,5,261,31"/>
-<area shape="rect" id="Node000002" href="$d8/de4/classfl_1_1_slice_a3d3cee4aebda755a1232261ccb0ae09c.html#a3d3cee4aebda755a1232261ccb0ae09c" title=" " alt="" coords="5,5,112,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,21,112,21,112,15,146,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="637,63,739,88"/>
+<area shape="rect" id="Node000002" href="$d8/de4/classfl_1_1_slice_a04915e7ffcbcfca160f1a39e45593e6d.html#a04915e7ffcbcfca160f1a39e45593e6d" title=" " alt="" coords="454,5,562,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="635,61,589,46,549,33,550,28,590,41,636,56"/>
+<area shape="rect" id="Node000003" href="$d5/d32/classfl_1_1_line_simplifier_exact_ab45b65bd5653cb34e2420e3306d98425.html#ab45b65bd5653cb34e2420e3306d98425" title=" " alt="" coords="427,55,589,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="624,78,589,78,589,73,624,73"/>
+<area shape="rect" id="Node000006" href="$d8/de4/classfl_1_1_slice_a3d3cee4aebda755a1232261ccb0ae09c.html#a3d3cee4aebda755a1232261ccb0ae09c" title=" " alt="" coords="455,120,561,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="636,95,590,110,550,123,549,117,589,105,635,90"/>
+<area shape="rect" id="Node000004" href="$d5/d32/classfl_1_1_line_simplifier_exact_abe0036297edb6a0641c42943d7c2ab57.html#abe0036297edb6a0641c42943d7c2ab57" title=" " alt="" coords="216,55,379,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="413,78,379,78,379,73,413,73"/>
+<area shape="rect" id="Node000005" href="$d5/d32/classfl_1_1_line_simplifier_exact_a3a4114a5aebc06310711d2fcc2643d67.html#a3a4114a5aebc06310711d2fcc2643d67" title=" " alt="" coords="5,55,168,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="202,78,168,78,168,73,202,73"/>
 </map>

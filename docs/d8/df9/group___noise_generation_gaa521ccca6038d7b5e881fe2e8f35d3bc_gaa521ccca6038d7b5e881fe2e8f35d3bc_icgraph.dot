@@ -25,9 +25,9 @@ digraph "inoise8"
   Node7 -> Node9 [id="edge9_Node000007_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="fill_noise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga7967fd7b1a7230a0f7428347c70dac3e.html#ga7967fd7b1a7230a0f7428347c70dac3e",tooltip="Fill an LED array with random colors, using 8-bit noise."];
   Node1 -> Node10 [id="edge10_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9d/_noise_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
+  Node10 [id="Node000010",label="fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
   Node10 -> Node11 [id="edge11_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9d/_noise_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node11 [id="Node000011",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node12 [id="edge12_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fl::NoisePalette::fillnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738",tooltip=" "];
   Node12 -> Node13 [id="edge13_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];

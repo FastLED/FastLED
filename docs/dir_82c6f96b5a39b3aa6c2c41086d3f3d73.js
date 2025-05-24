@@ -5,7 +5,7 @@ var dir_82c6f96b5a39b3aa6c2c41086d3f3d73 =
     [ "color.h", "de/de1/examples_2_luminescent_grand_2shared_2color_8h.html", "de/de1/examples_2_luminescent_grand_2shared_2color_8h" ],
     [ "color_mapper.cpp", "d4/df0/color__mapper_8cpp.html", "d4/df0/color__mapper_8cpp" ],
     [ "color_mapper.h", "d0/d4f/color__mapper_8h.html", "d0/d4f/color__mapper_8h" ],
-    [ "defs.h", "d5/d64/defs_8h.html", "d5/d64/defs_8h" ],
+    [ "defs.h", "d4/d78/_luminescent_grand_2shared_2defs_8h.html", "d4/d78/_luminescent_grand_2shared_2defs_8h" ],
     [ "dprint.cpp", "dd/dd5/dprint_8cpp.html", "dd/dd5/dprint_8cpp" ],
     [ "dprint.h", "df/d29/dprint_8h.html", "df/d29/dprint_8h" ],
     [ "framebuffer.cpp", "d3/dd6/framebuffer_8cpp.html", null ],

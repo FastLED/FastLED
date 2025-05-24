@@ -142,39 +142,40 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga0de3f6d9c9fab80100c4c7daa
 <div class="line">        <span class="keywordflow">return</span> isReady; \</div>
 <div class="line">    }   \</div>
 <div class="line">    <span class="keywordtype">void</span> reset() { mPrevTrigger = getTime(); }; \</div>
-<div class="line">    <span class="keywordtype">void</span> trigger() { mPrevTrigger = getTime() - mPeriod; }; \</div>
+<div class="line">    <span class="keywordtype">void</span> <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d.html#aea211d4658ff3e6eac03fa0bedc90f5d">trigger</a>() { mPrevTrigger = getTime() - mPeriod; }; \</div>
 <div class="line">        \</div>
 <div class="line">    <span class="keyword">operator</span> bool() { <span class="keywordflow">return</span> ready(); } \</div>
 <div class="line">};</div>
+<div class="ttc" id="a_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d_html_aea211d4658ff3e6eac03fa0bedc90f5d"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d.html#aea211d4658ff3e6eac03fa0bedc90f5d">trigger</a></div><div class="ttdeci">UIButton trigger(&quot;Trigger&quot;)</div></div>
 </div><!-- fragment -->
 <p>Preprocessor-based class "template" for <a class="el" href="../../de/d1d/class_c_every_n_time.html" title="Time interval checking class.">CEveryNTime</a>, used with <code>EVERY_N_TIME</code> timekeepers. </p>
 <p>Classes to implement <a class="el" href="../../d5/df2/group___timekeeping_ga90e084b8253af257a0257a23aeef53e1.html#ga90e084b8253af257a0257a23aeef53e1" title="Checks whether to execute a block of code every N milliseconds.">EVERY_N_MILLIS</a>, <a class="el" href="../../d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb" title="Checks whether to execute a block of code every N seconds.">EVERY_N_SECONDS</a>, <a class="el" href="../../d5/df2/group___timekeeping_gac1512a67df37be930a2015eca7219bad.html#gac1512a67df37be930a2015eca7219bad" title="Checks whether to execute a block of code every N minutes.">EVERY_N_MINUTES</a>, <a class="el" href="../../d5/df2/group___timekeeping_ga15cbb1cba95ba3a57f08ef0f65dacd28.html#ga15cbb1cba95ba3a57f08ef0f65dacd28" title="Checks whether to execute a block of code every N hours.">EVERY_N_HOURS</a>, and <a class="el" href="../../d5/df2/group___timekeeping_ga860bac35464e2c83c313e92a59e0e39a.html#ga860bac35464e2c83c313e92a59e0e39a" title="Checks whether to execute a block of code every N bseconds.">EVERY_N_BSECONDS</a>. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01077">1077</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno"> 1077</span><span class="preprocessor">#define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \</span></div>
-<div class="line"><span class="lineno"> 1078</span><span class="preprocessor">class NAME {    \</span></div>
-<div class="line"><span class="lineno"> 1079</span><span class="preprocessor">public: \</span></div>
-<div class="line"><span class="lineno"> 1080</span><span class="preprocessor">    TIMETYPE mPrevTrigger;  \</span></div>
-<div class="line"><span class="lineno"> 1081</span><span class="preprocessor">    TIMETYPE mPeriod;   \</span></div>
-<div class="line"><span class="lineno"> 1082</span><span class="preprocessor">    \</span></div>
-<div class="line"><span class="lineno"> 1083</span><span class="preprocessor">    NAME() { reset(); mPeriod = 1; }; \</span></div>
-<div class="line"><span class="lineno"> 1084</span><span class="preprocessor">    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \</span></div>
-<div class="line"><span class="lineno"> 1085</span><span class="preprocessor">    void setPeriod( TIMETYPE period) { mPeriod = period; }; \</span></div>
-<div class="line"><span class="lineno"> 1086</span><span class="preprocessor">    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \</span></div>
-<div class="line"><span class="lineno"> 1087</span><span class="preprocessor">    TIMETYPE getPeriod() { return mPeriod; };   \</span></div>
-<div class="line"><span class="lineno"> 1088</span><span class="preprocessor">    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \</span></div>
-<div class="line"><span class="lineno"> 1089</span><span class="preprocessor">    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \</span></div>
-<div class="line"><span class="lineno"> 1090</span><span class="preprocessor">    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \</span></div>
-<div class="line"><span class="lineno"> 1091</span><span class="preprocessor">    bool ready() { \</span></div>
-<div class="line"><span class="lineno"> 1092</span><span class="preprocessor">        bool isReady = (getElapsed() &gt;= mPeriod);   \</span></div>
-<div class="line"><span class="lineno"> 1093</span><span class="preprocessor">        if( isReady ) { reset(); }  \</span></div>
-<div class="line"><span class="lineno"> 1094</span><span class="preprocessor">        return isReady; \</span></div>
-<div class="line"><span class="lineno"> 1095</span><span class="preprocessor">    }   \</span></div>
-<div class="line"><span class="lineno"> 1096</span><span class="preprocessor">    void reset() { mPrevTrigger = getTime(); }; \</span></div>
-<div class="line"><span class="lineno"> 1097</span><span class="preprocessor">    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \</span></div>
-<div class="line"><span class="lineno"> 1098</span><span class="preprocessor">        \</span></div>
-<div class="line"><span class="lineno"> 1099</span><span class="preprocessor">    operator bool() { return ready(); } \</span></div>
-<div class="line"><span class="lineno"> 1100</span><span class="preprocessor">};</span></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l01059">1059</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno"> 1059</span><span class="preprocessor">#define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \</span></div>
+<div class="line"><span class="lineno"> 1060</span><span class="preprocessor">class NAME {    \</span></div>
+<div class="line"><span class="lineno"> 1061</span><span class="preprocessor">public: \</span></div>
+<div class="line"><span class="lineno"> 1062</span><span class="preprocessor">    TIMETYPE mPrevTrigger;  \</span></div>
+<div class="line"><span class="lineno"> 1063</span><span class="preprocessor">    TIMETYPE mPeriod;   \</span></div>
+<div class="line"><span class="lineno"> 1064</span><span class="preprocessor">    \</span></div>
+<div class="line"><span class="lineno"> 1065</span><span class="preprocessor">    NAME() { reset(); mPeriod = 1; }; \</span></div>
+<div class="line"><span class="lineno"> 1066</span><span class="preprocessor">    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \</span></div>
+<div class="line"><span class="lineno"> 1067</span><span class="preprocessor">    void setPeriod( TIMETYPE period) { mPeriod = period; }; \</span></div>
+<div class="line"><span class="lineno"> 1068</span><span class="preprocessor">    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \</span></div>
+<div class="line"><span class="lineno"> 1069</span><span class="preprocessor">    TIMETYPE getPeriod() { return mPeriod; };   \</span></div>
+<div class="line"><span class="lineno"> 1070</span><span class="preprocessor">    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \</span></div>
+<div class="line"><span class="lineno"> 1071</span><span class="preprocessor">    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \</span></div>
+<div class="line"><span class="lineno"> 1072</span><span class="preprocessor">    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \</span></div>
+<div class="line"><span class="lineno"> 1073</span><span class="preprocessor">    bool ready() { \</span></div>
+<div class="line"><span class="lineno"> 1074</span><span class="preprocessor">        bool isReady = (getElapsed() &gt;= mPeriod);   \</span></div>
+<div class="line"><span class="lineno"> 1075</span><span class="preprocessor">        if( isReady ) { reset(); }  \</span></div>
+<div class="line"><span class="lineno"> 1076</span><span class="preprocessor">        return isReady; \</span></div>
+<div class="line"><span class="lineno"> 1077</span><span class="preprocessor">    }   \</span></div>
+<div class="line"><span class="lineno"> 1078</span><span class="preprocessor">    void reset() { mPrevTrigger = getTime(); }; \</span></div>
+<div class="line"><span class="lineno"> 1079</span><span class="preprocessor">    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \</span></div>
+<div class="line"><span class="lineno"> 1080</span><span class="preprocessor">        \</span></div>
+<div class="line"><span class="lineno"> 1081</span><span class="preprocessor">    operator bool() { return ready(); } \</span></div>
+<div class="line"><span class="lineno"> 1082</span><span class="preprocessor">};</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -185,7 +186,7 @@ $(function(){initNavTree('d5/df2/group___timekeeping_ga0de3f6d9c9fab80100c4c7daa
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/df2/group___timekeeping.html">Timekeeping Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

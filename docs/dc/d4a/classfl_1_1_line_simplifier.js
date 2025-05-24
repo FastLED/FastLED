@@ -1,0 +1,25 @@
+var classfl_1_1_line_simplifier =
+[
+    [ "Point", "dc/d4a/classfl_1_1_line_simplifier_ae0463798d415f262a499765b9c7c77c8.html#ae0463798d415f262a499765b9c7c77c8", null ],
+    [ "VectorPoint", "dc/d4a/classfl_1_1_line_simplifier_ab4d221fdf5ee90ac3bab7222577d4020.html#ab4d221fdf5ee90ac3bab7222577d4020", null ],
+    [ "LineSimplifier", "dc/d4a/classfl_1_1_line_simplifier_adae88ea0f51ef94c6bacfaba859ab1e3.html#adae88ea0f51ef94c6bacfaba859ab1e3", null ],
+    [ "LineSimplifier", "dc/d4a/classfl_1_1_line_simplifier_ab95065a9a48d7158e9191c06d0ebc65c.html#ab95065a9a48d7158e9191c06d0ebc65c", null ],
+    [ "LineSimplifier", "dc/d4a/classfl_1_1_line_simplifier_adf4187b83b0963743ec28ef0e34c0868.html#adf4187b83b0963743ec28ef0e34c0868", null ],
+    [ "LineSimplifier", "dc/d4a/classfl_1_1_line_simplifier_a6f56d5df7047b06d2c20f3a4b5e3bfb0.html#a6f56d5df7047b06d2c20f3a4b5e3bfb0", null ],
+    [ "operator=", "dc/d4a/classfl_1_1_line_simplifier_a31710381b7022868abb5c0f25fd086cf.html#a31710381b7022868abb5c0f25fd086cf", null ],
+    [ "operator=", "dc/d4a/classfl_1_1_line_simplifier_a2c528e87a5b2805be9e24fd3b9a99e81.html#a2c528e87a5b2805be9e24fd3b9a99e81", null ],
+    [ "PerpendicularDistance2", "dc/d4a/classfl_1_1_line_simplifier_a4e22268eafeb2709d9c44bf24ad11069.html#a4e22268eafeb2709d9c44bf24ad11069", null ],
+    [ "removeOneLeastError", "dc/d4a/classfl_1_1_line_simplifier_ac48de8da23eba34d57ab28cd2fa06079.html#ac48de8da23eba34d57ab28cd2fa06079", null ],
+    [ "setMinimumDistance", "dc/d4a/classfl_1_1_line_simplifier_a6423c184e46838ba14b8ddcb688f7de0.html#a6423c184e46838ba14b8ddcb688f7de0", null ],
+    [ "simplify", "dc/d4a/classfl_1_1_line_simplifier_aa83e414cacc8d5536b8d148acfcd731c.html#aa83e414cacc8d5536b8d148acfcd731c", null ],
+    [ "simplify", "dc/d4a/classfl_1_1_line_simplifier_a201de7097fbafc8d15a883b6715ab21b.html#a201de7097fbafc8d15a883b6715ab21b", null ],
+    [ "simplifyInplace", "dc/d4a/classfl_1_1_line_simplifier_a1f72addd121b377f209324ad88a0c3ad.html#a1f72addd121b377f209324ad88a0c3ad", null ],
+    [ "simplifyInplace", "dc/d4a/classfl_1_1_line_simplifier_ae9769ec46cd2fc1576fb3d03db991368.html#ae9769ec46cd2fc1576fb3d03db991368", null ],
+    [ "simplifyInplaceT", "dc/d4a/classfl_1_1_line_simplifier_a5ede8373d86a97315503c19f738c4c74.html#a5ede8373d86a97315503c19f738c4c74", null ],
+    [ "simplifyInternal", "dc/d4a/classfl_1_1_line_simplifier_a2536fb35718c3aebc8274b305b407dee.html#a2536fb35718c3aebc8274b305b407dee", null ],
+    [ "simplifyT", "dc/d4a/classfl_1_1_line_simplifier_ab2ceacbb40ab8270441755fdcdd4e5e0.html#ab2ceacbb40ab8270441755fdcdd4e5e0", null ],
+    [ "indexStack", "dc/d4a/classfl_1_1_line_simplifier_ad6d03890d296d3f8eb0130fd7b73856f.html#ad6d03890d296d3f8eb0130fd7b73856f", null ],
+    [ "keep", "dc/d4a/classfl_1_1_line_simplifier_ab4f6f8b768bde5161d83574237990abd.html#ab4f6f8b768bde5161d83574237990abd", null ],
+    [ "mMinDistance", "dc/d4a/classfl_1_1_line_simplifier_af99ca85fd382d01873a9c3acdfd19caf.html#af99ca85fd382d01873a9c3acdfd19caf", null ],
+    [ "mSimplified", "dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa", null ]
+];

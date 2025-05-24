@@ -1,0 +1,23 @@
+<map id="fl::XYDrawComposited::draw" name="fl::XYDrawComposited::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,172,63"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601.html#aba8579ca7247cc690e8899d68e95a601" title=" " alt="" coords="220,56,441,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,49,207,53,206,58,172,55"/>
+<area shape="rect" id="Node000008" href="$d7/d82/struct_c_r_g_b_aec2425ad20ac3c5191ac2b47eec4dca0.html#aec2425ad20ac3c5191ac2b47eec4dca0" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="489,5,652,31"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="172,36,475,20,476,26,173,42"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="700,56,804,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="441,66,686,66,686,71,441,71"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94" title=" " alt="" coords="519,107,622,132"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="392,79,507,103,505,108,391,84"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="616,104,692,83,693,88,618,109"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="719,105,785,131"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="622,116,705,116,705,121,622,122"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="901,20,999,45"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="780,103,803,92,851,68,900,48,902,53,853,72,805,96,782,108"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="852,81,1048,107"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="785,111,838,105,839,110,786,117"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="618,28,693,50,692,55,616,33"/>
+<area shape="rect" id="Node000009" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="708,7,796,32"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="652,16,694,16,694,22,652,21"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="796,20,888,26,887,31,796,25"/>
+<area shape="poly" id="edge12_Node000009_Node000007" title=" " alt="" coords="786,30,853,56,902,74,901,79,851,60,784,34"/>
+</map>

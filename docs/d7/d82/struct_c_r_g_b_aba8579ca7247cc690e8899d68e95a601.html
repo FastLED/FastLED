@@ -127,25 +127,25 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a60
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00058">58</a> of file <a class="el" href="../../d0/de3/crgb_8cpp_source.html">crgb.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   58</span>                                                                    {</div>
-<div class="line"><span class="lineno">   59</span>    <span class="comment">// Use luma of upper pixel as alpha (0..255)</span></div>
-<div class="line"><span class="lineno">   60</span>    uint8_t max_component = 0;</div>
-<div class="line"><span class="lineno">   61</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; ++i) {</div>
-<div class="line"><span class="lineno">   62</span>        <span class="keywordflow">if</span> (upper.raw[i] &gt; max_component) {</div>
-<div class="line"><span class="lineno">   63</span>            max_component = upper.raw[i];</div>
-<div class="line"><span class="lineno">   64</span>        }</div>
-<div class="line"><span class="lineno">   65</span>    }</div>
-<div class="line"><span class="lineno">   66</span>    <span class="comment">// uint8_t alpha = upper.getLuma();</span></div>
-<div class="line"><span class="lineno">   67</span>    <span class="comment">// blend(lower, upper, alpha) → (lower * (255−alpha) + upper * alpha) / 256</span></div>
-<div class="line"><span class="lineno">   68</span>    uint8_t amountOf2 = 255 - max_component;</div>
-<div class="line"><span class="lineno">   69</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a>(upper, lower, amountOf2);</div>
-<div class="line"><span class="lineno">   70</span>}</div>
-<div class="ttc" id="astruct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94_html_a6348cb098a0b27f443bd1af290dafa94"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a></div><div class="ttdeci">static CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/de3/crgb_8cpp_source.html#l00050">crgb.cpp:50</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00059">59</a> of file <a class="el" href="../../d0/de3/crgb_8cpp_source.html">crgb.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   59</span>                                                                    {</div>
+<div class="line"><span class="lineno">   60</span>    <span class="comment">// Use luma of upper pixel as alpha (0..255)</span></div>
+<div class="line"><span class="lineno">   61</span>    uint8_t max_component = 0;</div>
+<div class="line"><span class="lineno">   62</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 3; ++i) {</div>
+<div class="line"><span class="lineno">   63</span>        <span class="keywordflow">if</span> (upper.raw[i] &gt; max_component) {</div>
+<div class="line"><span class="lineno">   64</span>            max_component = upper.raw[i];</div>
+<div class="line"><span class="lineno">   65</span>        }</div>
+<div class="line"><span class="lineno">   66</span>    }</div>
+<div class="line"><span class="lineno">   67</span>    <span class="comment">// uint8_t alpha = upper.getLuma();</span></div>
+<div class="line"><span class="lineno">   68</span>    <span class="comment">// blend(lower, upper, alpha) → (lower * (255−alpha) + upper * alpha) / 256</span></div>
+<div class="line"><span class="lineno">   69</span>    uint8_t amountOf2 = 255 - max_component;</div>
+<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a>(upper, lower, amountOf2);</div>
+<div class="line"><span class="lineno">   71</span>}</div>
+<div class="ttc" id="astruct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94_html_a6348cb098a0b27f443bd1af290dafa94"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94">CRGB::blend</a></div><div class="ttdeci">static CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/de3/crgb_8cpp_source.html#l00054">crgb.cpp:54</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, and <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00050">blend()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, and <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00054">blend()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d14/frame_8cpp_source.html#l00029">fl::Frame::draw()</a>, and <a class="el" href="../../da/d14/frame_8cpp_source.html#l00046">fl::Frame::drawXY()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d14/frame_8cpp_source.html#l00029">fl::Frame::draw()</a>, <a class="el" href="../../d0/d4f/draw__visitor_8h_source.html#l00035">fl::XYDrawComposited::draw()</a>, and <a class="el" href="../../da/d14/frame_8cpp_source.html#l00046">fl::Frame::drawXY()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -158,7 +158,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a60
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601_aba8579ca7247cc690e8899d68e95a601_icgraph.svg" width="619" height="94"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a601_aba8579ca7247cc690e8899d68e95a601_icgraph.svg" width="650" height="159"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -170,7 +170,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_aba8579ca7247cc690e8899d68e95a60
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

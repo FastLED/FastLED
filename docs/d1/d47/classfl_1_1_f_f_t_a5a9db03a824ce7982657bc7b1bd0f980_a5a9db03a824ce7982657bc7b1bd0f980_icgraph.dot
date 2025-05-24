@@ -1,0 +1,14 @@
+digraph "fl::FFT::size"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::FFT::size",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::FFT::~FFT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d47/classfl_1_1_f_f_t_a60c103563456eccad9afaf034f45b1e5.html#a60c103563456eccad9afaf034f45b1e5",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::FFT::setFFTCacheSize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d47/classfl_1_1_f_f_t_a13f6b695ef52e043f5769233922deab9.html#a13f6b695ef52e043f5769233922deab9",tooltip=" "];
+}

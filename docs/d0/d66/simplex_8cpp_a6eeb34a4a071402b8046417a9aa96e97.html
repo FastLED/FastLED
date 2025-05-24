@@ -129,19 +129,20 @@ $(function(){initNavTree('d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97.
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">70</a> of file <a class="el" href="../../d0/d66/simplex_8cpp_source.html">simplex.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   70</span>                                             {</div>
-<div class="line"><span class="lineno">   71</span>    uint8_t h = hash &amp; 15;</div>
+<div class="line"><span class="lineno">   71</span>    uint8_t h = <a class="code hl_function" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">hash</a> &amp; 15;</div>
 <div class="line"><span class="lineno">   72</span>    int32_t <a class="code hl_function" href="#a6eeb34a4a071402b8046417a9aa96e97">grad</a> = 1 + (h&amp;7); <span class="comment">// Gradient value 1.0, 2.0, ..., 8.0</span></div>
 <div class="line"><span class="lineno">   73</span>    <span class="keywordflow">if</span> ((h&amp;8) != 0) {</div>
 <div class="line"><span class="lineno">   74</span>        <a class="code hl_function" href="#a6eeb34a4a071402b8046417a9aa96e97">grad</a> = -<a class="code hl_function" href="#a6eeb34a4a071402b8046417a9aa96e97">grad</a>; <span class="comment">// Set a random sign for the gradient</span></div>
 <div class="line"><span class="lineno">   75</span>    }</div>
 <div class="line"><span class="lineno">   76</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#a6eeb34a4a071402b8046417a9aa96e97">grad</a> * <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>; <span class="comment">// Multiply the gradient with the distance (integer * 0.12 = *.12)</span></div>
 <div class="line"><span class="lineno">   77</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00080">Fire2023.ino:80</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d_html_aaa7388df65cacb4afe70894edfff3a6d"><div class="ttname"><a href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_aaa7388df65cacb4afe70894edfff3a6d.html#aaa7388df65cacb4afe70894edfff3a6d">fl::anonymous_namespace{noise_woryley.cpp}::hash</a></div><div class="ttdeci">uint16_t hash(int32_t x, int32_t y)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d13/noise__woryley_8cpp_source.html#l00018">noise_woryley.cpp:18</a></div></div>
 <div class="ttc" id="asimplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97_html_a6eeb34a4a071402b8046417a9aa96e97"><div class="ttname"><a href="#a6eeb34a4a071402b8046417a9aa96e97">grad</a></div><div class="ttdeci">static int32_t grad(uint8_t hash, int32_t x)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d66/simplex_8cpp_source.html#l00070">simplex.cpp:70</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00080">x</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00102">snoise16()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00125">snoise16()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00192">snoise16()</a>, and <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00324">snoise16()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d7c/src_2fx_22d_2wave_8cpp_source.html#l00012">fl::anonymous_namespace{wave.cpp}::BatchDraw::BatchDraw()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00102">snoise16()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00125">snoise16()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00192">snoise16()</a>, and <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00324">snoise16()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -154,7 +155,7 @@ $(function(){initNavTree('d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97.
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97_a6eeb34a4a071402b8046417a9aa96e97_icgraph.svg" width="190" height="184"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97_a6eeb34a4a071402b8046417a9aa96e97_icgraph.svg" width="312" height="263"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -166,7 +167,7 @@ $(function(){initNavTree('d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/d66/simplex_8cpp.html">simplex.cpp</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,8 @@
+<map id="fl::AudioSample::pcm" name="fl::AudioSample::pcm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,165,80"/>
+<area shape="rect" id="Node000002" href="$d0/de1/classfl_1_1_audio_sample_afe988920e20628a1cac954ba48885e4a.html#afe988920e20628a1cac954ba48885e4a" title=" " alt="" coords="213,29,388,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,55,200,51,200,56,166,61"/>
+<area shape="rect" id="Node000003" href="$d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5" title=" " alt="" coords="213,79,388,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="166,74,200,77,200,83,166,79"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="266,31,258,21,262,11,277,5,301,3,330,6,342,15,339,20,328,11,301,8,278,10,266,15,263,20,270,28"/>
+</map>

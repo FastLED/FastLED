@@ -1,5 +1,8 @@
 <map id="fl/sin32.cpp" name="fl/sin32.cpp">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,101,31"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="18,79,89,104"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="18,79,89,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,31,56,65,51,65,51,31"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="82,76,104,77,112,83,115,92,109,103,96,107,94,102,106,99,110,91,108,86,102,82,81,81"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="16,152,91,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="56,104,56,138,51,138,51,104"/>
 </map>

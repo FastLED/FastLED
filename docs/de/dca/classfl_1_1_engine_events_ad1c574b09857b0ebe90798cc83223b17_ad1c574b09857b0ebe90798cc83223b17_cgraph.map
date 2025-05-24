@@ -1,13 +1,12 @@
 <map id="fl::EngineEvents::onPlatformPreLoop" name="fl::EngineEvents::onPlatformPreLoop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,43,212,83"/>
-<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_ae65717bdca70986d9bf2e7cd34f2da67.html#ae65717bdca70986d9bf2e7cd34f2da67" title=" " alt="" coords="289,13,442,53"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,48,274,41,275,46,213,54"/>
-<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="260,78,471,103"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,71,247,75,246,80,212,77"/>
-<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="519,29,697,69"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="440,75,505,64,506,69,441,81"/>
-<area shape="rect" id="Node000005" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="527,118,689,143"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="444,101,518,113,517,118,443,106"/>
-<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="563,30,560,20,567,10,583,5,608,3,636,6,652,13,649,18,635,11,608,8,585,10,570,15,565,21,568,28"/>
-<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="569,120,560,110,565,100,581,94,608,91,642,95,652,100,656,106,651,109,648,104,641,100,608,97,582,99,568,104,565,109,573,116"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,212,75"/>
+<area shape="rect" id="Node000002" href="$de/dca/classfl_1_1_engine_events_ae65717bdca70986d9bf2e7cd34f2da67.html#ae65717bdca70986d9bf2e7cd34f2da67" title=" " alt="" coords="289,5,442,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,40,274,33,275,38,213,46"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="260,70,471,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,63,247,67,246,72,212,69"/>
+<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a0d7527af75982eb6037525e670aa26ec.html#a0d7527af75982eb6037525e670aa26ec" title=" " alt="" coords="519,21,697,61"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="440,67,505,56,506,61,441,73"/>
+<area shape="rect" id="Node000005" href="$d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb" title=" " alt="" coords="527,110,689,135"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="444,93,518,105,517,110,443,98"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="569,112,560,102,565,92,581,86,608,83,642,87,652,92,656,98,651,101,648,96,641,92,608,89,582,91,568,96,565,101,573,108"/>
 </map>

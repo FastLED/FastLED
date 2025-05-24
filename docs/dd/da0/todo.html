@@ -109,49 +109,45 @@ $(function(){initNavTree('dd/da0/todo.html','../../'); initResizable(true); });
 <dt>Member <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_a0093621cbfc137ce372b755bc2dde85d.html#a0093621cbfc137ce372b755bc2dde85d">_retry_cnt</a>  </dt>
 <dd><a class="anchor" id="_todo000002"></a>Include in FASTLED_DEBUG_COUNT_FRAME_RETRIES block?  </dd>
 <dt>Class <a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output.html">AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;</a>  </dt>
-<dd><a class="anchor" id="_todo000013"></a>Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future. <br  />
+<dd><a class="anchor" id="_todo000005"></a>Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future. <br  />
   </dd>
 <dt>Member <a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_a15872bb6ae69fd5a5c04b246fe73740e.html#a15872bb6ae69fd5a5c04b246fe73740e">AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;::select</a>  ()</dt>
-<dd><p class="startdd"><a class="anchor" id="_todo000014"></a>Research whether this really means 'hi' or 'lo'. </p>
-<p class="enddd"><a class="anchor" id="_todo000015"></a>Move select responsibility out of the SPI classes entirely, make it up to the caller to remember to lock/select the line?  </p>
+<dd><p class="startdd"><a class="anchor" id="_todo000006"></a>Research whether this really means 'hi' or 'lo'. </p>
+<p class="enddd"><a class="anchor" id="_todo000007"></a>Move select responsibility out of the SPI classes entirely, make it up to the caller to remember to lock/select the line?  </p>
 </dd>
 <dt>Member <a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output_af543930d08c9ce5c8229e45be97980e9.html#af543930d08c9ce5c8229e45be97980e9">AVRSoftwareSPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;::writeBytes</a>  (FASTLED_REGISTER uint8_t *data, int len)</dt>
-<dd><a class="anchor" id="_todo000016"></a>Need to type this better so that explicit casts into the call aren't required.  </dd>
+<dd><a class="anchor" id="_todo000008"></a>Need to type this better so that explicit casts into the call aren't required.  </dd>
 <dt>Member <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a61d27e179c9b68bde89d220aebc0de32.html#a61d27e179c9b68bde89d220aebc0de32">CFastLED::countFPS</a>  (int nFrames=25)</dt>
-<dd><a class="anchor" id="_todo000008"></a>Make this a rolling counter  </dd>
+<dd><a class="anchor" id="_todo000014"></a>Make this a rolling counter  </dd>
 <dt>Class <a class="el" href="../../db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html">CPixelView&lt; PIXEL_TYPE &gt;::pixelset_iterator_base&lt; T &gt;</a>  </dt>
-<dd><a class="anchor" id="_todo000031"></a>Make this a fully specified/proper iterator  </dd>
+<dd><a class="anchor" id="_todo000029"></a>Make this a fully specified/proper iterator  </dd>
 <dt>Class <a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p.html">DATA_NOP</a>  </dt>
-<dd><a class="anchor" id="_todo000010"></a>Convinience macro for building these  </dd>
+<dd><a class="anchor" id="_todo000011"></a>Convinience macro for building these  </dd>
 <dt>Member <a class="el" href="../../de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688">fill_raw_2dnoise8</a>  (uint8_t *pData, int width, int height, uint8_t octaves, <a class="el" href="../../db/d58/group___fractional_types_ga0633f7b895315d42362360319177fb52.html#ga0633f7b895315d42362360319177fb52" title="A 4.4 integer (4 bits integer, 4 bits fraction)">q44</a> freq44, <a class="el" href="../../db/d58/group___fractional_types_ga5d6d013429a5b8a09d564d6137217644.html#ga5d6d013429a5b8a09d564d6137217644" title="ANSI: unsigned short _Fract.">fract8</a> amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time)</dt>
-<dd><a class="anchor" id="_todo000028"></a>Why isn't this declared in the header (<a class="el" href="../../d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise.">noise.h</a>)?  </dd>
+<dd><a class="anchor" id="_todo000025"></a>Why isn't this declared in the header (<a class="el" href="../../d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise.">noise.h</a>)?  </dd>
 <dt>Module <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b.html">HSV2RGB</a>  </dt>
 <dd><a class="anchor" id="_todo000017"></a>Provide the "maximum brightness no matter what" variation. </dd>
 <dt>Member <a class="el" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>  </dt>
-<dd><a class="anchor" id="_todo000019"></a>I believe this is mis-named, and should be HSV_SECTION_4  </dd>
+<dd><a class="anchor" id="_todo000016"></a>I believe this is mis-named, and should be HSV_SECTION_4  </dd>
 <dt>Member <a class="el" href="../../df/d9d/hsv2rgb_8cpp_a08e6bc6fcc0701f8fbbdbead2f7e3167.html#a08e6bc6fcc0701f8fbbdbead2f7e3167">HSV_SECTION_6</a>  </dt>
-<dd><a class="anchor" id="_todo000018"></a>Unused. Remove?  </dd>
+<dd><a class="anchor" id="_todo000015"></a>Unused. Remove?  </dd>
 <dt>Member <a class="el" href="../../d2/ddb/fastspi__types_8h_afe32f8062c70f2114bd3a7adb55a4be3.html#afe32f8062c70f2114bd3a7adb55a4be3">MASK_SKIP_BITS</a>  </dt>
-<dd><a class="anchor" id="_todo000011"></a>Unused. Remove?  </dd>
-<dt>Member <a class="el" href="../../d2/ddb/fastspi__types_8h_aeb2ddb65a3f7469985904ba925931e53.html#aeb2ddb65a3f7469985904ba925931e53">MAX_DATA_RATE</a>  </dt>
 <dd><a class="anchor" id="_todo000012"></a>Unused. Remove?  </dd>
-<dt>Member <a class="el" href="../../d2/d73/group___palette_colors_ga361799a4ba193694ad974079c980430c.html#ga361799a4ba193694ad974079c980430c">nblendPaletteTowardPalette</a>  (<a class="el" href="../../d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values.">CRGBPalette16</a> &amp;currentPalette, <a class="el" href="../../d2/dc4/class_c_r_g_b_palette16.html" title="RGB color palette with 16 discrete values.">CRGBPalette16</a> &amp;targetPalette, uint8_t maxChanges=24)</dt>
-<dd><a class="anchor" id="_todo000007"></a>Shouldn't the <code>targetPalette</code> be <code>const</code>?  </dd>
+<dt>Member <a class="el" href="../../d2/ddb/fastspi__types_8h_aeb2ddb65a3f7469985904ba925931e53.html#aeb2ddb65a3f7469985904ba925931e53">MAX_DATA_RATE</a>  </dt>
+<dd><a class="anchor" id="_todo000013"></a>Unused. Remove?  </dd>
 <dt>Member <a class="el" href="../../d6/de8/noise_8cpp_a96f7525b7d6a9b4b64fe179dd064b104.html#a96f7525b7d6a9b4b64fe179dd064b104">nmax</a>  </dt>
-<dd><a class="anchor" id="_todo000030"></a>Remove?  </dd>
+<dd><a class="anchor" id="_todo000027"></a>Remove?  </dd>
 <dt>Member <a class="el" href="../../d6/de8/noise_8cpp_a2eec13b2f7aac3071397e40975c82e48.html#a2eec13b2f7aac3071397e40975c82e48">nmin</a>  </dt>
-<dd><a class="anchor" id="_todo000029"></a>Remove?  </dd>
+<dd><a class="anchor" id="_todo000026"></a>Remove?  </dd>
 <dt>Member <a class="el" href="../../db/d65/fastpin_8h_a4af4244f8a09607e0d6a5d0ee80f1de8.html#a4af4244f8a09607e0d6a5d0ee80f1de8">NO_PIN</a>  </dt>
-<dd><a class="anchor" id="_todo000006"></a>Unused, remove? <br  />
+<dd><a class="anchor" id="_todo000009"></a>Unused, remove? <br  />
   </dd>
 <dt>Member <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_abaa6fdee895d1130d5d498bd37f7eab0.html#abaa6fdee895d1130d5d498bd37f7eab0">noise_max</a>  </dt>
 <dd><a class="anchor" id="_todo000004"></a>Remove?  </dd>
 <dt>Member <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_aff7030c575134b5f0c81b47b22f8c98c.html#aff7030c575134b5f0c81b47b22f8c98c">noise_min</a>  </dt>
 <dd><a class="anchor" id="_todo000003"></a>Remove?  </dd>
-<dt>Module <a class="el" href="../../d6/d39/group___palette_classes.html">PaletteClasses</a>  </dt>
-<dd><a class="anchor" id="_todo000005"></a>For documentation purposes it would be nice to reorder these definitions by type and in ascending number of entries. </dd>
 <dt>Member <a class="el" href="../../d5/d4d/pixel__controller_8h_a0d71bfb7ef663994e4121f7b42aa8183.html#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a>  </dt>
-<dd><a class="anchor" id="_todo000027"></a>Can these macros be replaced with constants scoped to <a class="el" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd>
+<dd><a class="anchor" id="_todo000028"></a>Can these macros be replaced with constants scoped to <a class="el" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd>
 </dl>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
@@ -160,7 +156,7 @@ $(function(){initNavTree('dd/da0/todo.html','../../'); initResizable(true); });
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

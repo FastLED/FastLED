@@ -9,6 +9,6 @@ var dir_da6de6ffed4dc8eba2e7529df043e06f =
     [ "redsquare.h", "d3/db8/redsquare_8h.html", "d3/db8/redsquare_8h" ],
     [ "scale_up.cpp", "dc/d8c/scale__up_8cpp.html", "dc/d8c/scale__up_8cpp" ],
     [ "scale_up.h", "d2/d74/scale__up_8h.html", "d2/d74/scale__up_8h" ],
-    [ "wave.cpp", "d2/d7d/wave_8cpp.html", null ],
-    [ "wave.h", "dc/d61/wave_8h.html", "dc/d61/wave_8h" ]
+    [ "wave.cpp", "d4/d7c/src_2fx_22d_2wave_8cpp.html", "d4/d7c/src_2fx_22d_2wave_8cpp" ],
+    [ "wave.h", "de/de9/src_2fx_22d_2wave_8h.html", "de/de9/src_2fx_22d_2wave_8h" ]
 ];

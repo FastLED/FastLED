@@ -15,5 +15,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Chromancer"
   }
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_63a7680d6f3f38816504e5ce30b76a13->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000013_000029.html" href="dir_000013_000029.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_63a7680d6f3f38816504e5ce30b76a13->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="7", labeldistance=1.5 headhref="dir_000014_000031.html" href="dir_000014_000031.html" color="steelblue1" fontcolor="steelblue1"];
 }

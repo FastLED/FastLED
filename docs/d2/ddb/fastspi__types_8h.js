@@ -1,6 +1,7 @@
 var fastspi__types_8h =
 [
     [ "DATA_NOP", "d8/d0d/class_d_a_t_a___n_o_p.html", "d8/d0d/class_d_a_t_a___n_o_p" ],
+    [ "__INC_FASTSPI_TYPES_H", "d2/ddb/fastspi__types_8h_a296ed101609f321b04c0b522ce45fde1.html#a296ed101609f321b04c0b522ce45fde1", null ],
     [ "FLAG_START_BIT", "d2/ddb/fastspi__types_8h_aa870312b5cbfb4ba90913a08d0cd8087.html#aa870312b5cbfb4ba90913a08d0cd8087", null ],
     [ "MASK_SKIP_BITS", "d2/ddb/fastspi__types_8h_afe32f8062c70f2114bd3a7adb55a4be3.html#afe32f8062c70f2114bd3a7adb55a4be3", null ],
     [ "MAX_DATA_RATE", "d2/ddb/fastspi__types_8h_aeb2ddb65a3f7469985904ba925931e53.html#aeb2ddb65a3f7469985904ba925931e53", null ],

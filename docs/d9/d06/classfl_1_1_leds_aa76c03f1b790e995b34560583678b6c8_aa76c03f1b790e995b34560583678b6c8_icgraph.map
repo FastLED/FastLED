@@ -1,0 +1,7 @@
+<map id="fl::Leds::empty" name="fl::Leds::empty">
+<area shape="rect" id="Node000001" title=" " alt="" coords="195,31,313,56"/>
+<area shape="rect" id="Node000002" href="$d9/d06/classfl_1_1_leds_a463e520a25620688c24ae66232e95f54.html#a463e520a25620688c24ae66232e95f54" title=" " alt="" coords="5,5,147,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,36,147,31,147,25,181,30"/>
+<area shape="rect" id="Node000003" href="$d9/d06/classfl_1_1_leds_aeae1c15af5d07eb0dd46891a1c80e70b.html#aeae1c15af5d07eb0dd46891a1c80e70b" title=" " alt="" coords="5,55,147,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,56,147,60,147,55,181,51"/>
+</map>

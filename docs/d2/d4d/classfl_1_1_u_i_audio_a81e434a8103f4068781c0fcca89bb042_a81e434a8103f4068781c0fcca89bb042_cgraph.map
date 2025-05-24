@@ -1,0 +1,8 @@
+<map id="fl::UIAudio::FL_NO_COPY" name="fl::UIAudio::FL_NO_COPY">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,187,56"/>
+<area shape="rect" id="Node000002" href="$d2/d4d/classfl_1_1_u_i_audio_a7113accd92f49ef3eed1a9632d239e4f.html#a7113accd92f49ef3eed1a9632d239e4f" title=" " alt="" coords="235,5,383,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,30,221,26,221,31,187,35"/>
+<area shape="rect" id="Node000003" href="$d7/d2f/classfl_1_1_u_i_audio_impl_a4271a210033e4c6cd0486ccb45122b23.html#a4271a210033e4c6cd0486ccb45122b23" title=" " alt="" coords="431,31,637,56"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="187,41,417,41,417,46,187,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,24,417,28,417,33,383,29"/>
+</map>

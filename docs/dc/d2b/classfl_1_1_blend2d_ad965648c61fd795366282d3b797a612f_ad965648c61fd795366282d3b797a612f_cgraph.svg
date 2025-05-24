@@ -67,9 +67,9 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d3d/group___color_blurs_gadfd6e9dc2b0c79922d8d4be9d94cf5f5.html#gadfd6e9dc2b0c79922d8d4be9d94cf5f5" target="_top" xlink:title="Two&#45;dimensional blur filter.">
-<polygon fill="white" stroke="#666666" points="253.5,-93 206.5,-93 206.5,-74 253.5,-74 253.5,-93"/>
-<text text-anchor="middle" x="230" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">blur2d</text>
+<g id="a_Node000002"><a xlink:href="../../d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" target="_top" xlink:title="Two&#45;dimensional blur filter.">
+<polygon fill="white" stroke="#666666" points="259.5,-93 200.5,-93 200.5,-74 259.5,-74 259.5,-93"/>
+<text text-anchor="middle" x="230" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur2d</text>
 </a>
 </g>
 </g>
@@ -77,8 +77,8 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M94.01,-56.05C106.89,-58.81 121,-61.81 134,-64.5 154.75,-68.8 178.08,-73.47 196.43,-77.1"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="195.84,-80.55 206.33,-79.06 197.2,-73.69 195.84,-80.55"/>
+<path fill="none" stroke="#63b8ff" d="M94.01,-56.05C106.89,-58.81 121,-61.81 134,-64.5 152.41,-68.31 172.86,-72.42 190.06,-75.84"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="189.8,-79.35 200.29,-77.87 191.17,-72.49 189.8,-79.35"/>
 </a>
 </g>
 </g>
@@ -121,9 +121,9 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga33ce178f76009348d3a0f0723b22d4de.html#ga33ce178f76009348d3a0f0723b22d4de" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix.">
-<polygon fill="white" stroke="#666666" points="452,-130 374,-130 374,-111 452,-111 452,-130"/>
-<text text-anchor="middle" x="413" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">blurColumns</text>
+<g id="a_Node000003"><a xlink:href="../../d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" target="_top" xlink:title="Perform a blur1d() on every column of a rectangular matrix.">
+<polygon fill="white" stroke="#666666" points="458,-130 368,-130 368,-111 458,-111 458,-130"/>
+<text text-anchor="middle" x="413" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blurColumns</text>
 </a>
 </g>
 </g>
@@ -131,17 +131,17 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M253.56,-88.11C280.99,-93.72 328.04,-103.34 363.76,-110.64"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="363.48,-114.15 373.98,-112.73 364.88,-107.3 363.48,-114.15"/>
+<path fill="none" stroke="#63b8ff" d="M259.68,-89.36C285.94,-94.73 325.52,-102.82 357.74,-109.41"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="357.42,-112.92 367.92,-111.49 358.82,-106.06 357.42,-112.92"/>
 </a>
 </g>
 </g>
 <!-- Node9 -->
 <g id="Node000009" class="node">
 <title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
-<polygon fill="white" stroke="#666666" points="444,-93 382,-93 382,-74 444,-74 444,-93"/>
-<text text-anchor="middle" x="413" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">blurRows</text>
+<g id="a_Node000009"><a xlink:href="../../d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" target="_top" xlink:title="Perform a blur1d() on every row of a rectangular matrix.">
+<polygon fill="white" stroke="#666666" points="450,-93 376,-93 376,-74 450,-74 450,-93"/>
+<text text-anchor="middle" x="413" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blurRows</text>
 </a>
 </g>
 </g>
@@ -149,8 +149,8 @@ var sectionId = 'dynsection-0';
 <g id="edge4_Node000002_Node000009" class="edge">
 <title>Node2&#45;&gt;Node9</title>
 <g id="a_edge4_Node000002_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M253.56,-83.5C283.06,-83.5 335.25,-83.5 371.64,-83.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="371.92,-87 381.92,-83.5 371.92,-80 371.92,-87"/>
+<path fill="none" stroke="#63b8ff" d="M259.68,-83.5C288.23,-83.5 332.49,-83.5 365.96,-83.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="365.97,-87 375.97,-83.5 365.97,-80 365.97,-87"/>
 </a>
 </g>
 </g>
@@ -167,8 +167,8 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M452.01,-114.9C463.85,-113.16 477.14,-111.2 489.83,-109.33"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="490.45,-112.78 499.83,-107.86 489.43,-105.85 490.45,-112.78"/>
+<path fill="none" stroke="#63b8ff" d="M458.03,-114.01C468.21,-112.52 479.15,-110.9 489.67,-109.35"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="490.22,-112.81 499.6,-107.89 489.2,-105.89 490.22,-112.81"/>
 </a>
 </g>
 </g>
@@ -176,8 +176,8 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000009_Node000004" class="edge">
 <title>Node9&#45;&gt;Node4</title>
 <g id="a_edge5_Node000009_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M444.24,-87.72C457.81,-89.61 474.21,-91.9 489.73,-94.07"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="489.37,-97.55 499.75,-95.47 490.33,-90.62 489.37,-97.55"/>
+<path fill="none" stroke="#63b8ff" d="M450.28,-88.56C462.51,-90.27 476.43,-92.21 489.7,-94.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="489.29,-97.54 499.68,-95.46 490.26,-90.61 489.29,-97.54"/>
 </a>
 </g>
 </g>

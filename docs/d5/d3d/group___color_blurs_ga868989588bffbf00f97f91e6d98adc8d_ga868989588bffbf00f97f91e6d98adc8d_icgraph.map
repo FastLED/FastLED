@@ -1,0 +1,9 @@
+<map id="fl::blur2d" name="fl::blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter." alt="" coords="184,55,263,80"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="31,5,110,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,53,109,33,111,28,172,48"/>
+<area shape="rect" id="Node000003" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="5,55,136,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,70,136,70,136,65,170,65"/>
+<area shape="rect" id="Node000004" href="$df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="45,104,96,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,87,97,111,95,106,170,82"/>
+</map>

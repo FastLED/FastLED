@@ -110,7 +110,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ae830bc1aa13586a2cc64111682d0071
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d8/d2d/fl_2force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void CRGB::maximizeBrightness </td>
+          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void CRGB::maximizeBrightness </td>
           <td>(</td>
           <td class="paramtype">uint8_t</td>          <td class="paramname"><span class="paramname"><em>limit</em></span><span class="paramdefsep"> = </span><span class="paramdefval">255</span></td><td>)</td>
           <td></td>
@@ -126,22 +126,22 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ae830bc1aa13586a2cc64111682d0071
 <p>Maximize the brightness of this <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object. </p>
 <p>This makes the individual color channels as bright as possible while keeping the same value differences between channels. </p><dl class="section note"><dt>Note</dt><dd>This does not keep the same ratios between channels, just the same difference in absolute values. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00387">387</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  387</span>                                                                         {</div>
-<div class="line"><span class="lineno">  388</span>        uint8_t max = red;</div>
-<div class="line"><span class="lineno">  389</span>        <span class="keywordflow">if</span>( green &gt; max) max = green;</div>
-<div class="line"><span class="lineno">  390</span>        <span class="keywordflow">if</span>( blue &gt; max) max = blue;</div>
-<div class="line"><span class="lineno">  391</span> </div>
-<div class="line"><span class="lineno">  392</span>        <span class="comment">// stop div/0 when color is black</span></div>
-<div class="line"><span class="lineno">  393</span>        <span class="keywordflow">if</span>(max &gt; 0) {</div>
-<div class="line"><span class="lineno">  394</span>            uint16_t factor = ((uint16_t)(limit) * 256) / max;</div>
-<div class="line"><span class="lineno">  395</span>            red =   (red   * factor) / 256;</div>
-<div class="line"><span class="lineno">  396</span>            green = (green * factor) / 256;</div>
-<div class="line"><span class="lineno">  397</span>            blue =  (blue  * factor) / 256;</div>
-<div class="line"><span class="lineno">  398</span>        }</div>
-<div class="line"><span class="lineno">  399</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dd1/crgb_8h_source.html#l00392">392</a> of file <a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  392</span>                                                                         {</div>
+<div class="line"><span class="lineno">  393</span>        uint8_t max = red;</div>
+<div class="line"><span class="lineno">  394</span>        <span class="keywordflow">if</span>( green &gt; max) max = green;</div>
+<div class="line"><span class="lineno">  395</span>        <span class="keywordflow">if</span>( blue &gt; max) max = blue;</div>
+<div class="line"><span class="lineno">  396</span> </div>
+<div class="line"><span class="lineno">  397</span>        <span class="comment">// stop div/0 when color is black</span></div>
+<div class="line"><span class="lineno">  398</span>        <span class="keywordflow">if</span>(max &gt; 0) {</div>
+<div class="line"><span class="lineno">  399</span>            uint16_t factor = ((uint16_t)(limit) * 256) / max;</div>
+<div class="line"><span class="lineno">  400</span>            red =   (red   * factor) / 256;</div>
+<div class="line"><span class="lineno">  401</span>            green = (green * factor) / 256;</div>
+<div class="line"><span class="lineno">  402</span>            blue =  (blue  * factor) / 256;</div>
+<div class="line"><span class="lineno">  403</span>        }</div>
+<div class="line"><span class="lineno">  404</span>    }</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d2d/fl_2force__inline_8h_source.html#l00007">FASTLED_FORCE_INLINE</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>.</p>
 
 </div>
 </div>
@@ -152,7 +152,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_ae830bc1aa13586a2cc64111682d0071
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

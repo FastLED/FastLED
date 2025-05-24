@@ -123,22 +123,22 @@ $(function(){initNavTree('d9/d41/classfl_1_1_noise_palette_ac7e866ba3586a6d8fcc9
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dc7/noisepalette_8h_source.html#l00073">73</a> of file <a class="el" href="../../d6/dc7/noisepalette_8h_source.html">noisepalette.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   73</span>                              {</div>
-<div class="line"><span class="lineno">   74</span>        CRGBPalette16 newPalette;</div>
-<div class="line"><span class="lineno">   75</span>        <span class="keywordflow">do</span> {</div>
-<div class="line"><span class="lineno">   76</span>            newPalette = CRGBPalette16(</div>
-<div class="line"><span class="lineno">   77</span>                CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 32), CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 255),</div>
-<div class="line"><span class="lineno">   78</span>                CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 128, 255), CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 255));</div>
-<div class="line"><span class="lineno">   79</span>        } <span class="keywordflow">while</span> (newPalette == <a class="code hl_variable" href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">currentPalette</a>);</div>
-<div class="line"><span class="lineno">   80</span>        <a class="code hl_variable" href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">currentPalette</a> = newPalette;</div>
-<div class="line"><span class="lineno">   81</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971_html_a19fd1a29610bc06fe61ac6acb1b79971"><div class="ttname"><a href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">fl::NoisePalette::currentPalette</a></div><div class="ttdeci">CRGBPalette16 currentPalette</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc7/noisepalette_8h_source.html#l00064">noisepalette.h:64</a></div></div>
-<div class="ttc" id="agroup___random_ga4e63c74426f6516f28470dc1b814aefe_html_ga4e63c74426f6516f28470dc1b814aefe"><div class="ttname"><a href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a></div><div class="ttdeci">LIB8STATIC uint8_t random8()</div><div class="ttdoc">Generate an 8-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dfa/random8_8h_source.html#l00044">random8.h:44</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/dc7/noisepalette_8h_source.html#l00074">74</a> of file <a class="el" href="../../d6/dc7/noisepalette_8h_source.html">noisepalette.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   74</span>                              {</div>
+<div class="line"><span class="lineno">   75</span>        CRGBPalette16 newPalette;</div>
+<div class="line"><span class="lineno">   76</span>        <span class="keywordflow">do</span> {</div>
+<div class="line"><span class="lineno">   77</span>            newPalette = CRGBPalette16(</div>
+<div class="line"><span class="lineno">   78</span>                CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 32), CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 255),</div>
+<div class="line"><span class="lineno">   79</span>                CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 128, 255), CHSV(<a class="code hl_function" href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a>(), 255, 255));</div>
+<div class="line"><span class="lineno">   80</span>        } <span class="keywordflow">while</span> (newPalette == <a class="code hl_variable" href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">currentPalette</a>);</div>
+<div class="line"><span class="lineno">   81</span>        <a class="code hl_variable" href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">currentPalette</a> = newPalette;</div>
+<div class="line"><span class="lineno">   82</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971_html_a19fd1a29610bc06fe61ac6acb1b79971"><div class="ttname"><a href="../../d9/d41/classfl_1_1_noise_palette_a19fd1a29610bc06fe61ac6acb1b79971.html#a19fd1a29610bc06fe61ac6acb1b79971">fl::NoisePalette::currentPalette</a></div><div class="ttdeci">CRGBPalette16 currentPalette</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc7/noisepalette_8h_source.html#l00065">noisepalette.h:65</a></div></div>
+<div class="ttc" id="agroup___random_ga4e63c74426f6516f28470dc1b814aefe_html_ga4e63c74426f6516f28470dc1b814aefe"><div class="ttname"><a href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a></div><div class="ttdeci">LIB8STATIC uint8_t random8()</div><div class="ttdoc">Generate an 8-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dfa/random8_8h_source.html#l00046">random8.h:46</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/dc7/noisepalette_8h_source.html#l00064">currentPalette</a>, and <a class="el" href="../../d9/dfa/random8_8h_source.html#l00044">random8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/dc7/noisepalette_8h_source.html#l00065">currentPalette</a>, and <a class="el" href="../../d9/dfa/random8_8h_source.html#l00046">random8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d66/noisepalette_8cpp_source.html#l00039">setPalettePreset()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d66/noisepalette_8cpp_source.html#l00038">setPalettePreset()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +163,7 @@ $(function(){initNavTree('d9/d41/classfl_1_1_noise_palette_ac7e866ba3586a6d8fcc9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d41/classfl_1_1_noise_palette.html">NoisePalette</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

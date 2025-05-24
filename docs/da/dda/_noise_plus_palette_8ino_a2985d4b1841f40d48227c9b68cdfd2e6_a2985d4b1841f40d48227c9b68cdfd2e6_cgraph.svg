@@ -32,7 +32,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d1/dc5/_color_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/dda/_noise_plus_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="337,-104.5 184,-104.5 184,-74.5 337,-74.5 337,-104.5"/>
 <text text-anchor="start" x="192" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetupBlackAndWhiteStriped</text>
 <text text-anchor="middle" x="260.5" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">Palette</text>
@@ -51,7 +51,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d1/dc5/_color_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../da/dda/_noise_plus_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="339,-56 182,-56 182,-37 339,-37 339,-56"/>
 <text text-anchor="middle" x="260.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">SetupPurpleAndGreenPalette</text>
 </a>
@@ -87,7 +87,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000003"><a xlink:href="../../d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="433.5,-99 376.5,-99 376.5,-80 433.5,-80 433.5,-99"/>
 <text text-anchor="middle" x="405" y="-87" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
 </a>

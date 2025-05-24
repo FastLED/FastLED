@@ -1,0 +1,9 @@
+<map id="fl::BitsetInlined&lt; N &gt;::Proxy" name="fl::BitsetInlined&lt; N &gt;::Proxy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="35,299,166,339"/>
+<area shape="rect" id="Node000002" href="$d6/d6a/classfl_1_1_bitset_inlined.html" title="A Bitset implementation with inline storage that can grow if needed." alt="" coords="21,211,181,236"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,250,103,298,98,298,98,250"/>
+<area shape="rect" id="Node000003" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="5,108,196,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,162,103,210,98,210,98,162"/>
+<area shape="rect" id="Node000004" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="25,5,176,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,45,103,108,98,108,98,45"/>
+</map>

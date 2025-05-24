@@ -1,0 +1,17 @@
+digraph "kf_bfly4"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="kf_bfly4",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="kf_work",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_a96e4f47862a2df7183ae9e8caaf7a866.html#a96e4f47862a2df7183ae9e8caaf7a866",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="kiss_fft_stride",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d69/kiss__fft_8c_aec345dab68815f4c5c2904978626d877.html#aec345dab68815f4c5c2904978626d877",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="kiss_fft",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d69/kiss__fft_8c_ab36e2bb33b74c1a7eabe3271d0916030.html#ab36e2bb33b74c1a7eabe3271d0916030",tooltip=" "];
+}

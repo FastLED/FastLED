@@ -6,6 +6,8 @@ var _fx_wave2d_8ino =
     [ "NUM_LEDS", "dd/d10/_fx_wave2d_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd", null ],
     [ "WIDTH", "dd/d10/_fx_wave2d_8ino_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d", null ],
     [ "applyFancyEffect", "dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41", null ],
+    [ "CreateArgsLower", "dd/d10/_fx_wave2d_8ino_a9c851c66f2e46b214500ec6c3722b9a4.html#a9c851c66f2e46b214500ec6c3722b9a4", null ],
+    [ "CreateArgsUpper", "dd/d10/_fx_wave2d_8ino_afab48463dd09a75d6a518ac33378eda4.html#afab48463dd09a75d6a518ac33378eda4", null ],
     [ "DEFINE_GRADIENT_PALETTE", "dd/d10/_fx_wave2d_8ino_a662cd943a515300c34cf756e150f3e63.html#a662cd943a515300c34cf756e150f3e63", null ],
     [ "DEFINE_GRADIENT_PALETTE", "dd/d10/_fx_wave2d_8ino_ac4a022c25ad8412bc08ce7a7a9df5e75.html#ac4a022c25ad8412bc08ce7a7a9df5e75", null ],
     [ "getSuperSample", "dd/d10/_fx_wave2d_8ino_ad3facb26c8fe2270d260a10ea9aceb09.html#ad3facb26c8fe2270d260a10ea9aceb09", null ],
@@ -39,8 +41,8 @@ var _fx_wave2d_8ino =
     [ "superSample", "dd/d10/_fx_wave2d_8ino_ad750185cda0eac0e2aff5bae6f3e4a97.html#ad750185cda0eac0e2aff5bae6f3e4a97", null ],
     [ "title", "dd/d10/_fx_wave2d_8ino_a7208bb92002b7cfbe7d7dfb09b90079c.html#a7208bb92002b7cfbe7d7dfb09b90079c", null ],
     [ "triggerSpeed", "dd/d10/_fx_wave2d_8ino_abc5da8af03933051c0b6f48718711f86.html#abc5da8af03933051c0b6f48718711f86", null ],
-    [ "waveFxLower", "dd/d10/_fx_wave2d_8ino_a313ae68d0af0406e800df4ac6550b3e8.html#a313ae68d0af0406e800df4ac6550b3e8", null ],
-    [ "waveFxUpper", "dd/d10/_fx_wave2d_8ino_a79c6c23d5b733c06d2bda85fc9645a04.html#a79c6c23d5b733c06d2bda85fc9645a04", null ],
+    [ "waveFxLower", "dd/d10/_fx_wave2d_8ino_a48de17fa471128a5fc0a102c65c032e0.html#a48de17fa471128a5fc0a102c65c032e0", null ],
+    [ "waveFxUpper", "dd/d10/_fx_wave2d_8ino_aff94867e76c2e13059049528fd71af2f.html#aff94867e76c2e13059049528fd71af2f", null ],
     [ "xyMap", "dd/d10/_fx_wave2d_8ino_a091f238d3135fb1f2164e7d52c180b26.html#a091f238d3135fb1f2164e7d52c180b26", null ],
     [ "xyRect", "dd/d10/_fx_wave2d_8ino_aa3cf119b014a8863abbf4a7a2fdbaa7f.html#aa3cf119b014a8863abbf4a7a2fdbaa7f", null ]
 ];

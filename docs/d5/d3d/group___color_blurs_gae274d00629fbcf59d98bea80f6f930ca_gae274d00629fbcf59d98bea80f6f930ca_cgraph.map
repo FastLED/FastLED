@@ -1,0 +1,13 @@
+<map id="fl::blur1d" name="fl::blur1d">
+<area shape="rect" id="Node000001" title="One&#45;dimensional blur filter." alt="" coords="5,31,84,56"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="132,31,249,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,41,118,41,118,46,84,46"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="297,5,401,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="249,31,283,26,284,31,250,37"/>
+<area shape="rect" id="Node000004" href="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="305,55,393,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="250,50,292,56,291,61,249,55"/>
+<area shape="rect" id="Node000005" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="499,29,596,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="393,59,485,47,486,53,394,64"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="449,79,645,104"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="394,70,436,75,436,80,393,75"/>
+</map>

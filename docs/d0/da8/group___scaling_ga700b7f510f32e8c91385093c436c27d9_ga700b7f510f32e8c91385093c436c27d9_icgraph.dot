@@ -8,7 +8,7 @@ digraph "nscale8x3_video"
   rankdir="RL";
   Node1 [id="Node000001",label="nscale8x3_video",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Scale three one-byte values by a fourth one, which is treated as the numerator of a fraction whose de..."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="ColorFromPaletteExtended",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_ga59c2f3e8a12b9eef789c37ae4d5f0182.html#ga59c2f3e8a12b9eef789c37ae4d5f0182",tooltip="Same as ColorFromPalette, but higher precision."];
+  Node2 [id="Node000002",label="fl::ColorFromPaletteExtended",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a572c01969570d8ea54fa4eabf297d7bb.html#a572c01969570d8ea54fa4eabf297d7bb",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="CRGB::fadeLightBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a3b098899b112c2c9a7ad7490992e0d84.html#a3b098899b112c2c9a7ad7490992e0d84",tooltip="fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale"];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -22,9 +22,7 @@ digraph "nscale8x3_video"
   Node7 -> Node8 [id="edge7_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dd0/_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node4 -> Node9 [id="edge8_Node000004_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="map_data_into_colors\l_through_palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f",tooltip="Maps an array of palette color indexes into an array of LED colors."];
-  Node4 -> Node10 [id="edge9_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="operator%",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465",tooltip="Scale using CRGB::nscale8_video()"];
-  Node1 -> Node11 [id="edge10_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="CRGB::operator%=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97",tooltip="%= is a synonym for nscale8_video()."];
+  Node9 [id="Node000009",label="operator%",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465",tooltip="Scale using CRGB::nscale8_video()"];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="CRGB::operator%=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97",tooltip="%= is a synonym for nscale8_video()."];
 }

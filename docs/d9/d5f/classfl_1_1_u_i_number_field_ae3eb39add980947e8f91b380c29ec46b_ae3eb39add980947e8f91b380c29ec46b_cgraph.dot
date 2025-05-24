@@ -8,5 +8,10 @@ digraph "fl::UINumberField::setValue"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::UINumberField::\lsetValue",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UINumberField::\lvalue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838",tooltip=" "];
+  Node2 [id="Node000002",label="fl::UINumberFieldImpl\l::setValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_ad9a88b405197eaf2369e1fde9194d2f3.html#ad9a88b405197eaf2369e1fde9194d2f3",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UINumberFieldImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::UINumberField::\lvalue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838",tooltip=" "];
+  Node4 -> Node3 [id="edge4_Node000004_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

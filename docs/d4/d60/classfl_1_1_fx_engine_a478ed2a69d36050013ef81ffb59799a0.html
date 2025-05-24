@@ -124,20 +124,20 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_a478ed2a69d36050013ef81ff
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the transition was initiated, false otherwise. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00037">37</a> of file <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html">fx_engine.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   37</span>                                       {</div>
-<div class="line"><span class="lineno">   38</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.next(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, &amp;<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, <span class="keyword">true</span>);</div>
-<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">if</span> (!ok) {</div>
-<div class="line"><span class="lineno">   40</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   41</span>    }</div>
-<div class="line"><span class="lineno">   42</span>    <a class="code hl_function" href="../../d4/d60/classfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe.html#a855db03914c4e3f49b575a9c745026fe">setNextFx</a>(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, duration);</div>
-<div class="line"><span class="lineno">   43</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   44</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00033">33</a> of file <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html">fx_engine.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   33</span>                                       {</div>
+<div class="line"><span class="lineno">   34</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">mEffects</a>.next(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, &amp;<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, <span class="keyword">true</span>);</div>
+<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">if</span> (!ok) {</div>
+<div class="line"><span class="lineno">   36</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   37</span>    }</div>
+<div class="line"><span class="lineno">   38</span>    <a class="code hl_function" href="../../d4/d60/classfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe.html#a855db03914c4e3f49b575a9c745026fe">setNextFx</a>(<a class="code hl_variable" href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">mCurrId</a>, duration);</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   40</span>}</div>
 <div class="ttc" id="aclassfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7_html_a8439102707d508286481ab8c06ddceb7"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a8439102707d508286481ab8c06ddceb7.html#a8439102707d508286481ab8c06ddceb7">fl::FxEngine::mCurrId</a></div><div class="ttdeci">int mCurrId</div><div class="ttdoc">Id of the current effect.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3c/fx__engine_8h_source.html#l00123">fx_engine.h:123</a></div></div>
-<div class="ttc" id="aclassfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe_html_a855db03914c4e3f49b575a9c745026fe"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe.html#a855db03914c4e3f49b575a9c745026fe">fl::FxEngine::setNextFx</a></div><div class="ttdeci">bool setNextFx(int index, uint16_t duration)</div><div class="ttdoc">Sets the next effect to transition to.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d8e/fx__engine_8cpp_source.html#l00046">fx_engine.cpp:46</a></div></div>
+<div class="ttc" id="aclassfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe_html_a855db03914c4e3f49b575a9c745026fe"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_a855db03914c4e3f49b575a9c745026fe.html#a855db03914c4e3f49b575a9c745026fe">fl::FxEngine::setNextFx</a></div><div class="ttdeci">bool setNextFx(int index, uint16_t duration)</div><div class="ttdoc">Sets the next effect to transition to.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d8e/fx__engine_8cpp_source.html#l00042">fx_engine.cpp:42</a></div></div>
 <div class="ttc" id="aclassfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255_html_aa36ca65e51638c5c609bcd3f7976a255"><div class="ttname"><a href="../../d4/d60/classfl_1_1_fx_engine_aa36ca65e51638c5c609bcd3f7976a255.html#aa36ca65e51638c5c609bcd3f7976a255">fl::FxEngine::mEffects</a></div><div class="ttdeci">IntFxMap mEffects</div><div class="ttdoc">Collection of effects.</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3c/fx__engine_8h_source.html#l00121">fx_engine.h:121</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00123">mCurrId</a>, <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00121">mEffects</a>, and <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00046">setNextFx()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00123">mCurrId</a>, <a class="el" href="../../d9/d3c/fx__engine_8h_source.html#l00121">mEffects</a>, and <a class="el" href="../../df/d8e/fx__engine_8cpp_source.html#l00042">setNextFx()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -155,7 +155,7 @@ $(function(){initNavTree('d4/d60/classfl_1_1_fx_engine_a478ed2a69d36050013ef81ff
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d60/classfl_1_1_fx_engine.html">FxEngine</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

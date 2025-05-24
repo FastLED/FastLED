@@ -142,53 +142,54 @@ $(function(){initNavTree('dd/d45/struct_painter_a405cd2b8e31b1ad6e8d6abe9ba03c07
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00442">442</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  445</span>                                                               {</div>
-<div class="line"><span class="lineno">  446</span> led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">RawBeginDraw</a>();</div>
-<div class="line"><span class="lineno">  447</span> </div>
-<div class="line"><span class="lineno">  448</span> Color3i black = <a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>();</div>
-<div class="line"><span class="lineno">  449</span>                           </div>
-<div class="line"><span class="lineno">  450</span> <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
-<div class="line"><span class="lineno">  451</span>    <span class="keyword">const</span> Key&amp; key = keyboard.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i];</div>
-<div class="line"><span class="lineno">  452</span>    </div>
-<div class="line"><span class="lineno">  453</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> pixel_count = led_column_table[i];</div>
-<div class="line"><span class="lineno">  454</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> draw_pixel_count = ceil(pixel_count * sqrt(key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a>));</div>
-<div class="line"><span class="lineno">  455</span>    </div>
-<div class="line"><span class="lineno">  456</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> black_pixel_count = pixel_count - draw_pixel_count;</div>
-<div class="line"><span class="lineno">  457</span>    </div>
-<div class="line"><span class="lineno">  458</span>    <span class="comment">// If i is even</span></div>
-<div class="line"><span class="lineno">  459</span>    <span class="keywordflow">if</span> (i % 2 == 0) {</div>
-<div class="line"><span class="lineno">  460</span>     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; black_pixel_count; ++j) {</div>
-<div class="line"><span class="lineno">  461</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(*led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">GetIterator</a>(i));</div>
-<div class="line"><span class="lineno">  462</span>      }</div>
-<div class="line"><span class="lineno">  463</span>     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; draw_pixel_count; ++j) {</div>
-<div class="line"><span class="lineno">  464</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(black);</div>
-<div class="line"><span class="lineno">  465</span>     }</div>
-<div class="line"><span class="lineno">  466</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  467</span> </div>
-<div class="line"><span class="lineno">  468</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; draw_pixel_count; ++j) {</div>
-<div class="line"><span class="lineno">  469</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(black);</div>
-<div class="line"><span class="lineno">  470</span>      }</div>
-<div class="line"><span class="lineno">  471</span>      </div>
-<div class="line"><span class="lineno">  472</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; black_pixel_count; ++j) {</div>
-<div class="line"><span class="lineno">  473</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(*led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">GetIterator</a>(i));</div>
-<div class="line"><span class="lineno">  474</span>      }</div>
-<div class="line"><span class="lineno">  475</span>    }</div>
-<div class="line"><span class="lineno">  476</span>  }</div>
-<div class="line"><span class="lineno">  477</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">RawCommitDraw</a>();</div>
-<div class="line"><span class="lineno">  478</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00449">449</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  452</span>                                                               {</div>
+<div class="line"><span class="lineno">  453</span> led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">RawBeginDraw</a>();</div>
+<div class="line"><span class="lineno">  454</span> </div>
+<div class="line"><span class="lineno">  455</span> Color3i black = <a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>();</div>
+<div class="line"><span class="lineno">  456</span>                           </div>
+<div class="line"><span class="lineno">  457</span> <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
+<div class="line"><span class="lineno">  458</span>    <span class="keyword">const</span> Key&amp; key = keyboard.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i];</div>
+<div class="line"><span class="lineno">  459</span>    </div>
+<div class="line"><span class="lineno">  460</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> pixel_count = led_column_table[i];</div>
+<div class="line"><span class="lineno">  461</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> draw_pixel_count = <a class="code hl_function" href="../../d4/d36/namespacefl_a82b8852866205c90392fe4644d20f1f7.html#a82b8852866205c90392fe4644d20f1f7">ceil</a>(pixel_count * sqrt(key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a>));</div>
+<div class="line"><span class="lineno">  462</span>    </div>
+<div class="line"><span class="lineno">  463</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> black_pixel_count = pixel_count - draw_pixel_count;</div>
+<div class="line"><span class="lineno">  464</span>    </div>
+<div class="line"><span class="lineno">  465</span>    <span class="comment">// If i is even</span></div>
+<div class="line"><span class="lineno">  466</span>    <span class="keywordflow">if</span> (i % 2 == 0) {</div>
+<div class="line"><span class="lineno">  467</span>     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; black_pixel_count; ++j) {</div>
+<div class="line"><span class="lineno">  468</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(*led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">GetIterator</a>(i));</div>
+<div class="line"><span class="lineno">  469</span>      }</div>
+<div class="line"><span class="lineno">  470</span>     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; draw_pixel_count; ++j) {</div>
+<div class="line"><span class="lineno">  471</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(black);</div>
+<div class="line"><span class="lineno">  472</span>     }</div>
+<div class="line"><span class="lineno">  473</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  474</span> </div>
+<div class="line"><span class="lineno">  475</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; draw_pixel_count; ++j) {</div>
+<div class="line"><span class="lineno">  476</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(black);</div>
+<div class="line"><span class="lineno">  477</span>      }</div>
+<div class="line"><span class="lineno">  478</span>      </div>
+<div class="line"><span class="lineno">  479</span>      <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; black_pixel_count; ++j) {</div>
+<div class="line"><span class="lineno">  480</span>        led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(*led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">GetIterator</a>(i));</div>
+<div class="line"><span class="lineno">  481</span>      }</div>
+<div class="line"><span class="lineno">  482</span>    }</div>
+<div class="line"><span class="lineno">  483</span>  }</div>
+<div class="line"><span class="lineno">  484</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">RawCommitDraw</a>();</div>
+<div class="line"><span class="lineno">  485</span>}</div>
 <div class="ttc" id="aclass_keyboard_state_ab1438e70fd677a21c3601343ac5664f3_html_ab1438e70fd677a21c3601343ac5664f3"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">KeyboardState::keys_</a></div><div class="ttdeci">Key keys_[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
 <div class="ttc" id="aclass_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123_html_a0a54c27f180840a5713c0a20f14a8123"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">LedRopeInterface::RawDrawPixel</a></div><div class="ttdeci">virtual void RawDrawPixel(const Color3i &amp;c)=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a_html_a4655ae1b8e1b02b5604bf2303a367e4a"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw</a></div><div class="ttdeci">virtual void RawCommitDraw()=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac_html_aabd7b16e96dfbbcf2dac2b21f389d0ac"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw</a></div><div class="ttdeci">virtual void RawBeginDraw()=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25_html_ac9c28ef970a520f1c117201ea40fee25"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">LedRopeInterface::GetIterator</a></div><div class="ttdeci">virtual Color3i * GetIterator(int i)=0</div></div>
+<div class="ttc" id="anamespacefl_a82b8852866205c90392fe4644d20f1f7_html_a82b8852866205c90392fe4644d20f1f7"><div class="ttname"><a href="../../d4/d36/namespacefl_a82b8852866205c90392fe4644d20f1f7.html#a82b8852866205c90392fe4644d20f1f7">fl::ceil</a></div><div class="ttdeci">T ceil(T value)</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00018">math.h:18</a></div></div>
 <div class="ttc" id="astruct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9_html_af5a85a3006c2ec7d3f4c4132b120e7b9"><div class="ttname"><a href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a></div><div class="ttdeci">static Color3i Black()</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00009">color.h:9</a></div></div>
 <div class="ttc" id="astruct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b_html_a0096a4003cbc683bc1ed7e675c5c029b"><div class="ttname"><a href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">ColorHSV::v_</a></div><div class="ttdeci">float v_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00098">color.h:98</a></div></div>
 <div class="ttc" id="astruct_key_a9f67c53a51f8b33667c327f79c6782dc_html_a9f67c53a51f8b33667c327f79c6782dc"><div class="ttname"><a href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">Key::curr_color_</a></div><div class="ttdeci">ColorHSV curr_color_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00009">Color3i::Black()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">Key::curr_color_</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">LedRopeInterface::GetIterator()</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">KeyboardState::keys_</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">LedRopeInterface::RawDrawPixel()</a>, and <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00098">ColorHSV::v_</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00097">Paint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00098">Paint()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -213,7 +214,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a405cd2b8e31b1ad6e8d6abe9ba03c07
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/d45/struct_painter.html">Painter</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

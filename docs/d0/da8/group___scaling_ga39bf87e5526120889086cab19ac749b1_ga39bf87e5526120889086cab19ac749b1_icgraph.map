@@ -1,32 +1,30 @@
 <map id="nscale8x3" name="nscale8x3">
-<area shape="rect" id="Node000001" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="592,129,680,155"/>
-<area shape="rect" id="Node000002" href="$d2/d73/group___palette_colors_ga61f55da5eb81ddc50f7855b26fb0d69b.html#ga61f55da5eb81ddc50f7855b26fb0d69b" title="Same as ColorFromPalette, but with uint16_t index to give greater precision." alt="" coords="339,5,534,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="617,119,586,80,565,61,543,44,518,33,520,28,545,40,569,56,590,76,621,116"/>
-<area shape="rect" id="Node000003" href="$d2/d73/group___palette_colors_ga681c8340a30e692e7bbfec5a104cc80f.html#ga681c8340a30e692e7bbfec5a104cc80f" title=" " alt="" coords="339,55,534,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="603,124,543,94,506,83,508,77,545,89,605,120"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_aec2425ad20ac3c5191ac2b47eec4dca0.html#aec2425ad20ac3c5191ac2b47eec4dca0" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="355,104,518,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="578,137,518,130,519,124,579,132"/>
-<area shape="rect" id="Node000005" href="$dd/d61/_fx_water_8ino_aa04e7c98cb0803818832555bf128fb57.html#aa04e7c98cb0803818832555bf128fb57" title=" " alt="" coords="329,153,544,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="579,152,542,156,542,151,578,146"/>
-<area shape="rect" id="Node000007" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="378,203,495,228"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="603,164,545,192,496,207,495,202,543,188,601,159"/>
-<area shape="rect" id="Node000018" href="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" title="Return a CRGB object that is a scaled down version of this object." alt="" coords="382,252,491,277"/>
-<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="621,168,589,207,569,227,545,243,519,254,492,262,491,256,518,249,543,238,565,222,585,203,617,165"/>
-<area shape="rect" id="Node000006" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="173,79,224,104"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="357,152,328,143,304,131,280,118,223,100,225,95,282,113,306,126,330,138,358,147"/>
-<area shape="rect" id="Node000008" href="$d5/d3d/group___color_blurs_gaacf0416f9e0438f23f92d0df6c338ea3.html#gaacf0416f9e0438f23f92d0df6c338ea3" title="One&#45;dimensional blur filter." alt="" coords="167,128,230,153"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="364,204,328,192,304,180,280,167,229,151,231,146,282,162,306,175,330,188,365,198"/>
-<area shape="rect" id="Node000010" href="$d5/d3d/group___color_blurs_ga33ce178f76009348d3a0f0723b22d4de.html#ga33ce178f76009348d3a0f0723b22d4de" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="147,177,251,203"/>
-<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="364,210,251,198,251,193,364,205"/>
-<area shape="rect" id="Node000015" href="$d5/d3d/group___color_blurs_ga3000f2662fe45e9424c02b0d35f40b21.html#ga3000f2662fe45e9424c02b0d35f40b21" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="157,227,240,252"/>
-<area shape="poly" id="edge11_Node000007_Node000015" title=" " alt="" coords="365,225,240,238,240,233,364,220"/>
-<area shape="rect" id="Node000016" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="147,276,251,301"/>
-<area shape="poly" id="edge13_Node000007_Node000016" title=" " alt="" coords="365,232,330,243,306,255,282,267,249,278,247,273,280,262,304,250,328,238,364,227"/>
-<area shape="rect" id="Node000017" href="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f" title="Maps an array of palette color indexes into an array of LED colors." alt="" coords="116,326,281,366"/>
-<area shape="poly" id="edge14_Node000007_Node000017" title=" " alt="" coords="366,227,331,243,315,260,307,278,299,297,283,316,265,328,262,324,280,312,295,294,302,275,310,257,328,238,363,222"/>
-<area shape="rect" id="Node000009" href="$d4/d0c/_blur_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="11,128,62,153"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="153,143,62,143,62,138,153,138"/>
-<area shape="rect" id="Node000011" href="$d5/d3d/group___color_blurs_gadfd6e9dc2b0c79922d8d4be9d94cf5f5.html#gadfd6e9dc2b0c79922d8d4be9d94cf5f5" title="Two&#45;dimensional blur filter." alt="" coords="5,201,68,227"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="133,202,69,212,68,207,132,197"/>
-<area shape="poly" id="edge12_Node000015_Node000011" title=" " alt="" coords="143,233,68,221,69,216,144,228"/>
+<area shape="rect" id="Node000001" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="609,129,697,155"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af1762cc4dd61591c807c55bb8f76a303.html#af1762cc4dd61591c807c55bb8f76a303" title=" " alt="" coords="349,5,559,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="634,119,603,80,583,61,560,44,535,33,537,28,563,40,586,56,607,76,639,116"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.html#a465f15f94e7637263979b71f769cbf27" title=" " alt="" coords="349,55,559,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="620,124,560,94,524,83,525,77,562,89,623,120"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_aec2425ad20ac3c5191ac2b47eec4dca0.html#aec2425ad20ac3c5191ac2b47eec4dca0" title="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale" alt="" coords="373,104,535,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="595,137,535,130,536,124,596,132"/>
+<area shape="rect" id="Node000006" href="$dd/d61/_fx_water_8ino_aa04e7c98cb0803818832555bf128fb57.html#aa04e7c98cb0803818832555bf128fb57" title=" " alt="" coords="347,153,561,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="596,152,560,156,559,151,595,146"/>
+<area shape="rect" id="Node000008" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="395,227,513,252"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="618,164,563,192,485,229,483,224,560,188,615,159"/>
+<area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" title="Return a CRGB object that is a scaled down version of this object." alt="" coords="399,276,509,301"/>
+<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="642,169,611,218,589,244,563,266,537,278,510,286,508,281,535,273,560,261,585,240,607,215,638,166"/>
+<area shape="rect" id="Node000005" href="$d2/dba/structfl_1_1_x_y_draw_composited_a9be77bdd88ae485e4f08f13b734cce4d.html#a9be77bdd88ae485e4f08f13b734cce4d" title=" " alt="" coords="132,75,299,115"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="358,111,299,105,299,100,359,106"/>
+<area shape="rect" id="Node000007" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="190,140,241,165"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="333,162,241,157,241,151,333,157"/>
+<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae274d00629fbcf59d98bea80f6f930ca.html#gae274d00629fbcf59d98bea80f6f930ca" title="One&#45;dimensional blur filter." alt="" coords="176,189,255,215"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="381,231,255,211,255,205,382,225"/>
+<area shape="rect" id="Node000010" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="155,239,275,264"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="381,246,276,251,275,246,381,240"/>
+<area shape="rect" id="Node000015" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="166,288,265,313"/>
+<area shape="poly" id="edge11_Node000008_Node000015" title=" " alt="" coords="383,257,347,266,259,291,258,285,346,261,381,252"/>
+<area shape="rect" id="Node000016" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="163,337,267,363"/>
+<area shape="poly" id="edge13_Node000008_Node000016" title=" " alt="" coords="383,251,348,266,333,280,325,295,316,311,300,327,269,342,266,337,297,322,312,308,320,292,329,276,345,261,381,246"/>
+<area shape="rect" id="Node000011" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="5,264,84,289"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="142,265,85,274,84,268,141,260"/>
+<area shape="poly" id="edge12_Node000015_Node000011" title=" " alt="" coords="152,294,84,285,84,279,152,289"/>
 </map>

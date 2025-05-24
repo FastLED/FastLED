@@ -1,0 +1,5 @@
+<map id="fl::BitsetInlined&lt; N &gt;" name="fl::BitsetInlined&lt; N &gt;">
+<area shape="rect" id="Node000001" title="A Bitset implementation with inline storage that can grow if needed." alt="" coords="5,5,165,31"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="180,14,192,18,166,23,165,17,187,18,179,19"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="179,11,219,12,237,18,214,24,165,25,165,20,213,19,232,18,218,17,179,16"/>
+</map>

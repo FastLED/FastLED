@@ -1,12 +1,12 @@
 <map id="applyFancyEffect" name="applyFancyEffect">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,31,137,56"/>
-<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30.html#a2afdf19685e9f588d22fb45aef62ae30" title=" " alt="" coords="396,5,565,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,28,185,15,287,9,382,10,382,15,287,15,186,21,119,33"/>
-<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a431f445197b6ac690c83e27ed3005843.html#a431f445197b6ac690c83e27ed3005843" title="Call this when you want to (re)start the ramp cycle." alt="" coords="187,31,347,56"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="137,41,173,41,173,46,137,46"/>
-<area shape="rect" id="Node000004" href="$d0/d9d/classfl_1_1_time_ramp_a17b1376b4c537c669912cef12d9f211d.html#a17b1376b4c537c669912cef12d9f211d" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="185,80,348,105"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="123,53,203,74,202,79,122,59"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="312,77,347,66,435,33,437,38,349,71,313,82"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8" title=" " alt="" coords="421,80,540,105"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="348,90,407,90,407,95,348,95"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30.html#a2afdf19685e9f588d22fb45aef62ae30" title=" " alt="" coords="404,5,573,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,28,185,15,291,9,390,10,390,15,291,14,186,21,119,33"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a431f445197b6ac690c83e27ed3005843.html#a431f445197b6ac690c83e27ed3005843" title="Call this when you want to (re)start the ramp cycle." alt="" coords="191,31,351,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,41,177,41,177,46,138,46"/>
+<area shape="rect" id="Node000004" href="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="185,80,356,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="124,53,206,74,205,79,123,59"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="319,77,355,66,443,33,445,38,357,71,320,83"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8" title=" " alt="" coords="429,80,548,105"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="356,90,416,90,416,95,356,95"/>
 </map>

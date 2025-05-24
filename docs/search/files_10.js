@@ -19,10 +19,13 @@ var searchData=
   ['pjrcspectrumanalyzer_2eino_16',['PJRCSpectrumAnalyzer.ino',['../d7/dfa/_p_j_r_c_spectrum_analyzer_8ino.html',1,'']]],
   ['platforms_2ecpp_17',['platforms.cpp',['../d2/d62/platforms_8cpp.html',1,'']]],
   ['platforms_2eh_18',['platforms.h',['../da/dc9/platforms_8h.html',1,'']]],
-  ['porting_2emd_19',['PORTING.md',['../d9/d1b/_p_o_r_t_i_n_g_8md.html',1,'']]],
-  ['power_5fmgt_2ecpp_20',['power_mgt.cpp',['../dc/d56/power__mgt_8cpp.html',1,'']]],
-  ['power_5fmgt_2eh_21',['power_mgt.h',['../dc/d5b/power__mgt_8h.html',1,'']]],
-  ['pride2015_2eh_22',['pride2015.h',['../d7/dc4/pride2015_8h.html',1,'']]],
-  ['pride2015_2eino_23',['Pride2015.ino',['../d0/dce/_pride2015_8ino.html',1,'']]],
-  ['ptr_2eh_24',['ptr.h',['../d7/df1/fl_2ptr_8h.html',1,'(Global Namespace)'],['../dd/d98/ptr_8h.html',1,'(Global Namespace)']]]
+  ['point_2eh_19',['point.h',['../d2/d91/point_8h.html',1,'']]],
+  ['porting_2emd_20',['PORTING.md',['../d9/d1b/_p_o_r_t_i_n_g_8md.html',1,'']]],
+  ['power_5fmgt_2ecpp_21',['power_mgt.cpp',['../dc/d56/power__mgt_8cpp.html',1,'']]],
+  ['power_5fmgt_2eh_22',['power_mgt.h',['../dc/d5b/power__mgt_8h.html',1,'']]],
+  ['pride2015_2eh_23',['pride2015.h',['../d7/dc4/pride2015_8h.html',1,'']]],
+  ['pride2015_2eino_24',['Pride2015.ino',['../d0/dce/_pride2015_8ino.html',1,'']]],
+  ['priority_5fqueue_2eh_25',['priority_queue.h',['../d4/da1/priority__queue_8h.html',1,'']]],
+  ['ptr_2ecpp_26',['ptr.cpp',['../df/dc6/ptr_8cpp.html',1,'']]],
+  ['ptr_2eh_27',['ptr.h',['../dd/d98/ptr_8h.html',1,'']]]
 ];

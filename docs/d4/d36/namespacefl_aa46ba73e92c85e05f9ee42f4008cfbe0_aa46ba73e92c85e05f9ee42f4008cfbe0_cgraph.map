@@ -1,0 +1,12 @@
+<map id="fl::NewPtr" name="fl::NewPtr">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,43,91,68"/>
+<area shape="rect" id="Node000002" href="$da/d84/classfl_1_1_ptr_traits_a6f44b5dc3ee20b4ba14ed6b765cfa776.html#a6f44b5dc3ee20b4ba14ed6b765cfa776" title=" " alt="" coords="139,43,267,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,53,125,53,125,58,91,58"/>
+<area shape="rect" id="Node000003" href="$d1/d56/classfl_1_1_ptr_a2895e9ece61a2b6fdd33f8195033cfbe.html#a2895e9ece61a2b6fdd33f8195033cfbe" title=" " alt="" coords="315,43,477,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="267,53,301,53,301,58,267,58"/>
+<area shape="rect" id="Node000004" href="$d1/d56/classfl_1_1_ptr_a092e808d55b10861885afe25aa5aa72a.html#a092e808d55b10861885afe25aa5aa72a" title=" " alt="" coords="525,5,608,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="454,40,511,27,512,33,455,45"/>
+<area shape="rect" id="Node000005" href="$d1/d56/classfl_1_1_ptr_a5eadeb0f9f825544e0280cd8c6d48539.html#a5eadeb0f9f825544e0280cd8c6d48539" title=" " alt="" coords="525,79,608,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="457,65,512,77,511,82,456,71"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="538,80,532,70,535,61,547,54,567,52,590,55,600,64,597,68,588,60,567,57,549,59,539,64,537,70,543,77"/>
+</map>

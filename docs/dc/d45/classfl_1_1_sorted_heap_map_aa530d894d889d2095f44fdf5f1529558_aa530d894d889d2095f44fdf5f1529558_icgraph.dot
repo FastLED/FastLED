@@ -10,7 +10,9 @@ digraph "fl::SortedHeapMap::find"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::at",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_aae9df2efb473df0bd5471e2f1126b7fe.html#aae9df2efb473df0bd5471e2f1126b7fe",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_aa0456e804f5fb889bfeb787db298dd9b.html#aa0456e804f5fb889bfeb787db298dd9b",tooltip=" "];
+  Node3 [id="Node000003",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_a819b1b0aaf9f3d0e1f8c5eefd5a5dc6b.html#a819b1b0aaf9f3d0e1f8c5eefd5a5dc6b",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_a0b3ccbc12ecb2dfb916b316132987d57.html#a0b3ccbc12ecb2dfb916b316132987d57",tooltip=" "];
+  Node4 [id="Node000004",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::operator[]",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_aa0456e804f5fb889bfeb787db298dd9b.html#aa0456e804f5fb889bfeb787db298dd9b",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SortedHeapMap\<\l uint32_t, FramePtr,\l Less \>::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d45/classfl_1_1_sorted_heap_map_a0b3ccbc12ecb2dfb916b316132987d57.html#a0b3ccbc12ecb2dfb916b316132987d57",tooltip=" "];
 }

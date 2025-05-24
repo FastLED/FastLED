@@ -1,0 +1,12 @@
+<map id="fl::LedsXY::LedsXY" name="fl::LedsXY::LedsXY">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,144,56"/>
+<area shape="rect" id="Node000002" href="$de/d43/classfl_1_1_leds_x_y_a98f1bd907fac08a8b8ac0bc32c60d55a.html#a98f1bd907fac08a8b8ac0bc32c60d55a" title=" " alt="" coords="192,31,331,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,41,178,41,178,46,145,46"/>
+<area shape="rect" id="Node000003" href="$d9/d06/classfl_1_1_leds_a125dd5622c67afdf08cb6ada4f921277.html#a125dd5622c67afdf08cb6ada4f921277" title=" " alt="" coords="379,31,485,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="331,41,365,41,365,46,331,46"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="405,32,399,22,402,13,414,6,432,4,454,7,463,16,460,20,452,12,432,9,415,11,407,16,405,22,410,29"/>
+<area shape="rect" id="Node000004" href="$d9/d06/classfl_1_1_leds_a2eec9b15b02ad910b22b69f9d4e3f4ab.html#a2eec9b15b02ad910b22b69f9d4e3f4ab" title=" " alt="" coords="533,5,651,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="485,32,519,27,520,32,486,38"/>
+<area shape="rect" id="Node000005" href="$d9/d06/classfl_1_1_leds_ae18679e583e7af759bbd962cb4a1674b.html#ae18679e583e7af759bbd962cb4a1674b" title=" " alt="" coords="536,55,648,80"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="486,49,523,54,522,60,485,54"/>
+</map>

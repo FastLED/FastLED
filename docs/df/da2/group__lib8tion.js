@@ -3,7 +3,6 @@ var group__lib8tion =
     [ "Basic Math Operations", "d5/d98/group___math.html", "d5/d98/group___math" ],
     [ "Dimming and Brightening Functions", "dc/d3e/group___dimming.html", "dc/d3e/group___dimming" ],
     [ "Easing Functions", "d4/dfe/group___easing.html", "d4/dfe/group___easing" ],
-    [ "Fast Memory Functions for AVR", "d6/de6/group___fast_memory.html", "d6/de6/group___fast_memory" ],
     [ "Fast Random Number Generators", "d2/d0d/group___random.html", "d2/d0d/group___random" ],
     [ "Fast Trigonometry Functions", "d1/ddc/group___trig.html", "d1/ddc/group___trig" ],
     [ "Fixed-Point Fractional Types.", "db/d58/group___fractional_types.html", "db/d58/group___fractional_types" ],

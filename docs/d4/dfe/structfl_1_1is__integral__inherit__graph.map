@@ -1,0 +1,33 @@
+<map id="fl::is_integral&lt; T &gt;" name="fl::is_integral&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,382,149,407"/>
+<area shape="rect" id="Node000002" href="$df/d5c/structfl_1_1is__integral_3_01_t_01_6_01_4.html" title=" " alt="" coords="374,21,533,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,368,92,296,112,204,138,119,154,85,171,63,194,48,218,36,271,21,324,16,374,18,374,23,324,22,272,26,220,41,197,52,175,67,159,88,143,121,117,206,97,297,85,369"/>
+<area shape="rect" id="Node000003" href="$dc/d6a/structfl_1_1is__integral_3_01bool_01_4.html" title=" " alt="" coords="371,70,535,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="76,368,81,313,95,243,107,207,123,172,145,140,172,112,206,97,256,88,371,80,371,85,257,93,207,102,175,117,149,143,128,174,112,209,100,245,86,314,82,368"/>
+<area shape="rect" id="Node000004" href="$df/d88/structfl_1_1is__integral_3_01char_01_4.html" title=" " alt="" coords="371,119,535,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="78,368,86,322,102,265,129,209,149,183,172,162,206,147,257,138,371,130,371,135,257,143,208,152,175,166,153,187,134,212,107,267,91,323,84,369"/>
+<area shape="rect" id="Node000005" href="$dc/dbb/structfl_1_1is__integral_3_01const_01_t_01_4.html" title=" " alt="" coords="362,169,545,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="81,368,92,331,109,287,136,244,152,225,172,208,205,195,252,187,362,179,362,184,253,192,206,200,175,213,156,228,140,247,114,289,97,332,86,369"/>
+<area shape="rect" id="Node000006" href="$d1/d87/structfl_1_1is__integral_3_01int_01_4.html" title=" " alt="" coords="377,218,530,243"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="88,368,121,318,144,292,172,271,222,248,275,235,328,227,376,225,377,230,329,233,277,240,224,254,175,276,148,296,125,321,93,371"/>
+<area shape="rect" id="Node000007" href="$d4/d7d/structfl_1_1is__integral_3_01long_01_4.html" title=" " alt="" coords="371,267,535,293"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="104,371,135,350,172,331,222,314,274,301,371,285,371,290,275,306,224,319,174,336,138,354,107,376"/>
+<area shape="rect" id="Node000008" href="$d7/d75/structfl_1_1is__integral_3_01long_01long_01_4.html" title=" " alt="" coords="379,317,528,357"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="149,377,173,372,378,343,379,348,174,377,150,382"/>
+<area shape="rect" id="Node000009" href="$d6/d39/structfl_1_1is__integral_3_01short_01_4.html" title=" " alt="" coords="369,382,538,407"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="163,392,368,392,368,397,163,397"/>
+<area shape="rect" id="Node000010" href="$dc/d12/structfl_1_1is__integral_3_01signed_01char_01_4.html" title=" " alt="" coords="371,432,535,472"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="150,408,174,412,372,440,371,445,173,417,149,413"/>
+<area shape="rect" id="Node000011" href="$db/db8/structfl_1_1is__integral_3_01unsigned_01char_01_4.html" title=" " alt="" coords="363,496,543,536"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="107,414,138,436,174,455,221,472,270,485,363,503,362,509,269,491,220,477,172,460,135,440,104,418"/>
+<area shape="rect" id="Node000012" href="$d1/dff/structfl_1_1is__integral_3_01unsigned_01int_01_4.html" title=" " alt="" coords="363,560,543,600"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="93,418,125,471,148,497,175,519,220,542,268,558,317,569,363,575,363,580,316,574,267,563,218,547,172,524,144,501,121,474,88,421"/>
+<area shape="rect" id="Node000013" href="$dd/d37/structfl_1_1is__integral_3_01unsigned_01long_01_4.html" title=" " alt="" coords="363,624,543,664"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="86,420,96,459,113,506,139,553,155,573,175,591,219,617,267,633,317,642,364,645,363,651,316,647,266,638,216,621,172,595,152,577,134,556,108,508,91,461,81,421"/>
+<area shape="rect" id="Node000014" href="$df/db7/structfl_1_1is__integral_3_01unsigned_01long_01long_01_4.html" title=" " alt="" coords="363,688,543,728"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="82,421,87,473,101,540,113,575,129,608,150,639,175,665,218,691,266,706,315,713,363,715,363,720,315,719,265,711,215,695,172,669,146,642,125,611,108,577,96,542,82,474,77,421"/>
+<area shape="rect" id="Node000015" href="$dd/d14/structfl_1_1is__integral_3_01unsigned_01short_01_4.html" title=" " alt="" coords="363,752,543,792"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="85,421,97,495,116,590,142,679,158,713,175,735,217,761,265,776,315,782,363,782,363,787,315,788,264,781,215,766,172,739,154,716,137,681,111,591,91,496,80,422"/>
+<area shape="rect" id="Node000016" href="$d3/d48/structfl_1_1is__integral_3_01volatile_01_t_01_4.html" title=" " alt="" coords="355,817,552,842"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="83,421,93,508,110,624,123,682,138,734,155,776,175,803,199,820,226,832,285,845,343,846,396,839,396,845,344,851,284,850,224,837,197,825,171,807,150,779,133,736,117,684,105,625,87,509,78,421"/>
+</map>

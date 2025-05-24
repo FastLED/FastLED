@@ -8,7 +8,6 @@ var _fx_noise_ring_8ino =
     [ "PIR_LATCH_MS", "d3/dac/_fx_noise_ring_8ino_a8e4b530d14bb6e8c85e3145b11d77dc3.html#a8e4b530d14bb6e8c85e3145b11d77dc3", null ],
     [ "PIR_RISING_TIME", "d3/dac/_fx_noise_ring_8ino_afb69960719f1531c640d3a6f558e8283.html#afb69960719f1531c640d3a6f558e8283", null ],
     [ "draw", "d3/dac/_fx_noise_ring_8ino_a7a1cdb28d8d83f314435a3a1dc13f17f.html#a7a1cdb28d8d83f314435a3a1dc13f17f", null ],
-    [ "handleSerialDither", "d3/dac/_fx_noise_ring_8ino_a600abe8b97171a770aa8e6a30c14b911.html#a600abe8b97171a770aa8e6a30c14b911", null ],
     [ "loop", "d3/dac/_fx_noise_ring_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "d3/dac/_fx_noise_ring_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
     [ "brightness", "d3/dac/_fx_noise_ring_8ino_afdc5fee1e77edf843c461f2979fff24b.html#afdc5fee1e77edf843c461f2979fff24b", null ],

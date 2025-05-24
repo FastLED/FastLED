@@ -1,13 +1,11 @@
 <map id="CRGB::nscale8_video" name="CRGB::nscale8_video">
-<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="475,84,635,109"/>
+<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="475,55,635,80"/>
 <area shape="rect" id="Node000002" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="204,5,427,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,81,426,46,380,33,381,28,428,41,516,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="479,54,377,33,378,28,480,49"/>
 <area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="260,55,371,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="461,88,371,77,371,71,461,83"/>
-<area shape="rect" id="Node000006" href="$d2/d73/group___palette_colors_gaf34a692bbec05b697dc9c06d8bb0f74f.html#gaf34a692bbec05b697dc9c06d8bb0f74f" title="Maps an array of palette color indexes into an array of LED colors." alt="" coords="233,105,398,145"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="461,110,399,118,398,112,461,105"/>
-<area shape="rect" id="Node000007" href="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465" title="Scale using CRGB::nscale8_video()" alt="" coords="270,169,361,195"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="519,118,476,139,428,159,362,177,360,171,426,154,474,135,517,114"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="461,70,371,70,371,65,461,65"/>
+<area shape="rect" id="Node000006" href="$db/d87/group___pixel_types_ga3dab64b7dfff8c31e3ec8c3c20eec465.html#ga3dab64b7dfff8c31e3ec8c3c20eec465" title="Scale using CRGB::nscale8_video()" alt="" coords="270,104,361,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="480,85,362,110,360,105,478,80"/>
 <area shape="rect" id="Node000003" href="$de/db5/classfl_1_1_twinkle_fox_ab5d3d43b11bed65afbd407071ee85eb8.html#ab5d3d43b11bed65afbd407071ee85eb8" title=" " alt="" coords="5,5,156,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="190,21,156,21,156,15,190,15"/>
 <area shape="rect" id="Node000005" href="$d4/dd0/_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="55,55,106,80"/>

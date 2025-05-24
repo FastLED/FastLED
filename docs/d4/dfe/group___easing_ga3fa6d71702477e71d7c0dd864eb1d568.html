@@ -118,30 +118,30 @@ $(function(){initNavTree('d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d5
 <p>8-bit cubic ease-in / ease-out function. </p>
 <p>Takes around 18 cycles on AVR. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00642">642</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  643</span>{</div>
-<div class="line"><span class="lineno">  644</span>    uint8_t ii  = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(  i, i);</div>
-<div class="line"><span class="lineno">  645</span>    uint8_t iii = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>( ii, i);</div>
-<div class="line"><span class="lineno">  646</span> </div>
-<div class="line"><span class="lineno">  647</span>    uint16_t r1 = (3 * (uint16_t)(ii)) - ( 2 * (uint16_t)(iii));</div>
-<div class="line"><span class="lineno">  648</span> </div>
-<div class="line"><span class="lineno">  649</span>    <span class="comment">/* the code generated for the above *&#39;s automatically</span></div>
-<div class="line"><span class="lineno">  650</span><span class="comment">       cleans up R1, so there&#39;s no need to explicitily call</span></div>
-<div class="line"><span class="lineno">  651</span><span class="comment">       cleanup_R1(); */</span></div>
-<div class="line"><span class="lineno">  652</span> </div>
-<div class="line"><span class="lineno">  653</span>    uint8_t result = r1;</div>
-<div class="line"><span class="lineno">  654</span> </div>
-<div class="line"><span class="lineno">  655</span>    <span class="comment">// if we got &quot;256&quot;, return 255:</span></div>
-<div class="line"><span class="lineno">  656</span>    <span class="keywordflow">if</span>( r1 &amp; 0x100 ) {</div>
-<div class="line"><span class="lineno">  657</span>        result = 255;</div>
-<div class="line"><span class="lineno">  658</span>    }</div>
-<div class="line"><span class="lineno">  659</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  660</span>}</div>
-<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00170">scale8.h:170</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00624">624</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  625</span>{</div>
+<div class="line"><span class="lineno">  626</span>    uint8_t ii  = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(  i, i);</div>
+<div class="line"><span class="lineno">  627</span>    uint8_t iii = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>( ii, i);</div>
+<div class="line"><span class="lineno">  628</span> </div>
+<div class="line"><span class="lineno">  629</span>    uint16_t r1 = (3 * (uint16_t)(ii)) - ( 2 * (uint16_t)(iii));</div>
+<div class="line"><span class="lineno">  630</span> </div>
+<div class="line"><span class="lineno">  631</span>    <span class="comment">/* the code generated for the above *&#39;s automatically</span></div>
+<div class="line"><span class="lineno">  632</span><span class="comment">       cleans up R1, so there&#39;s no need to explicitily call</span></div>
+<div class="line"><span class="lineno">  633</span><span class="comment">       cleanup_R1(); */</span></div>
+<div class="line"><span class="lineno">  634</span> </div>
+<div class="line"><span class="lineno">  635</span>    uint8_t result = r1;</div>
+<div class="line"><span class="lineno">  636</span> </div>
+<div class="line"><span class="lineno">  637</span>    <span class="comment">// if we got &quot;256&quot;, return 255:</span></div>
+<div class="line"><span class="lineno">  638</span>    <span class="keywordflow">if</span>( r1 &amp; 0x100 ) {</div>
+<div class="line"><span class="lineno">  639</span>        result = 255;</div>
+<div class="line"><span class="lineno">  640</span>    }</div>
+<div class="line"><span class="lineno">  641</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  642</span>}</div>
+<div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00170">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00773">cubicwave8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00755">cubicwave8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -166,7 +166,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga3fa6d71702477e71d7c0dd864eb1d5
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

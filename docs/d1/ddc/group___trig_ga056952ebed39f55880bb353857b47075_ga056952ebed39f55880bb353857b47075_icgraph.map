@@ -1,5 +1,7 @@
 <map id="cos16" name="cos16">
-<area shape="rect" id="Node000001" title="Fast 16&#45;bit approximation of cos(x)." alt="" coords="104,5,164,31"/>
-<area shape="rect" id="Node000002" href="$d1/de4/_x_y_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,21,57,21,57,15,90,15"/>
+<area shape="rect" id="Node000001" title="Fast 16&#45;bit approximation of cos(x)." alt="" coords="244,31,304,56"/>
+<area shape="rect" id="Node000002" href="$d1/de4/_x_y_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="75,5,126,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,40,126,24,127,19,231,34"/>
+<area shape="rect" id="Node000003" href="$d0/dfa/structfl_1_1_transform16_a330fa5b714b5c5498469107d6e3596fa.html#a330fa5b714b5c5498469107d6e3596fa" title=" " alt="" coords="5,55,196,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,52,193,57,192,52,230,47"/>
 </map>

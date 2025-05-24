@@ -1,0 +1,11 @@
+<map id="fl::XYRasterU8Sparse::rasterize_internal" name="fl::XYRasterU8Sparse::rasterize_internal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,164,113"/>
+<area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_aec08d4bb9cae61bb1f6926ce1a1d9b9c.html#aec08d4bb9cae61bb1f6926ce1a1d9b9c" title=" " alt="" coords="226,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,70,211,39,233,32,234,37,213,45,134,75"/>
+<area shape="rect" id="Node000003" href="$d2/d48/structfl_1_1rect_aa037d3a961f3b854b58263f423de133e.html#aa037d3a961f3b854b58263f423de133e" title=" " alt="" coords="228,55,355,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,80,214,74,214,79,165,86"/>
+<area shape="rect" id="Node000004" href="$d0/d2b/classfl_1_1_tile2x2__u8_a8d25e019daadaed80d6e1a8ff017b0b8.html#a8d25e019daadaed80d6e1a8ff017b0b8" title=" " alt="" coords="214,104,369,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="165,99,201,103,200,109,164,105"/>
+<area shape="rect" id="Node000005" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a0a8c20563f07ed79fe075fac5f21e393.html#a0a8c20563f07ed79fe075fac5f21e393" title=" " alt="" coords="212,154,371,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="137,110,228,146,226,151,135,115"/>
+</map>

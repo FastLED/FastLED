@@ -8,5 +8,5 @@ digraph "lerp8by8"
   rankdir="RL";
   Node1 [id="Node000001",label="lerp8by8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Linear interpolation between two unsigned 8-bit values, with 8-bit fraction."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="CRGB::lerp8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a858435ed102057edaa676bd6d3d1e9cf.html#a858435ed102057edaa676bd6d3d1e9cf",tooltip="Return a new CRGB object after performing a linear interpolation between this object and the passed i..."];
+  Node2 [id="Node000002",label="CRGB::lerp8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_a8a98be5bfc312d334327001625ef3acc.html#a8a98be5bfc312d334327001625ef3acc",tooltip="Return a new CRGB object after performing a linear interpolation between this object and the passed i..."];
 }

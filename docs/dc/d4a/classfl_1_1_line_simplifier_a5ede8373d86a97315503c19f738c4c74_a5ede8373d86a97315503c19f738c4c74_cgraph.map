@@ -1,0 +1,13 @@
+<map id="fl::LineSimplifier::simplifyInplaceT" name="fl::LineSimplifier::simplifyInplaceT">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,143,95"/>
+<area shape="rect" id="Node000002" href="$dc/d4a/classfl_1_1_line_simplifier_ab2ceacbb40ab8270441755fdcdd4e5e0.html#ab2ceacbb40ab8270441755fdcdd4e5e0" title=" " alt="" coords="191,55,317,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,73,177,73,177,78,143,78"/>
+<area shape="rect" id="Node000003" href="$dc/d4a/classfl_1_1_line_simplifier_a2536fb35718c3aebc8274b305b407dee.html#a2536fb35718c3aebc8274b305b407dee" title=" " alt="" coords="365,55,497,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="317,73,352,73,352,78,317,78"/>
+<area shape="rect" id="Node000004" href="$d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe" title=" " alt="" coords="584,5,691,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="497,54,545,41,576,32,578,37,546,46,498,59"/>
+<area shape="rect" id="Node000005" href="$dc/d4a/classfl_1_1_line_simplifier_a4e22268eafeb2709d9c44bf24ad11069.html#a4e22268eafeb2709d9c44bf24ad11069" title=" " alt="" coords="545,55,729,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="498,73,531,73,531,78,498,78"/>
+<area shape="rect" id="Node000006" href="$d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe" title=" " alt="" coords="586,120,689,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="498,91,546,105,578,114,576,119,545,110,497,96"/>
+</map>

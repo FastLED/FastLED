@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::JsonDocument",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#da/deb/classfl_1_1_json_document",tooltip=" "];
+  Node0 [id="Node000000",label="fl::FunctionListBase\l\< FunctionType \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
 }

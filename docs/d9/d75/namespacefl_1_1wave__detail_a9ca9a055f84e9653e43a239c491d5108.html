@@ -115,18 +115,34 @@ $(function(){initNavTree('d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e4
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00016">16</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   16</span>{ <span class="keywordflow">return</span> (int16_t)(f * <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83.html#a9698efe2e6043036b56012d893b44b83">FIXED_SCALE</a>); }</div>
-<div class="ttc" id="awave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83_html_a9698efe2e6043036b56012d893b44b83"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83.html#a9698efe2e6043036b56012d893b44b83">FIXED_SCALE</a></div><div class="ttdeci">#define FIXED_SCALE</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00011">wave_simulation_real.cpp:11</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00020">20</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   20</span>                                {</div>
+<div class="line"><span class="lineno">   21</span>    f = <a class="code hl_function" href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a>(f, -1.0f, 1.0f);</div>
+<div class="line"><span class="lineno">   22</span>    <span class="keywordflow">if</span> (f &lt; 0.0f) {</div>
+<div class="line"><span class="lineno">   23</span>        <span class="keywordflow">return</span> (int16_t)(f * <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39.html#a176d6f831723b7f68a8eb0d976061a39">INT16_NEG</a>);</div>
+<div class="line"><span class="lineno">   24</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   25</span>        <span class="keywordflow">return</span> (int16_t)(f * <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0.html#ab0fafa39d99376e8470debbd235606f0">INT16_POS</a>); <span class="comment">// Round to nearest</span></div>
+<div class="line"><span class="lineno">   26</span>    }</div>
+<div class="line"><span class="lineno">   27</span>}</div>
+<div class="ttc" id="anamespacefl_a6072e119545650c71b6544cc0ce9e355_html_a6072e119545650c71b6544cc0ce9e355"><div class="ttname"><a href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a></div><div class="ttdeci">FASTLED_FORCE_INLINE T clamp(T value, T min, T max)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd3/clamp_8h_source.html#l00010">clamp.h:10</a></div></div>
+<div class="ttc" id="awave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39_html_a176d6f831723b7f68a8eb0d976061a39"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39.html#a176d6f831723b7f68a8eb0d976061a39">INT16_NEG</a></div><div class="ttdeci">#define INT16_NEG</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00014">wave_simulation_real.cpp:14</a></div></div>
+<div class="ttc" id="awave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0_html_ab0fafa39d99376e8470debbd235606f0"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0.html#ab0fafa39d99376e8470debbd235606f0">INT16_POS</a></div><div class="ttdeci">#define INT16_POS</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00013">wave_simulation_real.cpp:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00011">FIXED_SCALE</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/dd3/clamp_8h_source.html#l00010">fl::clamp()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00014">INT16_NEG</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00013">INT16_POS</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00029">fl::WaveSimulation1D_Real::WaveSimulation1D_Real()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00141">fl::WaveSimulation2D_Real::WaveSimulation2D_Real()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00081">fl::WaveSimulation1D_Real::set()</a>, <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00153">fl::WaveSimulation2D::setf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00194">fl::WaveSimulation2D_Real::setf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00039">fl::WaveSimulation1D_Real::setSpeed()</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00151">fl::WaveSimulation2D_Real::setSpeed()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00047">fl::WaveSimulation1D_Real::WaveSimulation1D_Real()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00159">fl::WaveSimulation2D_Real::WaveSimulation2D_Real()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00099">fl::WaveSimulation1D_Real::set()</a>, <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00185">fl::WaveSimulation2D::setf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00212">fl::WaveSimulation2D_Real::setf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00057">fl::WaveSimulation1D_Real::setSpeed()</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00169">fl::WaveSimulation2D_Real::setSpeed()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108_a9ca9a055f84e9653e43a239c491d5108_cgraph.svg" width="292" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108_a9ca9a055f84e9653e43a239c491d5108_icgraph.svg" width="440" height="435"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -139,7 +155,7 @@ $(function(){initNavTree('d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d75/namespacefl_1_1wave__detail.html">wave_detail</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

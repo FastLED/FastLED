@@ -1,7 +1,15 @@
 <map id="fl::UICheckbox::UICheckbox" name="fl::UICheckbox::UICheckbox">
-<area shape="rect" id="Node000001" title=" " alt="" coords="244,31,447,56"/>
-<area shape="rect" id="Node000002" href="$d7/dfe/classfl_1_1_u_i_checkbox_a1a773238734d899c20d46880a8a1b009.html#a1a773238734d899c20d46880a8a1b009" title=" " alt="" coords="5,5,196,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,34,196,31,197,25,231,29"/>
-<area shape="rect" id="Node000003" href="$d7/dfe/classfl_1_1_u_i_checkbox_a1e3269492ea9ac0cccf2aefe7e9ddd38.html#a1e3269492ea9ac0cccf2aefe7e9ddd38" title=" " alt="" coords="5,55,196,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,57,197,61,196,55,230,52"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="267,170,469,195"/>
+<area shape="rect" id="Node000002" href="$de/d6f/structfl_1_1_u_i_checkbox_1_1_listener_ac95257f0a5ff337a7e660880609689bc.html#ac95257f0a5ff337a7e660880609689bc" title=" " alt="" coords="24,5,200,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="344,162,289,110,255,83,217,60,191,48,194,43,220,55,258,79,293,106,347,158"/>
+<area shape="rect" id="Node000003" href="$d7/dfe/classfl_1_1_u_i_checkbox_a5d413140ce10a8dd7f52db94eaf80045.html#a5d413140ce10a8dd7f52db94eaf80045" title=" " alt="" coords="43,69,181,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="325,167,218,124,181,112,182,106,220,119,327,162"/>
+<area shape="rect" id="Node000004" href="$de/d6f/structfl_1_1_u_i_checkbox_1_1_listener_a8ef835ffff6d5b2bf6d0e36fc802bb04.html#a8ef835ffff6d5b2bf6d0e36fc802bb04" title=" " alt="" coords="24,133,200,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,172,200,166,200,161,253,167"/>
+<area shape="rect" id="Node000005" href="$d7/dfe/classfl_1_1_u_i_checkbox_a3572159a0da2567ed31fd35a98c49595.html#a3572159a0da2567ed31fd35a98c49595" title=" " alt="" coords="13,198,211,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="253,198,211,203,211,197,253,193"/>
+<area shape="rect" id="Node000006" href="$d7/dfe/classfl_1_1_u_i_checkbox_a9040f57f3360fc10cc09711729316c94.html#a9040f57f3360fc10cc09711729316c94" title=" " alt="" coords="5,247,219,273"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="322,203,219,237,172,250,170,245,218,232,320,198"/>
+<area shape="rect" id="Node000007" href="$d7/dfe/classfl_1_1_u_i_checkbox_a1a773238734d899c20d46880a8a1b009.html#a1a773238734d899c20d46880a8a1b009" title=" " alt="" coords="17,297,207,322"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="343,206,288,247,220,286,183,299,181,294,218,282,286,243,340,202"/>
 </map>

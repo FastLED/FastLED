@@ -1,0 +1,5 @@
+<map id="fl::traverseGridSegment16" name="fl::traverseGridSegment16">
+<area shape="rect" id="Node000001" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="231,5,424,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a976c550d29f5d8ac9137288b1e946028.html#a976c550d29f5d8ac9137288b1e946028" title="Traverse a grid segment by selecting the cells that are crossed." alt="" coords="5,5,183,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,21,183,21,183,15,217,15"/>
+</map>

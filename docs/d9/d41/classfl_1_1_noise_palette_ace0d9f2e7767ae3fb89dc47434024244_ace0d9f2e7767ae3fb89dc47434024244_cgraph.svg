@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 643;
+var viewWidth = 652;
 var viewHeight = 209;
 var sectionId = 'dynsection-0';
 </script>
@@ -224,9 +224,9 @@ var sectionId = 'dynsection-0';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../da/de3/group___color_fills_gac0bcd5712f9f57a186f2c5f96911af1d.html#gac0bcd5712f9f57a186f2c5f96911af1d" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
-<polygon fill="white" stroke="#666666" points="633.5,-120.5 576.5,-120.5 576.5,-101.5 633.5,-101.5 633.5,-120.5"/>
-<text text-anchor="middle" x="605" y="-108.5" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
+<g id="a_Node000008"><a xlink:href="../../da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<polygon fill="white" stroke="#666666" points="644,-120.5 575,-120.5 575,-101.5 644,-101.5 644,-120.5"/>
+<text text-anchor="middle" x="609.5" y="-108.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fill_solid</text>
 </a>
 </g>
 </g>
@@ -234,8 +234,8 @@ var sectionId = 'dynsection-0';
 <g id="edge7_Node000007_Node000008" class="edge">
 <title>Node7&#45;&gt;Node8</title>
 <g id="a_edge7_Node000007_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M532.71,-111C544.27,-111 555.77,-111 566.06,-111"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="566.29,-114.5 576.29,-111 566.29,-107.5 566.29,-114.5"/>
+<path fill="none" stroke="#63b8ff" d="M532.81,-111C543.76,-111 554.72,-111 564.77,-111"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="564.87,-114.5 574.87,-111 564.87,-107.5 564.87,-114.5"/>
 </a>
 </g>
 </g>
@@ -243,8 +243,8 @@ var sectionId = 'dynsection-0';
 <g id="Node000011" class="node">
 <title>Node11</title>
 <g id="a_Node000011"><a xlink:href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" target="_top" xlink:title="Generate an 8&#45;bit random number.">
-<polygon fill="white" stroke="#666666" points="635,-24.5 575,-24.5 575,-5.5 635,-5.5 635,-24.5"/>
-<text text-anchor="middle" x="605" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
+<polygon fill="white" stroke="#666666" points="639.5,-24.5 579.5,-24.5 579.5,-5.5 639.5,-5.5 639.5,-24.5"/>
+<text text-anchor="middle" x="609.5" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>
 </g>
 </g>
@@ -252,8 +252,8 @@ var sectionId = 'dynsection-0';
 <g id="edge10_Node000010_Node000011" class="edge">
 <title>Node10&#45;&gt;Node11</title>
 <g id="a_edge10_Node000010_Node000011"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M539.11,-15C547.97,-15 556.66,-15 564.66,-15"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="564.74,-18.5 574.74,-15 564.74,-11.5 564.74,-18.5"/>
+<path fill="none" stroke="#63b8ff" d="M539.42,-15C549.78,-15 559.99,-15 569.25,-15"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="569.26,-18.5 579.26,-15 569.26,-11.5 569.26,-18.5"/>
 </a>
 </g>
 </g>

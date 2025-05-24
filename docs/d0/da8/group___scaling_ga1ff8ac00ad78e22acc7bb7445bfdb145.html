@@ -128,158 +128,158 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>scaled value </dd></dl>
-<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d6/d86/_pacifica_8ino-example.html#a16">Pacifica.ino</a>.</dd>
+<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d6/d86/_pacifica_8ino-example.html#a15">Pacifica.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00540">540</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  540</span>                                                       {</div>
-<div class="line"><span class="lineno">  541</span><span class="preprocessor">#if SCALE16_C == 1</span></div>
-<div class="line"><span class="lineno">  542</span>    uint16_t result;</div>
-<div class="line"><span class="lineno">  543</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
-<div class="line"><span class="lineno">  544</span>    result = ((uint32_t)(i) * (1 + (uint32_t)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>))) / 65536;</div>
-<div class="line"><span class="lineno">  545</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  546</span>    result = ((uint32_t)(i) * (uint32_t)(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)) / 65536;</div>
-<div class="line"><span class="lineno">  547</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  548</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  549</span><span class="preprocessor">#elif SCALE16_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  550</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
-<div class="line"><span class="lineno">  551</span>    <span class="comment">// implemented sort of like</span></div>
-<div class="line"><span class="lineno">  552</span>    <span class="comment">//   result = ((i * scale) + i ) / 65536</span></div>
-<div class="line"><span class="lineno">  553</span>    <span class="comment">//</span></div>
-<div class="line"><span class="lineno">  554</span>    <span class="comment">// why not like this, you may ask?</span></div>
-<div class="line"><span class="lineno">  555</span>    <span class="comment">//   result = (i * (scale+1)) / 65536</span></div>
-<div class="line"><span class="lineno">  556</span>    <span class="comment">// the answer is that if scale is 65535, then scale+1</span></div>
-<div class="line"><span class="lineno">  557</span>    <span class="comment">// will be zero, which is not what we want.</span></div>
-<div class="line"><span class="lineno">  558</span>    uint32_t result;</div>
-<div class="line"><span class="lineno">  559</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  560</span>        <span class="comment">// result.A-B  = i.A x scale.A</span></div>
-<div class="line"><span class="lineno">  561</span>        <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  562</span>        <span class="comment">//  save results...</span></div>
-<div class="line"><span class="lineno">  563</span>        <span class="comment">// basic idea:</span></div>
-<div class="line"><span class="lineno">  564</span>        <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  565</span>        <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  566</span>        <span class="comment">// which can be written as...</span></div>
-<div class="line"><span class="lineno">  567</span>        <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  568</span>        <span class="comment">// Because we&#39;re going to add i.A-B to</span></div>
-<div class="line"><span class="lineno">  569</span>        <span class="comment">// result.A-D, we DO need to keep both</span></div>
-<div class="line"><span class="lineno">  570</span>        <span class="comment">// the r0 and r1 portions of the product</span></div>
-<div class="line"><span class="lineno">  571</span>        <span class="comment">// UNlike in the &#39;unfixed scale8&#39; version.</span></div>
-<div class="line"><span class="lineno">  572</span>        <span class="comment">// So the movw here is needed.</span></div>
-<div class="line"><span class="lineno">  573</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  574</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)</div>
-<div class="line"><span class="lineno">  575</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  576</span> </div>
-<div class="line"><span class="lineno">  577</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  578</span>        <span class="comment">// result.C-D  = i.B x scale.B</span></div>
-<div class="line"><span class="lineno">  579</span>        <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  580</span>        <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  581</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  582</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  583</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  584</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)</div>
-<div class="line"><span class="lineno">  585</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  586</span> </div>
-<div class="line"><span class="lineno">  587</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
-<div class="line"><span class="lineno">  588</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  589</span>        <span class="comment">// result.B-D += i.B x scale.A</span></div>
-<div class="line"><span class="lineno">  590</span>        <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  591</span> </div>
-<div class="line"><span class="lineno">  592</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  593</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  594</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  595</span> </div>
-<div class="line"><span class="lineno">  596</span>        <span class="comment">// result.B-D += i.A x scale.B</span></div>
-<div class="line"><span class="lineno">  597</span>        <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  598</span> </div>
-<div class="line"><span class="lineno">  599</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  600</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  601</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  602</span> </div>
-<div class="line"><span class="lineno">  603</span>        <span class="comment">// cleanup r1</span></div>
-<div class="line"><span class="lineno">  604</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  605</span> </div>
-<div class="line"><span class="lineno">  606</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  607</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
-<div class="line"><span class="lineno">  608</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  609</span> </div>
-<div class="line"><span class="lineno">  610</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  611</span>        <span class="comment">// result.A-D += i.A-B</span></div>
-<div class="line"><span class="lineno">  612</span>        <span class="stringliteral">&quot;  add %A[result], %A[i]                \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  613</span>        <span class="stringliteral">&quot;  adc %B[result], %B[i]                \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  614</span>        <span class="stringliteral">&quot;  adc %C[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  615</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  616</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  617</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero));</div>
-<div class="line"><span class="lineno">  618</span> </div>
-<div class="line"><span class="lineno">  619</span>    result = result &gt;&gt; 16;</div>
-<div class="line"><span class="lineno">  620</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  621</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  622</span>    uint32_t result;</div>
-<div class="line"><span class="lineno">  623</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  624</span>        <span class="comment">// result.A-B  = i.A x scale.A</span></div>
-<div class="line"><span class="lineno">  625</span>        <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  626</span>        <span class="comment">//  save results...</span></div>
-<div class="line"><span class="lineno">  627</span>        <span class="comment">// basic idea:</span></div>
-<div class="line"><span class="lineno">  628</span>        <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  629</span>        <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  630</span>        <span class="comment">// which can be written as...</span></div>
-<div class="line"><span class="lineno">  631</span>        <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  632</span>        <span class="comment">// We actually don&#39;t need to do anything with r0,</span></div>
-<div class="line"><span class="lineno">  633</span>        <span class="comment">// as result.A is never used again here, so we</span></div>
-<div class="line"><span class="lineno">  634</span>        <span class="comment">// could just move the high byte, but movw is</span></div>
-<div class="line"><span class="lineno">  635</span>        <span class="comment">// one clock cycle, just like mov, so might as</span></div>
-<div class="line"><span class="lineno">  636</span>        <span class="comment">// well, in case we want to use this code for</span></div>
-<div class="line"><span class="lineno">  637</span>        <span class="comment">// a generic 16x16 multiply somewhere.</span></div>
-<div class="line"><span class="lineno">  638</span> </div>
-<div class="line"><span class="lineno">  639</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  640</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)</div>
-<div class="line"><span class="lineno">  641</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  642</span> </div>
-<div class="line"><span class="lineno">  643</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  644</span>        <span class="comment">// result.C-D  = i.B x scale.B</span></div>
-<div class="line"><span class="lineno">  645</span>        <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  646</span>        <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  647</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  648</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  649</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  650</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>)</div>
-<div class="line"><span class="lineno">  651</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  652</span> </div>
-<div class="line"><span class="lineno">  653</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
-<div class="line"><span class="lineno">  654</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><span class="lineno">  655</span>        <span class="comment">// result.B-D += i.B x scale.A</span></div>
-<div class="line"><span class="lineno">  656</span>        <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  657</span> </div>
-<div class="line"><span class="lineno">  658</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  659</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  660</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  661</span> </div>
-<div class="line"><span class="lineno">  662</span>        <span class="comment">// result.B-D += i.A x scale.B</span></div>
-<div class="line"><span class="lineno">  663</span>        <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  664</span> </div>
-<div class="line"><span class="lineno">  665</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  666</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  667</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  668</span> </div>
-<div class="line"><span class="lineno">  669</span>        <span class="comment">// cleanup r1</span></div>
-<div class="line"><span class="lineno">  670</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
-<div class="line"><span class="lineno">  671</span> </div>
-<div class="line"><span class="lineno">  672</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  673</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
-<div class="line"><span class="lineno">  674</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
-<div class="line"><span class="lineno">  675</span> </div>
-<div class="line"><span class="lineno">  676</span>    result = result &gt;&gt; 16;</div>
-<div class="line"><span class="lineno">  677</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  678</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  679</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  680</span><span class="preprocessor">#error &quot;No implementation for scale16 available.&quot;</span></div>
-<div class="line"><span class="lineno">  681</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  682</span>}</div>
-<div class="ttc" id="a_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6_html_a257d57e60e0e43b50d9c9a8b77a432e6"><div class="ttname"><a href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 4,.1, 4,.1)</div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00546">546</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  546</span>                                                       {</div>
+<div class="line"><span class="lineno">  547</span><span class="preprocessor">#if SCALE16_C == 1</span></div>
+<div class="line"><span class="lineno">  548</span>    uint16_t result;</div>
+<div class="line"><span class="lineno">  549</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
+<div class="line"><span class="lineno">  550</span>    result = ((uint32_t)(i) * (1 + (uint32_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>))) / 65536;</div>
+<div class="line"><span class="lineno">  551</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  552</span>    result = ((uint32_t)(i) * (uint32_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) / 65536;</div>
+<div class="line"><span class="lineno">  553</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  554</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  555</span><span class="preprocessor">#elif SCALE16_AVRASM == 1</span></div>
+<div class="line"><span class="lineno">  556</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
+<div class="line"><span class="lineno">  557</span>    <span class="comment">// implemented sort of like</span></div>
+<div class="line"><span class="lineno">  558</span>    <span class="comment">//   result = ((i * scale) + i ) / 65536</span></div>
+<div class="line"><span class="lineno">  559</span>    <span class="comment">//</span></div>
+<div class="line"><span class="lineno">  560</span>    <span class="comment">// why not like this, you may ask?</span></div>
+<div class="line"><span class="lineno">  561</span>    <span class="comment">//   result = (i * (scale+1)) / 65536</span></div>
+<div class="line"><span class="lineno">  562</span>    <span class="comment">// the answer is that if scale is 65535, then scale+1</span></div>
+<div class="line"><span class="lineno">  563</span>    <span class="comment">// will be zero, which is not what we want.</span></div>
+<div class="line"><span class="lineno">  564</span>    uint32_t result;</div>
+<div class="line"><span class="lineno">  565</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  566</span>        <span class="comment">// result.A-B  = i.A x scale.A</span></div>
+<div class="line"><span class="lineno">  567</span>        <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  568</span>        <span class="comment">//  save results...</span></div>
+<div class="line"><span class="lineno">  569</span>        <span class="comment">// basic idea:</span></div>
+<div class="line"><span class="lineno">  570</span>        <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  571</span>        <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  572</span>        <span class="comment">// which can be written as...</span></div>
+<div class="line"><span class="lineno">  573</span>        <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  574</span>        <span class="comment">// Because we&#39;re going to add i.A-B to</span></div>
+<div class="line"><span class="lineno">  575</span>        <span class="comment">// result.A-D, we DO need to keep both</span></div>
+<div class="line"><span class="lineno">  576</span>        <span class="comment">// the r0 and r1 portions of the product</span></div>
+<div class="line"><span class="lineno">  577</span>        <span class="comment">// UNlike in the &#39;unfixed scale8&#39; version.</span></div>
+<div class="line"><span class="lineno">  578</span>        <span class="comment">// So the movw here is needed.</span></div>
+<div class="line"><span class="lineno">  579</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  580</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  581</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  582</span> </div>
+<div class="line"><span class="lineno">  583</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  584</span>        <span class="comment">// result.C-D  = i.B x scale.B</span></div>
+<div class="line"><span class="lineno">  585</span>        <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  586</span>        <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  587</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  588</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  589</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  590</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  591</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  592</span> </div>
+<div class="line"><span class="lineno">  593</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
+<div class="line"><span class="lineno">  594</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  595</span>        <span class="comment">// result.B-D += i.B x scale.A</span></div>
+<div class="line"><span class="lineno">  596</span>        <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  597</span> </div>
+<div class="line"><span class="lineno">  598</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  599</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  600</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  601</span> </div>
+<div class="line"><span class="lineno">  602</span>        <span class="comment">// result.B-D += i.A x scale.B</span></div>
+<div class="line"><span class="lineno">  603</span>        <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  604</span> </div>
+<div class="line"><span class="lineno">  605</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  606</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  607</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  608</span> </div>
+<div class="line"><span class="lineno">  609</span>        <span class="comment">// cleanup r1</span></div>
+<div class="line"><span class="lineno">  610</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  611</span> </div>
+<div class="line"><span class="lineno">  612</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  613</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
+<div class="line"><span class="lineno">  614</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  615</span> </div>
+<div class="line"><span class="lineno">  616</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  617</span>        <span class="comment">// result.A-D += i.A-B</span></div>
+<div class="line"><span class="lineno">  618</span>        <span class="stringliteral">&quot;  add %A[result], %A[i]                \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  619</span>        <span class="stringliteral">&quot;  adc %B[result], %B[i]                \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  620</span>        <span class="stringliteral">&quot;  adc %C[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  621</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  622</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  623</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero));</div>
+<div class="line"><span class="lineno">  624</span> </div>
+<div class="line"><span class="lineno">  625</span>    result = result &gt;&gt; 16;</div>
+<div class="line"><span class="lineno">  626</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  627</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  628</span>    uint32_t result;</div>
+<div class="line"><span class="lineno">  629</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  630</span>        <span class="comment">// result.A-B  = i.A x scale.A</span></div>
+<div class="line"><span class="lineno">  631</span>        <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  632</span>        <span class="comment">//  save results...</span></div>
+<div class="line"><span class="lineno">  633</span>        <span class="comment">// basic idea:</span></div>
+<div class="line"><span class="lineno">  634</span>        <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  635</span>        <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  636</span>        <span class="comment">// which can be written as...</span></div>
+<div class="line"><span class="lineno">  637</span>        <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  638</span>        <span class="comment">// We actually don&#39;t need to do anything with r0,</span></div>
+<div class="line"><span class="lineno">  639</span>        <span class="comment">// as result.A is never used again here, so we</span></div>
+<div class="line"><span class="lineno">  640</span>        <span class="comment">// could just move the high byte, but movw is</span></div>
+<div class="line"><span class="lineno">  641</span>        <span class="comment">// one clock cycle, just like mov, so might as</span></div>
+<div class="line"><span class="lineno">  642</span>        <span class="comment">// well, in case we want to use this code for</span></div>
+<div class="line"><span class="lineno">  643</span>        <span class="comment">// a generic 16x16 multiply somewhere.</span></div>
+<div class="line"><span class="lineno">  644</span> </div>
+<div class="line"><span class="lineno">  645</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  646</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  647</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  648</span> </div>
+<div class="line"><span class="lineno">  649</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  650</span>        <span class="comment">// result.C-D  = i.B x scale.B</span></div>
+<div class="line"><span class="lineno">  651</span>        <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  652</span>        <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  653</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  654</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  655</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  656</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  657</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  658</span> </div>
+<div class="line"><span class="lineno">  659</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
+<div class="line"><span class="lineno">  660</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><span class="lineno">  661</span>        <span class="comment">// result.B-D += i.B x scale.A</span></div>
+<div class="line"><span class="lineno">  662</span>        <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  663</span> </div>
+<div class="line"><span class="lineno">  664</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  665</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  666</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  667</span> </div>
+<div class="line"><span class="lineno">  668</span>        <span class="comment">// result.B-D += i.A x scale.B</span></div>
+<div class="line"><span class="lineno">  669</span>        <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  670</span> </div>
+<div class="line"><span class="lineno">  671</span>        <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  672</span>        <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  673</span>        <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  674</span> </div>
+<div class="line"><span class="lineno">  675</span>        <span class="comment">// cleanup r1</span></div>
+<div class="line"><span class="lineno">  676</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
+<div class="line"><span class="lineno">  677</span> </div>
+<div class="line"><span class="lineno">  678</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
+<div class="line"><span class="lineno">  679</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
+<div class="line"><span class="lineno">  680</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
+<div class="line"><span class="lineno">  681</span> </div>
+<div class="line"><span class="lineno">  682</span>    result = result &gt;&gt; 16;</div>
+<div class="line"><span class="lineno">  683</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  684</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  685</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  686</span><span class="preprocessor">#error &quot;No implementation for scale16 available.&quot;</span></div>
+<div class="line"><span class="lineno">  687</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  688</span>}</div>
+<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6">scale</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00957">beatsin16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00939">beatsin88()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00625">ease16InOutQuad()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00796">fill_raw_2dnoise16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00523">lerp15by16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00472">lerp16by16()</a>, <a class="el" href="../../dc/d70/pacifica_8h_source.html#l00090">fl::Pacifica::pacifica_one_layer()</a>, and <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00113">pacifica_one_layer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00939">beatsin16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00921">beatsin88()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00607">ease16InOutQuad()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00770">fill_raw_2dnoise16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00505">lerp15by16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00454">lerp16by16()</a>, <a class="el" href="../../dc/d70/pacifica_8h_source.html#l00090">fl::Pacifica::pacifica_one_layer()</a>, <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00113">pacifica_one_layer()</a>, <a class="el" href="../../d8/d8c/transform_8cpp_source.html#l00044">fl::Transform16::ToBounds()</a>, and <a class="el" href="../../d8/d8c/transform_8cpp_source.html#l00064">fl::Transform16::ToBounds()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -297,7 +297,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/group___scaling.html">Scaling Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

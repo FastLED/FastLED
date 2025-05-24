@@ -1,9 +1,0 @@
-<map id="fl::XYMap::mapToIndex" name="fl::XYMap::mapToIndex">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,176,56"/>
-<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_aaeab9d4f2c66f6e681415479493578c2.html#aaeab9d4f2c66f6e681415479493578c2" title=" " alt="" coords="224,31,395,56"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,41,210,41,210,46,176,46"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aabd143143924c6bddbe62e4b21688e76.html#aabd143143924c6bddbe62e4b21688e76" title=" " alt="" coords="443,5,581,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,30,428,26,429,31,395,35"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a44d29156c0decceaf2ff1970ddbdde7c.html#a44d29156c0decceaf2ff1970ddbdde7c" title=" " alt="" coords="447,55,577,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="395,51,434,55,433,61,395,56"/>
-</map>

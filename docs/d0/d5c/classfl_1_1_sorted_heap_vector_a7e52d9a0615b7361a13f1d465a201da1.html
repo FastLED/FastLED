@@ -106,7 +106,7 @@ $(function(){initNavTree('d0/d5c/classfl_1_1_sorted_heap_vector_a7e52d9a0615b736
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, typename LessThan&gt; </div>
+template&lt;typename T, typename LessThan = fl::less&lt;T&gt;&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -125,22 +125,22 @@ template&lt;typename T, typename LessThan&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00521">521</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  521</span>                              {</div>
-<div class="line"><span class="lineno">  522</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a> == <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>) {</div>
-<div class="line"><span class="lineno">  523</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  524</span>        }</div>
-<div class="line"><span class="lineno">  525</span>        <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>;</div>
-<div class="line"><span class="lineno">  526</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">needs_adjustment</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.size() &gt; <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a>;</div>
-<div class="line"><span class="lineno">  527</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">needs_adjustment</a>) {</div>
-<div class="line"><span class="lineno">  528</span>            <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.resize(<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>);</div>
-<div class="line"><span class="lineno">  529</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  530</span>            <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.reserve(<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>);</div>
-<div class="line"><span class="lineno">  531</span>        }</div>
-<div class="line"><span class="lineno">  532</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f_html_a001f763e9c3773426153eb607ce34e4f"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">fl::SortedHeapVector::mMaxSize</a></div><div class="ttdeci">size_t mMaxSize</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00513">vector.h:513</a></div></div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb_html_a2914668fe2a66c96aea20305662a53eb"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">fl::SortedHeapVector::mArray</a></div><div class="ttdeci">HeapVector&lt; T &gt; mArray</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00511">vector.h:511</a></div></div>
-<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_html"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">fl::SortedHeapVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00509">vector.h:509</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d68/vector_8h_source.html#l00633">633</a> of file <a class="el" href="../../d6/d68/vector_8h_source.html">vector.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  633</span>                              {</div>
+<div class="line"><span class="lineno">  634</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a> == <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>) {</div>
+<div class="line"><span class="lineno">  635</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  636</span>        }</div>
+<div class="line"><span class="lineno">  637</span>        <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a> = <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>;</div>
+<div class="line"><span class="lineno">  638</span>        <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">needs_adjustment</a> = <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.size() &gt; <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">mMaxSize</a>;</div>
+<div class="line"><span class="lineno">  639</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">needs_adjustment</a>) {</div>
+<div class="line"><span class="lineno">  640</span>            <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.resize(<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>);</div>
+<div class="line"><span class="lineno">  641</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  642</span>            <a class="code hl_variable" href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">mArray</a>.reserve(<a class="code hl_class" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">n</a>);</div>
+<div class="line"><span class="lineno">  643</span>        }</div>
+<div class="line"><span class="lineno">  644</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f_html_a001f763e9c3773426153eb607ce34e4f"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a001f763e9c3773426153eb607ce34e4f.html#a001f763e9c3773426153eb607ce34e4f">fl::SortedHeapVector::mMaxSize</a></div><div class="ttdeci">size_t mMaxSize</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00625">vector.h:625</a></div></div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb_html_a2914668fe2a66c96aea20305662a53eb"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector_a2914668fe2a66c96aea20305662a53eb.html#a2914668fe2a66c96aea20305662a53eb">fl::SortedHeapVector::mArray</a></div><div class="ttdeci">HeapVector&lt; T &gt; mArray</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00623">vector.h:623</a></div></div>
+<div class="ttc" id="aclassfl_1_1_sorted_heap_vector_html"><div class="ttname"><a href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">fl::SortedHeapVector</a></div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00621">vector.h:621</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -151,7 +151,7 @@ template&lt;typename T, typename LessThan&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">SortedHeapVector</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

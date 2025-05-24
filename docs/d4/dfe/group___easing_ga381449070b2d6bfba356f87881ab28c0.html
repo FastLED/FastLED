@@ -118,24 +118,24 @@ $(function(){initNavTree('d4/dfe/group___easing_ga381449070b2d6bfba356f87881ab28
 <p>8-bit quadratic ease-in / ease-out function. </p>
 <p>Takes around 13 cycles on AVR. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00580">580</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  581</span>{</div>
-<div class="line"><span class="lineno">  582</span>    uint8_t j = i;</div>
-<div class="line"><span class="lineno">  583</span>    <span class="keywordflow">if</span>( j &amp; 0x80 ) {</div>
-<div class="line"><span class="lineno">  584</span>        j = 255 - j;</div>
-<div class="line"><span class="lineno">  585</span>    }</div>
-<div class="line"><span class="lineno">  586</span>    uint8_t jj  = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(  j, j);</div>
-<div class="line"><span class="lineno">  587</span>    uint8_t jj2 = jj &lt;&lt; 1;</div>
-<div class="line"><span class="lineno">  588</span>    <span class="keywordflow">if</span>( i &amp; 0x80 ) {</div>
-<div class="line"><span class="lineno">  589</span>        jj2 = 255 - jj2;</div>
-<div class="line"><span class="lineno">  590</span>    }</div>
-<div class="line"><span class="lineno">  591</span>    <span class="keywordflow">return</span> jj2;</div>
-<div class="line"><span class="lineno">  592</span>}</div>
-<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00034">scale8.h:34</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00562">562</a> of file <a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  563</span>{</div>
+<div class="line"><span class="lineno">  564</span>    uint8_t j = i;</div>
+<div class="line"><span class="lineno">  565</span>    <span class="keywordflow">if</span>( j &amp; 0x80 ) {</div>
+<div class="line"><span class="lineno">  566</span>        j = 255 - j;</div>
+<div class="line"><span class="lineno">  567</span>    }</div>
+<div class="line"><span class="lineno">  568</span>    uint8_t jj  = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(  j, j);</div>
+<div class="line"><span class="lineno">  569</span>    uint8_t jj2 = jj &lt;&lt; 1;</div>
+<div class="line"><span class="lineno">  570</span>    <span class="keywordflow">if</span>( i &amp; 0x80 ) {</div>
+<div class="line"><span class="lineno">  571</span>        jj2 = 255 - jj2;</div>
+<div class="line"><span class="lineno">  572</span>    }</div>
+<div class="line"><span class="lineno">  573</span>    <span class="keywordflow">return</span> jj2;</div>
+<div class="line"><span class="lineno">  574</span>}</div>
+<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00040">scale8.h:40</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00034">scale8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00765">quadwave8()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00747">quadwave8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -160,7 +160,7 @@ $(function(){initNavTree('d4/dfe/group___easing_ga381449070b2d6bfba356f87881ab28
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/dfe/group___easing.html">Easing Functions</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

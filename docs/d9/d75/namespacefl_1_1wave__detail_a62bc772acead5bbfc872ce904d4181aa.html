@@ -115,13 +115,21 @@ $(function(){initNavTree('d9/d75/namespacefl_1_1wave__detail_a62bc772acead5bbfc8
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00019">19</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   19</span>{ <span class="keywordflow">return</span> ((<span class="keywordtype">float</span>)f) / <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83.html#a9698efe2e6043036b56012d893b44b83">FIXED_SCALE</a>; }</div>
-<div class="ttc" id="awave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83_html_a9698efe2e6043036b56012d893b44b83"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_a9698efe2e6043036b56012d893b44b83.html#a9698efe2e6043036b56012d893b44b83">FIXED_SCALE</a></div><div class="ttdeci">#define FIXED_SCALE</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00011">wave_simulation_real.cpp:11</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00030">30</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   30</span>                                {</div>
+<div class="line"><span class="lineno">   31</span>    <span class="comment">// return ((float)f) / FIXED_SCALE;</span></div>
+<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">if</span> (f &lt; 0) {</div>
+<div class="line"><span class="lineno">   33</span>        <span class="keywordflow">return</span> ((<span class="keywordtype">float</span>)f) / <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39.html#a176d6f831723b7f68a8eb0d976061a39">INT16_NEG</a>; <span class="comment">// Negative values</span></div>
+<div class="line"><span class="lineno">   34</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   35</span>        <span class="keywordflow">return</span> ((<span class="keywordtype">float</span>)f) / <a class="code hl_define" href="../../d8/da2/wave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0.html#ab0fafa39d99376e8470debbd235606f0">INT16_POS</a>; <span class="comment">// Positive values</span></div>
+<div class="line"><span class="lineno">   36</span>    }</div>
+<div class="line"><span class="lineno">   37</span>}</div>
+<div class="ttc" id="awave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39_html_a176d6f831723b7f68a8eb0d976061a39"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_a176d6f831723b7f68a8eb0d976061a39.html#a176d6f831723b7f68a8eb0d976061a39">INT16_NEG</a></div><div class="ttdeci">#define INT16_NEG</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00014">wave_simulation_real.cpp:14</a></div></div>
+<div class="ttc" id="awave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0_html_ab0fafa39d99376e8470debbd235606f0"><div class="ttname"><a href="../../d8/da2/wave__simulation__real_8cpp_ab0fafa39d99376e8470debbd235606f0.html#ab0fafa39d99376e8470debbd235606f0">INT16_POS</a></div><div class="ttdeci">#define INT16_POS</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00013">wave_simulation_real.cpp:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00011">FIXED_SCALE</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00014">INT16_NEG</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00013">INT16_POS</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00069">fl::WaveSimulation1D_Real::getf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00163">fl::WaveSimulation2D_Real::getf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00047">fl::WaveSimulation1D_Real::getSpeed()</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00159">fl::WaveSimulation2D_Real::getSpeed()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00087">fl::WaveSimulation1D_Real::getf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00181">fl::WaveSimulation2D_Real::getf()</a>, <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00065">fl::WaveSimulation1D_Real::getSpeed()</a>, and <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00177">fl::WaveSimulation2D_Real::getSpeed()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -139,7 +147,7 @@ $(function(){initNavTree('d9/d75/namespacefl_1_1wave__detail_a62bc772acead5bbfc8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d75/namespacefl_1_1wave__detail.html">wave_detail</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

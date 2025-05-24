@@ -25,9 +25,9 @@ digraph "loop"
   Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="MyColorFromPaletteExtended",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d61/_fx_water_8ino_aa04e7c98cb0803818832555bf128fb57.html#aa04e7c98cb0803818832555bf128fb57",tooltip=" "];
   Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="blend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db8/group___color_blends_ga4f06b4423f71f77346aaf5dabe7dd05c.html#ga4f06b4423f71f77346aaf5dabe7dd05c",tooltip="Computes a new color blended some fraction of the way between two other colors."];
+  Node10 [id="Node000010",label="fl::blend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805",tooltip=" "];
   Node10 -> Node11 [id="edge11_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="nblend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/db8/group___color_blends_ga325120664a9c9b41abceee65303b0c4e.html#ga325120664a9c9b41abceee65303b0c4e",tooltip="Destructively modifies one color, blending in a given fraction of an overlay color."];
+  Node11 [id="Node000011",label="fl::nblend",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6",tooltip=" "];
   Node11 -> Node13 [id="edge12_Node000011_Node000013",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="cleanup_R1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79",tooltip="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls."];
   Node11 -> Node14 [id="edge13_Node000011_Node000014",color="steelblue1",style="solid",tooltip=" "];
@@ -47,5 +47,5 @@ digraph "loop"
   Node17 -> Node19 [id="edge22_Node000017_Node000019",color="steelblue1",style="solid",tooltip=" "];
   Node19 [id="Node000019",label="xy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc",tooltip=" "];
   Node1 -> Node20 [id="edge23_Node000001_Node000020",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d61/_fx_water_8ino_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb",tooltip=" "];
+  Node20 [id="Node000020",label="fl::XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a540e832f2b3e0101e36d4155f5cfe6b9.html#a540e832f2b3e0101e36d4155f5cfe6b9",tooltip=" "];
 }

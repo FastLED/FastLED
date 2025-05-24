@@ -132,30 +132,30 @@ $(function(){initNavTree('d6/de8/noise_8cpp_ad89cf56a81ef482a0027a47eada176bb.ht
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00324">324</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  325</span>{</div>
-<div class="line"><span class="lineno">  326</span>    <span class="comment">// int8_t delta = b - a;</span></div>
-<div class="line"><span class="lineno">  327</span>    <span class="comment">// int16_t prod = (uint16_t)delta * (uint16_t)frac;</span></div>
-<div class="line"><span class="lineno">  328</span>    <span class="comment">// int8_t scaled = prod &gt;&gt; 8;</span></div>
-<div class="line"><span class="lineno">  329</span>    <span class="comment">// int8_t result = a + scaled;</span></div>
-<div class="line"><span class="lineno">  330</span>    <span class="comment">// return result;</span></div>
-<div class="line"><span class="lineno">  331</span>    int8_t result;</div>
-<div class="line"><span class="lineno">  332</span>    <span class="keywordflow">if</span>( b &gt; a) {</div>
-<div class="line"><span class="lineno">  333</span>        uint8_t delta = b - a;</div>
-<div class="line"><span class="lineno">  334</span>        uint8_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( delta, frac);</div>
-<div class="line"><span class="lineno">  335</span>        result = a + scaled;</div>
-<div class="line"><span class="lineno">  336</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  337</span>        uint8_t delta = a - b;</div>
-<div class="line"><span class="lineno">  338</span>        uint8_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( delta, frac);</div>
-<div class="line"><span class="lineno">  339</span>        result = a - scaled;</div>
-<div class="line"><span class="lineno">  340</span>    }</div>
-<div class="line"><span class="lineno">  341</span>    <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  342</span>}</div>
-<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00034">scale8.h:34</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00298">298</a> of file <a class="el" href="../../d6/de8/noise_8cpp_source.html">noise.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  299</span>{</div>
+<div class="line"><span class="lineno">  300</span>    <span class="comment">// int8_t delta = b - a;</span></div>
+<div class="line"><span class="lineno">  301</span>    <span class="comment">// int16_t prod = (uint16_t)delta * (uint16_t)frac;</span></div>
+<div class="line"><span class="lineno">  302</span>    <span class="comment">// int8_t scaled = prod &gt;&gt; 8;</span></div>
+<div class="line"><span class="lineno">  303</span>    <span class="comment">// int8_t result = a + scaled;</span></div>
+<div class="line"><span class="lineno">  304</span>    <span class="comment">// return result;</span></div>
+<div class="line"><span class="lineno">  305</span>    int8_t result;</div>
+<div class="line"><span class="lineno">  306</span>    <span class="keywordflow">if</span>( b &gt; a) {</div>
+<div class="line"><span class="lineno">  307</span>        uint8_t delta = b - a;</div>
+<div class="line"><span class="lineno">  308</span>        uint8_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( delta, frac);</div>
+<div class="line"><span class="lineno">  309</span>        result = a + scaled;</div>
+<div class="line"><span class="lineno">  310</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  311</span>        uint8_t delta = a - b;</div>
+<div class="line"><span class="lineno">  312</span>        uint8_t scaled = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( delta, frac);</div>
+<div class="line"><span class="lineno">  313</span>        result = a - scaled;</div>
+<div class="line"><span class="lineno">  314</span>    }</div>
+<div class="line"><span class="lineno">  315</span>    <span class="keywordflow">return</span> result;</div>
+<div class="line"><span class="lineno">  316</span>}</div>
+<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00040">scale8.h:40</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00034">scale8()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00669">inoise8_raw()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00624">inoise8_raw()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00575">inoise8_raw()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00643">inoise8_raw()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00598">inoise8_raw()</a>, and <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00549">inoise8_raw()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -180,7 +180,7 @@ $(function(){initNavTree('d6/de8/noise_8cpp_ad89cf56a81ef482a0027a47eada176bb.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/de8/noise_8cpp.html">noise.cpp</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

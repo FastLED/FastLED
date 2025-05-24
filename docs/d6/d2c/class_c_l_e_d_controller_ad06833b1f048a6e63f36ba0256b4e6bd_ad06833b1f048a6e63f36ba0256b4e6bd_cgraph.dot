@@ -17,9 +17,13 @@ digraph "CLEDController::setScreenMap"
   Node5 [id="Node000005",label="CLEDController::setScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a.html#a34a490a6be2f618ffe6ed7d60be5590a",tooltip=" "];
   Node5 -> Node2 [id="edge5_Node000005_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::EngineEvents::onCanvas\lUiSet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726",tooltip=" "];
-  Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::EngineEvents::\l_onCanvasUiSet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a7eb765a882db21850019e4ee59f0cce1.html#a7eb765a882db21850019e4ee59f0cce1",tooltip=" "];
-  Node6 -> Node8 [id="edge8_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::EngineEvents::getInstance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b",tooltip=" "];
+  Node6 [id="Node000006",label="fl::ScreenMap::getDiameter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_af9b06074ecc088fef30300f87650d2f5.html#af9b06074ecc088fef30300f87650d2f5",tooltip=" "];
+  Node5 -> Node7 [id="edge7_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::EngineEvents::onCanvas\lUiSet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726",tooltip=" "];
+  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::EngineEvents::\l_onCanvasUiSet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a7eb765a882db21850019e4ee59f0cce1.html#a7eb765a882db21850019e4ee59f0cce1",tooltip=" "];
+  Node7 -> Node9 [id="edge9_Node000007_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::EngineEvents::getInstance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b",tooltip=" "];
+  Node5 -> Node12 [id="edge10_Node000005_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ScreenMap::setDiameter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a0f7699554fd9fe34cd58b5d781203405.html#a0f7699554fd9fe34cd58b5d781203405",tooltip=" "];
 }

@@ -1,5 +1,8 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/Chromancer/detail.h" name="/home/runner/work/FastLED/FastLED/examples/Chromancer/detail.h">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,233,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="84,108,155,133"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="84,108,155,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="122,60,122,94,117,94,117,60"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="148,105,170,107,178,112,181,121,175,132,162,137,160,131,172,128,176,120,174,115,168,112,147,111"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="82,181,157,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,134,122,168,117,168,117,134"/>
 </map>

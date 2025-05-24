@@ -115,57 +115,57 @@ $(function(){initNavTree('da/df9/classfl_1_1_wave_simulation1_d___real_a2a810c84
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00090">90</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   90</span>                                   {</div>
-<div class="line"><span class="lineno">   91</span>    int16_t *curr = (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> == 0) ? <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_ac385a77ba1d89e0c8f62ef1d90fb74bf.html#ac385a77ba1d89e0c8f62ef1d90fb74bf">grid1</a>.get() : <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a4da47e2c0c0b0b27bbfdda53c65e6b87.html#a4da47e2c0c0b0b27bbfdda53c65e6b87">grid2</a>.get();</div>
-<div class="line"><span class="lineno">   92</span>    int16_t *next = (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> == 0) ? <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a4da47e2c0c0b0b27bbfdda53c65e6b87.html#a4da47e2c0c0b0b27bbfdda53c65e6b87">grid2</a>.get() : <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_ac385a77ba1d89e0c8f62ef1d90fb74bf.html#ac385a77ba1d89e0c8f62ef1d90fb74bf">grid1</a>.get();</div>
-<div class="line"><span class="lineno">   93</span> </div>
-<div class="line"><span class="lineno">   94</span>    <span class="comment">// Update boundaries with a Neumann (zero-gradient) condition:</span></div>
-<div class="line"><span class="lineno">   95</span>    curr[0] = curr[1];</div>
-<div class="line"><span class="lineno">   96</span>    curr[<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1] = curr[<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a>];</div>
-<div class="line"><span class="lineno">   97</span> </div>
-<div class="line"><span class="lineno">   98</span>    <span class="comment">// Compute dampening factor as an integer value: 2^(mDampenening)</span></div>
-<div class="line"><span class="lineno">   99</span>    int32_t dampening_factor = 1 &lt;&lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a32bd0e7274c31530e2ca48c64ca2e0db.html#a32bd0e7274c31530e2ca48c64ca2e0db">mDampenening</a>;</div>
-<div class="line"><span class="lineno">  100</span> </div>
-<div class="line"><span class="lineno">  101</span>    int32_t mCourantSq32 = <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a1e67cf47da70f5bde59a2d2c17c9db31.html#a1e67cf47da70f5bde59a2d2c17c9db31">mCourantSq</a>);</div>
-<div class="line"><span class="lineno">  102</span>    <span class="comment">// Iterate over each inner cell.</span></div>
-<div class="line"><span class="lineno">  103</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1; i++) {</div>
-<div class="line"><span class="lineno">  104</span>        <span class="comment">// Compute the 1D Laplacian:</span></div>
-<div class="line"><span class="lineno">  105</span>        <span class="comment">// lap = curr[i+1] - 2 * curr[i] + curr[i-1]</span></div>
-<div class="line"><span class="lineno">  106</span>        int32_t lap =</div>
-<div class="line"><span class="lineno">  107</span>            (int32_t)curr[i + 1] - ((int32_t)curr[i] &lt;&lt; 1) + curr[i - 1];</div>
-<div class="line"><span class="lineno">  108</span> </div>
-<div class="line"><span class="lineno">  109</span>        <span class="comment">// Multiply the Laplacian by the simulation speed using Q15 arithmetic:</span></div>
-<div class="line"><span class="lineno">  110</span>        int32_t term = (mCourantSq32 * lap) &gt;&gt; 15;</div>
+<p class="definition">Definition at line <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html#l00108">108</a> of file <a class="el" href="../../d8/da2/wave__simulation__real_8cpp_source.html">wave_simulation_real.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  108</span>                                   {</div>
+<div class="line"><span class="lineno">  109</span>    int16_t *curr = (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> == 0) ? <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_ac385a77ba1d89e0c8f62ef1d90fb74bf.html#ac385a77ba1d89e0c8f62ef1d90fb74bf">grid1</a>.get() : <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a4da47e2c0c0b0b27bbfdda53c65e6b87.html#a4da47e2c0c0b0b27bbfdda53c65e6b87">grid2</a>.get();</div>
+<div class="line"><span class="lineno">  110</span>    int16_t *next = (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> == 0) ? <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a4da47e2c0c0b0b27bbfdda53c65e6b87.html#a4da47e2c0c0b0b27bbfdda53c65e6b87">grid2</a>.get() : <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_ac385a77ba1d89e0c8f62ef1d90fb74bf.html#ac385a77ba1d89e0c8f62ef1d90fb74bf">grid1</a>.get();</div>
 <div class="line"><span class="lineno">  111</span> </div>
-<div class="line"><span class="lineno">  112</span>        <span class="comment">// Compute the new value:</span></div>
-<div class="line"><span class="lineno">  113</span>        <span class="comment">// f = -next[i] + 2 * curr[i] + term</span></div>
-<div class="line"><span class="lineno">  114</span>        int32_t f = -(int32_t)next[i] + ((int32_t)curr[i] &lt;&lt; 1) + term;</div>
+<div class="line"><span class="lineno">  112</span>    <span class="comment">// Update boundaries with a Neumann (zero-gradient) condition:</span></div>
+<div class="line"><span class="lineno">  113</span>    curr[0] = curr[1];</div>
+<div class="line"><span class="lineno">  114</span>    curr[<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1] = curr[<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a>];</div>
 <div class="line"><span class="lineno">  115</span> </div>
-<div class="line"><span class="lineno">  116</span>        <span class="comment">// Apply damping:</span></div>
-<div class="line"><span class="lineno">  117</span>        f = f - (f / dampening_factor);</div>
+<div class="line"><span class="lineno">  116</span>    <span class="comment">// Compute dampening factor as an integer value: 2^(mDampenening)</span></div>
+<div class="line"><span class="lineno">  117</span>    int32_t dampening_factor = 1 &lt;&lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a32bd0e7274c31530e2ca48c64ca2e0db.html#a32bd0e7274c31530e2ca48c64ca2e0db">mDampenening</a>;</div>
 <div class="line"><span class="lineno">  118</span> </div>
-<div class="line"><span class="lineno">  119</span>        <span class="comment">// Clamp the result to the Q15 range [-32768, 32767].</span></div>
-<div class="line"><span class="lineno">  120</span>        <span class="keywordflow">if</span> (f &gt; 32767)</div>
-<div class="line"><span class="lineno">  121</span>            f = 32767;</div>
-<div class="line"><span class="lineno">  122</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (f &lt; -32768)</div>
-<div class="line"><span class="lineno">  123</span>            f = -32768;</div>
-<div class="line"><span class="lineno">  124</span> </div>
-<div class="line"><span class="lineno">  125</span>        next[i] = (int16_t)f;</div>
-<div class="line"><span class="lineno">  126</span>    }</div>
-<div class="line"><span class="lineno">  127</span> </div>
-<div class="line"><span class="lineno">  128</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a146733a78fcd2203c7aca245726fdbda.html#a146733a78fcd2203c7aca245726fdbda">mHalfDuplex</a>) {</div>
-<div class="line"><span class="lineno">  129</span>        <span class="comment">// Set the negative values to zero.</span></div>
-<div class="line"><span class="lineno">  130</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1; i++) {</div>
-<div class="line"><span class="lineno">  131</span>            <span class="keywordflow">if</span> (next[i] &lt; 0) {</div>
-<div class="line"><span class="lineno">  132</span>                next[i] = 0;</div>
-<div class="line"><span class="lineno">  133</span>            }</div>
-<div class="line"><span class="lineno">  134</span>        }</div>
-<div class="line"><span class="lineno">  135</span>    }</div>
+<div class="line"><span class="lineno">  119</span>    int32_t mCourantSq32 = <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a1e67cf47da70f5bde59a2d2c17c9db31.html#a1e67cf47da70f5bde59a2d2c17c9db31">mCourantSq</a>);</div>
+<div class="line"><span class="lineno">  120</span>    <span class="comment">// Iterate over each inner cell.</span></div>
+<div class="line"><span class="lineno">  121</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1; i++) {</div>
+<div class="line"><span class="lineno">  122</span>        <span class="comment">// Compute the 1D Laplacian:</span></div>
+<div class="line"><span class="lineno">  123</span>        <span class="comment">// lap = curr[i+1] - 2 * curr[i] + curr[i-1]</span></div>
+<div class="line"><span class="lineno">  124</span>        int32_t lap =</div>
+<div class="line"><span class="lineno">  125</span>            (int32_t)curr[i + 1] - ((int32_t)curr[i] &lt;&lt; 1) + curr[i - 1];</div>
+<div class="line"><span class="lineno">  126</span> </div>
+<div class="line"><span class="lineno">  127</span>        <span class="comment">// Multiply the Laplacian by the simulation speed using Q15 arithmetic:</span></div>
+<div class="line"><span class="lineno">  128</span>        int32_t term = (mCourantSq32 * lap) &gt;&gt; 15;</div>
+<div class="line"><span class="lineno">  129</span> </div>
+<div class="line"><span class="lineno">  130</span>        <span class="comment">// Compute the new value:</span></div>
+<div class="line"><span class="lineno">  131</span>        <span class="comment">// f = -next[i] + 2 * curr[i] + term</span></div>
+<div class="line"><span class="lineno">  132</span>        int32_t f = -(int32_t)next[i] + ((int32_t)curr[i] &lt;&lt; 1) + term;</div>
+<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  134</span>        <span class="comment">// Apply damping:</span></div>
+<div class="line"><span class="lineno">  135</span>        f = f - (f / dampening_factor);</div>
 <div class="line"><span class="lineno">  136</span> </div>
-<div class="line"><span class="lineno">  137</span>    <span class="comment">// Toggle the active grid.</span></div>
-<div class="line"><span class="lineno">  138</span>    <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> ^= 1;</div>
-<div class="line"><span class="lineno">  139</span>}</div>
+<div class="line"><span class="lineno">  137</span>        <span class="comment">// Clamp the result to the Q15 range [-32768, 32767].</span></div>
+<div class="line"><span class="lineno">  138</span>        <span class="keywordflow">if</span> (f &gt; 32767)</div>
+<div class="line"><span class="lineno">  139</span>            f = 32767;</div>
+<div class="line"><span class="lineno">  140</span>        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (f &lt; -32768)</div>
+<div class="line"><span class="lineno">  141</span>            f = -32768;</div>
+<div class="line"><span class="lineno">  142</span> </div>
+<div class="line"><span class="lineno">  143</span>        next[i] = (int16_t)f;</div>
+<div class="line"><span class="lineno">  144</span>    }</div>
+<div class="line"><span class="lineno">  145</span> </div>
+<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a146733a78fcd2203c7aca245726fdbda.html#a146733a78fcd2203c7aca245726fdbda">mHalfDuplex</a>) {</div>
+<div class="line"><span class="lineno">  147</span>        <span class="comment">// Set the negative values to zero.</span></div>
+<div class="line"><span class="lineno">  148</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a3ea92bcc2d2b416c706d961a7cc8cc14.html#a3ea92bcc2d2b416c706d961a7cc8cc14">length</a> + 1; i++) {</div>
+<div class="line"><span class="lineno">  149</span>            <span class="keywordflow">if</span> (next[i] &lt; 0) {</div>
+<div class="line"><span class="lineno">  150</span>                next[i] = 0;</div>
+<div class="line"><span class="lineno">  151</span>            }</div>
+<div class="line"><span class="lineno">  152</span>        }</div>
+<div class="line"><span class="lineno">  153</span>    }</div>
+<div class="line"><span class="lineno">  154</span> </div>
+<div class="line"><span class="lineno">  155</span>    <span class="comment">// Toggle the active grid.</span></div>
+<div class="line"><span class="lineno">  156</span>    <a class="code hl_variable" href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a6ddea51f7d8bbf81d04e1268d27229c4.html#a6ddea51f7d8bbf81d04e1268d27229c4">whichGrid</a> ^= 1;</div>
+<div class="line"><span class="lineno">  157</span>}</div>
 <div class="ttc" id="aclassfl_1_1_wave_simulation1_d___real_a146733a78fcd2203c7aca245726fdbda_html_a146733a78fcd2203c7aca245726fdbda"><div class="ttname"><a href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a146733a78fcd2203c7aca245726fdbda.html#a146733a78fcd2203c7aca245726fdbda">fl::WaveSimulation1D_Real::mHalfDuplex</a></div><div class="ttdeci">bool mHalfDuplex</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d8e/wave__simulation__real_8h_source.html#l00108">wave_simulation_real.h:108</a></div></div>
 <div class="ttc" id="aclassfl_1_1_wave_simulation1_d___real_a1e67cf47da70f5bde59a2d2c17c9db31_html_a1e67cf47da70f5bde59a2d2c17c9db31"><div class="ttname"><a href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a1e67cf47da70f5bde59a2d2c17c9db31.html#a1e67cf47da70f5bde59a2d2c17c9db31">fl::WaveSimulation1D_Real::mCourantSq</a></div><div class="ttdeci">int16_t mCourantSq</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d8e/wave__simulation__real_8h_source.html#l00106">wave_simulation_real.h:106</a></div></div>
 <div class="ttc" id="aclassfl_1_1_wave_simulation1_d___real_a32bd0e7274c31530e2ca48c64ca2e0db_html_a32bd0e7274c31530e2ca48c64ca2e0db"><div class="ttname"><a href="../../da/df9/classfl_1_1_wave_simulation1_d___real_a32bd0e7274c31530e2ca48c64ca2e0db.html#a32bd0e7274c31530e2ca48c64ca2e0db">fl::WaveSimulation1D_Real::mDampenening</a></div><div class="ttdeci">int mDampenening</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d8e/wave__simulation__real_8h_source.html#l00107">wave_simulation_real.h:107</a></div></div>
@@ -185,7 +185,7 @@ $(function(){initNavTree('da/df9/classfl_1_1_wave_simulation1_d___real_a2a810c84
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/df9/classfl_1_1_wave_simulation1_d___real.html">WaveSimulation1D_Real</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

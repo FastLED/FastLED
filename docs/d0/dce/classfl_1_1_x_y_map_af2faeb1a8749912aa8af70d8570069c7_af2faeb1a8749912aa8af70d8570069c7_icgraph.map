@@ -1,5 +1,5 @@
 <map id="fl::XYMap::constructWithUserFunction" name="fl::XYMap::constructWithUserFunction">
-<area shape="rect" id="Node000001" title=" " alt="" coords="116,5,297,45"/>
-<area shape="rect" id="Node000002" href="$da/d2d/colorutils_8cpp_ae97f9574ca4fa1a7ab65782b2a804fba.html#ae97f9574ca4fa1a7ab65782b2a804fba" title=" " alt="" coords="5,13,68,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,28,68,28,68,23,102,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="132,5,313,45"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="5,13,84,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,28,84,28,84,23,118,23"/>
 </map>

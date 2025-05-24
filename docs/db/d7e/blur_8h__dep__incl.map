@@ -1,0 +1,40 @@
+<map id="fl/blur.h" name="fl/blur.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="285,5,355,31"/>
+<area shape="rect" id="Node000002" href="$de/dc8/blur_8cpp.html" title=" " alt="" coords="37,299,123,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="277,38,237,57,194,82,152,114,117,153,98,192,87,233,82,299,77,298,82,232,93,190,112,151,148,110,191,78,235,52,274,33"/>
+<area shape="rect" id="Node000003" href="$d7/df9/fl_2colorutils_8h.html" title="Utility functions for color fill, palettes, blending, and more." alt="" coords="267,79,373,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="323,44,323,79,317,79,317,44"/>
+<area shape="rect" id="Node000118" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="452,299,537,324"/>
+<area shape="poly" id="edge24_Node000001_Node000118" title=" " alt="" coords="369,18,478,28,545,40,616,58,687,84,754,120,813,166,839,193,861,224,866,238,861,252,838,269,804,282,716,300,619,309,538,312,538,307,619,304,715,295,803,277,835,265,856,249,861,238,856,227,835,197,810,170,751,124,685,89,614,63,544,45,477,33,368,23"/>
+<area shape="rect" id="Node000004" href="$dc/dcc/colorpalettes_8h.html" title="Declarations for the predefined color palettes supplied by FastLED." alt="" coords="261,152,379,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="323,118,323,152,317,152,317,118"/>
+<area shape="rect" id="Node000091" href="$da/d2d/colorutils_8cpp.html" title="Misc utility functions for palettes, blending, and more." alt="" coords="147,299,269,324"/>
+<area shape="poly" id="edge15_Node000003_Node000091" title=" " alt="" coords="253,97,220,103,187,113,156,130,131,154,123,172,122,192,128,212,138,232,167,269,196,297,192,300,164,273,134,235,123,214,117,192,118,171,127,150,153,125,185,108,219,98,253,92"/>
+<area shape="poly" id="edge23_Node000003_Node000118" title=" " alt="" coords="351,110,373,128,394,150,411,177,419,200,427,223,442,249,463,275,484,297,480,300,459,279,438,252,423,225,414,202,406,179,390,154,369,132,347,114"/>
+<area shape="rect" id="Node000120" href="$de/de9/src_2fx_22d_2wave_8h.html" title=" " alt="" coords="441,372,548,397"/>
+<area shape="poly" id="edge22_Node000003_Node000120" title=" " alt="" coords="253,102,183,120,148,134,116,154,65,194,25,235,13,256,8,277,12,299,27,322,47,333,86,342,200,359,441,378,441,383,199,364,85,347,45,337,23,326,7,301,3,277,8,254,21,232,62,190,113,150,146,130,182,114,252,97"/>
+<area shape="rect" id="Node000127" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="142,152,237,177"/>
+<area shape="poly" id="edge12_Node000003_Node000127" title=" " alt="" coords="288,113,212,154,209,149,285,108"/>
+<area shape="rect" id="Node000128" href="$d3/d77/gradient_8cpp.html" title=" " alt="" coords="452,225,567,251"/>
+<area shape="poly" id="edge16_Node000003_Node000128" title=" " alt="" coords="364,107,401,126,438,150,476,188,503,223,499,227,472,192,434,154,398,131,361,112"/>
+<area shape="rect" id="Node000129" href="$db/dfe/gradient_8h.html" title=" " alt="" coords="594,152,694,177"/>
+<area shape="poly" id="edge17_Node000003_Node000129" title=" " alt="" coords="386,104,594,150,593,155,384,109"/>
+<area shape="rect" id="Node000005" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="237,225,323,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="309,191,289,227,284,224,304,188"/>
+<area shape="rect" id="Node000080" href="$d6/dcc/colorpalettes_8cpp.html" title="Definitions for the predefined color palettes supplied by FastLED." alt="" coords="293,299,427,324"/>
+<area shape="poly" id="edge11_Node000004_Node000080" title=" " alt="" coords="329,190,359,298,354,299,324,192"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="236,258,113,301,112,296,234,253"/>
+<area shape="poly" id="edge5_Node000005_Node000080" title=" " alt="" coords="305,258,349,296,345,300,301,262"/>
+<area shape="poly" id="edge7_Node000005_Node000091" title=" " alt="" coords="260,263,221,300,218,297,256,259"/>
+<area shape="poly" id="edge8_Node000005_Node000118" title=" " alt="" coords="321,253,454,296,452,301,319,258"/>
+<area shape="poly" id="edge9_Node000118_Node000005" title=" " alt="" coords="453,297,320,253,322,248,454,291"/>
+<area shape="poly" id="edge10_Node000118_Node000120" title=" " alt="" coords="497,338,497,372,492,372,492,338"/>
+<area shape="poly" id="edge13_Node000127_Node000005" title=" " alt="" coords="216,184,267,223,263,227,213,188"/>
+<area shape="poly" id="edge14_Node000127_Node000080" title=" " alt="" coords="197,190,208,220,227,249,246,265,268,278,313,296,311,301,266,283,243,269,223,252,203,223,192,191"/>
+<area shape="poly" id="edge21_Node000129_Node000120" title=" " alt="" coords="708,166,770,173,828,188,850,199,865,213,869,231,861,252,830,287,793,315,752,338,708,355,622,376,548,384,548,379,621,371,707,350,750,333,790,311,826,283,856,249,864,231,860,216,847,203,826,193,769,179,707,172"/>
+<area shape="poly" id="edge19_Node000129_Node000128" title=" " alt="" coords="611,186,532,227,530,223,609,181"/>
+<area shape="rect" id="Node000130" href="$d0/d4f/draw__visitor_8h.html" title=" " alt="" coords="721,225,847,251"/>
+<area shape="poly" id="edge18_Node000129_Node000130" title=" " alt="" coords="680,181,762,223,760,227,677,186"/>
+<area shape="rect" id="Node000133" href="$d4/d78/xypath_8cpp.html" title=" " alt="" coords="591,225,697,251"/>
+<area shape="poly" id="edge20_Node000129_Node000133" title=" " alt="" coords="647,191,647,225,641,225,641,191"/>
+</map>

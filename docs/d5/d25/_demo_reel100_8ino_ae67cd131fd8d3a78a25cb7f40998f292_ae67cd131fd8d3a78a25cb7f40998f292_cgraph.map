@@ -1,11 +1,9 @@
 <map id="confetti" name="confetti">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,55,77,80"/>
-<area shape="rect" id="Node000002" href="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98" title="Reduce the brightness of an array of pixels all at once." alt="" coords="125,5,244,31"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="125,5,244,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="77,53,133,33,135,38,78,58"/>
-<area shape="rect" id="Node000004" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="141,55,229,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="77,65,127,65,127,70,77,70"/>
-<area shape="rect" id="Node000005" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="145,104,225,129"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="78,77,135,97,133,102,77,82"/>
-<area shape="rect" id="Node000003" href="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b" title="Scale the brightness of an array of pixels all at once." alt="" coords="292,5,364,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,15,278,15,278,21,244,21"/>
+<area shape="rect" id="Node000003" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="141,55,229,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="77,65,127,65,127,70,77,70"/>
+<area shape="rect" id="Node000004" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="145,104,225,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="78,77,135,97,133,102,77,82"/>
 </map>

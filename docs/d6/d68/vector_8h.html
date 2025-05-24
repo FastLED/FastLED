@@ -102,22 +102,27 @@ $(function(){initNavTree('d6/d68/vector_8h.html','../../'); initResizable(true);
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">vector.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br />
-<code>#include &lt;stddef.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d36/inplacenew_8h_source.html">inplacenew.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d28/fl_2scoped__ptr_8h_source.html">fl/scoped_ptr.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../df/dd8/stdint_8h_source.html">stdint.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/dea/functional_8h_source.html">fl/functional.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/d22/insert__result_8h_source.html">fl/insert_result.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d44/scoped__ptr_8h_source.html">fl/scoped_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d36/inplacenew_8h_source.html">inplacenew.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for vector.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d5f/vector_8h__incl.svg" width="607" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d5f/vector_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
@@ -137,6 +142,10 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d9e/structfl_1_1_heap_vector_1_1reverse__iterator.html">fl::HeapVector&lt; T &gt;::reverse_iterator</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/dc5/structfl_1_1_inlined_memory_block.html">fl::InlinedMemoryBlock&lt; T, N &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d18/classfl_1_1_inlined_vector.html">fl::InlinedVector&lt; T, INLINED_SIZE &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d5c/classfl_1_1_sorted_heap_vector.html">fl::SortedHeapVector&lt; T, LessThan &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -145,6 +154,18 @@ Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
 <tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Implements a simple red square effect for 2D LED grids. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ace09979e5072c69e806cd50d6bafdf16" id="r_ace09979e5072c69e806cd50d6bafdf16"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:ace09979e5072c69e806cd50d6bafdf16"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ace09979e5072c69e806cd50d6bafdf16.html#ace09979e5072c69e806cd50d6bafdf16">fl::vector</a> = <a class="el" href="../../db/ddd/classfl_1_1_heap_vector.html">HeapVector</a>&lt;T&gt;</td></tr>
+<tr class="separator:ace09979e5072c69e806cd50d6bafdf16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae72faea34fd210a59a976cd0f93a62e9" id="r_ae72faea34fd210a59a976cd0f93a62e9"><td class="memTemplParams" colspan="2">template&lt;typename T, size_t INLINED_SIZE&gt; </td></tr>
+<tr class="memitem:ae72faea34fd210a59a976cd0f93a62e9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae72faea34fd210a59a976cd0f93a62e9.html#ae72faea34fd210a59a976cd0f93a62e9">fl::vector_fixed</a> = <a class="el" href="../../d3/d73/classfl_1_1_fixed_vector.html">FixedVector</a>&lt;T, INLINED_SIZE&gt;</td></tr>
+<tr class="separator:ae72faea34fd210a59a976cd0f93a62e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2349ec990ce2ca2172b77815bc59b118" id="r_a2349ec990ce2ca2172b77815bc59b118"><td class="memTemplParams" colspan="2">template&lt;typename T, size_t INLINED_SIZE = 64&gt; </td></tr>
+<tr class="memitem:a2349ec990ce2ca2172b77815bc59b118"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2349ec990ce2ca2172b77815bc59b118.html#a2349ec990ce2ca2172b77815bc59b118">fl::vector_inlined</a> = <a class="el" href="../../da/d18/classfl_1_1_inlined_vector.html">InlinedVector</a>&lt;T, INLINED_SIZE&gt;</td></tr>
+<tr class="separator:a2349ec990ce2ca2172b77815bc59b118"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -153,7 +174,7 @@ Namespaces</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d68/vector_8h.html">vector.h</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:31 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

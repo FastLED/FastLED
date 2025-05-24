@@ -1,15 +1,15 @@
 <map id="fl::DemoReel100::sinelon" name="fl::DemoReel100::sinelon">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,80,191,105"/>
-<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="255,55,341,80"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,78,240,72,241,77,191,84"/>
-<area shape="rect" id="Node000006" href="$d3/d1c/group___color_fades_ga404d163d8a422cee2df2baac4151ca98.html#ga404d163d8a422cee2df2baac4151ca98" title="Reduce the brightness of an array of pixels all at once." alt="" coords="239,104,357,129"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="191,101,225,105,224,111,191,106"/>
-<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="408,5,475,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="335,52,394,31,396,36,336,57"/>
-<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="405,55,477,80"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="342,65,391,65,391,70,342,70"/>
-<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="525,5,592,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="475,15,512,15,512,21,475,21"/>
-<area shape="rect" id="Node000007" href="$d3/d1c/group___color_fades_gad0356fc313196732e7cd4e64f506f82b.html#gad0356fc313196732e7cd4e64f506f82b" title="Scale the brightness of an array of pixels all at once." alt="" coords="405,104,477,129"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="357,114,392,114,392,119,357,119"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="263,55,349,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,79,248,72,249,77,192,84"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490" title=" " alt="" coords="239,104,373,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="191,101,225,105,224,110,191,106"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="432,5,499,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,52,418,30,419,35,348,57"/>
+<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="429,55,501,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="350,65,415,65,415,70,350,70"/>
+<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="557,5,624,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="499,15,544,15,544,21,499,21"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ab90db73f2d846755d0b084e4af7af072.html#ab90db73f2d846755d0b084e4af7af072" title=" " alt="" coords="421,104,509,129"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="374,114,408,114,408,119,374,119"/>
 </map>

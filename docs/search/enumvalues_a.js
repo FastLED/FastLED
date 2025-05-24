@@ -26,11 +26,9 @@ var searchData=
   ['lightyellow_23',['LightYellow',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a1f48003dee0a649aa6ff945fb6eb993e',1,'CRGB']]],
   ['lime_24',['Lime',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a79c563c5a7e3bf2e9d3f390e9bc62851',1,'CRGB']]],
   ['limegreen_25',['LimeGreen',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a9a5e85f66f4cd2393deed860d760b4ec',1,'CRGB']]],
-  ['linearblend_26',['LINEARBLEND',['../d2/d73/group___palette_colors_ga565c04e626af4a3ec44bf97edc607b4e.html#gga565c04e626af4a3ec44bf97edc607b4ea7a36ed58acc67878c9dd1b6a83910f06',1,'colorutils.h']]],
-  ['linearblend_5fnowrap_27',['LINEARBLEND_NOWRAP',['../d2/d73/group___palette_colors_ga565c04e626af4a3ec44bf97edc607b4e.html#gga565c04e626af4a3ec44bf97edc607b4ea7bca22698a242b60273a072b10848014',1,'colorutils.h']]],
-  ['linen_28',['Linen',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a96354f6e0d06d2cb26d874c25dc82a48',1,'CRGB']]],
-  ['localcontrol_29',['LocalControl',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a1be862ad663b07b873f29e2170b994c5',1,'midi_Defs.h']]],
-  ['longest_5fhues_30',['LONGEST_HUES',['../da/de3/group___color_fills_ga097bfc6a8459d95e8afa8a16b9e6476a.html#gga097bfc6a8459d95e8afa8a16b9e6476aa682d0d9751da3543dc1f84a75040b54c',1,'colorutils.h']]],
-  ['lpd6803_31',['LPD6803',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad1f86c14749fa2431511fce22b1fd98c',1,'FastLED.h']]],
-  ['lpd8806_32',['LPD8806',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab8a3967574a80ed1fe3b6f862f1d695e',1,'FastLED.h']]]
+  ['linen_26',['Linen',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a96354f6e0d06d2cb26d874c25dc82a48',1,'CRGB']]],
+  ['localcontrol_27',['LocalControl',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a1be862ad663b07b873f29e2170b994c5',1,'midi_Defs.h']]],
+  ['longest_5fhues_28',['LONGEST_HUES',['../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849a2e531a3d46a47fde8830d374a2cf41f5',1,'fl']]],
+  ['lpd6803_29',['LPD6803',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad1f86c14749fa2431511fce22b1fd98c',1,'FastLED.h']]],
+  ['lpd8806_30',['LPD8806',['../db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ab8a3967574a80ed1fe3b6f862f1d695e',1,'FastLED.h']]]
 ];

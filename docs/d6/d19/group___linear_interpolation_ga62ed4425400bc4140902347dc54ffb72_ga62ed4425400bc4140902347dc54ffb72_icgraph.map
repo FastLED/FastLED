@@ -1,5 +1,5 @@
 <map id="lerp8by8" name="lerp8by8">
 <area shape="rect" id="Node000001" title="Linear interpolation between two unsigned 8&#45;bit values, with 8&#45;bit fraction." alt="" coords="153,5,232,31"/>
-<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a858435ed102057edaa676bd6d3d1e9cf.html#a858435ed102057edaa676bd6d3d1e9cf" title="Return a new CRGB object after performing a linear interpolation between this object and the passed i..." alt="" coords="5,5,105,31"/>
+<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a8a98be5bfc312d334327001625ef3acc.html#a8a98be5bfc312d334327001625ef3acc" title="Return a new CRGB object after performing a linear interpolation between this object and the passed i..." alt="" coords="5,5,105,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,21,106,21,106,15,139,15"/>
 </map>

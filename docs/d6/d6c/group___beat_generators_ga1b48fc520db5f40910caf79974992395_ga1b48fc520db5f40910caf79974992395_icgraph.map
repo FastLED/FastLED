@@ -1,46 +1,48 @@
 <map id="beat88" name="beat88">
-<area shape="rect" id="Node000001" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="785,527,852,553"/>
-<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="671,402,737,427"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="795,519,715,429,719,426,799,515"/>
-<area shape="rect" id="Node000020" href="$d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="245,653,332,678"/>
-<area shape="poly" id="edge23_Node000001_Node000020" title=" " alt="" coords="772,554,333,658,331,653,771,548"/>
-<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga12014943214a72eec31433d9682d4ebe.html#ga12014943214a72eec31433d9682d4ebe" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="564,165,623,190"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="689,391,598,191,603,189,694,388"/>
-<area shape="rect" id="Node000009" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="13,402,140,427"/>
-<area shape="poly" id="edge21_Node000002_Node000009" title=" " alt="" coords="677,438,626,474,555,518,471,561,427,578,382,592,330,606,286,614,244,611,195,592,171,576,150,556,116,509,93,463,79,429,84,427,98,461,120,507,154,552,174,572,197,587,245,606,286,609,328,601,381,587,425,573,469,556,552,514,623,470,674,433"/>
-<area shape="rect" id="Node000013" href="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc" title=" " alt="" coords="23,85,130,110"/>
-<area shape="poly" id="edge22_Node000002_Node000013" title=" " alt="" coords="698,389,692,341,678,280,656,215,640,184,621,155,568,98,543,79,517,64,458,43,381,24,329,13,288,8,247,12,197,24,166,36,137,53,94,87,90,83,134,49,164,32,195,19,247,6,288,3,330,8,382,19,459,38,519,60,546,75,572,94,625,152,644,181,660,212,684,278,697,340,703,388"/>
-<area shape="rect" id="Node000015" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="429,402,516,427"/>
-<area shape="poly" id="edge13_Node000002_Node000015" title=" " alt="" coords="657,417,516,417,516,412,657,412"/>
-<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="433,138,512,163"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="549,171,512,162,513,157,551,165"/>
-<area shape="rect" id="Node000011" href="$d2/db2/classfl_1_1_pacifica_abbe1bbf6675103bb2857b13cad156aa4.html#abbe1bbf6675103bb2857b13cad156aa4" title=" " alt="" coords="216,185,361,225"/>
-<area shape="poly" id="edge11_Node000003_Node000011" title=" " alt="" coords="550,184,362,201,361,196,550,179"/>
-<area shape="rect" id="Node000012" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="201,34,377,59"/>
-<area shape="poly" id="edge12_Node000003_Node000012" title=" " alt="" coords="563,159,515,129,420,90,336,62,337,57,422,85,517,124,566,154"/>
-<area shape="poly" id="edge4_Node000004_Node000009" title=" " alt="" coords="419,144,369,139,311,140,251,151,223,161,198,176,170,200,146,229,127,261,112,294,92,357,82,403,77,401,87,356,107,292,122,258,142,226,166,196,194,171,221,156,250,145,310,134,369,133,420,138"/>
-<area shape="rect" id="Node000010" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="263,250,314,275"/>
-<area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="454,176,423,209,383,240,348,254,315,262,314,257,346,249,380,235,420,205,451,173"/>
-<area shape="poly" id="edge6_Node000004_Node000011" title=" " alt="" coords="421,169,357,188,356,183,419,164"/>
-<area shape="poly" id="edge7_Node000004_Node000012" title=" " alt="" coords="446,131,416,105,380,81,335,62,337,57,383,76,419,101,450,127"/>
-<area shape="poly" id="edge10_Node000004_Node000013" title=" " alt="" coords="419,140,381,132,246,114,130,104,131,98,246,109,382,127,420,135"/>
-<area shape="poly" id="edge8_Node000012_Node000009" title=" " alt="" coords="260,70,228,97,198,131,154,207,120,286,97,355,84,403,79,401,92,354,115,284,149,204,194,128,224,93,256,66"/>
-<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="222,65,131,87,129,82,221,60"/>
-<area shape="poly" id="edge14_Node000015_Node000009" title=" " alt="" coords="416,417,140,417,140,412,416,412"/>
-<area shape="poly" id="edge17_Node000015_Node000010" title=" " alt="" coords="456,392,425,344,404,319,380,297,347,280,314,270,315,265,349,275,383,293,408,315,430,340,461,389"/>
-<area shape="poly" id="edge18_Node000015_Node000013" title=" " alt="" coords="448,394,417,367,380,342,354,331,330,325,286,321,242,315,219,306,194,290,171,270,151,246,117,195,94,147,80,111,85,109,98,145,122,193,155,243,175,266,198,286,222,301,244,310,286,316,330,320,355,326,383,338,420,363,451,390"/>
-<area shape="rect" id="Node000016" href="$d1/d60/classfl_1_1_demo_reel100_ad98699eb2a5f15302d2b95e07f2f69d2.html#ad98699eb2a5f15302d2b95e07f2f69d2" title=" " alt="" coords="199,351,378,377"/>
-<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="416,402,335,379,336,374,417,397"/>
-<area shape="rect" id="Node000017" href="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1" title=" " alt="" coords="257,453,320,478"/>
-<area shape="poly" id="edge16_Node000015_Node000017" title=" " alt="" coords="417,433,321,460,320,454,416,428"/>
-<area shape="rect" id="Node000018" href="$d1/d60/classfl_1_1_demo_reel100_a3ff4d3fc05b6e3a158d49d65cd954e1d.html#a3ff4d3fc05b6e3a158d49d65cd954e1d" title=" " alt="" coords="196,502,381,527"/>
-<area shape="poly" id="edge19_Node000015_Node000018" title=" " alt="" coords="452,439,421,467,383,493,354,505,352,500,380,488,418,463,449,435"/>
-<area shape="rect" id="Node000019" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="254,551,323,577"/>
-<area shape="poly" id="edge20_Node000015_Node000019" title=" " alt="" coords="462,441,431,493,409,520,383,542,354,556,324,563,323,558,352,551,380,538,405,516,427,490,458,438"/>
-<area shape="poly" id="edge24_Node000020_Node000009" title=" " alt="" coords="231,656,212,647,194,636,170,611,148,583,114,524,92,468,79,429,84,427,97,467,119,521,153,580,174,608,198,631,214,643,233,651"/>
-<area shape="poly" id="edge26_Node000020_Node000013" title=" " alt="" coords="252,647,221,623,194,591,79,111,84,110,198,588,225,619,255,643"/>
-<area shape="rect" id="Node000021" href="$df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d.html#a331b131b082d622bbd9208bf05308d0d" title=" " alt="" coords="5,627,148,653"/>
-<area shape="poly" id="edge25_Node000020_Node000021" title=" " alt="" coords="231,661,148,651,149,646,232,656"/>
-<area shape="rect" id="Node000022" href="$d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e3b.html#a6e24bc1de16730062b4d4be6ad4f8e3b" title=" " alt="" coords="49,677,104,702"/>
-<area shape="poly" id="edge27_Node000020_Node000022" title=" " alt="" coords="232,675,105,689,104,684,231,669"/>
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="884,527,951,553"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="769,402,836,427"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="893,519,813,429,817,426,897,515"/>
+<area shape="rect" id="Node000020" href="$d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="344,653,431,678"/>
+<area shape="poly" id="edge23_Node000001_Node000020" title=" " alt="" coords="871,554,431,658,430,653,870,548"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga12014943214a72eec31433d9682d4ebe.html#ga12014943214a72eec31433d9682d4ebe" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="663,165,721,190"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="787,391,697,191,702,189,792,388"/>
+<area shape="rect" id="Node000009" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="112,402,239,427"/>
+<area shape="poly" id="edge21_Node000002_Node000009" title=" " alt="" coords="776,438,724,474,653,518,570,561,526,578,481,592,428,606,385,614,342,611,293,592,269,576,248,556,215,509,191,463,178,429,183,427,196,461,219,507,252,552,273,572,296,587,344,606,385,609,427,601,479,587,524,573,568,556,651,514,721,470,773,433"/>
+<area shape="rect" id="Node000013" href="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc" title=" " alt="" coords="122,85,229,110"/>
+<area shape="poly" id="edge22_Node000002_Node000013" title=" " alt="" coords="797,389,790,341,777,280,754,215,738,184,719,155,667,98,642,79,616,64,557,43,479,24,428,13,387,8,346,12,295,24,265,36,236,53,192,87,189,83,233,49,262,32,294,19,345,6,387,3,429,8,481,19,558,38,618,60,645,75,670,94,723,152,743,181,759,212,782,278,796,340,802,388"/>
+<area shape="rect" id="Node000015" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="528,402,615,427"/>
+<area shape="poly" id="edge13_Node000002_Node000015" title=" " alt="" coords="755,417,615,417,615,412,755,412"/>
+<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="532,138,611,163"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="648,171,610,162,611,157,649,165"/>
+<area shape="rect" id="Node000011" href="$d2/db2/classfl_1_1_pacifica_abbe1bbf6675103bb2857b13cad156aa4.html#abbe1bbf6675103bb2857b13cad156aa4" title=" " alt="" coords="315,185,460,225"/>
+<area shape="poly" id="edge11_Node000003_Node000011" title=" " alt="" coords="649,184,461,201,460,196,649,179"/>
+<area shape="rect" id="Node000012" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="299,34,475,59"/>
+<area shape="poly" id="edge12_Node000003_Node000012" title=" " alt="" coords="662,159,613,129,519,90,434,62,436,57,521,85,616,124,664,154"/>
+<area shape="poly" id="edge4_Node000004_Node000009" title=" " alt="" coords="518,144,468,139,409,140,350,151,322,161,296,176,268,200,245,229,226,261,211,294,190,357,181,403,176,401,185,356,206,292,221,258,240,226,264,196,293,171,320,156,349,145,409,134,468,133,519,138"/>
+<area shape="rect" id="Node000010" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="362,250,413,275"/>
+<area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="553,176,522,209,481,240,447,254,413,262,412,257,445,249,479,235,518,205,549,173"/>
+<area shape="poly" id="edge6_Node000004_Node000011" title=" " alt="" coords="520,169,456,188,454,183,518,164"/>
+<area shape="poly" id="edge7_Node000004_Node000012" title=" " alt="" coords="545,131,515,105,479,81,434,62,436,57,481,76,518,101,549,127"/>
+<area shape="poly" id="edge10_Node000004_Node000013" title=" " alt="" coords="518,140,480,132,344,114,229,104,229,98,345,109,480,127,519,135"/>
+<area shape="poly" id="edge8_Node000012_Node000009" title=" " alt="" coords="359,70,327,97,297,131,253,207,219,286,196,355,182,403,177,401,190,354,214,284,248,204,293,128,323,93,355,66"/>
+<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="321,65,229,87,228,82,319,60"/>
+<area shape="poly" id="edge14_Node000015_Node000009" title=" " alt="" coords="515,417,239,417,239,412,515,412"/>
+<area shape="poly" id="edge17_Node000015_Node000010" title=" " alt="" coords="555,392,524,344,503,319,478,297,445,280,412,270,414,265,447,275,482,293,507,315,528,340,560,389"/>
+<area shape="poly" id="edge18_Node000015_Node000013" title=" " alt="" coords="547,394,516,367,479,342,452,331,428,325,384,321,341,315,318,306,293,290,270,270,249,246,216,195,192,147,178,111,183,109,197,145,220,193,254,243,274,266,296,286,320,301,342,310,385,316,429,320,454,326,481,338,519,363,550,390"/>
+<area shape="rect" id="Node000016" href="$d1/d60/classfl_1_1_demo_reel100_ad98699eb2a5f15302d2b95e07f2f69d2.html#ad98699eb2a5f15302d2b95e07f2f69d2" title=" " alt="" coords="298,351,477,377"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="514,402,434,379,435,374,516,397"/>
+<area shape="rect" id="Node000017" href="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1" title=" " alt="" coords="356,453,419,478"/>
+<area shape="poly" id="edge16_Node000015_Node000017" title=" " alt="" coords="516,433,420,460,418,454,514,428"/>
+<area shape="rect" id="Node000018" href="$d1/d60/classfl_1_1_demo_reel100_a3ff4d3fc05b6e3a158d49d65cd954e1d.html#a3ff4d3fc05b6e3a158d49d65cd954e1d" title=" " alt="" coords="295,502,480,527"/>
+<area shape="poly" id="edge19_Node000015_Node000018" title=" " alt="" coords="551,439,520,467,481,493,453,505,451,500,479,488,516,463,547,435"/>
+<area shape="rect" id="Node000019" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="353,551,422,577"/>
+<area shape="poly" id="edge20_Node000015_Node000019" title=" " alt="" coords="561,441,530,493,508,520,481,542,453,556,423,563,422,558,451,551,479,538,504,516,526,490,556,438"/>
+<area shape="poly" id="edge24_Node000020_Node000009" title=" " alt="" coords="330,656,311,647,293,636,268,611,247,583,213,524,190,468,178,429,183,427,195,467,218,521,251,580,272,608,296,631,313,643,332,651"/>
+<area shape="poly" id="edge26_Node000020_Node000013" title=" " alt="" coords="350,647,320,623,292,591,177,111,182,110,297,588,323,619,354,643"/>
+<area shape="rect" id="Node000021" href="$df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d.html#a331b131b082d622bbd9208bf05308d0d" title=" " alt="" coords="104,627,247,653"/>
+<area shape="poly" id="edge25_Node000020_Node000021" title=" " alt="" coords="330,661,247,651,247,646,331,656"/>
+<area shape="rect" id="Node000022" href="$d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e3b.html#a6e24bc1de16730062b4d4be6ad4f8e3b" title=" " alt="" coords="148,677,203,702"/>
+<area shape="poly" id="edge27_Node000020_Node000022" title=" " alt="" coords="331,675,203,689,203,684,330,669"/>
+<area shape="rect" id="Node000023" href="$d0/dce/_pride2015_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,677,56,702"/>
+<area shape="poly" id="edge28_Node000022_Node000023" title=" " alt="" coords="134,692,56,692,56,687,134,687"/>
 </map>

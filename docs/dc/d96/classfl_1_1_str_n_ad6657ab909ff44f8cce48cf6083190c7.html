@@ -125,40 +125,42 @@ template&lt;size_t SIZE = 64&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d0e/fl_2str_8h_source.html#l00284">284</a> of file <a class="el" href="../../dc/d0e/fl_2str_8h_source.html">str.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  284</span>                                     {</div>
-<div class="line"><span class="lineno">  285</span>        <span class="comment">// If capacity is less than current length, do nothing</span></div>
-<div class="line"><span class="lineno">  286</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a> &lt;= <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>) {</div>
-<div class="line"><span class="lineno">  287</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  288</span>        }</div>
-<div class="line"><span class="lineno">  289</span> </div>
-<div class="line"><span class="lineno">  290</span>        <span class="comment">// If new capacity fits in inline buffer, no need to allocate</span></div>
-<div class="line"><span class="lineno">  291</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a> + 1 &lt;= <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">SIZE</a>) {</div>
-<div class="line"><span class="lineno">  292</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  293</span>        }</div>
-<div class="line"><span class="lineno">  294</span> </div>
-<div class="line"><span class="lineno">  295</span>        <span class="comment">// If we already have unshared heap data with sufficient capacity, do nothing</span></div>
-<div class="line"><span class="lineno">  296</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> &amp;&amp; !<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;isShared() &amp;&amp; <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;hasCapacity(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a>)) {</div>
-<div class="line"><span class="lineno">  297</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  298</span>        }</div>
-<div class="line"><span class="lineno">  299</span> </div>
-<div class="line"><span class="lineno">  300</span>        <span class="comment">// Need to allocate new storage</span></div>
-<div class="line"><span class="lineno">  301</span>        <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">StringHolderPtr</a> <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a> = <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">StringHolderPtr::New</a>(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a>);</div>
-<div class="line"><span class="lineno">  302</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>) {</div>
-<div class="line"><span class="lineno">  303</span>            <span class="comment">// Copy existing content</span></div>
-<div class="line"><span class="lineno">  304</span>            <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">memcpy</a>(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>-&gt;data(), <a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">c_str</a>(), <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>);</div>
-<div class="line"><span class="lineno">  305</span>            <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>-&gt;data()[<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>] = <span class="charliteral">&#39;\0&#39;</span>;</div>
-<div class="line"><span class="lineno">  306</span>            <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> = <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>;</div>
-<div class="line"><span class="lineno">  307</span>        }</div>
-<div class="line"><span class="lineno">  308</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f_html_a08e3728f0d16add179cda13e21b92b5f"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">fl::StrN::mLength</a></div><div class="ttdeci">size_t mLength</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d0e/fl_2str_8h_source.html#l00081">str.h:81</a></div></div>
-<div class="ttc" id="aclassfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb_html_a67296b774f8201293edbbabbd1b642cb"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">fl::StrN::c_str</a></div><div class="ttdeci">const char * c_str() const</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d0e/fl_2str_8h_source.html#l00247">str.h:247</a></div></div>
-<div class="ttc" id="aclassfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89_html_a84b475483ef4518ddcdd01d7e5567b89"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">fl::StrN::mHeapData</a></div><div class="ttdeci">StringHolderPtr mHeapData</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d0e/fl_2str_8h_source.html#l00083">str.h:83</a></div></div>
-<div class="ttc" id="aclassfl_1_1_str_n_html"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n.html">fl::StrN</a></div><div class="ttdef"><b>Definition</b> <a href="../../dc/d0e/fl_2str_8h_source.html#l00079">str.h:79</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d93/str_8h_source.html#l00308">308</a> of file <a class="el" href="../../d1/d93/str_8h_source.html">str.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  308</span>                                     {</div>
+<div class="line"><span class="lineno">  309</span>        <span class="comment">// If capacity is less than current length, do nothing</span></div>
+<div class="line"><span class="lineno">  310</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a> &lt;= <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>) {</div>
+<div class="line"><span class="lineno">  311</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  312</span>        }</div>
+<div class="line"><span class="lineno">  313</span> </div>
+<div class="line"><span class="lineno">  314</span>        <span class="comment">// If new capacity fits in inline buffer, no need to allocate</span></div>
+<div class="line"><span class="lineno">  315</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a> + 1 &lt;= <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">SIZE</a>) {</div>
+<div class="line"><span class="lineno">  316</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  317</span>        }</div>
+<div class="line"><span class="lineno">  318</span> </div>
+<div class="line"><span class="lineno">  319</span>        <span class="comment">// If we already have unshared heap data with sufficient capacity, do</span></div>
+<div class="line"><span class="lineno">  320</span>        <span class="comment">// nothing</span></div>
+<div class="line"><span class="lineno">  321</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> &amp;&amp; !<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;isShared() &amp;&amp;</div>
+<div class="line"><span class="lineno">  322</span>            <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a>-&gt;hasCapacity(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a>)) {</div>
+<div class="line"><span class="lineno">  323</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  324</span>        }</div>
+<div class="line"><span class="lineno">  325</span> </div>
+<div class="line"><span class="lineno">  326</span>        <span class="comment">// Need to allocate new storage</span></div>
+<div class="line"><span class="lineno">  327</span>        <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">StringHolderPtr</a> <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a> = <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">StringHolderPtr::New</a>(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newCapacity</a>);</div>
+<div class="line"><span class="lineno">  328</span>        <span class="keywordflow">if</span> (<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>) {</div>
+<div class="line"><span class="lineno">  329</span>            <span class="comment">// Copy existing content</span></div>
+<div class="line"><span class="lineno">  330</span>            <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">memcpy</a>(<a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>-&gt;data(), <a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">c_str</a>(), <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>);</div>
+<div class="line"><span class="lineno">  331</span>            <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>-&gt;data()[<a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">mLength</a>] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><span class="lineno">  332</span>            <a class="code hl_variable" href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">mHeapData</a> = <a class="code hl_class" href="../../dc/d96/classfl_1_1_str_n.html">newData</a>;</div>
+<div class="line"><span class="lineno">  333</span>        }</div>
+<div class="line"><span class="lineno">  334</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f_html_a08e3728f0d16add179cda13e21b92b5f"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a08e3728f0d16add179cda13e21b92b5f.html#a08e3728f0d16add179cda13e21b92b5f">fl::StrN::mLength</a></div><div class="ttdeci">size_t mLength</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00108">str.h:108</a></div></div>
+<div class="ttc" id="aclassfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb_html_a67296b774f8201293edbbabbd1b642cb"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb">fl::StrN::c_str</a></div><div class="ttdeci">const char * c_str() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00272">str.h:272</a></div></div>
+<div class="ttc" id="aclassfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89_html_a84b475483ef4518ddcdd01d7e5567b89"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a84b475483ef4518ddcdd01d7e5567b89.html#a84b475483ef4518ddcdd01d7e5567b89">fl::StrN::mHeapData</a></div><div class="ttdeci">StringHolderPtr mHeapData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00110">str.h:110</a></div></div>
+<div class="ttc" id="aclassfl_1_1_str_n_html"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n.html">fl::StrN</a></div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00106">str.h:106</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/d0e/fl_2str_8h_source.html#l00247">c_str()</a>, <a class="el" href="../../dc/d0e/fl_2str_8h_source.html#l00083">mHeapData</a>, and <a class="el" href="../../dc/d0e/fl_2str_8h_source.html#l00081">mLength</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00272">c_str()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00110">mHeapData</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00108">mLength</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00167">fl::FileSystem::readText()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00165">fl::FileSystem::readText()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -183,7 +185,7 @@ template&lt;size_t SIZE = 64&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d96/classfl_1_1_str_n.html">StrN</a></li>
-    <li class="footer">Generated on Fri Apr 18 2025 03:39:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->
