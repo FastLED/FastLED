@@ -8,13 +8,13 @@
 
 #include "fl/json.h"
 #include "fl/map.h"
+#include "fl/math.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/str.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include <math.h>
 
 namespace fl {
 
@@ -209,6 +209,35 @@ vec2f ScreenMap::mapToIndex(uint32_t x) const {
 uint32_t ScreenMap::getLength() const { return length; }
 
 float ScreenMap::getDiameter() const { return mDiameter; }
+
+vec2f ScreenMap::getBounds() const {
+
+    if (length == 0 || !mLookUpTable) {
+        return {0, 0};
+    }
+
+    LUTXYFLOAT &lut = *mLookUpTable.get();
+
+    fl::vec2f* data = lut.getDataMutable();
+    // float minX = lut[0].x;
+    // float maxX = lut[0].x;
+    // float minY = lut[0].y;
+    // float maxY = lut[0].y;
+    float minX = data[0].x;
+    float maxX = data[0].x;
+    float minY = data[0].y;
+    float maxY = data[0].y;
+
+    for (uint32_t i = 1; i < length; i++) {
+        const vec2f &p = lut[i];
+        minX = MIN(minX, p.x);
+        maxX = MAX(maxX, p.x);
+        minY = MIN(minY, p.y);
+        maxY = MAX(maxY, p.y);
+    }
+
+    return {maxX - minX, maxY - minY};
+}
 
 const vec2f &ScreenMap::empty() {
     static const vec2f s_empty = vec2f(0, 0);

@@ -72,6 +72,9 @@ class ScreenMap {
     // The diameter each point represents.
     float getDiameter() const;
 
+    // Get the bounding box of all points in the screen map
+    vec2f getBounds() const;
+
     static bool ParseJson(const char *jsonStrScreenMap,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps,
                           Str *err = nullptr);

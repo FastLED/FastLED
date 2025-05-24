@@ -126,3 +126,34 @@ TEST_CASE("ScreenMap multiple strips JSON serialization") {
     CHECK(deserializedStrip2[2].x == 50.0f);
     CHECK(deserializedStrip2[2].y == 60.0f);
 }
+
+TEST_CASE("ScreenMap getBounds functionality") {
+    // Create a screen map with points at different coordinates
+    ScreenMap map(4);
+    map.set(0, {1.0f, 2.0f});
+    map.set(1, {-3.0f, 4.0f});
+    map.set(2, {5.0f, -6.0f});
+    map.set(3, {-2.0f, -1.0f});
+    
+    // Get the bounds
+    vec2f bounds = map.getBounds();
+    
+    // The bounds should be the difference between max and min values
+    // Max X: 5.0, Min X: -3.0 => Width = 8.0
+    // Max Y: 4.0, Min Y: -6.0 => Height = 10.0
+    CHECK(bounds.x == 8.0f);
+    CHECK(bounds.y == 10.0f);
+    
+    // Test with a single point
+    ScreenMap singlePoint(1);
+    singlePoint.set(0, {3.5f, 4.5f});
+    vec2f singleBounds = singlePoint.getBounds();
+    CHECK(singleBounds.x == 0.0f);
+    CHECK(singleBounds.y == 0.0f);
+    
+    // Test with an empty map
+    ScreenMap emptyMap(0);
+    vec2f emptyBounds = emptyMap.getBounds();
+    CHECK(emptyBounds.x == 0.0f);
+    CHECK(emptyBounds.y == 0.0f);
+}
