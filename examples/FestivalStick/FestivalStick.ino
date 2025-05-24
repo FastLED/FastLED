@@ -25,7 +25,7 @@ void loop() {
     for (int i = 0; i < NUM_LEDS; i++) {
         // Get the 2D position of this LED
         float anim = fl::map_range(i, 0, NUM_LEDS - 1, 0.0, 1.0);
-        float angle = anim * 2.0 * PI + (now / 1000.0f);
+        float angle = anim * 2.0 + PI * (now / 1000.0);
         float x = cos(angle) * circleMap.getBounds().x / 2.0f;
         float y = sin(angle) * circleMap.getBounds().y / 2.0f;
         // Set the color based on the position
