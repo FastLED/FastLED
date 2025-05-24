@@ -58,10 +58,9 @@ TODO:
 
 #include "defs.h"
 #include "funky.h"
+#include "gfx.h"
 
-// the rendering buffer (16*16)
-// do not touch
-CRGB leds[NUM_LEDS];
+
 
 // your display buffer for your not 16*16 setup
 CRGB leds2[CUSTOM_HEIGHT * CUSTOM_WIDTH];
@@ -620,6 +619,7 @@ void AutoRun() {
      //for(int i = 0; i < 500; i++) {NoiseExample5();}
      */
     // NoiseExample6();
+    FASTLED_ASSERT(false, "breakpoint");
     NoiseExample7();
 }
 
@@ -633,7 +633,7 @@ void SlowMandala() {
             SpiralStream(4, 4, 4, 127);
             Caleidoscope1();
             ShowFrame();
-            FastLED.delay(50);
+            //// FastLED.delay(50);
         }
     }
 }
@@ -647,7 +647,7 @@ void Dots1() {
     // average of the coordinates in yellow
     Pixel((p[2] + p[0]) / 2, (p[1] + p[3]) / 2, 50);
     ShowFrame();
-    FastLED.delay(20);
+    //// FastLED.delay(20);
     HorizontalStream(125);
 }
 
@@ -656,7 +656,7 @@ void Dots2() {
     MoveOscillators();
     Pixel((p[2] + p[0] + p[1]) / 3, (p[1] + p[3] + p[2]) / 3, osci[3]);
     ShowFrame();
-    FastLED.delay(20);
+    // FastLED.delay(20);
     HorizontalStream(125);
 }
 
@@ -669,7 +669,7 @@ void SlowMandala2() {
             SpiralStream(4, 4, 4, 127);
             Caleidoscope2();
             ShowFrame();
-            FastLED.delay(20);
+            // FastLED.delay(20);
         }
     }
 }
@@ -683,7 +683,7 @@ void SlowMandala3() {
             SpiralStream(4, 4, 4, 127);
             Caleidoscope2();
             ShowFrame();
-            FastLED.delay(20);
+            // FastLED.delay(20);
         }
     }
 }
@@ -993,7 +993,7 @@ void RenderCustomMatrix() {
 void ShowFrame() {
     // when using a matrix different than 16*16 use
     // RenderCustomMatrix();
-    FastLED.show();
+    GraphicsShow();
     LEDS.countFPS();
 }
 
@@ -1305,11 +1305,6 @@ void InitFunky() {
     x2 = random16();
     y2 = random16();
     z2 = random16();
+    InitGraphics();
 
-    FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds + 5, NUM_LEDS - 5);
-    // use this line only when using a custom size matrix
-    // FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds2, CUSTOM_HEIGHT *
-    // CUSTOM_WIDTH);
-    FastLED.setBrightness(BRIGHTNESS);
-    FastLED.setDither(0);
 }

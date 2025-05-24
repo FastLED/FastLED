@@ -1,8 +1,5 @@
 #pragma once
 
-#include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-
 #include "fl/stdint.h"
 
 #include "platforms/wasm/js_bindings.h"
@@ -19,20 +16,20 @@
 extern "C" {
 
 // Replacement for 'millis' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE uint32_t millis();
+uint32_t millis();
 
 // Replacement for 'micros' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE uint32_t micros();
+uint32_t micros();
 
 // Replacement for 'delay' in WebAssembly context
-EMSCRIPTEN_KEEPALIVE void delay(int ms);
-EMSCRIPTEN_KEEPALIVE void delayMicroseconds(int micros);
+void delay(int ms);
+void delayMicroseconds(int micros);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
-EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
-EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
+extern "C" int extern_setup();
+extern "C" int extern_loop();
 
 namespace fl {
 
