@@ -1,8 +1,6 @@
 FastLED 3.9.17
 ==============
 
-
-
 * esp
   * esp-idf v5.4 fixes to include lcd_50
     * https://github.com/FastLED/FastLED/pull/1924
@@ -10,31 +8,25 @@ FastLED 3.9.17
   * RMT5 will now respect DMA_MODE=DMA_ENABLED
     * Default is still off.
     * https://github.com/FastLED/FastLED/pull/1927
-* Noise Functions
-  * Woryley noise has been added.
-  * TODO: Add example.
-  * This is a work in progress.
-* datastructures
-  * Bringing in 3rd party code and cool fx has always been an absolute pain for FastLED. These algorithms in open source typically use std datastructures, which simply do not compile on legacy devices like AVR. Also the std:: data structures are not only gigantic, but also wreckless with the heap and produce lots of allocations which will absolutely make a sketch run out of memory via memory fragmentation. To solve this problem in the general case I've created std compatible data structures with inlined variants that will stay on the stack as long as the number of objects stays under a fixed maximum, but allows overflow. Starting with FastLED 3.9.17 an effort is being made to allow std substitutes. For example if you would typically include \<vector\> in a project you can include fl/vector.h instead.
-  * fl::hash_map
-    * open addressing but with inlined rehashing when "tombstones" fill up half the slots.
-  * fl::hash_map_inlined
-  * fl::hash_set
-  * fl::vector
-  * fl::vector_inlined
-  * fl::function<>
-  * fl::variant<T,U>
-  * fl::optional<T>
-  * fl::bitset
-    * our version differs from std::bitset as defaults to inlined memory to hold 1024 values without going to the heap. If you need more you can tune it. I **really** love bitsets because they are super compact and allow testing up to 64 entries at a time using integer bit twiddling. They can be used in data structures to test if something exists in the data structure. For example fl::hash_map will use a bitset on the stack (with heap overflow) to determine which buckets are truly occupied during tombstone eviction. This allows an inplace re-hash when the hash table fills up with dead entries, rather than expanding the hashmap unconditionally. This prevents unnecessary heap allocations when a hashmap has rapid inserts + removals. Without this inlined tagging would have to be used which would bloat the data structure with an extra byte of memory per entry on 8-bit machines or 4 extra bytes if the contained data is expected to be aligned (common for 16,32,64-bit machines).
-    * fl::bitset + fl::hash = bloom filter which is an amazing data structure that can optimize retrieval by giving you a signal of whether something is certainly not in a data collection, or might be, though I've never found a use case in FastLED yet.
+s.
+  * datastructures
+    * FastLED now has it's own subset of std lib. fl::vector<>, fl::hash_map<> etc so you can bring in external code to your sketches easily and have it still be cross platform compatible. Our std lib subset is backed by a fleet of platform testers so it compiles and works everywhere. Will this increase the AVR and other small memory footprints? No, we have strict checks for these platforms and compile size remains the same.
+    * fl::hash_map
+      * open addressing but with inlined rehashing when "tombstones" fill up half the slots.
+    * fl::hash_map_inlined
+    * fl::hash_set
+    * fl::vector
+    * fl::vector_inlined
+    * fl::function<>
+    * fl::variant<T,...>
+    * fl::optional<T>
 * graphics
   * CRGB::downscale(...) for downsizing led matrices / strips.
     * Essentially pixel averaging.
     * Uses a fastpath when downsizeing from M by N to M/2 by N/2.
     * Uses fixed-integer fractional downsizing when the destination matrix/strip is any other ratio.
   * CRGB::upscale(...) for expanding led matrices / strips, uses bilinear expansion.
-  * XYPath:
+  * XYPath (Work in progress):
     * Create paths that smoothly interpolate in response to animation values => [0, 1.0f]
     * Still a work in progress.
   * Subpixel calculations.
@@ -63,45 +55,7 @@ FastLED 3.9.17
     * Right now, RasterSparse is only implemented for uint8_t values and not an entire CRGB pixel, as CRGB values are typically computed via an algorithm during the compositing process. For example a gradient function can take a rasterized particle trail and apply coloring.
   * LineMath
     * Take a line A-B and calculate the closest distance from the line to a point P. This is important to optimize rendering if oversampling takes too much CPU.
-  * Putting it all together:
-    * Example 1: XYPath compositing
-      * Define an XYPath (you can use an fl::function that takes in a float [0, 1.0] and produces x,y in floating point space).
-      * Render 30 points of location between the span of X1 -> X2, where 0. <= X1 <= 1.0 and X1 <= X2 <= 1.0. In other words, we want an XYPath that draws a trial.
-      * These 30 points in x,y floating space will then be subpixel rendered to a RasterSparse as a layer.
-      * Composite the RasterSparse to the LED array using a gradient or a use defined drawing function.
-        * The RasterSparse has this logic built in.
-    * Example 2: Fireworks
-      * Generate a Particle that holds float position of the current x,y and velocity vx,vy. There is also a tail of 10 points long and a timer for how long the particle has been active.
-      * On explosion, generate K particles and give them semi random x,y velocities from the center point.
-      * On each frame calculate the new x,y location of each particle given the current velocity and gravity.
-        * This gravity calculation is technically called a "flow field".
-      * On each frame for each particle
-        * copy the current x,y to the front of the tail array (use our CircularArray)
-        * compute the next x,y from the curr x,y and the velocities xv and yv.
-          * x_new, y_new = x + xv, y + yv
-          * Save this as the current x,y
-        * Reduce the particles velocity vector using the exp() function and save it.
-          * calculate the time delta from the last frame, call it dt
-          * rate will be a negative number close to 0, like -0.05, meaning 5% decay for every "time unit"
-          * xv,xy = exp(xv, dt*rate), exp(xy, dt*rate)
-        * Apply gravity to current x,y and the tail list of x,y
-          * Bonus points: use our simplex noise function as a minor secondary field (stable) to simulate randomness from air flow current.
-        * The brightness is proportional to the time value. Bright when t is near 0, and then fading out when t approaches t-max (for example if t-max is one second then the particle will no longer light up after 1 second).
-        * Render this path to the raster
-        * Blend composite the raster using raster.Draw(visitor) using the default alpha less compositing mode (blending alpha value is auto generated from the brightness - YOU WANT THIS).
-          * Do this each pixel and tail so that the entire thing draws
-
-* audio
-  * We now have audio processing.
-    * Raw PCM data
-    * FFT analysis on demand using the blazingly fast kiss FFT library.
-    * zero cross factor to detecting noise like wind, microphone rubbing on shirt etc...
-    * RMS calculations.
-    * WIP: smooth loudness value to use in animations.
-  * Example:
-    * Sound produces an animation value
-    * Animation value is used to position a heart XYPath
-
+  
 
 FastLED 3.9.16
 ==============
