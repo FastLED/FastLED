@@ -15,7 +15,6 @@
 
 #include "active_strip_data.h"
 
-#include "exports.h"
 #include "strip_id_map.h"
 
 namespace fl {

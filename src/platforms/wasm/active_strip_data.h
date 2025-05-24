@@ -1,11 +1,5 @@
 #pragma once
 
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-#include <emscripten/html5.h>
-#include <emscripten/val.h>
-
 #include <memory>
 
 #include "fl/engine_events.h"
@@ -15,6 +9,10 @@
 #include "fl/singleton.h"
 #include "fl/slice.h"
 #include "strip_id_map.h"
+
+namespace emscripten {
+class val;
+}
 
 namespace fl {
 
