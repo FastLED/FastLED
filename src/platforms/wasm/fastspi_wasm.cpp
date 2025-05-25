@@ -23,7 +23,7 @@ CLEDController *WasmSpiOutput::tryFindOwner() {
 WasmSpiOutput::WasmSpiOutput() { EngineEvents::addListener(this); }
 WasmSpiOutput::~WasmSpiOutput() { EngineEvents::removeListener(this); }
 
-void WasmSpiOutput::onEndShowLeds() override {
+void WasmSpiOutput::onEndShowLeds() {
     // Get the led data and send it to the JavaScript side. This is tricky
     // because we have to find the owner of this pointer, which will be
     // inlined in a CLEDController subclass. Therefore we are going to do
