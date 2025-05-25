@@ -71,18 +71,11 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
 
 fl::vector<vec3f> mapCorkScrew = makeCorkScrew(corkscrew_args());
 fl::ScreenMap circle = fl::ScreenMap::Circle(
-    NUM_LEDS, 1.5f, 0.2f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
+    NUM_LEDS, 1.5f, 0.5f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
 
 
 CLEDController* addController() {
-    // Add a controller for the WS2812B LEDs
-    #ifdef __EMSCRIPTEN__
-    // always use WS2812 when in emscripten mode (hack)
-    CLEDController* controller = &FastLED.addLeds<WS2812, PIN_DATA, GRB>(leds, NUM_LEDS);
-    #else
     CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
-    #endif
-    // Set the screen map for the controller
     return controller;
 }
 
