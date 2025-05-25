@@ -52,8 +52,8 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
 
         // Calculate the x, y, z coordinates for the corkscrew
         float x = radius * cos(angle); // x coordinate
-        float y = radius * sin(angle); // y coordinate
-        float z = height;              // z coordinate
+        float z = radius * sin(angle); // y coordinate
+        float y = height;              // z coordinate
 
         // Store the 3D coordinates in the vector
         vec3f led_position(x, y, z);
@@ -78,7 +78,12 @@ fl::ScreenMap circle = fl::ScreenMap::Circle(
 
 CLEDController* addController() {
     // Add a controller for the WS2812B LEDs
+    #ifdef __EMSCRIPTEN__
+    // always use WS2812 when in emscripten mode (hack)
+    CLEDController* controller = &FastLED.addLeds<WS2812, PIN_DATA, GRB>(leds, NUM_LEDS);
+    #else
     CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
+    #endif
     // Set the screen map for the controller
     return controller;
 }
