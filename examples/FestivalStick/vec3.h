@@ -1,3 +1,7 @@
+#pragma once
+
+
+namespace sketch {
 
 template <typename T> struct vec3 {
     // value_type
@@ -146,3 +150,7 @@ template <typename T> struct vec3 {
 
     bool is_zero() const { return (x == 0 && y == 0 && z == 0); }
 };
+
+using vec3f = vec3<float>;
+
+}  // namespace sketch

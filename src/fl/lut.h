@@ -23,10 +23,12 @@ template <typename T> class LUT;
 typedef LUT<uint16_t> LUT16;
 typedef LUT<vec2<uint16_t>> LUTXY16;
 typedef LUT<vec2f> LUTXYFLOAT;
+typedef LUT<vec3f> LUTXYZFLOAT;
 
 FASTLED_SMART_PTR_NO_FWD(LUT16);
-FASTLED_SMART_PTR_NO_FWD(LUTXYFLOAT);
 FASTLED_SMART_PTR_NO_FWD(LUTXY16);
+FASTLED_SMART_PTR_NO_FWD(LUTXYFLOAT);
+FASTLED_SMART_PTR_NO_FWD(LUTXYZFLOAT);
 
 // Templated lookup table.
 template <typename T> class LUT : public fl::Referent {
