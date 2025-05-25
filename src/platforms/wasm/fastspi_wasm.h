@@ -28,24 +28,19 @@ extern uint8_t get_brightness();
 
 class WasmSpiOutput : public fl::EngineEvents::Listener {
   public:
-    WasmSpiOutput() ;
-    ~WasmSpiOutput() ;
+    WasmSpiOutput();
+    ~WasmSpiOutput();
+    void select();
+    void init();
+    void waitFully();
+    void release();
+    void writeByte(uint8_t byte);
+    void writeWord(uint16_t word);
+
+  private:
     CLEDController *tryFindOwner();
     void onEndShowLeds() override;
 
-    void select() {}
-    void init() {}
-    void waitFully() {}
-    void release() {}
-
-    void writeByte(uint8_t byte) {}
-
-    void writeWord(uint16_t word) {
-        writeByte(word >> 8);
-        writeByte(word & 0xFF);
-    }
-
-  private:
     int mId = -1; // Deferred initialization
     std::vector<uint8_t> mRgb;
 };

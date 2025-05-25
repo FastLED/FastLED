@@ -4,11 +4,9 @@
 
 namespace fl {
 
-
 CLEDController *WasmSpiOutput::tryFindOwner() {
     if (mId == -1) {
-        mId = StripIdMap::getOrFindByAddress(
-            reinterpret_cast<uint32_t>(this));
+        mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));
     }
     if (mId == -1) {
         return nullptr;
@@ -38,8 +36,8 @@ void WasmSpiOutput::onEndShowLeds() override {
     }
     ColorAdjustment color_adjustment =
         owner->getAdjustmentData(get_brightness());
-    PixelController<RGB> pixels(owner->leds(), owner->size(),
-                                color_adjustment, DISABLE_DITHER);
+    PixelController<RGB> pixels(owner->leds(), owner->size(), color_adjustment,
+                                DISABLE_DITHER);
     pixels.disableColorAdjustment();
     mRgb.clear();
     while (pixels.has(1)) {
@@ -50,11 +48,28 @@ void WasmSpiOutput::onEndShowLeds() override {
         mRgb.push_back(b);
         pixels.advanceData();
     }
-    ActiveStripData &active_strips =
-        Singleton<ActiveStripData>::instance();
+    ActiveStripData &active_strips = Singleton<ActiveStripData>::instance();
     active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
 }
 
+void WasmSpiOutput::select() { mRgb.clear(); }
+
+void WasmSpiOutput::init() { mRgb.clear(); }
+
+void WasmSpiOutput::waitFully() {}
+
+void WasmSpiOutput::release() {}
+
+void WasmSpiOutput::writeByte(uint8_t byte) {
+    // FASTLED_WARN("writeByte %d\n", byte);
+    mRgb.push_back(byte);
 }
+
+void WasmSpiOutput::writeWord(uint16_t word) {
+    writeByte(word >> 8);
+    writeByte(word & 0xFF);
+}
+
+} // namespace fl
 
 #endif // __EMSCRIPTEN__
