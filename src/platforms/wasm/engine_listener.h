@@ -5,13 +5,16 @@
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
 
+FASTLED_NAMESPACE_BEGIN
+class CLEDController;
+FASTLED_NAMESPACE_END
+
+
 namespace fl {
 class ScreenMap;
 }
 
 namespace fl {
-
-class CLEDController;
 
 class EngineListener : public fl::EngineEvents::Listener {
   public:

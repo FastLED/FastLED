@@ -4,6 +4,12 @@
 
 namespace fl {
 
+extern uint8_t get_brightness();
+
+
+
+
+
 CLEDController *WasmSpiOutput::tryFindOwner() {
     if (mId == -1) {
         mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));

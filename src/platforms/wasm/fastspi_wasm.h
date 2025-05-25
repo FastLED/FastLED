@@ -4,27 +4,20 @@
 #error "This file should only be included in an Emscripten build"
 #endif
 
-#include <stdint.h>
-
-#include <stdio.h>
-#include <vector>
-
-#include "active_strip_data.h"
-#include "fl/namespace.h"
-#include "fl/singleton.h"
-// #include "ui/events.h"
-#include "crgb.h"
-#include "dither_mode.h"
-#include "pixel_controller.h"
+#include "fl/vector.h"
+#include "fl/stdint.h"
 #include "platforms/wasm/engine_listener.h"
-#include "platforms/wasm/js.h"
-#include "platforms/wasm/strip_id_map.h"
+#include "fl/namespace.h"
+
+#define FASTLED_ALL_PINS_HARDWARE_SPI
+
+
+FASTLED_NAMESPACE_BEGIN
+class CLEDController;
+FASTLED_NAMESPACE_END
 
 namespace fl {
 
-extern uint8_t get_brightness();
-
-#define FASTLED_ALL_PINS_HARDWARE_SPI
 
 class WasmSpiOutput : public fl::EngineEvents::Listener {
   public:
@@ -42,7 +35,7 @@ class WasmSpiOutput : public fl::EngineEvents::Listener {
     void onEndShowLeds() override;
 
     int mId = -1; // Deferred initialization
-    std::vector<uint8_t> mRgb;
+    fl::vector<uint8_t> mRgb;
 };
 
 // Compatibility alias
