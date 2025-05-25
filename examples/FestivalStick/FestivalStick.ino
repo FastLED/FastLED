@@ -6,6 +6,9 @@
 #include <FastLED.h>
 // #include "vec3.h"
 
+using namespace fl;
+
+
 #define PIN_DATA 9
 #define PIN_CLOCK 7
 
@@ -15,8 +18,6 @@
 
 CRGB leds[NUM_LEDS];
 
-// using sketch::vec3f; // Use vec3f for 3D coordinates
-using fl::vec3f;
 
 // fl::vector<vec3f>
 struct corkscrew_args {
@@ -75,23 +76,11 @@ fl::ScreenMap circle = fl::ScreenMap::Circle(
     NUM_LEDS, 1.5f, 0.2f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
 
 
-CLEDController* addController() {
-    #ifdef __EMSCRIPTEN__
-    // Add a controller for the APA102HD LEDs
-    CLEDController* controller = &FastLED.addLeds<WS2812B, PIN_DATA, GRB>(leds, NUM_LEDS);
-    return controller;
-    #else
-    // Add a controller for the WS2812B LEDs
-    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
-    // Set the screen map for the controller
-    return controller;
-    #endif
-}
 
 void setup() {
-    auto controller = addController();
+    CLEDController& controller = FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
     // Set the screen map for the controller
-    controller->setScreenMap(circle);
+    controller.setScreenMap(circle);
     FastLED.setBrightness(255);
 }
 
