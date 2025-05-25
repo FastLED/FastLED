@@ -61,6 +61,46 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
     return out;
 }
 
+
+fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
+    // Create a ScreenMap for the corkscrew
+    fl::vector<vec2f> points(args.num_leds);
+
+    int num_leds = args.num_leds;
+    float leds_per_turn = args.leds_per_turn;
+    float width_cm = args.width_cm;
+
+
+    const float circumference = leds_per_turn;
+    const float radius = circumference / (2.0 * PI);      // radius in mm
+    const float angle_per_led = 2.0 * PI / leds_per_turn; // degrees per LED
+    const float height_per_turn_cm = width_cm; // 10cm height per turn
+    const float height_per_led =
+        height_per_turn_cm /
+        leds_per_turn * 1.3; // this is the changing height per led.
+
+
+
+    for (int i = 0; i < num_leds; i++) {
+        float angle = i * angle_per_led; // angle in radians
+        float r = radius + 10 + i * height_per_led; // height in cm
+
+        // Calculate the x, y coordinates for the corkscrew
+        float x = r * cos(angle); // x coordinate
+        float y = r * sin(angle); // y coordinate
+
+        // Store the 2D coordinates in the vector
+        points[i] = vec2f(x, y);
+    }
+
+    FASTLED_WARN("Creating ScreenMap with:\n" << points);
+
+    // Create a ScreenMap from the points
+    fl::ScreenMap screenMap(points.data(), num_leds, 1.0);
+    return screenMap;
+}
+
+
 // Create a corkscrew with:
 // - 30cm total length (300mm)
 // - 5cm width (50mm)
@@ -69,9 +109,9 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
 // fl::ScreenMap screenMap = makeCorkScrew(NUM_LEDS,
 // 300.0f, 50.0f, 2.0f, 24.0f);
 
-fl::vector<vec3f> mapCorkScrew = makeCorkScrew(corkscrew_args());
-fl::ScreenMap circle = fl::ScreenMap::Circle(
-    NUM_LEDS, 1.5f, 0.5f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
+corkscrew_args args = corkscrew_args();
+fl::vector<vec3f> mapCorkScrew = makeCorkScrew(args);
+fl::ScreenMap screenMap;
 
 
 CLEDController* addController() {
@@ -79,10 +119,13 @@ CLEDController* addController() {
     return controller;
 }
 
+
 void setup() {
+    screenMap = makeScreenMap(args);
+    //screenMap = ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
     auto controller = addController();
     // Set the screen map for the controller
-    controller->setScreenMap(circle);
+    controller->setScreenMap(screenMap);
     FastLED.setBrightness(32);
 }
 
