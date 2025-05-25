@@ -32,6 +32,8 @@
 #define MISO 8
 #define SCK 7
 
+#define SPI_DATA 1
+
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
