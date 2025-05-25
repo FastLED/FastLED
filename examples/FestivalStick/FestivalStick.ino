@@ -6,11 +6,10 @@
 #include <FastLED.h>
 // #include "vec3.h"
 
-#define PIN_DATA MOSI
-#define PIN_CLOCK SCK
+#define PIN_DATA 9
+#define PIN_CLOCK 7
 
 #define NUM_LEDS 288
-#define DATA_PIN 6
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
@@ -72,33 +71,51 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
 // 300.0f, 50.0f, 2.0f, 24.0f);
 
 fl::vector<vec3f> mapCorkScrew = makeCorkScrew(corkscrew_args());
+fl::ScreenMap circle = fl::ScreenMap::Circle(
+    NUM_LEDS, 1.5f, 0.2f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
+
+
+CLEDController* addController() {
+    #ifdef __EMSCRIPTEN__
+    // Add a controller for the APA102HD LEDs
+    CLEDController* controller = &FastLED.addLeds<WS2812B, PIN_DATA, GRB>(leds, NUM_LEDS);
+    return controller;
+    #else
+    // Add a controller for the WS2812B LEDs
+    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
+    // Set the screen map for the controller
+    return controller;
+    #endif
+}
 
 void setup() {
-    FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
-    FastLED.setBrightness(64);
+    auto controller = addController();
+    // Set the screen map for the controller
+    controller->setScreenMap(circle);
+    FastLED.setBrightness(255);
 }
 
 void loop() {
     uint32_t now = millis();
     fl::clear(leds);
 
-    for (int i = 0; i < NUM_LEDS; i++) {
-        // Get the 3D position of this LED from the corkscrew map
-        fl::vec3f pos = mapCorkScrew[i];
+    // for (int i = 0; i < NUM_LEDS; i++) {
+    //     // Get the 3D position of this LED from the corkscrew map
+    //     fl::vec3f pos = mapCorkScrew[i];
 
-        // Create a wave pattern that moves up the corkscrew
-        float wave = sin(pos.z * 0.2 - (now / 500.0));
-        wave = (wave + 1.0) / 2.0; // Normalize to 0-1 range
+    //     // Create a wave pattern that moves up the corkscrew
+    //     float wave = sin(pos.z * 0.2 - (now / 500.0));
+    //     wave = (wave + 1.0) / 2.0; // Normalize to 0-1 range
 
-        // Create a hue that changes with position and time
-        uint8_t hue = int32_t((pos.x * 10 + pos.y * 5 + now / 20)) % 256;
+    //     // Create a hue that changes with position and time
+    //     uint8_t hue = int32_t((pos.x * 10 + pos.y * 5 + now / 20)) % 256;
 
-        // Set brightness based on the wave pattern
-        uint8_t val = 128 + 127 * wave;
+    //     // Set brightness based on the wave pattern
+    //     uint8_t val = 128 + 127 * wave;
 
-        // Set the color
-        leds[i] = CHSV(hue, 240, val);
-    }
+    //     // Set the color
+    //     leds[i] = CHSV(hue, 240, val);
+    // }
 
     // Create a moving pattern that travels up the corkscrew
     // for (int i = 0; i < NUM_LEDS; i++) {
@@ -118,6 +135,12 @@ void loop() {
     //     // Set the color
     //     leds[i] = CHSV(hue, 240, val);
     // }
-
+    static uint32_t frame = 0;
+    for (int i = 0; i < NUM_LEDS; i++) {
+        if (i == frame) {
+            leds[i] = CRGB::White;
+        }
+    }
+    frame = (frame + 1) % NUM_LEDS;
     FastLED.show();
 }

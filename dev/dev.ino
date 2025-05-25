@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/FxNoiseRing/FxNoiseRing.ino"
+#include "../examples/FestivalStick/FestivalStick.ino"
