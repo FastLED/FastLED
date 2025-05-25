@@ -27,6 +27,11 @@
 #define INPUT 0
 #define OUTPUT 1
 
+// These are fake and any number can be used.
+#define MOSI 9
+#define MISO 8
+#define SCK 7
+
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
