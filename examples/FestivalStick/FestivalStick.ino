@@ -76,11 +76,17 @@ fl::ScreenMap circle = fl::ScreenMap::Circle(
     NUM_LEDS, 1.5f, 0.2f, 1.0f); // 1.5cm between LEDs, 0.2cm LED diameter
 
 
+CLEDController* addController() {
+    // Add a controller for the WS2812B LEDs
+    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
+    // Set the screen map for the controller
+    return controller;
+}
 
 void setup() {
-    CLEDController& controller = FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
+    auto controller = addController();
     // Set the screen map for the controller
-    controller.setScreenMap(circle);
+    controller->setScreenMap(circle);
     FastLED.setBrightness(255);
 }
 
