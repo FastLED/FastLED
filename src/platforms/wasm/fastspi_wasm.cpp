@@ -1,14 +1,14 @@
 #ifdef __EMSCRIPTEN__
 
+
+#define FASTLED_INTERNAL
+#include "FastLED.h"
+
 #include "platforms/wasm/fastspi_wasm.h"
 
 namespace fl {
 
 extern uint8_t get_brightness();
-
-
-
-
 
 CLEDController *WasmSpiOutput::tryFindOwner() {
     if (mId == -1) {
