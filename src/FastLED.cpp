@@ -102,6 +102,12 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+// This is bad code. But it produces the smallest binaries for reasons
+// beyond mortal comprehensions.
+// Instead of iterating through the link list for onBeginFrame(), beginShowLeds()
+// and endShowLeds(): store the pointers in an array and iterate through that.
+//
+// static uninitialized gControllersData produces the smallest binary on attiny85.
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
@@ -114,7 +120,7 @@ void CFastLED::show(uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	// static uninitialized gControllersData produces the smallest binary on attiny85.
+
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 
