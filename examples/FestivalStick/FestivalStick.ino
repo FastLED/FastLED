@@ -1,3 +1,14 @@
+/*
+Festival Stick is a dense corkscrew of LEDs that is wrapped around one end of
+a wooden walking stick commonly found on amazon.A0
+
+The UI screenmap projects this cork screw into polar coordinates, so that the LEDs are
+mapped to a sprial, with the inner portion of the spiral being the top, the outer
+most portion being the bottom.
+
+*/
+
+
 
 #include "fl/assert.h"
 #include "fl/screenmap.h"
@@ -15,6 +26,15 @@ using namespace fl;
 #define NUM_LEDS 288
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
+
+UITitle festivalStickTitle("Festival Stick");
+UIDescription festivalStickDescription(
+    "Festival Stick: Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. This assumes the dense 144 LEDs / meter.");
+
+
+
+UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
+
 
 CRGB leds[NUM_LEDS];
 
@@ -115,7 +135,7 @@ fl::ScreenMap screenMap;
 
 
 CLEDController* addController() {
-    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, GRB>(leds, NUM_LEDS);
+    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
     return controller;
 }
 
@@ -131,6 +151,34 @@ void setup() {
 
 // extern uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t t);
 
+
+void showGenerative() {
+    // This function is called to show the generative pattern
+    uint32_t now = millis();
+    fl::clear(leds);
+
+    for (int i = 0; i < NUM_LEDS; i++) {
+        // Get the 2D position of this LED from the screen map
+        fl::vec3f pos = mapCorkScrew[i];
+        float x = pos.x;
+        float y = pos.y;
+        float z = pos.z;
+
+        x*= 20.0f * ledsScale.value();
+        y*= 20.0f * ledsScale.value();
+        z*= 20.0f * ledsScale.value();
+
+        uint16_t noise_value = inoise16(x,y,z, now / 100);
+        // Normalize the noise value to 0-255
+        uint8_t brightness = map(noise_value, 0, 65535, 0, 255);
+        // Create a hue that changes with position and time
+        uint8_t sat = int32_t((x * 10 + y * 5 + now / 5)) % 256;
+        // Set the color
+        leds[i] = CHSV(170, sat, fl::clamp(255- sat, 64, 255));
+    }
+
+    FastLED.show();
+}
 
 void loop() {
     uint32_t now = millis();
@@ -154,27 +202,6 @@ void loop() {
     //     leds[i] = CHSV(hue, 240, val);
     // }
 
-    for (int i = 0; i < NUM_LEDS; i++) {
-        // Get the 2D position of this LED from the screen map
-        fl::vec3f pos = mapCorkScrew[i];
-        float x = pos.x;
-        float y = pos.y;
-        float z = pos.z;
-
-        uint16_t noise_value = inoise16(x * 20, y * 20, z * 20, now / 100);
-        // Normalize the noise value to 0-255
-        uint8_t brightness = map(noise_value, 0, 65535, 0, 255);
-        // Create a hue that changes with position and time
-        uint8_t hue = int32_t((x * 10 + y * 5 + now / 5)) % 256;
-        // Set the color
-        leds[i] = CHSV(hue, 240, brightness);
-    }
-    // static uint32_t frame = 0;
-    // for (int i = 0; i < NUM_LEDS; i++) {
-    //     if (i == frame) {
-    //         leds[i] = CRGB::White;
-    //     }
-    // }
-    // frame = (frame + 1) % NUM_LEDS;
+    showGenerative();
     FastLED.show();
 }
