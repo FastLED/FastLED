@@ -94,10 +94,12 @@
 /// palette code uses 'read dword', and now uses this macro
 /// to make sure that gradient palettes are 4-byte aligned.
 
+#ifndef FL_ALIGN_PROGMEM
 #if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266) || defined(FASTLED_DOXYGEN)
 #define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
 #else
 #define FL_ALIGN_PROGMEM
+#endif
 #endif
 
 #endif  // defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
