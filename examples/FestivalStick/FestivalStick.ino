@@ -29,7 +29,7 @@ using namespace fl;
 
 UITitle festivalStickTitle("Festival Stick");
 UIDescription festivalStickDescription(
-    "Festival Stick: Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. "
+    "Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. Super simple but very awesome looking."
     "This assumes the dense 144 LEDs / meter.");
 
 
