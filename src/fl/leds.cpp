@@ -1,4 +1,7 @@
 
+
+#ifndef __AVR__
+
 #include "fl/leds.h"
 #include "crgb.h"
 #include "fl/assert.h"
@@ -42,3 +45,6 @@ Leds::Leds(CRGB *leds, uint16_t width, uint16_t height)
     : Leds(leds, XYMap::constructRectangularGrid(width, height)) {}
 
 } // namespace fl
+
+
+#endif // __AVR__

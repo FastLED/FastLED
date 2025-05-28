@@ -1,4 +1,11 @@
 
+
+#ifndef __AVR__
+
+// do nothing
+
+#else
+
 #include <math.h>
 
 #include "fl/assert.h"
@@ -287,3 +294,6 @@ int XYPath::calculateSteps(float from, float to) {
 bool XYPath::hasDrawBounds() const { return mPathRenderer->hasDrawBounds(); }
 
 } // namespace fl
+
+
+#endif  // __AVR__
