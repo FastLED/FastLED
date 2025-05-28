@@ -1,6 +1,6 @@
 
 
-#ifndef __AVR__
+#ifdef __AVR__
 
 // do nothing
 
