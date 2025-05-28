@@ -6,7 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CPixelView\< CRGB \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df7/class_c_pixel_view.html",tooltip=" "];
-  Node0 -> Node1 [id="edge125_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="CRGBArray\< SIZE \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dc4/class_c_r_g_b_array.html",tooltip="A version of CPixelView<CRGB> with an included array of CRGB LEDs."];
+  Node0 [id="Node000000",label="CountingButton",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d58/class_counting_button.html",tooltip=" "];
 }

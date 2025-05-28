@@ -1,0 +1,23 @@
+<map id="CaleidoTest2" name="CaleidoTest2">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,111,179"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_a3d30cb10a05854f7ebb3cdb12ad45b58.html#a3d30cb10a05854f7ebb3cdb12ad45b58" title=" " alt="" coords="163,5,281,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,152,100,99,126,67,157,40,165,35,168,39,160,44,130,71,104,102,69,155"/>
+<area shape="rect" id="Node000004" href="$d6/d43/funky_8cpp_a9e8693c3e60974108ad9a80f3c741159.html#a9e8693c3e60974108ad9a80f3c741159" title=" " alt="" coords="189,55,255,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="72,151,110,121,157,89,175,81,177,85,160,94,113,125,76,155"/>
+<area shape="rect" id="Node000005" href="$d6/d43/funky_8cpp_ae4115b5faae21c6d68c9083e2955a9e0.html#ae4115b5faae21c6d68c9083e2955a9e0" title=" " alt="" coords="197,104,247,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="100,151,184,125,185,130,102,156"/>
+<area shape="rect" id="Node000006" href="$d6/d43/funky_8cpp_a41521dcf4e110bf3efb92e0aea33232f.html#a41521dcf4e110bf3efb92e0aea33232f" title=" " alt="" coords="166,153,278,179"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="111,163,152,163,152,169,111,169"/>
+<area shape="rect" id="Node000007" href="$d6/d43/funky_8cpp_af3e975448c84849c2d0be985d32fc8cd.html#af3e975448c84849c2d0be985d32fc8cd" title=" " alt="" coords="159,203,285,228"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="102,176,167,196,165,201,100,181"/>
+<area shape="rect" id="Node000008" href="$d6/d43/funky_8cpp_a732c5e52f87e01ec126bb5c957e002eb.html#a732c5e52f87e01ec126bb5c957e002eb" title=" " alt="" coords="176,252,268,277"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="76,177,113,206,160,237,174,244,171,249,157,242,110,210,72,181"/>
+<area shape="rect" id="Node000009" href="$d6/d43/funky_8cpp_ad6d911a3ab6bc1ecf4eb45713d86895b.html#ad6d911a3ab6bc1ecf4eb45713d86895b" title=" " alt="" coords="173,301,271,327"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="69,177,104,230,130,260,160,287,171,293,168,298,157,291,127,264,100,233,65,180"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_a1588dd85b5eadaa062cf10ab251f486f.html#a1588dd85b5eadaa062cf10ab251f486f" title=" " alt="" coords="371,104,410,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,28,287,40,329,66,365,93,362,97,326,71,284,44,260,33"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="247,114,358,114,358,119,247,119"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="265,151,358,123,359,128,267,156"/>
+<area shape="rect" id="Node000010" href="$de/da1/gfx_8cpp_ad896a9713e06cf986a48d1e652b5e445.html#ad896a9713e06cf986a48d1e652b5e445" title=" " alt="" coords="333,301,448,327"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="271,311,320,311,320,317,271,317"/>
+</map>

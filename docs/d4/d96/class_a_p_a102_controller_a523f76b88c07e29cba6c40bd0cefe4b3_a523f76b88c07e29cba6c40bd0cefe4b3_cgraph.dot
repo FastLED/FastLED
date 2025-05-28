@@ -37,8 +37,8 @@ digraph "APA102Controller::showPixels"
   Node22 [id="Node000022",label="PixelController::loadAnd\lScale_APA102_HD",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/struct_pixel_controller_a07853a147d535144f71b3f2640f4b0d5.html#a07853a147d535144f71b3f2640f4b0d5",tooltip=" "];
   Node22 -> Node23 [id="edge17_Node000022_Node000023",color="steelblue1",style="solid",tooltip=" "];
   Node23 [id="Node000023",label="fl::five_bit_hd_gamma\l_bitshift",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_aeae140ba48d511d1b20d6bd1b383b22b.html#aeae140ba48d511d1b20d6bd1b383b22b",tooltip=" "];
-  Node22 -> Node32 [id="edge18_Node000022_Node000032",color="steelblue1",style="solid",tooltip=" "];
-  Node32 [id="Node000032",label="PixelController::scale",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4",tooltip="Scale a value using the per-channel scale data."];
+  Node22 -> Node33 [id="edge18_Node000022_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="PixelController::scale",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4",tooltip="Scale a value using the per-channel scale data."];
   Node21 -> Node17 [id="edge19_Node000021_Node000017",color="steelblue1",style="solid",tooltip=" "];
   Node21 -> Node18 [id="edge20_Node000021_Node000018",color="steelblue1",style="solid",tooltip=" "];
   Node21 -> Node19 [id="edge21_Node000021_Node000019",color="steelblue1",style="solid",tooltip=" "];

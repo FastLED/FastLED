@@ -6,5 +6,11 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="sparse_arr_elem",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dda/cq__kernel_8h.html#d7/d22/structsparse__arr__elem",tooltip=" "];
+  Node0 [id="Node000000",label="Selectable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/da1/class_selectable.html",tooltip="Abstract class for \"selectable\" things."];
+  Node0 -> Node1 [id="edge235_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="Pin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d68/class_pin.html",tooltip="Naive fallback solution for low level pin access."];
+  Node1 -> Node2 [id="edge236_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="InputPin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd7/class_input_pin.html",tooltip="I/O pin initially set to INPUT."];
+  Node1 -> Node3 [id="edge237_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="OutputPin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/db0/class_output_pin.html",tooltip="I/O pin initially set to OUTPUT."];
 }

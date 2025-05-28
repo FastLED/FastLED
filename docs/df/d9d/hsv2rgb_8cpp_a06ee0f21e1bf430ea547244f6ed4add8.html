@@ -145,10 +145,10 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.
 <div class="line"><span class="lineno">  274</span>    uint8_t sat = hsv.sat;</div>
 <div class="line"><span class="lineno">  275</span>    uint8_t val = hsv.val;</div>
 <div class="line"><span class="lineno">  276</span>    </div>
-<div class="line"><span class="lineno">  277</span>    uint8_t offset = hue &amp; 0x1F; <span class="comment">// 0..31</span></div>
+<div class="line"><span class="lineno">  277</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = hue &amp; 0x1F; <span class="comment">// 0..31</span></div>
 <div class="line"><span class="lineno">  278</span>    </div>
 <div class="line"><span class="lineno">  279</span>    <span class="comment">// offset8 = offset * 8</span></div>
-<div class="line"><span class="lineno">  280</span>    uint8_t offset8 = offset;</div>
+<div class="line"><span class="lineno">  280</span>    uint8_t offset8 = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>;</div>
 <div class="line"><span class="lineno">  281</span>    {</div>
 <div class="line"><span class="lineno">  282</span><span class="preprocessor">#if defined(__AVR__)</span></div>
 <div class="line"><span class="lineno">  283</span>        <span class="comment">// Left to its own devices, gcc turns &quot;x &lt;&lt;= 3&quot; into a loop</span></div>
@@ -345,6 +345,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.
 <div class="line"><span class="lineno">  474</span>    rgb.g = g;</div>
 <div class="line"><span class="lineno">  475</span>    rgb.b = b;</div>
 <div class="line"><span class="lineno">  476</span>}</div>
+<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_gaf8e0821f34434cd6bfed4a16a895da23_html_gaf8e0821f34434cd6bfed4a16a895da23"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_gaf8e0821f34434cd6bfed4a16a895da23.html#gaf8e0821f34434cd6bfed4a16a895da23">scale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8_video() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00268">scale8.h:268</a></div></div>
@@ -352,7 +353,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.
 <div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00040">scale8.h:40</a></div></div>
 <div class="ttc" id="ahsv2rgb_8cpp_a62d9eb0363957a0e61b35ca80efb31a1_html_a62d9eb0363957a0e61b35ca80efb31a1"><div class="ttname"><a href="../../df/d9d/hsv2rgb_8cpp_a62d9eb0363957a0e61b35ca80efb31a1.html#a62d9eb0363957a0e61b35ca80efb31a1">FORCE_REFERENCE</a></div><div class="ttdeci">#define FORCE_REFERENCE(var)</div><div class="ttdoc">Force a variable reference to avoid compiler over-optimization.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d9d/hsv2rgb_8cpp_source.html#l00241">hsv2rgb.cpp:241</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00241">FORCE_REFERENCE</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00123">scale8_video()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00268">scale8_video_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00241">FORCE_REFERENCE</a>, <a class="el" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00123">scale8_video()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00268">scale8_video_LEAVING_R1_DIRTY()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00485">hsv2rgb_rainbow()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -360,7 +361,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8_a06ee0f21e1bf430ea547244f6ed4add8_cgraph.svg" width="388" height="250"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8_a06ee0f21e1bf430ea547244f6ed4add8_cgraph.svg" width="388" height="299"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -379,7 +380,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_a06ee0f21e1bf430ea547244f6ed4add8.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/d9d/hsv2rgb_8cpp.html">hsv2rgb.cpp</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

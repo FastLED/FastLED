@@ -35,7 +35,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/BilinearCompression/src/wave
   Node34 -> Node7 [id="edge18_Node000034_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node34 -> Node30 [id="edge19_Node000034_Node000030",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node36 [id="edge20_Node000003_Node000036",color="steelblue1",style="solid",tooltip=" "];
-  Node36 [id="Node000036",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d0c/fx_8h.html",tooltip=" "];
+  Node36 [id="Node000036",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d44/src_2fx_2fx_8h.html",tooltip=" "];
   Node36 -> Node4 [id="edge21_Node000036_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node36 -> Node6 [id="edge22_Node000036_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node36 -> Node7 [id="edge23_Node000036_Node000007",color="steelblue1",style="solid",tooltip=" "];
@@ -77,16 +77,13 @@ digraph "/home/runner/work/FastLED/FastLED/examples/BilinearCompression/src/wave
   Node58 [id="Node000058",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node58 -> Node4 [id="edge53_Node000058_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node58 -> Node57 [id="edge54_Node000058_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node58 -> Node30 [id="edge55_Node000058_Node000030",color="steelblue1",style="solid",tooltip=" "];
-  Node58 -> Node23 [id="edge56_Node000058_Node000023",color="steelblue1",style="solid",tooltip=" "];
-  Node58 -> Node11 [id="edge57_Node000058_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node40 [id="edge58_Node000002_Node000040",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node119 [id="edge59_Node000002_Node000119",color="steelblue1",style="solid",tooltip=" "];
-  Node119 [id="Node000119",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
-  Node119 -> Node120 [id="edge60_Node000119_Node000120",color="steelblue1",style="solid",tooltip=" "];
-  Node120 [id="Node000120",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
-  Node120 -> Node4 [id="edge61_Node000120_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node120 -> Node6 [id="edge62_Node000120_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node120 -> Node30 [id="edge63_Node000120_Node000030",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node58 [id="edge64_Node000001_Node000058",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node40 [id="edge55_Node000002_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node112 [id="edge56_Node000002_Node000112",color="steelblue1",style="solid",tooltip=" "];
+  Node112 [id="Node000112",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
+  Node112 -> Node113 [id="edge57_Node000112_Node000113",color="steelblue1",style="solid",tooltip=" "];
+  Node113 [id="Node000113",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
+  Node113 -> Node4 [id="edge58_Node000113_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node113 -> Node6 [id="edge59_Node000113_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node113 -> Node30 [id="edge60_Node000113_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node58 [id="edge61_Node000001_Node000058",color="steelblue1",style="solid",tooltip=" "];
 }

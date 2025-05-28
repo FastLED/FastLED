@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['p_0',['p',['../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5',1,'p:&#160;noise.cpp'],['../d0/d66/simplex_8cpp_a9ce6a6cfbbe39bd75ce3f245ef426824.html#a9ce6a6cfbbe39bd75ce3f245ef426824',1,'p:&#160;simplex.cpp']]],
+  ['p_0',['p',['../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5',1,'p:&#160;noise.cpp'],['../d0/d66/simplex_8cpp_a9ce6a6cfbbe39bd75ce3f245ef426824.html#a9ce6a6cfbbe39bd75ce3f245ef426824',1,'p:&#160;simplex.cpp'],['../d6/d43/funky_8cpp_af080a3eeae276c2b7f2d640cb7526e53.html#af080a3eeae276c2b7f2d640cb7526e53',1,'p:&#160;funky.cpp']]],
   ['pacifica_5fpalette_5f1_1',['pacifica_palette_1',['../d2/db2/classfl_1_1_pacifica_a3ab516f80fbad75dbb54df4c15f3de18.html#a3ab516f80fbad75dbb54df4c15f3de18',1,'fl::Pacifica::pacifica_palette_1'],['../dc/d25/_pacifica_8ino_a5f0ba57d5e9829562d239b9a030babca.html#a5f0ba57d5e9829562d239b9a030babca',1,'pacifica_palette_1:&#160;Pacifica.ino']]],
   ['pacifica_5fpalette_5f2_2',['pacifica_palette_2',['../d2/db2/classfl_1_1_pacifica_ab19c9798227d32cbc618bd2afbcf1b00.html#ab19c9798227d32cbc618bd2afbcf1b00',1,'fl::Pacifica::pacifica_palette_2'],['../dc/d25/_pacifica_8ino_ac4ddc21d263dc4e29c1ff6e11b21da8c.html#ac4ddc21d263dc4e29c1ff6e11b21da8c',1,'pacifica_palette_2:&#160;Pacifica.ino']]],
   ['pacifica_5fpalette_5f3_3',['pacifica_palette_3',['../d2/db2/classfl_1_1_pacifica_a68a450c0dd8338fe8abe30089242fb1f.html#a68a450c0dd8338fe8abe30089242fb1f',1,'fl::Pacifica::pacifica_palette_3'],['../dc/d25/_pacifica_8ino_ac5c9f762b2d2d06005ba2f19dfa30b78.html#ac5c9f762b2d2d06005ba2f19dfa30b78',1,'pacifica_palette_3:&#160;Pacifica.ino']]],
@@ -26,6 +26,7 @@ var searchData=
   ['pressure_23',['pressure',['../d1/d85/class_ripple_ace5a8cbdae3ff509be19386ce33c530e.html#ace5a8cbdae3ff509be19386ce33c530e',1,'Ripple']]],
   ['prev_5fanimation_24',['prev_animation',['../d8/df5/classfl_1_1_animartrix_ab19c9ce411ed88cb5f1df6e41f6b04ba.html#ab19c9ce411ed88cb5f1df6e41f6b04ba',1,'fl::Animartrix']]],
   ['pride_25',['pride',['../d2/db0/_fx_pride2015_8ino_ae9a4385e151588be4e7226b119670a09.html#ae9a4385e151588be4e7226b119670a09',1,'FxPride2015.ino']]],
-  ['psmartmatrix_26',['pSmartMatrix',['../d6/dda/_fast_l_e_d_8cpp_a0d0cd1944c11e20c7382f56e673339c8.html#a0d0cd1944c11e20c7382f56e673339c8',1,'FastLED.cpp']]],
-  ['ptr_5f_27',['ptr_',['../df/d0b/classfl_1_1scoped__ptr_a484d804eaa93e23ac1d9dca980e902fc.html#a484d804eaa93e23ac1d9dca980e902fc',1,'fl::scoped_ptr']]]
+  ['progmem_26',['PROGMEM',['../d6/d43/funky_8cpp_a9197173f62a52bdf7cfcc9984dfcfc16.html#a9197173f62a52bdf7cfcc9984dfcfc16',1,'funky.cpp']]],
+  ['psmartmatrix_27',['pSmartMatrix',['../d6/dda/_fast_l_e_d_8cpp_a0d0cd1944c11e20c7382f56e673339c8.html#a0d0cd1944c11e20c7382f56e673339c8',1,'FastLED.cpp']]],
+  ['ptr_5f_28',['ptr_',['../df/d0b/classfl_1_1scoped__ptr_a484d804eaa93e23ac1d9dca980e902fc.html#a484d804eaa93e23ac1d9dca980e902fc',1,'fl::scoped_ptr']]]
 ];

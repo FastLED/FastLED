@@ -25,5 +25,6 @@ var namespaces_dup =
       [ "min3", "d5/d1e/namespace_f_a_s_t_l_e_d___n_a_m_e_s_p_a_c_e___b_e_g_i_n_a4488d6e0ee54517f8e9b2b326bc165cf.html#a4488d6e0ee54517f8e9b2b326bc165cf", null ]
     ] ],
     [ "fl", "d4/d36/namespacefl.html", "d4/d36/namespacefl" ],
-    [ "gen", "dc/d8e/namespacegen.html", "dc/d8e/namespacegen" ]
+    [ "gen", "dc/d8e/namespacegen.html", "dc/d8e/namespacegen" ],
+    [ "sketch", "d8/d93/namespacesketch.html", "d8/d93/namespacesketch" ]
 ];

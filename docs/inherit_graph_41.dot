@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="DATA_NOP",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d0d/class_d_a_t_a___n_o_p.html",tooltip="Dummy class for output controllers that need no data transformations."];
+  Node0 [id="Node000000",label="CRGB.__unnamed0__.\l__unnamed0__.__unnamed2__",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/group___pixel_types.html#db/d2c/union_c_r_g_b_8____unnamed0_____8____unnamed0_____8____unnamed2____",tooltip=" "];
 }

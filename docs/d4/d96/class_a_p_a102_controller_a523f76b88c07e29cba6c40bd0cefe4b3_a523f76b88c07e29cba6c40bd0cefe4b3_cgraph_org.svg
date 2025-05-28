@@ -329,19 +329,19 @@
 </a>
 </g>
 </g>
-<!-- Node32 -->
-<g id="Node000032" class="node">
-<title>Node32</title>
-<g id="a_Node000032"><a xlink:href="../../d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
+<!-- Node33 -->
+<g id="Node000033" class="node">
+<title>Node33</title>
+<g id="a_Node000033"><a xlink:href="../../d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" target="_top" xlink:title="Scale a value using the per&#45;channel scale data.">
 <polygon fill="#fff0f0" stroke="red" points="732.5,-391.5 613.5,-391.5 613.5,-372.5 732.5,-372.5 732.5,-391.5"/>
 <text text-anchor="middle" x="673" y="-379.5" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::scale</text>
 </a>
 </g>
 </g>
-<!-- Node22&#45;&gt;Node32 -->
-<g id="edge18_Node000022_Node000032" class="edge">
-<title>Node22&#45;&gt;Node32</title>
-<g id="a_edge18_Node000022_Node000032"><a xlink:title=" ">
+<!-- Node22&#45;&gt;Node33 -->
+<g id="edge18_Node000022_Node000033" class="edge">
+<title>Node22&#45;&gt;Node33</title>
+<g id="a_edge18_Node000022_Node000033"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M549.1,-368.34C566.63,-370.29 585.6,-372.4 603.27,-374.36"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="603.17,-377.87 613.5,-375.5 603.95,-370.92 603.17,-377.87"/>
 </a>

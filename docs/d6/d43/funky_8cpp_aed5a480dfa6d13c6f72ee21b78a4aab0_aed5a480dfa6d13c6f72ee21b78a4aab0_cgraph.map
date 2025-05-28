@@ -1,0 +1,9 @@
+<map id="SpeedTest" name="SpeedTest">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,93,56"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_a732c5e52f87e01ec126bb5c957e002eb.html#a732c5e52f87e01ec126bb5c957e002eb" title=" " alt="" coords="145,5,237,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,33,131,26,132,31,94,38"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_ad6d911a3ab6bc1ecf4eb45713d86895b.html#ad6d911a3ab6bc1ecf4eb45713d86895b" title=" " alt="" coords="141,55,240,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,48,128,54,127,59,93,53"/>
+<area shape="rect" id="Node000004" href="$de/da1/gfx_8cpp_ad896a9713e06cf986a48d1e652b5e445.html#ad896a9713e06cf986a48d1e652b5e445" title=" " alt="" coords="288,55,403,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="240,65,274,65,274,70,240,70"/>
+</map>

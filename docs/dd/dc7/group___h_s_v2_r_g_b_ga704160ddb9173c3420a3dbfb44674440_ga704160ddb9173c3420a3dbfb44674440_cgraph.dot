@@ -11,6 +11,8 @@ digraph "hsv2rgb_spectrum"
   Node2 [id="Node000002",label="hsv2rgb_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019",tooltip="Convert an HSV value to RGB using a mathematically straight spectrum."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="hsv2rgb_raw_C",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233.html#ae692746db35d0cdcd304d01497f92233",tooltip="HSV to RGB implementation in raw C, platform independent."];
-  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
 }

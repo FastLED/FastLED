@@ -1,11 +1,13 @@
 <map id="fl::XYMap::constructRectangularGrid" name="fl::XYMap::constructRectangularGrid">
-<area shape="rect" id="Node000001" title=" " alt="" coords="273,80,529,105"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="273,104,529,129"/>
 <area shape="rect" id="Node000002" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="50,5,181,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="345,79,225,45,177,33,178,28,226,39,347,73"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="361,100,298,72,225,45,180,33,182,28,226,39,300,67,363,96"/>
 <area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_abbb31c081f6a2701b7999371375edfdf.html#abbb31c081f6a2701b7999371375edfdf" title=" " alt="" coords="45,55,186,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="260,83,186,76,186,71,260,77"/>
-<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" title=" " alt="" coords="5,104,225,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="260,107,226,110,225,105,260,102"/>
-<area shape="rect" id="Node000005" href="$de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" title=" " alt="" coords="25,153,206,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="343,112,226,143,174,156,173,151,225,138,342,106"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="313,104,186,82,187,77,314,99"/>
+<area shape="rect" id="Node000004" href="$d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" title=" " alt="" coords="28,104,203,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="260,119,203,119,203,114,260,114"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" title=" " alt="" coords="5,153,225,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="314,134,190,156,189,151,313,129"/>
+<area shape="rect" id="Node000006" href="$de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" title=" " alt="" coords="25,203,206,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="362,138,299,165,226,193,180,205,179,200,225,187,297,160,360,133"/>
 </map>

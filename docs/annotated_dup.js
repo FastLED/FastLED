@@ -270,6 +270,7 @@ var annotated_dup =
       [ "UITitleImpl", "df/d99/classfl_1_1_u_i_title_impl.html", "df/d99/classfl_1_1_u_i_title_impl" ],
       [ "Variant", "de/d60/classfl_1_1_variant.html", "de/d60/classfl_1_1_variant" ],
       [ "vec2", "d5/d5d/structfl_1_1vec2.html", "d5/d5d/structfl_1_1vec2" ],
+      [ "vec3", "dc/d7c/structfl_1_1vec3.html", "dc/d7c/structfl_1_1vec3" ],
       [ "Video", "d0/d4b/classfl_1_1_video.html", "d0/d4b/classfl_1_1_video" ],
       [ "VideoFxWrapper", "d4/dd2/classfl_1_1_video_fx_wrapper.html", "d4/dd2/classfl_1_1_video_fx_wrapper" ],
       [ "WaveCrgbGradientMap", "d0/da7/classfl_1_1_wave_crgb_gradient_map.html", "d0/da7/classfl_1_1_wave_crgb_gradient_map" ],
@@ -298,6 +299,9 @@ var annotated_dup =
       [ "HexagonAngle", "d4/dee/classgen_1_1_hexagon_angle.html", "d4/dee/classgen_1_1_hexagon_angle" ],
       [ "Point", "df/dc6/classgen_1_1_point.html", "df/dc6/classgen_1_1_point" ]
     ] ],
+    [ "sketch", "d8/d93/namespacesketch.html", [
+      [ "vec3", "dd/df1/structsketch_1_1vec3.html", "dd/df1/structsketch_1_1vec3" ]
+    ] ],
     [ "__FL_PORT_INFO", "d4/de9/struct_____f_l___p_o_r_t___i_n_f_o.html", "d4/de9/struct_____f_l___p_o_r_t___i_n_f_o" ],
     [ "APA102Controller", "d4/d96/class_a_p_a102_controller.html", "d4/d96/class_a_p_a102_controller" ],
     [ "APA102ControllerHD", "d6/dc7/class_a_p_a102_controller_h_d.html", "d6/dc7/class_a_p_a102_controller_h_d" ],
@@ -323,6 +327,7 @@ var annotated_dup =
     [ "ColorHSV", "d7/d38/struct_color_h_s_v.html", "d7/d38/struct_color_h_s_v" ],
     [ "ColorScheme", "d6/d72/struct_color_scheme.html", "d6/d72/struct_color_scheme" ],
     [ "ColorSelector", "df/d79/class_color_selector.html", "df/d79/class_color_selector" ],
+    [ "corkscrew_args", "dd/d43/_festival_stick_8ino.html#d1/dd1/structcorkscrew__args", "dd/d43/_festival_stick_8ino_d1/dd1/structcorkscrew__args" ],
     [ "CountingButton", "d6/d58/class_counting_button.html", "d6/d58/class_counting_button" ],
     [ "CPixelLEDController", "d0/dc9/class_c_pixel_l_e_d_controller.html", "d0/dc9/class_c_pixel_l_e_d_controller" ],
     [ "CPixelView", "db/df7/class_c_pixel_view.html", "db/df7/class_c_pixel_view" ],
@@ -388,6 +393,7 @@ var annotated_dup =
     [ "LPD1886Controller1250Khz_8bit", "db/df7/class_l_p_d1886_controller1250_khz__8bit.html", null ],
     [ "LPD6803Controller", "d0/d40/class_l_p_d6803_controller.html", "d0/d40/class_l_p_d6803_controller" ],
     [ "LPD8806Controller", "dc/d33/class_l_p_d8806_controller.html", "dc/d33/class_l_p_d8806_controller" ],
+    [ "MaxFadeTracker", "da/db7/class_max_fade_tracker.html", "da/db7/class_max_fade_tracker" ],
     [ "Message", "d4/daa/struct_message.html", "d4/daa/struct_message" ],
     [ "MidiInterface", "df/d6a/class_midi_interface.html", "df/d6a/class_midi_interface" ],
     [ "MidiShieldButton", "d0/ddf/class_midi_shield_button.html", "d0/ddf/class_midi_shield_button" ],
@@ -451,10 +457,6 @@ var annotated_dup =
     [ "UCS2903", "d7/d84/class_u_c_s2903.html", null ],
     [ "UCS2903Controller", "d6/d05/class_u_c_s2903_controller.html", null ],
     [ "ui_state", "da/db7/structui__state.html", "da/db7/structui__state" ],
-    [ "UIButton", "da/d03/class_u_i_button.html", "da/d03/class_u_i_button" ],
-    [ "UICheckbox", "de/d39/class_u_i_checkbox.html", "de/d39/class_u_i_checkbox" ],
-    [ "UINumberField", "db/d12/class_u_i_number_field.html", "db/d12/class_u_i_number_field" ],
-    [ "UISlider", "df/d68/class_u_i_slider.html", "df/d68/class_u_i_slider" ],
     [ "WaveEffect", "d6/def/struct_wave_effect.html", "d6/def/struct_wave_effect" ],
     [ "WS2801Controller", "d9/d95/class_w_s2801_controller.html", "d9/d95/class_w_s2801_controller" ],
     [ "WS2803Controller", "dc/d28/class_w_s2803_controller.html", null ],
@@ -471,6 +473,5 @@ var annotated_dup =
     [ "WS2815Controller", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2816Controller", "dd/dbc/class_w_s2816_controller.html", "dd/dbc/class_w_s2816_controller" ],
-    [ "WS2852", "df/d10/class_w_s2852.html", null ],
-    [ "XYMap", "d7/de6/class_x_y_map.html", "d7/de6/class_x_y_map" ]
+    [ "WS2852", "df/d10/class_w_s2852.html", null ]
 ];

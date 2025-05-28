@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$db/d3b/class_fast_pin.html" title="The simplest level of Pin class." alt="" coords="5,5,125,31"/>
-<area shape="rect" id="Node000001" href="$d5/d51/class_fast_pin_b_b.html" title="FastPin implementation for bit&#45;banded access." alt="" coords="173,5,312,31"/>
-<area shape="poly" id="edge127_Node000000_Node000001" title=" " alt="" coords="139,15,173,15,173,21,139,21"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,64,31"/>
+<area shape="rect" id="Node000001" href="$d4/dee/classgen_1_1_hexagon_angle.html" title=" " alt="" coords="112,5,257,31"/>
+<area shape="poly" id="edge126_Node000000_Node000001" title=" " alt="" coords="77,15,112,15,112,21,77,21"/>
 </map>

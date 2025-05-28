@@ -6,6 +6,7 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "assert.h", "dc/da7/assert_8h.html", null ],
     [ "audio.cpp", "d1/ddc/audio_8cpp.html", "d1/ddc/audio_8cpp" ],
     [ "audio.h", "da/d09/audio_8h.html", "da/d09/audio_8h" ],
+    [ "avr_disallowed.h", "d5/dd1/avr__disallowed_8h.html", "d5/dd1/avr__disallowed_8h" ],
     [ "bilinear_expansion.cpp", "de/d80/bilinear__expansion_8cpp.html", "de/d80/bilinear__expansion_8cpp" ],
     [ "bilinear_expansion.h", "da/d34/bilinear__expansion_8h.html", "da/d34/bilinear__expansion_8h" ],
     [ "bitset.h", "d1/d69/bitset_8h.html", "d1/d69/bitset_8h" ],

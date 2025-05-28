@@ -65,6 +65,7 @@ var group___clockless_chipsets =
     [ "WS2815Controller< DATA_PIN, RGB_ORDER >", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816< DATA_PIN, RGB_ORDER >", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2852< DATA_PIN, RGB_ORDER >", "df/d10/class_w_s2852.html", null ],
+    [ "CLOCKLESS_FREQUENCY", "d7/d6f/group___clockless_chipsets_gaf56f7c119dbc6c3babb2ae887b60cc04.html#gaf56f7c119dbc6c3babb2ae887b60cc04", null ],
     [ "FMUL", "d7/d6f/group___clockless_chipsets_ga21e124974d43423655bca453500f8378.html#ga21e124974d43423655bca453500f8378", null ],
     [ "HAS_DMX_SERIAL", "d7/d6f/group___clockless_chipsets_gad25cc7362bddaaf030f656cc924703de.html#gad25cc7362bddaaf030f656cc924703de", null ],
     [ "HAS_DMX_SIMPLE", "d7/d6f/group___clockless_chipsets_ga278b64a1353068fb1562202130337615.html#ga278b64a1353068fb1562202130337615", null ]

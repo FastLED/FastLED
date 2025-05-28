@@ -11,6 +11,7 @@ var classfl_1_1_screen_map =
     [ "Circle", "d2/d78/classfl_1_1_screen_map_a4e85c9cd6a6488bd83cfcf01190b137d.html#a4e85c9cd6a6488bd83cfcf01190b137d", null ],
     [ "DefaultStrip", "d2/d78/classfl_1_1_screen_map_a736a47f15d6262809d6438d1c2f4c5b1.html#a736a47f15d6262809d6438d1c2f4c5b1", null ],
     [ "empty", "d2/d78/classfl_1_1_screen_map_a89ecce7c68528744d0e6a64f7c7f6b36.html#a89ecce7c68528744d0e6a64f7c7f6b36", null ],
+    [ "getBounds", "d2/d78/classfl_1_1_screen_map_acdd1f6476a583ced7a15c184f5696992.html#acdd1f6476a583ced7a15c184f5696992", null ],
     [ "getDiameter", "d2/d78/classfl_1_1_screen_map_af9b06074ecc088fef30300f87650d2f5.html#af9b06074ecc088fef30300f87650d2f5", null ],
     [ "getLength", "d2/d78/classfl_1_1_screen_map_a5204df94f85ac93d9f2863b7d4e483fe.html#a5204df94f85ac93d9f2863b7d4e483fe", null ],
     [ "mapToIndex", "d2/d78/classfl_1_1_screen_map_a30881b75152760d609b7f4a03cee6054.html#a30881b75152760d609b7f4a03cee6054", null ],

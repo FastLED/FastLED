@@ -19,4 +19,6 @@ digraph "fl::RectangularDrawBuffer::onQueuingDone"
   Node6 [id="Node000006",label="fl::RectangularDrawBuffer\l::getBlockInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a106bb52955940f3087ecf12131090458.html#a106bb52955940f3087ecf12131090458",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::RectangularDrawBuffer\l::getMaxBytesInStrip",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a87f728161573a58fb2bef6c684281bc8.html#a87f728161573a58fb2bef6c684281bc8",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104",tooltip=" "];
 }

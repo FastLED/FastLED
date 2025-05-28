@@ -160,10 +160,10 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_source.html','../../'); initResiza
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="comment">// Figure out which section of the hue wheel we&#39;re in,</span></div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="comment">// and how far offset we are withing that section</span></div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    uint8_t section = hsv.hue / <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>; <span class="comment">// 0..2</span></div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    uint8_t offset = hsv.hue % <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>;  <span class="comment">// 0..63</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = hsv.hue % <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>;  <span class="comment">// 0..63</span></div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    uint8_t rampup = offset; <span class="comment">// 0..63</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    uint8_t rampdown = (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1) - offset; <span class="comment">// 63..0</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    uint8_t rampup = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>; <span class="comment">// 0..63</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    uint8_t rampdown = (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1) - <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>; <span class="comment">// 63..0</span></div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="comment">// We now scale rampup and rampdown to a 0-255 range -- at least</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="comment">// in theory, but here&#39;s where architecture-specific decsions</span></div>
@@ -262,8 +262,8 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_source.html','../../'); initResiza
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="comment">// Figure how far we are offset into the section of the</span></div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="comment">// color wheel that we&#39;re in</span></div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    uint8_t offset = hsv.hue &amp; (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1);  <span class="comment">// 0..63</span></div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    uint8_t rampup = offset * 4; <span class="comment">// 0..252</span></div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = hsv.hue &amp; (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1);  <span class="comment">// 0..63</span></div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    uint8_t rampup = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> * 4; <span class="comment">// 0..252</span></div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    <span class="comment">// compute color-amplitude-scaled-down versions of rampup and rampdown</span></div>
@@ -368,10 +368,10 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_source.html','../../'); initResiza
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    uint8_t sat = hsv.sat;</div>
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    uint8_t val = hsv.val;</div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    uint8_t offset = hue &amp; 0x1F; <span class="comment">// 0..31</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = hue &amp; 0x1F; <span class="comment">// 0..31</span></div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    </div>
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    <span class="comment">// offset8 = offset * 8</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    uint8_t offset8 = offset;</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    uint8_t offset8 = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>;</div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    {</div>
 <div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="preprocessor">#if defined(__AVR__)</span></div>
 <div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        <span class="comment">// Left to its own devices, gcc turns &quot;x &lt;&lt;= 3&quot; into a loop</span></div>
@@ -796,6 +796,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_source.html','../../'); initResiza
 <div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span> </div>
 <div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span><a class="code hl_define" href="../../df/d2a/namespace_8h_a1d5d01fb2365bb29ff7972156bff53e8.html#a1d5d01fb2365bb29ff7972156bff53e8">FASTLED_NAMESPACE_END</a></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
+<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019_html_ga66f61978949a6830b138d1bf08257019"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga66f61978949a6830b138d1bf08257019.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a></div><div class="ttdeci">void hsv2rgb_raw(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="#l00023">hsv2rgb.cpp:23</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440_html_ga704160ddb9173c3420a3dbfb44674440"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga704160ddb9173c3420a3dbfb44674440.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a></div><div class="ttdeci">void hsv2rgb_spectrum(const struct CHSV &amp;hsv, CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="#l00226">hsv2rgb.cpp:226</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55c68fe4b9_html_gab3d6aa6b1a86a5e9bb820c55c68fe4b9"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_gab3d6aa6b1a86a5e9bb820c55c68fe4b9.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9">rgb2hsv_approximate</a></div><div class="ttdeci">CHSV rgb2hsv_approximate(const CRGB &amp;rgb)</div><div class="ttdoc">Recover approximate HSV values from RGB.</div><div class="ttdef"><b>Definition</b> <a href="#l00504">hsv2rgb.cpp:504</a></div></div>
@@ -834,7 +835,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_source.html','../../'); initResiza
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/d9d/hsv2rgb_8cpp.html">hsv2rgb.cpp</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

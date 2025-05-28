@@ -124,27 +124,27 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a61d27e179c9b68bde89d220aebc
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00328">328</a> of file <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  328</span>                                   {</div>
-<div class="line"><span class="lineno">  329</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> br = 0;</div>
-<div class="line"><span class="lineno">  330</span>    <span class="keyword">static</span> uint32_t lastframe = 0; <span class="comment">// millis();</span></div>
-<div class="line"><span class="lineno">  331</span> </div>
-<div class="line"><span class="lineno">  332</span>    <span class="keywordflow">if</span>(br++ &gt;= nFrames) {</div>
-<div class="line"><span class="lineno">  333</span>        uint32_t now = millis();</div>
-<div class="line"><span class="lineno">  334</span>        now -= lastframe;</div>
-<div class="line"><span class="lineno">  335</span>        <span class="keywordflow">if</span>(now == 0) {</div>
-<div class="line"><span class="lineno">  336</span>            now = 1; <span class="comment">// prevent division by zero below</span></div>
-<div class="line"><span class="lineno">  337</span>        }</div>
-<div class="line"><span class="lineno">  338</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387.html#a32e135f0aefb23c35d27dd8d94577387">m_nFPS</a> = (br * 1000) / now;</div>
-<div class="line"><span class="lineno">  339</span>        br = 0;</div>
-<div class="line"><span class="lineno">  340</span>        lastframe = millis();</div>
-<div class="line"><span class="lineno">  341</span>    }</div>
-<div class="line"><span class="lineno">  342</span>}</div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387_html_a32e135f0aefb23c35d27dd8d94577387"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387.html#a32e135f0aefb23c35d27dd8d94577387">CFastLED::m_nFPS</a></div><div class="ttdeci">uint16_t m_nFPS</div><div class="ttdoc">tracking for current frames per second (FPS) value</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00364">FastLED.h:364</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00334">334</a> of file <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  334</span>                                   {</div>
+<div class="line"><span class="lineno">  335</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> br = 0;</div>
+<div class="line"><span class="lineno">  336</span>    <span class="keyword">static</span> uint32_t lastframe = 0; <span class="comment">// millis();</span></div>
+<div class="line"><span class="lineno">  337</span> </div>
+<div class="line"><span class="lineno">  338</span>    <span class="keywordflow">if</span>(br++ &gt;= nFrames) {</div>
+<div class="line"><span class="lineno">  339</span>        uint32_t now = millis();</div>
+<div class="line"><span class="lineno">  340</span>        now -= lastframe;</div>
+<div class="line"><span class="lineno">  341</span>        <span class="keywordflow">if</span>(now == 0) {</div>
+<div class="line"><span class="lineno">  342</span>            now = 1; <span class="comment">// prevent division by zero below</span></div>
+<div class="line"><span class="lineno">  343</span>        }</div>
+<div class="line"><span class="lineno">  344</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387.html#a32e135f0aefb23c35d27dd8d94577387">m_nFPS</a> = (br * 1000) / now;</div>
+<div class="line"><span class="lineno">  345</span>        br = 0;</div>
+<div class="line"><span class="lineno">  346</span>        lastframe = millis();</div>
+<div class="line"><span class="lineno">  347</span>    }</div>
+<div class="line"><span class="lineno">  348</span>}</div>
+<div class="ttc" id="aclass_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387_html_a32e135f0aefb23c35d27dd8d94577387"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a32e135f0aefb23c35d27dd8d94577387.html#a32e135f0aefb23c35d27dd8d94577387">CFastLED::m_nFPS</a></div><div class="ttdeci">uint16_t m_nFPS</div><div class="ttdoc">tracking for current frames per second (FPS) value</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00373">FastLED.h:373</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00364">m_nFPS</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00373">m_nFPS</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00107">show()</a>, and <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00181">showColor()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00113">show()</a>, and <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00187">showColor()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +162,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a61d27e179c9b68bde89d220aebc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

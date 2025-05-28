@@ -13,5 +13,8 @@ var searchData=
   ['ok_10',['ok',['../dd/d2e/structfl_1_1_f_f_t_impl_1_1_result_af5d4676c70e59409197fd3e07be6951d.html#af5d4676c70e59409197fd3e07be6951d',1,'fl::FFTImpl::Result']]],
   ['on_5f_11',['on_',['../d8/ddd/class_toggle_button_ab4507485bf1b7d331190e66e7f5bfeda.html#ab4507485bf1b7d331190e66e7f5bfeda',1,'ToggleButton::on_'],['../d6/d58/class_counting_button_a0efc7ef5ae97ad4fd0187228e617e2dd.html#a0efc7ef5ae97ad4fd0187228e617e2dd',1,'CountingButton::on_'],['../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67',1,'Key::on_']]],
   ['orig_5fcolor_5f_12',['orig_color_',['../db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84',1,'Key']]],
-  ['output_13',['output',['../d0/dd1/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_fill_ab0fcba6be2de971ce0be45e73a1955f4.html#ab0fcba6be2de971ce0be45e73a1955f4',1,'fl::anonymous_namespace{gradient.cpp}::VisitorFill']]]
+  ['osci_13',['osci',['../d6/d43/funky_8cpp_aaf5ccb6c822f7c896c0c4a968a007eae.html#aaf5ccb6c822f7c896c0c4a968a007eae',1,'funky.cpp']]],
+  ['output_14',['output',['../d0/dd1/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_fill_ab0fcba6be2de971ce0be45e73a1955f4.html#ab0fcba6be2de971ce0be45e73a1955f4',1,'fl::anonymous_namespace{gradient.cpp}::VisitorFill']]],
+  ['outputrate_5f_15',['outputRate_',['../da/db7/class_max_fade_tracker_a2174e94f695802943c87b4e6585ac4c8.html#a2174e94f695802943c87b4e6585ac4c8',1,'MaxFadeTracker']]],
+  ['outputtimesec_16',['outputTimeSec',['../dc/d5d/_audio_8ino_af74e839c78d0aa33a4656ae2f1279c90.html#af74e839c78d0aa33a4656ae2f1279c90',1,'Audio.ino']]]
 ];

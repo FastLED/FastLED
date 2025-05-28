@@ -1,0 +1,175 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/XYPath/simple.h" name="/home/runner/work/FastLED/FastLED/examples/XYPath/simple.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="3009,5,3209,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="2677,108,2761,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="3010,58,2774,110,2773,105,3009,53"/>
+<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="1399,181,1484,207"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="3010,59,2922,82,2832,110,2803,124,2774,136,2657,155,2501,170,2319,181,2125,188,1755,195,1498,196,1498,190,1755,189,2125,182,2319,175,2500,165,2656,150,2773,131,2801,119,2830,106,2921,77,3008,54"/>
+<area shape="rect" id="Node000093" href="$d0/d4f/draw__visitor_8h.html" title=" " alt="" coords="2735,255,2860,280"/>
+<area shape="poly" id="edge83_Node000001_Node000093" title=" " alt="" coords="3010,52,2944,74,2912,90,2883,110,2855,141,2833,176,2806,243,2801,241,2828,174,2851,138,2880,106,2909,85,2942,69,3008,47"/>
+<area shape="rect" id="Node000095" href="$dd/d67/function_8h.html" title=" " alt="" coords="3159,401,3257,427"/>
+<area shape="poly" id="edge123_Node000001_Node000095" title=" " alt="" coords="3211,54,3249,75,3266,89,3280,107,3296,143,3302,183,3299,224,3289,264,3258,337,3226,391,3222,388,3253,335,3284,262,3293,223,3297,183,3291,145,3275,109,3262,93,3246,80,3208,59"/>
+<area shape="rect" id="Node000031" href="$d8/db8/math__macros_8h.html" title=" " alt="" coords="3575,255,3710,280"/>
+<area shape="poly" id="edge92_Node000001_Node000031" title=" " alt="" coords="3210,57,3282,79,3354,106,3430,140,3502,179,3614,245,3612,249,3500,183,3427,145,3352,110,3280,84,3209,62"/>
+<area shape="rect" id="Node000098" href="$d1/d1e/raster_8h.html" title=" " alt="" coords="3093,181,3176,207"/>
+<area shape="poly" id="edge93_Node000001_Node000098" title=" " alt="" coords="3116,60,3133,167,3128,168,3111,61"/>
+<area shape="rect" id="Node000110" href="$d0/d87/time__alpha_8h.html" title=" " alt="" coords="3635,181,3754,207"/>
+<area shape="poly" id="edge99_Node000001_Node000110" title=" " alt="" coords="3210,31,3295,36,3394,48,3497,70,3547,86,3596,106,3642,136,3678,169,3674,173,3639,140,3593,110,3546,91,3496,75,3393,53,3295,41,3209,36"/>
+<area shape="rect" id="Node000111" href="$d9/d3b/ui_8h.html" title=" " alt="" coords="3371,181,3429,207"/>
+<area shape="poly" id="edge103_Node000001_Node000111" title=" " alt="" coords="3210,55,3268,77,3323,106,3359,136,3386,168,3382,172,3355,140,3320,110,3266,82,3209,60"/>
+<area shape="rect" id="Node000117" href="$d5/df2/xypath_8h.html" title=" " alt="" coords="2968,181,3059,207"/>
+<area shape="poly" id="edge113_Node000001_Node000117" title=" " alt="" coords="3100,61,3061,135,3034,172,3029,169,3056,132,3095,59"/>
+<area shape="rect" id="Node000121" href="$de/df7/time_8h.html" title=" " alt="" coords="2969,401,3050,427"/>
+<area shape="poly" id="edge116_Node000001_Node000121" title=" " alt="" coords="3010,54,2964,75,2944,91,2928,109,2923,120,2922,133,2930,161,2944,187,2958,205,2970,215,2983,221,3009,226,3035,232,3047,240,3058,253,3066,271,3069,290,3063,327,3047,363,3029,392,3025,389,3042,360,3058,326,3063,290,3061,272,3054,256,3044,244,3033,237,3008,231,2981,226,2968,220,2954,209,2939,189,2925,163,2917,134,2918,119,2923,107,2940,87,2961,71,3008,49"/>
+<area shape="rect" id="Node000122" href="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html" title=" " alt="" coords="3173,108,3265,133"/>
+<area shape="poly" id="edge119_Node000001_Node000122" title=" " alt="" coords="3144,58,3195,97,3191,102,3141,62"/>
+<area shape="rect" id="Node000134" href="$d7/d5e/_x_y_path_2src_2xypaths_8h.html" title=" " alt="" coords="2937,108,3047,133"/>
+<area shape="poly" id="edge121_Node000001_Node000134" title=" " alt="" coords="3075,62,3020,102,3017,98,3072,58"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="2766,475,2837,500"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1484,193,1827,194,2342,201,2599,208,2822,219,2983,233,3032,242,3058,252,3076,273,3089,295,3097,316,3100,338,3098,361,3092,383,3065,428,3050,440,3029,451,2973,467,2909,478,2851,485,2850,479,2908,473,2972,461,3027,446,3047,436,3061,425,3087,381,3093,360,3095,339,3092,318,3084,297,3072,277,3054,257,3031,247,2982,238,2821,224,2599,214,2342,206,1827,199,1484,198"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="531,255,645,280"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="1398,200,1094,218,881,235,659,257,659,252,880,229,1093,213,1398,195"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="669,255,787,280"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="1399,201,1149,221,801,257,800,252,1149,216,1398,196"/>
+<area shape="rect" id="Node000008" href="$d4/d64/force__inline_8h.html" title=" " alt="" coords="1343,475,1465,500"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="1398,199,888,217,619,235,530,245,504,251,491,257,482,275,482,299,491,326,509,352,534,372,568,390,609,406,656,420,766,444,888,460,1014,472,1135,478,1329,483,1329,489,1134,484,1013,477,887,465,765,449,655,426,607,411,566,395,531,376,505,355,486,329,477,300,477,274,487,253,502,246,530,240,619,229,887,212,1398,194"/>
+<area shape="rect" id="Node000009" href="$d9/d13/cpp__compat_8h.html" title="Compatibility functions based on C++ version." alt="" coords="1203,255,1317,280"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="1406,209,1296,252,1295,247,1404,204"/>
+<area shape="rect" id="Node000011" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="797,401,923,427"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="1399,199,898,218,635,235,548,246,522,251,510,257,498,273,492,287,493,301,499,313,525,337,566,356,618,372,675,385,784,402,783,408,674,391,617,378,564,361,522,341,494,317,488,302,487,287,493,270,506,253,520,246,547,240,635,230,898,212,1398,194"/>
+<area shape="rect" id="Node000012" href="$d9/d3e/led__sysdefs_8h.html" title="Determines which platform system definitions to include." alt="" coords="1121,328,1231,353"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="1399,202,1275,220,1217,236,1195,246,1181,257,1172,269,1167,284,1166,314,1161,314,1162,283,1167,267,1177,253,1192,241,1215,231,1274,215,1398,196"/>
+<area shape="rect" id="Node000014" href="$d0/da8/fastled__delay_8h.html" title="Utility functions and classes for managing delay cycles." alt="" coords="5,255,125,280"/>
+<area shape="poly" id="edge15_Node000003_Node000014" title=" " alt="" coords="1399,198,1203,201,894,209,522,226,329,239,139,256,139,251,329,234,522,221,893,204,1202,195,1399,193"/>
+<area shape="rect" id="Node000016" href="$de/ded/bitswap_8h.html" title="Functions for doing a rotation of bits/bytes used by parallel output." alt="" coords="149,255,235,280"/>
+<area shape="poly" id="edge18_Node000003_Node000016" title=" " alt="" coords="1399,198,1217,199,934,205,596,223,421,237,249,256,248,250,420,232,596,218,934,200,1217,193,1399,192"/>
+<area shape="rect" id="Node000017" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="1357,328,1451,353"/>
+<area shape="poly" id="edge21_Node000003_Node000017" title=" " alt="" coords="1399,199,903,218,644,235,558,246,532,251,521,257,516,267,521,278,536,288,563,296,644,309,751,317,871,321,1243,325,1343,332,1343,338,1243,331,871,327,751,322,643,314,562,301,534,293,517,282,510,267,517,253,531,246,557,240,644,230,903,213,1398,194"/>
+<area shape="rect" id="Node000069" href="$db/d65/fastpin_8h.html" title="Class base definitions for defining fast pin access." alt="" coords="1341,255,1419,280"/>
+<area shape="poly" id="edge22_Node000003_Node000069" title=" " alt="" coords="1427,208,1393,245,1389,241,1423,205"/>
+<area shape="rect" id="Node000070" href="$d2/ddb/fastspi__types_8h.html" title="Data types and constants used by SPI interfaces." alt="" coords="1443,255,1565,280"/>
+<area shape="poly" id="edge26_Node000003_Node000070" title=" " alt="" coords="1454,205,1487,242,1483,246,1450,209"/>
+<area shape="rect" id="Node000071" href="$d3/de1/dmx_8h.html" title="Defines the DMX512&#45;based LED controllers." alt="" coords="1589,255,1651,280"/>
+<area shape="poly" id="edge30_Node000003_Node000071" title=" " alt="" coords="1464,204,1577,249,1575,254,1462,209"/>
+<area shape="rect" id="Node000074" href="$da/dc9/platforms_8h.html" title="Determines which platforms headers to include." alt="" coords="811,255,909,280"/>
+<area shape="poly" id="edge32_Node000003_Node000074" title=" " alt="" coords="1399,202,1196,223,923,256,922,251,1196,217,1398,196"/>
+<area shape="rect" id="Node000076" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="947,328,1096,353"/>
+<area shape="poly" id="edge35_Node000003_Node000076" title=" " alt="" coords="1399,200,1155,219,1035,236,995,246,974,256,968,271,972,286,983,302,997,317,993,320,979,305,967,288,963,270,970,253,993,241,1034,231,1154,214,1398,195"/>
+<area shape="rect" id="Node000020" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="2503,401,2585,427"/>
+<area shape="poly" id="edge37_Node000003_Node000020" title=" " alt="" coords="1484,193,1747,197,2123,208,2468,225,2584,237,2619,244,2638,253,2649,271,2651,290,2645,310,2634,330,2602,366,2568,395,2565,390,2598,362,2629,327,2640,308,2646,290,2644,273,2634,257,2618,250,2583,243,2468,230,2123,213,1746,203,1484,199"/>
+<area shape="rect" id="Node000019" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="2143,328,2244,353"/>
+<area shape="poly" id="edge40_Node000003_Node000019" title=" " alt="" coords="1484,192,1671,193,1925,200,2049,207,2158,218,2240,233,2268,242,2285,253,2291,263,2292,274,2281,293,2260,310,2235,324,2233,320,2257,306,2277,289,2287,273,2286,265,2281,257,2265,247,2239,238,2158,223,2049,212,1924,205,1671,198,1484,198"/>
+<area shape="rect" id="Node000077" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="2053,255,2139,280"/>
+<area shape="poly" id="edge43_Node000003_Node000077" title=" " alt="" coords="1484,196,1717,215,1872,231,2028,252,2040,254,2039,259,2028,257,1871,237,1716,220,1484,201"/>
+<area shape="rect" id="Node000078" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="259,255,354,280"/>
+<area shape="poly" id="edge46_Node000003_Node000078" title=" " alt="" coords="1399,199,981,212,681,230,374,257,368,258,368,253,373,252,680,224,980,207,1398,193"/>
+<area shape="rect" id="Node000084" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="1676,255,1761,280"/>
+<area shape="poly" id="edge47_Node000003_Node000084" title=" " alt="" coords="1480,204,1663,251,1662,256,1478,209"/>
+<area shape="rect" id="Node000086" href="$dc/dcc/colorpalettes_8h.html" title="Declarations for the predefined color palettes supplied by FastLED." alt="" coords="985,255,1103,280"/>
+<area shape="poly" id="edge52_Node000003_Node000086" title=" " alt="" coords="1399,206,1117,256,1116,250,1398,200"/>
+<area shape="rect" id="Node000087" href="$d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise." alt="" coords="1948,328,2017,353"/>
+<area shape="poly" id="edge54_Node000003_Node000087" title=" " alt="" coords="1484,196,1690,215,1800,231,1845,241,1878,252,1927,282,1965,316,1961,320,1924,286,1876,257,1843,246,1799,237,1690,220,1484,201"/>
+<area shape="rect" id="Node000088" href="$dc/d5b/power__mgt_8h.html" title="Functions to limit the power used by FastLED." alt="" coords="2164,255,2271,280"/>
+<area shape="poly" id="edge61_Node000003_Node000088" title=" " alt="" coords="1484,195,1760,214,1949,231,2140,252,2151,253,2150,259,2140,257,1948,236,1760,219,1484,201"/>
+<area shape="rect" id="Node000089" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="1786,255,1865,280"/>
+<area shape="poly" id="edge64_Node000003_Node000089" title=" " alt="" coords="1485,201,1762,252,1773,254,1772,260,1761,257,1484,207"/>
+<area shape="rect" id="Node000091" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="1940,255,2028,280"/>
+<area shape="poly" id="edge68_Node000003_Node000091" title=" " alt="" coords="1485,197,1675,219,1922,252,1927,253,1926,258,1921,257,1674,224,1484,202"/>
+<area shape="rect" id="Node000057" href="$db/dc0/engine__events_8h.html" title=" " alt="" coords="2495,255,2636,280"/>
+<area shape="poly" id="edge73_Node000003_Node000057" title=" " alt="" coords="1484,195,1873,216,2432,252,2481,256,2481,261,2432,257,1872,221,1484,200"/>
+<area shape="rect" id="Node000092" href="$da/d78/leds_8h.html" title=" " alt="" coords="2346,255,2419,280"/>
+<area shape="poly" id="edge80_Node000003_Node000092" title=" " alt="" coords="1484,194,1833,208,2078,225,2327,252,2332,253,2331,258,2326,257,2077,230,1833,213,1484,199"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="2830,472,2852,473,2860,479,2863,488,2857,499,2844,503,2842,498,2854,495,2858,487,2856,482,2850,478,2829,477"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="1296,252,1405,209,1407,214,1297,257"/>
+<area shape="poly" id="edge12_Node000012_Node000003" title=" " alt="" coords="1179,327,1184,291,1189,271,1201,253,1232,234,1279,219,1384,200,1385,205,1280,225,1234,239,1205,257,1194,273,1189,292,1185,328"/>
+<area shape="poly" id="edge13_Node000012_Node000011" title=" " alt="" coords="1126,356,925,401,924,396,1125,351"/>
+<area shape="rect" id="Node000013" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="2133,475,2254,500"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1232,344,1381,363,1471,378,1559,399,1592,412,1623,424,1759,451,1895,468,2020,478,2119,482,2119,487,2019,483,1895,473,1758,456,1622,429,1590,417,1558,404,1470,383,1380,368,1232,349"/>
+<area shape="poly" id="edge16_Node000014_Node000003" title=" " alt="" coords="125,255,149,252,518,223,878,205,1182,196,1385,193,1385,198,1182,202,878,210,518,228,150,257,126,260"/>
+<area shape="poly" id="edge17_Node000014_Node000008" title=" " alt="" coords="80,278,119,309,177,351,248,392,325,424,413,443,531,458,669,469,817,476,1109,483,1329,484,1329,489,1109,489,817,482,668,474,530,463,412,449,323,429,246,397,175,355,116,314,77,282"/>
+<area shape="poly" id="edge19_Node000016_Node000003" title=" " alt="" coords="234,256,258,252,423,234,592,219,919,202,1197,194,1385,192,1385,198,1197,199,919,207,592,225,424,239,259,257,235,261"/>
+<area shape="poly" id="edge20_Node000016_Node000008" title=" " alt="" coords="203,279,228,310,268,351,317,392,345,410,374,424,431,437,529,447,801,464,1099,476,1329,482,1329,487,1098,481,801,470,528,453,430,442,372,429,343,415,314,396,264,355,224,313,199,282"/>
+<area shape="poly" id="edge23_Node000069_Node000003" title=" " alt="" coords="1395,253,1428,216,1432,220,1399,256"/>
+<area shape="poly" id="edge24_Node000069_Node000012" title=" " alt="" coords="1348,283,1223,326,1221,321,1346,278"/>
+<area shape="rect" id="Node000056" href="$d8/d4b/unused_8h.html" title=" " alt="" coords="1729,328,1823,353"/>
+<area shape="poly" id="edge25_Node000069_Node000056" title=" " alt="" coords="1420,275,1432,277,1716,327,1715,332,1432,283,1419,280"/>
+<area shape="poly" id="edge27_Node000070_Node000008" title=" " alt="" coords="1457,283,1391,304,1364,316,1347,330,1340,346,1338,363,1346,399,1364,434,1386,463,1382,466,1360,437,1341,401,1332,363,1335,344,1343,326,1361,312,1389,299,1456,277"/>
+<area shape="poly" id="edge28_Node000070_Node000013" title=" " alt="" coords="1521,278,1632,348,1711,390,1794,424,1880,448,1967,464,2119,480,2119,485,1966,469,1878,453,1792,429,1708,395,1629,353,1519,282"/>
+<area shape="poly" id="edge29_Node000070_Node000056" title=" " alt="" coords="1548,277,1720,322,1718,327,1547,283"/>
+<area shape="poly" id="edge31_Node000071_Node000003" title=" " alt="" coords="1597,257,1489,214,1491,209,1599,252"/>
+<area shape="poly" id="edge33_Node000074_Node000003" title=" " alt="" coords="909,257,940,252,1188,221,1385,199,1385,204,1188,226,940,257,909,262"/>
+<area shape="poly" id="edge34_Node000074_Node000011" title=" " alt="" coords="863,280,863,388,857,388,857,280"/>
+<area shape="poly" id="edge36_Node000076_Node000013" title=" " alt="" coords="1085,351,1295,386,1559,424,1870,457,2119,478,2119,483,1870,462,1558,429,1294,391,1084,356"/>
+<area shape="poly" id="edge38_Node000020_Node000003" title=" " alt="" coords="2566,399,2607,371,2646,334,2661,314,2669,294,2669,274,2658,257,2642,250,2608,243,2494,231,2152,213,1773,203,1498,199,1498,193,1773,198,2152,208,2495,225,2609,237,2644,245,2662,253,2674,273,2674,294,2666,316,2650,337,2610,376,2569,403"/>
+<area shape="poly" id="edge39_Node000020_Node000004" title=" " alt="" coords="2586,424,2754,470,2752,475,2585,429"/>
+<area shape="poly" id="edge41_Node000019_Node000004" title=" " alt="" coords="2224,351,2325,386,2454,424,2617,457,2753,477,2752,483,2616,462,2453,429,2324,391,2222,356"/>
+<area shape="poly" id="edge42_Node000019_Node000020" title=" " alt="" coords="2245,350,2490,399,2489,404,2244,355"/>
+<area shape="poly" id="edge44_Node000077_Node000003" title=" " alt="" coords="2052,257,2052,257,1895,237,1739,221,1498,201,1498,196,1740,215,1896,231,2052,252,2053,252"/>
+<area shape="poly" id="edge45_Node000077_Node000019" title=" " alt="" coords="2113,278,2168,317,2165,322,2110,282"/>
+<area shape="poly" id="edge51_Node000084_Node000003" title=" " alt="" coords="1680,257,1497,210,1498,205,1681,252"/>
+<area shape="poly" id="edge48_Node000084_Node000008" title=" " alt="" coords="1704,282,1433,469,1430,465,1701,278"/>
+<area shape="poly" id="edge49_Node000084_Node000013" title=" " alt="" coords="1717,281,1710,316,1712,335,1719,352,1745,374,1784,395,1834,413,1891,430,2012,456,2119,474,2118,479,2011,461,1890,435,1833,418,1782,400,1742,379,1715,355,1707,336,1705,315,1712,280"/>
+<area shape="poly" id="edge50_Node000084_Node000056" title=" " alt="" coords="1730,279,1760,315,1756,319,1726,282"/>
+<area shape="poly" id="edge53_Node000086_Node000076" title=" " alt="" coords="1043,281,1032,316,1027,314,1038,280"/>
+<area shape="poly" id="edge55_Node000087_Node000004" title=" " alt="" coords="2001,351,2066,389,2108,408,2151,424,2204,436,2274,446,2445,463,2752,481,2752,487,2444,468,2274,451,2203,441,2150,429,2105,413,2063,393,1999,356"/>
+<area shape="poly" id="edge60_Node000087_Node000013" title=" " alt="" coords="1993,352,2021,387,2062,425,2103,449,2146,467,2143,472,2101,454,2058,429,2017,391,1989,355"/>
+<area shape="rect" id="Node000042" href="$db/dd1/crgb_8h.html" title="Defines the red, green, and blue (RGB) pixel struct." alt="" coords="2162,401,2225,427"/>
+<area shape="poly" id="edge56_Node000087_Node000042" title=" " alt="" coords="2017,351,2150,395,2148,400,2016,356"/>
+<area shape="poly" id="edge57_Node000042_Node000004" title=" " alt="" coords="2225,420,2244,424,2389,445,2532,461,2753,480,2752,485,2532,466,2388,450,2244,429,2224,426"/>
+<area shape="poly" id="edge59_Node000042_Node000008" title=" " alt="" coords="2162,421,1479,482,1479,477,2162,415"/>
+<area shape="poly" id="edge58_Node000042_Node000013" title=" " alt="" coords="2196,427,2196,461,2191,461,2191,427"/>
+<area shape="poly" id="edge62_Node000088_Node000003" title=" " alt="" coords="2163,257,1972,236,1784,220,1497,201,1498,195,1784,214,1973,231,2164,252"/>
+<area shape="poly" id="edge63_Node000088_Node000019" title=" " alt="" coords="2216,281,2204,316,2199,314,2211,279"/>
+<area shape="poly" id="edge65_Node000089_Node000003" title=" " alt="" coords="1785,257,1785,257,1497,206,1498,201,1786,252,1786,252"/>
+<area shape="poly" id="edge66_Node000089_Node000017" title=" " alt="" coords="1786,280,1774,283,1606,312,1465,333,1464,328,1606,306,1773,277,1785,275"/>
+<area shape="poly" id="edge67_Node000089_Node000020" title=" " alt="" coords="1865,277,2005,318,2131,351,2328,384,2489,404,2489,410,2327,390,2130,356,2003,323,1863,283"/>
+<area shape="poly" id="edge70_Node000091_Node000008" title=" " alt="" coords="1968,282,1911,318,1836,356,1736,394,1635,428,1467,474,1465,469,1634,422,1735,389,1834,351,1908,313,1965,278"/>
+<area shape="poly" id="edge72_Node000091_Node000013" title=" " alt="" coords="1971,282,1956,297,1943,314,1936,333,1939,352,1953,376,1971,397,2017,431,2069,455,2120,470,2118,475,2067,460,2015,436,1968,401,1949,379,1933,354,1931,333,1939,312,1952,293,1967,279"/>
+<area shape="poly" id="edge69_Node000091_Node000019" title=" " alt="" coords="2018,277,2147,321,2145,326,2017,283"/>
+<area shape="poly" id="edge71_Node000091_Node000042" title=" " alt="" coords="2002,278,2167,391,2164,395,1999,282"/>
+<area shape="poly" id="edge74_Node000057_Node000013" title=" " alt="" coords="2555,282,2474,355,2423,396,2367,429,2308,454,2251,473,2249,468,2306,449,2364,424,2420,391,2470,351,2552,278"/>
+<area shape="rect" id="Node000066" href="$da/d61/xymap_8h.html" title=" " alt="" coords="2369,328,2460,353"/>
+<area shape="poly" id="edge75_Node000057_Node000066" title=" " alt="" coords="2542,282,2453,324,2451,320,2540,278"/>
+<area shape="poly" id="edge76_Node000066_Node000004" title=" " alt="" coords="2424,352,2450,389,2470,408,2492,424,2559,453,2629,471,2696,480,2752,483,2752,489,2696,485,2628,476,2557,458,2489,429,2466,412,2446,392,2419,355"/>
+<area shape="poly" id="edge78_Node000066_Node000008" title=" " alt="" coords="2398,356,2329,394,2285,414,2238,429,2172,442,2084,453,1872,470,1653,481,1479,487,1479,482,1652,476,1871,465,2084,448,2171,437,2237,424,2283,409,2327,389,2395,351"/>
+<area shape="poly" id="edge79_Node000066_Node000013" title=" " alt="" coords="2408,356,2377,391,2334,429,2289,454,2245,472,2243,467,2287,449,2330,424,2373,387,2404,352"/>
+<area shape="poly" id="edge77_Node000066_Node000042" title=" " alt="" coords="2380,356,2238,401,2237,396,2378,351"/>
+<area shape="poly" id="edge81_Node000092_Node000042" title=" " alt="" coords="2369,283,2221,395,2218,391,2366,278"/>
+<area shape="poly" id="edge82_Node000092_Node000066" title=" " alt="" coords="2390,279,2406,315,2402,317,2386,281"/>
+<area shape="poly" id="edge84_Node000093_Node000004" title=" " alt="" coords="2763,282,2729,301,2714,314,2702,329,2699,340,2703,352,2718,385,2738,416,2780,464,2776,467,2734,419,2713,388,2697,354,2694,340,2698,327,2710,310,2726,296,2761,278"/>
+<area shape="poly" id="edge89_Node000093_Node000013" title=" " alt="" coords="2773,282,2734,303,2692,330,2666,357,2648,382,2630,407,2599,429,2537,449,2450,464,2268,484,2268,478,2449,459,2536,444,2596,424,2626,403,2644,379,2661,353,2689,326,2731,298,2771,278"/>
+<area shape="poly" id="edge90_Node000093_Node000056" title=" " alt="" coords="2735,276,2648,283,1936,331,1837,338,1836,332,1936,325,2648,277,2734,271"/>
+<area shape="poly" id="edge85_Node000093_Node000042" title=" " alt="" coords="2735,277,2533,300,2431,315,2358,331,2229,397,2227,392,2356,325,2430,309,2532,294,2734,272"/>
+<area shape="poly" id="edge91_Node000093_Node000066" title=" " alt="" coords="2736,283,2474,331,2473,326,2735,277"/>
+<area shape="rect" id="Node000027" href="$d4/d67/geometry_8h.html" title=" " alt="" coords="2836,328,2943,353"/>
+<area shape="poly" id="edge86_Node000093_Node000027" title=" " alt="" coords="2814,278,2865,317,2862,322,2810,282"/>
+<area shape="rect" id="Node000094" href="$db/dfe/gradient_8h.html" title=" " alt="" coords="2711,328,2811,353"/>
+<area shape="poly" id="edge87_Node000093_Node000094" title=" " alt="" coords="2794,282,2776,317,2771,314,2789,279"/>
+<area shape="poly" id="edge88_Node000094_Node000095" title=" " alt="" coords="2812,349,2824,351,3145,401,3144,406,2824,356,2811,354"/>
+<area shape="rect" id="Node000099" href="$d4/df9/raster__sparse_8h.html" title=" " alt="" coords="2909,255,3043,280"/>
+<area shape="poly" id="edge94_Node000098_Node000099" title=" " alt="" coords="3110,209,3015,251,3013,247,3108,204"/>
+<area shape="poly" id="edge95_Node000099_Node000004" title=" " alt="" coords="2986,279,3003,313,3006,334,3001,355,2975,384,2932,415,2837,471,2834,466,2929,411,2971,380,2996,352,3000,334,2997,315,2982,281"/>
+<area shape="poly" id="edge97_Node000099_Node000013" title=" " alt="" coords="2979,281,2976,317,2969,337,2957,355,2934,373,2905,388,2831,415,2741,437,2640,454,2434,476,2268,486,2267,481,2434,471,2639,448,2740,432,2830,410,2903,383,2931,368,2953,351,2964,335,2971,316,2974,280"/>
+<area shape="poly" id="edge98_Node000099_Node000066" title=" " alt="" coords="2909,280,2474,335,2473,329,2908,275"/>
+<area shape="poly" id="edge96_Node000099_Node000027" title=" " alt="" coords="2964,282,2916,321,2912,317,2960,278"/>
+<area shape="poly" id="edge100_Node000110_Node000004" title=" " alt="" coords="3706,206,3723,239,3727,260,3725,281,3708,331,3690,369,3663,400,3620,429,3574,442,3494,454,3272,471,3032,482,2851,488,2851,482,3031,477,3272,466,3494,448,3573,437,3618,424,3659,396,3685,366,3704,329,3720,279,3722,260,3718,241,3701,208"/>
+<area shape="poly" id="edge101_Node000110_Node000031" title=" " alt="" coords="3688,209,3661,245,3657,242,3684,205"/>
+<area shape="rect" id="Node000106" href="$de/d77/warn_8h.html" title=" " alt="" coords="3786,255,3865,280"/>
+<area shape="poly" id="edge102_Node000110_Node000106" title=" " alt="" coords="3717,204,3793,246,3791,250,3714,209"/>
+<area shape="poly" id="edge104_Node000111_Node000004" title=" " alt="" coords="3418,205,3439,226,3457,253,3476,303,3487,346,3487,366,3483,387,3473,407,3456,429,3444,437,3424,444,3364,457,3192,474,3001,484,2851,488,2851,483,3000,479,3192,469,3363,452,3422,439,3442,432,3453,425,3468,405,3478,385,3482,366,3482,347,3471,304,3452,256,3435,229,3414,209"/>
+<area shape="poly" id="edge111_Node000111_Node000013" title=" " alt="" coords="3407,206,3417,234,3425,272,3426,314,3422,335,3413,355,3384,390,3353,408,3316,418,3270,429,3208,439,3105,448,2818,465,2268,486,2267,481,2818,460,3104,443,3208,434,3269,424,3314,413,3351,403,3381,386,3408,352,3417,334,3421,314,3420,273,3412,235,3402,208"/>
+<area shape="poly" id="edge112_Node000111_Node000056" title=" " alt="" coords="3371,200,2886,227,2619,244,2483,257,2458,270,2433,283,2337,297,2170,312,1836,338,1836,333,2169,307,2336,291,2431,277,2456,265,2482,252,2618,239,2886,222,3370,194"/>
+<area shape="poly" id="edge107_Node000111_Node000057" title=" " alt="" coords="3371,201,2650,261,2650,256,3370,195"/>
+<area shape="poly" id="edge110_Node000111_Node000031" title=" " alt="" coords="3431,201,3591,248,3589,253,3429,207"/>
+<area shape="rect" id="Node000112" href="$da/d09/audio_8h.html" title=" " alt="" coords="3524,401,3607,427"/>
+<area shape="poly" id="edge105_Node000111_Node000112" title=" " alt="" coords="3431,203,3470,223,3490,236,3507,253,3530,286,3546,322,3564,387,3559,388,3541,324,3525,289,3503,256,3487,240,3467,227,3428,208"/>
+<area shape="rect" id="Node000114" href="$d0/d64/function__list_8h.html" title=" " alt="" coords="3271,328,3398,353"/>
+<area shape="poly" id="edge108_Node000111_Node000114" title=" " alt="" coords="3397,208,3348,317,3343,314,3392,206"/>
+<area shape="poly" id="edge106_Node000112_Node000004" title=" " alt="" coords="3524,426,3506,429,3316,451,3129,468,2851,486,2850,481,3129,463,3316,446,3505,424,3523,421"/>
+<area shape="poly" id="edge109_Node000114_Node000095" title=" " alt="" coords="3316,356,3242,397,3239,392,3313,351"/>
+<area shape="poly" id="edge115_Node000117_Node000092" title=" " alt="" coords="2968,201,2740,221,2591,237,2439,257,2434,258,2433,253,2438,252,2590,232,2740,215,2967,196"/>
+<area shape="poly" id="edge114_Node000117_Node000095" title=" " alt="" coords="3060,203,3108,221,3132,235,3153,253,3176,285,3192,322,3208,387,3203,388,3187,323,3171,288,3149,256,3129,239,3106,226,3058,208"/>
+<area shape="poly" id="edge117_Node000121_Node000004" title=" " alt="" coords="2977,429,2849,473,2847,468,2975,424"/>
+<area shape="poly" id="edge118_Node000121_Node000013" title=" " alt="" coords="2969,422,2899,429,2268,483,2267,478,2898,424,2968,417"/>
+<area shape="poly" id="edge120_Node000122_Node000098" title=" " alt="" coords="3207,135,3161,174,3157,170,3203,131"/>
+<area shape="poly" id="edge122_Node000134_Node000117" title=" " alt="" coords="2998,133,3009,167,3003,169,2993,134"/>
+</map>

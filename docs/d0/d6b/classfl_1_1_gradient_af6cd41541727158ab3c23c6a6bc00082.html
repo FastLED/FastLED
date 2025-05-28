@@ -118,26 +118,27 @@ $(function(){initNavTree('d0/d6b/classfl_1_1_gradient_af6cd41541727158ab3c23c6a6
 <p class="definition">Definition at line <a class="el" href="../../d3/d77/gradient_8cpp_source.html#l00130">130</a> of file <a class="el" href="../../d3/d77/gradient_8cpp_source.html">gradient.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  130</span>                                               {</div>
 <div class="line"><span class="lineno">  131</span>    <span class="comment">// Visitor is cumbersome but guarantees all paths are handled.</span></div>
-<div class="line"><span class="lineno">  132</span>    <span class="keyword">struct </span>Copy {</div>
-<div class="line"><span class="lineno">  133</span>        Copy(Gradient &amp;owner) : mOwner(owner) {}</div>
+<div class="line"><span class="lineno">  132</span>    <span class="keyword">struct </span><a class="code hl_function" href="../../d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297">Copy</a> {</div>
+<div class="line"><span class="lineno">  133</span>        <a class="code hl_function" href="../../d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297">Copy</a>(Gradient &amp;owner) : mOwner(owner) {}</div>
 <div class="line"><span class="lineno">  134</span>        <span class="keywordtype">void</span> accept(<span class="keyword">const</span> CRGBPalette16 &amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>) { mOwner.set(&amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>); }</div>
 <div class="line"><span class="lineno">  135</span>        <span class="keywordtype">void</span> accept(<span class="keyword">const</span> CRGBPalette32 &amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>) { mOwner.set(&amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>); }</div>
 <div class="line"><span class="lineno">  136</span>        <span class="keywordtype">void</span> accept(<span class="keyword">const</span> CRGBPalette256 &amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>) { mOwner.set(&amp;<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>); }</div>
 <div class="line"><span class="lineno">  137</span>        <span class="keywordtype">void</span> accept(<span class="keyword">const</span> GradientFunction &amp;func) { mOwner.set(func); }</div>
 <div class="line"><span class="lineno">  138</span>        Gradient &amp;mOwner;</div>
 <div class="line"><span class="lineno">  139</span>    };</div>
-<div class="line"><span class="lineno">  140</span>    Copy copy_to_self(*<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">  140</span>    <a class="code hl_function" href="../../d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297">Copy</a> copy_to_self(*<span class="keyword">this</span>);</div>
 <div class="line"><span class="lineno">  141</span>    other.variant().visit(copy_to_self);</div>
 <div class="line"><span class="lineno">  142</span>}</div>
 <div class="ttc" id="a_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b_html_a11632ea8c136b409234a9a69be346c7b"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a></div><div class="ttdeci">UINumberField palette(&quot;Palette&quot;, 0, 0, 2)</div></div>
+<div class="ttc" id="afunky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297_html_ae9798cb13b5c6a6a4d37863426e6d297"><div class="ttname"><a href="../../d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297">Copy</a></div><div class="ttdeci">void Copy(byte x0, byte y0, byte x1, byte y1, byte x2, byte y2)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d43/funky_8cpp_source.html#l00494">funky.cpp:494</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/d6b/classfl_1_1_gradient_a7d0bbc988a07b1a9171b59d987dbec51.html#a7d0bbc988a07b1a9171b59d987dbec51">Gradient()</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>, <a class="el" href="../../db/dfe/gradient_8h_source.html#l00063">fl::GradientInlined::variant()</a>, and <a class="el" href="../../d6/d10/variant_8h_source.html#l00136">fl::Variant&lt; Types &gt;::visit()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d6b/classfl_1_1_gradient_a7d0bbc988a07b1a9171b59d987dbec51.html#a7d0bbc988a07b1a9171b59d987dbec51">Gradient()</a>, <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00494">Copy()</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a11632ea8c136b409234a9a69be346c7b.html#a11632ea8c136b409234a9a69be346c7b">palette</a>, <a class="el" href="../../db/dfe/gradient_8h_source.html#l00063">fl::GradientInlined::variant()</a>, and <a class="el" href="../../d6/d10/variant_8h_source.html#l00136">fl::Variant&lt; Types &gt;::visit()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d6b/classfl_1_1_gradient_af6cd41541727158ab3c23c6a6bc00082_af6cd41541727158ab3c23c6a6bc00082_cgraph.svg" width="376" height="175"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d6b/classfl_1_1_gradient_af6cd41541727158ab3c23c6a6bc00082_af6cd41541727158ab3c23c6a6bc00082_cgraph.svg" width="463" height="224"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -149,7 +150,7 @@ $(function(){initNavTree('d0/d6b/classfl_1_1_gradient_af6cd41541727158ab3c23c6a6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d6b/classfl_1_1_gradient.html">Gradient</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -30,7 +30,7 @@ var namespacefl =
     ] ],
     [ "anonymous_namespace{wave.cpp}", "dd/da9/namespacefl_1_1anonymous__namespace_02wave_8cpp_03.html", "dd/da9/namespacefl_1_1anonymous__namespace_02wave_8cpp_03" ],
     [ "anonymous_namespace{xypath.cpp}", "d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03.html", [
-      [ "tls_raster", "d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03_ad82fe25b6ebd057f9b96a91042959776.html#ad82fe25b6ebd057f9b96a91042959776", null ]
+      [ "get_tls_raster", "d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03_ab39c007bd4c0024a1f7cde3d029b8241.html#ab39c007bd4c0024a1f7cde3d029b8241", null ]
     ] ],
     [ "anonymous_namespace{xypath_renderer.cpp}", "d7/d49/namespacefl_1_1anonymous__namespace_02xypath__renderer_8cpp_03.html", [
       [ "to_uint8", "d7/d49/namespacefl_1_1anonymous__namespace_02xypath__renderer_8cpp_03_aa3453d2d7dec5650650f0dc91e80a417.html#aa3453d2d7dec5650650f0dc91e80a417", null ]
@@ -46,7 +46,7 @@ var namespacefl =
       [ "float_to_fixed", "d9/d75/namespacefl_1_1wave__detail_a9ca9a055f84e9653e43a239c491d5108.html#a9ca9a055f84e9653e43a239c491d5108", null ]
     ] ],
     [ "xypath_detail", "db/de2/namespacefl_1_1xypath__detail.html", [
-      [ "unique_missing_name", "db/de2/namespacefl_1_1xypath__detail_a08684ecca8bccd0e4930447291590e22.html#a08684ecca8bccd0e4930447291590e22", null ]
+      [ "unique_missing_name", "db/de2/namespacefl_1_1xypath__detail_ab34c8adcefb5d53be8c184463b404a74.html#ab34c8adcefb5d53be8c184463b404a74", null ]
     ] ],
     [ "_DrawContext", "d2/d32/structfl_1_1___draw_context.html", "d2/d32/structfl_1_1___draw_context" ],
     [ "add_pointer", "d4/d36/namespacefl.html#da/d17/structfl_1_1add__pointer", "d4/d36/namespacefl_da/d17/structfl_1_1add__pointer_dup" ],
@@ -298,6 +298,7 @@ var namespacefl =
     [ "UITitleImpl", "df/d99/classfl_1_1_u_i_title_impl.html", "df/d99/classfl_1_1_u_i_title_impl" ],
     [ "Variant", "de/d60/classfl_1_1_variant.html", "de/d60/classfl_1_1_variant" ],
     [ "vec2", "d5/d5d/structfl_1_1vec2.html", "d5/d5d/structfl_1_1vec2" ],
+    [ "vec3", "dc/d7c/structfl_1_1vec3.html", "dc/d7c/structfl_1_1vec3" ],
     [ "Video", "d0/d4b/classfl_1_1_video.html", "d0/d4b/classfl_1_1_video" ],
     [ "VideoFxWrapper", "d4/dd2/classfl_1_1_video_fx_wrapper.html", "d4/dd2/classfl_1_1_video_fx_wrapper" ],
     [ "WaveCrgbGradientMap", "d0/da7/classfl_1_1_wave_crgb_gradient_map.html", "d0/da7/classfl_1_1_wave_crgb_gradient_map" ],
@@ -336,15 +337,18 @@ var namespacefl =
     [ "LUT16", "d4/d36/namespacefl_ae87f38b353cf66b4e5393f9b43293b0f.html#ae87f38b353cf66b4e5393f9b43293b0f", null ],
     [ "LUTXY16", "d4/d36/namespacefl_ad1095e4aace3dcedf778224335479cba.html#ad1095e4aace3dcedf778224335479cba", null ],
     [ "LUTXYFLOAT", "d4/d36/namespacefl_a5d307bcfa41ff5241ade9d4fccfc1b65.html#a5d307bcfa41ff5241ade9d4fccfc1b65", null ],
+    [ "LUTXYZFLOAT", "d4/d36/namespacefl_a246bd80f6be0e16b3c76e96c3b6281ed.html#a246bd80f6be0e16b3c76e96c3b6281ed", null ],
     [ "optional", "d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726", null ],
     [ "pair", "d4/d36/namespacefl_a639fab708bc546f4e6633471268db2bc.html#a639fab708bc546f4e6633471268db2bc", null ],
     [ "pair_xy_float", "d4/d36/namespacefl_a4d9fb9f97a67e179df7ad92f60739203.html#a4d9fb9f97a67e179df7ad92f60739203", null ],
+    [ "pair_xyz_float", "d4/d36/namespacefl_ad845c49ce661bb886ea1b3ade42802a4.html#ad845c49ce661bb886ea1b3ade42802a4", null ],
     [ "remove_cv_t", "d4/d36/namespacefl_a224aeeea66bd4aa24c94d9d7dcad75cd.html#a224aeeea66bd4aa24c94d9d7dcad75cd", null ],
     [ "remove_reference_t", "d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5", null ],
     [ "string", "d4/d36/namespacefl_a2b855faa541d057b6b02f771c2cda3d7.html#a2b855faa541d057b6b02f771c2cda3d7", null ],
     [ "ThreadLocal", "d4/d36/namespacefl_a790c430c582b1f7a72d265de87fd6a0f.html#a790c430c582b1f7a72d265de87fd6a0f", null ],
     [ "unordered_map", "d4/d36/namespacefl_abaae7f90b18904efb34f766576b6b6fa.html#abaae7f90b18904efb34f766576b6b6fa", null ],
     [ "vec2f", "d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a", null ],
+    [ "vec3f", "d4/d36/namespacefl_a61f967bb4963ce21a9ef09d513f9ea66.html#a61f967bb4963ce21a9ef09d513f9ea66", null ],
     [ "vector", "d4/d36/namespacefl_ace09979e5072c69e806cd50d6bafdf16.html#ace09979e5072c69e806cd50d6bafdf16", null ],
     [ "vector_fixed", "d4/d36/namespacefl_ae72faea34fd210a59a976cd0f93a62e9.html#ae72faea34fd210a59a976cd0f93a62e9", null ],
     [ "vector_inlined", "d4/d36/namespacefl_a2349ec990ce2ca2172b77815bc59b118.html#a2349ec990ce2ca2172b77815bc59b118", null ],
@@ -545,6 +549,7 @@ var namespacefl =
     [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a234c2f2e01ee4096118541ef93de3fcd.html#a234c2f2e01ee4096118541ef93de3fcd", null ],
     [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_ae9116742f0d6281cf045ccf4b2a2791a.html#ae9116742f0d6281cf045ccf4b2a2791a", null ],
     [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a62986fa3751de77035b7a343907ef650.html#a62986fa3751de77035b7a343907ef650", null ],
+    [ "FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_aff7a931f178b895489dc62a3b3ae70b3.html#aff7a931f178b895489dc62a3b3ae70b3", null ],
     [ "FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_a17a25f9a9eb5be6d08ee831a92abbb57.html#a17a25f9a9eb5be6d08ee831a92abbb57", null ],
     [ "FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_afdcefd5871d3520e7067b1382d7de7f8.html#afdcefd5871d3520e7067b1382d7de7f8", null ],
     [ "FASTLED_UI_DEFINE_OPERATORS", "d4/d36/namespacefl_a62401430f1f8254f5a13b7cb1e96281e.html#a62401430f1f8254f5a13b7cb1e96281e", null ],

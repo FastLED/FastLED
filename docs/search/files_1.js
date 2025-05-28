@@ -13,5 +13,7 @@ var searchData=
   ['arrayofledarrays_2eino_10',['ArrayOfLedArrays.ino',['../d6/dca/_array_of_led_arrays_8ino.html',1,'']]],
   ['assert_2eh_11',['assert.h',['../dc/da7/assert_8h.html',1,'']]],
   ['audio_2ecpp_12',['audio.cpp',['../d1/ddc/audio_8cpp.html',1,'']]],
-  ['audio_2eh_13',['audio.h',['../da/d09/audio_8h.html',1,'']]]
+  ['audio_2eh_13',['audio.h',['../da/d09/audio_8h.html',1,'']]],
+  ['audio_2eino_14',['Audio.ino',['../dc/d5d/_audio_8ino.html',1,'']]],
+  ['avr_5fdisallowed_2eh_15',['avr_disallowed.h',['../d5/dd1/avr__disallowed_8h.html',1,'']]]
 ];

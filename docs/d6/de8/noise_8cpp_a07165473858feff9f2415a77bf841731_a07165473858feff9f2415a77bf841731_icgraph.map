@@ -12,13 +12,17 @@
 <area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="344,119,310,119,310,114,344,114"/>
 <area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="240,153,309,179"/>
 <area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="361,137,310,156,308,151,359,132"/>
-<area shape="rect" id="Node000008" href="$de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="31,79,166,104"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="244,148,191,118,159,107,161,102,193,113,246,143"/>
-<area shape="rect" id="Node000013" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="39,128,158,153"/>
-<area shape="poly" id="edge9_Node000007_Node000013" title=" " alt="" coords="226,162,158,152,159,147,227,156"/>
-<area shape="rect" id="Node000016" href="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="58,177,139,203"/>
-<area shape="poly" id="edge10_Node000007_Node000016" title=" " alt="" coords="227,175,140,187,139,182,226,170"/>
-<area shape="rect" id="Node000018" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="5,227,192,252"/>
-<area shape="poly" id="edge11_Node000007_Node000018" title=" " alt="" coords="244,189,193,216,156,229,154,224,191,212,242,184"/>
-<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="130,68,121,60,99,57,80,59,70,64,68,70,74,77,69,80,63,70,66,61,79,54,99,52,123,56,133,64"/>
+<area shape="rect" id="Node000008" href="$de/da4/group___noise_fill_ga3dc6c55a3f8495a7bc6dc0124434c688.html#ga3dc6c55a3f8495a7bc6dc0124434c688" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="31,29,166,55"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="242,146,238,142,223,121,216,102,207,85,190,68,165,55,167,50,194,64,211,82,220,100,228,119,242,139,246,143"/>
+<area shape="rect" id="Node000013" href="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="39,79,158,104"/>
+<area shape="poly" id="edge9_Node000007_Node000013" title=" " alt="" coords="244,148,191,118,157,106,159,101,193,113,246,143"/>
+<area shape="rect" id="Node000016" href="$d6/d43/funky_8cpp_ad75910933b9f979e883c13b78798580b.html#ad75910933b9f979e883c13b78798580b" title=" " alt="" coords="59,128,138,153"/>
+<area shape="poly" id="edge10_Node000007_Node000016" title=" " alt="" coords="226,162,138,149,139,144,227,157"/>
+<area shape="rect" id="Node000026" href="$d6/d43/funky_8cpp_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="58,177,139,203"/>
+<area shape="poly" id="edge11_Node000007_Node000026" title=" " alt="" coords="227,175,140,187,139,182,226,170"/>
+<area shape="rect" id="Node000028" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="5,227,192,252"/>
+<area shape="poly" id="edge12_Node000007_Node000028" title=" " alt="" coords="244,189,193,216,156,229,154,224,191,212,242,184"/>
+<area shape="rect" id="Node000030" href="$d6/d43/funky_8cpp_a860ae8fa7d0d81ee588154f8304240b9.html#a860ae8fa7d0d81ee588154f8304240b9" title=" " alt="" coords="54,276,143,301"/>
+<area shape="poly" id="edge13_Node000007_Node000030" title=" " alt="" coords="261,192,233,230,214,249,193,266,169,277,144,285,143,280,167,272,191,261,211,245,229,227,257,189"/>
+<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="130,19,121,11,99,8,80,10,70,15,68,20,74,28,69,31,63,21,66,11,79,5,99,3,123,6,133,15"/>
 </map>

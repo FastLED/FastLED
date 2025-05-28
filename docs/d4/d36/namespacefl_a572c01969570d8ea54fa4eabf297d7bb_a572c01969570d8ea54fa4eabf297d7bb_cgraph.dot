@@ -25,5 +25,7 @@ digraph "fl::ColorFromPaletteExtended"
   Node7 -> Node5 [id="edge10_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node8 [id="edge11_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="nscale8_video_LEAVING\l_R1_DIRTY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe612dafd146.html#gadfd26d9b154f5ec79dbffe612dafd146",tooltip="In place modifying version of scale8_video() that does not clean up the R1 register on AVR."];
-  Node1 -> Node6 [id="edge12_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge12_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104",tooltip=" "];
+  Node1 -> Node6 [id="edge13_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

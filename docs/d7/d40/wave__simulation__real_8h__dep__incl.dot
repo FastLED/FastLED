@@ -21,7 +21,9 @@ digraph "fl/wave_simulation_real.h"
   Node5 -> Node10 [id="edge7_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/Wave2d\l/Wave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d44/_wave2d_8ino.html",tooltip=" "];
   Node5 -> Node11 [id="edge8_Node000005_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fx/2d/wave.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d7c/src_2fx_22d_2wave_8cpp.html",tooltip=" "];
-  Node1 -> Node12 [id="edge9_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node12 [id="Node000012",label="fl/wave_simulation\l_real.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da2/wave__simulation__real_8cpp.html",tooltip=" "];
+  Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html",tooltip=" "];
+  Node5 -> Node17 [id="edge9_Node000005_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fx/2d/wave.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d7c/src_2fx_22d_2wave_8cpp.html",tooltip=" "];
+  Node1 -> Node18 [id="edge10_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/wave_simulation\l_real.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da2/wave__simulation__real_8cpp.html",tooltip=" "];
 }

@@ -198,6 +198,7 @@ var hierarchy =
     [ "CONTROLLER", null, [
       [ "RGBWEmulatedController< CONTROLLER, RGB_ORDER >::ControllerT", "d9/d4b/class_r_g_b_w_emulated_controller_1_1_controller_t.html", null ]
     ] ],
+    [ "corkscrew_args", "dd/d43/_festival_stick_8ino.html#d1/dd1/structcorkscrew__args", null ],
     [ "CountingButton", "d6/d58/class_counting_button.html", null ],
     [ "CPixelView< PIXEL_TYPE >", "db/df7/class_c_pixel_view.html", null ],
     [ "CPixelView< PIXEL_TYPE >::pixelset_iterator_base< T >", "db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html", null ],
@@ -440,6 +441,7 @@ var hierarchy =
       [ "fl::LUT< uint16_t >", "d6/d18/classfl_1_1_l_u_t.html", null ],
       [ "fl::LUT< vec2< uint16_t > >", "d6/d18/classfl_1_1_l_u_t.html", null ],
       [ "fl::LUT< vec2f >", "d6/d18/classfl_1_1_l_u_t.html", null ],
+      [ "fl::LUT< vec3f >", "d6/d18/classfl_1_1_l_u_t.html", null ],
       [ "fl::AudioSampleImpl", "da/d39/classfl_1_1_audio_sample_impl.html", null ],
       [ "fl::ByteStream", "d2/d5e/classfl_1_1_byte_stream.html", [
         [ "fl::ByteStreamMemory", "d1/dc0/classfl_1_1_byte_stream_memory.html", null ]
@@ -587,6 +589,7 @@ var hierarchy =
     [ "fl::vec2< T >", "d5/d5d/structfl_1_1vec2.html", [
       [ "fl::pair_xy< T >", "d3/da1/structfl_1_1pair__xy.html", null ]
     ] ],
+    [ "fl::vec3< T >", "dc/d7c/structfl_1_1vec3.html", null ],
     [ "fl::WaveFxArgs", "d3/da2/structfl_1_1_wave_fx_args.html", null ],
     [ "fl::WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d.html", null ],
     [ "fl::WaveSimulation1D_Real", "da/df9/classfl_1_1_wave_simulation1_d___real.html", null ],
@@ -631,6 +634,7 @@ var hierarchy =
       [ "LedRopeTCL", "d4/df6/class_led_rope_t_c_l.html", null ]
     ] ],
     [ "LPD8806Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >::LPD8806_ADJUST", "da/d77/class_l_p_d8806_controller_1_1_l_p_d8806___a_d_j_u_s_t.html", null ],
+    [ "MaxFadeTracker", "da/db7/class_max_fade_tracker.html", null ],
     [ "Message< SysExMaxSize >", "d4/daa/struct_message.html", null ],
     [ "MidiInterface< Transport, _Settings, _Platform >", "df/d6a/class_midi_interface.html", null ],
     [ "MidiShieldButton", "d0/ddf/class_midi_shield_button.html", null ],
@@ -657,6 +661,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "SerialMIDI< SerialPort, _Settings >", "de/d62/class_serial_m_i_d_i.html", null ],
+    [ "sketch::vec3< T >", "dd/df1/structsketch_1_1vec3.html", null ],
     [ "sparse_arr", "d1/dda/cq__kernel_8h.html#da/d99/structsparse__arr", null ],
     [ "sparse_arr_elem", "d1/dda/cq__kernel_8h.html#d7/d22/structsparse__arr__elem", null ],
     [ "sub4", "de/ded/bitswap_8h.html#d8/ddd/structsub4", null ],
@@ -664,6 +669,5 @@ var hierarchy =
     [ "Timer", "d8/d08/class_timer.html", null ],
     [ "ToggleButton", "d8/ddd/class_toggle_button.html", null ],
     [ "ui_state", "da/db7/structui__state.html", null ],
-    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ],
-    [ "XYMap", "d7/de6/class_x_y_map.html", null ]
+    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ]
 ];

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::FFT_Args",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d63/structfl_1_1_f_f_t___args.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::FFT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d47/classfl_1_1_f_f_t.html",tooltip=" "];
 }

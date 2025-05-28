@@ -1,0 +1,11 @@
+<map id="SetupTotallyRandomPalette" name="SetupTotallyRandomPalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="543,31,744,56"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_a50c2e0f8c7120112ab44db6f47400021.html#a50c2e0f8c7120112ab44db6f47400021" title=" " alt="" coords="303,31,495,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="529,46,495,46,495,41,529,41"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_ad9d5e765486223d6ec3c0d0083dff61f.html#ad9d5e765486223d6ec3c0d0083dff61f" title=" " alt="" coords="131,5,255,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="289,32,254,28,255,23,289,27"/>
+<area shape="rect" id="Node000006" href="$d6/d43/funky_8cpp_acad976043d165e98872bea80a09eda2d.html#acad976043d165e98872bea80a09eda2d" title=" " alt="" coords="131,55,255,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="289,59,255,63,255,58,289,53"/>
+<area shape="rect" id="Node000004" href="$d6/d43/funky_8cpp_afbac31e23b311c5a81442334e48514a9.html#afbac31e23b311c5a81442334e48514a9" title=" " alt="" coords="5,5,83,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,21,83,21,83,15,117,15"/>
+</map>

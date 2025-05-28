@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::FixedSet\< Key, N \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d44/classfl_1_1_fixed_set.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::FixedMap\< Key,\l Value, N \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df3/classfl_1_1_fixed_map.html",tooltip=" "];
 }

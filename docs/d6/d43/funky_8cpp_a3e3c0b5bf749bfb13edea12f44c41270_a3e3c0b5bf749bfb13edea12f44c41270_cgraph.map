@@ -1,0 +1,17 @@
+<map id="SlowMandala" name="SlowMandala">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,115,105"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_a3d30cb10a05854f7ebb3cdb12ad45b58.html#a3d30cb10a05854f7ebb3cdb12ad45b58" title=" " alt="" coords="163,5,280,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,78,162,40,175,34,177,39,164,44,87,82"/>
+<area shape="rect" id="Node000004" href="$d6/d43/funky_8cpp_a88e38d5367d0195cc47f27f0346f8400.html#a88e38d5367d0195cc47f27f0346f8400" title=" " alt="" coords="195,55,248,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="115,81,180,71,181,76,115,87"/>
+<area shape="rect" id="Node000005" href="$d6/d43/funky_8cpp_ad6d911a3ab6bc1ecf4eb45713d86895b.html#ad6d911a3ab6bc1ecf4eb45713d86895b" title=" " alt="" coords="172,153,271,179"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="89,103,164,138,180,145,177,150,162,143,87,108"/>
+<area shape="rect" id="Node000007" href="$d6/d43/funky_8cpp_a2bc65b5a4b4e422d01c5c09b25d30233.html#a2bc65b5a4b4e422d01c5c09b25d30233" title=" " alt="" coords="168,104,275,129"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="115,98,155,104,154,109,115,103"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_a1588dd85b5eadaa062cf10ab251f486f.html#a1588dd85b5eadaa062cf10ab251f486f" title=" " alt="" coords="366,55,405,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="265,28,354,55,352,60,263,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="248,65,352,65,352,70,248,70"/>
+<area shape="rect" id="Node000006" href="$de/da1/gfx_8cpp_ad896a9713e06cf986a48d1e652b5e445.html#ad896a9713e06cf986a48d1e652b5e445" title=" " alt="" coords="328,153,443,179"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="271,163,314,163,314,169,271,169"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="263,101,352,74,354,79,265,107"/>
+</map>

@@ -4,6 +4,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Apa102", "dir_4af27665149ddc88916f90164a94ed56.html", "dir_4af27665149ddc88916f90164a94ed56" ],
     [ "Apa102HD", "dir_444f6549ff4d6964f399c8619651b3db.html", "dir_444f6549ff4d6964f399c8619651b3db" ],
     [ "Apa102HDOverride", "dir_f0d66018db171d7886189b7326773e15.html", "dir_f0d66018db171d7886189b7326773e15" ],
+    [ "Audio", "dir_1fe2633b6793b56f980e752e54e330d5.html", "dir_1fe2633b6793b56f980e752e54e330d5" ],
     [ "BilinearCompression", "dir_0c53b031131b51ab79944bb15407f73b.html", "dir_0c53b031131b51ab79944bb15407f73b" ],
     [ "Blink", "dir_05dd8b05715c4ed4a1c3d13c1176049b.html", "dir_05dd8b05715c4ed4a1c3d13c1176049b" ],
     [ "BlinkParallel", "dir_ff1c3822ae637bf2e9e5f215088a4795.html", "dir_ff1c3822ae637bf2e9e5f215088a4795" ],
@@ -16,12 +17,14 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "DemoReel100", "dir_16996705dca5e5845caca64f4257e696.html", "dir_16996705dca5e5845caca64f4257e696" ],
     [ "Esp32S3I2SDemo", "dir_1e86eb05dfedeac38d51c0d61b4912b9.html", "dir_1e86eb05dfedeac38d51c0d61b4912b9" ],
     [ "EspI2SDemo", "dir_6914355e2a4418f7bd5a98ad7f31c748.html", "dir_6914355e2a4418f7bd5a98ad7f31c748" ],
+    [ "FestivalStick", "dir_2e465c5b9ed57da8a7c891afc818c43b.html", "dir_2e465c5b9ed57da8a7c891afc818c43b" ],
     [ "Fire2012", "dir_a5438c32bb8a8ac18387223a3f06b103.html", "dir_a5438c32bb8a8ac18387223a3f06b103" ],
     [ "Fire2012WithPalette", "dir_251c36837ef2b5132d93dde41ef3cbc8.html", "dir_251c36837ef2b5132d93dde41ef3cbc8" ],
     [ "Fire2023", "dir_a7814f5eb642f8fc842d435ed906d060.html", "dir_a7814f5eb642f8fc842d435ed906d060" ],
     [ "FireCylinder", "dir_a83f5321b6fdce4474b55dfcf0fb2e86.html", "dir_a83f5321b6fdce4474b55dfcf0fb2e86" ],
     [ "FireMatrix", "dir_874aa52466291c494f7db7e1a8c97a3e.html", "dir_874aa52466291c494f7db7e1a8c97a3e" ],
     [ "FirstLight", "dir_98ca105c125a65040d83d7608744422a.html", "dir_98ca105c125a65040d83d7608744422a" ],
+    [ "FunkyClouds", "dir_58c979d6a480d714df86ed5870cbce26.html", "dir_58c979d6a480d714df86ed5870cbce26" ],
     [ "FxAnimartrix", "dir_a47cefd1a9dc5204ece7f659f55684ee.html", "dir_a47cefd1a9dc5204ece7f659f55684ee" ],
     [ "FxCylon", "dir_b17b03dbbeff6440d0c46be77fbddfc7.html", "dir_b17b03dbbeff6440d0c46be77fbddfc7" ],
     [ "FxDemoReel100", "dir_a5ef1113d2f4afb5ddb3ebba1f868be7.html", "dir_a5ef1113d2f4afb5ddb3ebba1f868be7" ],
@@ -62,5 +65,6 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Wave", "dir_62798ea9a090ceb87f4747f68ba3eda3.html", "dir_62798ea9a090ceb87f4747f68ba3eda3" ],
     [ "Wave2d", "dir_80f7443b4793499ecb90496bd7f8a795.html", "dir_80f7443b4793499ecb90496bd7f8a795" ],
     [ "WS2816", "dir_cb4a10e64a7e9eee0f3b58f5f8b62c83.html", "dir_cb4a10e64a7e9eee0f3b58f5f8b62c83" ],
-    [ "XYMatrix", "dir_a1f73a1624754db6b6179d3280e34825.html", "dir_a1f73a1624754db6b6179d3280e34825" ]
+    [ "XYMatrix", "dir_a1f73a1624754db6b6179d3280e34825.html", "dir_a1f73a1624754db6b6179d3280e34825" ],
+    [ "XYPath", "dir_cc9984e6eff452013925a455461d1380.html", "dir_cc9984e6eff452013925a455461d1380" ]
 ];

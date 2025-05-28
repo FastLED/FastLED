@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::has_member_swap\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d1f/structfl_1_1has__member__swap.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::Grid\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/db9/classfl_1_1_grid.html",tooltip=" "];
 }

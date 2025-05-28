@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d5/d94/classfl_1_1_wave_simulation2_d___real.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="da/df9/classfl_1_1_wave_simulation1_d___real.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="149,-19 0,-19 0,0 149,0 149,-19"/>
-<text text-anchor="middle" x="74.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation2D_Real</text>
+<text text-anchor="middle" x="74.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveSimulation1D_Real</text>
 </a>
 </g>
 </g>

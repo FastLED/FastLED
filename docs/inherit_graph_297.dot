@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="kiss_fftr_state",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/kiss__fftr_8c.html#df/dc2/structkiss__fftr__state",tooltip=" "];
+  Node0 [id="Node000000",label="kiss_fft_cpx",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx",tooltip=" "];
 }

@@ -9,10 +9,12 @@ digraph "fl::five_bit_bitshift"
   Node1 [id="Node000001",label="fl::five_bit_bitshift",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="brightness_bitshifter16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94",tooltip=" "];
-  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="brightness_bitshifter8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="steps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="map16_to_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e",tooltip=" "];
+  Node4 [id="Node000004",label="brightness_bitshifter8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="scale16by8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf",tooltip="Scale a 16-bit unsigned value by an 8-bit value, which is treated as the numerator of a fraction whos..."];
+  Node5 [id="Node000005",label="map16_to_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="scale16by8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf",tooltip="Scale a 16-bit unsigned value by an 8-bit value, which is treated as the numerator of a fraction whos..."];
 }

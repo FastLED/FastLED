@@ -7,7 +7,7 @@ var searchData=
   ['max_4',['MAX',['../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f',1,'math_macros.h']]],
   ['max_5fcled_5fcontrollers_5',['MAX_CLED_CONTROLLERS',['../d6/dda/_fast_l_e_d_8cpp_a0782d884c985fcd71fcaed142b6e9b5b.html#a0782d884c985fcd71fcaed142b6e9b5b',1,'FastLED.cpp']]],
   ['max_5fdata_5frate_6',['MAX_DATA_RATE',['../d2/ddb/fastspi__types_8h_aeb2ddb65a3f7469985904ba925931e53.html#aeb2ddb65a3f7469985904ba925931e53',1,'fastspi_types.h']]],
-  ['max_5fdimension_7',['MAX_DIMENSION',['../d6/d9d/_noise_8ino_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49',1,'MAX_DIMENSION:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49',1,'MAX_DIMENSION:&#160;NoisePlusPalette.ino']]],
+  ['max_5fdimension_7',['MAX_DIMENSION',['../d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49',1,'MAX_DIMENSION:&#160;funky.cpp'],['../d6/d9d/_noise_8ino_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49',1,'MAX_DIMENSION:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49',1,'MAX_DIMENSION:&#160;NoisePlusPalette.ino']]],
   ['max_5ffrequency_8',['MAX_FREQUENCY',['../d1/dff/fft__impl_8cpp_a1fcff99f421f1bc8a1bbdb641ca0324e.html#a1fcff99f421f1bc8a1bbdb641ca0324e',1,'fft_impl.cpp']]],
   ['max_5flikely_5fupdate_5frate_5fhz_9',['MAX_LIKELY_UPDATE_RATE_HZ',['../d5/d4d/pixel__controller_8h_a6b62d843cb5aa0c21dceafe56901fd17.html#a6b62d843cb5aa0c21dceafe56901fd17',1,'pixel_controller.h']]],
   ['max_5fma_10',['MAX_MA',['../dd/d4d/_fx_twinkle_fox_8ino_ad2d80d44f21df65f9be19af301451c9a.html#ad2d80d44f21df65f9be19af301451c9a',1,'MAX_MA:&#160;FxTwinkleFox.ino'],['../d4/dd0/_twinkle_fox_8ino_ad2d80d44f21df65f9be19af301451c9a.html#ad2d80d44f21df65f9be19af301451c9a',1,'MAX_MA:&#160;TwinkleFox.ino']]],
@@ -29,5 +29,7 @@ var searchData=
   ['min_5facceptable_5fdither_5frate_5fhz_26',['MIN_ACCEPTABLE_DITHER_RATE_HZ',['../d5/d4d/pixel__controller_8h_a4e5988c0a9a14761da407256de025abf.html#a4e5988c0a9a14761da407256de025abf',1,'pixel_controller.h']]],
   ['min_5fdelay_27',['MIN_DELAY',['../d9/d8d/fastspi__bitbang_8h_ad3b51637a39a4ff75bd979b917cb89ef.html#ad3b51637a39a4ff75bd979b917cb89ef',1,'fastspi_bitbang.h']]],
   ['min_5ffrequency_28',['MIN_FREQUENCY',['../d1/dff/fft__impl_8cpp_aea88670257377b3103f3fbc73135949f.html#aea88670257377b3103f3fbc73135949f',1,'fft_impl.cpp']]],
-  ['min_5fval_29',['MIN_VAL',['../d1/dff/fft__impl_8cpp_a0b7d3509aaa80be4c33c5d503be7aded.html#a0b7d3509aaa80be4c33c5d503be7aded',1,'fft_impl.cpp']]]
+  ['min_5fval_29',['MIN_VAL',['../d1/dff/fft__impl_8cpp_a0b7d3509aaa80be4c33c5d503be7aded.html#a0b7d3509aaa80be4c33c5d503be7aded',1,'fft_impl.cpp']]],
+  ['msgeq7_5freset_5fpin_30',['MSGEQ7_RESET_PIN',['../d7/dfc/_funky_clouds_2defs_8h_a6a19fe700d504d7d33ea14ad72a1cd0c.html#a6a19fe700d504d7d33ea14ad72a1cd0c',1,'defs.h']]],
+  ['msgeq7_5fstrobe_5fpin_31',['MSGEQ7_STROBE_PIN',['../d7/dfc/_funky_clouds_2defs_8h_a82443e7207e53953f447afed21818826.html#a82443e7207e53953f447afed21818826',1,'defs.h']]]
 ];

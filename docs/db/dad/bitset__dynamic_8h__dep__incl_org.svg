@@ -53,19 +53,19 @@
 </a>
 </g>
 </g>
-<!-- Node18 -->
-<g id="Node000018" class="node">
-<title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d8/da7/line__simplification_8h.html" target="_top" xlink:title=" ">
+<!-- Node25 -->
+<g id="Node000025" class="node">
+<title>Node25</title>
+<g id="a_Node000025"><a xlink:href="../../d8/da7/line__simplification_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="432.5,-74 308.5,-74 308.5,-55 432.5,-55 432.5,-74"/>
 <text text-anchor="middle" x="370.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl/line_simplification.h</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node18 -->
-<g id="edge6_Node000002_Node000018" class="edge">
-<title>Node2&#45;&gt;Node18</title>
-<g id="a_edge6_Node000002_Node000018"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node25 -->
+<g id="edge6_Node000002_Node000025" class="edge">
+<title>Node2&#45;&gt;Node25</title>
+<g id="a_edge6_Node000002_Node000025"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M299.76,-104.97C317.13,-95.28 339.99,-82.52 354.96,-74.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="297.79,-102.06 290.76,-109.98 301.2,-108.17 297.79,-102.06"/>
 </a>
@@ -125,19 +125,19 @@
 </a>
 </g>
 </g>
-<!-- Node19 -->
-<g id="Node000019" class="node">
-<title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../de/ddb/line__simplification_8cpp.html" target="_top" xlink:title=" ">
+<!-- Node26 -->
+<g id="Node000026" class="node">
+<title>Node26</title>
+<g id="a_Node000026"><a xlink:href="../../de/ddb/line__simplification_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="472,-19 337,-19 337,0 472,0 472,-19"/>
 <text text-anchor="middle" x="404.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl/line_simplification.cpp</text>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node19 -->
-<g id="edge7_Node000018_Node000019" class="edge">
-<title>Node18&#45;&gt;Node19</title>
-<g id="a_edge7_Node000018_Node000019"><a xlink:title=" ">
+<!-- Node25&#45;&gt;Node26 -->
+<g id="edge7_Node000025_Node000026" class="edge">
+<title>Node25&#45;&gt;Node26</title>
+<g id="a_edge7_Node000025_Node000026"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M381.66,-46.1C387.47,-37.04 394.32,-26.37 398.99,-19.09"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="378.57,-44.44 376.11,-54.75 384.46,-48.22 378.57,-44.44"/>
 </a>

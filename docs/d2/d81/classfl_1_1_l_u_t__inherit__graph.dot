@@ -14,4 +14,6 @@ digraph "fl::LUT&lt; T &gt;"
   Node4 [id="Node000004",label="fl::LUT\< vec2\< uint16\l_t \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d18/classfl_1_1_l_u_t.html",tooltip=" "];
   Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< vec2f \>",fontcolor="grey" ];
   Node5 [id="Node000005",label="fl::LUT\< vec2f \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d18/classfl_1_1_l_u_t.html",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< vec3f \>",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::LUT\< vec3f \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d18/classfl_1_1_l_u_t.html",tooltip=" "];
 }

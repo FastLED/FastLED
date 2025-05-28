@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::is_member_function\l_pointer\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d54/structfl_1_1is__member__function__pointer.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::is_member_function\l_pointer\< Ret(C::*)(A...)\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9f/structfl_1_1is__member__function__pointer_3_01_ret_07_c_1_1_5_08_07_a_8_8_8_08_4.html",tooltip=" "];
 }

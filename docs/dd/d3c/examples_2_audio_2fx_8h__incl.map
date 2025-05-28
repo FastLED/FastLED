@@ -1,0 +1,24 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/Audio/fx.h" name="/home/runner/work/FastLED/FastLED/examples/Audio/fx.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="130,5,345,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,91,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,48,90,90,88,85,191,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="115,93,181,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,48,173,86,170,82,214,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="206,93,269,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="240,46,240,79,235,79,235,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="293,93,363,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="261,44,306,82,302,86,258,48"/>
+<area shape="rect" id="Node000006" href="$d0/d87/time__alpha_8h.html" title=" " alt="" coords="387,93,506,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="288,43,404,86,402,91,287,48"/>
+<area shape="rect" id="Node000007" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="261,167,331,192"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="424,121,334,163,332,158,421,116"/>
+<area shape="rect" id="Node000009" href="$d8/db8/math__macros_8h.html" title=" " alt="" coords="379,167,514,192"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="449,119,449,153,444,153,444,119"/>
+<area shape="rect" id="Node000010" href="$de/d77/warn_8h.html" title=" " alt="" coords="538,167,617,192"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="469,116,545,158,543,162,466,121"/>
+<area shape="poly" id="edge8_Node000007_Node000007" title=" " alt="" coords="324,164,347,165,355,171,358,180,352,191,338,195,337,190,349,187,353,179,351,174,345,170,324,169"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="259,240,333,265"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="299,192,299,226,293,226,293,192"/>
+<area shape="rect" id="Node000011" href="$d6/d01/dbg_8h.html" title=" " alt="" coords="542,240,613,265"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="580,192,580,226,575,226,575,192"/>
+</map>

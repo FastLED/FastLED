@@ -132,34 +132,34 @@ $(function(){initNavTree('df/dc4/classfl_1_1_heart_path_a70f9c0ab95f904302f41628
 <div class="line"><span class="lineno">   56</span>    <span class="keywordtype">float</span> t = alpha * 2.0f * <a class="code hl_define" href="../../d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca">PI</a>;</div>
 <div class="line"><span class="lineno">   57</span> </div>
 <div class="line"><span class="lineno">   58</span>    <span class="comment">// Heart formula based on a modified cardioid with improved aesthetics</span></div>
-<div class="line"><span class="lineno">   59</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> = 16.0f * powf(sinf(t), 3);</div>
+<div class="line"><span class="lineno">   59</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = 16.0f * powf(sinf(t), 3);</div>
 <div class="line"><span class="lineno">   60</span> </div>
 <div class="line"><span class="lineno">   61</span>    <span class="comment">// Modified y formula for a more balanced heart shape</span></div>
 <div class="line"><span class="lineno">   62</span>    <span class="comment">// This creates a fuller bottom and more defined top curve</span></div>
-<div class="line"><span class="lineno">   63</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> = -(13.0f * cosf(t) - 5.0f * cosf(2.0f * t) -</div>
+<div class="line"><span class="lineno">   63</span>    <span class="keywordtype">float</span> <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = -(13.0f * cosf(t) - 5.0f * cosf(2.0f * t) -</div>
 <div class="line"><span class="lineno">   64</span>                2.0f * cosf(3.0f * t) - cosf(4.0f * t));</div>
 <div class="line"><span class="lineno">   65</span> </div>
 <div class="line"><span class="lineno">   66</span>    <span class="comment">// Scale to fit in [-1, 1] range</span></div>
 <div class="line"><span class="lineno">   67</span>    <span class="comment">// The 16.0f divisor for x ensures x is in [-1, 1]</span></div>
-<div class="line"><span class="lineno">   68</span>    <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> /= 16.0f;</div>
+<div class="line"><span class="lineno">   68</span>    <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> /= 16.0f;</div>
 <div class="line"><span class="lineno">   69</span> </div>
 <div class="line"><span class="lineno">   70</span>    <span class="comment">// Scale y to ensure it&#39;s in [-1, 1]</span></div>
 <div class="line"><span class="lineno">   71</span>    <span class="comment">// The 16.0f divisor ensures proper scaling while maintaining proportions</span></div>
-<div class="line"><span class="lineno">   72</span>    <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> /= -16.0f;</div>
+<div class="line"><span class="lineno">   72</span>    <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> /= -16.0f;</div>
 <div class="line"><span class="lineno">   73</span> </div>
 <div class="line"><span class="lineno">   74</span>    <span class="comment">// Apply a slight vertical stretch to fill the [-1, 1] range better</span></div>
-<div class="line"><span class="lineno">   75</span>    <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> *= 1.10f;</div>
+<div class="line"><span class="lineno">   75</span>    <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> *= 1.10f;</div>
 <div class="line"><span class="lineno">   76</span> </div>
-<div class="line"><span class="lineno">   77</span>    <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a> += 0.17f; <span class="comment">// Adjust y to fit within the range of [-1, 1]</span></div>
+<div class="line"><span class="lineno">   77</span>    <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> += 0.17f; <span class="comment">// Adjust y to fit within the range of [-1, 1]</span></div>
 <div class="line"><span class="lineno">   78</span> </div>
-<div class="line"><span class="lineno">   79</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">vec2f</a>(<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a>, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a>);</div>
+<div class="line"><span class="lineno">   79</span>    <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">vec2f</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>);</div>
 <div class="line"><span class="lineno">   80</span>}</div>
-<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
-<div class="ttc" id="a_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac_html_aa980ed3886ec08856d5a2143c09301ac"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_aa980ed3886ec08856d5a2143c09301ac.html#aa980ed3886ec08856d5a2143c09301ac">y</a></div><div class="ttdeci">uint32_t y[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00083">Fire2023.ino:83</a></div></div>
+<div class="ttc" id="a_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00072">Audio.ino:72</a></div></div>
+<div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
 <div class="ttc" id="amath__macros_8h_a598a3330b3c21701223ee0ca14316eca_html_a598a3330b3c21701223ee0ca14316eca"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca">PI</a></div><div class="ttdeci">#define PI</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00057">math_macros.h:57</a></div></div>
-<div class="ttc" id="anamespacefl_a853ddd0222a0547e63df2afdd422e11a_html_a853ddd0222a0547e63df2afdd422e11a"><div class="ttname"><a href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">fl::vec2f</a></div><div class="ttdeci">vec2&lt; float &gt; vec2f</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/geometry_8h_source.html#l00151">geometry.h:151</a></div></div>
+<div class="ttc" id="anamespacefl_a853ddd0222a0547e63df2afdd422e11a_html_a853ddd0222a0547e63df2afdd422e11a"><div class="ttname"><a href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">fl::vec2f</a></div><div class="ttdeci">vec2&lt; float &gt; vec2f</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/geometry_8h_source.html#l00301">geometry.h:301</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00057">PI</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00083">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00057">PI</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, and <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>.</p>
 
 </div>
 </div>
@@ -170,7 +170,7 @@ $(function(){initNavTree('df/dc4/classfl_1_1_heart_path_a70f9c0ab95f904302f41628
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/dc4/classfl_1_1_heart_path.html">HeartPath</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

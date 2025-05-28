@@ -1,15 +1,17 @@
 <map id="Painter::VegasVisualizer" name="Painter::VegasVisualizer">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,128,184,153"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,184,179"/>
 <area shape="rect" id="Node000002" href="$de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9" title=" " alt="" coords="305,29,417,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,125,166,95,231,65,291,49,292,54,233,70,168,100,117,130"/>
-<area shape="rect" id="Node000006" href="$d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac" title=" " alt="" coords="240,79,483,104"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="163,125,278,104,279,109,164,131"/>
-<area shape="rect" id="Node000007" href="$d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a" title=" " alt="" coords="232,128,491,153"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="184,138,218,138,218,143,184,143"/>
-<area shape="rect" id="Node000008" href="$d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123" title=" " alt="" coords="258,178,465,218"/>
-<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="155,151,255,172,254,178,154,156"/>
-<area shape="rect" id="Node000009" href="$d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5" title=" " alt="" coords="295,243,427,268"/>
-<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="113,151,164,190,198,210,233,228,282,242,281,247,231,232,195,215,161,194,110,156"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,151,159,108,194,85,231,65,291,47,292,52,233,70,196,89,162,113,111,155"/>
+<area shape="rect" id="Node000006" href="$d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8" title=" " alt="" coords="330,79,393,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="126,151,231,114,316,96,317,101,233,119,128,156"/>
+<area shape="rect" id="Node000007" href="$d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac" title=" " alt="" coords="240,128,483,153"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="184,155,226,151,226,156,185,160"/>
+<area shape="rect" id="Node000008" href="$d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a" title=" " alt="" coords="232,177,491,203"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="185,171,218,174,218,180,184,177"/>
+<area shape="rect" id="Node000009" href="$d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123" title=" " alt="" coords="258,227,465,267"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="129,176,233,213,262,221,261,226,231,218,127,181"/>
+<area shape="rect" id="Node000010" href="$d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5" title=" " alt="" coords="295,292,427,317"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="109,177,160,227,195,254,233,277,282,293,281,298,231,282,192,258,156,231,105,181"/>
 <area shape="rect" id="Node000003" href="$de/d12/struct_color3i_a61889348324aefa14c28164d41e98e2a.html#a61889348324aefa14c28164d41e98e2a" title=" " alt="" coords="539,5,661,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="417,34,525,23,525,28,418,39"/>
 <area shape="rect" id="Node000005" href="$de/d12/struct_color3i_a49dcda1c5a2731858de82313748b85a2.html#a49dcda1c5a2731858de82313748b85a2" title=" " alt="" coords="539,55,661,80"/>

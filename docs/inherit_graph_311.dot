@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="LPD8806Controller\<\l DATA_PIN, CLOCK_PIN,\l RGB_ORDER, SPI_SPEED\l \>::LPD8806_ADJUST",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d77/class_l_p_d8806_controller_1_1_l_p_d8806___a_d_j_u_s_t.html",tooltip=" "];
+  Node0 [id="Node000000",label="LedColumns",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d4a/struct_led_columns.html",tooltip=" "];
 }

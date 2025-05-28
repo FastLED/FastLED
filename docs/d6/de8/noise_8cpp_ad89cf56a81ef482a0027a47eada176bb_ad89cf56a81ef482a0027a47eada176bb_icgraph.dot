@@ -25,7 +25,11 @@ digraph "lerp7by8"
   Node7 -> Node13 [id="edge9_Node000007_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="fill_raw_noise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/da4/group___noise_fill_ga1e4dba9289b03333697e70d4b7f3b006.html#ga1e4dba9289b03333697e70d4b7f3b006",tooltip="Fill a 1D 8-bit buffer with noise, using inoise8()"];
   Node7 -> Node16 [id="edge10_Node000007_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fillnoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
-  Node7 -> Node18 [id="edge11_Node000007_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl::NoisePalette::fillnoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738",tooltip=" "];
+  Node16 [id="Node000016",label="FillNoise",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d43/funky_8cpp_ad75910933b9f979e883c13b78798580b.html#ad75910933b9f979e883c13b78798580b",tooltip=" "];
+  Node7 -> Node26 [id="edge11_Node000007_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fillnoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d43/funky_8cpp_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3",tooltip=" "];
+  Node7 -> Node28 [id="edge12_Node000007_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::NoisePalette::fillnoise8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738",tooltip=" "];
+  Node7 -> Node30 [id="edge13_Node000007_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fillnoise82",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d43/funky_8cpp_a860ae8fa7d0d81ee588154f8304240b9.html#a860ae8fa7d0d81ee588154f8304240b9",tooltip=" "];
 }

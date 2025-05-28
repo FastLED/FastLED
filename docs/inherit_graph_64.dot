@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Blend2d::Entry",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d4d/structfl_1_1_blend2d_1_1_entry.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::BitsetInlined\<\l N \>::Proxy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d83/structfl_1_1_bitset_inlined_1_1_proxy.html",tooltip=" "];
 }

@@ -160,13 +160,15 @@ $(function(){initNavTree('df/dab/fastled__progmem_8h_source.html','../../'); ini
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span></div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266) || defined(FASTLED_DOXYGEN)</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="../../df/dab/fastled__progmem_8h_a30d32309ee815a4857c30666fafeed6b.html#a30d32309ee815a4857c30666fafeed6b">   98</a></span><span class="preprocessor">#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">#define FL_ALIGN_PROGMEM</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif  </span><span class="comment">// defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)</span></div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="preprocessor">#ifndef FL_ALIGN_PROGMEM</span></div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="preprocessor">#if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266) || defined(FASTLED_DOXYGEN)</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="../../df/dab/fastled__progmem_8h_a30d32309ee815a4857c30666fafeed6b.html#a30d32309ee815a4857c30666fafeed6b">   99</a></span><span class="preprocessor">#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))</span></div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="preprocessor">#define FL_ALIGN_PROGMEM</span></div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#endif  </span><span class="comment">// defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)</span></div>
 <div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -175,7 +177,7 @@ $(function(){initNavTree('df/dab/fastled__progmem_8h_source.html','../../'); ini
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/dab/fastled__progmem_8h.html">fastled_progmem.h</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

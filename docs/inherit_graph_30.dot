@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="CountingButton",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d58/class_counting_button.html",tooltip=" "];
+  Node0 [id="Node000000",label="corkscrew_args",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d43/_festival_stick_8ino.html#d1/dd1/structcorkscrew__args",tooltip=" "];
 }

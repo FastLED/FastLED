@@ -144,10 +144,10 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233.
 <div class="line"><span class="lineno">   61</span>    <span class="comment">// Figure out which section of the hue wheel we&#39;re in,</span></div>
 <div class="line"><span class="lineno">   62</span>    <span class="comment">// and how far offset we are withing that section</span></div>
 <div class="line"><span class="lineno">   63</span>    uint8_t section = hsv.hue / <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>; <span class="comment">// 0..2</span></div>
-<div class="line"><span class="lineno">   64</span>    uint8_t offset = hsv.hue % <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>;  <span class="comment">// 0..63</span></div>
+<div class="line"><span class="lineno">   64</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = hsv.hue % <a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a>;  <span class="comment">// 0..63</span></div>
 <div class="line"><span class="lineno">   65</span> </div>
-<div class="line"><span class="lineno">   66</span>    uint8_t rampup = offset; <span class="comment">// 0..63</span></div>
-<div class="line"><span class="lineno">   67</span>    uint8_t rampdown = (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1) - offset; <span class="comment">// 63..0</span></div>
+<div class="line"><span class="lineno">   66</span>    uint8_t rampup = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>; <span class="comment">// 0..63</span></div>
+<div class="line"><span class="lineno">   67</span>    uint8_t rampdown = (<a class="code hl_define" href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a> - 1) - <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>; <span class="comment">// 63..0</span></div>
 <div class="line"><span class="lineno">   68</span> </div>
 <div class="line"><span class="lineno">   69</span>    <span class="comment">// We now scale rampup and rampdown to a 0-255 range -- at least</span></div>
 <div class="line"><span class="lineno">   70</span>    <span class="comment">// in theory, but here&#39;s where architecture-specific decsions</span></div>
@@ -206,17 +206,25 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233.
 <div class="line"><span class="lineno">  123</span>        rgb.b = brightness_floor;</div>
 <div class="line"><span class="lineno">  124</span>    }</div>
 <div class="line"><span class="lineno">  125</span>}</div>
+<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="ahsv2rgb_8cpp_a177d9e4c6c1125e9499a26c2603d8da6_html_a177d9e4c6c1125e9499a26c2603d8da6"><div class="ttname"><a href="../../df/d9d/hsv2rgb_8cpp_a177d9e4c6c1125e9499a26c2603d8da6.html#a177d9e4c6c1125e9499a26c2603d8da6">APPLY_DIMMING</a></div><div class="ttdeci">#define APPLY_DIMMING(X)</div><div class="ttdoc">Apply dimming compensation to values.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d9d/hsv2rgb_8cpp_source.html#l00031">hsv2rgb.cpp:31</a></div></div>
 <div class="ttc" id="ahsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0_html_aeeee29536659359a2d1bd0be6339aaa0"><div class="ttname"><a href="../../df/d9d/hsv2rgb_8cpp_aeeee29536659359a2d1bd0be6339aaa0.html#aeeee29536659359a2d1bd0be6339aaa0">HSV_SECTION_3</a></div><div class="ttdeci">#define HSV_SECTION_3</div><div class="ttdoc">Divide the color wheel into four sections, 64 elements each.</div><div class="ttdef"><b>Definition</b> <a href="../../df/d9d/hsv2rgb_8cpp_source.html#l00039">hsv2rgb.cpp:39</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00031">APPLY_DIMMING</a>, and <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00039">HSV_SECTION_3</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00031">APPLY_DIMMING</a>, <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00039">HSV_SECTION_3</a>, and <a class="el" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d9d/hsv2rgb_8cpp_source.html#l00023">hsv2rgb_raw()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233_ae692746db35d0cdcd304d01497f92233_cgraph.svg" width="239" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233_ae692746db35d0cdcd304d01497f92233_icgraph.svg" width="667" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -229,7 +237,7 @@ $(function(){initNavTree('df/d9d/hsv2rgb_8cpp_ae692746db35d0cdcd304d01497f92233.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/d9d/hsv2rgb_8cpp.html">hsv2rgb.cpp</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

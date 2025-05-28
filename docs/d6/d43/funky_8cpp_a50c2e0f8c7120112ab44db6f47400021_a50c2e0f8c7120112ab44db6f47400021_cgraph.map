@@ -1,0 +1,13 @@
+<map id="ChangePalettePeriodically" name="ChangePalettePeriodically">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,70,197,95"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26" title=" " alt="" coords="248,5,452,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,67,249,46,250,51,158,73"/>
+<area shape="rect" id="Node000004" href="$d6/d43/funky_8cpp_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46" title=" " alt="" coords="245,70,455,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="197,80,232,80,232,85,197,85"/>
+<area shape="rect" id="Node000005" href="$d6/d43/funky_8cpp_a0341f9e24549d5cbf47ce7c13eae9028.html#a0341f9e24549d5cbf47ce7c13eae9028" title=" " alt="" coords="249,119,451,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="167,93,272,114,271,119,165,98"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="505,13,581,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,23,491,23,491,28,452,28"/>
+<area shape="rect" id="Node000006" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="503,119,583,145"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="451,129,489,129,489,135,451,135"/>
+</map>

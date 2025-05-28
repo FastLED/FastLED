@@ -1,18 +1,21 @@
 <map id="fl::Blend2d::draw" name="fl::Blend2d::draw">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,104,136,129"/>
 <area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="273,55,351,80"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,101,183,90,258,75,259,80,185,95,131,107"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,101,183,89,258,74,259,79,185,94,127,107"/>
 <area shape="rect" id="Node000010" href="$d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" title=" " alt="" coords="184,104,440,129"/>
 <area shape="poly" id="edge6_Node000001_Node000010" title=" " alt="" coords="137,114,171,114,171,119,137,119"/>
-<area shape="rect" id="Node000012" href="$d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" title=" " alt="" coords="251,153,373,179"/>
-<area shape="poly" id="edge8_Node000001_Node000012" title=" " alt="" coords="127,127,185,139,238,150,237,155,183,145,126,132"/>
+<area shape="rect" id="Node000013" href="$d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" title=" " alt="" coords="251,153,373,179"/>
+<area shape="poly" id="edge10_Node000001_Node000013" title=" " alt="" coords="131,127,185,138,237,149,236,154,183,143,130,132"/>
 <area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="496,5,616,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="351,57,482,30,483,35,352,62"/>
 <area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="507,55,605,80"/>
 <area shape="poly" id="edge4_Node000002_Node000009" title=" " alt="" coords="352,65,493,65,493,70,352,70"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="672,31,789,56"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="616,24,659,30,658,35,616,29"/>
-<area shape="poly" id="edge5_Node000009_Node000004" title=" " alt="" coords="605,58,658,51,659,56,606,63"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="672,43,789,68"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="617,28,659,37,658,43,615,33"/>
+<area shape="poly" id="edge5_Node000009_Node000004" title=" " alt="" coords="606,61,658,58,658,63,606,67"/>
 <area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f" title=" " alt="" coords="488,104,624,129"/>
 <area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="440,114,474,114,474,119,440,119"/>
+<area shape="rect" id="Node000012" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="701,117,760,143"/>
+<area shape="poly" id="edge9_Node000010_Node000012" title=" " alt="" coords="389,127,488,138,556,141,624,138,688,133,688,138,624,143,556,146,488,143,389,132"/>
+<area shape="poly" id="edge8_Node000011_Node000012" title=" " alt="" coords="625,119,687,124,687,129,624,125"/>
 </map>

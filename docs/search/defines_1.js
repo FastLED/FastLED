@@ -15,8 +15,11 @@ var searchData=
   ['arduinojson_5fenable_5fstd_5fstring_12',['ARDUINOJSON_ENABLE_STD_STRING',['../d1/d9e/third__party_2arduinojson_2json_8h_af5b2b6b4e14c101382c65f3ca93f0014.html#af5b2b6b4e14c101382c65f3ca93f0014',1,'json.h']]],
   ['arduinojson_5fenable_5fstring_5fview_13',['ARDUINOJSON_ENABLE_STRING_VIEW',['../d1/d9e/third__party_2arduinojson_2json_8h_a21eec5d4b774b6bf12cb2c2ebe156f48.html#a21eec5d4b774b6bf12cb2c2ebe156f48',1,'json.h']]],
   ['array_5fsize_14',['ARRAY_SIZE',['../d5/d25/_demo_reel100_8ino_a4163b4a4e9d8f2949741962dca6c5944.html#a4163b4a4e9d8f2949741962dca6c5944',1,'DemoReel100.ino']]],
-  ['audio_5fsample_5frate_15',['AUDIO_SAMPLE_RATE',['../d1/dff/fft__impl_8cpp_a36b0af5a0e22aa1e36a4f3ad02247c60.html#a36b0af5a0e22aa1e36a4f3ad02247c60',1,'fft_impl.cpp']]],
-  ['auto_5fselect_5fbackground_5fcolor_16',['AUTO_SELECT_BACKGROUND_COLOR',['../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;TwinkleFox.ino']]],
-  ['autopulsechangetime_17',['autoPulseChangeTime',['../d1/ddb/_chromancer_8ino_ae3f0b2edc8a6be3c7e2375933f7f738a.html#ae3f0b2edc8a6be3c7e2375933f7f738a',1,'Chromancer.ino']]],
-  ['autopulsetimeout_18',['autoPulseTimeout',['../d1/ddb/_chromancer_8ino_ab419f69a9503ac15cd3403db8cdac922.html#ab419f69a9503ac15cd3403db8cdac922',1,'Chromancer.ino']]]
+  ['audio_5fleft_5fpin_15',['AUDIO_LEFT_PIN',['../d7/dfc/_funky_clouds_2defs_8h_a833653302b9a1b81e4c75670d61790dc.html#a833653302b9a1b81e4c75670d61790dc',1,'defs.h']]],
+  ['audio_5fright_5fpin_16',['AUDIO_RIGHT_PIN',['../d7/dfc/_funky_clouds_2defs_8h_a704acd697a00aaff69299732804f69da.html#a704acd697a00aaff69299732804f69da',1,'defs.h']]],
+  ['audio_5fsample_5frate_17',['AUDIO_SAMPLE_RATE',['../d1/dff/fft__impl_8cpp_a36b0af5a0e22aa1e36a4f3ad02247c60.html#a36b0af5a0e22aa1e36a4f3ad02247c60',1,'fft_impl.cpp']]],
+  ['auto_5fselect_5fbackground_5fcolor_18',['AUTO_SELECT_BACKGROUND_COLOR',['../d1/df6/twinklefox_8h_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_a955388ff8ac9df46fcb461c73162c831.html#a955388ff8ac9df46fcb461c73162c831',1,'AUTO_SELECT_BACKGROUND_COLOR:&#160;TwinkleFox.ino']]],
+  ['autopulsechangetime_19',['autoPulseChangeTime',['../d1/ddb/_chromancer_8ino_ae3f0b2edc8a6be3c7e2375933f7f738a.html#ae3f0b2edc8a6be3c7e2375933f7f738a',1,'Chromancer.ino']]],
+  ['autopulsetimeout_20',['autoPulseTimeout',['../d1/ddb/_chromancer_8ino_ab419f69a9503ac15cd3403db8cdac922.html#ab419f69a9503ac15cd3403db8cdac922',1,'Chromancer.ino']]],
+  ['avr_5fdisallowed_21',['AVR_DISALLOWED',['../d5/dd1/avr__disallowed_8h_aa7b2f18171fbba022e60fe16201c5b41.html#aa7b2f18171fbba022e60fe16201c5b41',1,'avr_disallowed.h']]]
 ];

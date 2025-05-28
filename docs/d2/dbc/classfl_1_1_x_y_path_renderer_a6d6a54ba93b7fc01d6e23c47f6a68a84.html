@@ -119,37 +119,37 @@ $(function(){initNavTree('d2/dbc/classfl_1_1_x_y_path_renderer_a6d6a54ba93b7fc01
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00080">80</a> of file <a class="el" href="../../d4/d78/xypath_8cpp_source.html">xypath.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   80</span>                                                                  {</div>
-<div class="line"><span class="lineno">   81</span>    <span class="comment">// auto &amp;tx = *(mGridTransform.mImpl);</span></div>
-<div class="line"><span class="lineno">   82</span>    <span class="keyword">auto</span> &amp;tx = <a class="code hl_variable" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a482c5241c0d8d77c14fcd235d2b9444f.html#a482c5241c0d8d77c14fcd235d2b9444f">mGridTransform</a>;</div>
-<div class="line"><span class="lineno">   83</span> </div>
-<div class="line"><span class="lineno">   84</span>    <span class="comment">// 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]</span></div>
-<div class="line"><span class="lineno">   85</span>    <span class="comment">//    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2</span></div>
-<div class="line"><span class="lineno">   86</span>    <span class="comment">//    offset_x = (width–0.5 + 0.5) / 2 = width/2</span></div>
-<div class="line"><span class="lineno">   87</span>    tx.set_scale_x((width - 1.0f) * 0.5f);</div>
-<div class="line"><span class="lineno">   88</span>    <span class="comment">// tx.scale_x = (width - 1.0f) * 0.5f;</span></div>
-<div class="line"><span class="lineno">   89</span>    <span class="comment">// tx.offset_x = width * 0.5f;</span></div>
-<div class="line"><span class="lineno">   90</span>    tx.set_offset_x(width * 0.5f);</div>
-<div class="line"><span class="lineno">   91</span> </div>
-<div class="line"><span class="lineno">   92</span>    <span class="comment">// 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]</span></div>
-<div class="line"><span class="lineno">   93</span>    <span class="comment">//    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)</span></div>
-<div class="line"><span class="lineno">   94</span>    <span class="comment">//    scale_y  = (height–0.5) – 0.5     = height–1</span></div>
-<div class="line"><span class="lineno">   95</span>    <span class="comment">//    offset_y = 0.5</span></div>
-<div class="line"><span class="lineno">   96</span>    <span class="comment">// tx.scale_y = (height - 1.0f) * 0.5f;</span></div>
-<div class="line"><span class="lineno">   97</span>    <span class="comment">// tx.offset_y = height * 0.5f;</span></div>
-<div class="line"><span class="lineno">   98</span> </div>
-<div class="line"><span class="lineno">   99</span>    tx.set_scale_y((height - 1.0f) * 0.5f);</div>
-<div class="line"><span class="lineno">  100</span>    tx.set_offset_y(height * 0.5f);</div>
-<div class="line"><span class="lineno">  101</span> </div>
-<div class="line"><span class="lineno">  102</span>    <a class="code hl_function" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c.html#a7ec553a0959c13c9808d32d04d78af9c">onTransformFloatChanged</a>();</div>
-<div class="line"><span class="lineno">  103</span>    <a class="code hl_variable" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_ac89cb019482af04735f4ffe6855158ca.html#ac89cb019482af04735f4ffe6855158ca">mDrawBoundsSet</a> = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  104</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00092">92</a> of file <a class="el" href="../../d4/d78/xypath_8cpp_source.html">xypath.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   92</span>                                                                  {</div>
+<div class="line"><span class="lineno">   93</span>    <span class="comment">// auto &amp;tx = *(mGridTransform.mImpl);</span></div>
+<div class="line"><span class="lineno">   94</span>    <span class="keyword">auto</span> &amp;tx = <a class="code hl_variable" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a482c5241c0d8d77c14fcd235d2b9444f.html#a482c5241c0d8d77c14fcd235d2b9444f">mGridTransform</a>;</div>
+<div class="line"><span class="lineno">   95</span> </div>
+<div class="line"><span class="lineno">   96</span>    <span class="comment">// 1) map world‑X ∈ [–1..+1] → pixel‑X ∈ [0.5 .. width–0.5]</span></div>
+<div class="line"><span class="lineno">   97</span>    <span class="comment">//    scale_x  = ( (width–0.5) – 0.5 ) / 2 = (width–1)/2</span></div>
+<div class="line"><span class="lineno">   98</span>    <span class="comment">//    offset_x = (width–0.5 + 0.5) / 2 = width/2</span></div>
+<div class="line"><span class="lineno">   99</span>    tx.set_scale_x((width - 1.0f) * 0.5f);</div>
+<div class="line"><span class="lineno">  100</span>    <span class="comment">// tx.scale_x = (width - 1.0f) * 0.5f;</span></div>
+<div class="line"><span class="lineno">  101</span>    <span class="comment">// tx.offset_x = width * 0.5f;</span></div>
+<div class="line"><span class="lineno">  102</span>    tx.set_offset_x(width * 0.5f);</div>
+<div class="line"><span class="lineno">  103</span> </div>
+<div class="line"><span class="lineno">  104</span>    <span class="comment">// 2) map world‑Y ∈ [ -1 .. 1 ] → pixel‑Y ∈ [0.5 .. height–0.5]</span></div>
+<div class="line"><span class="lineno">  105</span>    <span class="comment">//    (your LinePath lives at Y=0, so it will sit at row‑0 center = 0.5)</span></div>
+<div class="line"><span class="lineno">  106</span>    <span class="comment">//    scale_y  = (height–0.5) – 0.5     = height–1</span></div>
+<div class="line"><span class="lineno">  107</span>    <span class="comment">//    offset_y = 0.5</span></div>
+<div class="line"><span class="lineno">  108</span>    <span class="comment">// tx.scale_y = (height - 1.0f) * 0.5f;</span></div>
+<div class="line"><span class="lineno">  109</span>    <span class="comment">// tx.offset_y = height * 0.5f;</span></div>
+<div class="line"><span class="lineno">  110</span> </div>
+<div class="line"><span class="lineno">  111</span>    tx.set_scale_y((height - 1.0f) * 0.5f);</div>
+<div class="line"><span class="lineno">  112</span>    tx.set_offset_y(height * 0.5f);</div>
+<div class="line"><span class="lineno">  113</span> </div>
+<div class="line"><span class="lineno">  114</span>    <a class="code hl_function" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c.html#a7ec553a0959c13c9808d32d04d78af9c">onTransformFloatChanged</a>();</div>
+<div class="line"><span class="lineno">  115</span>    <a class="code hl_variable" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_ac89cb019482af04735f4ffe6855158ca.html#ac89cb019482af04735f4ffe6855158ca">mDrawBoundsSet</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  116</span>}</div>
 <div class="ttc" id="aclassfl_1_1_x_y_path_renderer_a482c5241c0d8d77c14fcd235d2b9444f_html_a482c5241c0d8d77c14fcd235d2b9444f"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a482c5241c0d8d77c14fcd235d2b9444f.html#a482c5241c0d8d77c14fcd235d2b9444f">fl::XYPathRenderer::mGridTransform</a></div><div class="ttdeci">TransformFloat mGridTransform</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d88/xypath__renderer_8h_source.html#l00057">xypath_renderer.h:57</a></div></div>
-<div class="ttc" id="aclassfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c_html_a7ec553a0959c13c9808d32d04d78af9c"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c.html#a7ec553a0959c13c9808d32d04d78af9c">fl::XYPathRenderer::onTransformFloatChanged</a></div><div class="ttdeci">void onTransformFloatChanged()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d78/xypath_8cpp_source.html#l00106">xypath.cpp:106</a></div></div>
+<div class="ttc" id="aclassfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c_html_a7ec553a0959c13c9808d32d04d78af9c"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7ec553a0959c13c9808d32d04d78af9c.html#a7ec553a0959c13c9808d32d04d78af9c">fl::XYPathRenderer::onTransformFloatChanged</a></div><div class="ttdeci">void onTransformFloatChanged()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d78/xypath_8cpp_source.html#l00118">xypath.cpp:118</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_path_renderer_ac89cb019482af04735f4ffe6855158ca_html_ac89cb019482af04735f4ffe6855158ca"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_ac89cb019482af04735f4ffe6855158ca.html#ac89cb019482af04735f4ffe6855158ca">fl::XYPathRenderer::mDrawBoundsSet</a></div><div class="ttdeci">bool mDrawBoundsSet</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d88/xypath__renderer_8h_source.html#l00058">xypath_renderer.h:58</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/d88/xypath__renderer_8h_source.html#l00058">mDrawBoundsSet</a>, <a class="el" href="../../d2/d88/xypath__renderer_8h_source.html#l00057">mGridTransform</a>, and <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00106">onTransformFloatChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d88/xypath__renderer_8h_source.html#l00058">mDrawBoundsSet</a>, <a class="el" href="../../d2/d88/xypath__renderer_8h_source.html#l00057">mGridTransform</a>, and <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00118">onTransformFloatChanged()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -167,7 +167,7 @@ $(function(){initNavTree('d2/dbc/classfl_1_1_x_y_path_renderer_a6d6a54ba93b7fc01
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/dbc/classfl_1_1_x_y_path_renderer.html">XYPathRenderer</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

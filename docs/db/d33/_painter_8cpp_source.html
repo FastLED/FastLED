@@ -504,14 +504,14 @@ $(function(){initNavTree('db/d33/_painter_8cpp_source.html','../../'); initResiz
 <div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>      painted_lights++;</div>
 <div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>    }</div>
 <div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    </div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>    <span class="keywordtype">int</span> length = taper_idx_2 - taper_idx_1;</div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; min(200, length); ++i) {</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="../../d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8">length</a> = taper_idx_2 - taper_idx_1;</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; min(200, <a class="code hl_function" href="../../d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8">length</a>); ++i) {</div>
 <div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(c);</div>
 <div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>      painted_lights++;</div>
 <div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>    }</div>
 <div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    length = led_column_table[i] - taper_idx_2;</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; length; ++i) {</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    <a class="code hl_function" href="../../d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8">length</a> = led_column_table[i] - taper_idx_2;</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_function" href="../../d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8">length</a>; ++i) {</div>
 <div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(<a class="code hl_function" href="../../de/d12/struct_color3i_af5a85a3006c2ec7d3f4c4132b120e7b9.html#af5a85a3006c2ec7d3f4c4132b120e7b9">Color3i::Black</a>());</div>
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>      painted_lights++;</div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    }</div>
@@ -625,6 +625,7 @@ $(function(){initNavTree('db/d33/_painter_8cpp_source.html','../../'); initResiz
 <div class="ttc" id="aclass_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25_html_ac9c28ef970a520f1c117201ea40fee25"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_ac9c28ef970a520f1c117201ea40fee25.html#ac9c28ef970a520f1c117201ea40fee25">LedRopeInterface::GetIterator</a></div><div class="ttdeci">virtual Color3i * GetIterator(int i)=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_ad19c0274cfe19053dfca7c72696cbe2e_html_ad19c0274cfe19053dfca7c72696cbe2e"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_ad19c0274cfe19053dfca7c72696cbe2e.html#ad19c0274cfe19053dfca7c72696cbe2e">LedRopeInterface::DrawSequentialRepeat</a></div><div class="ttdeci">virtual void DrawSequentialRepeat(int repeat)=0</div></div>
 <div class="ttc" id="aclass_led_rope_interface_html"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface.html">LedRopeInterface</a></div><div class="ttdef"><b>Definition</b> <a href="../../db/d19/led__rope__interface_8h_source.html#l00007">led_rope_interface.h:7</a></div></div>
+<div class="ttc" id="adirect_8h_a56a6f879483f3e06fdac34afba3711d8_html_a56a6f879483f3e06fdac34afba3711d8"><div class="ttname"><a href="../../d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8">length</a></div><div class="ttdeci">UISlider length(&quot;Length&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="adprint_8h_a1f26413d4abaec9e43e0734dddc1db7a_html_a1f26413d4abaec9e43e0734dddc1db7a"><div class="ttname"><a href="../../df/d29/dprint_8h_a1f26413d4abaec9e43e0734dddc1db7a.html#a1f26413d4abaec9e43e0734dddc1db7a">dprint</a></div><div class="ttdeci">#define dprint(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00011">dprint.h:11</a></div></div>
 <div class="ttc" id="adprint_8h_a841cac3f63b25edb3183df5bed0d94d3_html_a841cac3f63b25edb3183df5bed0d94d3"><div class="ttname"><a href="../../df/d29/dprint_8h_a841cac3f63b25edb3183df5bed0d94d3.html#a841cac3f63b25edb3183df5bed0d94d3">dprintln</a></div><div class="ttdeci">#define dprintln(x)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d29/dprint_8h_source.html#l00012">dprint.h:12</a></div></div>
 <div class="ttc" id="adprint_8h_html"><div class="ttname"><a href="../../df/d29/dprint_8h.html">dprint.h</a></div></div>
@@ -686,7 +687,7 @@ $(function(){initNavTree('db/d33/_painter_8cpp_source.html','../../'); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../dir_82c6f96b5a39b3aa6c2c41086d3f3d73.html">shared</a></li><li class="navelem"><a class="el" href="../../db/d33/_painter_8cpp.html">Painter.cpp</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

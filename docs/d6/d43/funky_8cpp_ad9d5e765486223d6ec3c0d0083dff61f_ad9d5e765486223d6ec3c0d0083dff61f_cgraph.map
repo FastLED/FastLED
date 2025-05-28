@@ -1,0 +1,31 @@
+<map id="NoiseExample7" name="NoiseExample7">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,169,129,194"/>
+<area shape="rect" id="Node000002" href="$d6/d43/funky_8cpp_a50c2e0f8c7120112ab44db6f47400021.html#a50c2e0f8c7120112ab44db6f47400021" title=" " alt="" coords="177,70,369,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,166,123,135,176,104,195,97,197,102,178,109,126,140,85,171"/>
+<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090" title=" " alt="" coords="206,119,341,145"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="120,166,206,145,207,151,122,171"/>
+<area shape="rect" id="Node000009" href="$d6/d43/funky_8cpp_ad75910933b9f979e883c13b78798580b.html#ad75910933b9f979e883c13b78798580b" title=" " alt="" coords="234,169,313,194"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="130,179,220,179,220,184,130,184"/>
+<area shape="rect" id="Node000018" href="$d6/d43/funky_8cpp_ad6d911a3ab6bc1ecf4eb45713d86895b.html#ad6d911a3ab6bc1ecf4eb45713d86895b" title=" " alt="" coords="224,218,323,243"/>
+<area shape="poly" id="edge12_Node000001_Node000018" title=" " alt="" coords="122,191,211,213,210,218,120,197"/>
+<area shape="rect" id="Node000020" href="$d6/d43/funky_8cpp_a1588dd85b5eadaa062cf10ab251f486f.html#a1588dd85b5eadaa062cf10ab251f486f" title=" " alt="" coords="254,267,293,293"/>
+<area shape="poly" id="edge14_Node000001_Node000020" title=" " alt="" coords="85,192,126,223,178,254,210,265,241,272,240,278,209,270,176,258,123,227,82,196"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26" title=" " alt="" coords="420,5,624,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,67,421,46,422,51,330,73"/>
+<area shape="rect" id="Node000005" href="$d6/d43/funky_8cpp_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46" title=" " alt="" coords="417,70,627,95"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="369,80,404,80,404,85,369,85"/>
+<area shape="rect" id="Node000006" href="$d6/d43/funky_8cpp_a0341f9e24549d5cbf47ce7c13eae9028.html#a0341f9e24549d5cbf47ce7c13eae9028" title=" " alt="" coords="421,119,623,145"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="339,93,444,114,443,119,337,98"/>
+<area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="687,13,763,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="625,23,673,23,673,28,625,28"/>
+<area shape="rect" id="Node000007" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="685,119,765,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="623,129,671,129,671,135,623,135"/>
+<area shape="rect" id="Node000010" href="$d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="487,169,557,194"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="313,179,474,179,474,184,313,184"/>
+<area shape="rect" id="Node000011" href="$d8/df9/group___noise_generation_ga6c57ed3ea69e819c29602578ecbabd71.html#ga6c57ed3ea69e819c29602578ecbabd71" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="675,169,775,194"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="557,179,661,179,661,184,557,184"/>
+<area shape="rect" id="Node000017" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="693,218,756,243"/>
+<area shape="poly" id="edge11_Node000010_Node000017" title=" " alt="" coords="558,186,627,203,680,216,679,222,626,208,556,191"/>
+<area shape="rect" id="Node000019" href="$de/da1/gfx_8cpp_ad896a9713e06cf986a48d1e652b5e445.html#ad896a9713e06cf986a48d1e652b5e445" title=" " alt="" coords="465,218,579,243"/>
+<area shape="poly" id="edge13_Node000018_Node000019" title=" " alt="" coords="323,228,451,228,451,233,323,233"/>
+</map>

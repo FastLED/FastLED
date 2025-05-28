@@ -46,9 +46,17 @@ digraph "ColorFromPalette"
   Node18 -> Node20 [id="edge19_Node000018_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node20 [id="Node000020",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node21 [id="edge20_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="pacifica_one_layer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_a74ff76f68b211ed517ba9110d1084302.html#a74ff76f68b211ed517ba9110d1084302",tooltip=" "];
+  Node21 [id="Node000021",label="NoiseExample7",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_ad9d5e765486223d6ec3c0d0083dff61f.html#ad9d5e765486223d6ec3c0d0083dff61f",tooltip=" "];
   Node21 -> Node22 [id="edge21_Node000021_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node22 [id="Node000022",label="pacifica_loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc",tooltip=" "];
+  Node22 [id="Node000022",label="AutoRun",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_afbac31e23b311c5a81442334e48514a9.html#afbac31e23b311c5a81442334e48514a9",tooltip=" "];
   Node22 -> Node23 [id="edge22_Node000022_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node23 [id="Node000023",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node23 [id="Node000023",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df4/_funky_clouds_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node24 [id="edge23_Node000001_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="NoiseExample8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_acad976043d165e98872bea80a09eda2d.html#acad976043d165e98872bea80a09eda2d",tooltip=" "];
+  Node1 -> Node25 [id="edge24_Node000001_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="pacifica_one_layer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_a74ff76f68b211ed517ba9110d1084302.html#a74ff76f68b211ed517ba9110d1084302",tooltip=" "];
+  Node25 -> Node26 [id="edge25_Node000025_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="pacifica_loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_a158d427a947ef0a715c7ffd916346acc.html#a158d427a947ef0a715c7ffd916346acc",tooltip=" "];
+  Node26 -> Node27 [id="edge26_Node000026_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d25/_pacifica_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
 }

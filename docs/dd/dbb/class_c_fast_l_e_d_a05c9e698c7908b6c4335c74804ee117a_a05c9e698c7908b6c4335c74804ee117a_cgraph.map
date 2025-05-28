@@ -1,5 +1,21 @@
 <map id="CFastLED::_FL_MAP_CLOCKED_CHIPSET" name="CFastLED::_FL_MAP_CLOCKED_CHIPSET">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,223,45"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a0b54e78f5f27a6278351e0ff18784b3a.html#a0b54e78f5f27a6278351e0ff18784b3a" title=" " alt="" coords="271,5,488,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,23,257,23,257,28,223,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,49,223,89"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a0b54e78f5f27a6278351e0ff18784b3a.html#a0b54e78f5f27a6278351e0ff18784b3a" title=" " alt="" coords="271,19,488,59"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,54,257,50,258,55,223,59"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f" title="Add a CLEDController instance to the world." alt="" coords="307,84,451,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,77,294,85,293,90,223,83"/>
+<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a44d20f088426191c82919c9cdbc63a35.html#a44d20f088426191c82919c9cdbc63a35" title="Gets the maximum possible refresh rate of the strip." alt="" coords="536,5,793,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="448,81,487,69,511,54,535,40,559,32,561,37,537,44,513,59,489,74,450,86"/>
+<area shape="rect" id="Node000005" href="$d6/d2c/class_c_l_e_d_controller_af877a15a5ec452780fbd1d359b8a9913.html#af877a15a5ec452780fbd1d359b8a9913" title="Initialize the LED controller." alt="" coords="590,55,739,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="451,87,576,74,577,79,452,92"/>
+<area shape="rect" id="Node000006" href="$de/dca/classfl_1_1_engine_events_a8ec266f9f7b35b9174d331cb6c338d80.html#a8ec266f9f7b35b9174d331cb6c338d80" title=" " alt="" coords="575,105,755,145"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="452,101,561,112,561,117,451,106"/>
+<area shape="rect" id="Node000011" href="$d6/d2c/class_c_l_e_d_controller_a6c8e2157d244ce8b1b878947ca7695d9.html#a6c8e2157d244ce8b1b878947ca7695d9" title="Set the default array of LEDs to be used by this controller." alt="" coords="575,169,754,195"/>
+<area shape="poly" id="edge8_Node000003_Node000011" title=" " alt="" coords="410,107,468,131,537,154,576,164,575,169,535,159,466,136,408,112"/>
+<area shape="rect" id="Node000007" href="$de/dca/classfl_1_1_engine_events_a006e1f01b766436e0eec2e406b4512d5.html#a006e1f01b766436e0eec2e406b4512d5" title=" " alt="" coords="887,51,1022,91"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="754,106,873,83,874,89,755,111"/>
+<area shape="rect" id="Node000008" href="$de/dca/classfl_1_1_engine_events_a34a4625c4fbcf754f70820bc4f0e418b.html#a34a4625c4fbcf754f70820bc4f0e418b" title=" " alt="" coords="849,116,1060,141"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="755,123,836,124,836,130,755,129"/>
+<area shape="rect" id="Node000012" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="841,169,1068,195"/>
+<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="754,179,827,179,827,185,754,185"/>
 </map>

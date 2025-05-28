@@ -143,21 +143,22 @@ $(function(){initNavTree('d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba
 <div class="line"><span class="lineno">   47</span>    out.mLookUpTable = LUT16Ptr::New(<a class="code hl_variable" href="../../d0/dce/classfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66.html#a14faee68282b9a4b37fa166f0a075e66">width</a> * <a class="code hl_variable" href="../../d0/dce/classfl_1_1_x_y_map_ac7e2ae65af4c96222c5aa10801d6579d.html#ac7e2ae65af4c96222c5aa10801d6579d">height</a>);</div>
 <div class="line"><span class="lineno">   48</span>    memcpy(out.mLookUpTable-&gt;getDataMutable(), lookUpTable,</div>
 <div class="line"><span class="lineno">   49</span>           <a class="code hl_variable" href="../../d0/dce/classfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66.html#a14faee68282b9a4b37fa166f0a075e66">width</a> * <a class="code hl_variable" href="../../d0/dce/classfl_1_1_x_y_map_ac7e2ae65af4c96222c5aa10801d6579d.html#ac7e2ae65af4c96222c5aa10801d6579d">height</a> * <span class="keyword">sizeof</span>(uint16_t));</div>
-<div class="line"><span class="lineno">   50</span>    out.mOffset = offset;</div>
+<div class="line"><span class="lineno">   50</span>    out.mOffset = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>;</div>
 <div class="line"><span class="lineno">   51</span>    <span class="keywordflow">return</span> out;</div>
 <div class="line"><span class="lineno">   52</span>}</div>
 <div class="ttc" id="aclassfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66_html_a14faee68282b9a4b37fa166f0a075e66"><div class="ttname"><a href="../../d0/dce/classfl_1_1_x_y_map_a14faee68282b9a4b37fa166f0a075e66.html#a14faee68282b9a4b37fa166f0a075e66">fl::XYMap::width</a></div><div class="ttdeci">uint16_t width</div><div class="ttdef"><b>Definition</b> <a href="../../da/d61/xymap_8h_source.html#l00121">xymap.h:121</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f_html_a9985d6fbdcedd16a68209f204164b04f"><div class="ttname"><a href="../../d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f">fl::XYMap::XYMap</a></div><div class="ttdeci">XYMap(uint16_t width, uint16_t height, bool is_serpentine=true, uint16_t offset=0)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d09/xymap_8cpp_source.html#l00061">xymap.cpp:61</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_map_ab06005819ba0c56b5b001d83245fcdbf_html_ab06005819ba0c56b5b001d83245fcdbfaea35786fe8218aede545920fb37b31e8"><div class="ttname"><a href="../../d0/dce/classfl_1_1_x_y_map_ab06005819ba0c56b5b001d83245fcdbf.html#ab06005819ba0c56b5b001d83245fcdbfaea35786fe8218aede545920fb37b31e8">fl::XYMap::kLookUpTable</a></div><div class="ttdeci">@ kLookUpTable</div><div class="ttdef"><b>Definition</b> <a href="../../da/d61/xymap_8h_source.html#l00045">xymap.h:45</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_map_ac7e2ae65af4c96222c5aa10801d6579d_html_ac7e2ae65af4c96222c5aa10801d6579d"><div class="ttname"><a href="../../d0/dce/classfl_1_1_x_y_map_ac7e2ae65af4c96222c5aa10801d6579d.html#ac7e2ae65af4c96222c5aa10801d6579d">fl::XYMap::height</a></div><div class="ttdeci">uint16_t height</div><div class="ttdef"><b>Definition</b> <a href="../../da/d61/xymap_8h_source.html#l00122">xymap.h:122</a></div></div>
+<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d09/xymap_8cpp_source.html#l00061">XYMap()</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00122">height</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00045">kLookUpTable</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00124">mLookUpTable</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00125">mOffset</a>, and <a class="el" href="../../da/d61/xymap_8h_source.html#l00121">width</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d09/xymap_8cpp_source.html#l00061">XYMap()</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00122">height</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00045">kLookUpTable</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00124">mLookUpTable</a>, <a class="el" href="../../da/d61/xymap_8h_source.html#l00125">mOffset</a>, <a class="el" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset()</a>, and <a class="el" href="../../da/d61/xymap_8h_source.html#l00121">width</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9_a2193220fbe218947fdd4fd2aba56f6a9_cgraph.svg" width="376" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9_a2193220fbe218947fdd4fd2aba56f6a9_cgraph.svg" width="483" height="70"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -169,7 +170,7 @@ $(function(){initNavTree('d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/dce/classfl_1_1_x_y_map.html">XYMap</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

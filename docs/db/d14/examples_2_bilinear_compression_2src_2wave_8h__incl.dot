@@ -112,7 +112,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/BilinearCompression/src/wave
   Node33 -> Node34 [id="edge79_Node000033_Node000034",color="steelblue1",style="solid",tooltip=" "];
   Node34 [id="Node000034",label="fl/draw_mode.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d35/draw__mode_8h.html",tooltip=" "];
   Node2 -> Node35 [id="edge80_Node000002_Node000035",color="steelblue1",style="solid",tooltip=" "];
-  Node35 [id="Node000035",label="fx/fx.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d0c/fx_8h.html",tooltip=" "];
+  Node35 [id="Node000035",label="fx/fx.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d44/src_2fx_2fx_8h.html",tooltip=" "];
   Node35 -> Node3 [id="edge81_Node000035_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node35 -> Node25 [id="edge82_Node000035_Node000025",color="steelblue1",style="solid",tooltip=" "];
   Node35 -> Node36 [id="edge83_Node000035_Node000036",color="steelblue1",style="solid",tooltip=" "];
@@ -220,13 +220,13 @@ digraph "/home/runner/work/FastLED/FastLED/examples/BilinearCompression/src/wave
   Node56 -> Node46 [id="edge165_Node000056_Node000046",color="steelblue1",style="solid",tooltip=" "];
   Node56 -> Node43 [id="edge166_Node000056_Node000043",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node39 [id="edge167_Node000001_Node000039",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node118 [id="edge168_Node000001_Node000118",color="steelblue1",style="solid",tooltip=" "];
-  Node118 [id="Node000118",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
-  Node118 -> Node119 [id="edge169_Node000118_Node000119",color="steelblue1",style="solid",tooltip=" "];
-  Node119 [id="Node000119",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
-  Node119 -> Node3 [id="edge170_Node000119_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node119 -> Node55 [id="edge171_Node000119_Node000055",color="steelblue1",style="solid",tooltip=" "];
-  Node119 -> Node5 [id="edge172_Node000119_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node119 -> Node50 [id="edge173_Node000119_Node000050",color="steelblue1",style="solid",tooltip=" "];
-  Node119 -> Node29 [id="edge174_Node000119_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node111 [id="edge168_Node000001_Node000111",color="steelblue1",style="solid",tooltip=" "];
+  Node111 [id="Node000111",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
+  Node111 -> Node112 [id="edge169_Node000111_Node000112",color="steelblue1",style="solid",tooltip=" "];
+  Node112 [id="Node000112",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
+  Node112 -> Node3 [id="edge170_Node000112_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node112 -> Node55 [id="edge171_Node000112_Node000055",color="steelblue1",style="solid",tooltip=" "];
+  Node112 -> Node5 [id="edge172_Node000112_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node112 -> Node50 [id="edge173_Node000112_Node000050",color="steelblue1",style="solid",tooltip=" "];
+  Node112 -> Node29 [id="edge174_Node000112_Node000029",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -174,7 +174,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave2d/Wave2d.ino"
   Node60 [id="Node000060",label="fl/supersample.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dce/supersample_8h.html",tooltip=" "];
   Node59 -> Node34 [id="edge126_Node000059_Node000034",color="steelblue1",style="solid",tooltip=" "];
   Node59 -> Node61 [id="edge127_Node000059_Node000061",color="steelblue1",style="solid",tooltip=" "];
-  Node61 [id="Node000061",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d0c/fx_8h.html",tooltip=" "];
+  Node61 [id="Node000061",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d44/src_2fx_2fx_8h.html",tooltip=" "];
   Node61 -> Node3 [id="edge128_Node000061_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node61 -> Node35 [id="edge129_Node000061_Node000035",color="steelblue1",style="solid",tooltip=" "];
   Node61 -> Node8 [id="edge130_Node000061_Node000008",color="steelblue1",style="solid",tooltip=" "];
@@ -215,16 +215,9 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave2d/Wave2d.ino"
   Node67 -> Node50 [id="edge161_Node000067_Node000050",color="steelblue1",style="solid",tooltip=" "];
   Node67 -> Node66 [id="edge162_Node000067_Node000066",color="steelblue1",style="solid",tooltip=" "];
   Node67 -> Node25 [id="edge163_Node000067_Node000025",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node18 [id="edge164_Node000067_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node34 [id="edge165_Node000067_Node000034",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node44 [id="edge166_Node000067_Node000044",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node43 [id="edge167_Node000067_Node000043",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node16 [id="edge168_Node000067_Node000016",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node41 [id="edge169_Node000067_Node000041",color="steelblue1",style="solid",tooltip=" "];
-  Node67 -> Node2 [id="edge170_Node000067_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node66 -> Node114 [id="edge171_Node000066_Node000114",color="steelblue1",style="solid",tooltip=" "];
-  Node114 [id="Node000114",label="stdlib.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node1 -> Node115 [id="edge172_Node000001_Node000115",color="steelblue1",style="solid",tooltip=" "];
-  Node115 [id="Node000115",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node1 -> Node67 [id="edge173_Node000001_Node000067",color="steelblue1",style="solid",tooltip=" "];
+  Node66 -> Node113 [id="edge164_Node000066_Node000113",color="steelblue1",style="solid",tooltip=" "];
+  Node113 [id="Node000113",label="stdlib.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node114 [id="edge165_Node000001_Node000114",color="steelblue1",style="solid",tooltip=" "];
+  Node114 [id="Node000114",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node67 [id="edge166_Node000001_Node000067",color="steelblue1",style="solid",tooltip=" "];
 }

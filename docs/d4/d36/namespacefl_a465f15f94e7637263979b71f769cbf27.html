@@ -134,14 +134,14 @@ $(function(){initNavTree('d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.h
 <div class="line"><span class="lineno">  725</span>    <span class="comment">// Extract the eight most significant bits of the index as a palette index.</span></div>
 <div class="line"><span class="lineno">  726</span>    uint8_t index_8bit = index &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  727</span>    <span class="comment">// Calculate the 8-bit offset from the palette index.</span></div>
-<div class="line"><span class="lineno">  728</span>    uint8_t offset = index &amp; 0xff;</div>
+<div class="line"><span class="lineno">  728</span>    uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = index &amp; 0xff;</div>
 <div class="line"><span class="lineno">  729</span>    <span class="comment">// Get the palette entry from the 8-bit index</span></div>
 <div class="line"><span class="lineno">  730</span>    <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *entry = &amp;(pal[0]) + index_8bit;</div>
 <div class="line"><span class="lineno">  731</span>    uint8_t red1 = entry-&gt;red;</div>
 <div class="line"><span class="lineno">  732</span>    uint8_t green1 = entry-&gt;green;</div>
 <div class="line"><span class="lineno">  733</span>    uint8_t blue1 = entry-&gt;blue;</div>
 <div class="line"><span class="lineno">  734</span> </div>
-<div class="line"><span class="lineno">  735</span>    uint8_t <a class="code hl_function" href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a> = offset &amp;&amp; (blendType != NOBLEND);</div>
+<div class="line"><span class="lineno">  735</span>    uint8_t <a class="code hl_function" href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a> = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> &amp;&amp; (blendType != NOBLEND);</div>
 <div class="line"><span class="lineno">  736</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">blend</a>) {</div>
 <div class="line"><span class="lineno">  737</span>        <span class="keywordflow">if</span> (index_8bit == 255) {</div>
 <div class="line"><span class="lineno">  738</span>            entry = &amp;(pal[0]);</div>
@@ -151,7 +151,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.h
 <div class="line"><span class="lineno">  742</span> </div>
 <div class="line"><span class="lineno">  743</span>        <span class="comment">// Calculate the scaling factor and scaled values for the lower palette</span></div>
 <div class="line"><span class="lineno">  744</span>        <span class="comment">// value.</span></div>
-<div class="line"><span class="lineno">  745</span>        uint8_t f1 = 255 - offset;</div>
+<div class="line"><span class="lineno">  745</span>        uint8_t f1 = 255 - <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>;</div>
 <div class="line"><span class="lineno">  746</span>        red1 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(red1, f1);</div>
 <div class="line"><span class="lineno">  747</span>        green1 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(green1, f1);</div>
 <div class="line"><span class="lineno">  748</span>        blue1 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(blue1, f1);</div>
@@ -160,9 +160,9 @@ $(function(){initNavTree('d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.h
 <div class="line"><span class="lineno">  751</span>        uint8_t red2 = entry-&gt;red;</div>
 <div class="line"><span class="lineno">  752</span>        uint8_t green2 = entry-&gt;green;</div>
 <div class="line"><span class="lineno">  753</span>        uint8_t blue2 = entry-&gt;blue;</div>
-<div class="line"><span class="lineno">  754</span>        red2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(red2, offset);</div>
-<div class="line"><span class="lineno">  755</span>        green2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(green2, offset);</div>
-<div class="line"><span class="lineno">  756</span>        blue2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(blue2, offset);</div>
+<div class="line"><span class="lineno">  754</span>        red2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(red2, <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>);</div>
+<div class="line"><span class="lineno">  755</span>        green2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(green2, <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>);</div>
+<div class="line"><span class="lineno">  756</span>        blue2 = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(blue2, <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>);</div>
 <div class="line"><span class="lineno">  757</span>        <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
 <div class="line"><span class="lineno">  758</span> </div>
 <div class="line"><span class="lineno">  759</span>        <span class="comment">// These sums can&#39;t overflow, so no qadd8 needed.</span></div>
@@ -177,19 +177,20 @@ $(function(){initNavTree('d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.h
 <div class="line"><span class="lineno">  768</span>    <span class="keywordflow">return</span> CRGB(red1, green1, blue1);</div>
 <div class="line"><span class="lineno">  769</span>}</div>
 <div class="ttc" id="a_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd_html_ac01a35be16cdce00db3ba856a6ef71cd"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a></div><div class="ttdeci">UISlider brightness(&quot;Brightness&quot;, 255, 0, 255, 1)</div></div>
+<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 <div class="ttc" id="agroup___scaling_ga39bf87e5526120889086cab19ac749b1_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="../../d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">Scale three one-byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00363">scale8.h:363</a></div></div>
 <div class="ttc" id="anamespacefl_a924fc8748f53389e55fdc63bfc14b805_html_a924fc8748f53389e55fdc63bfc14b805"><div class="ttname"><a href="../../d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805">fl::blend</a></div><div class="ttdeci">CRGB blend(const CRGB &amp;p1, const CRGB &amp;p2, fract8 amountOfP2)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00060">colorutils.cpp:60</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00055">crgb.h:55</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00060">blend()</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00363">nscale8x3()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00060">blend()</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00363">nscale8x3()</a>, <a class="el" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27_a465f15f94e7637263979b71f769cbf27_cgraph.svg" width="100%" height="450"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27_a465f15f94e7637263979b71f769cbf27_cgraph.svg" width="100%" height="511"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -201,7 +202,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a465f15f94e7637263979b71f769cbf27.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

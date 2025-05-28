@@ -48,7 +48,11 @@ digraph "inoise16_raw"
   Node5 -> Node21 [id="edge21_Node000005_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node21 [id="Node000021",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d0d/_r_g_b_w_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node5 -> Node22 [id="edge22_Node000005_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node22 [id="Node000022",label="NoiseGenerator::Value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7a/struct_noise_generator_addecf502634007f361b656342ffd1621.html#addecf502634007f361b656342ffd1621",tooltip=" "];
+  Node22 [id="Node000022",label="showGenerative",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d43/_festival_stick_8ino_a212713e2e42ed18627ce9761d153d423.html#a212713e2e42ed18627ce9761d153d423",tooltip=" "];
   Node22 -> Node23 [id="edge23_Node000022_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node23 [id="Node000023",label="NoiseGenerator::LedValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7a/struct_noise_generator_a62be308aab8c1d496976934e35bf648b.html#a62be308aab8c1d496976934e35bf648b",tooltip=" "];
+  Node23 [id="Node000023",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d43/_festival_stick_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node5 -> Node24 [id="edge24_Node000005_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="NoiseGenerator::Value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7a/struct_noise_generator_addecf502634007f361b656342ffd1621.html#addecf502634007f361b656342ffd1621",tooltip=" "];
+  Node24 -> Node25 [id="edge25_Node000024_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="NoiseGenerator::LedValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7a/struct_noise_generator_a62be308aab8c1d496976934e35bf648b.html#a62be308aab8c1d496976934e35bf648b",tooltip=" "];
 }

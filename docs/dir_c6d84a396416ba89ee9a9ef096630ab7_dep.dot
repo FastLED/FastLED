@@ -12,6 +12,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxFire2012"
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
   dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
-  dir_c6d84a396416ba89ee9a9ef096630ab7->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000038_000031.html" href="dir_000038_000031.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_c6d84a396416ba89ee9a9ef096630ab7->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000038_000033.html" href="dir_000038_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_c6d84a396416ba89ee9a9ef096630ab7->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000041_000033.html" href="dir_000041_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_c6d84a396416ba89ee9a9ef096630ab7->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000041_000036.html" href="dir_000041_000036.html" color="steelblue1" fontcolor="steelblue1"];
 }

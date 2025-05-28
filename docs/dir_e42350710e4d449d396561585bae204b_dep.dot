@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Overclock"
   dir_e42350710e4d449d396561585bae204b [label="Overclock", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_e42350710e4d449d396561585bae204b.html",tooltip=""];
   }
   dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
-  dir_e42350710e4d449d396561585bae204b->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="2", labeldistance=1.5 headhref="dir_000064_000033.html" href="dir_000064_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_e42350710e4d449d396561585bae204b->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="2", labeldistance=1.5 headhref="dir_000067_000036.html" href="dir_000067_000036.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -2,23 +2,23 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,126,184,166"/>
 <area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aeae140ba48d511d1b20d6bd1b383b22b.html#aeae140ba48d511d1b20d6bd1b383b22b" title=" " alt="" coords="232,85,399,125"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,127,218,120,219,125,185,132"/>
-<area shape="rect" id="Node000011" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="236,161,395,187"/>
-<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="184,155,223,160,222,165,184,160"/>
+<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a060678fc5a4cf518e155ed3a6145b8d4.html#a060678fc5a4cf518e155ed3a6145b8d4" title="Scale a value using the per&#45;channel scale data." alt="" coords="236,161,395,187"/>
+<area shape="poly" id="edge8_Node000001_Node000012" title=" " alt="" coords="184,155,223,160,222,165,184,160"/>
 <area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a702e9f65198e3877e48031e793eac2ff.html#a702e9f65198e3877e48031e793eac2ff" title=" " alt="" coords="467,57,646,97"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="398,92,453,86,453,91,399,98"/>
 <area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aae9d44cd34c016ac8522f638f4b2624d.html#aae9d44cd34c016ac8522f638f4b2624d" title=" " alt="" coords="729,5,867,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="639,54,731,31,733,36,640,59"/>
-<area shape="rect" id="Node000008" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="929,56,1025,81"/>
-<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="646,72,915,67,915,72,646,78"/>
-<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_abeb8d8ef178da3a4dbbed27dc6c0c3c7.html#abeb8d8ef178da3a4dbbed27dc6c0c3c7" title=" " alt="" coords="715,106,881,146"/>
-<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="647,92,702,104,701,109,646,98"/>
-<area shape="poly" id="edge4_Node000004_Node000008" title=" " alt="" coords="845,28,919,50,918,55,843,33"/>
-<area shape="poly" id="edge6_Node000009_Node000008" title=" " alt="" coords="860,103,923,83,924,88,862,108"/>
-<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="447,161,667,187"/>
-<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="395,171,433,171,433,177,395,177"/>
-<area shape="rect" id="Node000014" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="525,211,589,236"/>
-<area shape="poly" id="edge12_Node000011_Node000014" title=" " alt="" coords="379,184,511,211,510,217,378,189"/>
-<area shape="poly" id="edge10_Node000012_Node000012" title=" " alt="" coords="518,163,509,153,514,143,530,137,557,135,590,139,603,148,600,152,588,143,557,140,531,142,517,147,515,152,522,159"/>
-<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="720,171,876,196"/>
-<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="667,176,706,177,706,182,667,181"/>
+<area shape="rect" id="Node000009" href="$d0/da8/group___scaling_gaa51d5b048c2a4a20a00bddcdc257daaf.html#gaa51d5b048c2a4a20a00bddcdc257daaf" title="Scale a 16&#45;bit unsigned value by an 8&#45;bit value, which is treated as the numerator of a fraction whos..." alt="" coords="929,56,1025,81"/>
+<area shape="poly" id="edge7_Node000003_Node000009" title=" " alt="" coords="646,72,915,67,915,72,646,78"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_abeb8d8ef178da3a4dbbed27dc6c0c3c7.html#abeb8d8ef178da3a4dbbed27dc6c0c3c7" title=" " alt="" coords="715,106,881,146"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="647,92,702,104,701,109,646,98"/>
+<area shape="poly" id="edge4_Node000004_Node000009" title=" " alt="" coords="845,28,919,50,918,55,843,33"/>
+<area shape="poly" id="edge6_Node000010_Node000009" title=" " alt="" coords="860,103,923,83,924,88,862,108"/>
+<area shape="rect" id="Node000013" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="447,161,667,187"/>
+<area shape="poly" id="edge9_Node000012_Node000013" title=" " alt="" coords="395,171,433,171,433,177,395,177"/>
+<area shape="rect" id="Node000015" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="525,211,589,236"/>
+<area shape="poly" id="edge12_Node000012_Node000015" title=" " alt="" coords="379,184,511,211,510,217,378,189"/>
+<area shape="poly" id="edge10_Node000013_Node000013" title=" " alt="" coords="518,163,509,153,514,143,530,137,557,135,590,139,603,148,600,152,588,143,557,140,531,142,517,147,515,152,522,159"/>
+<area shape="rect" id="Node000014" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="720,171,876,196"/>
+<area shape="poly" id="edge11_Node000013_Node000014" title=" " alt="" coords="667,176,706,177,706,182,667,181"/>
 </map>

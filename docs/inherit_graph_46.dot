@@ -6,7 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="Enum",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node0 -> Node1 [id="edge126_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="gen.HexagonAngle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dee/classgen_1_1_hexagon_angle.html",tooltip=" "];
+  Node0 [id="Node000000",label="DrawRasterToWaveSimulator",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d8f/struct_draw_raster_to_wave_simulator.html",tooltip=" "];
 }

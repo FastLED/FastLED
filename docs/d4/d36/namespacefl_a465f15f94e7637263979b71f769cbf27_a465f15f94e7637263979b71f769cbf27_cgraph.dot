@@ -24,5 +24,7 @@ digraph "fl::ColorFromPaletteExtended"
   Node7 [id="Node000007",label="nscale8x3",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1.html#ga39bf87e5526120889086cab19ac749b1",tooltip="Scale three one-byte values by a fourth one, which is treated as the numerator of a fraction whose de..."];
   Node7 -> Node5 [id="edge10_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node6 [id="edge11_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node6 [id="edge12_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node8 [id="edge12_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104",tooltip=" "];
+  Node1 -> Node6 [id="edge13_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d7/d42/structfl_1_1_str_stream_helper_3_01unsigned_01int_01_4.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="dc/ddb/structfl_1_1_str_stream_helper_3_01uint8__t_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="110,-30 0,-30 0,0 110,0 110,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::StrStreamHelper</text>
-<text text-anchor="middle" x="55" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; unsigned int &gt;</text>
+<text text-anchor="middle" x="55" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; uint8_t &gt;</text>
 </a>
 </g>
 </g>

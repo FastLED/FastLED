@@ -49,7 +49,7 @@
 <script type="application/ecmascript">
 var viewWidth = 607;
 var viewHeight = 38;
-var sectionId = 'dynsection-0';
+var sectionId = 'dynsection-1';
 </script>
 <script type="application/ecmascript" xlink:href="../../svg.min.js"/>
 <svg id="graph" class="graph">

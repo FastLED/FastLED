@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="cq_kernel_cfg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dda/cq__kernel_8h.html#d9/dd1/structcq__kernel__cfg",tooltip=" "];
+  Node0 [id="Node000000",label="CPixelView\< PIXEL_TYPE\l \>::pixelset_iterator\l_base\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html",tooltip="Iterator helper class for CPixelView."];
 }

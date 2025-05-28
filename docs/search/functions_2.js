@@ -48,9 +48,10 @@ var searchData=
   ['brightness_5fbitshifter8_45',['brightness_bitshifter8',['../dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59',1,'brightness_bitshifter.h']]],
   ['bseconds16_46',['bseconds16',['../d5/df2/group___timekeeping_ga52659d1994f2f21eb05080c97417e93b.html#ga52659d1994f2f21eb05080c97417e93b',1,'lib8tion.h']]],
   ['busy_47',['busy',['../d9/d33/classfl_1_1_object_f_l_e_d_a43c14340f8b498ecfbe5c9bfd66bcebc.html#a43c14340f8b498ecfbe5c9bfd66bcebc',1,'fl::ObjectFLED']]],
-  ['bytesleft_48',['bytesLeft',['../d5/d86/classfl_1_1_file_handle_a50d8beee0dcf0ff392d85f878402d3b0.html#a50d8beee0dcf0ff392d85f878402d3b0',1,'fl::FileHandle']]],
-  ['bytesperframe_49',['bytesPerFrame',['../d8/ddd/classfl_1_1_pixel_stream_a5ff9f768584e639f234dc9af3ab19780.html#a5ff9f768584e639f234dc9af3ab19780',1,'fl::PixelStream']]],
-  ['bytesremaining_50',['bytesRemaining',['../d8/ddd/classfl_1_1_pixel_stream_a414d49c527fd0b43e5333eeb13d9a9de.html#a414d49c527fd0b43e5333eeb13d9a9de',1,'fl::PixelStream']]],
-  ['bytesremaininginframe_51',['bytesRemainingInFrame',['../d8/ddd/classfl_1_1_pixel_stream_a797e6505cbe4f0361150155808b691f4.html#a797e6505cbe4f0361150155808b691f4',1,'fl::PixelStream']]],
-  ['bytestreammemory_52',['ByteStreamMemory',['../d1/dc0/classfl_1_1_byte_stream_memory_a2a57c855d78475b438213ebf2e8dcdea.html#a2a57c855d78475b438213ebf2e8dcdea',1,'fl::ByteStreamMemory']]]
+  ['button_48',['button',['../d8/d14/simple_8h_abe7ed54e6091b952e545d5b799556bf9.html#abe7ed54e6091b952e545d5b799556bf9',1,'simple.h']]],
+  ['bytesleft_49',['bytesLeft',['../d5/d86/classfl_1_1_file_handle_a50d8beee0dcf0ff392d85f878402d3b0.html#a50d8beee0dcf0ff392d85f878402d3b0',1,'fl::FileHandle']]],
+  ['bytesperframe_50',['bytesPerFrame',['../d8/ddd/classfl_1_1_pixel_stream_a5ff9f768584e639f234dc9af3ab19780.html#a5ff9f768584e639f234dc9af3ab19780',1,'fl::PixelStream']]],
+  ['bytesremaining_51',['bytesRemaining',['../d8/ddd/classfl_1_1_pixel_stream_a414d49c527fd0b43e5333eeb13d9a9de.html#a414d49c527fd0b43e5333eeb13d9a9de',1,'fl::PixelStream']]],
+  ['bytesremaininginframe_52',['bytesRemainingInFrame',['../d8/ddd/classfl_1_1_pixel_stream_a797e6505cbe4f0361150155808b691f4.html#a797e6505cbe4f0361150155808b691f4',1,'fl::PixelStream']]],
+  ['bytestreammemory_53',['ByteStreamMemory',['../d1/dc0/classfl_1_1_byte_stream_memory_a2a57c855d78475b438213ebf2e8dcdea.html#a2a57c855d78475b438213ebf2e8dcdea',1,'fl::ByteStreamMemory']]]
 ];

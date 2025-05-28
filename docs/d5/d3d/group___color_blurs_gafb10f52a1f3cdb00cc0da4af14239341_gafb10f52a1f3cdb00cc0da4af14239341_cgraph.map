@@ -4,15 +4,18 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,105,131,86,169,75,171,80,133,91,79,110"/>
 <area shape="rect" id="Node000010" href="$d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7" title=" " alt="" coords="132,101,313,141"/>
 <area shape="poly" id="edge6_Node000001_Node000010" title=" " alt="" coords="84,118,119,118,119,123,84,123"/>
-<area shape="rect" id="Node000012" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="203,165,242,191"/>
-<area shape="poly" id="edge8_Node000001_Node000012" title=" " alt="" coords="79,131,133,150,191,167,189,172,131,155,78,136"/>
+<area shape="rect" id="Node000013" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="203,165,242,191"/>
+<area shape="poly" id="edge10_Node000001_Node000013" title=" " alt="" coords="79,131,133,150,191,167,189,172,131,155,78,136"/>
 <area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="369,5,489,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,52,357,31,358,36,263,57"/>
 <area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="380,55,479,80"/>
 <area shape="poly" id="edge4_Node000002_Node000009" title=" " alt="" coords="262,61,366,63,366,69,262,67"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="545,31,663,56"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="490,24,532,30,531,35,489,29"/>
-<area shape="poly" id="edge5_Node000009_Node000004" title=" " alt="" coords="479,58,531,51,532,56,479,63"/>
-<area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f" title=" " alt="" coords="361,108,497,133"/>
-<area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="313,118,348,118,348,123,313,123"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="545,43,663,68"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="490,28,532,37,531,43,489,33"/>
+<area shape="poly" id="edge5_Node000009_Node000004" title=" " alt="" coords="479,61,531,58,532,63,479,67"/>
+<area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map_a9985d6fbdcedd16a68209f204164b04f.html#a9985d6fbdcedd16a68209f204164b04f" title=" " alt="" coords="361,104,497,129"/>
+<area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="313,116,348,116,348,121,314,122"/>
+<area shape="rect" id="Node000012" href="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104" title=" " alt="" coords="575,117,633,143"/>
+<area shape="poly" id="edge9_Node000010_Node000012" title=" " alt="" coords="314,134,362,139,429,142,497,139,561,133,562,138,498,145,429,148,361,145,313,139"/>
+<area shape="poly" id="edge8_Node000011_Node000012" title=" " alt="" coords="498,119,561,124,560,129,497,125"/>
 </map>

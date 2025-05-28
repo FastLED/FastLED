@@ -143,13 +143,13 @@ $(function(){initNavTree('d5/d25/brightness__bitshifter_8h_source.html','../../'
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">// Return value is the number of shifts on the src. Multiply this by the number of steps to get the</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment">// the number of shifts on the dst.</span></div>
 <div class="foldopen" id="foldopen00043" data-start="{" data-end="}">
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94">   43</a></span><span class="keyword">inline</span> uint8_t <a class="code hl_function" href="../../dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94">brightness_bitshifter16</a>(uint8_t *brightness_src, uint16_t *brightness_dst, uint8_t max_shifts, uint8_t steps=2) {</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94">   43</a></span><span class="keyword">inline</span> uint8_t <a class="code hl_function" href="../../dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94">brightness_bitshifter16</a>(uint8_t *brightness_src, uint16_t *brightness_dst, uint8_t max_shifts, uint8_t <a class="code hl_function" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a>=2) {</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    uint8_t src = *brightness_src;</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordflow">if</span> (*brightness_dst == 0 || src == 0) {</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    uint16_t overflow_mask = 0b1000000000000000;</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">for</span> (uint8_t i = 1; i &lt; steps; i++) {</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="keywordflow">for</span> (uint8_t i = 1; i &lt; <a class="code hl_function" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a>; i++) {</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        overflow_mask &gt;&gt;= 1;</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        overflow_mask |= 0b1000000000000000;</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    }</div>
@@ -167,7 +167,7 @@ $(function(){initNavTree('d5/d25/brightness__bitshifter_8h_source.html','../../'
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            <span class="comment">// next shift will overflow</span></div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        }</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        curr &lt;&lt;= steps;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        curr &lt;&lt;= <a class="code hl_function" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a>;</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        src &gt;&gt;= 1;</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        shifts++;</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
@@ -178,6 +178,7 @@ $(function(){initNavTree('d5/d25/brightness__bitshifter_8h_source.html','../../'
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>}</div>
 </div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span></div>
+<div class="ttc" id="adirect_8h_a1b7dc7e9feb3d26023be6578bdd7adf1_html_a1b7dc7e9feb3d26023be6578bdd7adf1"><div class="ttname"><a href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a></div><div class="ttdeci">UISlider steps(&quot;Steps&quot;, 100.0f, 1.0f, 200.0f, 1.0f)</div></div>
 <div class="ttc" id="agroup___dimming_gaacc037b326dc7b77b87708e5bf403c59_html_gaacc037b326dc7b77b87708e5bf403c59"><div class="ttname"><a href="../../dc/d3e/group___dimming_gaacc037b326dc7b77b87708e5bf403c59.html#gaacc037b326dc7b77b87708e5bf403c59">brightness_bitshifter8</a></div><div class="ttdeci">uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightness_dst, uint8_t max_shifts)</div><div class="ttdef"><b>Definition</b> <a href="#l00014">brightness_bitshifter.h:14</a></div></div>
 <div class="ttc" id="agroup___dimming_gade4149bdb99e2307d4236e5e90031f94_html_gade4149bdb99e2307d4236e5e90031f94"><div class="ttname"><a href="../../dc/d3e/group___dimming_gade4149bdb99e2307d4236e5e90031f94.html#gade4149bdb99e2307d4236e5e90031f94">brightness_bitshifter16</a></div><div class="ttdeci">uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *brightness_dst, uint8_t max_shifts, uint8_t steps=2)</div><div class="ttdef"><b>Definition</b> <a href="#l00043">brightness_bitshifter.h:43</a></div></div>
 <div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
@@ -188,7 +189,7 @@ $(function(){initNavTree('d5/d25/brightness__bitshifter_8h_source.html','../../'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d91669bda445047ed1892ac77a05ddb9.html">lib8tion</a></li><li class="navelem"><a class="el" href="../../d5/d25/brightness__bitshifter_8h.html">brightness_bitshifter.h</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -33,12 +33,13 @@ var searchData=
   ['rgbw_30',['rgbw',['../d1/d3a/_r_g_b_w_emulated_8ino_af6840056f51753c6731a47458751842d.html#af6840056f51753c6731a47458751842d',1,'RGBWEmulated.ino']]],
   ['rgbw_5fmode_31',['rgbw_mode',['../db/d74/struct_rgbw_a5adc9b4220b62026da0e6f4b20fbdddf.html#a5adc9b4220b62026da0e6f4b20fbdddf',1,'Rgbw']]],
   ['rgbwemu_32',['rgbwEmu',['../d1/d3a/_r_g_b_w_emulated_8ino_a6075e4aa5ec6a0ab92565c1f885b5678.html#a6075e4aa5ec6a0ab92565c1f885b5678',1,'RGBWEmulated.ino']]],
-  ['right_5fdown_33',['RIGHT_DOWN',['../d4/dee/classgen_1_1_hexagon_angle_a4c8ded49feb15350856551dff1f11c79.html#a4c8ded49feb15350856551dff1f11c79',1,'gen::HexagonAngle']]],
-  ['right_5fup_34',['RIGHT_UP',['../d4/dee/classgen_1_1_hexagon_angle_aa0cafc5e4f6a62f494cd2495f849a089.html#aa0cafc5e4f6a62f494cd2495f849a089',1,'gen::HexagonAngle']]],
-  ['ripplecount_35',['rippleCount',['../d1/d85/class_ripple_ad1fe244336130644cc742a908fbf6781.html#ad1fe244336130644cc742a908fbf6781',1,'Ripple']]],
-  ['rippleid_36',['rippleId',['../d1/d85/class_ripple_ab636f855a020648d0c87c27e72fef17e.html#ab636f855a020648d0c87c27e72fef17e',1,'Ripple']]],
-  ['ripples_37',['ripples',['../d1/ddb/_chromancer_8ino_afa406bdeaa8ffb23c1a33475fd0730a9.html#afa406bdeaa8ffb23c1a33475fd0730a9',1,'Chromancer.ino']]],
-  ['rlevel_38',['rLevel',['../d9/d33/classfl_1_1_object_f_l_e_d_aae8f49b7faf9c8cd17d75efd689b49e5.html#aae8f49b7faf9c8cd17d75efd689b49e5',1,'fl::ObjectFLED']]],
-  ['rotation_39',['rotation',['../d0/dfa/structfl_1_1_transform16_aae474c83f05403ecf2e49ebd4ba3739e.html#aae474c83f05403ecf2e49ebd4ba3739e',1,'fl::Transform16::rotation'],['../d5/db7/classfl_1_1_transform_float_impl_ae29b40b9efdd0619175a936a1c389e5e.html#ae29b40b9efdd0619175a936a1c389e5e',1,'fl::TransformFloatImpl::rotation']]],
-  ['running_40',['running',['../d6/d7f/classfl_1_1_fx_layer_afb58a3a4fd74b9c33c03be29870e9fbf.html#afb58a3a4fd74b9c33c03be29870e9fbf',1,'fl::FxLayer::running'],['../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425',1,'Timer::running']]]
+  ['right_33',['right',['../d6/d43/funky_8cpp_a6729c73e5827d37b63f024546dfc3ab4.html#a6729c73e5827d37b63f024546dfc3ab4',1,'funky.cpp']]],
+  ['right_5fdown_34',['RIGHT_DOWN',['../d4/dee/classgen_1_1_hexagon_angle_a4c8ded49feb15350856551dff1f11c79.html#a4c8ded49feb15350856551dff1f11c79',1,'gen::HexagonAngle']]],
+  ['right_5fup_35',['RIGHT_UP',['../d4/dee/classgen_1_1_hexagon_angle_aa0cafc5e4f6a62f494cd2495f849a089.html#aa0cafc5e4f6a62f494cd2495f849a089',1,'gen::HexagonAngle']]],
+  ['ripplecount_36',['rippleCount',['../d1/d85/class_ripple_ad1fe244336130644cc742a908fbf6781.html#ad1fe244336130644cc742a908fbf6781',1,'Ripple']]],
+  ['rippleid_37',['rippleId',['../d1/d85/class_ripple_ab636f855a020648d0c87c27e72fef17e.html#ab636f855a020648d0c87c27e72fef17e',1,'Ripple']]],
+  ['ripples_38',['ripples',['../d1/ddb/_chromancer_8ino_afa406bdeaa8ffb23c1a33475fd0730a9.html#afa406bdeaa8ffb23c1a33475fd0730a9',1,'Chromancer.ino']]],
+  ['rlevel_39',['rLevel',['../d9/d33/classfl_1_1_object_f_l_e_d_aae8f49b7faf9c8cd17d75efd689b49e5.html#aae8f49b7faf9c8cd17d75efd689b49e5',1,'fl::ObjectFLED']]],
+  ['rotation_40',['rotation',['../d0/dfa/structfl_1_1_transform16_aae474c83f05403ecf2e49ebd4ba3739e.html#aae474c83f05403ecf2e49ebd4ba3739e',1,'fl::Transform16::rotation'],['../d5/db7/classfl_1_1_transform_float_impl_ae29b40b9efdd0619175a936a1c389e5e.html#ae29b40b9efdd0619175a936a1c389e5e',1,'fl::TransformFloatImpl::rotation']]],
+  ['running_41',['running',['../d6/d7f/classfl_1_1_fx_layer_afb58a3a4fd74b9c33c03be29870e9fbf.html#afb58a3a4fd74b9c33c03be29870e9fbf',1,'fl::FxLayer::running'],['../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425',1,'Timer::running']]]
 ];

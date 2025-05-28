@@ -1,0 +1,9 @@
+<map id="InitFunky" name="InitFunky">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,87,80"/>
+<area shape="rect" id="Node000002" href="$de/da1/gfx_8cpp_a3ce843b7d70e0983d33956f812fc1ea1.html#a3ce843b7d70e0983d33956f812fc1ea1" title=" " alt="" coords="135,5,235,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,52,134,33,136,38,83,57"/>
+<area shape="rect" id="Node000003" href="$d6/d43/funky_8cpp_a2ae744ca33ba576e9bd30cfa6f307193.html#a2ae744ca33ba576e9bd30cfa6f307193" title=" " alt="" coords="135,55,234,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="87,65,121,65,121,70,87,70"/>
+<area shape="rect" id="Node000004" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="141,104,229,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="83,78,136,97,134,102,81,83"/>
+</map>

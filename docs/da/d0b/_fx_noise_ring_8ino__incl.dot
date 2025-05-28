@@ -178,18 +178,13 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node99 -> Node54 [id="edge123_Node000099_Node000054",color="steelblue1",style="solid",tooltip=" "];
   Node54 -> Node32 [id="edge124_Node000054_Node000032",color="steelblue1",style="solid",tooltip=" "];
   Node54 -> Node45 [id="edge125_Node000054_Node000045",color="steelblue1",style="solid",tooltip=" "];
-  Node54 -> Node19 [id="edge126_Node000054_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node54 -> Node23 [id="edge127_Node000054_Node000023",color="steelblue1",style="solid",tooltip=" "];
-  Node54 -> Node6 [id="edge128_Node000054_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node54 -> Node52 [id="edge129_Node000054_Node000052",color="steelblue1",style="solid",tooltip=" "];
-  Node54 -> Node42 [id="edge130_Node000054_Node000042",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node108 [id="edge131_Node000001_Node000108",color="steelblue1",style="solid",tooltip=" "];
-  Node108 [id="Node000108",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
-  Node108 -> Node10 [id="edge132_Node000108_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node108 -> Node25 [id="edge133_Node000108_Node000025",color="steelblue1",style="solid",tooltip=" "];
-  Node108 -> Node42 [id="edge134_Node000108_Node000042",color="steelblue1",style="solid",tooltip=" "];
-  Node108 -> Node13 [id="edge135_Node000108_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node111 [id="edge136_Node000001_Node000111",color="steelblue1",style="solid",tooltip=" "];
-  Node111 [id="Node000111",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
-  Node111 -> Node10 [id="edge137_Node000111_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node107 [id="edge126_Node000001_Node000107",color="steelblue1",style="solid",tooltip=" "];
+  Node107 [id="Node000107",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
+  Node107 -> Node10 [id="edge127_Node000107_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node107 -> Node25 [id="edge128_Node000107_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node107 -> Node42 [id="edge129_Node000107_Node000042",color="steelblue1",style="solid",tooltip=" "];
+  Node107 -> Node13 [id="edge130_Node000107_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node110 [id="edge131_Node000001_Node000110",color="steelblue1",style="solid",tooltip=" "];
+  Node110 [id="Node000110",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
+  Node110 -> Node10 [id="edge132_Node000110_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

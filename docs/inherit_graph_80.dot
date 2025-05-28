@@ -6,13 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::EngineEvents::Listener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/da2/classfl_1_1_engine_events_1_1_listener.html",tooltip=" "];
-  Node0 -> Node1 [id="edge128_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="fl::UIButton::Listener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html",tooltip=" "];
-  Node0 -> Node2 [id="edge129_Node000000_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UICheckbox::Listener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d6f/structfl_1_1_u_i_checkbox_1_1_listener.html",tooltip=" "];
-  Node0 -> Node3 [id="edge130_Node000000_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UINumberField::\lListener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d0d/structfl_1_1_u_i_number_field_1_1_listener.html",tooltip=" "];
-  Node0 -> Node4 [id="edge131_Node000000_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::UISlider::Listener",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/df8/structfl_1_1_u_i_slider_1_1_listener.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::EngineEvents",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events.html",tooltip=" "];
 }

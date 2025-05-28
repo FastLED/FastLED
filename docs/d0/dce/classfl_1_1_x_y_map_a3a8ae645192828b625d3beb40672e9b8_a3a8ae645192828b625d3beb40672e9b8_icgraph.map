@@ -1,14 +1,16 @@
 <map id="fl::XYMap::getWidth" name="fl::XYMap::getWidth">
-<area shape="rect" id="Node000001" title=" " alt="" coords="556,56,707,81"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4" title=" " alt="" coords="189,5,296,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="594,52,553,34,507,21,452,13,395,10,296,15,296,9,395,5,452,8,509,15,555,29,596,47"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a50f80745c984dcab9711ba181ca0680c.html#a50f80745c984dcab9711ba181ca0680c" title=" " alt="" coords="344,31,508,56"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="542,60,508,56,508,51,543,55"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a15e7e16c76c7f861c33b89cdec7b85a5.html#a15e7e16c76c7f861c33b89cdec7b85a5" title=" " alt="" coords="359,80,493,105"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="542,82,494,87,493,82,542,76"/>
-<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="367,129,485,155"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="587,89,509,119,471,132,469,127,507,114,585,84"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="556,81,707,107"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4" title=" " alt="" coords="189,31,296,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="594,77,553,60,507,46,452,38,395,36,296,40,296,35,395,30,452,33,509,41,555,55,596,73"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a50f80745c984dcab9711ba181ca0680c.html#a50f80745c984dcab9711ba181ca0680c" title=" " alt="" coords="344,56,508,81"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="542,86,508,81,508,76,543,80"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a15e7e16c76c7f861c33b89cdec7b85a5.html#a15e7e16c76c7f861c33b89cdec7b85a5" title=" " alt="" coords="359,105,493,131"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="542,107,494,113,493,108,542,102"/>
+<area shape="rect" id="Node000007" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="367,155,485,180"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="587,115,509,145,471,157,469,152,507,139,585,110"/>
 <area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a04814149f06e8bd894c0f8f421c8708f.html#a04814149f06e8bd894c0f8f421c8708f" title="Downscale an CRGB matrix (or strip) to the smaller size." alt="" coords="5,5,141,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="176,21,141,21,141,15,176,15"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="330,33,296,28,297,23,331,27"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="175,36,141,31,142,26,176,31"/>
+<area shape="rect" id="Node000004" href="$dc/d5d/_audio_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="48,55,99,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="176,55,99,66,98,61,175,50"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="330,58,296,53,297,48,331,53"/>
 </map>

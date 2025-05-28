@@ -13,10 +13,11 @@ var searchData=
   ['max_5fsize_10',['max_size',['../d4/d36/namespacefl.html#d4/dda/structfl_1_1max__size',1,'fl']]],
   ['max_5fsize_3c_20t_2c_20rest_2e_2e_2e_20_3e_11',['max_size&lt; T, Rest... &gt;',['../df/db4/structfl_1_1max__size_3_01_t_00_01_rest_8_8_8_01_4.html',1,'fl']]],
   ['max_5fsize_3c_3e_12',['max_size&lt;&gt;',['../d9/db2/structfl_1_1max__size_3_4.html',1,'fl']]],
-  ['memcallable_13',['MemCallable',['../dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable.html',1,'fl::function&lt; R(Args...)&gt;']]],
-  ['message_14',['Message',['../d4/daa/struct_message.html',1,'']]],
-  ['message_3c_20settings_3a_3asysexmaxsize_20_3e_15',['Message&lt; Settings::SysExMaxSize &gt;',['../d4/daa/struct_message.html',1,'']]],
-  ['midiinterface_16',['MidiInterface',['../df/d6a/class_midi_interface.html',1,'']]],
-  ['midishieldbutton_17',['MidiShieldButton',['../d0/ddf/class_midi_shield_button.html',1,'']]],
-  ['modulators_18',['modulators',['../d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators',1,'animartrix_detail']]]
+  ['maxfadetracker_13',['MaxFadeTracker',['../da/db7/class_max_fade_tracker.html',1,'']]],
+  ['memcallable_14',['MemCallable',['../dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable.html',1,'fl::function&lt; R(Args...)&gt;']]],
+  ['message_15',['Message',['../d4/daa/struct_message.html',1,'']]],
+  ['message_3c_20settings_3a_3asysexmaxsize_20_3e_16',['Message&lt; Settings::SysExMaxSize &gt;',['../d4/daa/struct_message.html',1,'']]],
+  ['midiinterface_17',['MidiInterface',['../df/d6a/class_midi_interface.html',1,'']]],
+  ['midishieldbutton_18',['MidiShieldButton',['../d0/ddf/class_midi_shield_button.html',1,'']]],
+  ['modulators_19',['modulators',['../d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators',1,'animartrix_detail']]]
 ];

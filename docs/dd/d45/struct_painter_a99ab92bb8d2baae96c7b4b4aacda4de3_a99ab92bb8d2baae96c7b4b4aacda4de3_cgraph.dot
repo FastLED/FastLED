@@ -64,8 +64,10 @@ digraph "Painter::Paint"
   Node1 -> Node23 [id="edge35_Node000001_Node000023",color="steelblue1",style="solid",tooltip=" "];
   Node23 [id="Node000023",label="Painter::VegasVisualizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_ab6318a63a778550cd78f3eae183cb8dc.html#ab6318a63a778550cd78f3eae183cb8dc",tooltip=" "];
   Node23 -> Node13 [id="edge36_Node000023_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node23 -> Node8 [id="edge37_Node000023_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node23 -> Node9 [id="edge38_Node000023_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node23 -> Node10 [id="edge39_Node000023_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node23 -> Node11 [id="edge40_Node000023_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node24 [id="edge37_Node000023_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="length",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8",tooltip=" "];
+  Node23 -> Node8 [id="edge38_Node000023_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node9 [id="edge39_Node000023_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node10 [id="edge40_Node000023_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node11 [id="edge41_Node000023_Node000011",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -136,23 +136,23 @@ $(function(){initNavTree('db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c41
 <div class="ttc" id="a_blink_8ino_a23b348310475af5d6544794f1a167ee8_html_a23b348310475af5d6544794f1a167ee8"><div class="ttname"><a href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a></div><div class="ttdeci">#define CLOCK_PIN</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc3/_blink_8ino_source.html#l00015">Blink.ino:15</a></div></div>
 <div class="ttc" id="a_blink_8ino_adad67fe595ea440c8f8247ec2cddf070_html_adad67fe595ea440c8f8247ec2cddf070"><div class="ttname"><a href="../../d0/dc3/_blink_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a></div><div class="ttdeci">#define DATA_PIN</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc3/_blink_8ino_source.html#l00014">Blink.ino:14</a></div></div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00420">420</a> of file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  420</span><span class="preprocessor">    #define _FL_MAP_CLOCKED_CHIPSET(CHIPSET_ENUM, CONTROLLER_CLASS)                              \</span></div>
-<div class="line"><span class="lineno">  421</span><span class="preprocessor">        template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN&gt;                                              \</span></div>
-<div class="line"><span class="lineno">  422</span><span class="preprocessor">        struct ClockedChipsetHelper&lt;CHIPSET_ENUM, DATA_PIN, CLOCK_PIN&gt; {                           \</span></div>
-<div class="line"><span class="lineno">  423</span><span class="preprocessor">            static const bool IS_VALID = true;                                                     \</span></div>
-<div class="line"><span class="lineno">  424</span><span class="preprocessor">            typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN&gt; ControllerType;                          \</span></div>
-<div class="line"><span class="lineno">  425</span><span class="preprocessor">            </span><span class="comment">/* Controller type with RGB_ORDER specified */</span><span class="preprocessor">                                         \</span></div>
-<div class="line"><span class="lineno">  426</span><span class="preprocessor">            template&lt;EOrder RGB_ORDER&gt;                                                             \</span></div>
-<div class="line"><span class="lineno">  427</span><span class="preprocessor">            struct CONTROLLER_CLASS_WITH_ORDER {                                                   \</span></div>
-<div class="line"><span class="lineno">  428</span><span class="preprocessor">                typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN, RGB_ORDER&gt; ControllerType;           \</span></div>
-<div class="line"><span class="lineno">  429</span><span class="preprocessor">            };                                                                                     \</span></div>
-<div class="line"><span class="lineno">  430</span><span class="preprocessor">            </span><span class="comment">/* Controller type with RGB_ORDER and spi frequency specified */</span><span class="preprocessor">                       \</span></div>
-<div class="line"><span class="lineno">  431</span><span class="preprocessor">            template&lt;EOrder RGB_ORDER, uint32_t FREQ&gt;                                              \</span></div>
-<div class="line"><span class="lineno">  432</span><span class="preprocessor">            struct CONTROLLER_CLASS_WITH_ORDER_AND_FREQ {                                          \</span></div>
-<div class="line"><span class="lineno">  433</span><span class="preprocessor">                typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN, RGB_ORDER, FREQ&gt; ControllerType;     \</span></div>
-<div class="line"><span class="lineno">  434</span><span class="preprocessor">            };                                                                                     \</span></div>
-<div class="line"><span class="lineno">  435</span><span class="preprocessor">        };</span></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00429">429</a> of file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  429</span><span class="preprocessor">    #define _FL_MAP_CLOCKED_CHIPSET(CHIPSET_ENUM, CONTROLLER_CLASS)                              \</span></div>
+<div class="line"><span class="lineno">  430</span><span class="preprocessor">        template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN&gt;                                              \</span></div>
+<div class="line"><span class="lineno">  431</span><span class="preprocessor">        struct ClockedChipsetHelper&lt;CHIPSET_ENUM, DATA_PIN, CLOCK_PIN&gt; {                           \</span></div>
+<div class="line"><span class="lineno">  432</span><span class="preprocessor">            static const bool IS_VALID = true;                                                     \</span></div>
+<div class="line"><span class="lineno">  433</span><span class="preprocessor">            typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN&gt; ControllerType;                          \</span></div>
+<div class="line"><span class="lineno">  434</span><span class="preprocessor">            </span><span class="comment">/* Controller type with RGB_ORDER specified */</span><span class="preprocessor">                                         \</span></div>
+<div class="line"><span class="lineno">  435</span><span class="preprocessor">            template&lt;EOrder RGB_ORDER&gt;                                                             \</span></div>
+<div class="line"><span class="lineno">  436</span><span class="preprocessor">            struct CONTROLLER_CLASS_WITH_ORDER {                                                   \</span></div>
+<div class="line"><span class="lineno">  437</span><span class="preprocessor">                typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN, RGB_ORDER&gt; ControllerType;           \</span></div>
+<div class="line"><span class="lineno">  438</span><span class="preprocessor">            };                                                                                     \</span></div>
+<div class="line"><span class="lineno">  439</span><span class="preprocessor">            </span><span class="comment">/* Controller type with RGB_ORDER and spi frequency specified */</span><span class="preprocessor">                       \</span></div>
+<div class="line"><span class="lineno">  440</span><span class="preprocessor">            template&lt;EOrder RGB_ORDER, uint32_t FREQ&gt;                                              \</span></div>
+<div class="line"><span class="lineno">  441</span><span class="preprocessor">            struct CONTROLLER_CLASS_WITH_ORDER_AND_FREQ {                                          \</span></div>
+<div class="line"><span class="lineno">  442</span><span class="preprocessor">                typedef CONTROLLER_CLASS&lt;DATA_PIN, CLOCK_PIN, RGB_ORDER, FREQ&gt; ControllerType;     \</span></div>
+<div class="line"><span class="lineno">  443</span><span class="preprocessor">            };                                                                                     \</span></div>
+<div class="line"><span class="lineno">  444</span><span class="preprocessor">        };</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -163,7 +163,7 @@ $(function(){initNavTree('db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c41
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></li>
-    <li class="footer">Generated on Sat May 24 2025 22:44:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Wed May 28 2025 07:26:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->
