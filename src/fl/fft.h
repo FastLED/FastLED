@@ -85,10 +85,7 @@ class FFT {
   private:
     // Get the FFTImpl for the given arguments.
     FFTImpl &get_or_create(const FFT_Args &args);
-
-    // using HashMap = fl::HashMapLru<FFT_Args, Ptr<FFTImpl>>;
     struct HashMap;
-    // HashMap mMap = HashMap(8);
     scoped_ptr<HashMap> mMap;
 };
 

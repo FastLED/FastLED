@@ -1,7 +1,21 @@
 
 #include "audio.h"
+#include "fl/thread_local.h"
 
 namespace fl {
+
+namespace {
+
+FFT& get_flex_fft() {
+    // This is a singleton for the FFT implementation.
+    // It is used to avoid creating multiple FFT instances.
+    static ThreadLocal<FFT> gFlexFFT;
+    return gFlexFFT.access();
+}
+
+}
+
+
 
 const AudioSample::VectorPCM &AudioSample::pcm() const {
     if (isValid()) {
@@ -107,7 +121,7 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     current_spl_ = dbfs + offset_;
 }
 
-static FFT gFlexFFT;
+
 
 void AudioSample::fft(FFTBins *out) {
     fl::Slice<const int16_t> sample = pcm();
@@ -118,7 +132,7 @@ void AudioSample::fft(FFTBins *out) {
     args.fmax = FFT_Args::DefaultMaxFrequency();
     args.sample_rate =
         FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
-    gFlexFFT.run(sample, out, args);
+    get_flex_fft().run(sample, out, args);
 }
 
 } // namespace fl
