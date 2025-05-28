@@ -162,7 +162,18 @@ def main(
 
         # 3. Check firmware size and get commit hash
         print("Checking firmware size...")
-        size = check_firmware_size(board)
+        try:
+            size = check_firmware_size(board)
+        except FileNotFoundError as e:
+            print(f"Error checking firmware size: {e}")
+            if not step_back_commits(skip_step):
+                break
+            continue
+        except AssertionError as e:
+            print(f"Error: {e}")
+            if not step_back_commits(skip_step):
+                break
+            continue
         commit_hash = get_commit_hash()
         if size and commit_hash:
             commit_date = get_commit_date(commit_hash)
