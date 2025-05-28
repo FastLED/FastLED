@@ -18,6 +18,8 @@
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
 
+#include "fl/avr_disallowed.h"
+
 namespace fl {
 
 class Gradient;
@@ -32,9 +34,10 @@ FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(XYPathFunction);
 
 namespace xypath_detail {
-fl::Str unique_missing_name(const fl::Str &prefix = "XYCustomPath: ");
+fl::Str unique_missing_name(const char *prefix = "XYCustomPath: ");
 } // namespace xypath_detail
 
+AVR_DISALLOWED
 class XYPath : public Referent {
   public:
     /////////////////////////////////////////////
@@ -56,7 +59,7 @@ class XYPath : public Referent {
     NewCustomPath(const fl::function<vec2f(float)> &path,
                   const rect<int> &drawbounds = rect<int>(),
                   const TransformFloat &transform = TransformFloat(),
-                  const Str &name = xypath_detail::unique_missing_name());
+                  const char * name = nullptr);
 
     static XYPathPtr NewCirclePath();
     static XYPathPtr NewCirclePath(uint16_t width, uint16_t height);

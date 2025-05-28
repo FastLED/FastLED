@@ -32,7 +32,7 @@ ThreadLocal<XYRasterU8Sparse>& get_tls_raster() {
 } // namespace
 
 namespace xypath_detail {
-fl::Str unique_missing_name(const fl::Str &prefix) {
+fl::Str unique_missing_name(const char* prefix) {
     static int sUniqueName = 0;
     int id = ++sUniqueName;
     Str name = prefix;
@@ -239,7 +239,7 @@ XYPathPtr XYPath::NewCatmullRomPath(uint16_t width, uint16_t height,
 XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
                                 const rect<int> &drawbounds,
                                 const TransformFloat &transform,
-                                const Str &name) {
+                                const char* name) {
 
     XYPathFunctionPtr path = NewPtr<XYPathFunction>(f);
     path->setName(name);
