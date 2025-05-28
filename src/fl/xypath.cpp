@@ -16,7 +16,12 @@
 namespace fl {
 
 namespace { // anonymous namespace
-ThreadLocal<XYRasterU8Sparse> tls_raster;
+
+ThreadLocal<XYRasterU8Sparse>& get_tls_raster() {
+    static ThreadLocal<XYRasterU8Sparse> tls_raster;
+    return tls_raster;
+}
+
 } // namespace
 
 namespace xypath_detail {
@@ -258,7 +263,7 @@ void XYPath::setTransform(const TransformFloat &transform) {
 
 void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
                        int steps) {
-    XYRasterU8Sparse &raster = tls_raster.access();
+    XYRasterU8Sparse &raster = get_tls_raster().access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
     rasterize(from, to, steps, raster);
@@ -267,7 +272,7 @@ void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
 
 void XYPath::drawGradient(const Gradient &gradient, float from, float to,
                           Leds *leds, int steps) {
-    XYRasterU8Sparse &raster = tls_raster.access();
+    XYRasterU8Sparse &raster = get_tls_raster().access();
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
     rasterize(from, to, steps, raster);
