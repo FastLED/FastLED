@@ -15,19 +15,9 @@ import { isDenseGrid } from './graphics_utils.js';
 
 const DISABLE_MERGE_GEOMETRIES = false;
 
-// Helper function to group LEDs by material properties
-function groupLedsByMaterial(leds) {
-  const groups = new Map();
-  
-  leds.forEach(led => {
-    const key = `${led.material.color.r},${led.material.color.g},${led.material.color.b}`;
-    if (!groups.has(key)) {
-      groups.set(key, []);
-    }
-    groups.get(key).push(led);
-  });
-  
-  return groups;
+// Helper function to group all LEDs together unconditionally
+function groupAllLeds(leds) {
+  return leds;
 }
 
 function makePositionCalculators(frameData, screenWidth, screenHeight) {
@@ -443,9 +433,9 @@ export class GraphicsManagerThreeJS {
       planeGeometry = new THREE.PlaneGeometry(1.0, 1.0);
     }
     
-    // Group geometries by strip for merging
-    const geometriesByStrip = new Map();
-    const ledDataByStrip = new Map();
+    // Group all geometries together for merging
+    const allGeometries = [];
+    const allLedData = [];
     
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
@@ -463,11 +453,6 @@ export class GraphicsManagerThreeJS {
       
       const x_array = stripData.map.x;
       const y_array = stripData.map.y;
-      
-      if (canMergeGeometries && !geometriesByStrip.has(stripId)) {
-        geometriesByStrip.set(stripId, []);
-        ledDataByStrip.set(stripId, []);
-      }
       
       for (let i = 0; i < x_array.length; i++) {
         // Calculate position
@@ -518,64 +503,59 @@ export class GraphicsManagerThreeJS {
           instanceGeometry.translate(x, y, z);
           
           // Add to collection for merging
-          geometriesByStrip.get(stripId).push(instanceGeometry);
-          ledDataByStrip.get(stripId).push({ x, y, z });
+          allGeometries.push(instanceGeometry);
+          allLedData.push({ x, y, z });
         }
       }
     });
     
-    // If using merged geometry, create merged meshes
-    if (canMergeGeometries) {
-      for (const [stripId, geometries] of geometriesByStrip.entries()) {
-        if (geometries.length === 0) continue;
+    // If using merged geometry, create a single merged mesh for all LEDs
+    if (canMergeGeometries && allGeometries.length > 0) {
+      try {
+        // Merge all geometries together
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(allGeometries);
         
-        try {
-          // Merge geometries for this strip
-          const mergedGeometry = BufferGeometryUtils.mergeGeometries(geometries);
-          
-          // Create material and mesh with vertex colors
-          const material = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff,
-            vertexColors: true 
-          });
-          
-          // Create color attribute for the merged geometry
-          const colorCount = mergedGeometry.attributes.position.count;
-          const colorArray = new Float32Array(colorCount * 3);
-          mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-          
-          const mesh = new THREE.Mesh(mergedGeometry, material);
-          this.scene.add(mesh);
-          this.mergedMeshes.push(mesh);
-          
-          // Create dummy objects for individual control
-          const ledPositions = ledDataByStrip.get(stripId);
-          for (let i = 0; i < ledPositions.length; i++) {
-            const pos = ledPositions[i];
-            const dummyObj = {
-              material: { color: new THREE.Color(0, 0, 0) },
-              position: new THREE.Vector3(pos.x, pos.y, pos.z),
-              _isMerged: true,
-              _mergedIndex: i,
-              _parentMesh: mesh
-            };
-            this.leds.push(dummyObj);
-          }
-        } catch (e) {
-          console.log(BufferGeometryUtils);
-          console.error(`Failed to merge geometries for strip ${stripId}:`, e);
-          
-          // Fallback to individual geometries
-          for (let i = 0; i < geometries.length; i++) {
-            const pos = ledDataByStrip.get(stripId)[i];
-            const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const geometry = geometries[i].clone();
-            geometry.translate(-pos.x, -pos.y, -pos.z); // Reset position
-            const led = new THREE.Mesh(geometry, material);
-            led.position.set(pos.x, pos.y, pos.z);
-            this.scene.add(led);
-            this.leds.push(led);
-          }
+        // Create material and mesh with vertex colors
+        const material = new THREE.MeshBasicMaterial({ 
+          color: 0xffffff,
+          vertexColors: true 
+        });
+        
+        // Create color attribute for the merged geometry
+        const colorCount = mergedGeometry.attributes.position.count;
+        const colorArray = new Float32Array(colorCount * 3);
+        mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+        
+        const mesh = new THREE.Mesh(mergedGeometry, material);
+        this.scene.add(mesh);
+        this.mergedMeshes.push(mesh);
+        
+        // Create dummy objects for individual control
+        for (let i = 0; i < allLedData.length; i++) {
+          const pos = allLedData[i];
+          const dummyObj = {
+            material: { color: new THREE.Color(0, 0, 0) },
+            position: new THREE.Vector3(pos.x, pos.y, pos.z),
+            _isMerged: true,
+            _mergedIndex: i,
+            _parentMesh: mesh
+          };
+          this.leds.push(dummyObj);
+        }
+      } catch (e) {
+        console.log(BufferGeometryUtils);
+        console.error('Failed to merge geometries:', e);
+        
+        // Fallback to individual geometries
+        for (let i = 0; i < allGeometries.length; i++) {
+          const pos = allLedData[i];
+          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+          const geometry = allGeometries[i].clone();
+          geometry.translate(-pos.x, -pos.y, -pos.z); // Reset position
+          const led = new THREE.Mesh(geometry, material);
+          led.position.set(pos.x, pos.y, pos.z);
+          this.scene.add(led);
+          this.leds.push(led);
         }
       }
       
@@ -584,9 +564,7 @@ export class GraphicsManagerThreeJS {
       if (planeGeometry) planeGeometry.dispose();
       
       // Clean up individual geometries
-      for (const geometries of geometriesByStrip.values()) {
-        geometries.forEach(g => g.dispose());
-      }
+      allGeometries.forEach(g => g.dispose());
     }
   }
 
