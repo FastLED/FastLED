@@ -5,8 +5,14 @@ Legacy header. Prefer to use fl/colorutils.h instead since
 */
 #include "fl/colorutils.h"
 
-
+using fl::fadeLightBy;
+using fl::fade_video;
 using fl::fadeToBlackBy;
+using fl::nscale8_video;
+using fl::fade_raw;
+using fl::nscale8;
+using fl::fadeUsingColor;
+using fl::blend;
 using fl::CRGBPalette16;
 using fl::CRGBPalette32;
 using fl::CRGBPalette256;
@@ -23,6 +29,8 @@ using fl::TDynamicRGBGradientPalette_bytes;
 // using fl::TProgmemRGBGradientPalette_byte;
 // using fl::TProgmemRGBPalette16;
 // using fl::TProgmemRGBGradientPaletteRef;
+
+using fl::UpscalePalette;
 
 
 using fl::TDynamicRGBGradientPaletteRef;
@@ -43,10 +51,12 @@ using fl::blurRows;
 using fl::blur1d;
 using fl::blur2d;
 using fl::nblend;
-using fl::blend;
+using fl::applyGamma_video;
+
 
 // TBlendType values.
 using fl::NOBLEND;
+using fl::BLEND;
 using fl::LINEARBLEND;        ///< Linear interpolation between palette entries, with wrap-around from end to the beginning again
 using fl::LINEARBLEND_NOWRAP;
 
