@@ -238,7 +238,7 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(copy.count(), 2);
     
     // move constructor
-    bitset_dynamic moved(std::move(copy));
+    bitset_dynamic moved(fl::move(copy));
     REQUIRE_EQ(moved.size(), 10);
     REQUIRE_EQ(moved.test(3), true);
     REQUIRE_EQ(moved.test(7), true);
