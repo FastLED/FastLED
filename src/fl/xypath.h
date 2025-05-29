@@ -59,7 +59,7 @@ class XYPath : public Referent {
     NewCustomPath(const fl::function<vec2f(float)> &path,
                   const rect<int> &drawbounds = rect<int>(),
                   const TransformFloat &transform = TransformFloat(),
-                  const char * name = nullptr);
+                  const char *name = nullptr);
 
     static XYPathPtr NewCirclePath();
     static XYPathPtr NewCirclePath(uint16_t width, uint16_t height);

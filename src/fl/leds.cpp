@@ -46,5 +46,4 @@ Leds::Leds(CRGB *leds, uint16_t width, uint16_t height)
 
 } // namespace fl
 
-
 #endif // __AVR__

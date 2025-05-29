@@ -14,7 +14,8 @@ template <typename T> struct vec3 {
     constexpr vec3() = default;
     constexpr vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
-    template <typename U> explicit constexpr vec3(U xyz) : x(xyz), y(xyz), z(xyz) {}
+    template <typename U>
+    explicit constexpr vec3(U xyz) : x(xyz), y(xyz), z(xyz) {}
 
     constexpr vec3(const vec3 &p) : x(p.x), y(p.y), z(p.z) {}
     vec3 &operator*=(const float &f) {
@@ -84,13 +85,21 @@ template <typename T> struct vec3 {
         return *this;
     }
 
-    vec3 operator-(const vec3 &p) const { return vec3(x - p.x, y - p.y, z - p.z); }
+    vec3 operator-(const vec3 &p) const {
+        return vec3(x - p.x, y - p.y, z - p.z);
+    }
 
-    vec3 operator+(const vec3 &p) const { return vec3(x + p.x, y + p.y, z + p.z); }
+    vec3 operator+(const vec3 &p) const {
+        return vec3(x + p.x, y + p.y, z + p.z);
+    }
 
-    vec3 operator*(const vec3 &p) const { return vec3(x * p.x, y * p.y, z * p.z); }
+    vec3 operator*(const vec3 &p) const {
+        return vec3(x * p.x, y * p.y, z * p.z);
+    }
 
-    vec3 operator/(const vec3 &p) const { return vec3(x / p.x, y / p.y, z / p.z); }
+    vec3 operator/(const vec3 &p) const {
+        return vec3(x / p.x, y / p.y, z / p.z);
+    }
 
     template <typename NumberT> vec3 operator+(const NumberT &p) const {
         return vec3(x + p, y + p, z + p);
@@ -115,9 +124,13 @@ template <typename T> struct vec3 {
         return vec3<T>(a, b, c);
     }
 
-    bool operator==(const vec3 &p) const { return (x == p.x && y == p.y && z == p.z); }
+    bool operator==(const vec3 &p) const {
+        return (x == p.x && y == p.y && z == p.z);
+    }
 
-    bool operator!=(const vec3 &p) const { return (x != p.x || y != p.y || z != p.z); }
+    bool operator!=(const vec3 &p) const {
+        return (x != p.x || y != p.y || z != p.z);
+    }
 
     template <typename U> bool operator==(const vec3<U> &p) const {
         return (x == p.x && y == p.y && z == p.z);
@@ -127,9 +140,13 @@ template <typename T> struct vec3 {
         return (x != p.x || y != p.y || z != p.z);
     }
 
-    vec3 getMax(const vec3 &p) const { return vec3(MAX(x, p.x), MAX(y, p.y), MAX(z, p.z)); }
+    vec3 getMax(const vec3 &p) const {
+        return vec3(MAX(x, p.x), MAX(y, p.y), MAX(z, p.z));
+    }
 
-    vec3 getMin(const vec3 &p) const { return vec3(MIN(x, p.x), MIN(y, p.y), MIN(z, p.z)); }
+    vec3 getMin(const vec3 &p) const {
+        return vec3(MIN(x, p.x), MIN(y, p.y), MIN(z, p.z));
+    }
 
     template <typename U> vec3<U> cast() const {
         return vec3<U>(static_cast<U>(x), static_cast<U>(y), static_cast<U>(z));

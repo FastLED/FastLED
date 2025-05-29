@@ -218,7 +218,7 @@ vec2f ScreenMap::getBounds() const {
 
     LUTXYFLOAT &lut = *mLookUpTable.get();
 
-    fl::vec2f* data = lut.getDataMutable();
+    fl::vec2f *data = lut.getDataMutable();
     // float minX = lut[0].x;
     // float maxX = lut[0].x;
     // float minY = lut[0].y;

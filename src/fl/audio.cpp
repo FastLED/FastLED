@@ -6,14 +6,14 @@ namespace fl {
 
 namespace {
 
-FFT& get_flex_fft() {
+FFT &get_flex_fft() {
     // This is a singleton for the FFT implementation.
     // It is used to avoid creating multiple FFT instances.
     static ThreadLocal<FFT> gFlexFFT;
     return gFlexFFT.access();
 }
 
-}  // namespace
+} // namespace
 
 const AudioSample::VectorPCM &AudioSample::pcm() const {
     if (isValid()) {
@@ -118,8 +118,6 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     // 3) estimate SPL
     current_spl_ = dbfs + offset_;
 }
-
-
 
 void AudioSample::fft(FFTBins *out) {
     fl::Slice<const int16_t> sample = pcm();
