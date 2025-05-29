@@ -128,25 +128,32 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
 #if !FASTLED_ENABLE_JSON
     return;
 #else
+    if (!_doc) {
+        FASTLED_WARN("ScreenMap::toJson called with nullptr _doc");
+        return;
+    }
     auto &doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
-    for (auto kv : segmentMaps) {
-        auto segment = map[kv.first].to<FLArduinoJson::JsonObject>();
-        auto x_array = segment["x"].to<FLArduinoJson::JsonArray>();
-        auto y_array = segment["y"].to<FLArduinoJson::JsonArray>();
-        for (uint16_t i = 0; i < kv.second.getLength(); i++) {
-            const vec2f &xy = kv.second[i];
-            x_array.add(xy.x);
-            y_array.add(xy.y);
-        }
-        float diameter = kv.second.getDiameter();
-        if (diameter < 0.0f) {
-            diameter = .5f; // 5mm.
-        }
-        if (diameter > 0.0f) {
-            segment["diameter"] = diameter;
+    if (!segmentMaps.empty()) {
+        for (auto kv : segmentMaps) {
+            auto segment = map[kv.first].to<FLArduinoJson::JsonObject>();
+            auto x_array = segment["x"].to<FLArduinoJson::JsonArray>();
+            auto y_array = segment["y"].to<FLArduinoJson::JsonArray>();
+            for (uint16_t i = 0; i < kv.second.getLength(); i++) {
+                const vec2f &xy = kv.second[i];
+                x_array.add(xy.x);
+                y_array.add(xy.y);
+            }
+            float diameter = kv.second.getDiameter();
+            if (diameter < 0.0f) {
+                diameter = .5f; // 5mm.
+            }
+            if (diameter > 0.0f) {
+                segment["diameter"] = diameter;
+            }
         }
     }
+
 #endif
 }
 
