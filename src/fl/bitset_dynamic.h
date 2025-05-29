@@ -4,6 +4,8 @@
 #include <string.h> // for memcpy
 
 #include "fl/math_macros.h"
+#include "fl/scoped_ptr.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -13,7 +15,7 @@ class bitset_dynamic {
     static constexpr uint32_t bits_per_block = 8 * sizeof(uint64_t);
     using block_type = uint64_t;
 
-    block_type *_blocks = nullptr;
+    scoped_array<block_type> _blocks;
     uint32_t _block_count = 0;
     uint32_t _size = 0;
 
@@ -24,7 +26,7 @@ class bitset_dynamic {
 
   public:
     // Default constructor
-    bitset_dynamic() = default;
+    bitset_dynamic(): bitset_dynamic(256) {} // Default to 256 bits;
 
     // Constructor with initial size
     explicit bitset_dynamic(uint32_t size) { resize(size); }
@@ -33,15 +35,14 @@ class bitset_dynamic {
     bitset_dynamic(const bitset_dynamic &other) {
         if (other._size > 0) {
             resize(other._size);
-            memcpy(_blocks, other._blocks, _block_count * sizeof(block_type));
+            memcpy(_blocks.get(), other._blocks.get(), _block_count * sizeof(block_type));
         }
     }
 
     // Move constructor
     bitset_dynamic(bitset_dynamic &&other) noexcept
-        : _blocks(other._blocks), _block_count(other._block_count),
+        : _blocks(fl::move(other._blocks)), _block_count(other._block_count),
           _size(other._size) {
-        other._blocks = nullptr;
         other._block_count = 0;
         other._size = 0;
     }
@@ -51,7 +52,7 @@ class bitset_dynamic {
         if (this != &other) {
             if (other._size > 0) {
                 resize(other._size);
-                memcpy(_blocks, other._blocks,
+                memcpy(_blocks.get(), other._blocks.get(),
                        _block_count * sizeof(block_type));
             } else {
                 clear();
@@ -63,11 +64,9 @@ class bitset_dynamic {
     // Move assignment
     bitset_dynamic &operator=(bitset_dynamic &&other) noexcept {
         if (this != &other) {
-            delete[] _blocks;
-            _blocks = other._blocks;
+            _blocks = fl::move(other._blocks);
             _block_count = other._block_count;
             _size = other._size;
-            other._blocks = nullptr;
             other._block_count = 0;
             other._size = 0;
         }
@@ -75,7 +74,7 @@ class bitset_dynamic {
     }
 
     // Destructor
-    ~bitset_dynamic() { delete[] _blocks; }
+    ~bitset_dynamic() = default;
 
     void assign(size_t n, bool val) {
         if (n > _size) {
@@ -98,21 +97,20 @@ class bitset_dynamic {
         uint32_t new_block_count = calc_block_count(new_size);
 
         if (new_block_count != _block_count) {
-            block_type *new_blocks = nullptr;
-
+            scoped_array<block_type> new_blocks;
+            
             if (new_block_count > 0) {
-                new_blocks = new block_type[new_block_count]();
+                new_blocks.reset(new block_type[new_block_count]());
 
                 // Copy existing data if any
                 if (_blocks && _block_count > 0) {
-                    memcpy(new_blocks, _blocks,
+                    memcpy(new_blocks.get(), _blocks.get(),
                            MIN(_block_count, new_block_count) *
                                sizeof(block_type));
                 }
             }
 
-            delete[] _blocks;
-            _blocks = new_blocks;
+            _blocks = fl::move(new_blocks);
             _block_count = new_block_count;
         }
 
@@ -140,8 +138,7 @@ class bitset_dynamic {
 
     // Clear the bitset (reset to empty)
     void clear() {
-        delete[] _blocks;
-        _blocks = nullptr;
+        _blocks.reset();
         _block_count = 0;
         _size = 0;
     }
@@ -149,7 +146,7 @@ class bitset_dynamic {
     // Reset all bits to 0 without changing size
     void reset() noexcept {
         if (_blocks && _block_count > 0) {
-            memset(_blocks, 0, _block_count * sizeof(block_type));
+            memset(_blocks.get(), 0, _block_count * sizeof(block_type));
         }
     }
 
@@ -158,7 +155,7 @@ class bitset_dynamic {
         if (pos < _size) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
-            _blocks[idx] &= ~(static_cast<block_type>(1) << off);
+            _blocks.get()[idx] &= ~(static_cast<block_type>(1) << off);
         }
     }
 
@@ -167,7 +164,7 @@ class bitset_dynamic {
         if (pos < _size) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
-            _blocks[idx] |= (static_cast<block_type>(1) << off);
+            _blocks.get()[idx] |= (static_cast<block_type>(1) << off);
         }
     }
 
@@ -185,14 +182,14 @@ class bitset_dynamic {
         if (pos < _size) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
-            _blocks[idx] ^= (static_cast<block_type>(1) << off);
+            _blocks.get()[idx] ^= (static_cast<block_type>(1) << off);
         }
     }
 
     // Flip all bits
     void flip() noexcept {
         for (uint32_t i = 0; i < _block_count; ++i) {
-            _blocks[i] = ~_blocks[i];
+            _blocks.get()[i] = ~_blocks.get()[i];
         }
 
         // Clear any bits beyond size
@@ -201,7 +198,7 @@ class bitset_dynamic {
             uint32_t last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
-            _blocks[last_block_idx] &= mask;
+            _blocks.get()[last_block_idx] &= mask;
         }
     }
 
@@ -210,7 +207,7 @@ class bitset_dynamic {
         if (pos < _size) {
             const uint32_t idx = pos / bits_per_block;
             const uint32_t off = pos % bits_per_block;
-            return (_blocks[idx] >> off) & 1;
+            return (_blocks.get()[idx] >> off) & 1;
         }
         return false;
     }
@@ -219,7 +216,7 @@ class bitset_dynamic {
     uint32_t count() const noexcept {
         uint32_t result = 0;
         for (uint32_t i = 0; i < _block_count; ++i) {
-            block_type v = _blocks[i];
+            block_type v = _blocks.get()[i];
             // Brian Kernighan's algorithm for counting bits
             while (v) {
                 v &= (v - 1);
@@ -232,7 +229,7 @@ class bitset_dynamic {
     // Check if any bit is set
     bool any() const noexcept {
         for (uint32_t i = 0; i < _block_count; ++i) {
-            if (_blocks[i] != 0)
+            if (_blocks.get()[i] != 0)
                 return true;
         }
         return false;
@@ -247,7 +244,7 @@ class bitset_dynamic {
             return true;
 
         for (uint32_t i = 0; i < _block_count - 1; ++i) {
-            if (_blocks[i] != ~static_cast<block_type>(0))
+            if (_blocks.get()[i] != ~static_cast<block_type>(0))
                 return false;
         }
 
@@ -256,7 +253,7 @@ class bitset_dynamic {
             uint32_t last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
-            return (_blocks[_block_count - 1] & mask) == mask;
+            return (_blocks.get()[_block_count - 1] & mask) == mask;
         }
 
         return true;
@@ -274,7 +271,7 @@ class bitset_dynamic {
         uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
-            result._blocks[i] = _blocks[i] & other._blocks[i];
+            result._blocks.get()[i] = _blocks.get()[i] & other._blocks.get()[i];
         }
 
         return result;
@@ -286,12 +283,12 @@ class bitset_dynamic {
         uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
-            result._blocks[i] = _blocks[i] | other._blocks[i];
+            result._blocks.get()[i] = _blocks.get()[i] | other._blocks.get()[i];
         }
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            memcpy(result._blocks + min_blocks, _blocks + min_blocks,
+            memcpy(result._blocks.get() + min_blocks, _blocks.get() + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 
@@ -304,12 +301,12 @@ class bitset_dynamic {
         uint32_t min_blocks = MIN(_block_count, other._block_count);
 
         for (uint32_t i = 0; i < min_blocks; ++i) {
-            result._blocks[i] = _blocks[i] ^ other._blocks[i];
+            result._blocks.get()[i] = _blocks.get()[i] ^ other._blocks.get()[i];
         }
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            memcpy(result._blocks + min_blocks, _blocks + min_blocks,
+            memcpy(result._blocks.get() + min_blocks, _blocks.get() + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 
@@ -319,9 +316,12 @@ class bitset_dynamic {
     // Bitwise NOT operator
     bitset_dynamic operator~() const {
         bitset_dynamic result(_size);
+        if (!result._blocks) {
+            result._blocks.reset(new block_type[_block_count]());
+        }
 
         for (uint32_t i = 0; i < _block_count; ++i) {
-            result._blocks[i] = ~_blocks[i];
+            result._blocks.get()[i] = ~_blocks.get()[i];
         }
 
         // Clear any bits beyond size
@@ -330,7 +330,7 @@ class bitset_dynamic {
             uint32_t last_bit_pos = (_size - 1) % bits_per_block;
             block_type mask =
                 (static_cast<block_type>(1) << (last_bit_pos + 1)) - 1;
-            result._blocks[last_block_idx] &= mask;
+            result._blocks.get()[last_block_idx] &= mask;
         }
 
         return result;

@@ -129,7 +129,7 @@ TEST_CASE("compare fixed and dynamic bitsets") {
 TEST_CASE("test bitset_dynamic") {
     // default-constructed bitset is empty
     bitset_dynamic bs;
-    REQUIRE_EQ(bs.size(), 0);
+    REQUIRE_EQ(bs.size(), 256);
     REQUIRE_EQ(bs.none(), true);
     REQUIRE_EQ(bs.count(), 0);
     
