@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#pragma once
 
 #include "fl/namespace.h"
 #include <stdint.h>
