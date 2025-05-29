@@ -121,32 +121,32 @@ $(function(){initNavTree('d9/d68/classfl_1_1_sound_level_meter_a3ffe4bf54119b3dd
 
 <p>Process a block of int16 PCM samples. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00084">84</a> of file <a class="el" href="../../d1/ddc/audio_8cpp_source.html">audio.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   84</span>                                                                       {</div>
-<div class="line"><span class="lineno">   85</span>    <span class="comment">// 1) compute block power → dBFS</span></div>
-<div class="line"><span class="lineno">   86</span>    <span class="keywordtype">double</span> sum_sq = 0.0;</div>
-<div class="line"><span class="lineno">   87</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; count; ++i) {</div>
-<div class="line"><span class="lineno">   88</span>        <span class="keywordtype">double</span> s = samples[i] / 32768.0; <span class="comment">// normalize to ±1</span></div>
-<div class="line"><span class="lineno">   89</span>        sum_sq += s * s;</div>
-<div class="line"><span class="lineno">   90</span>    }</div>
-<div class="line"><span class="lineno">   91</span>    <span class="keywordtype">double</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = sum_sq / count; <span class="comment">// mean power</span></div>
-<div class="line"><span class="lineno">   92</span>    <span class="keywordtype">double</span> dbfs = 10.0 * log10(<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> + 1e-12);</div>
-<div class="line"><span class="lineno">   93</span>    <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a609bb6a19256d3a5c47e006b2f23d4d6.html#a609bb6a19256d3a5c47e006b2f23d4d6">current_dbfs_</a> = dbfs;</div>
-<div class="line"><span class="lineno">   94</span> </div>
-<div class="line"><span class="lineno">   95</span>    <span class="comment">// 2) update global floor (with optional smoothing)</span></div>
-<div class="line"><span class="lineno">   96</span>    <span class="keywordflow">if</span> (dbfs &lt; <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>) {</div>
-<div class="line"><span class="lineno">   97</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a> &lt;= 0.0) {</div>
-<div class="line"><span class="lineno">   98</span>            <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a> = dbfs;</div>
-<div class="line"><span class="lineno">   99</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  100</span>            <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a> = <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a> * dbfs +</div>
-<div class="line"><span class="lineno">  101</span>                                 (1.0 - <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a>) * <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>;</div>
-<div class="line"><span class="lineno">  102</span>        }</div>
-<div class="line"><span class="lineno">  103</span>        <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c.html#a919674231290297ddf0d7758e919364c">offset_</a> = <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_ad0763031c074c1c4f2c7ab9cc9076a19.html#ad0763031c074c1c4f2c7ab9cc9076a19">spl_floor_</a> - <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>;</div>
-<div class="line"><span class="lineno">  104</span>    }</div>
-<div class="line"><span class="lineno">  105</span> </div>
-<div class="line"><span class="lineno">  106</span>    <span class="comment">// 3) estimate SPL</span></div>
-<div class="line"><span class="lineno">  107</span>    <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_ae01b6fb38fad4e88f0250a7c7bc33681.html#ae01b6fb38fad4e88f0250a7c7bc33681">current_spl_</a> = dbfs + <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c.html#a919674231290297ddf0d7758e919364c">offset_</a>;</div>
-<div class="line"><span class="lineno">  108</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00096">96</a> of file <a class="el" href="../../d1/ddc/audio_8cpp_source.html">audio.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   96</span>                                                                       {</div>
+<div class="line"><span class="lineno">   97</span>    <span class="comment">// 1) compute block power → dBFS</span></div>
+<div class="line"><span class="lineno">   98</span>    <span class="keywordtype">double</span> sum_sq = 0.0;</div>
+<div class="line"><span class="lineno">   99</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; count; ++i) {</div>
+<div class="line"><span class="lineno">  100</span>        <span class="keywordtype">double</span> s = samples[i] / 32768.0; <span class="comment">// normalize to ±1</span></div>
+<div class="line"><span class="lineno">  101</span>        sum_sq += s * s;</div>
+<div class="line"><span class="lineno">  102</span>    }</div>
+<div class="line"><span class="lineno">  103</span>    <span class="keywordtype">double</span> <a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> = sum_sq / count; <span class="comment">// mean power</span></div>
+<div class="line"><span class="lineno">  104</span>    <span class="keywordtype">double</span> dbfs = 10.0 * log10(<a class="code hl_variable" href="../../d6/de8/noise_8cpp_ad4f390ff52b49f726bfdf77302fbd4d5.html#ad4f390ff52b49f726bfdf77302fbd4d5">p</a> + 1e-12);</div>
+<div class="line"><span class="lineno">  105</span>    <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a609bb6a19256d3a5c47e006b2f23d4d6.html#a609bb6a19256d3a5c47e006b2f23d4d6">current_dbfs_</a> = dbfs;</div>
+<div class="line"><span class="lineno">  106</span> </div>
+<div class="line"><span class="lineno">  107</span>    <span class="comment">// 2) update global floor (with optional smoothing)</span></div>
+<div class="line"><span class="lineno">  108</span>    <span class="keywordflow">if</span> (dbfs &lt; <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>) {</div>
+<div class="line"><span class="lineno">  109</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a> &lt;= 0.0) {</div>
+<div class="line"><span class="lineno">  110</span>            <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a> = dbfs;</div>
+<div class="line"><span class="lineno">  111</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  112</span>            <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a> = <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a> * dbfs +</div>
+<div class="line"><span class="lineno">  113</span>                                 (1.0 - <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_aaaad5847e5a778461f88aea9c02703b4.html#aaaad5847e5a778461f88aea9c02703b4">smoothing_alpha_</a>) * <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>;</div>
+<div class="line"><span class="lineno">  114</span>        }</div>
+<div class="line"><span class="lineno">  115</span>        <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c.html#a919674231290297ddf0d7758e919364c">offset_</a> = <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_ad0763031c074c1c4f2c7ab9cc9076a19.html#ad0763031c074c1c4f2c7ab9cc9076a19">spl_floor_</a> - <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">dbfs_floor_global_</a>;</div>
+<div class="line"><span class="lineno">  116</span>    }</div>
+<div class="line"><span class="lineno">  117</span> </div>
+<div class="line"><span class="lineno">  118</span>    <span class="comment">// 3) estimate SPL</span></div>
+<div class="line"><span class="lineno">  119</span>    <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_ae01b6fb38fad4e88f0250a7c7bc33681.html#ae01b6fb38fad4e88f0250a7c7bc33681">current_spl_</a> = dbfs + <a class="code hl_variable" href="../../d9/d68/classfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c.html#a919674231290297ddf0d7758e919364c">offset_</a>;</div>
+<div class="line"><span class="lineno">  120</span>}</div>
 <div class="ttc" id="aclassfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f_html_a3102476ebb31884e0efe33f2c8b2b60f"><div class="ttname"><a href="../../d9/d68/classfl_1_1_sound_level_meter_a3102476ebb31884e0efe33f2c8b2b60f.html#a3102476ebb31884e0efe33f2c8b2b60f">fl::SoundLevelMeter::dbfs_floor_global_</a></div><div class="ttdeci">double dbfs_floor_global_</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00093">audio.h:93</a></div></div>
 <div class="ttc" id="aclassfl_1_1_sound_level_meter_a609bb6a19256d3a5c47e006b2f23d4d6_html_a609bb6a19256d3a5c47e006b2f23d4d6"><div class="ttname"><a href="../../d9/d68/classfl_1_1_sound_level_meter_a609bb6a19256d3a5c47e006b2f23d4d6.html#a609bb6a19256d3a5c47e006b2f23d4d6">fl::SoundLevelMeter::current_dbfs_</a></div><div class="ttdeci">double current_dbfs_</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00095">audio.h:95</a></div></div>
 <div class="ttc" id="aclassfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c_html_a919674231290297ddf0d7758e919364c"><div class="ttname"><a href="../../d9/d68/classfl_1_1_sound_level_meter_a919674231290297ddf0d7758e919364c.html#a919674231290297ddf0d7758e919364c">fl::SoundLevelMeter::offset_</a></div><div class="ttdeci">double offset_</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00094">audio.h:94</a></div></div>
@@ -175,7 +175,7 @@ $(function(){initNavTree('d9/d68/classfl_1_1_sound_level_meter_a3ffe4bf54119b3dd
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d68/classfl_1_1_sound_level_meter.html">SoundLevelMeter</a></li>
-    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu May 29 2025 04:44:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

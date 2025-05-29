@@ -38,7 +38,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a9c851c66f2e46b214500ec6c3722b9a4.html#a9c851c66f2e46b214500ec6c3722b9a4" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp_a9c851c66f2e46b214500ec6c3722b9a4.html#a9c851c66f2e46b214500ec6c3722b9a4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="313,-93 213,-93 213,-74 313,-74 313,-93"/>
 <text text-anchor="middle" x="263" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">CreateArgsLower</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d8/d96/examples_2_x_y_path_2src_2wave_8cpp_afab48463dd09a75d6a518ac33378eda4.html#afab48463dd09a75d6a518ac33378eda4" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp_afab48463dd09a75d6a518ac33378eda4.html#afab48463dd09a75d6a518ac33378eda4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="313,-56 213,-56 213,-37 313,-37 313,-56"/>
 <text text-anchor="middle" x="263" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CreateArgsUpper</text>
 </a>

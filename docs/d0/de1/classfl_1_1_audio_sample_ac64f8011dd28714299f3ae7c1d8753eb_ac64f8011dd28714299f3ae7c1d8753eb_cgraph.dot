@@ -21,7 +21,18 @@ digraph "fl::AudioSample::fft"
   Node5 -> Node7 [id="edge7_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::AudioSample::isValid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5",tooltip=" "];
   Node1 -> Node8 [id="edge8_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::FFTBins::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dd3/structfl_1_1_f_f_t_bins_af683fef1815a999c74b9d3c88a4c439a.html#af683fef1815a999c74b9d3c88a4c439a",tooltip=" "];
-  Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fl::Slice::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe",tooltip=" "];
+  Node8 [id="Node000008",label="fl::FFT::run",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d47/classfl_1_1_f_f_t_a63cd4b56f67a2a7c50897b17bbfd7a04.html#a63cd4b56f67a2a7c50897b17bbfd7a04",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::FFT::get_or_create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca546493.html#a2f2b31050c11af2512949bb2ca546493",tooltip=" "];
+  Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::NewPtr",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0.html#aa46ba73e92c85e05f9ee42f4008cfbe0",tooltip=" "];
+  Node8 -> Node17 [id="edge11_Node000008_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::FFTImpl::run",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d9d/classfl_1_1_f_f_t_impl_a2cf1798382987b6b0dd6aee368d957d8.html#a2cf1798382987b6b0dd6aee368d957d8",tooltip=" "];
+  Node17 -> Node5 [id="edge12_Node000017_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node17 [id="edge13_Node000017_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node18 [id="edge14_Node000008_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::Slice::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de4/classfl_1_1_slice_ac58f0072a72c9466170b3bf931473dbe.html#ac58f0072a72c9466170b3bf931473dbe",tooltip=" "];
+  Node1 -> Node19 [id="edge15_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::FFTBins::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dd3/structfl_1_1_f_f_t_bins_af683fef1815a999c74b9d3c88a4c439a.html#af683fef1815a999c74b9d3c88a4c439a",tooltip=" "];
+  Node1 -> Node18 [id="edge16_Node000001_Node000018",color="steelblue1",style="solid",tooltip=" "];
 }

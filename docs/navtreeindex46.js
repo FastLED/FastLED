@@ -1,6 +1,5 @@
 var NAVTREEINDEX46 =
 {
-"functions.html":[6,3,0],
 "functions.html":[6,3,0,0],
 "functions_a.html":[6,3,0,1],
 "functions_b.html":[6,3,0,2],
@@ -249,5 +248,6 @@ var NAVTREEINDEX46 =
 "index.html#autotoc_md9":[0,3],
 "namespacemembers.html":[5,1,0],
 "namespacemembers.html":[5,1,0,0],
-"namespacemembers_a.html":[5,1,0,1]
+"namespacemembers_a.html":[5,1,0,1],
+"namespacemembers_b.html":[5,1,0,2]
 };

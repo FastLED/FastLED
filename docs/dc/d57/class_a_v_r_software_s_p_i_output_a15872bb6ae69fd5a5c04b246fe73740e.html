@@ -126,9 +126,9 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED&gt; </div>
 </div><div class="memdoc">
 
 <p>Select the SPI output (chip select) </p>
-<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000011">Todo</a></b></dt><dd>Research whether this really means 'hi' or 'lo'. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000007">Todo</a></b></dt><dd>Research whether this really means 'hi' or 'lo'. </dd></dl>
 <dl class="section user"><dt></dt><dd></dd></dl>
-<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000012">Todo</a></b></dt><dd>Move select responsibility out of the SPI classes entirely, make it up to the caller to remember to lock/select the line? </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000008">Todo</a></b></dt><dd>Move select responsibility out of the SPI classes entirely, make it up to the caller to remember to lock/select the line? </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html#l00239">239</a> of file <a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html">fastspi_bitbang.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  239</span>{ <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../dc/d57/class_a_v_r_software_s_p_i_output_aa564945b8f013b7ba3f8cd3700c13305.html#aa564945b8f013b7ba3f8cd3700c13305">m_pSelect</a> != <a class="code hl_class" href="../../dc/d57/class_a_v_r_software_s_p_i_output.html">NULL</a>) { <a class="code hl_variable" href="../../dc/d57/class_a_v_r_software_s_p_i_output_aa564945b8f013b7ba3f8cd3700c13305.html#aa564945b8f013b7ba3f8cd3700c13305">m_pSelect</a>-&gt;select(); } } <span class="comment">// FastPin&lt;SELECT_PIN&gt;::hi(); }</span></div>
@@ -155,7 +155,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dc/d57/class_a_v_r_software_s_p_i_output.html">AVRSoftwareSPIOutput</a></li>
-    <li class="footer">Generated on Wed May 28 2025 07:26:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu May 29 2025 04:44:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

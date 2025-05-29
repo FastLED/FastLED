@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl::FunctionList::invoke</title>
+<title>FastLED: fl::FunctionList&lt; void &gt;::invoke</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,12 +101,10 @@ $(function(){initNavTree('d1/d5d/classfl_1_1_function_list_adca4004c4e31051cf0de
 
 <div class="contents">
 <a id="adca4004c4e31051cf0dee2aac517730e" name="adca4004c4e31051cf0dee2aac517730e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adca4004c4e31051cf0dee2aac517730e">&#9670;&#160;</a></span>invoke()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adca4004c4e31051cf0dee2aac517730e">&#9670;&#160;</a></span>invoke() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename... Args&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -128,15 +126,13 @@ template&lt;typename... Args&gt; </div>
 <p class="definition">Definition at line <a class="el" href="../../d0/d64/function__list_8h_source.html#l00038">38</a> of file <a class="el" href="../../d0/d64/function__list_8h_source.html">function_list.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   38</span>                              {</div>
 <div class="line"><span class="lineno">   39</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;<a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">pair</a> : this-&gt;<a class="code hl_variable" href="../../d7/de3/classfl_1_1_function_list_base_aebc913ca7669395d56715eb2a3e57d6c.html#aebc913ca7669395d56715eb2a3e57d6c">mFunctions</a>) {</div>
-<div class="line"><span class="lineno">   40</span>            <span class="keyword">auto</span> &amp;<a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">function</a> = <a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">pair</a>.second;</div>
-<div class="line"><span class="lineno">   41</span>            <a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">function</a>(<a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">args</a>...);</div>
+<div class="line"><span class="lineno">   40</span>            <span class="keyword">auto</span> &amp;<span class="keyword">function</span> = <a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">pair</a>.second;</div>
+<div class="line"><span class="lineno">   41</span>            <span class="keyword">function</span>(<a class="code hl_class" href="../../d1/d5d/classfl_1_1_function_list.html">args</a>...);</div>
 <div class="line"><span class="lineno">   42</span>        }</div>
 <div class="line"><span class="lineno">   43</span>    }</div>
 <div class="ttc" id="aclassfl_1_1_function_list_base_aebc913ca7669395d56715eb2a3e57d6c_html_aebc913ca7669395d56715eb2a3e57d6c"><div class="ttname"><a href="../../d7/de3/classfl_1_1_function_list_base_aebc913ca7669395d56715eb2a3e57d6c.html#aebc913ca7669395d56715eb2a3e57d6c">fl::FunctionListBase&lt; function&lt; void(Args...)&gt; &gt;::mFunctions</a></div><div class="ttdeci">fl::vector&lt; pair&lt; int, function&lt; void(Args...)&gt; &gt; &gt; mFunctions</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d64/function__list_8h_source.html#l00010">function_list.h:10</a></div></div>
 <div class="ttc" id="aclassfl_1_1_function_list_html"><div class="ttname"><a href="../../d1/d5d/classfl_1_1_function_list.html">fl::FunctionList</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/d64/function__list_8h_source.html#l00036">function_list.h:36</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/d43/_festival_stick_8ino_source.html#l00133">args</a>, and <a class="el" href="../../d0/d64/function__list_8h_source.html#l00010">fl::FunctionListBase&lt; function&lt; void(Args...)&gt; &gt;::mFunctions</a>.</p>
-
 </div>
 </div>
 </div><!-- contents -->
@@ -145,8 +141,8 @@ template&lt;typename... Args&gt; </div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d5d/classfl_1_1_function_list.html">FunctionList</a></li>
-    <li class="footer">Generated on Wed May 28 2025 07:26:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/df5/classfl_1_1_function_list_3_01void_01_4.html">FunctionList&lt; void &gt;</a></li>
+    <li class="footer">Generated on Thu May 29 2025 04:44:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

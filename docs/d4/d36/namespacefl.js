@@ -6,6 +6,9 @@ var namespacefl =
       [ "Alloc", "d5/d98/namespacefl_1_1anonymous__namespace_02allocator_8cpp_03_ad2b4b1702cf09e1720127f0ab8b0e532.html#ad2b4b1702cf09e1720127f0ab8b0e532", null ],
       [ "Free", "d5/d98/namespacefl_1_1anonymous__namespace_02allocator_8cpp_03_a061a5acbd43e6305bf6e4ec6b7a5bc3e.html#a061a5acbd43e6305bf6e4ec6b7a5bc3e", null ]
     ] ],
+    [ "anonymous_namespace{audio.cpp}", "d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03.html", [
+      [ "get_flex_fft", "d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03_a63dcc803fe703f176b52e25bde0c3adf.html#a63dcc803fe703f176b52e25bde0c3adf", null ]
+    ] ],
     [ "anonymous_namespace{blur.cpp}", "d5/d5f/namespacefl_1_1anonymous__namespace_02blur_8cpp_03.html", [
       [ "xy_legacy_wrapper", "d5/d5f/namespacefl_1_1anonymous__namespace_02blur_8cpp_03_a1fce2041d1fcef82965b6040fba808fb.html#a1fce2041d1fcef82965b6040fba808fb", null ]
     ] ],
@@ -638,7 +641,6 @@ var namespacefl =
     [ "BlueWhite_p", "d4/d36/namespacefl_a8f59549de3d13e5c2eca8eb5a6db03b3.html#a8f59549de3d13e5c2eca8eb5a6db03b3", null ],
     [ "cosArray", "d4/d36/namespacefl_ada273a8d1bfc0a5d3fe2971b142d0089.html#ada273a8d1bfc0a5d3fe2971b142d0089", null ],
     [ "FairyLight_p", "d4/d36/namespacefl_ace1de9edb33714f4962e3a296e0b4fcf.html#ace1de9edb33714f4962e3a296e0b4fcf", null ],
-    [ "gFlexFFT", "d4/d36/namespacefl_a8ae2374298924cb73f6505f177a8080f.html#a8ae2374298924cb73f6505f177a8080f", null ],
     [ "Holly_p", "d4/d36/namespacefl_ae7cf0c4f10bb3bbdc390e5c7cf55fc63.html#ae7cf0c4f10bb3bbdc390e5c7cf55fc63", null ],
     [ "Ice_p", "d4/d36/namespacefl_abf87a7086b57b455fb053693754fc208.html#abf87a7086b57b455fb053693754fc208", null ],
     [ "instead", "d5/d3d/group___color_blurs_ga90f2a00a4a93f7896a79a51f82349a19.html#ga90f2a00a4a93f7896a79a51f82349a19", null ],

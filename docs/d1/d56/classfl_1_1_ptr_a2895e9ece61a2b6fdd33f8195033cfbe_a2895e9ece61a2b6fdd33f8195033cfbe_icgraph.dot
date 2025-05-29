@@ -33,14 +33,14 @@ digraph "fl::Ptr::TakeOwnership"
   Node13 [id="Node000013",label="fl::RosePath::RosePath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc1/classfl_1_1_rose_path_a07b56a3ed0439b2408f818f1cc53fa58.html#a07b56a3ed0439b2408f818f1cc53fa58",tooltip=" "];
   Node8 -> Node14 [id="edge13_Node000008_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="fl::FFT::get_or_create",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d47/classfl_1_1_f_f_t_a2f2b31050c11af2512949bb2ca546493.html#a2f2b31050c11af2512949bb2ca546493",tooltip=" "];
-  Node8 -> Node16 [id="edge14_Node000008_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="anonymous_namespace\l\{xypaths::cpp\}::make_path",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d76/namespaceanonymous__namespace_02xypaths_8cpp_03_a8091017d8d8c14f1197f3480df54acf5.html#a8091017d8d8c14f1197f3480df54acf5",tooltip=" "];
-  Node8 -> Node18 [id="edge15_Node000008_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl::XYPath::NewCustomPath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_a6eb96929496e7ca3a84e1a9d184daa45.html#a6eb96929496e7ca3a84e1a9d184daa45",tooltip=" "];
-  Node8 -> Node19 [id="edge16_Node000008_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="fl::XYPath::NewLinePath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_a32ddbbb670b08579c9e8d9fb56fcc0ff.html#a32ddbbb670b08579c9e8d9fb56fcc0ff",tooltip=" "];
-  Node8 -> Node20 [id="edge17_Node000008_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="NewWaveSimulation2D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9",tooltip=" "];
-  Node1 -> Node21 [id="edge18_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="fl::PtrTraits::New",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d",tooltip=" "];
+  Node8 -> Node17 [id="edge14_Node000008_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="anonymous_namespace\l\{xypaths::cpp\}::make_path",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d76/namespaceanonymous__namespace_02xypaths_8cpp_03_a8091017d8d8c14f1197f3480df54acf5.html#a8091017d8d8c14f1197f3480df54acf5",tooltip=" "];
+  Node8 -> Node19 [id="edge15_Node000008_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::XYPath::NewCustomPath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_a6eb96929496e7ca3a84e1a9d184daa45.html#a6eb96929496e7ca3a84e1a9d184daa45",tooltip=" "];
+  Node8 -> Node20 [id="edge16_Node000008_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::XYPath::NewLinePath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_a32ddbbb670b08579c9e8d9fb56fcc0ff.html#a32ddbbb670b08579c9e8d9fb56fcc0ff",tooltip=" "];
+  Node8 -> Node21 [id="edge17_Node000008_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="NewWaveSimulation2D",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9",tooltip=" "];
+  Node1 -> Node23 [id="edge18_Node000001_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::PtrTraits::New",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d",tooltip=" "];
 }
