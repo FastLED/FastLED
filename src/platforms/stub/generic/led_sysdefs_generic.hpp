@@ -3,7 +3,7 @@
 
 #include "platforms/stub/led_sysdefs_stub.h"
 #include "fl/unused.h"
-#include "fl/diagnostic_macros.h"
+#include "fl/compiler_control.h"
 
 
 #include <chrono>
