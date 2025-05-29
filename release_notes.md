@@ -1,3 +1,8 @@
+FastLED 3.9.18 + 3.9.19
+==============
+* Hotfixes for AVR platforms for 3.9.17
+
+
 FastLED 3.9.17
 ==============
 

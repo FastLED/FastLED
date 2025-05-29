@@ -13,9 +13,7 @@ FFT& get_flex_fft() {
     return gFlexFFT.access();
 }
 
-}
-
-
+}  // namespace
 
 const AudioSample::VectorPCM &AudioSample::pcm() const {
     if (isValid()) {
