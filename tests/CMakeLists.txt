@@ -98,7 +98,7 @@ set(CXX_SPECIFIC_FLAGS
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND CXX_SPECIFIC_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field)
+    list(APPEND CXX_SPECIFIC_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field -Wglobal-constructors -Werror=global-constructors)
 endif()
 
 

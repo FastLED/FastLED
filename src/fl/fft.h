@@ -59,11 +59,7 @@ struct FFT_Args {
         this->sample_rate = sample_rate;
     }
 
-    bool operator==(const FFT_Args &other) const {
-        return samples == other.samples && bands == other.bands &&
-               fmin == other.fmin && fmax == other.fmax &&
-               sample_rate == other.sample_rate;
-    }
+    bool operator==(const FFT_Args &other) const ;
     bool operator!=(const FFT_Args &other) const { return !(*this == other); }
 };
 

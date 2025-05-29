@@ -48,6 +48,9 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
     os.environ["CXX"] = CLANGPP
     os.environ["AR"] = LLVM_AR
 
+    os.environ["CXXFLAGS"] = os.environ.get("CXXFLAGS", "") + " -ferror-limit=1"
+    os.environ["CFLAGS"] = os.environ.get("CFLAGS", "") + " -ferror-limit=1"
+
     if WASM_BUILD:
         wasm_flags = [
             "--target=wasm32",
@@ -181,6 +184,7 @@ def compile_fastled(specific_test: str | None = None) -> None:
                 "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--no-entry -Wl,--export-all -Wl,--lto-O3 -Wl,-z,stack-size=8388608",
             ]
         )
+
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     run_command(cmake_configure_command, cwd=BUILD_DIR)
 

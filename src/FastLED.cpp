@@ -2,6 +2,7 @@
 #include "FastLED.h"
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
+#include "fl/diagnostic_macros.h"
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
@@ -55,7 +56,12 @@ uint8_t get_brightness();
 /// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = NULL;
 
-CFastLED FastLED;
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING("-Wglobal-constructors")
+
+CFastLED FastLED;  // global constructor allowed in this case.
+
+FL_DISABLE_WARNING_POP
 
 CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;

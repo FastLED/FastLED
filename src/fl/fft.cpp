@@ -2,6 +2,7 @@
 #include "fl/fft.h"
 #include "fl/fft_impl.h"
 #include "fl/hash_map_lru.h"
+#include "fl/diagnostic_macros.h"
 
 namespace fl {
 
@@ -43,6 +44,19 @@ FFTImpl &FFT::get_or_create(const FFT_Args &args) {
     Ptr<FFTImpl> fft = NewPtr<FFTImpl>(args);
     (*mMap)[args] = fft;
     return *fft;
+}
+
+
+
+bool FFT_Args::operator==(const FFT_Args &other) const {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING("-Wfloat-equal");
+
+    return samples == other.samples && bands == other.bands &&
+           fmin == other.fmin && fmax == other.fmax &&
+           sample_rate == other.sample_rate;
+
+    FL_DISABLE_WARNING_POP
 }
 
 } // namespace fl

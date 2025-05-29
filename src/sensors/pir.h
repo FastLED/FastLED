@@ -69,7 +69,6 @@ private:
     TimeRamp  mRamp;
     bool       mLastState = false;
     UIButton mButton;
-    bool mResetState = false;
     
 };
 

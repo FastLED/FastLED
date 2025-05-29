@@ -3,11 +3,19 @@
 
 #include "platforms/stub/led_sysdefs_stub.h"
 #include "fl/unused.h"
+#include "fl/diagnostic_macros.h"
+
 
 #include <chrono>
 #include <thread>
 
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING("-Wglobal-constructors")
+
 static const auto start_time = std::chrono::system_clock::now();
+
+FL_DISABLE_WARNING_POP
 
 void pinMode(uint8_t pin, uint8_t mode) {
     // Empty stub as we don't actually ever write anything
