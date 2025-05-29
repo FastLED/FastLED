@@ -948,9 +948,6 @@ using namespace fl;
 #endif
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcomment"
-
 // Experimental: loop() hijacking.
 //
 // EngineEvents requires that FastLED.show() be invoked.
@@ -964,10 +961,10 @@ using namespace fl;
 //
 // It's possible to hijack the loop() via a macro so that
 // extra code can be injected at the start of every frame.
-// 
-// #define loop() \
-//     real_loop(); \
-//     void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
-//     void real_loop()
 
-#pragma GCC diagnostic pop
+#if 0
+#define loop() \
+     real_loop(); \
+     void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
+     void real_loop()
+#endif
