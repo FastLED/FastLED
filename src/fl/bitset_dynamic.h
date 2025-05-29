@@ -24,7 +24,7 @@ class bitset_dynamic {
 
   public:
     // Default constructor
-    bitset_dynamic() { resize(256); }
+    bitset_dynamic() = default;
 
     // Constructor with initial size
     explicit bitset_dynamic(uint32_t size) { resize(size); }
