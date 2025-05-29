@@ -73,12 +73,13 @@ float WaveSimulation2D::getf(size_t x, size_t y) const {
 
 int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
     if (!has(x, y))
-        return 0;
+        return 0;    
     int32_t sum = 0;
-    for (uint32_t j = 0; j < mMultiplier; ++j) {
-        for (uint32_t i = 0; i < mMultiplier; ++i) {
-            uint32_t xx = x * mMultiplier + i;
-            uint32_t yy = y * mMultiplier + j;
+    uint8_t mult = MAX(1, mMultiplier);
+    for (uint32_t j = 0; j < mult; ++j) {
+        for (uint32_t i = 0; i < mult; ++i) {
+            uint32_t xx = x * mult + i;
+            uint32_t yy = y * mult + j;
             int32_t pt = mSim->geti16(xx, yy);
             // int32_t ch_pt = mChangeGrid[(yy * mMultiplier) + xx];
             int32_t ch_pt = mChangeGrid(xx, yy);
@@ -89,7 +90,7 @@ int16_t WaveSimulation2D::geti16(size_t x, size_t y) const {
             }
         }
     }
-    int16_t out = static_cast<int16_t>(sum / (mMultiplier * mMultiplier));
+    int16_t out = static_cast<int16_t>(sum / (mult * mult));
     return out;
 }
 
@@ -97,13 +98,14 @@ int16_t WaveSimulation2D::geti16Previous(size_t x, size_t y) const {
     if (!has(x, y))
         return 0;
     int32_t sum = 0;
-    for (uint32_t j = 0; j < mMultiplier; ++j) {
-        for (uint32_t i = 0; i < mMultiplier; ++i) {
+    uint8_t mult = MAX(1, mMultiplier);
+    for (uint32_t j = 0; j < mult; ++j) {
+        for (uint32_t i = 0; i < mult; ++i) {
             sum +=
-                mSim->geti16Previous(x * mMultiplier + i, y * mMultiplier + j);
+                mSim->geti16Previous(x * mult + i, y * mult + j);
         }
     }
-    int16_t out = static_cast<int16_t>(sum / (mMultiplier * mMultiplier));
+    int16_t out = static_cast<int16_t>(sum / (mult * mult));
     return out;
 }
 
@@ -143,11 +145,13 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
     if (!has(x, y))
         return;
 
-    // radius in pixels of your diamond
-    int rad = static_cast<int>(mMultiplier) / 2;
+    uint8_t mult = MAX(1, mMultiplier);
 
-    for (size_t j = 0; j < mMultiplier; ++j) {
-        for (size_t i = 0; i < mMultiplier; ++i) {
+    // radius in pixels of your diamond
+    int rad = static_cast<int>(mult) / 2;
+
+    for (size_t j = 0; j < mult; ++j) {
+        for (size_t i = 0; i < mult; ++i) {
             // compute offset from the center of this block
             int dx = static_cast<int>(i) - rad;
             int dy = static_cast<int>(j) - rad;
@@ -155,8 +159,8 @@ void WaveSimulation2D::seti16(size_t x, size_t y, int16_t v16) {
             if (ABS(dx) + ABS(dy) > rad) {
                 continue;
             }
-            size_t xx = x * mMultiplier + i;
-            size_t yy = y * mMultiplier + j;
+            size_t xx = x * mult + i;
+            size_t yy = y * mult + j;
             if (mSim->has(xx, yy)) {
                 int16_t &pt = mChangeGrid.at(xx, yy);
                 if (pt == 0) {
@@ -250,30 +254,33 @@ float WaveSimulation1D::getf(size_t x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
-    for (uint32_t i = 0; i < mMultiplier; ++i) {
-        sum += mSim->getf(x * mMultiplier + i);
+    uint8_t mult = MAX(1, mMultiplier);
+    for (uint32_t i = 0; i < mult; ++i) {
+        sum += mSim->getf(x * mult + i);
     }
-    return sum / static_cast<float>(mMultiplier);
+    return sum / static_cast<float>(mult);
 }
 
 int16_t WaveSimulation1D::geti16(size_t x) const {
     if (!has(x))
         return 0;
+    uint8_t mult = MAX(1, mMultiplier);
     int32_t sum = 0;
-    for (uint32_t i = 0; i < mMultiplier; ++i) {
-        sum += mSim->geti16(x * mMultiplier + i);
+    for (uint32_t i = 0; i < mult; ++i) {
+        sum += mSim->geti16(x * mult + i);
     }
-    return static_cast<int16_t>(sum / mMultiplier);
+    return static_cast<int16_t>(sum / mult);
 }
 
 int16_t WaveSimulation1D::geti16Previous(size_t x) const {
     if (!has(x))
         return 0;
+    uint8_t mult = MAX(1, mMultiplier);
     int32_t sum = 0;
-    for (uint32_t i = 0; i < mMultiplier; ++i) {
-        sum += mSim->geti16Previous(x * mMultiplier + i);
+    for (uint32_t i = 0; i < mult; ++i) {
+        sum += mSim->geti16Previous(x * mult + i);
     }
-    return static_cast<int16_t>(sum / mMultiplier);
+    return static_cast<int16_t>(sum / mult);
 }
 
 bool WaveSimulation1D::geti16All(size_t x, int16_t *curr, int16_t *prev,
@@ -325,8 +332,9 @@ void WaveSimulation1D::setf(size_t x, float value) {
     if (!has(x))
         return;
     value = fl::clamp(value, -1.0f, 1.0f);
-    for (uint32_t i = 0; i < mMultiplier; ++i) {
-        mSim->set(x * mMultiplier + i, value);
+    uint8_t mult = MAX(1, mMultiplier);
+    for (uint32_t i = 0; i < mult; ++i) {
+        mSim->set(x * mult + i, value);
     }
 }
 

@@ -202,7 +202,7 @@ class WaveSimulation2D {
     uint32_t mOuterWidth;  // Width of the downsampled (outer) grid.
     uint32_t mOuterHeight; // Height of the downsampled (outer) grid.
     uint8_t mExtraFrames = 0;
-    uint32_t mMultiplier; // Supersampling multiplier (e.g., 2, 4, or 8).
+    uint32_t mMultiplier = 1; // Supersampling multiplier (e.g., 1, 2, 4, or 8).
     U8EasingFunction mU8Mode = WAVE_U8_MODE_LINEAR;
     // Internal high-resolution simulation.
     fl::scoped_ptr<WaveSimulation2D_Real> mSim;
