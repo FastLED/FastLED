@@ -71,13 +71,20 @@ using namespace fl;
 // like water.
 #define SPEED 30
 
+// This is our frame buffer
 CRGB leds[NUM_LEDS];
+
+// We use an XYMap because it will produce the correct ScreenMap for the
+// web display.
 XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalette noisePalette = NoisePalette(xyMap);
 
 UITitle title("FastLED Wasm Demo");
 UIDescription description("This example combines two features of FastLED to produce a remarkable range of effects from a relatively small amount of code.  This example combines FastLED's color palette lookup functions with FastLED's Perlin noise generator, and the combination is extremely powerful");
 
+
+// These UI elements are dynamic when using the FastLED web compiler.
+// When deployed to a real device these elements will always be the default value.
 UISlider brightness("Brightness", 255, 0, 255);
 UICheckbox isOff("Off", false);
 UISlider speed("Noise - Speed", 15, 1, 50);
@@ -89,7 +96,10 @@ UIButton changeFx("Switch between Noise & Animartrix");
 UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
+// Animartrix is a visualizer.
 Animartrix animartrix(xyMap, POLAR_WAVES);
+
+// FxEngine allows nice things like switching between visualizers.
 FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
@@ -97,17 +107,18 @@ void setup() {
     Serial.println("Sketch setup");
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenMap(xyMap);
+        .setScreenMap(xyMap);  // This is needed for the web display to work correctly.
     Serial.println("FastLED setup done");
     FastLED.setBrightness(brightness);
     //noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
-    fxEngine.addFx(animartrix);
+    fxEngine.addFx(animartrix);  // Adding both effects allows us to switch between them.
     fxEngine.addFx(noisePalette);
     Serial.println("Sketch setup done");
 }
 
 void loop() {
+    uint32_t now = millis();
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
@@ -117,6 +128,8 @@ void loop() {
         fxEngine.nextFx();
     }
     static int frame = 0;
+    // We use the dynamic version here which allows the change time to respond
+    // to changes from the UI element.
     EVERY_N_MILLISECONDS_DYNAMIC(changePalletTime.as<int>() * 1000) {
         if (changePallete) {
             noisePalette.changeToRandomPalette();
@@ -127,6 +140,8 @@ void loop() {
         noisePalette.changeToRandomPalette();
 
     }
+
+    // Do a change of palette if the button is pressed.
     static int lastFxIndex = -1;
     if (fxIndex.value() != lastFxIndex) {
         lastFxIndex = fxIndex;
@@ -134,7 +149,7 @@ void loop() {
     }
 
 
-    fxEngine.draw(millis(), leds);
+    fxEngine.draw(now, leds);
     FastLED.show();
     frame++;
 }

@@ -26,7 +26,7 @@
 #include "timer.h"
 
 #define LED_PIN 2
-#define COLOR_ORDER GRB
+#define COLOR_ORDER GRB  // Color order matters for a real device, web-compiler will ignore this.
 #define NUM_LEDS 250
 #define PIN_PIR 0
 
@@ -38,21 +38,29 @@ using namespace fl;
 
 CRGB leds[NUM_LEDS];
 
+// These sliders and checkboxes are dynamic when using the FastLED web compiler.
+// When deployed to a real device these elements will always be the default value.
 UISlider brightness("Brightness", 1, 0, 1);
 UISlider scale("Scale", 4, .1, 4, .1);
 UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 UISlider timescale("Time Scale", 1, .1, 10, .1);
+// This PIR type is special because it will bind to a pin for a real device,
+// but also provides a UIButton when run in the simulator.
 PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
 UICheckbox useDither("Use Binary Dither", true);
 
 Timer timer;
 float current_brightness = 0;
 
+// Save a pointer to the controller so that we can modify the dither in real time.
 CLEDController* controller = nullptr;
 
 
 void setup() {
     Serial.begin(115200);
+    // ScreenMap is purely something that is needed for the sketch to correctly
+    // show on the web display. For deployements to real devices, this essentially
+    // becomes a no-op.
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
     controller = &FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
                 .setCorrection(TypicalLEDStrip)
@@ -67,6 +75,9 @@ void draw(uint32_t now) {
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
+        // Sorry this is a little convoluted but we are applying noise
+        // in the 16-bit space and then mapping it back to 8-bit space.
+        // All the constants were experimentally determined.
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
         float x = cos(angle);
         float y = sin(angle);
@@ -77,21 +88,21 @@ void draw(uint32_t now) {
         uint16_t noise3 = inoise16(x, y, 0xffff + now);
         noise3 = noise3 >> 8;
         int16_t noise4 = map(noise3, 0, 255, -64, 255);
-        if (noise4 < 0) {
+        if (noise4 < 0) {  // Clamp negative values to 0.
             noise4 = 0;
         }
+        // Shift back to 8-bit space.
         leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
     }
 }
 
 void loop() {
-    
+    // Allow the dither to be enabled and disabled.
     controller->setDither(useDither ? BINARY_DITHER : DISABLE_DITHER);
-    EVERY_N_SECONDS(1) {
-        FASTLED_WARN("loop");
-    }
-    uint8_t bri = pir.transition(millis());
+    uint32_t now = millis();
+    uint8_t bri = pir.transition(now);
     FastLED.setBrightness(bri * brightness.as<float>());
-    draw(millis());
+    // Apply leds generation to the leds.
+    draw(now);
     FastLED.show();
 }

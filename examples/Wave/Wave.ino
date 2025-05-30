@@ -1,5 +1,8 @@
 
 /*
+
+This is a 1D wave simluation!
+
 This demo is best viewed using the FastLED compiler.
 Install: pip install fastled
 Run: fastled <this sketch directory>
@@ -16,7 +19,7 @@ all the UI elements you see below.
 using namespace fl;
 
 #define NUM_LEDS 100
-#define IS_SERPINTINE true
+#define IS_SERPINTINE true  // Type of matrix display, you probably have this.
 
 CRGB leds[NUM_LEDS];
 
@@ -34,6 +37,7 @@ UISlider superSample("SuperSampleExponent", 0.f, 0.f, 3.f, 1.f);
 
 void setup() {
     Serial.begin(115200);
+    // No ScreenMap necessary for strips.
     FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS);
 }
 
@@ -42,11 +46,12 @@ void triggerRipple(WaveSimulation1D &waveSim, int x) {
     for (int i = x - 1; i <= x + 1; i++) {
         if (i < 0 || i >= NUM_LEDS)
             continue;
-        FASTLED_WARN("Setting " << i);
         waveSim.setf(i, -1.f);
     }
 }
 
+// Wave simulation looks better when you render at a higher resolution then
+// downscale the result to the display resolution.
 SuperSample getSuperSample() {
     switch (int(superSample)) {
     case 0:
@@ -63,13 +68,16 @@ SuperSample getSuperSample() {
 }
 
 void loop() {
-    // Your code here
+    // Allow the waveSimulator to respond to the current slider value each frame.
     waveSim.setSpeed(slider);
     waveSim.setDampening(dampening);
+    // Pretty much you always want half duplex to be true, otherwise you get a gray
+    // wave effect that doesn't look good.
     waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
     static int x = 0;
     if (button.clicked()) {
+        // If button click then select a random position in the wave.
         x = random() % NUM_LEDS;
     }
     if (button.isPressed()) {
