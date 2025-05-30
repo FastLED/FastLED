@@ -72,15 +72,12 @@ bool gError = false;
 void setup() {
     Serial.begin(115200);
     Serial.println("Sketch setup");
+    // Initialize the file system and check for errors
     if (!filesystem.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
 
-    // Note that data/ is a special directory used by our wasm compiler. Any data
-    // is placed in it will be included in the files.json file which the browser will
-    // use to stream the file asynchroniously in during the runtime. For a real sd card
-    // just place all this in the /data/ directory of the SD card to get matching
-    // behavior.
+    // Open video files from the SD card
     video = filesystem.openVideo("data/video.rgb", NUM_LEDS, FPS, 2);
     if (!video) {
       FASTLED_WARN("Failed to instantiate video");
@@ -93,6 +90,8 @@ void setup() {
       gError = true;
       return;
     }
+
+    // Read the screen map configuration
     ScreenMap screenMap;
     bool ok = filesystem.readScreenMap("data/screenmap.json", "strip1", &screenMap);
     if (!ok) {
@@ -101,6 +100,7 @@ void setup() {
       return;
     }
 
+    // Configure FastLED with the LED type, pin, and color order
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMap);
@@ -115,13 +115,18 @@ void loop() {
       Serial.println("First loop.");
     }
     if (gError) {
+      // If an error occurred, print a warning every second
       EVERY_N_SECONDS(1) {
         FASTLED_WARN("No loop because an error occured.");
       }
       return;
     }
+
+    // Select the video to play based on the UI input
     Video& vid = !bool(whichVideo.value()) ? video : video2;
     vid.setTimeScale(videoSpeed);
+
+    // Get the current time and draw the video frame
     uint32_t now = millis();
     vid.draw(now, leds);
     FastLED.show();
