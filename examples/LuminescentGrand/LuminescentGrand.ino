@@ -175,7 +175,6 @@ void DbgDoSimulatedKeyboardPress() {
 void loop() {
   //FASTLED_DBG("loop");
 
-  FASTLED_WARN("$$$$$$$ START OF FRAME $$$$$$$$");
 
   // Calculate dt.
   static uint32_t s_prev_time = 0;
@@ -227,8 +226,6 @@ void loop() {
   const unsigned long start_painting = millis();
   FASTLED_UNUSED(start_painting);
 
-  FASTLED_WARN("$$$$$$$ START OF FRAME $$$$$$$$");
-
 
   // Paints the keyboard using the led_rope.
   Painter::VisState which_vis = Painter::VisState(ui_st.which_visualizer);
@@ -249,7 +246,6 @@ void loop() {
     FASTLED_DBG("is_debugging = " << is_debugging);
   }
 
-  FASTLED_WARN("$$$$$$$ END OF FRAME $$$$$$$$");
 
   FastLED.show();
 }
