@@ -43,6 +43,9 @@ class DigitalPinImpl : public Referent {
             case DigitalPin::kOutput:
                 ::pinMode(mDigitalPin, OUTPUT);
                 break;
+            case DigitalPin::kInputPullup:
+                ::pinMode(mDigitalPin, INPUT_PULLUP);
+                break;
         }
     }
     bool high() { return HIGH == ::digitalRead(mDigitalPin); }
@@ -65,6 +68,9 @@ class DigitalPinImpl : public Referent {
                 break;
             case DigitalPin::kOutput:
                 mPin.setOutput();
+                break;
+            case DigitalPin::kInputPullup:
+                mPin.setInputPullup();
                 break;
         }
     }

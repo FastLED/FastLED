@@ -27,6 +27,7 @@
 
 #define INPUT  0
 #define OUTPUT 1
+#define INPUT_PULLUP 2
 
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;

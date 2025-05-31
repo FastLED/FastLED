@@ -35,6 +35,7 @@ UIDescription festivalStickDescription(
 
 
 UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
+UIButton button("Button");
 
 
 CRGB leds[NUM_LEDS];

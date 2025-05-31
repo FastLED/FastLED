@@ -21,10 +21,8 @@ class DigitalPin {
     enum Mode {
         kInput = 0,
         kOutput,
-        // the fallback mechanism does not support pullups or pulldowns, so we don't either yet.
-        // TODO: Add these for the fallback mechanism.
-        // kInputPullup,
-        // kInputPulldown,
+        kInputPullup,
+        // kInputPulldown,  Not implemented in Arduino.h
     };
 
     DigitalPin(int pin);
