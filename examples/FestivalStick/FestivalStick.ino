@@ -19,6 +19,10 @@ most portion being the bottom.
 
 using namespace fl;
 
+// Power management settings
+#define VOLTS 5
+#define MAX_AMPS 1
+
 
 #define PIN_DATA 9
 #define PIN_CLOCK 7
@@ -154,7 +158,9 @@ void setup() {
     auto controller = addController();
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
-    FastLED.setBrightness(32);
+    
+    // Set power management
+    FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_AMPS * 1000);
 }
 
 
