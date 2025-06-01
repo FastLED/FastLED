@@ -45,14 +45,15 @@ class Button {
 // onClick(), onPress(), and onRelease().
 class ButtonAdvanced {
   public:
-    ButtonAdvanced(int pin, Button::Strategy strategy = Button::kHighLowFloating);
+    ButtonAdvanced(int pin,
+                   Button::Strategy strategy = Button::kHighLowFloating);
 
   protected:
-    struct Listener: public EngineEvents::Listener {
+    struct Listener : public EngineEvents::Listener {
         Listener(ButtonAdvanced *owner);
-        ~Listener() ;
-        void addToEngineEventsOnce() ;
-        void onBeginFrame() override ;
+        ~Listener();
+        void addToEngineEventsOnce();
+        void onBeginFrame() override;
 
       private:
         ButtonAdvanced *mOwner;
