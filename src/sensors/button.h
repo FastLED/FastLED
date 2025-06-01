@@ -47,8 +47,22 @@ class ButtonAdvanced {
   public:
     ButtonAdvanced(int pin, Button::Strategy strategy = Button::kHighLowFloating);
 
+  protected:
+    struct Listener: public EngineEvents::Listener {
+        Listener(ButtonAdvanced *owner);
+        ~Listener() ;
+        void addToEngineEventsOnce() ;
+        void onBeginFrame() override ;
+
+      private:
+        ButtonAdvanced *mOwner;
+        bool added = false;
+        bool mClickedLastFrame = false;
+    };
+
   private:
     Button mButton;
+    Listener mListener;
 };
 
 } // namespace fl

@@ -5,78 +5,95 @@
 #include "fl/ptr.h"
 #include "fl/ui.h"
 
-#include "fl/namespace.h"
-#include "sensors/digital_pin.h"
-#include "sensors/button.h"
 #include "fl/assert.h"
+#include "fl/namespace.h"
+#include "sensors/button.h"
+#include "sensors/digital_pin.h"
 
 namespace fl {
 
-
-Button::Button(int pin, Button::Strategy strategy): mPin(pin), mStrategy(strategy) {
-    switch(strategy) {
-        case kHighLowFloating:
-            mPin.setPinMode(DigitalPin::kInput); // Set pin to input mode
-            break;
-        case kPullUp:
-            mPin.setPinMode(DigitalPin::kInputPullup); // Set pin to input pullup mode
-            break;
-        default:
-            // Unknown strategy, do nothing
-            FASTLED_ASSERT(false, "Unknown Button strategy");
-            break;
+Button::Button(int pin, Button::Strategy strategy)
+    : mPin(pin), mStrategy(strategy) {
+    switch (strategy) {
+    case kHighLowFloating:
+        mPin.setPinMode(DigitalPin::kInput); // Set pin to input mode
+        break;
+    case kPullUp:
+        mPin.setPinMode(
+            DigitalPin::kInputPullup); // Set pin to input pullup mode
+        break;
+    default:
+        // Unknown strategy, do nothing
+        FASTLED_ASSERT(false, "Unknown Button strategy");
+        break;
     }
 }
 
 Button::~Button() {}
 
-
 bool Button::highLowFloating() {
-  // FastLED doesn't have reliable support for pullups/pulldowns.
-  // So we instead use a strategy where the pin is set to high, then
-  // checked if it's high, then set to low, and then checked if it's low
-  // if this is the case, then the pin is floating and thefore the button is not
-  // being pressed.
-  mPin.setPinMode(DigitalPin::kOutput);
-  mPin.write(true); // set pin to high
-  mPin.setPinMode(DigitalPin::kInput);
-  const bool was_high = mPin.high(); // check if pin is high
-  mPin.setPinMode(DigitalPin::kOutput);
-  mPin.write(false); // set pin to low
-  mPin.setPinMode(DigitalPin::kInput);
-  const bool was_low = !mPin.high(); // check if pin is low
-  const bool floating = was_high && was_low; // if both are true, then the pin is floating
-  const bool pressed = !floating; // if the pin is floating, then the button is not pressed
-  return pressed;
+    // FastLED doesn't have reliable support for pullups/pulldowns.
+    // So we instead use a strategy where the pin is set to high, then
+    // checked if it's high, then set to low, and then checked if it's low
+    // if this is the case, then the pin is floating and thefore the button is
+    // not being pressed.
+    mPin.setPinMode(DigitalPin::kOutput);
+    mPin.write(true); // set pin to high
+    mPin.setPinMode(DigitalPin::kInput);
+    const bool was_high = mPin.high(); // check if pin is high
+    mPin.setPinMode(DigitalPin::kOutput);
+    mPin.write(false); // set pin to low
+    mPin.setPinMode(DigitalPin::kInput);
+    const bool was_low = !mPin.high(); // check if pin is low
+    const bool floating =
+        was_high && was_low; // if both are true, then the pin is floating
+    const bool pressed =
+        !floating; // if the pin is floating, then the button is not pressed
+    return pressed;
 }
 
-bool Button::isPressed()  {
-  // FastLED doesn't have reliable support for pullups/pulldowns.
-  // So we instead use a strategy where the pin is set to high, then
-  // checked if it's high, then set to low, and then checked if it's low
-  // if this is the case, then the pin is floating and thefore the button is not
-  // being pressed.
-  // return (mStrategy == kHighLowFloating) ? highLowFloating() :
-  //        (mStrategy == kPullUp) ? mPin.high() : // not implemented yet
-  //        (mStrategy == kPullDown) ? !mPin.high() : // not implemented yet
-  //        false; // unknown strategy, return false
-  switch(mStrategy) {
+bool Button::isPressed() {
+    // FastLED doesn't have reliable support for pullups/pulldowns.
+    // So we instead use a strategy where the pin is set to high, then
+    // checked if it's high, then set to low, and then checked if it's low
+    // if this is the case, then the pin is floating and thefore the button is
+    // not being pressed. return (mStrategy == kHighLowFloating) ?
+    // highLowFloating() :
+    //        (mStrategy == kPullUp) ? mPin.high() : // not implemented yet
+    //        (mStrategy == kPullDown) ? !mPin.high() : // not implemented yet
+    //        false; // unknown strategy, return false
+    switch (mStrategy) {
     case kHighLowFloating:
-      return highLowFloating();
+        return highLowFloating();
     case kPullUp:
-      return mPin.high(); // not implemented yet
+        return mPin.high(); // not implemented yet
     default:
-      FASTLED_ASSERT(false, "Unknown Button strategy");
-      return false; // unknown strategy, return false
-  }
+        FASTLED_ASSERT(false, "Unknown Button strategy");
+        return false; // unknown strategy, return false
+    }
 }
-
-
 
 ButtonAdvanced::ButtonAdvanced(int pin, Button::Strategy strategy)
-    : mButton(pin, strategy) {
+    : mButton(pin, strategy), mListener(this) {}
+
+void ButtonAdvanced::Listener::onBeginFrame() {}
+
+ButtonAdvanced::Listener::Listener(ButtonAdvanced *owner) : mOwner(owner) {
+    EngineEvents::addListener(this);
 }
 
+ButtonAdvanced::Listener::~Listener() {
+    if (added) {
+        EngineEvents::removeListener(this);
+    }
+}
 
+void ButtonAdvanced::Listener::addToEngineEventsOnce() {
+    if (added) {
+        return;
+    }
+    EngineEvents::addListener(this);
+    added = true;
+}
 
 } // namespace fl
