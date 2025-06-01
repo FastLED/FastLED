@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
+#include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/ui.h"
-#include "fl/namespace.h"
 #include "sensors/digital_pin.h"
 
 namespace fl {
@@ -18,7 +18,8 @@ class Button {
         // FastLED doesn't have reliable support for pullups/pulldowns.
         // So we instead use a strategy where the pin is set to high, then
         // checked if it's high, then set to low, and then checked if it's low
-        // if this is the case, then the pin is floating and thefore the button is not
+        // if this is the case, then the pin is floating and thefore the button
+        // is not
         // being pressed.
         kHighLowFloating,
         kPullUp,
@@ -29,14 +30,25 @@ class Button {
     Button(const Button &other) = default;
     Button &operator=(const Button &other) = delete;
     Button(Button &&other) = delete;
-    bool isPressed() ;
-
+    bool isPressed();
 
     bool highLowFloating();
 
   private:
     fl::DigitalPin mPin;
     Strategy mStrategy = kHighLowFloating;
+};
+
+// This advanced button hooks into the FastLED beginFrame() engine
+// events and will detect button clicks, presses, and releases.
+// You can hook in callbacks to the button state changes for
+// onClick(), onPress(), and onRelease().
+class ButtonAdvanced {
+  public:
+    ButtonAdvanced(int pin, Button::Strategy strategy = Button::kHighLowFloating);
+
+  private:
+    Button mButton;
 };
 
 } // namespace fl

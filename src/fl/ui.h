@@ -117,8 +117,27 @@ class UIButton : public UIButtonImpl {
     using Super = UIButtonImpl;
     UIButton(const char *name) : UIButtonImpl(name), mListener(this) {}
     ~UIButton() {}
-    bool isPressed() const { return Super::isPressed(); }
-    bool clicked() const { return Super::clicked(); }
+    bool isPressed() const {
+        if (Super::isPressed()) {
+            return true;
+        }
+        // If we have a real button, check if it's pressed
+        if (mRealButton) {
+            return mRealButton->isPressed();
+        }
+        // Otherwise, return the default state
+        return false;
+    }
+    bool clicked() const {
+        if (Super::clicked()) {
+            return true;
+        }
+        if (mRealButton) {
+            // If we have a real button, check if it was clicked
+            return mRealButton->isPressed();
+        }
+        return false;
+    }
     int clickedCount() const { return Super::clickedCount(); }
     operator bool() const { return clicked(); }
 

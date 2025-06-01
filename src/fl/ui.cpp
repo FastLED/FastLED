@@ -36,7 +36,7 @@ void UIButton::Listener::onBeginFrame() {
     if (mOwner->mRealButton) {
         if (mOwner->mRealButton->isPressed()) {
             clicked_this_frame = true;
-            mOwner->click(); // Update the UI button state
+            //mOwner->click(); // Update the UI button state
         }
     }
     

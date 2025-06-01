@@ -126,7 +126,7 @@ fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
     FASTLED_WARN("Creating ScreenMap with:\n" << points);
 
     // Create a ScreenMap from the points
-    fl::ScreenMap screenMap(points.data(), num_leds, 1.0);
+    fl::ScreenMap screenMap(points.data(), num_leds, .5);
     return screenMap;
 }
 
@@ -169,16 +169,17 @@ void setup() {
     button.onChangedEx([](UIButton& but) {
         // This function is called when the button is pressed
         // If the button is pressed, show the generative pattern
-        FASTLED_WARN("Button pressed");
+        if (but.isPressed()) {
+            FASTLED_WARN("Button pressed");
+        } else {
+            FASTLED_WARN("NOT Button pressed");
+        }
     });
 }
 
 
-void showGenerative() {
+void showGenerative(uint32_t now) {
     // This function is called to show the generative pattern
-    uint32_t now = millis();
-    fl::clear(leds);
-
     for (int i = 0; i < NUM_LEDS; i++) {
         // Get the 2D position of this LED from the screen map
         fl::vec3f pos = mapCorkScrew[i];
@@ -198,32 +199,11 @@ void showGenerative() {
         // Set the color
         leds[i] = CHSV(170, sat, fl::clamp(255- sat, 64, 255));
     }
-
-    FastLED.show();
 }
 
 void loop() {
     uint32_t now = millis();
     fl::clear(leds);
-
-    // for (int i = 0; i < NUM_LEDS; i++) {
-    //     // Get the 3D position of this LED from the corkscrew map
-    //     fl::vec3f pos = mapCorkScrew[i];
-
-    //     // Create a wave pattern that moves up the corkscrew
-    //     float wave = sin(pos.z * 0.2 - (now / 500.0));
-    //     wave = (wave + 1.0) / 2.0; // Normalize to 0-1 range
-
-    //     // Create a hue that changes with position and time
-    //     uint8_t hue = int32_t((pos.x * 10 + pos.y * 5 + now / 20)) % 256;
-
-    //     // Set brightness based on the wave pattern
-    //     uint8_t val = 128 + 127 * wave;
-
-    //     // Set the color
-    //     leds[i] = CHSV(hue, 240, val);
-    // }
-
-    showGenerative();
+    showGenerative(now);
     FastLED.show();
 }

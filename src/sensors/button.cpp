@@ -71,4 +71,12 @@ bool Button::isPressed()  {
   }
 }
 
+
+
+ButtonAdvanced::ButtonAdvanced(int pin, Button::Strategy strategy)
+    : mButton(pin, strategy) {
+}
+
+
+
 } // namespace fl
