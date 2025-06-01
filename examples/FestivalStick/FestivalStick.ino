@@ -159,7 +159,12 @@ void setup() {
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
     
-    // Set power management
+    // Set power management. This allows this festival stick to conformatable
+    // run on any USB battery that can output at least 1A at 5V.
+    // Keep in mind that this sketch is designed to use APA102HD mode, which will
+    // result in even lowwer run power consumption, since the power mode does not take
+    // into account the APA102HD gamma correction. However it is still a correct upper bound
+    // that will match the ledset exactly when the display tries to go full white.
     FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_AMPS * 1000);
 }
 
