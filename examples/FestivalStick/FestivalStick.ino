@@ -23,6 +23,10 @@ using namespace fl;
 #define PIN_DATA 9
 #define PIN_CLOCK 7
 
+// Pin could have been tied to ground, instead it's tied to another pin.
+#define PIN_BUTTON 1
+#define PIN_GRND 2
+
 #define NUM_LEDS 288
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -141,8 +145,10 @@ CLEDController* addController() {
     return controller;
 }
 
-
 void setup() {
+    pinMode(PIN_GRND, OUTPUT);
+    digitalWrite(PIN_GRND, LOW); // Set ground pin to low
+    button.addRealButton(Button(PIN_BUTTON));
     screenMap = makeScreenMap(args);
     //screenMap = ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
     auto controller = addController();
@@ -150,8 +156,6 @@ void setup() {
     controller->setScreenMap(screenMap);
     FastLED.setBrightness(32);
 }
-
-// extern uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t t);
 
 
 void showGenerative() {
