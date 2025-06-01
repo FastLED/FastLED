@@ -4,7 +4,6 @@
 
 #include "fl/ptr.h"
 #include "fl/ui.h"
-
 #include "fl/namespace.h"
 #include "sensors/digital_pin.h"
 
@@ -36,7 +35,7 @@ class Button {
     bool highLowFloating();
 
   private:
-    DigitalPin mPin;
+    fl::DigitalPin mPin;
     Strategy mStrategy = kHighLowFloating;
 };
 

@@ -6,8 +6,8 @@
 #include "fl/ui.h"
 
 #include "fl/namespace.h"
-#include "sensors/button.h"
 #include "sensors/digital_pin.h"
+#include "sensors/button.h"
 #include "fl/assert.h"
 
 namespace fl {

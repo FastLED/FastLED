@@ -12,6 +12,7 @@
 #include "fl/ui_impl.h"
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
+#include "sensors/button.h"
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \
@@ -121,6 +122,10 @@ class UIButton : public UIButtonImpl {
     int clickedCount() const { return Super::clickedCount(); }
     operator bool() const { return clicked(); }
 
+    void addRealButton(const Button& pin) {
+        mRealButton.reset(new Button(pin));
+    }
+
     void click() { Super::click(); }
 
     int onChanged(function<void()> callback) {
@@ -170,6 +175,7 @@ class UIButton : public UIButtonImpl {
   private:
     FunctionList<UIButton &> mCallbacks;
     Listener mListener;
+    fl::scoped_ptr<Button> mRealButton;
 };
 
 class UICheckbox : public UICheckboxImpl {
