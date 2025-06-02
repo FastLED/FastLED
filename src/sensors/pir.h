@@ -16,9 +16,9 @@ namespace fl {
 // For best results set the PIR to maximum sensitive and minimum delay time before retrigger.
 // Instantiating this class will create a ui UIButton when
 // compiling using the FastLED web compiler.
-class Pir {
+class PirLowLevel {
   public:
-    Pir(int pin);
+    PirLowLevel(int pin);
     bool detect();
     operator bool() { return detect(); }
 
@@ -65,7 +65,7 @@ public:
     void activate(uint32_t now) { mRamp.trigger(now); }
 
 private:
-    Pir        mPir;
+    PirLowLevel        mPir;
     TimeRamp  mRamp;
     bool       mLastState = false;
     UIButton mButton;

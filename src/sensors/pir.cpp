@@ -20,16 +20,16 @@ Str getButtonName(const char *button_name) {
         return Str("PIR");
     }
     StrStream s;
-    s << "Pir " << g_counter++;
+    s << "PirLowLevel " << g_counter++;
     return s.str();
 }
 } // namespace
 
-Pir::Pir(int pin): mPin(pin) {
+PirLowLevel::PirLowLevel(int pin): mPin(pin) {
     mPin.setPinMode(DigitalPin::kInput);
 }
 
-bool Pir::detect() {
+bool PirLowLevel::detect() {
     return mPin.high();
 }
 
