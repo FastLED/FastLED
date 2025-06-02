@@ -117,6 +117,7 @@
         "ranges": "cpp",
         "math.h": "c",
         "__locale": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "__split_buffer": "cpp"
     }
 }
