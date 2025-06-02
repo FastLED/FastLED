@@ -37,7 +37,7 @@ bool PirLowLevel::detect() {
 Pir::Pir(int pin, uint32_t latchMs, uint32_t risingTime,
                          uint32_t fallingTime, const char* button_name)
     : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
-    mButton.onChanged([this]() {
+    mButton.onChanged([this](UIButton&) {
         this->mRamp.trigger(millis());
     });
 }

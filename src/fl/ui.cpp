@@ -24,7 +24,7 @@ void UISlider::Listener::onBeginFrame() {
     }
     float value = owner.value();
     if (value != owner.mLastFrameValue) {
-        owner.mCallbacks.invoke(*mOwner, value);
+        owner.mCallbacks.invoke(*mOwner);
         owner.mLastFrameValue = value;
     }
 }
@@ -59,7 +59,7 @@ void UICheckbox::Listener::onBeginFrame() {
     }
     bool value = owner.value();
     if (value != owner.mLastFrameValue) {
-        owner.mCallbacks.invoke(owner, value);
+        owner.mCallbacks.invoke(owner);
         owner.mLastFrameValue = value;
     }
 }
@@ -73,7 +73,7 @@ void UINumberField::Listener::onBeginFrame() {
     }
     double value = owner.value();
     if (value != owner.mLastFrameValue) {
-        owner.mCallbacks.invoke(owner, value);
+        owner.mCallbacks.invoke(owner);
         owner.mLastFrameValue = value;
     }
 }

@@ -166,7 +166,7 @@ void setup() {
     // into account the APA102HD gamma correction. However it is still a correct upper bound
     // that will match the ledset exactly when the display tries to go full white.
     FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_AMPS * 1000);
-    button.onChangedEx([](UIButton& but) {
+    button.onChanged([](UIButton& but) {
         // This function is called when the button is pressed
         // If the button is pressed, show the generative pattern
         if (but.isPressed()) {
@@ -175,6 +175,7 @@ void setup() {
             FASTLED_WARN("NOT Button pressed");
         }
     });
+
 }
 
 

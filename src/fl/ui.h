@@ -60,18 +60,9 @@ class UISlider : public UISliderImpl {
         return *this;
     }
 
-    int onChanged(function<void(float)> callback) {
-        function<void(UISlider &, float)> wrapped_cb =
-            [callback](UISlider &slider, float value) {
-                FASTLED_UNUSED(slider);
-                callback(value);
-            };
-        int out = mCallbacks.add(wrapped_cb);
-        mListener.addToEngineEventsOnce();
-        return out;
-    }
 
-    int onChangedEx(function<void(UISlider &, float)> callback) {
+
+    int onChanged(function<void(UISlider &)> callback) {
         int out = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return out;
@@ -103,7 +94,7 @@ class UISlider : public UISliderImpl {
     };
 
   private:
-    FunctionList<UISlider &, float> mCallbacks;
+    FunctionList<UISlider &> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFramevalueValid = false;
     Listener mListener;
@@ -146,18 +137,7 @@ class UIButton : public UIButtonImpl {
     }
 
     void click() { Super::click(); }
-
-    int onChanged(function<void()> callback) {
-        function<void(UIButton &)> wrapped_cb = [callback](UIButton &button) {
-            FASTLED_UNUSED(button);
-            callback();
-        };
-        int id = mCallbacks.add(wrapped_cb);
-        mListener.addToEngineEventsOnce();
-        return id;
-    }
-
-    int onChangedEx(function<void(UIButton &)> callback) {
+    int onChanged(function<void(UIButton &)> callback) {
         int id = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
         return id;
@@ -212,17 +192,8 @@ class UICheckbox : public UICheckboxImpl {
         return *this;
     }
 
-    void onChanged(function<void(bool)> callback) {
-        function<void(UICheckbox &, bool)> wrapped_cb =
-            [callback](UICheckbox &checkbox, bool value) {
-                FASTLED_UNUSED(checkbox);
-                callback(value);
-            };
-        mCallbacks.add(wrapped_cb);
-        mListener.addToEngineEventsOnce();
-    }
 
-    void onChangedEx(function<void(UICheckbox &, bool)> callback) {
+    void onChanged(function<void(UICheckbox &)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -254,7 +225,7 @@ class UICheckbox : public UICheckboxImpl {
 
   private:
     Super &impl() { return *this; }
-    FunctionList<UICheckbox &, bool> mCallbacks;
+    FunctionList<UICheckbox &> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
@@ -281,17 +252,9 @@ class UINumberField : public UINumberFieldImpl {
         return *this;
     }
 
-    void onChanged(function<void(double)> callback) {
-        function<void(UINumberField &, double)> wrapped_cb =
-            [callback](UINumberField &checkbox, bool value) {
-                FASTLED_UNUSED(checkbox);
-                callback(value);
-            };
-        mCallbacks.add(wrapped_cb);
-        mListener.addToEngineEventsOnce();
-    }
 
-    void onChangedEx(function<void(UINumberField &, double)> callback) {
+
+    void onChanged(function<void(UINumberField &)> callback) {
         mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
     }
@@ -324,7 +287,7 @@ class UINumberField : public UINumberFieldImpl {
     Listener mListener;
     double mLastFrameValue = 0;
     bool mLastFrameValueValid = false;
-    FunctionList<UINumberField &, double> mCallbacks;
+    FunctionList<UINumberField &> mCallbacks;
 
     Super &impl() { return *this; }
 };
