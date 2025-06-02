@@ -26,6 +26,7 @@ using string = fl::Str; // std-like string
 
 template <typename T> struct rect;
 template <typename T> struct vec2;
+template <typename T> struct vec3;
 template <typename T> class Slice;
 template <typename T> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
@@ -528,6 +529,18 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         append(")");
         return *this;
     }
+
+    template <typename T> Str &append(const vec3<T> &pt) {
+        append("(");
+        append(pt.x);
+        append(",");
+        append(pt.y);
+        append(",");
+        append(pt.z);
+        append(")");
+        return *this;
+    }
+        
 
     template <typename T, size_t N>
     Str &append(const fl::FixedVector<T, N> &vec) {
