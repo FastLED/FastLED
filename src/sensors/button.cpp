@@ -76,7 +76,15 @@ bool Button::isPressed() {
 ButtonAdvanced::ButtonAdvanced(int pin, Button::Strategy strategy)
     : mButton(pin, strategy), mListener(this) {}
 
-void ButtonAdvanced::Listener::onBeginFrame() {}
+void ButtonAdvanced::Listener::onEndFrame() {
+    const bool pressed_curr_frame = mOwner->mButton.isPressed();
+    const bool pressed_last_frame = mOwner->mPressedLastFrame;
+    const bool changed_this_frame = pressed_curr_frame != pressed_last_frame;
+    mOwner->mPressedLastFrame = pressed_curr_frame;
+    if (changed_this_frame && pressed_curr_frame) {
+        mOwner->mOnClickCallbacks.invoke();
+    }
+}
 
 ButtonAdvanced::Listener::Listener(ButtonAdvanced *owner) : mOwner(owner) {
     EngineEvents::addListener(this);
@@ -94,6 +102,12 @@ void ButtonAdvanced::Listener::addToEngineEventsOnce() {
     }
     EngineEvents::addListener(this);
     added = true;
+}
+
+int ButtonAdvanced::onClick(function<void()> callback) {
+    int id = mOnClickCallbacks.add(callback);
+    mListener.addToEngineEventsOnce();
+    return id;
 }
 
 } // namespace fl
