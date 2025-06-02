@@ -143,6 +143,16 @@ class UIButton : public UIButtonImpl {
         return id;
     }
 
+    int onClicked(function<void()> callback) {
+        int id = mCallbacks.add([callback](UIButton &btn) {
+            if (btn.clicked()) {
+                callback();
+            }
+        });
+        mListener.addToEngineEventsOnce();
+        return id;
+    }
+
     void removeCallback(int id) { mCallbacks.remove(id); }
     void clearCallbacks() { mCallbacks.clear(); }
 
