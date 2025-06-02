@@ -334,7 +334,7 @@ FastLED 3.9.5
     * `sensors/pir.h`
       * `fl::Pir`: This is a basic PIR that will tell you if the sensor is curently triggered. It doesn't do much else.
       * `fl::AdvancedPir`: An extended version of `fl::Pir` which gives transition effects as it turns on and off. Here is what the
-        the constructor looks like: `fl::PirAdvanced(int pin, uint32_t latchMs = 5000, uint32_t risingTime = 1000, uint32_t fallingTime = 1000)`.
+        the constructor looks like: `fl::Pir(int pin, uint32_t latchMs = 5000, uint32_t risingTime = 1000, uint32_t fallingTime = 1000)`.
         You will give it the pin, an optional latch time (how long it stays on for), the rising time (how long to go from off to on) and the falling
         time which is how long it takes to go from on to off. By default it will ramp on for one second, stay on for 5 seconds at full brightness, then
         start turning off for one second. All you have to do is give it the current `millis()` value.

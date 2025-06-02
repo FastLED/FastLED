@@ -46,7 +46,7 @@ UISlider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 UISlider timescale("Time Scale", 1, .1, 10, .1);
 // This PIR type is special because it will bind to a pin for a real device,
 // but also provides a UIButton when run in the simulator.
-PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
+Pir pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
 UICheckbox useDither("Use Binary Dither", true);
 
 Timer timer;

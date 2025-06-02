@@ -34,7 +34,7 @@ bool PirLowLevel::detect() {
 }
 
 
-PirAdvanced::PirAdvanced(int pin, uint32_t latchMs, uint32_t risingTime,
+Pir::Pir(int pin, uint32_t latchMs, uint32_t risingTime,
                          uint32_t fallingTime, const char* button_name)
     : mPir(pin), mRamp(risingTime, latchMs, fallingTime), mButton(getButtonName(button_name).c_str()) {
     mButton.onChanged([this]() {
@@ -42,7 +42,7 @@ PirAdvanced::PirAdvanced(int pin, uint32_t latchMs, uint32_t risingTime,
     });
 }
 
-bool PirAdvanced::detect(uint32_t now) {
+bool Pir::detect(uint32_t now) {
     bool currentState = mPir.detect();
     if (currentState && !mLastState) {
         mRamp.trigger(now);
@@ -51,7 +51,7 @@ bool PirAdvanced::detect(uint32_t now) {
     return mRamp.isActive(now);
 }
 
-uint8_t PirAdvanced::transition(uint32_t now) {
+uint8_t Pir::transition(uint32_t now) {
     // ensure detect() logic runs so we trigger on edges
     detect(now);
     return mRamp.update8(now);
