@@ -10,48 +10,69 @@
 
 namespace fl {
 
+enum ButtonStrategy {
+
+    // FastLED doesn't have reliable support for pullups/pulldowns.
+    // So we instead use a strategy where the pin is set to high, then
+    // checked if it's high, then set to low, and then checked if it's low
+    // if this is the case, then the pin is floating and thefore the button
+    // is not
+    // being pressed.
+    kHighLowFloating,
+    kPullUp,
+
+};
+
 // A simple digital pin. If we are compiling in an Arduino environment, then
 // this class will bind to that. Otherwise it will fall back to the platform
 // api. Note that this class does not support analog mode nor pullups/pulldowns.
-class Button {
+class ButtonLowLevel {
   public:
-    enum Strategy {
-        // FastLED doesn't have reliable support for pullups/pulldowns.
-        // So we instead use a strategy where the pin is set to high, then
-        // checked if it's high, then set to low, and then checked if it's low
-        // if this is the case, then the pin is floating and thefore the button
-        // is not
-        // being pressed.
-        kHighLowFloating,
-        kPullUp,
-    };
-
-    Button(int pin, Strategy strategy = kHighLowFloating);
-    ~Button();
-    Button(const Button &other) = default;
-    Button &operator=(const Button &other) = delete;
-    Button(Button &&other) = delete;
+    ButtonLowLevel(int pin, ButtonStrategy strategy = kHighLowFloating);
+    ~ButtonLowLevel();
+    ButtonLowLevel(const ButtonLowLevel &other) = default;
+    ButtonLowLevel &operator=(const ButtonLowLevel &other) = delete;
+    ButtonLowLevel(ButtonLowLevel &&other) = delete;
     bool isPressed();
 
     bool highLowFloating();
 
+    void setStrategy(ButtonStrategy strategy);
+
   private:
     fl::DigitalPin mPin;
-    Strategy mStrategy = kHighLowFloating;
+    ButtonStrategy mStrategy = kHighLowFloating;
 };
 
-// This advanced button hooks into the FastLED beginFrame() engine
-// events and will detect button clicks, presses, and releases.
-class ButtonAdvanced {
+// The default button type hooks into the FastLED EngineEvents to monitor
+// whether the button is pressed or not. You do not need to run an update
+// function. If you need more control, use ButtonLowLevel directly.
+class Button {
   public:
-    ButtonAdvanced(int pin,
-                   Button::Strategy strategy = Button::kHighLowFloating);
+    Button(int pin,
+           ButtonStrategy strategy = ButtonStrategy::kHighLowFloating);
 
     int onClick(fl::function<void()> callback);
+    void removeOnClick(int id) {
+        mOnClickCallbacks.remove(id);
+    }
+
+    void setStrategy(ButtonStrategy strategy) {
+        mButton.setStrategy(strategy);
+    }
+
+    bool isPressed() {
+        return mButton.isPressed();
+    }
+
+    bool clicked() const {
+        // If we have a real button, check if it's pressed
+        return mClickedThisFrame;
+    }
 
   protected:
     struct Listener : public EngineEvents::Listener {
-        Listener(ButtonAdvanced *owner);
+        Listener(Button *owner);
         ~Listener();
         void addToEngineEventsOnce();
 
@@ -64,18 +85,19 @@ class ButtonAdvanced {
         void onEndFrame() override;
 
       private:
-        ButtonAdvanced *mOwner;
+        Button *mOwner;
         bool added = false;
         bool mPressedLastFrame = false;
     };
 
   private:
-    Button mButton;
+    ButtonLowLevel mButton;
     Listener mListener;
-    bool mPressedLastFrame = false; // last state of the button
+    bool mPressedLastFrame = false;  // Don't read this variale, it's used internally.
+    bool mClickedThisFrame = false;  // This is true if clicked this frame.
 
     fl::FunctionList<void> mOnClickCallbacks;
-    // fl::FunctionList<void(ButtonAdvanced&)> mOnChangedCallbacks;
+    // fl::FunctionList<void(Button&)> mOnChangedCallbacks;
 };
 
 } // namespace fl

@@ -12,26 +12,14 @@
 
 namespace fl {
 
-Button::Button(int pin, Button::Strategy strategy)
-    : mPin(pin), mStrategy(strategy) {
-    switch (strategy) {
-    case kHighLowFloating:
-        mPin.setPinMode(DigitalPin::kInput); // Set pin to input mode
-        break;
-    case kPullUp:
-        mPin.setPinMode(
-            DigitalPin::kInputPullup); // Set pin to input pullup mode
-        break;
-    default:
-        // Unknown strategy, do nothing
-        FASTLED_ASSERT(false, "Unknown Button strategy");
-        break;
-    }
+ButtonLowLevel::ButtonLowLevel(int pin, ButtonStrategy strategy)
+    : mPin(pin) {
+    setStrategy(strategy);
 }
 
-Button::~Button() {}
+ButtonLowLevel::~ButtonLowLevel() {}
 
-bool Button::highLowFloating() {
+bool ButtonLowLevel::highLowFloating() {
     // FastLED doesn't have reliable support for pullups/pulldowns.
     // So we instead use a strategy where the pin is set to high, then
     // checked if it's high, then set to low, and then checked if it's low
@@ -52,7 +40,7 @@ bool Button::highLowFloating() {
     return pressed;
 }
 
-bool Button::isPressed() {
+bool ButtonLowLevel::isPressed() {
     // FastLED doesn't have reliable support for pullups/pulldowns.
     // So we instead use a strategy where the pin is set to high, then
     // checked if it's high, then set to low, and then checked if it's low
@@ -68,35 +56,36 @@ bool Button::isPressed() {
     case kPullUp:
         return mPin.high(); // not implemented yet
     default:
-        FASTLED_ASSERT(false, "Unknown Button strategy");
+        FASTLED_ASSERT(false, "Unknown ButtonLowLevel strategy");
         return false; // unknown strategy, return false
     }
 }
 
-ButtonAdvanced::ButtonAdvanced(int pin, Button::Strategy strategy)
+Button::Button(int pin, ButtonStrategy strategy)
     : mButton(pin, strategy), mListener(this) {}
 
-void ButtonAdvanced::Listener::onEndFrame() {
+void Button::Listener::onEndFrame() {
     const bool pressed_curr_frame = mOwner->mButton.isPressed();
     const bool pressed_last_frame = mOwner->mPressedLastFrame;
     const bool changed_this_frame = pressed_curr_frame != pressed_last_frame;
     mOwner->mPressedLastFrame = pressed_curr_frame;
     if (changed_this_frame && pressed_curr_frame) {
+        mOwner->mClickedThisFrame = true;
         mOwner->mOnClickCallbacks.invoke();
     }
 }
 
-ButtonAdvanced::Listener::Listener(ButtonAdvanced *owner) : mOwner(owner) {
-    EngineEvents::addListener(this);
+Button::Listener::Listener(Button *owner) : mOwner(owner) {
+    addToEngineEventsOnce();
 }
 
-ButtonAdvanced::Listener::~Listener() {
+Button::Listener::~Listener() {
     if (added) {
         EngineEvents::removeListener(this);
     }
 }
 
-void ButtonAdvanced::Listener::addToEngineEventsOnce() {
+void Button::Listener::addToEngineEventsOnce() {
     if (added) {
         return;
     }
@@ -104,10 +93,28 @@ void ButtonAdvanced::Listener::addToEngineEventsOnce() {
     added = true;
 }
 
-int ButtonAdvanced::onClick(function<void()> callback) {
+int Button::onClick(function<void()> callback) {
     int id = mOnClickCallbacks.add(callback);
-    mListener.addToEngineEventsOnce();
     return id;
+}
+
+
+
+void ButtonLowLevel::setStrategy(ButtonStrategy strategy) {
+    mStrategy = strategy;
+    switch (mStrategy) {
+    case kHighLowFloating:
+        mPin.setPinMode(DigitalPin::kInput); // Set pin to input mode
+        break;
+    case kPullUp:
+        mPin.setPinMode(
+            DigitalPin::kInputPullup); // Set pin to input pullup mode
+        break;
+    default:
+        // Unknown strategy, do nothing
+        FASTLED_ASSERT(false, "Unknown ButtonLowLevel strategy");
+        break;
+    }
 }
 
 } // namespace fl
