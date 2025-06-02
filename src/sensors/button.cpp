@@ -89,7 +89,7 @@ void Button::Listener::addToEngineEventsOnce() {
     if (added) {
         return;
     }
-    EngineEvents::addListener(this);
+    EngineEvents::addListener(this, 1);  // One high priority so that it runs before UI elements.
     added = true;
 }
 
