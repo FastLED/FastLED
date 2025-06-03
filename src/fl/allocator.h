@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include "fl/inplacenew.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -31,11 +33,35 @@ template <typename T> class PSRamAllocator {
 // std compatible allocator.
 template <typename T> class allocator {
   public:
+    // Type definitions required by STL
+    using value_type = T;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    
+    // Rebind allocator to type U
+    template <typename U>
+    struct rebind {
+        using other = allocator<U>;
+    };
+    
+    // Default constructor
+    allocator() noexcept {}
+    
+    // Copy constructor
+    template <typename U>
+    allocator(const allocator<U>&) noexcept {}
+    
+    // Destructor
+    ~allocator() noexcept {}
+
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
     // in a single block.
-
-    T* allocate(size_t n ) {
+    T* allocate(size_t n) {
         if (n == 0) {
             return nullptr; // Handle zero allocation
         }
@@ -44,14 +70,26 @@ template <typename T> class allocator {
             return nullptr; // Handle allocation failure
         }
         memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
-        return ptr;
+        return static_cast<T*>(ptr);
     }
 
-    void deallocate( T* p, size_t n ) {
+    void deallocate(T* p, size_t n) {
         if (p == nullptr) {
             return; // Handle null pointer
         }
         free(p); // Free the allocated memory
+    }
+    
+    // Construct an object at the specified address
+    template <typename U, typename... Args>
+    void construct(U* p, Args&&... args) {
+        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
+    }
+    
+    // Destroy an object at the specified address
+    template <typename U>
+    void destroy(U* p) {
+        p->~U();
     }
 };
 
@@ -62,14 +100,44 @@ template <typename T> class allocator {
 template <> \
 class allocator<TYPE> { \
   public: \
+    using value_type = TYPE; \
+    using pointer = TYPE*; \
+    using const_pointer = const TYPE*; \
+    using reference = TYPE&; \
+    using const_reference = const TYPE&; \
+    using size_type = size_t; \
+    using difference_type = ptrdiff_t; \
+    \
+    template <typename U> \
+    struct rebind { \
+        using other = allocator<U>; \
+    }; \
+    \
+    allocator() noexcept {} \
+    \
+    template <typename U> \
+    allocator(const allocator<U>&) noexcept {} \
+    \
+    ~allocator() noexcept {} \
+    \
     TYPE *allocate(size_t n) { \
         return reinterpret_cast<TYPE *>(PSRamAllocate(sizeof(TYPE) * n, true)); \
     } \
-    void deallocate(TYPE *p) { \
+    void deallocate(TYPE *p, size_t n) { \
         if (p == nullptr) { \
             return; \
         } \
         PSRamDeallocate(p); \
+    } \
+    \
+    template <typename U, typename... Args> \
+    void construct(U* p, Args&&... args) { \
+        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...); \
+    } \
+    \
+    template <typename U> \
+    void destroy(U* p) { \
+        p->~U(); \
     } \
 };
 
