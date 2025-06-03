@@ -35,3 +35,13 @@
 
   * sutaburosu's guide to playing around with FastLED 4
     * https://github.com/sutaburosu/FastLED4-ESP32-playpen
+
+
+# Corkscrew projection
+
+  * Projection from Corkscrew (r, θ, h) to Cylindrical (r, θ, h)
+  * // Rasterizes point with a value For best visual results, you'll want to
+    // rasterize tile2x2 tiles, which are generated for you by the XYPathRenderer
+    // to represent sub pixel / neightbor splatting positions along a path.
+    // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
+    // into a general purpose function.

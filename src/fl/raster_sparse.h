@@ -51,6 +51,11 @@ class XYRasterU8Sparse {
 
     XYRasterU8Sparse &clear() { return reset(); }
 
+    // Rasterizes point with a value For best visual results, you'll want to
+    // rasterize tile2x2 tiles, which are generated for you by the XYPathRenderer
+    // to represent sub pixel / neightbor splatting positions along a path.
+    // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
+    // into a general purpose function.
     void rasterize(const vec2<int> &pt, uint8_t value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);
