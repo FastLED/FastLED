@@ -26,6 +26,7 @@ struct Corkscrew {
         float totalAngle = 19.f * TWO_PI; // Default to 19 turns
         float offsetCircumference = 0;
         bool compact = false;
+        Input() = default;
     };
 
     struct Output {
@@ -139,9 +140,7 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     input.offsetCircumference = 0.0f;
     input.compact = false;
 
-    Corkscrew::Output output;
-
-    Corkscrew::generateMap(input, output);
+    Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK(output.width == 10);
     CHECK(output.height == 2);          // Two vertical segments for two turns
