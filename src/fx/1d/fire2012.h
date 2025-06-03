@@ -2,6 +2,7 @@
 
 #include "FastLED.h"
 #include "fl/namespace.h"
+#include "fl/vector.h"
 #include "fx/fx1d.h"
 
 namespace fl {
@@ -52,7 +53,7 @@ class Fire2012 : public Fx1d {
              const CRGBPalette16 &palette = (const CRGBPalette16 &)HeatColors_p)
         : Fx1d(num_leds), cooling(cooling), sparking(sparking),
           reverse_direction(reverse_direction), palette(palette) {
-        heat.reset(new uint8_t[num_leds]()); // Initialize to zero
+        heat.resize(num_leds); // Vector elements are default-initialized
     }
 
     ~Fire2012() {}
@@ -99,7 +100,7 @@ class Fire2012 : public Fx1d {
     fl::Str fxName() const override { return "Fire2012"; }
 
   private:
-    fl::scoped_array<uint8_t> heat;
+    fl::vector<uint8_t, fl::allocator_psram<uint8_t>> heat;
     uint8_t cooling;
     uint8_t sparking;
     bool reverse_direction;
