@@ -62,7 +62,7 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
 
             // Optionally compact the mapping into Vec2u8 format
             if (input.compact) {
-                Vec2u8 compactSample = {
+                fl::vec2u8 compactSample = {
                     static_cast<uint8_t>((sample.x / input.totalCircumference) *
                                          255),
                     static_cast<uint8_t>((sample.y / verticalSegments) * 255)};
