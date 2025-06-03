@@ -2,8 +2,8 @@
 
 #include "test.h"
 
-#include <FastLED.h>
 #include "fl/vector.h"
+#include <FastLED.h>
 
 #include "fl/math_macros.h"
 
@@ -20,7 +20,7 @@ struct Vec2u8 {
 };
 
 struct CorkscrewProjectionInput {
-    float totalCircumference = 100;  // Length in centimeters
+    float totalCircumference = 100;   // Length in centimeters
     float totalAngle = 19.f * TWO_PI; // Default to 19 turns
     float offsetCircumference = 0;
     bool compact = false;
@@ -33,19 +33,19 @@ struct CorkscrewProjectionOutput {
     fl::vector<Vec2u8> mappingCompact;
 };
 
-struct CorkscrewProjection {
-    static void run(const CorkscrewProjectionInput& input, 
-                   CorkscrewProjectionOutput& output);
+struct Corkscrew {
+    static void generateMap(const CorkscrewProjectionInput &input,
+                            CorkscrewProjectionOutput &output);
 };
 
 // Corkscrew-to-cylindrical projection function
-void CorkscrewProjection::run(const CorkscrewProjectionInput& input,
-                              CorkscrewProjectionOutput& output) {
+void Corkscrew::generateMap(const CorkscrewProjectionInput &input,
+                            CorkscrewProjectionOutput &output) {
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment
     // For two turns (4π), we want exactly 2 vertical segments
     uint16_t verticalSegments = round(input.totalAngle / TWO_PI);
-    
+
     // Determine cylindrical dimensions
     output.height = verticalSegments;
     output.width = ceil(input.totalCircumference);
@@ -76,10 +76,10 @@ void CorkscrewProjection::run(const CorkscrewProjectionInput& input,
                     float corkscrewH = height * verticalSegments;
 
                     // Apply circumference offset
-                    float corkscrewCircumference =
-                        fmodf(corkscrewTheta * input.totalCircumference / TWO_PI +
-                                  segmentOffset,
-                              input.totalCircumference);
+                    float corkscrewCircumference = fmodf(
+                        corkscrewTheta * input.totalCircumference / TWO_PI +
+                            segmentOffset,
+                        input.totalCircumference);
 
                     // Accumulate samples
                     sample.x += corkscrewCircumference;
@@ -96,7 +96,8 @@ void CorkscrewProjection::run(const CorkscrewProjectionInput& input,
             // Optionally compact the mapping into Vec2u8 format
             if (input.compact) {
                 Vec2u8 compactSample = {
-                    static_cast<uint8_t>((sample.x / input.totalCircumference) * 255),
+                    static_cast<uint8_t>((sample.x / input.totalCircumference) *
+                                         255),
                     static_cast<uint8_t>((sample.y / verticalSegments) * 255)};
                 output.mappingCompact.push_back(compactSample);
             }
@@ -104,7 +105,7 @@ void CorkscrewProjection::run(const CorkscrewProjectionInput& input,
     }
 }
 
-TEST_CASE("Corkscrew project") {
+TEST_CASE("Corkscrew generateMap") {
     CorkscrewProjectionInput input;
     input.totalCircumference = 10.0f;
     input.totalAngle = TWO_PI;
@@ -113,7 +114,7 @@ TEST_CASE("Corkscrew project") {
 
     CorkscrewProjectionOutput output;
 
-    CorkscrewProjection::run(input, output);
+    Corkscrew::generateMap(input, output);
 
     CHECK(output.width == 10);
     CHECK(output.height == 1);
@@ -126,7 +127,7 @@ TEST_CASE("Corkscrew project") {
     CHECK(output.mapping[0].y <= 1.0f); // 1 vertical segment for 2π angle
 }
 
-TEST_CASE("Corkscrew project with two turns") {
+TEST_CASE("Corkscrew generateMap with two turns") {
     CorkscrewProjectionInput input;
     input.totalCircumference = 10.0f;
     input.totalAngle = 2 * TWO_PI; // Two full turns
@@ -135,10 +136,10 @@ TEST_CASE("Corkscrew project with two turns") {
 
     CorkscrewProjectionOutput output;
 
-    CorkscrewProjection::run(input, output);
+    Corkscrew::generateMap(input, output);
 
     CHECK(output.width == 10);
-    CHECK(output.height == 2); // Two vertical segments for two turns
+    CHECK(output.height == 2);          // Two vertical segments for two turns
     CHECK(output.mapping.size() == 20); // 10 width * 2 height
 
     // Check first pixel for correctness (basic integrity)
