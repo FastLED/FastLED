@@ -13,6 +13,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
 #include "fl/namespace.h"
 #include "fl/scoped_ptr.h"
+#include "fl/vector.h"
 #include "fl/warn.h"
 
 #include "fl/ptr.h"
@@ -99,8 +100,8 @@ class WaveSimulation1D_Real {
     uint32_t length; // Length of the inner simulation grid.
     // Two grids stored in fixed Q15 format, each with length+2 entries
     // (including boundary cells).
-    fl::scoped_array<int16_t> grid1;
-    fl::scoped_array<int16_t> grid2;
+    fl::vector<int16_t> grid1;
+    fl::vector<int16_t> grid2;
     size_t whichGrid; // Indicates the active grid (0 or 1).
 
     int16_t mCourantSq; // Simulation speed (courant squared) stored in Q15.
@@ -189,8 +190,8 @@ class WaveSimulation2D_Real {
     uint32_t stride; // Row length (width + 2 for the borders).
 
     // Two separate grids stored in fixed Q15 format.
-    fl::scoped_array<int16_t> grid1;
-    fl::scoped_array<int16_t> grid2;
+    fl::vector<int16_t> grid1;
+    fl::vector<int16_t> grid2;
 
     size_t whichGrid; // Indicates the active grid (0 or 1).
 

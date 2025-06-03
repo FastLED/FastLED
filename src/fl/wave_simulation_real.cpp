@@ -47,9 +47,9 @@ using namespace wave_detail;
 WaveSimulation1D_Real::WaveSimulation1D_Real(uint32_t len, float courantSq,
                                              int dampening)
     : length(len),
-      grid1(new int16_t[length + 2]()), // Allocate and zero-initialize with
-                                        // length+2 elements.
-      grid2(new int16_t[length + 2]()), whichGrid(0),
+      grid1(length + 2), // Initialize vector with correct size
+      grid2(length + 2), // Initialize vector with correct size
+      whichGrid(0),
       mCourantSq(float_to_fixed(courantSq)), mDampenening(dampening) {
     // Additional initialization can be added here if needed.
 }
@@ -71,7 +71,7 @@ int16_t WaveSimulation1D_Real::geti16(size_t x) const {
         FASTLED_WARN("Out of range.");
         return 0;
     }
-    const int16_t *curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    const int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     return curr[x + 1];
 }
 
@@ -80,7 +80,7 @@ int16_t WaveSimulation1D_Real::geti16Previous(size_t x) const {
         FASTLED_WARN("Out of range.");
         return 0;
     }
-    const int16_t *prev = (whichGrid == 0) ? grid2.get() : grid1.get();
+    const int16_t *prev = (whichGrid == 0) ? grid2.data() : grid1.data();
     return prev[x + 1];
 }
 
@@ -90,7 +90,7 @@ float WaveSimulation1D_Real::getf(size_t x) const {
         return 0.0f;
     }
     // Retrieve value from the active grid (offset by 1 for boundary).
-    const int16_t *curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    const int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     return fixed_to_float(curr[x + 1]);
 }
 
@@ -101,13 +101,13 @@ void WaveSimulation1D_Real::set(size_t x, float value) {
         FASTLED_WARN("warning X value too high");
         return;
     }
-    int16_t *curr = (whichGrid == 0) ? grid1.get() : grid2.get();
+    int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
     curr[x + 1] = float_to_fixed(value);
 }
 
 void WaveSimulation1D_Real::update() {
-    int16_t *curr = (whichGrid == 0) ? grid1.get() : grid2.get();
-    int16_t *next = (whichGrid == 0) ? grid2.get() : grid1.get();
+    int16_t *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
+    int16_t *next = (whichGrid == 0) ? grid2.data() : grid1.data();
 
     // Update boundaries with a Neumann (zero-gradient) condition:
     curr[0] = curr[1];
@@ -159,8 +159,8 @@ void WaveSimulation1D_Real::update() {
 WaveSimulation2D_Real::WaveSimulation2D_Real(uint32_t W, uint32_t H,
                                              float speed, float dampening)
     : width(W), height(H), stride(W + 2),
-      grid1(new int16_t[(W + 2) * (H + 2)]()),
-      grid2(new int16_t[(W + 2) * (H + 2)]()), whichGrid(0),
+      grid1((W + 2) * (H + 2)),
+      grid2((W + 2) * (H + 2)), whichGrid(0),
       // Initialize speed 0.16 in fixed Q15
       mCourantSq(float_to_fixed(speed)),
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
@@ -183,7 +183,7 @@ float WaveSimulation2D_Real::getf(size_t x, size_t y) const {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0.0f;
     }
-    const int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
+    const int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     return fixed_to_float(curr[(y + 1) * stride + (x + 1)]);
 }
 
@@ -192,7 +192,7 @@ int16_t WaveSimulation2D_Real::geti16(size_t x, size_t y) const {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
     }
-    const int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
+    const int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     return curr[(y + 1) * stride + (x + 1)];
 }
 
@@ -201,7 +201,7 @@ int16_t WaveSimulation2D_Real::geti16Previous(size_t x, size_t y) const {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return 0;
     }
-    const int16_t *prev = (whichGrid == 0 ? grid2.get() : grid1.get());
+    const int16_t *prev = (whichGrid == 0 ? grid2.data() : grid1.data());
     return prev[(y + 1) * stride + (x + 1)];
 }
 
@@ -219,13 +219,13 @@ void WaveSimulation2D_Real::seti16(size_t x, size_t y, int16_t value) {
         FASTLED_WARN("Out of range: " << x << ", " << y);
         return;
     }
-    int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
+    int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
     curr[(y + 1) * stride + (x + 1)] = value;
 }
 
 void WaveSimulation2D_Real::update() {
-    int16_t *curr = (whichGrid == 0 ? grid1.get() : grid2.get());
-    int16_t *next = (whichGrid == 0 ? grid2.get() : grid1.get());
+    int16_t *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
+    int16_t *next = (whichGrid == 0 ? grid2.data() : grid1.data());
 
     // Update horizontal boundaries.
     for (size_t j = 0; j < height + 2; ++j) {
