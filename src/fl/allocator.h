@@ -10,6 +10,8 @@ namespace fl {
 void SetPSRamAllocator(void *(*alloc)(size_t), void (*free)(void *));
 void *PSRamAllocate(size_t size, bool zero = true);
 void PSRamDeallocate(void *ptr);
+void Malloc(size_t size);
+void Free(void *ptr);
 
 template <typename T> class PSRamAllocator {
   public:
@@ -26,30 +28,30 @@ template <typename T> class PSRamAllocator {
     }
 };
 
-// Define your own allocator in the code and the the fl::vector class will
-// use it.
-template <typename T> class Allocator {
+// std compatible allocator.
+template <typename T> class allocator {
   public:
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
     // in a single block.
 
-    static T *Alloc(size_t n) {
-        size_t size = sizeof(T) * n;
-        void * ptr = malloc(size);
-        if (ptr == nullptr) {
-            return nullptr; // Allocation failed
+    T* allocate(size_t n ) {
+        if (n == 0) {
+            return nullptr; // Handle zero allocation
         }
-        memset(ptr, 0, sizeof(T) * n); // Initialize to zero
-        return reinterpret_cast<T *>(ptr);
+        void *ptr = malloc(sizeof(T) * n);
+        if (ptr == nullptr) {
+            return nullptr; // Handle allocation failure
+        }
+        memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
+        return ptr;
     }
 
-    // Use this to free the allocated memory.
-    static void Free(T *p) {
+    void deallocate( T* p, size_t n ) {
         if (p == nullptr) {
-            return;
+            return; // Handle null pointer
         }
-        free(p); // Free the memory
+        free(p); // Free the allocated memory
     }
 };
 
@@ -58,12 +60,12 @@ template <typename T> class Allocator {
 // Usage: FL_USE_PSRAM_ALLOCATOR(MyClass)
 #define FL_USE_PSRAM_ALLOCATOR(TYPE) \
 template <> \
-class Allocator<TYPE> { \
+class allocator<TYPE> { \
   public: \
-    static TYPE *Alloc(size_t n) { \
+    TYPE *allocate(size_t n) { \
         return reinterpret_cast<TYPE *>(PSRamAllocate(sizeof(TYPE) * n, true)); \
     } \
-    static void Free(TYPE *p) { \
+    void deallocate(TYPE *p) { \
         if (p == nullptr) { \
             return; \
         } \

@@ -91,6 +91,10 @@ template <typename T, typename Deleter = PointerDeleter<T>> class scoped_ptr {
     Deleter deleter_; // Custom deleter
 };
 
+
+
+// A second variant, this one allows you to allocate seperataly and use
+// a deleter function to manage the deletion. Some older code needs this.
 template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
   public:
     // Constructor
@@ -161,7 +165,9 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
 };
 
 
-template <typename T, typename Alloc = Allocator<T>> class scoped_array2 {
+
+// A variant of scoped_ptr where the 
+template <typename T, typename Alloc = allocator<T>> class scoped_array2 {
   public:
     // Constructor
     explicit scoped_array2(size_t size = 0)
@@ -268,5 +274,7 @@ template <typename T, typename Alloc = Allocator<T>> class scoped_array2 {
     T *arr_ = nullptr;     // Managed array pointer
     size_t size_ = 0;      // Size of the array
 };
+
+
 
 } // namespace fl
