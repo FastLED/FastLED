@@ -166,7 +166,7 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
 
 
 
-// A variant of scoped_ptr where the 
+// A variant of scoped_ptr where allocation is done completly via a fl::allocator.
 template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
   public:
 
@@ -178,7 +178,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
             arr_ = mAlloc.allocate(size);
             // Default initialize each element
             for (size_t i = 0; i < size; ++i) {
-                new (&arr_[i]) T();
+                mAlloc.construct(&arr_[i]);
             }
         }
     }
@@ -188,7 +188,7 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
         if (arr_) {
             // Call destructor on each element
             for (size_t i = 0; i < size_; ++i) {
-                arr_[i].~T();
+                mAlloc.destroy(&arr_[i]);
             }
             mAlloc.deallocate(arr_, size_);
         }
@@ -237,7 +237,8 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
         if (arr_) {
             // Call destructor on each element
             for (size_t i = 0; i < size_; ++i) {
-                arr_[i].~T();
+                // arr_[i].~T();
+                mAlloc.destroy(&arr_[i]);
             }
             // ::operator delete(arr_);
             mAlloc.deallocate(arr_, size_);
@@ -250,7 +251,8 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
             arr_ = mAlloc.allocate(new_size);
             // Default initialize each element
             for (size_t i = 0; i < new_size; ++i) {
-                new (&arr_[i]) T();
+                // new (&arr_[i]) T();
+                mAlloc.construct(&arr_[i]);
             }
         }
     }
