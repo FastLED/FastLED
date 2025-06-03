@@ -56,7 +56,7 @@ class ScaleUp : public Fx2d {
     void noExpand(const CRGB *input, CRGB *output, uint16_t width,
                   uint16_t height);
     Fx2dPtr mDelegate;
-    fl::vector<CRGB> mSurface;
+    fl::vector<CRGB, fl::allocator_psram<CRGB>> mSurface;
 };
 
 } // namespace fl
