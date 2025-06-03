@@ -19,28 +19,33 @@ struct Vec2u8 {
     uint8_t x, y;
 };
 
-struct CorkscrewProjectionInput {
-    float totalCircumference = 100;   // Length in centimeters
-    float totalAngle = 19.f * TWO_PI; // Default to 19 turns
-    float offsetCircumference = 0;
-    bool compact = false;
-};
-
-struct CorkscrewProjectionOutput {
-    fl::vector<Vec2f> mapping;
-    uint16_t width;
-    uint16_t height;
-    fl::vector<Vec2u8> mappingCompact;
-};
-
 struct Corkscrew {
-    static void generateMap(const CorkscrewProjectionInput &input,
-                            CorkscrewProjectionOutput &output);
+
+    struct Input {
+        float totalCircumference = 100;   // Length in centimeters
+        float totalAngle = 19.f * TWO_PI; // Default to 19 turns
+        float offsetCircumference = 0;
+        bool compact = false;
+    };
+
+    struct Output {
+        fl::vector<Vec2f> mapping;
+        uint16_t width;
+        uint16_t height;
+        fl::vector<Vec2u8> mappingCompact;
+    };
+
+    static void generateMap(const Input &input, Output &output);
+
+    static Output generateMap(const Input &input) {
+        Output output;
+        generateMap(input, output);
+        return output;
+    }
 };
 
 // Corkscrew-to-cylindrical projection function
-void Corkscrew::generateMap(const CorkscrewProjectionInput &input,
-                            CorkscrewProjectionOutput &output) {
+void Corkscrew::generateMap(const Corkscrew::Input &input, Corkscrew::Output &output) {
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment
     // For two turns (4π), we want exactly 2 vertical segments
@@ -106,13 +111,13 @@ void Corkscrew::generateMap(const CorkscrewProjectionInput &input,
 }
 
 TEST_CASE("Corkscrew generateMap") {
-    CorkscrewProjectionInput input;
+    Corkscrew::Input input;
     input.totalCircumference = 10.0f;
     input.totalAngle = TWO_PI;
     input.offsetCircumference = 0.0f;
     input.compact = false;
 
-    CorkscrewProjectionOutput output;
+    Corkscrew::Output output;
 
     Corkscrew::generateMap(input, output);
 
@@ -128,13 +133,13 @@ TEST_CASE("Corkscrew generateMap") {
 }
 
 TEST_CASE("Corkscrew generateMap with two turns") {
-    CorkscrewProjectionInput input;
+    Corkscrew::Input input;
     input.totalCircumference = 10.0f;
     input.totalAngle = 2 * TWO_PI; // Two full turns
     input.offsetCircumference = 0.0f;
     input.compact = false;
 
-    CorkscrewProjectionOutput output;
+    Corkscrew::Output output;
 
     Corkscrew::generateMap(input, output);
 
