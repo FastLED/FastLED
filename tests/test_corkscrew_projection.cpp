@@ -41,8 +41,10 @@ struct CorkscrewProjection {
 // Corkscrew-to-cylindrical projection function
 void CorkscrewProjection::run(const CorkscrewProjectionInput& input,
                               CorkscrewProjectionOutput& output) {
-    // For a single turn (2π), we want 1 vertical segment
-    uint16_t verticalSegments = 1;
+    // Calculate vertical segments based on number of turns
+    // For a single turn (2π), we want exactly 1 vertical segment
+    // For two turns (4π), we want exactly 2 vertical segments
+    uint16_t verticalSegments = round(input.totalAngle / TWO_PI);
     
     // Determine cylindrical dimensions
     output.height = verticalSegments;
@@ -122,4 +124,26 @@ TEST_CASE("Corkscrew project") {
     CHECK(output.mapping[0].x <= input.totalCircumference);
     CHECK(output.mapping[0].y >= 0.0f);
     CHECK(output.mapping[0].y <= 1.0f); // 1 vertical segment for 2π angle
+}
+
+TEST_CASE("Corkscrew project with two turns") {
+    CorkscrewProjectionInput input;
+    input.totalCircumference = 10.0f;
+    input.totalAngle = 2 * TWO_PI; // Two full turns
+    input.offsetCircumference = 0.0f;
+    input.compact = false;
+
+    CorkscrewProjectionOutput output;
+
+    CorkscrewProjection::run(input, output);
+
+    CHECK(output.width == 10);
+    CHECK(output.height == 2); // Two vertical segments for two turns
+    CHECK(output.mapping.size() == 20); // 10 width * 2 height
+
+    // Check first pixel for correctness (basic integrity)
+    CHECK(output.mapping[0].x >= 0.0f);
+    CHECK(output.mapping[0].x <= input.totalCircumference);
+    CHECK(output.mapping[0].y >= 0.0f);
+    CHECK(output.mapping[0].y <= 2.0f); // 2 vertical segments for 4π angle
 }
