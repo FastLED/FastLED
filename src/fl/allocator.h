@@ -6,6 +6,7 @@
 #include <string.h>
 #include "fl/inplacenew.h"
 #include "fl/type_traits.h"
+#include "fl/unused.h"
 
 namespace fl {
 
@@ -74,6 +75,7 @@ template <typename T> class allocator {
     }
 
     void deallocate(T* p, size_t n) {
+        FASTLED_UNUSED(n);
         if (p == nullptr) {
             return; // Handle null pointer
         }

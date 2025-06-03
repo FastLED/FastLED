@@ -167,13 +167,15 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
 
 
 // A variant of scoped_ptr where the 
-template <typename T, typename Alloc = allocator<T>> class scoped_array2 {
+template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
   public:
+
+    Alloc mAlloc; // Allocator instance to manage memory allocation
     // Constructor
     explicit scoped_array2(size_t size = 0)
         : arr_(nullptr), size_(size) {
         if (size > 0) {
-            arr_ = Alloc::Alloc(size);
+            arr_ = mAlloc.allocate(size);
             // Default initialize each element
             for (size_t i = 0; i < size; ++i) {
                 new (&arr_[i]) T();
@@ -188,7 +190,7 @@ template <typename T, typename Alloc = allocator<T>> class scoped_array2 {
             for (size_t i = 0; i < size_; ++i) {
                 arr_[i].~T();
             }
-            Alloc::Free(arr_);
+            mAlloc.deallocate(arr_, size_);
         }
     }
 
@@ -237,13 +239,15 @@ template <typename T, typename Alloc = allocator<T>> class scoped_array2 {
             for (size_t i = 0; i < size_; ++i) {
                 arr_[i].~T();
             }
-            Alloc::Free(arr_);
+            // ::operator delete(arr_);
+            mAlloc.deallocate(arr_, size_);
             arr_ = nullptr;
         }
         
         size_ = new_size;
         if (new_size > 0) {
-            arr_ = Alloc::Alloc(new_size);
+            // arr_ = static_cast<T*>(::operator new(new_size * sizeof(T)));
+            arr_ = mAlloc.allocate(new_size);
             // Default initialize each element
             for (size_t i = 0; i < new_size; ++i) {
                 new (&arr_[i]) T();
