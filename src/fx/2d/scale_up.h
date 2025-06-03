@@ -11,6 +11,7 @@
 
 #include "fl/bilinear_expansion.h"
 #include "fl/ptr.h"
+#include "fl/vector.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
@@ -55,7 +56,7 @@ class ScaleUp : public Fx2d {
     void noExpand(const CRGB *input, CRGB *output, uint16_t width,
                   uint16_t height);
     Fx2dPtr mDelegate;
-    fl::scoped_array<CRGB> mSurface;
+    fl::vector<CRGB> mSurface;
 };
 
 } // namespace fl

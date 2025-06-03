@@ -42,11 +42,11 @@ ScaleUp::ScaleUp(XYMap xymap, Fx2dPtr fx) : Fx2d(xymap), mDelegate(fx) {
 }
 
 void ScaleUp::draw(DrawContext context) {
-    if (!mSurface) {
-        mSurface.reset(new CRGB[mDelegate->getNumLeds()]);
+    if (mSurface.empty()) {
+        mSurface.resize(mDelegate->getNumLeds());
     }
     DrawContext delegateContext = context;
-    delegateContext.leds = mSurface.get();
+    delegateContext.leds = mSurface.data();
     mDelegate->draw(delegateContext);
 
     uint16_t in_w = mDelegate->getWidth();
@@ -55,9 +55,9 @@ void ScaleUp::draw(DrawContext context) {
     uint16_t out_h = getHeight();
     ;
     if (in_w == out_w && in_h == out_h) {
-        noExpand(mSurface.get(), context.leds, in_w, in_h);
+        noExpand(mSurface.data(), context.leds, in_w, in_h);
     } else {
-        expand(mSurface.get(), context.leds, in_w, in_h, mXyMap);
+        expand(mSurface.data(), context.leds, in_w, in_h, mXyMap);
     }
 }
 
