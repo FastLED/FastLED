@@ -190,8 +190,8 @@ class WaveSimulation2D_Real {
     uint32_t stride; // Row length (width + 2 for the borders).
 
     // Two separate grids stored in fixed Q15 format.
-    fl::vector<int16_t> grid1;
-    fl::vector<int16_t> grid2;
+    fl::vector<int16_t, fl::allocator_psram<int16_t>> grid1;
+    fl::vector<int16_t, fl::allocator_psram<int16_t>> grid2;
 
     size_t whichGrid; // Indicates the active grid (0 or 1).
 
