@@ -4,8 +4,9 @@
  * @file corkscrew.h
  * @brief Corkscrew projection utilities
  *
- * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical (θ, h)
- * coordinates.
+ * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical cartesian (w, h)
+ * space, where w = one turn of the Corkscrew. The the corkscrew at (0,0) will
+ * map to (0,0) in cylindrical space.
  *
  * The projection:
  * - Super samples cylindrical space
@@ -37,6 +38,7 @@
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/vector.h"
+#include "fl/allocator.h"
 
 namespace fl {
 

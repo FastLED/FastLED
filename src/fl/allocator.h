@@ -95,6 +95,57 @@ template <typename T> class allocator {
     }
 };
 
+template <typename T> class allocator_psram {
+    public:
+        // Type definitions required by STL
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using reference = T&;
+        using const_reference = const T&;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+    
+        // Rebind allocator to type U
+        template <typename U>
+        struct rebind {
+            using other = allocator_psram<U>;
+        };
+    
+        // Default constructor
+        allocator_psram() noexcept {}
+    
+        // Copy constructor
+        template <typename U>
+        allocator_psram(const allocator_psram<U>&) noexcept {}
+    
+        // Destructor
+        ~allocator_psram() noexcept {}
+    
+        // Allocate memory for n objects of type T
+        T* allocate(size_t n) {
+            return PSRamAllocator<T>::Alloc(n);
+        }
+    
+        // Deallocate memory for n objects of type T
+        void deallocate(T* p, size_t n) {
+            PSRamAllocator<T>::Free(p);
+            FASTLED_UNUSED(n);
+        }
+    
+        // Construct an object at the specified address
+        template <typename U, typename... Args>
+        void construct(U* p, Args&&... args) {
+            new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
+        }
+    
+        // Destroy an object at the specified address
+        template <typename U>
+        void destroy(U* p) {
+            p->~U();
+        }
+};
+
 
 // Macro to specialize the Allocator for a specific type to use PSRam
 // Usage: FL_USE_PSRAM_ALLOCATOR(MyClass)
