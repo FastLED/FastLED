@@ -72,9 +72,9 @@ struct Corkscrew {
     };
 
     struct Output {
+        uint16_t width = 0;
+        uint16_t height = 0;
         fl::vector<fl::vec2f> mapping;
-        uint16_t width;
-        uint16_t height;
         fl::vector<fl::vec2u8> mappingCompact;
     };
 
