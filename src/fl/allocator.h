@@ -6,14 +6,14 @@
 
 namespace fl {
 
-void SetLargeBlockAllocator(void *(*alloc)(size_t), void (*free)(void *));
-void *LargeBlockAllocate(size_t size, bool zero = true);
-void LargeBlockDeallocate(void *ptr);
+void SetPSRamAllocator(void *(*alloc)(size_t), void (*free)(void *));
+void *PSRamAllocate(size_t size, bool zero = true);
+void PSRamDeallocate(void *ptr);
 
-template <typename T> class LargeBlockAllocator {
+template <typename T> class PSRamAllocator {
   public:
     static T *Alloc(size_t n) {
-        void *ptr = LargeBlockAllocate(sizeof(T) * n, true);
+        void *ptr = PSRamAllocate(sizeof(T) * n, true);
         return reinterpret_cast<T *>(ptr);
     }
 
@@ -21,7 +21,7 @@ template <typename T> class LargeBlockAllocator {
         if (p == nullptr) {
             return;
         }
-        LargeBlockDeallocate(p);
+        PSRamDeallocate(p);
     }
 };
 
@@ -45,5 +45,7 @@ template <typename T> class Allocator {
         delete[] p;
     }
 };
+
+// #define FL_USE_PSRAM_ALLOCATOR(TYPE)
 
 } // namespace fl

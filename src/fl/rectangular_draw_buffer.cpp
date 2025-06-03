@@ -60,8 +60,8 @@ bool RectangularDrawBuffer::onQueuingDone() {
     getBlockInfo(&num_strips, &max_bytes_in_strip, &total_bytes);
     if (total_bytes > mAllLedsBufferUint8Size) {
         uint8_t *old_ptr = mAllLedsBufferUint8.release();
-        fl::LargeBlockAllocator<uint8_t>::Free(old_ptr);
-        uint8_t *ptr = fl::LargeBlockAllocator<uint8_t>::Alloc(total_bytes);
+        fl::PSRamAllocator<uint8_t>::Free(old_ptr);
+        uint8_t *ptr = fl::PSRamAllocator<uint8_t>::Alloc(total_bytes);
         mAllLedsBufferUint8.reset(ptr);
     }
     mAllLedsBufferUint8Size = total_bytes;

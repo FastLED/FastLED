@@ -27,7 +27,7 @@ namespace {
 
 TEST_CASE("test frame custom allocator") {
     // Set our custom allocator
-    SetLargeBlockAllocator(custom_malloc, custom_free);
+    SetPSRamAllocator(custom_malloc, custom_free);
     
     FramePtr frame = FramePtr::New(100);  // 100 pixels.
     CHECK(allocation_count == 1);  // One for RGB.
@@ -39,7 +39,7 @@ TEST_CASE("test frame custom allocator") {
 
 
 TEST_CASE("test blend by black") {
-    SetLargeBlockAllocator(custom_malloc, custom_free);
+    SetPSRamAllocator(custom_malloc, custom_free);
     FramePtr frame = FramePtr::New(1);  // 1 pixels.
     frame->rgb()[0] = CRGB(255, 0, 0);  // Red
     CRGB out;

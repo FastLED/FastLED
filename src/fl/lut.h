@@ -34,14 +34,14 @@ FASTLED_SMART_PTR_NO_FWD(LUTXYZFLOAT);
 template <typename T> class LUT : public fl::Referent {
   public:
     LUT(uint32_t length) : length(length) {
-        T *ptr = LargeBlockAllocator<T>::Alloc(length);
+        T *ptr = PSRamAllocator<T>::Alloc(length);
         mDataHandle.reset(ptr);
         data = ptr;
     }
     // In this version the data is passed in but not managed by this object.
     LUT(uint32_t length, T *data) : length(length) { this->data = data; }
     ~LUT() {
-        LargeBlockAllocator<T>::Free(mDataHandle.release());
+        PSRamAllocator<T>::Free(mDataHandle.release());
         data = mDataHandle.get();
     }
 

@@ -33,12 +33,12 @@ void *(*Alloc)(size_t) = DefaultAlloc;
 void (*Free)(void *) = DefaultFree;
 } // namespace
 
-void SetLargeBlockAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
+void SetPSRamAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
     Alloc = alloc;
     Free = free;
 }
 
-void *LargeBlockAllocate(size_t size, bool zero) {
+void *PSRamAllocate(size_t size, bool zero) {
     void *ptr = Alloc(size);
     if (zero) {
         memset(ptr, 0, size);
@@ -46,6 +46,6 @@ void *LargeBlockAllocate(size_t size, bool zero) {
     return ptr;
 }
 
-void LargeBlockDeallocate(void *ptr) { Free(ptr); }
+void PSRamDeallocate(void *ptr) { Free(ptr); }
 
 } // namespace fl
