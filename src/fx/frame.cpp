@@ -15,22 +15,19 @@ using namespace fl;
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb() {
-    mRgb.reset(reinterpret_cast<CRGB *>(
-        PSRamAllocate(pixels_count * sizeof(CRGB))));
-    memset(mRgb.get(), 0, pixels_count * sizeof(CRGB));
+    mRgb.resize(pixels_count);
+    memset(mRgb.data(), 0, pixels_count * sizeof(CRGB));
 }
 
 Frame::~Frame() {
-    if (mRgb) {
-        PSRamDeallocate(mRgb.release());
-    }
+    // Vector will handle memory cleanup automatically
 }
 
 void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
-    if (mRgb) {
+    if (!mRgb.empty()) {
         switch (draw_mode) {
         case DRAW_MODE_OVERWRITE: {
-            memcpy(leds, mRgb.get(), mPixelsCount * sizeof(CRGB));
+            memcpy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
             break;
         }
         case DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS: {
@@ -76,7 +73,7 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
     }
 }
 
-void Frame::clear() { memset(mRgb.get(), 0, mPixelsCount * sizeof(CRGB)); }
+void Frame::clear() { memset(mRgb.data(), 0, mPixelsCount * sizeof(CRGB)); }
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
                         uint8_t amountofFrame2, CRGB *pixels) {
@@ -87,7 +84,7 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
     const CRGB *rgbFirst = frame1.rgb();
     const CRGB *rgbSecond = frame2.rgb();
 
-    if (!rgbFirst || !rgbSecond) {
+    if (frame1.mRgb.empty() || frame2.mRgb.empty()) {
         // Error, why are we getting null pointers?
         return;
     }
@@ -104,7 +101,7 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
         FASTLED_DBG("Frames must have the same size");
         return; // Frames must have the same size
     }
-    interpolate(frame1, frame2, amountOfFrame2, mRgb.get());
+    interpolate(frame1, frame2, amountOfFrame2, mRgb.data());
 }
 
 } // namespace fl
