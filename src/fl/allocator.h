@@ -25,4 +25,25 @@ template <typename T> class LargeBlockAllocator {
     }
 };
 
+// Define your own allocator in the code and the the fl::vector class will
+// use it.
+template <typename T> class Allocator {
+  public:
+    // Use this to allocate large blocks of memory for T.
+    // This is useful for large arrays or objects that need to be allocated
+    // in a single block.
+
+    static T *Alloc(size_t n) {
+        return new T[n]();
+    }
+
+    // Use this to free the allocated memory.
+    static void Free(T *p) {
+        if (p == nullptr) {
+            return;
+        }
+        delete[] p;
+    }
+};
+
 } // namespace fl

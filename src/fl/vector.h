@@ -304,7 +304,7 @@ template <typename T, size_t N> class FixedVector {
 
 template <typename T> class HeapVector {
   private:
-    fl::scoped_array<T> mArray;
+    T* mArray = nullptr;
 
     size_t mCapacity = 0;
     size_t mSize = 0;
@@ -328,7 +328,7 @@ template <typename T> class HeapVector {
 
     // Constructor
     HeapVector(size_t size = 0, const T &value = T()) : mCapacity(size) {
-        mArray.reset(new T[mCapacity]());
+        mArray = new T[mCapacity]();
         for (size_t i = 0; i < size; ++i) {
             mArray[i] = value;
         }
@@ -357,7 +357,10 @@ template <typename T> class HeapVector {
     }
 
     // Destructor
-    ~HeapVector() { clear(); }
+    ~HeapVector() { 
+        clear();
+        delete[] mArray;
+    }
 
     void ensure_size(size_t n) {
         if (n > mCapacity) {
@@ -365,14 +368,12 @@ template <typename T> class HeapVector {
             if (new_capacity < n) {
                 new_capacity = n;
             }
-            T *ptr = new T[new_capacity]();
-            fl::scoped_array<T> new_array(ptr);
+            T *new_array = new T[new_capacity]();
             for (size_t i = 0; i < mSize; ++i) {
                 new_array[i] = mArray[i];
             }
-            // mArray = std::move(new_array);
-            mArray.reset();
-            mArray.reset(new_array.release());
+            delete[] mArray;
+            mArray = new_array;
             mCapacity = new_capacity;
         }
     }
@@ -399,8 +400,8 @@ template <typename T> class HeapVector {
     }
 
     void resize(size_t n, const T &value) {
-        mArray.reset();
-        mArray.reset(new T[n]());
+        delete[] mArray;
+        mArray = new T[n]();
         for (size_t i = 0; i < n; ++i) {
             mArray[i] = value;
         }
@@ -533,12 +534,11 @@ template <typename T> class HeapVector {
     }
 
     void swap(HeapVector<T> &other) {
-        T *temp = mArray.release();
+        T *temp = mArray;
         size_t temp_size = mSize;
         size_t temp_capacity = mCapacity;
-        T *temp2 = other.mArray.release();
-        mArray.reset(temp2);
-        other.mArray.reset(temp);
+        mArray = other.mArray;
+        other.mArray = temp;
         mSize = other.mSize;
         mCapacity = other.mCapacity;
         other.mSize = temp_size;
@@ -597,9 +597,9 @@ template <typename T> class HeapVector {
     //     }
     // }
 
-    T *data() { return mArray.get(); }
+    T *data() { return mArray; }
 
-    const T *data() const { return mArray.get(); }
+    const T *data() const { return mArray; }
 
     bool operator==(const HeapVector<T> &other) const {
         if (size() != other.size()) {
