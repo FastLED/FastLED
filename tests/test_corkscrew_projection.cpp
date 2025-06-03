@@ -3,7 +3,7 @@
 #include "test.h"
 
 #include <FastLED.h>
-#include <vector>
+#include "fl/vector.h"
 
 #include "fl/math_macros.h"
 
@@ -27,10 +27,10 @@ struct CorkscrewProjectionInput {
 };
 
 struct CorkscrewProjectionOutput {
-    std::vector<Vec2f> mapping;
+    fl::vector<Vec2f> mapping;
     uint16_t width;
     uint16_t height;
-    std::vector<Vec2u8> mappingCompact;
+    fl::vector<Vec2u8> mappingCompact;
 };
 
 struct CorkscrewProjection {
