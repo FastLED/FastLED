@@ -5,12 +5,13 @@
 
 #include "fl/clamp.h"
 #include "fl/geometry.h"
+#include "fl/allocator.h"
 
 namespace fl {
 
 template <typename T, size_t INLINED_SIZE> class FixedVector;
 
-template <typename T> class HeapVector;
+template <typename T, typename Allocator> class HeapVector;
 
 template <typename T, size_t INLINED_SIZE> class InlinedVector;
 
@@ -23,7 +24,8 @@ template <typename T> class Slice {
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, size_t size) : mData(data), mSize(size) {}
 
-    Slice(const HeapVector<T> &vector)
+    template<typename Alloc>
+    Slice(const HeapVector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <size_t INLINED_SIZE>
@@ -34,8 +36,8 @@ template <typename T> class Slice {
     Slice(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
-    template <typename U>
-    Slice(const HeapVector<U> &vector)
+    template <typename U, typename Alloc>
+    Slice(const HeapVector<U, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <typename U, size_t INLINED_SIZE>

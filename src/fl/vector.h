@@ -302,11 +302,12 @@ template <typename T, size_t N> class FixedVector {
     size_t current_size = 0;
 };
 
-template <typename T> class HeapVector {
+template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
   private:
-    scoped_array2<T> mArray;
+    T* mArray = nullptr;
     size_t mCapacity = 0;
     size_t mSize = 0;
+    Allocator mAlloc;
 
   public:
     typedef T *iterator;
@@ -328,9 +329,10 @@ template <typename T> class HeapVector {
     // Constructor
     HeapVector(size_t size = 0, const T &value = T()) : mCapacity(size), mSize(size) {
         if (size > 0) {
-            mArray.reset(size);
+            // mArray.reset(size);
+            mArray = mAlloc.allocate(size);
             for (size_t i = 0; i < size; ++i) {
-                mArray[i] = value;
+                mAlloc.construct(&mArray[i], value);
             }
         }
     }
@@ -359,6 +361,13 @@ template <typename T> class HeapVector {
     // Destructor
     ~HeapVector() { 
         clear();
+        if (mArray) {
+            for (size_t i = 0; i < mSize; ++i) {
+                mAlloc.destroy(&mArray[i]);
+            }
+            mAlloc.deallocate(mArray, mCapacity);
+            mArray = nullptr;
+        }
     }
 
     void ensure_size(size_t n) {
@@ -367,11 +376,23 @@ template <typename T> class HeapVector {
             if (new_capacity < n) {
                 new_capacity = n;
             }
-            scoped_array2<T> new_array(new_capacity);
+            
+            T* new_array = mAlloc.allocate(new_capacity);
+            
+            // Copy existing elements to new array
             for (size_t i = 0; i < mSize; ++i) {
-                new_array[i] = mArray[i];
+                mAlloc.construct(&new_array[i], mArray[i]);
             }
-            mArray.swap(new_array);
+            
+            // Clean up old array
+            if (mArray) {
+                for (size_t i = 0; i < mSize; ++i) {
+                    mAlloc.destroy(&mArray[i]);
+                }
+                mAlloc.deallocate(mArray, mCapacity);
+            }
+            
+            mArray = new_array;
             mCapacity = new_capacity;
         }
     }
@@ -398,12 +419,44 @@ template <typename T> class HeapVector {
     }
 
     void resize(size_t n, const T &value) {
-        mArray.reset(n);
-        for (size_t i = 0; i < n; ++i) {
-            mArray[i] = value;
+        if (n > mCapacity) {
+            // Need to allocate more space
+            T* new_array = mAlloc.allocate(n);
+            
+            // Copy existing elements
+            for (size_t i = 0; i < mSize; ++i) {
+                mAlloc.construct(&new_array[i], mArray[i]);
+            }
+            
+            // Initialize new elements with value
+            for (size_t i = mSize; i < n; ++i) {
+                mAlloc.construct(&new_array[i], value);
+            }
+            
+            // Clean up old array
+            if (mArray) {
+                for (size_t i = 0; i < mSize; ++i) {
+                    mAlloc.destroy(&mArray[i]);
+                }
+                mAlloc.deallocate(mArray, mCapacity);
+            }
+            
+            mArray = new_array;
+            mCapacity = n;
+            mSize = n;
+        } else if (n > mSize) {
+            // Just need to add more elements
+            for (size_t i = mSize; i < n; ++i) {
+                mAlloc.construct(&mArray[i], value);
+            }
+            mSize = n;
+        } else if (n < mSize) {
+            // Need to remove elements
+            for (size_t i = n; i < mSize; ++i) {
+                mAlloc.destroy(&mArray[i]);
+            }
+            mSize = n;
         }
-        mCapacity = n;
-        mSize = n;
     }
 
     template <typename InputIt,
@@ -440,7 +493,7 @@ template <typename T> class HeapVector {
     void push_back(const T &value) {
         ensure_size(mSize + 1);
         if (mSize < mCapacity) {
-            mArray[mSize] = value;
+            mAlloc.construct(&mArray[mSize], value);
             ++mSize;
         }
     }
@@ -448,14 +501,15 @@ template <typename T> class HeapVector {
     void pop_back() {
         if (mSize > 0) {
             --mSize;
-            mArray[mSize] = T();
+            mAlloc.destroy(&mArray[mSize]);
         }
     }
 
     void clear() {
-        while (mSize > 0) {
-            pop_back();
+        for (size_t i = 0; i < mSize; ++i) {
+            mAlloc.destroy(&mArray[i]);
         }
+        mSize = 0;
     }
 
     // Iterator methods
@@ -531,13 +585,10 @@ template <typename T> class HeapVector {
     }
 
     void swap(HeapVector<T> &other) {
-        mArray.swap(other.mArray);
-        size_t temp_size = mSize;
-        size_t temp_capacity = mCapacity;
-        mSize = other.mSize;
-        mCapacity = other.mCapacity;
-        other.mSize = temp_size;
-        other.mCapacity = temp_capacity;
+        fl::swap(mArray, other.mArray);
+        fl::swap(mSize, other.mSize);
+        fl::swap(mCapacity, other.mCapacity);
+        fl::swap(mAlloc, other.mAlloc);
     }
 
     void swap(iterator a, iterator b) {
@@ -592,9 +643,9 @@ template <typename T> class HeapVector {
     //     }
     // }
 
-    T *data() { return mArray.get(); }
+    T *data() { return mArray; }
 
-    const T *data() const { return mArray.get(); }
+    const T *data() const { return mArray; }
 
     bool operator==(const HeapVector<T> &other) const {
         if (size() != other.size()) {
@@ -1020,7 +1071,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     HeapVector<T> mHeap;
 };
 
-template <typename T> using vector = HeapVector<T>;
+template <typename T, typename Allocator = fl::allocator<T>> using vector = HeapVector<T, Allocator>;
 
 template <typename T, size_t INLINED_SIZE>
 using vector_fixed = FixedVector<T, INLINED_SIZE>;

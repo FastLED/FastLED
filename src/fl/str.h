@@ -28,7 +28,7 @@ template <typename T> struct rect;
 template <typename T> struct vec2;
 template <typename T> struct vec3;
 template <typename T> class Slice;
-template <typename T> class HeapVector;
+template <typename T, typename Allocator> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;

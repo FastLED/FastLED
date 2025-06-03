@@ -63,9 +63,9 @@ struct Corkscrew {
             0; // Width of cylindrical map (circumference of one turn)
         uint16_t height =
             0; // Height of cylindrical map (total vertical segments)
-        fl::vector<fl::vec2f>
+        fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
             mapping; // Full precision mapping from corkscrew to cylindrical
-        fl::vector<fl::vec2u8>
+        fl::vector<fl::vec2u8, fl::allocator_psram<fl::vec2u8>>
             mappingCompact; // Compact mapping for fixed integer computation
     };
 
