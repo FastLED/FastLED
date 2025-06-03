@@ -53,18 +53,14 @@
 
 #include "fl/math_macros.h"
 #include "fl/vector.h"
+#include "fl/geometry.h"
 
 #define TWO_PI (PI * 2.0)
 
 namespace fl {
 
-struct Vec2f {
-    float x, y;
-};
-
-struct Vec2u8 {
-    uint8_t x, y;
-};
+using Vec2f = fl::vec2<float>;
+using Vec2u8 = fl::vec2<uint8_t>;
 
 struct Corkscrew {
 
