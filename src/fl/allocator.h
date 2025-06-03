@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 namespace fl {
@@ -34,7 +35,13 @@ template <typename T> class Allocator {
     // in a single block.
 
     static T *Alloc(size_t n) {
-        return new T[n]();
+        size_t size = sizeof(T) * n;
+        void * ptr = malloc(size);
+        if (ptr == nullptr) {
+            return nullptr; // Allocation failed
+        }
+        memset(ptr, 0, sizeof(T) * n); // Initialize to zero
+        return reinterpret_cast<T *>(ptr);
     }
 
     // Use this to free the allocated memory.
@@ -42,10 +49,26 @@ template <typename T> class Allocator {
         if (p == nullptr) {
             return;
         }
-        delete[] p;
+        free(p); // Free the memory
     }
 };
 
-// #define FL_USE_PSRAM_ALLOCATOR(TYPE)
+
+// Macro to specialize the Allocator for a specific type to use PSRam
+// Usage: FL_USE_PSRAM_ALLOCATOR(MyClass)
+#define FL_USE_PSRAM_ALLOCATOR(TYPE) \
+template <> \
+class Allocator<TYPE> { \
+  public: \
+    static TYPE *Alloc(size_t n) { \
+        return reinterpret_cast<TYPE *>(PSRamAllocate(sizeof(TYPE) * n, true)); \
+    } \
+    static void Free(TYPE *p) { \
+        if (p == nullptr) { \
+            return; \
+        } \
+        PSRamDeallocate(p); \
+    } \
+};
 
 } // namespace fl
