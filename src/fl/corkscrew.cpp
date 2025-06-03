@@ -1,6 +1,8 @@
 #include "fl/corkscrew.h"
 #include "fl/math.h"
 
+#define TWO_PI (PI * 2.0)
+
 namespace fl {
 
 // Corkscrew-to-cylindrical projection function
@@ -29,7 +31,7 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
     for (uint16_t h = 0; h < output.height; ++h) {
         float segmentOffset = input.offsetCircumference * h;
         for (uint16_t w = 0; w < output.width; ++w) {
-            Vec2f sample = {0, 0};
+            vec2f sample = {0, 0};
             // 2x2 supersampling
             for (uint8_t ssH = 0; ssH < 2; ++ssH) {
                 for (uint8_t ssW = 0; ssW < 2; ++ssW) {

@@ -55,25 +55,24 @@
 #include "fl/vector.h"
 #include "fl/geometry.h"
 
-#define TWO_PI (PI * 2.0)
+
 
 namespace fl {
 
-using Vec2f = fl::vec2<float>;
 using Vec2u8 = fl::vec2<uint8_t>;
 
 struct Corkscrew {
 
     struct Input {
         float totalCircumference = 100;   // Length in centimeters
-        float totalAngle = 19.f * TWO_PI; // Default to 19 turns
+        float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;
         bool compact = false;
         Input() = default;
     };
 
     struct Output {
-        fl::vector<Vec2f> mapping;
+        fl::vector<vec2f> mapping;
         uint16_t width;
         uint16_t height;
         fl::vector<Vec2u8> mappingCompact;
