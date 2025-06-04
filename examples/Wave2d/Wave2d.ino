@@ -23,9 +23,11 @@ using namespace fl;
 CRGB leds[NUM_LEDS];
 
 UITitle title("Wave2D Demo");
-UIDescription description("Shows the use of the Wave2d effect.");
+UIDescription description("Shows the use of the Wave2d effect. By default the wave is cyclical on the x-axis and waves will spill over to the other side.");
 
 UIButton button("Trigger");
+UICheckbox xCyclical("X Is Cyclical", true);  // The wave keeps on propagating across the x-axis, when true.
+
 UICheckbox autoTrigger("Auto Trigger", true);
 UISlider extraFrames("Extra Frames", 0.0f, 0.0f, 8.0f, 1.0f);
 UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
@@ -37,10 +39,7 @@ WaveSimulation2D waveSim(WIDTH, HEIGHT, SUPER_SAMPLE_4X);
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
-void setup() {
-    Serial.begin(115200);
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
-}
+
 
 SuperSample getSuperSample() {
     switch (int(superSample)) {
@@ -63,8 +62,14 @@ void triggerRipple(WaveSimulation2D &waveSim) {
     waveSim.setf(x, y, 1);
 }
 
+void setup() {
+    Serial.begin(115200);
+    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+}
+
 void loop() {
     // Your code here
+    waveSim.setXCylindrical(xCyclical.value());
     waveSim.setSpeed(slider);
     waveSim.setDampening(dampening);
     waveSim.setHalfDuplex(halfDuplex);
