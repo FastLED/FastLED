@@ -7,54 +7,9 @@
 
 namespace fl {
 
-// LEGACY - TODO - fold this into a free functions
-struct CorkscrewLegacy {
+void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output);
 
-    /**
-     * Input parameters for corkscrew projection
-     * - totalHeight: Total height of the corkscrew in centimeters.
-     * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 *
-     * 2π).
-     * - offsetCircumference: Optional offset for gap accounting between
-     * segments.
-     * - numLeds: Number of LEDs in the strip.
-     * - width: Width of cylindrical map (circumference of one turn).
-     * - height: Height of cylindrical map (total vertical segments).
-     * - mapping: Full precision mapping from corkscrew to cylindrical
-     * coordinates, stored in a vector with a PSRAM allocator for efficient
-     * memory usage.
-     */
-
-    using Input = Corkscrew::Input;
-    using Output = CorkscrewOutput;
-
-    /**
-     * Output data from corkscrew projection
-     */
-
-    /**
-     * Generates a mapping from corkscrew to cylindrical coordinates
-     * @param input The input parameters defining the corkscrew.
-     * @param output The resulting cylindrical mapping, modified in place.
-     */
-    static void generateMap(const Input &input, Output &output);
-
-    /**
-     * Generates a mapping from corkscrew to cylindrical coordinates and returns
-     * it.
-     * @param input The input parameters defining the corkscrew.
-     * @return The resulting cylindrical mapping.
-     */
-    static Output generateMap(const Input &input) {
-        Output output;
-        generateMap(input, output);
-        return output;
-    }
-};
-
-// Corkscrew-to-cylindrical projection function
-void CorkscrewLegacy::generateMap(const Corkscrew::Input &input,
-                                  CorkscrewLegacy::Output &output) {
+void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // Calculate circumference per turn from height and total angle
     float circumferencePerTurn = input.totalHeight * TWO_PI / input.totalAngle;
 
@@ -147,29 +102,9 @@ void CorkscrewLegacy::generateMap(const Corkscrew::Input &input,
     }
 }
 
-Tile2x2_u8 CorkscrewLegacy::Output::at(int16_t x, int16_t y) const {
-    // Ensure x and y are within bounds
-    if (x < 0 || x >= width || y < 0 || y >= height) {
-        // Handle out-of-bounds access, possibly by returning a default
-        // Tile2x2_u8
-        return Tile2x2_u8();
-    }
-
-    // Calculate the index in the mapping vector
-    uint16_t index = y * width + x;
-
-    // Retrieve the vec2f from the mapping
-    vec2f position = mapping[index];
-
-    // Use the splat function to convert the vec2f to a Tile2x2_u8
-    Tile2x2_u8 tile = splat(position);
-    return tile;
-}
 
 Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
-    // Generate the mapping using the existing CorkscrewLegacy::generateMap
-    // function
-    CorkscrewLegacy::generateMap(mInput, mOutput);
+    fl::generateMap(mInput, mOutput);
 }
 
 vec2<int16_t> Corkscrew::at(uint16_t i) const {
@@ -197,7 +132,7 @@ size_t Corkscrew::size() const { return mOutput.mapping.size(); }
 
 CorkscrewOutput Corkscrew::generateMap(const Input &input) {
     CorkscrewOutput output;
-    CorkscrewLegacy::generateMap(input, output);
+    fl::generateMap(input, output);
     return output;
 }
 
