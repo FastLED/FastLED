@@ -61,6 +61,7 @@ class Tile2x2_u8 {
 
     vec2<int16_t> origin() const { return mOrigin; }
 
+    /// bounds => [begin_x, end_x) (where end_x is exclusive)
     rect<int16_t> bounds() const {
         vec2<int16_t> min = mOrigin;
         vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
