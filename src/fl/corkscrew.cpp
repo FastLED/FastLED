@@ -1,6 +1,7 @@
 #include "fl/corkscrew.h"
 #include "fl/math.h"
 #include "fl/algorithm.h"
+#include "fl/splat.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -99,6 +100,26 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
     if (input.invert) {
         fl::reverse(output.mapping.begin(), output.mapping.end());
     }
+}
+
+
+
+Tile2x2_u8 Corkscrew::Output::at(int16_t x, int16_t y) const {
+    // Ensure x and y are within bounds
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        // Handle out-of-bounds access, possibly by returning a default Tile2x2_u8
+        return Tile2x2_u8();
+    }
+
+    // Calculate the index in the mapping vector
+    uint16_t index = y * width + x;
+
+    // Retrieve the vec2f from the mapping
+    vec2f position = mapping[index];
+
+    // Use the splat function to convert the vec2f to a Tile2x2_u8
+    Tile2x2_u8 tile = splat(position);
+    return tile;
 }
 
 } // namespace fl

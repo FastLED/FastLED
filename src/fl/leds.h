@@ -68,10 +68,6 @@ template <size_t W, size_t H> class LedsXY : public Leds {
     }
 
   private:
-    static_assert(W > 0 && H > 0, "Width and height must be greater than 0");
-    static_assert(W * H < 65536, "Width and height must be less than 65536");
-    static_assert(W % 2 == 0, "Width must be even");
-    static_assert(H % 2 == 0, "Height must be even");
     CRGB mLeds[W * H] = {};
 };
 

@@ -14,7 +14,6 @@ most portion being the bottom.
 #include "fl/screenmap.h"
 #include "fl/warn.h"
 #include "noise.h"
-#include "fl/sstream.h"
 #include <FastLED.h>
 // #include "vec3.h"
 
@@ -182,37 +181,25 @@ void setup() {
 
 void showGenerative(uint32_t now) {
     // This function is called to show the generative pattern
-    //fl::vector_inlined<CRGB, 12> leds_copy;
-
-    //FASTLED_WARN("corkscrew: " << mapCorkScrew);
-
-    // Scale factor for noise coordinates
-    const float noiseScale = float(0xffff);
-    // Time factor for animation speed
-    const uint32_t timeScale = now / 100;
-
     for (int i = 0; i < NUM_LEDS; i++) {
-        // Get the 3D position of this LED from the corkscrew map
+        // Get the 2D position of this LED from the screen map
         fl::vec3f pos = mapCorkScrew[i];
-        
-        // Scale the position for noise input
-        uint32_t noise_x = pos.x * noiseScale;
-        uint32_t noise_y = pos.y * noiseScale;
-        uint32_t noise_z = pos.z * noiseScale;
-        
-        // Use 4D noise with time as the fourth dimension
-        uint16_t noise_value = inoise16_raw(noise_x, noise_y, noise_z + now * 0xf);
-        // map to a uin8_t for brightness
+        float x = pos.x;
+        float y = pos.y;
+        float z = pos.z;
+
+        x*= 20.0f * ledsScale.value();
+        y*= 20.0f * ledsScale.value();
+        z*= 20.0f * ledsScale.value();
+
+        uint16_t noise_value = inoise16(x,y,z, now / 100);
+        // Normalize the noise value to 0-255
         uint8_t brightness = map(noise_value, 0, 65535, 0, 255);
-        CRGB c(brightness, brightness, brightness);
-
-        if (i < 12) {
-            FASTLED_WARN("brightness: " << brightness);
-        }
-        leds[i] = c;
+        // Create a hue that changes with position and time
+        uint8_t sat = int32_t((x * 10 + y * 5 + now / 5)) % 256;
+        // Set the color
+        leds[i] = CHSV(170, sat, fl::clamp(255- sat, 64, 255));
     }
-    //FASTLED_WARN("timescale: " << timeScale << " noiseScale: " << noiseScale);
-
 }
 
 void loop() {

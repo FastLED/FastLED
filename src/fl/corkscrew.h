@@ -4,8 +4,8 @@
  * @file corkscrew.h
  * @brief Corkscrew projection utilities
  *
- * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical cartesian (w, h)
- * space, where w = one turn of the Corkscrew. The corkscrew at (0,0) will
+ * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical cartesian (w,
+ * h) space, where w = one turn of the Corkscrew. The corkscrew at (0,0) will
  * map to (0,0) in cylindrical space.
  *
  * The projection:
@@ -32,10 +32,11 @@
  * {w,h}
  */
 
+#include "fl/allocator.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
+#include "fl/tile2x2.h"
 #include "fl/vector.h"
-#include "fl/allocator.h"
 
 namespace fl {
 
@@ -44,21 +45,31 @@ struct Corkscrew {
     /**
      * Input parameters for corkscrew projection
      * - totalHeight: Total height of the corkscrew in centimeters.
-     * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 * 2π).
-     * - offsetCircumference: Optional offset for gap accounting between segments.
+     * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 *
+     * 2π).
+     * - offsetCircumference: Optional offset for gap accounting between
+     * segments.
      * - numLeds: Number of LEDs in the strip.
      * - width: Width of cylindrical map (circumference of one turn).
      * - height: Height of cylindrical map (total vertical segments).
-     * - mapping: Full precision mapping from corkscrew to cylindrical coordinates,
-     *   stored in a vector with a PSRAM allocator for efficient memory usage.
+     * - mapping: Full precision mapping from corkscrew to cylindrical
+     * coordinates, stored in a vector with a PSRAM allocator for efficient
+     * memory usage.
      */
     struct Input {
-        float totalHeight = 23.25;        // Total height of the corkscrew in centimeters for 144 densly wrapped up over 19 turns
+        float totalHeight =
+            23.25; // Total height of the corkscrew in centimeters for 144
+                   // densly wrapped up over 19 turns
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
         uint16_t numLeds = 144;           // Default to dense 144 leds.
         bool invert = false;              // If true, reverse the mapping order
         Input() = default;
+        Input(float height, float total_angle, float offset = 0,
+              uint16_t leds = 144, bool invertMapping = false)
+            : totalHeight(height), totalAngle(total_angle),
+              offsetCircumference(offset), numLeds(leds),
+              invert(invertMapping) {}
     };
 
     /**
@@ -72,6 +83,7 @@ struct Corkscrew {
         fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
             mapping; // Full precision mapping from corkscrew to cylindrical
         Output() = default;
+        fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
     };
 
     /**
@@ -82,7 +94,8 @@ struct Corkscrew {
     static void generateMap(const Input &input, Output &output);
 
     /**
-     * Generates a mapping from corkscrew to cylindrical coordinates and returns it.
+     * Generates a mapping from corkscrew to cylindrical coordinates and returns
+     * it.
      * @param input The input parameters defining the corkscrew.
      * @return The resulting cylindrical mapping.
      */
