@@ -1,5 +1,6 @@
 #include "fl/corkscrew.h"
 #include "fl/math.h"
+#include "fl/algorithm.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -92,6 +93,11 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
                 output.mapping.push_back(sample);
             }
         }
+    }
+    
+    // Apply inversion if requested
+    if (input.invert) {
+        fl::reverse(output.mapping.begin(), output.mapping.end());
     }
 }
 

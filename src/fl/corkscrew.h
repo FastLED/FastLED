@@ -57,6 +57,7 @@ struct Corkscrew {
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
         uint16_t numLeds = 144;           // Default to dense 144 leds.
+        bool invert = false;              // If true, reverse the mapping order
         Input() = default;
     };
 
