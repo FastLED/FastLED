@@ -153,6 +153,6 @@ TEST_CASE("Corkscrew circumference test") {
     CHECK(output.mapping.size() > 0);
     
     // Check that circumference matches calculated value
-    float expectedCircumference = 100.0f * TWO_PI / (19.0f * TWO_PI);
+    float expectedCircumference = 100.0f / 19.0f;
     CHECK_CLOSE(output.circumference, expectedCircumference, 0.01f);
 }
