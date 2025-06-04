@@ -5,11 +5,11 @@
  * @brief Corkscrew projection utilities
  *
  * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical cartesian (w, h)
- * space, where w = one turn of the Corkscrew. The the corkscrew at (0,0) will
+ * space, where w = one turn of the Corkscrew. The corkscrew at (0,0) will
  * map to (0,0) in cylindrical space.
  *
  * The projection:
- * - Super samples cylindrical space
+ * - Super samples cylindrical space?
  * - θ is normalized to [0, 1] or mapped to [0, W-1] for grid projection
  * - Uses 2x2 super sampling for better visual quality
  * - Works with XYPathRenderer's "Splat Rendering" for sub-pixel rendering
