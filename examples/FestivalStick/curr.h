@@ -172,14 +172,21 @@ void loop() {
     fl::clear(leds);
     fl::clear(frameBuffer);
 
-    // draw a white line down the middle
+    static int w = 0;
+
+    EVERY_N_MILLIS(300) {
+        // Update the corkscrew mapping every second
+        w = (w + 1) % CORKSCREW_WIDTH;
+    }
+
+
+    // draw a blue line down the middle
     for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
-        int w = 3;
-        frameBuffer.at(w, i) = CRGB::Blue;
-        frameBuffer.at(w+1, i) = CRGB::Blue;
-        frameBuffer.at(w-1, i) = CRGB::Blue;
-        frameBuffer.at(w+2, i) = CRGB::Blue;
-        frameBuffer.at(w-2, i) = CRGB::Blue;
+        frameBuffer.at(w % CORKSCREW_WIDTH, i) = CRGB::Blue;
+        frameBuffer.at((w + 1) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+        frameBuffer.at((w - 1 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+        frameBuffer.at((w + 2) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+        frameBuffer.at((w - 2 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
     }
 
 
