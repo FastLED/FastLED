@@ -1,4 +1,7 @@
 
+#pragma once
+
+
 
 /*
 This demo is best viewed using the FastLED compiler.
@@ -14,20 +17,12 @@ The demo includes two wave layers (upper and lower) with different colors and pr
 which are blended together to create complex visual effects.
 */
 
-#include <Arduino.h>      // Core Arduino functionality
-#include <FastLED.h>      // Main FastLED library for controlling LEDs
 
-#include "wavefx.h"
+// Define the dimensions of our LED matrix
+#define HEIGHT 64          // Number of rows in the matrix
+#define WIDTH 64           // Number of columns in the matrix
+#define NUM_LEDS ((WIDTH) * (HEIGHT))  // Total number of LEDs
+#define IS_SERPINTINE true // Whether the LED strip zigzags back and forth (common in matrix layouts)
 
-using namespace fl;        // Use the FastLED namespace for convenience
-
-
-void setup() {
-    Serial.begin(115200);  // Initialize serial communication for debugging
-    wavefx_setup();
-}
-
-void loop() {
-    // The main program loop that runs continuously
-    wavefx_loop();
-}
+void wavefx_setup();
+void wavefx_loop();
