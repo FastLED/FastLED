@@ -147,10 +147,10 @@ TEST_CASE("Corkscrew circumference test") {
     Corkscrew::Output output = Corkscrew::generateMap(input);
     
     // Basic sanity checks
-    CHECK(output.width > 0);
-    CHECK(output.height > 0);
+    CHECK_EQ(output.width, 6);
+    CHECK_EQ(output.height, 19);
     CHECK_CLOSE(output.circumference, 5.26316f, .01f);
-    CHECK(output.mapping.size() > 0);
+    CHECK_EQ(output.mapping.size(), 114);
     
     // Check that circumference matches calculated value
     float expectedCircumference = 100.0f / 19.0f;
