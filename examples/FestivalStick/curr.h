@@ -173,7 +173,7 @@ void loop() {
 
     // draw a white line down the middle
     for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
-        frameBuffer(CORKSCREW_WIDTH / 2, i) = CRGB::White;
+        frameBuffer(CORKSCREW_WIDTH / 2, i) = CRGB::Blue;
     }
 
     // printOutput(corkscrewMap);

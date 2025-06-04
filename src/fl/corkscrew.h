@@ -77,6 +77,8 @@ class Corkscrew {
     Corkscrew(const Corkscrew &) = default;
 
     vec2<int16_t> at(uint16_t i) const;
+    // This is a splatted pixel. This is will look way better than
+    // using at(), because it uses 2x2 neighboor sampling.
     Tile2x2_u8 at_splat(uint16_t i) const;
     size_t size() const;
 
