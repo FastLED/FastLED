@@ -118,7 +118,7 @@ class Corkscrew {
   public:
     using Input = CorkscrewInput;
     using Output = CorkscrewOutput;
-    using Vec2i16Iter = Output::Vec2i16Iterator;
+    using Vec2i16Iter = CorkscrewOutput::Vec2i16Iterator;
 
     Corkscrew(const Input &input);
     Corkscrew(const Corkscrew &) = default;
