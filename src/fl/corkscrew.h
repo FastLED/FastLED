@@ -53,10 +53,10 @@ struct Corkscrew {
      *   stored in a vector with a PSRAM allocator for efficient memory usage.
      */
     struct Input {
-        float totalHeight = 100;          // Total height of the corkscrew in centimeters
+        float totalHeight = 23.25;        // Total height of the corkscrew in centimeters for 144 densly wrapped up over 19 turns
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
-        uint16_t numLeds = 0; // Number of LEDs in the strip
+        uint16_t numLeds = 144;           // Default to dense 144 leds.
         Input() = default;
     };
 
