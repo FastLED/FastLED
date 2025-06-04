@@ -22,9 +22,10 @@ TEST_CASE("splat simple test") {
     REQUIRE(result.bounds().mMax.x == 2);
     REQUIRE(result.bounds().mMax.y == 2);
 
-    // // Verify the output
-    // REQUIRE(result.lower_left() == 64);  // Expected intensity for lower-left
-    // REQUIRE(result.lower_right() == 64); // Expected intensity for lower-right
-    // REQUIRE(result.upper_left() == 64);  // Expected intensity for upper-left
-    // REQUIRE(result.upper_right() == 64); // Expected intensity for upper-right
+
+    // Verify the output
+    REQUIRE_EQ(result.lower_left(), 255);  // Expected intensity for lower-left
+    REQUIRE_EQ(result.lower_right(), 0); // Expected intensity for lower-right
+    REQUIRE_EQ(result.upper_left(), 0);  // Expected intensity for upper-left
+    REQUIRE_EQ(result.upper_right(), 0); // Expected intensity for upper-right
 }
