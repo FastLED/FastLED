@@ -1,0 +1,30 @@
+
+// g++ --std=c++11 test.cpp
+
+#include "test.h"
+
+#include "test.h"
+#include "fl/splat.h"
+
+#include "fl/namespace.h"
+
+using namespace fl;
+
+TEST_CASE("splat simple test") {
+    // Define a simple input coordinate
+    vec2f input(0, 0);
+
+    // Call the splat function
+    Tile2x2_u8 result = splat(input);
+
+    REQUIRE(result.bounds().mMin.x == 0);
+    REQUIRE(result.bounds().mMin.y == 0);
+    REQUIRE(result.bounds().mMax.x == 2);
+    REQUIRE(result.bounds().mMax.y == 2);
+
+    // // Verify the output
+    // REQUIRE(result.lower_left() == 64);  // Expected intensity for lower-left
+    // REQUIRE(result.lower_right() == 64); // Expected intensity for lower-right
+    // REQUIRE(result.upper_left() == 64);  // Expected intensity for upper-left
+    // REQUIRE(result.upper_right() == 64); // Expected intensity for upper-right
+}

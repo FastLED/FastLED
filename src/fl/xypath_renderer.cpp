@@ -28,6 +28,11 @@ Tile2x2_u8 XYPathRenderer::at_subpixel(float alpha) {
         return Tile2x2_u8();
     }
     vec2f xy = at(alpha);
+
+    // 1) shift back so whole‐pixels go 0…W–1, 0…H–1
+    xy.x -= 0.5f;
+    xy.y -= 0.5f;
+
     return splat(xy);
 }
 

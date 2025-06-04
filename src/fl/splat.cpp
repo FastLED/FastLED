@@ -12,9 +12,9 @@ static uint8_t to_uint8(float f) {
 }
 
 Tile2x2_u8 splat(vec2f xy) {
-    // 1) shift back so whole‐pixels go 0…W–1, 0…H–1
-    float x = xy.x - 0.5f;
-    float y = xy.y - 0.5f;
+    // 1) collect values.
+    float x = xy.x;
+    float y = xy.y;
 
     // 2) integer cell indices
     int16_t cx = static_cast<int16_t>(floorf(x));
