@@ -48,6 +48,8 @@ UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);     // Controls overall
 UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);      // Controls how many times blur is applied (more = smoother but slower)
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f); // Controls anti-aliasing quality (higher = better quality but more CPU)
 
+UICheckbox xCyclical("X Is Cyclical", false);  // If true, waves wrap around the x-axis (like a loop)
+
 // Upper wave layer controls:
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);           // How fast the upper wave propagates
 UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f); // How quickly the upper wave loses energy
@@ -367,6 +369,9 @@ void loop() {
     
     // Get the current time in milliseconds
     uint32_t now = millis();
+
+    // set the x cyclical
+    waveFxLower.setXCylindrical(xCyclical.value());  // Set whether lower wave wraps around x-axis
     
     // Apply all UI settings and get button states
     ui_state state = ui();
