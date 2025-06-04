@@ -52,6 +52,7 @@ struct Corkscrew {
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
         bool compact = false; // Whether to use compact representation
+        uint16_t numLeds = 0; // Number of LEDs in the strip
         Input() = default;
     };
 
@@ -67,6 +68,8 @@ struct Corkscrew {
             mapping; // Full precision mapping from corkscrew to cylindrical
         fl::vector<fl::vec2u8, fl::allocator_psram<fl::vec2u8>>
             mappingCompact; // Compact mapping for fixed integer computation
+        fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
+            ledMapping; // Mapping for each LED position
     };
 
     /**

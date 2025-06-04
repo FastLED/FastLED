@@ -20,6 +20,12 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
     output.mapping.clear();
     output.mapping.reserve(output.width * output.height);
 
+    // Clear and prepare LED mapping if numLeds is specified
+    output.ledMapping.clear();
+    if (input.numLeds > 0) {
+        output.ledMapping.reserve(input.numLeds);
+    }
+
     // Corrected super sampling step size
     float thetaStep = 0.5f / output.width;
     float hStep = 0.5f / output.height;
@@ -68,6 +74,26 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
                     static_cast<uint8_t>((sample.y / verticalSegments) * 255)};
                 output.mappingCompact.push_back(compactSample);
             }
+        }
+    }
+    
+    // Generate LED mapping if numLeds is specified
+    if (input.numLeds > 0) {
+        for (uint16_t i = 0; i < input.numLeds; ++i) {
+            // Calculate position along the corkscrew (0.0 to 1.0)
+            float position = static_cast<float>(i) / (input.numLeds - 1);
+            
+            // Calculate angle and height
+            float angle = position * input.totalAngle;
+            float height = position * verticalSegments;
+            
+            // Calculate circumference position
+            float circumference = fmodf(
+                angle * input.totalCircumference / TWO_PI,
+                input.totalCircumference);
+            
+            // Store the mapping
+            output.ledMapping.push_back({circumference, height});
         }
     }
 }
