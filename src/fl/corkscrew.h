@@ -40,6 +40,25 @@
 
 namespace fl {
 
+/**
+ * Generates a mapping from corkscrew to cylindrical coordinates
+ * @param input The input parameters defining the corkscrew.
+ * @return The resulting cylindrical mapping.
+ */
+struct CorkscrewInput {
+    float totalHeight = 23.25; // Total height of the corkscrew in centimeters
+                               // for 144 densly wrapped up over 19 turns
+    float totalAngle = 19.f * 2 * PI; // Default to 19 turns
+    float offsetCircumference = 0;    // Optional offset for gap accounting
+    uint16_t numLeds = 144;           // Default to dense 144 leds.
+    bool invert = false;              // If true, reverse the mapping order
+    CorkscrewInput() = default;
+    CorkscrewInput(float height, float total_angle, float offset = 0,
+                   uint16_t leds = 144, bool invertMapping = false)
+        : totalHeight(height), totalAngle(total_angle),
+          offsetCircumference(offset), numLeds(leds), invert(invertMapping) {}
+};
+
 struct CorkscrewOutput {
     uint16_t width = 0;  // Width of cylindrical map (circumference of one turn)
     uint16_t height = 0; // Height of cylindrical map (total vertical segments)
@@ -51,27 +70,7 @@ struct CorkscrewOutput {
 
 class Corkscrew2 {
   public:
-    /**
-     * Generates a mapping from corkscrew to cylindrical coordinates
-     * @param input The input parameters defining the corkscrew.
-     * @return The resulting cylindrical mapping.
-     */
-    struct Input {
-        float totalHeight =
-            23.25; // Total height of the corkscrew in centimeters for 144
-                   // densly wrapped up over 19 turns
-        float totalAngle = 19.f * 2 * PI; // Default to 19 turns
-        float offsetCircumference = 0;    // Optional offset for gap accounting
-        uint16_t numLeds = 144;           // Default to dense 144 leds.
-        bool invert = false;              // If true, reverse the mapping order
-        Input() = default;
-        Input(float height, float total_angle, float offset = 0,
-              uint16_t leds = 144, bool invertMapping = false)
-            : totalHeight(height), totalAngle(total_angle),
-              offsetCircumference(offset), numLeds(leds),
-              invert(invertMapping) {}
-    };
-
+    using Input = CorkscrewInput;
     using Output = CorkscrewOutput;
 
     Corkscrew2(const Input &input);
@@ -81,13 +80,11 @@ class Corkscrew2 {
     Tile2x2_u8 at_splat(uint16_t i) const;
     size_t size() const;
 
-
-    static CorkscrewOutput generateMap(const Input &input) ;
+    static CorkscrewOutput generateMap(const Input &input);
 
   private:
-    Input mInput;   // The input parameters defining the corkscrew
+    Input mInput;            // The input parameters defining the corkscrew
     CorkscrewOutput mOutput; // The resulting cylindrical mapping
 };
-
 
 } // namespace fl
