@@ -149,7 +149,7 @@ TEST_CASE("Corkscrew circumference test") {
     // Basic sanity checks
     CHECK(output.width > 0);
     CHECK(output.height > 0);
-    CHECK(output.circumference > 0.0f);
+    CHECK_CLOSE(output.circumference, 5.26316f, .01f);
     CHECK(output.mapping.size() > 0);
     
     // Check that circumference matches calculated value
