@@ -229,8 +229,13 @@ void WaveSimulation2D_Real::update() {
 
     // Update horizontal boundaries.
     for (size_t j = 0; j < height + 2; ++j) {
-        curr[j * stride + 0] = curr[j * stride + 1];
-        curr[j * stride + (width + 1)] = curr[j * stride + width];
+        if (mXCylindrical) {
+            curr[j * stride + 0] = curr[j * stride + width];
+            curr[j * stride + (width + 1)] = curr[j * stride + 1];
+        } else {
+            curr[j * stride + 0] = curr[j * stride + 1];
+            curr[j * stride + (width + 1)] = curr[j * stride + width];
+        }
     }
 
     // Update vertical boundaries.
