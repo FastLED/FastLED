@@ -68,13 +68,13 @@ struct CorkscrewOutput {
     fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
 };
 
-class Corkscrew2 {
+class Corkscrew {
   public:
     using Input = CorkscrewInput;
     using Output = CorkscrewOutput;
 
-    Corkscrew2(const Input &input);
-    Corkscrew2(const Corkscrew2 &) = default;
+    Corkscrew(const Input &input);
+    Corkscrew(const Corkscrew &) = default;
 
     vec2<int16_t> at(uint16_t i) const;
     Tile2x2_u8 at_splat(uint16_t i) const;

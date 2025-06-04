@@ -25,7 +25,7 @@ struct CorkscrewLegacy {
      * memory usage.
      */
 
-    using Input = Corkscrew2::Input;
+    using Input = Corkscrew::Input;
     using Output = CorkscrewOutput;
 
     /**
@@ -53,7 +53,7 @@ struct CorkscrewLegacy {
 };
 
 // Corkscrew-to-cylindrical projection function
-void CorkscrewLegacy::generateMap(const Corkscrew2::Input &input,
+void CorkscrewLegacy::generateMap(const Corkscrew::Input &input,
                                   CorkscrewLegacy::Output &output) {
     // Calculate circumference per turn from height and total angle
     float circumferencePerTurn = input.totalHeight * TWO_PI / input.totalAngle;
@@ -166,13 +166,13 @@ Tile2x2_u8 CorkscrewLegacy::Output::at(int16_t x, int16_t y) const {
     return tile;
 }
 
-Corkscrew2::Corkscrew2(const Corkscrew2::Input &input) : mInput(input) {
+Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     // Generate the mapping using the existing CorkscrewLegacy::generateMap
     // function
     CorkscrewLegacy::generateMap(mInput, mOutput);
 }
 
-vec2<int16_t> Corkscrew2::at(uint16_t i) const {
+vec2<int16_t> Corkscrew::at(uint16_t i) const {
     if (i >= mOutput.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2<int16_t>(0, 0);
@@ -183,7 +183,7 @@ vec2<int16_t> Corkscrew2::at(uint16_t i) const {
                          static_cast<int16_t>(position.y));
 }
 
-Tile2x2_u8 Corkscrew2::at_splat(uint16_t i) const {
+Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
     if (i >= mOutput.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
@@ -193,9 +193,9 @@ Tile2x2_u8 Corkscrew2::at_splat(uint16_t i) const {
     return splat(mOutput.mapping[i]);
 }
 
-size_t Corkscrew2::size() const { return mOutput.mapping.size(); }
+size_t Corkscrew::size() const { return mOutput.mapping.size(); }
 
-CorkscrewOutput Corkscrew2::generateMap(const Input &input) {
+CorkscrewOutput Corkscrew::generateMap(const Input &input) {
     CorkscrewOutput output;
     CorkscrewLegacy::generateMap(input, output);
     return output;

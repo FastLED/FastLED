@@ -23,14 +23,14 @@
 
 using namespace fl;
 
-TEST_CASE("Corkscrew2 generateMap") {
-    Corkscrew2::Input input;
+TEST_CASE("Corkscrew generateMap") {
+    Corkscrew::Input input;
     input.totalHeight = 10.0f;
     input.totalAngle = TWO_PI;
     input.offsetCircumference = 0.0f;
     input.numLeds = 10;
 
-    Corkscrew2::Output output = Corkscrew2::generateMap(input);
+    Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 10);
     CHECK_EQ(output.height, 1);          // One vertical segment for one turn
@@ -42,14 +42,14 @@ TEST_CASE("Corkscrew2 generateMap") {
     CHECK_LE(output.mapping[0].y, 1.0f); // 1 vertical segment for 2π angle
 }
 
-TEST_CASE("Corkscrew2 generateMap with two turns") {
-    Corkscrew2::Input input;
+TEST_CASE("Corkscrew generateMap with two turns") {
+    Corkscrew::Input input;
     input.totalHeight = 10.0f;
     input.totalAngle = 2 * TWO_PI; // Two full turns
     input.numLeds = 10;            // 10 LEDs around the corkscrew
     input.offsetCircumference = 0.0f;
 
-    Corkscrew2::Output output = Corkscrew2::generateMap(input);
+    Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 5);
     CHECK_EQ(output.height, 2);          // Two vertical segments for two turns
@@ -62,15 +62,15 @@ TEST_CASE("Corkscrew2 generateMap with two turns") {
     CHECK_LE(output.mapping[0].y, 2.0f); // 2 vertical segments for 4π angle
 }
 
-TEST_CASE("Corkscrew2 circumference test") {
-    Corkscrew2::Input input;
+TEST_CASE("Corkscrew circumference test") {
+    Corkscrew::Input input;
     // Use defaults: totalHeight = 100, totalAngle = 19 * 2 * PI
     input.totalHeight = 23.25f; // Total height of the corkscrew in centimeters
     input.totalAngle = 19.0f * TWO_PI; // Default to 19 turns
     input.offsetCircumference = 0.0f;  // No offset
     input.numLeds = 288; // Default to dense 144 LEDs times two strips
 
-    Corkscrew2::Output output = Corkscrew2::generateMap(input);
+    Corkscrew::Output output = Corkscrew::generateMap(input);
 
     // Basic sanity checks
     CHECK_EQ(output.width, 16);
