@@ -92,6 +92,8 @@ class WaveFx : public Fx2d {
         setAutoUpdate(args.auto_updates);
     }
 
+    void setXCylindrical(bool on) { mWaveSim.setXCylindrical(on); }
+
     void setSpeed(float speed) {
         // Set the speed of the wave simulation.
         mWaveSim.setSpeed(speed);

@@ -157,6 +157,8 @@ class WaveSimulation2D {
              mSim->getDampenening());
     }
 
+    void setXCylindrical(bool on) { mSim->setXCylindrical(on); }
+
     // Downsampled getter for the floating point value at (x,y) in the outer
     // grid. It averages over the corresponding multiplier×multiplier block in
     // the high-res simulation.
