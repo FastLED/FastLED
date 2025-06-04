@@ -68,6 +68,7 @@ struct Corkscrew {
             0; // Width of cylindrical map (circumference of one turn)
         uint16_t height =
             0; // Height of cylindrical map (total vertical segments)
+        float circumference = 0.0f; // Circumference per turn (derived from totalHeight and totalAngle)
         fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
             mapping; // Full precision mapping from corkscrew to cylindrical
         Output() = default;

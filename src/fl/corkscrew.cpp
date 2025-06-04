@@ -19,6 +19,7 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
     // Determine cylindrical dimensions
     output.height = verticalSegments;
     output.width = ceil(circumferencePerTurn);
+    output.circumference = circumferencePerTurn;
 
     output.mapping.clear();
     

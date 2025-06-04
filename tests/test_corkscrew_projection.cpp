@@ -139,3 +139,20 @@ TEST_CASE("Corkscrew generateMap with 6 points over 2 turns") {
     CHECK_CLOSE(output.mapping[5].x, 0.0f, 0.1f);
     CHECK_CLOSE(output.mapping[5].y, 2.0f, 0.1f);
 }
+
+TEST_CASE("Corkscrew circumference test") {
+    Corkscrew::Input input;
+    // Use defaults: totalHeight = 100, totalAngle = 19 * 2 * PI
+    
+    Corkscrew::Output output = Corkscrew::generateMap(input);
+    
+    // Basic sanity checks
+    CHECK(output.width > 0);
+    CHECK(output.height > 0);
+    CHECK(output.circumference > 0.0f);
+    CHECK(output.mapping.size() > 0);
+    
+    // Check that circumference matches calculated value
+    float expectedCircumference = 100.0f * TWO_PI / (19.0f * TWO_PI);
+    CHECK_CLOSE(output.circumference, expectedCircumference, 0.01f);
+}
