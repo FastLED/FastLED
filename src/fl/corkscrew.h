@@ -65,6 +65,52 @@ struct CorkscrewOutput {
     fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
         mapping; // Full precision mapping from corkscrew to cylindrical
     CorkscrewOutput() = default;
+
+    class Vec2i16Iterator {
+    public:
+        using value_type = vec2f;
+        using difference_type = int32_t;
+        using pointer = vec2f*;
+        using reference = vec2f&;
+
+        Vec2i16Iterator(CorkscrewOutput* owner, size_t position)
+            : owner_(owner), position_(position) {}
+
+        vec2f& operator*() const {
+            return owner_->mapping[position_];
+        }
+
+        Vec2i16Iterator& operator++() {
+            ++position_;
+            return *this;
+        }
+
+        Vec2i16Iterator operator++(int) {
+            Vec2i16Iterator temp = *this;
+            ++position_;
+            return temp;
+        }
+
+        bool operator==(const Vec2i16Iterator& other) const {
+            return position_ == other.position_;
+        }
+
+        bool operator!=(const Vec2i16Iterator& other) const {
+            return position_ != other.position_;
+        }
+
+    private:
+        CorkscrewOutput* owner_;
+        size_t position_;
+    };
+
+    Vec2i16Iterator begin_vec2i16() {
+        return Vec2i16Iterator(this, 0);
+    }
+
+    Vec2i16Iterator end() {
+        return Vec2i16Iterator(this, mapping.size());
+    }
     fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
 };
 
@@ -83,6 +129,14 @@ class Corkscrew {
     size_t size() const;
 
     static CorkscrewOutput generateMap(const Input &input);
+
+    Output& access() {
+        return mOutput;
+    }
+
+    const Output& access() const {
+        return mOutput;
+    }
 
   private:
     Input mInput;            // The input parameters defining the corkscrew

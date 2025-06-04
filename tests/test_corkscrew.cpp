@@ -51,26 +51,30 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
 
 
 
-    const int CORKSCREW_TOTAL_HEIGHT = 1;
-    const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
-    const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
-    const int CORKSCREW_TURNS = 2; // Default to 19 turns
-    const int num_leds = 2; // Default to dense 144 LEDs times two strips
+    const int kCorkscrewTotalHeight = 1; // cm
+    //const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
+    //const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
+    const int kCorkscrewTurns = 1; // Default to 19 turns
 
 
 
     Corkscrew::Input input;
-    input.totalHeight = CORKSCREW_TOTAL_HEIGHT;
-    input.totalAngle = CORKSCREW_TURNS * 2 * PI; // Default to 19 turns
+    input.totalHeight = kCorkscrewTotalHeight;
+    input.totalAngle = kCorkscrewTurns * 2 * PI; // Default to 19 turns
     input.offsetCircumference = 0.0f;
-    input.numLeds = num_leds;
+    input.numLeds = 2;
 
     // Generate the corkscrew map
 
+    
+
     Corkscrew corkscrew(input);
+
+    volatile Corkscrew::Output* output = &corkscrew.access();
 
     vec2<int16_t> first = corkscrew.at(0);
     vec2<int16_t> second = corkscrew.at(1);
+    MESSAGE("done");
 
 
 }
