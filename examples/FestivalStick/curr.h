@@ -59,7 +59,8 @@ Corkscrew::Input
                    NUM_LEDS, // Default to dense 144 leds.
     );
 
-Corkscrew::Output corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
+// Corkscrew::Output corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
+Corkscrew corkscrew(corkscrewInput);
 
 // Used only for the fl::ScreenMap generation.
 struct corkscrew_args {
@@ -173,10 +174,29 @@ void loop() {
 
     // draw a white line down the middle
     for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
-        frameBuffer(CORKSCREW_WIDTH / 2, i) = CRGB::Blue;
+        int w = 3;
+        frameBuffer.at(w, i) = CRGB::Blue;
+        frameBuffer.at(w+1, i) = CRGB::Blue;
+        frameBuffer.at(w-1, i) = CRGB::Blue;
+        frameBuffer.at(w+2, i) = CRGB::Blue;
+        frameBuffer.at(w-2, i) = CRGB::Blue;
     }
 
+
     // printOutput(corkscrewMap);
+
+    for (int i = 0; i < NUM_LEDS; ++i) {
+        // Get the position in the frame buffer
+        vec2<int16_t> pos = corkscrew.at(i);
+        // Draw the tile to the frame buffer
+        CRGB c = frameBuffer.at(pos.x, pos.y);
+        leds[i] = c;
+
+        FASTLED_WARN_IF(i < 16, "LED " << i << " at position: "
+                        << pos.x << ", " << pos.y
+                        << " with color: " << c);
+            
+    }
     
     FastLED.show();
 }
