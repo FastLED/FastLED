@@ -43,6 +43,14 @@ struct Corkscrew {
 
     /**
      * Input parameters for corkscrew projection
+     * - totalCircumference: Length in centimeters of one complete turn.
+     * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 * 2π).
+     * - offsetCircumference: Optional offset for gap accounting between segments.
+     * - numLeds: Number of LEDs in the strip.
+     * - width: Width of cylindrical map (circumference of one turn).
+     * - height: Height of cylindrical map (total vertical segments).
+     * - mapping: Full precision mapping from corkscrew to cylindrical coordinates,
+     *   stored in a vector with a PSRAM allocator for efficient memory usage.
      */
     struct Input {
         float totalCircumference = 100;   // Length in centimeters
@@ -67,11 +75,16 @@ struct Corkscrew {
 
     /**
      * Generates a mapping from corkscrew to cylindrical coordinates
-     * @param input The input parameters defining the corkscrew
-     * @param output The resulting cylindrical mapping
+     * @param input The input parameters defining the corkscrew.
+     * @param output The resulting cylindrical mapping, modified in place.
      */
     static void generateMap(const Input &input, Output &output);
 
+    /**
+     * Generates a mapping from corkscrew to cylindrical coordinates and returns it.
+     * @param input The input parameters defining the corkscrew.
+     * @return The resulting cylindrical mapping.
+     */
     static Output generateMap(const Input &input) {
         Output output;
         generateMap(input, output);
