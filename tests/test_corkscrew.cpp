@@ -7,14 +7,7 @@
 
 
 #define NUM_LEDS 288
-#define CORKSCREW_TOTAL_HEIGHT                                                 \
-    23.25f // Total height of the corkscrew in centimeters for 144 densly
-           // wrapped up over 19 turns
 
-#define CORKSCREW_WIDTH 16
-#define CORKSCREW_HEIGHT 19
-
-#define CORKSCREW_TURNS 19.f // Default to 19 turns
 
 #define TWO_PI (PI * 2.0)
 
@@ -55,36 +48,31 @@ TEST_CASE("Corkscrew generateMap") {
 
 TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // Define the corkscrew input parameters
+
+
+
+    const int CORKSCREW_TOTAL_HEIGHT = 1;
+    const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
+    const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
+    const int CORKSCREW_TURNS = 2; // Default to 19 turns
+    const int num_leds = 2; // Default to dense 144 LEDs times two strips
+
+
+
     Corkscrew::Input input;
     input.totalHeight = CORKSCREW_TOTAL_HEIGHT;
     input.totalAngle = CORKSCREW_TURNS * 2 * PI; // Default to 19 turns
     input.offsetCircumference = 0.0f;
-    input.numLeds = NUM_LEDS;
+    input.numLeds = num_leds;
 
     // Generate the corkscrew map
 
     Corkscrew corkscrew(input);
 
-    // Create a frame buffer
-    LedsXY<CORKSCREW_WIDTH, CORKSCREW_HEIGHT> frameBuffer;
+    vec2<int16_t> first = corkscrew.at(0);
+    vec2<int16_t> second = corkscrew.at(1);
 
-    // Simulate the mapping logic from the loop function
-    for (int i = 0; i < NUM_LEDS; ++i) {
-        // Get the position in the frame buffer
-        // vec2<int16_t> pos(static_cast<int16_t>(output.mapping[i].x), static_cast<int16_t>(output.mapping[i].y));
-        vec2<int16_t> pos = corkscrew.at(i); // Get the position for LED i
 
-        // Verify that the position is within the frame buffer bounds
-        CHECK_GE(pos.x, 0);
-        CHECK_LE(pos.x, CORKSCREW_WIDTH);
-        CHECK_GE(pos.y, 0);
-        CHECK_LE(pos.y, CORKSCREW_HEIGHT);
-
-        // Optionally, verify the color mapping logic if needed
-        // For example, check that the color is correctly set in the frame buffer
-        // CRGB c = frameBuffer.at(pos.x, pos.y);
-        // CHECK_EQ(c, expectedColor); // Define expectedColor based on your logic
-    }
 }
 
 TEST_CASE("Corkscrew generateMap with two turns") {

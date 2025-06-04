@@ -317,6 +317,7 @@ template <typename T> struct vec2 {
 
 using vec2f = vec2<float>; // Full precision but slow.
 using vec2u8 = vec2<uint8_t>; // 8-bit unsigned integer vector.
+using vec2i16 = vec2<int16_t>; // 16-bit signed integer vector.
 
 // Legacy support for vec3
 using pair_xyz_float = vec3<float>; // Legacy name for vec3f

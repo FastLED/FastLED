@@ -107,14 +107,14 @@ Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     fl::generateMap(mInput, mOutput);
 }
 
-vec2<int16_t> Corkscrew::at(uint16_t i) const {
+vec2i16 Corkscrew::at(uint16_t i) const {
     if (i >= mOutput.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default value
-        return vec2<int16_t>(0, 0);
+        return vec2i16(0, 0);
     }
     // Convert the float position to integer
     const vec2f &position = mOutput.mapping[i];
-    return vec2<int16_t>(static_cast<int16_t>(position.x),
+    return vec2i16(static_cast<int16_t>(position.x),
                          static_cast<int16_t>(position.y));
 }
 
