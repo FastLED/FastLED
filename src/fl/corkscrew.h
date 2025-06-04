@@ -40,21 +40,21 @@
 
 namespace fl {
 
-struct Corkscrew {
+struct CorkscrewOutput {
+    uint16_t width = 0;  // Width of cylindrical map (circumference of one turn)
+    uint16_t height = 0; // Height of cylindrical map (total vertical segments)
+    fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
+        mapping; // Full precision mapping from corkscrew to cylindrical
+    CorkscrewOutput() = default;
+    fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
+};
 
+class Corkscrew2 {
+  public:
     /**
-     * Input parameters for corkscrew projection
-     * - totalHeight: Total height of the corkscrew in centimeters.
-     * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 *
-     * 2π).
-     * - offsetCircumference: Optional offset for gap accounting between
-     * segments.
-     * - numLeds: Number of LEDs in the strip.
-     * - width: Width of cylindrical map (circumference of one turn).
-     * - height: Height of cylindrical map (total vertical segments).
-     * - mapping: Full precision mapping from corkscrew to cylindrical
-     * coordinates, stored in a vector with a PSRAM allocator for efficient
-     * memory usage.
+     * Generates a mapping from corkscrew to cylindrical coordinates
+     * @param input The input parameters defining the corkscrew.
+     * @return The resulting cylindrical mapping.
      */
     struct Input {
         float totalHeight =
@@ -72,38 +72,22 @@ struct Corkscrew {
               invert(invertMapping) {}
     };
 
-    /**
-     * Output data from corkscrew projection
-     */
-    struct Output {
-        uint16_t width =
-            0; // Width of cylindrical map (circumference of one turn)
-        uint16_t height =
-            0; // Height of cylindrical map (total vertical segments)
-        fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
-            mapping; // Full precision mapping from corkscrew to cylindrical
-        Output() = default;
-        fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
-    };
+    using Output = CorkscrewOutput;
 
-    /**
-     * Generates a mapping from corkscrew to cylindrical coordinates
-     * @param input The input parameters defining the corkscrew.
-     * @param output The resulting cylindrical mapping, modified in place.
-     */
-    static void generateMap(const Input &input, Output &output);
+    Corkscrew2(const Input &input);
+    Corkscrew2(const Corkscrew2 &) = default;
 
-    /**
-     * Generates a mapping from corkscrew to cylindrical coordinates and returns
-     * it.
-     * @param input The input parameters defining the corkscrew.
-     * @return The resulting cylindrical mapping.
-     */
-    static Output generateMap(const Input &input) {
-        Output output;
-        generateMap(input, output);
-        return output;
-    }
+    vec2<int16_t> at(uint16_t i) const;
+    Tile2x2_u8 at_splat(uint16_t i) const;
+    size_t size() const;
+
+
+    static CorkscrewOutput generateMap(const Input &input) ;
+
+  private:
+    Input mInput;   // The input parameters defining the corkscrew
+    CorkscrewOutput mOutput; // The resulting cylindrical mapping
 };
+
 
 } // namespace fl
