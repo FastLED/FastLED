@@ -34,15 +34,14 @@ TEST_CASE("Corkscrew generateMap") {
 
     Corkscrew::generateMap(input, output);
 
-    CHECK(output.width == 10);
-    CHECK(output.height == 1);
-    CHECK(output.mapping.size() == 10);
+    CHECK_EQ(output.width, 10);
+    CHECK_EQ(output.height, 1);          // One vertical segment for one turn
+    CHECK_EQ(output.mapping.size(), 10); // 10 LEDs around the corkscrew
 
-    // Check first pixel for correctness (basic integrity)
-    CHECK(output.mapping[0].x >= 0.0f);
-    CHECK(output.mapping[0].x <= 10.0f);
-    CHECK(output.mapping[0].y >= 0.0f);
-    CHECK(output.mapping[0].y <= 1.0f); // 1 vertical segment for 2π angle
+    CHECK_GE(output.mapping[0].x, 0.0f);
+    CHECK_LE(output.mapping[0].x, 10.0f);
+    CHECK_GE(output.mapping[0].y, 0.0f);
+    CHECK_LE(output.mapping[0].y, 1.0f); // 1 vertical segment for 2π angle
 }
 
 TEST_CASE("Corkscrew generateMap with two turns") {
