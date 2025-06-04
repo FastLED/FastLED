@@ -8,6 +8,9 @@ namespace fl {
 // Corkscrew-to-cylindrical projection function
 void Corkscrew::generateMap(const Corkscrew::Input &input,
                             Corkscrew::Output &output) {
+    // Calculate circumference per turn from height and total angle
+    float circumferencePerTurn = input.totalHeight * TWO_PI / input.totalAngle;
+    
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment
     // For two turns (4π), we want exactly 2 vertical segments
@@ -15,7 +18,7 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
 
     // Determine cylindrical dimensions
     output.height = verticalSegments;
-    output.width = ceil(input.totalCircumference);
+    output.width = ceil(circumferencePerTurn);
 
     output.mapping.clear();
     
@@ -34,8 +37,8 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
             
             // Calculate circumference position
             float circumference = fmodf(
-                angle * input.totalCircumference / TWO_PI,
-                input.totalCircumference);
+                angle * circumferencePerTurn / TWO_PI,
+                circumferencePerTurn);
             
             // Store the mapping
             output.mapping.push_back({circumference, height});
@@ -69,9 +72,9 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
 
                         // Apply circumference offset
                         float corkscrewCircumference = fmodf(
-                            corkscrewTheta * input.totalCircumference / TWO_PI +
+                            corkscrewTheta * circumferencePerTurn / TWO_PI +
                                 segmentOffset,
-                            input.totalCircumference);
+                            circumferencePerTurn);
 
                         // Accumulate samples
                         sample.x += corkscrewCircumference;

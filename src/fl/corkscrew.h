@@ -15,7 +15,7 @@
  * - Works with XYPathRenderer's "Splat Rendering" for sub-pixel rendering
  *
  * Inputs:
- * - Total Circumference/length of the Corkscrew
+ * - Total Height of the Corkscrew in centimeters
  * - Total angle of the Corkscrew (number of veritcal segments × 2π)
  * - Optional offset circumference (default 0)
  *   - Allows pixel-perfect corkscrew with gaps via circumference offsetting
@@ -43,7 +43,7 @@ struct Corkscrew {
 
     /**
      * Input parameters for corkscrew projection
-     * - totalCircumference: Length in centimeters of one complete turn.
+     * - totalHeight: Total height of the corkscrew in centimeters.
      * - totalAngle: Total angle of the corkscrew, defaulting to 19 turns (19 * 2π).
      * - offsetCircumference: Optional offset for gap accounting between segments.
      * - numLeds: Number of LEDs in the strip.
@@ -53,7 +53,7 @@ struct Corkscrew {
      *   stored in a vector with a PSRAM allocator for efficient memory usage.
      */
     struct Input {
-        float totalCircumference = 100;   // Length in centimeters
+        float totalHeight = 100;          // Total height of the corkscrew in centimeters
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
         uint16_t numLeds = 0; // Number of LEDs in the strip
