@@ -35,9 +35,13 @@ using namespace fl;
 #define CORKSCREW_TOTAL_HEIGHT                                                 \
     23.25f // Total height of the corkscrew in centimeters for 144 densly
            // wrapped up over 19 turns
-#define CORKSCREW_TURNS 19.f * 2 * PI // Default to 19 turns
+#define CORKSCREW_TURNS 19 // Default to 19 turns
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
+
+#define CORKSCREW_WIDTH 16
+#define CORKSCREW_HEIGHT 19
+
 
 UITitle festivalStickTitle("Festival Stick");
 UIDescription festivalStickDescription(
@@ -54,7 +58,7 @@ CRGB leds[NUM_LEDS];
 // with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
 Corkscrew::Input
     corkscrewInput(CORKSCREW_TOTAL_HEIGHT,
-                   CORKSCREW_TURNS, // Default to 19 turns
+                   CORKSCREW_TURNS * 2.0f * PI, // Default to 19 turns
                    0,        // offset to account for gaps between segments
                    NUM_LEDS, // Default to dense 144 leds.
     );
@@ -162,8 +166,7 @@ void printOutput(const Corkscrew::Output& output) {
     FASTLED_WARN(stream.str());
 }
 
-#define CORKSCREW_WIDTH 16
-#define CORKSCREW_HEIGHT 19
+
 
 LedsXY<CORKSCREW_WIDTH, CORKSCREW_HEIGHT> frameBuffer;
 
