@@ -108,7 +108,7 @@ struct CorkscrewOutput {
         return Vec2i16Iterator(this, 0);
     }
 
-    Vec2i16Iterator end() {
+    Vec2i16Iterator end_vec2i16() {
         return Vec2i16Iterator(this, mapping.size());
     }
     fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
@@ -118,6 +118,7 @@ class Corkscrew {
   public:
     using Input = CorkscrewInput;
     using Output = CorkscrewOutput;
+    using Vec2i16Iter = Output::Vec2i16Iterator;
 
     Corkscrew(const Input &input);
     Corkscrew(const Corkscrew &) = default;
@@ -127,6 +128,16 @@ class Corkscrew {
     // using at(), because it uses 2x2 neighboor sampling.
     Tile2x2_u8 at_splat(uint16_t i) const;
     size_t size() const;
+
+    Vec2i16Iter begin_vec2i16() {
+        return mOutput.begin_vec2i16();
+    }
+
+    Vec2i16Iter end_vec2i16() {
+        return mOutput.end_vec2i16();
+    }
+
+    /// For testing
 
     static CorkscrewOutput generateMap(const Input &input);
 
