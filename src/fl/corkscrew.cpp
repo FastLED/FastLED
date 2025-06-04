@@ -16,10 +16,12 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
     // For two turns (4π), we want exactly 2 vertical segments
     uint16_t verticalSegments = round(input.totalAngle / TWO_PI);
 
+    // Calculate width based on LED density per turn
+    float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
+    
     // Determine cylindrical dimensions
     output.height = verticalSegments;
-    output.width = ceil(circumferencePerTurn);
-    output.circumference = circumferencePerTurn;
+    output.width = ceil(ledsPerTurn);
 
     output.mapping.clear();
     
