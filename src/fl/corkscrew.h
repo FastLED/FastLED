@@ -30,9 +30,6 @@
  *   - Height is the total number of vertical segments
  * - Vector of vec2f {width, height} mapping corkscrew (r,c) to cylindrical
  * {w,h}
- * - Optional compact format using vec2<uint8_t> for linear blending
- *   - Keeps computation in fixed integer space
- *   - Fits in a single uint32_t (up to 256×256 pixels)
  */
 
 #include "fl/geometry.h"
@@ -51,7 +48,6 @@ struct Corkscrew {
         float totalCircumference = 100;   // Length in centimeters
         float totalAngle = 19.f * 2 * PI; // Default to 19 turns
         float offsetCircumference = 0;    // Optional offset for gap accounting
-        bool compact = false; // Whether to use compact representation
         uint16_t numLeds = 0; // Number of LEDs in the strip
         Input() = default;
     };
@@ -66,8 +62,6 @@ struct Corkscrew {
             0; // Height of cylindrical map (total vertical segments)
         fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
             mapping; // Full precision mapping from corkscrew to cylindrical
-        fl::vector<fl::vec2u8, fl::allocator_psram<fl::vec2u8>>
-            mappingCompact; // Compact mapping for fixed integer computation
         Output() = default;
     };
 

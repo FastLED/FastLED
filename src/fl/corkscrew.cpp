@@ -40,20 +40,6 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
             // Store the mapping
             output.mapping.push_back({circumference, height});
         }
-        
-        // If compact representation is requested, generate it
-        if (input.compact) {
-            output.mappingCompact.clear();
-            output.mappingCompact.reserve(input.numLeds);
-            
-            for (const auto& point : output.mapping) {
-                fl::vec2u8 compactSample = {
-                    static_cast<uint8_t>((point.x / input.totalCircumference) * 255),
-                    static_cast<uint8_t>((point.y / verticalSegments) * 255)
-                };
-                output.mappingCompact.push_back(compactSample);
-            }
-        }
     } 
     else {
         // Original grid-based mapping
@@ -98,15 +84,6 @@ void Corkscrew::generateMap(const Corkscrew::Input &input,
                 sample.y *= 0.25f;
 
                 output.mapping.push_back(sample);
-
-                // Optionally compact the mapping into Vec2u8 format
-                if (input.compact) {
-                    fl::vec2u8 compactSample = {
-                        static_cast<uint8_t>((sample.x / input.totalCircumference) *
-                                             255),
-                        static_cast<uint8_t>((sample.y / verticalSegments) * 255)};
-                    output.mappingCompact.push_back(compactSample);
-                }
             }
         }
     }
