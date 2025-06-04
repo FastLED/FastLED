@@ -52,7 +52,7 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     CHECK(output.mapping[0].y <= 2.0f); // 2 vertical segments for 4π angle
 }
 
-TEST_CASE("Corkscrew generateMap with LED mapping") {
+TEST_CASE("Corkscrew generateMap with LED count") {
     Corkscrew::Input input;
     input.totalCircumference = 10.0f;
     input.totalAngle = TWO_PI; // One full turn
@@ -63,20 +63,20 @@ TEST_CASE("Corkscrew generateMap with LED mapping") {
     Corkscrew::Output output;
     Corkscrew::generateMap(input, output);
     
-    // Check that the LED mapping has the correct size
-    CHECK(output.ledMapping.size() == 20);
+    // Check that the mapping has the correct size (based on numLeds)
+    CHECK(output.mapping.size() == 20);
     
     // Check first LED position
-    CHECK(output.ledMapping[0].x >= 0.0f);
-    CHECK(output.ledMapping[0].x <= input.totalCircumference);
-    CHECK(output.ledMapping[0].y >= 0.0f);
+    CHECK(output.mapping[0].x >= 0.0f);
+    CHECK(output.mapping[0].x <= input.totalCircumference);
+    CHECK(output.mapping[0].y >= 0.0f);
     
     // Check last LED position
-    CHECK(output.ledMapping[19].x >= 0.0f);
-    CHECK(output.ledMapping[19].x <= input.totalCircumference);
-    CHECK(output.ledMapping[19].y <= 1.0f); // Should be at the end of 1 vertical segment
+    CHECK(output.mapping[19].x >= 0.0f);
+    CHECK(output.mapping[19].x <= input.totalCircumference);
+    CHECK(output.mapping[19].y <= 1.0f); // Should be at the end of 1 vertical segment
     
     // Check that LEDs are distributed along the corkscrew
-    CHECK(output.ledMapping[10].y > output.ledMapping[0].y);
-    CHECK(output.ledMapping[19].y > output.ledMapping[10].y);
+    CHECK(output.mapping[10].y > output.mapping[0].y);
+    CHECK(output.mapping[19].y > output.mapping[10].y);
 }
