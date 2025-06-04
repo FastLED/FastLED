@@ -10,7 +10,7 @@
 
 using namespace fl;
 
-TEST_CASE("fastled_file_offset") {
+TEST_CASE("reverse an int list") {
     fl::vector<int> vec;
     vec.push_back(1);
     vec.push_back(2);
