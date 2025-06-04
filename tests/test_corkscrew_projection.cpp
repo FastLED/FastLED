@@ -72,7 +72,7 @@ TEST_CASE("Corkscrew circumference test") {
     input.totalHeight = 23.25f; // Total height of the corkscrew in centimeters
     input.totalAngle = 19.0f * TWO_PI; // Default to 19 turns
     input.offsetCircumference = 0.0f; // No offset
-    input.numLeds = 144; // Default to dense 144 LEDs
+    input.numLeds = 288; // Default to dense 144 LEDs times two strips
 
     Corkscrew::Output output = Corkscrew::generateMap(input);
     
