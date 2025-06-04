@@ -24,7 +24,7 @@ class Tile2x2_u8 {
                           XYRasterU8Sparse *output);
 
     Tile2x2_u8() = default;
-    Tile2x2_u8(const vec2<int> &origin) : mOrigin(origin) {}
+    Tile2x2_u8(const vec2<int16_t> &origin) : mOrigin(origin) {}
     Tile2x2_u8(const Tile2x2_u8 &) = default;
     Tile2x2_u8 &operator=(const Tile2x2_u8 &) = default;
     Tile2x2_u8(Tile2x2_u8 &&) = default;
@@ -59,12 +59,12 @@ class Tile2x2_u8 {
         return result;
     }
 
-    vec2<int> origin() const { return mOrigin; }
+    vec2<int16_t> origin() const { return mOrigin; }
 
-    rect<int> bounds() const {
-        vec2<int> min = mOrigin;
-        vec2<int> max = mOrigin + vec2<int>(2, 2);
-        return rect<int>(min, max);
+    rect<int16_t> bounds() const {
+        vec2<int16_t> min = mOrigin;
+        vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
+        return rect<int16_t>(min, max);
     }
 
     // Draws the subpixel tile to the led array.
@@ -82,7 +82,7 @@ class Tile2x2_u8 {
                     int yy = mOrigin.y + y;
                     if (xymap.has(xx, yy)) {
                         int index = xymap(xx, yy);
-                        visitor.draw(vec2<int>(xx, yy), index, value);
+                        visitor.draw(vec2<int16_t>(xx, yy), index, value);
                     }
                 }
             }
@@ -92,7 +92,7 @@ class Tile2x2_u8 {
   private:
     uint8_t mTile[2][2] = {};
     // Subpixels can be rendered outside the viewport so this must be signed.
-    vec2<int> mOrigin;
+    vec2<int16_t> mOrigin;
 };
 
 } // namespace fl

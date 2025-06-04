@@ -39,7 +39,7 @@ class XYRasterU8Sparse {
   public:
     XYRasterU8Sparse() = default;
     XYRasterU8Sparse(int width, int height) {
-        setBounds(rect<int>(0, 0, width, height));
+        setBounds(rect<int16_t>(0, 0, width, height));
     }
     XYRasterU8Sparse(const XYRasterU8Sparse &) = delete;
 
@@ -56,22 +56,22 @@ class XYRasterU8Sparse {
     // to represent sub pixel / neightbor splatting positions along a path.
     // TODO: Bring the math from XYPathRenderer::at_subpixel(float alpha)
     // into a general purpose function.
-    void rasterize(const vec2<int> &pt, uint8_t value) {
+    void rasterize(const vec2<int16_t> &pt, uint8_t value) {
         // Turn it into a Tile2x2_u8 tile and see if we can cache it.
         write(pt, value);
     }
 
     void setSize(uint16_t width, uint16_t height) {
-        setBounds(rect<int>(0, 0, width, height));
+        setBounds(rect<int16_t>(0, 0, width, height));
     }
 
-    void setBounds(const rect<int> &bounds) {
+    void setBounds(const rect<int16_t> &bounds) {
         mAbsoluteBounds = bounds;
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<int>, uint8_t>::iterator;
-    using const_iterator = fl::HashMap<vec2<int>, uint8_t>::const_iterator;
+    using iterator = fl::HashMap<vec2<int16_t>, uint8_t>::iterator;
+    using const_iterator = fl::HashMap<vec2<int16_t>, uint8_t>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -84,7 +84,7 @@ class XYRasterU8Sparse {
     void rasterize(const Tile2x2_u8 &tile) { rasterize_internal(tile); }
 
     void rasterize_internal(const Tile2x2_u8 &tile,
-                            const rect<int> *optional_bounds = nullptr);
+                            const rect<int16_t> *optional_bounds = nullptr);
 
     // Renders the subpixel tiles to the raster. Any previous data is
     // cleared. Memory will only be allocated if the size of the raster
@@ -94,21 +94,21 @@ class XYRasterU8Sparse {
     // y); }
 
     Pair<bool, uint8_t> at(uint16_t x, uint16_t y) const {
-        const uint8_t *val = mSparseGrid.find_value(vec2<int>(x, y));
+        const uint8_t *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
         return {false, 0};
     }
 
-    rect<int> bounds() const {
+    rect<int16_t> bounds() const {
         if (mAbsoluteBoundsSet) {
             return mAbsoluteBounds;
         }
         return bounds_pixels();
     }
 
-    rect<int> bounds_pixels() const {
+    rect<int16_t> bounds_pixels() const {
         int min_x = 0;
         bool min_x_set = false;
         int min_y = 0;
@@ -118,7 +118,7 @@ class XYRasterU8Sparse {
         int max_y = 0;
         bool max_y_set = false;
         for (const auto &it : mSparseGrid) {
-            const vec2<int> &pt = it.first;
+            const vec2<int16_t> &pt = it.first;
             if (!min_x_set || pt.x < min_x) {
                 min_x = pt.x;
                 min_x_set = true;
@@ -136,7 +136,7 @@ class XYRasterU8Sparse {
                 max_y_set = true;
             }
         }
-        return rect<int>(min_x, min_y, max_x + 1, max_y + 1);
+        return rect<int16_t>(min_x, min_y, max_x + 1, max_y + 1);
     }
 
     // Warning! - SLOW.
@@ -166,7 +166,7 @@ class XYRasterU8Sparse {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<int> &pt, uint8_t value) {
+    void write(const vec2<int16_t> &pt, uint8_t value) {
         // FASTLED_WARN("write: " << pt.x << "," << pt.y << " value: " <<
         // value); mSparseGrid.insert(pt, value);
 
@@ -207,7 +207,7 @@ class XYRasterU8Sparse {
     }
 
   private:
-    using Key = vec2<int>;
+    using Key = vec2<int16_t>;
     using Value = uint8_t;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
@@ -216,9 +216,9 @@ class XYRasterU8Sparse {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<int>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<int16_t>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
-    fl::rect<int> mAbsoluteBounds;
+    fl::rect<int16_t> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
 

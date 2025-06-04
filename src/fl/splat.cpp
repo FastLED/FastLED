@@ -31,7 +31,7 @@ Tile2x2_u8 splat(vec2f xy) {
     float w_ur = fx * fy;             // upper‑right
 
     // 5) build Tile2x2_u8 anchored at (cx,cy)
-    Tile2x2_u8 out(vec2<int>(cx, cy));
+    Tile2x2_u8 out(vec2<int16_t>(cx, cy));
     out.lower_left() = to_uint8(w_ll);
     out.lower_right() = to_uint8(w_lr);
     out.upper_left() = to_uint8(w_ul);
