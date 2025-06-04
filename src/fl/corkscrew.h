@@ -68,6 +68,7 @@ struct Corkscrew {
             mapping; // Full precision mapping from corkscrew to cylindrical
         fl::vector<fl::vec2u8, fl::allocator_psram<fl::vec2u8>>
             mappingCompact; // Compact mapping for fixed integer computation
+        Output() = default;
     };
 
     /**
