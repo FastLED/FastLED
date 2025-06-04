@@ -37,8 +37,14 @@ template <typename T> inline T fl_abs(T value) {
 #define ALMOST_EQUAL_FLOAT(a, b) (ABS((a) - (b)) < EPSILON_F)
 #endif
 
+
+
 #ifndef ALMOST_EQUAL_DOUBLE
-#define ALMOST_EQUAL_DOUBLE(a, b) (ABS((a) - (b)) < EPSILON_F)
+#define ALMOST_EQUAL_EPSILON(a, b, epsilon) (ABS((a) - (b)) < (epsilon))
+#endif
+
+#ifndef ALMOST_EQUAL_DOUBLE
+#define ALMOST_EQUAL_DOUBLE(a, b) ALMOST_EQUAL_EPSILON(a, b, EPSILON_F)
 #endif
 
 #ifndef INFINITY_DOUBLE
