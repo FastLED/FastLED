@@ -118,6 +118,13 @@
         "math.h": "c",
         "__locale": "cpp",
         "version": "cpp",
-        "__split_buffer": "cpp"
+        "__split_buffer": "cpp",
+        "cassert": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "climits": "cpp",
+        "locale": "cpp",
+        "queue": "cpp",
+        "cstdbool": "cpp"
     }
 }

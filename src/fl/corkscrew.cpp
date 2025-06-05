@@ -107,15 +107,14 @@ Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     fl::generateMap(mInput, mOutput);
 }
 
-vec2i16 Corkscrew::at(uint16_t i) const {
+vec2f Corkscrew::at(uint16_t i) const {
     if (i >= mOutput.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default value
-        return vec2i16(0, 0);
+        return vec2f(0, 0);
     }
     // Convert the float position to integer
     const vec2f &position = mOutput.mapping[i];
-    return vec2i16(static_cast<int16_t>(position.x),
-                         static_cast<int16_t>(position.y));
+    return position;
 }
 
 Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
