@@ -3,6 +3,8 @@
 #include "fl/math_macros.h"
 #include "test.h"
 
+#include "fl/sstream.h"
+
 #include "fl/corkscrew.h"
 
 
@@ -54,7 +56,7 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     const int kCorkscrewTotalHeight = 1; // cm
     //const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
     //const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
-    const int kCorkscrewTurns = 1; // Default to 19 turns
+    const int kCorkscrewTurns = 2; // Default to 19 turns
 
 
 
@@ -62,7 +64,7 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     input.totalHeight = kCorkscrewTotalHeight;
     input.totalAngle = kCorkscrewTurns * 2 * PI; // Default to 19 turns
     input.offsetCircumference = 0.0f;
-    input.numLeds = 2;
+    input.numLeds = 3;
 
     // Generate the corkscrew map
 
@@ -72,8 +74,25 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
 
     volatile Corkscrew::Output* output = &corkscrew.access();
 
-    vec2<int16_t> first = corkscrew.at(0);
-    vec2<int16_t> second = corkscrew.at(1);
+    // vec2<int16_t> first = corkscrew.at(0);
+    // vec2<int16_t> second = corkscrew.at(1);
+
+    Corkscrew::Vec2i16Iter it = corkscrew.begin_vec2i16();
+    Corkscrew::Vec2i16Iter end = corkscrew.end_vec2i16();
+
+    fl::sstream ss;
+    ss << "\n";
+    ss << "width: " <<  output->width << "\n";
+    ss << "height: " <<  output->height << "\n";
+
+    while (it != end) {
+        ss << *it << "\n";
+        ++it;
+    }
+
+    FASTLED_WARN(ss.str());
+
+
     MESSAGE("done");
 
 
