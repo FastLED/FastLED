@@ -50,7 +50,7 @@ FFTImpl &FFT::get_or_create(const FFT_Args &args) {
 
 bool FFT_Args::operator==(const FFT_Args &other) const {
     FL_DISABLE_WARNING_PUSH
-    FL_DISABLE_WARNING("-Wfloat-equal");
+    FL_DISABLE_WARNING(float-equal);
 
     return samples == other.samples && bands == other.bands &&
            fmin == other.fmin && fmax == other.fmax &&

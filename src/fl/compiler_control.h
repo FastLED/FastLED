@@ -1,17 +1,19 @@
 #pragma once
 
-// Stringify helper
-#define FL_STRINGIFY(x) #x
-#define FL_DO_PRAGMA(x) _Pragma(#x)
+// Stringify helper for pragma arguments
+#define FL_STRINGIFY2(x) #x
+#define FL_STRINGIFY(x) FL_STRINGIFY2(x)
 
 #if defined(__clang__)
-  #define FL_DISABLE_WARNING_PUSH         FL_DO_PRAGMA(clang diagnostic push)
-  #define FL_DISABLE_WARNING_POP          FL_DO_PRAGMA(clang diagnostic pop)
-  #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(clang diagnostic ignored warning))
+  #define FL_DISABLE_WARNING_PUSH         _Pragma("clang diagnostic push")
+  #define FL_DISABLE_WARNING_POP          _Pragma("clang diagnostic pop")
+  // Usage: FL_DISABLE_WARNING(float-equal)
+  #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(clang diagnostic ignored "-W" #warning))
 #elif defined(__GNUC__)
-  #define FL_DISABLE_WARNING_PUSH         FL_DO_PRAGMA(GCC diagnostic push)
-  #define FL_DISABLE_WARNING_POP          FL_DO_PRAGMA(GCC diagnostic pop)
-  #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(GCC diagnostic ignored warning))
+  #define FL_DISABLE_WARNING_PUSH         _Pragma("GCC diagnostic push")
+  #define FL_DISABLE_WARNING_POP          _Pragma("GCC diagnostic pop")
+  // Usage: FL_DISABLE_WARNING(float-equal)
+  #define FL_DISABLE_WARNING(warning)     _Pragma(FL_STRINGIFY(GCC diagnostic ignored "-W" #warning))
 #else
   #define FL_DISABLE_WARNING_PUSH
   #define FL_DISABLE_WARNING_POP
