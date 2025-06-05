@@ -87,7 +87,6 @@ class Button {
       private:
         Button *mOwner;
         bool added = false;
-        bool mPressedLastFrame = false;
     };
 
   private:
