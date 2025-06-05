@@ -11,7 +11,7 @@
 
 
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(-Wglobal-constructors)
+FL_DISABLE_WARNING(global-constructors)
 
 static const auto start_time = std::chrono::system_clock::now();
 
