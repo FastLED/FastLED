@@ -144,29 +144,35 @@ $(function(){initNavTree('d8/db8/math__macros_8h_source.html','../../'); initRes
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a621db28d412216b1f19e72ba24cc0013.html#a621db28d412216b1f19e72ba24cc0013">   37</a></span><span class="preprocessor">#define ALMOST_EQUAL_FLOAT(a, b) (ABS((a) - (b)) &lt; EPSILON_F)</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#ifndef ALMOST_EQUAL_DOUBLE</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_aa6fa0fdc9d1e46a72482406f96f8a705.html#aa6fa0fdc9d1e46a72482406f96f8a705">   41</a></span><span class="preprocessor">#define ALMOST_EQUAL_DOUBLE(a, b) (ABS((a) - (b)) &lt; EPSILON_F)</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#ifndef INFINITY_DOUBLE</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a80077b6aa3aa051569796f8e91567d01.html#a80077b6aa3aa051569796f8e91567d01">   45</a></span><span class="preprocessor">#define INFINITY_DOUBLE (1.0 / 0.0)</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#ifndef INFINITY_FLOAT</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_ababd442ca8c23bd8ff4709744fe5bb9c.html#ababd442ca8c23bd8ff4709744fe5bb9c">   49</a></span><span class="preprocessor">#define INFINITY_FLOAT (1.0f / 0.0f)</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#ifndef FLT_MAX</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a7fbf1534f9e0f0bfdb86fb928902474c.html#a7fbf1534f9e0f0bfdb86fb928902474c">   53</a></span><span class="preprocessor">#define FLT_MAX 3.402823466e+38F</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#ifndef PI</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca">   57</a></span><span class="preprocessor">#define PI 3.1415926535897932384626433832795</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#ifndef M_PI</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_ae71449b1cc6e6250b91f539153a7a0d3.html#ae71449b1cc6e6250b91f539153a7a0d3">   61</a></span><span class="preprocessor">#define M_PI PI</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#ifndef ALMOST_EQUAL_DOUBLE</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_af547ae81ff58f804c001285dab36b9aa.html#af547ae81ff58f804c001285dab36b9aa">   43</a></span><span class="preprocessor">#define ALMOST_EQUAL_EPSILON(a, b, epsilon) (ABS((a) - (b)) &lt; (epsilon))</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#ifndef ALMOST_EQUAL_DOUBLE</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_aa6fa0fdc9d1e46a72482406f96f8a705.html#aa6fa0fdc9d1e46a72482406f96f8a705">   47</a></span><span class="preprocessor">#define ALMOST_EQUAL_DOUBLE(a, b) ALMOST_EQUAL_EPSILON(a, b, EPSILON_F)</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#ifndef INFINITY_DOUBLE</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a80077b6aa3aa051569796f8e91567d01.html#a80077b6aa3aa051569796f8e91567d01">   51</a></span><span class="preprocessor">#define INFINITY_DOUBLE (1.0 / 0.0)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#ifndef INFINITY_FLOAT</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_ababd442ca8c23bd8ff4709744fe5bb9c.html#ababd442ca8c23bd8ff4709744fe5bb9c">   55</a></span><span class="preprocessor">#define INFINITY_FLOAT (1.0f / 0.0f)</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#ifndef FLT_MAX</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a7fbf1534f9e0f0bfdb86fb928902474c.html#a7fbf1534f9e0f0bfdb86fb928902474c">   59</a></span><span class="preprocessor">#define FLT_MAX 3.402823466e+38F</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#ifndef PI</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca">   63</a></span><span class="preprocessor">#define PI 3.1415926535897932384626433832795</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#ifndef M_PI</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="../../d8/db8/math__macros_8h_ae71449b1cc6e6250b91f539153a7a0d3.html#ae71449b1cc6e6250b91f539153a7a0d3">   67</a></span><span class="preprocessor">#define M_PI PI</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="anamespacefl_a37eb210c0692e8e71004a6b2edfe6c0b_html_a37eb210c0692e8e71004a6b2edfe6c0b"><div class="ttname"><a href="../../d4/d36/namespacefl_a37eb210c0692e8e71004a6b2edfe6c0b.html#a37eb210c0692e8e71004a6b2edfe6c0b">fl::fl_abs</a></div><div class="ttdeci">T fl_abs(T value)</div><div class="ttdef"><b>Definition</b> <a href="#l00005">math_macros.h:5</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Implements a simple red square effect for 2D LED grids.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00016">crgb.h:16</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -176,7 +182,7 @@ $(function(){initNavTree('d8/db8/math__macros_8h_source.html','../../'); initRes
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d8/db8/math__macros_8h.html">math_macros.h</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

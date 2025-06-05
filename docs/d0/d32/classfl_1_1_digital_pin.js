@@ -2,7 +2,8 @@ var classfl_1_1_digital_pin =
 [
     [ "Mode", "d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17", [
       [ "kInput", "d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17a1260d52ece55ca9d63a41f122af76345", null ],
-      [ "kOutput", "d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17a6dde2c67cc694684bb275021ae36cd04", null ]
+      [ "kOutput", "d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17a6dde2c67cc694684bb275021ae36cd04", null ],
+      [ "kInputPullup", "d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17a88f75163fd78514ae1a025350a82e9ba", null ]
     ] ],
     [ "DigitalPin", "d0/d32/classfl_1_1_digital_pin_ae034367cbe43c3a93a34d68d936c8107.html#ae034367cbe43c3a93a34d68d936c8107", null ],
     [ "~DigitalPin", "d0/d32/classfl_1_1_digital_pin_a0f29e3f9ac6d64f525659cff861cbe25.html#a0f29e3f9ac6d64f525659cff861cbe25", null ],

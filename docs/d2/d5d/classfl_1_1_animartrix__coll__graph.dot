@@ -22,12 +22,12 @@ digraph "fl::Animartrix"
   Node14 -> Node13 [id="edge7_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="animartrix_detail::\lANIMartRIX",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html",tooltip=" "];
   Node1 -> Node13 [id="edge8_Node000013_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" data",fontcolor="grey" ];
-  Node28 -> Node12 [id="edge9_Node000012_Node000028",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
-  Node28 [id="Node000028",label="fl::PointerDeleter\l\< fl::FastLEDANIMartRIX \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node29 -> Node28 [id="edge10_Node000028_Node000029",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FastLEDANIMartRIX \>",fontcolor="grey" ];
-  Node29 [id="Node000029",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node30 -> Node12 [id="edge11_Node000012_Node000030",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FastLEDANIMartRIX \>",fontcolor="grey" ];
-  Node30 [id="Node000030",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
-  Node31 -> Node1 [id="edge12_Node000001_Node000031",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" leds",fontcolor="grey" ];
-  Node31 [id="Node000031",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
+  Node25 -> Node12 [id="edge9_Node000012_Node000025",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
+  Node25 [id="Node000025",label="fl::PointerDeleter\l\< fl::FastLEDANIMartRIX \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node26 -> Node25 [id="edge10_Node000025_Node000026",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FastLEDANIMartRIX \>",fontcolor="grey" ];
+  Node26 [id="Node000026",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node27 -> Node12 [id="edge11_Node000012_Node000027",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FastLEDANIMartRIX \>",fontcolor="grey" ];
+  Node27 [id="Node000027",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node28 -> Node1 [id="edge12_Node000001_Node000028",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" leds",fontcolor="grey" ];
+  Node28 [id="Node000028",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
 }

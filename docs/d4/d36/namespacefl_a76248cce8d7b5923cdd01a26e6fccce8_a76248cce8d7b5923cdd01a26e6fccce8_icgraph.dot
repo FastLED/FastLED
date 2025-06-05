@@ -12,7 +12,7 @@ digraph "fl::time_alpha8"
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::TimeRamp::update8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0",tooltip="Compute current 0–255 output based on how much time has elapsed since trigger()."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="applyFancyEffect",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41",tooltip=" "];
+  Node4 [id="Node000004",label="applyFancyEffect",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node5 [id="Node000005",label="wavefx_loop",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335",tooltip=" "];
 }

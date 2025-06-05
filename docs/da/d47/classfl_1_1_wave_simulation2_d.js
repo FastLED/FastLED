@@ -23,6 +23,7 @@ var classfl_1_1_wave_simulation2_d =
     [ "seti16", "da/d47/classfl_1_1_wave_simulation2_d_a9ee610f3a5561c1b6032899829ce4bd1.html#a9ee610f3a5561c1b6032899829ce4bd1", null ],
     [ "setSpeed", "da/d47/classfl_1_1_wave_simulation2_d_a614a159f66c77408c1cfedbd8644784c.html#a614a159f66c77408c1cfedbd8644784c", null ],
     [ "setSuperSample", "da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9", null ],
+    [ "setXCylindrical", "da/d47/classfl_1_1_wave_simulation2_d_a3e9083afb328803c446cc0ddec40cb3c.html#a3e9083afb328803c446cc0ddec40cb3c", null ],
     [ "update", "da/d47/classfl_1_1_wave_simulation2_d_a1b5867a9c2a54dc64ea1e57e2d07dc04.html#a1b5867a9c2a54dc64ea1e57e2d07dc04", null ],
     [ "mChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a", null ],
     [ "mExtraFrames", "da/d47/classfl_1_1_wave_simulation2_d_a1ede875fe1fde38487bb1e8d6a12c201.html#a1ede875fe1fde38487bb1e8d6a12c201", null ],

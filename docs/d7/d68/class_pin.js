@@ -19,6 +19,7 @@ var class_pin =
     [ "select", "d7/d68/class_pin_ae9ccf38d18d904e2ba7881c4b5af3fd0.html#ae9ccf38d18d904e2ba7881c4b5af3fd0", null ],
     [ "set", "d7/d68/class_pin_a2dd81fdd9dd54b9383594f6c15a29058.html#a2dd81fdd9dd54b9383594f6c15a29058", null ],
     [ "setInput", "d7/d68/class_pin_a3b1c3fa3480cd4a57c065f2e8811543a.html#a3b1c3fa3480cd4a57c065f2e8811543a", null ],
+    [ "setInputPullup", "d7/d68/class_pin_a8f151eca62dc95654d808d5787c70531.html#a8f151eca62dc95654d808d5787c70531", null ],
     [ "setOutput", "d7/d68/class_pin_a2309200ff683097b1aa8679ae3dc1e30.html#a2309200ff683097b1aa8679ae3dc1e30", null ],
     [ "strobe", "d7/d68/class_pin_ac4ce6209c47e73e4cbc751d735c56e97.html#ac4ce6209c47e73e4cbc751d735c56e97", null ],
     [ "toggle", "d7/d68/class_pin_a5ecffd86fb366af5ff559faf82a1fc81.html#a5ecffd86fb366af5ff559faf82a1fc81", null ],

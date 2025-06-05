@@ -8,5 +8,7 @@ var geometry_8h =
     [ "fl::pair_xy_float", "d4/d36/namespacefl_a4d9fb9f97a67e179df7ad92f60739203.html#a4d9fb9f97a67e179df7ad92f60739203", null ],
     [ "fl::pair_xyz_float", "d4/d36/namespacefl_ad845c49ce661bb886ea1b3ade42802a4.html#ad845c49ce661bb886ea1b3ade42802a4", null ],
     [ "fl::vec2f", "d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a", null ],
+    [ "fl::vec2i16", "d4/d36/namespacefl_ad7a6967837e299802665fc066cb4e588.html#ad7a6967837e299802665fc066cb4e588", null ],
+    [ "fl::vec2u8", "d4/d36/namespacefl_a83ab640a785cd75e64b67a4d0ec4be0e.html#a83ab640a785cd75e64b67a4d0ec4be0e", null ],
     [ "fl::vec3f", "d4/d36/namespacefl_a61f967bb4963ce21a9ef09d513f9ea66.html#a61f967bb4963ce21a9ef09d513f9ea66", null ]
 ];

@@ -10,5 +10,6 @@ var searchData=
   ['tprogmempalette16_7',['TProgmemPalette16',['../dd/db2/colorutils__misc_8h_a2e2c47988086791244a547f098633a4a.html#a2e2c47988086791244a547f098633a4a',1,'colorutils_misc.h']]],
   ['tprogmempalette32_8',['TProgmemPalette32',['../dd/db2/colorutils__misc_8h_acbe65e7b11919a132bc2f148e448bacc.html#acbe65e7b11919a132bc2f148e448bacc',1,'colorutils_misc.h']]],
   ['twinkle_5fdensity_9',['TWINKLE_DENSITY',['../d1/df6/twinklefox_8h_aa3d59a6a52e9d67ebc67a1cbef17de44.html#aa3d59a6a52e9d67ebc67a1cbef17de44',1,'TWINKLE_DENSITY:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_aa3d59a6a52e9d67ebc67a1cbef17de44.html#aa3d59a6a52e9d67ebc67a1cbef17de44',1,'TWINKLE_DENSITY:&#160;TwinkleFox.ino']]],
-  ['twinkle_5fspeed_10',['TWINKLE_SPEED',['../d1/df6/twinklefox_8h_a6cf082d8e55adee313b4705a8cf99d75.html#a6cf082d8e55adee313b4705a8cf99d75',1,'TWINKLE_SPEED:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_a6cf082d8e55adee313b4705a8cf99d75.html#a6cf082d8e55adee313b4705a8cf99d75',1,'TWINKLE_SPEED:&#160;TwinkleFox.ino']]]
+  ['twinkle_5fspeed_10',['TWINKLE_SPEED',['../d1/df6/twinklefox_8h_a6cf082d8e55adee313b4705a8cf99d75.html#a6cf082d8e55adee313b4705a8cf99d75',1,'TWINKLE_SPEED:&#160;twinklefox.h'],['../d4/dd0/_twinkle_fox_8ino_a6cf082d8e55adee313b4705a8cf99d75.html#a6cf082d8e55adee313b4705a8cf99d75',1,'TWINKLE_SPEED:&#160;TwinkleFox.ino']]],
+  ['two_5fpi_11',['TWO_PI',['../d3/d9b/corkscrew_8cpp_a3b947f4b635461030ff2d87833e5049e.html#a3b947f4b635461030ff2d87833e5049e',1,'corkscrew.cpp']]]
 ];

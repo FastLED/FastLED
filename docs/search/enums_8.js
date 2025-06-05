@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['midicontrolchangenumber_0',['MidiControlChangeNumber',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263',1,'midi_Defs.h']]],
-  ['miditype_1',['MidiType',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84c',1,'midi_Defs.h']]],
-  ['mode_2',['Mode',['../d0/d32/classfl_1_1_digital_pin_a311bcf896155643629be9f7c1b8a0c17.html#a311bcf896155643629be9f7c1b8a0c17',1,'fl::DigitalPin::Mode'],['../d8/d7f/struct_thru_ad19abe318ba3710100aefdea1895fbbb.html#ad19abe318ba3710100aefdea1895fbbb',1,'Thru::Mode']]]
+  ['led_5fmodel_5ft_0',['led_model_t',['../d4/d88/led__strip__types_8h_a96acac66c087508b5ea980682d2e4994.html#a96acac66c087508b5ea980682d2e4994',1,'led_strip_types.h']]],
+  ['ledcolorcorrection_1',['LEDColorCorrection',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#gadf6bcba67c9573665af20788c4431ae8',1,'color.h']]],
+  ['leddirection_2',['leddirection',['../d4/d36/namespacefl_ac230c9a58b003c876832f8688ffa2359.html#ac230c9a58b003c876832f8688ffa2359',1,'fl']]]
 ];

@@ -1,0 +1,20 @@
+<map id="fl::splat" name="fl::splat">
+<area shape="rect" id="Node000001" title="&quot;Splat&quot; as in &quot;splat pixel rendering&quot; takes a pixel value in float x,y coordinates and &quot;splats&quot; it in..." alt="" coords="5,145,76,171"/>
+<area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_a6f695974940e32739826774a8cef92db.html#a6f695974940e32739826774a8cef92db" title=" " alt="" coords="125,5,306,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,144,73,94,95,65,122,41,134,34,137,39,126,45,99,69,78,97,50,146"/>
+<area shape="rect" id="Node000004" href="$d0/d2b/classfl_1_1_tile2x2__u8_a4c75bfa6e7a38de1f64fd3cf05f3696e.html#a4c75bfa6e7a38de1f64fd3cf05f3696e" title=" " alt="" coords="139,55,292,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="59,143,123,105,138,98,141,103,125,110,62,147"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad1672aba306ba7467534a85f7f2dabd4.html#ad1672aba306ba7467534a85f7f2dabd4" title=" " alt="" coords="170,120,261,145"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="76,150,156,139,157,144,77,156"/>
+<area shape="rect" id="Node000006" href="$d0/d2b/classfl_1_1_tile2x2__u8_a4e42397994781d4786e4a88970c925cc.html#a4e42397994781d4786e4a88970c925cc" title=" " alt="" coords="124,169,307,195"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="77,160,111,165,110,170,76,165"/>
+<area shape="rect" id="Node000007" href="$d0/d2b/classfl_1_1_tile2x2__u8_a65d67da8e85b7177e1eaa41ece80e0c4.html#a65d67da8e85b7177e1eaa41ece80e0c4" title=" " alt="" coords="138,219,293,259"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="63,169,125,204,144,212,142,217,123,208,60,173"/>
+<area shape="rect" id="Node000008" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="196,284,235,309"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="50,169,78,218,99,246,125,269,154,283,183,290,182,296,152,288,123,274,96,249,73,221,45,172"/>
+<area shape="rect" id="Node000003" href="$d0/d2b/classfl_1_1_tile2x2__u8_aec08d4bb9cae61bb1f6926ce1a1d9b9c.html#aec08d4bb9cae61bb1f6926ce1a1d9b9c" title=" " alt="" coords="355,116,485,141"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="276,28,308,41,357,72,397,104,394,109,354,76,305,46,274,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="293,93,358,110,357,115,292,98"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="264,167,357,142,358,147,266,172"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="276,217,305,204,351,176,390,148,393,152,354,181,308,208,278,222"/>
+</map>

@@ -124,60 +124,63 @@ $(function(){initNavTree('da/d47/classfl_1_1_wave_simulation2_d_a9ee610f3a5561c1
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00142">142</a> of file <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html">wave_simulation.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  142</span>                                                             {</div>
-<div class="line"><span class="lineno">  143</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../da/d47/classfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe.html#acbdedef9000201675ce1b2d33288affe">has</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>))</div>
-<div class="line"><span class="lineno">  144</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  145</span> </div>
-<div class="line"><span class="lineno">  146</span>    <span class="comment">// radius in pixels of your diamond</span></div>
-<div class="line"><span class="lineno">  147</span>    <span class="keywordtype">int</span> rad = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a>) / 2;</div>
-<div class="line"><span class="lineno">  148</span> </div>
-<div class="line"><span class="lineno">  149</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> j = 0; j &lt; <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a>; ++j) {</div>
-<div class="line"><span class="lineno">  150</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a>; ++i) {</div>
-<div class="line"><span class="lineno">  151</span>            <span class="comment">// compute offset from the center of this block</span></div>
-<div class="line"><span class="lineno">  152</span>            <span class="keywordtype">int</span> dx = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(i) - rad;</div>
-<div class="line"><span class="lineno">  153</span>            <span class="keywordtype">int</span> dy = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(j) - rad;</div>
-<div class="line"><span class="lineno">  154</span>            <span class="comment">// keep only those points whose Manhattan distance ≤ rad</span></div>
-<div class="line"><span class="lineno">  155</span>            <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(dx) + <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(dy) &gt; rad) {</div>
-<div class="line"><span class="lineno">  156</span>                <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  157</span>            }</div>
-<div class="line"><span class="lineno">  158</span>            <span class="keywordtype">size_t</span> xx = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> * <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a> + i;</div>
-<div class="line"><span class="lineno">  159</span>            <span class="keywordtype">size_t</span> yy = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a> + j;</div>
-<div class="line"><span class="lineno">  160</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718.html#a548d8bfa0fada000e64a8d7dfba93718">mSim</a>-&gt;has(xx, yy)) {</div>
-<div class="line"><span class="lineno">  161</span>                int16_t &amp;pt = <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a">mChangeGrid</a>.at(xx, yy);</div>
-<div class="line"><span class="lineno">  162</span>                <span class="keywordflow">if</span> (pt == 0) {</div>
-<div class="line"><span class="lineno">  163</span>                    <span class="comment">// not set yet so set unconditionally.</span></div>
-<div class="line"><span class="lineno">  164</span>                    pt = v16;</div>
-<div class="line"><span class="lineno">  165</span>                } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  166</span>                    <span class="keyword">const</span> <span class="keywordtype">bool</span> sign_matches = (pt &gt;= 0) == (v16 &gt;= 0);</div>
-<div class="line"><span class="lineno">  167</span>                    <span class="keywordflow">if</span> (!sign_matches) {</div>
-<div class="line"><span class="lineno">  168</span>                        <span class="comment">// opposite signs, so overwrite</span></div>
-<div class="line"><span class="lineno">  169</span>                        pt = v16;</div>
-<div class="line"><span class="lineno">  170</span>                    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  171</span>                        <span class="comment">// if the magnitude of the new pt is greater than what</span></div>
-<div class="line"><span class="lineno">  172</span>                        <span class="comment">// was already there, then overwrite.</span></div>
-<div class="line"><span class="lineno">  173</span>                        uint16_t abs_pt = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(pt));</div>
-<div class="line"><span class="lineno">  174</span>                        uint16_t abs_v16 = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(v16));</div>
-<div class="line"><span class="lineno">  175</span>                        <span class="keywordflow">if</span> (abs_v16 &gt; abs_pt) {</div>
-<div class="line"><span class="lineno">  176</span>                            pt = v16;</div>
-<div class="line"><span class="lineno">  177</span>                        }</div>
-<div class="line"><span class="lineno">  178</span>                    }</div>
-<div class="line"><span class="lineno">  179</span>                }</div>
-<div class="line"><span class="lineno">  180</span>            }</div>
-<div class="line"><span class="lineno">  181</span>        }</div>
-<div class="line"><span class="lineno">  182</span>    }</div>
-<div class="line"><span class="lineno">  183</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00144">144</a> of file <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html">wave_simulation.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  144</span>                                                             {</div>
+<div class="line"><span class="lineno">  145</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../da/d47/classfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe.html#acbdedef9000201675ce1b2d33288affe">has</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>))</div>
+<div class="line"><span class="lineno">  146</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  147</span> </div>
+<div class="line"><span class="lineno">  148</span>    uint8_t mult = <a class="code hl_define" href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(1, <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">mMultiplier</a>);</div>
+<div class="line"><span class="lineno">  149</span> </div>
+<div class="line"><span class="lineno">  150</span>    <span class="comment">// radius in pixels of your diamond</span></div>
+<div class="line"><span class="lineno">  151</span>    <span class="keywordtype">int</span> rad = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(mult) / 2;</div>
+<div class="line"><span class="lineno">  152</span> </div>
+<div class="line"><span class="lineno">  153</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> j = 0; j &lt; mult; ++j) {</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; mult; ++i) {</div>
+<div class="line"><span class="lineno">  155</span>            <span class="comment">// compute offset from the center of this block</span></div>
+<div class="line"><span class="lineno">  156</span>            <span class="keywordtype">int</span> dx = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(i) - rad;</div>
+<div class="line"><span class="lineno">  157</span>            <span class="keywordtype">int</span> dy = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(j) - rad;</div>
+<div class="line"><span class="lineno">  158</span>            <span class="comment">// keep only those points whose Manhattan distance ≤ rad</span></div>
+<div class="line"><span class="lineno">  159</span>            <span class="keywordflow">if</span> (<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(dx) + <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(dy) &gt; rad) {</div>
+<div class="line"><span class="lineno">  160</span>                <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">  161</span>            }</div>
+<div class="line"><span class="lineno">  162</span>            <span class="keywordtype">size_t</span> xx = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> * mult + i;</div>
+<div class="line"><span class="lineno">  163</span>            <span class="keywordtype">size_t</span> yy = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * mult + j;</div>
+<div class="line"><span class="lineno">  164</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718.html#a548d8bfa0fada000e64a8d7dfba93718">mSim</a>-&gt;has(xx, yy)) {</div>
+<div class="line"><span class="lineno">  165</span>                int16_t &amp;pt = <a class="code hl_variable" href="../../da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a">mChangeGrid</a>.at(xx, yy);</div>
+<div class="line"><span class="lineno">  166</span>                <span class="keywordflow">if</span> (pt == 0) {</div>
+<div class="line"><span class="lineno">  167</span>                    <span class="comment">// not set yet so set unconditionally.</span></div>
+<div class="line"><span class="lineno">  168</span>                    pt = v16;</div>
+<div class="line"><span class="lineno">  169</span>                } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  170</span>                    <span class="keyword">const</span> <span class="keywordtype">bool</span> sign_matches = (pt &gt;= 0) == (v16 &gt;= 0);</div>
+<div class="line"><span class="lineno">  171</span>                    <span class="keywordflow">if</span> (!sign_matches) {</div>
+<div class="line"><span class="lineno">  172</span>                        <span class="comment">// opposite signs, so overwrite</span></div>
+<div class="line"><span class="lineno">  173</span>                        pt = v16;</div>
+<div class="line"><span class="lineno">  174</span>                    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  175</span>                        <span class="comment">// if the magnitude of the new pt is greater than what</span></div>
+<div class="line"><span class="lineno">  176</span>                        <span class="comment">// was already there, then overwrite.</span></div>
+<div class="line"><span class="lineno">  177</span>                        uint16_t abs_pt = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(pt));</div>
+<div class="line"><span class="lineno">  178</span>                        uint16_t abs_v16 = <span class="keyword">static_cast&lt;</span>uint16_t<span class="keyword">&gt;</span>(<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(v16));</div>
+<div class="line"><span class="lineno">  179</span>                        <span class="keywordflow">if</span> (abs_v16 &gt; abs_pt) {</div>
+<div class="line"><span class="lineno">  180</span>                            pt = v16;</div>
+<div class="line"><span class="lineno">  181</span>                        }</div>
+<div class="line"><span class="lineno">  182</span>                    }</div>
+<div class="line"><span class="lineno">  183</span>                }</div>
+<div class="line"><span class="lineno">  184</span>            }</div>
+<div class="line"><span class="lineno">  185</span>        }</div>
+<div class="line"><span class="lineno">  186</span>    }</div>
+<div class="line"><span class="lineno">  187</span>}</div>
 <div class="ttc" id="a_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00072">Audio.ino:72</a></div></div>
 <div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a_html_a48bd7417bf66c8d4fc8c15d5a96ce04a"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a">fl::WaveSimulation2D::mChangeGrid</a></div><div class="ttdeci">fl::Grid&lt; int16_t &gt; mChangeGrid</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00209">wave_simulation.h:209</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718_html_a548d8bfa0fada000e64a8d7dfba93718"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718.html#a548d8bfa0fada000e64a8d7dfba93718">fl::WaveSimulation2D::mSim</a></div><div class="ttdeci">fl::scoped_ptr&lt; WaveSimulation2D_Real &gt; mSim</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00208">wave_simulation.h:208</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe_html_acbdedef9000201675ce1b2d33288affe"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe.html#acbdedef9000201675ce1b2d33288affe">fl::WaveSimulation2D::has</a></div><div class="ttdeci">bool has(size_t x, size_t y) const</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8c/wave__simulation_8cpp_source.html#l00138">wave_simulation.cpp:138</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94_html_aecf74e6f14030e06010dda9cb34c7e94"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">fl::WaveSimulation2D::mMultiplier</a></div><div class="ttdeci">uint32_t mMultiplier</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00205">wave_simulation.h:205</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a_html_a48bd7417bf66c8d4fc8c15d5a96ce04a"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_a48bd7417bf66c8d4fc8c15d5a96ce04a.html#a48bd7417bf66c8d4fc8c15d5a96ce04a">fl::WaveSimulation2D::mChangeGrid</a></div><div class="ttdeci">fl::Grid&lt; int16_t &gt; mChangeGrid</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00211">wave_simulation.h:211</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718_html_a548d8bfa0fada000e64a8d7dfba93718"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_a548d8bfa0fada000e64a8d7dfba93718.html#a548d8bfa0fada000e64a8d7dfba93718">fl::WaveSimulation2D::mSim</a></div><div class="ttdeci">fl::scoped_ptr&lt; WaveSimulation2D_Real &gt; mSim</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00210">wave_simulation.h:210</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe_html_acbdedef9000201675ce1b2d33288affe"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_acbdedef9000201675ce1b2d33288affe.html#acbdedef9000201675ce1b2d33288affe">fl::WaveSimulation2D::has</a></div><div class="ttdeci">bool has(size_t x, size_t y) const</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8c/wave__simulation_8cpp_source.html#l00140">wave_simulation.cpp:140</a></div></div>
+<div class="ttc" id="aclassfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94_html_aecf74e6f14030e06010dda9cb34c7e94"><div class="ttname"><a href="../../da/d47/classfl_1_1_wave_simulation2_d_aecf74e6f14030e06010dda9cb34c7e94.html#aecf74e6f14030e06010dda9cb34c7e94">fl::WaveSimulation2D::mMultiplier</a></div><div class="ttdeci">uint32_t mMultiplier</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d36/wave__simulation_8h_source.html#l00207">wave_simulation.h:207</a></div></div>
 <div class="ttc" id="amath__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759_html_a996f7be338ccb40d1a2a5abc1ad61759"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a></div><div class="ttdeci">#define ABS(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00019">math_macros.h:19</a></div></div>
+<div class="ttc" id="amath__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f_html_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><div class="ttname"><a href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a></div><div class="ttdeci">#define MAX(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00011">math_macros.h:11</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00019">ABS</a>, <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00138">has()</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00209">mChangeGrid</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00205">mMultiplier</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00208">mSim</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, and <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00019">ABS</a>, <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00140">has()</a>, <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00011">MAX</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00211">mChangeGrid</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00207">mMultiplier</a>, <a class="el" href="../../dc/d36/wave__simulation_8h_source.html#l00210">mSim</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, and <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00185">setf()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d8c/wave__simulation_8cpp_source.html#l00189">setf()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -202,7 +205,7 @@ $(function(){initNavTree('da/d47/classfl_1_1_wave_simulation2_d_a9ee610f3a5561c1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d47/classfl_1_1_wave_simulation2_d.html">WaveSimulation2D</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:40 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

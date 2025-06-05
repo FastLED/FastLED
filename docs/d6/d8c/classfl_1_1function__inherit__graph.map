@@ -1,26 +1,22 @@
 <map id="fl::function&lt; typename &gt;" name="fl::function&lt; typename &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,290,192,315"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="463,9,606,49"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,276,114,229,135,172,168,115,189,89,214,67,243,50,274,37,340,21,405,16,463,18,463,23,405,21,341,26,276,42,246,55,218,71,193,93,172,118,140,174,119,231,107,277"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="465,73,604,113"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="108,276,124,243,147,205,177,167,215,136,245,121,277,108,343,93,408,86,465,85,465,91,408,91,344,98,278,113,247,126,217,141,181,171,151,208,128,246,113,278"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="467,137,602,177"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="117,277,159,235,185,214,215,198,279,175,347,161,411,155,467,153,467,158,411,160,347,167,281,180,217,202,188,219,162,239,121,281"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="457,202,612,227"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="132,281,171,262,215,245,278,231,342,222,457,213,457,218,342,227,279,236,217,251,173,266,135,286"/>
-<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="458,252,611,292"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="206,292,458,275,458,280,206,298"/>
-<area shape="rect" id="Node000007" href="$d5/d9d/classfl_1_1function_3_01_r_07_args_8_8_8_08_4.html" title=" " alt="" coords="446,317,623,342"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="198,314,216,316,336,323,446,326,446,331,336,329,216,321,198,320"/>
-<area shape="rect" id="Node000008" href="$dc/da9/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable.html" title=" " alt="" coords="713,379,879,419"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="158,316,217,331,320,351,424,365,577,381,713,391,712,396,577,386,424,371,319,356,215,336,157,322"/>
-<area shape="rect" id="Node000009" href="$dd/d15/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable_base.html" title=" " alt="" coords="451,429,618,469"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="119,325,160,371,187,394,217,412,275,433,337,445,397,451,451,452,451,457,397,456,336,451,274,438,215,417,184,398,156,375,115,328"/>
-<area shape="rect" id="Node000010" href="$d5/d17/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_const_mem_callable.html" title=" " alt="" coords="695,451,897,491"/>
-<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="113,327,130,358,153,394,182,429,217,458,280,488,347,508,416,518,486,520,554,517,618,509,724,488,725,493,619,514,555,522,486,526,416,523,346,513,278,493,215,462,178,433,148,397,125,361,109,329"/>
-<area shape="rect" id="Node000011" href="$dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable.html" title=" " alt="" coords="713,532,879,572"/>
-<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="108,328,120,372,141,426,173,480,194,504,217,523,277,555,342,577,410,589,479,594,546,593,609,587,716,569,717,575,610,593,546,598,478,599,409,594,341,582,275,560,215,528,190,507,169,483,136,429,115,374,102,329"/>
-<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="631,428,712,412,713,417,632,433"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="632,455,695,460,694,465,631,460"/>
-<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="600,472,745,529,743,534,598,477"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,192,250"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="463,5,606,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,210,124,177,147,139,177,101,215,70,244,54,276,42,342,26,406,19,463,18,463,23,406,24,343,31,278,47,247,59,217,74,181,104,151,142,128,180,113,213"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="465,69,604,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,212,159,170,185,149,215,132,279,109,345,95,409,88,465,85,465,91,410,93,346,100,280,114,217,137,188,154,162,174,121,216"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="458,133,611,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="147,217,215,197,343,173,457,158,458,164,344,179,217,203,148,223"/>
+<area shape="rect" id="Node000005" href="$d5/d9d/classfl_1_1function_3_01_r_07_args_8_8_8_08_4.html" title=" " alt="" coords="446,198,623,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="206,228,446,213,446,219,206,233"/>
+<area shape="rect" id="Node000006" href="$dc/da9/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable.html" title=" " alt="" coords="713,260,879,300"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="206,241,713,272,712,278,206,246"/>
+<area shape="rect" id="Node000007" href="$dd/d15/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_callable_base.html" title=" " alt="" coords="451,311,618,351"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="132,255,172,276,217,293,277,308,338,318,451,327,451,332,338,323,276,313,215,299,170,281,130,259"/>
+<area shape="rect" id="Node000008" href="$d5/d17/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_const_mem_callable.html" title=" " alt="" coords="695,332,897,372"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="123,258,165,296,217,330,277,353,339,370,403,380,468,384,590,381,694,369,695,375,591,387,468,390,403,385,338,375,275,358,215,334,161,300,120,262"/>
+<area shape="rect" id="Node000009" href="$dc/da3/structfl_1_1function_3_01_r_07_args_8_8_8_08_4_1_1_mem_callable.html" title=" " alt="" coords="713,413,879,453"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="114,261,130,292,153,326,182,359,217,386,279,414,344,434,412,447,479,454,545,456,607,454,712,444,713,450,607,459,545,461,479,459,411,452,343,439,277,419,215,390,179,363,149,329,125,294,109,264"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="631,309,712,294,713,299,632,315"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="632,336,695,341,694,346,631,341"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="600,353,745,411,743,416,598,358"/>
 </map>

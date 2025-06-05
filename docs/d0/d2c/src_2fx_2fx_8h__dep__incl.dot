@@ -19,7 +19,7 @@ digraph "fx/fx.h"
   Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/BilinearCompression\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d16/examples_2_bilinear_compression_2src_2wave_8h.html",tooltip=" "];
   Node6 -> Node10 [id="edge7_Node000006_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/FxWave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino.html",tooltip=" "];
+  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/wavefx.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp.html",tooltip=" "];
   Node6 -> Node11 [id="edge8_Node000006_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/Wave2d\l/Wave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d44/_wave2d_8ino.html",tooltip=" "];
   Node6 -> Node12 [id="edge9_Node000006_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];

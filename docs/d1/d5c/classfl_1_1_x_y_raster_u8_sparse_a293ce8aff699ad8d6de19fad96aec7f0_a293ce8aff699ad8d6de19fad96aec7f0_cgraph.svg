@@ -87,7 +87,7 @@ var sectionId = 'dynsection-0';
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a201c42c51adecf79b815e3178e32604b.html#a201c42c51adecf79b815e3178e32604b" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a99a5b8beee07bad57f8a932811e51dd8.html#a99a5b8beee07bad57f8a932811e51dd8" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="274,-78 155,-78 155,-48 274,-48 274,-78"/>
 <text text-anchor="start" x="163" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYRasterU8Sparse</text>
 <text text-anchor="middle" x="214.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::setBounds</text>
@@ -125,7 +125,7 @@ var sectionId = 'dynsection-0';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ae50080dc92f18317bd58108309643a3a.html#ae50080dc92f18317bd58108309643a3a" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_af4fa9ea8d4da50d2550319ad1266b8a4.html#af4fa9ea8d4da50d2550319ad1266b8a4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="429,-78 310,-78 310,-48 429,-48 429,-78"/>
 <text text-anchor="start" x="318" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYRasterU8Sparse</text>
 <text text-anchor="middle" x="369.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::bounds</text>
@@ -162,7 +162,7 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ae1881273a12120a126c55d2585488963.html#ae1881273a12120a126c55d2585488963" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a9badb17a68e18781d2605fcba8786974.html#a9badb17a68e18781d2605fcba8786974" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="584,-78 465,-78 465,-48 584,-48 584,-78"/>
 <text text-anchor="start" x="473" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYRasterU8Sparse</text>
 <text text-anchor="middle" x="524.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::bounds_pixels</text>

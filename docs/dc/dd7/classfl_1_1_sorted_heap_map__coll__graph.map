@@ -1,17 +1,19 @@
 <map id="fl::SortedHeapMap&lt; Key, Value, Less &gt;" name="fl::SortedHeapMap&lt; Key, Value, Less &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1021,107,1175,147"/>
-<area shape="rect" id="Node000002" href="$d0/d5c/classfl_1_1_sorted_heap_vector.html" title=" " alt="" coords="765,92,940,161"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="954,124,1021,124,1021,129,954,129"/>
-<area shape="rect" id="Node000003" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="375,35,556,75"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="570,71,765,108,764,113,569,77"/>
-<area shape="rect" id="Node000004" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="5,5,187,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="201,31,375,45,374,50,200,36"/>
-<area shape="rect" id="Node000011" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="21,73,171,98"/>
-<area shape="poly" id="edge4_Node000003_Node000011" title=" " alt="" coords="185,85,266,84,350,77,383,72,384,77,351,83,266,89,185,90"/>
-<area shape="rect" id="Node000012" href="$d7/d53/structfl_1_1_sorted_heap_map_1_1_pair_less.html" title=" " alt="" coords="389,99,542,154"/>
-<area shape="poly" id="edge5_Node000002_Node000012" title=" " alt="" coords="556,124,765,124,765,129,556,129"/>
-<area shape="rect" id="Node000013" href="$d0/d5c/classfl_1_1_sorted_heap_vector.html" title=" " alt="" coords="388,181,543,221"/>
-<area shape="poly" id="edge6_Node000002_Node000013" title=" " alt="" coords="556,198,646,191,741,173,782,159,784,164,742,179,647,196,557,203"/>
-<area shape="rect" id="Node000014" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="45,189,147,214"/>
-<area shape="poly" id="edge7_Node000013_Node000014" title=" " alt="" coords="161,199,388,199,388,204,161,204"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1019,141,1172,181"/>
+<area shape="rect" id="Node000002" href="$d0/d5c/classfl_1_1_sorted_heap_vector.html" title=" " alt="" coords="763,127,937,196"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="951,159,1019,159,1019,164,951,164"/>
+<area shape="rect" id="Node000003" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="372,69,553,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="567,106,763,143,762,148,566,111"/>
+<area shape="rect" id="Node000004" href="$d2/d3f/structfl_1_1_sorted_heap_map_1_1_pair.html" title=" " alt="" coords="5,5,184,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="198,40,348,67,372,71,371,76,348,72,197,46"/>
+<area shape="rect" id="Node000007" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="8,69,181,109"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="195,87,372,87,372,92,195,92"/>
+<area shape="rect" id="Node000009" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="25,133,165,173"/>
+<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="178,145,260,136,347,121,402,107,404,112,349,127,261,141,179,150"/>
+<area shape="rect" id="Node000010" href="$d7/d53/structfl_1_1_sorted_heap_map_1_1_pair_less.html" title=" " alt="" coords="386,134,539,189"/>
+<area shape="poly" id="edge6_Node000002_Node000010" title=" " alt="" coords="553,159,763,159,763,164,553,164"/>
+<area shape="rect" id="Node000011" href="$d0/d5c/classfl_1_1_sorted_heap_vector.html" title=" " alt="" coords="385,216,540,256"/>
+<area shape="poly" id="edge7_Node000002_Node000011" title=" " alt="" coords="554,232,644,225,738,208,779,194,781,199,739,213,644,231,554,238"/>
+<area shape="rect" id="Node000012" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="43,223,146,249"/>
+<area shape="poly" id="edge8_Node000011_Node000012" title=" " alt="" coords="160,233,385,233,385,239,160,239"/>
 </map>

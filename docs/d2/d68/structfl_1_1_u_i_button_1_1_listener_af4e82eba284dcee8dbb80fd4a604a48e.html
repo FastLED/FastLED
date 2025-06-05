@@ -127,20 +127,29 @@ $(function(){initNavTree('d2/d68/structfl_1_1_u_i_button_1_1_listener_af4e82eba2
 
 <p class="definition">Definition at line <a class="el" href="../../d4/d38/ui_8cpp_source.html#l00032">32</a> of file <a class="el" href="../../d4/d38/ui_8cpp_source.html">ui.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   32</span>                                    {</div>
-<div class="line"><span class="lineno">   33</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> clicked_this_frame = <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;clicked();</div>
-<div class="line"><span class="lineno">   34</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> clicked_changed = (clicked_this_frame != <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">mClickedLastFrame</a>);</div>
-<div class="line"><span class="lineno">   35</span>    <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">mClickedLastFrame</a> = clicked_this_frame;</div>
-<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">if</span> (clicked_changed) {</div>
-<div class="line"><span class="lineno">   37</span>        <span class="comment">// FASTLED_WARN(&quot;Button: &quot; &lt;&lt; mOwner-&gt;name() &lt;&lt; &quot; clicked: &quot; &lt;&lt;</span></div>
-<div class="line"><span class="lineno">   38</span>        <span class="comment">// mOwner-&gt;clicked());</span></div>
-<div class="line"><span class="lineno">   39</span>        <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;mCallbacks.invoke(*<a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>);</div>
-<div class="line"><span class="lineno">   40</span>    }</div>
-<div class="line"><span class="lineno">   41</span>    <span class="comment">// mOwner-&gt;mCallbacks.invoke(*mOwner);</span></div>
-<div class="line"><span class="lineno">   42</span>}</div>
-<div class="ttc" id="astructfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174_html_a4c73bf216be346bcb9dfe3c70ec29174"><div class="ttname"><a href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">fl::UIButton::Listener::mClickedLastFrame</a></div><div class="ttdeci">bool mClickedLastFrame</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00167">ui.h:167</a></div></div>
-<div class="ttc" id="astructfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7_html_a7fda447477577c20e1dcaf479d4dddf7"><div class="ttname"><a href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">fl::UIButton::Listener::mOwner</a></div><div class="ttdeci">UIButton * mOwner</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00165">ui.h:165</a></div></div>
+<div class="line"><span class="lineno">   33</span>    <span class="keywordtype">bool</span> clicked_this_frame = <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;clicked();</div>
+<div class="line"><span class="lineno">   34</span>    </div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// Check the real button if one is attached</span></div>
+<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;mRealButton) {</div>
+<div class="line"><span class="lineno">   37</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;mRealButton-&gt;isPressed()) {</div>
+<div class="line"><span class="lineno">   38</span>            clicked_this_frame = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   39</span>            <span class="comment">//mOwner-&gt;click(); // Update the UI button state</span></div>
+<div class="line"><span class="lineno">   40</span>        }</div>
+<div class="line"><span class="lineno">   41</span>    }</div>
+<div class="line"><span class="lineno">   42</span>    </div>
+<div class="line"><span class="lineno">   43</span>    <span class="keyword">const</span> <span class="keywordtype">bool</span> clicked_changed = (clicked_this_frame != <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">mClickedLastFrame</a>);</div>
+<div class="line"><span class="lineno">   44</span>    <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">mClickedLastFrame</a> = clicked_this_frame;</div>
+<div class="line"><span class="lineno">   45</span>    <span class="keywordflow">if</span> (clicked_changed) {</div>
+<div class="line"><span class="lineno">   46</span>        <span class="comment">// FASTLED_WARN(&quot;Button: &quot; &lt;&lt; mOwner-&gt;name() &lt;&lt; &quot; clicked: &quot; &lt;&lt;</span></div>
+<div class="line"><span class="lineno">   47</span>        <span class="comment">// mOwner-&gt;clicked());</span></div>
+<div class="line"><span class="lineno">   48</span>        <a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>-&gt;mCallbacks.invoke(*<a class="code hl_variable" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">mOwner</a>);</div>
+<div class="line"><span class="lineno">   49</span>    }</div>
+<div class="line"><span class="lineno">   50</span>    <span class="comment">// mOwner-&gt;mCallbacks.invoke(*mOwner);</span></div>
+<div class="line"><span class="lineno">   51</span>}</div>
+<div class="ttc" id="astructfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174_html_a4c73bf216be346bcb9dfe3c70ec29174"><div class="ttname"><a href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a4c73bf216be346bcb9dfe3c70ec29174.html#a4c73bf216be346bcb9dfe3c70ec29174">fl::UIButton::Listener::mClickedLastFrame</a></div><div class="ttdeci">bool mClickedLastFrame</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00181">ui.h:181</a></div></div>
+<div class="ttc" id="astructfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7_html_a7fda447477577c20e1dcaf479d4dddf7"><div class="ttname"><a href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener_a7fda447477577c20e1dcaf479d4dddf7.html#a7fda447477577c20e1dcaf479d4dddf7">fl::UIButton::Listener::mOwner</a></div><div class="ttdeci">UIButton * mOwner</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00179">ui.h:179</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d3b/ui_8h_source.html#l00167">mClickedLastFrame</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00165">mOwner</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d3b/ui_8h_source.html#l00181">mClickedLastFrame</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00179">mOwner</a>.</p>
 
 </div>
 </div>
@@ -151,7 +160,7 @@ $(function(){initNavTree('d2/d68/structfl_1_1_u_i_button_1_1_listener_af4e82eba2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d1d/classfl_1_1_u_i_button.html">UIButton</a></li><li class="navelem"><a class="el" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener.html">Listener</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:40 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

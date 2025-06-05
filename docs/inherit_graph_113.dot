@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Hash\< vec2\< T \> \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d8c/structfl_1_1_hash_3_01vec2_3_01_t_01_4_01_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::FxEngine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d60/classfl_1_1_fx_engine.html",tooltip="Manages and renders multiple visual effects (Fx) for LED strips."];
 }

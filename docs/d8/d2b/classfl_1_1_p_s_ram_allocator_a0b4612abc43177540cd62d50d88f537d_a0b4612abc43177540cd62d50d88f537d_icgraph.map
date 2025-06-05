@@ -1,0 +1,9 @@
+<map id="fl::PSRamAllocator::Alloc" name="fl::PSRamAllocator::Alloc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="243,69,385,109"/>
+<area shape="rect" id="Node000002" href="$d6/d18/classfl_1_1_l_u_t_aba8417b53dedda7cccd39b0c090f6f42.html#aba8417b53dedda7cccd39b0c090f6f42" title=" " alt="" coords="27,5,173,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,68,167,48,168,43,234,63"/>
+<area shape="rect" id="Node000003" href="$d3/df2/classfl_1_1allocator__psram_ab9301e51ccb147671d1f633cc292331f.html#ab9301e51ccb147671d1f633cc292331f" title=" " alt="" coords="29,69,171,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,92,171,92,171,87,229,87"/>
+<area shape="rect" id="Node000004" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="5,133,195,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="234,116,168,136,167,131,232,111"/>
+</map>

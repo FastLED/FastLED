@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ae50080dc92f18317bd58108309643a3a.html#ae50080dc92f18317bd58108309643a3a" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_af4fa9ea8d4da50d2550319ad1266b8a4.html#af4fa9ea8d4da50d2550319ad1266b8a4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="274,-67.5 155,-67.5 155,-37.5 274,-37.5 274,-67.5"/>
 <text text-anchor="start" x="163" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYRasterU8Sparse</text>
 <text text-anchor="middle" x="214.5" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">::bounds</text>
@@ -58,7 +58,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ae1881273a12120a126c55d2585488963.html#ae1881273a12120a126c55d2585488963" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a9badb17a68e18781d2605fcba8786974.html#a9badb17a68e18781d2605fcba8786974" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="429,-67.5 310,-67.5 310,-37.5 429,-37.5 429,-67.5"/>
 <text text-anchor="start" x="318" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYRasterU8Sparse</text>
 <text text-anchor="middle" x="369.5" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">::bounds_pixels</text>

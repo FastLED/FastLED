@@ -1,8 +1,0 @@
-<map id="triggerRipple" name="triggerRipple">
-<area shape="rect" id="Node000001" title=" " alt="" coords="299,5,405,31"/>
-<area shape="rect" id="Node000002" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,21,56,21,56,15,285,15"/>
-<area shape="rect" id="Node000003" href="$dd/d10/_fx_wave2d_8ino_a861547b83e4a6aa092de815fca8219e8.html#a861547b83e4a6aa092de815fca8219e8" title=" " alt="" coords="104,31,251,56"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="286,30,251,35,250,30,285,25"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="90,31,56,25,57,20,91,26"/>
-</map>

@@ -115,45 +115,62 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00107">107</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  107</span>                  {</div>
-<div class="line"><span class="lineno">  108</span>  <span class="comment">// If we&#39;re runing at a low &quot;speed&quot;, some 8-bit artifacts become visible</span></div>
-<div class="line"><span class="lineno">  109</span>  <span class="comment">// from frame-to-frame.  In order to reduce this, we can do some fast data-smoothing.</span></div>
-<div class="line"><span class="lineno">  110</span>  <span class="comment">// The amount of data smoothing we&#39;re doing depends on &quot;speed&quot;.</span></div>
-<div class="line"><span class="lineno">  111</span>  uint8_t dataSmoothing = 0;</div>
-<div class="line"><span class="lineno">  112</span>  <span class="keywordflow">if</span>( <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> &lt; 50) {</div>
-<div class="line"><span class="lineno">  113</span>    dataSmoothing = 200 - (<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> * 4);</div>
-<div class="line"><span class="lineno">  114</span>  }</div>
-<div class="line"><span class="lineno">  115</span>  </div>
-<div class="line"><span class="lineno">  116</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49">MAX_DIMENSION</a>; i++) {</div>
-<div class="line"><span class="lineno">  117</span>    <span class="keywordtype">int</span> ioffset = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * i;</div>
-<div class="line"><span class="lineno">  118</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_define" href="../../d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49">MAX_DIMENSION</a>; j++) {</div>
-<div class="line"><span class="lineno">  119</span>      <span class="keywordtype">int</span> joffset = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * j;</div>
-<div class="line"><span class="lineno">  120</span>      </div>
-<div class="line"><span class="lineno">  121</span>      uint8_t data = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> + ioffset,<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> + joffset,<a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>);</div>
-<div class="line"><span class="lineno">  122</span> </div>
-<div class="line"><span class="lineno">  123</span>      <span class="comment">// The range of the inoise8 function is roughly 16-238.</span></div>
-<div class="line"><span class="lineno">  124</span>      <span class="comment">// These two operations expand those values out to roughly 0..255</span></div>
-<div class="line"><span class="lineno">  125</span>      <span class="comment">// You can comment them out if you want the raw noise data.</span></div>
-<div class="line"><span class="lineno">  126</span>      data = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>(data,16);</div>
-<div class="line"><span class="lineno">  127</span>      data = <a class="code hl_function" href="../../d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5">qadd8</a>(data,<a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(data,39));</div>
-<div class="line"><span class="lineno">  128</span> </div>
-<div class="line"><span class="lineno">  129</span>      <span class="keywordflow">if</span>( dataSmoothing ) {</div>
-<div class="line"><span class="lineno">  130</span>        uint8_t olddata = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a>[i][j];</div>
-<div class="line"><span class="lineno">  131</span>        uint8_t newdata = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( olddata, dataSmoothing) + <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( data, 256 - dataSmoothing);</div>
-<div class="line"><span class="lineno">  132</span>        data = newdata;</div>
-<div class="line"><span class="lineno">  133</span>      }</div>
-<div class="line"><span class="lineno">  134</span>      </div>
-<div class="line"><span class="lineno">  135</span>      <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a>[i][j] = data;</div>
-<div class="line"><span class="lineno">  136</span>    }</div>
-<div class="line"><span class="lineno">  137</span>  }</div>
-<div class="line"><span class="lineno">  138</span>  </div>
-<div class="line"><span class="lineno">  139</span>  <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> += <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>;</div>
-<div class="line"><span class="lineno">  140</span>  </div>
-<div class="line"><span class="lineno">  141</span>  <span class="comment">// apply slow drift to X and Y, just for visual variation.</span></div>
-<div class="line"><span class="lineno">  142</span>  <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> += <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> / 8;</div>
-<div class="line"><span class="lineno">  143</span>  <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> -= <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> / 16;</div>
-<div class="line"><span class="lineno">  144</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00143">143</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  143</span>                  {</div>
+<div class="line"><span class="lineno">  144</span>  <span class="comment">// If we&#39;re running at a low &quot;speed&quot;, some 8-bit artifacts become visible</span></div>
+<div class="line"><span class="lineno">  145</span>  <span class="comment">// from frame-to-frame.  In order to reduce this, we can do some fast data-smoothing.</span></div>
+<div class="line"><span class="lineno">  146</span>  <span class="comment">// The amount of data smoothing we&#39;re doing depends on &quot;speed&quot;.</span></div>
+<div class="line"><span class="lineno">  147</span>  uint8_t dataSmoothing = 0;</div>
+<div class="line"><span class="lineno">  148</span>  <span class="keywordflow">if</span>( <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> &lt; 50) {</div>
+<div class="line"><span class="lineno">  149</span>    <span class="comment">// At lower speeds, apply more smoothing</span></div>
+<div class="line"><span class="lineno">  150</span>    <span class="comment">// This formula creates more smoothing at lower speeds:</span></div>
+<div class="line"><span class="lineno">  151</span>    <span class="comment">// speed=10 → smoothing=160, speed=30 → smoothing=80</span></div>
+<div class="line"><span class="lineno">  152</span>    dataSmoothing = 200 - (<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> * 4);</div>
+<div class="line"><span class="lineno">  153</span>  }</div>
+<div class="line"><span class="lineno">  154</span>  </div>
+<div class="line"><span class="lineno">  155</span>  <span class="comment">// Loop through each pixel in our noise array</span></div>
+<div class="line"><span class="lineno">  156</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49">MAX_DIMENSION</a>; i++) {</div>
+<div class="line"><span class="lineno">  157</span>    <span class="comment">// Calculate the offset for this pixel in the x dimension</span></div>
+<div class="line"><span class="lineno">  158</span>    <span class="keywordtype">int</span> ioffset = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * i;</div>
+<div class="line"><span class="lineno">  159</span>    </div>
+<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_define" href="../../d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49">MAX_DIMENSION</a>; j++) {</div>
+<div class="line"><span class="lineno">  161</span>      <span class="comment">// Calculate the offset for this pixel in the y dimension</span></div>
+<div class="line"><span class="lineno">  162</span>      <span class="keywordtype">int</span> joffset = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * j;</div>
+<div class="line"><span class="lineno">  163</span>      </div>
+<div class="line"><span class="lineno">  164</span>      <span class="comment">// Generate the noise value for this pixel using 3D Perlin noise</span></div>
+<div class="line"><span class="lineno">  165</span>      <span class="comment">// The noise function takes x, y, and z (time) coordinates</span></div>
+<div class="line"><span class="lineno">  166</span>      uint8_t data = <a class="code hl_function" href="../../d8/df9/group___noise_generation_gaa521ccca6038d7b5e881fe2e8f35d3bc.html#gaa521ccca6038d7b5e881fe2e8f35d3bc">inoise8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> + ioffset, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> + joffset, <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a>);</div>
+<div class="line"><span class="lineno">  167</span> </div>
+<div class="line"><span class="lineno">  168</span>      <span class="comment">// The range of the inoise8 function is roughly 16-238.</span></div>
+<div class="line"><span class="lineno">  169</span>      <span class="comment">// These two operations expand those values out to roughly 0..255</span></div>
+<div class="line"><span class="lineno">  170</span>      <span class="comment">// You can comment them out if you want the raw noise data.</span></div>
+<div class="line"><span class="lineno">  171</span>      data = <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>(data, 16);                <span class="comment">// Subtract 16 (with underflow protection)</span></div>
+<div class="line"><span class="lineno">  172</span>      data = <a class="code hl_function" href="../../d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5">qadd8</a>(data, <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(data, 39));  <span class="comment">// Add a scaled version of the data to itself</span></div>
+<div class="line"><span class="lineno">  173</span> </div>
+<div class="line"><span class="lineno">  174</span>      <span class="comment">// Apply data smoothing if enabled</span></div>
+<div class="line"><span class="lineno">  175</span>      <span class="keywordflow">if</span>( dataSmoothing ) {</div>
+<div class="line"><span class="lineno">  176</span>        uint8_t olddata = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a>[i][j];       <span class="comment">// Get the previous frame&#39;s value</span></div>
+<div class="line"><span class="lineno">  177</span>        </div>
+<div class="line"><span class="lineno">  178</span>        <span class="comment">// Blend between old and new data based on smoothing amount</span></div>
+<div class="line"><span class="lineno">  179</span>        <span class="comment">// Higher dataSmoothing = more of the old value is kept</span></div>
+<div class="line"><span class="lineno">  180</span>        uint8_t newdata = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(olddata, dataSmoothing) + </div>
+<div class="line"><span class="lineno">  181</span>                          <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(data, 256 - dataSmoothing);</div>
+<div class="line"><span class="lineno">  182</span>        data = newdata;</div>
+<div class="line"><span class="lineno">  183</span>      }</div>
+<div class="line"><span class="lineno">  184</span>      </div>
+<div class="line"><span class="lineno">  185</span>      <span class="comment">// Store the final noise value in our array</span></div>
+<div class="line"><span class="lineno">  186</span>      <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad">noise</a>[i][j] = data;</div>
+<div class="line"><span class="lineno">  187</span>    }</div>
+<div class="line"><span class="lineno">  188</span>  }</div>
+<div class="line"><span class="lineno">  189</span>  </div>
+<div class="line"><span class="lineno">  190</span>  <span class="comment">// Increment z to move through the noise space over time</span></div>
+<div class="line"><span class="lineno">  191</span>  <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> += <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>;</div>
+<div class="line"><span class="lineno">  192</span>  </div>
+<div class="line"><span class="lineno">  193</span>  <span class="comment">// Apply slow drift to X and Y, just for visual variation</span></div>
+<div class="line"><span class="lineno">  194</span>  <span class="comment">// This creates a gentle shifting of the entire pattern</span></div>
+<div class="line"><span class="lineno">  195</span>  <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> += <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> / 8;   <span class="comment">// X drifts at 1/8 the speed of z</span></div>
+<div class="line"><span class="lineno">  196</span>  <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> -= <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a> / 16;  <span class="comment">// Y drifts at 1/16 the speed of z in the opposite direction</span></div>
+<div class="line"><span class="lineno">  197</span>}</div>
 <div class="ttc" id="a_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00072">Audio.ino:72</a></div></div>
 <div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
 <div class="ttc" id="a_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14_html_a5035fda839d1069fa13897b1739f5a14"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a></div><div class="ttdeci">UISlider speed(&quot;Speed&quot;, 1.0f, -20.0f, 20.0f, 0.01f)</div></div>
@@ -168,7 +185,7 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00590">inoise8()</a>, <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00087">MAX_DIMENSION</a>, <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00088">noise</a>, <a class="el" href="../../d5/dd1/math8_8h_source.html#l00031">qadd8()</a>, <a class="el" href="../../d5/dd1/math8_8h_source.html#l00103">qsub8()</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, <a class="el" href="../../db/d91/scale8_8h_source.html#l00040">scale8()</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a5035fda839d1069fa13897b1739f5a14.html#a5035fda839d1069fa13897b1739f5a14">speed</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00084">z</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00182">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00248">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -193,7 +210,7 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_9855228c8cabbd40154e79ac1a40dc7f.html">NoisePlusPalette</a></li><li class="navelem"><a class="el" href="../../da/dda/_noise_plus_palette_8ino.html">NoisePlusPalette.ino</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

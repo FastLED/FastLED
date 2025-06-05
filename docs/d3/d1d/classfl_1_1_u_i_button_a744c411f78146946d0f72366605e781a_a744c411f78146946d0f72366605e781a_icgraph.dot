@@ -8,5 +8,7 @@ digraph "fl::UIButton::clicked"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::UIButton::clicked",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UIButton::operator bool",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/classfl_1_1_u_i_button_a968a0bb86c410de20a29d1fe10a13f9b.html#a968a0bb86c410de20a29d1fe10a13f9b",tooltip=" "];
+  Node2 [id="Node000002",label="fl::UIButton::onClicked",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/classfl_1_1_u_i_button_ab71c901c2322aa2323f75271e98bd873.html#ab71c901c2322aa2323f75271e98bd873",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UIButton::operator bool",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/classfl_1_1_u_i_button_a968a0bb86c410de20a29d1fe10a13f9b.html#a968a0bb86c410de20a29d1fe10a13f9b",tooltip=" "];
 }

@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="5,5,156,31"/>
+<area shape="rect" id="Node000000" href="$d2/d4a/classfl_1_1_time_alpha.html" title=" " alt="" coords="5,31,113,56"/>
+<area shape="rect" id="Node000001" href="$d8/d62/classfl_1_1_time_clamped_transition.html" title=" " alt="" coords="161,5,353,31"/>
+<area shape="poly" id="edge223_Node000000_Node000001" title=" " alt="" coords="126,32,161,28,162,33,127,37"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp.html" title=" " alt="" coords="203,55,312,80"/>
+<area shape="poly" id="edge224_Node000000_Node000002" title=" " alt="" coords="127,49,203,58,202,63,127,54"/>
 </map>

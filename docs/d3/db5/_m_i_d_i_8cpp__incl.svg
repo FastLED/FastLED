@@ -120,37 +120,37 @@
 </a>
 </g>
 </g>
-<!-- Node28 -->
-<g id="Node000028" class="node">
-<title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../db/dff/serial_m_i_d_i_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
+<!-- Node32 -->
+<g id="Node000032" class="node">
+<title>Node32</title>
+<g id="a_Node000032"><a xlink:href="../../db/dff/serial_m_i_d_i_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
 <polygon fill="white" stroke="#666666" points="407.93,-74 332.93,-74 332.93,-55 407.93,-55 407.93,-74"/>
 <text text-anchor="middle" x="370.43" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">serialMIDI.h</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node28 -->
-<g id="edge13_Node000002_Node000028" class="edge">
-<title>Node2&#45;&gt;Node28</title>
-<g id="a_edge13_Node000002_Node000028"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node32 -->
+<g id="edge13_Node000002_Node000032" class="edge">
+<title>Node2&#45;&gt;Node32</title>
+<g id="a_edge13_Node000002_Node000032"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M256.71,-169.77C281.96,-164.7 321.13,-153.3 345.43,-129 357.59,-116.84 364,-98.04 367.27,-84.06"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="370.73,-84.58 369.26,-74.09 363.87,-83.2 370.73,-84.58"/>
 </a>
 </g>
 </g>
-<!-- Node29 -->
-<g id="Node000029" class="node">
-<title>Node29</title>
-<g id="a_Node000029"><a xlink:href="../../de/d99/_m_i_d_i_8hpp.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Inline implementations.">
+<!-- Node33 -->
+<g id="Node000033" class="node">
+<title>Node33</title>
+<g id="a_Node000033"><a xlink:href="../../de/d99/_m_i_d_i_8hpp.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Inline implementations.">
 <polygon fill="white" stroke="#666666" points="452.43,-129 392.43,-129 392.43,-110 452.43,-110 452.43,-129"/>
 <text text-anchor="middle" x="422.43" y="-117" font-family="Helvetica,sans-Serif" font-size="10.00">MIDI.hpp</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node29 -->
-<g id="edge15_Node000002_Node000029" class="edge">
-<title>Node2&#45;&gt;Node29</title>
-<g id="a_edge15_Node000002_Node000029"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node33 -->
+<g id="edge15_Node000002_Node000033" class="edge">
+<title>Node2&#45;&gt;Node33</title>
+<g id="a_edge15_Node000002_Node000033"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M256.49,-166.79C288.21,-157.94 344.43,-142.26 382.55,-131.62"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="383.61,-134.96 392.3,-128.9 381.73,-128.22 383.61,-134.96"/>
 </a>
@@ -246,10 +246,10 @@
 </a>
 </g>
 </g>
-<!-- Node28&#45;&gt;Node4 -->
-<g id="edge14_Node000028_Node000004" class="edge">
-<title>Node28&#45;&gt;Node4</title>
-<g id="a_edge14_Node000028_Node000004"><a xlink:title=" ">
+<!-- Node32&#45;&gt;Node4 -->
+<g id="edge14_Node000032_Node000004" class="edge">
+<title>Node32&#45;&gt;Node4</title>
+<g id="a_edge14_Node000032_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M350.02,-54.98C329.41,-46.38 297.32,-32.99 273.73,-23.15"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="274.78,-19.79 264.2,-19.17 272.08,-26.25 274.78,-19.79"/>
 </a>

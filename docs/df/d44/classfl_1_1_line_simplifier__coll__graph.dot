@@ -24,12 +24,14 @@ digraph "fl::LineSimplifier&lt; NumberT &gt;"
   Node12 -> Node7 [id="edge8_Node000007_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mHeap",fontcolor="grey" ];
   Node12 [id="Node000012",label="fl::HeapVector\< fl\l::Pair\< int, int \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node13 -> Node12 [id="edge9_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mArray",fontcolor="grey" ];
-  Node13 [id="Node000013",label="fl::scoped_array\< fl\l::Pair\< int, int \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
-  Node21 -> Node12 [id="edge10_Node000012_Node000021",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::Pair\< int, int \> \>",fontcolor="grey" ];
-  Node21 [id="Node000021",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
-  Node22 -> Node7 [id="edge11_Node000007_Node000022",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::Pair\< int, int\l \>, 64 \>",fontcolor="grey" ];
-  Node22 [id="Node000022",label="fl::InlinedVector\<\l T, INLINED_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector.html",tooltip=" "];
-  Node23 -> Node22 [id="edge12_Node000022_Node000023",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mFixed",fontcolor="grey" ];
-  Node23 [id="Node000023",label="fl::FixedVector\< T,\l INLINED_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d73/classfl_1_1_fixed_vector.html",tooltip=" "];
-  Node11 -> Node23 [id="edge13_Node000023_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T, INLINED_SIZE \>",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::Pair\< int, int \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/def/structfl_1_1_pair.html",tooltip=" "];
+  Node17 -> Node12 [id="edge10_Node000012_Node000017",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAlloc",fontcolor="grey" ];
+  Node17 [id="Node000017",label="fl::allocator\< fl::\lPair\< int, int \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/dcd/classfl_1_1allocator.html",tooltip=" "];
+  Node19 -> Node12 [id="edge11_Node000012_Node000019",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::Pair\< int, int \> \>",fontcolor="grey" ];
+  Node19 [id="Node000019",label="fl::HeapVector\< T,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node20 -> Node7 [id="edge12_Node000007_Node000020",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::Pair\< int, int\l \>, 64 \>",fontcolor="grey" ];
+  Node20 [id="Node000020",label="fl::InlinedVector\<\l T, INLINED_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d18/classfl_1_1_inlined_vector.html",tooltip=" "];
+  Node21 -> Node20 [id="edge13_Node000020_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mFixed",fontcolor="grey" ];
+  Node21 [id="Node000021",label="fl::FixedVector\< T,\l INLINED_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d73/classfl_1_1_fixed_vector.html",tooltip=" "];
+  Node11 -> Node21 [id="edge14_Node000021_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T, INLINED_SIZE \>",fontcolor="grey" ];
 }

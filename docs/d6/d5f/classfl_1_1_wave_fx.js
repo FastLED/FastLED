@@ -14,6 +14,7 @@ var classfl_1_1_wave_fx =
     [ "setHalfDuplex", "d6/d5f/classfl_1_1_wave_fx_a369422ca1de64829404d4a42b012479c.html#a369422ca1de64829404d4a42b012479c", null ],
     [ "setSpeed", "d6/d5f/classfl_1_1_wave_fx_a3d8f396b7d4f31a8c7a9c637fd7da6d0.html#a3d8f396b7d4f31a8c7a9c637fd7da6d0", null ],
     [ "setSuperSample", "d6/d5f/classfl_1_1_wave_fx_a7a1cecf1d1eed42db31e5a44b9b91010.html#a7a1cecf1d1eed42db31e5a44b9b91010", null ],
+    [ "setXCylindrical", "d6/d5f/classfl_1_1_wave_fx_adcc62937b64c442f328b89f5c9529a30.html#adcc62937b64c442f328b89f5c9529a30", null ],
     [ "update", "d6/d5f/classfl_1_1_wave_fx_a2ffae4cadd9548d1a9e127c9a95a42fd.html#a2ffae4cadd9548d1a9e127c9a95a42fd", null ],
     [ "mAutoUpdates", "d6/d5f/classfl_1_1_wave_fx_ad294cd3059b32df4c6d60f7b5627a8cb.html#ad294cd3059b32df4c6d60f7b5627a8cb", null ],
     [ "mCrgbMap", "d6/d5f/classfl_1_1_wave_fx_a74a5fbc02845853f595005992ac6758c.html#a74a5fbc02845853f595005992ac6758c", null ],

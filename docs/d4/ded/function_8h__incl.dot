@@ -19,13 +19,18 @@ digraph "fl/function.h"
   Node6 [id="Node000006",label="stdint.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
   Node6 -> Node3 [id="edge7_Node000006_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node6 [id="edge8_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node5 -> Node4 [id="edge9_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node7 [id="edge10_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl/template_magic.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
-  Node7 -> Node8 [id="edge11_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl/type_traits.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d63/type__traits_8h.html",tooltip=" "];
-  Node8 -> Node3 [id="edge12_Node000008_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node8 -> Node6 [id="edge13_Node000008_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node8 -> Node4 [id="edge14_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node7 [id="edge15_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node7 [id="edge9_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/allocator.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/da9/allocator_8h.html",tooltip=" "];
+  Node7 -> Node3 [id="edge10_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node22 [id="edge11_Node000007_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="inplacenew.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d36/inplacenew_8h.html",tooltip=" "];
+  Node22 -> Node3 [id="edge12_Node000022_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node22 -> Node6 [id="edge13_Node000022_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node22 [id="edge14_Node000005_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node4 [id="edge15_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node24 [id="edge16_Node000005_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl/deprecated.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dce/deprecated_8h.html",tooltip=" "];
+  Node2 -> Node17 [id="edge17_Node000002_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/template_magic.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
+  Node1 -> Node17 [id="edge18_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
 }

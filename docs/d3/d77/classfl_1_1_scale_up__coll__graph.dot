@@ -15,13 +15,9 @@ digraph "fl::ScaleUp"
   Node11 -> Node2 [id="edge4_Node000002_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mXyMap",fontcolor="grey" ];
   Node11 [id="Node000011",label="fl::XYMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map.html",tooltip=" "];
   Node12 -> Node1 [id="edge5_Node000001_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSurface",fontcolor="grey" ];
-  Node12 [id="Node000012",label="fl::scoped_array\< CRGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
-  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" arr_",fontcolor="grey" ];
-  Node13 [id="Node000013",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
-  Node14 -> Node12 [id="edge7_Node000012_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
-  Node14 [id="Node000014",label="fl::ArrayDeleter\< CRGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
-  Node15 -> Node14 [id="edge8_Node000014_Node000015",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< CRGB \>",fontcolor="grey" ];
-  Node15 [id="Node000015",label="fl::ArrayDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
-  Node16 -> Node12 [id="edge9_Node000012_Node000016",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< CRGB \>",fontcolor="grey" ];
-  Node16 [id="Node000016",label="fl::scoped_array\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node12 [id="Node000012",label="fl::HeapVector\< T,\l Allocator \>\< CRGB,\l fl::allocator_psram\l\< CRGB \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node13 -> Node12 [id="edge6_Node000012_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< CRGB, fl::allocator\l_psram\< CRGB \> \>",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::HeapVector\< T,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node14 -> Node13 [id="edge7_Node000013_Node000014",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T, Allocator \>",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::HeapVector\< T,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
 }

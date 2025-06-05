@@ -158,78 +158,78 @@
 </a>
 </g>
 </g>
-<!-- Node28 -->
-<g id="Node000028" class="node">
-<title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
+<!-- Node25 -->
+<g id="Node000025" class="node">
+<title>Node25</title>
+<g id="a_Node000025"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="809,-159.5 663,-159.5 663,-129.5 809,-129.5 809,-159.5"/>
 <text text-anchor="start" x="671" y="-147.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PointerDeleter</text>
 <text text-anchor="middle" x="736" y="-136.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::FastLEDANIMartRIX &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node28&#45;&gt;Node12 -->
-<g id="edge9_Node000012_Node000028" class="edge">
-<title>Node28&#45;&gt;Node12</title>
-<g id="a_edge9_Node000012_Node000028"><a xlink:title=" ">
+<!-- Node25&#45;&gt;Node12 -->
+<g id="edge9_Node000012_Node000025" class="edge">
+<title>Node25&#45;&gt;Node12</title>
+<g id="a_edge9_Node000012_Node000025"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M819.12,-133.13C861.51,-126.5 913.87,-117.15 960,-105.5 973.08,-102.2 987.09,-97.83 999.73,-93.57"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="818.48,-129.68 809.13,-134.67 819.54,-136.6 818.48,-129.68"/>
 </a>
 </g>
 <text text-anchor="middle" x="893.5" y="-134.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> deleter_</text>
 </g>
-<!-- Node29 -->
-<g id="Node000029" class="node">
-<title>Node29</title>
-<g id="a_Node000029"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
+<!-- Node26 -->
+<g id="Node000026" class="node">
+<title>Node26</title>
+<g id="a_Node000026"><a xlink:href="../../d8/d3d/structfl_1_1_pointer_deleter.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="494,-154 366,-154 366,-135 494,-135 494,-154"/>
 <text text-anchor="middle" x="430" y="-142" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PointerDeleter&lt; T &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node29&#45;&gt;Node28 -->
-<g id="edge10_Node000028_Node000029" class="edge">
-<title>Node29&#45;&gt;Node28</title>
-<g id="a_edge10_Node000028_Node000029"><a xlink:title=" ">
+<!-- Node26&#45;&gt;Node25 -->
+<g id="edge10_Node000025_Node000026" class="edge">
+<title>Node26&#45;&gt;Node25</title>
+<g id="a_edge10_Node000025_Node000026"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M504.39,-144.5C552.5,-144.5 615.09,-144.5 662.93,-144.5"/>
 <polygon fill="orange" stroke="orange" points="504.36,-141 494.36,-144.5 504.36,-148 504.36,-141"/>
 </a>
 </g>
 <text text-anchor="middle" x="578.5" y="-147.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::FastLEDANIMartRIX &gt;</text>
 </g>
-<!-- Node30 -->
-<g id="Node000030" class="node">
-<title>Node30</title>
-<g id="a_Node000030"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr.html" target="_top" xlink:title=" ">
+<!-- Node27 -->
+<g id="Node000027" class="node">
+<title>Node27</title>
+<g id="a_Node000027"><a xlink:href="../../df/d0b/classfl_1_1scoped__ptr.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="787,-111.5 685,-111.5 685,-81.5 787,-81.5 787,-111.5"/>
 <text text-anchor="start" x="693" y="-99.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::scoped_ptr&lt; T,</text>
 <text text-anchor="middle" x="736" y="-88.5" font-family="Helvetica,sans-Serif" font-size="10.00"> Deleter &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node30&#45;&gt;Node12 -->
-<g id="edge11_Node000012_Node000030" class="edge">
-<title>Node30&#45;&gt;Node12</title>
-<g id="a_edge11_Node000012_Node000030"><a xlink:title=" ">
+<!-- Node27&#45;&gt;Node12 -->
+<g id="edge11_Node000012_Node000027" class="edge">
+<title>Node27&#45;&gt;Node12</title>
+<g id="a_edge11_Node000012_Node000027"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M797.32,-92.93C849.52,-89.84 924.76,-85.38 977.79,-82.24"/>
 <polygon fill="orange" stroke="orange" points="796.98,-89.44 787.2,-93.53 797.39,-96.43 796.98,-89.44"/>
 </a>
 </g>
 <text text-anchor="middle" x="893.5" y="-93.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; fl::FastLEDANIMartRIX &gt;</text>
 </g>
-<!-- Node31 -->
-<g id="Node000031" class="node">
-<title>Node31</title>
-<g id="a_Node000031"><a xlink:href="../../d7/d82/struct_c_r_g_b.html" target="_top" xlink:title="Representation of an RGB pixel (Red, Green, Blue)">
+<!-- Node28 -->
+<g id="Node000028" class="node">
+<title>Node28</title>
+<g id="a_Node000028"><a xlink:href="../../d7/d82/struct_c_r_g_b.html" target="_top" xlink:title="Representation of an RGB pixel (Red, Green, Blue)">
 <polygon fill="white" stroke="#666666" points="301.5,-19 257.5,-19 257.5,0 301.5,0 301.5,-19"/>
 <text text-anchor="middle" x="279.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB</text>
 </a>
 </g>
 </g>
-<!-- Node31&#45;&gt;Node1 -->
-<g id="edge12_Node000001_Node000031" class="edge">
-<title>Node31&#45;&gt;Node1</title>
-<g id="a_edge12_Node000001_Node000031"><a xlink:title=" ">
+<!-- Node28&#45;&gt;Node1 -->
+<g id="edge12_Node000001_Node000028" class="edge">
+<title>Node28&#45;&gt;Node1</title>
+<g id="a_edge12_Node000001_Node000028"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M311.91,-12.25C334.67,-14.24 365.58,-16.95 389.93,-19.08"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="312.04,-8.75 301.78,-11.36 311.43,-15.72 312.04,-8.75"/>
 </a>

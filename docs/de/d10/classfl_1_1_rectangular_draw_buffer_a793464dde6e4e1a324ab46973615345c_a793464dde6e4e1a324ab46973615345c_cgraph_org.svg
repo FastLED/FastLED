@@ -21,9 +21,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d1/de2/classfl_1_1_large_block_allocator_ad856621afa5c3bb9e8d417157f2c3d38.html#ad856621afa5c3bb9e8d417157f2c3d38" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="312,-163.5 186,-163.5 186,-133.5 312,-133.5 312,-163.5"/>
-<text text-anchor="start" x="194" y="-151.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LargeBlockAllocator</text>
+<g id="a_Node000002"><a xlink:href="../../d8/d2b/classfl_1_1_p_s_ram_allocator_a0b4612abc43177540cd62d50d88f537d.html#a0b4612abc43177540cd62d50d88f537d" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="302.5,-163.5 195.5,-163.5 195.5,-133.5 302.5,-133.5 302.5,-163.5"/>
+<text text-anchor="start" x="203.5" y="-151.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PSRamAllocator</text>
 <text text-anchor="middle" x="249" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">::Alloc</text>
 </a>
 </g>
@@ -40,9 +40,9 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d1/de2/classfl_1_1_large_block_allocator_ad9d7253fbb523baa27ea1d0d406aacc1.html#ad9d7253fbb523baa27ea1d0d406aacc1" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="312,-115.5 186,-115.5 186,-85.5 312,-85.5 312,-115.5"/>
-<text text-anchor="start" x="194" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LargeBlockAllocator</text>
+<g id="a_Node000004"><a xlink:href="../../d8/d2b/classfl_1_1_p_s_ram_allocator_aa490cf21dead05d3f4f8bfebc3fcf5ae.html#aa490cf21dead05d3f4f8bfebc3fcf5ae" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="302.5,-115.5 195.5,-115.5 195.5,-85.5 302.5,-85.5 302.5,-115.5"/>
+<text text-anchor="start" x="203.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PSRamAllocator</text>
 <text text-anchor="middle" x="249" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">::Free</text>
 </a>
 </g>
@@ -51,8 +51,8 @@
 <g id="edge3_Node000001_Node000004" class="edge">
 <title>Node1&#45;&gt;Node4</title>
 <g id="a_edge3_Node000001_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M142.07,-86.05C153.15,-87.57 164.63,-89.13 175.76,-90.65"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="175.48,-94.14 185.86,-92.03 176.43,-87.21 175.48,-94.14"/>
+<path fill="none" stroke="#63b8ff" d="M142.07,-86.05C156.34,-88 171.26,-90.04 185.26,-91.94"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="184.88,-95.43 195.26,-93.31 185.83,-88.49 184.88,-95.43"/>
 </a>
 </g>
 </g>
@@ -96,9 +96,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_abbfba8ffcb35eb85959e52bc168242b2.html#abbfba8ffcb35eb85959e52bc168242b2" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="488,-158 366,-158 366,-139 488,-139 488,-158"/>
-<text text-anchor="middle" x="427" y="-146" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LargeBlockAllocate</text>
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a089a2f21a67e7f0dfa65f111a45d4b6d.html#a089a2f21a67e7f0dfa65f111a45d4b6d" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="478.5,-158 375.5,-158 375.5,-139 478.5,-139 478.5,-158"/>
+<text text-anchor="middle" x="427" y="-146" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PSRamAllocate</text>
 </a>
 </g>
 </g>
@@ -106,17 +106,17 @@
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M312.05,-148.5C326.15,-148.5 341.22,-148.5 355.63,-148.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="355.99,-152 365.99,-148.5 355.99,-145 355.99,-152"/>
+<path fill="none" stroke="#63b8ff" d="M302.81,-148.5C322.47,-148.5 344.94,-148.5 365.26,-148.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="365.35,-152 375.35,-148.5 365.35,-145 365.35,-152"/>
 </a>
 </g>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_ab2b85462a826ee1c562964e9639eaa76.html#ab2b85462a826ee1c562964e9639eaa76" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="494.5,-110 359.5,-110 359.5,-91 494.5,-91 494.5,-110"/>
-<text text-anchor="middle" x="427" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LargeBlockDeallocate</text>
+<g id="a_Node000005"><a xlink:href="../../d4/d36/namespacefl_a927c08fb5d28927acc0e318fabf79985.html#a927c08fb5d28927acc0e318fabf79985" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="485,-110 369,-110 369,-91 485,-91 485,-110"/>
+<text text-anchor="middle" x="427" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PSRamDeallocate</text>
 </a>
 </g>
 </g>
@@ -124,8 +124,8 @@
 <g id="edge4_Node000004_Node000005" class="edge">
 <title>Node4&#45;&gt;Node5</title>
 <g id="a_edge4_Node000004_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M312.05,-100.5C324.04,-100.5 336.72,-100.5 349.12,-100.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="349.43,-104 359.43,-100.5 349.43,-97 349.43,-104"/>
+<path fill="none" stroke="#63b8ff" d="M302.81,-100.5C320.4,-100.5 340.25,-100.5 358.79,-100.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="358.94,-104 368.94,-100.5 358.94,-97 358.94,-104"/>
 </a>
 </g>
 </g>

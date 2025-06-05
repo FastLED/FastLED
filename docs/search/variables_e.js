@@ -13,7 +13,7 @@ var searchData=
   ['nmax_10',['nmax',['../d6/de8/noise_8cpp_a96f7525b7d6a9b4b64fe179dd064b104.html#a96f7525b7d6a9b4b64fe179dd064b104',1,'noise.cpp']]],
   ['nmin_11',['nmin',['../d6/de8/noise_8cpp_a2eec13b2f7aac3071397e40975c82e48.html#a2eec13b2f7aac3071397e40975c82e48',1,'noise.cpp']]],
   ['nodeconnections_12',['nodeConnections',['../de/d0c/mapping_8h_a917538d03ac7170879f016d8baea29d5.html#a917538d03ac7170879f016d8baea29d5',1,'mapping.h']]],
-  ['noise_13',['noise',['../d9/d41/classfl_1_1_noise_palette_a65f58d503ef7a59546374b9fcd989b88.html#a65f58d503ef7a59546374b9fcd989b88',1,'fl::NoisePalette::noise'],['../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad',1,'noise:&#160;Fire2023.ino'],['../d6/d43/funky_8cpp_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368',1,'noise:&#160;funky.cpp'],['../d6/d9d/_noise_8ino_ab1daa3b4200ab5e038070a3ec84685c5.html#ab1daa3b4200ab5e038070a3ec84685c5',1,'noise:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368',1,'noise:&#160;NoisePlusPalette.ino'],['../da/db6/_smart_matrix_8ino_ab4dc37562a61e47e67eba7dd61457144.html#ab4dc37562a61e47e67eba7dd61457144',1,'noise:&#160;SmartMatrix.ino']]],
+  ['noise_13',['noise',['../d9/d41/classfl_1_1_noise_palette_a2e07cb33272cef9bc671816bf3671b93.html#a2e07cb33272cef9bc671816bf3671b93',1,'fl::NoisePalette::noise'],['../d8/d2c/_fire2023_8ino_a0b46167016d5b2cd0c800213002e1fad.html#a0b46167016d5b2cd0c800213002e1fad',1,'noise:&#160;Fire2023.ino'],['../d6/d43/funky_8cpp_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368',1,'noise:&#160;funky.cpp'],['../d6/d9d/_noise_8ino_ab1daa3b4200ab5e038070a3ec84685c5.html#ab1daa3b4200ab5e038070a3ec84685c5',1,'noise:&#160;Noise.ino'],['../da/dda/_noise_plus_palette_8ino_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368',1,'noise:&#160;NoisePlusPalette.ino'],['../da/db6/_smart_matrix_8ino_ab4dc37562a61e47e67eba7dd61457144.html#ab4dc37562a61e47e67eba7dd61457144',1,'noise:&#160;SmartMatrix.ino']]],
   ['noise2_14',['noise2',['../d8/d2c/_fire2023_8ino_a78ba8011caa71657ddf95aa0f52df0d2.html#a78ba8011caa71657ddf95aa0f52df0d2',1,'noise2:&#160;Fire2023.ino'],['../d6/d43/funky_8cpp_a7bb9f03fc0a38a5096676b60df0ce548.html#a7bb9f03fc0a38a5096676b60df0ce548',1,'noise2:&#160;funky.cpp']]],
   ['noise_5fangle_15',['noise_angle',['../d6/d74/namespaceanimartrix__detail.html#ac5dae83b69be4d1dfa9b43332ef8267c',1,'animartrix_detail::modulators']]],
   ['noise_5fmax_16',['noise_max',['../d6/dda/_fast_l_e_d_8cpp_abaa6fdee895d1130d5d498bd37f7eab0.html#abaa6fdee895d1130d5d498bd37f7eab0',1,'FastLED.cpp']]],
@@ -26,7 +26,7 @@ var searchData=
   ['now_23',['now',['../d2/d32/structfl_1_1___draw_context_a246bf7c34a6010905fbb34364003c166.html#a246bf7c34a6010905fbb34364003c166',1,'fl::_DrawContext']]],
   ['npos_24',['npos',['../dc/de6/classfl_1_1_hash_map_a12ea90946e7a2c70d34c8f47e2270d80.html#a12ea90946e7a2c70d34c8f47e2270d80',1,'fl::HashMap']]],
   ['num_5fcomponents_25',['num_components',['../d4/d88/led__strip__types_8h.html#a44f72facd9eafbec1abdea93a796bece',1,'led_color_component_format_t::format_layout']]],
-  ['num_5fleds_26',['num_leds',['../dd/d43/_festival_stick_8ino.html#a8e4ebab15ec8272a42f677477408acd4',1,'corkscrew_args']]],
+  ['num_5fleds_26',['num_leds',['../d7/da1/old_8h.html#a8e4ebab15ec8272a42f677477408acd4',1,'corkscrew_args']]],
   ['num_5fx_27',['num_x',['../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_adfa3311d69a20c54ce83fde78f6b45e2.html#adfa3311d69a20c54ce83fde78f6b45e2',1,'animartrix_detail::ANIMartRIX']]],
   ['num_5fy_28',['num_y',['../df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x_ad47da14450499a276b3d0ef12188e032.html#ad47da14450499a276b3d0ef12188e032',1,'animartrix_detail::ANIMartRIX']]],
   ['numberofautopulsetypes_29',['numberOfAutoPulseTypes',['../d1/ddb/_chromancer_8ino_af1af6039bd9e7e2b7dab618c911a82cd.html#af1af6039bd9e7e2b7dab618c911a82cd',1,'Chromancer.ino']]],
@@ -35,6 +35,7 @@ var searchData=
   ['numberofsteps_32',['numberOfSteps',['../da/d05/_bilinear_compression_8ino_a9010653ce3034198d1c603ef1731ec99.html#a9010653ce3034198d1c603ef1731ec99',1,'BilinearCompression.ino']]],
   ['numbytes_33',['numbytes',['../d9/d33/classfl_1_1_object_f_l_e_d_a14dd418554d8c095d34c9ed927f74815.html#a14dd418554d8c095d34c9ed927f74815',1,'fl::ObjectFLED']]],
   ['numbyteslocal_34',['numbytesLocal',['../d9/d33/classfl_1_1_object_f_l_e_d_ad1763f8f08053f3229914fac0a8fde4c.html#ad1763f8f08053f3229914fac0a8fde4c',1,'fl::ObjectFLED']]],
-  ['numpins_35',['numpins',['../d9/d33/classfl_1_1_object_f_l_e_d_a49c6f2bcefd5d59879c2d3a3d09895c9.html#a49c6f2bcefd5d59879c2d3a3d09895c9',1,'fl::ObjectFLED']]],
-  ['numpinslocal_36',['numpinsLocal',['../d9/d33/classfl_1_1_object_f_l_e_d_aeda5b19e82a4db026dd18a6a95a3db29.html#aeda5b19e82a4db026dd18a6a95a3db29',1,'fl::ObjectFLED']]]
+  ['numleds_35',['numLeds',['../d6/d7c/structfl_1_1_corkscrew_input_a00376f13006e52f161f7d1e0ec8fbbed.html#a00376f13006e52f161f7d1e0ec8fbbed',1,'fl::CorkscrewInput']]],
+  ['numpins_36',['numpins',['../d9/d33/classfl_1_1_object_f_l_e_d_a49c6f2bcefd5d59879c2d3a3d09895c9.html#a49c6f2bcefd5d59879c2d3a3d09895c9',1,'fl::ObjectFLED']]],
+  ['numpinslocal_37',['numpinsLocal',['../d9/d33/classfl_1_1_object_f_l_e_d_aeda5b19e82a4db026dd18a6a95a3db29.html#aeda5b19e82a4db026dd18a6a95a3db29',1,'fl::ObjectFLED']]]
 ];

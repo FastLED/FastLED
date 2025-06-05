@@ -17,12 +17,15 @@ var searchData=
   ['singleton_2eh_14',['singleton.h',['../d4/d0b/singleton_8h.html',1,'']]],
   ['slice_2eh_15',['slice.h',['../d0/d48/slice_8h.html',1,'']]],
   ['smartmatrix_2eino_16',['SmartMatrix.ino',['../da/db6/_smart_matrix_8ino.html',1,'']]],
-  ['stdint_2eh_17',['stdint.h',['../df/dd8/stdint_8h.html',1,'']]],
-  ['str_2ecpp_18',['str.cpp',['../d1/d1f/str_8cpp.html',1,'']]],
-  ['str_2eh_19',['str.h',['../d1/d93/str_8h.html',1,'']]],
-  ['string_2eh_20',['string.h',['../da/d66/string_8h.html',1,'']]],
-  ['strstream_2ecpp_21',['strstream.cpp',['../d3/d80/strstream_8cpp.html',1,'']]],
-  ['strstream_2eh_22',['strstream.h',['../d8/d00/strstream_8h.html',1,'']]],
-  ['stub_5fmain_2ecpp_23',['stub_main.cpp',['../d7/d65/stub__main_8cpp.html',1,'']]],
-  ['supersample_2eh_24',['supersample.h',['../d2/dce/supersample_8h.html',1,'']]]
+  ['splat_2ecpp_17',['splat.cpp',['../da/dbe/splat_8cpp.html',1,'']]],
+  ['splat_2eh_18',['splat.h',['../d3/daf/splat_8h.html',1,'']]],
+  ['sstream_2eh_19',['sstream.h',['../da/da4/sstream_8h.html',1,'']]],
+  ['stdint_2eh_20',['stdint.h',['../df/dd8/stdint_8h.html',1,'']]],
+  ['str_2ecpp_21',['str.cpp',['../d1/d1f/str_8cpp.html',1,'']]],
+  ['str_2eh_22',['str.h',['../d1/d93/str_8h.html',1,'']]],
+  ['string_2eh_23',['string.h',['../da/d66/string_8h.html',1,'']]],
+  ['strstream_2ecpp_24',['strstream.cpp',['../d3/d80/strstream_8cpp.html',1,'']]],
+  ['strstream_2eh_25',['strstream.h',['../d8/d00/strstream_8h.html',1,'']]],
+  ['stub_5fmain_2ecpp_26',['stub_main.cpp',['../d7/d65/stub__main_8cpp.html',1,'']]],
+  ['supersample_2eh_27',['supersample.h',['../d2/dce/supersample_8h.html',1,'']]]
 ];

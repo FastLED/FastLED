@@ -270,11 +270,11 @@
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../dd/d10/_fx_wave2d_8ino.html" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../d9/d29/wavefx_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="441,-41 278,-41 278,0 441,0 441,-41"/>
 <text text-anchor="start" x="286" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="286" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/FxWave2d</text>
-<text text-anchor="middle" x="359.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/FxWave2d.ino</text>
+<text text-anchor="middle" x="359.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/wavefx.cpp</text>
 </a>
 </g>
 </g>

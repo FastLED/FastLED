@@ -1,9 +1,10 @@
 var dir_4d1829fa9bd13d7db71e765b2707b248 =
 [
+    [ "algorithm.h", "df/dd9/algorithm_8h.html", "df/dd9/algorithm_8h" ],
     [ "allocator.cpp", "d6/d89/allocator_8cpp.html", "d6/d89/allocator_8cpp" ],
     [ "allocator.h", "da/da9/allocator_8h.html", "da/da9/allocator_8h" ],
     [ "array.h", "db/d63/array_8h.html", "db/d63/array_8h" ],
-    [ "assert.h", "dc/da7/assert_8h.html", null ],
+    [ "assert.h", "dc/da7/assert_8h.html", "dc/da7/assert_8h" ],
     [ "audio.cpp", "d1/ddc/audio_8cpp.html", "d1/ddc/audio_8cpp" ],
     [ "audio.h", "da/d09/audio_8h.html", "da/d09/audio_8h" ],
     [ "avr_disallowed.h", "d5/dd1/avr__disallowed_8h.html", "d5/dd1/avr__disallowed_8h" ],
@@ -22,7 +23,10 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "colorutils.cpp", "da/d2d/colorutils_8cpp.html", "da/d2d/colorutils_8cpp" ],
     [ "colorutils.h", "d7/df9/fl_2colorutils_8h.html", "d7/df9/fl_2colorutils_8h" ],
     [ "colorutils_misc.h", "dd/db2/colorutils__misc_8h.html", "dd/db2/colorutils__misc_8h" ],
+    [ "compiler_control.h", "d4/d54/compiler__control_8h.html", "d4/d54/compiler__control_8h" ],
     [ "convert.h", "d3/d82/convert_8h.html", "d3/d82/convert_8h" ],
+    [ "corkscrew.cpp", "d3/d9b/corkscrew_8cpp.html", "d3/d9b/corkscrew_8cpp" ],
+    [ "corkscrew.h", "d5/d61/corkscrew_8h.html", "d5/d61/corkscrew_8h" ],
     [ "dbg.h", "d6/d01/dbg_8h.html", "d6/d01/dbg_8h" ],
     [ "deprecated.h", "d4/dce/deprecated_8h.html", "d4/dce/deprecated_8h" ],
     [ "downscale.cpp", "d8/df9/downscale_8cpp.html", "d8/df9/downscale_8cpp" ],
@@ -90,6 +94,9 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "sin32.h", "d3/d84/sin32_8h.html", "d3/d84/sin32_8h" ],
     [ "singleton.h", "d4/d0b/singleton_8h.html", "d4/d0b/singleton_8h" ],
     [ "slice.h", "d0/d48/slice_8h.html", "d0/d48/slice_8h" ],
+    [ "splat.cpp", "da/dbe/splat_8cpp.html", "da/dbe/splat_8cpp" ],
+    [ "splat.h", "d3/daf/splat_8h.html", "d3/daf/splat_8h" ],
+    [ "sstream.h", "da/da4/sstream_8h.html", "da/da4/sstream_8h" ],
     [ "stdint.h", "df/dd8/stdint_8h.html", null ],
     [ "str.cpp", "d1/d1f/str_8cpp.html", "d1/d1f/str_8cpp" ],
     [ "str.h", "d1/d93/str_8h.html", "d1/d93/str_8h" ],
@@ -131,6 +138,6 @@ var dir_4d1829fa9bd13d7db71e765b2707b248 =
     [ "xypath.h", "d5/df2/xypath_8h.html", "d5/df2/xypath_8h" ],
     [ "xypath_impls.cpp", "d4/db1/xypath__impls_8cpp.html", null ],
     [ "xypath_impls.h", "d8/d5f/xypath__impls_8h.html", "d8/d5f/xypath__impls_8h" ],
-    [ "xypath_renderer.cpp", "d2/d31/xypath__renderer_8cpp.html", "d2/d31/xypath__renderer_8cpp" ],
+    [ "xypath_renderer.cpp", "d2/d31/xypath__renderer_8cpp.html", null ],
     [ "xypath_renderer.h", "d2/d88/xypath__renderer_8h.html", "d2/d88/xypath__renderer_8h" ]
 ];

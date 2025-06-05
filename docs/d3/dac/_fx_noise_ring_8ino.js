@@ -14,7 +14,7 @@ var _fx_noise_ring_8ino =
     [ "controller", "d3/dac/_fx_noise_ring_8ino_a6ce69b48435c268b408f7adc51049d0f.html#a6ce69b48435c268b408f7adc51049d0f", null ],
     [ "current_brightness", "d3/dac/_fx_noise_ring_8ino_aa93a09c431638fd9e8e2743f624a6e49.html#aa93a09c431638fd9e8e2743f624a6e49", null ],
     [ "leds", "d3/dac/_fx_noise_ring_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ],
-    [ "pir", "d3/dac/_fx_noise_ring_8ino_a54fa86805f756b7ce2dc3687e92d8bd1.html#a54fa86805f756b7ce2dc3687e92d8bd1", null ],
+    [ "pir", "d3/dac/_fx_noise_ring_8ino_a673be4bdd78cb33ae532f522711a675d.html#a673be4bdd78cb33ae532f522711a675d", null ],
     [ "scale", "d3/dac/_fx_noise_ring_8ino_a257d57e60e0e43b50d9c9a8b77a432e6.html#a257d57e60e0e43b50d9c9a8b77a432e6", null ],
     [ "timeBitshift", "d3/dac/_fx_noise_ring_8ino_aa5e06ce6d8c8393f6c360c947921e53a.html#aa5e06ce6d8c8393f6c360c947921e53a", null ],
     [ "timer", "d3/dac/_fx_noise_ring_8ino_aaf7e0389622e8f7b78393ee10d8e93a4.html#aaf7e0389622e8f7b78393ee10d8e93a4", null ],

@@ -59,7 +59,11 @@ var searchData=
   ['corder_5fwgrb_56',['CORDER_WGRB',['../de/d7a/_object_f_l_e_d_8h_a2aab129a7729a4a77d49e33c3f4544da.html#a2aab129a7729a4a77d49e33c3f4544da',1,'ObjectFLED.h']]],
   ['corder_5fwrbg_57',['CORDER_WRBG',['../de/d7a/_object_f_l_e_d_8h_aed9fbd1bcbb311c70aea8d13f6f80ae3.html#aed9fbd1bcbb311c70aea8d13f6f80ae3',1,'ObjectFLED.h']]],
   ['corder_5fwrgb_58',['CORDER_WRGB',['../de/d7a/_object_f_l_e_d_8h_aa5a089dd91a76b150f156f85470595c2.html#aa5a089dd91a76b150f156f85470595c2',1,'ObjectFLED.h']]],
-  ['cubepulsesenabled_59',['cubePulsesEnabled',['../d1/ddb/_chromancer_8ino_afad48f6a02eaea6d9a2844e54281a7c4.html#afad48f6a02eaea6d9a2844e54281a7c4',1,'Chromancer.ino']]],
-  ['custom_5fheight_60',['CUSTOM_HEIGHT',['../d7/dfc/_funky_clouds_2defs_8h_a948ff67766b541220e15358368f21054.html#a948ff67766b541220e15358368f21054',1,'defs.h']]],
-  ['custom_5fwidth_61',['CUSTOM_WIDTH',['../d7/dfc/_funky_clouds_2defs_8h_a3af53e6e8c5ad83c99b54699c5b06a6d.html#a3af53e6e8c5ad83c99b54699c5b06a6d',1,'defs.h']]]
+  ['corkscrew_5fheight_59',['CORKSCREW_HEIGHT',['../d4/d06/curr_8h_a3cc6c1e15b1c16d7dd167297867d379e.html#a3cc6c1e15b1c16d7dd167297867d379e',1,'curr.h']]],
+  ['corkscrew_5ftotal_5fheight_60',['CORKSCREW_TOTAL_HEIGHT',['../d4/d06/curr_8h_ad2108857c0f530a10fae1f2300d0a172.html#ad2108857c0f530a10fae1f2300d0a172',1,'curr.h']]],
+  ['corkscrew_5fturns_61',['CORKSCREW_TURNS',['../d4/d06/curr_8h_a6fec319b82c1c4dcda729e1b8f0a2a8b.html#a6fec319b82c1c4dcda729e1b8f0a2a8b',1,'curr.h']]],
+  ['corkscrew_5fwidth_62',['CORKSCREW_WIDTH',['../d4/d06/curr_8h_a67cc3ecd8b5891d0efe70f23d60ce65a.html#a67cc3ecd8b5891d0efe70f23d60ce65a',1,'curr.h']]],
+  ['cubepulsesenabled_63',['cubePulsesEnabled',['../d1/ddb/_chromancer_8ino_afad48f6a02eaea6d9a2844e54281a7c4.html#afad48f6a02eaea6d9a2844e54281a7c4',1,'Chromancer.ino']]],
+  ['custom_5fheight_64',['CUSTOM_HEIGHT',['../d7/dfc/_funky_clouds_2defs_8h_a948ff67766b541220e15358368f21054.html#a948ff67766b541220e15358368f21054',1,'defs.h']]],
+  ['custom_5fwidth_65',['CUSTOM_WIDTH',['../d7/dfc/_funky_clouds_2defs_8h_a3af53e6e8c5ad83c99b54699c5b06a6d.html#a3af53e6e8c5ad83c99b54699c5b06a6d',1,'defs.h']]]
 ];

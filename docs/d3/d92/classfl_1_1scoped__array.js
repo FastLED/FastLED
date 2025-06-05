@@ -6,6 +6,7 @@ var classfl_1_1scoped__array =
     [ "scoped_array", "d3/d92/classfl_1_1scoped__array_ad8d42ab70515534ab3f8e1f46b61f665.html#ad8d42ab70515534ab3f8e1f46b61f665", null ],
     [ "scoped_array", "d3/d92/classfl_1_1scoped__array_a5f4f46840d7331ee91ef63a6fb251fe7.html#a5f4f46840d7331ee91ef63a6fb251fe7", null ],
     [ "clear", "d3/d92/classfl_1_1scoped__array_aebda12d013612a0852e1d07374340157.html#aebda12d013612a0852e1d07374340157", null ],
+    [ "FASTLED_DEPRECATED_CLASS", "d3/d92/classfl_1_1scoped__array_acef62495a15a9875ceda1916943ea31c.html#acef62495a15a9875ceda1916943ea31c", null ],
     [ "get", "d3/d92/classfl_1_1scoped__array_ac726846a84175cb31ff545082729900c.html#ac726846a84175cb31ff545082729900c", null ],
     [ "operator bool", "d3/d92/classfl_1_1scoped__array_ad15f2901b4e0f68f631a45a648b39446.html#ad15f2901b4e0f68f631a45a648b39446", null ],
     [ "operator!", "d3/d92/classfl_1_1scoped__array_aa86436168992107141cd9d40a2e06dca.html#aa86436168992107141cd9d40a2e06dca", null ],

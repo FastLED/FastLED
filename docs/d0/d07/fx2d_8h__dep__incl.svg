@@ -493,11 +493,11 @@ var sectionId = 'dynsection-1';
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="../../dd/d10/_fx_wave2d_8ino.html" target="_top" xlink:title=" ">
+<g id="a_Node000015"><a xlink:href="../../d9/d29/wavefx_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="704,-195 541,-195 541,-154 704,-154 704,-195"/>
 <text text-anchor="start" x="549" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="549" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/FxWave2d</text>
-<text text-anchor="middle" x="622.5" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/FxWave2d.ino</text>
+<text text-anchor="middle" x="622.5" y="-161" font-family="Helvetica,sans-Serif" font-size="10.00">/wavefx.cpp</text>
 </a>
 </g>
 </g>

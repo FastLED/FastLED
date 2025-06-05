@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 619;
+var viewWidth = 539;
 var viewHeight = 274;
 var sectionId = 'dynsection-1';
 </script>
@@ -59,8 +59,8 @@ var sectionId = 'dynsection-1';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="611,-153 509,-153 509,-134 611,-134 611,-153"/>
-<text text-anchor="middle" x="560" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::XYMap</text>
+<polygon fill="#999999" stroke="#666666" points="531,-153 429,-153 429,-134 531,-134 531,-153"/>
+<text text-anchor="middle" x="480" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::XYMap</text>
 </a>
 </g>
 </g>
@@ -68,8 +68,8 @@ var sectionId = 'dynsection-1';
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a66320ff898a584bf26e3783607c2cc5e.html#a66320ff898a584bf26e3783607c2cc5e" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="428,-266 326,-266 326,-247 428,-247 428,-266"/>
-<text text-anchor="middle" x="377" y="-254" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::XYMap</text>
+<polygon fill="white" stroke="#666666" points="348,-266 246,-266 246,-247 348,-247 348,-266"/>
+<text text-anchor="middle" x="297" y="-254" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::XYMap</text>
 </a>
 </g>
 </g>
@@ -77,8 +77,8 @@ var sectionId = 'dynsection-1';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M546.61,-161.36C531.55,-181.69 504.26,-214.39 473,-232.5 459.46,-240.34 443.38,-245.65 428.34,-249.23"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="549.45,-163.4 552.46,-153.24 543.77,-159.31 549.45,-163.4"/>
+<path fill="none" stroke="#63b8ff" d="M466.61,-161.36C451.55,-181.69 424.26,-214.39 393,-232.5 379.46,-240.34 363.38,-245.65 348.34,-249.23"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="469.45,-163.4 472.46,-153.24 463.77,-159.31 469.45,-163.4"/>
 </a>
 </g>
 </g>
@@ -86,8 +86,8 @@ var sectionId = 'dynsection-1';
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_ab9c11882da60bac8e6cec1fde421b14e.html#ab9c11882da60bac8e6cec1fde421b14e" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="473,-190 281,-190 281,-171 473,-171 473,-190"/>
-<text text-anchor="middle" x="377" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructRectangularGrid</text>
+<polygon fill="white" stroke="#666666" points="393,-190 201,-190 201,-171 393,-171 393,-190"/>
+<text text-anchor="middle" x="297" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructRectangularGrid</text>
 </a>
 </g>
 </g>
@@ -95,8 +95,8 @@ var sectionId = 'dynsection-1';
 <g id="edge2_Node000001_Node000003" class="edge">
 <title>Node1&#45;&gt;Node3</title>
 <g id="a_edge2_Node000001_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M506.98,-155.26C495.79,-157.71 484.01,-160.24 473,-162.5 459.02,-165.37 443.85,-168.32 429.83,-170.97"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="508.05,-158.61 517.06,-153.03 506.54,-151.77 508.05,-158.61"/>
+<path fill="none" stroke="#63b8ff" d="M426.98,-155.26C415.79,-157.71 404.01,-160.24 393,-162.5 379.02,-165.37 363.85,-168.32 349.83,-170.97"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="428.05,-158.61 437.06,-153.03 426.54,-151.77 428.05,-158.61"/>
 </a>
 </g>
 </g>
@@ -104,45 +104,64 @@ var sectionId = 'dynsection-1';
 <g id="Node000005" class="node">
 <title>Node5</title>
 <g id="a_Node000005"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_abbb31c081f6a2701b7999371375edfdf.html#abbb31c081f6a2701b7999371375edfdf" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="215.5,-264 109.5,-264 109.5,-245 215.5,-245 215.5,-264"/>
-<text text-anchor="middle" x="162.5" y="-252" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::identity</text>
+<polygon fill="white" stroke="#666666" points="135.5,-264 29.5,-264 29.5,-245 135.5,-245 135.5,-264"/>
+<text text-anchor="middle" x="82.5" y="-252" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::identity</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node5 -->
-<g id="edge14_Node000001_Node000005" class="edge">
+<g id="edge13_Node000001_Node000005" class="edge">
 <title>Node1&#45;&gt;Node5</title>
-<g id="a_edge14_Node000001_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M539.72,-159.33C523.07,-172.17 497.83,-189.68 473,-199.5 449.46,-208.81 297.53,-233.5 215.63,-246.4"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="541.92,-162.05 547.6,-153.11 537.58,-156.56 541.92,-162.05"/>
+<g id="a_edge13_Node000001_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M459.72,-159.33C443.07,-172.17 417.83,-189.68 393,-199.5 369.46,-208.81 217.53,-233.5 135.63,-246.4"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="461.92,-162.05 467.6,-153.11 457.58,-156.56 461.92,-162.05"/>
+</a>
+</g>
+</g>
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a29454fe0a5380af96f921085bbf34b87.html#a29454fe0a5380af96f921085bbf34b87" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="380,-153 214,-153 214,-134 380,-134 380,-153"/>
+<text text-anchor="middle" x="297" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructSerpentine</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node9 -->
+<g id="edge8_Node000001_Node000009" class="edge">
+<title>Node1&#45;&gt;Node9</title>
+<g id="a_edge8_Node000001_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M418.45,-143.5C406.13,-143.5 392.98,-143.5 380.06,-143.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="418.58,-147 428.58,-143.5 418.58,-140 418.58,-147"/>
 </a>
 </g>
 </g>
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a29454fe0a5380af96f921085bbf34b87.html#a29454fe0a5380af96f921085bbf34b87" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="460,-153 294,-153 294,-134 460,-134 460,-153"/>
-<text text-anchor="middle" x="377" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructSerpentine</text>
+<g id="a_Node000010"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9.html#a2193220fbe218947fdd4fd2aba56f6a9" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="365,-115.5 229,-115.5 229,-85.5 365,-85.5 365,-115.5"/>
+<text text-anchor="start" x="237" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructWith</text>
+<text text-anchor="middle" x="297" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">LookUpTable</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node10 -->
-<g id="edge9_Node000001_Node000010" class="edge">
+<g id="edge10_Node000001_Node000010" class="edge">
 <title>Node1&#45;&gt;Node10</title>
-<g id="a_edge9_Node000001_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M498.45,-143.5C486.13,-143.5 472.98,-143.5 460.06,-143.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="498.58,-147 508.58,-143.5 498.58,-140 498.58,-147"/>
+<g id="a_edge10_Node000001_Node000010"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M428.86,-131.59C407.91,-126.61 383.33,-120.77 361.17,-115.51"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="428.29,-135.05 438.83,-133.96 429.91,-128.24 428.29,-135.05"/>
 </a>
 </g>
 </g>
 <!-- Node11 -->
 <g id="Node000011" class="node">
 <title>Node11</title>
-<g id="a_Node000011"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_a2193220fbe218947fdd4fd2aba56f6a9.html#a2193220fbe218947fdd4fd2aba56f6a9" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="445,-115.5 309,-115.5 309,-85.5 445,-85.5 445,-115.5"/>
-<text text-anchor="start" x="317" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructWith</text>
-<text text-anchor="middle" x="377" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">LookUpTable</text>
+<g id="a_Node000011"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="365,-67.5 229,-67.5 229,-37.5 365,-37.5 365,-67.5"/>
+<text text-anchor="start" x="237" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructWith</text>
+<text text-anchor="middle" x="297" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">UserFunction</text>
 </a>
 </g>
 </g>
@@ -150,45 +169,26 @@ var sectionId = 'dynsection-1';
 <g id="edge11_Node000001_Node000011" class="edge">
 <title>Node1&#45;&gt;Node11</title>
 <g id="a_edge11_Node000001_Node000011"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M508.86,-131.59C487.91,-126.61 463.33,-120.77 441.17,-115.51"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="508.29,-135.05 518.83,-133.96 509.91,-128.24 508.29,-135.05"/>
+<path fill="none" stroke="#63b8ff" d="M461.71,-126.45C445.32,-111.22 419.35,-89.38 393,-76.5 384.29,-72.24 374.75,-68.69 365.18,-65.74"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="459.7,-129.37 469.35,-133.73 464.52,-124.3 459.7,-129.37"/>
 </a>
 </g>
 </g>
-<!-- Node12 -->
-<g id="Node000012" class="node">
-<title>Node12</title>
-<g id="a_Node000012"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_af2faeb1a8749912aa8af70d8570069c7.html#af2faeb1a8749912aa8af70d8570069c7" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="445,-67.5 309,-67.5 309,-37.5 445,-37.5 445,-67.5"/>
-<text text-anchor="start" x="317" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::constructWith</text>
-<text text-anchor="middle" x="377" y="-44.5" font-family="Helvetica,sans-Serif" font-size="10.00">UserFunction</text>
+<!-- Node13 -->
+<g id="Node000013" class="node">
+<title>Node13</title>
+<g id="a_Node000013"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_aec5d1603b088412e6f19ffe9fb9fd5e7.html#aec5d1603b088412e6f19ffe9fb9fd5e7" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="356,-19 238,-19 238,0 356,0 356,-19"/>
+<text text-anchor="middle" x="297" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::operator=</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node12 -->
-<g id="edge12_Node000001_Node000012" class="edge">
-<title>Node1&#45;&gt;Node12</title>
-<g id="a_edge12_Node000001_Node000012"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M541.71,-126.45C525.32,-111.22 499.35,-89.38 473,-76.5 464.29,-72.24 454.75,-68.69 445.18,-65.74"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="539.7,-129.37 549.35,-133.73 544.52,-124.3 539.7,-129.37"/>
-</a>
-</g>
-</g>
-<!-- Node14 -->
-<g id="Node000014" class="node">
-<title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../d0/dce/classfl_1_1_x_y_map_aec5d1603b088412e6f19ffe9fb9fd5e7.html#aec5d1603b088412e6f19ffe9fb9fd5e7" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="436,-19 318,-19 318,0 436,0 436,-19"/>
-<text text-anchor="middle" x="377" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYMap::operator=</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node14 -->
-<g id="edge15_Node000001_Node000014" class="edge">
-<title>Node1&#45;&gt;Node14</title>
-<g id="a_edge15_Node000001_Node000014"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M550.44,-124.72C537.54,-98.7 510.6,-52.23 473,-28.5 462.05,-21.59 449.09,-17.11 436.32,-14.24"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="547.35,-126.38 554.82,-133.9 553.67,-123.36 547.35,-126.38"/>
+<!-- Node1&#45;&gt;Node13 -->
+<g id="edge14_Node000001_Node000013" class="edge">
+<title>Node1&#45;&gt;Node13</title>
+<g id="a_edge14_Node000001_Node000013"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M470.44,-124.72C457.54,-98.7 430.6,-52.23 393,-28.5 382.05,-21.59 369.09,-17.11 356.32,-14.24"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="467.35,-126.38 474.82,-133.9 473.67,-123.36 467.35,-126.38"/>
 </a>
 </g>
 </g>
@@ -196,8 +196,8 @@ var sectionId = 'dynsection-1';
 <g id="Node000004" class="node">
 <title>Node4</title>
 <g id="a_Node000004"><a xlink:href="../../dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="211.5,-227 113.5,-227 113.5,-208 211.5,-208 211.5,-227"/>
-<text text-anchor="middle" x="162.5" y="-215" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Blend2d::draw</text>
+<polygon fill="white" stroke="#666666" points="131.5,-227 33.5,-227 33.5,-208 131.5,-208 131.5,-227"/>
+<text text-anchor="middle" x="82.5" y="-215" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Blend2d::draw</text>
 </a>
 </g>
 </g>
@@ -205,8 +205,8 @@ var sectionId = 'dynsection-1';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M311.09,-191.8C279,-197.39 240.95,-204.01 211.53,-209.14"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="312.02,-195.19 321.28,-190.03 310.82,-188.3 312.02,-195.19"/>
+<path fill="none" stroke="#63b8ff" d="M231.09,-191.8C199,-197.39 160.95,-204.01 131.53,-209.14"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="232.02,-195.19 241.28,-190.03 230.82,-188.3 232.02,-195.19"/>
 </a>
 </g>
 </g>
@@ -214,17 +214,17 @@ var sectionId = 'dynsection-1';
 <g id="edge4_Node000003_Node000005" class="edge">
 <title>Node3&#45;&gt;Node5</title>
 <g id="a_edge4_Node000003_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M309.69,-192.88C299.78,-195.96 289.91,-199.78 281,-204.5 262.08,-214.52 264.07,-226.77 245,-236.5 235.97,-241.11 225.78,-244.55 215.74,-247.11"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="310.95,-196.16 319.59,-190.03 309.01,-189.43 310.95,-196.16"/>
+<path fill="none" stroke="#63b8ff" d="M229.69,-192.88C219.78,-195.96 209.91,-199.78 201,-204.5 182.08,-214.52 184.07,-226.77 165,-236.5 155.97,-241.11 145.78,-244.55 135.74,-247.11"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="230.95,-196.16 239.59,-190.03 229.01,-189.43 230.95,-196.16"/>
 </a>
 </g>
 </g>
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="228,-190 97,-190 97,-171 228,-171 228,-190"/>
-<text text-anchor="middle" x="162.5" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">NewWaveSimulation2D</text>
+<g id="a_Node000006"><a xlink:href="../../d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="148,-190 17,-190 17,-171 148,-171 148,-190"/>
+<text text-anchor="middle" x="82.5" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">NewWaveSimulation2D</text>
 </a>
 </g>
 </g>
@@ -232,17 +232,35 @@ var sectionId = 'dynsection-1';
 <g id="edge5_Node000003_Node000006" class="edge">
 <title>Node3&#45;&gt;Node6</title>
 <g id="a_edge5_Node000003_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M270.84,-180.5C256.22,-180.5 241.57,-180.5 228.01,-180.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="270.94,-184 280.94,-180.5 270.94,-177 270.94,-184"/>
+<path fill="none" stroke="#63b8ff" d="M190.84,-180.5C176.22,-180.5 161.57,-180.5 148.01,-180.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="190.94,-184 200.94,-180.5 190.94,-177 190.94,-184"/>
+</a>
+</g>
+</g>
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="165,-153 0,-153 0,-134 165,-134 165,-153"/>
+<text text-anchor="middle" x="82.5" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::setScreenMap</text>
+</a>
+</g>
+</g>
+<!-- Node3&#45;&gt;Node7 -->
+<g id="edge6_Node000003_Node000007" class="edge">
+<title>Node3&#45;&gt;Node7</title>
+<g id="a_edge6_Node000003_Node000007"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M231.42,-169.25C201.7,-164.08 166.83,-158.01 138.41,-153.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="230.82,-172.7 241.28,-170.97 232.02,-165.81 230.82,-172.7"/>
 </a>
 </g>
 </g>
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="245,-153 80,-153 80,-134 245,-134 245,-153"/>
-<text text-anchor="middle" x="162.5" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController::setScreenMap</text>
+<g id="a_Node000008"><a xlink:href="../../de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="150.5,-116 14.5,-116 14.5,-97 150.5,-97 150.5,-116"/>
+<text text-anchor="middle" x="82.5" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LedsXY::setSerpentine</text>
 </a>
 </g>
 </g>
@@ -250,71 +268,35 @@ var sectionId = 'dynsection-1';
 <g id="edge7_Node000003_Node000008" class="edge">
 <title>Node3&#45;&gt;Node8</title>
 <g id="a_edge7_Node000003_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M311.42,-169.25C281.7,-164.08 246.83,-158.01 218.41,-153.06"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="310.82,-172.7 321.28,-170.97 312.02,-165.81 310.82,-172.7"/>
+<path fill="none" stroke="#63b8ff" d="M211.86,-167.55C208.12,-166.05 204.48,-164.37 201,-162.5 180.79,-151.64 184.98,-136.78 165,-125.5 158.17,-121.64 150.59,-118.57 142.89,-116.11"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="210.75,-170.87 221.34,-170.95 213.11,-164.28 210.75,-170.87"/>
 </a>
 </g>
 </g>
-<!-- Node9 -->
-<g id="Node000009" class="node">
-<title>Node9</title>
-<g id="a_Node000009"><a xlink:href="../../de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="230.5,-116 94.5,-116 94.5,-97 230.5,-97 230.5,-116"/>
-<text text-anchor="middle" x="162.5" y="-104" font-family="Helvetica,sans-Serif" font-size="10.00">fl::LedsXY::setSerpentine</text>
+<!-- Node9&#45;&gt;Node8 -->
+<g id="edge9_Node000009_Node000008" class="edge">
+<title>Node9&#45;&gt;Node8</title>
+<g id="a_edge9_Node000009_Node000008"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M231.42,-132.25C201.7,-127.08 166.83,-121.01 138.41,-116.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="230.82,-135.7 241.28,-133.97 232.02,-128.81 230.82,-135.7"/>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node9 -->
-<g id="edge8_Node000003_Node000009" class="edge">
-<title>Node3&#45;&gt;Node9</title>
-<g id="a_edge8_Node000003_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M291.86,-167.55C288.12,-166.05 284.48,-164.37 281,-162.5 260.79,-151.64 264.98,-136.78 245,-125.5 238.17,-121.64 230.59,-118.57 222.89,-116.11"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="290.75,-170.87 301.34,-170.95 293.11,-164.28 290.75,-170.87"/>
+<!-- Node12 -->
+<g id="Node000012" class="node">
+<title>Node12</title>
+<g id="a_Node000012"><a xlink:href="../../d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" target="_top" xlink:title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi...">
+<polygon fill="white" stroke="#666666" points="112,-62 53,-62 53,-43 112,-43 112,-62"/>
+<text text-anchor="middle" x="82.5" y="-50" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur2d</text>
 </a>
 </g>
 </g>
-<!-- Node7 -->
-<g id="Node000007" class="node">
-<title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../da/d05/_bilinear_compression_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="44,-190 0,-190 0,-171 44,-171 44,-190"/>
-<text text-anchor="middle" x="22" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">setup</text>
-</a>
-</g>
-</g>
-<!-- Node6&#45;&gt;Node7 -->
-<g id="edge6_Node000006_Node000007" class="edge">
-<title>Node6&#45;&gt;Node7</title>
-<g id="a_edge6_Node000006_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M86.45,-180.5C70.88,-180.5 55.7,-180.5 44.1,-180.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="86.71,-184 96.71,-180.5 86.71,-177 86.71,-184"/>
-</a>
-</g>
-</g>
-<!-- Node10&#45;&gt;Node9 -->
-<g id="edge10_Node000010_Node000009" class="edge">
-<title>Node10&#45;&gt;Node9</title>
-<g id="a_edge10_Node000010_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M311.42,-132.25C281.7,-127.08 246.83,-121.01 218.41,-116.06"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="310.82,-135.7 321.28,-133.97 312.02,-128.81 310.82,-135.7"/>
-</a>
-</g>
-</g>
-<!-- Node13 -->
-<g id="Node000013" class="node">
-<title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" target="_top" xlink:title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi...">
-<polygon fill="white" stroke="#666666" points="192,-62 133,-62 133,-43 192,-43 192,-62"/>
-<text text-anchor="middle" x="162.5" y="-50" font-family="Helvetica,sans-Serif" font-size="10.00">fl::blur2d</text>
-</a>
-</g>
-</g>
-<!-- Node12&#45;&gt;Node13 -->
-<g id="edge13_Node000012_Node000013" class="edge">
-<title>Node12&#45;&gt;Node13</title>
-<g id="a_edge13_Node000012_Node000013"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M298.47,-52.5C261.45,-52.5 219.4,-52.5 192.21,-52.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="298.76,-56 308.76,-52.5 298.76,-49 298.76,-56"/>
+<!-- Node11&#45;&gt;Node12 -->
+<g id="edge12_Node000011_Node000012" class="edge">
+<title>Node11&#45;&gt;Node12</title>
+<g id="a_edge12_Node000011_Node000012"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M218.47,-52.5C181.45,-52.5 139.4,-52.5 112.21,-52.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="218.76,-56 228.76,-52.5 218.76,-49 218.76,-56"/>
 </a>
 </g>
 </g>

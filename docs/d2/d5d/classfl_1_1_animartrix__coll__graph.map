@@ -15,12 +15,12 @@
 <area shape="poly" id="edge6_Node000012_Node000013" title=" " alt="" coords="1082,140,1285,125,1309,123,1309,128,1286,131,1082,145"/>
 <area shape="rect" id="Node000014" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html" title=" " alt="" coords="507,100,650,140"/>
 <area shape="poly" id="edge7_Node000013_Node000014" title=" " alt="" coords="664,123,866,136,905,139,904,144,865,141,664,128"/>
-<area shape="rect" id="Node000028" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="889,5,1084,45"/>
-<area shape="poly" id="edge9_Node000012_Node000028" title=" " alt="" coords="1098,38,1190,54,1286,75,1339,91,1338,96,1285,80,1189,59,1097,43"/>
-<area shape="rect" id="Node000029" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="493,13,664,38"/>
-<area shape="poly" id="edge10_Node000028_Node000029" title=" " alt="" coords="678,23,889,23,889,28,678,28"/>
-<area shape="rect" id="Node000030" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="919,69,1055,109"/>
-<area shape="poly" id="edge11_Node000012_Node000030" title=" " alt="" coords="1069,91,1309,106,1309,111,1068,97"/>
-<area shape="rect" id="Node000031" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="349,193,407,218"/>
-<area shape="poly" id="edge12_Node000001_Node000031" title=" " alt="" coords="421,199,525,190,525,195,421,204"/>
+<area shape="rect" id="Node000025" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="889,5,1084,45"/>
+<area shape="poly" id="edge9_Node000012_Node000025" title=" " alt="" coords="1098,38,1190,54,1286,75,1339,91,1338,96,1285,80,1189,59,1097,43"/>
+<area shape="rect" id="Node000026" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="493,13,664,38"/>
+<area shape="poly" id="edge10_Node000025_Node000026" title=" " alt="" coords="678,23,889,23,889,28,678,28"/>
+<area shape="rect" id="Node000027" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="919,69,1055,109"/>
+<area shape="poly" id="edge11_Node000012_Node000027" title=" " alt="" coords="1069,91,1309,106,1309,111,1068,97"/>
+<area shape="rect" id="Node000028" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="349,193,407,218"/>
+<area shape="poly" id="edge12_Node000001_Node000028" title=" " alt="" coords="421,199,525,190,525,195,421,204"/>
 </map>

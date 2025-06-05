@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::map_range_detail\l::map_range_math\< T, U \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dca/structfl_1_1map__range__detail_1_1map__range__math.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::is_same\< T, U \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d46/structfl_1_1is__same.html",tooltip=" "];
 }

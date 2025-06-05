@@ -267,89 +267,85 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_source.html','../../');
 <div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
 <div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>  <span class="comment">//FASTLED_DBG(&quot;loop&quot;);</span></div>
 <div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>  <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;$$$$$$$ START OF FRAME $$$$$$$$&quot;</span>);</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span> </div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>  <span class="comment">// Calculate dt.</span></div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>  <span class="keyword">static</span> uint32_t s_prev_time = 0;</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  uint32_t prev_time = 0;</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(prev_time);  <span class="comment">// actually used in perf tests.</span></div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  uint32_t now_ms = millis();</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  uint32_t delta_ms = now_ms - s_prev_time;</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>  s_prev_time = now_ms;</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>) {</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keywordflow">if</span> (Serial.available() &gt; 0) {</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>      <span class="keywordtype">int</span> v = Serial.read();</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>      <span class="keywordflow">if</span> (v == <span class="charliteral">&#39;d&#39;</span>) {</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>      }</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    }</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>  }</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  DbgDoSimulatedKeyboardPress();</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start_time = millis();</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="comment">// Each frame we call the midi processor 100 times to make sure that all notes</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>  <span class="comment">// are processed.</span></div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 100; ++i) {</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    MY_MIDI.read();</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>  }</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> midi_time = millis() - start_time;</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  </div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>  <span class="comment">// Updates keyboard: releases sustained keys that.</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>  <span class="keyword">const</span> uint32_t keyboard_time_start = millis();</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>  <span class="comment">// This is kind of a hack... but give the keyboard a future time</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>  <span class="comment">// so that all keys just pressed get a value &gt; 0 for their time</span></div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>  <span class="comment">// durations.</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>  keyboard.<a class="code hl_function" href="../../db/d37/class_keyboard_state_a12563a96cac7c1069fd1fdcbed1ed3c0.html#a12563a96cac7c1069fd1fdcbed1ed3c0">Update</a>(now_ms + delta_ms, delta_ms);</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  <span class="keyword">const</span> uint32_t keyboard_delta_time = millis() - keyboard_time_start;</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>  </div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>  <a class="code hl_struct" href="../../da/db7/structui__state.html">ui_state</a> ui_st = <a class="code hl_function" href="../../d9/da7/ui__state_8h_a17a6dc6626e7a7a2d1afc49f7d16ef94.html#a17a6dc6626e7a7a2d1afc49f7d16ef94">ui_update</a>(now_ms, delta_ms);</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>  <span class="comment">//dprint(&quot;vis selector = &quot;);</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>  <span class="comment">//dprintln(vis_state);</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>  <span class="comment">// Calculate dt.</span></div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>  <span class="keyword">static</span> uint32_t s_prev_time = 0;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>  uint32_t prev_time = 0;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>  <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(prev_time);  <span class="comment">// actually used in perf tests.</span></div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>  uint32_t now_ms = millis();</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>  uint32_t delta_ms = now_ms - s_prev_time;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>  s_prev_time = now_ms;</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>  <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>) {</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keywordflow">if</span> (Serial.available() &gt; 0) {</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>      <span class="keywordtype">int</span> v = Serial.read();</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>      <span class="keywordflow">if</span> (v == <span class="charliteral">&#39;d&#39;</span>) {</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>      }</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    }</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>  }</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>  DbgDoSimulatedKeyboardPress();</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>  </div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start_time = millis();</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>  <span class="comment">// Each frame we call the midi processor 100 times to make sure that all notes</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>  <span class="comment">// are processed.</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 100; ++i) {</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    MY_MIDI.read();</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>  }</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> midi_time = millis() - start_time;</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>  </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>  <span class="comment">// Updates keyboard: releases sustained keys that.</span></div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>  <span class="keyword">const</span> uint32_t keyboard_time_start = millis();</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span> </div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>  <span class="comment">// This is kind of a hack... but give the keyboard a future time</span></div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>  <span class="comment">// so that all keys just pressed get a value &gt; 0 for their time</span></div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>  <span class="comment">// durations.</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>  keyboard.<a class="code hl_function" href="../../db/d37/class_keyboard_state_a12563a96cac7c1069fd1fdcbed1ed3c0.html#a12563a96cac7c1069fd1fdcbed1ed3c0">Update</a>(now_ms + delta_ms, delta_ms);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>  <span class="keyword">const</span> uint32_t keyboard_delta_time = millis() - keyboard_time_start;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>  </div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>  <a class="code hl_struct" href="../../da/db7/structui__state.html">ui_state</a> ui_st = <a class="code hl_function" href="../../d9/da7/ui__state_8h_a17a6dc6626e7a7a2d1afc49f7d16ef94.html#a17a6dc6626e7a7a2d1afc49f7d16ef94">ui_update</a>(now_ms, delta_ms);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>  <span class="comment">//dprint(&quot;vis selector = &quot;);</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>  <span class="comment">//dprintln(vis_state);</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>  </div>
 <div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>  </div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>  </div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>  <span class="comment">// These int values are for desting the performance of the</span></div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>  <span class="comment">// app. If the app ever runs slow then set kShowFps to 1</span></div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>  <span class="comment">// in the settings.h file.</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start_painting = millis();</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>  <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(start_painting);</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>  <span class="comment">// These int values are for desting the performance of the</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>  <span class="comment">// app. If the app ever runs slow then set kShowFps to 1</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>  <span class="comment">// in the settings.h file.</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start_painting = millis();</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>  <a class="code hl_define" href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a>(start_painting);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;$$$$$$$ START OF FRAME $$$$$$$$&quot;</span>);</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>  <span class="comment">// Paints the keyboard using the led_rope.</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>  <a class="code hl_enumeration" href="../../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad">Painter::VisState</a> which_vis = <a class="code hl_enumeration" href="../../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad">Painter::VisState</a>(ui_st.<a class="code hl_variable" href="../../da/db7/structui__state_a64e160b26e32e15c6cae1c534d112eec.html#a64e160b26e32e15c6cae1c534d112eec">which_visualizer</a>);</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  <a class="code hl_function" href="../../dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3">Painter::Paint</a>(now_ms, delta_ms, which_vis, &amp;keyboard, &amp;led_rope);</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> paint_time = millis() - start_time;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> total_time = midi_time + paint_time + keyboard_delta_time;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>  </div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>  <span class="keywordflow">if</span> (<a class="code hl_enumvalue" href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4fa2f761c3b3472e5d8dd10f0e52194a32f">kShowFps</a>) {</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <span class="keywordtype">float</span> fps = 1.0f/(float(total_time) / 1000.f);</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    Serial.print(<span class="stringliteral">&quot;fps                  - &quot;</span>); Serial.println(fps);</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    Serial.print(<span class="stringliteral">&quot;midi time            - &quot;</span>); Serial.println(midi_time);</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    Serial.print(<span class="stringliteral">&quot;keyboard update time - &quot;</span>); Serial.println(keyboard_delta_time);</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    Serial.print(<span class="stringliteral">&quot;draw &amp; paint time    - &quot;</span>); Serial.println(paint_time);</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>  }</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>  <a class="code hl_define" href="../../d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb">EVERY_N_SECONDS</a>(1) {</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <a class="code hl_define" href="../../d6/d01/dbg_8h_ad827e4b2bf1db9d697a566d6046b6f8b.html#ad827e4b2bf1db9d697a566d6046b6f8b">FASTLED_DBG</a>(<span class="stringliteral">&quot;is_debugging = &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>);</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>  }</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>  <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;$$$$$$$ END OF FRAME $$$$$$$$&quot;</span>);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>  <span class="comment">// Paints the keyboard using the led_rope.</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>  <a class="code hl_enumeration" href="../../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad">Painter::VisState</a> which_vis = <a class="code hl_enumeration" href="../../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad">Painter::VisState</a>(ui_st.<a class="code hl_variable" href="../../da/db7/structui__state_a64e160b26e32e15c6cae1c534d112eec.html#a64e160b26e32e15c6cae1c534d112eec">which_visualizer</a>);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>  <a class="code hl_function" href="../../dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3">Painter::Paint</a>(now_ms, delta_ms, which_vis, &amp;keyboard, &amp;led_rope);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> paint_time = millis() - start_time;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> total_time = midi_time + paint_time + keyboard_delta_time;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>  </div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>  <span class="keywordflow">if</span> (<a class="code hl_enumvalue" href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4fa2f761c3b3472e5d8dd10f0e52194a32f">kShowFps</a>) {</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordtype">float</span> fps = 1.0f/(float(total_time) / 1000.f);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    Serial.print(<span class="stringliteral">&quot;fps                  - &quot;</span>); Serial.println(fps);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    Serial.print(<span class="stringliteral">&quot;midi time            - &quot;</span>); Serial.println(midi_time);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    Serial.print(<span class="stringliteral">&quot;keyboard update time - &quot;</span>); Serial.println(keyboard_delta_time);</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    Serial.print(<span class="stringliteral">&quot;draw &amp; paint time    - &quot;</span>); Serial.println(paint_time);</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>  }</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>  <a class="code hl_define" href="../../d5/df2/group___timekeeping_gaf4a00b9c39c12d777b99808d18f959fb.html#gaf4a00b9c39c12d777b99808d18f959fb">EVERY_N_SECONDS</a>(1) {</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <a class="code hl_define" href="../../d6/d01/dbg_8h_ad827e4b2bf1db9d697a566d6046b6f8b.html#ad827e4b2bf1db9d697a566d6046b6f8b">FASTLED_DBG</a>(<span class="stringliteral">&quot;is_debugging = &quot;</span> &lt;&lt; <a class="code hl_variable" href="../../dd/dd5/dprint_8cpp_a05c120132db8916c2e7883c085a6fcaf.html#a05c120132db8916c2e7883c085a6fcaf">is_debugging</a>);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>  }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>  <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.show();</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>}</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.show();</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>}</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="preprocessor">#endif  </span><span class="comment">// __AVR__</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="preprocessor">#endif  </span><span class="comment">// __AVR__</span></div>
 <div class="ttc" id="a_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef_html_aac80e317e5bde15da9ff90feeccbc5ef"><div class="ttname"><a href="../../d4/d0c/_blur_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef">toggle</a></div><div class="ttdeci">bool toggle</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0c/_blur_8ino_source.html#l00012">Blur.ino:12</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../d6/dda/_fast_l_e_d_8cpp_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00058">FastLED.cpp:58</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="a_keyboard_8h_html"><div class="ttname"><a href="../../df/d85/_keyboard_8h.html">Keyboard.h</a></div></div>
 <div class="ttc" id="a_led_rope_t_c_l_8h_html"><div class="ttname"><a href="../../d9/d7e/_led_rope_t_c_l_8h.html">LedRopeTCL.h</a></div></div>
@@ -383,7 +379,7 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_source.html','../../');
 <div class="ttc" id="astruct_painter_a0457706d4c40cb4dcd9f3e2221a218ad_html_a0457706d4c40cb4dcd9f3e2221a218ad"><div class="ttname"><a href="../../dd/d45/struct_painter_a0457706d4c40cb4dcd9f3e2221a218ad.html#a0457706d4c40cb4dcd9f3e2221a218ad">Painter::VisState</a></div><div class="ttdeci">VisState</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db0/_painter_8h_source.html#l00012">Painter.h:12</a></div></div>
 <div class="ttc" id="astruct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3_html_a99ab92bb8d2baae96c7b4b4aacda4de3"><div class="ttname"><a href="../../dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3">Painter::Paint</a></div><div class="ttdeci">static void Paint(uint32_t now_ms, uint32_t delta_ms, VisState vis_state, KeyboardState *keyboard, LedRopeInterface *light_rope)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d33/_painter_8cpp_source.html#l00098">Painter.cpp:98</a></div></div>
 <div class="ttc" id="astructui__state_a64e160b26e32e15c6cae1c534d112eec_html_a64e160b26e32e15c6cae1c534d112eec"><div class="ttname"><a href="../../da/db7/structui__state_a64e160b26e32e15c6cae1c534d112eec.html#a64e160b26e32e15c6cae1c534d112eec">ui_state::which_visualizer</a></div><div class="ttdeci">int which_visualizer</div><div class="ttdef"><b>Definition</b> <a href="../../d9/da7/ui__state_8h_source.html#l00013">ui_state.h:13</a></div></div>
-<div class="ttc" id="astructui__state_html"><div class="ttname"><a href="../../da/db7/structui__state.html">ui_state</a></div><div class="ttdef"><b>Definition</b> <a href="../../dd/d10/_fx_wave2d_8ino_source.html#l00192">FxWave2d.ino:192</a></div></div>
+<div class="ttc" id="astructui__state_html"><div class="ttname"><a href="../../da/db7/structui__state.html">ui_state</a></div><div class="ttdef"><b>Definition</b> <a href="../../d9/d29/wavefx_8cpp_source.html#l00250">wavefx.cpp:250</a></div></div>
 <div class="ttc" id="aui_8h_html"><div class="ttname"><a href="../../d9/d3b/ui_8h.html">ui.h</a></div></div>
 <div class="ttc" id="aui__state_8h_a17a6dc6626e7a7a2d1afc49f7d16ef94_html_a17a6dc6626e7a7a2d1afc49f7d16ef94"><div class="ttname"><a href="../../d9/da7/ui__state_8h_a17a6dc6626e7a7a2d1afc49f7d16ef94.html#a17a6dc6626e7a7a2d1afc49f7d16ef94">ui_update</a></div><div class="ttdeci">ui_state ui_update(uint32_t now_ms, uint32_t delta_ms)</div></div>
 <div class="ttc" id="aui__state_8h_aa6f50ea564e0ba7375ce590a5196f12f_html_aa6f50ea564e0ba7375ce590a5196f12f"><div class="ttname"><a href="../../d9/da7/ui__state_8h_aa6f50ea564e0ba7375ce590a5196f12f.html#aa6f50ea564e0ba7375ce590a5196f12f">ui_init</a></div><div class="ttdeci">void ui_init()</div></div>
@@ -391,7 +387,6 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_source.html','../../');
 <div class="ttc" id="aui__state_8h_html"><div class="ttname"><a href="../../d9/da7/ui__state_8h.html">ui_state.h</a></div></div>
 <div class="ttc" id="aunused_8h_a9de675fbd4d59f415613d91c159cf5b5_html_a9de675fbd4d59f415613d91c159cf5b5"><div class="ttname"><a href="../../d8/d4b/unused_8h_a9de675fbd4d59f415613d91c159cf5b5.html#a9de675fbd4d59f415613d91c159cf5b5">FASTLED_UNUSED</a></div><div class="ttdeci">#define FASTLED_UNUSED(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4b/unused_8h_source.html#l00003">unused.h:3</a></div></div>
 <div class="ttc" id="aunused_8h_html"><div class="ttname"><a href="../../d8/d4b/unused_8h.html">unused.h</a></div></div>
-<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -399,7 +394,7 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_source.html','../../');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../d8/de5/_luminescent_grand_8ino.html">LuminescentGrand.ino</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

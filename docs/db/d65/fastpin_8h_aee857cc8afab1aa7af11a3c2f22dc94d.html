@@ -123,7 +123,7 @@ $(function(){initNavTree('db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.ht
 <div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *portName() { <span class="keywordflow">return</span> #L; } \</div>
 <div class="line">    <span class="keyword">typedef</span> BASE __t_baseType;  \</div>
 <div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">void</span> *portAddr() { <span class="keywordflow">return</span> (<span class="keywordtype">void</span>*)&amp;__t_baseType::r(); } };</div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html"><div class="ttname"><a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o.html">__FL_PORT_INFO</a></div><div class="ttdoc">Utility template for tracking down information about pins and ports.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d65/fastpin_8h_source.html#l00356">fastpin.h:356</a></div></div>
+<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html"><div class="ttname"><a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o.html">__FL_PORT_INFO</a></div><div class="ttdoc">Utility template for tracking down information about pins and ports.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d65/fastpin_8h_source.html#l00359">fastpin.h:359</a></div></div>
 </div><!-- fragment -->
 <p>Macro to create the instantiations for defined ports. </p>
 <p>We're going to abuse this later for auto discovery of pin/port mappings for new variants. <br  />
@@ -135,12 +135,12 @@ $(function(){initNavTree('db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.ht
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d65/fastpin_8h_source.html#l00372">372</a> of file <a class="el" href="../../db/d65/fastpin_8h_source.html">fastpin.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  372</span><span class="preprocessor">#define _FL_DEFINE_PORT(L, BASE) template&lt;&gt; struct __FL_PORT_INFO&lt;L&gt; { \</span></div>
-<div class="line"><span class="lineno">  373</span><span class="preprocessor">    static bool hasPort() { return 1; } \</span></div>
-<div class="line"><span class="lineno">  374</span><span class="preprocessor">    static const char *portName() { return #L; } \</span></div>
-<div class="line"><span class="lineno">  375</span><span class="preprocessor">    typedef BASE __t_baseType;  \</span></div>
-<div class="line"><span class="lineno">  376</span><span class="preprocessor">    static const void *portAddr() { return (void*)&amp;__t_baseType::r(); } };</span></div>
+<p class="definition">Definition at line <a class="el" href="../../db/d65/fastpin_8h_source.html#l00375">375</a> of file <a class="el" href="../../db/d65/fastpin_8h_source.html">fastpin.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  375</span><span class="preprocessor">#define _FL_DEFINE_PORT(L, BASE) template&lt;&gt; struct __FL_PORT_INFO&lt;L&gt; { \</span></div>
+<div class="line"><span class="lineno">  376</span><span class="preprocessor">    static bool hasPort() { return 1; } \</span></div>
+<div class="line"><span class="lineno">  377</span><span class="preprocessor">    static const char *portName() { return #L; } \</span></div>
+<div class="line"><span class="lineno">  378</span><span class="preprocessor">    typedef BASE __t_baseType;  \</span></div>
+<div class="line"><span class="lineno">  379</span><span class="preprocessor">    static const void *portAddr() { return (void*)&amp;__t_baseType::r(); } };</span></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -151,7 +151,7 @@ $(function(){initNavTree('db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d65/fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

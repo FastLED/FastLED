@@ -30,13 +30,13 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/mid
   Node6 -> Node16 [id="edge13_Node000006_Node000016",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="fl/ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d98/ptr_8h.html",tooltip=" "];
   Node16 -> Node15 [id="edge14_Node000016_Node000015",color="steelblue1",style="solid",tooltip=" "];
-  Node16 -> Node18 [id="edge15_Node000016_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl/template_magic.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
-  Node6 -> Node18 [id="edge16_Node000006_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node6 -> Node20 [id="edge17_Node000006_Node000020",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="fl/vector.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d68/vector_8h.html",tooltip=" "];
-  Node20 -> Node7 [id="edge18_Node000020_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node20 -> Node5 [id="edge19_Node000020_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node20 -> Node14 [id="edge20_Node000020_Node000014",color="steelblue1",style="solid",tooltip=" "];
-  Node20 -> Node15 [id="edge21_Node000020_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node24 [id="edge15_Node000016_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl/template_magic.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d0c/template__magic_8h.html",tooltip=" "];
+  Node6 -> Node24 [id="edge16_Node000006_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node25 [id="edge17_Node000006_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/vector.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d68/vector_8h.html",tooltip=" "];
+  Node25 -> Node7 [id="edge18_Node000025_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node5 [id="edge19_Node000025_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node14 [id="edge20_Node000025_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node15 [id="edge21_Node000025_Node000015",color="steelblue1",style="solid",tooltip=" "];
 }

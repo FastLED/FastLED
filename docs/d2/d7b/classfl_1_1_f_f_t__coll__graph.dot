@@ -13,10 +13,10 @@ digraph "fl::FFT"
   Node3 [id="Node000003",label="fl::FFT::HashMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d77/structfl_1_1_f_f_t_1_1_hash_map.html",tooltip=" "];
   Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::HashMapLru\< FFT\l_Args, Ptr\< FFTImpl \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/df3/classfl_1_1_hash_map_lru.html",tooltip=" "];
-  Node36 -> Node2 [id="edge4_Node000002_Node000036",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
-  Node36 [id="Node000036",label="fl::PointerDeleter\l\< fl::FFT::HashMap \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node37 -> Node36 [id="edge5_Node000036_Node000037",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FFT::HashMap \>",fontcolor="grey" ];
-  Node37 [id="Node000037",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node38 -> Node2 [id="edge6_Node000002_Node000038",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FFT::HashMap \>",fontcolor="grey" ];
-  Node38 [id="Node000038",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node34 -> Node2 [id="edge4_Node000002_Node000034",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
+  Node34 [id="Node000034",label="fl::PointerDeleter\l\< fl::FFT::HashMap \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node35 -> Node34 [id="edge5_Node000034_Node000035",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FFT::HashMap \>",fontcolor="grey" ];
+  Node35 [id="Node000035",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node36 -> Node2 [id="edge6_Node000002_Node000036",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::FFT::HashMap \>",fontcolor="grey" ];
+  Node36 [id="Node000036",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
 }

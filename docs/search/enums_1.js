@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['colortemperature_0',['ColorTemperature',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#ga251e9e8dc2c7b981786b71706522b2a9',1,'color.h']]]
+  ['buttonstrategy_0',['ButtonStrategy',['../d4/d36/namespacefl_ac1d4a27d825a85e6fbb3fae56546f2af.html#ac1d4a27d825a85e6fbb3fae56546f2af',1,'fl']]]
 ];

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="sparse_arr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dda/cq__kernel_8h.html#da/d99/structsparse__arr",tooltip=" "];
+  Node0 [id="Node000000",label="PixelControllerVtable\l\< PixelControllerT \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d72/struct_pixel_controller_vtable.html",tooltip=" "];
 }

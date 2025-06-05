@@ -24,9 +24,7 @@ digraph "fl::FrameInterpolator::draw"
   Node11 [id="Node000011",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a8a0c8d0a9e5bc93dd87dd70cbd8fdc64.html#a8a0c8d0a9e5bc93dd87dd70cbd8fdc64",tooltip=" "];
   Node11 -> Node12 [id="edge9_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="fl::Frame::Frame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_ac1ae7be31afe8c7d481025ca7236b5d6.html#ac1ae7be31afe8c7d481025ca7236b5d6",tooltip=" "];
-  Node12 -> Node13 [id="edge10_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fl::LargeBlockAllocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abbfba8ffcb35eb85959e52bc168242b2.html#abbfba8ffcb35eb85959e52bc168242b2",tooltip=" "];
-  Node11 -> Node11 [id="edge11_Node000011_Node000011",color="steelblue1",style="solid",tooltip=" "];
-  Node11 -> Node14 [id="edge12_Node000011_Node000014",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="fl::Frame::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2",tooltip=" "];
+  Node11 -> Node11 [id="edge10_Node000011_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node13 [id="edge11_Node000011_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::Frame::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2",tooltip=" "];
 }

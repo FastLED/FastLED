@@ -1,6 +1,7 @@
 var funky_8cpp =
 [
     [ "MAX_DIMENSION", "d6/d43/funky_8cpp_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49", null ],
+    [ "NUM_LEDS", "d6/d43/funky_8cpp_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd", null ],
     [ "Audio1", "d6/d43/funky_8cpp_a1b20f1474772f15832d6ab79538ffcbb.html#a1b20f1474772f15832d6ab79538ffcbb", null ],
     [ "Audio2", "d6/d43/funky_8cpp_aba61b839ccbbd9d26a94bdb82c3cb165.html#aba61b839ccbbd9d26a94bdb82c3cb165", null ],
     [ "Audio3", "d6/d43/funky_8cpp_a4b8e27b9a194ec6a26457cd177a9e8bd.html#a4b8e27b9a194ec6a26457cd177a9e8bd", null ],

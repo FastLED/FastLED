@@ -2,20 +2,18 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,80,164,105"/>
 <area shape="rect" id="Node000002" href="$d1/de0/classfl_1_1_frame_ac1ae7be31afe8c7d481025ca7236b5d6.html#ac1ae7be31afe8c7d481025ca7236b5d6" title=" " alt="" coords="212,5,340,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,77,211,40,227,33,229,38,213,44,119,82"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94" title=" " alt="" coords="225,55,327,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,80,211,73,211,79,165,85"/>
-<area shape="rect" id="Node000009" href="$d1/de0/classfl_1_1_frame_af87085697e2f19076fa6cd89d995501b.html#af87085697e2f19076fa6cd89d995501b" title=" " alt="" coords="222,104,330,129"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="165,100,209,106,208,111,164,105"/>
-<area shape="rect" id="Node000010" href="$d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2" title=" " alt="" coords="219,153,333,179"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="120,103,230,146,228,151,118,108"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_abbfba8ffcb35eb85959e52bc168242b2.html#abbfba8ffcb35eb85959e52bc168242b2" title=" " alt="" coords="388,5,551,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="340,15,374,15,374,21,340,21"/>
-<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="417,55,521,80"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="327,65,403,65,403,70,327,70"/>
-<area shape="rect" id="Node000006" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="436,104,503,129"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="327,77,423,102,422,108,326,83"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="648,79,745,104"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="503,110,634,96,635,101,503,116"/>
-<area shape="rect" id="Node000008" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="599,128,795,153"/>
-<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="503,117,585,126,585,132,503,123"/>
+<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a6348cb098a0b27f443bd1af290dafa94.html#a6348cb098a0b27f443bd1af290dafa94" title=" " alt="" coords="225,55,327,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,80,211,73,211,79,165,85"/>
+<area shape="rect" id="Node000008" href="$d1/de0/classfl_1_1_frame_af87085697e2f19076fa6cd89d995501b.html#af87085697e2f19076fa6cd89d995501b" title=" " alt="" coords="222,104,330,129"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="165,100,209,106,208,111,164,105"/>
+<area shape="rect" id="Node000009" href="$d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2" title=" " alt="" coords="219,153,333,179"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="120,103,230,146,228,151,118,108"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa" title="Default constructor." alt="" coords="388,31,492,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="327,57,374,50,375,56,328,63"/>
+<area shape="rect" id="Node000005" href="$d5/d98/group___math_ga9a604de042246d6c87fdbfdd5578f377.html#ga9a604de042246d6c87fdbfdd5578f377" title="Blend a variable proportion (0&#45;255) of one byte to another." alt="" coords="407,80,473,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="328,73,393,83,392,88,327,78"/>
+<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="589,55,687,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="473,86,575,73,576,78,474,91"/>
+<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="540,104,736,129"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="474,94,527,100,526,106,473,99"/>
 </map>

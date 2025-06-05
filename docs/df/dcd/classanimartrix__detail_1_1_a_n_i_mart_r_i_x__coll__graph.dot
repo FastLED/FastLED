@@ -18,14 +18,15 @@ digraph "animartrix_detail::ANIMartRIX"
   Node6 -> Node1 [id="edge5_Node000001_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" distance\npolar_theta",fontcolor="grey" ];
   Node6 [id="Node000006",label="fl::HeapVector\< fl\l::HeapVector\< float \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node7 -> Node6 [id="edge6_Node000006_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mArray",fontcolor="grey" ];
-  Node7 [id="Node000007",label="fl::scoped_array\< fl\l::HeapVector\< float \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
-  Node8 -> Node7 [id="edge7_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" arr_",fontcolor="grey" ];
-  Node8 [id="Node000008",label="fl::HeapVector\< float \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
-  Node13 -> Node8 [id="edge8_Node000008_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float \>",fontcolor="grey" ];
-  Node13 [id="Node000013",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
-  Node14 -> Node7 [id="edge9_Node000007_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
-  Node14 [id="Node000014",label="fl::ArrayDeleter\< fl\l::HeapVector\< float \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/db6/structfl_1_1_array_deleter.html",tooltip=" "];
-  Node12 -> Node7 [id="edge10_Node000007_Node000012",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::HeapVector\< float \> \>",fontcolor="grey" ];
-  Node12 [id="Node000012",label="fl::scoped_array\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
-  Node13 -> Node6 [id="edge11_Node000006_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::HeapVector\< float \> \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::HeapVector\< float \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node8 -> Node7 [id="edge7_Node000007_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAlloc",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::allocator\< float \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/dcd/classfl_1_1allocator.html",tooltip=" "];
+  Node9 -> Node8 [id="edge8_Node000008_Node000009",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float \>",fontcolor="grey" ];
+  Node9 [id="Node000009",label="fl::allocator\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/dcd/classfl_1_1allocator.html",tooltip=" "];
+  Node10 -> Node7 [id="edge9_Node000007_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float \>",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::HeapVector\< T,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node11 -> Node6 [id="edge10_Node000006_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAlloc",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::allocator\< fl::\lHeapVector\< float \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/dcd/classfl_1_1allocator.html",tooltip=" "];
+  Node9 -> Node11 [id="edge11_Node000011_Node000009",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::HeapVector\< float \> \>",fontcolor="grey" ];
+  Node10 -> Node6 [id="edge12_Node000006_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::HeapVector\< float \> \>",fontcolor="grey" ];
 }

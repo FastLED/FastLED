@@ -123,23 +123,33 @@ $(function(){initNavTree('d8/d08/class_timer_afcd053bdcfb07b0ad9c85f8f7490ea3d.h
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/dd0/timer_8h_source.html#l00013">13</a> of file <a class="el" href="../../d5/dd0/timer_8h_source.html">timer.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   13</span>                              {</div>
-<div class="line"><span class="lineno">   14</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">running</a>) {</div>
-<div class="line"><span class="lineno">   15</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   16</span>        }</div>
-<div class="line"><span class="lineno">   17</span>        uint32_t elapsed = now - <a class="code hl_variable" href="../../d8/d08/class_timer_a4130b44bc4e9cc1ed58536b03462ddee.html#a4130b44bc4e9cc1ed58536b03462ddee">start_time</a>;</div>
-<div class="line"><span class="lineno">   18</span>        <span class="keywordflow">if</span> (elapsed &gt; <a class="code hl_variable" href="../../d8/d08/class_timer_a642f0fef0aac4b26bf923242aa6face1.html#a642f0fef0aac4b26bf923242aa6face1">duration</a>) {</div>
-<div class="line"><span class="lineno">   19</span>            <a class="code hl_variable" href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">running</a> = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   20</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   21</span>        }</div>
-<div class="line"><span class="lineno">   22</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   23</span>    }</div>
-<div class="ttc" id="aclass_timer_a3b8bb57a0a252c88f85c0592715ea425_html_a3b8bb57a0a252c88f85c0592715ea425"><div class="ttname"><a href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">Timer::running</a></div><div class="ttdeci">bool running</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00028">timer.h:28</a></div></div>
-<div class="ttc" id="aclass_timer_a4130b44bc4e9cc1ed58536b03462ddee_html_a4130b44bc4e9cc1ed58536b03462ddee"><div class="ttname"><a href="../../d8/d08/class_timer_a4130b44bc4e9cc1ed58536b03462ddee.html#a4130b44bc4e9cc1ed58536b03462ddee">Timer::start_time</a></div><div class="ttdeci">uint32_t start_time</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00026">timer.h:26</a></div></div>
-<div class="ttc" id="aclass_timer_a642f0fef0aac4b26bf923242aa6face1_html_a642f0fef0aac4b26bf923242aa6face1"><div class="ttname"><a href="../../d8/d08/class_timer_a642f0fef0aac4b26bf923242aa6face1.html#a642f0fef0aac4b26bf923242aa6face1">Timer::duration</a></div><div class="ttdeci">uint32_t duration</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00027">timer.h:27</a></div></div>
+<p>Update the timer state based on current time. </p>
+<p>Checks if the timer is still running based on the current time. If the specified duration has elapsed, the timer will stop.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">now</td><td>Current time in milliseconds (typically from millis()) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if the timer is still running, false if stopped or elapsed </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d5/dd0/timer_8h_source.html#l00042">42</a> of file <a class="el" href="../../d5/dd0/timer_8h_source.html">timer.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   42</span>                              {</div>
+<div class="line"><span class="lineno">   43</span>        <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">running</a>) {</div>
+<div class="line"><span class="lineno">   44</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   45</span>        }</div>
+<div class="line"><span class="lineno">   46</span>        uint32_t elapsed = now - <a class="code hl_variable" href="../../d8/d08/class_timer_a4130b44bc4e9cc1ed58536b03462ddee.html#a4130b44bc4e9cc1ed58536b03462ddee">start_time</a>;</div>
+<div class="line"><span class="lineno">   47</span>        <span class="keywordflow">if</span> (elapsed &gt; <a class="code hl_variable" href="../../d8/d08/class_timer_a642f0fef0aac4b26bf923242aa6face1.html#a642f0fef0aac4b26bf923242aa6face1">duration</a>) {</div>
+<div class="line"><span class="lineno">   48</span>            <a class="code hl_variable" href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">running</a> = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   49</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   50</span>        }</div>
+<div class="line"><span class="lineno">   51</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   52</span>    }</div>
+<div class="ttc" id="aclass_timer_a3b8bb57a0a252c88f85c0592715ea425_html_a3b8bb57a0a252c88f85c0592715ea425"><div class="ttname"><a href="../../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425">Timer::running</a></div><div class="ttdeci">bool running</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00057">timer.h:57</a></div></div>
+<div class="ttc" id="aclass_timer_a4130b44bc4e9cc1ed58536b03462ddee_html_a4130b44bc4e9cc1ed58536b03462ddee"><div class="ttname"><a href="../../d8/d08/class_timer_a4130b44bc4e9cc1ed58536b03462ddee.html#a4130b44bc4e9cc1ed58536b03462ddee">Timer::start_time</a></div><div class="ttdeci">uint32_t start_time</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00055">timer.h:55</a></div></div>
+<div class="ttc" id="aclass_timer_a642f0fef0aac4b26bf923242aa6face1_html_a642f0fef0aac4b26bf923242aa6face1"><div class="ttname"><a href="../../d8/d08/class_timer_a642f0fef0aac4b26bf923242aa6face1.html#a642f0fef0aac4b26bf923242aa6face1">Timer::duration</a></div><div class="ttdeci">uint32_t duration</div><div class="ttdef"><b>Definition</b> <a href="../../d5/dd0/timer_8h_source.html#l00056">timer.h:56</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/dd0/timer_8h_source.html#l00027">duration</a>, <a class="el" href="../../d5/dd0/timer_8h_source.html#l00028">running</a>, and <a class="el" href="../../d5/dd0/timer_8h_source.html#l00026">start_time</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/dd0/timer_8h_source.html#l00056">duration</a>, <a class="el" href="../../d5/dd0/timer_8h_source.html#l00057">running</a>, and <a class="el" href="../../d5/dd0/timer_8h_source.html#l00055">start_time</a>.</p>
 
 </div>
 </div>
@@ -150,7 +160,7 @@ $(function(){initNavTree('d8/d08/class_timer_afcd053bdcfb07b0ad9c85f8f7490ea3d.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/d08/class_timer.html">Timer</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

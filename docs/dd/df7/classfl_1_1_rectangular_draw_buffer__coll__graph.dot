@@ -27,5 +27,5 @@ digraph "fl::RectangularDrawBuffer"
   Node10 -> Node1 [id="edge10_Node000001_Node000010",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mDrawList\nmPrevDrawList",fontcolor="grey" ];
   Node10 [id="Node000010",label="fl::HeapVector\< DrawItem \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node11 -> Node10 [id="edge11_Node000010_Node000011",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< DrawItem \>",fontcolor="grey" ];
-  Node11 [id="Node000011",label="fl::HeapVector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node11 [id="Node000011",label="fl::HeapVector\< T,\l Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
 }

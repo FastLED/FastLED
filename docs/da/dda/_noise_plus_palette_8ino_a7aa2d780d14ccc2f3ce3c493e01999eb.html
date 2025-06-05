@@ -119,24 +119,29 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a7aa2d780d14ccc2f3ce3c
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00285">285</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  286</span>{</div>
-<div class="line"><span class="lineno">  287</span>  uint16_t i;</div>
-<div class="line"><span class="lineno">  288</span>  <span class="keywordflow">if</span>( <a class="code hl_define" href="../../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d">kMatrixSerpentineLayout</a> == <span class="keyword">false</span>) {</div>
-<div class="line"><span class="lineno">  289</span>    i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  290</span>  }</div>
-<div class="line"><span class="lineno">  291</span>  <span class="keywordflow">if</span>( <a class="code hl_define" href="../../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d">kMatrixSerpentineLayout</a> == <span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">  292</span>    <span class="keywordflow">if</span>( <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &amp; 0x01) {</div>
-<div class="line"><span class="lineno">  293</span>      <span class="comment">// Odd rows run backwards</span></div>
-<div class="line"><span class="lineno">  294</span>      uint8_t reverseX = (<a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a> - 1) - <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  295</span>      i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + reverseX;</div>
-<div class="line"><span class="lineno">  296</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  297</span>      <span class="comment">// Even rows run forwards</span></div>
-<div class="line"><span class="lineno">  298</span>      i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  299</span>    }</div>
-<div class="line"><span class="lineno">  300</span>  }</div>
-<div class="line"><span class="lineno">  301</span>  <span class="keywordflow">return</span> i;</div>
-<div class="line"><span class="lineno">  302</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00382">382</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  383</span>{</div>
+<div class="line"><span class="lineno">  384</span>  uint16_t i;</div>
+<div class="line"><span class="lineno">  385</span>  </div>
+<div class="line"><span class="lineno">  386</span>  <span class="comment">// For a regular/sequential layout, it&#39;s just y * width + x</span></div>
+<div class="line"><span class="lineno">  387</span>  <span class="keywordflow">if</span>( <a class="code hl_define" href="../../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d">kMatrixSerpentineLayout</a> == <span class="keyword">false</span>) {</div>
+<div class="line"><span class="lineno">  388</span>    i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  389</span>  }</div>
+<div class="line"><span class="lineno">  390</span>  </div>
+<div class="line"><span class="lineno">  391</span>  <span class="comment">// For a serpentine layout (zigzag), odd rows run backwards</span></div>
+<div class="line"><span class="lineno">  392</span>  <span class="keywordflow">if</span>( <a class="code hl_define" href="../../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d">kMatrixSerpentineLayout</a> == <span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  393</span>    <span class="keywordflow">if</span>( <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &amp; 0x01) {  <span class="comment">// Check if y is odd (bitwise AND with 1)</span></div>
+<div class="line"><span class="lineno">  394</span>      <span class="comment">// Odd rows run backwards</span></div>
+<div class="line"><span class="lineno">  395</span>      uint8_t reverseX = (<a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a> - 1) - <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  396</span>      i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + reverseX;</div>
+<div class="line"><span class="lineno">  397</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  398</span>      <span class="comment">// Even rows run forwards</span></div>
+<div class="line"><span class="lineno">  399</span>      i = (<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3">kMatrixWidth</a>) + <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  400</span>    }</div>
+<div class="line"><span class="lineno">  401</span>  }</div>
+<div class="line"><span class="lineno">  402</span>  </div>
+<div class="line"><span class="lineno">  403</span>  <span class="keywordflow">return</span> i;</div>
+<div class="line"><span class="lineno">  404</span>}</div>
 <div class="ttc" id="a_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00072">Audio.ino:72</a></div></div>
 <div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
 <div class="ttc" id="a_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d_html_a268a33d1b2b5558e10b1ffed3959808d"><div class="ttname"><a href="../../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d">kMatrixSerpentineLayout</a></div><div class="ttdeci">#define kMatrixSerpentineLayout</div><div class="ttdef"><b>Definition</b> <a href="../../d7/ddc/_noise_playground_8ino_source.html#l00023">NoisePlayground.ino:23</a></div></div>
@@ -144,7 +149,7 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a7aa2d780d14ccc2f3ce3c
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d7/ddc/_noise_playground_8ino_source.html#l00023">kMatrixSerpentineLayout</a>, <a class="el" href="../../da/db6/_smart_matrix_8ino_source.html#l00013">kMatrixWidth</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, and <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00148">mapNoiseToLEDsUsingPalette()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00202">mapNoiseToLEDsUsingPalette()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +167,7 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_a7aa2d780d14ccc2f3ce3c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_9855228c8cabbd40154e79ac1a40dc7f.html">NoisePlusPalette</a></li><li class="navelem"><a class="el" href="../../da/dda/_noise_plus_palette_8ino.html">NoisePlusPalette.ino</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

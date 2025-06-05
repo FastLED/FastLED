@@ -129,24 +129,24 @@ template&lt;typename XYVisitor&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/df9/raster__sparse_8h_source.html#l00148">148</a> of file <a class="el" href="../../d4/df9/raster__sparse_8h_source.html">raster_sparse.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>                                                      {</div>
-<div class="line"><span class="lineno">  149</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;it : <a class="code hl_variable" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">mSparseGrid</a>) {</div>
-<div class="line"><span class="lineno">  150</span>            <span class="keyword">auto</span> pt = it.first;</div>
-<div class="line"><span class="lineno">  151</span>            <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.has(pt.x, pt.y)) {</div>
-<div class="line"><span class="lineno">  152</span>                <span class="keywordflow">continue</span>;</div>
-<div class="line"><span class="lineno">  153</span>            }</div>
-<div class="line"><span class="lineno">  154</span>            uint32_t index = <a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>(pt.x, pt.y);</div>
-<div class="line"><span class="lineno">  155</span>            uint8_t value = it.second;</div>
-<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">if</span> (value &gt; 0) { <span class="comment">// Something wrote here.</span></div>
-<div class="line"><span class="lineno">  157</span>                visitor.draw(pt, index, value);</div>
+<p class="definition">Definition at line <a class="el" href="../../d4/df9/raster__sparse_8h_source.html#l00153">153</a> of file <a class="el" href="../../d4/df9/raster__sparse_8h_source.html">raster_sparse.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  153</span>                                                      {</div>
+<div class="line"><span class="lineno">  154</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;it : <a class="code hl_variable" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">mSparseGrid</a>) {</div>
+<div class="line"><span class="lineno">  155</span>            <span class="keyword">auto</span> pt = it.first;</div>
+<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.has(pt.x, pt.y)) {</div>
+<div class="line"><span class="lineno">  157</span>                <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  158</span>            }</div>
-<div class="line"><span class="lineno">  159</span>        }</div>
-<div class="line"><span class="lineno">  160</span>    }</div>
+<div class="line"><span class="lineno">  159</span>            uint32_t index = <a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>(pt.x, pt.y);</div>
+<div class="line"><span class="lineno">  160</span>            uint8_t value = it.second;</div>
+<div class="line"><span class="lineno">  161</span>            <span class="keywordflow">if</span> (value &gt; 0) { <span class="comment">// Something wrote here.</span></div>
+<div class="line"><span class="lineno">  162</span>                visitor.draw(pt, index, value);</div>
+<div class="line"><span class="lineno">  163</span>            }</div>
+<div class="line"><span class="lineno">  164</span>        }</div>
+<div class="line"><span class="lineno">  165</span>    }</div>
 <div class="ttc" id="a_blur2d_8ino_aec006558d688505c331eb481e3df4319_html_aec006558d688505c331eb481e3df4319"><div class="ttname"><a href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a></div><div class="ttdeci">XYMap xymap(WIDTH, HEIGHT, SERPENTINE)</div></div>
-<div class="ttc" id="aclassfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865_html_aca9db41eeaa4e6aff04b757ef5205865"><div class="ttname"><a href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">fl::XYRasterU8Sparse::mSparseGrid</a></div><div class="ttdeci">HashMapLarge mSparseGrid</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df9/raster__sparse_8h_source.html#l00212">raster_sparse.h:212</a></div></div>
+<div class="ttc" id="aclassfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865_html_aca9db41eeaa4e6aff04b757ef5205865"><div class="ttname"><a href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">fl::XYRasterU8Sparse::mSparseGrid</a></div><div class="ttdeci">HashMapLarge mSparseGrid</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df9/raster__sparse_8h_source.html#l00217">raster_sparse.h:217</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/df9/raster__sparse_8h_source.html#l00212">mSparseGrid</a>, and <a class="el" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/df9/raster__sparse_8h_source.html#l00217">mSparseGrid</a>, and <a class="el" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.</p>
 
 </div>
 </div>
@@ -157,7 +157,7 @@ template&lt;typename XYVisitor&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html">XYRasterU8Sparse</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:40 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

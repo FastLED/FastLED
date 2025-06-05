@@ -3,6 +3,7 @@ var math__macros_8h =
     [ "ABS", "d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759", null ],
     [ "ALMOST_EQUAL", "d8/db8/math__macros_8h_a1f8698fec915b202346cc2bae8b36dc2.html#a1f8698fec915b202346cc2bae8b36dc2", null ],
     [ "ALMOST_EQUAL_DOUBLE", "d8/db8/math__macros_8h_aa6fa0fdc9d1e46a72482406f96f8a705.html#aa6fa0fdc9d1e46a72482406f96f8a705", null ],
+    [ "ALMOST_EQUAL_EPSILON", "d8/db8/math__macros_8h_af547ae81ff58f804c001285dab36b9aa.html#af547ae81ff58f804c001285dab36b9aa", null ],
     [ "ALMOST_EQUAL_FLOAT", "d8/db8/math__macros_8h_a621db28d412216b1f19e72ba24cc0013.html#a621db28d412216b1f19e72ba24cc0013", null ],
     [ "EPSILON_D", "d8/db8/math__macros_8h_ae970d6f3d59a20a40c228b139484c091.html#ae970d6f3d59a20a40c228b139484c091", null ],
     [ "EPSILON_F", "d8/db8/math__macros_8h_a5915b5d8217777018aac98809dd70929.html#a5915b5d8217777018aac98809dd70929", null ],

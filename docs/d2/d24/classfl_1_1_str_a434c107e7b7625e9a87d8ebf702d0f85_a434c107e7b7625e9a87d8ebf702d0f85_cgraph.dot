@@ -17,7 +17,7 @@ digraph "fl::Str::append"
   Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fl::StrN\< FASTLED_STR\l_INLINED_SIZE \>::write",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n_a270fb921e74601bc45cc8513e8a075f7.html#a270fb921e74601bc45cc8513e8a075f7",tooltip=" "];
   Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::HeapVector::data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_af55b7debe54f11e76ecf7dc6e7b50984.html#af55b7debe54f11e76ecf7dc6e7b50984",tooltip=" "];
+  Node6 [id="Node000006",label="fl::HeapVector::data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_ad9b36f0e3e83edcda97aea201378f969.html#ad9b36f0e3e83edcda97aea201378f969",tooltip=" "];
   Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::HeapVector::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a37e5c0526e1be1bdc4c17139ac026939.html#a37e5c0526e1be1bdc4c17139ac026939",tooltip=" "];
+  Node7 [id="Node000007",label="fl::HeapVector::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a95bc33f4abf2c37c9a22860600a50399.html#a95bc33f4abf2c37c9a22860600a50399",tooltip=" "];
 }

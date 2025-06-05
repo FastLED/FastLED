@@ -1,15 +1,17 @@
 <map id="fl::PointerDeleter&lt; T &gt;" name="fl::PointerDeleter&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,177,176,202"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,205,176,230"/>
 <area shape="rect" id="Node000002" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="401,5,596,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,164,146,123,171,102,199,84,248,63,301,47,401,29,402,34,302,52,250,68,201,89,175,106,150,127,112,168"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,191,141,136,168,107,199,83,247,59,300,43,352,32,401,26,402,31,353,37,301,48,249,64,201,88,171,111,145,139,107,194"/>
 <area shape="rect" id="Node000003" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="419,69,578,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,169,199,143,314,115,419,97,420,102,315,120,201,148,132,174"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="118,194,156,170,199,148,255,129,313,114,418,95,419,101,314,119,256,134,201,153,158,175,121,199"/>
 <area shape="rect" id="Node000004" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="428,133,569,173"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="190,178,428,157,428,162,190,183"/>
-<area shape="rect" id="Node000005" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,198,587,253"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="151,203,200,212,309,221,410,224,410,229,309,227,200,217,150,208"/>
-<area shape="rect" id="Node000006" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,277,587,331"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="119,209,156,236,201,259,253,275,308,287,410,299,409,304,307,292,252,281,199,264,153,240,115,213"/>
-<area shape="rect" id="Node000007" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="404,356,593,396"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="108,212,145,266,171,294,201,316,250,339,303,356,355,366,404,371,404,377,354,371,301,361,248,344,199,321,168,298,141,270,103,215"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="172,199,200,195,427,160,428,166,200,200,173,205"/>
+<area shape="rect" id="Node000005" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="433,197,565,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="190,215,432,215,432,220,190,220"/>
+<area shape="rect" id="Node000006" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,262,587,317"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="140,232,201,249,309,268,410,280,409,285,308,274,199,255,138,237"/>
+<area shape="rect" id="Node000007" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="410,341,587,395"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="113,239,151,278,175,297,201,312,253,333,307,347,410,362,409,368,306,353,251,338,199,317,172,301,148,282,109,243"/>
+<area shape="rect" id="Node000008" href="$d8/d3d/structfl_1_1_pointer_deleter.html" title=" " alt="" coords="404,420,593,460"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="104,242,118,274,139,312,167,349,202,379,249,404,302,422,354,432,404,437,404,443,354,437,300,427,247,409,198,384,163,352,135,315,114,277,99,244"/>
 </map>

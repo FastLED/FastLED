@@ -24,14 +24,14 @@ digraph "fl::XYPath"
   Node10 [id="Node000010",label="fl::XYRasterU8Sparse",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html",tooltip=" "];
   Node11 -> Node10 [id="edge9_Node000010_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSparseGrid",fontcolor="grey" ];
   Node11 [id="Node000011",label="fl::HashMap\< Key, Value,\l HashKey, EqualToKey,\l FASTLED_HASHMAP_INLINED\l_COUNT \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
-  Node38 -> Node10 [id="edge10_Node000010_Node000038",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCache",fontcolor="grey" ];
-  Node38 [id="Node000038",label="fl::HashMap\< fl::vec2\l\< int \>, uint8_t *, fl\l::FastHash\< Key \>, fl::\lEqualTo\< Key \>, kMaxCacheSize \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
-  Node42 -> Node10 [id="edge11_Node000010_Node000042",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAbsoluteBounds",fontcolor="grey" ];
-  Node42 [id="Node000042",label="fl::rect\< int \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
-  Node46 -> Node9 [id="edge12_Node000009_Node000046",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
-  Node46 [id="Node000046",label="fl::PointerDeleter\l\< fl::XYRasterU8Sparse \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node47 -> Node46 [id="edge13_Node000046_Node000047",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::XYRasterU8Sparse \>",fontcolor="grey" ];
-  Node47 [id="Node000047",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
-  Node48 -> Node9 [id="edge14_Node000009_Node000048",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::XYRasterU8Sparse \>",fontcolor="grey" ];
-  Node48 [id="Node000048",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
+  Node36 -> Node10 [id="edge10_Node000010_Node000036",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCache",fontcolor="grey" ];
+  Node36 [id="Node000036",label="fl::HashMap\< fl::vec2\l\< int16_t \>, uint8_t\l *, fl::FastHash\< Key\l \>, fl::EqualTo\< Key \>,\l kMaxCacheSize \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
+  Node40 -> Node10 [id="edge11_Node000010_Node000040",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAbsoluteBounds",fontcolor="grey" ];
+  Node40 [id="Node000040",label="fl::rect\< int16_t \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
+  Node44 -> Node9 [id="edge12_Node000009_Node000044",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" deleter_",fontcolor="grey" ];
+  Node44 [id="Node000044",label="fl::PointerDeleter\l\< fl::XYRasterU8Sparse \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node45 -> Node44 [id="edge13_Node000044_Node000045",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::XYRasterU8Sparse \>",fontcolor="grey" ];
+  Node45 [id="Node000045",label="fl::PointerDeleter\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d3d/structfl_1_1_pointer_deleter.html",tooltip=" "];
+  Node46 -> Node9 [id="edge14_Node000009_Node000046",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::XYRasterU8Sparse \>",fontcolor="grey" ];
+  Node46 [id="Node000046",label="fl::scoped_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d0b/classfl_1_1scoped__ptr.html",tooltip=" "];
 }

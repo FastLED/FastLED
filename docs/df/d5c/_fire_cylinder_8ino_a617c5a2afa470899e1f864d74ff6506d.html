@@ -139,26 +139,52 @@ $(function(){initNavTree('df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74f
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html#l00075">75</a> of file <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html">FireCylinder.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   76</span>                                          {</div>
-<div class="line"><span class="lineno">   77</span>    <span class="comment">// get palette index</span></div>
-<div class="line"><span class="lineno">   78</span>    uint16_t <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a793f35a07941d133ebbd4bd1ae016bd5.html#a793f35a07941d133ebbd4bd1ae016bd5">scaleXY</a>.as&lt;uint16_t&gt;();</div>
-<div class="line"><span class="lineno">   79</span>    <span class="keywordtype">float</span> xf = (float)width / (<span class="keywordtype">float</span>)max_width;</div>
-<div class="line"><span class="lineno">   80</span>    uint8_t <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = (uint8_t)(xf * 255);</div>
-<div class="line"><span class="lineno">   81</span>    uint32_t cosx = <a class="code hl_function" href="../../d1/ddc/group___trig_ga4432f985c94f5bff715db402d767b0e8.html#ga4432f985c94f5bff715db402d767b0e8">cos8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);</div>
-<div class="line"><span class="lineno">   82</span>    uint32_t sinx = <a class="code hl_define" href="../../d1/ddc/group___trig_gaec8c5c0ed079727baa3b40184354ce41.html#gaec8c5c0ed079727baa3b40184354ce41">sin8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);</div>
-<div class="line"><span class="lineno">   83</span>    <span class="keywordtype">float</span> trig_scale = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_abc20a5996574178e97b694dd7f2eefb7.html#abc20a5996574178e97b694dd7f2eefb7">scaleX</a>.value();</div>
-<div class="line"><span class="lineno">   84</span>    cosx *= trig_scale;</div>
-<div class="line"><span class="lineno">   85</span>    sinx *= trig_scale;</div>
-<div class="line"><span class="lineno">   86</span>    uint32_t <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = height * <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> + <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1.html#a081c2d7f9619a32bd806baa1831ce1c1">y_speed</a>; <span class="comment">// swapped: now using height</span></div>
-<div class="line"><span class="lineno">   87</span>    uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> = millis32 / <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_ab30cfa783bcdc8d60ef92d141aff3db2.html#ab30cfa783bcdc8d60ef92d141aff3db2">invSpeedZ</a>.as&lt;uint16_t&gt;();</div>
-<div class="line"><span class="lineno">   88</span> </div>
-<div class="line"><span class="lineno">   89</span>    uint16_t noise16 = <a class="code hl_function" href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c">inoise16</a>(cosx &lt;&lt; 8, sinx &lt;&lt; 8, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &lt;&lt; 8, 0);</div>
-<div class="line"><span class="lineno">   90</span>    uint8_t noise_val = noise16 &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">   91</span>    int8_t subtraction_factor = <a class="code hl_function" href="../../d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415.html#ga162169ac0c2d1f3d01eaff8f32e1b415">abs8</a>(height - (max_height - 1)) * 255 /</div>
-<div class="line"><span class="lineno">   92</span>                                (max_height - 1); <span class="comment">// swapped: now using height</span></div>
-<div class="line"><span class="lineno">   93</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>(noise_val, subtraction_factor);</div>
-<div class="line"><span class="lineno">   94</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html#l00105">105</a> of file <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html">FireCylinder.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  106</span>                                          {</div>
+<div class="line"><span class="lineno">  107</span>    <span class="comment">// This function calculates which color to use from our palette for each LED</span></div>
+<div class="line"><span class="lineno">  108</span>    </div>
+<div class="line"><span class="lineno">  109</span>    <span class="comment">// Get the scale factor from the UI slider</span></div>
+<div class="line"><span class="lineno">  110</span>    uint16_t <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a793f35a07941d133ebbd4bd1ae016bd5.html#a793f35a07941d133ebbd4bd1ae016bd5">scaleXY</a>.as&lt;uint16_t&gt;();</div>
+<div class="line"><span class="lineno">  111</span>    </div>
+<div class="line"><span class="lineno">  112</span>    <span class="comment">// Convert width position to an angle (0-255 represents 0-360 degrees)</span></div>
+<div class="line"><span class="lineno">  113</span>    <span class="comment">// This maps our flat coordinate to a position on a cylinder</span></div>
+<div class="line"><span class="lineno">  114</span>    <span class="keywordtype">float</span> xf = (float)width / (<span class="keywordtype">float</span>)max_width;  <span class="comment">// Normalized position (0.0 to 1.0)</span></div>
+<div class="line"><span class="lineno">  115</span>    uint8_t <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = (uint8_t)(xf * 255);            <span class="comment">// Convert to 0-255 range for trig functions</span></div>
+<div class="line"><span class="lineno">  116</span>    </div>
+<div class="line"><span class="lineno">  117</span>    <span class="comment">// Calculate the sine and cosine of this angle to get 3D coordinates on the cylinder</span></div>
+<div class="line"><span class="lineno">  118</span>    uint32_t cosx = <a class="code hl_function" href="../../d1/ddc/group___trig_ga4432f985c94f5bff715db402d767b0e8.html#ga4432f985c94f5bff715db402d767b0e8">cos8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);  <span class="comment">// cos8 returns a value 0-255 representing cosine</span></div>
+<div class="line"><span class="lineno">  119</span>    uint32_t sinx = <a class="code hl_define" href="../../d1/ddc/group___trig_gaec8c5c0ed079727baa3b40184354ce41.html#gaec8c5c0ed079727baa3b40184354ce41">sin8</a>(<a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>);  <span class="comment">// sin8 returns a value 0-255 representing sine</span></div>
+<div class="line"><span class="lineno">  120</span>    </div>
+<div class="line"><span class="lineno">  121</span>    <span class="comment">// Apply scaling to the sine/cosine values</span></div>
+<div class="line"><span class="lineno">  122</span>    <span class="comment">// This controls how &quot;wide&quot; the noise pattern is around the cylinder</span></div>
+<div class="line"><span class="lineno">  123</span>    <span class="keywordtype">float</span> trig_scale = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> * <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_abc20a5996574178e97b694dd7f2eefb7.html#abc20a5996574178e97b694dd7f2eefb7">scaleX</a>.value();</div>
+<div class="line"><span class="lineno">  124</span>    cosx *= trig_scale;</div>
+<div class="line"><span class="lineno">  125</span>    sinx *= trig_scale;</div>
+<div class="line"><span class="lineno">  126</span>    </div>
+<div class="line"><span class="lineno">  127</span>    <span class="comment">// Calculate Y coordinate (vertical position) with speed offset for movement</span></div>
+<div class="line"><span class="lineno">  128</span>    uint32_t <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = height * <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> + <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1.html#a081c2d7f9619a32bd806baa1831ce1c1">y_speed</a>;</div>
+<div class="line"><span class="lineno">  129</span>    </div>
+<div class="line"><span class="lineno">  130</span>    <span class="comment">// Calculate Z coordinate (time dimension) - controls how the pattern changes over time</span></div>
+<div class="line"><span class="lineno">  131</span>    uint16_t <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a4e48336126ecdad27c0411a91b14bf5a.html#a4e48336126ecdad27c0411a91b14bf5a">z</a> = millis32 / <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_ab30cfa783bcdc8d60ef92d141aff3db2.html#ab30cfa783bcdc8d60ef92d141aff3db2">invSpeedZ</a>.as&lt;uint16_t&gt;();</div>
+<div class="line"><span class="lineno">  132</span> </div>
+<div class="line"><span class="lineno">  133</span>    <span class="comment">// Generate 16-bit Perlin noise using our 4D coordinates (x,y,z,t)</span></div>
+<div class="line"><span class="lineno">  134</span>    <span class="comment">// The &lt;&lt; 8 shifts values left by 8 bits (multiplies by 256) to use the full 16-bit range</span></div>
+<div class="line"><span class="lineno">  135</span>    <span class="comment">// The last parameter (0) could be replaced with another time variable for more variation</span></div>
+<div class="line"><span class="lineno">  136</span>    uint16_t noise16 = <a class="code hl_function" href="../../d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c">inoise16</a>(cosx &lt;&lt; 8, sinx &lt;&lt; 8, <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &lt;&lt; 8, 0);</div>
+<div class="line"><span class="lineno">  137</span>    </div>
+<div class="line"><span class="lineno">  138</span>    <span class="comment">// Convert 16-bit noise to 8-bit by taking the high byte</span></div>
+<div class="line"><span class="lineno">  139</span>    uint8_t noise_val = noise16 &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  140</span>    </div>
+<div class="line"><span class="lineno">  141</span>    <span class="comment">// Calculate how much to subtract based on vertical position (height)</span></div>
+<div class="line"><span class="lineno">  142</span>    <span class="comment">// This creates the fade-out effect from bottom to top</span></div>
+<div class="line"><span class="lineno">  143</span>    <span class="comment">// The formula maps height from 0 to max_height-1 to a value from 255 to 0</span></div>
+<div class="line"><span class="lineno">  144</span>    int8_t subtraction_factor = <a class="code hl_function" href="../../d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415.html#ga162169ac0c2d1f3d01eaff8f32e1b415">abs8</a>(height - (max_height - 1)) * 255 /</div>
+<div class="line"><span class="lineno">  145</span>                                (max_height - 1);</div>
+<div class="line"><span class="lineno">  146</span>    </div>
+<div class="line"><span class="lineno">  147</span>    <span class="comment">// Subtract the factor from the noise value (with underflow protection)</span></div>
+<div class="line"><span class="lineno">  148</span>    <span class="comment">// qsub8 is a &quot;saturating subtraction&quot; - it won&#39;t go below 0</span></div>
+<div class="line"><span class="lineno">  149</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3">qsub8</a>(noise_val, subtraction_factor);</div>
+<div class="line"><span class="lineno">  150</span>}</div>
 <div class="ttc" id="a_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00072">Audio.ino:72</a></div></div>
 <div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
 <div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
@@ -175,7 +201,7 @@ $(function(){initNavTree('df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74f
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d5/dd1/math8_8h_source.html#l00500">abs8()</a>, <a class="el" href="../../d3/db9/trig8_8h_source.html#l00271">cos8()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00440">inoise16()</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_ab30cfa783bcdc8d60ef92d141aff3db2.html#ab30cfa783bcdc8d60ef92d141aff3db2">invSpeedZ</a>, <a class="el" href="../../d5/dd1/math8_8h_source.html#l00103">qsub8()</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_abc20a5996574178e97b694dd7f2eefb7.html#abc20a5996574178e97b694dd7f2eefb7">scaleX</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a793f35a07941d133ebbd4bd1ae016bd5.html#a793f35a07941d133ebbd4bd1ae016bd5">scaleXY</a>, <a class="el" href="../../d3/db9/trig8_8h_source.html#l00221">sin8</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00072">y</a>, <a class="el" href="../../d7/ddc/_noise_playground_8ino_source.html#l00051">y_speed</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00084">z</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html#l00109">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d5c/_fire_cylinder_8ino_source.html#l00165">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -200,7 +226,7 @@ $(function(){initNavTree('df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_a83f5321b6fdce4474b55dfcf0fb2e86.html">FireCylinder</a></li><li class="navelem"><a class="el" href="../../df/d5c/_fire_cylinder_8ino.html">FireCylinder.ino</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:57 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

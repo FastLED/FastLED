@@ -11,5 +11,8 @@ digraph "fl::ThreadLocalFake::access"
   Node2 [id="Node000002",label="fl::anonymous_namespace\l\{audio::cpp\}::get_flex_fft",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03_a63dcc803fe703f176b52e25bde0c3adf.html#a63dcc803fe703f176b52e25bde0c3adf",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node3 [id="edge3_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::ThreadLocalFake\l::operator T&",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dfc/classfl_1_1_thread_local_fake_a3fc5f57fb8dae1d4622d33bcbdd16266.html#a3fc5f57fb8dae1d4622d33bcbdd16266",tooltip=" "];
+  Node3 [id="Node000003",label="fl::anonymous_namespace\l\{xypath::cpp\}::get_tls\l_raster",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03_a85e4c86634208307df5691237143a988.html#a85e4c86634208307df5691237143a988",tooltip=" "];
+  Node3 -> Node3 [id="edge4_Node000003_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node4 [id="edge5_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ThreadLocalFake\l::operator T&",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dfc/classfl_1_1_thread_local_fake_a3fc5f57fb8dae1d4622d33bcbdd16266.html#a3fc5f57fb8dae1d4622d33bcbdd16266",tooltip=" "];
 }

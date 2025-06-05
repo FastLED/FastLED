@@ -19,4 +19,6 @@ digraph "fl::WaveFx::WaveFx"
   Node6 [id="Node000006",label="fl::Fx2d::getWidth",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3e/classfl_1_1_fx2d_ad43b84d2abcda8905bdcd35f9a8c46ff.html#ad43b84d2abcda8905bdcd35f9a8c46ff",tooltip=" "];
   Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl::WaveFx::setAutoUpdate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_a35b76280dc308f7b6c0e6783bf6be390.html#a35b76280dc308f7b6c0e6783bf6be390",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::WaveFx::setXCylindrical",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_adcc62937b64c442f328b89f5c9529a30.html#adcc62937b64c442f328b89f5c9529a30",tooltip=" "];
 }

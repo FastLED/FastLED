@@ -1,0 +1,10 @@
+<map id="fl::UICheckbox::onChanged" name="fl::UICheckbox::onChanged">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,42,203,67"/>
+<area shape="rect" id="Node000002" href="$d7/dfe/classfl_1_1_u_i_checkbox_af76f946adbb7b46a4f8636cef8933271.html#af76f946adbb7b46a4f8636cef8933271" title=" " alt="" coords="251,42,453,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,52,237,52,237,57,203,57"/>
+<area shape="rect" id="Node000003" href="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ad67db98e127fee84a13a9e26731373cf.html#ad67db98e127fee84a13a9e26731373cf" title=" " alt="" coords="501,5,647,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,39,487,34,487,39,449,45"/>
+<area shape="rect" id="Node000004" href="$d1/d2e/classfl_1_1_u_i_checkbox_impl_ac636a695e20dcb53580c27f99b279eea.html#ac636a695e20dcb53580c27f99b279eea" title=" " alt="" coords="695,35,840,75"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="454,54,501,55,647,55,681,54,681,59,647,60,501,60,454,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="647,34,681,39,680,44,646,39"/>
+</map>

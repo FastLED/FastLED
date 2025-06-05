@@ -14,7 +14,7 @@ digraph "nscale8x3"
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="CRGB::fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aec2425ad20ac3c5191ac2b47eec4dca0.html#aec2425ad20ac3c5191ac2b47eec4dca0",tooltip="fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale"];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::XYDrawComposited\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dba/structfl_1_1_x_y_draw_composited_a9be77bdd88ae485e4f08f13b734cce4d.html#a9be77bdd88ae485e4f08f13b734cce4d",tooltip=" "];
+  Node5 [id="Node000005",label="fl::XYDrawComposited\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dba/structfl_1_1_x_y_draw_composited_a003dd68149045877d6ccd38987df8792.html#a003dd68149045877d6ccd38987df8792",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="MyColorFromPaletteExtended",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d61/_fx_water_8ino_aa04e7c98cb0803818832555bf128fb57.html#aa04e7c98cb0803818832555bf128fb57",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];

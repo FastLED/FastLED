@@ -8,13 +8,13 @@ digraph "fl::RectangularDrawBuffer::onQueuingDone"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::RectangularDrawBuffer\l::onQueuingDone",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::LargeBlockAllocator\l::Alloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de2/classfl_1_1_large_block_allocator_ad856621afa5c3bb9e8d417157f2c3d38.html#ad856621afa5c3bb9e8d417157f2c3d38",tooltip=" "];
+  Node2 [id="Node000002",label="fl::PSRamAllocator\l::Alloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d2b/classfl_1_1_p_s_ram_allocator_a0b4612abc43177540cd62d50d88f537d.html#a0b4612abc43177540cd62d50d88f537d",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::LargeBlockAllocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abbfba8ffcb35eb85959e52bc168242b2.html#abbfba8ffcb35eb85959e52bc168242b2",tooltip=" "];
+  Node3 [id="Node000003",label="fl::PSRamAllocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a089a2f21a67e7f0dfa65f111a45d4b6d.html#a089a2f21a67e7f0dfa65f111a45d4b6d",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::LargeBlockAllocator\l::Free",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de2/classfl_1_1_large_block_allocator_ad9d7253fbb523baa27ea1d0d406aacc1.html#ad9d7253fbb523baa27ea1d0d406aacc1",tooltip=" "];
+  Node4 [id="Node000004",label="fl::PSRamAllocator\l::Free",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d2b/classfl_1_1_p_s_ram_allocator_aa490cf21dead05d3f4f8bfebc3fcf5ae.html#aa490cf21dead05d3f4f8bfebc3fcf5ae",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::LargeBlockDeallocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab2b85462a826ee1c562964e9639eaa76.html#ab2b85462a826ee1c562964e9639eaa76",tooltip=" "];
+  Node5 [id="Node000005",label="fl::PSRamDeallocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a927c08fb5d28927acc0e318fabf79985.html#a927c08fb5d28927acc0e318fabf79985",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::RectangularDrawBuffer\l::getBlockInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a106bb52955940f3087ecf12131090458.html#a106bb52955940f3087ecf12131090458",tooltip=" "];
   Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];

@@ -46,7 +46,7 @@ var class_c_l_e_d_controller =
     [ "m_DitherMode", "d6/d2c/class_c_l_e_d_controller_a9af9dd5c08991667e4062396eec5bd8a.html#a9af9dd5c08991667e4062396eec5bd8a", null ],
     [ "m_enabled", "d6/d2c/class_c_l_e_d_controller_a0fe4074cc8a619e3b2666e94edb2dc23.html#a0fe4074cc8a619e3b2666e94edb2dc23", null ],
     [ "m_nLeds", "d6/d2c/class_c_l_e_d_controller_ab4d0f0ed5a214b675c9a03aecd7b0df8.html#ab4d0f0ed5a214b675c9a03aecd7b0df8", null ],
-    [ "m_pHead", "d6/d2c/class_c_l_e_d_controller_afc138dfd8c32629cf4ecf0d430397e77.html#afc138dfd8c32629cf4ecf0d430397e77", null ],
+    [ "m_pHead", "d6/d2c/class_c_l_e_d_controller_a34880630504128de2b027eb625680543.html#a34880630504128de2b027eb625680543", null ],
     [ "m_pNext", "d6/d2c/class_c_l_e_d_controller_aaad2e8eeedcb36298e0c45d11bcf14b5.html#aaad2e8eeedcb36298e0c45d11bcf14b5", null ],
     [ "m_pTail", "d6/d2c/class_c_l_e_d_controller_aba5aa24458cb37f0f5e6b18a74408a47.html#aba5aa24458cb37f0f5e6b18a74408a47", null ],
     [ "mRgbMode", "d6/d2c/class_c_l_e_d_controller_a67632cb7348cf5ef9be6575056322259.html#a67632cb7348cf5ef9be6575056322259", null ]

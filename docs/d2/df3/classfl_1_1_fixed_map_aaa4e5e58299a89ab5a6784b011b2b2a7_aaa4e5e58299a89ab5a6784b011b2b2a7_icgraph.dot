@@ -11,4 +11,8 @@ digraph "fl::FixedMap::empty"
   Node2 [id="Node000002",label="fl::FixedMap\< int,\l FxPtr, FASTLED_FX_ENGINE\l_MAX_FX \>::next",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df3/classfl_1_1_fixed_map_a86e9680f024d9fb7a7fa9f96a90f4a1e.html#a86e9680f024d9fb7a7fa9f96a90f4a1e",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::FixedMap\< int,\l FxPtr, FASTLED_FX_ENGINE\l_MAX_FX \>::prev",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df3/classfl_1_1_fixed_map_a35706a466e8c68cf3c5e9b8c94f8e17d.html#a35706a466e8c68cf3c5e9b8c94f8e17d",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ScreenMap::toJson",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a66f65f7c85a58e9bd6bf6dbfc50be1f3.html#a66f65f7c85a58e9bd6bf6dbfc50be1f3",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ScreenMap::toJsonStr",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a04f64837c09b5fc91c1821d21809c5f5.html#a04f64837c09b5fc91c1821d21809c5f5",tooltip=" "];
 }

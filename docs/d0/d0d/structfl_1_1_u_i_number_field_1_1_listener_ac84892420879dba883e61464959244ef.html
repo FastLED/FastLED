@@ -125,25 +125,25 @@ $(function(){initNavTree('d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_ac84
 
 <p>Reimplemented from <a class="el" href="../../db/da2/classfl_1_1_engine_events_1_1_listener_afe6e04c6ee929d06cf01704eec9304a1.html#afe6e04c6ee929d06cf01704eec9304a1">fl::EngineEvents::Listener</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d38/ui_8cpp_source.html#l00058">58</a> of file <a class="el" href="../../d4/d38/ui_8cpp_source.html">ui.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   58</span>                                         {</div>
-<div class="line"><span class="lineno">   59</span>    <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f.html#aa9fd991cb3abb114bf6c578f92324d3f">UINumberField</a> &amp;owner = *<a class="code hl_variable" href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d.html#a722cb32c58372505197e2c687589908d">mOwner</a>;</div>
-<div class="line"><span class="lineno">   60</span>    <span class="keywordflow">if</span> (!owner.mLastFrameValueValid) {</div>
-<div class="line"><span class="lineno">   61</span>        owner.mLastFrameValue = owner.value();</div>
-<div class="line"><span class="lineno">   62</span>        owner.mLastFrameValueValid = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   63</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   64</span>    }</div>
-<div class="line"><span class="lineno">   65</span>    <span class="keywordtype">double</span> <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a> = owner.value();</div>
-<div class="line"><span class="lineno">   66</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a> != owner.mLastFrameValue) {</div>
-<div class="line"><span class="lineno">   67</span>        owner.mCallbacks.invoke(owner, <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a>);</div>
-<div class="line"><span class="lineno">   68</span>        owner.mLastFrameValue = <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a>;</div>
-<div class="line"><span class="lineno">   69</span>    }</div>
-<div class="line"><span class="lineno">   70</span>}</div>
-<div class="ttc" id="aclassfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838_html_a12b085596ca5cb182bfe302597f32838"><div class="ttname"><a href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">fl::UINumberField::value</a></div><div class="ttdeci">double value() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00246">ui.h:246</a></div></div>
-<div class="ttc" id="aclassfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f_html_aa9fd991cb3abb114bf6c578f92324d3f"><div class="ttname"><a href="../../d9/d5f/classfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f.html#aa9fd991cb3abb114bf6c578f92324d3f">fl::UINumberField::UINumberField</a></div><div class="ttdeci">UINumberField(const char *name, double value, double min=0, double max=100)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00242">ui.h:242</a></div></div>
-<div class="ttc" id="astructfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d_html_a722cb32c58372505197e2c687589908d"><div class="ttname"><a href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d.html#a722cb32c58372505197e2c687589908d">fl::UINumberField::Listener::mOwner</a></div><div class="ttdeci">UINumberField * mOwner</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00295">ui.h:295</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d38/ui_8cpp_source.html#l00067">67</a> of file <a class="el" href="../../d4/d38/ui_8cpp_source.html">ui.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   67</span>                                         {</div>
+<div class="line"><span class="lineno">   68</span>    <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f.html#aa9fd991cb3abb114bf6c578f92324d3f">UINumberField</a> &amp;owner = *<a class="code hl_variable" href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d.html#a722cb32c58372505197e2c687589908d">mOwner</a>;</div>
+<div class="line"><span class="lineno">   69</span>    <span class="keywordflow">if</span> (!owner.mLastFrameValueValid) {</div>
+<div class="line"><span class="lineno">   70</span>        owner.mLastFrameValue = owner.value();</div>
+<div class="line"><span class="lineno">   71</span>        owner.mLastFrameValueValid = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   72</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   73</span>    }</div>
+<div class="line"><span class="lineno">   74</span>    <span class="keywordtype">double</span> <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a> = owner.value();</div>
+<div class="line"><span class="lineno">   75</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a> != owner.mLastFrameValue) {</div>
+<div class="line"><span class="lineno">   76</span>        owner.mCallbacks.invoke(owner);</div>
+<div class="line"><span class="lineno">   77</span>        owner.mLastFrameValue = <a class="code hl_function" href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">value</a>;</div>
+<div class="line"><span class="lineno">   78</span>    }</div>
+<div class="line"><span class="lineno">   79</span>}</div>
+<div class="ttc" id="aclassfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838_html_a12b085596ca5cb182bfe302597f32838"><div class="ttname"><a href="../../d9/d5f/classfl_1_1_u_i_number_field_a12b085596ca5cb182bfe302597f32838.html#a12b085596ca5cb182bfe302597f32838">fl::UINumberField::value</a></div><div class="ttdeci">double value() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00252">ui.h:252</a></div></div>
+<div class="ttc" id="aclassfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f_html_aa9fd991cb3abb114bf6c578f92324d3f"><div class="ttname"><a href="../../d9/d5f/classfl_1_1_u_i_number_field_aa9fd991cb3abb114bf6c578f92324d3f.html#aa9fd991cb3abb114bf6c578f92324d3f">fl::UINumberField::UINumberField</a></div><div class="ttdeci">UINumberField(const char *name, double value, double min=0, double max=100)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00248">ui.h:248</a></div></div>
+<div class="ttc" id="astructfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d_html_a722cb32c58372505197e2c687589908d"><div class="ttname"><a href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_a722cb32c58372505197e2c687589908d.html#a722cb32c58372505197e2c687589908d">fl::UINumberField::Listener::mOwner</a></div><div class="ttdeci">UINumberField * mOwner</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00293">ui.h:293</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d3b/ui_8h_source.html#l00242">fl::UINumberField::UINumberField()</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00302">fl::UINumberField::mCallbacks</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00300">fl::UINumberField::mLastFrameValue</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00301">fl::UINumberField::mLastFrameValueValid</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00295">mOwner</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00246">fl::UINumberField::value()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d3b/ui_8h_source.html#l00248">fl::UINumberField::UINumberField()</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00300">fl::UINumberField::mCallbacks</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00298">fl::UINumberField::mLastFrameValue</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00299">fl::UINumberField::mLastFrameValueValid</a>, <a class="el" href="../../d9/d3b/ui_8h_source.html#l00293">mOwner</a>, and <a class="el" href="../../d9/d3b/ui_8h_source.html#l00252">fl::UINumberField::value()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d0/d0d/structfl_1_1_u_i_number_field_1_1_listener_ac84
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d5f/classfl_1_1_u_i_number_field.html">UINumberField</a></li><li class="navelem"><a class="el" href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener.html">Listener</a></li>
-    <li class="footer">Generated on Thu May 29 2025 04:44:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Thu Jun 5 2025 04:29:40 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

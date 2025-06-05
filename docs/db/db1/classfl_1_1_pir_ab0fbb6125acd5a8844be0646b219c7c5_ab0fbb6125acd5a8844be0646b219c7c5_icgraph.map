@@ -1,0 +1,5 @@
+<map id="fl::Pir::detect" name="fl::Pir::detect">
+<area shape="rect" id="Node000001" title="Returns true if the PIR is “latched on” (within latchMs of last trigger)." alt="" coords="179,5,283,31"/>
+<area shape="rect" id="Node000002" href="$db/db1/classfl_1_1_pir_a0745b8cefa16e3bec5773e55229ad58d.html#a0745b8cefa16e3bec5773e55229ad58d" title="Returns a 0–255 ramp value: • ramps 0→255 over risingTime • holds 255 until latchMs–fallingTime • ram..." alt="" coords="5,5,131,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,21,131,21,131,15,165,15"/>
+</map>

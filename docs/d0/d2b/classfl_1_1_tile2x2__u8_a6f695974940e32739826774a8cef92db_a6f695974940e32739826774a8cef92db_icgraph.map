@@ -1,7 +1,11 @@
 <map id="fl::Tile2x2_u8::lower_left" name="fl::Tile2x2_u8::lower_left">
-<area shape="rect" id="Node000001" title=" " alt="" coords="387,13,568,38"/>
-<area shape="rect" id="Node000002" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357" title=" " alt="" coords="196,5,339,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="373,28,339,28,339,23,373,23"/>
-<area shape="rect" id="Node000003" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a0b5feeab9eab82fb0a1a432170ef6a27.html#a0b5feeab9eab82fb0a1a432170ef6a27" title=" " alt="" coords="5,5,148,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,28,148,28,148,23,183,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="528,35,709,60"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5fdbb3ce6ffb23366c26c68bd64f2bd0.html#a5fdbb3ce6ffb23366c26c68bd64f2bd0" title="&quot;Splat&quot; as in &quot;splat pixel rendering&quot; takes a pixel value in float x,y coordinates and &quot;splats&quot; it in..." alt="" coords="409,35,480,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,50,480,50,480,45,514,45"/>
+<area shape="rect" id="Node000003" href="$dc/d82/classfl_1_1_corkscrew_aad33fddbb1fe6a90182c52cb1b47c394.html#aad33fddbb1fe6a90182c52cb1b47c394" title=" " alt="" coords="196,5,361,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,41,350,33,351,28,396,36"/>
+<area shape="rect" id="Node000004" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357" title=" " alt="" coords="207,55,350,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="396,58,351,66,350,61,395,53"/>
+<area shape="rect" id="Node000005" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a0b5feeab9eab82fb0a1a432170ef6a27.html#a0b5feeab9eab82fb0a1a432170ef6a27" title=" " alt="" coords="5,55,148,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="193,78,148,78,148,73,193,73"/>
 </map>

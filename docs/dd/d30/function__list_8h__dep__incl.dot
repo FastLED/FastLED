@@ -29,7 +29,7 @@ digraph "fl/function_list.h"
   Node2 -> Node12 [id="edge11_Node000002_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="/home/runner/work/FastLED\l/FastLED/examples/FxSdCard\l/FxSdCard.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d35/_fx_sd_card_8ino.html",tooltip=" "];
   Node2 -> Node13 [id="edge12_Node000002_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/FxWave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino.html",tooltip=" "];
+  Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/wavefx.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp.html",tooltip=" "];
   Node2 -> Node14 [id="edge13_Node000002_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 [id="Node000014",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/arduino/LedRopeTCL.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dc9/_led_rope_t_c_l_8cpp.html",tooltip=" "];
   Node2 -> Node15 [id="edge14_Node000002_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
@@ -61,12 +61,17 @@ digraph "fl/function_list.h"
   Node25 -> Node26 [id="edge29_Node000025_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node26 [id="Node000026",label="fx/fx_engine.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d8e/fx__engine_8cpp.html",tooltip=" "];
   Node2 -> Node27 [id="edge30_Node000002_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node27 [id="Node000027",label="sensors/digital_pin.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d2b/digital__pin_8cpp.html",tooltip=" "];
+  Node27 [id="Node000027",label="sensors/button.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/df7/button_8cpp.html",tooltip=" "];
   Node2 -> Node28 [id="edge31_Node000002_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node28 [id="Node000028",label="sensors/digital_pin.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d83/digital__pin_8h.html",tooltip=" "];
-  Node28 -> Node27 [id="edge32_Node000028_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node28 -> Node29 [id="edge33_Node000028_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node29 [id="Node000029",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
-  Node29 -> Node11 [id="edge34_Node000029_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node29 [id="edge35_Node000002_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="sensors/button.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d0e/button_8h.html",tooltip=" "];
+  Node28 -> Node2 [id="edge32_Node000028_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 -> Node27 [id="edge33_Node000028_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node29 [id="edge34_Node000002_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="sensors/digital_pin.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d2b/digital__pin_8cpp.html",tooltip=" "];
+  Node2 -> Node30 [id="edge35_Node000002_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="sensors/pir.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
+  Node30 -> Node11 [id="edge36_Node000030_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 -> Node31 [id="edge37_Node000030_Node000031",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="sensors/pir.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/pir_8cpp.html",tooltip=" "];
+  Node1 -> Node28 [id="edge38_Node000001_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

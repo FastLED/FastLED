@@ -67,7 +67,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d2b/classfl_1_1_tile2x2__u8_a3a1e28e0fcaadbffe9c40cc7bf944ea5.html#a3a1e28e0fcaadbffe9c40cc7bf944ea5" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d0/d2b/classfl_1_1_tile2x2__u8_a654bd979b3b3c3075db02dfde470d70b.html#a654bd979b3b3c3075db02dfde470d70b" target="_top" xlink:title="bounds =&gt; [begin_x, end_x) (where end_x is exclusive)">
 <polygon fill="white" stroke="#666666" points="304.5,-19 181.5,-19 181.5,0 304.5,0 304.5,-19"/>
 <text text-anchor="middle" x="243" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Tile2x2_u8::bounds</text>
 </a>

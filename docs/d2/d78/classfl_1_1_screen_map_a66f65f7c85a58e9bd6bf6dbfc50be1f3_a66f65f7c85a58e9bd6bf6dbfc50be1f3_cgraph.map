@@ -1,5 +1,7 @@
 <map id="fl::ScreenMap::toJson" name="fl::ScreenMap::toJson">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,164,31"/>
-<area shape="rect" id="Node000002" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="212,5,251,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,15,198,15,198,21,164,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,164,56"/>
+<area shape="rect" id="Node000002" href="$d2/df3/classfl_1_1_fixed_map_aaa4e5e58299a89ab5a6784b011b2b2a7.html#aaa4e5e58299a89ab5a6784b011b2b2a7" title=" " alt="" coords="212,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,31,198,26,198,32,165,36"/>
+<area shape="rect" id="Node000003" href="$d7/dfa/_p_j_r_c_spectrum_analyzer_8ino_a310eea447890e3471c6b27fd79dc94fc.html#a310eea447890e3471c6b27fd79dc94fc" title=" " alt="" coords="268,55,307,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,50,255,61,254,66,164,55"/>
 </map>

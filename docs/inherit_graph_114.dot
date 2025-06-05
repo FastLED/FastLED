@@ -6,7 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::HashMap\< Key, bool,\l Hash, KeyEqual \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/de6/classfl_1_1_hash_map.html",tooltip=" "];
-  Node0 -> Node1 [id="edge139_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="fl::HashSet\< Key, Hash,\l KeyEqual \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d8c/classfl_1_1_hash_set.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::Gradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient.html",tooltip=" "];
 }

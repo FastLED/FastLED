@@ -12,5 +12,5 @@ var classfl_1_1_frame =
     [ "rgb", "d1/de0/classfl_1_1_frame_a82df8e8ec9de16c14bd5449099adde46.html#a82df8e8ec9de16c14bd5449099adde46", null ],
     [ "size", "d1/de0/classfl_1_1_frame_a33cf60e696151e0d5777d89ed299c2f2.html#a33cf60e696151e0d5777d89ed299c2f2", null ],
     [ "mPixelsCount", "d1/de0/classfl_1_1_frame_abc1f3d5bb1b21b855f9e08649ef4926b.html#abc1f3d5bb1b21b855f9e08649ef4926b", null ],
-    [ "mRgb", "d1/de0/classfl_1_1_frame_a663b0422d77188fa67ae2e09bdc17f53.html#a663b0422d77188fa67ae2e09bdc17f53", null ]
+    [ "mRgb", "d1/de0/classfl_1_1_frame_a811d1a4115ff4f52e2c9f6c9ce787f60.html#a811d1a4115ff4f52e2c9f6c9ce787f60", null ]
 ];

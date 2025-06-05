@@ -126,10 +126,10 @@ var sectionId = 'dynsection-1';
 </g>
 <text text-anchor="middle" x="427" y="-261.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _buckets</text>
 </g>
-<!-- Node33 -->
-<g id="Node000033" class="node">
-<title>Node33</title>
-<g id="a_Node000033"><a xlink:href="../../dc/de6/classfl_1_1_hash_map.html" target="_top" xlink:title=" ">
+<!-- Node31 -->
+<g id="Node000031" class="node">
+<title>Node31</title>
+<g id="a_Node000031"><a xlink:href="../../dc/de6/classfl_1_1_hash_map.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="785,-112.54 558,-112.54 558,-60.54 785,-60.54 785,-112.54"/>
 <text text-anchor="start" x="566" y="-100.54" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HashMap&lt; Key, fl</text>
 <text text-anchor="start" x="566" y="-89.54" font-family="Helvetica,sans-Serif" font-size="10.00">::HashMapLru::ValueWithTimestamp,</text>
@@ -138,30 +138,30 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node4&#45;&gt;Node33 -->
-<g id="edge11_Node000033_Node000004" class="edge">
-<title>Node4&#45;&gt;Node33</title>
-<g id="a_edge11_Node000033_Node000004"><a xlink:title=" ">
+<!-- Node4&#45;&gt;Node31 -->
+<g id="edge11_Node000031_Node000004" class="edge">
+<title>Node4&#45;&gt;Node31</title>
+<g id="a_edge11_Node000031_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M319.94,-240.96C390.97,-237.64 496.41,-231.04 512,-220.54 526.51,-210.77 518.52,-198.74 530,-185.54 555.95,-155.71 592.68,-130.24 622.07,-112.6"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="319.55,-237.47 309.72,-241.42 319.87,-244.46 319.55,-237.47"/>
 </a>
 </g>
 <text text-anchor="middle" x="427" y="-242.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _buckets</text>
 </g>
-<!-- Node20 -->
-<g id="Node000020" class="node">
-<title>Node20</title>
-<g id="a_Node000020"><a xlink:href="../../d6/d6a/classfl_1_1_bitset_inlined.html" target="_top" xlink:title=" ">
+<!-- Node18 -->
+<g id="Node000018" class="node">
+<title>Node18</title>
+<g id="a_Node000018"><a xlink:href="../../d6/d6a/classfl_1_1_bitset_inlined.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="98,-108.54 0,-108.54 0,-78.54 98,-78.54 98,-108.54"/>
 <text text-anchor="start" x="8" y="-96.54" font-family="Helvetica,sans-Serif" font-size="10.00">fl::BitsetInlined&lt;</text>
 <text text-anchor="middle" x="49" y="-85.54" font-family="Helvetica,sans-Serif" font-size="10.00"> N &gt;&lt; 1024 &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node20&#45;&gt;Node3 -->
-<g id="edge4_Node000003_Node000020" class="edge">
-<title>Node20&#45;&gt;Node3</title>
-<g id="a_edge4_Node000003_Node000020"><a xlink:title=" ">
+<!-- Node18&#45;&gt;Node3 -->
+<g id="edge4_Node000003_Node000018" class="edge">
+<title>Node18&#45;&gt;Node3</title>
+<g id="a_edge4_Node000003_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M59.36,-117.93C76.63,-158.99 117.78,-240.64 183,-273.54 324,-344.67 516.63,-284.89 612.03,-246.57"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="62.6,-116.59 55.58,-108.65 56.11,-119.23 62.6,-116.59"/>
 </a>
@@ -169,10 +169,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="middle" x="253.5" y="-319.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _deleted</text>
 <text text-anchor="middle" x="253.5" y="-308.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_occupied</text>
 </g>
-<!-- Node28 -->
-<g id="Node000028" class="node">
-<title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../dc/de6/classfl_1_1_hash_map.html" target="_top" xlink:title=" ">
+<!-- Node26 -->
+<g id="Node000026" class="node">
+<title>Node26</title>
+<g id="a_Node000026"><a xlink:href="../../dc/de6/classfl_1_1_hash_map.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="324,-114.04 183,-114.04 183,-73.04 324,-73.04 324,-114.04"/>
 <text text-anchor="start" x="191" y="-102.04" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HashMap&lt; Key, T,</text>
 <text text-anchor="start" x="191" y="-91.04" font-family="Helvetica,sans-Serif" font-size="10.00"> Hash, KeyEqual, INLINED</text>
@@ -180,10 +180,10 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node20&#45;&gt;Node28 -->
-<g id="edge8_Node000028_Node000020" class="edge">
-<title>Node20&#45;&gt;Node28</title>
-<g id="a_edge8_Node000028_Node000020"><a xlink:title=" ">
+<!-- Node18&#45;&gt;Node26 -->
+<g id="edge8_Node000026_Node000018" class="edge">
+<title>Node18&#45;&gt;Node26</title>
+<g id="a_edge8_Node000026_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M108.3,-93.54C131.55,-93.54 158.51,-93.54 182.78,-93.54"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="108.25,-90.04 98.25,-93.54 108.25,-97.04 108.25,-90.04"/>
 </a>
@@ -191,10 +191,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="middle" x="140.5" y="-107.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _deleted</text>
 <text text-anchor="middle" x="140.5" y="-96.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_occupied</text>
 </g>
-<!-- Node20&#45;&gt;Node33 -->
-<g id="edge12_Node000033_Node000020" class="edge">
-<title>Node20&#45;&gt;Node33</title>
-<g id="a_edge12_Node000033_Node000020"><a xlink:title=" ">
+<!-- Node18&#45;&gt;Node31 -->
+<g id="edge12_Node000031_Node000018" class="edge">
+<title>Node18&#45;&gt;Node31</title>
+<g id="a_edge12_Node000031_Node000018"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M72.97,-71.57C97.81,-49.47 139.71,-16.81 183,-3.54 206.09,3.54 493.99,-2.1 512,-6.54 555.4,-17.24 600.48,-41.48 631.42,-60.5"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="70.57,-69.03 65.52,-78.34 75.27,-74.21 70.57,-69.03"/>
 </a>
@@ -202,58 +202,58 @@ var sectionId = 'dynsection-1';
 <text text-anchor="middle" x="253.5" y="-17.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _deleted</text>
 <text text-anchor="middle" x="253.5" y="-6.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_occupied</text>
 </g>
-<!-- Node25 -->
-<g id="Node000025" class="node">
-<title>Node25</title>
-<g id="a_Node000025"><a xlink:href="../../d6/dfd/structfl_1_1_hash.html" target="_top" xlink:title=" ">
+<!-- Node23 -->
+<g id="Node000023" class="node">
+<title>Node23</title>
+<g id="a_Node000023"><a xlink:href="../../d6/dfd/structfl_1_1_hash.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="294.5,-54.04 212.5,-54.04 212.5,-35.04 294.5,-35.04 294.5,-54.04"/>
 <text text-anchor="middle" x="253.5" y="-42.04" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Hash&lt; T &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node25&#45;&gt;Node3 -->
-<g id="edge5_Node000003_Node000025" class="edge">
-<title>Node25&#45;&gt;Node3</title>
-<g id="a_edge5_Node000003_Node000025"><a xlink:title=" ">
+<!-- Node23&#45;&gt;Node3 -->
+<g id="edge5_Node000003_Node000023" class="edge">
+<title>Node23&#45;&gt;Node3</title>
+<g id="a_edge5_Node000003_Node000023"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M304.76,-43.41C370.46,-42.97 480.86,-46.06 512,-70.54 530.9,-85.39 515.49,-102.38 530,-121.54 553.33,-152.35 589.01,-177.32 618.57,-194.48"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="304.58,-39.92 294.62,-43.51 304.65,-46.92 304.58,-39.92"/>
 </a>
 </g>
 <text text-anchor="middle" x="427" y="-73.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _hash</text>
 </g>
-<!-- Node25&#45;&gt;Node33 -->
-<g id="edge13_Node000033_Node000025" class="edge">
-<title>Node25&#45;&gt;Node33</title>
-<g id="a_edge13_Node000033_Node000025"><a xlink:title=" ">
+<!-- Node23&#45;&gt;Node31 -->
+<g id="edge13_Node000031_Node000023" class="edge">
+<title>Node23&#45;&gt;Node31</title>
+<g id="a_edge13_Node000031_Node000023"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M290.66,-31.76C306.24,-26.9 324.8,-21.95 342,-19.54 416.83,-9.06 437.95,-4.53 512,-19.54 550.94,-27.43 592.2,-45.21 622.86,-60.47"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="289.33,-28.51 280.89,-34.92 291.48,-35.17 289.33,-28.51"/>
 </a>
 </g>
 <text text-anchor="middle" x="427" y="-22.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _hash</text>
 </g>
-<!-- Node26 -->
-<g id="Node000026" class="node">
-<title>Node26</title>
-<g id="a_Node000026"><a xlink:href="../../d3/de5/structfl_1_1_equal_to.html" target="_top" xlink:title=" ">
+<!-- Node24 -->
+<g id="Node000024" class="node">
+<title>Node24</title>
+<g id="a_Node000024"><a xlink:href="../../d3/de5/structfl_1_1_equal_to.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="320,-362.04 187,-362.04 187,-343.04 320,-343.04 320,-362.04"/>
 <text text-anchor="middle" x="253.5" y="-350.04" font-family="Helvetica,sans-Serif" font-size="10.00">fl::EqualTo&lt; FFT_Args &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node26&#45;&gt;Node3 -->
-<g id="edge6_Node000003_Node000026" class="edge">
-<title>Node26&#45;&gt;Node3</title>
-<g id="a_edge6_Node000003_Node000026"><a xlink:title=" ">
+<!-- Node24&#45;&gt;Node3 -->
+<g id="edge6_Node000003_Node000024" class="edge">
+<title>Node24&#45;&gt;Node3</title>
+<g id="a_edge6_Node000003_Node000024"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M330.46,-349.97C382.78,-346.28 453.19,-337.46 512,-316.54 558.38,-300.04 605.93,-268.98 636.69,-246.65"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="330,-346.5 320.25,-350.65 330.46,-353.48 330,-346.5"/>
 </a>
 </g>
 <text text-anchor="middle" x="427" y="-351.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> _equal</text>
 </g>
-<!-- Node28&#45;&gt;Node3 -->
-<g id="edge7_Node000003_Node000028" class="edge">
-<title>Node28&#45;&gt;Node3</title>
-<g id="a_edge7_Node000003_Node000028"><a xlink:title=" ">
+<!-- Node26&#45;&gt;Node3 -->
+<g id="edge7_Node000003_Node000026" class="edge">
+<title>Node26&#45;&gt;Node3</title>
+<g id="a_edge7_Node000003_Node000026"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M293.53,-119.54C308.17,-128.16 325.32,-136.97 342,-142.54 414.31,-166.7 437.84,-147.84 512,-165.54 543.16,-172.98 576.81,-184.18 605.05,-194.53"/>
 <polygon fill="orange" stroke="orange" points="295.13,-116.42 284.76,-114.23 291.5,-122.4 295.13,-116.42"/>
 </a>
@@ -264,10 +264,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="342" y="-179.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">&lt; FFT_Args &gt;, FASTLED_HASHMAP</text>
 <text text-anchor="middle" x="427" y="-168.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_INLINED_COUNT &gt;</text>
 </g>
-<!-- Node28&#45;&gt;Node33 -->
-<g id="edge14_Node000033_Node000028" class="edge">
-<title>Node28&#45;&gt;Node33</title>
-<g id="a_edge14_Node000033_Node000028"><a xlink:title=" ">
+<!-- Node26&#45;&gt;Node31 -->
+<g id="edge14_Node000031_Node000026" class="edge">
+<title>Node26&#45;&gt;Node31</title>
+<g id="a_edge14_Node000031_Node000026"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M334.31,-87.85C336.9,-87.73 339.47,-87.63 342,-87.54 413.81,-84.97 494.51,-84.69 557.96,-85.06"/>
 <polygon fill="orange" stroke="orange" points="334.02,-84.36 324.21,-88.35 334.37,-91.35 334.02,-84.36"/>
 </a>
@@ -278,10 +278,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="355" y="-101.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">&lt; Key &gt;, FASTLED_HASHMAP</text>
 <text text-anchor="middle" x="427" y="-90.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey">_INLINED_COUNT &gt;</text>
 </g>
-<!-- Node32 -->
-<g id="Node000032" class="node">
-<title>Node32</title>
-<g id="a_Node000032"><a xlink:href="../../d1/df3/classfl_1_1_hash_map_lru.html" target="_top" xlink:title=" ">
+<!-- Node30 -->
+<g id="Node000030" class="node">
+<title>Node30</title>
+<g id="a_Node000030"><a xlink:href="../../d1/df3/classfl_1_1_hash_map_lru.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1005,-122.04 883,-122.04 883,-81.04 1005,-81.04 1005,-122.04"/>
 <text text-anchor="start" x="891" y="-110.04" font-family="Helvetica,sans-Serif" font-size="10.00">fl::HashMapLru&lt; Key,</text>
 <text text-anchor="start" x="891" y="-99.04" font-family="Helvetica,sans-Serif" font-size="10.00"> T, Hash, KeyEqual,</text>
@@ -289,20 +289,20 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node32&#45;&gt;Node2 -->
-<g id="edge9_Node000002_Node000032" class="edge">
-<title>Node32&#45;&gt;Node2</title>
-<g id="a_edge9_Node000002_Node000032"><a xlink:title=" ">
+<!-- Node30&#45;&gt;Node2 -->
+<g id="edge9_Node000002_Node000030" class="edge">
+<title>Node30&#45;&gt;Node2</title>
+<g id="a_edge9_Node000002_Node000030"><a xlink:title=" ">
 <path fill="none" stroke="orange" stroke-dasharray="5,2" d="M1015.13,-108.69C1067.95,-114.07 1139.91,-121.4 1191.96,-126.71"/>
 <polygon fill="orange" stroke="orange" points="1015.47,-105.2 1005.17,-107.67 1014.76,-112.17 1015.47,-105.2"/>
 </a>
 </g>
 <text text-anchor="middle" x="1098.5" y="-127.54" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; FFT_Args, Ptr&lt; FFTImpl &gt; &gt;</text>
 </g>
-<!-- Node33&#45;&gt;Node32 -->
-<g id="edge10_Node000032_Node000033" class="edge">
-<title>Node33&#45;&gt;Node32</title>
-<g id="a_edge10_Node000032_Node000033"><a xlink:title=" ">
+<!-- Node31&#45;&gt;Node30 -->
+<g id="edge10_Node000030_Node000031" class="edge">
+<title>Node31&#45;&gt;Node30</title>
+<g id="a_edge10_Node000030_Node000031"><a xlink:title=" ">
 <path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M795.51,-93.36C825.86,-95.04 857.04,-96.77 882.87,-98.21"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="795.44,-89.85 785.26,-92.79 795.05,-96.84 795.44,-89.85"/>
 </a>

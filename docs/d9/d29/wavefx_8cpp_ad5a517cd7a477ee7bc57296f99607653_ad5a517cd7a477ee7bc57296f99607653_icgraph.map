@@ -1,0 +1,12 @@
+<map id="triggerRipple" name="triggerRipple">
+<area shape="rect" id="Node000001" title=" " alt="" coords="452,55,559,80"/>
+<area shape="rect" id="Node000002" href="$d1/d16/_wave_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="305,5,356,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="446,54,355,27,357,22,448,48"/>
+<area shape="rect" id="Node000003" href="$d9/d29/wavefx_8cpp_a861547b83e4a6aa092de815fca8219e8.html#a861547b83e4a6aa092de815fca8219e8" title=" " alt="" coords="257,55,404,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="439,70,404,70,404,65,439,65"/>
+<area shape="rect" id="Node000004" href="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335" title=" " alt="" coords="104,80,209,105"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="448,86,404,94,301,100,210,98,210,93,300,95,404,89,447,81"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="244,83,210,88,209,82,243,77"/>
+<area shape="rect" id="Node000005" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,80,56,105"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="90,95,56,95,56,90,90,90"/>
+</map>

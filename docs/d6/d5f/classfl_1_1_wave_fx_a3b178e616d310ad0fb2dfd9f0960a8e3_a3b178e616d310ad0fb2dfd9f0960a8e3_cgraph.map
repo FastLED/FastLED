@@ -1,13 +1,15 @@
 <map id="fl::WaveFx::WaveFx" name="fl::WaveFx::WaveFx">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,156,129"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,128,156,153"/>
 <area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d_a98879bee7a7a97ceb2cc34ea2eefc7fe.html#a98879bee7a7a97ceb2cc34ea2eefc7fe" title=" " alt="" coords="246,29,357,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,101,203,63,232,55,233,60,205,69,111,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,126,144,95,203,64,232,54,233,59,205,68,147,99,101,130"/>
 <area shape="rect" id="Node000005" href="$d7/d3e/classfl_1_1_fx2d_a97e2460468edf63b256d7c50ba03f8d0.html#a97e2460468edf63b256d7c50ba03f8d0" title=" " alt="" coords="230,79,373,104"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="156,105,216,98,217,104,157,111"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="138,125,230,104,231,110,139,131"/>
 <area shape="rect" id="Node000006" href="$d7/d3e/classfl_1_1_fx2d_ad43b84d2abcda8905bdcd35f9a8c46ff.html#ad43b84d2abcda8905bdcd35f9a8c46ff" title=" " alt="" coords="233,128,370,153"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="157,122,220,129,219,134,156,128"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="156,138,219,138,219,143,156,143"/>
 <area shape="rect" id="Node000007" href="$d6/d5f/classfl_1_1_wave_fx_a35b76280dc308f7b6c0e6783bf6be390.html#a35b76280dc308f7b6c0e6783bf6be390" title=" " alt="" coords="204,177,399,203"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="113,127,205,162,235,171,233,176,203,167,111,132"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="139,151,231,172,230,177,138,156"/>
+<area shape="rect" id="Node000008" href="$d6/d5f/classfl_1_1_wave_fx_adcc62937b64c442f328b89f5c9529a30.html#adcc62937b64c442f328b89f5c9529a30" title=" " alt="" coords="204,227,399,252"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="101,151,147,181,205,212,229,220,227,225,203,216,144,186,98,156"/>
 <area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx_aa4a990c2a2d04e57046cf8b0f64ce4e7.html#aa4a990c2a2d04e57046cf8b0f64ce4e7" title=" " alt="" coords="469,5,547,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="356,33,455,21,455,27,357,38"/>
 <area shape="rect" id="Node000004" href="$d7/d3e/classfl_1_1_fx2d_a96dec159104519d347041d11509b72f3.html#a96dec159104519d347041d11509b72f3" title=" " alt="" coords="447,55,569,80"/>

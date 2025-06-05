@@ -21,7 +21,7 @@ digraph "fx/detail/transition.h"
   Node7 -> Node8 [id="edge7_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="/home/runner/work/FastLED\l/FastLED/examples/BilinearCompression\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d16/examples_2_bilinear_compression_2src_2wave_8h.html",tooltip=" "];
   Node7 -> Node11 [id="edge8_Node000007_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/FxWave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino.html",tooltip=" "];
+  Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/wavefx.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp.html",tooltip=" "];
   Node7 -> Node13 [id="edge9_Node000007_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html",tooltip=" "];
   Node2 -> Node20 [id="edge10_Node000002_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];

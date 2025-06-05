@@ -26,9 +26,9 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/MID
   Node8 -> Node3 [id="edge11_Node000008_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node8 -> Node9 [id="edge12_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
-  Node2 -> Node28 [id="edge13_Node000002_Node000028",color="steelblue1",style="solid",tooltip=" "];
-  Node28 [id="Node000028",label="serialMIDI.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/serial_m_i_d_i_8h.html",tooltip="MIDI Library for the Arduino - Platform @license MIT - Copyright (c) 2015 Francois Best."];
-  Node28 -> Node4 [id="edge14_Node000028_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node29 [id="edge15_Node000002_Node000029",color="steelblue1",style="solid",tooltip=" "];
-  Node29 [id="Node000029",label="MIDI.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d99/_m_i_d_i_8hpp.html",tooltip="MIDI Library for the Arduino - Inline implementations."];
+  Node2 -> Node32 [id="edge13_Node000002_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="serialMIDI.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/serial_m_i_d_i_8h.html",tooltip="MIDI Library for the Arduino - Platform @license MIT - Copyright (c) 2015 Francois Best."];
+  Node32 -> Node4 [id="edge14_Node000032_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node33 [id="edge15_Node000002_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="MIDI.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d99/_m_i_d_i_8hpp.html",tooltip="MIDI Library for the Arduino - Inline implementations."];
 }

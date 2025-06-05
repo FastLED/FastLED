@@ -14,7 +14,7 @@ digraph "fl/time_alpha.h"
   Node1 -> Node4 [id="edge4_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/BilinearCompression\l/BilinearCompression.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d05/_bilinear_compression_8ino.html",tooltip=" "];
   Node1 -> Node5 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/FxWave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino.html",tooltip=" "];
+  Node5 [id="Node000005",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/wavefx.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp.html",tooltip=" "];
   Node1 -> Node6 [id="edge6_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/complex.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3b/complex_8h.html",tooltip=" "];
   Node1 -> Node7 [id="edge7_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];

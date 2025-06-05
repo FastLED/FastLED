@@ -1,16 +1,18 @@
 <map id="ColorSelector" name="ColorSelector">
-<area shape="rect" id="Node000001" title=" " alt="" coords="63,284,172,309"/>
-<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="56,196,179,221"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,235,120,283,115,283,115,235"/>
-<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="5,108,139,133"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="71,147,76,171,85,183,98,194,94,198,81,187,71,173,66,148"/>
-<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="201,108,295,133"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="209,141,176,160,131,198,127,194,173,155,206,137"/>
-<area shape="rect" id="Node000029" href="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html" title=" " alt="" coords="209,196,364,221"/>
-<area shape="poly" id="edge7_Node000029_Node000004" title=" " alt="" coords="244,147,246,171,256,184,268,194,264,198,252,187,242,173,238,148"/>
-<area shape="rect" id="Node000005" href="$d6/d8d/classfl_1_1_u_i_button_impl.html" title=" " alt="" coords="109,13,233,38"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="191,47,240,106,236,110,187,50"/>
-<area shape="rect" id="Node000009" href="$d1/d5d/classfl_1_1_function_list.html" title=" " alt="" coords="257,5,396,45"/>
-<area shape="poly" id="edge5_Node000004_Node000009" title=" " alt="" coords="304,57,260,109,256,106,300,54"/>
-<area shape="poly" id="edge6_Node000004_Node000029" title=" " alt="" coords="304,184,309,171,307,158,296,146,280,136,283,131,299,141,312,156,314,171,309,186"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="768,39,877,64"/>
+<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="548,39,671,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="685,49,768,49,768,54,685,54"/>
+<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="281,5,415,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="429,26,548,41,547,46,428,31"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="301,96,395,121"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="408,93,550,61,551,67,409,98"/>
+<area shape="rect" id="Node000017" href="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html" title=" " alt="" coords="532,108,687,133"/>
+<area shape="poly" id="edge7_Node000017_Node000004" title=" " alt="" coords="409,109,532,114,532,120,409,114"/>
+<area shape="rect" id="Node000005" href="$d6/d8d/classfl_1_1_u_i_button_impl.html" title=" " alt="" coords="13,39,137,64"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="151,64,258,86,301,96,300,101,257,91,150,69"/>
+<area shape="rect" id="Node000009" href="$d1/d5d/classfl_1_1_function_list.html" title=" " alt="" coords="5,89,144,129"/>
+<area shape="poly" id="edge5_Node000004_Node000009" title=" " alt="" coords="158,106,301,106,301,111,158,111"/>
+<area shape="poly" id="edge6_Node000004_Node000017" title=" " alt="" coords="567,141,506,156,472,159,438,155,399,141,367,124,370,119,402,136,439,150,472,154,505,151,566,136"/>
+<area shape="rect" id="Node000019" href="$df/d0b/classfl_1_1scoped__ptr.html" title=" " alt="" coords="9,153,141,193"/>
+<area shape="poly" id="edge8_Node000004_Node000019" title=" " alt="" coords="153,152,300,117,301,122,155,157"/>
 </map>

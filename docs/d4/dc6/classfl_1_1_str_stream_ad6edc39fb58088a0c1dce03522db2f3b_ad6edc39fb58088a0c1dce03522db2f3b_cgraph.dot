@@ -12,5 +12,5 @@ digraph "fl::StrStream::operator&lt;&lt;"
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Tile2x2_u8::at",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_aec08d4bb9cae61bb1f6926ce1a1d9b9c.html#aec08d4bb9cae61bb1f6926ce1a1d9b9c",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::Tile2x2_u8::bounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_a3a1e28e0fcaadbffe9c40cc7bf944ea5.html#a3a1e28e0fcaadbffe9c40cc7bf944ea5",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Tile2x2_u8::bounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_a654bd979b3b3c3075db02dfde470d70b.html#a654bd979b3b3c3075db02dfde470d70b",tooltip="bounds => [begin_x, end_x) (where end_x is exclusive)"];
 }

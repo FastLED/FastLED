@@ -1,11 +1,11 @@
 <map id="fl::time_alpha8" name="fl::time_alpha8">
-<area shape="rect" id="Node000001" title=" " alt="" coords="524,42,643,67"/>
-<area shape="rect" id="Node000002" href="$d8/d62/classfl_1_1_time_clamped_transition_a5b7eeb214cf644e38a7d385825aa82ef.html#a5b7eeb214cf644e38a7d385825aa82ef" title=" " alt="" coords="284,5,476,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="510,47,476,42,477,37,511,42"/>
-<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="295,70,465,95"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="511,67,466,74,465,68,510,62"/>
-<area shape="rect" id="Node000004" href="$dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="104,70,236,95"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="281,85,237,85,237,80,281,80"/>
-<area shape="rect" id="Node000005" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,70,56,95"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="90,85,56,85,56,80,90,80"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="579,42,697,67"/>
+<area shape="rect" id="Node000002" href="$d8/d62/classfl_1_1_time_clamped_transition_a5b7eeb214cf644e38a7d385825aa82ef.html#a5b7eeb214cf644e38a7d385825aa82ef" title=" " alt="" coords="339,5,531,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="565,47,531,42,531,37,566,42"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="349,70,520,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="565,67,520,74,520,68,565,62"/>
+<area shape="rect" id="Node000004" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="159,70,291,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="335,85,291,85,291,80,335,80"/>
+<area shape="rect" id="Node000005" href="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335" title=" " alt="" coords="5,70,111,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="145,85,111,85,111,80,145,80"/>
 </map>

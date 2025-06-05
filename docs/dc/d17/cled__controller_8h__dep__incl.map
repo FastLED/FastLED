@@ -8,11 +8,11 @@
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="254,117,264,151,258,153,249,118"/>
 <area shape="rect" id="Node000005" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="137,225,223,251"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="242,188,195,227,192,223,238,184"/>
-<area shape="rect" id="Node000091" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="174,299,253,324"/>
-<area shape="poly" id="edge10_Node000004_Node000091" title=" " alt="" coords="258,191,237,252,220,300,215,298,232,250,253,190"/>
+<area shape="rect" id="Node000094" href="$d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform." alt="" coords="174,299,253,324"/>
+<area shape="poly" id="edge10_Node000004_Node000094" title=" " alt="" coords="258,191,237,252,220,300,215,298,232,250,253,190"/>
 <area shape="poly" id="edge6_Node000005_Node000001" title=" " alt="" coords="171,212,128,32,133,30,177,211"/>
 <area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="154,261,96,301,93,296,151,256"/>
 <area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="183,211,203,151,234,103,238,106,208,153,188,213"/>
-<area shape="poly" id="edge8_Node000005_Node000091" title=" " alt="" coords="185,262,203,297,199,300,181,265"/>
-<area shape="poly" id="edge9_Node000091_Node000005" title=" " alt="" coords="208,287,190,252,195,250,213,284"/>
+<area shape="poly" id="edge8_Node000005_Node000094" title=" " alt="" coords="185,262,203,297,199,300,181,265"/>
+<area shape="poly" id="edge9_Node000094_Node000005" title=" " alt="" coords="208,287,190,252,195,250,213,284"/>
 </map>

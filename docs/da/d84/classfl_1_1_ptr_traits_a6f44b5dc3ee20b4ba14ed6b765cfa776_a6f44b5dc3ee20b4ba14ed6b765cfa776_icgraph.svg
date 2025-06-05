@@ -261,8 +261,8 @@ var sectionId = 'dynsection-1';
 <g id="edge12_Node000005_Node000014" class="edge">
 <title>Node5&#45;&gt;Node14</title>
 <g id="a_edge12_Node000005_Node000014"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M334.71,-174.19C317.04,-167.23 294.92,-158.69 275,-151.5 265.76,-148.16 255.83,-144.73 246.32,-141.51"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="333.44,-177.45 344.03,-177.87 336.01,-170.94 333.44,-177.45"/>
+<path fill="none" stroke="#63b8ff" d="M335.87,-174.1C318.05,-166.82 295.42,-157.84 275,-150.5 266.56,-147.47 257.52,-144.4 248.75,-141.52"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="334.65,-177.38 345.23,-177.95 337.31,-170.91 334.65,-177.38"/>
 </a>
 </g>
 </g>
@@ -297,15 +297,15 @@ var sectionId = 'dynsection-1';
 <g id="edge15_Node000005_Node000017" class="edge">
 <title>Node5&#45;&gt;Node17</title>
 <g id="a_edge15_Node000005_Node000017"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M358.85,-168.62C344.72,-141.53 314.98,-91.96 275,-65.5 269.1,-61.6 262.45,-58.49 255.61,-56.03"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="355.86,-170.47 363.49,-177.81 362.11,-167.31 355.86,-170.47"/>
+<path fill="none" stroke="#63b8ff" d="M358.93,-168.4C344.91,-141 315.3,-90.92 275,-64.5 269.77,-61.07 263.95,-58.3 257.93,-56.05"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="355.96,-170.29 363.54,-177.7 362.24,-167.18 355.96,-170.29"/>
 </a>
 </g>
 </g>
 <!-- Node18 -->
 <g id="Node000018" class="node">
 <title>Node18</title>
-<g id="a_Node000018"><a xlink:href="../../d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
+<g id="a_Node000018"><a xlink:href="../../d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="265,-19 134,-19 134,0 265,0 265,-19"/>
 <text text-anchor="middle" x="199.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">NewWaveSimulation2D</text>
 </a>
@@ -353,24 +353,6 @@ var sectionId = 'dynsection-1';
 <g id="a_edge13_Node000014_Node000015"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M113.98,-126.5C105.14,-126.5 96.43,-126.5 88.35,-126.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="114,-130 124,-126.5 114,-123 114,-130"/>
-</a>
-</g>
-</g>
-<!-- Node19 -->
-<g id="Node000019" class="node">
-<title>Node19</title>
-<g id="a_Node000019"><a xlink:href="../../da/d05/_bilinear_compression_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="66,-19 22,-19 22,0 66,0 66,-19"/>
-<text text-anchor="middle" x="44" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">setup</text>
-</a>
-</g>
-</g>
-<!-- Node18&#45;&gt;Node19 -->
-<g id="edge17_Node000018_Node000019" class="edge">
-<title>Node18&#45;&gt;Node19</title>
-<g id="a_edge17_Node000018_Node000019"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M123.83,-9.5C102.67,-9.5 81.29,-9.5 66.15,-9.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="123.85,-13 133.85,-9.5 123.85,-6 123.85,-13"/>
 </a>
 </g>
 </g>

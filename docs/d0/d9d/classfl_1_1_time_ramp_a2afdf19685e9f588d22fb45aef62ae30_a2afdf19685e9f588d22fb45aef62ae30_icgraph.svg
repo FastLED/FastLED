@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 508;
+var viewWidth = 623;
 var viewHeight = 46;
 var sectionId = 'dynsection-0';
 </script>
@@ -59,17 +59,17 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="500,-38 373,-38 373,-19 500,-19 500,-38"/>
-<text text-anchor="middle" x="436.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeRamp::isActive</text>
+<polygon fill="#999999" stroke="#666666" points="615,-38 488,-38 488,-19 615,-19 615,-38"/>
+<text text-anchor="middle" x="551.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeRamp::isActive</text>
 </a>
 </g>
 </g>
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="173,-38 74,-38 74,-19 173,-19 173,-38"/>
-<text text-anchor="middle" x="123.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">applyFancyEffect</text>
+<g id="a_Node000002"><a xlink:href="../../d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="288,-38 189,-38 189,-19 288,-19 288,-38"/>
+<text text-anchor="middle" x="238.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">applyFancyEffect</text>
 </a>
 </g>
 </g>
@@ -77,35 +77,35 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M362.67,-28.5C304.3,-28.5 224.02,-28.5 173.19,-28.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="362.94,-32 372.94,-28.5 362.94,-25 362.94,-32"/>
+<path fill="none" stroke="#63b8ff" d="M477.67,-28.5C419.3,-28.5 339.02,-28.5 288.19,-28.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="477.94,-32 487.94,-28.5 477.94,-25 477.94,-32"/>
 </a>
 </g>
 </g>
-<!-- Node4 -->
-<g id="Node000004" class="node">
-<title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" target="_top" xlink:title="Compute current 0–255 output based on how much time has elapsed since trigger().">
-<polygon fill="white" stroke="#666666" points="337,-19 209,-19 209,0 337,0 337,-19"/>
-<text text-anchor="middle" x="273" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeRamp::update8</text>
+<!-- Node5 -->
+<g id="Node000005" class="node">
+<title>Node5</title>
+<g id="a_Node000005"><a xlink:href="../../d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" target="_top" xlink:title="Compute current 0–255 output based on how much time has elapsed since trigger().">
+<polygon fill="white" stroke="#666666" points="452,-19 324,-19 324,0 452,0 452,-19"/>
+<text text-anchor="middle" x="388" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::TimeRamp::update8</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node4 -->
-<g id="edge3_Node000001_Node000004" class="edge">
-<title>Node1&#45;&gt;Node4</title>
-<g id="a_edge3_Node000001_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M362.43,-19.9C354.03,-18.92 345.52,-17.91 337.26,-16.94"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="362.26,-23.41 372.6,-21.1 363.07,-16.46 362.26,-23.41"/>
+<!-- Node1&#45;&gt;Node5 -->
+<g id="edge4_Node000001_Node000005" class="edge">
+<title>Node1&#45;&gt;Node5</title>
+<g id="a_edge4_Node000001_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M477.43,-19.9C469.03,-18.92 460.52,-17.91 452.26,-16.94"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="477.26,-23.41 487.6,-21.1 478.07,-16.46 477.26,-23.41"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="38,-38 0,-38 0,-19 38,-19 38,-38"/>
-<text text-anchor="middle" x="19" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">loop</text>
+<g id="a_Node000003"><a xlink:href="../../d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="153,-38 74,-38 74,-19 153,-19 153,-38"/>
+<text text-anchor="middle" x="113.5" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">wavefx_loop</text>
 </a>
 </g>
 </g>
@@ -113,17 +113,35 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M63.74,-28.5C54.39,-28.5 45.39,-28.5 38,-28.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="63.95,-32 73.95,-28.5 63.95,-25 63.95,-32"/>
+<path fill="none" stroke="#63b8ff" d="M178.8,-28.5C170.14,-28.5 161.41,-28.5 153.29,-28.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="178.89,-32 188.89,-28.5 178.89,-25 178.89,-32"/>
 </a>
 </g>
 </g>
-<!-- Node4&#45;&gt;Node2 -->
-<g id="edge4_Node000004_Node000002" class="edge">
-<title>Node4&#45;&gt;Node2</title>
-<g id="a_edge4_Node000004_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M198.52,-18.97C189.91,-20.07 181.3,-21.18 173.15,-22.23"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="199.12,-22.42 208.59,-17.67 198.23,-15.47 199.12,-22.42"/>
+<!-- Node4 -->
+<g id="Node000004" class="node">
+<title>Node4</title>
+<g id="a_Node000004"><a xlink:href="../../dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="38,-38 0,-38 0,-19 38,-19 38,-38"/>
+<text text-anchor="middle" x="19" y="-26" font-family="Helvetica,sans-Serif" font-size="10.00">loop</text>
+</a>
+</g>
+</g>
+<!-- Node3&#45;&gt;Node4 -->
+<g id="edge3_Node000003_Node000004" class="edge">
+<title>Node3&#45;&gt;Node4</title>
+<g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M63.65,-28.5C54.63,-28.5 45.75,-28.5 38.37,-28.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="63.81,-32 73.81,-28.5 63.81,-25 63.81,-32"/>
+</a>
+</g>
+</g>
+<!-- Node5&#45;&gt;Node2 -->
+<g id="edge5_Node000005_Node000002" class="edge">
+<title>Node5&#45;&gt;Node2</title>
+<g id="a_edge5_Node000005_Node000002"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M313.52,-18.97C304.91,-20.07 296.3,-21.18 288.15,-22.23"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="314.12,-22.42 323.59,-17.67 313.23,-15.47 314.12,-22.42"/>
 </a>
 </g>
 </g>

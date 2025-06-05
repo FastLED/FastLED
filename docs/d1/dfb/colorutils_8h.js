@@ -3,6 +3,7 @@ var colorutils_8h =
     [ "DECLARE_GRADIENT_PALETTE", "d1/dfb/colorutils_8h_a411fcee795cb5527817e708ae5aa9549.html#a411fcee795cb5527817e708ae5aa9549", null ],
     [ "DEFINE_GRADIENT_PALETTE", "d1/dfb/colorutils_8h_a180d83b9f32efe5825c8612fa8720d79.html#a180d83b9f32efe5825c8612fa8720d79", null ],
     [ "TGradientDirectionCode", "d1/dfb/colorutils_8h_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849", null ],
+    [ "applyGamma_video", "d1/dfb/colorutils_8h_a64234a425ff5b9c41ec3d24bf1999fd8.html#a64234a425ff5b9c41ec3d24bf1999fd8", null ],
     [ "blend", "d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805", null ],
     [ "blur1d", "d1/dfb/colorutils_8h_ae274d00629fbcf59d98bea80f6f930ca.html#ae274d00629fbcf59d98bea80f6f930ca", null ],
     [ "blur2d", "d1/dfb/colorutils_8h_a868989588bffbf00f97f91e6d98adc8d.html#a868989588bffbf00f97f91e6d98adc8d", null ],
@@ -10,12 +11,19 @@ var colorutils_8h =
     [ "blurRows", "d1/dfb/colorutils_8h_ae784c48b029a7a4da1f0e831792f2aae.html#ae784c48b029a7a4da1f0e831792f2aae", null ],
     [ "ColorFromPalette", "d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090", null ],
     [ "ColorFromPaletteExtended", "d1/dfb/colorutils_8h_a572c01969570d8ea54fa4eabf297d7bb.html#a572c01969570d8ea54fa4eabf297d7bb", null ],
+    [ "fade_raw", "d1/dfb/colorutils_8h_ab16013e537de56c5385c65630af98800.html#ab16013e537de56c5385c65630af98800", null ],
+    [ "fade_video", "d1/dfb/colorutils_8h_aef2cc8add9392f9a0a977a9780dc2f02.html#aef2cc8add9392f9a0a977a9780dc2f02", null ],
+    [ "fadeLightBy", "d1/dfb/colorutils_8h_ab2a5ecaa191e8408446d42ea435834ed.html#ab2a5ecaa191e8408446d42ea435834ed", null ],
     [ "fadeToBlackBy", "d1/dfb/colorutils_8h_a90ef14e5ef0cc07c435a39eca3ddc490.html#a90ef14e5ef0cc07c435a39eca3ddc490", null ],
+    [ "fadeUsingColor", "d1/dfb/colorutils_8h_a095276dcfb9490d74eb6a2baebc10dad.html#a095276dcfb9490d74eb6a2baebc10dad", null ],
     [ "fill_gradient", "d1/dfb/colorutils_8h_a0ebbf1f0b8faba8e0b6b9a5653b53fb5.html#a0ebbf1f0b8faba8e0b6b9a5653b53fb5", null ],
     [ "fill_rainbow", "d1/dfb/colorutils_8h_a9736b17688566f11258bfc4f7550937f.html#a9736b17688566f11258bfc4f7550937f", null ],
     [ "fill_solid", "d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7", null ],
     [ "HeatColor", "d1/dfb/colorutils_8h_a76fb9fd4373aa9fb6e06b2d49e0861ec.html#a76fb9fd4373aa9fb6e06b2d49e0861ec", null ],
     [ "napplyGamma_video", "d1/dfb/colorutils_8h_aca1b8ffda79135fcb6c683f4e860db32.html#aca1b8ffda79135fcb6c683f4e860db32", null ],
     [ "nblend", "d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6", null ],
-    [ "nblendPaletteTowardPalette", "d1/dfb/colorutils_8h_a95a41ac33135f9b0658d2de39ef63526.html#a95a41ac33135f9b0658d2de39ef63526", null ]
+    [ "nblendPaletteTowardPalette", "d1/dfb/colorutils_8h_a95a41ac33135f9b0658d2de39ef63526.html#a95a41ac33135f9b0658d2de39ef63526", null ],
+    [ "nscale8", "d1/dfb/colorutils_8h_ab90db73f2d846755d0b084e4af7af072.html#ab90db73f2d846755d0b084e4af7af072", null ],
+    [ "nscale8_video", "d1/dfb/colorutils_8h_af178e5cac12f46acad3eba87b0e96644.html#af178e5cac12f46acad3eba87b0e96644", null ],
+    [ "UpscalePalette", "d1/dfb/colorutils_8h_a17b7fd301b5691fcbb9136a675dc9faa.html#a17b7fd301b5691fcbb9136a675dc9faa", null ]
 ];

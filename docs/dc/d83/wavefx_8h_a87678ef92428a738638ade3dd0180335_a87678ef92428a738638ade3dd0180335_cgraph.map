@@ -1,0 +1,23 @@
+<map id="wavefx_loop" name="wavefx_loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,105,111,131"/>
+<area shape="rect" id="Node000002" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="166,31,298,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,103,158,65,175,58,177,63,160,70,83,108"/>
+<area shape="rect" id="Node000007" href="$d9/d29/wavefx_8cpp_a861547b83e4a6aa092de815fca8219e8.html#a861547b83e4a6aa092de815fca8219e8" title=" " alt="" coords="159,80,305,105"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="110,108,145,103,146,108,111,113"/>
+<area shape="rect" id="Node000008" href="$d9/d29/wavefx_8cpp_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653" title=" " alt="" coords="385,131,492,156"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="111,119,371,136,371,142,111,124"/>
+<area shape="rect" id="Node000009" href="$d9/d29/wavefx_8cpp_a17165033747bbdfa4fed36d476f531ab.html#a17165033747bbdfa4fed36d476f531ab" title=" " alt="" coords="213,181,251,207"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="89,128,201,178,199,183,87,133"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30.html#a2afdf19685e9f588d22fb45aef62ae30" title=" " alt="" coords="572,5,741,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,28,353,15,459,9,558,10,558,16,459,15,354,21,282,33"/>
+<area shape="rect" id="Node000004" href="$d0/d9d/classfl_1_1_time_ramp_a431f445197b6ac690c83e27ed3005843.html#a431f445197b6ac690c83e27ed3005843" title="Call this when you want to (re)start the ramp cycle." alt="" coords="359,31,519,56"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="298,41,345,41,345,46,298,46"/>
+<area shape="rect" id="Node000005" href="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="353,80,524,105"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="286,53,372,74,371,79,285,59"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="483,77,523,65,610,33,612,38,525,70,485,82"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8" title=" " alt="" coords="597,80,716,105"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="524,90,584,90,584,95,524,95"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="285,103,374,125,372,130,284,108"/>
+<area shape="rect" id="Node000010" href="$d9/d29/wavefx_8cpp_ad3facb26c8fe2270d260a10ea9aceb09.html#ad3facb26c8fe2270d260a10ea9aceb09" title=" " alt="" coords="374,181,503,207"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="251,191,360,191,360,197,251,197"/>
+</map>

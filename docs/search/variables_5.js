@@ -1,7 +1,7 @@
 var searchData=
 [
   ['e_0',['e',['../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341',1,'PixelController']]],
-  ['easemodesqrt_1',['easeModeSqrt',['../dd/d10/_fx_wave2d_8ino_ab1a9bc5dc9514cfa0875be8690626ded.html#ab1a9bc5dc9514cfa0875be8690626ded',1,'FxWave2d.ino']]],
+  ['easemodesqrt_1',['easeModeSqrt',['../d9/d29/wavefx_8cpp_ab1a9bc5dc9514cfa0875be8690626ded.html#ab1a9bc5dc9514cfa0875be8690626ded',1,'wavefx.cpp']]],
   ['edithermode_2',['EDitherMode',['../d8/d90/dither__mode_8h_a5447874a455d2096c8350f15ae13c03c.html#a5447874a455d2096c8350f15ae13c03c',1,'dither_mode.h']]],
   ['elems_3',['elems',['../d1/dda/cq__kernel_8h.html#a312258aadae7392d7e700aa090636be7',1,'sparse_arr']]],
   ['empty_4',['Empty',['../de/d60/classfl_1_1_variant_a71323c1db5653e45ce0fcbce8f93ca68.html#a71323c1db5653e45ce0fcbce8f93ca68',1,'fl::Variant']]],

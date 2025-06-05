@@ -1,7 +1,9 @@
 <map id="fl::TimeRamp::update8" name="fl::TimeRamp::update8">
-<area shape="rect" id="Node000001" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="284,5,455,31"/>
-<area shape="rect" id="Node000002" href="$dd/d10/_fx_wave2d_8ino_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="104,5,236,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="270,21,236,21,236,15,270,15"/>
-<area shape="rect" id="Node000003" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+<area shape="rect" id="Node000001" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="437,5,608,31"/>
+<area shape="rect" id="Node000002" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="257,5,389,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="423,21,390,21,390,15,423,15"/>
+<area shape="rect" id="Node000003" href="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335" title=" " alt="" coords="104,5,209,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,21,210,21,210,15,244,15"/>
+<area shape="rect" id="Node000004" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
 </map>

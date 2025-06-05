@@ -34,7 +34,7 @@ digraph "fx/fx2d.h"
   Node14 [id="Node000014",label="fx/2d/wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/de9/src_2fx_22d_2wave_8h.html",tooltip=" "];
   Node14 -> Node2 [id="edge14_Node000014_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node14 -> Node15 [id="edge15_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/FxWave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino.html",tooltip=" "];
+  Node15 [id="Node000015",label="/home/runner/work/FastLED\l/FastLED/examples/FxWave2d\l/wavefx.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp.html",tooltip=" "];
   Node14 -> Node16 [id="edge16_Node000014_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="/home/runner/work/FastLED\l/FastLED/examples/Wave2d\l/Wave2d.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d44/_wave2d_8ino.html",tooltip=" "];
   Node14 -> Node5 [id="edge17_Node000014_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];

@@ -15,14 +15,14 @@ digraph "fl::UINumberField"
   Node4 [id="Node000004",label="fl::EngineEvents::Listener",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/da2/classfl_1_1_engine_events_1_1_listener.html",tooltip=" "];
   Node1 -> Node3 [id="edge4_Node000003_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mOwner",fontcolor="grey" ];
   Node5 -> Node1 [id="edge5_Node000001_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCallbacks",fontcolor="grey" ];
-  Node5 [id="Node000005",label="fl::FunctionList\< fl\l::UINumberField &, double \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5d/classfl_1_1_function_list.html",tooltip=" "];
+  Node5 [id="Node000005",label="fl::FunctionList\< fl\l::UINumberField & \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5d/classfl_1_1_function_list.html",tooltip=" "];
   Node6 -> Node5 [id="edge6_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::FunctionListBase\l\< function\< void(Args...)\> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
   Node7 -> Node6 [id="edge7_Node000006_Node000007",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mFunctions",fontcolor="grey" ];
-  Node7 [id="Node000007",label="fl::HeapVector\< fl\l::Pair\< int, function\l\< void(Args...)\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
-  Node19 -> Node6 [id="edge8_Node000006_Node000019",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< function\< void(Args...)\> \>",fontcolor="grey" ];
-  Node19 [id="Node000019",label="fl::FunctionListBase\l\< FunctionType \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
-  Node24 -> Node5 [id="edge9_Node000005_Node000024",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::UINumberField\l &, double \>",fontcolor="grey" ];
-  Node24 [id="Node000024",label="fl::FunctionList\< Args \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5d/classfl_1_1_function_list.html",tooltip=" "];
-  Node6 -> Node24 [id="edge10_Node000024_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::HeapVector\< T,\l Allocator \>\< fl::Pair\l\< int, function\< void\l(Args...)\> \> \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
+  Node10 -> Node6 [id="edge8_Node000006_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< function\< void(Args...)\> \>",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::FunctionListBase\l\< FunctionType \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de3/classfl_1_1_function_list_base.html",tooltip=" "];
+  Node12 -> Node5 [id="edge9_Node000005_Node000012",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::UINumberField & \>",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::FunctionList\< Args \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d5d/classfl_1_1_function_list.html",tooltip=" "];
+  Node6 -> Node12 [id="edge10_Node000012_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

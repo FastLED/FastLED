@@ -9,5 +9,6 @@ var structfl_1_1_wave_fx_args =
     [ "dampening", "d3/da2/structfl_1_1_wave_fx_args_a680195f7dd128c7998081f286fea1f3c.html#a680195f7dd128c7998081f286fea1f3c", null ],
     [ "factor", "d3/da2/structfl_1_1_wave_fx_args_a4ccef0276bac38adb044a29f9ff20039.html#a4ccef0276bac38adb044a29f9ff20039", null ],
     [ "half_duplex", "d3/da2/structfl_1_1_wave_fx_args_aab1c5816b5558e6ceb34ac1d4f4f3582.html#aab1c5816b5558e6ceb34ac1d4f4f3582", null ],
-    [ "speed", "d3/da2/structfl_1_1_wave_fx_args_a0ba93ec8982cb69fdfcfa1a012a5c695.html#a0ba93ec8982cb69fdfcfa1a012a5c695", null ]
+    [ "speed", "d3/da2/structfl_1_1_wave_fx_args_a0ba93ec8982cb69fdfcfa1a012a5c695.html#a0ba93ec8982cb69fdfcfa1a012a5c695", null ],
+    [ "x_cyclical", "d3/da2/structfl_1_1_wave_fx_args_a10b45dd6099a06041513ebb3ac12e608.html#a10b45dd6099a06041513ebb3ac12e608", null ]
 ];

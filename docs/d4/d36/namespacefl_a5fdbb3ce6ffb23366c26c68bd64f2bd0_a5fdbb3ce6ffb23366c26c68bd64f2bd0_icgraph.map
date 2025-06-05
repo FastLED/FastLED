@@ -1,0 +1,9 @@
+<map id="fl::splat" name="fl::splat">
+<area shape="rect" id="Node000001" title="&quot;Splat&quot; as in &quot;splat pixel rendering&quot; takes a pixel value in float x,y coordinates and &quot;splats&quot; it in..." alt="" coords="409,35,480,60"/>
+<area shape="rect" id="Node000002" href="$dc/d82/classfl_1_1_corkscrew_aad33fddbb1fe6a90182c52cb1b47c394.html#aad33fddbb1fe6a90182c52cb1b47c394" title=" " alt="" coords="196,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="395,41,350,33,351,28,396,36"/>
+<area shape="rect" id="Node000003" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357" title=" " alt="" coords="207,55,350,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="396,58,351,66,350,61,395,53"/>
+<area shape="rect" id="Node000004" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a0b5feeab9eab82fb0a1a432170ef6a27.html#a0b5feeab9eab82fb0a1a432170ef6a27" title=" " alt="" coords="5,55,148,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="193,78,148,78,148,73,193,73"/>
+</map>
