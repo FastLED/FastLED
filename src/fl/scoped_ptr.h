@@ -99,7 +99,7 @@ template <typename T, typename Deleter = PointerDeleter<T>> class scoped_ptr {
 
 template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
   public:
-    FASTLED_DEPRECATED("Use fl::vector<T, fl::allocator_psram<T>> instead");
+    FASTLED_DEPRECATED_CLASS("Use fl::vector<T, fl::allocator_psram<T>> instead");
     // Constructor
     explicit scoped_array(T *arr = nullptr) : arr_(arr) {}
     scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {}
@@ -172,7 +172,7 @@ template <typename T, typename Deleter = ArrayDeleter<T>> class scoped_array {
 // A variant of scoped_ptr where allocation is done completly via a fl::allocator.
 template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
   public:
-    FASTLED_DEPRECATED("Use fl::vector<T, fl::allocator_psram<T>> instead");
+    FASTLED_DEPRECATED_CLASS("Use fl::vector<T, fl::allocator_psram<T>> instead");
     Alloc mAlloc; // Allocator instance to manage memory allocation
     // Constructor
     explicit scoped_array2(size_t size = 0)

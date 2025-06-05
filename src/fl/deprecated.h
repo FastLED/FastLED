@@ -4,7 +4,9 @@
 #ifndef FASTLED_DEPRECATED
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #define FASTLED_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#define FASTLED_DEPRECATED_CLASS(msg) __attribute__((deprecated(msg)))
 #else
+#define FASTLED_DEPRECATED_CLASS(msg)
 #define FASTLED_DEPRECATED(msg) __attribute__((deprecated))
 #endif
 #endif
