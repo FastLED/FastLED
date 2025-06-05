@@ -66,36 +66,36 @@ struct CorkscrewOutput {
         mapping; // Full precision mapping from corkscrew to cylindrical
     CorkscrewOutput() = default;
 
-    class Vec2i16Iterator {
+    class iterator {
     public:
         using value_type = vec2f;
         using difference_type = int32_t;
         using pointer = vec2f*;
         using reference = vec2f&;
 
-        Vec2i16Iterator(CorkscrewOutput* owner, size_t position)
+        iterator(CorkscrewOutput* owner, size_t position)
             : owner_(owner), position_(position) {}
 
         vec2f& operator*() const {
             return owner_->mapping[position_];
         }
 
-        Vec2i16Iterator& operator++() {
+        iterator& operator++() {
             ++position_;
             return *this;
         }
 
-        Vec2i16Iterator operator++(int) {
-            Vec2i16Iterator temp = *this;
+        iterator operator++(int) {
+            iterator temp = *this;
             ++position_;
             return temp;
         }
 
-        bool operator==(const Vec2i16Iterator& other) const {
+        bool operator==(const iterator& other) const {
             return position_ == other.position_;
         }
 
-        bool operator!=(const Vec2i16Iterator& other) const {
+        bool operator!=(const iterator& other) const {
             return position_ != other.position_;
         }
 
@@ -104,12 +104,12 @@ struct CorkscrewOutput {
         size_t position_;
     };
 
-    Vec2i16Iterator begin_vec2i16() {
-        return Vec2i16Iterator(this, 0);
+    iterator begin() {
+        return iterator(this, 0);
     }
 
-    Vec2i16Iterator end_vec2i16() {
-        return Vec2i16Iterator(this, mapping.size());
+    iterator end() {
+        return iterator(this, mapping.size());
     }
     fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
 };
@@ -118,7 +118,7 @@ class Corkscrew {
   public:
     using Input = CorkscrewInput;
     using Output = CorkscrewOutput;
-    using Vec2i16Iter = CorkscrewOutput::Vec2i16Iterator;
+    using iterator = CorkscrewOutput::iterator;
 
     Corkscrew(const Input &input);
     Corkscrew(const Corkscrew &) = default;
@@ -129,12 +129,12 @@ class Corkscrew {
     Tile2x2_u8 at_splat(uint16_t i) const;
     size_t size() const;
 
-    Vec2i16Iter begin_vec2i16() {
-        return mOutput.begin_vec2i16();
+    iterator begin() {
+        return mOutput.begin();
     }
 
-    Vec2i16Iter end_vec2i16() {
-        return mOutput.end_vec2i16();
+    iterator end() {
+        return mOutput.end();
     }
 
     /// For testing

@@ -77,8 +77,8 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // vec2<int16_t> first = corkscrew.at(0);
     // vec2<int16_t> second = corkscrew.at(1);
 
-    Corkscrew::Vec2i16Iter it = corkscrew.begin_vec2i16();
-    Corkscrew::Vec2i16Iter end = corkscrew.end_vec2i16();
+    Corkscrew::iterator it = corkscrew.begin();
+    Corkscrew::iterator end = corkscrew.end();
 
     fl::sstream ss;
     ss << "\n";
