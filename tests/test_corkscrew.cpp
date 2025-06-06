@@ -13,19 +13,7 @@
 
 #define TWO_PI (PI * 2.0)
 
-// Define an improved CHECK_CLOSE macro that provides better error messages
-#define CHECK_CLOSE(a, b, epsilon)                                             \
-    do {                                                                       \
-        float _a = (a);                                                        \
-        float _b = (b);                                                        \
-        float _diff = fabsf(_a - _b);                                          \
-        bool _result = _diff <= (epsilon);                                     \
-        if (!_result) {                                                        \
-            printf("CHECK_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a,     \
-                   (float)_b, _diff, (float)(epsilon));                        \
-        }                                                                      \
-        CHECK(_result);                                                        \
-    } while (0)
+
 
 using namespace fl;
 
