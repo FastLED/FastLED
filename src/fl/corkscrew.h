@@ -111,7 +111,6 @@ struct CorkscrewState {
     iterator end() {
         return iterator(this, mapping.size());
     }
-    fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
 };
 
 
