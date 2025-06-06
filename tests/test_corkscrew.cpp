@@ -50,26 +50,17 @@ TEST_CASE("Corkscrew generateMap") {
 
 TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // Define the corkscrew input parameters
-
-
-
     const int kCorkscrewTotalHeight = 1; // cm
     //const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
     //const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
     const int kCorkscrewTurns = 2; // Default to 19 turns
-
-
 
     Corkscrew::Input input;
     input.totalHeight = kCorkscrewTotalHeight;
     input.totalAngle = kCorkscrewTurns * 2 * PI; // Default to 19 turns
     input.offsetCircumference = 0.0f;
     input.numLeds = 3;
-
     // Generate the corkscrew map
-
-    
-
     Corkscrew corkscrew(input);
 
     volatile Corkscrew::Output* output = &corkscrew.access();
