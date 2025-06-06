@@ -105,20 +105,12 @@ TEST_CASE("Corkscrew generated map as a circle") {
     vec2f third =
         corkscrew.at(2); // Access the third element to trigger generation
 
-    // fl::sstream ss;
-    // ss << "\n";
-    // ss << "first: " << first << "\n";
-    // ss << "second: " << second << "\n";
-    // ss << "third: " << third << "\n";
-
     vec2f expected_outputs[] = {
         {0.0f, 0.0f}, // First LED at the bottom
         {0.5f, 0.0f}, // Second LED in the middle
         {0.0f, 0.0f}  // Third LED at the top
     };
 
-    // FASTLED_WARN(ss.str());
-    // FASTLED_WARN("Done");
     auto begin = corkscrew.begin();
     auto end = corkscrew.end();
     size_t count = end - begin;

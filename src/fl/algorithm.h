@@ -137,4 +137,14 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2,
     return first1 == last1 && first2 == last2;
 }
 
+template <typename Container1, typename Container2>
+bool equal_containers(const Container1& c1, const Container2& c2) {
+    size_t size1 = c1.size();
+    size_t size2 = c2.size();
+    if (size1 != size2) {
+        return false;
+    }
+    return equal(c1.begin(), c1.end(), c2.begin(), c2.end());
+}
+
 } // namespace fl
