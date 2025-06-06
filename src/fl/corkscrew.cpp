@@ -31,9 +31,10 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // If numLeds is specified, use that for mapping size instead of grid
     output.mapping.reserve(input.numLeds);
     // Generate LED mapping based on numLeds
+    const float last_value = float(input.numLeds - 1);
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
-        float position = static_cast<float>(i) / (input.numLeds - 1);
+        float position = static_cast<float>(i) / last_value;
 
         // Calculate angle and height
         float angle = position * input.totalTurns * 2 * PI;
