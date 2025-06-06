@@ -48,7 +48,7 @@ UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface");
 
 UICheckbox allWhite("All White", false);
-UICheckbox noSplat("No Splat", false);
+UICheckbox splatRendering("Splat Rendering", true);
 
 // CRGB leds[NUM_LEDS];
 
@@ -101,20 +101,28 @@ void loop() {
     // fl::clear(leds);
     fl::clear(frameBuffer);
 
-    static int pos = 0;
-    EVERY_N_MILLIS(10) {
-        // Update the corkscrew mapping every second
-        // w = (w + 1) % CORKSCREW_WIDTH;
-        // frameBuffer.
-        pos++;
-        if (pos > corkscrew.size() - 1) {
-            pos = 0; // Reset to the beginning
+    static float pos = 0;
+
+    // Update the corkscrew mapping every second
+    // w = (w + 1) % CORKSCREW_WIDTH;
+    // frameBuffer.
+    pos += .05;
+    if (pos > corkscrew.size() - 1) {
+        pos = 0; // Reset to the beginning
+    }
+
+
+    if (allWhite) {
+        for (size_t i = 0; i < frameBuffer.size(); ++i) {
+            frameBuffer.data()[i] = CRGB(8, 8, 8);
         }
     }
 
-    vec2f pos_vec2f = corkscrew.at(pos);
 
-    if (noSplat) {
+
+    vec2f pos_vec2f = corkscrew.at_interp(pos);
+
+    if (splatRendering) {
 
         FASTLED_WARN("Position: " << pos);
 
@@ -151,11 +159,6 @@ void loop() {
             CRGB::Blue; // Draw a blue pixel at (w, h)
     }
 
-    if (allWhite) {
-        for (size_t i = 0; i < frameBuffer.size(); ++i) {
-            frameBuffer.data()[i] = CRGB::White;
-        }
-    }
 
     FastLED.show();
 }

@@ -34,7 +34,7 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
     const float width_step = 1.0f / float(input.numLeds);  // Corkscrew reaches max width on last led.
     const float height_step = 1.0f / float(input.numLeds - 1);  // Corkscrew reaches max height on last led.
     // const float led_width_factor = circumferencePerTurn / TWO_PI;
-    const float length_per_turn = input.totalLength / input.totalTurns;
+    const float length_per_turn = input.numLeds / input.totalTurns;
 
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
@@ -77,6 +77,28 @@ vec2f Corkscrew::at(uint16_t i) const {
     const vec2f &position = mState.mapping[i];
     return position;
 }
+
+vec2f Corkscrew::at_interp(float i) const {
+    if (i < 0 || i >= mState.mapping.size()) {
+        // Handle out-of-bounds access, possibly by returning a default value
+        return vec2f(0, 0);
+    }
+    // sample two points then interpolate between them
+    uint16_t index = static_cast<uint16_t>(i);
+    uint16_t index2 = static_cast<uint16_t>(ceil(i));
+
+    if (index == index2) {
+        // If the index is the same, just return the position at that index
+        return at(index);
+    } else {
+        // Interpolate between the two points
+        const vec2f &p1 = mState.mapping[index];
+        const vec2f &p2 = mState.mapping[index2];
+        float t = i - index; // Fractional part
+        return p1 * (1.0f - t) + p2 * t; // Linear interpolation
+    }
+}
+    
 
 Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
     if (i >= mState.mapping.size()) {
