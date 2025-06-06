@@ -48,10 +48,10 @@ namespace fl {
 struct CorkscrewInput {
     float totalHeight = 23.25; // Total height of the corkscrew in centimeters
                                // for 144 densly wrapped up over 19 turns
-    float totalTurns = 19.f; // Default to 19 turns
-    float offsetCircumference = 0;    // Optional offset for gap accounting
-    uint16_t numLeds = 144;           // Default to dense 144 leds.
-    bool invert = false;              // If true, reverse the mapping order
+    float totalTurns = 19.f;   // Default to 19 turns
+    float offsetCircumference = 0; // Optional offset for gap accounting
+    uint16_t numLeds = 144;        // Default to dense 144 leds.
+    bool invert = false;           // If true, reverse the mapping order
     CorkscrewInput() = default;
     CorkscrewInput(float height, float total_turns, float offset = 0,
                    uint16_t leds = 144, bool invertMapping = false)
@@ -67,20 +67,18 @@ struct CorkscrewState {
     CorkscrewState() = default;
 
     class iterator {
-    public:
+      public:
         using value_type = vec2f;
         using difference_type = int32_t;
-        using pointer = vec2f*;
-        using reference = vec2f&;
+        using pointer = vec2f *;
+        using reference = vec2f &;
 
-        iterator(CorkscrewState* owner, size_t position)
+        iterator(CorkscrewState *owner, size_t position)
             : owner_(owner), position_(position) {}
 
-        vec2f& operator*() const {
-            return owner_->mapping[position_];
-        }
+        vec2f &operator*() const { return owner_->mapping[position_]; }
 
-        iterator& operator++() {
+        iterator &operator++() {
             ++position_;
             return *this;
         }
@@ -91,28 +89,23 @@ struct CorkscrewState {
             return temp;
         }
 
-        bool operator==(const iterator& other) const {
+        bool operator==(const iterator &other) const {
             return position_ == other.position_;
         }
 
-        bool operator!=(const iterator& other) const {
+        bool operator!=(const iterator &other) const {
             return position_ != other.position_;
         }
 
-    private:
-        CorkscrewState* owner_;
+      private:
+        CorkscrewState *owner_;
         size_t position_;
     };
 
-    iterator begin() {
-        return iterator(this, 0);
-    }
+    iterator begin() { return iterator(this, 0); }
 
-    iterator end() {
-        return iterator(this, mapping.size());
-    }
+    iterator end() { return iterator(this, mapping.size()); }
 };
-
 
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
 // a densly wrapped LED corkscrew.
@@ -132,28 +125,20 @@ class Corkscrew {
     Tile2x2_u8 at_splat(uint16_t i) const;
     size_t size() const;
 
-    iterator begin() {
-        return mState.begin();
-    }
+    iterator begin() { return mState.begin(); }
 
-    iterator end() {
-        return mState.end();
-    }
+    iterator end() { return mState.end(); }
 
     /// For testing
 
     static State generateState(const Input &input);
 
-    State& access() {
-        return mState;
-    }
+    State &access() { return mState; }
 
-    const State& access() const {
-        return mState;
-    }
+    const State &access() const { return mState; }
 
   private:
-    Input mInput;            // The input parameters defining the corkscrew
+    Input mInput; // The input parameters defining the corkscrew
     State mState; // The resulting cylindrical mapping
 };
 
