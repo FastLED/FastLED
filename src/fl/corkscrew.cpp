@@ -35,6 +35,7 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     output.mapping.reserve(input.numLeds);
     // Generate LED mapping based on numLeds
     const float last_value = float(input.numLeds - 1);
+    const float led_width_factor = circumferencePerTurn / TWO_PI;
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
         float alpha = static_cast<float>(i) / last_value;
@@ -44,8 +45,7 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
         float height = alpha * input.totalHeight;
 
         // Calculate circumference position
-        float circumference = fmodf(angle * circumferencePerTurn / TWO_PI,
-                                    circumferencePerTurn);
+        float circumference = fmodf(angle * led_width_factor, circumferencePerTurn);
 
         // Store the mapping
         output.mapping.push_back({circumference, height});
