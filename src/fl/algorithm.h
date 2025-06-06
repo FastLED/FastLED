@@ -89,4 +89,52 @@ Iterator min_element(Iterator first, Iterator last, Compare comp) {
 
 
 
+template <typename Iterator1, typename Iterator2>
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2) {
+    while (first1 != last1) {
+        if (*first1 != *first2) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    return true;
+}
+
+template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryPredicate pred) {
+    while (first1 != last1) {
+        if (!pred(*first1, *first2)) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    return true;
+}
+
+template <typename Iterator1, typename Iterator2>
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) {
+    while (first1 != last1 && first2 != last2) {
+        if (*first1 != *first2) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    return first1 == last1 && first2 == last2;
+}
+
+template <typename Iterator1, typename Iterator2, typename BinaryPredicate>
+bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, BinaryPredicate pred) {
+    while (first1 != last1 && first2 != last2) {
+        if (!pred(*first1, *first2)) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    return first1 == last1 && first2 == last2;
+}
+
 } // namespace fl

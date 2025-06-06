@@ -2,6 +2,7 @@
 
 #include "fl/math_macros.h"
 #include "test.h"
+#include "fl/algorithm.h"
 
 #include "fl/sstream.h"
 
@@ -39,6 +40,13 @@ TEST_CASE("Vertical corkscrew mapping") {
     const int kCorkscrewTurns = 2; // Default to 19 turns
     const int kNumLeds = 3;
 
+
+    vec2f expected_outputs[] = {
+        {0.0f, 0.0f}, // First LED at the bottom
+        {0.0f, 0.5f}, // Second LED in the middle
+        {0.0f, 1.0f}  // Third LED at the top
+    };
+
     Corkscrew::Input input;
     input.totalHeight = kCorkscrewTotalHeight;
     input.totalTurns = kCorkscrewTurns; // Default to 19 turns
@@ -66,6 +74,10 @@ TEST_CASE("Vertical corkscrew mapping") {
     }
 
     FASTLED_WARN(ss.str());
+
+    const bool is_equal = fl::equal(it, end, expected_outputs);
+
+    REQUIRE(is_equal);
 
     MESSAGE("done");
 }
