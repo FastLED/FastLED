@@ -8,14 +8,7 @@ Most of the time, you'll want the reverse mapping, that is
 drawing to a rectangular grid, and then mapping that to a corkscrew.
 
 However, to make sure the above mapping works correctly, we have
-to test that the forward mapping works correctly also.
-
-Important notes:
-
-For this simple test we are just getting the vec2f position of the map
-and using that to draw to the frame buffer. However to improve the look
-the output pixels should be in tile2x2 format, so that we can the pixels
-can be "splatted" to the frame buffer to give a better look.
+to test that the forward mapping works correctly first.
 
 */
 
@@ -126,16 +119,12 @@ void loop() {
 
     if (splatRendering) {
 
-        FASTLED_WARN("Position: " << pos);
+        // FASTLED_WARN("Position: " << pos);
 
-        FASTLED_WARN("Position vec2f: " << pos_vec2f);
+        // FASTLED_WARN("Position vec2f: " << pos_vec2f);
         Tile2x2_u8 pos_tile = corkscrew.at_splat(pos);
-        // vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
-        // Now map the cork screw position to the cylindrical buffer that we
-        // will draw. frameBuffer.at(pos_i16.x, pos_i16.y) = CRGB::Blue; // Draw
-        // a blue pixel at (w, h)
 
-        FASTLED_WARN("Tile: " << pos_tile);
+        // FASTLED_WARN("Tile: " << pos_tile);
 
         vec2<int16_t> origin = pos_tile.origin();
         // origin can just draw.
