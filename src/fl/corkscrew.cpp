@@ -9,9 +9,9 @@
 
 namespace fl {
 
-void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output);
+void generateState(const Corkscrew::Input &input, CorkscrewState* output);
 
-void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
+void generateState(const Corkscrew::Input &input, CorkscrewState* output) {
     // Calculate circumference per turn from height and total angle
     const float numerator = ALMOST_EQUAL_FLOAT(input.totalHeight, 0) ? 1 : input.totalHeight;
     const float circumferencePerTurn = numerator / input.totalTurns;
@@ -24,12 +24,12 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // Calculate width based on LED density per turn
     // float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
 
-    output.mapping.clear();
-    output.width = 0;  // we will change this below.
-    output.height = 0;
+    output->mapping.clear();
+    output->width = 0;  // we will change this below.
+    output->height = 0;
 
     // If numLeds is specified, use that for mapping size instead of grid
-    output.mapping.reserve(input.numLeds);
+    output->mapping.reserve(input.numLeds);
     // Generate LED mapping based on numLeds
     const float last_value = float(input.numLeds - 1);
     const float led_width_factor = circumferencePerTurn / TWO_PI;
@@ -45,32 +45,32 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
         float circumference = fmodf(angle * led_width_factor, circumferencePerTurn);
 
         // Store the mapping
-        output.mapping.push_back({circumference, height});
+        output->mapping.push_back({circumference, height});
     }
 
-    if (!output.mapping.empty()) {
-        float max_width = fl::max_element(output.mapping.begin(), output.mapping.end(),
+    if (!output->mapping.empty()) {
+        float max_width = fl::max_element(output->mapping.begin(), output->mapping.end(),
                                            [](const vec2f &a, const vec2f &b) {
                                                return a.x < b.x;
                                            })->x;
-        float max_height = fl::max_element(output.mapping.begin(), output.mapping.end(),
+        float max_height = fl::max_element(output->mapping.begin(), output->mapping.end(),
                                             [](const vec2f &a, const vec2f &b) {
                                                 return a.y < b.y;
                                             })->y;
-        output.width = static_cast<uint16_t>(ceilf(max_width)) + 1;
-        output.height = static_cast<uint16_t>(ceilf(max_height)) + 1;
+        output->width = static_cast<uint16_t>(ceilf(max_width)) + 1;
+        output->height = static_cast<uint16_t>(ceilf(max_height)) + 1;
     }
 
 
     // Apply inversion if requested
     if (input.invert) {
-        fl::reverse(output.mapping.begin(), output.mapping.end());
+        fl::reverse(output->mapping.begin(), output->mapping.end());
     }
 }
 
 
 Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
-    fl::generateMap(mInput, mState);
+    fl::generateState(mInput, &mState);
 }
 
 vec2f Corkscrew::at(uint16_t i) const {
@@ -95,9 +95,9 @@ Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
 
 size_t Corkscrew::size() const { return mState.mapping.size(); }
 
-CorkscrewOutput Corkscrew::generateMap(const Input &input) {
-    CorkscrewOutput output;
-    fl::generateMap(input, output);
+Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
+    CorkscrewState output;
+    fl::generateState(input, &output);
     return output;
 }
 

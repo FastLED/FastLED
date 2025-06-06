@@ -59,12 +59,12 @@ struct CorkscrewInput {
           offsetCircumference(offset), numLeds(leds), invert(invertMapping) {}
 };
 
-struct CorkscrewOutput {
+struct CorkscrewState {
     uint16_t width = 0;  // Width of cylindrical map (circumference of one turn)
     uint16_t height = 0; // Height of cylindrical map (total vertical segments)
     fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
         mapping; // Full precision mapping from corkscrew to cylindrical
-    CorkscrewOutput() = default;
+    CorkscrewState() = default;
 
     class iterator {
     public:
@@ -73,7 +73,7 @@ struct CorkscrewOutput {
         using pointer = vec2f*;
         using reference = vec2f&;
 
-        iterator(CorkscrewOutput* owner, size_t position)
+        iterator(CorkscrewState* owner, size_t position)
             : owner_(owner), position_(position) {}
 
         vec2f& operator*() const {
@@ -100,7 +100,7 @@ struct CorkscrewOutput {
         }
 
     private:
-        CorkscrewOutput* owner_;
+        CorkscrewState* owner_;
         size_t position_;
     };
 
@@ -114,11 +114,14 @@ struct CorkscrewOutput {
     fl::Tile2x2_u8 at(int16_t x, int16_t y) const;
 };
 
+
+// Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
+// a densly wrapped LED corkscrew.
 class Corkscrew {
   public:
     using Input = CorkscrewInput;
-    using State = CorkscrewOutput;
-    using iterator = CorkscrewOutput::iterator;
+    using State = CorkscrewState;
+    using iterator = CorkscrewState::iterator;
 
     Corkscrew(const Input &input);
     Corkscrew(const Corkscrew &) = default;
@@ -140,7 +143,7 @@ class Corkscrew {
 
     /// For testing
 
-    static CorkscrewOutput generateMap(const Input &input);
+    static State generateState(const Input &input);
 
     State& access() {
         return mState;
