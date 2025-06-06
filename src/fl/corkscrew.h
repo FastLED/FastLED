@@ -48,14 +48,14 @@ namespace fl {
 struct CorkscrewInput {
     float totalHeight = 23.25; // Total height of the corkscrew in centimeters
                                // for 144 densly wrapped up over 19 turns
-    float totalAngle = 19.f * 2 * PI; // Default to 19 turns
+    float totalTurns = 19.f; // Default to 19 turns
     float offsetCircumference = 0;    // Optional offset for gap accounting
     uint16_t numLeds = 144;           // Default to dense 144 leds.
     bool invert = false;              // If true, reverse the mapping order
     CorkscrewInput() = default;
-    CorkscrewInput(float height, float total_angle, float offset = 0,
+    CorkscrewInput(float height, float total_turns, float offset = 0,
                    uint16_t leds = 144, bool invertMapping = false)
-        : totalHeight(height), totalAngle(total_angle),
+        : totalHeight(height), totalTurns(total_turns),
           offsetCircumference(offset), numLeds(leds), invert(invertMapping) {}
 };
 
