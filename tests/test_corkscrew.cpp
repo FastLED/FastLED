@@ -7,6 +7,7 @@
 #include "fl/sstream.h"
 
 #include "fl/corkscrew.h"
+#include "fl/grid.h"
 
 #define NUM_LEDS 288
 
@@ -57,8 +58,6 @@ TEST_CASE("Vertical corkscrew mapping") {
 
     REQUIRE_EQ(1, corkscrew.cylinder_width());
     REQUIRE_EQ(2, corkscrew.cylinder_height()); // 3 vertical segments for 2π angle
-
-    volatile Corkscrew::State *output = &corkscrew.access();
 
     Corkscrew::iterator it = corkscrew.begin();
     Corkscrew::iterator end = corkscrew.end();
@@ -137,4 +136,26 @@ TEST_CASE("Corkscrew circumference test") {
     // Check that circumference matches calculated value
     // float expectedCircumference = 100.0f / 19.0f;
     // CHECK_CLOSE(output.circumference, expectedCircumference, 0.01f);
+}
+
+TEST_CASE("Corkscrew circumference test") {
+    Corkscrew::Input input;
+    input.totalHeight = 1.0f;
+    input.totalTurns = 1.0f;  
+    input.offsetCircumference = 0.0f; // No offset
+    input.numLeds = 3; // Default to dense 144 LEDs times two strips
+
+    Corkscrew::State output = Corkscrew::generateState(input);
+
+    // Basic sanity checks
+    REQUIRE_EQ(2, output.width);
+    REQUIRE_EQ(2, output.height);
+    REQUIRE_EQ(3, output.mapping.size());
+
+    fl::vector<vec2f> expected_value;
+    expected_value.push_back(vec2f(0.0f, 0.0f)); // First LED at the bottom
+    expected_value.push_back(vec2f(0.5f, 0.5f)); // Second LED in the middle
+    expected_value.push_back(vec2f(0.0f, 1.0f)); // Third LED at the top
+    const bool is_same = fl::equal_container(output.mapping, expected_value);
+    REQUIRE(is_same);
 }
