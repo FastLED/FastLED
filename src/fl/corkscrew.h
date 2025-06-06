@@ -46,6 +46,7 @@ namespace fl {
  * @return The resulting cylindrical mapping.
  */
 struct CorkscrewInput {
+    float totalLength = 100;  // Total length of the corkscrew in centimeters, set to dense 144 strips.
     float totalHeight = 23.25; // Total height of the corkscrew in centimeters
                                // for 144 densly wrapped up over 19 turns
     float totalTurns = 19.f;   // Default to 19 turns
@@ -53,9 +54,9 @@ struct CorkscrewInput {
     uint16_t numLeds = 144;        // Default to dense 144 leds.
     bool invert = false;           // If true, reverse the mapping order
     CorkscrewInput() = default;
-    CorkscrewInput(float height, float total_turns, float offset = 0,
+    CorkscrewInput(float total_length, float height, float total_turns, float offset = 0,
                    uint16_t leds = 144, bool invertMapping = false)
-        : totalHeight(height), totalTurns(total_turns),
+        : totalLength(total_length),totalHeight(height), totalTurns(total_turns),
           offsetCircumference(offset), numLeds(leds), invert(invertMapping) {}
 };
 

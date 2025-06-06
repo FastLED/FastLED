@@ -28,6 +28,7 @@ using namespace fl;
 #define CORKSCREW_TOTAL_HEIGHT 0 // when height = 0, it's a circle.
                                  // wrapped up over 19 turns
 #define CORKSCREW_TURNS 1        // Default to 19 turns
+#define CORKSCREW_TOTAL_LENGTH 100
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
@@ -40,7 +41,8 @@ UIDescription festivalStickDescription(
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
 Corkscrew::Input
-    corkscrewInput(CORKSCREW_TOTAL_HEIGHT,
+    corkscrewInput(CORKSCREW_TOTAL_LENGTH,
+                   CORKSCREW_TOTAL_HEIGHT,
                    CORKSCREW_TURNS, // Default to 19 turns
                    0,        // offset to account for gaps between segments
                    NUM_LEDS, // Default to dense 144 leds.
@@ -91,7 +93,6 @@ void loop() {
 
     static int pos = 0;
     EVERY_N_MILLIS(100) {
-        FASTLED_ASSERT(false, "blah");
         // Update the corkscrew mapping every second
         // w = (w + 1) % CORKSCREW_WIDTH;
         // frameBuffer.
@@ -118,6 +119,8 @@ void loop() {
 
     vec2f pos_vec2f = corkscrew.at(pos);
     vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
+
+    FASTLED_WARN("Pos.x = " << pos_vec2f.x << ", Pos.y = " << pos_vec2f.y);
 
     frameBuffer.at(pos_i16.x, pos_i16.y) = CRGB::Blue; // Draw a blue pixel at (w, h)
 

@@ -12,10 +12,6 @@ namespace fl {
 void generateState(const Corkscrew::Input &input, CorkscrewState *output);
 
 void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
-    // Calculate circumference per turn from height and total angle
-    const float numerator =
-        ALMOST_EQUAL_FLOAT(input.totalHeight, 0) ? 1 : input.totalHeight;
-    const float circumferencePerTurn = numerator / input.totalTurns;
 
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment
@@ -32,22 +28,17 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
     // If numLeds is specified, use that for mapping size instead of grid
     output->mapping.reserve(input.numLeds);
     // Generate LED mapping based on numLeds
-    const float last_value = float(input.numLeds - 1);
-    const float led_width_factor = circumferencePerTurn / TWO_PI;
+    const float max_i = float(input.numLeds - 1);
+    // const float led_width_factor = circumferencePerTurn / TWO_PI;
+    const float leds_per_turn = input.numLeds / input.totalTurns;
+
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
-        float alpha = static_cast<float>(i) / last_value;
-
-        // Calculate angle and height
-        float angle = alpha * input.totalTurns * 2 * PI;
+        float alpha = static_cast<float>(i) / max_i;
         float height = alpha * input.totalHeight;
-
-        // Calculate circumference position
-        float circumference =
-            fmodf(angle * led_width_factor, circumferencePerTurn);
-
-        // Store the mapping
-        output->mapping.push_back({circumference, height});
+        float width_before_mod = alpha * input.totalLength;
+        float width = fmodf(width_before_mod, leds_per_turn);
+        output->mapping.push_back({width, height});
     }
 
     if (!output->mapping.empty()) {
