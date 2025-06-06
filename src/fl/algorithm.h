@@ -147,4 +147,14 @@ bool equal_container(const Container1& c1, const Container2& c2) {
     return equal(c1.begin(), c1.end(), c2.begin(), c2.end());
 }
 
+template <typename Container1, typename Container2, typename BinaryPredicate>
+bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate pred) {
+    size_t size1 = c1.size();
+    size_t size2 = c2.size();
+    if (size1 != size2) {
+        return false;
+    }
+    return equal(c1.begin(), c1.end(), c2.begin(), c2.end(), pred);
+}
+
 } // namespace fl
