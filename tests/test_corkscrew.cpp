@@ -7,13 +7,9 @@
 
 #include "fl/corkscrew.h"
 
-
 #define NUM_LEDS 288
 
-
 #define TWO_PI (PI * 2.0)
-
-
 
 using namespace fl;
 
@@ -39,8 +35,8 @@ TEST_CASE("Corkscrew generateMap") {
 TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // Define the corkscrew input parameters
     const int kCorkscrewTotalHeight = 1; // cm
-    //const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
-    //const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
+    // const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
+    // const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
     const int kCorkscrewTurns = 2; // Default to 19 turns
 
     Corkscrew::Input input;
@@ -51,7 +47,7 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // Generate the corkscrew map
     Corkscrew corkscrew(input);
 
-    volatile Corkscrew::Output* output = &corkscrew.access();
+    volatile Corkscrew::Output *output = &corkscrew.access();
 
     // vec2<int16_t> first = corkscrew.at(0);
     // vec2<int16_t> second = corkscrew.at(1);
@@ -61,8 +57,8 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
 
     fl::sstream ss;
     ss << "\n";
-    ss << "width: " <<  output->width << "\n";
-    ss << "height: " <<  output->height << "\n";
+    ss << "width: " << output->width << "\n";
+    ss << "height: " << output->height << "\n";
 
     while (it != end) {
         ss << *it << "\n";
@@ -71,17 +67,14 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
 
     FASTLED_WARN(ss.str());
 
-
     MESSAGE("done");
-
-
 }
 
 TEST_CASE("Corkscrew generateMap with two turns") {
     Corkscrew::Input input;
     input.totalHeight = 10.0f;
-    input.totalTurns = 2 ; // Two full turns
-    input.numLeds = 10;            // 10 LEDs around the corkscrew
+    input.totalTurns = 2; // Two full turns
+    input.numLeds = 10;   // 10 LEDs around the corkscrew
     input.offsetCircumference = 0.0f;
 
     Corkscrew::Output output = Corkscrew::generateMap(input);
@@ -101,8 +94,8 @@ TEST_CASE("Corkscrew circumference test") {
     Corkscrew::Input input;
     // Use defaults: totalHeight = 100, totalAngle = 19 * 2 * PI
     input.totalHeight = 23.25f; // Total height of the corkscrew in centimeters
-    input.totalTurns = 19.0f; // Default to 19 turns
-    input.offsetCircumference = 0.0f;  // No offset
+    input.totalTurns = 19.0f;   // Default to 19 turns
+    input.offsetCircumference = 0.0f; // No offset
     input.numLeds = 288; // Default to dense 144 LEDs times two strips
 
     Corkscrew::Output output = Corkscrew::generateMap(input);
