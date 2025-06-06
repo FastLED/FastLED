@@ -13,8 +13,6 @@
 
 using namespace fl;
 
-#if 0
-
 TEST_CASE("Corkscrew generateMap") {
     Corkscrew::Input input;
     input.totalHeight = 10.0f;
@@ -25,7 +23,7 @@ TEST_CASE("Corkscrew generateMap") {
     Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 10);
-    CHECK_EQ(output.height, 11);          // One vertical segment for one turn
+    CHECK_EQ(output.height, 11);         // One vertical segment for one turn
     CHECK_EQ(output.mapping.size(), 10); // 10 LEDs around the corkscrew
 
     CHECK_GE(output.mapping[0].x, 0.0f);
@@ -82,7 +80,7 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 6);
-    CHECK_EQ(output.height, 11);          // Two vertical segments for two turns
+    CHECK_EQ(output.height, 11);         // Two vertical segments for two turns
     CHECK_EQ(output.mapping.size(), 10); // 5 width * 2 height
 
     // Check first pixel for correctness (basic integrity)
@@ -91,8 +89,6 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     CHECK_GE(output.mapping[0].y, 0.0f);
     CHECK_LE(output.mapping[0].y, 2.0f); // 2 vertical segments for 4π angle
 }
-
-#endif
 
 TEST_CASE("Corkscrew generated map as a circle") {
     Corkscrew::Input input;
@@ -103,9 +99,12 @@ TEST_CASE("Corkscrew generated map as a circle") {
 
     // Corkscrew::Output output = Corkscrew::generateMap(input);
     Corkscrew corkscrew(input);
-    vec2f first = corkscrew.at(0); // Access the first element to trigger generation
-    vec2f second = corkscrew.at(1); // Access the second element to trigger generation
-    vec2f third = corkscrew.at(2); // Access the third element to trigger generation
+    vec2f first =
+        corkscrew.at(0); // Access the first element to trigger generation
+    vec2f second =
+        corkscrew.at(1); // Access the second element to trigger generation
+    vec2f third =
+        corkscrew.at(2); // Access the third element to trigger generation
 
     fl::sstream ss;
     ss << "\n";

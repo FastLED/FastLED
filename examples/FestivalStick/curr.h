@@ -176,28 +176,34 @@ void loop() {
     fl::clear(frameBuffer);
 
     static int w = 0;
+    static int h = 0;
 
-    EVERY_N_MILLIS(300) {
+    EVERY_N_MILLIS(100) {
         // Update the corkscrew mapping every second
-        w = (w + 1) % CORKSCREW_WIDTH;
+        // w = (w + 1) % CORKSCREW_WIDTH;
+        if (w < CORKSCREW_WIDTH - 1) {
+            w++;
+        } else {
+            w = 0;
+            h = (h + 1) % CORKSCREW_HEIGHT; // Move to the next row
+        }
     }
 
+    // // draw a blue line down the middle
+    // for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
+    //     frameBuffer.at(w % CORKSCREW_WIDTH, i) = CRGB::Blue;
+    //     frameBuffer.at((w + 1) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+    //     frameBuffer.at((w - 1 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+    //     frameBuffer.at((w + 2) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+    //     frameBuffer.at((w - 2 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
+    // }
 
-    // draw a blue line down the middle
-    for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
-        frameBuffer.at(w % CORKSCREW_WIDTH, i) = CRGB::Blue;
-        frameBuffer.at((w + 1) % CORKSCREW_WIDTH, i) = CRGB::Blue;
-        frameBuffer.at((w - 1 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
-        frameBuffer.at((w + 2) % CORKSCREW_WIDTH, i) = CRGB::Blue;
-        frameBuffer.at((w - 2 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) = CRGB::Blue;
-    }
-
+    frameBuffer.at(w, h) = CRGB::Blue; // Draw a blue pixel at (w, h)
 
     // printOutput(corkscrewMap);
-
     for (int i = 0; i < NUM_LEDS; ++i) {
         // Get the position in the frame buffer
-        vec2<int16_t> pos = corkscrew.at(i);
+        vec2f pos = corkscrew.at(i);
         // Draw the tile to the frame buffer
         CRGB c = frameBuffer.at(pos.x, pos.y);
         leds[i] = c;
