@@ -117,7 +117,7 @@ struct CorkscrewOutput {
 class Corkscrew {
   public:
     using Input = CorkscrewInput;
-    using Output = CorkscrewOutput;
+    using State = CorkscrewOutput;
     using iterator = CorkscrewOutput::iterator;
 
     Corkscrew(const Input &input);
@@ -130,28 +130,28 @@ class Corkscrew {
     size_t size() const;
 
     iterator begin() {
-        return mOutput.begin();
+        return mState.begin();
     }
 
     iterator end() {
-        return mOutput.end();
+        return mState.end();
     }
 
     /// For testing
 
     static CorkscrewOutput generateMap(const Input &input);
 
-    Output& access() {
-        return mOutput;
+    State& access() {
+        return mState;
     }
 
-    const Output& access() const {
-        return mOutput;
+    const State& access() const {
+        return mState;
     }
 
   private:
     Input mInput;            // The input parameters defining the corkscrew
-    CorkscrewOutput mOutput; // The resulting cylindrical mapping
+    State mState; // The resulting cylindrical mapping
 };
 
 } // namespace fl

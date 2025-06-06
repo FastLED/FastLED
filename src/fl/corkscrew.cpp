@@ -70,30 +70,30 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
 
 
 Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
-    fl::generateMap(mInput, mOutput);
+    fl::generateMap(mInput, mState);
 }
 
 vec2f Corkscrew::at(uint16_t i) const {
-    if (i >= mOutput.mapping.size()) {
+    if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2f(0, 0);
     }
     // Convert the float position to integer
-    const vec2f &position = mOutput.mapping[i];
+    const vec2f &position = mState.mapping[i];
     return position;
 }
 
 Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
-    if (i >= mOutput.mapping.size()) {
+    if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
         return Tile2x2_u8();
     }
     // Use the splat function to convert the vec2f to a Tile2x2_u8
-    return splat(mOutput.mapping[i]);
+    return splat(mState.mapping[i]);
 }
 
-size_t Corkscrew::size() const { return mOutput.mapping.size(); }
+size_t Corkscrew::size() const { return mState.mapping.size(); }
 
 CorkscrewOutput Corkscrew::generateMap(const Input &input) {
     CorkscrewOutput output;

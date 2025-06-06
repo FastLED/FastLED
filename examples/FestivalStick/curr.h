@@ -63,7 +63,7 @@ Corkscrew::Input
                    NUM_LEDS, // Default to dense 144 leds.
     );
 
-// Corkscrew::Output corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
+// Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
 Corkscrew corkscrew(corkscrewInput);
 
 // Used only for the fl::ScreenMap generation.
@@ -154,7 +154,7 @@ void setup() {
     });
 }
 
-void printOutput(const Corkscrew::Output& output) {
+void printOutput(const Corkscrew::State& output) {
     fl::sstream stream;
     stream << "Corkscrew Output:\n";
     stream << "Width: " << output.width << "\n";

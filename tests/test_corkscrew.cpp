@@ -20,7 +20,7 @@ TEST_CASE("Corkscrew generateMap") {
     input.offsetCircumference = 0.0f;
     input.numLeds = 10;
 
-    Corkscrew::Output output = Corkscrew::generateMap(input);
+    Corkscrew::State output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 10);
     CHECK_EQ(output.height, 11);         // One vertical segment for one turn
@@ -47,7 +47,7 @@ TEST_CASE("Corkscrew to Frame Buffer Mapping") {
     // Generate the corkscrew map
     Corkscrew corkscrew(input);
 
-    volatile Corkscrew::Output *output = &corkscrew.access();
+    volatile Corkscrew::State *output = &corkscrew.access();
 
     // vec2<int16_t> first = corkscrew.at(0);
     // vec2<int16_t> second = corkscrew.at(1);
@@ -77,7 +77,7 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     input.numLeds = 10;   // 10 LEDs around the corkscrew
     input.offsetCircumference = 0.0f;
 
-    Corkscrew::Output output = Corkscrew::generateMap(input);
+    Corkscrew::State output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 6);
     CHECK_EQ(output.height, 11);         // Two vertical segments for two turns
@@ -97,7 +97,7 @@ TEST_CASE("Corkscrew generated map as a circle") {
     input.offsetCircumference = 0.0f;
     input.numLeds = 3; // 10 LEDs around the corkscrew
 
-    // Corkscrew::Output output = Corkscrew::generateMap(input);
+    // Corkscrew::State output = Corkscrew::generateMap(input);
     Corkscrew corkscrew(input);
     vec2f first =
         corkscrew.at(0); // Access the first element to trigger generation
@@ -124,7 +124,7 @@ TEST_CASE("Corkscrew circumference test") {
     input.offsetCircumference = 0.0f; // No offset
     input.numLeds = 288; // Default to dense 144 LEDs times two strips
 
-    Corkscrew::Output output = Corkscrew::generateMap(input);
+    Corkscrew::State output = Corkscrew::generateMap(input);
 
     // Basic sanity checks
     CHECK_EQ(output.width, 3);
