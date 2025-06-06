@@ -16,7 +16,7 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment
     // For two turns (4π), we want exactly 2 vertical segments
-    uint16_t verticalSegments = ceil(input.totalTurns);
+    // uint16_t verticalSegments = ceil(input.totalTurns);
 
     // Calculate width based on LED density per turn
     // float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
@@ -34,11 +34,11 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     const float last_value = float(input.numLeds - 1);
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
-        float position = static_cast<float>(i) / last_value;
+        float alpha = static_cast<float>(i) / last_value;
 
         // Calculate angle and height
-        float angle = position * input.totalTurns * 2 * PI;
-        float height = position * verticalSegments;
+        float angle = alpha * input.totalTurns * 2 * PI;
+        float height = alpha * input.totalHeight;
 
         // Calculate circumference position
         float circumference = fmodf(angle * circumferencePerTurn / TWO_PI,
