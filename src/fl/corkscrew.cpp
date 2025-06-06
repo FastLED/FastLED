@@ -19,11 +19,12 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     uint16_t verticalSegments = round(input.totalAngle / TWO_PI);
 
     // Calculate width based on LED density per turn
-    float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
+    // float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
 
     // Determine cylindrical dimensions
-    output.height = verticalSegments;
-    output.width = ceil(ledsPerTurn);
+    // output.height = verticalSegments;
+    // output.width = ceil(ledsPerTurn);
+    output.height = output.width = 0;  // we will change this below.
 
     output.mapping.clear();
 
@@ -44,6 +45,19 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
 
         // Store the mapping
         output.mapping.push_back({circumference, height});
+    }
+
+    if (!output.mapping.empty()) {
+        float max_width = fl::max_element(output.mapping.begin(), output.mapping.end(),
+                                           [](const vec2f &a, const vec2f &b) {
+                                               return a.x < b.x;
+                                           })->x;
+        float max_height = fl::max_element(output.mapping.begin(), output.mapping.end(),
+                                            [](const vec2f &a, const vec2f &b) {
+                                                return a.y < b.y;
+                                            })->y;
+        output.width = static_cast<uint16_t>(ceilf(max_width)) + 1;
+        output.height = static_cast<uint16_t>(ceilf(max_height)) + 1;
     }
 
 

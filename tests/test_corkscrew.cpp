@@ -39,7 +39,7 @@ TEST_CASE("Corkscrew generateMap") {
     Corkscrew::Output output = Corkscrew::generateMap(input);
 
     CHECK_EQ(output.width, 10);
-    CHECK_EQ(output.height, 1);          // One vertical segment for one turn
+    CHECK_EQ(output.height, 2);          // One vertical segment for one turn
     CHECK_EQ(output.mapping.size(), 10); // 10 LEDs around the corkscrew
 
     CHECK_GE(output.mapping[0].x, 0.0f);
@@ -98,8 +98,8 @@ TEST_CASE("Corkscrew generateMap with two turns") {
 
     Corkscrew::Output output = Corkscrew::generateMap(input);
 
-    CHECK_EQ(output.width, 5);
-    CHECK_EQ(output.height, 2);          // Two vertical segments for two turns
+    CHECK_EQ(output.width, 6);
+    CHECK_EQ(output.height, 3);          // Two vertical segments for two turns
     CHECK_EQ(output.mapping.size(), 10); // 5 width * 2 height
 
     // Check first pixel for correctness (basic integrity)
@@ -120,8 +120,8 @@ TEST_CASE("Corkscrew circumference test") {
     Corkscrew::Output output = Corkscrew::generateMap(input);
 
     // Basic sanity checks
-    CHECK_EQ(output.width, 16);
-    CHECK_EQ(output.height, 19);
+    CHECK_EQ(output.width, 3);
+    CHECK_EQ(output.height, 20);
     CHECK_EQ(output.mapping.size(), 288);
 
     // Check that circumference matches calculated value
