@@ -3,6 +3,8 @@
 #include "fl/math.h"
 #include "fl/splat.h"
 
+#include "fl/math_macros.h"
+
 #define TWO_PI (PI * 2.0)
 
 namespace fl {
@@ -11,7 +13,8 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output);
 
 void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // Calculate circumference per turn from height and total angle
-    float circumferencePerTurn = input.totalHeight / input.totalTurns;
+    const float numerator = ALMOST_EQUAL_FLOAT(input.totalHeight, 0) ? 1 : input.totalHeight;
+    const float circumferencePerTurn = numerator / input.totalTurns;
 
     // Calculate vertical segments based on number of turns
     // For a single turn (2π), we want exactly 1 vertical segment

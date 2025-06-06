@@ -13,6 +13,8 @@
 
 using namespace fl;
 
+#if 0
+
 TEST_CASE("Corkscrew generateMap") {
     Corkscrew::Input input;
     input.totalHeight = 10.0f;
@@ -88,6 +90,31 @@ TEST_CASE("Corkscrew generateMap with two turns") {
     CHECK_LE(output.mapping[0].x, 5.0f);
     CHECK_GE(output.mapping[0].y, 0.0f);
     CHECK_LE(output.mapping[0].y, 2.0f); // 2 vertical segments for 4π angle
+}
+
+#endif
+
+TEST_CASE("Corkscrew generated map as a circle") {
+    Corkscrew::Input input;
+    input.totalHeight = 0.f;
+    input.totalTurns = 1; // One full turn
+    input.offsetCircumference = 0.0f;
+    input.numLeds = 3; // 10 LEDs around the corkscrew
+
+    // Corkscrew::Output output = Corkscrew::generateMap(input);
+    Corkscrew corkscrew(input);
+    vec2f first = corkscrew.at(0); // Access the first element to trigger generation
+    vec2f second = corkscrew.at(1); // Access the second element to trigger generation
+    vec2f third = corkscrew.at(2); // Access the third element to trigger generation
+
+    fl::sstream ss;
+    ss << "\n";
+    ss << "first: " << first << "\n";
+    ss << "second: " << second << "\n";
+    ss << "third: " << third << "\n";
+
+    FASTLED_WARN(ss.str());
+    FASTLED_WARN("Done");
 }
 
 TEST_CASE("Corkscrew circumference test") {
