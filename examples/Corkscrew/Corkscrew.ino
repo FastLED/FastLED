@@ -34,11 +34,11 @@ using namespace fl;
 
 #define PIN_DATA 9
 
-#define NUM_LEDS 300
+#define NUM_LEDS 288
 #define CORKSCREW_TOTAL_LENGTH 100
-#define CORKSCREW_TOTAL_HEIGHT 10 // when height = 0, it's a circle.
+#define CORKSCREW_TOTAL_HEIGHT 23.25 // when height = 0, it's a circle.
                                   // wrapped up over 19 turns
-#define CORKSCREW_TURNS 10        // Default to 19 turns
+#define CORKSCREW_TURNS 19        // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -46,6 +46,8 @@ using namespace fl;
 UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface");
+
+UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
@@ -90,7 +92,7 @@ void setup() {
         &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
 
     fl::ScreenMap screenMap = xyMap.toScreenMap();
-    screenMap.setDiameter(.1f);
+    screenMap.setDiameter(.2f);
 
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
@@ -106,7 +108,7 @@ void loop() {
     // Update the corkscrew mapping every second
     // w = (w + 1) % CORKSCREW_WIDTH;
     // frameBuffer.
-    pos += .05;
+    pos += speed.value();
     if (pos > corkscrew.size() - 1) {
         pos = 0; // Reset to the beginning
     }
@@ -148,7 +150,10 @@ void loop() {
                 int wrapped_x = x % frameBuffer.width();
                 int wrapped_y = y % frameBuffer.height();
                 FASTLED_WARN("x: " << wrapped_x << " y: " << wrapped_y);
-                frameBuffer.at(wrapped_x, wrapped_y) = color * alpha;
+                CRGB c = color;
+                // c *= alpha / 255.f; // Scale the color by the alpha value
+                c.nscale8(alpha); // Scale the color by the alpha value
+                frameBuffer.at(wrapped_x, wrapped_y) = c;
             }
         }
     } else {
