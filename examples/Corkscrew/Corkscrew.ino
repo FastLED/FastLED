@@ -34,11 +34,10 @@ using namespace fl;
 
 #define PIN_DATA 9
 
-
 #define NUM_LEDS 300
-#define CORKSCREW_TOTAL_LENGTH 300
+#define CORKSCREW_TOTAL_LENGTH 100
 #define CORKSCREW_TOTAL_HEIGHT 10 // when height = 0, it's a circle.
-                                 // wrapped up over 19 turns
+                                  // wrapped up over 19 turns
 #define CORKSCREW_TURNS 10        // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
@@ -48,13 +47,15 @@ UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface");
 
+UICheckbox allWhite("All White", false);
+UICheckbox noSplat("No Splat", false);
+
 // CRGB leds[NUM_LEDS];
 
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
 Corkscrew::Input
-    corkscrewInput(CORKSCREW_TOTAL_LENGTH,
-                   CORKSCREW_TOTAL_HEIGHT,
+    corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
                    CORKSCREW_TURNS, // Default to 19 turns
                    0,        // offset to account for gaps between segments
                    NUM_LEDS, // Default to dense 144 leds.
@@ -75,8 +76,6 @@ Corkscrew corkscrew(corkscrewInput);
 fl::ScreenMap screenMap;
 fl::Grid<CRGB> frameBuffer;
 
-
-
 void setup() {
     int width = corkscrew.cylinder_width();
     int height = corkscrew.cylinder_height();
@@ -84,15 +83,17 @@ void setup() {
     frameBuffer.reset(width, height);
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);
 
-    CRGB* leds = frameBuffer.data();
+    CRGB *leds = frameBuffer.data();
     size_t num_leds = frameBuffer.size();
 
-    CLEDController *controller = &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
+    CLEDController *controller =
+        &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
 
-    Corkscrew corkscrew2(corkscrewInput);
+    fl::ScreenMap screenMap = xyMap.toScreenMap();
+    screenMap.setDiameter(.1f);
 
     // Set the screen map for the controller
-    controller->setScreenMap(xyMap);
+    controller->setScreenMap(screenMap);
 }
 
 void loop() {
@@ -111,12 +112,50 @@ void loop() {
         }
     }
 
-
     vec2f pos_vec2f = corkscrew.at(pos);
-    vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
-    // Now map the cork screw position to the cylindrical buffer that we will
-    // draw.
-    frameBuffer.at(pos_i16.x, pos_i16.y) = CRGB::Blue; // Draw a blue pixel at (w, h)
+
+    if (noSplat) {
+
+        FASTLED_WARN("Position: " << pos);
+
+        FASTLED_WARN("Position vec2f: " << pos_vec2f);
+        Tile2x2_u8 pos_tile = corkscrew.at_splat(pos);
+        // vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
+        // Now map the cork screw position to the cylindrical buffer that we
+        // will draw. frameBuffer.at(pos_i16.x, pos_i16.y) = CRGB::Blue; // Draw
+        // a blue pixel at (w, h)
+
+        FASTLED_WARN("Tile: " << pos_tile);
+
+        vec2<int16_t> origin = pos_tile.origin();
+        // origin can just draw.
+        const CRGB color = CRGB::Blue;
+        for (int x = origin.x; x < origin.x + 2; ++x) {
+            for (int y = origin.y; y < origin.y + 2; ++y) {
+                int dx = x - origin.x;
+                int dy = y - origin.y;
+                uint8_t alpha = pos_tile.at(dx, dy);
+
+                // Wrap around the frame buffer
+                int wrapped_x = x % frameBuffer.width();
+                int wrapped_y = y % frameBuffer.height();
+                FASTLED_WARN("x: " << wrapped_x << " y: " << wrapped_y);
+                frameBuffer.at(wrapped_x, wrapped_y) = color * alpha;
+            }
+        }
+    } else {
+        vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
+        // Now map the cork screw position to the cylindrical buffer that we
+        // will draw.
+        frameBuffer.at(pos_i16.x, pos_i16.y) =
+            CRGB::Blue; // Draw a blue pixel at (w, h)
+    }
+
+    if (allWhite) {
+        for (size_t i = 0; i < frameBuffer.size(); ++i) {
+            frameBuffer.data()[i] = CRGB::White;
+        }
+    }
 
     FastLED.show();
 }

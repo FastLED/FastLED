@@ -2,6 +2,7 @@
 #include "fl/algorithm.h"
 #include "fl/math.h"
 #include "fl/splat.h"
+#include "fl/assert.h"
 
 #include "fl/math_macros.h"
 
@@ -81,6 +82,8 @@ Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
     if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
+        FASTLED_ASSERT(false, "Out of bounds access in Corkscrew at_splat: " << i
+                        << " size: " << mState.mapping.size());
         return Tile2x2_u8();
     }
     // Use the splat function to convert the vec2f to a Tile2x2_u8
