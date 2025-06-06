@@ -13,19 +13,15 @@ template <typename T> class Grid {
     Grid(uint32_t width, uint32_t height) { reset(width, height); }
 
     void reset(uint32_t width, uint32_t height) {
+        clear();
         if (width != mWidth || height != mHeight) {
             mWidth = width;
             mHeight = height;
-            // Only re-allocate if the size is now bigger.
-            mData.reserve(width * height);
-            // Fill with default objects.
-            while (mData.size() < width * height) {
-                mData.push_back(T());
-            }
-            mSlice = fl::MatrixSlice<T>(mData.data(), width, height, 0, 0,
-                                        width - 1, height - 1);
+            mData.resize(width * height);
+
         }
-        clear();
+        mSlice = fl::MatrixSlice<T>(mData.data(), width, height, 0, 0,
+                                    width, height);
     }
 
     void clear() {
@@ -59,6 +55,11 @@ template <typename T> class Grid {
 
     uint32_t width() const { return mWidth; }
     uint32_t height() const { return mHeight; }
+
+    T* data() { return mData.data(); }
+    const T* data() const { return mData.data(); }
+
+    size_t size() const { return mData.size(); }
 
   private:
     static T &NullValue() {

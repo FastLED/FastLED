@@ -179,13 +179,13 @@ void loop() {
     static int h = 0;
 
     EVERY_N_MILLIS(100) {
-        // Update the corkscrew mapping every second
-        // w = (w + 1) % CORKSCREW_WIDTH;
-        if (w < CORKSCREW_WIDTH - 1) {
-            w++;
+        w++;
+        if (w < frameBuffer.width() - 1) {
+            // If we haven't reached the end of the row, keep going
         } else {
+            // If we have reached the end of the row, reset w and increment h
             w = 0;
-            h = (h + 1) % CORKSCREW_HEIGHT; // Move to the next row
+            h = (h + 1) % frameBuffer.height(); // Move to the next row
         }
     }
 
@@ -206,12 +206,7 @@ void loop() {
         vec2f pos = corkscrew.at(i);
         // Draw the tile to the frame buffer
         CRGB c = frameBuffer.at(pos.x, pos.y);
-        leds[i] = c;
-
-        FASTLED_WARN_IF(i < 16, "LED " << i << " at position: "
-                        << pos.x << ", " << pos.y
-                        << " with color: " << c);
-            
+        leds[i] = c;            
     }
     
     FastLED.show();
