@@ -24,12 +24,9 @@ void generateMap(const Corkscrew::Input &input, CorkscrewOutput &output) {
     // Calculate width based on LED density per turn
     // float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
 
-    // Determine cylindrical dimensions
-    // output.height = verticalSegments;
-    // output.width = ceil(ledsPerTurn);
-    output.height = output.width = 0;  // we will change this below.
-
     output.mapping.clear();
+    output.width = 0;  // we will change this below.
+    output.height = 0;
 
     // If numLeds is specified, use that for mapping size instead of grid
     output.mapping.reserve(input.numLeds);
