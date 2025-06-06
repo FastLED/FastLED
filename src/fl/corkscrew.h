@@ -122,6 +122,7 @@ class Corkscrew {
 
     Corkscrew(const Input &input);
     Corkscrew(const Corkscrew &) = default;
+    Corkscrew(Corkscrew &&) = default;
 
     vec2f at(uint16_t i) const;
     // This is a splatted pixel. This is will look way better than
