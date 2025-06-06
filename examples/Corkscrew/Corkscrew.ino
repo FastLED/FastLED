@@ -121,6 +121,8 @@ void loop() {
 
     // now select the pixel via the corkscrew mapping.
 
+    FASTLED_ASSERT(false, "debugger");
+
     vec2f pos_vec2f = corkscrew.at(pos);
     vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
 

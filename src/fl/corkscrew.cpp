@@ -28,7 +28,9 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
     // If numLeds is specified, use that for mapping size instead of grid
     output->mapping.reserve(input.numLeds);
     // Generate LED mapping based on numLeds
-    const float max_i_width = float(input.numLeds);  // Corkscrew reaches max width on last led.
+    // Note that max_i_width should be float(input.numLeds) so last does not wrap
+    // around. But testing this causes very weird issues.
+    const float max_i_width = float(input.numLeds - 1);  // Corkscrew reaches max width on last led.
     const float max_i_height = float(input.numLeds - 1);  // Corkscrew reaches max height on last led.
     // const float led_width_factor = circumferencePerTurn / TWO_PI;
     const float leds_per_turn = input.numLeds / input.totalTurns;
