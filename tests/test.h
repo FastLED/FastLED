@@ -93,9 +93,9 @@ namespace doctest {
         }
     };
 
-    template<typename T>
-    struct StringMaker<fl::vector<T>> {
-        static String convert(const fl::vector<T>& value) {
+    template<typename T, typename Alloc>
+    struct StringMaker<fl::vector<T, Alloc>> {
+        static String convert(const fl::vector<T, Alloc>& value) {
             fl::Str out;
             out.append(value);
             return out.c_str();
