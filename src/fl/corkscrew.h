@@ -137,6 +137,9 @@ class Corkscrew {
 
     const State &access() const { return mState; }
 
+    int16_t cylinder_width() const { return mState.width; }
+    int16_t cylinder_height() const { return mState.height; }
+
   private:
     Input mInput; // The input parameters defining the corkscrew
     State mState; // The resulting cylindrical mapping

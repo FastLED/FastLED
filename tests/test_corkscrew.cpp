@@ -32,25 +32,25 @@ TEST_CASE("Corkscrew generateState") {
     CHECK_LE(output.mapping[0].y, 1.0f); // 1 vertical segment for 2π angle
 }
 
-TEST_CASE("Corkscrew to Frame Buffer Mapping") {
-    // Define the corkscrew input parameters
+TEST_CASE("Vertical corkscrew mapping") {
+    // Tests that a corkscrew with only three leds aligned vertically
+    // will produce the expected output.
     const int kCorkscrewTotalHeight = 1; // cm
-    // const int CORKSCREW_WIDTH = 1; // Width of the corkscrew in pixels
-    // const int CORKSCREW_HEIGHT = 1; // Height of the corkscrew in pixels
     const int kCorkscrewTurns = 2; // Default to 19 turns
+    const int kNumLeds = 3;
 
     Corkscrew::Input input;
     input.totalHeight = kCorkscrewTotalHeight;
     input.totalTurns = kCorkscrewTurns; // Default to 19 turns
     input.offsetCircumference = 0.0f;
-    input.numLeds = 3;
+    input.numLeds = kNumLeds;
     // Generate the corkscrew map
     Corkscrew corkscrew(input);
 
-    volatile Corkscrew::State *output = &corkscrew.access();
+    REQUIRE_EQ(1, corkscrew.cylinder_width());
+    REQUIRE_EQ(2, corkscrew.cylinder_height()); // 3 vertical segments for 2π angle
 
-    // vec2<int16_t> first = corkscrew.at(0);
-    // vec2<int16_t> second = corkscrew.at(1);
+    volatile Corkscrew::State *output = &corkscrew.access();
 
     Corkscrew::iterator it = corkscrew.begin();
     Corkscrew::iterator end = corkscrew.end();
