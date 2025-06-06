@@ -47,16 +47,12 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
     }
 
     if (!output->mapping.empty()) {
-        float max_width =
-            fl::max_element(
-                output->mapping.begin(), output->mapping.end(),
-                [](const vec2f &a, const vec2f &b) { return a.x < b.x; })
-                ->x;
-        float max_height =
-            fl::max_element(
-                output->mapping.begin(), output->mapping.end(),
-                [](const vec2f &a, const vec2f &b) { return a.y < b.y; })
-                ->y;
+        float max_width = 0.0f;
+        float max_height = 0.0f;
+        for (const auto &point : output->mapping) {
+            max_width = MAX(max_width, point.x);
+            max_height = MAX(max_height, point.y);
+        }
         output->width = static_cast<uint16_t>(ceilf(max_width)) + 1;
         output->height = static_cast<uint16_t>(ceilf(max_height)) + 1;
     }
