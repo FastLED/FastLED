@@ -89,12 +89,27 @@ struct CorkscrewState {
             return temp;
         }
 
+        iterator &operator--() {
+            --position_;
+            return *this;
+        }
+
+        iterator operator--(int) {
+            iterator temp = *this;
+            --position_;
+            return temp;
+        }
+
         bool operator==(const iterator &other) const {
             return position_ == other.position_;
         }
 
         bool operator!=(const iterator &other) const {
             return position_ != other.position_;
+        }
+
+        difference_type operator-(const iterator &other) const {
+            return static_cast<difference_type>(position_) - static_cast<difference_type>(other.position_);
         }
 
       private:

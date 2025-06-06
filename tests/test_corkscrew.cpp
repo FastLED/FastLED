@@ -63,23 +63,10 @@ TEST_CASE("Vertical corkscrew mapping") {
     Corkscrew::iterator it = corkscrew.begin();
     Corkscrew::iterator end = corkscrew.end();
 
-    fl::sstream ss;
-    ss << "\n";
-    ss << "width: " << output->width << "\n";
-    ss << "height: " << output->height << "\n";
-
-    while (it != end) {
-        ss << *it << "\n";
-        ++it;
-    }
-
-    FASTLED_WARN(ss.str());
+    size_t count = end - it;
 
     const bool is_equal = fl::equal(it, end, expected_outputs);
-
     REQUIRE(is_equal);
-
-    MESSAGE("done");
 }
 
 TEST_CASE("Corkscrew generateState with two turns") {
