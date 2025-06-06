@@ -30,10 +30,10 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
     // Generate LED mapping based on numLeds
     // Note that width_step should be 1.0f/float(input.numLeds) so last led in a turn
     // does not wrap around.
-    const float width_step = 1.0f / float(input.numLeds - 1);  // Corkscrew reaches max width on last led.
+    const float width_step = 1.0f / float(input.numLeds);  // Corkscrew reaches max width on last led.
     const float height_step = 1.0f / float(input.numLeds - 1);  // Corkscrew reaches max height on last led.
     // const float led_width_factor = circumferencePerTurn / TWO_PI;
-    const float leds_per_turn = input.numLeds / input.totalTurns;
+    const float length_per_turn = input.totalLength / input.totalTurns;
 
     for (uint16_t i = 0; i < input.numLeds; ++i) {
         // Calculate position along the corkscrew (0.0 to 1.0)
@@ -42,7 +42,7 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
         const float alpha_height = i_f * height_step;
         const float width_before_mod = alpha_width * input.totalLength;
         const float height = alpha_height * input.totalHeight;
-        const float width = fmodf(width_before_mod, leds_per_turn);
+        const float width = fmodf(width_before_mod, length_per_turn);
         output->mapping.push_back({width, height});
     }
 

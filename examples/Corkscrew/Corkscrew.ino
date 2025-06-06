@@ -1,10 +1,21 @@
 /*
-Festival Stick is a dense corkscrew of LEDs that is wrapped around one end of
-a wooden walking stick commonly found on amazon.A0
+Basic cork screw test.
 
-The UI screenmap projects this cork screw into polar coordinates, so that the
-LEDs are mapped to a sprial, with the inner portion of the spiral being the top,
-the outer most portion being the bottom.
+This test is forward mapping, in which we test that
+the corkscrew is mapped to cylinder cartesian coordinates.
+
+Most of the time, you'll want the reverse mapping, that is
+drawing to a rectangular grid, and then mapping that to a corkscrew.
+
+However, to make sure the above mapping works correctly, we have
+to test that the forward mapping works correctly also.
+
+Important notes:
+
+For this simple test we are just getting the vec2f position of the map
+and using that to draw to the frame buffer. However to improve the look
+the output pixels should be in tile2x2 format, so that we can the pixels
+can be "splatted" to the frame buffer to give a better look.
 
 */
 
@@ -24,11 +35,12 @@ using namespace fl;
 #define PIN_DATA 9
 
 
-#define NUM_LEDS 10
-#define CORKSCREW_TOTAL_HEIGHT 0 // when height = 0, it's a circle.
+#define NUM_LEDS 300
+#define CORKSCREW_TOTAL_LENGTH 300
+#define CORKSCREW_TOTAL_HEIGHT 10 // when height = 0, it's a circle.
                                  // wrapped up over 19 turns
-#define CORKSCREW_TURNS 1        // Default to 19 turns
-#define CORKSCREW_TOTAL_LENGTH 100
+#define CORKSCREW_TURNS 10        // Default to 19 turns
+
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
@@ -66,13 +78,6 @@ fl::Grid<CRGB> frameBuffer;
 
 
 void setup() {
-    //corkscrew_args args = corkscrew_args();
-    // screenMap = makeScreenMap(args);
-    // screenMap = ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
-    FASTLED_ASSERT(false, "debugger");
-
-
-
     int width = corkscrew.cylinder_width();
     int height = corkscrew.cylinder_height();
 
@@ -96,7 +101,7 @@ void loop() {
     fl::clear(frameBuffer);
 
     static int pos = 0;
-    EVERY_N_MILLIS(100) {
+    EVERY_N_MILLIS(10) {
         // Update the corkscrew mapping every second
         // w = (w + 1) % CORKSCREW_WIDTH;
         // frameBuffer.
@@ -106,30 +111,12 @@ void loop() {
         }
     }
 
-    // // draw a blue line down the middle
-    // for (int i = 0; i < CORKSCREW_HEIGHT; ++i) {
-    //     frameBuffer.at(w % CORKSCREW_WIDTH, i) = CRGB::Blue;
-    //     frameBuffer.at((w + 1) % CORKSCREW_WIDTH, i) = CRGB::Blue;
-    //     frameBuffer.at((w - 1 + CORKSCREW_WIDTH) % CORKSCREW_WIDTH, i) =
-    //     CRGB::Blue; frameBuffer.at((w + 2) % CORKSCREW_WIDTH, i) =
-    //     CRGB::Blue; frameBuffer.at((w - 2 + CORKSCREW_WIDTH) %
-    //     CORKSCREW_WIDTH, i) = CRGB::Blue;
-    // }
-
-    // frameBuffer.at(w, h) = CRGB::Blue; // Draw a blue pixel at (w, h)
-
-
-    // now select the pixel via the corkscrew mapping.
-
-    FASTLED_ASSERT(false, "debugger");
 
     vec2f pos_vec2f = corkscrew.at(pos);
-    vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
-
-    FASTLED_WARN("Pos.x = " << pos_vec2f.x << ", Pos.y = " << pos_vec2f.y);
-
+    vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
+    // Now map the cork screw position to the cylindrical buffer that we will
+    // draw.
     frameBuffer.at(pos_i16.x, pos_i16.y) = CRGB::Blue; // Draw a blue pixel at (w, h)
-
 
     FastLED.show();
 }
