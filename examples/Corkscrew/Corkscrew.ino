@@ -69,7 +69,9 @@ void setup() {
     //corkscrew_args args = corkscrew_args();
     // screenMap = makeScreenMap(args);
     // screenMap = ScreenMap::Circle(NUM_LEDS, 1.5f, 0.5f, 1.0f);
-    // FASTLED_ASSERT(false, "debugger");
+    FASTLED_ASSERT(false, "debugger");
+
+
 
     int width = corkscrew.cylinder_width();
     int height = corkscrew.cylinder_height();
@@ -81,6 +83,8 @@ void setup() {
     size_t num_leds = frameBuffer.size();
 
     CLEDController *controller = &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
+
+    Corkscrew corkscrew2(corkscrewInput);
 
     // Set the screen map for the controller
     controller->setScreenMap(xyMap);
