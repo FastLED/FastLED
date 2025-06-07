@@ -118,6 +118,11 @@ public:
 // GPIO 20-22, 24-26 used by default for SPI flash.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL |  _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
 
+#elif CONFIG_IDF_TARGET_ESP32P4
+// 55 GPIO pins. ESPIDF defines all pins as valid.
+// NOTE: GPIO 24 & 25 commonly used for USB and may cause flashes when uploading.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(24) | _FL_BIT(25))
+
 #elif CONFIG_IDF_TARGET_ESP32H2
 // 22 GPIO pins.  ESPIDF defines all pins as valid.
 // ESP32-H2 datasheet not yet available, when it is, mask the pins commonly used by SPI flash.
@@ -130,6 +135,7 @@ public:
 #warning Unknown ESP32 chip variant.  Only pins defined by ESP-IDF will be masked.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
 #endif
+
 
 #endif
 
