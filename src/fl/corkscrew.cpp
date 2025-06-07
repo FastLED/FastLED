@@ -101,6 +101,13 @@ vec2f Corkscrew::at_interp(float i) const {
     
 
 Tile2x2_u8 Corkscrew::at_splat(float i) const {
+    // To finish this, we need to handle wrap around.
+    // To accomplish this we need a different data structure than the the Tile2x2_u8.
+    // 1. It will be called CorkscrewTile2x2_u8.
+    // 2. The four alpha values will each contain the index the LED is at, uint16_t.
+    // 3. There will be no origin, each pixel in the tile will contain a uint16_t origin.
+    // This is not supposed to be a storage format, but a convenient pre-computed value
+    // for rendering.
     if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
