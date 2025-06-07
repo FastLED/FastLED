@@ -100,7 +100,7 @@ vec2f Corkscrew::at_interp(float i) const {
 }
     
 
-Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
+Tile2x2_u8 Corkscrew::at_splat(float i) const {
     if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
@@ -109,7 +109,19 @@ Tile2x2_u8 Corkscrew::at_splat(uint16_t i) const {
         return Tile2x2_u8();
     }
     // Use the splat function to convert the vec2f to a Tile2x2_u8
-    return splat(mState.mapping[i]);
+    float i_floor = floorf(i);
+    float i_ceil = ceilf(i);
+    if (ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
+        // If the index is the same, just return the splat of that index
+        return splat(mState.mapping[static_cast<uint16_t>(i_floor)]);
+    } else {
+        // Interpolate between the two points and return the splat of the result
+        vec2f pos1 = mState.mapping[static_cast<uint16_t>(i_floor)];
+        vec2f pos2 = mState.mapping[static_cast<uint16_t>(i_ceil)];
+        vec2f interpolated_pos = pos1 * (1.0f - (i - i_floor)) + pos2 * (i - i_floor);
+        return splat(interpolated_pos);
+    }
+
 }
 
 size_t Corkscrew::size() const { return mState.mapping.size(); }
