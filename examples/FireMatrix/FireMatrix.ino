@@ -83,7 +83,7 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal) {
 };
 
 // Create a mapping between 1D array positions and 2D x,y coordinates
-XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
+XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
 
 void setup() {
     Serial.begin(115200);  // Initialize serial communication for debugging
@@ -160,8 +160,8 @@ void loop() {
     uint32_t y_speed = timeScale.update(now);
     
     // Loop through every LED in our matrix
-    for (int i = 0; i < HEIGHT; i++) {
-        for (int j = 0; j < WIDTH; j++) {
+    for (int i = 0; i < WIDTH; i++) {
+        for (int j = 0; j < HEIGHT; j++) {
             // Calculate which color to use from our palette for this LED
             uint8_t palette_index = getPaletteIndex(now, i, j, y_speed);
             
@@ -170,9 +170,9 @@ void loop() {
             CRGB c = ColorFromPalette(myPal, palette_index, BRIGHTNESS);
             
             // Convert our 2D coordinates (i,j) to the 1D array index
-            // We use (HEIGHT-1)-i and (WIDTH-1)-j to flip the coordinates
+            // We use (WIDTH-1)-i and (HEIGHT-1)-j to flip the coordinates
             // This makes the fire appear to rise from the bottom
-            int index = xyMap((HEIGHT - 1) - i, (WIDTH - 1) - j);
+            int index = xyMap((WIDTH - 1) - i, (HEIGHT - 1) - j);
             
             // Set the LED color in our array
             leds[index] = c;
