@@ -252,6 +252,10 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml)
 
+
+[![esp32p4](https://github.com/FastLED/FastLED/actions/workflows/build_esp32p4.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32p4.yml)
+
+
 *Specific features*
 
 [![esp32_i2s_ws2812](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml)
