@@ -22,7 +22,7 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Old fork that we were using
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
-# ALL will be auto populated in the Board constructor whenever a 
+# ALL will be auto populated in the Board constructor whenever a
 # board is defined.
 ALL: list["Board"] = []
 

@@ -1,4 +1,10 @@
-FastLED 3.9.18 + 3.9.19
+FastLED 3.9.21
+==============
+
+  * Esp32P4 now officially supported.
+
+
+FastLED 3.9.18 + 3.9.19 + 3.9.20
 ==============
 * Hotfixes for AVR platforms for 3.9.17
 
