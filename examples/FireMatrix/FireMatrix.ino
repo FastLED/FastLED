@@ -119,8 +119,8 @@ uint8_t getPaletteIndex(uint32_t millis32, int i, int j, uint32_t y_speed) {
     // Calculate how much to subtract based on vertical position (j)
     // This creates the fade-out effect from bottom to top
     // abs8() ensures we get a positive value
-    // The formula maps j from 0 to WIDTH-1 to a value from 255 to 0
-    int8_t subtraction_factor = abs8(j - (WIDTH - 1)) * 255 / (WIDTH - 1);
+    // The formula maps j from 0 to HEIGHT-1 to a value from 255 to 0
+    int8_t subtraction_factor = abs8(j - (HEIGHT - 1)) * 255 / (HEIGHT - 1);
     
     // Subtract the factor from the noise value (with underflow protection)
     // qsub8 is a "saturating subtraction" - it won't go below 0
