@@ -22,6 +22,8 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 # Old fork that we were using
 # ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
+# ALL will be auto populated in the Board constructor whenever a 
+# board is defined.
 ALL: list["Board"] = []
 
 
@@ -197,6 +199,13 @@ ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_3_PIOARDUINO,
+)
+
+ESP32_P4 = Board(
+    board_name="esp32p4",
+    real_board_name="esp32-p4-evboard",
+    platform_needs_install=True,  # Install platform package to get the boards
+    platform="https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip",
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(

@@ -45,6 +45,7 @@ DEFAULT_BOARDS_NAMES = [
     "ATtiny1616",
     "esp32c6",
     "esp32s3",
+    "esp32p4",
     "yun",
     "digix",
     "teensy30",
