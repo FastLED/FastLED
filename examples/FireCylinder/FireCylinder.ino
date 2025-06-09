@@ -96,7 +96,9 @@ void setup() {
     // - NEOPIXEL is the LED type
     // - 3 is the data pin number (for real hardware)
     // - setScreenMap connects our 2D coordinate system to the 1D LED array
-    FastLED.addLeds<NEOPIXEL, 3>(leds, HEIGHT * WIDTH).setScreenMap(xyMap);
+    fl::ScreenMap screen_map = xyMap.toScreenMap();
+    screen_map.setDiameter(0.1f);  // Set the diameter for the cylinder (0.2 cm per LED)
+    FastLED.addLeds<NEOPIXEL, 3>(leds, HEIGHT * WIDTH).setScreenMap(screen_map);
     
     // Apply color correction for more accurate colors on LED strips
     FastLED.setCorrection(TypicalLEDStrip);
