@@ -87,7 +87,7 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
 };
 
 // Create a mapping between 1D array positions and 2D x,y coordinates
-XYMap xyMap(HEIGHT, WIDTH, SERPENTINE);
+XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
 
 void setup() {
     Serial.begin(115200);  // Initialize serial communication for debugging
