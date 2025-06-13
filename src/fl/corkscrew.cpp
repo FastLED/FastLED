@@ -129,6 +129,13 @@ Tile2x2_u8 Corkscrew::at_splat(float i) const {
         // Interpolate between the two points and return the splat of the result
         vec2f pos1 = mState.mapping[static_cast<uint16_t>(i_floor)];
         vec2f pos2 = mState.mapping[static_cast<uint16_t>(i_ceil)];
+
+        if (pos2.x < pos1.x) {
+            // If the next point is on the other side of the cylinder, we need
+            // to wrap it around and bring it back into the positive direction so we can construct a Tile2x2_u8 wrap with it.
+            pos2.x += mState.width;
+        }
+
         vec2f interpolated_pos =
             pos1 * (1.0f - (i - i_floor)) + pos2 * (i - i_floor);
         return splat(interpolated_pos);

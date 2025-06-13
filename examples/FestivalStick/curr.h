@@ -116,26 +116,24 @@ void loop() {
     }
    
     if (splatRendering) {
-        Tile2x2_u8 pos_tile = corkscrew.at_splat(pos);
-        vec2<int16_t> origin = pos_tile.origin();
-        // origin can just draw.
+        Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         const CRGB color = CRGB::Blue;
-        // BEGIN DRAWING X,Y
-        for (int x = origin.x; x < origin.x + 2; ++x) {
-            for (int y = origin.y; y < origin.y + 2; ++y) {
-                int dx = x - origin.x;
-                int dy = y - origin.y;
-                uint8_t alpha = pos_tile.at(dx, dy);
-                // Wrap around the frame buffer
-                int wrapped_x = x % frameBuffer.width();
-                int wrapped_y = y % frameBuffer.height();
-                CRGB c = color;
-                // c *= alpha / 255.f; // Scale the color by the alpha value
-                c.nscale8(alpha); // Scale the color by the alpha value
-                frameBuffer.at(wrapped_x, wrapped_y) = c;
+        // Draw each pixel in the 2x2 tile using the new wrapping API
+        for (int dx = 0; dx < 2; ++dx) {
+            for (int dy = 0; dy < 2; ++dy) {
+                auto data = pos_tile.at(dx, dy);
+                vec2i16 wrapped_pos = data.first;  // Already wrapped position
+                uint8_t alpha = data.second;       // Alpha value
+
+                if (alpha > 0) {  // Only draw if there's some alpha
+                    CRGB c = color;
+                    c.nscale8(alpha); // Scale the color by the alpha value
+                    frameBuffer.at(wrapped_pos.x, wrapped_pos.y) = c;
+                }
             }
         }
     } else {
+        // This is the legacy 
         vec2f pos_vec2f = corkscrew.at_interp(pos);
         vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
         // Now map the cork screw position to the cylindrical buffer that we
