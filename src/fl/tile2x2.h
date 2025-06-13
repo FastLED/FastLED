@@ -55,11 +55,7 @@ class Tile2x2_u8 {
     vec2<int16_t> origin() const { return mOrigin; }
 
     /// bounds => [begin_x, end_x) (where end_x is exclusive)
-    rect<int16_t> bounds() const {
-        vec2<int16_t> min = mOrigin;
-        vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
-        return rect<int16_t>(min, max);
-    }
+    rect<int16_t> bounds() const;
 
     // Draws the subpixel tile to the led array.
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
@@ -95,7 +91,7 @@ class Tile2x2_u8_wrap {
     // the width of the cylinder and the y-coordinate wraps around the height.
     // This converts a tile2x2 to a wrapped x,y version.
   public:
-    using Data = fl::pair<vec2i16, uint8_t>;
+    using Data = fl::pair<vec2i16, uint8_t>;  // origin, alpha
 
     Tile2x2_u8_wrap() = default;
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width);

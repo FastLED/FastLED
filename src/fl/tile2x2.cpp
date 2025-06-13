@@ -1,12 +1,12 @@
 #include "fl/tile2x2.h"
 #include "crgb.h"
 #include "fl/draw_visitor.h"
+#include "fl/math_macros.h"
 #include "fl/raster.h"
 #include "fl/raster_sparse.h"
 #include "fl/unused.h"
 #include "fl/warn.h"
 #include "fl/xymap.h"
-#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -99,6 +99,12 @@ Tile2x2_u8 Tile2x2_u8::Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
         }
     }
     return result;
+}
+
+rect<int16_t> Tile2x2_u8::bounds() const {
+    vec2<int16_t> min = mOrigin;
+    vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
+    return rect<int16_t>(min, max);
 }
 
 } // namespace fl
