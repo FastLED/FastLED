@@ -163,9 +163,9 @@ class Corkscrew {
     int16_t cylinder_height() const { return mState.height; }
 
   private:
-    // This is a splatted pixel. This is will look way better than
-    // using at(), because it uses 2x2 neighboor sampling.
-    // Soon to be deprecated.
+    // For internal use. Splats the pixel on the surface which
+    // extends past the width. This extended Tile2x2 is designed
+    // to be wrapped around with a Tile2x2_u8_wrap.
     Tile2x2_u8 at_splat_extrapolate(float i) const;
 
     Input mInput; // The input parameters defining the corkscrew
