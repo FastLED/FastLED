@@ -83,10 +83,7 @@ void setup() {
     CRGB *leds = frameBuffer.data();
     size_t num_leds = frameBuffer.size();
 
-
-
     CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
-
 
     // CLEDController *controller =
     //     &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);

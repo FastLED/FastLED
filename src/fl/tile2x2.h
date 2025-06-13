@@ -91,12 +91,13 @@ class Tile2x2_u8_wrap {
     // the width of the cylinder and the y-coordinate wraps around the height.
     // This converts a tile2x2 to a wrapped x,y version.
   public:
-    using Data = fl::pair<vec2i16, uint8_t>;  // origin, alpha
+    using Data = fl::pair<vec2i16, uint8_t>;  // absolute position, alpha
 
     Tile2x2_u8_wrap() = default;
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width);
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height);
 
+    // Returns the absolute position and the alpha.
     Data &at(uint16_t x, uint16_t y);
     const Data &at(uint16_t x, uint16_t y) const;
 
