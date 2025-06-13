@@ -5,9 +5,9 @@
 
 #include "fl/geometry.h"
 #include "fl/namespace.h"
+#include "fl/pair.h"
 #include "fl/slice.h"
 #include "fl/xymap.h"
-#include "fl/pair.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -32,9 +32,7 @@ class Tile2x2_u8 {
 
     void scale(uint8_t scale);
 
-    void setOrigin(int16_t x, int16_t y) {
-        mOrigin = vec2<int16_t>(x, y);
-    }
+    void setOrigin(int16_t x, int16_t y) { mOrigin = vec2<int16_t>(x, y); }
 
     uint8_t &operator()(int x, int y) { return at(x, y); }
     uint8_t &at(int x, int y) { return mTile[y][x]; }
@@ -50,24 +48,9 @@ class Tile2x2_u8 {
     const uint8_t &lower_right() const { return at(1, 0); }
     const uint8_t &upper_right() const { return at(1, 1); }
 
-    uint8_t maxValue() const {
-        uint8_t max = 0;
-        max = MAX(max, at(0, 0));
-        max = MAX(max, at(0, 1));
-        max = MAX(max, at(1, 0));
-        max = MAX(max, at(1, 1));
-        return max;
-    }
+    uint8_t maxValue() const;
 
-    static Tile2x2_u8 Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
-        Tile2x2_u8 result;
-        for (int x = 0; x < 2; ++x) {
-            for (int y = 0; y < 2; ++y) {
-                result.at(x, y) = MAX(a.at(x, y), b.at(x, y));
-            }
-        }
-        return result;
-    }
+    static Tile2x2_u8 Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
 
     vec2<int16_t> origin() const { return mOrigin; }
 
@@ -105,8 +88,6 @@ class Tile2x2_u8 {
     // Subpixels can be rendered outside the viewport so this must be signed.
     vec2<int16_t> mOrigin;
 };
-
-
 
 class Tile2x2_u8_wrap {
     // This is a class that is like a Tile2x2_u8 but wraps around the edges.

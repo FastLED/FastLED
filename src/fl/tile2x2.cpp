@@ -6,8 +6,7 @@
 #include "fl/unused.h"
 #include "fl/warn.h"
 #include "fl/xymap.h"
-
-using namespace fl;
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -22,7 +21,6 @@ static vec2i16 wrap_x(const vec2i16 &v, const uint16_t width) {
     return vec2i16(v.x % width, v.y);
 }
 } // namespace
-
 
 void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
                            XYRasterU8Sparse *out_raster) {
@@ -47,8 +45,6 @@ void Tile2x2_u8::scale(uint8_t scale) {
     }
 }
 
-
-
 Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap_x(vec2i16(origin.x, origin.y), width), from.at(0, 0)};
@@ -72,9 +68,8 @@ const Tile2x2_u8_wrap::Data &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) const {
     return tile[y][x];
 }
 
-
-
-Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height) {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width,
+                                 uint16_t height) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap(vec2i16(origin.x, origin.y), vec2i16(width, height)),
                 from.at(0, 0)};
@@ -82,8 +77,28 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_
                 from.at(0, 1)};
     at(1, 0) = {wrap(vec2i16(origin.x + 1, origin.y), vec2i16(width, height)),
                 from.at(1, 0)};
-    at(1, 1) = {wrap(vec2i16(origin.x + 1, origin.y + 1), vec2i16(width, height)),
-                from.at(1, 1)};
+    at(1,
+       1) = {wrap(vec2i16(origin.x + 1, origin.y + 1), vec2i16(width, height)),
+             from.at(1, 1)};
+}
+
+uint8_t Tile2x2_u8::maxValue() const {
+    uint8_t max = 0;
+    max = MAX(max, at(0, 0));
+    max = MAX(max, at(0, 1));
+    max = MAX(max, at(1, 0));
+    max = MAX(max, at(1, 1));
+    return max;
+}
+
+Tile2x2_u8 Tile2x2_u8::Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
+    Tile2x2_u8 result;
+    for (int x = 0; x < 2; ++x) {
+        for (int y = 0; y < 2; ++y) {
+            result.at(x, y) = MAX(a.at(x, y), b.at(x, y));
+        }
+    }
+    return result;
 }
 
 } // namespace fl
