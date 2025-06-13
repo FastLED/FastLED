@@ -42,7 +42,7 @@ class ActiveStripData : public fl::EngineEvents::Listener {
         updateScreenMap(id, screenmap);
     }
 
-    const bool hasScreenMap(int id) const { return mScreenMap.has(id); }
+    bool hasScreenMap(int id) const { return mScreenMap.has(id); }
 
   private:
     friend class fl::Singleton<ActiveStripData>;
