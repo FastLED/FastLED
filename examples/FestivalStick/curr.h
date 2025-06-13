@@ -133,7 +133,7 @@ void loop() {
             }
         }
     } else {
-        // This is the legacy 
+        // None splat rendering, looks aweful.
         vec2f pos_vec2f = corkscrew.at_interp(pos);
         vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
         // Now map the cork screw position to the cylindrical buffer that we
