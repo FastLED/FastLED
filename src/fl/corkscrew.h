@@ -128,7 +128,6 @@ struct CorkscrewState {
     iterator end() { return iterator(this, mapping.size()); }
 };
 
-
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
 // a densly wrapped LED corkscrew.
 class Corkscrew {
@@ -145,7 +144,11 @@ class Corkscrew {
     vec2f at_interp(float i) const;
     // This is a splatted pixel. This is will look way better than
     // using at(), because it uses 2x2 neighboor sampling.
+    // Soon to be deprecated.
     Tile2x2_u8 at_splat(float i) const;
+
+    // This is the future api.
+    Tile2x2_u8_wrap at_wrap(float i) const;
 
     size_t size() const;
 

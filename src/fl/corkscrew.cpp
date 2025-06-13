@@ -143,4 +143,13 @@ Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
     return output;
 }
 
+
+
+Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
+    // This is a splatted pixel, but wrapped around the cylinder.
+    // This is useful for rendering the corkscrew in a cylindrical way.
+    Tile2x2_u8 tile = at_splat(i);
+    return Tile2x2_u8_wrap(tile, mState.width, mState.height);
+}
+
 } // namespace fl
