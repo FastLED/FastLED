@@ -40,6 +40,7 @@ CRGB leds[NUM_LEDS];
 UITitle title("FxWave2D Demo");
 UIDescription description("Advanced layered and blended wave effects.");
 
+UICheckbox xCyclical("X Is Cyclical", false);  // If true, waves wrap around the x-axis (like a loop)
 // Main control UI elements:
 UIButton button("Trigger");                                  // Button to trigger a single ripple
 UIButton buttonFancy("Trigger Fancy");                       // Button to trigger a fancy cross-shaped effect
@@ -50,7 +51,7 @@ UISlider blurAmount("Global Blur Amount", 0, 0, 172, 1);     // Controls overall
 UISlider blurPasses("Global Blur Passes", 1, 1, 10, 1);      // Controls how many times blur is applied (more = smoother but slower)
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f); // Controls anti-aliasing quality (higher = better quality but more CPU)
 
-UICheckbox xCyclical("X Is Cyclical", false);  // If true, waves wrap around the x-axis (like a loop)
+
 
 // Upper wave layer controls:
 UISlider speedUpper("Wave Upper: Speed", 0.12f, 0.0f, 1.0f);           // How fast the upper wave propagates
