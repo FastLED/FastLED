@@ -2,7 +2,8 @@ FastLED 3.9.21
 ==============
 
   * Esp32P4 now officially supported.
-  * Esp32S3
+  * Esp32S3 - 16 Parallel LEDs Driver
+    * Thanks for the user feedback! This mode has updated instructions. Now very easy to use, but still platformio only.
 
 
 FastLED 3.9.18 + 3.9.19 + 3.9.20
