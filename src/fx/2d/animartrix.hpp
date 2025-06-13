@@ -14,6 +14,8 @@
 #include "fl/scoped_ptr.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
+#include "eorder.h"
+#include "pixel_controller.h"  // For RGB_BYTE_0, RGB_BYTE_1, RGB_BYTE_2
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
@@ -93,6 +95,8 @@ class Animartrix : public Fx2d {
     int fxGet() const { return static_cast<int>(current_animation); }
     Str fxName() const override { return "Animartrix:"; }
     void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
+    void setColorOrder(EOrder order) { color_order = order; }
+    EOrder getColorOrder() const { return color_order; }
 
   private:
     friend void AnimartrixLoop(Animartrix &self, uint32_t now);
@@ -102,6 +106,7 @@ class Animartrix : public Fx2d {
     fl::scoped_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
+    EOrder color_order = RGB;
 };
 
 void AnimartrixLoop(Animartrix &self, uint32_t now);
@@ -263,6 +268,17 @@ const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
 void Animartrix::draw(DrawContext ctx) {
     this->leds = ctx.leds;
     AnimartrixLoop(*this, ctx.now);
+    if (color_order != RGB) {
+        for (int i = 0; i < mXyMap.getTotal(); ++i) {
+            CRGB &pixel = ctx.leds[i];
+            const uint8_t b0_index = RGB_BYTE0(color_order);
+            const uint8_t b1_index = RGB_BYTE1(color_order);
+            const uint8_t b2_index = RGB_BYTE2(color_order);
+            pixel = CRGB(pixel.raw[b0_index], pixel.raw[b1_index],
+                         pixel.raw[b2_index]);
+        }
+
+    }
     this->leds = nullptr;
 }
 

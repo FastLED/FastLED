@@ -51,7 +51,7 @@ using namespace fl;
 
 // This is purely use for the web compiler to display the animartrix effects.
 // This small led was chosen because otherwise the bloom effect is too strong.
-#define LED_DIAMETER 0.1  // .1 cm or 1mm
+#define LED_DIAMETER 0.15  // .15 cm or 1.5mm
 
 
 CRGB leds[NUM_LEDS];
@@ -63,10 +63,12 @@ UIDescription description("Demo of the Animatrix effects. @author of fx is Stefa
 
 UISlider brightness("Brightness", 255, 0, 255);
 UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS - 1);
+UINumberField colorOrder("Color Order", 0, 0, 5);
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 Animartrix animartrix(xyMap, FIRST_ANIMATION);
 FxEngine fxEngine(NUM_LEDS);
+
 
 void setup() {
     auto screen_map = xyMap.toScreenMap();
@@ -76,6 +78,18 @@ void setup() {
         .setScreenMap(screen_map);
     FastLED.setBrightness(brightness);
     fxEngine.addFx(animartrix);
+
+    colorOrder.onChanged([](int value) {
+        switch(value) {
+            case 0: value = RGB; break;
+            case 1: value = RBG; break;
+            case 2: value = GRB; break;
+            case 3: value = GBR; break;
+            case 4: value = BRG; break;
+            case 5: value = BGR; break;
+        }
+        animartrix.setColorOrder(static_cast<EOrder>(value));
+    });
 }
 
 void loop() {
