@@ -7,6 +7,7 @@
 #include "fl/namespace.h"
 #include "fl/slice.h"
 #include "fl/xymap.h"
+#include "fl/pair.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -103,6 +104,27 @@ class Tile2x2_u8 {
     uint8_t mTile[2][2] = {};
     // Subpixels can be rendered outside the viewport so this must be signed.
     vec2<int16_t> mOrigin;
+};
+
+
+
+class Tile2x2_u8_wrap {
+    // This is a class that is like a Tile2x2_u8 but wraps around the edges.
+    // This is useful for cylinder mapping where the x-coordinate wraps around
+    // the width of the cylinder and the y-coordinate wraps around the height.
+    // This converts a tile2x2 to a wrapped x,y version.
+  public:
+    using Data = fl::pair<vec2i16, uint8_t>;
+
+    Tile2x2_u8_wrap() = default;
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width);
+    Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height);
+
+    Data &at(uint16_t x, uint16_t y);
+    const Data &at(uint16_t x, uint16_t y) const;
+
+  private:
+    Data tile[2][2] = {}; // zero filled.
 };
 
 } // namespace fl
