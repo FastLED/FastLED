@@ -40,11 +40,11 @@ UIDescription festivalStickDescription(
     "Take a wooden walking stick, wrap dense LEDs around it like a corkscrew. Super simple but very awesome looking."
     "This assumes the dense 144 LEDs / meter.");
 
-
-
 UISlider ledsScale("Leds scale", 0.1f, 0.1f, 1.0f, 0.01f);
 UIButton button("Button");
 
+// Adding a brightness slider
+UISlider brightness("Brightness", 16, 0, 255, 1); // Brightness from 0 to 255
 
 CRGB leds[NUM_LEDS];
 
@@ -166,6 +166,8 @@ void setup() {
     // into account the APA102HD gamma correction. However it is still a correct upper bound
     // that will match the ledset exactly when the display tries to go full white.
     FastLED.setMaxPowerInVoltsAndMilliamps(VOLTS, MAX_AMPS * 1000);
+    // set brightness 8
+    FastLED.setBrightness(brightness.as_int());
     button.onChanged([](UIButton& but) {
         // This function is called when the button is pressed
         // If the button is pressed, show the generative pattern

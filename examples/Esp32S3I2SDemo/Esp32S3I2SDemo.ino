@@ -37,11 +37,7 @@
 // framework = arduino
 // board = seeed_xiao_esp32s3
 // build_flags = 
-//     ${env:generic-esp.build_flags}
 //     -DBOARD_HAS_PSRAM
-//     -mfix-esp32-psram-cache-issue
-//     -mfix-esp32-psram-cache-strategy=memw
-// board_build.partitions = huge_app.csv
 //
 // Then in your setup function you are going to want to call psramInit();
 //
