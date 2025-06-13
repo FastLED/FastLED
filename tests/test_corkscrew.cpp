@@ -41,7 +41,7 @@ TEST_CASE("Corkscrew Circle10 test") {
 
 }
 
-TEST_CASE("Tile2x2_u8_cyc wrap-around test with width and height") {
+TEST_CASE("Tile2x2_u8_wrap wrap-around test with width and height") {
     // Initialize a Tile2x2_u8 with known values and set origin beyond boundaries
     Tile2x2_u8 originalTile;
     originalTile.setOrigin(3, 3); // Set the origin beyond the width and height
@@ -50,10 +50,10 @@ TEST_CASE("Tile2x2_u8_cyc wrap-around test with width and height") {
     originalTile.at(1, 0) = 3;
     originalTile.at(1, 1) = 4;
 
-    // Convert to Tile2x2_u8_cyc with given width and height
+    // Convert to Tile2x2_u8_wrap with given width and height
     uint16_t width = 2;
     uint16_t height = 2;
-    Tile2x2_u8_cyc cycTile(originalTile, width, height);
+    Tile2x2_u8_wrap cycTile(originalTile, width, height);
 
     // Verify that the conversion wraps around correctly
     REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
@@ -72,7 +72,7 @@ TEST_CASE("Tile2x2_u8_cyc wrap-around test with width and height") {
     REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
-TEST_CASE("Tile2x2_u8_cyc conversion with width and height") {
+TEST_CASE("Tile2x2_u8_wrap conversion with width and height") {
     // Initialize a Tile2x2_u8 with known values
     Tile2x2_u8 originalTile;
     originalTile.setOrigin(0, 0); // Set the origin to (0, 0)
@@ -81,10 +81,10 @@ TEST_CASE("Tile2x2_u8_cyc conversion with width and height") {
     originalTile.at(1, 0) = 3;
     originalTile.at(1, 1) = 4;
 
-    // Convert to Tile2x2_u8_cyc with given width and height
+    // Convert to Tile2x2_u8_wrap with given width and height
     uint16_t width = 2;
     uint16_t height = 2;
-    Tile2x2_u8_cyc cycTile(originalTile, width, height);
+    Tile2x2_u8_wrap cycTile(originalTile, width, height);
 
     // Verify that the conversion is correct
     REQUIRE_EQ(cycTile.at(0, 0).second, 1);
@@ -93,7 +93,7 @@ TEST_CASE("Tile2x2_u8_cyc conversion with width and height") {
     REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 }
 
-TEST_CASE("Tile2x2_u8_cyc conversion test") {
+TEST_CASE("Tile2x2_u8_wrap conversion test") {
     // Initialize a Tile2x2_u8 with known values and a specific origin
     Tile2x2_u8 originalTile;
     originalTile.setOrigin(50, 50); // Set the origin to (50, 50)
@@ -102,9 +102,9 @@ TEST_CASE("Tile2x2_u8_cyc conversion test") {
     originalTile.at(1, 0) = 3;
     originalTile.at(1, 1) = 4;
 
-    // Convert to Tile2x2_u8_cyc with a given width
+    // Convert to Tile2x2_u8_wrap with a given width
     uint16_t width = 10;
-    Tile2x2_u8_cyc cycTile(originalTile, width);
+    Tile2x2_u8_wrap cycTile(originalTile, width);
 
     // Verify that the conversion is correct
     REQUIRE_EQ(cycTile.at(0, 0).second, 1);

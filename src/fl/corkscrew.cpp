@@ -153,7 +153,7 @@ static vec2i16 wrap_x(const vec2i16 &v, const uint16_t width) {
     return vec2i16(v.x % width, v.y);
 }
 
-Tile2x2_u8_cyc::Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width) {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap_x(vec2i16(origin.x, origin.y), width), from.at(0, 0)};
     at(0, 1) = {wrap_x(vec2i16(origin.x, origin.y + 1), width), from.at(0, 1)};
@@ -162,14 +162,14 @@ Tile2x2_u8_cyc::Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width) {
                 from.at(1, 1)};
 }
 
-Tile2x2_u8_cyc::Data &Tile2x2_u8_cyc::at(uint16_t x, uint16_t y) {
+Tile2x2_u8_wrap::Data &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
     return tile[y][x];
 }
 
-const Tile2x2_u8_cyc::Data &Tile2x2_u8_cyc::at(uint16_t x, uint16_t y) const {
+const Tile2x2_u8_wrap::Data &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) const {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
@@ -178,7 +178,7 @@ const Tile2x2_u8_cyc::Data &Tile2x2_u8_cyc::at(uint16_t x, uint16_t y) const {
 
 
 
-Tile2x2_u8_cyc::Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width, uint16_t height) {
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height) {
     const vec2i16 origin = from.origin();
     at(0, 0) = {wrap(vec2i16(origin.x, origin.y), vec2i16(width, height)),
                 from.at(0, 0)};
