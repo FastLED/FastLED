@@ -158,5 +158,12 @@ bool equal_container(const Container1& c1, const Container2& c2, BinaryPredicate
 }
 
 
+template <typename Iterator, typename T>
+void fill(Iterator first, Iterator last, const T& value) {
+    while (first != last) {
+        *first = value;
+        ++first;
+    }
+}
 
 } // namespace fl
