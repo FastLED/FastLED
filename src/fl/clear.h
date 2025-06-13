@@ -28,5 +28,12 @@ inline void clear(Grid<T> &grid) {
     grid.clear();
 }
 
+// Default, when you don't know what do then call clear.
+template<typename Container>
+inline void clear(Container &container) {
+    container.clear();
+}
+
+
 
 } // namespace fl

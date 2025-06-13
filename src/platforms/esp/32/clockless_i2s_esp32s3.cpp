@@ -40,6 +40,8 @@ typedef fl::FixedVector<int, 16> PinList16;
 
 typedef uint8_t Pin;
 
+bool gPsramInited = false;
+
 
 
 // Maps multiple pins and CRGB strips to a single I2S_Esp32 object.
@@ -180,6 +182,13 @@ class Driver: public InternalI2SDriver {
 };
 
 InternalI2SDriver* InternalI2SDriver::create() {
+    if (!gPsramInited) {
+        gPsramInited = true;
+        bool ok = psramInit();
+        if (!ok) {
+            log_e("PSRAM initialization failed, I2S driver may crash.");
+        }
+    }
     return new Driver();
 }
 
