@@ -3,14 +3,15 @@
 /**
  * @file corkscrew.h
  * @brief Corkscrew projection utilities
- * 
- * You want to draw on a rectangular surface, and have it map to a GOD DAMN CORKSCREW!
- * Well guess what, this is the file for you.
  *
- * Corkscrew projection maps from Corkscrew angle height, (θ, h)  to Cylindrical cartesian (w,
- * h) space, where w = one turn of the Corkscrew. The corkscrew at (0) will
- * map to the first index in the cylinder map at (0, 0). The last value is probly not
- * at the max pixel value at (width - 1, height - 1), but could be.
+ * You want to draw on a rectangular surface, and have it map to a GOD DAMN
+ * CORKSCREW! Well guess what, this is the file for you.
+ *
+ * Corkscrew projection maps from Corkscrew angle height, (θ, h)  to Cylindrical
+ * cartesian (w, h) space, where w = one turn of the Corkscrew. The corkscrew at
+ * (0) will map to the first index in the cylinder map at (0, 0). The last value
+ * is probly not at the max pixel value at (width - 1, height - 1), but could
+ * be.
  *
  *
  * Inputs:
@@ -34,6 +35,7 @@
 #include "fl/allocator.h"
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
+#include "fl/pair.h"
 #include "fl/tile2x2.h"
 #include "fl/vector.h"
 
@@ -45,7 +47,8 @@ namespace fl {
  * @return The resulting cylindrical mapping.
  */
 struct CorkscrewInput {
-    float totalLength = 100;  // Total length of the corkscrew in centimeters, set to dense 144 strips.
+    float totalLength = 100;   // Total length of the corkscrew in centimeters,
+                               // set to dense 144 strips.
     float totalHeight = 23.25; // Total height of the corkscrew in centimeters
                                // for 144 densly wrapped up over 19 turns
     float totalTurns = 19.f;   // Default to 19 turns
@@ -53,10 +56,12 @@ struct CorkscrewInput {
     uint16_t numLeds = 144;        // Default to dense 144 leds.
     bool invert = false;           // If true, reverse the mapping order
     CorkscrewInput() = default;
-    CorkscrewInput(float total_length, float height, float total_turns, float offset = 0,
-                   uint16_t leds = 144, bool invertMapping = false)
-        : totalLength(total_length),totalHeight(height), totalTurns(total_turns),
-          offsetCircumference(offset), numLeds(leds), invert(invertMapping) {}
+    CorkscrewInput(float total_length, float height, float total_turns,
+                   float offset = 0, uint16_t leds = 144,
+                   bool invertMapping = false)
+        : totalLength(total_length), totalHeight(height),
+          totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
+          invert(invertMapping) {}
 };
 
 struct CorkscrewState {
@@ -109,7 +114,8 @@ struct CorkscrewState {
         }
 
         difference_type operator-(const iterator &other) const {
-            return static_cast<difference_type>(position_) - static_cast<difference_type>(other.position_);
+            return static_cast<difference_type>(position_) -
+                   static_cast<difference_type>(other.position_);
         }
 
       private:
@@ -120,6 +126,21 @@ struct CorkscrewState {
     iterator begin() { return iterator(this, 0); }
 
     iterator end() { return iterator(this, mapping.size()); }
+};
+
+class Tile2x2_u8_cyc {
+    // This is a class that is like a Tile2x2_u8 but cycles around the edges.
+  public:
+    using Data = fl::pair<vec2i16, uint8_t>;
+
+    Tile2x2_u8_cyc() = default;
+    Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width);
+
+    Data &at(uint16_t x, uint16_t y);
+    const Data &at(uint16_t x, uint16_t y) const;
+
+  private:
+    Data tile[2][2] = {}; // zero filled.
 };
 
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering

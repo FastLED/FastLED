@@ -40,6 +40,11 @@ class Tile2x2_u8 {
     uint8_t &lower_right() { return at(1, 0); }
     uint8_t &upper_right() { return at(1, 1); }
 
+    const uint8_t &lower_left() const { return at(0, 0); }
+    const uint8_t &upper_left() const { return at(0, 1); }
+    const uint8_t &lower_right() const { return at(1, 0); }
+    const uint8_t &upper_right() const { return at(1, 1); }
+
     uint8_t maxValue() const {
         uint8_t max = 0;
         max = MAX(max, at(0, 0));
