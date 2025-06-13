@@ -71,7 +71,7 @@ Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     fl::generateState(mInput, &mState);
 }
 
-vec2f Corkscrew::at(uint16_t i) const {
+vec2f Corkscrew::at_exact(uint16_t i) const {
     if (i >= mState.mapping.size()) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2f(0, 0);
@@ -81,28 +81,8 @@ vec2f Corkscrew::at(uint16_t i) const {
     return position;
 }
 
-vec2f Corkscrew::at_interp(float i) const {
-    if (i < 0 || i >= mState.mapping.size()) {
-        // Handle out-of-bounds access, possibly by returning a default value
-        return vec2f(0, 0);
-    }
-    // sample two points then interpolate between them
-    uint16_t index = static_cast<uint16_t>(i);
-    uint16_t index2 = static_cast<uint16_t>(ceil(i));
 
-    if (index == index2) {
-        // If the index is the same, just return the position at that index
-        return at(index);
-    } else {
-        // Interpolate between the two points
-        const vec2f &p1 = mState.mapping[index];
-        const vec2f &p2 = mState.mapping[index2];
-        float t = i - index;             // Fractional part
-        return p1 * (1.0f - t) + p2 * t; // Linear interpolation
-    }
-}
-
-Tile2x2_u8 Corkscrew::at_splat(float i) const {
+Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     // To finish this, we need to handle wrap around.
     // To accomplish this we need a different data structure than the the
     // Tile2x2_u8.
@@ -155,7 +135,7 @@ Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
 Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
     // This is a splatted pixel, but wrapped around the cylinder.
     // This is useful for rendering the corkscrew in a cylindrical way.
-    Tile2x2_u8 tile = at_splat(i);
+    Tile2x2_u8 tile = at_splat_extrapolate(i);
     return Tile2x2_u8_wrap(tile, mState.width, mState.height);
 }
 
