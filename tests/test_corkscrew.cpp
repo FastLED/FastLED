@@ -42,9 +42,10 @@ TEST_CASE("Corkscrew Circle10 test") {
 }
 
 TEST_CASE("Tile2x2_u8_cyc conversion test") {
-    // Initialize a Tile2x2_u8 with known values
+    // Initialize a Tile2x2_u8 with known values and a specific origin
     Tile2x2_u8 originalTile;
-    originalTile.at(0, 0) = 1;
+    originalTile.setOrigin(50, 50); // Set the origin to (50, 50)
+    originalTile.at(0, 0) = 1; // Initialize the missing element
     originalTile.at(0, 1) = 2;
     originalTile.at(1, 0) = 3;
     originalTile.at(1, 1) = 4;
@@ -59,7 +60,7 @@ TEST_CASE("Tile2x2_u8_cyc conversion test") {
     REQUIRE_EQ(cycTile.at(1, 0).second, 3);
     REQUIRE_EQ(cycTile.at(1, 1).second, 4);
 
-    // Verify wrap-around behavior
+    // Verify wrap-around behavior on the x-axis
     REQUIRE_EQ(cycTile.at(2, 2).second, 1); // Wraps around to (0, 0)
     REQUIRE_EQ(cycTile.at(2, 3).second, 2); // Wraps around to (0, 1)
     REQUIRE_EQ(cycTile.at(3, 2).second, 3); // Wraps around to (1, 0)

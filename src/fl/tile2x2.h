@@ -31,6 +31,10 @@ class Tile2x2_u8 {
 
     void scale(uint8_t scale);
 
+    void setOrigin(int16_t x, int16_t y) {
+        mOrigin = vec2<int16_t>(x, y);
+    }
+
     uint8_t &operator()(int x, int y) { return at(x, y); }
     uint8_t &at(int x, int y) { return mTile[y][x]; }
     const uint8_t &at(int x, int y) const { return mTile[y][x]; }
