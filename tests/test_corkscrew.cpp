@@ -41,6 +41,58 @@ TEST_CASE("Corkscrew Circle10 test") {
 
 }
 
+TEST_CASE("Tile2x2_u8_cyc wrap-around test with width and height") {
+    // Initialize a Tile2x2_u8 with known values and set origin beyond boundaries
+    Tile2x2_u8 originalTile;
+    originalTile.setOrigin(3, 3); // Set the origin beyond the width and height
+    originalTile.at(0, 0) = 1;
+    originalTile.at(0, 1) = 2;
+    originalTile.at(1, 0) = 3;
+    originalTile.at(1, 1) = 4;
+
+    // Convert to Tile2x2_u8_cyc with given width and height
+    uint16_t width = 2;
+    uint16_t height = 2;
+    Tile2x2_u8_cyc cycTile(originalTile, width, height);
+
+    // Verify that the conversion wraps around correctly
+    REQUIRE_EQ(cycTile.at(0, 0).first.x, 1); // Wraps around to (1, 1)
+    REQUIRE_EQ(cycTile.at(0, 0).first.y, 1);
+    REQUIRE_EQ(cycTile.at(0, 1).first.x, 1); // Wraps around to (1, 0)
+    REQUIRE_EQ(cycTile.at(0, 1).first.y, 0);
+    REQUIRE_EQ(cycTile.at(1, 0).first.x, 0); // Wraps around to (0, 1)
+    REQUIRE_EQ(cycTile.at(1, 0).first.y, 1);
+    REQUIRE_EQ(cycTile.at(1, 1).first.x, 0); // Wraps around to (0, 0)
+    REQUIRE_EQ(cycTile.at(1, 1).first.y, 0);
+
+    // Verify that the values are correct
+    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+}
+
+TEST_CASE("Tile2x2_u8_cyc conversion with width and height") {
+    // Initialize a Tile2x2_u8 with known values
+    Tile2x2_u8 originalTile;
+    originalTile.setOrigin(0, 0); // Set the origin to (0, 0)
+    originalTile.at(0, 0) = 1;
+    originalTile.at(0, 1) = 2;
+    originalTile.at(1, 0) = 3;
+    originalTile.at(1, 1) = 4;
+
+    // Convert to Tile2x2_u8_cyc with given width and height
+    uint16_t width = 2;
+    uint16_t height = 2;
+    Tile2x2_u8_cyc cycTile(originalTile, width, height);
+
+    // Verify that the conversion is correct
+    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+}
+
 TEST_CASE("Tile2x2_u8_cyc conversion test") {
     // Initialize a Tile2x2_u8 with known values and a specific origin
     Tile2x2_u8 originalTile;
