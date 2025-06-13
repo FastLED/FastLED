@@ -33,7 +33,7 @@
 // PLATFORMIO BUILD FLAGS:
 // Define your platformio.ini like so:
 //
-// UPDATE, THIS THIS ONE FIRST!
+// UPDATE, USE THIS ONE FIRST!
 // [env:esp32s3]
 // platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
 // framework = arduino
