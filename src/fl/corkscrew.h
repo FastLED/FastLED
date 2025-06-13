@@ -135,6 +135,7 @@ class Tile2x2_u8_cyc {
 
     Tile2x2_u8_cyc() = default;
     Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width);
+    Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width, uint16_t height);
 
     Data &at(uint16_t x, uint16_t y);
     const Data &at(uint16_t x, uint16_t y) const;

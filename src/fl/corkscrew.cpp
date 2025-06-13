@@ -176,4 +176,18 @@ const Tile2x2_u8_cyc::Data &Tile2x2_u8_cyc::at(uint16_t x, uint16_t y) const {
     return tile[y][x];
 }
 
+
+
+Tile2x2_u8_cyc::Tile2x2_u8_cyc(const Tile2x2_u8 &from, uint16_t width, uint16_t height) {
+    const vec2i16 origin = from.origin();
+    at(0, 0) = {wrap(vec2i16(origin.x, origin.y), vec2i16(width, height)),
+                from.at(0, 0)};
+    at(0, 1) = {wrap(vec2i16(origin.x, origin.y + 1), vec2i16(width, height)),
+                from.at(0, 1)};
+    at(1, 0) = {wrap(vec2i16(origin.x + 1, origin.y), vec2i16(width, height)),
+                from.at(1, 0)};
+    at(1, 1) = {wrap(vec2i16(origin.x + 1, origin.y + 1), vec2i16(width, height)),
+                from.at(1, 1)};
+}
+
 } // namespace fl
