@@ -8,6 +8,7 @@
 
 #include "fl/corkscrew.h"
 #include "fl/grid.h"
+#include "fl/tile2x2.h" // Ensure this header is included for Tile2x2_u8
 
 #define NUM_LEDS 288
 
@@ -38,4 +39,29 @@ TEST_CASE("Corkscrew Circle10 test") {
     REQUIRE_EQ(output.width, 10);
     REQUIRE_EQ(output.height, 1);
 
+}
+
+TEST_CASE("Tile2x2_u8_cyc conversion test") {
+    // Initialize a Tile2x2_u8 with known values
+    Tile2x2_u8 originalTile;
+    originalTile.at(0, 0) = 1;
+    originalTile.at(0, 1) = 2;
+    originalTile.at(1, 0) = 3;
+    originalTile.at(1, 1) = 4;
+
+    // Convert to Tile2x2_u8_cyc with a given width
+    uint16_t width = 10;
+    Tile2x2_u8_cyc cycTile(originalTile, width);
+
+    // Verify that the conversion is correct
+    REQUIRE_EQ(cycTile.at(0, 0).second, 1);
+    REQUIRE_EQ(cycTile.at(0, 1).second, 2);
+    REQUIRE_EQ(cycTile.at(1, 0).second, 3);
+    REQUIRE_EQ(cycTile.at(1, 1).second, 4);
+
+    // Verify wrap-around behavior
+    REQUIRE_EQ(cycTile.at(2, 2).second, 1); // Wraps around to (0, 0)
+    REQUIRE_EQ(cycTile.at(2, 3).second, 2); // Wraps around to (0, 1)
+    REQUIRE_EQ(cycTile.at(3, 2).second, 3); // Wraps around to (1, 0)
+    REQUIRE_EQ(cycTile.at(3, 3).second, 4); // Wraps around to (1, 1)
 }
