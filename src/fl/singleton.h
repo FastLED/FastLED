@@ -9,6 +9,8 @@ namespace fl {
 template <typename T, int N = 0> class Singleton {
   public:
     static T &instance() {
+        // We love function level singletons!! They don't get construction until first call.
+        // And they seem to have locks on them in most compilers. So yay.
         static T instance;
         return instance;
     }

@@ -2,6 +2,7 @@ FastLED 3.9.21
 ==============
 
   * Esp32P4 now officially supported.
+  * Esp32S3
 
 
 FastLED 3.9.18 + 3.9.19 + 3.9.20
