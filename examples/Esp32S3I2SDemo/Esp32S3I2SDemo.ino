@@ -41,7 +41,7 @@
 // build_flags = -DBOARD_HAS_PSRAM
 //
 //
-////////// ORIGNAL ///////////
+////////// ORIGNAL - ARCHIVE ///////////
 // ORIGINAL (THE ORIGINAL CONFIGURATION THAT GOT THIS TO WORK)
 // [env:esp32s3]
 // platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
