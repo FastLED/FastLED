@@ -30,10 +30,13 @@
 /// Raw YVes driver needs a perfect parallel rectacngle buffer for operation. In this code we've provided FastLED
 /// type bindings.
 ///
+// ArduinoIDE
+//  Should already be enabled.
+//
 // PLATFORMIO BUILD FLAGS:
 // Define your platformio.ini like so:
 //
-// UPDATE, USE THIS ONE FIRST!
+// PlatformIO
 // [env:esp32s3]
 // platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
 // framework = arduino
