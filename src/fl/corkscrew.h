@@ -3,16 +3,15 @@
 /**
  * @file corkscrew.h
  * @brief Corkscrew projection utilities
+ * 
+ * You want to draw on a rectangular surface, and have it map to a GOD DAMN CORKSCREW!
+ * Well guess what, this is the file for you.
  *
- * Corkscrew projection maps from Corkscrew (θ, h) to Cylindrical cartesian (w,
- * h) space, where w = one turn of the Corkscrew. The corkscrew at (0,0) will
- * map to (0,0) in cylindrical space.
+ * Corkscrew projection maps from Corkscrew angle height, (θ, h)  to Cylindrical cartesian (w,
+ * h) space, where w = one turn of the Corkscrew. The corkscrew at (0) will
+ * map to the first index in the cylinder map at (0, 0). The last value is probly not
+ * at the max pixel value at (width - 1, height - 1), but could be.
  *
- * The projection:
- * - Super samples cylindrical space?
- * - θ is normalized to [0, 1] or mapped to [0, W-1] for grid projection
- * - Uses 2x2 super sampling for better visual quality
- * - Works with XYPathRenderer's "Splat Rendering" for sub-pixel rendering
  *
  * Inputs:
  * - Total Height of the Corkscrew in centimeters
