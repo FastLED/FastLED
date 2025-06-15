@@ -79,6 +79,7 @@ DEFAULT_EXAMPLES = [
     "Chromancer",
     "ColorPalette",
     "ColorTemperature",
+    "Corkscrew",
     "Cylon",
     "DemoReel100",
     "Downscale",
