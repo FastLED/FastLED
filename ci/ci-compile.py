@@ -80,6 +80,7 @@ DEFAULT_EXAMPLES = [
     "ColorTemperature",
     "Cylon",
     "DemoReel100",
+    "Downscale",
     "FirstLight",
     "Fire2012",
     "Multiple/MultipleStripsInOneArray",

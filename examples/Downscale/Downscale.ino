@@ -13,6 +13,13 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
+
+#ifdef __AVR__
+// AVR is not powerful enough.
+void setup() {}
+void loop() {}
+#else
+
 #include <Arduino.h>
 #include <FastLED.h>
 
@@ -220,3 +227,5 @@ void loop() {
 
     FastLED.show();
 }
+
+#endif  // __AVR__
