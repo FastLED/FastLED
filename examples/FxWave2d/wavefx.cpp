@@ -1,9 +1,4 @@
 
-
-#pragma once
-
-
-
 /*
 This demo is best viewed using the FastLED compiler.
 
