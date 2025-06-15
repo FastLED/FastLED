@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "fl/bilinear_expansion.h"
+#include "fl/upscale.h"
 #include "fl/ptr.h"
 #include "fl/vector.h"
 #include "fl/xymap.h"

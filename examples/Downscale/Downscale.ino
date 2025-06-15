@@ -23,7 +23,7 @@ all the UI elements you see below.
 #include "fl/ui.h"
 #include "fl/xypath.h"
 #include "fx/time.h"
-#include "fl/bilinear_compression.h"
+#include "fl/downscale.h"
 
 // Sketch.
 #include "src/wave.h"
@@ -82,12 +82,12 @@ void setupUiCallbacks() {
     maxAnimation.onChanged(
         [](float value) { shapeProgress.set_max_clamp(maxAnimation.value()); });
 
-    trigger.onChanged([]() {
+    trigger.onClicked([]() {
         // shapeProgress.trigger(millis());
         FASTLED_WARN("Trigger pressed");
     });
-    useWaveFx.onChanged([](bool on) {
-        if (on) {
+    useWaveFx.onChanged([](fl::UICheckbox &checkbox) {
+        if (checkbox.value()) {
             FASTLED_WARN("WaveFX enabled");
         } else {
             FASTLED_WARN("WaveFX disabled");

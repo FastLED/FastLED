@@ -6,7 +6,7 @@
 #include "FastLED.h"
 #include "fl/xymap.h"
 
-#include "fl/bilinear_expansion.h"
+#include "fl/upscale.h"
 #include "fl/downscale.h"
 #include "lib8tion/math8.h"
 
@@ -82,7 +82,7 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
         "Upscaling only works with a src matrix that is rectangular");
     uint16_t w = srcXY.getWidth();
     uint16_t h = srcXY.getHeight();
-    fl::bilinearExpand(src, dst, w, h, dstXY);
+    fl::upscale(src, dst, w, h, dstXY);
 }
 
 CRGB &CRGB::nscale8(uint8_t scaledown) {

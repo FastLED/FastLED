@@ -3,7 +3,7 @@
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
-#include "fl/bilinear_expansion.h"
+#include "fl/upscale.h"
 #include "fl/ptr.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
@@ -64,13 +64,13 @@ void ScaleUp::draw(DrawContext context) {
 void ScaleUp::expand(const CRGB *input, CRGB *output, uint16_t width,
                      uint16_t height, XYMap mXyMap) {
 #if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
-    bilinearExpandPowerOf2(input, output, width, height, mXyMap);
+    fl::upscalePowerOf2(input, output, static_cast<uint8_t>(width), static_cast<uint8_t>(height), mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
-    bilinearExpandArbitrary(input, output, width, height, mXyMap);
+    fl::upscaleArbitrary(input, output, width, height, mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
-    bilinearExpand(input, output, width, height, mXyMap);
+    fl::upscale(input, output, width, height, mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
-    bilinearExpandFloat(input, output, width, height, mXyMap);
+    fl::upscaleFloat(input, output, static_cast<uint8_t>(width), static_cast<uint8_t>(height), mXyMap);
 #else
 #error "Invalid FASTLED_SCALE_UP"
 #endif
