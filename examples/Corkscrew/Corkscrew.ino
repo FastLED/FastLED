@@ -113,46 +113,31 @@ void loop() {
         }
     }
 
-
-
-    vec2f pos_vec2f = corkscrew.at_interp(pos);
-
     if (splatRendering) {
-
-        // FASTLED_WARN("Position: " << pos);
-
-        // FASTLED_WARN("Position vec2f: " << pos_vec2f);
-        Tile2x2_u8 pos_tile = corkscrew.at_splat(pos);
-
-        // FASTLED_WARN("Tile: " << pos_tile);
-
-        vec2<int16_t> origin = pos_tile.origin();
-        // origin can just draw.
+        Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         const CRGB color = CRGB::Blue;
-        for (int x = origin.x; x < origin.x + 2; ++x) {
-            for (int y = origin.y; y < origin.y + 2; ++y) {
-                int dx = x - origin.x;
-                int dy = y - origin.y;
-                uint8_t alpha = pos_tile.at(dx, dy);
+        // Draw each pixel in the 2x2 tile using the new wrapping API
+        for (int dx = 0; dx < 2; ++dx) {
+            for (int dy = 0; dy < 2; ++dy) {
+                auto data = pos_tile.at(dx, dy);
+                vec2i16 wrapped_pos = data.first;  // Already wrapped position
+                uint8_t alpha = data.second;       // Alpha value
 
-                // Wrap around the frame buffer
-                int wrapped_x = x % frameBuffer.width();
-                int wrapped_y = y % frameBuffer.height();
-                FASTLED_WARN("x: " << wrapped_x << " y: " << wrapped_y);
-                CRGB c = color;
-                // c *= alpha / 255.f; // Scale the color by the alpha value
-                c.nscale8(alpha); // Scale the color by the alpha value
-                frameBuffer.at(wrapped_x, wrapped_y) = c;
+                if (alpha > 0) {  // Only draw if there's some alpha
+                    CRGB c = color;
+                    c.nscale8(alpha); // Scale the color by the alpha value
+                    frameBuffer.at(wrapped_pos.x, wrapped_pos.y) = c;
+                }
             }
         }
     } else {
+        // None splat rendering, looks aweful.
+        vec2f pos_vec2f = corkscrew.at_exact(pos);
         vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
         frameBuffer.at(pos_i16.x, pos_i16.y) =
             CRGB::Blue; // Draw a blue pixel at (w, h)
     }
-
-
     FastLED.show();
 }
