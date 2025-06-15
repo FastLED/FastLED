@@ -23,6 +23,12 @@ This is the famouse Animartrix demo by Stefan Petrick. The effects are generated
 using polor polar coordinates. The effects are very complex and powerful.
 */
 
+#ifdef __AVR__
+// AVR is not powerful enough.
+void setup() {}
+void loop() {}
+#else
+
 
 #include <stdio.h>
 #include <string>
@@ -105,3 +111,4 @@ void loop() {
 }
 
 
+#endif  // __AVR__
