@@ -83,6 +83,7 @@ DEFAULT_EXAMPLES = [
     "Cylon",
     "DemoReel100",
     "Downscale",
+    "FestivalStick",
     "FirstLight",
     "Fire2012",
     "Multiple/MultipleStripsInOneArray",
