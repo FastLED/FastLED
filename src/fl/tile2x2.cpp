@@ -91,7 +91,7 @@ uint8_t Tile2x2_u8::maxValue() const {
     return max;
 }
 
-Tile2x2_u8 Tile2x2_u8::Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
+Tile2x2_u8 Tile2x2_u8::MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
     Tile2x2_u8 result;
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {

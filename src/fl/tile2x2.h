@@ -50,7 +50,7 @@ class Tile2x2_u8 {
 
     uint8_t maxValue() const;
 
-    static Tile2x2_u8 Max(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
+    static Tile2x2_u8 MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b);
 
     vec2<int16_t> origin() const { return mOrigin; }
 
