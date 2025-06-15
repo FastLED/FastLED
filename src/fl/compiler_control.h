@@ -19,3 +19,11 @@
   #define FL_DISABLE_WARNING_POP
   #define FL_DISABLE_WARNING(warning)
 #endif
+
+
+#if defined(__clang__)
+  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
+    FL_DISABLE_WARNING(global-constructors)
+#else
+  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS /* nothing */
+#endif

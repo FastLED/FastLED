@@ -57,7 +57,7 @@ uint8_t get_brightness();
 void *pSmartMatrix = NULL;
 
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(global-constructors)
+FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 
 CFastLED FastLED;  // global constructor allowed in this case.
 
