@@ -53,7 +53,7 @@ Corkscrew::Input
     corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
                    CORKSCREW_TURNS, // Default to 19 turns
                    0,        // offset to account for gaps between segments
-                   NUM_LEDS, // Default to dense 144 leds.
+                   NUM_LEDS  // Default to dense 144 leds.
     );
 
 // Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
