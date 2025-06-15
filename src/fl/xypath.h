@@ -18,8 +18,6 @@
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
 
-#include "fl/avr_disallowed.h"
-
 namespace fl {
 
 class Gradient;
@@ -37,7 +35,6 @@ namespace xypath_detail {
 fl::Str unique_missing_name(const char *prefix = "XYCustomPath: ");
 } // namespace xypath_detail
 
-AVR_DISALLOWED
 class XYPath : public Referent {
   public:
     /////////////////////////////////////////////
@@ -57,7 +54,7 @@ class XYPath : public Referent {
     // Custom path using just a function.
     static XYPathPtr
     NewCustomPath(const fl::function<vec2f(float)> &path,
-                  const rect<int> &drawbounds = rect<int>(),
+                  const rect<int16_t> &drawbounds = rect<int16_t>(),
                   const TransformFloat &transform = TransformFloat(),
                   const char *name = nullptr);
 
@@ -148,10 +145,10 @@ class XYPathFunction : public XYPathGenerator {
     const Str name() const override { return mName; }
     void setName(const Str &name) { mName = name; }
 
-    fl::rect<int> drawBounds() const { return mDrawBounds; }
-    void setDrawBounds(const fl::rect<int> &bounds) { mDrawBounds = bounds; }
+    fl::rect<int16_t> drawBounds() const { return mDrawBounds; }
+    void setDrawBounds(const fl::rect<int16_t> &bounds) { mDrawBounds = bounds; }
 
-    bool hasDrawBounds(fl::rect<int> *bounds) override {
+    bool hasDrawBounds(fl::rect<int16_t> *bounds) override {
         if (bounds) {
             *bounds = mDrawBounds;
         }
@@ -161,7 +158,7 @@ class XYPathFunction : public XYPathGenerator {
   private:
     fl::function<vec2f(float)> mFunction;
     fl::Str mName = "XYPathFunction Unnamed";
-    fl::rect<int> mDrawBounds;
+    fl::rect<int16_t> mDrawBounds;
 };
 
 } // namespace fl

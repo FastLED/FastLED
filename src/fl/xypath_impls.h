@@ -57,7 +57,7 @@ class XYPathGenerator : public Referent {
     virtual const Str name() const = 0;
     virtual vec2f compute(float alpha) = 0;
     // No writes when returning false.
-    virtual bool hasDrawBounds(rect<int> *bounds) {
+    virtual bool hasDrawBounds(rect<int16_t> *bounds) {
         FASTLED_UNUSED(bounds);
         return false;
     }
