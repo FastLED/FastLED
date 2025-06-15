@@ -34,6 +34,12 @@ to white at the top, with red and yellow in between (for the default palette).
 //    (not just brightness). This creates a fade-out effect from the bottom of the matrix to the top
 // 4. The palette is carefully designed to give realistic fire colors
 
+#if defined(__AVR__)
+// AVR is not powerful enough.
+void setup() {}
+void loop() {}
+#else
+
 #include "FastLED.h"     // Main FastLED library for controlling LEDs
 #include "fl/ui.h"       // UI components for the FastLED web compiler (sliders, etc.)
 #include "fl/xymap.h"    // Mapping between 1D LED array and 2D coordinates
@@ -190,3 +196,5 @@ void loop() {
     // Send the color data to the actual LEDs
     FastLED.show();
 }
+
+#endif

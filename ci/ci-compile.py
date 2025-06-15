@@ -101,6 +101,8 @@ DEFAULT_EXAMPLES = [
     "RGBWEmulated",
     "TwinkleFox",
     "XYMatrix",
+    "FireMatrix",
+    "FireCylinder",
     "FxGfx2Video",
     "FxSdCard",
     "FxCylon",

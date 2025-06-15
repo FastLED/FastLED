@@ -33,6 +33,12 @@ with colors transitioning from black to red/yellow/white (or other palettes).
 // 4. The height coordinate controls color fade-out to create the rising fire effect
 // 5. The time dimension adds continuous variation to make the fire look dynamic
 
+#if defined(__AVR__)
+// AVR is not powerful enough.
+void setup() {}
+void loop() {}
+#else
+
 #include "FastLED.h"     // Main FastLED library for controlling LEDs
 #include "fl/ui.h"       // UI components for the FastLED web compiler (sliders, buttons, etc.)
 #include "fl/xymap.h"    // Mapping between 1D LED array and 2D coordinates
@@ -212,3 +218,5 @@ void loop() {
     // Send the color data to the actual LEDs
     FastLED.show();
 }
+
+#endif  // __AVR__
