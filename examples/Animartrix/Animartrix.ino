@@ -23,8 +23,8 @@ This is the famouse Animartrix demo by Stefan Petrick. The effects are generated
 using polor polar coordinates. The effects are very complex and powerful.
 */
 
-#ifdef __AVR__
-// AVR is not powerful enough.
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Platform does not have enough memory
 void setup() {}
 void loop() {}
 #else

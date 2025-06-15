@@ -10,7 +10,7 @@
 
 #include <FastLED.h>  // Main FastLED library for controlling LEDs
 
-#ifdef __AVR__
+#if !SKETCH_HAS_LOTS_OF_MEMORY
 // Don't compile this for AVR microcontrollers (like Arduino Uno) because they typically 
 // don't have enough memory to handle this complex animation.
 // Instead, we provide empty setup/loop functions so the sketch will compile but do nothing.

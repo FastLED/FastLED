@@ -34,7 +34,7 @@ with colors transitioning from black to red/yellow/white (or other palettes).
 // 5. The time dimension adds continuous variation to make the fire look dynamic
 
 #if defined(__AVR__)
-// AVR is not powerful enough.
+// Platform does not have enough memory
 void setup() {}
 void loop() {}
 #else

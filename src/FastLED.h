@@ -968,3 +968,6 @@ using namespace fl;
      void loop() { FASTLED_WARN("hijacked the loop"); real_loop(); } \
      void real_loop()
 #endif
+
+
+#include "fl/sketch_macros.h"

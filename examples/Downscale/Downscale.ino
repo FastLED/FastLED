@@ -14,14 +14,16 @@ all the UI elements you see below.
 */
 
 
-#ifdef __AVR__
-// AVR is not powerful enough.
-void setup() {}
-void loop() {}
-#else
 
 #include <Arduino.h>
 #include <FastLED.h>
+
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Platform does not have enough memory
+void setup() {}
+void loop() {}
+#else
 
 #include "fl/draw_visitor.h"
 #include "fl/math_macros.h"
@@ -154,8 +156,6 @@ void loop() {
         s_prev_alpha = curr_alpha;
     }
 
-    const bool is_active =
-        true || curr_alpha < maxAnimation.value() && curr_alpha > 0.0f;
 
     static uint32_t frame = 0;
     frame++;
@@ -183,9 +183,6 @@ void loop() {
         }
         uint8_t alpha =
             fl::map_range<uint8_t>(i, 0.0f, number_of_steps - 1, 64, 255);
-        if (!is_active) {
-            alpha = 0;
-        }
         Tile2x2_u8 subpixel = shape->at_subpixel(a);
         subpixel.scale(alpha);
         // subpixels.push_back(subpixel);
@@ -195,7 +192,7 @@ void loop() {
     s_prev_alpha = curr_alpha;
 
 
-    if (useWaveFx && is_active) {
+    if (useWaveFx) {
         DrawRasterToWaveSimulator draw_wave_fx(&wave_fx);
         raster.draw(xyMap, draw_wave_fx);
     } else {

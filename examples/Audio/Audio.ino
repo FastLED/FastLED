@@ -13,8 +13,8 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
-#ifdef __AVR__
-// AVR is not powerful enough.
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Platform does not have enough memory
 void setup() {}
 void loop() {}
 #else

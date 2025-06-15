@@ -9,7 +9,7 @@
 /// 4. When the compiler is done a web page will open.
 
 
-#ifdef __AVR__
+#if !SKETCH_HAS_LOTS_OF_MEMORY
 void setup() {
   // put your setup code here, to run once:
 }

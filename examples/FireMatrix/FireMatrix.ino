@@ -35,7 +35,7 @@ to white at the top, with red and yellow in between (for the default palette).
 // 4. The palette is carefully designed to give realistic fire colors
 
 #if defined(__AVR__)
-// AVR is not powerful enough.
+// Platform does not have enough memory
 void setup() {}
 void loop() {}
 #else
