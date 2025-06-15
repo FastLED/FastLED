@@ -70,6 +70,7 @@ OTHER_BOARDS_NAMES = [
 
 # Examples to compile.
 DEFAULT_EXAMPLES = [
+    "Animartrix",
     "Apa102",
     "Apa102HD",
     "Apa102HDOverride",
