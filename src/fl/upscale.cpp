@@ -4,9 +4,9 @@
 
 #include <stdint.h>
 
-#include "bilinear_expansion.h"
 #include "crgb.h"
 #include "fl/namespace.h"
+#include "fl/upscale.h"
 #include "fl/xymap.h"
 
 namespace fl {
@@ -17,9 +17,8 @@ uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
 uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
                                     uint8_t v11, uint8_t dx, uint8_t dy);
 
-void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
-                             uint16_t inputWidth, uint16_t inputHeight,
-                             XYMap xyMap) {
+void upscaleArbitrary(const CRGB *input, CRGB *output, uint16_t inputWidth,
+                      uint16_t inputHeight, XYMap xyMap) {
     uint16_t n = xyMap.getTotal();
     uint16_t outputWidth = xyMap.getWidth();
     uint16_t outputHeight = xyMap.getHeight();
@@ -82,8 +81,8 @@ uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
     return result;
 }
 
-void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                            uint8_t inputHeight, XYMap xyMap) {
+void upscalePowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
+                     uint8_t inputHeight, XYMap xyMap) {
     uint8_t width = xyMap.getWidth();
     uint8_t height = xyMap.getHeight();
     if (width != xyMap.getWidth() || height != xyMap.getHeight()) {
@@ -158,7 +157,7 @@ uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
 }
 
 // Floating-point version of bilinear interpolation
-uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
+uint8_t upscaleFloat(uint8_t v00, uint8_t v10, uint8_t v01,
                                  uint8_t v11, float dx, float dy) {
     float dx_inv = 1.0f - dx;
     float dy_inv = 1.0f - dy;
@@ -179,9 +178,8 @@ uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
 }
 
 // Floating-point version for arbitrary grid sizes
-void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
-                                  uint16_t inputWidth, uint16_t inputHeight,
-                                  XYMap xyMap) {
+void upscaleArbitraryFloat(const CRGB *input, CRGB *output, uint16_t inputWidth,
+                           uint16_t inputHeight, XYMap xyMap) {
     uint16_t n = xyMap.getTotal();
     uint16_t outputWidth = xyMap.getWidth();
     uint16_t outputHeight = xyMap.getHeight();
@@ -214,11 +212,11 @@ void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
 
             CRGB result;
             result.r =
-                bilinearInterpolateFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
+                upscaleFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
             result.g =
-                bilinearInterpolateFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
+                upscaleFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
             result.b =
-                bilinearInterpolateFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
+                upscaleFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
 
             uint16_t idx = xyMap.mapToIndex(x, y);
             if (idx < n) {
@@ -229,8 +227,8 @@ void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
 }
 
 // Floating-point version for power-of-two grid sizes
-void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
-                         uint8_t inputHeight, XYMap xyMap) {
+void upscaleFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
+                  uint8_t inputHeight, XYMap xyMap) {
     uint8_t outputWidth = xyMap.getWidth();
     uint8_t outputHeight = xyMap.getHeight();
     if (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight()) {
@@ -267,11 +265,11 @@ void bilinearExpandFloat(const CRGB *input, CRGB *output, uint8_t inputWidth,
 
             CRGB result;
             result.r =
-                bilinearInterpolateFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
+                upscaleFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
             result.g =
-                bilinearInterpolateFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
+                upscaleFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
             result.b =
-                bilinearInterpolateFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
+                upscaleFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
 
             uint16_t idx = xyMap.mapToIndex(x, y);
             if (idx < n) {
