@@ -3,9 +3,10 @@ FastLED 3.9.21
 
   * Esp32P4 now officially supported.
   * Esp32S3 - 16 Parallel LEDs Driver
-    * Thanks for the user feedback! This mode has updated instructions. Now very easy to use, but still platformio only.
-  * I know the news is bad folks. But remember that everyday is choice. You can choose to be the light you want to see in the world.
-    * happy coding! ~Zach
+    * [ ] Check that this compiles in Arduino IDE.
+    * [ ] Check Arduino Core versions and error/warn if necessary.
+  * Animartrix now officially released.
+    * examples/Animartrix/Animartrix.ino
 
 
 FastLED 3.9.18 + 3.9.19 + 3.9.20
