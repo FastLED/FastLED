@@ -74,6 +74,7 @@ DEFAULT_EXAMPLES = [
     "Apa102",
     "Apa102HD",
     "Apa102HDOverride",
+    "Audio",
     "Blink",
     "Blur",
     "Chromancer",
