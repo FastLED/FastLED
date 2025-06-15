@@ -91,15 +91,8 @@ void setup() {
 }
 
 void loop() {
-    uint32_t now = millis();
-    // fl::clear(leds);
     fl::clear(frameBuffer);
-
     static float pos = 0;
-
-    // Update the corkscrew mapping every second
-    // w = (w + 1) % CORKSCREW_WIDTH;
-    // frameBuffer.
     pos += speed.value();
     if (pos > corkscrew.size() - 1) {
         pos = 0; // Reset to the beginning
