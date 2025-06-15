@@ -54,7 +54,7 @@ UICheckbox splatRendering("Splat Rendering", true);
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
 Corkscrew::Input corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
-                                CORKSCREW_TURNS, 0, NUM_LEDS);
+                                CORKSCREW_TURNS, NUM_LEDS, 0);
 
 // Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
 Corkscrew corkscrew(corkscrewInput);

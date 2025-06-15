@@ -57,7 +57,7 @@ struct CorkscrewInput {
     bool invert = false;           // If true, reverse the mapping order
     CorkscrewInput() = default;
     CorkscrewInput(float total_length, float height, float total_turns,
-                   float offset = 0, uint16_t leds = 144,
+                   uint16_t leds, float offset = 0,
                    bool invertMapping = false)
         : totalLength(total_length), totalHeight(height),
           totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),

@@ -30,8 +30,8 @@ using namespace fl;
 #define NUM_LEDS 288
 #define CORKSCREW_TOTAL_LENGTH 100
 #define CORKSCREW_TOTAL_HEIGHT 23.25 // when height = 0, it's a circle.
-                                  // wrapped up over 19 turns
-#define CORKSCREW_TURNS 19        // Default to 19 turns
+                                     // wrapped up over 19 turns
+#define CORKSCREW_TURNS 19           // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -49,12 +49,11 @@ UICheckbox splatRendering("Splat Rendering", true);
 
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
-Corkscrew::Input
-    corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
-                   CORKSCREW_TURNS, // Default to 19 turns
-                   0,        // offset to account for gaps between segments
-                   NUM_LEDS  // Default to dense 144 leds.
-    );
+Corkscrew::Input corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
+                                CORKSCREW_TURNS, // Default to 19 turns
+                                NUM_LEDS,        // Default to dense 144 leds.
+                                0 // offset to account for gaps between segments
+);
 
 // Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
 Corkscrew corkscrew(corkscrewInput);
@@ -106,7 +105,6 @@ void loop() {
         pos = 0; // Reset to the beginning
     }
 
-
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
             frameBuffer.data()[i] = CRGB(8, 8, 8);
@@ -120,10 +118,10 @@ void loop() {
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
                 auto data = pos_tile.at(dx, dy);
-                vec2i16 wrapped_pos = data.first;  // Already wrapped position
-                uint8_t alpha = data.second;       // Alpha value
+                vec2i16 wrapped_pos = data.first; // Already wrapped position
+                uint8_t alpha = data.second;      // Alpha value
 
-                if (alpha > 0) {  // Only draw if there's some alpha
+                if (alpha > 0) { // Only draw if there's some alpha
                     CRGB c = color;
                     c.nscale8(alpha); // Scale the color by the alpha value
                     frameBuffer.at(wrapped_pos.x, wrapped_pos.y) = c;
