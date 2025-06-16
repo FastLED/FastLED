@@ -181,7 +181,9 @@ void setup_i2s_using_fastled_api() {
 
 
 void setup() {
-    psramInit(); // IMPORTANT: This is required to enable PSRAM. If you don't do this, the driver will not work.
+    // This is no longer necessary, it will get called automatically when
+    // the I2S peripheral is initialized.
+    // psramInit(); // IMPORTANT: This is required to enable PSRAM. If you don't do this, the driver will not work.
     // put your setup code here, to run once:
     Serial.begin(115200);
 
