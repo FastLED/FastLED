@@ -31,7 +31,7 @@
 //
 // PlatformIO
 // [env:esp32s3]
-// platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
+// platform = https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip
 // framework = arduino
 // board = seeed_xiao_esp32s3
 
