@@ -4,20 +4,15 @@
 /// Originally from: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
 ///
 /// UPDATE: Newest ESP32-S3 Arduino core (3.10) has a bug that prevents this driver from working. See issue 1903.
-///         workaround: PIN YOUR DEPDENCIES! We provide a PlatformIO configuration. See below. Sorry Arduino IDE user, you can't pass
-///         in -DBOARD_HAS_PSRAM!!
+///         workaround: PIN YOUR DEPEDENCIES! We provide a PlatformIO configuration.
 ///
 /// This is an advanced driver. It has certain ramifications.
-///   - You probably aren't going to be able to use this in ArduinoIDE, because arduion does not support build flags. This one needs
-///     -DBOARD_HAS_PSRAM as a build flag.
 ///   - Once flashed, the ESP32-S3 might NOT want to be reprogrammed again. To get around
 ///     this hold the reset button and release when the flash tool is looking for an
 ///     an upload port.
 ///   - Put a delay in the setup function. This is to make it easier to flash the device during developement.
 ///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
 ///     but just be aware of it. If your device suddenly stops works, remove the printfs and see if that fixes the problem.
-///   - You MUST use all the available PINS specified in this demo. Anything less than that will cause FastLED to crash.
-///     UPDATE: Users report they can use less pins and different ones, so experiment around and find out!
 ///
 /// Is RGBW supported? Yes.
 ///
@@ -41,7 +36,6 @@
 // platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
 // framework = arduino
 // board = seeed_xiao_esp32s3
-// build_flags = -DBOARD_HAS_PSRAM
 //
 //
 ////////// ORIGNAL - ARCHIVE ///////////
