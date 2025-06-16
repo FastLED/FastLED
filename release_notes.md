@@ -1,8 +1,7 @@
-FastLED 3.9.21
+FastLED 3.10.0
 ==============
 
-  * Esp32P4 now officially supported.
-  * Animartrix now officially released.
+  * Animartrix now out of beta.
     * examples/Animartrix/Animartrix.ino
   * ESP32
     * Esp32P4 now officially supported.
