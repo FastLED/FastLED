@@ -70,6 +70,10 @@ For more examples, see this [link](examples). Web compiled [examples](https://za
 
 # New Feature Announcements
 
+## New in 3.10.0: Animartrix out of beta
+
+[![FastLED 3.10 Animartrix](https://fastled.github.io/assets/fastled_3_10_animartrix.jpg)](https://fastled.github.io/assets/fastled_3_10_animartrix.mp4)
+
 
 ## New in 3.9.16: WaveFx / Multi Layer Compositing / Time-based animation control
 
