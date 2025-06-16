@@ -13,4 +13,6 @@ digraph "fl::TimeRamp::trigger"
   Node3 [id="Node000003",label="wavefx_loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::TimeRamp::trigger",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a351a6be74f90f0fed250bcc34d4ac19b.html#a351a6be74f90f0fed250bcc34d4ac19b",tooltip=" "];
 }

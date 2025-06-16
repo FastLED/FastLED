@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Esp32S3I2SDemo"
   dir_1e86eb05dfedeac38d51c0d61b4912b9 [label="Esp32S3I2SDemo", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_1e86eb05dfedeac38d51c0d61b4912b9.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_1e86eb05dfedeac38d51c0d61b4912b9->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000022_000033.html" href="dir_000022_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_1e86eb05dfedeac38d51c0d61b4912b9->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000024_000035.html" href="dir_000024_000035.html" color="steelblue1" fontcolor="steelblue1"];
 }

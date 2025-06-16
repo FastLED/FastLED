@@ -1,7 +1,5 @@
 <map id="fl::downscale" name="fl::downscale">
-<area shape="rect" id="Node000001" title=" " alt="" coords="189,31,296,56"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="189,5,296,31"/>
 <area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a04814149f06e8bd894c0f8f421c8708f.html#a04814149f06e8bd894c0f8f421c8708f" title="Downscale an CRGB matrix (or strip) to the smaller size." alt="" coords="5,5,141,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,36,141,31,142,26,176,31"/>
-<area shape="rect" id="Node000003" href="$dc/d5d/_audio_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="48,55,99,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,55,99,66,98,61,175,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,21,141,21,141,15,176,15"/>
 </map>

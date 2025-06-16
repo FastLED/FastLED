@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="Message\< SysExMaxSize \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/daa/struct_message.html",tooltip=" "];
+  Node0 [id="Node000000",label="MaxFadeTracker",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/db7/class_max_fade_tracker.html",tooltip="Tracks a smoothed peak with attack, decay, and output-inertia time-constants."];
 }

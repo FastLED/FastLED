@@ -146,29 +146,29 @@ $(function(){initNavTree('d0/da8/group___scaling_ga39bf87e5526120889086cab19ac74
 <div class="fragment"><div class="line"><span class="lineno">  363</span>                                                                            {</div>
 <div class="line"><span class="lineno">  364</span><span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><span class="lineno">  365</span><span class="preprocessor">#if (FASTLED_SCALE8_FIXED == 1)</span></div>
-<div class="line"><span class="lineno">  366</span>    uint16_t scale_fixed = <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> + 1;</div>
+<div class="line"><span class="lineno">  366</span>    uint16_t scale_fixed = <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a> + 1;</div>
 <div class="line"><span class="lineno">  367</span>    r = (((uint16_t)r) * scale_fixed) &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  368</span>    g = (((uint16_t)g) * scale_fixed) &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  369</span>    b = (((uint16_t)b) * scale_fixed) &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  370</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  371</span>    r = ((int)r * (int)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  372</span>    g = ((int)g * (int)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
-<div class="line"><span class="lineno">  373</span>    b = ((int)b * (int)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  371</span>    r = ((int)r * (int)(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  372</span>    g = ((int)g * (int)(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)) &gt;&gt; 8;</div>
+<div class="line"><span class="lineno">  373</span>    b = ((int)b * (int)(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)) &gt;&gt; 8;</div>
 <div class="line"><span class="lineno">  374</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  375</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
-<div class="line"><span class="lineno">  376</span>    r = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(r, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
-<div class="line"><span class="lineno">  377</span>    g = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(g, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
-<div class="line"><span class="lineno">  378</span>    b = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(b, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
+<div class="line"><span class="lineno">  376</span>    r = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(r, <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>);</div>
+<div class="line"><span class="lineno">  377</span>    g = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(g, <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>);</div>
+<div class="line"><span class="lineno">  378</span>    b = <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a>(b, <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>);</div>
 <div class="line"><span class="lineno">  379</span>    <a class="code hl_function" href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a>();</div>
 <div class="line"><span class="lineno">  380</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">  381</span><span class="preprocessor">#error &quot;No implementation for nscale8x3 available.&quot;</span></div>
 <div class="line"><span class="lineno">  382</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  383</span>}</div>
-<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="afunky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38_html_ab7346c8b67db0b99afe3fe1eff3b5b38"><div class="ttname"><a href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a></div><div class="ttdeci">uint16_t scale</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d43/funky_8cpp_source.html#l00083">funky.cpp:83</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79_html_ga3fade00fb4cf5b937b973128198a7a79"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00339">scale8.h:339</a></div></div>
 <div class="ttc" id="agroup___scaling_dirty_ga7386235cada3aca429b189681d2ec56d_html_ga7386235cada3aca429b189681d2ec56d"><div class="ttname"><a href="../../d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8() does not clean up the R1 register on AVR.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00176">scale8.h:176</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d91/scale8_8h_source.html#l00339">cleanup_R1()</a>, <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00083">scale</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00176">scale8_LEAVING_R1_DIRTY()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00389">fl::ColorFromPaletteExtended()</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00723">fl::ColorFromPaletteExtended()</a>, <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00111">CRGB::fadeToBlackBy()</a>, <a class="el" href="../../dd/d61/_fx_water_8ino_source.html#l00030">MyColorFromPaletteExtended()</a>, <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00088">CRGB::nscale8()</a>, and <a class="el" href="../../d0/d4b/crgb_8hpp_source.html#l00121">CRGB::scale8()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -183,7 +183,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga39bf87e5526120889086cab19ac74
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1_ga39bf87e5526120889086cab19ac749b1_icgraph.svg" width="100%" height="576"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/da8/group___scaling_ga39bf87e5526120889086cab19ac749b1_ga39bf87e5526120889086cab19ac749b1_icgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -195,7 +195,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga39bf87e5526120889086cab19ac74
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/group___scaling.html">Scaling Functions</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:49 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

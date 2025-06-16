@@ -11,4 +11,6 @@ digraph "fl::anonymous_namespace{gradient::cpp}::Visitor::accept"
   Node2 [id="Node000002",label="fl::anonymous_namespace\l\{gradient::cpp\}::Visitor\l::accept",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddc/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_a14e6d6a5c80faf0e31f682a733b7cd83.html#a14e6d6a5c80faf0e31f682a733b7cd83",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="ColorFromPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
 }

@@ -8,19 +8,17 @@ digraph "fl::ScaleUp::expand"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::ScaleUp::expand",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::bilinearExpand",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6",tooltip=" "];
+  Node2 [id="Node000002",label="fl::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a111ba754b48942237db55be314bf5a23.html#a111ba754b48942237db55be314bf5a23",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::bilinearExpandArbitrary",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aed039daa2110de9add4bdbeea4052a57.html#aed039daa2110de9add4bdbeea4052a57",tooltip="Performs bilinear interpolation for upscaling an image."];
+  Node3 [id="Node000003",label="fl::upscaleArbitrary",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a24f105d99ab32936dacbf815c54f320c.html#a24f105d99ab32936dacbf815c54f320c",tooltip="Performs bilinear interpolation for upscaling an image."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::bilinearInterpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.html#a2e4fe67035df871b23df6b907ca338c8",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::bilinearExpandPowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af0b8ea13c33c033aa6bf8ede489a5c2a.html#af0b8ea13c33c033aa6bf8ede489a5c2a",tooltip="Performs bilinear interpolation for upscaling an image."];
+  Node5 [id="Node000005",label="fl::upscalePowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7a1dd8c713699196f2b8b2b55be5a005.html#a7a1dd8c713699196f2b8b2b55be5a005",tooltip="Performs bilinear interpolation for upscaling an image."];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::bilinearInterpolatePowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.html#a31d30c7ed12b05422e7aa7f03c25fb07",tooltip=" "];
   Node1 -> Node3 [id="edge6_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="fl::bilinearExpandFloat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa1458a6ef9b83a5c2550d8c3a87bc973.html#aa1458a6ef9b83a5c2550d8c3a87bc973",tooltip=" "];
-  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::bilinearInterpolateFloat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_adc9d7b1babde9b079710372109bd3ffb.html#adc9d7b1babde9b079710372109bd3ffb",tooltip=" "];
-  Node1 -> Node5 [id="edge9_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::upscaleFloat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a299d56a7ab9fd6d6cd5a43baeed44842.html#a299d56a7ab9fd6d6cd5a43baeed44842",tooltip=" "];
+  Node1 -> Node5 [id="edge8_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
 }

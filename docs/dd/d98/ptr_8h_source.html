@@ -525,8 +525,8 @@ $(function(){initNavTree('dd/d98/ptr_8h_source.html','../../'); initResizable(tr
 <div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
 <div class="foldopen" id="foldopen00359" data-start="{" data-end="}">
 <div class="line"><a id="l00359" name="l00359"></a><span class="lineno"><a class="line" href="../../db/d77/classfl_1_1_weak_ptr_abb7765999c95f08819bfac82c69bb74f.html#abb7765999c95f08819bfac82c69bb74f">  359</a></span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../db/d77/classfl_1_1_weak_ptr_abb7765999c95f08819bfac82c69bb74f.html#abb7765999c95f08819bfac82c69bb74f">operator!=</a>(<span class="keyword">const</span> T *other)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        <span class="keywordtype">bool</span> equal = *<span class="keyword">this</span> == other;</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>        <span class="keywordflow">return</span> !equal;</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>        <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_acdddf03e2d40b1af890e252ac40a9e1f.html#acdddf03e2d40b1af890e252ac40a9e1f">equal</a> = *<span class="keyword">this</span> == other;</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>        <span class="keywordflow">return</span> !<a class="code hl_function" href="../../d4/d36/namespacefl_acdddf03e2d40b1af890e252ac40a9e1f.html#acdddf03e2d40b1af890e252ac40a9e1f">equal</a>;</div>
 <div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>    }</div>
 </div>
 <div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span> </div>
@@ -737,6 +737,7 @@ $(function(){initNavTree('dd/d98/ptr_8h_source.html','../../'); initResizable(tr
 <div class="ttc" id="aclassfl_1_1_weak_referent_html"><div class="ttname"><a href="../../dd/da7/classfl_1_1_weak_referent.html">fl::WeakReferent</a></div><div class="ttdef"><b>Definition</b> <a href="#l00262">ptr.h:262</a></div></div>
 <div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
 <div class="ttc" id="anamespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0_html_aa46ba73e92c85e05f9ee42f4008cfbe0"><div class="ttname"><a href="../../d4/d36/namespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0.html#aa46ba73e92c85e05f9ee42f4008cfbe0">fl::NewPtr</a></div><div class="ttdeci">Ptr&lt; T &gt; NewPtr(Args... args)</div><div class="ttdef"><b>Definition</b> <a href="#l00451">ptr.h:451</a></div></div>
+<div class="ttc" id="anamespacefl_acdddf03e2d40b1af890e252ac40a9e1f_html_acdddf03e2d40b1af890e252ac40a9e1f"><div class="ttname"><a href="../../d4/d36/namespacefl_acdddf03e2d40b1af890e252ac40a9e1f.html#acdddf03e2d40b1af890e252ac40a9e1f">fl::equal</a></div><div class="ttdeci">bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2)</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd9/algorithm_8h_source.html#l00093">algorithm.h:93</a></div></div>
 <div class="ttc" id="anamespacefl_ad954bc6ead1b937bebf9472beaa8654a_html_ad954bc6ead1b937bebf9472beaa8654a"><div class="ttname"><a href="../../d4/d36/namespacefl_ad954bc6ead1b937bebf9472beaa8654a.html#ad954bc6ead1b937bebf9472beaa8654a">fl::NewPtrNoTracking</a></div><div class="ttdeci">Ptr&lt; T &gt; NewPtrNoTracking(Args... args)</div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Implements a simple red square effect for 2D LED grids.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00016">crgb.h:16</a></div></div>
 <div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00142">old.h:142</a></div></div>
@@ -749,7 +750,7 @@ $(function(){initNavTree('dd/d98/ptr_8h_source.html','../../'); initResizable(tr
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d98/ptr_8h.html">ptr.h</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -115,26 +115,16 @@ $(function(){initNavTree('db/de9/_esp32_s3_i2_s_demo_8ino_a7fe451135ae0a7e53d36a
 <p>The Yves ESP32_S3 I2S driver is a driver that uses the I2S peripheral on the ESP32-S3 to drive leds. </p>
 <p>Originally from: <a href="https://github.com/hpwit/I2SClockLessLedDriveresp32s3">https://github.com/hpwit/I2SClockLessLedDriveresp32s3</a></p>
 <p>This is an advanced driver. It has certain ramifications.</p><ul>
-<li>You probably aren't going to be able to use this in ArduinoIDE, because ArduinoIDE does not allow you to put in the necessary build flags. You will need to use PlatformIO to build this.</li>
-<li>These flags enable PSRAM.</li>
 <li>Once flashed, the ESP32-S3 might NOT want to be reprogrammed again. To get around this hold the reset button and release when the flash tool is looking for an an upload port.</li>
-<li>Put a delay in the setup function. This is to make it easier to flash the device.</li>
-<li>Serial output will mess up the DMA controller. I'm not sure why this is happening but just be aware of it. If your device suddenly stops works, remove the printfs and see if that fixes the problem.</li>
-<li>You MUST use all the available PINS specified in this demo. Anything less than that will cause FastLED to crash.</li>
-<li>Certain leds will turn white in debug mode. Probably has something to do with timing.</li>
+<li>Put a delay in the setup function. This is to make it easier to flash the device during developement.</li>
+<li>Serial output will mess up the DMA controller. I'm not sure why this is happening but just be aware of it. If your device suddenly stops working, remove the printfs and see if that fixes the problem.</li>
 </ul>
 <p>Is RGBW supported? Yes.</p>
-<p>Is Overclocking supported? No.</p>
-<p>What about the new WS2812-5VB leds? Kinda. We put in a hack to add the extra wait time of 300 uS.</p>
-<p>What are the advantages of using the FastLED bindings over the raw driver?</p><ul>
-<li>FastLED api is more user friendly since you don't have to combine all your leds into one rectangular block.</li>
-<li>FastLED api allows you to have different sized strips which will be upscaled to the largest strip internally.</li>
-</ul>
-<p>What are the advantages of using the raw driver over the FastLED bindings?</p><ul>
-<li>The raw driver uses less memory because it doesn't have a frame buffer copy. </li>
-</ul>
+<p>Is Overclocking supported? Yes. Use this to bend the timeings to support other WS281X variants. Fun fact, just overclock the chipset until the LED starts working.</p>
+<p>What about the new WS2812-5VB leds? Yes, they have 250us timing.</p>
+<p>Why use this? Raw YVes driver needs a perfect parallel rectacngle buffer for operation. In this code we've provided FastLED type bindings. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00059">59</a> of file <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html">Esp32S3I2SDemo.ino</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00039">39</a> of file <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html">Esp32S3I2SDemo.ino</a>.</p>
 
 </div>
 </div>
@@ -145,7 +135,7 @@ $(function(){initNavTree('db/de9/_esp32_s3_i2_s_demo_8ino_a7fe451135ae0a7e53d36a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_1e86eb05dfedeac38d51c0d61b4912b9.html">Esp32S3I2SDemo</a></li><li class="navelem"><a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino.html">Esp32S3I2SDemo.ino</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,31 +1,31 @@
 <map id="fl/wave_simulation.h" name="fl/wave_simulation.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="659,5,817,31"/>
-<area shape="rect" id="Node000002" href="$d1/d16/_wave_8ino.html" title=" " alt="" coords="427,79,627,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="698,38,593,81,591,76,696,33"/>
-<area shape="rect" id="Node000003" href="$de/d8c/wave__simulation_8cpp.html" title=" " alt="" coords="652,93,824,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="741,45,741,93,735,93,735,45"/>
-<area shape="rect" id="Node000004" href="$de/de9/src_2fx_22d_2wave_8h.html" title=" " alt="" coords="849,93,955,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="773,35,881,91,878,95,771,39"/>
-<area shape="rect" id="Node000005" href="$d5/d16/examples_2_bilinear_compression_2src_2wave_8h.html" title=" " alt="" coords="252,181,536,236"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="865,126,836,136,756,155,693,165,548,184,536,186,536,181,547,179,692,160,755,150,835,131,863,121"/>
-<area shape="rect" id="Node000008" href="$d9/d29/wavefx_8cpp.html" title=" " alt="" coords="560,181,777,236"/>
-<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="864,127,731,184,728,179,862,122"/>
-<area shape="rect" id="Node000009" href="$dd/d44/_wave2d_8ino.html" title=" " alt="" coords="801,181,1003,236"/>
-<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="905,133,905,181,899,181,899,133"/>
-<area shape="rect" id="Node000010" href="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html" title=" " alt="" coords="1027,181,1227,236"/>
-<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="941,122,1070,179,1068,184,939,127"/>
-<area shape="rect" id="Node000016" href="$d4/d7c/src_2fx_22d_2wave_8cpp.html" title=" " alt="" coords="1252,196,1373,221"/>
-<area shape="poly" id="edge14_Node000004_Node000016" title=" " alt="" coords="969,117,1096,143,1240,179,1284,193,1282,199,1239,184,1094,148,968,122"/>
-<area shape="rect" id="Node000006" href="$da/d05/_bilinear_compression_8ino.html" title=" " alt="" coords="5,284,289,339"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="318,244,213,286,211,281,316,239"/>
-<area shape="rect" id="Node000007" href="$d7/d15/examples_2_bilinear_compression_2src_2wave_8cpp.html" title=" " alt="" coords="313,284,597,339"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="419,246,442,283,437,285,415,249"/>
-<area shape="rect" id="Node000011" href="$d7/d3b/complex_8h.html" title=" " alt="" coords="742,284,942,339"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="1041,243,917,286,915,281,1040,238"/>
-<area shape="rect" id="Node000012" href="$d6/daf/direct_8h.html" title=" " alt="" coords="966,284,1166,339"/>
-<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="1106,249,1084,285,1080,283,1102,246"/>
-<area shape="rect" id="Node000014" href="$d8/d14/simple_8h.html" title=" " alt="" coords="1190,284,1390,339"/>
-<area shape="poly" id="edge12_Node000010_Node000014" title=" " alt="" coords="1183,241,1249,281,1246,286,1180,245"/>
-<area shape="rect" id="Node000015" href="$d8/d96/examples_2_x_y_path_2src_2wave_8cpp.html" title=" " alt="" coords="1414,284,1614,339"/>
-<area shape="poly" id="edge13_Node000010_Node000015" title=" " alt="" coords="1241,237,1414,281,1413,287,1240,242"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="531,5,689,31"/>
+<area shape="rect" id="Node000002" href="$d1/d16/_wave_8ino.html" title=" " alt="" coords="299,79,499,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="570,38,465,81,463,76,568,33"/>
+<area shape="rect" id="Node000003" href="$de/d8c/wave__simulation_8cpp.html" title=" " alt="" coords="524,93,696,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="613,45,613,93,607,93,607,45"/>
+<area shape="rect" id="Node000004" href="$de/de9/src_2fx_22d_2wave_8h.html" title=" " alt="" coords="721,93,827,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="645,35,753,91,750,95,643,39"/>
+<area shape="rect" id="Node000005" href="$de/d79/examples_2_downscale_2src_2wave_8h.html" title=" " alt="" coords="188,181,408,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="737,126,708,136,628,155,565,164,501,171,420,184,409,186,408,181,419,179,500,166,564,158,627,149,707,131,735,121"/>
+<area shape="rect" id="Node000008" href="$d9/d29/wavefx_8cpp.html" title=" " alt="" coords="432,181,649,236"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="736,127,603,184,600,179,734,122"/>
+<area shape="rect" id="Node000009" href="$dd/d44/_wave2d_8ino.html" title=" " alt="" coords="673,181,875,236"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="777,133,777,181,771,181,771,133"/>
+<area shape="rect" id="Node000010" href="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html" title=" " alt="" coords="899,181,1099,236"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="813,122,942,179,940,184,811,127"/>
+<area shape="rect" id="Node000016" href="$d4/d7c/src_2fx_22d_2wave_8cpp.html" title=" " alt="" coords="1124,196,1245,221"/>
+<area shape="poly" id="edge14_Node000004_Node000016" title=" " alt="" coords="841,117,968,143,1112,179,1156,193,1154,199,1111,184,966,148,840,122"/>
+<area shape="rect" id="Node000006" href="$d6/d1a/examples_2_downscale_2downscale_8h.html" title=" " alt="" coords="5,284,225,339"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="240,245,165,286,162,281,237,240"/>
+<area shape="rect" id="Node000007" href="$de/d3f/examples_2_downscale_2src_2wave_8cpp.html" title=" " alt="" coords="249,284,469,339"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="323,246,346,283,341,285,319,249"/>
+<area shape="rect" id="Node000011" href="$d7/d3b/complex_8h.html" title=" " alt="" coords="615,284,815,339"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="913,243,790,286,788,281,912,238"/>
+<area shape="rect" id="Node000012" href="$d6/daf/direct_8h.html" title=" " alt="" coords="839,284,1039,339"/>
+<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="979,249,957,285,953,283,974,246"/>
+<area shape="rect" id="Node000014" href="$d8/d14/simple_8h.html" title=" " alt="" coords="1063,284,1263,339"/>
+<area shape="poly" id="edge12_Node000010_Node000014" title=" " alt="" coords="1055,241,1122,281,1119,286,1052,245"/>
+<area shape="rect" id="Node000015" href="$d8/d96/examples_2_x_y_path_2src_2wave_8cpp.html" title=" " alt="" coords="1287,284,1487,339"/>
+<area shape="poly" id="edge13_Node000010_Node000015" title=" " alt="" coords="1113,237,1288,282,1287,287,1112,242"/>
 </map>

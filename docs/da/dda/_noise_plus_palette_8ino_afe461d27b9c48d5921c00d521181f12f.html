@@ -115,42 +115,9 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00248">248</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  248</span>            {</div>
-<div class="line"><span class="lineno">  249</span>  <span class="comment">// The main program loop that runs continuously</span></div>
-<div class="line"><span class="lineno">  250</span>  </div>
-<div class="line"><span class="lineno">  251</span>  <span class="comment">// Periodically choose a new palette, speed, and scale</span></div>
-<div class="line"><span class="lineno">  252</span>  <span class="comment">// This creates variety in the animation over time</span></div>
-<div class="line"><span class="lineno">  253</span>  <a class="code hl_function" href="../../da/dda/_noise_plus_palette_8ino_a2985d4b1841f40d48227c9b68cdfd2e6.html#a2985d4b1841f40d48227c9b68cdfd2e6">ChangePaletteAndSettingsPeriodically</a>();</div>
-<div class="line"><span class="lineno">  254</span> </div>
-<div class="line"><span class="lineno">  255</span>  <span class="comment">// Generate new noise data for this frame</span></div>
-<div class="line"><span class="lineno">  256</span>  <a class="code hl_function" href="../../da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3">fillnoise8</a>();</div>
-<div class="line"><span class="lineno">  257</span>  </div>
-<div class="line"><span class="lineno">  258</span>  <span class="comment">// Convert the noise data to colors in the LED array</span></div>
-<div class="line"><span class="lineno">  259</span>  <span class="comment">// using the current palette</span></div>
-<div class="line"><span class="lineno">  260</span>  <a class="code hl_function" href="../../da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918">mapNoiseToLEDsUsingPalette</a>();</div>
-<div class="line"><span class="lineno">  261</span> </div>
-<div class="line"><span class="lineno">  262</span>  <span class="comment">// Send the color data to the actual LEDs</span></div>
-<div class="line"><span class="lineno">  263</span>  <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.show();</div>
-<div class="line"><span class="lineno">  264</span>  </div>
-<div class="line"><span class="lineno">  265</span>  <span class="comment">// No delay is needed here as the calculations already take some time</span></div>
-<div class="line"><span class="lineno">  266</span>  <span class="comment">// Adding a delay would slow down the animation</span></div>
-<div class="line"><span class="lineno">  267</span>  <span class="comment">// delay(10);</span></div>
-<div class="line"><span class="lineno">  268</span>}</div>
-<div class="ttc" id="a_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div></div>
-<div class="ttc" id="a_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918_html_a280e07fce1769d79d75e63ce6236a918"><div class="ttname"><a href="../../da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918">mapNoiseToLEDsUsingPalette</a></div><div class="ttdeci">void mapNoiseToLEDsUsingPalette()</div><div class="ttdef"><b>Definition</b> <a href="../../da/dda/_noise_plus_palette_8ino_source.html#l00202">NoisePlusPalette.ino:202</a></div></div>
-<div class="ttc" id="a_noise_plus_palette_8ino_a2985d4b1841f40d48227c9b68cdfd2e6_html_a2985d4b1841f40d48227c9b68cdfd2e6"><div class="ttname"><a href="../../da/dda/_noise_plus_palette_8ino_a2985d4b1841f40d48227c9b68cdfd2e6.html#a2985d4b1841f40d48227c9b68cdfd2e6">ChangePaletteAndSettingsPeriodically</a></div><div class="ttdeci">void ChangePaletteAndSettingsPeriodically()</div><div class="ttdef"><b>Definition</b> <a href="../../da/dda/_noise_plus_palette_8ino_source.html#l00289">NoisePlusPalette.ino:289</a></div></div>
-<div class="ttc" id="a_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3_html_a695b396822bbfb2d9b29c121cf13e8f3"><div class="ttname"><a href="../../da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3">fillnoise8</a></div><div class="ttdeci">void fillnoise8()</div><div class="ttdef"><b>Definition</b> <a href="../../da/dda/_noise_plus_palette_8ino_source.html#l00143">NoisePlusPalette.ino:143</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00008">8</a> of file <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html">NoisePlusPalette.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">    8</span>{}</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00289">ChangePaletteAndSettingsPeriodically()</a>, <a class="el" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>, <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00143">fillnoise8()</a>, and <a class="el" href="../../da/dda/_noise_plus_palette_8ino_source.html#l00202">mapNoiseToLEDsUsingPalette()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f_afe461d27b9c48d5921c00d521181f12f_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-
 </div>
 </div>
 </div><!-- contents -->
@@ -160,7 +127,7 @@ $(function(){initNavTree('da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_9855228c8cabbd40154e79ac1a40dc7f.html">NoisePlusPalette</a></li><li class="navelem"><a class="el" href="../../da/dda/_noise_plus_palette_8ino.html">NoisePlusPalette.ino</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

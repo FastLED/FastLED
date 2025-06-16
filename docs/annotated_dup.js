@@ -53,7 +53,7 @@ var annotated_dup =
       [ "contains_type< T, U, Rest... >", "d3/d65/structfl_1_1contains__type_3_01_t_00_01_u_00_01_rest_8_8_8_01_4.html", "d3/d65/structfl_1_1contains__type_3_01_t_00_01_u_00_01_rest_8_8_8_01_4" ],
       [ "Corkscrew", "dc/d82/classfl_1_1_corkscrew.html", "dc/d82/classfl_1_1_corkscrew" ],
       [ "CorkscrewInput", "d6/d7c/structfl_1_1_corkscrew_input.html", "d6/d7c/structfl_1_1_corkscrew_input" ],
-      [ "CorkscrewOutput", "d7/d93/structfl_1_1_corkscrew_output.html", "d7/d93/structfl_1_1_corkscrew_output" ],
+      [ "CorkscrewState", "d4/d76/structfl_1_1_corkscrew_state.html", "d4/d76/structfl_1_1_corkscrew_state" ],
       [ "Cylon", "dc/dd6/classfl_1_1_cylon.html", "dc/dd6/classfl_1_1_cylon" ],
       [ "decay", "d4/d15/structfl_1_1decay.html", "d4/d15/structfl_1_1decay" ],
       [ "DefaultLess", "d6/de8/structfl_1_1_default_less.html", "d6/de8/structfl_1_1_default_less" ],
@@ -253,6 +253,7 @@ var annotated_dup =
       [ "swap_impl< T, true >", "df/d7b/structfl_1_1swap__impl_3_01_t_00_01true_01_4.html", "df/d7b/structfl_1_1swap__impl_3_01_t_00_01true_01_4" ],
       [ "ThreadLocalFake", "dd/dfc/classfl_1_1_thread_local_fake.html", "dd/dfc/classfl_1_1_thread_local_fake" ],
       [ "Tile2x2_u8", "d0/d2b/classfl_1_1_tile2x2__u8.html", "d0/d2b/classfl_1_1_tile2x2__u8" ],
+      [ "Tile2x2_u8_wrap", "df/d21/classfl_1_1_tile2x2__u8__wrap.html", "df/d21/classfl_1_1_tile2x2__u8__wrap" ],
       [ "TimeAlpha", "d2/d4a/classfl_1_1_time_alpha.html", "d2/d4a/classfl_1_1_time_alpha" ],
       [ "TimeClampedTransition", "d8/d62/classfl_1_1_time_clamped_transition.html", "d8/d62/classfl_1_1_time_clamped_transition" ],
       [ "TimeFunction", "d8/db5/classfl_1_1_time_function.html", "d8/db5/classfl_1_1_time_function" ],
@@ -463,6 +464,10 @@ var annotated_dup =
     [ "UCS2903", "d7/d84/class_u_c_s2903.html", null ],
     [ "UCS2903Controller", "d6/d05/class_u_c_s2903_controller.html", null ],
     [ "ui_state", "da/db7/structui__state.html", "da/db7/structui__state" ],
+    [ "UIButton", "da/d03/class_u_i_button.html", "da/d03/class_u_i_button" ],
+    [ "UICheckbox", "de/d39/class_u_i_checkbox.html", "de/d39/class_u_i_checkbox" ],
+    [ "UINumberField", "db/d12/class_u_i_number_field.html", "db/d12/class_u_i_number_field" ],
+    [ "UISlider", "df/d68/class_u_i_slider.html", "df/d68/class_u_i_slider" ],
     [ "WaveEffect", "d6/def/struct_wave_effect.html", "d6/def/struct_wave_effect" ],
     [ "WS2801Controller", "d9/d95/class_w_s2801_controller.html", "d9/d95/class_w_s2801_controller" ],
     [ "WS2803Controller", "dc/d28/class_w_s2803_controller.html", null ],
@@ -479,5 +484,6 @@ var annotated_dup =
     [ "WS2815Controller", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2816Controller", "dd/dbc/class_w_s2816_controller.html", "dd/dbc/class_w_s2816_controller" ],
-    [ "WS2852", "df/d10/class_w_s2852.html", null ]
+    [ "WS2852", "df/d10/class_w_s2852.html", null ],
+    [ "XYMap", "d7/de6/class_x_y_map.html", "d7/de6/class_x_y_map" ]
 ];

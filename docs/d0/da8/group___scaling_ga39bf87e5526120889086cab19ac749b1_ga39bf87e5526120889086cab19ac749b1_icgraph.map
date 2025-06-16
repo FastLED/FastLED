@@ -10,21 +10,23 @@
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="596,152,560,156,559,151,595,146"/>
 <area shape="rect" id="Node000008" href="$d7/d82/struct_c_r_g_b_a5a3c3370a7de840ac31c07f6dc9bdb63.html#a5a3c3370a7de840ac31c07f6dc9bdb63" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="395,227,513,252"/>
 <area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="618,164,563,192,485,229,483,224,560,188,615,159"/>
-<area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" title="Return a CRGB object that is a scaled down version of this object." alt="" coords="399,276,509,301"/>
-<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="642,169,611,218,589,244,563,266,537,278,510,286,508,281,535,273,560,261,585,240,607,215,638,166"/>
-<area shape="rect" id="Node000005" href="$d2/dba/structfl_1_1_x_y_draw_composited_a003dd68149045877d6ccd38987df8792.html#a003dd68149045877d6ccd38987df8792" title=" " alt="" coords="132,75,299,115"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="358,111,299,105,299,100,359,106"/>
-<area shape="rect" id="Node000007" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="190,140,241,165"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="333,162,241,157,241,151,333,157"/>
-<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae274d00629fbcf59d98bea80f6f930ca.html#gae274d00629fbcf59d98bea80f6f930ca" title="One&#45;dimensional blur filter." alt="" coords="176,189,255,215"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="381,231,255,211,255,205,382,225"/>
-<area shape="rect" id="Node000010" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="155,239,275,264"/>
-<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="381,246,276,251,275,246,381,240"/>
-<area shape="rect" id="Node000015" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="166,288,265,313"/>
-<area shape="poly" id="edge11_Node000008_Node000015" title=" " alt="" coords="383,257,347,266,259,291,258,285,346,261,381,252"/>
-<area shape="rect" id="Node000016" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="163,337,267,363"/>
-<area shape="poly" id="edge13_Node000008_Node000016" title=" " alt="" coords="383,251,348,266,333,280,325,295,316,311,300,327,269,342,266,337,297,322,312,308,320,292,329,276,345,261,381,246"/>
-<area shape="rect" id="Node000011" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="5,264,84,289"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="142,265,85,274,84,268,141,260"/>
-<area shape="poly" id="edge12_Node000015_Node000011" title=" " alt="" coords="152,294,84,285,84,279,152,289"/>
+<area shape="rect" id="Node000018" href="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" title="Return a CRGB object that is a scaled down version of this object." alt="" coords="399,276,509,301"/>
+<area shape="poly" id="edge15_Node000001_Node000018" title=" " alt="" coords="642,169,611,218,589,244,563,266,537,278,510,286,508,281,535,273,560,261,585,240,607,215,638,166"/>
+<area shape="rect" id="Node000005" href="$d2/dba/structfl_1_1_x_y_draw_composited_a003dd68149045877d6ccd38987df8792.html#a003dd68149045877d6ccd38987df8792" title=" " alt="" coords="132,63,299,103"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="358,106,298,98,299,92,359,101"/>
+<area shape="rect" id="Node000007" href="$dd/d61/_fx_water_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="190,128,241,153"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="333,156,240,146,241,141,333,151"/>
+<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_gae274d00629fbcf59d98bea80f6f930ca.html#gae274d00629fbcf59d98bea80f6f930ca" title="One&#45;dimensional blur filter." alt="" coords="176,177,255,203"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="381,227,254,201,256,195,382,222"/>
+<area shape="rect" id="Node000010" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="155,227,275,252"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="381,242,275,242,275,237,381,237"/>
+<area shape="rect" id="Node000015" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="166,276,265,301"/>
+<area shape="poly" id="edge11_Node000008_Node000015" title=" " alt="" coords="382,257,266,281,265,276,381,252"/>
+<area shape="rect" id="Node000016" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="163,325,267,351"/>
+<area shape="poly" id="edge13_Node000008_Node000016" title=" " alt="" coords="383,252,348,266,333,277,325,289,315,302,300,315,268,329,266,324,297,310,311,299,320,286,330,273,345,261,381,247"/>
+<area shape="rect" id="Node000017" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="190,375,241,400"/>
+<area shape="poly" id="edge14_Node000008_Node000017" title=" " alt="" coords="383,249,365,255,348,265,337,277,331,288,325,313,319,338,312,351,300,364,271,380,242,388,240,382,269,375,297,360,308,348,314,337,320,312,326,286,333,273,345,261,362,251,381,244"/>
+<area shape="rect" id="Node000011" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="5,252,84,277"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="142,253,85,262,84,256,141,248"/>
+<area shape="poly" id="edge12_Node000015_Node000011" title=" " alt="" coords="152,282,84,273,84,267,152,277"/>
 </map>

@@ -6,6 +6,5 @@ var searchData=
   ['usedither_3',['useDither',['../d3/dac/_fx_noise_ring_8ino_ac3257b9dd3c9c4551f6fa895d3b13a20.html#ac3257b9dd3c9c4551f6fa895d3b13a20',1,'FxNoiseRing.ino']]],
   ['usereceiveractivesensing_4',['UseReceiverActiveSensing',['../db/d58/struct_default_settings_a2ea7229b65bce799659fb58bc1006e41.html#a2ea7229b65bce799659fb58bc1006e41',1,'DefaultSettings']]],
   ['userunningstatus_5',['UseRunningStatus',['../db/d58/struct_default_settings_a55abbfe8fcf5e9e927b0ca97a5b2eaa2.html#a55abbfe8fcf5e9e927b0ca97a5b2eaa2',1,'DefaultSettings']]],
-  ['usesenderactivesensing_6',['UseSenderActiveSensing',['../db/d58/struct_default_settings_ad6fc6300a7811a6f53ccdaf8923738b4.html#ad6fc6300a7811a6f53ccdaf8923738b4',1,'DefaultSettings']]],
-  ['usewavefx_7',['useWaveFx',['../da/d05/_bilinear_compression_8ino_a869703b074e09c2b93e17fbdbd3b9cfc.html#a869703b074e09c2b93e17fbdbd3b9cfc',1,'BilinearCompression.ino']]]
+  ['usesenderactivesensing_6',['UseSenderActiveSensing',['../db/d58/struct_default_settings_ad6fc6300a7811a6f53ccdaf8923738b4.html#ad6fc6300a7811a6f53ccdaf8923738b4',1,'DefaultSettings']]]
 ];

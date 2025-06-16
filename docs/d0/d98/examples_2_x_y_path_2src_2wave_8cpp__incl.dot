@@ -78,13 +78,16 @@ digraph "/home/runner/work/FastLED/FastLED/examples/XYPath/src/wave.cpp"
   Node59 [id="Node000059",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node59 -> Node4 [id="edge54_Node000059_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node59 -> Node58 [id="edge55_Node000059_Node000058",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node42 [id="edge56_Node000002_Node000042",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node112 [id="edge57_Node000002_Node000112",color="steelblue1",style="solid",tooltip=" "];
-  Node112 [id="Node000112",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
-  Node112 -> Node113 [id="edge58_Node000112_Node000113",color="steelblue1",style="solid",tooltip=" "];
-  Node113 [id="Node000113",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
-  Node113 -> Node4 [id="edge59_Node000113_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node113 -> Node6 [id="edge60_Node000113_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node113 -> Node34 [id="edge61_Node000113_Node000034",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node59 [id="edge62_Node000001_Node000059",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node34 [id="edge56_Node000059_Node000034",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node27 [id="edge57_Node000059_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node21 [id="edge58_Node000059_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node42 [id="edge59_Node000002_Node000042",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node122 [id="edge60_Node000002_Node000122",color="steelblue1",style="solid",tooltip=" "];
+  Node122 [id="Node000122",label="fl/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
+  Node122 -> Node123 [id="edge61_Node000122_Node000123",color="steelblue1",style="solid",tooltip=" "];
+  Node123 [id="Node000123",label="fl/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
+  Node123 -> Node4 [id="edge62_Node000123_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node123 -> Node6 [id="edge63_Node000123_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node123 -> Node34 [id="edge64_Node000123_Node000034",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node59 [id="edge65_Node000001_Node000059",color="steelblue1",style="solid",tooltip=" "];
 }

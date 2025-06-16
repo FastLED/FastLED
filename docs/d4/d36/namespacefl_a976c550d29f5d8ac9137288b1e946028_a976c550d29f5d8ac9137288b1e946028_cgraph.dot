@@ -8,7 +8,11 @@ digraph "fl::traverseGridSegment"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::traverseGridSegment",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Traverse a grid segment by selecting the cells that are crossed."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::traverseGridSegment16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324",tooltip="Traverse a grid segment using fixed-point 8.8 arithmetic."];
+  Node2 [id="Node000002",label="fl::end",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::traverseGridSegment32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d",tooltip=" "];
+  Node3 [id="Node000003",label="fl::traverseGridSegment16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324",tooltip="Traverse a grid segment using fixed-point 8.8 arithmetic."];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::traverseGridSegment32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d",tooltip=" "];
+  Node4 -> Node2 [id="edge5_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
 }

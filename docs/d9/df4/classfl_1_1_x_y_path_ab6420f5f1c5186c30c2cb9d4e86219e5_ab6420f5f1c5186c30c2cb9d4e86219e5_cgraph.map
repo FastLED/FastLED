@@ -1,12 +1,15 @@
 <map id="fl::XYPath::drawGradient" name="fl::XYPath::drawGradient">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,184,80"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,81,184,107"/>
 <area shape="rect" id="Node000002" href="$d9/df4/classfl_1_1_x_y_path_a165a207887957cdbab6f97715e90c46d.html#a165a207887957cdbab6f97715e90c46d" title=" " alt="" coords="232,5,419,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,52,251,31,253,36,155,57"/>
-<area shape="rect" id="Node000004" href="$d9/df4/classfl_1_1_x_y_path_af6029bf8c93cd26d3389878578ac7221.html#af6029bf8c93cd26d3389878578ac7221" title=" " alt="" coords="251,55,399,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,65,237,65,237,70,184,70"/>
-<area shape="rect" id="Node000005" href="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1" title=" " alt="" coords="477,80,535,105"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="152,77,232,90,358,95,463,92,464,98,358,100,232,95,151,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,79,272,33,274,38,135,84"/>
+<area shape="rect" id="Node000004" href="$d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410" title=" " alt="" coords="476,83,536,108"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,91,419,91,462,92,462,97,419,97,184,96"/>
+<area shape="rect" id="Node000005" href="$d9/df4/classfl_1_1_x_y_path_af6029bf8c93cd26d3389878578ac7221.html#af6029bf8c93cd26d3389878578ac7221" title=" " alt="" coords="251,107,399,132"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="184,101,238,107,237,112,184,106"/>
+<area shape="rect" id="Node000006" href="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1" title=" " alt="" coords="477,132,535,157"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="123,104,173,125,233,142,295,150,358,152,464,146,464,152,358,157,295,155,231,147,171,130,121,109"/>
 <area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355" title=" " alt="" coords="467,5,545,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="419,15,453,15,453,21,419,21"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="400,75,464,84,463,89,399,80"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="399,107,462,98,462,104,400,112"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="400,127,464,136,463,141,399,132"/>
 </map>

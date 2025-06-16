@@ -104,7 +104,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave/Wave.ino"
   Node1 -> Node60 [id="edge73_Node000001_Node000060",color="steelblue1",style="solid",tooltip=" "];
   Node60 [id="Node000060",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node1 -> Node61 [id="edge74_Node000001_Node000061",color="steelblue1",style="solid",tooltip=" "];
-  Node61 [id="Node000061",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node61 [id="Node000061",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
   Node61 -> Node4 [id="edge75_Node000061_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node61 -> Node62 [id="edge76_Node000061_Node000062",color="steelblue1",style="solid",tooltip=" "];
   Node62 [id="Node000062",label="SmartMatrix.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
@@ -196,4 +196,8 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave/Wave.ino"
   Node61 -> Node113 [id="edge140_Node000061_Node000113",color="steelblue1",style="solid",tooltip=" "];
   Node113 [id="Node000113",label="fl/leds.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d78/leds_8h.html",tooltip=" "];
   Node113 -> Node37 [id="edge141_Node000113_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node61 -> Node37 [id="edge142_Node000061_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node61 -> Node46 [id="edge143_Node000061_Node000046",color="steelblue1",style="solid",tooltip=" "];
+  Node61 -> Node26 [id="edge144_Node000061_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node61 -> Node3 [id="edge145_Node000061_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

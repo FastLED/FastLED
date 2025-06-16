@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::WaveSimulation2D_Real",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d94/classfl_1_1_wave_simulation2_d___real.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::WaveSimulation2D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d47/classfl_1_1_wave_simulation2_d.html",tooltip=" "];
 }

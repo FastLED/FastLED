@@ -1,11 +1,9 @@
 <map id="fx/2d/animartrix_detail.hpp" name="fx/2d/animartrix_detail.hpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="270,5,469,31"/>
-<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="292,79,447,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="372,44,372,79,367,79,367,44"/>
-<area shape="rect" id="Node000003" href="$dd/d96/_fx_animartrix_8ino.html" title=" " alt="" coords="5,152,240,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="324,111,199,155,197,149,322,106"/>
-<area shape="rect" id="Node000004" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="265,152,474,207"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="372,118,372,152,367,152,367,118"/>
-<area shape="rect" id="Node000005" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="499,152,699,207"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="414,106,530,149,528,154,412,111"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="125,5,324,31"/>
+<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="147,79,302,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,44,227,79,222,79,222,44"/>
+<area shape="rect" id="Node000003" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="5,152,215,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,115,147,154,143,150,197,110"/>
+<area shape="rect" id="Node000004" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="239,152,439,207"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="253,110,306,150,303,154,250,115"/>
 </map>

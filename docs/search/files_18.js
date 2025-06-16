@@ -12,6 +12,6 @@ var searchData=
   ['xypath_5fimpls_2eh_9',['xypath_impls.h',['../d8/d5f/xypath__impls_8h.html',1,'']]],
   ['xypath_5frenderer_2ecpp_10',['xypath_renderer.cpp',['../d2/d31/xypath__renderer_8cpp.html',1,'']]],
   ['xypath_5frenderer_2eh_11',['xypath_renderer.h',['../d2/d88/xypath__renderer_8h.html',1,'']]],
-  ['xypaths_2ecpp_12',['xypaths.cpp',['../d4/dda/_bilinear_compression_2src_2xypaths_8cpp.html',1,'(Global Namespace)'],['../d8/d55/_x_y_path_2src_2xypaths_8cpp.html',1,'(Global Namespace)']]],
-  ['xypaths_2eh_13',['xypaths.h',['../dd/d43/_bilinear_compression_2src_2xypaths_8h.html',1,'(Global Namespace)'],['../d7/d5e/_x_y_path_2src_2xypaths_8h.html',1,'(Global Namespace)']]]
+  ['xypaths_2ecpp_12',['xypaths.cpp',['../dd/d96/_downscale_2src_2xypaths_8cpp.html',1,'(Global Namespace)'],['../d8/d55/_x_y_path_2src_2xypaths_8cpp.html',1,'(Global Namespace)']]],
+  ['xypaths_2eh_13',['xypaths.h',['../de/d75/_downscale_2src_2xypaths_8h.html',1,'(Global Namespace)'],['../d7/d5e/_x_y_path_2src_2xypaths_8h.html',1,'(Global Namespace)']]]
 ];

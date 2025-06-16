@@ -10,4 +10,6 @@ digraph "fl::Gradient::Gradient"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::Gradient::Gradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a7d0bbc988a07b1a9171b59d987dbec51.html#a7d0bbc988a07b1a9171b59d987dbec51",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
 }

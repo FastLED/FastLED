@@ -23,9 +23,7 @@ var _esp32_s3_i2_s_demo_8ino =
     [ "fill_rainbow", "db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c5977efde754.html#a7a96d6e71a7754105104c5977efde754", null ],
     [ "loop", "db/de9/_esp32_s3_i2_s_demo_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "db/de9/_esp32_s3_i2_s_demo_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "setup_i2s_using_fastled_api", "db/de9/_esp32_s3_i2_s_demo_8ino_aac2669026fdd52035013cac9b23d95ba.html#aac2669026fdd52035013cac9b23d95ba", null ],
-    [ "driver", "db/de9/_esp32_s3_i2_s_demo_8ino_aa939480170a19d50b8c6de6621628a1d.html#aa939480170a19d50b8c6de6621628a1d", null ],
-    [ "gUseFastLEDApi", "db/de9/_esp32_s3_i2_s_demo_8ino_ac87664d786425ad608fe136d06065e61.html#ac87664d786425ad608fe136d06065e61", null ],
+    [ "setup_i2s", "db/de9/_esp32_s3_i2_s_demo_8ino_af37dc39b5a269c588f0e15a7938918a8.html#af37dc39b5a269c588f0e15a7938918a8", null ],
     [ "leds", "db/de9/_esp32_s3_i2_s_demo_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ],
     [ "PINS", "db/de9/_esp32_s3_i2_s_demo_8ino_af768dfde54b0bb743a08b26309efbc47.html#af768dfde54b0bb743a08b26309efbc47", null ]
 ];

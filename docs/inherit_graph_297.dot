@@ -6,7 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="FrameBufferBase",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc5/class_frame_buffer_base.html",tooltip=" "];
-  Node0 -> Node1 [id="edge233_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="FrameBuffer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d23/class_frame_buffer.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::XYRasterU8Sparse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html",tooltip=" "];
 }

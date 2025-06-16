@@ -1,0 +1,14 @@
+<map id="fl/upscale.h" name="fl/upscale.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="308,5,404,31"/>
+<area shape="rect" id="Node000002" href="$d0/de3/crgb_8cpp.html" title="Utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="5,79,83,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,36,83,84,82,79,294,31"/>
+<area shape="rect" id="Node000003" href="$da/d34/bilinear__expansion_8h.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="107,79,277,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="318,39,220,81,218,76,316,34"/>
+<area shape="rect" id="Node000004" href="$d0/d4f/upscale_8cpp.html" title=" " alt="" coords="301,79,411,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="359,44,359,79,353,79,353,44"/>
+<area shape="rect" id="Node000005" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="429,152,571,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="382,37,426,77,493,150,489,154,422,81,378,41"/>
+<area shape="rect" id="Node000006" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="487,79,615,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="401,33,520,76,518,81,399,38"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="536,117,510,153,506,150,532,114"/>
+</map>

@@ -10,12 +10,15 @@ digraph "fl::Gradient::Gradient"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::Gradient::Gradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a7d0bbc988a07b1a9171b59d987dbec51.html#a7d0bbc988a07b1a9171b59d987dbec51",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="Copy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297",tooltip=" "];
-  Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_a1588dd85b5eadaa062cf10ab251f486f.html#a1588dd85b5eadaa062cf10ab251f486f",tooltip=" "];
-  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::GradientInlined\l::variant",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined_ab7c3be82e8735081efe5b861d8a76902.html#ab7c3be82e8735081efe5b861d8a76902",tooltip=" "];
-  Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::Variant::visit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_aacd9b4b842fceee467353199af2b4c62.html#aacd9b4b842fceee467353199af2b4c62",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="Copy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_ae9798cb13b5c6a6a4d37863426e6d297.html#ae9798cb13b5c6a6a4d37863426e6d297",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d43/funky_8cpp_a1588dd85b5eadaa062cf10ab251f486f.html#a1588dd85b5eadaa062cf10ab251f486f",tooltip=" "];
+  Node1 -> Node3 [id="edge6_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::GradientInlined\l::variant",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined_ab7c3be82e8735081efe5b861d8a76902.html#ab7c3be82e8735081efe5b861d8a76902",tooltip=" "];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Variant::visit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant_aacd9b4b842fceee467353199af2b4c62.html#aacd9b4b842fceee467353199af2b4c62",tooltip=" "];
 }

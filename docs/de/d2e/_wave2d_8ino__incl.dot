@@ -229,7 +229,14 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave2d/Wave2d.ino"
   Node70 -> Node54 [id="edge173_Node000070_Node000054",color="steelblue1",style="solid",tooltip=" "];
   Node70 -> Node69 [id="edge174_Node000070_Node000069",color="steelblue1",style="solid",tooltip=" "];
   Node70 -> Node29 [id="edge175_Node000070_Node000029",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node116 [id="edge176_Node000001_Node000116",color="steelblue1",style="solid",tooltip=" "];
-  Node116 [id="Node000116",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
-  Node1 -> Node70 [id="edge177_Node000001_Node000070",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node11 [id="edge176_Node000070_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node37 [id="edge177_Node000070_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node46 [id="edge178_Node000070_Node000046",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node26 [id="edge179_Node000070_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node22 [id="edge180_Node000070_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node44 [id="edge181_Node000070_Node000044",color="steelblue1",style="solid",tooltip=" "];
+  Node70 -> Node2 [id="edge182_Node000070_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node118 [id="edge183_Node000001_Node000118",color="steelblue1",style="solid",tooltip=" "];
+  Node118 [id="Node000118",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node70 [id="edge184_Node000001_Node000070",color="steelblue1",style="solid",tooltip=" "];
 }

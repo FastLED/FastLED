@@ -174,8 +174,8 @@
 <g id="Node000015" class="node">
 <title>Node15</title>
 <g id="a_Node000015"><a xlink:href="../../d2/d48/structfl_1_1rect.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="677,-56 594,-56 594,-37 677,-37 677,-56"/>
-<text text-anchor="middle" x="635.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::rect&lt; int &gt;</text>
+<polygon fill="white" stroke="#666666" points="687.5,-56 583.5,-56 583.5,-37 687.5,-37 687.5,-56"/>
+<text text-anchor="middle" x="635.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::rect&lt; int16_t &gt;</text>
 </a>
 </g>
 </g>
@@ -183,8 +183,8 @@
 <g id="edge9_Node000001_Node000015" class="edge">
 <title>Node15&#45;&gt;Node1</title>
 <g id="a_edge9_Node000001_Node000015"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M687.2,-53.05C716.54,-57.65 753.88,-64.9 786,-75.5 804.54,-81.62 824.54,-91.59 838.21,-98.97"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="687.6,-49.57 677.19,-51.54 686.55,-56.49 687.6,-49.57"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M698.05,-54.82C725.4,-59.43 757.73,-66.17 786,-75.5 804.54,-81.62 824.54,-91.59 838.21,-98.97"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="698.27,-51.31 687.84,-53.15 697.14,-58.22 698.27,-51.31"/>
 </a>
 </g>
 <text text-anchor="middle" x="748.5" y="-78.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mDrawBounds</text>
@@ -193,8 +193,8 @@
 <g id="Node000016" class="node">
 <title>Node16</title>
 <g id="a_Node000016"><a xlink:href="../../d5/d5d/structfl_1_1vec2.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="421.5,-56 334.5,-56 334.5,-37 421.5,-37 421.5,-56"/>
-<text text-anchor="middle" x="378" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vec2&lt; int &gt;</text>
+<polygon fill="white" stroke="#666666" points="432,-56 324,-56 324,-37 432,-37 432,-56"/>
+<text text-anchor="middle" x="378" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::vec2&lt; int16_t &gt;</text>
 </a>
 </g>
 </g>
@@ -202,8 +202,8 @@
 <g id="edge10_Node000015_Node000016" class="edge">
 <title>Node16&#45;&gt;Node15</title>
 <g id="a_edge10_Node000015_Node000016"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M431.97,-46.5C480.03,-46.5 549.87,-46.5 593.71,-46.5"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="431.76,-43 421.76,-46.5 431.76,-50 431.76,-43"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M442.44,-46.5C485.95,-46.5 542.93,-46.5 583.5,-46.5"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="442.25,-43 432.25,-46.5 442.25,-50 442.25,-43"/>
 </a>
 </g>
 <text text-anchor="middle" x="513" y="-60.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mMax</text>
@@ -222,11 +222,11 @@
 <g id="edge11_Node000016_Node000017" class="edge">
 <title>Node17&#45;&gt;Node16</title>
 <g id="a_edge11_Node000016_Node000017"><a xlink:title=" ">
-<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M123.43,-46.5C182.08,-46.5 278.86,-46.5 334.35,-46.5"/>
+<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M123.51,-46.5C178.58,-46.5 267.21,-46.5 323.75,-46.5"/>
 <polygon fill="orange" stroke="orange" points="123.3,-43 113.3,-46.5 123.3,-50 123.3,-43"/>
 </a>
 </g>
-<text text-anchor="middle" x="227" y="-49.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int &gt;</text>
+<text text-anchor="middle" x="227" y="-49.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int16_t &gt;</text>
 </g>
 <!-- Node18 -->
 <g id="Node000018" class="node">
@@ -241,11 +241,11 @@
 <g id="edge12_Node000015_Node000018" class="edge">
 <title>Node18&#45;&gt;Node15</title>
 <g id="a_edge12_Node000015_Node000018"><a xlink:title=" ">
-<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M426.58,-14.26C463.17,-18.17 514.92,-24.23 560,-31.5 570.94,-33.26 582.72,-35.48 593.62,-37.67"/>
+<path fill="none" stroke="orange" stroke-dasharray="5,2" d="M426.58,-14.26C463.17,-18.17 514.92,-24.23 560,-31.5 569.77,-33.07 580.21,-35.01 590.09,-36.97"/>
 <polygon fill="orange" stroke="orange" points="426.52,-10.74 416.21,-13.17 425.79,-17.7 426.52,-10.74"/>
 </a>
 </g>
-<text text-anchor="middle" x="513" y="-34.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int &gt;</text>
+<text text-anchor="middle" x="513" y="-34.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; int16_t &gt;</text>
 </g>
 </g>
 </svg>

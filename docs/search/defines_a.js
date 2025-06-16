@@ -12,6 +12,6 @@ var searchData=
   ['kiss_5ffftr_5ffree_9',['kiss_fftr_free',['../dc/da7/kiss__fftr_8h_a6885422c822dff503165060c22779559.html#a6885422c822dff503165060c22779559',1,'kiss_fftr.h']]],
   ['kiss_5ffftr_5fnext_5ffast_5fsize_5freal_10',['kiss_fftr_next_fast_size_real',['../d0/dc9/kiss__fft_8h_ad5d759d8e80434375e61c6a7de9aee79.html#ad5d759d8e80434375e61c6a7de9aee79',1,'kiss_fft.h']]],
   ['kmatrixheight_11',['kMatrixHeight',['../da/db6/_smart_matrix_8ino_a7488623a35a4d489e1a549dfa72f9ccd.html#a7488623a35a4d489e1a549dfa72f9ccd',1,'SmartMatrix.ino']]],
-  ['kmatrixserpentinelayout_12',['kMatrixSerpentineLayout',['../d7/ddc/_noise_playground_8ino_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d',1,'NoisePlayground.ino']]],
+  ['kmatrixserpentinelayout_12',['kMatrixSerpentineLayout',['../d3/d4e/_noise_playground_8h_a268a33d1b2b5558e10b1ffed3959808d.html#a268a33d1b2b5558e10b1ffed3959808d',1,'NoisePlayground.h']]],
   ['kmatrixwidth_13',['kMatrixWidth',['../da/db6/_smart_matrix_8ino_ae60a9f648123bf540d8898a231f64aa3.html#ae60a9f648123bf540d8898a231f64aa3',1,'SmartMatrix.ino']]]
 ];

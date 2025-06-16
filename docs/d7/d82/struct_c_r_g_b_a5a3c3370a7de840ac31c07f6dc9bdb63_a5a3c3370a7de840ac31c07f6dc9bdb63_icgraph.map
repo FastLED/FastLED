@@ -1,13 +1,15 @@
 <map id="CRGB::nscale8" name="CRGB::nscale8">
-<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="479,80,596,105"/>
+<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="479,104,596,129"/>
 <area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gae274d00629fbcf59d98bea80f6f930ca.html#gae274d00629fbcf59d98bea80f6f930ca" title="One&#45;dimensional blur filter." alt="" coords="331,5,410,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="497,76,430,44,403,33,405,28,432,40,499,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="508,97,471,71,429,44,406,33,408,28,432,40,474,66,511,93"/>
 <area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga85831e1d1b3ea3468f0c4d39baf66378.html#ga85831e1d1b3ea3468f0c4d39baf66378" title="Perform a blur1d() on every column of a rectangular matrix." alt="" coords="311,55,431,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="465,84,430,79,431,74,466,79"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="480,103,414,83,415,78,482,97"/>
 <area shape="rect" id="Node000008" href="$d5/d3d/group___color_blurs_gae784c48b029a7a4da1f0e831792f2aae.html#gae784c48b029a7a4da1f0e831792f2aae" title="Perform a blur1d() on every row of a rectangular matrix." alt="" coords="321,104,420,129"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="465,106,421,112,420,107,465,100"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="465,119,420,119,420,114,465,114"/>
 <area shape="rect" id="Node000009" href="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="319,153,423,179"/>
-<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="497,113,432,143,403,156,401,151,430,138,495,109"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="482,136,415,156,414,151,480,131"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="345,203,396,228"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="510,140,432,192,398,208,395,204,429,188,507,136"/>
 <area shape="rect" id="Node000004" href="$d5/d3d/group___color_blurs_ga868989588bffbf00f97f91e6d98adc8d.html#ga868989588bffbf00f97f91e6d98adc8d" title="Two&#45;dimensional blur filter." alt="" coords="184,80,263,105"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="298,83,263,89,262,83,297,77"/>
 <area shape="rect" id="Node000005" href="$d5/d3d/group___color_blurs_gafb10f52a1f3cdb00cc0da4af14239341.html#gafb10f52a1f3cdb00cc0da4af14239341" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="31,31,110,56"/>

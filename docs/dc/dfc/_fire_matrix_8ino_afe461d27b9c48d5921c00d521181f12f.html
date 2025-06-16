@@ -115,72 +115,9 @@ $(function(){initNavTree('dc/dfc/_fire_matrix_8ino_afe461d27b9c48d5921c00d521181
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html#l00144">144</a> of file <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html">FireMatrix.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  144</span>            {</div>
-<div class="line"><span class="lineno">  145</span>    <span class="comment">// The main program loop that runs continuously</span></div>
-<div class="line"><span class="lineno">  146</span>    </div>
-<div class="line"><span class="lineno">  147</span>    <span class="comment">// Set the overall brightness from the UI slider</span></div>
-<div class="line"><span class="lineno">  148</span>    <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.setBrightness(<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a>);</div>
-<div class="line"><span class="lineno">  149</span>    </div>
-<div class="line"><span class="lineno">  150</span>    <span class="comment">// Get the selected color palette</span></div>
-<div class="line"><span class="lineno">  151</span>    CRGBPalette16 myPal = <a class="code hl_function" href="../../dc/dfc/_fire_matrix_8ino_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220">getPalette</a>();</div>
-<div class="line"><span class="lineno">  152</span>    </div>
-<div class="line"><span class="lineno">  153</span>    <span class="comment">// Get the current time in milliseconds</span></div>
-<div class="line"><span class="lineno">  154</span>    uint32_t now = millis();</div>
-<div class="line"><span class="lineno">  155</span>    </div>
-<div class="line"><span class="lineno">  156</span>    <span class="comment">// Update the animation speed from the UI slider</span></div>
-<div class="line"><span class="lineno">  157</span>    <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a390d1832f7ab3610d798b7835baa0eb3.html#a390d1832f7ab3610d798b7835baa0eb3">timeScale</a>.setSpeed(<a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a2ea4aadd218ac0b5e7b12847fa9eafbf.html#a2ea4aadd218ac0b5e7b12847fa9eafbf">speedY</a>);</div>
-<div class="line"><span class="lineno">  158</span>    </div>
-<div class="line"><span class="lineno">  159</span>    <span class="comment">// Calculate the current y-offset for animation (makes the fire move)</span></div>
-<div class="line"><span class="lineno">  160</span>    uint32_t <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1.html#a081c2d7f9619a32bd806baa1831ce1c1">y_speed</a> = <a class="code hl_variable" href="../../df/d5c/_fire_cylinder_8ino_a390d1832f7ab3610d798b7835baa0eb3.html#a390d1832f7ab3610d798b7835baa0eb3">timeScale</a>.update(now);</div>
-<div class="line"><span class="lineno">  161</span>    </div>
-<div class="line"><span class="lineno">  162</span>    <span class="comment">// Loop through every LED in our matrix</span></div>
-<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../dc/d5d/_audio_8ino_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a>; i++) {</div>
-<div class="line"><span class="lineno">  164</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_define" href="../../dc/d5d/_audio_8ino_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>; j++) {</div>
-<div class="line"><span class="lineno">  165</span>            <span class="comment">// Calculate which color to use from our palette for this LED</span></div>
-<div class="line"><span class="lineno">  166</span>            uint8_t palette_index = <a class="code hl_function" href="../../dc/dfc/_fire_matrix_8ino_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba">getPaletteIndex</a>(now, i, j, <a class="code hl_variable" href="../../d7/ddc/_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1.html#a081c2d7f9619a32bd806baa1831ce1c1">y_speed</a>);</div>
-<div class="line"><span class="lineno">  167</span>            </div>
-<div class="line"><span class="lineno">  168</span>            <span class="comment">// Get the actual RGB color from the palette</span></div>
-<div class="line"><span class="lineno">  169</span>            <span class="comment">// BRIGHTNESS ensures we use the full brightness range</span></div>
-<div class="line"><span class="lineno">  170</span>            <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> c = <a class="code hl_function" href="../../d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090">ColorFromPalette</a>(myPal, palette_index, <a class="code hl_define" href="../../d4/d0c/_blur_8ino_accd116060cc3445af11c45ec44fd69d9.html#accd116060cc3445af11c45ec44fd69d9">BRIGHTNESS</a>);</div>
-<div class="line"><span class="lineno">  171</span>            </div>
-<div class="line"><span class="lineno">  172</span>            <span class="comment">// Convert our 2D coordinates (i,j) to the 1D array index</span></div>
-<div class="line"><span class="lineno">  173</span>            <span class="comment">// We use (HEIGHT-1)-i and (WIDTH-1)-j to flip the coordinates</span></div>
-<div class="line"><span class="lineno">  174</span>            <span class="comment">// This makes the fire appear to rise from the bottom</span></div>
-<div class="line"><span class="lineno">  175</span>            <span class="keywordtype">int</span> index = <a class="code hl_variable" href="../../dc/dfc/_fire_matrix_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>((<a class="code hl_define" href="../../dc/d5d/_audio_8ino_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a> - 1) - i, (<a class="code hl_define" href="../../dc/d5d/_audio_8ino_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a> - 1) - j);</div>
-<div class="line"><span class="lineno">  176</span>            </div>
-<div class="line"><span class="lineno">  177</span>            <span class="comment">// Set the LED color in our array</span></div>
-<div class="line"><span class="lineno">  178</span>            <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[index] = c;</div>
-<div class="line"><span class="lineno">  179</span>        }</div>
-<div class="line"><span class="lineno">  180</span>    }</div>
-<div class="line"><span class="lineno">  181</span>    </div>
-<div class="line"><span class="lineno">  182</span>    <span class="comment">// Send the color data to the actual LEDs</span></div>
-<div class="line"><span class="lineno">  183</span>    <a class="code hl_variable" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.show();</div>
-<div class="line"><span class="lineno">  184</span>}</div>
-<div class="ttc" id="a_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00011">Apa102.ino:11</a></div></div>
-<div class="ttc" id="a_audio_8ino_a241aeeb764887ae5e3de58b98f04b16d_html_a241aeeb764887ae5e3de58b98f04b16d"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a></div><div class="ttdeci">#define WIDTH</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00033">Audio.ino:33</a></div></div>
-<div class="ttc" id="a_audio_8ino_aed89bd71aee8be823e8a20ec4e093c1e_html_aed89bd71aee8be823e8a20ec4e093c1e"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a></div><div class="ttdeci">#define HEIGHT</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00032">Audio.ino:32</a></div></div>
-<div class="ttc" id="a_blur_8ino_accd116060cc3445af11c45ec44fd69d9_html_accd116060cc3445af11c45ec44fd69d9"><div class="ttname"><a href="../../d4/d0c/_blur_8ino_accd116060cc3445af11c45ec44fd69d9.html#accd116060cc3445af11c45ec44fd69d9">BRIGHTNESS</a></div><div class="ttdeci">#define BRIGHTNESS</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0c/_blur_8ino_source.html#l00008">Blur.ino:8</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div></div>
-<div class="ttc" id="a_fire_cylinder_8ino_a2ea4aadd218ac0b5e7b12847fa9eafbf_html_a2ea4aadd218ac0b5e7b12847fa9eafbf"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_a2ea4aadd218ac0b5e7b12847fa9eafbf.html#a2ea4aadd218ac0b5e7b12847fa9eafbf">speedY</a></div><div class="ttdeci">UISlider speedY(&quot;SpeedY&quot;, 1.3, 1, 6,.1)</div></div>
-<div class="ttc" id="a_fire_cylinder_8ino_a390d1832f7ab3610d798b7835baa0eb3_html_a390d1832f7ab3610d798b7835baa0eb3"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_a390d1832f7ab3610d798b7835baa0eb3.html#a390d1832f7ab3610d798b7835baa0eb3">timeScale</a></div><div class="ttdeci">TimeWarp timeScale(0, 1.0f)</div></div>
-<div class="ttc" id="a_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd_html_ac01a35be16cdce00db3ba856a6ef71cd"><div class="ttname"><a href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a></div><div class="ttdeci">UISlider brightness(&quot;Brightness&quot;, 255, 0, 255, 1)</div></div>
-<div class="ttc" id="a_fire_matrix_8ino_a0c74bc312803a49e792bffc775a56220_html_a0c74bc312803a49e792bffc775a56220"><div class="ttname"><a href="../../dc/dfc/_fire_matrix_8ino_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220">getPalette</a></div><div class="ttdeci">CRGBPalette16 getPalette()</div><div class="ttdef"><b>Definition</b> <a href="../../dc/dfc/_fire_matrix_8ino_source.html#l00130">FireMatrix.ino:130</a></div></div>
-<div class="ttc" id="a_fire_matrix_8ino_a593fb12ac1f018e17ad0f8ee5eeaa6ba_html_a593fb12ac1f018e17ad0f8ee5eeaa6ba"><div class="ttname"><a href="../../dc/dfc/_fire_matrix_8ino_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba">getPaletteIndex</a></div><div class="ttdeci">uint8_t getPaletteIndex(uint32_t millis32, int i, int j, uint32_t y_speed)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/dfc/_fire_matrix_8ino_source.html#l00101">FireMatrix.ino:101</a></div></div>
-<div class="ttc" id="a_fire_matrix_8ino_a5a57e9bb79d3e5010378f232c677e27f_html_a5a57e9bb79d3e5010378f232c677e27f"><div class="ttname"><a href="../../dc/dfc/_fire_matrix_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a></div><div class="ttdeci">XYMap xyMap(HEIGHT, WIDTH, SERPENTINE)</div></div>
-<div class="ttc" id="a_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1_html_a081c2d7f9619a32bd806baa1831ce1c1"><div class="ttname"><a href="../../d7/ddc/_noise_playground_8ino_a081c2d7f9619a32bd806baa1831ce1c1.html#a081c2d7f9619a32bd806baa1831ce1c1">y_speed</a></div><div class="ttdeci">int y_speed</div><div class="ttdef"><b>Definition</b> <a href="../../d7/ddc/_noise_playground_8ino_source.html#l00051">NoisePlayground.ino:51</a></div></div>
-<div class="ttc" id="anamespacefl_a74e1895d1234ab29fef4458532e91090_html_a74e1895d1234ab29fef4458532e91090"><div class="ttname"><a href="../../d4/d36/namespacefl_a74e1895d1234ab29fef4458532e91090.html#a74e1895d1234ab29fef4458532e91090">fl::ColorFromPalette</a></div><div class="ttdeci">CRGB ColorFromPalette(const CRGBPalette16 &amp;pal, uint8_t index, uint8_t brightness, TBlendType blendType)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00299">colorutils.cpp:299</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00055">crgb.h:55</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html#l00006">6</a> of file <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html">FireMatrix.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">    6</span>{}</div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00008">BRIGHTNESS</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_ac01a35be16cdce00db3ba856a6ef71cd.html#ac01a35be16cdce00db3ba856a6ef71cd">brightness</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00299">fl::ColorFromPalette()</a>, <a class="el" href="../../db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>, <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html#l00130">getPalette()</a>, <a class="el" href="../../dc/dfc/_fire_matrix_8ino_source.html#l00101">getPaletteIndex()</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00032">HEIGHT</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a2ea4aadd218ac0b5e7b12847fa9eafbf.html#a2ea4aadd218ac0b5e7b12847fa9eafbf">speedY</a>, <a class="el" href="../../df/d5c/_fire_cylinder_8ino_a390d1832f7ab3610d798b7835baa0eb3.html#a390d1832f7ab3610d798b7835baa0eb3">timeScale</a>, <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00033">WIDTH</a>, <a class="el" href="../../dc/dfc/_fire_matrix_8ino_a5a57e9bb79d3e5010378f232c677e27f.html#a5a57e9bb79d3e5010378f232c677e27f">xyMap</a>, and <a class="el" href="../../d7/ddc/_noise_playground_8ino_source.html#l00051">y_speed</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/dfc/_fire_matrix_8ino_afe461d27b9c48d5921c00d521181f12f_afe461d27b9c48d5921c00d521181f12f_cgraph.svg" width="100%" height="571"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-
 </div>
 </div>
 </div><!-- contents -->
@@ -190,7 +127,7 @@ $(function(){initNavTree('dc/dfc/_fire_matrix_8ino_afe461d27b9c48d5921c00d521181
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_874aa52466291c494f7db7e1a8c97a3e.html">FireMatrix</a></li><li class="navelem"><a class="el" href="../../dc/dfc/_fire_matrix_8ino.html">FireMatrix.ino</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

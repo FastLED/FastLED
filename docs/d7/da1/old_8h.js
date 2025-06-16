@@ -13,6 +13,7 @@ var old_8h =
     [ "PIN_GRND", "d7/da1/old_8h_a8e277fe7e489fc11705fd50644d99b78.html#a8e277fe7e489fc11705fd50644d99b78", null ],
     [ "VOLTS", "d7/da1/old_8h_a20c4825527b2b6d9399edff12194231e.html#a20c4825527b2b6d9399edff12194231e", null ],
     [ "addController", "d7/da1/old_8h_a7cf0493efb9851a93bc678b3c2794f85.html#a7cf0493efb9851a93bc678b3c2794f85", null ],
+    [ "brightness", "d7/da1/old_8h_acabc6b536d5fc5495f9657b1d1fa1332.html#acabc6b536d5fc5495f9657b1d1fa1332", null ],
     [ "button", "d7/da1/old_8h_a1aba00ccb05d318eedbdb922d076f3e6.html#a1aba00ccb05d318eedbdb922d076f3e6", null ],
     [ "festivalStickDescription", "d7/da1/old_8h_a5ed585da2a39495b128988e9c4def5de.html#a5ed585da2a39495b128988e9c4def5de", null ],
     [ "festivalStickTitle", "d7/da1/old_8h_acf9de82ee6744454e8f04d7d5b57e22a.html#acf9de82ee6744454e8f04d7d5b57e22a", null ],

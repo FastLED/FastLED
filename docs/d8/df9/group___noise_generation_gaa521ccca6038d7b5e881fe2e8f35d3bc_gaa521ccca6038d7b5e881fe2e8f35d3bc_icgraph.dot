@@ -12,7 +12,7 @@ digraph "inoise8"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fill_2dnoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc",tooltip="Fill an LED matrix with random colors, using 16-bit noise."];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/ddc/_noise_playground_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d4e/_noise_playground_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
   Node2 -> Node2 [id="edge5_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];

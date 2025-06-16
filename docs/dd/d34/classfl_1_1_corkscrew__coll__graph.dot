@@ -9,8 +9,8 @@ digraph "fl::Corkscrew"
   Node1 [id="Node000001",label="fl::Corkscrew",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mInput",fontcolor="grey" ];
   Node2 [id="Node000002",label="fl::CorkscrewInput",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d7c/structfl_1_1_corkscrew_input.html",tooltip="Generates a mapping from corkscrew to cylindrical coordinates."];
-  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mOutput",fontcolor="grey" ];
-  Node3 [id="Node000003",label="fl::CorkscrewOutput",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d93/structfl_1_1_corkscrew_output.html",tooltip=" "];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mState",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::CorkscrewState",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d76/structfl_1_1_corkscrew_state.html",tooltip=" "];
   Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mapping",fontcolor="grey" ];
   Node4 [id="Node000004",label="fl::HeapVector\< T,\l Allocator \>\< fl::vec2\l\< float \>, fl::allocator\l_psram\< fl::vec2\< float \> \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector.html",tooltip=" "];
   Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::vec2\< float \>\l, fl::allocator_psram\l\< fl::vec2\< float \> \> \>",fontcolor="grey" ];

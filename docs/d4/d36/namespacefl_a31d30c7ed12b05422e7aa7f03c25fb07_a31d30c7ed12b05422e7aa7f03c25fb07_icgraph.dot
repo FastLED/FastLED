@@ -8,12 +8,18 @@ digraph "fl::bilinearInterpolatePowerOf2"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::bilinearInterpolatePowerOf2",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::bilinearExpandPowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af0b8ea13c33c033aa6bf8ede489a5c2a.html#af0b8ea13c33c033aa6bf8ede489a5c2a",tooltip="Performs bilinear interpolation for upscaling an image."];
+  Node2 [id="Node000002",label="fl::upscalePowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7a1dd8c713699196f2b8b2b55be5a005.html#a7a1dd8c713699196f2b8b2b55be5a005",tooltip="Performs bilinear interpolation for upscaling an image."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::bilinearExpand",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::ScaleUp::expand",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066",tooltip=" "];
-  Node3 -> Node6 [id="edge4_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1",tooltip=" "];
-  Node2 -> Node4 [id="edge5_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::bilinearExpandPowerOf2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ac37540db2494843b64b21c58ba98aa95.html#ac37540db2494843b64b21c58ba98aa95",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ScaleUp::expand",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ScaleUp::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a111ba754b48942237db55be314bf5a23.html#a111ba754b48942237db55be314bf5a23",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::bilinearExpand",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2c1b40f2ba748d4d15102c3e5ebd37f4.html#a2c1b40f2ba748d4d15102c3e5ebd37f4",tooltip=" "];
+  Node6 -> Node4 [id="edge7_Node000006_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="CRGB::upscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1",tooltip=" "];
 }

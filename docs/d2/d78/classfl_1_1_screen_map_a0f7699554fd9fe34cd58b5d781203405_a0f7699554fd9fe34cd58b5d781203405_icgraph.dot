@@ -11,4 +11,6 @@ digraph "fl::ScreenMap::setDiameter"
   Node2 [id="Node000002",label="CLEDController::setScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a.html#a34a490a6be2f618ffe6ed7d60be5590a",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="CLEDController::setScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
 }

@@ -111,15 +111,15 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="foldopen" id="foldopen00008" data-start="{" data-end="}">
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8">    8</a></span>uint8_t <a class="code hl_function" href="../../d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8">time_alpha8</a>(uint32_t now, uint32_t start, uint32_t end) {</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8">    8</a></span>uint8_t <a class="code hl_function" href="../../d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8">time_alpha8</a>(uint32_t now, uint32_t start, uint32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>) {</div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <span class="keywordflow">if</span> (now &lt; start) {</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    }</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordflow">if</span> (now &gt; end) {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordflow">if</span> (now &gt; <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>) {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <span class="keywordflow">return</span> 255;</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    }</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    uint32_t elapsed = now - start;</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    uint32_t total = end - start;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    uint32_t total = <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a> - start;</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    uint32_t out = (elapsed * 255) / total;</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="keywordflow">if</span> (out &gt; 255) {</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>        out = 255;</div>
@@ -129,15 +129,15 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
 <div class="foldopen" id="foldopen00024" data-start="{" data-end="}">
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626">   24</a></span>uint16_t <a class="code hl_function" href="../../d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626">time_alpha16</a>(uint32_t now, uint32_t start, uint32_t end) {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626">   24</a></span>uint16_t <a class="code hl_function" href="../../d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626">time_alpha16</a>(uint32_t now, uint32_t start, uint32_t <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>) {</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keywordflow">if</span> (now &lt; start) {</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    }</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">if</span> (now &gt; end) {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">if</span> (now &gt; <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>) {</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordflow">return</span> 65535;</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    }</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    uint32_t elapsed = now - start;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    uint32_t total = end - start;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    uint32_t total = <a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a> - start;</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    uint32_t out = (elapsed * 65535) / total;</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordflow">if</span> (out &gt; 65535) {</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        out = 65535;</div>
@@ -168,7 +168,7 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_variable" href="../../d0/d9d/classfl_1_1_time_ramp_af1f1680fdb7df58642578827870f5cbd.html#af1f1680fdb7df58642578827870f5cbd">mRisingTime</a> = risingTime;</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <a class="code hl_variable" href="../../d0/d9d/classfl_1_1_time_ramp_a3ea2e7c7a101b9db69e772edebd72c82.html#a3ea2e7c7a101b9db69e772edebd72c82">mLatchMs</a> = latchMs;</div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <a class="code hl_variable" href="../../d0/d9d/classfl_1_1_time_ramp_ad9e8339427b131e380fb58b84ef11932.html#ad9e8339427b131e380fb58b84ef11932">mFallingTime</a> = fallingTime;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d.html#aea211d4658ff3e6eac03fa0bedc90f5d">trigger</a>(now);</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <a class="code hl_function" href="../../d0/d9d/classfl_1_1_time_ramp_a431f445197b6ac690c83e27ed3005843.html#a431f445197b6ac690c83e27ed3005843">trigger</a>(now);</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>}</div>
 </div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
@@ -225,7 +225,6 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 </div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="a_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d_html_aea211d4658ff3e6eac03fa0bedc90f5d"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_aea211d4658ff3e6eac03fa0bedc90f5d.html#aea211d4658ff3e6eac03fa0bedc90f5d">trigger</a></div><div class="ttdeci">UIButton trigger(&quot;Trigger&quot;)</div></div>
 <div class="ttc" id="aclassfl_1_1_time_ramp_a0cd9dd8dd2e99c04eb4257fbef421227_html_a0cd9dd8dd2e99c04eb4257fbef421227"><div class="ttname"><a href="../../d0/d9d/classfl_1_1_time_ramp_a0cd9dd8dd2e99c04eb4257fbef421227.html#a0cd9dd8dd2e99c04eb4257fbef421227">fl::TimeRamp::mLastValue</a></div><div class="ttdeci">uint8_t mLastValue</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d87/time__alpha_8h_source.html#l00085">time_alpha.h:85</a></div></div>
 <div class="ttc" id="aclassfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0_html_a17739bd3c0b0ea5b1aaac7670f4edfb0"><div class="ttname"><a href="../../d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0">fl::TimeRamp::update8</a></div><div class="ttdeci">uint8_t update8(uint32_t now) override</div><div class="ttdoc">Compute current 0–255 output based on how much time has elapsed since trigger().</div><div class="ttdef"><b>Definition</b> <a href="#l00083">time_alpha.cpp:83</a></div></div>
 <div class="ttc" id="aclassfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30_html_a2afdf19685e9f588d22fb45aef62ae30"><div class="ttname"><a href="../../d0/d9d/classfl_1_1_time_ramp_a2afdf19685e9f588d22fb45aef62ae30.html#a2afdf19685e9f588d22fb45aef62ae30">fl::TimeRamp::isActive</a></div><div class="ttdeci">bool isActive(uint32_t now) const override</div><div class="ttdef"><b>Definition</b> <a href="#l00060">time_alpha.cpp:60</a></div></div>
@@ -239,6 +238,7 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 <div class="ttc" id="aclassfl_1_1_time_ramp_ad9e8339427b131e380fb58b84ef11932_html_ad9e8339427b131e380fb58b84ef11932"><div class="ttname"><a href="../../d0/d9d/classfl_1_1_time_ramp_ad9e8339427b131e380fb58b84ef11932.html#ad9e8339427b131e380fb58b84ef11932">fl::TimeRamp::mFallingTime</a></div><div class="ttdeci">uint32_t mFallingTime</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d87/time__alpha_8h_source.html#l00078">time_alpha.h:78</a></div></div>
 <div class="ttc" id="aclassfl_1_1_time_ramp_af1f1680fdb7df58642578827870f5cbd_html_af1f1680fdb7df58642578827870f5cbd"><div class="ttname"><a href="../../d0/d9d/classfl_1_1_time_ramp_af1f1680fdb7df58642578827870f5cbd.html#af1f1680fdb7df58642578827870f5cbd">fl::TimeRamp::mRisingTime</a></div><div class="ttdeci">uint32_t mRisingTime</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d87/time__alpha_8h_source.html#l00077">time_alpha.h:77</a></div></div>
 <div class="ttc" id="amath__macros_8h_html"><div class="ttname"><a href="../../d8/db8/math__macros_8h.html">math_macros.h</a></div></div>
+<div class="ttc" id="anamespacefl_a56e7d4811c99d9aa696932bcb89a50b1_html_a56e7d4811c99d9aa696932bcb89a50b1"><div class="ttname"><a href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00015">range_access.h:15</a></div></div>
 <div class="ttc" id="anamespacefl_a76248cce8d7b5923cdd01a26e6fccce8_html_a76248cce8d7b5923cdd01a26e6fccce8"><div class="ttname"><a href="../../d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8">fl::time_alpha8</a></div><div class="ttdeci">uint8_t time_alpha8(uint32_t now, uint32_t start, uint32_t end)</div><div class="ttdef"><b>Definition</b> <a href="#l00008">time_alpha.cpp:8</a></div></div>
 <div class="ttc" id="anamespacefl_acfaa9ea12b5d90b75331982e844c2626_html_acfaa9ea12b5d90b75331982e844c2626"><div class="ttname"><a href="../../d4/d36/namespacefl_acfaa9ea12b5d90b75331982e844c2626.html#acfaa9ea12b5d90b75331982e844c2626">fl::time_alpha16</a></div><div class="ttdeci">uint16_t time_alpha16(uint32_t now, uint32_t start, uint32_t end)</div><div class="ttdef"><b>Definition</b> <a href="#l00024">time_alpha.cpp:24</a></div></div>
 <div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Implements a simple red square effect for 2D LED grids.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00016">crgb.h:16</a></div></div>
@@ -251,7 +251,7 @@ $(function(){initNavTree('d6/d07/time__alpha_8cpp_source.html','../../'); initRe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d07/time__alpha_8cpp.html">time_alpha.cpp</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

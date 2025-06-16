@@ -17,12 +17,18 @@ digraph "rgbw.h"
   Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="cpixel_ledcontroller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d57/cpixel__ledcontroller_8h.html",tooltip="defines the templated version of the CLEDController class"];
   Node3 -> Node6 [id="edge6_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node140 [id="edge7_Node000001_Node000140",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node140 [id="Node000140",label="pixel_iterator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d6c/pixel__iterator_8h.html",tooltip="Non-templated low level pixel data writing class."];
-  Node140 -> Node126 [id="edge8_Node000140_Node000126",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node126 [id="Node000126",label="chipsets.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d66/chipsets_8h.html",tooltip="Contains the bulk of the definitions for the various LED chipsets supported."];
-  Node140 -> Node4 [id="edge9_Node000140_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node140 -> Node3 [id="edge10_Node000140_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node137 [id="edge11_Node000001_Node000137",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node137 [id="Node000137",label="rgbw.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp.html",tooltip="Functions for red, green, blue, white (RGBW) output."];
+  Node3 -> Node142 [id="edge7_Node000003_Node000142",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node142 [id="Node000142",label="fx/2d/animartrix.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc3/animartrix_8hpp.html",tooltip=" "];
+  Node142 -> Node46 [id="edge8_Node000142_Node000046",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node46 [id="Node000046",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix."];
+  Node142 -> Node90 [id="edge9_Node000142_Node000090",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node90 [id="Node000090",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/wasm_8ino.html",tooltip="Demonstrates an advanced ino file with multiple effects and UI elements."];
+  Node1 -> Node143 [id="edge10_Node000001_Node000143",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node143 [id="Node000143",label="pixel_iterator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d6c/pixel__iterator_8h.html",tooltip="Non-templated low level pixel data writing class."];
+  Node143 -> Node128 [id="edge11_Node000143_Node000128",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node128 [id="Node000128",label="chipsets.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d66/chipsets_8h.html",tooltip="Contains the bulk of the definitions for the various LED chipsets supported."];
+  Node143 -> Node4 [id="edge12_Node000143_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node143 -> Node3 [id="edge13_Node000143_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node139 [id="edge14_Node000001_Node000139",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node139 [id="Node000139",label="rgbw.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d8d/rgbw_8cpp.html",tooltip="Functions for red, green, blue, white (RGBW) output."];
 }

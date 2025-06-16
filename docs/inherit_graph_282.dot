@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Variant\< Types\l \>::type_to_tag_impl\l\< T, U, Rest... \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/db5/structfl_1_1_variant_1_1type__to__tag__impl_3_01_t_00_01_u_00_01_rest_8_8_8_01_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::Variant\< Types\l \>::type_to_tag_impl\l\< T, Ts \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html#d7/d55/structfl_1_1_variant_1_1type__to__tag__impl",tooltip=" "];
 }

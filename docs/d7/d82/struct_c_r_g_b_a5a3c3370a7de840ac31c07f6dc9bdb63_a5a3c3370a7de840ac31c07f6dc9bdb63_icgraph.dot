@@ -24,4 +24,6 @@ digraph "CRGB::nscale8"
   Node8 -> Node4 [id="edge8_Node000008_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node9 [id="edge9_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node9 [id="Node000009",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
 }

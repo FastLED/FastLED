@@ -120,9 +120,9 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga48f4d856c46824dd30ff
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00102">102</a> of file <a class="el" href="../../d0/d66/simplex_8cpp_source.html">simplex.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  102</span>                              {</div>
-<div class="line"><span class="lineno">  103</span>    uint32_t i0 = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &gt;&gt; 12;</div>
+<div class="line"><span class="lineno">  103</span>    uint32_t i0 = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &gt;&gt; 12;</div>
 <div class="line"><span class="lineno">  104</span>    uint32_t i1 = i0 + 1;</div>
-<div class="line"><span class="lineno">  105</span>    int32_t x0 = <a class="code hl_variable" href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &amp; 0xfff;   <span class="comment">// .12</span></div>
+<div class="line"><span class="lineno">  105</span>    int32_t x0 = <a class="code hl_variable" href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a> &amp; 0xfff;   <span class="comment">// .12</span></div>
 <div class="line"><span class="lineno">  106</span>    int32_t x1 = x0 - 0x1000; <span class="comment">// .12</span></div>
 <div class="line"><span class="lineno">  107</span> </div>
 <div class="line"><span class="lineno">  108</span>    int32_t t0 = 0x8000 - ((x0*x0)&gt;&gt;9);             <span class="comment">// .15</span></div>
@@ -140,11 +140,11 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga48f4d856c46824dd30ff
 <div class="line"><span class="lineno">  120</span>    n = (n * 26694) &gt;&gt; 16; <span class="comment">// .15: fix scale to fit in [-1,1]</span></div>
 <div class="line"><span class="lineno">  121</span>    <span class="keywordflow">return</span> uint16_t(n) + 0x8000;</div>
 <div class="line"><span class="lineno">  122</span>}</div>
-<div class="ttc" id="a_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../dc/d5d/_audio_8ino_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d5d/_audio_8ino_source.html#l00071">Audio.ino:71</a></div></div>
+<div class="ttc" id="a_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674_html_a58b753d86c1d8504daa0c369f659f674"><div class="ttname"><a href="../../d8/d2c/_fire2023_8ino_a58b753d86c1d8504daa0c369f659f674.html#a58b753d86c1d8504daa0c369f659f674">x</a></div><div class="ttdeci">uint32_t x[NUM_LAYERS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d2c/_fire2023_8ino_source.html#l00082">Fire2023.ino:82</a></div></div>
 <div class="ttc" id="asimplex_8cpp_a1a82c4835f55136d206fd9b693eaed81_html_a1a82c4835f55136d206fd9b693eaed81"><div class="ttname"><a href="../../d0/d66/simplex_8cpp_a1a82c4835f55136d206fd9b693eaed81.html#a1a82c4835f55136d206fd9b693eaed81">P</a></div><div class="ttdeci">#define P(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d66/simplex_8cpp_source.html#l00033">simplex.cpp:33</a></div></div>
 <div class="ttc" id="asimplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97_html_a6eeb34a4a071402b8046417a9aa96e97"><div class="ttname"><a href="../../d0/d66/simplex_8cpp_a6eeb34a4a071402b8046417a9aa96e97.html#a6eeb34a4a071402b8046417a9aa96e97">grad</a></div><div class="ttdeci">static int32_t grad(uint8_t hash, int32_t x)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d66/simplex_8cpp_source.html#l00070">simplex.cpp:70</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00033">P</a>, and <a class="el" href="../../dc/d5d/_audio_8ino_source.html#l00071">x</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00070">grad()</a>, <a class="el" href="../../d0/d66/simplex_8cpp_source.html#l00033">P</a>, and <a class="el" href="../../d8/d2c/_fire2023_8ino_source.html#l00082">x</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -162,7 +162,7 @@ $(function(){initNavTree('d8/df9/group___noise_generation_ga48f4d856c46824dd30ff
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/group___noise_generation.html">Noise Generation Functions</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:49 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

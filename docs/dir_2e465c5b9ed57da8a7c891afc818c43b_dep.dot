@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FestivalStick"
   dir_2e465c5b9ed57da8a7c891afc818c43b [label="FestivalStick", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_2e465c5b9ed57da8a7c891afc818c43b.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_2e465c5b9ed57da8a7c891afc818c43b->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="9", labeldistance=1.5 headhref="dir_000026_000033.html" href="dir_000026_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_2e465c5b9ed57da8a7c891afc818c43b->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="10", labeldistance=1.5 headhref="dir_000028_000035.html" href="dir_000028_000035.html" color="steelblue1" fontcolor="steelblue1"];
 }

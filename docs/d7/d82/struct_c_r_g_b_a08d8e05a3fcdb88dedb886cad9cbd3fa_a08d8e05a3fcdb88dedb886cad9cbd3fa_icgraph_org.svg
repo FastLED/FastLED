@@ -251,487 +251,487 @@
 </a>
 </g>
 </g>
-<!-- Node33 -->
-<g id="Node000033" class="node">
-<title>Node33</title>
-<g id="a_Node000033"><a xlink:href="../../d7/d82/struct_c_r_g_b_affe221c4c140e08cdc359d9651958bb2.html#affe221c4c140e08cdc359d9651958bb2" target="_top" xlink:title=" ">
+<!-- Node34 -->
+<g id="Node000034" class="node">
+<title>Node34</title>
+<g id="a_Node000034"><a xlink:href="../../d7/d82/struct_c_r_g_b_affe221c4c140e08cdc359d9651958bb2.html#affe221c4c140e08cdc359d9651958bb2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="510,-983 369,-983 369,-964 510,-964 510,-983"/>
 <text text-anchor="middle" x="439.5" y="-971" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::nscale8_constexpr</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node33 -->
-<g id="edge25_Node000001_Node000033" class="edge">
-<title>Node1&#45;&gt;Node33</title>
-<g id="a_edge25_Node000001_Node000033"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node34 -->
+<g id="edge25_Node000001_Node000034" class="edge">
+<title>Node1&#45;&gt;Node34</title>
+<g id="a_edge25_Node000001_Node000034"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M587.51,-752.42C585.3,-796.03 573.71,-900.39 514,-955.5 510.33,-958.89 506.13,-961.66 501.64,-963.94"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="591.01,-752.4 587.9,-742.27 584.02,-752.13 591.01,-752.4"/>
 </a>
 </g>
 </g>
-<!-- Node34 -->
-<g id="Node000034" class="node">
-<title>Node34</title>
-<g id="a_Node000034"><a xlink:href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" target="_top" xlink:title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">
+<!-- Node35 -->
+<g id="Node000035" class="node">
+<title>Node35</title>
+<g id="a_Node000035"><a xlink:href="../../d7/d82/struct_c_r_g_b_a0441d6094ab8f98d800ec789c36b4461.html#a0441d6094ab8f98d800ec789c36b4461" target="_top" xlink:title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">
 <polygon fill="#fff0f0" stroke="red" points="499.5,-946 379.5,-946 379.5,-927 499.5,-927 499.5,-946"/>
 <text text-anchor="middle" x="439.5" y="-934" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::nscale8_video</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node34 -->
-<g id="edge26_Node000001_Node000034" class="edge">
-<title>Node1&#45;&gt;Node34</title>
-<g id="a_edge26_Node000001_Node000034"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node35 -->
+<g id="edge26_Node000001_Node000035" class="edge">
+<title>Node1&#45;&gt;Node35</title>
+<g id="a_edge26_Node000001_Node000035"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M585.96,-752.73C580.97,-791.08 564.6,-874.46 514,-918.5 509.74,-922.21 504.84,-925.18 499.63,-927.56"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="589.48,-752.71 587.16,-742.37 582.53,-751.89 589.48,-752.71"/>
-</a>
-</g>
-</g>
-<!-- Node40 -->
-<g id="Node000040" class="node">
-<title>Node40</title>
-<g id="a_Node000040"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97" target="_top" xlink:title="%= is a synonym for nscale8_video().">
-<polygon fill="white" stroke="#666666" points="494.5,-909 384.5,-909 384.5,-890 494.5,-890 494.5,-909"/>
-<text text-anchor="middle" x="439.5" y="-897" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator%=</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node40 -->
-<g id="edge27_Node000001_Node000040" class="edge">
-<title>Node1&#45;&gt;Node40</title>
-<g id="a_edge27_Node000001_Node000040"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M583.84,-752.27C576.01,-784.44 555.95,-847.92 514,-881.5 508.36,-886.02 501.75,-889.42 494.85,-891.99"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="587.31,-752.82 586.12,-742.29 580.48,-751.26 587.31,-752.82"/>
 </a>
 </g>
 </g>
 <!-- Node41 -->
 <g id="Node000041" class="node">
 <title>Node41</title>
-<g id="a_Node000041"><a xlink:href="../../d7/d82/struct_c_r_g_b_a93123ad44d92fc14de38799354c910de.html#a93123ad44d92fc14de38799354c910de" target="_top" xlink:title="&quot;and&quot; operator brings each channel down to the lower of the two values">
-<polygon fill="white" stroke="#666666" points="493,-872 386,-872 386,-853 493,-853 493,-872"/>
-<text text-anchor="middle" x="439.5" y="-860" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&amp;=</text>
+<g id="a_Node000041"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac7a79509725b4d54f710e757a15f2a97.html#ac7a79509725b4d54f710e757a15f2a97" target="_top" xlink:title="%= is a synonym for nscale8_video().">
+<polygon fill="white" stroke="#666666" points="494.5,-909 384.5,-909 384.5,-890 494.5,-890 494.5,-909"/>
+<text text-anchor="middle" x="439.5" y="-897" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator%=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node41 -->
-<g id="edge28_Node000001_Node000041" class="edge">
+<g id="edge27_Node000001_Node000041" class="edge">
 <title>Node1&#45;&gt;Node41</title>
-<g id="a_edge28_Node000001_Node000041"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M580.64,-751.61C569.9,-776.86 547.51,-820.9 514,-844.5 507.77,-848.89 500.59,-852.21 493.21,-854.73"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584,-752.63 584.52,-742.05 577.52,-750 584,-752.63"/>
+<g id="a_edge27_Node000001_Node000041"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M583.84,-752.27C576.01,-784.44 555.95,-847.92 514,-881.5 508.36,-886.02 501.75,-889.42 494.85,-891.99"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="587.31,-752.82 586.12,-742.29 580.48,-751.26 587.31,-752.82"/>
 </a>
 </g>
 </g>
 <!-- Node42 -->
 <g id="Node000042" class="node">
 <title>Node42</title>
-<g id="a_Node000042"><a xlink:href="../../d7/d82/struct_c_r_g_b_a9dffc0be8059fa24b87fd619e47ca267.html#a9dffc0be8059fa24b87fd619e47ca267" target="_top" xlink:title="&quot;and&quot; operator brings each channel down to the lower of the two values">
-<polygon fill="white" stroke="#666666" points="493,-835 386,-835 386,-816 493,-816 493,-835"/>
-<text text-anchor="middle" x="439.5" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&amp;=</text>
+<g id="a_Node000042"><a xlink:href="../../d7/d82/struct_c_r_g_b_a93123ad44d92fc14de38799354c910de.html#a93123ad44d92fc14de38799354c910de" target="_top" xlink:title="&quot;and&quot; operator brings each channel down to the lower of the two values">
+<polygon fill="white" stroke="#666666" points="493,-872 386,-872 386,-853 493,-853 493,-872"/>
+<text text-anchor="middle" x="439.5" y="-860" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&amp;=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node42 -->
-<g id="edge29_Node000001_Node000042" class="edge">
+<g id="edge28_Node000001_Node000042" class="edge">
 <title>Node1&#45;&gt;Node42</title>
-<g id="a_edge29_Node000001_Node000042"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M575.13,-750.38C561.78,-767.61 539.33,-793.12 514,-807.5 507.6,-811.13 500.49,-814.03 493.27,-816.36"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="578.05,-752.33 581.25,-742.23 572.45,-748.13 578.05,-752.33"/>
+<g id="a_edge28_Node000001_Node000042"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M580.64,-751.61C569.9,-776.86 547.51,-820.9 514,-844.5 507.77,-848.89 500.59,-852.21 493.21,-854.73"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="584,-752.63 584.52,-742.05 577.52,-750 584,-752.63"/>
 </a>
 </g>
 </g>
 <!-- Node43 -->
 <g id="Node000043" class="node">
 <title>Node43</title>
-<g id="a_Node000043"><a xlink:href="../../d7/d82/struct_c_r_g_b_aba784833e0a2b040a696273b7dc0fe93.html#aba784833e0a2b040a696273b7dc0fe93" target="_top" xlink:title="Multiply each of the channels by a constant, saturating each channel at 0xFF.">
-<polygon fill="white" stroke="#666666" points="492,-798 387,-798 387,-779 492,-779 492,-798"/>
-<text text-anchor="middle" x="439.5" y="-786" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator*=</text>
+<g id="a_Node000043"><a xlink:href="../../d7/d82/struct_c_r_g_b_a9dffc0be8059fa24b87fd619e47ca267.html#a9dffc0be8059fa24b87fd619e47ca267" target="_top" xlink:title="&quot;and&quot; operator brings each channel down to the lower of the two values">
+<polygon fill="white" stroke="#666666" points="493,-835 386,-835 386,-816 493,-816 493,-835"/>
+<text text-anchor="middle" x="439.5" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&amp;=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node43 -->
-<g id="edge30_Node000001_Node000043" class="edge">
+<g id="edge29_Node000001_Node000043" class="edge">
 <title>Node1&#45;&gt;Node43</title>
-<g id="a_edge30_Node000001_Node000043"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M563.03,-747.18C548.99,-754.96 530.93,-764.18 514,-770.5 505.26,-773.76 495.72,-776.6 486.48,-779"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="565.06,-750.06 572.04,-742.09 561.61,-743.96 565.06,-750.06"/>
+<g id="a_edge29_Node000001_Node000043"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M575.13,-750.38C561.78,-767.61 539.33,-793.12 514,-807.5 507.6,-811.13 500.49,-814.03 493.27,-816.36"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="578.05,-752.33 581.25,-742.23 572.45,-748.13 578.05,-752.33"/>
 </a>
 </g>
 </g>
 <!-- Node44 -->
 <g id="Node000044" class="node">
 <title>Node44</title>
-<g id="a_Node000044"><a xlink:href="../../d7/d82/struct_c_r_g_b_ab73205f6424b49c4c5aec4993c90f820.html#ab73205f6424b49c4c5aec4993c90f820" target="_top" xlink:title="Add a constant of &#39;1&#39; from each channel, saturating at 0xFF.">
-<polygon fill="white" stroke="#666666" points="493.5,-761 385.5,-761 385.5,-742 493.5,-742 493.5,-761"/>
-<text text-anchor="middle" x="439.5" y="-749" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator++</text>
+<g id="a_Node000044"><a xlink:href="../../d7/d82/struct_c_r_g_b_aba784833e0a2b040a696273b7dc0fe93.html#aba784833e0a2b040a696273b7dc0fe93" target="_top" xlink:title="Multiply each of the channels by a constant, saturating each channel at 0xFF.">
+<polygon fill="white" stroke="#666666" points="492,-798 387,-798 387,-779 492,-779 492,-798"/>
+<text text-anchor="middle" x="439.5" y="-786" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator*=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node44 -->
-<g id="edge32_Node000001_Node000044" class="edge">
+<g id="edge30_Node000001_Node000044" class="edge">
 <title>Node1&#45;&gt;Node44</title>
-<g id="a_edge32_Node000001_Node000044"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M539.71,-738.72C524.98,-740.62 508.7,-742.71 493.67,-744.65"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="540.16,-742.19 549.63,-737.44 539.27,-735.25 540.16,-742.19"/>
+<g id="a_edge30_Node000001_Node000044"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M563.03,-747.18C548.99,-754.96 530.93,-764.18 514,-770.5 505.26,-773.76 495.72,-776.6 486.48,-779"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="565.06,-750.06 572.04,-742.09 561.61,-743.96 565.06,-750.06"/>
 </a>
 </g>
 </g>
 <!-- Node45 -->
 <g id="Node000045" class="node">
 <title>Node45</title>
-<g id="a_Node000045"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5258caa5e2e61e80a654729c49560ec0.html#a5258caa5e2e61e80a654729c49560ec0" target="_top" xlink:title="Add one CRGB to another, saturating at 0xFF for each channel.">
-<polygon fill="white" stroke="#666666" points="493.5,-724 385.5,-724 385.5,-705 493.5,-705 493.5,-724"/>
-<text text-anchor="middle" x="439.5" y="-712" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator+=</text>
+<g id="a_Node000045"><a xlink:href="../../d7/d82/struct_c_r_g_b_ab73205f6424b49c4c5aec4993c90f820.html#ab73205f6424b49c4c5aec4993c90f820" target="_top" xlink:title="Add a constant of &#39;1&#39; from each channel, saturating at 0xFF.">
+<polygon fill="white" stroke="#666666" points="493.5,-761 385.5,-761 385.5,-742 493.5,-742 493.5,-761"/>
+<text text-anchor="middle" x="439.5" y="-749" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator++</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node45 -->
-<g id="edge33_Node000001_Node000045" class="edge">
+<g id="edge32_Node000001_Node000045" class="edge">
 <title>Node1&#45;&gt;Node45</title>
-<g id="a_edge33_Node000001_Node000045"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M539.29,-726.56C524.67,-724.77 508.56,-722.81 493.67,-720.99"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="539.28,-730.08 549.63,-727.82 540.13,-723.13 539.28,-730.08"/>
+<g id="a_edge32_Node000001_Node000045"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M539.71,-738.72C524.98,-740.62 508.7,-742.71 493.67,-744.65"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="540.16,-742.19 549.63,-737.44 539.27,-735.25 540.16,-742.19"/>
 </a>
 </g>
 </g>
 <!-- Node46 -->
 <g id="Node000046" class="node">
 <title>Node46</title>
-<g id="a_Node000046"><a xlink:href="../../d7/d82/struct_c_r_g_b_a8cd926bb39573572babf2ff1ea152e78.html#a8cd926bb39573572babf2ff1ea152e78" target="_top" xlink:title="Invert each channel.">
-<polygon fill="white" stroke="#666666" points="487,-687 392,-687 392,-668 487,-668 487,-687"/>
-<text text-anchor="middle" x="439.5" y="-675" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;</text>
+<g id="a_Node000046"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5258caa5e2e61e80a654729c49560ec0.html#a5258caa5e2e61e80a654729c49560ec0" target="_top" xlink:title="Add one CRGB to another, saturating at 0xFF for each channel.">
+<polygon fill="white" stroke="#666666" points="493.5,-724 385.5,-724 385.5,-705 493.5,-705 493.5,-724"/>
+<text text-anchor="middle" x="439.5" y="-712" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator+=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node46 -->
-<g id="edge34_Node000001_Node000046" class="edge">
+<g id="edge33_Node000001_Node000046" class="edge">
 <title>Node1&#45;&gt;Node46</title>
-<g id="a_edge34_Node000001_Node000046"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M561.8,-718.16C547.89,-710.96 530.34,-702.52 514,-696.5 504.23,-692.9 493.49,-689.71 483.31,-687.03"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="560.31,-721.33 570.79,-722.9 563.58,-715.14 560.31,-721.33"/>
+<g id="a_edge33_Node000001_Node000046"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M539.29,-726.56C524.67,-724.77 508.56,-722.81 493.67,-720.99"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="539.28,-730.08 549.63,-727.82 540.13,-723.13 539.28,-730.08"/>
 </a>
 </g>
 </g>
 <!-- Node47 -->
 <g id="Node000047" class="node">
 <title>Node47</title>
-<g id="a_Node000047"><a xlink:href="../../d7/d82/struct_c_r_g_b_a6b2d9ed6541cf5a3bdc791bc13af88bf.html#a6b2d9ed6541cf5a3bdc791bc13af88bf" target="_top" xlink:title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00.">
-<polygon fill="white" stroke="#666666" points="294.5,-353 195.5,-353 195.5,-334 294.5,-334 294.5,-353"/>
-<text text-anchor="middle" x="245" y="-341" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;&#45;</text>
+<g id="a_Node000047"><a xlink:href="../../d7/d82/struct_c_r_g_b_a8cd926bb39573572babf2ff1ea152e78.html#a8cd926bb39573572babf2ff1ea152e78" target="_top" xlink:title="Invert each channel.">
+<polygon fill="white" stroke="#666666" points="487,-687 392,-687 392,-668 487,-668 487,-687"/>
+<text text-anchor="middle" x="439.5" y="-675" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node47 -->
-<g id="edge35_Node000001_Node000047" class="edge">
+<g id="edge34_Node000001_Node000047" class="edge">
 <title>Node1&#45;&gt;Node47</title>
-<g id="a_edge35_Node000001_Node000047"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M574.76,-714.92C561.27,-698.22 538.84,-673.64 514,-659.5 454.5,-625.65 416.89,-665.15 365,-620.5 277.12,-544.89 252.23,-392.75 247.11,-353.12"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="572.05,-717.12 580.97,-722.83 577.55,-712.81 572.05,-717.12"/>
+<g id="a_edge34_Node000001_Node000047"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M561.8,-718.16C547.89,-710.96 530.34,-702.52 514,-696.5 504.23,-692.9 493.49,-689.71 483.31,-687.03"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="560.31,-721.33 570.79,-722.9 563.58,-715.14 560.31,-721.33"/>
 </a>
 </g>
 </g>
 <!-- Node48 -->
 <g id="Node000048" class="node">
 <title>Node48</title>
-<g id="a_Node000048"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac05d9e24162f57408ce56c3a940ca928.html#ac05d9e24162f57408ce56c3a940ca928" target="_top" xlink:title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00.">
-<polygon fill="white" stroke="#666666" points="489,-611 390,-611 390,-592 489,-592 489,-611"/>
-<text text-anchor="middle" x="439.5" y="-599" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;&#45;</text>
+<g id="a_Node000048"><a xlink:href="../../d7/d82/struct_c_r_g_b_a6b2d9ed6541cf5a3bdc791bc13af88bf.html#a6b2d9ed6541cf5a3bdc791bc13af88bf" target="_top" xlink:title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00.">
+<polygon fill="white" stroke="#666666" points="294.5,-353 195.5,-353 195.5,-334 294.5,-334 294.5,-353"/>
+<text text-anchor="middle" x="245" y="-341" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;&#45;</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node48 -->
-<g id="edge36_Node000001_Node000048" class="edge">
+<g id="edge35_Node000001_Node000048" class="edge">
 <title>Node1&#45;&gt;Node48</title>
-<g id="a_edge36_Node000001_Node000048"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M579.66,-713.56C568.2,-689.67 545.39,-648.9 514,-625.5 505.61,-619.24 495.5,-614.57 485.51,-611.1"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="576.62,-715.33 583.99,-722.94 582.97,-712.4 576.62,-715.33"/>
+<g id="a_edge35_Node000001_Node000048"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M574.76,-714.92C561.27,-698.22 538.84,-673.64 514,-659.5 454.5,-625.65 416.89,-665.15 365,-620.5 277.12,-544.89 252.23,-392.75 247.11,-353.12"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="572.05,-717.12 580.97,-722.83 577.55,-712.81 572.05,-717.12"/>
 </a>
 </g>
 </g>
 <!-- Node49 -->
 <g id="Node000049" class="node">
 <title>Node49</title>
-<g id="a_Node000049"><a xlink:href="../../d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2b.html#a53b2e467a153a12691da7f1906960d2b" target="_top" xlink:title="Subtract one CRGB from another, saturating at 0x00 for each channel.">
-<polygon fill="white" stroke="#666666" points="491.5,-574 387.5,-574 387.5,-555 491.5,-555 491.5,-574"/>
-<text text-anchor="middle" x="439.5" y="-562" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;=</text>
+<g id="a_Node000049"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac05d9e24162f57408ce56c3a940ca928.html#ac05d9e24162f57408ce56c3a940ca928" target="_top" xlink:title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00.">
+<polygon fill="white" stroke="#666666" points="489,-611 390,-611 390,-592 489,-592 489,-611"/>
+<text text-anchor="middle" x="439.5" y="-599" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;&#45;</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node49 -->
-<g id="edge37_Node000001_Node000049" class="edge">
+<g id="edge36_Node000001_Node000049" class="edge">
 <title>Node1&#45;&gt;Node49</title>
-<g id="a_edge37_Node000001_Node000049"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M583.79,-712.79C575.9,-680.7 555.74,-617.35 514,-583.5 507.55,-578.27 499.82,-574.46 491.84,-571.7"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="580.43,-713.78 586.09,-722.74 587.25,-712.21 580.43,-713.78"/>
+<g id="a_edge36_Node000001_Node000049"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M579.66,-713.56C568.2,-689.67 545.39,-648.9 514,-625.5 505.61,-619.24 495.5,-614.57 485.51,-611.1"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="576.62,-715.33 583.99,-722.94 582.97,-712.4 576.62,-715.33"/>
 </a>
 </g>
 </g>
 <!-- Node50 -->
 <g id="Node000050" class="node">
 <title>Node50</title>
-<g id="a_Node000050"><a xlink:href="../../d7/d82/struct_c_r_g_b_a3b017a1901263fd000a006d6cfff1b78.html#a3b017a1901263fd000a006d6cfff1b78" target="_top" xlink:title="Divide each of the channels by a constant.">
-<polygon fill="white" stroke="#666666" points="491,-537 388,-537 388,-518 491,-518 491,-537"/>
-<text text-anchor="middle" x="439.5" y="-525" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator/=</text>
+<g id="a_Node000050"><a xlink:href="../../d7/d82/struct_c_r_g_b_a53b2e467a153a12691da7f1906960d2b.html#a53b2e467a153a12691da7f1906960d2b" target="_top" xlink:title="Subtract one CRGB from another, saturating at 0x00 for each channel.">
+<polygon fill="white" stroke="#666666" points="491.5,-574 387.5,-574 387.5,-555 491.5,-555 491.5,-574"/>
+<text text-anchor="middle" x="439.5" y="-562" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&#45;=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node50 -->
-<g id="edge38_Node000001_Node000050" class="edge">
+<g id="edge37_Node000001_Node000050" class="edge">
 <title>Node1&#45;&gt;Node50</title>
-<g id="a_edge38_Node000001_Node000050"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M585.9,-712.33C580.83,-674.08 564.32,-590.86 514,-546.5 507.47,-540.75 499.43,-536.7 491.08,-533.86"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="582.48,-713.15 587.14,-722.66 589.43,-712.32 582.48,-713.15"/>
+<g id="a_edge37_Node000001_Node000050"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M583.79,-712.79C575.9,-680.7 555.74,-617.35 514,-583.5 507.55,-578.27 499.82,-574.46 491.84,-571.7"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="580.43,-713.78 586.09,-722.74 587.25,-712.21 580.43,-713.78"/>
 </a>
 </g>
 </g>
 <!-- Node51 -->
 <g id="Node000051" class="node">
 <title>Node51</title>
-<g id="a_Node000051"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc888.html#ac0ef642e7d3bb2fca4846255984fc888" target="_top" xlink:title="Allow assignment from HSV color.">
-<polygon fill="white" stroke="#666666" points="489.5,-500 389.5,-500 389.5,-481 489.5,-481 489.5,-500"/>
-<text text-anchor="middle" x="439.5" y="-488" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
+<g id="a_Node000051"><a xlink:href="../../d7/d82/struct_c_r_g_b_a3b017a1901263fd000a006d6cfff1b78.html#a3b017a1901263fd000a006d6cfff1b78" target="_top" xlink:title="Divide each of the channels by a constant.">
+<polygon fill="white" stroke="#666666" points="491,-537 388,-537 388,-518 491,-518 491,-537"/>
+<text text-anchor="middle" x="439.5" y="-525" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator/=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node51 -->
-<g id="edge39_Node000001_Node000051" class="edge">
+<g id="edge38_Node000001_Node000051" class="edge">
 <title>Node1&#45;&gt;Node51</title>
-<g id="a_edge39_Node000001_Node000051"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587.45,-712.63C585.15,-669.14 573.36,-564.99 514,-509.5 507.26,-503.2 498.71,-498.92 489.85,-496.04"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.96,-712.91 587.87,-722.76 590.96,-712.62 583.96,-712.91"/>
+<g id="a_edge38_Node000001_Node000051"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M585.9,-712.33C580.83,-674.08 564.32,-590.86 514,-546.5 507.47,-540.75 499.43,-536.7 491.08,-533.86"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="582.48,-713.15 587.14,-722.66 589.43,-712.32 582.48,-713.15"/>
 </a>
 </g>
 </g>
 <!-- Node52 -->
 <g id="Node000052" class="node">
 <title>Node52</title>
-<g id="a_Node000052"><a xlink:href="../../d7/d82/struct_c_r_g_b_a64046b8971489cd4e287d2196714a4d7.html#a64046b8971489cd4e287d2196714a4d7" target="_top" xlink:title="Allow assignment from one RGB struct to another.">
-<polygon fill="white" stroke="#666666" points="489.5,-463 389.5,-463 389.5,-444 489.5,-444 489.5,-463"/>
-<text text-anchor="middle" x="439.5" y="-451" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
+<g id="a_Node000052"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac0ef642e7d3bb2fca4846255984fc888.html#ac0ef642e7d3bb2fca4846255984fc888" target="_top" xlink:title="Allow assignment from HSV color.">
+<polygon fill="white" stroke="#666666" points="489.5,-500 389.5,-500 389.5,-481 489.5,-481 489.5,-500"/>
+<text text-anchor="middle" x="439.5" y="-488" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node52 -->
-<g id="edge40_Node000001_Node000052" class="edge">
+<g id="edge39_Node000001_Node000052" class="edge">
 <title>Node1&#45;&gt;Node52</title>
-<g id="a_edge40_Node000001_Node000052"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M588.56,-712.72C588.81,-664.37 582.41,-539.26 514,-472.5 507.3,-465.96 498.67,-461.59 489.68,-458.69"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="585.06,-712.75 588.41,-722.8 592.06,-712.86 585.06,-712.75"/>
+<g id="a_edge39_Node000001_Node000052"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587.45,-712.63C585.15,-669.14 573.36,-564.99 514,-509.5 507.26,-503.2 498.71,-498.92 489.85,-496.04"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.96,-712.91 587.87,-722.76 590.96,-712.62 583.96,-712.91"/>
 </a>
 </g>
 </g>
 <!-- Node53 -->
 <g id="Node000053" class="node">
 <title>Node53</title>
-<g id="a_Node000053"><a xlink:href="../../d7/d82/struct_c_r_g_b_a0e49b1542e34c8da9c824e6b8c5503fe.html#a0e49b1542e34c8da9c824e6b8c5503fe" target="_top" xlink:title="Allow assignment from 32&#45;bit (really 24&#45;bit) 0xRRGGBB color code.">
-<polygon fill="white" stroke="#666666" points="489.5,-426 389.5,-426 389.5,-407 489.5,-407 489.5,-426"/>
-<text text-anchor="middle" x="439.5" y="-414" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
+<g id="a_Node000053"><a xlink:href="../../d7/d82/struct_c_r_g_b_a64046b8971489cd4e287d2196714a4d7.html#a64046b8971489cd4e287d2196714a4d7" target="_top" xlink:title="Allow assignment from one RGB struct to another.">
+<polygon fill="white" stroke="#666666" points="489.5,-463 389.5,-463 389.5,-444 489.5,-444 489.5,-463"/>
+<text text-anchor="middle" x="439.5" y="-451" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node53 -->
-<g id="edge41_Node000001_Node000053" class="edge">
+<g id="edge40_Node000001_Node000053" class="edge">
 <title>Node1&#45;&gt;Node53</title>
-<g id="a_edge41_Node000001_Node000053"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M585.74,-713.01C578.45,-653.46 553.71,-475.56 514,-435.5 507.41,-428.85 498.82,-424.43 489.85,-421.51"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="582.27,-713.46 586.93,-722.98 589.22,-712.63 582.27,-713.46"/>
+<g id="a_edge40_Node000001_Node000053"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M588.56,-712.72C588.81,-664.37 582.41,-539.26 514,-472.5 507.3,-465.96 498.67,-461.59 489.68,-458.69"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="585.06,-712.75 588.41,-722.8 592.06,-712.86 585.06,-712.75"/>
 </a>
 </g>
 </g>
 <!-- Node54 -->
 <g id="Node000054" class="node">
 <title>Node54</title>
-<g id="a_Node000054"><a xlink:href="../../d7/d82/struct_c_r_g_b_a8cbbbf36d097e8d1bd58665aba74a6d9.html#a8cbbbf36d097e8d1bd58665aba74a6d9" target="_top" xlink:title="Right shift each of the channels by a constant.">
-<polygon fill="white" stroke="#666666" points="497.5,-389 381.5,-389 381.5,-370 497.5,-370 497.5,-389"/>
-<text text-anchor="middle" x="439.5" y="-377" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&gt;&gt;=</text>
+<g id="a_Node000054"><a xlink:href="../../d7/d82/struct_c_r_g_b_a0e49b1542e34c8da9c824e6b8c5503fe.html#a0e49b1542e34c8da9c824e6b8c5503fe" target="_top" xlink:title="Allow assignment from 32&#45;bit (really 24&#45;bit) 0xRRGGBB color code.">
+<polygon fill="white" stroke="#666666" points="489.5,-426 389.5,-426 389.5,-407 489.5,-407 489.5,-426"/>
+<text text-anchor="middle" x="439.5" y="-414" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node54 -->
-<g id="edge42_Node000001_Node000054" class="edge">
+<g id="edge41_Node000001_Node000054" class="edge">
 <title>Node1&#45;&gt;Node54</title>
-<g id="a_edge42_Node000001_Node000054"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M586.29,-712.73C580.32,-648.06 558.27,-444.35 514,-398.5 509.42,-393.76 503.83,-390.15 497.79,-387.4"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="582.82,-713.16 587.2,-722.81 589.79,-712.54 582.82,-713.16"/>
+<g id="a_edge41_Node000001_Node000054"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M585.74,-713.01C578.45,-653.46 553.71,-475.56 514,-435.5 507.41,-428.85 498.82,-424.43 489.85,-421.51"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="582.27,-713.46 586.93,-722.98 589.22,-712.63 582.27,-713.46"/>
 </a>
 </g>
 </g>
 <!-- Node55 -->
 <g id="Node000055" class="node">
 <title>Node55</title>
-<g id="a_Node000055"><a xlink:href="../../d7/d82/struct_c_r_g_b_afff801013606761aaf539f588c878bb4.html#afff801013606761aaf539f588c878bb4" target="_top" xlink:title="&quot;or&quot; operator brings each channel up to the higher of the two values">
-<polygon fill="white" stroke="#666666" points="491,-352 388,-352 388,-333 491,-333 491,-352"/>
-<text text-anchor="middle" x="439.5" y="-340" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator|=</text>
+<g id="a_Node000055"><a xlink:href="../../d7/d82/struct_c_r_g_b_a8cbbbf36d097e8d1bd58665aba74a6d9.html#a8cbbbf36d097e8d1bd58665aba74a6d9" target="_top" xlink:title="Right shift each of the channels by a constant.">
+<polygon fill="white" stroke="#666666" points="497.5,-389 381.5,-389 381.5,-370 497.5,-370 497.5,-389"/>
+<text text-anchor="middle" x="439.5" y="-377" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator&gt;&gt;=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node55 -->
-<g id="edge43_Node000001_Node000055" class="edge">
+<g id="edge42_Node000001_Node000055" class="edge">
 <title>Node1&#45;&gt;Node55</title>
-<g id="a_edge43_Node000001_Node000055"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M586.77,-712.82C582.07,-643.69 562.94,-413.26 514,-361.5 507.84,-354.99 499.77,-350.59 491.24,-347.65"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.28,-713.06 587.43,-722.81 590.27,-712.61 583.28,-713.06"/>
+<g id="a_edge42_Node000001_Node000055"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M586.29,-712.73C580.32,-648.06 558.27,-444.35 514,-398.5 509.42,-393.76 503.83,-390.15 497.79,-387.4"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="582.82,-713.16 587.2,-722.81 589.79,-712.54 582.82,-713.16"/>
 </a>
 </g>
 </g>
 <!-- Node56 -->
 <g id="Node000056" class="node">
 <title>Node56</title>
-<g id="a_Node000056"><a xlink:href="../../d7/d82/struct_c_r_g_b_a10c7ed0988920e1eef60aee83ab67cce.html#a10c7ed0988920e1eef60aee83ab67cce" target="_top" xlink:title="&quot;or&quot; operator brings each channel up to the higher of the two values">
-<polygon fill="white" stroke="#666666" points="491,-315 388,-315 388,-296 491,-296 491,-315"/>
-<text text-anchor="middle" x="439.5" y="-303" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator|=</text>
+<g id="a_Node000056"><a xlink:href="../../d7/d82/struct_c_r_g_b_afff801013606761aaf539f588c878bb4.html#afff801013606761aaf539f588c878bb4" target="_top" xlink:title="&quot;or&quot; operator brings each channel up to the higher of the two values">
+<polygon fill="white" stroke="#666666" points="491,-352 388,-352 388,-333 491,-333 491,-352"/>
+<text text-anchor="middle" x="439.5" y="-340" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator|=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node56 -->
-<g id="edge44_Node000001_Node000056" class="edge">
+<g id="edge43_Node000001_Node000056" class="edge">
 <title>Node1&#45;&gt;Node56</title>
-<g id="a_edge44_Node000001_Node000056"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587.16,-712.81C583.63,-639.3 567.6,-382.2 514,-324.5 507.9,-317.93 499.85,-313.52 491.33,-310.57"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.67,-713.14 587.62,-722.97 590.67,-712.82 583.67,-713.14"/>
+<g id="a_edge43_Node000001_Node000056"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M586.77,-712.82C582.07,-643.69 562.94,-413.26 514,-361.5 507.84,-354.99 499.77,-350.59 491.24,-347.65"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.28,-713.06 587.43,-722.81 590.27,-712.61 583.28,-713.06"/>
 </a>
 </g>
 </g>
 <!-- Node57 -->
 <g id="Node000057" class="node">
 <title>Node57</title>
-<g id="a_Node000057"><a xlink:href="../../d7/d82/struct_c_r_g_b_af5d015c2569e7c12b5e5161371570593.html#af5d015c2569e7c12b5e5161371570593" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
-<polygon fill="white" stroke="#666666" points="480.5,-278 398.5,-278 398.5,-259 480.5,-259 480.5,-278"/>
-<text text-anchor="middle" x="439.5" y="-266" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::scale8</text>
+<g id="a_Node000057"><a xlink:href="../../d7/d82/struct_c_r_g_b_a10c7ed0988920e1eef60aee83ab67cce.html#a10c7ed0988920e1eef60aee83ab67cce" target="_top" xlink:title="&quot;or&quot; operator brings each channel up to the higher of the two values">
+<polygon fill="white" stroke="#666666" points="491,-315 388,-315 388,-296 491,-296 491,-315"/>
+<text text-anchor="middle" x="439.5" y="-303" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::operator|=</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node57 -->
-<g id="edge45_Node000001_Node000057" class="edge">
+<g id="edge44_Node000001_Node000057" class="edge">
 <title>Node1&#45;&gt;Node57</title>
-<g id="a_edge45_Node000001_Node000057"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587.48,-712.55C585.03,-634.52 572.22,-351.1 514,-287.5 505.46,-278.17 492.98,-273.16 480.73,-270.55"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.99,-713 587.78,-722.89 590.99,-712.79 583.99,-713"/>
+<g id="a_edge44_Node000001_Node000057"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587.16,-712.81C583.63,-639.3 567.6,-382.2 514,-324.5 507.9,-317.93 499.85,-313.52 491.33,-310.57"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.67,-713.14 587.62,-722.97 590.67,-712.82 583.67,-713.14"/>
 </a>
 </g>
 </g>
 <!-- Node58 -->
 <g id="Node000058" class="node">
 <title>Node58</title>
-<g id="a_Node000058"><a xlink:href="../../d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
-<polygon fill="white" stroke="#666666" points="480.5,-241 398.5,-241 398.5,-222 480.5,-222 480.5,-241"/>
-<text text-anchor="middle" x="439.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::scale8</text>
+<g id="a_Node000058"><a xlink:href="../../d7/d82/struct_c_r_g_b_af5d015c2569e7c12b5e5161371570593.html#af5d015c2569e7c12b5e5161371570593" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
+<polygon fill="white" stroke="#666666" points="480.5,-278 398.5,-278 398.5,-259 480.5,-259 480.5,-278"/>
+<text text-anchor="middle" x="439.5" y="-266" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::scale8</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node58 -->
-<g id="edge46_Node000001_Node000058" class="edge">
+<g id="edge45_Node000001_Node000058" class="edge">
 <title>Node1&#45;&gt;Node58</title>
-<g id="a_edge46_Node000001_Node000058"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587.76,-712.5C586.36,-630.37 576.91,-320.08 514,-250.5 505.51,-241.11 493.06,-236.1 480.8,-233.49"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584.26,-712.96 587.91,-722.91 591.26,-712.86 584.26,-712.96"/>
+<g id="a_edge45_Node000001_Node000058"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587.48,-712.55C585.03,-634.52 572.22,-351.1 514,-287.5 505.46,-278.17 492.98,-273.16 480.73,-270.55"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.99,-713 587.78,-722.89 590.99,-712.79 583.99,-713"/>
 </a>
 </g>
 </g>
 <!-- Node59 -->
 <g id="Node000059" class="node">
 <title>Node59</title>
-<g id="a_Node000059"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5d4166493508a1eedc34248d3fe8ad40.html#a5d4166493508a1eedc34248d3fe8ad40" target="_top" xlink:title="Allow assignment from 32&#45;bit (really 24&#45;bit) 0xRRGGBB color code.">
-<polygon fill="white" stroke="#666666" points="497.5,-204 381.5,-204 381.5,-185 497.5,-185 497.5,-204"/>
-<text text-anchor="middle" x="439.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setColorCode</text>
+<g id="a_Node000059"><a xlink:href="../../d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc" target="_top" xlink:title="Return a CRGB object that is a scaled down version of this object.">
+<polygon fill="white" stroke="#666666" points="480.5,-241 398.5,-241 398.5,-222 480.5,-222 480.5,-241"/>
+<text text-anchor="middle" x="439.5" y="-229" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::scale8</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node59 -->
-<g id="edge47_Node000001_Node000059" class="edge">
+<g id="edge46_Node000001_Node000059" class="edge">
 <title>Node1&#45;&gt;Node59</title>
-<g id="a_edge47_Node000001_Node000059"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M588,-712.34C587.58,-626.1 581.58,-289.06 514,-213.5 509.52,-208.49 503.91,-204.72 497.79,-201.9"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584.5,-712.61 588.03,-722.6 591.5,-712.59 584.5,-712.61"/>
+<g id="a_edge46_Node000001_Node000059"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587.76,-712.5C586.36,-630.37 576.91,-320.08 514,-250.5 505.51,-241.11 493.06,-236.1 480.8,-233.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="584.26,-712.96 587.91,-722.91 591.26,-712.86 584.26,-712.96"/>
 </a>
 </g>
 </g>
 <!-- Node60 -->
 <g id="Node000060" class="node">
 <title>Node60</title>
-<g id="a_Node000060"><a xlink:href="../../d7/d82/struct_c_r_g_b_a6a74f4f37adcd7b7144e7cb37d7b7367.html#a6a74f4f37adcd7b7144e7cb37d7b7367" target="_top" xlink:title="Allow assignment from hue, saturation, and value.">
-<polygon fill="white" stroke="#666666" points="482.5,-167 396.5,-167 396.5,-148 482.5,-148 482.5,-167"/>
-<text text-anchor="middle" x="439.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setHSV</text>
+<g id="a_Node000060"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5d4166493508a1eedc34248d3fe8ad40.html#a5d4166493508a1eedc34248d3fe8ad40" target="_top" xlink:title="Allow assignment from 32&#45;bit (really 24&#45;bit) 0xRRGGBB color code.">
+<polygon fill="white" stroke="#666666" points="497.5,-204 381.5,-204 381.5,-185 497.5,-185 497.5,-204"/>
+<text text-anchor="middle" x="439.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setColorCode</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node60 -->
-<g id="edge48_Node000001_Node000060" class="edge">
+<g id="edge47_Node000001_Node000060" class="edge">
 <title>Node1&#45;&gt;Node60</title>
-<g id="a_edge48_Node000001_Node000060"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M588.21,-712.64C588.74,-623.16 586.39,-258.19 514,-176.5 506.05,-167.52 494.46,-162.53 482.83,-159.82"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584.71,-712.75 588.13,-722.78 591.71,-712.8 584.71,-712.75"/>
+<g id="a_edge47_Node000001_Node000060"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M588,-712.34C587.58,-626.1 581.58,-289.06 514,-213.5 509.52,-208.49 503.91,-204.72 497.79,-201.9"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="584.5,-712.61 588.03,-722.6 591.5,-712.59 584.5,-712.61"/>
 </a>
 </g>
 </g>
 <!-- Node61 -->
 <g id="Node000061" class="node">
 <title>Node61</title>
-<g id="a_Node000061"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac459ec93893ae2453f748506b357a484.html#ac459ec93893ae2453f748506b357a484" target="_top" xlink:title="Allow assignment from just a hue.">
-<polygon fill="white" stroke="#666666" points="482,-130 397,-130 397,-111 482,-111 482,-130"/>
-<text text-anchor="middle" x="439.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setHue</text>
+<g id="a_Node000061"><a xlink:href="../../d7/d82/struct_c_r_g_b_a6a74f4f37adcd7b7144e7cb37d7b7367.html#a6a74f4f37adcd7b7144e7cb37d7b7367" target="_top" xlink:title="Allow assignment from hue, saturation, and value.">
+<polygon fill="white" stroke="#666666" points="482.5,-167 396.5,-167 396.5,-148 482.5,-148 482.5,-167"/>
+<text text-anchor="middle" x="439.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setHSV</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node61 -->
-<g id="edge49_Node000001_Node000061" class="edge">
+<g id="edge48_Node000001_Node000061" class="edge">
 <title>Node1&#45;&gt;Node61</title>
-<g id="a_edge49_Node000001_Node000061"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M588.39,-712.51C589.82,-619.2 591.09,-227.22 514,-139.5 505.91,-130.29 494,-125.27 482.11,-122.6"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="584.89,-712.53 588.22,-722.59 591.89,-712.65 584.89,-712.53"/>
+<g id="a_edge48_Node000001_Node000061"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M588.21,-712.64C588.74,-623.16 586.39,-258.19 514,-176.5 506.05,-167.52 494.46,-162.53 482.83,-159.82"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="584.71,-712.75 588.13,-722.78 591.71,-712.8 584.71,-712.75"/>
 </a>
 </g>
 </g>
 <!-- Node62 -->
 <g id="Node000062" class="node">
 <title>Node62</title>
-<g id="a_Node000062"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5cbcf0f60b75d83468f8db543f2bea93.html#a5cbcf0f60b75d83468f8db543f2bea93" target="_top" xlink:title="Allow assignment from red, green, and blue.">
-<polygon fill="white" stroke="#666666" points="482.5,-93 396.5,-93 396.5,-74 482.5,-74 482.5,-93"/>
-<text text-anchor="middle" x="439.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setRGB</text>
+<g id="a_Node000062"><a xlink:href="../../d7/d82/struct_c_r_g_b_ac459ec93893ae2453f748506b357a484.html#ac459ec93893ae2453f748506b357a484" target="_top" xlink:title="Allow assignment from just a hue.">
+<polygon fill="white" stroke="#666666" points="482,-130 397,-130 397,-111 482,-111 482,-130"/>
+<text text-anchor="middle" x="439.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setHue</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node62 -->
-<g id="edge50_Node000001_Node000062" class="edge">
+<g id="edge49_Node000001_Node000062" class="edge">
 <title>Node1&#45;&gt;Node62</title>
-<g id="a_edge50_Node000001_Node000062"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587,-712.87C581.66,-611.45 555.22,-149.74 514,-102.5 506.03,-93.36 494.29,-88.34 482.53,-85.65"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.51,-713.14 587.52,-722.94 590.5,-712.78 583.51,-713.14"/>
+<g id="a_edge49_Node000001_Node000062"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M588.39,-712.51C589.82,-619.2 591.09,-227.22 514,-139.5 505.91,-130.29 494,-125.27 482.11,-122.6"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="584.89,-712.53 588.22,-722.59 591.89,-712.65 584.89,-712.53"/>
 </a>
 </g>
 </g>
 <!-- Node63 -->
 <g id="Node000063" class="node">
 <title>Node63</title>
-<g id="a_Node000063"><a xlink:href="../../d7/d82/struct_c_r_g_b_a986ac62988523a4371f8f90cf844924d.html#a986ac62988523a4371f8f90cf844924d" target="_top" xlink:title="Subtract a constant from each channel, saturating at 0x00.">
-<polygon fill="white" stroke="#666666" points="507.5,-56 371.5,-56 371.5,-37 507.5,-37 507.5,-56"/>
-<text text-anchor="middle" x="439.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::subtractFromRGB</text>
+<g id="a_Node000063"><a xlink:href="../../d7/d82/struct_c_r_g_b_a5cbcf0f60b75d83468f8db543f2bea93.html#a5cbcf0f60b75d83468f8db543f2bea93" target="_top" xlink:title="Allow assignment from red, green, and blue.">
+<polygon fill="white" stroke="#666666" points="482.5,-93 396.5,-93 396.5,-74 482.5,-74 482.5,-93"/>
+<text text-anchor="middle" x="439.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::setRGB</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node63 -->
-<g id="edge51_Node000001_Node000063" class="edge">
+<g id="edge50_Node000001_Node000063" class="edge">
 <title>Node1&#45;&gt;Node63</title>
-<g id="a_edge51_Node000001_Node000063"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M587.14,-712.68C582.39,-607.18 557.96,-114.58 514,-64.5 511.05,-61.14 507.59,-58.36 503.81,-56.06"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="583.65,-713.03 587.59,-722.87 590.65,-712.72 583.65,-713.03"/>
+<g id="a_edge50_Node000001_Node000063"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587,-712.87C581.66,-611.45 555.22,-149.74 514,-102.5 506.03,-93.36 494.29,-88.34 482.53,-85.65"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.51,-713.14 587.52,-722.94 590.5,-712.78 583.51,-713.14"/>
 </a>
 </g>
 </g>
 <!-- Node64 -->
 <g id="Node000064" class="node">
 <title>Node64</title>
-<g id="a_Node000064"><a xlink:href="../../d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" target="_top" xlink:title=" ">
+<g id="a_Node000064"><a xlink:href="../../d7/d82/struct_c_r_g_b_a986ac62988523a4371f8f90cf844924d.html#a986ac62988523a4371f8f90cf844924d" target="_top" xlink:title="Subtract a constant from each channel, saturating at 0x00.">
+<polygon fill="white" stroke="#666666" points="507.5,-56 371.5,-56 371.5,-37 507.5,-37 507.5,-56"/>
+<text text-anchor="middle" x="439.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::subtractFromRGB</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node64 -->
+<g id="edge51_Node000001_Node000064" class="edge">
+<title>Node1&#45;&gt;Node64</title>
+<g id="a_edge51_Node000001_Node000064"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M587.14,-712.68C582.39,-607.18 557.96,-114.58 514,-64.5 511.05,-61.14 507.59,-58.36 503.81,-56.06"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="583.65,-713.03 587.59,-722.87 590.65,-712.72 583.65,-713.03"/>
+</a>
+</g>
+</g>
+<!-- Node65 -->
+<g id="Node000065" class="node">
+<title>Node65</title>
+<g id="a_Node000065"><a xlink:href="../../d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="483.5,-19 395.5,-19 395.5,0 483.5,0 483.5,-19"/>
 <text text-anchor="middle" x="439.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB::upscale</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node64 -->
-<g id="edge53_Node000001_Node000064" class="edge">
-<title>Node1&#45;&gt;Node64</title>
-<g id="a_edge53_Node000001_Node000064"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node65 -->
+<g id="edge53_Node000001_Node000065" class="edge">
+<title>Node1&#45;&gt;Node65</title>
+<g id="a_edge53_Node000001_Node000065"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M587.26,-712.61C583.02,-603.51 560.36,-80.62 514,-27.5 506.31,-18.69 495.09,-13.83 483.71,-11.24"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="583.77,-712.99 587.65,-722.85 590.77,-712.72 583.77,-712.99"/>
 </a>
@@ -927,10 +927,10 @@
 </a>
 </g>
 </g>
-<!-- Node63&#45;&gt;Node47 -->
-<g id="edge52_Node000063_Node000047" class="edge">
-<title>Node63&#45;&gt;Node47</title>
-<g id="a_edge52_Node000063_Node000047"><a xlink:title=" ">
+<!-- Node64&#45;&gt;Node48 -->
+<g id="edge52_Node000064_Node000048" class="edge">
+<title>Node64&#45;&gt;Node48</title>
+<g id="a_edge52_Node000064_Node000048"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M369.31,-61.21C367.82,-62.24 366.38,-63.33 365,-64.5 276.08,-139.99 251.95,-293.71 247.06,-333.78"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="371.41,-64.04 378.38,-56.06 367.96,-57.95 371.41,-64.04"/>
 </a>

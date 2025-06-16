@@ -1,11 +1,9 @@
 <map id="fl::XYMap::getType" name="fl::XYMap::getType">
-<area shape="rect" id="Node000001" title=" " alt="" coords="355,55,497,80"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4" title=" " alt="" coords="195,29,301,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,58,301,52,302,47,341,53"/>
-<area shape="rect" id="Node000005" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="189,79,307,104"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="341,81,307,86,306,81,341,76"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="355,31,497,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bd6c765c4dbccf31b10bddf7f22b5e4.html#a2bd6c765c4dbccf31b10bddf7f22b5e4" title=" " alt="" coords="195,5,301,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="341,34,301,28,302,23,341,29"/>
+<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="189,55,307,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="341,57,307,62,306,57,341,52"/>
 <area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_a04814149f06e8bd894c0f8f421c8708f.html#a04814149f06e8bd894c0f8f421c8708f" title="Downscale an CRGB matrix (or strip) to the smaller size." alt="" coords="5,5,141,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,35,141,30,142,25,181,30"/>
-<area shape="rect" id="Node000004" href="$dc/d5d/_audio_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="48,55,99,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="182,54,99,66,98,61,181,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,21,142,21,142,15,181,15"/>
 </map>

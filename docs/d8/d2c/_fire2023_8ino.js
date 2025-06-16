@@ -22,7 +22,7 @@ var _fire2023_8ino =
     [ "loop", "d8/d2c/_fire2023_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "makeScreenMap", "d8/d2c/_fire2023_8ino_a51736e5cacd97906844354b613c686f6.html#a51736e5cacd97906844354b613c686f6", null ],
     [ "setup", "d8/d2c/_fire2023_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "XY", "d8/d2c/_fire2023_8ino_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb", null ],
+    [ "XY", "d8/d2c/_fire2023_8ino_a540e832f2b3e0101e36d4155f5cfe6b9.html#a540e832f2b3e0101e36d4155f5cfe6b9", null ],
     [ "heat", "d8/d2c/_fire2023_8ino_a6a301247e6fb4e71e80de85c3c60e2be.html#a6a301247e6fb4e71e80de85c3c60e2be", null ],
     [ "hotPalette", "d8/d2c/_fire2023_8ino_a70a199bac40761895020c866374b0eb6.html#a70a199bac40761895020c866374b0eb6", null ],
     [ "leds", "d8/d2c/_fire2023_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ],

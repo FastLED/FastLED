@@ -24,11 +24,11 @@ digraph "fl::XYPathFunction"
   Node14 -> Node13 [id="edge8_Node000013_Node000014",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< FASTLED_STR_INLINED\l_SIZE \>",fontcolor="grey" ];
   Node14 [id="Node000014",label="fl::StrN\< SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d96/classfl_1_1_str_n.html",tooltip=" "];
   Node15 -> Node1 [id="edge9_Node000001_Node000015",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mDrawBounds",fontcolor="grey" ];
-  Node15 [id="Node000015",label="fl::rect\< int \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
+  Node15 [id="Node000015",label="fl::rect\< int16_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
   Node16 -> Node15 [id="edge10_Node000015_Node000016",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mMax\nmMin",fontcolor="grey" ];
-  Node16 [id="Node000016",label="fl::vec2\< int \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d5d/structfl_1_1vec2.html",tooltip=" "];
-  Node17 -> Node16 [id="edge11_Node000016_Node000017",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int \>",fontcolor="grey" ];
+  Node16 [id="Node000016",label="fl::vec2\< int16_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d5d/structfl_1_1vec2.html",tooltip=" "];
+  Node17 -> Node16 [id="edge11_Node000016_Node000017",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int16_t \>",fontcolor="grey" ];
   Node17 [id="Node000017",label="fl::vec2\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d5d/structfl_1_1vec2.html",tooltip=" "];
-  Node18 -> Node15 [id="edge12_Node000015_Node000018",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int \>",fontcolor="grey" ];
+  Node18 -> Node15 [id="edge12_Node000015_Node000018",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int16_t \>",fontcolor="grey" ];
   Node18 [id="Node000018",label="fl::rect\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
 }

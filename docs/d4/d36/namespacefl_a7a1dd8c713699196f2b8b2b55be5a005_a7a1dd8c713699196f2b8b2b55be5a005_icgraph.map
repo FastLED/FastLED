@@ -1,0 +1,16 @@
+<map id="fl::upscalePowerOf2" name="fl::upscalePowerOf2">
+<area shape="rect" id="Node000001" title="Performs bilinear interpolation for upscaling an image." alt="" coords="625,56,776,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac37540db2494843b64b21c58ba98aa95.html#ac37540db2494843b64b21c58ba98aa95" title=" " alt="" coords="379,5,577,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="630,55,534,33,535,28,631,50"/>
+<area shape="rect" id="Node000003" href="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066" title=" " alt="" coords="184,56,331,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="612,71,331,71,331,66,612,66"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a111ba754b48942237db55be314bf5a23.html#a111ba754b48942237db55be314bf5a23" title=" " alt="" coords="434,107,522,132"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="631,87,523,112,522,107,630,82"/>
+<area shape="rect" id="Node000004" href="$d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262" title=" " alt="" coords="5,56,136,81"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="170,71,136,71,136,66,170,66"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="420,109,313,84,314,79,421,104"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a2c1b40f2ba748d4d15102c3e5ebd37f4.html#a2c1b40f2ba748d4d15102c3e5ebd37f4" title=" " alt="" coords="190,105,325,131"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="420,122,325,121,325,116,420,116"/>
+<area shape="rect" id="Node000007" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="199,155,316,180"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="421,134,317,157,316,152,420,129"/>
+</map>

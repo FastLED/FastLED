@@ -11,10 +11,11 @@ var searchData=
   ['fl_3a_3aanonymous_5fnamespace_7bline_5fsimplification_2ecpp_7d_8',['anonymous_namespace{line_simplification.cpp}',['../d9/d8e/namespacefl_1_1anonymous__namespace_02line__simplification_8cpp_03.html',1,'fl']]],
   ['fl_3a_3aanonymous_5fnamespace_7bnoise_5fworyley_2ecpp_7d_9',['anonymous_namespace{noise_woryley.cpp}',['../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03.html',1,'fl']]],
   ['fl_3a_3aanonymous_5fnamespace_7bpir_2ecpp_7d_10',['anonymous_namespace{pir.cpp}',['../dd/d25/namespacefl_1_1anonymous__namespace_02pir_8cpp_03.html',1,'fl']]],
-  ['fl_3a_3aanonymous_5fnamespace_7bwave_2ecpp_7d_11',['anonymous_namespace{wave.cpp}',['../dd/da9/namespacefl_1_1anonymous__namespace_02wave_8cpp_03.html',1,'fl']]],
-  ['fl_3a_3aanonymous_5fnamespace_7bxypath_2ecpp_7d_12',['anonymous_namespace{xypath.cpp}',['../d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03.html',1,'fl']]],
-  ['fl_3a_3amap_5frange_5fdetail_13',['map_range_detail',['../d4/d2f/namespacefl_1_1map__range__detail.html',1,'fl']]],
-  ['fl_3a_3astring_5ffunctions_14',['string_functions',['../d7/d59/namespacefl_1_1string__functions.html',1,'fl']]],
-  ['fl_3a_3awave_5fdetail_15',['wave_detail',['../d9/d75/namespacefl_1_1wave__detail.html',1,'fl']]],
-  ['fl_3a_3axypath_5fdetail_16',['xypath_detail',['../db/de2/namespacefl_1_1xypath__detail.html',1,'fl']]]
+  ['fl_3a_3aanonymous_5fnamespace_7btile2x2_2ecpp_7d_11',['anonymous_namespace{tile2x2.cpp}',['../db/da4/namespacefl_1_1anonymous__namespace_02tile2x2_8cpp_03.html',1,'fl']]],
+  ['fl_3a_3aanonymous_5fnamespace_7bwave_2ecpp_7d_12',['anonymous_namespace{wave.cpp}',['../dd/da9/namespacefl_1_1anonymous__namespace_02wave_8cpp_03.html',1,'fl']]],
+  ['fl_3a_3aanonymous_5fnamespace_7bxypath_2ecpp_7d_13',['anonymous_namespace{xypath.cpp}',['../d4/da7/namespacefl_1_1anonymous__namespace_02xypath_8cpp_03.html',1,'fl']]],
+  ['fl_3a_3amap_5frange_5fdetail_14',['map_range_detail',['../d4/d2f/namespacefl_1_1map__range__detail.html',1,'fl']]],
+  ['fl_3a_3astring_5ffunctions_15',['string_functions',['../d7/d59/namespacefl_1_1string__functions.html',1,'fl']]],
+  ['fl_3a_3awave_5fdetail_16',['wave_detail',['../d9/d75/namespacefl_1_1wave__detail.html',1,'fl']]],
+  ['fl_3a_3axypath_5fdetail_17',['xypath_detail',['../db/de2/namespacefl_1_1xypath__detail.html',1,'fl']]]
 ];

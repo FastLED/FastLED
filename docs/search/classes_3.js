@@ -37,7 +37,7 @@ var searchData=
   ['corkscrew_34',['Corkscrew',['../dc/d82/classfl_1_1_corkscrew.html',1,'fl']]],
   ['corkscrew_5fargs_35',['corkscrew_args',['../d7/da1/old_8h.html#d1/dd1/structcorkscrew__args',1,'']]],
   ['corkscrewinput_36',['CorkscrewInput',['../d6/d7c/structfl_1_1_corkscrew_input.html',1,'fl']]],
-  ['corkscrewoutput_37',['CorkscrewOutput',['../d7/d93/structfl_1_1_corkscrew_output.html',1,'fl']]],
+  ['corkscrewstate_37',['CorkscrewState',['../d4/d76/structfl_1_1_corkscrew_state.html',1,'fl']]],
   ['countingbutton_38',['CountingButton',['../d6/d58/class_counting_button.html',1,'']]],
   ['cpixelledcontroller_39',['CPixelLEDController',['../d0/dc9/class_c_pixel_l_e_d_controller.html',1,'']]],
   ['cpixelledcontroller_3c_20grb_2c_20controller_3a_3alanes_5fvalue_2c_20controller_3a_3amask_5fvalue_20_3e_40',['CPixelLEDController&lt; GRB, CONTROLLER::LANES_VALUE, CONTROLLER::MASK_VALUE &gt;',['../d0/dc9/class_c_pixel_l_e_d_controller.html',1,'']]],

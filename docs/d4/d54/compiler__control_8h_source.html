@@ -124,6 +124,14 @@ $(function(){initNavTree('d4/d54/compiler__control_8h_source.html','../../'); in
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="../../d4/d54/compiler__control_8h_a888ec6cdc7563315545ced9cff7a5fbf.html#a888ec6cdc7563315545ced9cff7a5fbf">   19</a></span><span class="preprocessor">  #define FL_DISABLE_WARNING_POP</span></div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="../../d4/d54/compiler__control_8h_a06ccf684cc4daef26f13a1c1b951596c.html#a06ccf684cc4daef26f13a1c1b951596c">   20</a></span><span class="preprocessor">  #define FL_DISABLE_WARNING(warning)</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#if defined(__clang__)</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">    FL_DISABLE_WARNING(global-constructors)</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../d4/d54/compiler__control_8h_a36f5f9a23a3191a00a5c0de50038b164.html#a36f5f9a23a3191a00a5c0de50038b164">   28</a></span><span class="preprocessor">  #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS </span><span class="comment">/* nothing */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -131,7 +139,7 @@ $(function(){initNavTree('d4/d54/compiler__control_8h_source.html','../../'); in
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -6,8 +6,6 @@ digraph "fl::rect&lt; T &gt;"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   Node1 [id="Node000001",label="fl::rect\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
-  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int \>",fontcolor="grey" ];
-  Node2 [id="Node000002",label="fl::rect\< int \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
-  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int16_t \>",fontcolor="grey" ];
-  Node3 [id="Node000003",label="fl::rect\< int16_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int16_t \>",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::rect\< int16_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
 }

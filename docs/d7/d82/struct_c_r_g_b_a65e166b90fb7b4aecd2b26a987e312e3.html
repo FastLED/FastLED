@@ -146,10 +146,10 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e
 <p class="definition">Definition at line <a class="el" href="../../d0/de3/crgb_8cpp_source.html#l00029">29</a> of file <a class="el" href="../../d0/de3/crgb_8cpp_source.html">crgb.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   30</span>                                                           {</div>
 <div class="line"><span class="lineno">   31</span><span class="preprocessor">#if defined(NO_CORRECTION) &amp;&amp; (NO_CORRECTION == 1)</span></div>
-<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB</a>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>, <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>);</div>
+<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB</a>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>, <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>, <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>);</div>
 <div class="line"><span class="lineno">   33</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">   34</span>    <a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB</a> adj(0, 0, 0);</div>
-<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a> &gt; 0) {</div>
+<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a> &gt; 0) {</div>
 <div class="line"><span class="lineno">   36</span>        <span class="keywordflow">for</span> (uint8_t i = 0; i &lt; 3; ++i) {</div>
 <div class="line"><span class="lineno">   37</span>            uint8_t cc = colorCorrection.raw[i];</div>
 <div class="line"><span class="lineno">   38</span>            uint8_t ct = colorTemperature.raw[i];</div>
@@ -158,7 +158,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e
 <div class="line"><span class="lineno">   41</span>                <span class="comment">// infrequently so size matters more than speed.</span></div>
 <div class="line"><span class="lineno">   42</span>                uint32_t work = (((uint16_t)cc) + 1);</div>
 <div class="line"><span class="lineno">   43</span>                work *= (((uint16_t)ct) + 1);</div>
-<div class="line"><span class="lineno">   44</span>                work *= <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>;</div>
+<div class="line"><span class="lineno">   44</span>                work *= <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>;</div>
 <div class="line"><span class="lineno">   45</span>                work /= 0x10000L;</div>
 <div class="line"><span class="lineno">   46</span>                adj.raw[i] = work &amp; 0xFF;</div>
 <div class="line"><span class="lineno">   47</span>            }</div>
@@ -167,10 +167,10 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e
 <div class="line"><span class="lineno">   50</span>    <span class="keywordflow">return</span> adj;</div>
 <div class="line"><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">   52</span>}</div>
-<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="afunky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38_html_ab7346c8b67db0b99afe3fe1eff3b5b38"><div class="ttname"><a href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a></div><div class="ttdeci">uint16_t scale</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d43/funky_8cpp_source.html#l00083">funky.cpp:83</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa_html_a08d8e05a3fcdb88dedb886cad9cbd3fa"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB::CRGB</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB()=default</div><div class="ttdoc">Default constructor.</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, and <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d82/struct_c_r_g_b_a08d8e05a3fcdb88dedb886cad9cbd3fa.html#a08d8e05a3fcdb88dedb886cad9cbd3fa">CRGB()</a>, and <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00083">scale</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00274">CLEDController::getAdjustment()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -197,7 +197,7 @@ $(function(){initNavTree('d7/d82/struct_c_r_g_b_a65e166b90fb7b4aecd2b26a987e312e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:49 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

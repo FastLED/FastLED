@@ -8,5 +8,7 @@ digraph "fl::XYPath::rasterize"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::XYPath::rasterize",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="steps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1",tooltip=" "];
+  Node2 [id="Node000002",label="raster",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="steps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1",tooltip=" "];
 }

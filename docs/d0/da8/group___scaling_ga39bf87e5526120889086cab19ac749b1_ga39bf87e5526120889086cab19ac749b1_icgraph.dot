@@ -32,6 +32,8 @@ digraph "nscale8x3"
   Node15 -> Node11 [id="edge12_Node000015_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 -> Node16 [id="edge13_Node000008_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node16 [id="Node000016",label="fill_2dnoise8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga6fcc17e60eac4b9dbb620f7e354177f1.html#ga6fcc17e60eac4b9dbb620f7e354177f1",tooltip="Fill an LED matrix with random colors, using 8-bit noise."];
-  Node1 -> Node17 [id="edge14_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="CRGB::scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc",tooltip="Return a CRGB object that is a scaled down version of this object."];
+  Node8 -> Node17 [id="edge14_Node000008_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node18 [id="edge15_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="CRGB::scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aa9c54727cd2a2145a126220ecd802ffc.html#aa9c54727cd2a2145a126220ecd802ffc",tooltip="Return a CRGB object that is a scaled down version of this object."];
 }

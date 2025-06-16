@@ -8,5 +8,11 @@ digraph "fl::FileSystem::openVideo"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::FileSystem::openVideo",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::FileSystem::openRead",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Video::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a3301424a6ba7d16a1d823371a79b9fe7.html#a3301424a6ba7d16a1d823371a79b9fe7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::FileSystem::openRead",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Video::setError",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_ad5d7752852741024febd54bd9f55ab0f.html#ad5d7752852741024febd54bd9f55ab0f",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Video::error",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/classfl_1_1_video_a10c8abfc4dce8d463a91f7c610e41354.html#a10c8abfc4dce8d463a91f7c610e41354",tooltip=" "];
 }

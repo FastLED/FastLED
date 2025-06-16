@@ -1,17 +1,15 @@
 <map id="fl::vec2&lt; T &gt;" name="fl::vec2&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,153,112,179"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,129,112,155"/>
 <area shape="rect" id="Node000002" href="$d3/da1/structfl_1_1pair__xy.html" title=" " alt="" coords="272,5,396,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,140,95,99,113,78,135,61,167,44,203,31,271,19,272,24,204,37,170,49,137,66,117,82,100,102,74,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,116,101,88,135,62,168,47,204,35,271,21,272,26,205,40,170,52,137,67,105,92,80,120"/>
 <area shape="rect" id="Node000003" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="270,55,398,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="83,142,107,125,135,109,203,86,269,72,270,77,205,91,137,114,110,129,86,147"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="95,121,135,105,204,86,269,74,270,79,205,92,137,110,97,126"/>
 <area shape="rect" id="Node000004" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="262,104,406,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="118,147,135,143,261,123,262,128,137,149,119,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="126,133,261,121,262,126,126,139"/>
 <area shape="rect" id="Node000005" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="262,153,406,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="126,163,262,163,262,169,126,169"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="119,155,136,158,201,164,262,165,262,170,200,169,136,163,118,160"/>
 <area shape="rect" id="Node000006" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="255,203,413,228"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="119,179,137,183,255,203,254,208,135,189,118,185"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="89,160,137,185,196,200,255,209,254,214,195,206,135,190,87,165"/>
 <area shape="rect" id="Node000007" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="262,252,406,277"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="85,185,110,204,137,220,200,241,262,254,261,259,199,246,135,224,107,208,82,190"/>
-<area shape="rect" id="Node000008" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="276,301,392,327"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="74,189,99,231,117,252,137,269,171,286,207,298,276,310,276,315,205,303,169,291,135,274,113,256,95,234,69,192"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="77,165,102,198,137,226,167,240,199,250,262,260,261,266,198,255,165,245,135,231,99,201,73,168"/>
 </map>

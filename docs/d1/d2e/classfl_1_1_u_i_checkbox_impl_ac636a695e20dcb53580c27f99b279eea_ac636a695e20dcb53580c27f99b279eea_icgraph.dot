@@ -35,7 +35,11 @@ digraph "fl::UICheckboxImpl::value"
   Node1 -> Node9 [id="edge15_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node10 [id="edge16_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node13 [id="edge17_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="fl::UICheckboxImpl\l::setValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_a0639a9a387e346c8bf6337864be07986.html#a0639a9a387e346c8bf6337864be07986",tooltip=" "];
-  Node13 -> Node9 [id="edge18_Node000013_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 -> Node10 [id="edge19_Node000013_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="setupUiCallbacks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_a893c59eb458bea800b5e5e5c1bf57fcd.html#a893c59eb458bea800b5e5e5c1bf57fcd",tooltip=" "];
+  Node13 -> Node14 [id="edge18_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+  Node1 -> Node15 [id="edge19_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::UICheckboxImpl\l::setValue",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1_u_i_checkbox_impl_a0639a9a387e346c8bf6337864be07986.html#a0639a9a387e346c8bf6337864be07986",tooltip=" "];
+  Node15 -> Node9 [id="edge20_Node000015_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 -> Node10 [id="edge21_Node000015_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -10,7 +10,9 @@ var searchData=
   ['noisegen_2eh_7',['noisegen.h',['../d8/d10/noisegen_8h.html',1,'']]],
   ['noisepalette_2ecpp_8',['noisepalette.cpp',['../d6/d66/noisepalette_8cpp.html',1,'']]],
   ['noisepalette_2eh_9',['noisepalette.h',['../d6/dc7/noisepalette_8h.html',1,'']]],
-  ['noiseplayground_2eino_10',['NoisePlayground.ino',['../d7/ddc/_noise_playground_8ino.html',1,'']]],
-  ['noisepluspalette_2eino_11',['NoisePlusPalette.ino',['../da/dda/_noise_plus_palette_8ino.html',1,'']]],
-  ['noisewave_2eh_12',['noisewave.h',['../d9/d2c/noisewave_8h.html',1,'']]]
+  ['noiseplayground_2eh_10',['NoisePlayground.h',['../d3/d4e/_noise_playground_8h.html',1,'']]],
+  ['noiseplayground_2eino_11',['NoisePlayground.ino',['../d7/ddc/_noise_playground_8ino.html',1,'']]],
+  ['noisepluspalette_2eh_12',['NoisePlusPalette.h',['../de/d77/_noise_plus_palette_8h.html',1,'']]],
+  ['noisepluspalette_2eino_13',['NoisePlusPalette.ino',['../da/dda/_noise_plus_palette_8ino.html',1,'']]],
+  ['noisewave_2eh_14',['noisewave.h',['../d9/d2c/noisewave_8h.html',1,'']]]
 ];

@@ -1,0 +1,11 @@
+<map id="fl::upscale" name="fl::upscale">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,93,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a24f105d99ab32936dacbf815c54f320c.html#a24f105d99ab32936dacbf815c54f320c" title="Performs bilinear interpolation for upscaling an image." alt="" coords="144,5,289,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,34,130,28,131,34,94,39"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a7a1dd8c713699196f2b8b2b55be5a005.html#a7a1dd8c713699196f2b8b2b55be5a005" title="Performs bilinear interpolation for upscaling an image." alt="" coords="141,55,292,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="94,47,128,52,127,57,93,52"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.html#a2e4fe67035df871b23df6b907ca338c8" title=" " alt="" coords="371,5,530,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="290,15,357,15,357,21,290,21"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a31d30c7ed12b05422e7aa7f03c25fb07.html#a31d30c7ed12b05422e7aa7f03c25fb07" title=" " alt="" coords="340,55,561,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="292,65,326,65,326,70,292,70"/>
+</map>

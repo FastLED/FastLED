@@ -12,7 +12,7 @@ digraph "fx/2d/scale_up.h"
   Node3 [id="Node000003",label="stddef.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node2 -> Node2 [id="edge3_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl/bilinear_expansion.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d34/bilinear__expansion_8h.html",tooltip="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix."];
+  Node4 [id="Node000004",label="fl/upscale.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d0c/upscale_8h.html",tooltip=" "];
   Node4 -> Node2 [id="edge5_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node5 [id="edge6_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="crgb.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dd1/crgb_8h.html",tooltip="Defines the red, green, and blue (RGB) pixel struct."];

@@ -1,31 +1,5 @@
 var _noise_plus_palette_8ino =
 [
-    [ "BRIGHTNESS", "da/dda/_noise_plus_palette_8ino_accd116060cc3445af11c45ec44fd69d9.html#accd116060cc3445af11c45ec44fd69d9", null ],
-    [ "COLOR_ORDER", "da/dda/_noise_plus_palette_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2", null ],
-    [ "HOLD_PALETTES_X_TIMES_AS_LONG", "da/dda/_noise_plus_palette_8ino_ada85ead2c583656b3229945e843b4f99.html#ada85ead2c583656b3229945e843b4f99", null ],
-    [ "LED_PIN", "da/dda/_noise_plus_palette_8ino_ab4553be4db9860d940f81d7447173b2f.html#ab4553be4db9860d940f81d7447173b2f", null ],
-    [ "LED_TYPE", "da/dda/_noise_plus_palette_8ino_a364dc046543d8ab7d4214120afc9c814.html#a364dc046543d8ab7d4214120afc9c814", null ],
-    [ "MAX_DIMENSION", "da/dda/_noise_plus_palette_8ino_a776947deb6cf27cbd4faf91e0d60ff49.html#a776947deb6cf27cbd4faf91e0d60ff49", null ],
-    [ "NUM_LEDS", "da/dda/_noise_plus_palette_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd", null ],
-    [ "ChangePaletteAndSettingsPeriodically", "da/dda/_noise_plus_palette_8ino_a2985d4b1841f40d48227c9b68cdfd2e6.html#a2985d4b1841f40d48227c9b68cdfd2e6", null ],
-    [ "currentPalette", "da/dda/_noise_plus_palette_8ino_ac2c014b36e317beda5cb4a2932508162.html#ac2c014b36e317beda5cb4a2932508162", null ],
-    [ "fillnoise8", "da/dda/_noise_plus_palette_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3", null ],
     [ "loop", "da/dda/_noise_plus_palette_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
-    [ "mapNoiseToLEDsUsingPalette", "da/dda/_noise_plus_palette_8ino_a280e07fce1769d79d75e63ce6236a918.html#a280e07fce1769d79d75e63ce6236a918", null ],
-    [ "setup", "da/dda/_noise_plus_palette_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "SetupBlackAndWhiteStripedPalette", "da/dda/_noise_plus_palette_8ino_afea43f4d537a50569a537b9fa2bc2f26.html#afea43f4d537a50569a537b9fa2bc2f26", null ],
-    [ "SetupPurpleAndGreenPalette", "da/dda/_noise_plus_palette_8ino_aea1a93f40934fd32c715042e04540d46.html#aea1a93f40934fd32c715042e04540d46", null ],
-    [ "SetupRandomPalette", "da/dda/_noise_plus_palette_8ino_af5f045646a260d2cf4131fcdd548901f.html#af5f045646a260d2cf4131fcdd548901f", null ],
-    [ "XY", "da/dda/_noise_plus_palette_8ino_a7aa2d780d14ccc2f3ce3c493e01999eb.html#a7aa2d780d14ccc2f3ce3c493e01999eb", null ],
-    [ "colorLoop", "da/dda/_noise_plus_palette_8ino_a2dfa1f9066bd74d949625bfc3dcaa075.html#a2dfa1f9066bd74d949625bfc3dcaa075", null ],
-    [ "kMatrixHeight", "da/dda/_noise_plus_palette_8ino_ae39cabe8e0435a52a03468662a4aa343.html#ae39cabe8e0435a52a03468662a4aa343", null ],
-    [ "kMatrixSerpentineLayout", "da/dda/_noise_plus_palette_8ino_a122b5cb9087d873c6247c05882c1695c.html#a122b5cb9087d873c6247c05882c1695c", null ],
-    [ "kMatrixWidth", "da/dda/_noise_plus_palette_8ino_a2255bcc7c13353a867fe688064782888.html#a2255bcc7c13353a867fe688064782888", null ],
-    [ "leds", "da/dda/_noise_plus_palette_8ino_a03c034c82f0b6a82edc9f01e10cd40f5.html#a03c034c82f0b6a82edc9f01e10cd40f5", null ],
-    [ "noise", "da/dda/_noise_plus_palette_8ino_a115f3e06b8ef57a6eeaec79ddf8c8368.html#a115f3e06b8ef57a6eeaec79ddf8c8368", null ],
-    [ "scale", "da/dda/_noise_plus_palette_8ino_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38", null ],
-    [ "speed", "da/dda/_noise_plus_palette_8ino_a12633132d07532aac2bd05fa1d5c8a72.html#a12633132d07532aac2bd05fa1d5c8a72", null ],
-    [ "x", "da/dda/_noise_plus_palette_8ino_a4dde988b1b2adba65ae3efa69f65d960.html#a4dde988b1b2adba65ae3efa69f65d960", null ],
-    [ "y", "da/dda/_noise_plus_palette_8ino_ab0580f504a7428539be299fa71565f30.html#ab0580f504a7428539be299fa71565f30", null ],
-    [ "z", "da/dda/_noise_plus_palette_8ino_a72adab9ed2ad760c11fba6030575e111.html#a72adab9ed2ad760c11fba6030575e111", null ]
+    [ "setup", "da/dda/_noise_plus_palette_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ]
 ];

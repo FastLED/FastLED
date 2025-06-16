@@ -135,7 +135,7 @@ $(function(){initNavTree('d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe6
 <p class="definition">Definition at line <a class="el" href="../../db/d91/scale8_8h_source.html#l00317">317</a> of file <a class="el" href="../../db/d91/scale8_8h_source.html">scale8.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  318</span>                                                                           {</div>
 <div class="line"><span class="lineno">  319</span><span class="preprocessor">#if SCALE8_C == 1 || defined(LIB8_ATTINY)</span></div>
-<div class="line"><span class="lineno">  320</span>    i = (((int)i * (int)<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>) &gt;&gt; 8) + ((i &amp;&amp; <a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>) ? 1 : 0);</div>
+<div class="line"><span class="lineno">  320</span>    i = (((int)i * (int)<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>) &gt;&gt; 8) + ((i &amp;&amp; <a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>) ? 1 : 0);</div>
 <div class="line"><span class="lineno">  321</span><span class="preprocessor">#elif SCALE8_AVRASM == 1</span></div>
 <div class="line"><span class="lineno">  322</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(<span class="stringliteral">&quot;  tst %[i]\n\t&quot;</span></div>
 <div class="line"><span class="lineno">  323</span>                 <span class="stringliteral">&quot;  breq L_%=\n\t&quot;</span></div>
@@ -145,15 +145,15 @@ $(function(){initNavTree('d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe6
 <div class="line"><span class="lineno">  327</span>                 <span class="stringliteral">&quot;  subi %[i], 0xFF\n\t&quot;</span></div>
 <div class="line"><span class="lineno">  328</span>                 <span class="stringliteral">&quot;L_%=: \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  329</span>                 : [i] <span class="stringliteral">&quot;+d&quot;</span>(i) <span class="comment">// r16-r31, restricted by subi</span></div>
-<div class="line"><span class="lineno">  330</span>                 : [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  330</span>                 : [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</div>
 <div class="line"><span class="lineno">  331</span>                 : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  332</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">  333</span><span class="preprocessor">#error &quot;No implementation for scale8_video_LEAVING_R1_DIRTY available.&quot;</span></div>
 <div class="line"><span class="lineno">  334</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  335</span>}</div>
-<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="afunky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38_html_ab7346c8b67db0b99afe3fe1eff3b5b38"><div class="ttname"><a href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a></div><div class="ttdeci">uint16_t scale</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d43/funky_8cpp_source.html#l00083">funky.cpp:83</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00012">LIB8STATIC_ALWAYS_INLINE</a>, and <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00083">scale</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../db/d91/scale8_8h_source.html#l00453">nscale8x2_video()</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00397">nscale8x3_video()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -173,7 +173,7 @@ $(function(){initNavTree('d0/da5/group___scaling_dirty_gadfd26d9b154f5ec79dbffe6
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da5/group___scaling_dirty.html">Scaling Functions that Leave R1 Dirty</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:49 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

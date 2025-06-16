@@ -6,6 +6,8 @@ var searchData=
   ['ui_5fstate_2ecpp_3',['ui_state.cpp',['../dc/d4e/ui__state_8cpp.html',1,'']]],
   ['ui_5fstate_2eh_4',['ui_state.h',['../d9/da7/ui__state_8h.html',1,'']]],
   ['unused_2eh_5',['unused.h',['../d8/d4b/unused_8h.html',1,'']]],
-  ['util_2ecpp_6',['util.cpp',['../df/d2d/util_8cpp.html',1,'']]],
-  ['util_2eh_7',['util.h',['../d8/d3c/util_8h.html',1,'']]]
+  ['upscale_2ecpp_6',['upscale.cpp',['../d0/d4f/upscale_8cpp.html',1,'']]],
+  ['upscale_2eh_7',['upscale.h',['../d6/d0c/upscale_8h.html',1,'']]],
+  ['util_2ecpp_8',['util.cpp',['../df/d2d/util_8cpp.html',1,'']]],
+  ['util_2eh_9',['util.h',['../d8/d3c/util_8h.html',1,'']]]
 ];

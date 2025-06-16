@@ -1,9 +1,7 @@
 <map id="fl::Video::timeScale" name="fl::Video::timeScale">
-<area shape="rect" id="Node000001" title=" " alt="" coords="323,31,471,56"/>
-<area shape="rect" id="Node000002" href="$d0/d4b/classfl_1_1_video_a61259028f047a368f52a0be596bedd0f.html#a61259028f047a368f52a0be596bedd0f" title=" " alt="" coords="106,5,273,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,35,273,31,273,26,310,30"/>
-<area shape="rect" id="Node000003" href="$d0/d4b/classfl_1_1_video_aa57f4eb0735d8b07f69c7d86318ddd0c.html#aa57f4eb0735d8b07f69c7d86318ddd0c" title=" " alt="" coords="104,55,275,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="310,56,275,60,274,55,309,51"/>
-<area shape="rect" id="Node000004" href="$d7/d35/_fx_sd_card_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,70,57,70,57,65,90,65"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="224,31,372,56"/>
+<area shape="rect" id="Node000002" href="$d0/d4b/classfl_1_1_video_a61259028f047a368f52a0be596bedd0f.html#a61259028f047a368f52a0be596bedd0f" title=" " alt="" coords="7,5,174,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,35,174,31,175,26,211,30"/>
+<area shape="rect" id="Node000003" href="$d0/d4b/classfl_1_1_video_aa57f4eb0735d8b07f69c7d86318ddd0c.html#aa57f4eb0735d8b07f69c7d86318ddd0c" title=" " alt="" coords="5,55,176,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,56,176,60,176,55,210,51"/>
 </map>

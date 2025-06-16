@@ -110,29 +110,34 @@ $(function(){initNavTree('dc/d83/wavefx_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">/*</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">This demo is best viewed using the FastLED compiler.</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">Install: pip install fastled</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">Run: fastled &lt;this sketch directory&gt;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">This will compile and preview the sketch in the browser, and enable</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">all the UI elements you see below.</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment"></span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">Windows/MacOS binaries: https://github.com/FastLED/FastLED/releases</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment"></span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">Python</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"></span> </div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">OVERVIEW:</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">This sketch demonstrates a 2D wave simulation with multiple layers and blending effects.</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">It creates ripple effects that propagate across the LED matrix, similar to water waves.</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">The demo includes two wave layers (upper and lower) with different colors and properties,</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">which are blended together to create complex visual effects.</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">*/</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// Define the dimensions of our LED matrix</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">   22</a></span><span class="preprocessor">#define HEIGHT 64          </span><span class="comment">// Number of rows in the matrix</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">   23</a></span><span class="preprocessor">#define WIDTH 64           </span><span class="comment">// Number of columns in the matrix</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">   24</a></span><span class="preprocessor">#define NUM_LEDS ((WIDTH) * (HEIGHT))  </span><span class="comment">// Total number of LEDs</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_aaef57fab56b804d85580f89cc5309d4d.html#aaef57fab56b804d85580f89cc5309d4d">   25</a></span><span class="preprocessor">#define IS_SERPINTINE true </span><span class="comment">// Whether the LED strip zigzags back and forth (common in matrix layouts)</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/d83/wavefx_8h_aa7e56c878f8b5a70abd4e271630d572e.html#aa7e56c878f8b5a70abd4e271630d572e">wavefx_setup</a>();</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/d83/wavefx_8h_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335">wavefx_loop</a>();</div>
-<div class="ttc" id="awavefx_8h_a87678ef92428a738638ade3dd0180335_html_a87678ef92428a738638ade3dd0180335"><div class="ttname"><a href="../../dc/d83/wavefx_8h_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335">wavefx_loop</a></div><div class="ttdeci">void wavefx_loop()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d29/wavefx_8cpp_source.html#l00369">wavefx.cpp:369</a></div></div>
-<div class="ttc" id="awavefx_8h_aa7e56c878f8b5a70abd4e271630d572e_html_aa7e56c878f8b5a70abd4e271630d572e"><div class="ttname"><a href="../../dc/d83/wavefx_8h_aa7e56c878f8b5a70abd4e271630d572e.html#aa7e56c878f8b5a70abd4e271630d572e">wavefx_setup</a></div><div class="ttdeci">void wavefx_setup()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d29/wavefx_8cpp_source.html#l00351">wavefx.cpp:351</a></div></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">Install: pip install fastled</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">Run: fastled &lt;this sketch directory&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">This will compile and preview the sketch in the browser, and enable</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">all the UI elements you see below.</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"></span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">OVERVIEW:</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">This sketch demonstrates a 2D wave simulation with multiple layers and blending effects.</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">It creates ripple effects that propagate across the LED matrix, similar to water waves.</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">The demo includes two wave layers (upper and lower) with different colors and properties,</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">which are blended together to create complex visual effects.</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// Define the dimensions of our LED matrix</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">   27</a></span><span class="preprocessor">#define HEIGHT 64          </span><span class="comment">// Number of rows in the matrix</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">   28</a></span><span class="preprocessor">#define WIDTH 64           </span><span class="comment">// Number of columns in the matrix</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">   29</a></span><span class="preprocessor">#define NUM_LEDS ((WIDTH) * (HEIGHT))  </span><span class="comment">// Total number of LEDs</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="../../dc/d83/wavefx_8h_aaef57fab56b804d85580f89cc5309d4d.html#aaef57fab56b804d85580f89cc5309d4d">   30</a></span><span class="preprocessor">#define IS_SERPINTINE true </span><span class="comment">// Whether the LED strip zigzags back and forth (common in matrix layouts)</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/d83/wavefx_8h_aa7e56c878f8b5a70abd4e271630d572e.html#aa7e56c878f8b5a70abd4e271630d572e">wavefx_setup</a>();</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/d83/wavefx_8h_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335">wavefx_loop</a>();</div>
+<div class="ttc" id="awavefx_8h_a87678ef92428a738638ade3dd0180335_html_a87678ef92428a738638ade3dd0180335"><div class="ttname"><a href="../../dc/d83/wavefx_8h_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335">wavefx_loop</a></div><div class="ttdeci">void wavefx_loop()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d29/wavefx_8cpp_source.html#l00370">wavefx.cpp:370</a></div></div>
+<div class="ttc" id="awavefx_8h_aa7e56c878f8b5a70abd4e271630d572e_html_aa7e56c878f8b5a70abd4e271630d572e"><div class="ttname"><a href="../../dc/d83/wavefx_8h_aa7e56c878f8b5a70abd4e271630d572e.html#aa7e56c878f8b5a70abd4e271630d572e">wavefx_setup</a></div><div class="ttdeci">void wavefx_setup()</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d29/wavefx_8cpp_source.html#l00352">wavefx.cpp:352</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -140,7 +145,7 @@ $(function(){initNavTree('dc/d83/wavefx_8h_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_47eec6d0c0bc604dac9aa356a4226313.html">FxWave2d</a></li><li class="navelem"><a class="el" href="../../dc/d83/wavefx_8h.html">wavefx.h</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

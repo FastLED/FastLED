@@ -32,4 +32,6 @@ digraph "fl::DemoReel100::bpm"
   Node14 [id="Node000014",label="map8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d",tooltip="Map from one full-range 8-bit value into a narrower range of 8-bit values, possibly a range of hues."];
   Node14 -> Node6 [id="edge13_Node000014_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node12 [id="edge14_Node000007_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node15 [id="edge15_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
 }

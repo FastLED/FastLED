@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="dd/da7/classfl_1_1_weak_referent.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="db/d77/classfl_1_1_weak_ptr.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="98,-19 0,-19 0,0 98,0 98,-19"/>
-<text text-anchor="middle" x="49" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WeakReferent</text>
+<text text-anchor="middle" x="49" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WeakPtr&lt; T &gt;</text>
 </a>
 </g>
 </g>

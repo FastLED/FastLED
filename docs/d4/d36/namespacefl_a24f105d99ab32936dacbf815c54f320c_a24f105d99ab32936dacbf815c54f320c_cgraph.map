@@ -1,0 +1,5 @@
+<map id="fl::upscaleArbitrary" name="fl::upscaleArbitrary">
+<area shape="rect" id="Node000001" title="Performs bilinear interpolation for upscaling an image." alt="" coords="5,5,151,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2e4fe67035df871b23df6b907ca338c8.html#a2e4fe67035df871b23df6b907ca338c8" title=" " alt="" coords="199,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,15,185,15,185,21,151,21"/>
+</map>

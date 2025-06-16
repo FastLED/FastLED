@@ -1,7 +1,9 @@
 <map id="fl::ScreenMap::setDiameter" name="fl::ScreenMap::setDiameter">
-<area shape="rect" id="Node000001" title=" " alt="" coords="541,5,740,31"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="541,31,740,56"/>
 <area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a34a490a6be2f618ffe6ed7d60be5590a.html#a34a490a6be2f618ffe6ed7d60be5590a" title=" " alt="" coords="273,5,493,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="528,21,494,21,494,15,528,15"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="527,35,493,32,494,26,528,30"/>
+<area shape="rect" id="Node000004" href="$d8/dd0/_fire_cylinder_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="354,55,413,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="528,57,413,67,413,62,527,51"/>
 <area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_ad06833b1f048a6e63f36ba0256b4e6bd.html#ad06833b1f048a6e63f36ba0256b4e6bd" title=" " alt="" coords="5,5,225,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="260,21,226,21,226,15,260,15"/>
 </map>

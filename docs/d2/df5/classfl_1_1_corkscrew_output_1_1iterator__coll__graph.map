@@ -1,9 +1,0 @@
-<map id="fl::CorkscrewOutput::iterator" name="fl::CorkscrewOutput::iterator">
-<area shape="rect" id="Node000001" title=" " alt="" coords="927,29,1077,69"/>
-<area shape="rect" id="Node000002" href="$d7/d93/structfl_1_1_corkscrew_output.html" title=" " alt="" coords="676,37,827,62"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="840,47,927,47,927,52,840,52"/>
-<area shape="rect" id="Node000003" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="345,15,567,84"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="580,47,676,47,676,52,580,52"/>
-<area shape="rect" id="Node000004" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="5,29,145,69"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="159,47,345,47,345,52,159,52"/>
-</map>

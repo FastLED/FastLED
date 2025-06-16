@@ -18,5 +18,5 @@ digraph "loop"
   Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="inoise16_raw",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd",tooltip="16-bit, fixed point implementation of Perlin's noise without scaling."];
   Node3 -> Node8 [id="edge6_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="ledsScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a3dfdc49306d88d392965b34e6469711a.html#a3dfdc49306d88d392965b34e6469711a",tooltip=" "];
+  Node8 [id="Node000008",label="ledsScale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/da1/old_8h_a3dfdc49306d88d392965b34e6469711a.html#a3dfdc49306d88d392965b34e6469711a",tooltip=" "];
 }

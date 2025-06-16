@@ -255,8 +255,8 @@ var hierarchy =
     [ "fl::contains_type< T, U, Rest... >", "d3/d65/structfl_1_1contains__type_3_01_t_00_01_u_00_01_rest_8_8_8_01_4.html", null ],
     [ "fl::Corkscrew", "dc/d82/classfl_1_1_corkscrew.html", null ],
     [ "fl::CorkscrewInput", "d6/d7c/structfl_1_1_corkscrew_input.html", null ],
-    [ "fl::CorkscrewOutput", "d7/d93/structfl_1_1_corkscrew_output.html", null ],
-    [ "fl::CorkscrewOutput::iterator", "d5/d9f/classfl_1_1_corkscrew_output_1_1iterator.html", null ],
+    [ "fl::CorkscrewState", "d4/d76/structfl_1_1_corkscrew_state.html", null ],
+    [ "fl::CorkscrewState::iterator", "db/dde/classfl_1_1_corkscrew_state_1_1iterator.html", null ],
     [ "fl::decay< T >", "d4/d15/structfl_1_1decay.html", null ],
     [ "fl::DefaultLess< T >", "d6/de8/structfl_1_1_default_less.html", null ],
     [ "fl::DigitalPin", "d0/d32/classfl_1_1_digital_pin.html", null ],
@@ -568,6 +568,7 @@ var hierarchy =
     [ "fl::swap_impl< T, true >", "df/d7b/structfl_1_1swap__impl_3_01_t_00_01true_01_4.html", null ],
     [ "fl::ThreadLocalFake< T >", "dd/dfc/classfl_1_1_thread_local_fake.html", null ],
     [ "fl::Tile2x2_u8", "d0/d2b/classfl_1_1_tile2x2__u8.html", null ],
+    [ "fl::Tile2x2_u8_wrap", "df/d21/classfl_1_1_tile2x2__u8__wrap.html", null ],
     [ "fl::TimeAlpha", "d2/d4a/classfl_1_1_time_alpha.html", [
       [ "fl::TimeClampedTransition", "d8/d62/classfl_1_1_time_clamped_transition.html", null ],
       [ "fl::TimeRamp", "d0/d9d/classfl_1_1_time_ramp.html", null ]
@@ -682,5 +683,6 @@ var hierarchy =
     [ "Timer", "d8/d08/class_timer.html", null ],
     [ "ToggleButton", "d8/ddd/class_toggle_button.html", null ],
     [ "ui_state", "da/db7/structui__state.html", null ],
-    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ]
+    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ],
+    [ "XYMap", "d7/de6/class_x_y_map.html", null ]
 ];

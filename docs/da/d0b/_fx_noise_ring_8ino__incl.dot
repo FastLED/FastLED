@@ -182,13 +182,18 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing/FxNoiseRing.ino"
   Node96 -> Node70 [id="edge127_Node000096_Node000070",color="steelblue1",style="solid",tooltip=" "];
   Node58 -> Node36 [id="edge128_Node000058_Node000036",color="steelblue1",style="solid",tooltip=" "];
   Node58 -> Node48 [id="edge129_Node000058_Node000048",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node109 [id="edge130_Node000001_Node000109",color="steelblue1",style="solid",tooltip=" "];
-  Node109 [id="Node000109",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
-  Node109 -> Node10 [id="edge131_Node000109_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node109 -> Node25 [id="edge132_Node000109_Node000025",color="steelblue1",style="solid",tooltip=" "];
-  Node109 -> Node45 [id="edge133_Node000109_Node000045",color="steelblue1",style="solid",tooltip=" "];
-  Node109 -> Node13 [id="edge134_Node000109_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node19 [id="edge130_Node000058_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node23 [id="edge131_Node000058_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node6 [id="edge132_Node000058_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node30 [id="edge133_Node000058_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node45 [id="edge134_Node000058_Node000045",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node111 [id="edge135_Node000001_Node000111",color="steelblue1",style="solid",tooltip=" "];
-  Node111 [id="Node000111",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
+  Node111 [id="Node000111",label="sensors/pir.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dd3/pir_8h.html",tooltip=" "];
   Node111 -> Node10 [id="edge136_Node000111_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node111 -> Node25 [id="edge137_Node000111_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node111 -> Node45 [id="edge138_Node000111_Node000045",color="steelblue1",style="solid",tooltip=" "];
+  Node111 -> Node13 [id="edge139_Node000111_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node113 [id="edge140_Node000001_Node000113",color="steelblue1",style="solid",tooltip=" "];
+  Node113 [id="Node000113",label="timer.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/dd0/timer_8h.html",tooltip=" "];
+  Node113 -> Node10 [id="edge141_Node000113_Node000010",color="steelblue1",style="solid",tooltip=" "];
 }

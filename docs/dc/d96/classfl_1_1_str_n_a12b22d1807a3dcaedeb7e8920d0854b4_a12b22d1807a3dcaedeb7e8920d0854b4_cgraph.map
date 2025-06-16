@@ -1,9 +1,11 @@
 <map id="fl::StrN::substring" name="fl::StrN::substring">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,140,80"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,140,105"/>
 <area shape="rect" id="Node000002" href="$dc/d96/classfl_1_1_str_n_ae1303fb18c4230406d75f3649da8711d.html#ae1303fb18c4230406d75f3649da8711d" title=" " alt="" coords="189,5,292,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,52,182,32,184,37,117,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,77,198,34,200,39,104,82"/>
 <area shape="rect" id="Node000003" href="$dc/d96/classfl_1_1_str_n_a67296b774f8201293edbbabbd1b642cb.html#a67296b774f8201293edbbabbd1b642cb" title=" " alt="" coords="188,55,293,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,65,174,65,174,70,140,70"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,80,174,75,175,80,141,85"/>
 <area shape="rect" id="Node000004" href="$dc/d96/classfl_1_1_str_n_ab410c80422fa2cfe87605dd9b32002c1.html#ab410c80422fa2cfe87605dd9b32002c1" title=" " alt="" coords="188,104,293,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="117,77,184,97,182,102,116,83"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="141,100,175,105,174,110,140,105"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="209,153,272,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="104,103,199,145,197,150,102,108"/>
 </map>

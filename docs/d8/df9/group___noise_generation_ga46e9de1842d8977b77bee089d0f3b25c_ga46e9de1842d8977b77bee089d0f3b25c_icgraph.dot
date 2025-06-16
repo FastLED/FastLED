@@ -19,7 +19,7 @@ digraph "inoise16"
   Node5 -> Node6 [id="edge6_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fill_2dnoise16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da4/group___noise_fill_ga714a0f305e385a60d81a40d1f98b53fc.html#ga714a0f305e385a60d81a40d1f98b53fc",tooltip="Fill an LED matrix with random colors, using 16-bit noise."];
   Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/ddc/_noise_playground_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node7 [id="Node000007",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d4e/_noise_playground_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node5 -> Node5 [id="edge8_Node000005_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node8 [id="edge9_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fill_raw_2dnoise16into8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/de8/noise_8cpp_a46bde35765a7eddbd1049fe49429e94e.html#a46bde35765a7eddbd1049fe49429e94e",tooltip=" "];
@@ -32,13 +32,13 @@ digraph "inoise16"
   Node11 -> Node12 [id="edge13_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node12 [id="Node000012",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d2c/_fire2023_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node13 [id="edge14_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node13 [id="Node000013",label="getPaletteIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dfc/_fire_matrix_8ino_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba",tooltip=" "];
+  Node13 [id="Node000013",label="getPaletteIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba",tooltip=" "];
   Node13 -> Node14 [id="edge15_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node14 [id="Node000014",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dfc/_fire_matrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node14 [id="Node000014",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d88/_fire_matrix_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node15 [id="edge16_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node15 [id="Node000015",label="getPaletteIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d5c/_fire_cylinder_8ino_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d",tooltip=" "];
+  Node15 [id="Node000015",label="getPaletteIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d",tooltip=" "];
   Node15 -> Node16 [id="edge17_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d5c/_fire_cylinder_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node16 [id="Node000016",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node17 [id="edge18_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node17 [id="Node000017",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d0d/_r_g_b_w_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node18 [id="edge19_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];

@@ -17,14 +17,14 @@ digraph "wavefx_loop"
   Node5 [id="Node000005",label="fl::TimeRamp::update8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d9d/classfl_1_1_time_ramp_a17739bd3c0b0ea5b1aaac7670f4edfb0.html#a17739bd3c0b0ea5b1aaac7670f4edfb0",tooltip="Compute current 0–255 output based on how much time has elapsed since trigger()."];
   Node5 -> Node3 [id="edge5_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fl::time_alpha8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8",tooltip=" "];
-  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node7 [id="Node000007",label="processAutoTrigger",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_a861547b83e4a6aa092de815fca8219e8.html#a861547b83e4a6aa092de815fca8219e8",tooltip=" "];
-  Node7 -> Node8 [id="edge8_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="triggerRipple",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653",tooltip=" "];
-  Node1 -> Node8 [id="edge9_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node9 [id="edge10_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="ui",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_a17165033747bbdfa4fed36d476f531ab.html#a17165033747bbdfa4fed36d476f531ab",tooltip=" "];
-  Node9 -> Node10 [id="edge11_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="getSuperSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_ad3facb26c8fe2270d260a10ea9aceb09.html#ad3facb26c8fe2270d260a10ea9aceb09",tooltip=" "];
+  Node6 [id="Node000006",label="fl::time_alpha8",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a76248cce8d7b5923cdd01a26e6fccce8.html#a76248cce8d7b5923cdd01a26e6fccce8",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="processAutoTrigger",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_a861547b83e4a6aa092de815fca8219e8.html#a861547b83e4a6aa092de815fca8219e8",tooltip=" "];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="triggerRipple",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_ad5a517cd7a477ee7bc57296f99607653.html#ad5a517cd7a477ee7bc57296f99607653",tooltip=" "];
+  Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="ui",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_a17165033747bbdfa4fed36d476f531ab.html#a17165033747bbdfa4fed36d476f531ab",tooltip=" "];
+  Node10 -> Node11 [id="edge11_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="getSuperSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d29/wavefx_8cpp_ad3facb26c8fe2270d260a10ea9aceb09.html#ad3facb26c8fe2270d260a10ea9aceb09",tooltip=" "];
 }

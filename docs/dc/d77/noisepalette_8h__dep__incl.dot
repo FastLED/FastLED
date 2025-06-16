@@ -9,11 +9,7 @@ digraph "fx/2d/noisepalette.h"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="/home/runner/work/FastLED\l/FastLED/examples/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix."];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/FxSdCard\l/FxSdCard.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d35/_fx_sd_card_8ino.html",tooltip=" "];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/wasm_8ino.html",tooltip="Demonstrates an advanced ino file with multiple effects and UI elements."];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/Overclock\l/Overclock.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d43/_overclock_8ino.html",tooltip="Demonstrates how to overclock a FastLED setup."];
-  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/wasm_8ino.html",tooltip="Demonstrates an advanced ino file with multiple effects and UI elements."];
-  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="fx/2d/noisepalette.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d66/noisepalette_8cpp.html",tooltip=" "];
+  Node4 [id="Node000004",label="fx/2d/noisepalette.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d66/noisepalette_8cpp.html",tooltip=" "];
 }

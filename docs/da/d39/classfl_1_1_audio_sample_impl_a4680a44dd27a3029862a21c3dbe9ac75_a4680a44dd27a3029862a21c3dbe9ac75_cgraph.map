@@ -1,5 +1,9 @@
 <map id="fl::AudioSampleImpl::assign" name="fl::AudioSampleImpl::assign">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,159,45"/>
-<area shape="rect" id="Node000002" href="$da/d39/classfl_1_1_audio_sample_impl_abc40b208aebb869c47b64951b3f78268.html#abc40b208aebb869c47b64951b3f78268" title=" " alt="" coords="207,5,360,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,23,193,23,193,28,159,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,159,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58" title=" " alt="" coords="246,5,321,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,46,232,28,233,33,160,51"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="252,55,315,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,65,238,65,238,70,159,70"/>
+<area shape="rect" id="Node000004" href="$da/d39/classfl_1_1_audio_sample_impl_abc40b208aebb869c47b64951b3f78268.html#abc40b208aebb869c47b64951b3f78268" title=" " alt="" coords="207,105,360,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="154,85,200,98,199,103,152,90"/>
 </map>

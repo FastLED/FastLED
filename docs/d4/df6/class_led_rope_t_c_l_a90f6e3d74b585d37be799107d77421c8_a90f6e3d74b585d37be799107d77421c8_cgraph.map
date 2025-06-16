@@ -1,16 +1,20 @@
 <map id="LedRopeTCL::DrawSequentialRepeat" name="LedRopeTCL::DrawSequentialRepeat">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,97,217,137"/>
-<area shape="rect" id="Node000002" href="$d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464" title=" " alt="" coords="287,5,467,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,94,201,66,264,39,291,31,292,37,266,45,203,71,149,99"/>
-<area shape="rect" id="Node000003" href="$d4/df6/class_led_rope_t_c_l_a82a6589500d1934733920c133cdf6710.html#a82a6589500d1934733920c133cdf6710" title=" " alt="" coords="301,55,452,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="217,94,294,80,295,85,218,100"/>
-<area shape="rect" id="Node000004" href="$d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111" title=" " alt="" coords="273,104,481,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="218,114,259,114,259,119,218,119"/>
-<area shape="rect" id="Node000006" href="$d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454" title=" " alt="" coords="265,153,488,179"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="218,134,295,148,294,153,217,139"/>
-<area shape="rect" id="Node000007" href="$d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed" title=" " alt="" coords="275,227,478,252"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="155,134,266,188,335,219,333,224,264,192,153,139"/>
-<area shape="rect" id="Node000005" href="$d4/df6/class_led_rope_t_c_l_a4aada290bc25e4cc5dceb5a521ed935e.html#a4aada290bc25e4cc5dceb5a521ed935e" title=" " alt="" coords="536,104,737,129"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="481,114,522,114,522,119,481,119"/>
-<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="335,228,326,218,330,208,348,202,377,200,413,204,423,209,427,214,423,217,420,213,412,209,377,205,349,207,334,212,331,218,339,225"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,146,217,186"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58" title=" " alt="" coords="339,5,414,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,144,186,91,224,63,264,40,294,28,325,21,326,26,296,33,266,44,227,68,190,95,133,148"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="345,55,408,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,143,201,115,264,89,331,72,332,77,266,94,203,120,149,148"/>
+<area shape="rect" id="Node000004" href="$d4/df6/class_led_rope_t_c_l_a79ccaade09b2a2ac734abb010107a464.html#a79ccaade09b2a2ac734abb010107a464" title=" " alt="" coords="287,104,467,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="217,144,294,129,295,134,218,149"/>
+<area shape="rect" id="Node000005" href="$d4/df6/class_led_rope_t_c_l_a82a6589500d1934733920c133cdf6710.html#a82a6589500d1934733920c133cdf6710" title=" " alt="" coords="301,153,452,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="218,163,288,163,288,169,218,169"/>
+<area shape="rect" id="Node000006" href="$d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111" title=" " alt="" coords="273,203,481,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="218,183,295,198,294,203,217,188"/>
+<area shape="rect" id="Node000008" href="$d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454" title=" " alt="" coords="265,252,488,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="150,184,204,211,266,237,297,246,295,251,264,242,202,216,148,189"/>
+<area shape="rect" id="Node000009" href="$d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed" title=" " alt="" coords="275,325,478,351"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="136,184,193,234,267,286,330,318,327,322,264,291,190,238,132,188"/>
+<area shape="rect" id="Node000007" href="$d4/df6/class_led_rope_t_c_l_a4aada290bc25e4cc5dceb5a521ed935e.html#a4aada290bc25e4cc5dceb5a521ed935e" title=" " alt="" coords="536,203,737,228"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="481,213,522,213,522,218,481,218"/>
+<area shape="poly" id="edge9_Node000009_Node000009" title=" " alt="" coords="335,327,326,317,330,307,348,301,377,299,413,303,423,307,427,313,423,316,420,311,412,308,377,304,349,306,334,311,331,316,339,323"/>
 </map>

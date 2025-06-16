@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave"
   dir_62798ea9a090ceb87f4747f68ba3eda3 [label="Wave", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_62798ea9a090ceb87f4747f68ba3eda3.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_62798ea9a090ceb87f4747f68ba3eda3->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000094_000033.html" href="dir_000094_000033.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_62798ea9a090ceb87f4747f68ba3eda3->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000095_000035.html" href="dir_000095_000035.html" color="steelblue1" fontcolor="steelblue1"];
 }

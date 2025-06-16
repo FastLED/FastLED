@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/d05/_bilinear_compression_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="218.5,-67.5 180.5,-67.5 180.5,-48.5 218.5,-48.5 218.5,-67.5"/>
 <text text-anchor="middle" x="199.5" y="-55.5" font-family="Helvetica,sans-Serif" font-size="10.00">loop</text>
 </a>
@@ -58,7 +58,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d4/dda/_bilinear_compression_2src_2xypaths_8cpp_a216df6dfd9fcc2f1644620313c78ce51.html#a216df6dfd9fcc2f1644620313c78ce51" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../dd/d96/_downscale_2src_2xypaths_8cpp_a216df6dfd9fcc2f1644620313c78ce51.html#a216df6dfd9fcc2f1644620313c78ce51" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="88,-24.5 0,-24.5 0,-5.5 88,-5.5 88,-24.5"/>
 <text text-anchor="middle" x="44" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">CreateXYPaths</text>
 </a>

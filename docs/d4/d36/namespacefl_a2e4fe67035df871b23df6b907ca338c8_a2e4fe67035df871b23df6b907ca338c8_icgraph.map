@@ -1,12 +1,18 @@
 <map id="fl::bilinearInterpolate" name="fl::bilinearInterpolate">
-<area shape="rect" id="Node000001" title=" " alt="" coords="623,29,781,55"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aed039daa2110de9add4bdbeea4052a57.html#aed039daa2110de9add4bdbeea4052a57" title="Performs bilinear interpolation for upscaling an image." alt="" coords="383,29,575,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="609,45,575,45,575,39,609,39"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a521b1a75c2204adfdd48e82bec341de6.html#a521b1a75c2204adfdd48e82bec341de6" title=" " alt="" coords="200,55,335,80"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="369,58,335,62,335,57,368,53"/>
-<area shape="rect" id="Node000004" href="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066" title=" " alt="" coords="5,5,152,31"/>
-<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="368,38,152,25,152,20,369,33"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="204,54,128,33,129,28,206,49"/>
-<area shape="rect" id="Node000006" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="20,55,137,80"/>
-<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="186,70,138,70,138,65,186,65"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="812,56,971,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a24f105d99ab32936dacbf815c54f320c.html#a24f105d99ab32936dacbf815c54f320c" title="Performs bilinear interpolation for upscaling an image." alt="" coords="619,56,764,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="798,71,765,71,765,66,798,66"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ae0d933dcd599eac58bd2f18114c41ff5.html#ae0d933dcd599eac58bd2f18114c41ff5" title="Performs bilinear interpolation for upscaling an image." alt="" coords="379,5,571,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="622,55,529,33,530,28,624,50"/>
+<area shape="rect" id="Node000004" href="$d5/d79/classfl_1_1_scale_up_a04b53ac5f5bbe9d2477fc08e8ab77066.html#a04b53ac5f5bbe9d2477fc08e8ab77066" title=" " alt="" coords="184,56,331,81"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="605,71,331,71,331,66,605,66"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a111ba754b48942237db55be314bf5a23.html#a111ba754b48942237db55be314bf5a23" title=" " alt="" coords="431,107,519,132"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="623,87,519,112,518,107,622,82"/>
+<area shape="rect" id="Node000005" href="$d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262" title=" " alt="" coords="5,56,136,81"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="170,71,136,71,136,66,170,66"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="416,109,312,84,313,79,418,103"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a2c1b40f2ba748d4d15102c3e5ebd37f4.html#a2c1b40f2ba748d4d15102c3e5ebd37f4" title=" " alt="" coords="190,105,325,131"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="417,122,325,121,325,116,417,116"/>
+<area shape="rect" id="Node000008" href="$d7/d82/struct_c_r_g_b_ab0312ff6ed447d7d6429c200419088d1.html#ab0312ff6ed447d7d6429c200419088d1" title=" " alt="" coords="199,155,316,180"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="418,135,316,157,315,152,416,129"/>
 </map>

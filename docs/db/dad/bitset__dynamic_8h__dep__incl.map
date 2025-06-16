@@ -4,14 +4,14 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="375,44,375,79,370,79,370,44"/>
 <area shape="rect" id="Node000003" href="$d6/d13/hash__map_8h.html" title=" " alt="" coords="235,152,348,177"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="351,115,306,154,303,150,348,111"/>
-<area shape="rect" id="Node000025" href="$d8/da7/line__simplification_8h.html" title=" " alt="" coords="417,152,582,177"/>
-<area shape="poly" id="edge6_Node000002_Node000025" title=" " alt="" coords="406,108,480,149,477,154,404,113"/>
+<area shape="rect" id="Node000024" href="$d8/da7/line__simplification_8h.html" title=" " alt="" coords="417,152,582,177"/>
+<area shape="poly" id="edge6_Node000002_Node000024" title=" " alt="" coords="406,108,480,149,477,154,404,113"/>
 <area shape="rect" id="Node000004" href="$dd/d0c/hash__map__lru_8h.html" title=" " alt="" coords="5,225,143,251"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="244,184,110,228,108,223,243,179"/>
 <area shape="rect" id="Node000008" href="$dc/de3/hash__set_8h.html" title=" " alt="" coords="167,225,271,251"/>
 <area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="271,189,233,227,229,223,268,185"/>
 <area shape="rect" id="Node000009" href="$d4/df9/raster__sparse_8h.html" title=" " alt="" coords="296,225,431,251"/>
 <area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="315,185,354,223,350,227,311,189"/>
-<area shape="rect" id="Node000026" href="$de/ddb/line__simplification_8cpp.html" title=" " alt="" coords="455,225,635,251"/>
-<area shape="poly" id="edge7_Node000025_Node000026" title=" " alt="" coords="516,188,540,224,535,227,512,191"/>
+<area shape="rect" id="Node000025" href="$de/ddb/line__simplification_8cpp.html" title=" " alt="" coords="455,225,635,251"/>
+<area shape="poly" id="edge7_Node000024_Node000025" title=" " alt="" coords="516,188,540,224,535,227,512,191"/>
 </map>

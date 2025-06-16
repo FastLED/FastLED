@@ -1,5 +1,7 @@
 <map id="fl::XYPath::rasterize" name="fl::XYPath::rasterize">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,153,31"/>
-<area shape="rect" id="Node000002" href="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1" title=" " alt="" coords="201,5,259,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,15,188,15,188,21,153,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,153,56"/>
+<area shape="rect" id="Node000002" href="$d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410" title=" " alt="" coords="201,5,261,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,28,187,23,188,28,154,34"/>
+<area shape="rect" id="Node000003" href="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1" title=" " alt="" coords="203,55,260,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,52,190,58,189,63,153,58"/>
 </map>

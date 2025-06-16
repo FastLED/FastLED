@@ -117,22 +117,22 @@ $(function(){initNavTree('db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d8/d79/_color_temperature_8ino-example.html#a2">ColorTemperature.ino</a>, and <a class="el" href="../../db/dd5/_demo_reel100_8ino-example.html#a8">DemoReel100.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00189">189</a> of file <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html">Esp32S3I2SDemo.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  189</span>                                  {</div>
-<div class="line"><span class="lineno">  190</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> s_offset = 0;</div>
-<div class="line"><span class="lineno">  191</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa.html#ad772ef459a5e48b8cca65ea9d52857aa">NUMSTRIPS</a>; j++) {</div>
-<div class="line"><span class="lineno">  192</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>; i++) {</div>
-<div class="line"><span class="lineno">  193</span>            <span class="keywordtype">int</span> idx = (i + s_offset) % <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a> + <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a> * j;</div>
-<div class="line"><span class="lineno">  194</span>            all_leds[idx] = <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a>(i, 255, 255);</div>
-<div class="line"><span class="lineno">  195</span>        }</div>
-<div class="line"><span class="lineno">  196</span>    }</div>
-<div class="line"><span class="lineno">  197</span>    s_offset++;</div>
-<div class="line"><span class="lineno">  198</span>}</div>
-<div class="ttc" id="a_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86_html_a12d6dbbf786a1b89a3cf4d23426e8d86"><div class="ttname"><a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a></div><div class="ttdeci">#define NUM_LEDS_PER_STRIP</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00066">Esp32S3I2SDemo.ino:66</a></div></div>
-<div class="ttc" id="a_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa_html_ad772ef459a5e48b8cca65ea9d52857aa"><div class="ttname"><a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa.html#ad772ef459a5e48b8cca65ea9d52857aa">NUMSTRIPS</a></div><div class="ttdeci">#define NUMSTRIPS</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00065">Esp32S3I2SDemo.ino:65</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00166">166</a> of file <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html">Esp32S3I2SDemo.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  166</span>                                  {</div>
+<div class="line"><span class="lineno">  167</span>    <span class="keyword">static</span> <span class="keywordtype">int</span> s_offset = 0;</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; j &lt; <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa.html#ad772ef459a5e48b8cca65ea9d52857aa">NUMSTRIPS</a>; j++) {</div>
+<div class="line"><span class="lineno">  169</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>; i++) {</div>
+<div class="line"><span class="lineno">  170</span>            <span class="keywordtype">int</span> idx = (i + s_offset) % <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a> + <a class="code hl_define" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a> * j;</div>
+<div class="line"><span class="lineno">  171</span>            all_leds[idx] = <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a>(i, 255, 255);</div>
+<div class="line"><span class="lineno">  172</span>        }</div>
+<div class="line"><span class="lineno">  173</span>    }</div>
+<div class="line"><span class="lineno">  174</span>    s_offset++;</div>
+<div class="line"><span class="lineno">  175</span>}</div>
+<div class="ttc" id="a_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86_html_a12d6dbbf786a1b89a3cf4d23426e8d86"><div class="ttname"><a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a></div><div class="ttdeci">#define NUM_LEDS_PER_STRIP</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00046">Esp32S3I2SDemo.ino:46</a></div></div>
+<div class="ttc" id="a_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa_html_ad772ef459a5e48b8cca65ea9d52857aa"><div class="ttname"><a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_ad772ef459a5e48b8cca65ea9d52857aa.html#ad772ef459a5e48b8cca65ea9d52857aa">NUMSTRIPS</a></div><div class="ttdeci">#define NUMSTRIPS</div><div class="ttdef"><b>Definition</b> <a href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00045">Esp32S3I2SDemo.ino:45</a></div></div>
 <div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="../../dc/d53/struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00016">chsv.h:16</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00066">NUM_LEDS_PER_STRIP</a>, and <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00065">NUMSTRIPS</a>.</p>
+<p class="reference">References <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00046">NUM_LEDS_PER_STRIP</a>, and <a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino_source.html#l00045">NUMSTRIPS</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d7/d22/_color_temperature_8ino_source.html#l00056">loop()</a>, and <a class="el" href="../../d5/d25/_demo_reel100_8ino_source.html#l00069">rainbow()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -152,7 +152,7 @@ $(function(){initNavTree('db/de9/_esp32_s3_i2_s_demo_8ino_a7a96d6e71a7754105104c
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_1e86eb05dfedeac38d51c0d61b4912b9.html">Esp32S3I2SDemo</a></li><li class="navelem"><a class="el" href="../../db/de9/_esp32_s3_i2_s_demo_8ino.html">Esp32S3I2SDemo.ino</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:38 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

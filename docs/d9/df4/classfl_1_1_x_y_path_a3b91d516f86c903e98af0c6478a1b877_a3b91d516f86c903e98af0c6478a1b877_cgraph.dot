@@ -12,8 +12,11 @@ digraph "fl::XYPath::drawColor"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::clamp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::XYPath::rasterize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_af6029bf8c93cd26d3389878578ac7221.html#af6029bf8c93cd26d3389878578ac7221",tooltip=" "];
-  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="steps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1",tooltip=" "];
-  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="raster",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::XYPath::rasterize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_af6029bf8c93cd26d3389878578ac7221.html#af6029bf8c93cd26d3389878578ac7221",tooltip=" "];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="steps",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

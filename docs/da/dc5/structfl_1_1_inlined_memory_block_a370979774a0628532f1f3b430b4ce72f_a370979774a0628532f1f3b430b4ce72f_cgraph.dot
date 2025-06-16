@@ -9,4 +9,6 @@ digraph "fl::InlinedMemoryBlock::InlinedMemoryBlock"
   Node1 [id="Node000001",label="fl::InlinedMemoryBlock\l::InlinedMemoryBlock",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::InlinedMemoryBlock\l::memory",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc5/structfl_1_1_inlined_memory_block_ac7adc8a37e4bb8a399eb2e32c85409ef.html#ac7adc8a37e4bb8a399eb2e32c85409ef",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a44ec854fe5278548217eba95585d0e58.html#a44ec854fe5278548217eba95585d0e58",tooltip=" "];
 }

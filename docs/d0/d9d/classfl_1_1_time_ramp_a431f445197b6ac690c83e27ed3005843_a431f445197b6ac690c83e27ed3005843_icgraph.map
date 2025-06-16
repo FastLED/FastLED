@@ -1,9 +1,11 @@
 <map id="fl::TimeRamp::trigger" name="fl::TimeRamp::trigger">
-<area shape="rect" id="Node000001" title="Call this when you want to (re)start the ramp cycle." alt="" coords="437,5,597,31"/>
-<area shape="rect" id="Node000002" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="257,5,389,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="424,21,389,21,389,15,424,15"/>
+<area shape="rect" id="Node000001" title="Call this when you want to (re)start the ramp cycle." alt="" coords="465,31,625,56"/>
+<area shape="rect" id="Node000002" href="$d9/d29/wavefx_8cpp_ad9a319c4c09fbbad4700861a49058f41.html#ad9a319c4c09fbbad4700861a49058f41" title=" " alt="" coords="271,5,403,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="451,35,403,29,404,23,452,29"/>
+<area shape="rect" id="Node000005" href="$d0/d9d/classfl_1_1_time_ramp_a351a6be74f90f0fed250bcc34d4ac19b.html#a351a6be74f90f0fed250bcc34d4ac19b" title=" " alt="" coords="257,55,417,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="452,57,418,61,417,55,452,51"/>
 <area shape="rect" id="Node000003" href="$d9/d29/wavefx_8cpp_a87678ef92428a738638ade3dd0180335.html#a87678ef92428a738638ade3dd0180335" title=" " alt="" coords="104,5,209,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,21,210,21,210,15,244,15"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="258,21,210,21,210,15,258,15"/>
 <area shape="rect" id="Node000004" href="$dd/d10/_fx_wave2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
 </map>

@@ -136,9 +136,9 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  547</span><span class="preprocessor">#if SCALE16_C == 1</span></div>
 <div class="line"><span class="lineno">  548</span>    uint16_t result;</div>
 <div class="line"><span class="lineno">  549</span><span class="preprocessor">#if FASTLED_SCALE8_FIXED == 1</span></div>
-<div class="line"><span class="lineno">  550</span>    result = ((uint32_t)(i) * (1 + (uint32_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>))) / 65536;</div>
+<div class="line"><span class="lineno">  550</span>    result = ((uint32_t)(i) * (1 + (uint32_t)(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>))) / 65536;</div>
 <div class="line"><span class="lineno">  551</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  552</span>    result = ((uint32_t)(i) * (uint32_t)(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)) / 65536;</div>
+<div class="line"><span class="lineno">  552</span>    result = ((uint32_t)(i) * (uint32_t)(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)) / 65536;</div>
 <div class="line"><span class="lineno">  553</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  554</span>    <span class="keywordflow">return</span> result;</div>
 <div class="line"><span class="lineno">  555</span><span class="preprocessor">#elif SCALE16_AVRASM == 1</span></div>
@@ -166,7 +166,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  577</span>        <span class="comment">// UNlike in the &#39;unfixed scale8&#39; version.</span></div>
 <div class="line"><span class="lineno">  578</span>        <span class="comment">// So the movw here is needed.</span></div>
 <div class="line"><span class="lineno">  579</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  580</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  580</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</div>
 <div class="line"><span class="lineno">  581</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  582</span> </div>
 <div class="line"><span class="lineno">  583</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
@@ -176,7 +176,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  587</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  588</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  589</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  590</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  590</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</div>
 <div class="line"><span class="lineno">  591</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  592</span> </div>
 <div class="line"><span class="lineno">  593</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
@@ -199,7 +199,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  610</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  611</span> </div>
 <div class="line"><span class="lineno">  612</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  613</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
+<div class="line"><span class="lineno">  613</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
 <div class="line"><span class="lineno">  614</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  615</span> </div>
 <div class="line"><span class="lineno">  616</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
@@ -232,7 +232,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  643</span>        <span class="comment">// a generic 16x16 multiply somewhere.</span></div>
 <div class="line"><span class="lineno">  644</span> </div>
 <div class="line"><span class="lineno">  645</span>        : [result] <span class="stringliteral">&quot;=r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  646</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  646</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</div>
 <div class="line"><span class="lineno">  647</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  648</span> </div>
 <div class="line"><span class="lineno">  649</span>    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
@@ -242,7 +242,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  653</span>        <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  654</span>        <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  655</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  656</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>)</div>
+<div class="line"><span class="lineno">  656</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</div>
 <div class="line"><span class="lineno">  657</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  658</span> </div>
 <div class="line"><span class="lineno">  659</span>    <span class="keyword">const</span> uint8_t zero = 0;</div>
@@ -265,7 +265,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  676</span>        <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
 <div class="line"><span class="lineno">  677</span> </div>
 <div class="line"><span class="lineno">  678</span>        : [result] <span class="stringliteral">&quot;+r&quot;</span>(result)</div>
-<div class="line"><span class="lineno">  679</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
+<div class="line"><span class="lineno">  679</span>        : [i] <span class="stringliteral">&quot;r&quot;</span>(i), [<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>] <span class="stringliteral">&quot;r&quot;</span>(<a class="code hl_variable" href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>), [zero] <span class="stringliteral">&quot;r&quot;</span>(zero)</div>
 <div class="line"><span class="lineno">  680</span>        : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span>);</div>
 <div class="line"><span class="lineno">  681</span> </div>
 <div class="line"><span class="lineno">  682</span>    result = result &gt;&gt; 16;</div>
@@ -275,9 +275,9 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div class="line"><span class="lineno">  686</span><span class="preprocessor">#error &quot;No implementation for scale16 available.&quot;</span></div>
 <div class="line"><span class="lineno">  687</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  688</span>}</div>
-<div class="ttc" id="a_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db_html_a9249bbbf81270ca9e6d11e25df5df3db"><div class="ttname"><a href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a></div><div class="ttdeci">UISlider scale(&quot;Scale&quot;, 1.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="afunky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38_html_ab7346c8b67db0b99afe3fe1eff3b5b38"><div class="ttname"><a href="../../d6/d43/funky_8cpp_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a></div><div class="ttdeci">uint16_t scale</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d43/funky_8cpp_source.html#l00083">funky.cpp:83</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../da/d05/_bilinear_compression_8ino_a9249bbbf81270ca9e6d11e25df5df3db.html#a9249bbbf81270ca9e6d11e25df5df3db">scale</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d7a/lib8static_8h_source.html#l00010">LIB8STATIC</a>, and <a class="el" href="../../d6/d43/funky_8cpp_source.html#l00083">scale</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00939">beatsin16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00921">beatsin88()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00607">ease16InOutQuad()</a>, <a class="el" href="../../d6/de8/noise_8cpp_source.html#l00770">fill_raw_2dnoise16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00505">lerp15by16()</a>, <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00454">lerp16by16()</a>, <a class="el" href="../../dc/d70/pacifica_8h_source.html#l00090">fl::Pacifica::pacifica_one_layer()</a>, <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00113">pacifica_one_layer()</a>, <a class="el" href="../../d8/d8c/transform_8cpp_source.html#l00044">fl::Transform16::ToBounds()</a>, and <a class="el" href="../../d8/d8c/transform_8cpp_source.html#l00064">fl::Transform16::ToBounds()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -297,7 +297,7 @@ $(function(){initNavTree('d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/group___scaling.html">Scaling Functions</a></li>
-    <li class="footer">Generated on Thu Jun 5 2025 04:29:39 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Mon Jun 16 2025 06:27:49 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->
