@@ -33,7 +33,7 @@ def main() -> int:
     board_dir = board_dirs[which]
     # build_info_json = board_dir / "build_info.json"
     optimization_report = board_dir / "optimization_report.txt"
-    text = optimization_report.read_text(encoding="utf-8")
+    text = optimization_report.read_text(encoding="utf-8", errors="replace")
     print(text)
     return 0
 
