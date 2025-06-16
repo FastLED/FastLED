@@ -16,7 +16,7 @@ from ci.locked_print import locked_print
 
 HERE = Path(__file__).parent.resolve()
 
-LIBS = ["src", "ci"]
+LIBS = ["src"]
 EXTRA_LIBS = [
     "https://github.com/me-no-dev/ESPAsyncWebServer.git",
     "ArduinoOTA",
