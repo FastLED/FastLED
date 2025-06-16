@@ -179,9 +179,6 @@ ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="seeed_xiao_esp32s3",  # Seeed Xiao ESP32-S3 has psram.
     platform=ESP32_IDF_5_4_PIOARDUINO,
-    defines=[
-        "BOARD_HAS_PSRAM",
-    ],
     board_partitions="huge_app.csv",  # Reserved for future use.
 )
 
