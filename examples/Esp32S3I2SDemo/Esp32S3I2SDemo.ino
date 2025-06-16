@@ -3,8 +3,6 @@
 /// The Yves ESP32_S3 I2S driver is a driver that uses the I2S peripheral on the ESP32-S3 to drive leds.
 /// Originally from: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
 ///
-/// UPDATE: Newest ESP32-S3 Arduino core (3.10) has a bug that prevents this driver from working. See issue 1903.
-///         workaround: PIN YOUR DEPEDENCIES! We provide a PlatformIO configuration.
 ///
 /// This is an advanced driver. It has certain ramifications.
 ///   - Once flashed, the ESP32-S3 might NOT want to be reprogrammed again. To get around
@@ -12,7 +10,7 @@
 ///     an upload port.
 ///   - Put a delay in the setup function. This is to make it easier to flash the device during developement.
 ///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
-///     but just be aware of it. If your device suddenly stops works, remove the printfs and see if that fixes the problem.
+///     but just be aware of it. If your device suddenly stops working, remove the printfs and see if that fixes the problem.
 ///
 /// Is RGBW supported? Yes.
 ///
@@ -38,7 +36,7 @@
 // board = seeed_xiao_esp32s3
 
 
-#define FASTLED_USES_ESP32S3_I2S
+#define FASTLED_USES_ESP32S3_I2S  // Must define this before including FastLED.h
 
 #include "FastLED.h"
 #include "fl/assert.h"
@@ -47,6 +45,8 @@
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NUMSTRIPS)
+
+// Note that you can use less strips than this.
 
 #define EXAMPLE_PIN_NUM_DATA0 19  // B0
 #define EXAMPLE_PIN_NUM_DATA1 45  // B1
@@ -65,8 +65,6 @@
 #define EXAMPLE_PIN_NUM_DATA14 17 // R3
 #define EXAMPLE_PIN_NUM_DATA15 18 // R4
 
-
-const bool gUseFastLEDApi = true;  // Set this to false to use the raw driver.
 
 // Users say you can use a lot less strips. Experiment around and find out!
 // Please comment at reddit.com/r/fastled and let us know if you have problems.
@@ -90,10 +88,9 @@ int PINS[] = {
     EXAMPLE_PIN_NUM_DATA15
 };
 
-fl::InternalI2SDriver *driver = nullptr;
 CRGB leds[NUM_LEDS];
 
-void setup_i2s_using_fastled_api() {
+void setup_i2s() {
     // Note, in this case we are using contingious memory for the leds. But this is not required.
     // Each strip can be a different size and the FastLED api will upscale the smaller strips to the largest strip.
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA0, GRB>(
@@ -144,15 +141,11 @@ void setup_i2s_using_fastled_api() {
     FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA15, GRB>(
         leds + (15 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
     );
-    FastLED.setBrightness(32);
 }
 
 
 
 void setup() {
-    // This is no longer necessary, it will get called automatically when
-    // the I2S peripheral is initialized.
-    // psramInit(); // IMPORTANT: This is required to enable PSRAM. If you don't do this, the driver will not work.
     // put your setup code here, to run once:
     Serial.begin(57600);
 
@@ -164,13 +157,10 @@ void setup() {
 
     log_d("waiting 6 seconds before startup");
     delay(6000);  // The long reset time here is to make it easier to flash the device during the development process.
-    if (gUseFastLEDApi) {
-        setup_i2s_using_fastled_api();
-    } else {
-        driver = fl::InternalI2SDriver::create();
-        driver->initled((uint8_t *)leds, PINS, NUMSTRIPS, NUM_LEDS_PER_STRIP);  // Skips extra frame buffer copy.
-        driver->setBrightness(32);
-    }
+
+    setup_i2s();
+    FastLED.setBrightness(32);
+   
 }
 
 void fill_rainbow(CRGB* all_leds) {
@@ -186,10 +176,6 @@ void fill_rainbow(CRGB* all_leds) {
 
 void loop() {
     fill_rainbow(leds);
-    if (gUseFastLEDApi) {
-        FastLED.show();
-    } else {
-        FASTLED_ASSERT(driver != nullptr, "Did not expect driver to be null");
-        driver->show();
-    }
+    FastLED.show();
+    
 }
