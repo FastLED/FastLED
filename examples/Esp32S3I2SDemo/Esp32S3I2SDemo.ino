@@ -36,32 +36,7 @@
 // platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
 // framework = arduino
 // board = seeed_xiao_esp32s3
-//
-//
-////////// ORIGNAL - ARCHIVE ///////////
-// ORIGINAL (THE ORIGINAL CONFIGURATION THAT GOT THIS TO WORK)
-// [env:esp32s3]
-// platform = https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip
-// framework = arduino
-// board = seeed_xiao_esp32s3
-// build_flags = 
-//     -DBOARD_HAS_PSRAM
-//     -mfix-esp32-psram-cache-issue
-//     -mfix-esp32-psram-cache-strategy=memw
-// board_build.partitions = huge_app.csv
-//
-// Then in your setup function you are going to want to call psramInit();
-//
-// Want to get a contributor badge for FastLED? This driver has only been lightly tested.
-// There are certain open questions:
-//  - Can the pins order for the strips be changed?    (the pins can be defined arbitrarily,Tested on esp32s3, esp32duino version 3.2.0)
-//  - Are there some combination of pins that can be ommitted?
-//  - What other caveats are there?
-//
-//  If you know the answer to these questions then please submit a PR to the FastLED repo and
-//  we will update the information for the community.
 
-#include <esp_psram.h>
 
 #define FASTLED_USES_ESP32S3_I2S
 
@@ -179,7 +154,7 @@ void setup() {
     // the I2S peripheral is initialized.
     // psramInit(); // IMPORTANT: This is required to enable PSRAM. If you don't do this, the driver will not work.
     // put your setup code here, to run once:
-    Serial.begin(115200);
+    Serial.begin(57600);
 
     // This is used so that you can see if PSRAM is enabled. If not, we will crash in setup() or in loop().
     log_d("Total heap: %d", ESP.getHeapSize());
@@ -187,7 +162,7 @@ void setup() {
     log_d("Total PSRAM: %d", ESP.getPsramSize());  // If this prints out 0, then PSRAM is not enabled.
     log_d("Free PSRAM: %d", ESP.getFreePsram());
 
-    log_d("waiting 6 second before startup");
+    log_d("waiting 6 seconds before startup");
     delay(6000);  // The long reset time here is to make it easier to flash the device during the development process.
     if (gUseFastLEDApi) {
         setup_i2s_using_fastled_api();

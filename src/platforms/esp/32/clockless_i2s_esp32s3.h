@@ -14,6 +14,20 @@
 #include "fl/vector.h"
 #include "eorder.h"
 
+#ifndef FASTLED_INTERNAL
+// We need to do a check for the esp-idf version because very specific versions of the
+// esp-idf arduino core are broken.
+#include "platforms/esp/esp_version.h"
+// Broken in 3.0.2 (esp-idf 5.1.0)
+// Broken in 3.0.4 (esp-idf 5.1.0)
+// Broken in 3.0.7 (esp-idf 5.1.0)
+// Broken in 3.1.0 (esp-idf 5.3.2)
+#if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 1, 0) && ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 2, 0)
+#error "I2S driver is known to not be compatible with ESP-IDF 5.1.0, upgrade to ESP-IDF 5.4.0 in Arduino core esp32 3.2.0+, see https://github.com/FastLED/FastLED/issues/1903"
+#elif ESP_IDF_VERSION == ESP_IDF_VERSION_VAL(5, 3, 2)
+#error "I2S driver is known to not be compatible with ESP-IDF 5.3.2, upgrade to ESP-IDF 5.4.0 in Arduino core esp32 3.2.0+, see https://github.com/FastLED/FastLED/issues/1903"
+#endif
+#endif  // FASTLED_INTERNAL
 
 namespace fl {
 

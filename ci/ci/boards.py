@@ -11,6 +11,7 @@ ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 
 # TODO: Upgrade toolkit to 5.3
 ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10/platform-espressif32.zip"
+ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip"
 ESP32_IDF_5_1_PIOARDUINO_LATEST = (
     "https://github.com/pioarduino/platform-espressif32.git#develop"
 )
@@ -177,13 +178,9 @@ ESP32_C6_DEVKITC_1 = Board(
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32s3",
     real_board_name="seeed_xiao_esp32s3",  # Seeed Xiao ESP32-S3 has psram.
-    platform=ESP32_IDF_5_3_PIOARDUINO,
+    platform=ESP32_IDF_5_4_PIOARDUINO,
     defines=[
         "BOARD_HAS_PSRAM",
-    ],
-    build_flags=[  # Reserved for future use.
-        "-mfix-esp32-psram-cache-issue",
-        "-mfix-esp32-psram-cache-strategy=memw",
     ],
     board_partitions="huge_app.csv",  # Reserved for future use.
 )
