@@ -26,12 +26,16 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
         // Calculate position along the corkscrew (0.0 to 1.0)
         const float ledProgress = static_cast<float>(i) / static_cast<float>(input.numLeds - 1);
         
-        // Calculate angle position (0 to totalTurns * 2π)
-        const float totalAngle = ledProgress * input.totalTurns * TWO_PI;
-        const float normalizedAngle = fmodf(totalAngle, TWO_PI) / TWO_PI; // 0 to 1 within current turn
+        // Calculate which turn we're in and position within that turn
+        const float totalProgress = ledProgress * input.totalTurns;
+        const float currentTurn = floorf(totalProgress); // Which complete turn (0, 1, 2, ...)
+        const float positionInTurn = totalProgress - currentTurn; // 0.0 to 1.0 within current turn
         
-        // Calculate height position (0 to height-1)
-        const float heightProgress = ledProgress; // Linear progression through height
+        // Height increases at turn boundaries (stair step at width border)
+        const float heightProgress = currentTurn / input.totalTurns;
+        
+        // Width position based on position within current turn
+        const float normalizedAngle = positionInTurn; // 0 to 1 within current turn
         
         // Map to grid coordinates
         const float width_pos = normalizedAngle * static_cast<float>(output->width - 1) + input.offsetCircumference;

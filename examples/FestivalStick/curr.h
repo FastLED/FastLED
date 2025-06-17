@@ -25,13 +25,11 @@ to test that the forward mapping works correctly first.
 
 using namespace fl;
 
-
 #define PIN_DATA 9
 #define PIN_CLOCK 7
 
-
 #define NUM_LEDS 288
-#define CORKSCREW_TURNS 19.0     // Default to 19 turns
+#define CORKSCREW_TURNS 19.5 // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -57,14 +55,14 @@ static float currentPosition = 0.0f;
 static uint32_t lastUpdateTime = 0;
 
 // Option 2: Constexpr dimensions for compile-time array sizing
-constexpr uint16_t CORKSCREW_WIDTH = fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
-constexpr uint16_t CORKSCREW_HEIGHT = fl::calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
+constexpr uint16_t CORKSCREW_WIDTH =
+    fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
+constexpr uint16_t CORKSCREW_HEIGHT =
+    fl::calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
 
 // Now you can use these for array initialization:
-// CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized array
-
-static_assert(CORKSCREW_WIDTH == 16, "Width should be 16");
-static_assert(CORKSCREW_HEIGHT == 18, "Height should be 18");
+// CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized
+// array
 
 // Create a corkscrew with:
 // - 30cm total length (300mm)
@@ -82,7 +80,7 @@ void setup() {
     // Use constexpr dimensions (computed at compile time)
     constexpr int width = CORKSCREW_WIDTH;   // = 16
     constexpr int height = CORKSCREW_HEIGHT; // = 18
-    
+
     // Or use runtime corkscrew for dynamic sizing
     // int width = corkscrew.cylinder_width();
     // int height = corkscrew.cylinder_height();
@@ -93,7 +91,8 @@ void setup() {
     CRGB *leds = frameBuffer.data();
     size_t num_leds = frameBuffer.size();
 
-    CLEDController* controller = &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
+    CLEDController *controller =
+        &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
 
     // CLEDController *controller =
     //     &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
@@ -111,33 +110,35 @@ void loop() {
     fl::clear(frameBuffer);
 
     // Update the corkscrew mapping with auto-advance or manual position control
-    float combinedPosition;
-    
+    float combinedPosition = 0.0f;
+
     if (autoAdvance.value()) {
         // Check if auto-advance was just enabled
-        if (now - lastUpdateTime > 100) {
-            // Auto-advance mode: increment smoothly from current position
-            float elapsedSeconds = (now - lastUpdateTime) / 1000.0f;
-            float increment = elapsedSeconds * speed.value() * 0.05f; // Make it 1/20th the original speed
-            currentPosition = fmodf(currentPosition + increment, 1.0f);
-            lastUpdateTime = now;
-        }
+        // if (now - lastUpdateTime > 100) {
+        // Auto-advance mode: increment smoothly from current position
+        float elapsedSeconds = (now - lastUpdateTime) / 1000.0f;
+        float increment = elapsedSeconds * speed.value() *
+                          0.3f; // Make it 1/20th the original speed
+        currentPosition = fmodf(currentPosition + increment, 1.0f);
+        lastUpdateTime = now;
+        //}
         combinedPosition = currentPosition;
     } else {
         // Manual mode: use the dual slider control
         combinedPosition = positionCoarse.value() + positionFine.value();
         // Clamp to ensure we don't exceed 1.0
-        if (combinedPosition > 1.0f) combinedPosition = 1.0f;
+        if (combinedPosition > 1.0f)
+            combinedPosition = 1.0f;
     }
-    
+
     float pos = combinedPosition * (corkscrew.size() - 1);
-    
+
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
             frameBuffer.data()[i] = CRGB(8, 8, 8);
         }
     }
-   
+
     if (splatRendering) {
         Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         const CRGB color = CRGB::Blue;
@@ -145,10 +146,10 @@ void loop() {
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
                 Tile2x2_u8_wrap::Data data = pos_tile.at(dx, dy);
-                vec2i16 wrapped_pos = data.first;  // Already wrapped position
-                uint8_t alpha = data.second;       // Alpha value
+                vec2i16 wrapped_pos = data.first; // Already wrapped position
+                uint8_t alpha = data.second;      // Alpha value
 
-                if (alpha > 0) {  // Only draw if there's some alpha
+                if (alpha > 0) { // Only draw if there's some alpha
                     CRGB c = color;
                     c.nscale8(alpha); // Scale the color by the alpha value
                     frameBuffer.at(wrapped_pos.x, wrapped_pos.y) = c;
