@@ -4,7 +4,7 @@
 #include "fl/math.h"
 #include "fl/splat.h"
 #include "fl/warn.h"
-
+#include "fl/tile2x2.h"
 #include "fl/math_macros.h"
 
 #define TWO_PI (PI * 2.0)

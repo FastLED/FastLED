@@ -7,6 +7,7 @@
 #include "fl/unused.h"
 #include "fl/warn.h"
 #include "fl/xymap.h"
+#include "fl/vector.h"
 
 namespace fl {
 
@@ -105,6 +106,48 @@ rect<int16_t> Tile2x2_u8::bounds() const {
     vec2<int16_t> min = mOrigin;
     vec2<int16_t> max = mOrigin + vec2<int16_t>(2, 2);
     return rect<int16_t>(min, max);
+}
+
+fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t) {
+    fl::vector_fixed<Tile2x2_u8_wrap, 2> result;
+    
+    // Clamp t to [0, 1]
+    if (t <= 0.0f) {
+        result.push_back(a);
+        return result;
+    }
+    if (t >= 1.0f) {
+        result.push_back(b);
+        return result;
+    }
+    
+    // Create interpolated tile
+    Tile2x2_u8_wrap interpolated;
+    
+    // Interpolate each of the 4 positions
+    for (uint16_t x = 0; x < 2; ++x) {
+        for (uint16_t y = 0; y < 2; ++y) {
+            const auto& data_a = a.at(x, y);
+            const auto& data_b = b.at(x, y);
+            
+            // For now, assume positions are the same or close enough
+            // Use position from 'a' as the base
+            vec2i16 pos = data_a.first;
+            
+            // Simple linear interpolation for alpha values
+            uint8_t alpha_a = data_a.second;
+            uint8_t alpha_b = data_b.second;
+            
+            // Linear interpolation: a + t * (b - a)
+            float alpha_float = alpha_a + t * (alpha_b - alpha_a);
+            uint8_t interpolated_alpha = static_cast<uint8_t>(alpha_float + 0.5f); // Round to nearest
+            
+            interpolated.tile[y][x] = {pos, interpolated_alpha};
+        }
+    }
+    
+    result.push_back(interpolated);
+    return result;
 }
 
 } // namespace fl

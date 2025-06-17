@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stdint.h>
@@ -8,6 +7,7 @@
 #include "fl/pair.h"
 #include "fl/slice.h"
 #include "fl/xymap.h"
+#include "fl/vector.h"
 
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
@@ -17,6 +17,7 @@ namespace fl {
 
 class XYMap;
 class XYRasterU8Sparse;
+
 
 class Tile2x2_u8 {
 
@@ -100,6 +101,9 @@ class Tile2x2_u8_wrap {
     // Returns the absolute position and the alpha.
     Data &at(uint16_t x, uint16_t y);
     const Data &at(uint16_t x, uint16_t y) const;
+
+    // Interpolates between two wrapped tiles and returns up to 2 interpolated tiles
+    static vector_fixed<Tile2x2_u8_wrap, 2> Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t);
 
   private:
     Data tile[2][2] = {}; // zero filled.
