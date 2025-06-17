@@ -31,7 +31,7 @@ using namespace fl;
 
 
 #define NUM_LEDS 288
-#define CORKSCREW_TURNS 20.5     // Default to 20.5 turns
+#define CORKSCREW_TURNS 19.0     // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
