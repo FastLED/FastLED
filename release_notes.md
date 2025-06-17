@@ -1,3 +1,10 @@
+FastLED 3.10.1
+==============
+  * New LED chipset: SM16824E
+    * 3-Wire
+    * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
+
+
 FastLED 3.10.0
 ==============
 
