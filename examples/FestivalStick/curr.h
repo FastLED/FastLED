@@ -41,7 +41,8 @@ UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface");
 
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
-UISlider position("Position", 0.0f, 0.0f, 1.0f, 0.01f);
+UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
+UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
 
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
@@ -104,8 +105,11 @@ void loop() {
     // fl::clear(leds);
     fl::clear(frameBuffer);
 
-    // Update the corkscrew mapping every second
-    float pos = position.value() * (corkscrew.size() - 1);
+    // Update the corkscrew mapping with combined coarse and fine position control
+    float combinedPosition = positionCoarse.value() + positionFine.value();
+    // Clamp to ensure we don't exceed 1.0
+    if (combinedPosition > 1.0f) combinedPosition = 1.0f;
+    float pos = combinedPosition * (corkscrew.size() - 1);
     
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
