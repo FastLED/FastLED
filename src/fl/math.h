@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "fl/clamp.h"
@@ -20,6 +19,11 @@ template <typename T> inline T ceil(T value) {
         return static_cast<T>(static_cast<int>(value));
     }
     return static_cast<T>(::ceil(static_cast<float>(value)));
+}
+
+// Constexpr version for compile-time evaluation (compatible with older C++ standards)
+constexpr int ceil_constexpr(float value) {
+    return static_cast<int>((value > static_cast<int>(value)) ? static_cast<int>(value) + 1 : static_cast<int>(value));
 }
 
 // Arduino will define this in the global namespace as macros, so we can't

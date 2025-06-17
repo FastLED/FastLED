@@ -43,10 +43,6 @@
 namespace fl {
 
 // Simple constexpr functions for compile-time corkscrew dimension calculation
-constexpr uint16_t ceil_constexpr(float value) {
-    return static_cast<uint16_t>((value > static_cast<int>(value)) ? static_cast<int>(value) + 1 : static_cast<int>(value));
-}
-
 constexpr uint16_t calculateCorkscrewWidth(float totalTurns, uint16_t numLeds) {
     return ceil_constexpr(static_cast<float>(numLeds) / totalTurns);
 }
