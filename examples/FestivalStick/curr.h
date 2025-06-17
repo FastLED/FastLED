@@ -44,12 +44,18 @@ UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
 
+UICheckbox autoAdvance("Auto Advance", false);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 
 // Option 1: Runtime Corkscrew (flexible, configurable at runtime)
 Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS, 0);
 Corkscrew corkscrew(corkscrewInput);
+
+// Auto-advance state tracking
+static bool wasAutoAdvancing = false;
+static uint32_t autoAdvanceStartTime = 0;
+static float autoAdvanceStartPosition = 0.0f;
 
 // Option 2: Constexpr dimensions for compile-time array sizing
 constexpr uint16_t CORKSCREW_WIDTH = fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
@@ -105,10 +111,32 @@ void loop() {
     // fl::clear(leds);
     fl::clear(frameBuffer);
 
-    // Update the corkscrew mapping with combined coarse and fine position control
-    float combinedPosition = positionCoarse.value() + positionFine.value();
-    // Clamp to ensure we don't exceed 1.0
-    if (combinedPosition > 1.0f) combinedPosition = 1.0f;
+    // Update the corkscrew mapping with auto-advance or manual position control
+    float combinedPosition;
+    
+    if (autoAdvance.value()) {
+        // Check if auto-advance was just enabled
+        if (!wasAutoAdvancing) {
+            // Just started auto-advancing - capture current manual position and time
+            autoAdvanceStartPosition = positionCoarse.value() + positionFine.value();
+            if (autoAdvanceStartPosition > 1.0f) autoAdvanceStartPosition = 1.0f;
+            autoAdvanceStartTime = now;
+            wasAutoAdvancing = true;
+        }
+        
+        // Auto-advance mode: increment smoothly from starting position
+        float elapsedSeconds = (now - autoAdvanceStartTime) / 1000.0f;
+        float increment = elapsedSeconds * speed.value() * 0.05f; // Make it 1/20th the original speed
+        combinedPosition = autoAdvanceStartPosition + increment;
+        combinedPosition = fmodf(combinedPosition, 1.0f); // Keep between 0.0 and 1.0
+    } else {
+        // Manual mode: use the dual slider control
+        wasAutoAdvancing = false; // Reset auto-advance tracking
+        combinedPosition = positionCoarse.value() + positionFine.value();
+        // Clamp to ensure we don't exceed 1.0
+        if (combinedPosition > 1.0f) combinedPosition = 1.0f;
+    }
+    
     float pos = combinedPosition * (corkscrew.size() - 1);
     
     if (allWhite) {
