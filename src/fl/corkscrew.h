@@ -97,8 +97,7 @@ struct CorkscrewInput {
 struct CorkscrewState {
     uint16_t width = 0;  // Width of cylindrical map (circumference of one turn)
     uint16_t height = 0; // Height of cylindrical map (total vertical segments)
-    fl::vector<fl::vec2f, fl::allocator_psram<fl::vec2f>>
-        mapping; // Full precision mapping from corkscrew to cylindrical
+    // Removed mapping vector - positions now computed on-the-fly
     CorkscrewState() = default;
 
     class iterator {
@@ -108,10 +107,10 @@ struct CorkscrewState {
         using pointer = vec2f *;
         using reference = vec2f &;
 
-        iterator(CorkscrewState *owner, size_t position)
-            : owner_(owner), position_(position) {}
+        iterator(const class Corkscrew *corkscrew, size_t position)
+            : corkscrew_(corkscrew), position_(position) {}
 
-        vec2f &operator*() const { return owner_->mapping[position_]; }
+        vec2f operator*() const;
 
         iterator &operator++() {
             ++position_;
@@ -149,13 +148,9 @@ struct CorkscrewState {
         }
 
       private:
-        CorkscrewState *owner_;
+        const class Corkscrew *corkscrew_;
         size_t position_;
     };
-
-    iterator begin() { return iterator(this, 0); }
-
-    iterator end() { return iterator(this, mapping.size()); }
 };
 
 // Maps a Corkscrew defined by the input to a cylindrical mapping for rendering
@@ -175,19 +170,14 @@ class Corkscrew {
     // This is the future api.
     Tile2x2_u8_wrap at_wrap(float i) const;
     size_t size() const;
-    iterator begin() { return mState.begin(); }
-    iterator end() { return mState.end(); }
-
-    /// For testing
-
-    static State generateState(const Input &input);
-
-    State &access() { return mState; }
-
-    const State &access() const { return mState; }
+    iterator begin() { return iterator(this, 0); }
+    iterator end() { return iterator(this, size()); }
 
     int16_t cylinder_width() const { return mState.width; }
     int16_t cylinder_height() const { return mState.height; }
+
+    /// For testing
+    static State generateState(const Input &input);
 
   private:
     // For internal use. Splats the pixel on the surface which

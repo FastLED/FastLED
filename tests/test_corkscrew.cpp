@@ -55,7 +55,9 @@ TEST_CASE("Corkscrew Circle10 test") {
     // Check LED distribution - find max height position actually used
     float max_height = 0.0f;
     float min_height = 999.0f;
-    for (const auto& pos : output_festival.mapping) {
+    Corkscrew corkscrew_festival(input_festival);
+    for (uint16_t i = 0; i < corkscrew_festival.size(); ++i) {
+        vec2f pos = corkscrew_festival.at_exact(i);
         max_height = MAX(max_height, pos.y);
         min_height = MIN(min_height, pos.y);
     }
@@ -69,10 +71,12 @@ TEST_CASE("Corkscrew LED distribution test") {
     // Test if LEDs actually reach the top row
     Corkscrew::Input input(19.0f, 288, 0.0f); // FestivalStick case
     Corkscrew::State output = Corkscrew::generateState(input);
+    Corkscrew corkscrew(input);
     
     // Count how many LEDs map to each row
     fl::vector<int> row_counts(output.height, 0);
-    for (const auto& pos : output.mapping) {
+    for (uint16_t i = 0; i < corkscrew.size(); ++i) {
+        vec2f pos = corkscrew.at_exact(i);
         int row = static_cast<int>(pos.y);
         if (row >= 0 && row < output.height) {
             row_counts[row]++;

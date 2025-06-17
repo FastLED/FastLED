@@ -40,23 +40,9 @@ vec2f calculateLedPosition(uint16_t ledIndex, uint16_t numLeds, float totalTurns
 }
 
 void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
-
-    output->mapping.clear();
     output->width = input.calculateWidth();
     output->height = input.calculateHeight();
-
-    // Generate LED mapping based on numLeds
-    output->mapping.reserve(input.numLeds);
-    
-    for (uint16_t i = 0; i < input.numLeds; ++i) {
-        vec2f position = calculateLedPosition(i, input.numLeds, input.totalTurns, input.offsetCircumference, output->width, output->height);
-        output->mapping.push_back(position);
-    }
-
-    // Apply inversion if requested
-    if (input.invert) {
-        fl::reverse(output->mapping.begin(), output->mapping.end());
-    }
+    // No longer pre-calculating mapping - positions computed on-the-fly
 }
 }  // namespace
 
@@ -66,43 +52,46 @@ Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
 }
 
 vec2f Corkscrew::at_exact(uint16_t i) const {
-    if (i >= mState.mapping.size()) {
+    if (i >= mInput.numLeds) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2f(0, 0);
     }
-    // Convert the float position to integer
-    const vec2f &position = mState.mapping[i];
+    
+    // Compute position on-the-fly
+    vec2f position = calculateLedPosition(i, mInput.numLeds, mInput.totalTurns, 
+                                         mInput.offsetCircumference, mState.width, mState.height);
+    
+    // Apply inversion if requested
+    if (mInput.invert) {
+        uint16_t invertedIndex = mInput.numLeds - 1 - i;
+        position = calculateLedPosition(invertedIndex, mInput.numLeds, mInput.totalTurns, 
+                                       mInput.offsetCircumference, mState.width, mState.height);
+    }
+    
     return position;
 }
 
 
 Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
-    // To finish this, we need to handle wrap around.
-    // To accomplish this we need a different data structure than the the
-    // Tile2x2_u8.
-    // 1. It will be called CorkscrewTile2x2_u8.
-    // 2. The four alpha values will each contain the index the LED is at,
-    // uint16_t.
-    // 3. There will be no origin, each pixel in the tile will contain a
-    // uint16_t origin. This is not supposed to be a storage format, but a
-    // convenient pre-computed value for rendering.
-    if (i >= mState.mapping.size()) {
+    if (i >= mInput.numLeds) {
         // Handle out-of-bounds access, possibly by returning a default
         // Tile2x2_u8
         FASTLED_ASSERT(false, "Out of bounds access in Corkscrew at_splat: "
-                                  << i << " size: " << mState.mapping.size());
+                                  << i << " size: " << mInput.numLeds);
         return Tile2x2_u8();
     }
+    
     // Use the splat function to convert the vec2f to a Tile2x2_u8
     float i_floor = floorf(i);
     float i_ceil = ceilf(i);
     if (ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
         // If the index is the same, just return the splat of that index
-        return splat(mState.mapping[static_cast<uint16_t>(i_floor)]);
+        vec2f position = at_exact(static_cast<uint16_t>(i_floor));
+        return splat(position);
     } else {
         // Interpolate between the two points and return the splat of the result
-        vec2f pos1 = mState.mapping[static_cast<uint16_t>(i_floor)];
-        vec2f pos2 = mState.mapping[static_cast<uint16_t>(i_ceil)];
+        vec2f pos1 = at_exact(static_cast<uint16_t>(i_floor));
+        vec2f pos2 = at_exact(static_cast<uint16_t>(i_ceil));
 
         if (pos2.x < pos1.x) {
             // If the next point is on the other side of the cylinder, we need
@@ -116,7 +105,7 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     }
 }
 
-size_t Corkscrew::size() const { return mState.mapping.size(); }
+size_t Corkscrew::size() const { return mInput.numLeds; }
 
 Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
     CorkscrewState output;
@@ -131,6 +120,11 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
     // This is useful for rendering the corkscrew in a cylindrical way.
     Tile2x2_u8 tile = at_splat_extrapolate(i);
     return Tile2x2_u8_wrap(tile, mState.width, mState.height);
+}
+
+// Iterator implementation
+vec2f CorkscrewState::iterator::operator*() const {
+    return corkscrew_->at_exact(static_cast<uint16_t>(position_));
 }
 
 } // namespace fl
