@@ -144,11 +144,8 @@ class Corkscrew {
 
     // This is the future api.
     Tile2x2_u8_wrap at_wrap(float i) const;
-
     size_t size() const;
-
     iterator begin() { return mState.begin(); }
-
     iterator end() { return mState.end(); }
 
     /// For testing

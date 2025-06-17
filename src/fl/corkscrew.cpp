@@ -3,6 +3,7 @@
 #include "fl/assert.h"
 #include "fl/math.h"
 #include "fl/splat.h"
+#include "fl/warn.h"
 
 #include "fl/math_macros.h"
 
