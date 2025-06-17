@@ -44,7 +44,7 @@ UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
 
-UICheckbox autoAdvance("Auto Advance", false);
+UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 
