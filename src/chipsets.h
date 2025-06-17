@@ -1121,6 +1121,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
 
 // NEW LED! Help us test it!
+// Under developement.
 // SM16824E - 300ns, 900ns, 0ns
 //   * T0H: .3
 //   * T0L: .9
