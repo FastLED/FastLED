@@ -115,14 +115,12 @@ void loop() {
 
     if (autoAdvance.value()) {
         // Check if auto-advance was just enabled
-        // if (now - lastUpdateTime > 100) {
         // Auto-advance mode: increment smoothly from current position
         float elapsedSeconds = (now - lastUpdateTime) / 1000.0f;
         float increment = elapsedSeconds * speed.value() *
                           0.3f; // Make it 1/20th the original speed
         currentPosition = fmodf(currentPosition + increment, 1.0f);
         lastUpdateTime = now;
-        //}
         combinedPosition = currentPosition;
     } else {
         // Manual mode: use the dual slider control
@@ -133,6 +131,8 @@ void loop() {
     }
 
     float pos = combinedPosition * (corkscrew.size() - 1);
+
+    FL_WARN("pos: " << pos);
 
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
@@ -160,6 +160,7 @@ void loop() {
     } else {
         // None splat rendering, looks aweful.
         vec2f pos_vec2f = corkscrew.at_exact(pos);
+        FL_WARN("pos_vec2f: " << pos_vec2f);
         vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
