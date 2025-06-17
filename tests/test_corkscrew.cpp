@@ -88,6 +88,37 @@ TEST_CASE("Corkscrew LED distribution test") {
     REQUIRE(row_counts[0] > 0);  // Bottom row should have LEDs
 }
 
+TEST_CASE("Corkscrew two turns test") {
+    // Test 2 turns with 5 LEDs per turn (10 LEDs total)
+    Corkscrew::Input input_two_turns(2.0f, 10, 0.0f); // 2 turns, 10 LEDs, no offset
+    Corkscrew::State output_two_turns = Corkscrew::generateState(input_two_turns);
+    
+    // Verify: 10 LEDs / 2 turns = 5 LEDs per turn
+    REQUIRE_EQ(output_two_turns.width, 5);   // LEDs per turn
+    REQUIRE_EQ(output_two_turns.height, 2);  // Number of turns
+    
+    // Verify grid size matches LED count
+    REQUIRE_EQ(output_two_turns.width * output_two_turns.height, 10);
+    
+    // Test LED positioning across both turns
+    Corkscrew corkscrew_two_turns(input_two_turns);
+    REQUIRE_EQ(corkscrew_two_turns.size(), 10);
+    
+    // Check that LEDs are distributed across both rows
+    fl::vector<int> row_counts(output_two_turns.height, 0);
+    for (uint16_t i = 0; i < corkscrew_two_turns.size(); ++i) {
+        vec2f pos = corkscrew_two_turns.at_exact(i);
+        int row = static_cast<int>(pos.y);
+        if (row >= 0 && row < output_two_turns.height) {
+            row_counts[row]++;
+        }
+    }
+    
+    // Both rows should have LEDs
+    REQUIRE(row_counts[0] > 0);  // First turn should have LEDs
+    REQUIRE(row_counts[1] > 0);  // Second turn should have LEDs
+}
+
 TEST_CASE("Constexpr corkscrew dimension calculation") {
     // Test constexpr functions at compile time
     
