@@ -45,6 +45,7 @@ UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface");
 
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
+UISlider position("Position", 0.0f, 0.0f, 1.0f, 0.01f);
 
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
@@ -97,18 +98,12 @@ void setup() {
 
 void loop() {
     uint32_t now = millis();
-    // fl::clear(lesdds);
+    // fl::clear(leds);
     fl::clear(frameBuffer);
 
-    static float pos = 0;
-
     // Update the corkscrew mapping every second
-    // w = (w + 1) % CORKSCREW_WIDTH;
-    // frameBuffer.
-    pos += speed.value();
-    if (pos > corkscrew.size() - 1) {
-        pos = 0; // Reset to the beginning
-    }
+    float pos = position.value() * (corkscrew.size() - 1);
+    
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
             frameBuffer.data()[i] = CRGB(8, 8, 8);
@@ -121,7 +116,7 @@ void loop() {
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
-                auto data = pos_tile.at(dx, dy);
+                Tile2x2_u8_wrap::Data data = pos_tile.at(dx, dy);
                 vec2i16 wrapped_pos = data.first;  // Already wrapped position
                 uint8_t alpha = data.second;       // Alpha value
 
