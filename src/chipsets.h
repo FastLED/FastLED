@@ -891,6 +891,11 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
+/// SM16824E controller class.
+/// @copydetails WS2812Controller800Khz
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SM16824EController : public ClocklessController<DATA_PIN, 3 * FMUL, 9 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
 
 #else
 
@@ -1124,7 +1129,7 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1
 //   * TRES: 1.6
 //   * TRST: 200
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16824EController : public ClocklessController<DATA_PIN, C_NS(300), C_NS(900), C_NS(0), RGB_ORDER, 0, false, 200> {};
+class SM16824EController : public ClocklessController<DATA_PIN, C_NS(300), C_NS(900), C_NS(0), RGB_ORDER> {};
 #endif
 /// @} ClocklessChipsets
 
