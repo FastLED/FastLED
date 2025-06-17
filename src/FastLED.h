@@ -159,6 +159,11 @@ template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_P
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> 
 class SM16703 : public SM16703Controller<DATA_PIN, RGB_ORDER> {};
 
+/// @brief SM16824E controller class.
+/// @copydetails SM16824EController
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> 
+class SM16824E : public SM16824EController<DATA_PIN, RGB_ORDER> {};
+
 /// @brief TM1829 controller class.
 /// @copydetails TM1829Controller800Khz
 template<uint8_t DATA_PIN, EOrder RGB_ORDER>
