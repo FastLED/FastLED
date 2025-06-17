@@ -41,6 +41,7 @@ UIDescription festivalStickDescription(
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
+UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.0001f);
 
 UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
@@ -125,7 +126,7 @@ void loop() {
         combinedPosition = currentPosition;
     } else {
         // Manual mode: use the dual slider control
-        combinedPosition = positionCoarse.value() + positionFine.value();
+        combinedPosition = positionCoarse.value() + positionFine.value() + positionExtraFine.value();
         // Clamp to ensure we don't exceed 1.0
         if (combinedPosition > 1.0f)
             combinedPosition = 1.0f;
