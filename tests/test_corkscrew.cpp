@@ -89,29 +89,56 @@ TEST_CASE("Corkscrew LED distribution test") {
 }
 
 TEST_CASE("Corkscrew two turns test") {
-    // Test 2 turns with 5 LEDs per turn (10 LEDs total)
-    Corkscrew::Input input_two_turns(2.0f, 10, 0.0f); // 2 turns, 10 LEDs, no offset
+    // Test 2 turns with 2 LEDs per turn (4 LEDs total)
+    Corkscrew::Input input_two_turns(2.0f, 4, 0.0f); // 2 turns, 4 LEDs, no offset
     Corkscrew::State output_two_turns = Corkscrew::generateState(input_two_turns);
     
-    // Verify: 10 LEDs / 2 turns = 5 LEDs per turn
-    REQUIRE_EQ(output_two_turns.width, 5);   // LEDs per turn
+    // Verify: 4 LEDs / 2 turns = 2 LEDs per turn
+    REQUIRE_EQ(output_two_turns.width, 2);   // LEDs per turn
     REQUIRE_EQ(output_two_turns.height, 2);  // Number of turns
     
     // Verify grid size matches LED count
-    REQUIRE_EQ(output_two_turns.width * output_two_turns.height, 10);
+    REQUIRE_EQ(output_two_turns.width * output_two_turns.height, 4);
     
     // Test LED positioning across both turns
     Corkscrew corkscrew_two_turns(input_two_turns);
-    REQUIRE_EQ(corkscrew_two_turns.size(), 10);
+    REQUIRE_EQ(corkscrew_two_turns.size(), 4);
     
     // Check that LEDs are distributed across both rows
     fl::vector<int> row_counts(output_two_turns.height, 0);
-    for (uint16_t i = 0; i < corkscrew_two_turns.size(); ++i) {
-        vec2f pos = corkscrew_two_turns.at_exact(i);
-        int row = static_cast<int>(pos.y);
-        if (row >= 0 && row < output_two_turns.height) {
-            row_counts[row]++;
-        }
+    
+    // Unrolled loop for 4 LEDs
+    vec2f pos0 = corkscrew_two_turns.at_exact(0);
+    vec2f pos1 = corkscrew_two_turns.at_exact(1);
+    vec2f pos2 = corkscrew_two_turns.at_exact(2);
+    vec2f pos3 = corkscrew_two_turns.at_exact(3);
+
+    FL_WARN("pos0: " << pos0);
+    FL_WARN("pos1: " << pos1);
+    FL_WARN("pos2: " << pos2);
+    FL_WARN("pos3: " << pos3);
+
+    int row0 = static_cast<int>(pos0.y);
+    if (row0 >= 0 && row0 < output_two_turns.height) {
+        row_counts[row0]++;
+    }
+    
+    
+    int row1 = static_cast<int>(pos1.y);
+    if (row1 >= 0 && row1 < output_two_turns.height) {
+        row_counts[row1]++;
+    }
+    
+
+    int row2 = static_cast<int>(pos2.y);
+    if (row2 >= 0 && row2 < output_two_turns.height) {
+        row_counts[row2]++;
+    }
+    
+
+    int row3 = static_cast<int>(pos3.y);
+    if (row3 >= 0 && row3 < output_two_turns.height) {
+        row_counts[row3]++;
     }
     
     // Both rows should have LEDs

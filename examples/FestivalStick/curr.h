@@ -28,7 +28,7 @@ using namespace fl;
 #define PIN_DATA 9
 #define PIN_CLOCK 7
 
-#define NUM_LEDS 288
+#define NUM_LEDS 34
 #define CORKSCREW_TURNS 19.5 // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs

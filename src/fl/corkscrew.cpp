@@ -24,14 +24,14 @@ vec2f calculateLedPosition(uint16_t ledIndex, uint16_t numLeds, float totalTurns
     const float positionInTurn = totalProgress - currentTurn; // 0.0 to 1.0 within current turn
     
     // Height increases at turn boundaries (stair step at width border)
-    const float heightProgress = currentTurn / totalTurns;
+    //const float heightProgress = currentTurn / totalTurns;
     
     // Width position based on position within current turn
     const float normalizedAngle = positionInTurn; // 0 to 1 within current turn
     
     // Map to grid coordinates
     const float width_pos = normalizedAngle * static_cast<float>(width - 1) + offsetCircumference;
-    const float height_pos = heightProgress * static_cast<float>(height - 1);
+    const float height_pos = ledProgress * static_cast<float>(height - 1);
     
     // Handle width wrapping for offset circumference
     const float final_width = fmodf(width_pos, static_cast<float>(width));
