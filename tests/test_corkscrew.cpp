@@ -18,8 +18,8 @@ using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
     Corkscrew::Input input;
-    input.totalLength = 10.0f; // Total length of the corkscrew in centimeters
-    input.totalHeight = 0.0f;
+    input.width = 10;          // Width of the rectangular grid
+    input.height = 1;          // Height of the rectangular grid  
     input.totalTurns = 1.0f;  
     input.offsetCircumference = 0.0f; // No offset
     input.numLeds = 10; // Default to dense 144 LEDs times two strips

@@ -31,11 +31,9 @@ using namespace fl;
 
 
 #define NUM_LEDS 288
-#define CORKSCREW_TOTAL_LENGTH 100 // 100 cm
-#define CORKSCREW_TOTAL_HEIGHT                                                 \
-    23.25                  // when height = 0, it's a circle.
-                           // wrapped up over 19 turns
-#define CORKSCREW_TURNS 20.5 // Default to 19 turns
+#define CORKSCREW_WIDTH 14       // Width of the rectangular grid (circumference in pixels)
+#define CORKSCREW_HEIGHT 21      // Height of the rectangular grid (total vertical segments)
+#define CORKSCREW_TURNS 20.5     // Default to 20.5 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -52,9 +50,9 @@ UICheckbox splatRendering("Splat Rendering", true);
 
 // CRGB leds[NUM_LEDS];
 
-// Tested on a 288 led (2x 144 max density led strip) with 19 turns
-// with 23.25cm height, 19 turns, and ~15.5 LEDs per turn.
-Corkscrew::Input corkscrewInput(CORKSCREW_TOTAL_LENGTH, CORKSCREW_TOTAL_HEIGHT,
+// Tested on a 288 led (2x 144 max density led strip) with 20.5 turns
+// Maps to a rectangular grid of CORKSCREW_WIDTH x CORKSCREW_HEIGHT
+Corkscrew::Input corkscrewInput(CORKSCREW_WIDTH, CORKSCREW_HEIGHT,
                                 CORKSCREW_TURNS, NUM_LEDS, 0);
 
 // Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);

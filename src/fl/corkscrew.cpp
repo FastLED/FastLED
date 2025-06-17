@@ -15,51 +15,44 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output);
 
 void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
 
-    // Calculate vertical segments based on number of turns
-    // For a single turn (2π), we want exactly 1 vertical segment
-    // For two turns (4π), we want exactly 2 vertical segments
-    // uint16_t verticalSegments = ceil(input.totalTurns);
-
-    // Calculate width based on LED density per turn
-    // float ledsPerTurn = static_cast<float>(input.numLeds) / verticalSegments;
-
     output->mapping.clear();
-    output->width = 0; // we will change this below.
-    output->height = 0;
+    output->width = input.width;
+    output->height = input.height;
 
-    // If numLeds is specified, use that for mapping size instead of grid
-    output->mapping.reserve(input.numLeds);
-    // Generate LED mapping based on numLeds
-    // Note that width_step should be 1.0f/float(input.numLeds) so last led in a
-    // turn does not wrap around.
-    const float width_step =
-        1.0f / float(input.numLeds); // Corkscrew reaches max width on last led.
-    const float height_step =
-        1.0f /
-        float(input.numLeds - 1); // Corkscrew reaches max height on last led.
-    // const float led_width_factor = circumferencePerTurn / TWO_PI;
-    const float length_per_turn = input.numLeds / input.totalTurns;
-
-    for (uint16_t i = 0; i < input.numLeds; ++i) {
-        // Calculate position along the corkscrew (0.0 to 1.0)
-        const float i_f = static_cast<float>(i);
-        const float alpha_width = i_f * width_step;
-        const float alpha_height = i_f * height_step;
-        const float width_before_mod = alpha_width * input.totalLength;
-        const float height = alpha_height * input.totalHeight;
-        const float width = fmodf(width_before_mod, length_per_turn);
-        output->mapping.push_back({width, height});
+    // If width or height is 0, calculate defaults based on corkscrew parameters
+    if (output->width == 0 || output->height == 0) {
+        // Calculate default width based on LED density per turn
+        float ledsPerTurn = static_cast<float>(input.numLeds) / input.totalTurns;
+        if (output->width == 0) {
+            output->width = static_cast<uint16_t>(ceilf(ledsPerTurn));
+        }
+        if (output->height == 0) {
+            output->height = static_cast<uint16_t>(ceilf(input.totalTurns));
+        }
     }
 
-    if (!output->mapping.empty()) {
-        float max_width = 0.0f;
-        float max_height = 0.0f;
-        for (const auto &point : output->mapping) {
-            max_width = MAX(max_width, point.x);
-            max_height = MAX(max_height, point.y);
-        }
-        output->width = static_cast<uint16_t>(ceilf(max_width)) + 1;
-        output->height = static_cast<uint16_t>(ceilf(max_height)) + 1;
+    // Generate LED mapping based on numLeds
+    output->mapping.reserve(input.numLeds);
+    
+    for (uint16_t i = 0; i < input.numLeds; ++i) {
+        // Calculate position along the corkscrew (0.0 to 1.0)
+        const float ledProgress = static_cast<float>(i) / static_cast<float>(input.numLeds - 1);
+        
+        // Calculate angle position (0 to totalTurns * 2π)
+        const float totalAngle = ledProgress * input.totalTurns * TWO_PI;
+        const float normalizedAngle = fmodf(totalAngle, TWO_PI) / TWO_PI; // 0 to 1 within current turn
+        
+        // Calculate height position (0 to height-1)
+        const float heightProgress = ledProgress; // Linear progression through height
+        
+        // Map to grid coordinates
+        const float width_pos = normalizedAngle * static_cast<float>(output->width - 1) + input.offsetCircumference;
+        const float height_pos = heightProgress * static_cast<float>(output->height - 1);
+        
+        // Handle width wrapping for offset circumference
+        const float final_width = fmodf(width_pos, static_cast<float>(output->width));
+        
+        output->mapping.push_back({final_width, height_pos});
     }
 
     // Apply inversion if requested

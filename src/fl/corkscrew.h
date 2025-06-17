@@ -47,19 +47,17 @@ namespace fl {
  * @return The resulting cylindrical mapping.
  */
 struct CorkscrewInput {
-    float totalLength = 100;   // Total length of the corkscrew in centimeters,
-                               // set to dense 144 strips.
-    float totalHeight = 23.25; // Total height of the corkscrew in centimeters
-                               // for 144 densly wrapped up over 19 turns
+    uint16_t width = 0;        // Width of the rectangular grid (circumference in pixels)
+    uint16_t height = 0;       // Height of the rectangular grid (total vertical segments)
     float totalTurns = 19.f;   // Default to 19 turns
     float offsetCircumference = 0; // Optional offset for gap accounting
     uint16_t numLeds = 144;        // Default to dense 144 leds.
     bool invert = false;           // If true, reverse the mapping order
     CorkscrewInput() = default;
-    CorkscrewInput(float total_length, float height, float total_turns,
+    CorkscrewInput(uint16_t grid_width, uint16_t grid_height, float total_turns,
                    uint16_t leds, float offset = 0,
                    bool invertMapping = false)
-        : totalLength(total_length), totalHeight(height),
+        : width(grid_width), height(grid_height),
           totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
           invert(invertMapping) {}
 };
