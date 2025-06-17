@@ -421,6 +421,7 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * TM1803 - 3 wire chipset, sold by RadioShack
 * UCS1903 - another 3-wire LED chipset, cheap
 * GW6205 - another 3-wire LED chipset
+* SM16824E - another clockless 3 wire.
 * LPD8806 - SPI-based chipset, very high speed
 * WS2801 - SPI-based chipset, cheap and widely available
 * SM16716 - SPI-based chipset
@@ -429,6 +430,7 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
 * LPD6803 - SPI-based chipset, chip CMODE pin must be set to 1 (inside oscillator mode)
+
 
 ## APA102 and the 'High Definition' Mode in FastLED
 
