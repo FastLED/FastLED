@@ -35,3 +35,13 @@
 
   * sutaburosu's guide to playing around with FastLED 4
     * https://github.com/sutaburosu/FastLED4-ESP32-playpen
+
+
+# SM16824E
+
+  * T0H: .3
+  * T0L: .9
+  * T1H: .9
+  * T1L: .3
+  * TRES: 1.6
+  * TRST: 200
