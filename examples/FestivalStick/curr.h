@@ -46,14 +46,19 @@ UISlider position("Position", 0.0f, 0.0f, 1.0f, 0.01f);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 
-// CRGB leds[NUM_LEDS];
-
-// Tested on a 288 led (2x 144 max density led strip) with 20.5 turns
-// Auto-calculates optimal grid dimensions from turns and LEDs
+// Option 1: Runtime Corkscrew (flexible, configurable at runtime)
 Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS, 0);
-
-// Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);
 Corkscrew corkscrew(corkscrewInput);
+
+// Option 2: Constexpr dimensions for compile-time array sizing
+constexpr uint16_t CORKSCREW_WIDTH = fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
+constexpr uint16_t CORKSCREW_HEIGHT = fl::calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
+
+// Now you can use these for array initialization:
+// CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized array
+
+static_assert(CORKSCREW_WIDTH == 16, "Width should be 16");
+static_assert(CORKSCREW_HEIGHT == 18, "Height should be 18");
 
 // Create a corkscrew with:
 // - 30cm total length (300mm)
@@ -65,13 +70,16 @@ Corkscrew corkscrew(corkscrewInput);
 
 // fl::vector<vec3f> mapCorkScrew = makeCorkScrew(args);
 fl::ScreenMap screenMap;
-fl::Grid<CRGB> frameBuffer; 
-
-
+fl::Grid<CRGB> frameBuffer;
 
 void setup() {
-    int width = corkscrew.cylinder_width();
-    int height = corkscrew.cylinder_height();
+    // Use constexpr dimensions (computed at compile time)
+    constexpr int width = CORKSCREW_WIDTH;   // = 16
+    constexpr int height = CORKSCREW_HEIGHT; // = 18
+    
+    // Or use runtime corkscrew for dynamic sizing
+    // int width = corkscrew.cylinder_width();
+    // int height = corkscrew.cylinder_height();
 
     frameBuffer.reset(width, height);
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);

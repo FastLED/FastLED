@@ -83,3 +83,35 @@ TEST_CASE("Corkscrew LED distribution test") {
     REQUIRE(row_counts[output.height - 1] > 0); // Top row should have LEDs
     REQUIRE(row_counts[0] > 0);  // Bottom row should have LEDs
 }
+
+TEST_CASE("Constexpr corkscrew dimension calculation") {
+    // Test constexpr functions at compile time
+    
+    // FestivalStick case: 19 turns, 288 LEDs
+    constexpr uint16_t festival_width = fl::calculateCorkscrewWidth(19.0f, 288);
+    constexpr uint16_t festival_height = fl::calculateCorkscrewHeight(19.0f, 288);
+    
+    static_assert(festival_width == 16, "FestivalStick width should be 16");
+    static_assert(festival_height == 18, "FestivalStick height should be 18");
+    
+    // Default case: 19 turns, 144 LEDs
+    constexpr uint16_t default_width = fl::calculateCorkscrewWidth(19.0f, 144);
+    constexpr uint16_t default_height = fl::calculateCorkscrewHeight(19.0f, 144);
+    
+    static_assert(default_width == 8, "Default width should be 8");
+    static_assert(default_height == 18, "Default height should be 18");
+    
+    // Verify runtime and compile-time versions match
+    fl::Corkscrew::Input runtime_input(19.0f, 288, 0.0f);
+    fl::Corkscrew::State runtime_output = fl::Corkscrew::generateState(runtime_input);
+    
+    REQUIRE_EQ(festival_width, runtime_output.width);
+    REQUIRE_EQ(festival_height, runtime_output.height);
+    
+    // Test simple perfect case: 100 LEDs, 10 turns = 10x10 grid
+    constexpr uint16_t simple_width = fl::calculateCorkscrewWidth(10.0f, 100);
+    constexpr uint16_t simple_height = fl::calculateCorkscrewHeight(10.0f, 100);
+    
+    static_assert(simple_width == 10, "Simple width should be 10");
+    static_assert(simple_height == 10, "Simple height should be 10");
+}
