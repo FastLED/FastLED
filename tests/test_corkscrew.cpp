@@ -17,25 +17,27 @@
 using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
-    Corkscrew::Input input;
-    input.width = 10;          // Width of the rectangular grid
-    input.height = 1;          // Height of the rectangular grid  
-    input.totalTurns = 1.0f;  
-    input.offsetCircumference = 0.0f; // No offset
-    input.numLeds = 10; // Default to dense 144 LEDs times two strips
-    Corkscrew::State output = Corkscrew::generateState(input);
-    fl::vector<vec2f> expected_values;
-    expected_values.push_back(vec2f(0.0f, 0.0f)); // First LED at the bottom
-    expected_values.push_back(vec2f(1.0f, 0.0f)); // Second LED in the middle
-    expected_values.push_back(vec2f(2.0f, 0.0f)); // Third LED at the top
-    expected_values.push_back(vec2f(3.0f, 0.0f)); // Fourth LED at the top
-    expected_values.push_back(vec2f(4.0f, 0.0f)); // Fifth LED at the top
-    expected_values.push_back(vec2f(5.0f, 0.0f)); // Sixth LED at the top
-    expected_values.push_back(vec2f(6.0f, 0.0f)); // Seventh LED at the top
-    expected_values.push_back(vec2f(7.0f, 0.0f)); // Eighth LED at the top
-    expected_values.push_back(vec2f(8.0f, 0.0f)); // Ninth LED at the top
-    expected_values.push_back(vec2f(9.0f, 0.0f)); // Tenth LED at the top
-
-    REQUIRE_EQ(output.width, 10);
-    REQUIRE_EQ(output.height, 1);
+    // Test the auto-calculating constructor
+    Corkscrew::Input input_auto(1.0f, 10, 0.0f); // 1 turn, 10 LEDs, no offset
+    Corkscrew::State output_auto = Corkscrew::generateState(input_auto);
+    
+    // Verify auto-calculated dimensions
+    REQUIRE_EQ(output_auto.width, 10);  // ceil(10 LEDs / 1 turn) = 10
+    REQUIRE_EQ(output_auto.height, 1);  // ceil(1 turn) = 1
+    
+    // Test your specific example: 20 LEDs with 2 turns (10 LEDs per turn)
+    Corkscrew::Input input_example(2.0f, 20, 0.0f); // 2 turns, 20 LEDs, no offset
+    Corkscrew::State output_example = Corkscrew::generateState(input_example);
+    
+    // Verify: 20 LEDs / 2 turns = 10 LEDs per turn
+    REQUIRE_EQ(output_example.width, 10);  // LEDs per turn
+    REQUIRE_EQ(output_example.height, 2);  // Number of turns
+    
+    // Test default constructor
+    Corkscrew::Input input_default;
+    Corkscrew::State output_default = Corkscrew::generateState(input_default);
+    
+    // Verify defaults: 144 LEDs / 19 turns ≈ 7.58 → ceil = 8
+    REQUIRE_EQ(output_default.width, 8);   // ceil(144/19) = ceil(7.58) = 8
+    REQUIRE_EQ(output_default.height, 19); // ceil(19) = 19
 }

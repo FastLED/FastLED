@@ -34,6 +34,7 @@
 
 #include "fl/allocator.h"
 #include "fl/geometry.h"
+#include "fl/math.h"
 #include "fl/math_macros.h"
 #include "fl/pair.h"
 #include "fl/tile2x2.h"
@@ -47,19 +48,30 @@ namespace fl {
  * @return The resulting cylindrical mapping.
  */
 struct CorkscrewInput {
-    uint16_t width = 0;        // Width of the rectangular grid (circumference in pixels)
-    uint16_t height = 0;       // Height of the rectangular grid (total vertical segments)
     float totalTurns = 19.f;   // Default to 19 turns
     float offsetCircumference = 0; // Optional offset for gap accounting
     uint16_t numLeds = 144;        // Default to dense 144 leds.
     bool invert = false;           // If true, reverse the mapping order
+    
     CorkscrewInput() = default;
-    CorkscrewInput(uint16_t grid_width, uint16_t grid_height, float total_turns,
-                   uint16_t leds, float offset = 0,
+    
+    // Constructor with turns and LEDs
+    CorkscrewInput(float total_turns, uint16_t leds, float offset = 0,
                    bool invertMapping = false)
-        : width(grid_width), height(grid_height),
-          totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
+        : totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
           invert(invertMapping) {}
+    
+    // Calculate optimal width and height based on number of turns and LEDs
+    uint16_t calculateWidth() const {
+        // Width = LEDs per turn
+        float ledsPerTurn = static_cast<float>(numLeds) / totalTurns;
+        return static_cast<uint16_t>(fl::ceil(ledsPerTurn));
+    }
+    
+    uint16_t calculateHeight() const {
+        // Height = number of turns
+        return static_cast<uint16_t>(fl::ceil(totalTurns));
+    }
 };
 
 struct CorkscrewState {

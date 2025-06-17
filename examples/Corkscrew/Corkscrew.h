@@ -28,8 +28,6 @@ using namespace fl;
 #define PIN_DATA 9
 
 #define NUM_LEDS 288
-#define CORKSCREW_WIDTH 16       // Width of the rectangular grid (circumference in pixels)
-#define CORKSCREW_HEIGHT 19      // Height of the rectangular grid (total vertical segments)
 #define CORKSCREW_TURNS 19       // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
@@ -47,10 +45,9 @@ UICheckbox splatRendering("Splat Rendering", true);
 // CRGB leds[NUM_LEDS];
 
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
-// Maps to a rectangular grid of CORKSCREW_WIDTH x CORKSCREW_HEIGHT
-Corkscrew::Input corkscrewInput(CORKSCREW_WIDTH, CORKSCREW_HEIGHT,
-                                CORKSCREW_TURNS, // Default to 19 turns
-                                NUM_LEDS,        // Default to dense 144 leds.
+// Auto-calculates optimal grid dimensions from turns and LEDs
+Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, // 19 turns
+                                NUM_LEDS,        // 288 leds
                                 0 // offset to account for gaps between segments
 );
 

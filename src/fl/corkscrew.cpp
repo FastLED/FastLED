@@ -16,20 +16,8 @@ void generateState(const Corkscrew::Input &input, CorkscrewState *output);
 void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
 
     output->mapping.clear();
-    output->width = input.width;
-    output->height = input.height;
-
-    // If width or height is 0, calculate defaults based on corkscrew parameters
-    if (output->width == 0 || output->height == 0) {
-        // Calculate default width based on LED density per turn
-        float ledsPerTurn = static_cast<float>(input.numLeds) / input.totalTurns;
-        if (output->width == 0) {
-            output->width = static_cast<uint16_t>(ceilf(ledsPerTurn));
-        }
-        if (output->height == 0) {
-            output->height = static_cast<uint16_t>(ceilf(input.totalTurns));
-        }
-    }
+    output->width = input.calculateWidth();
+    output->height = input.calculateHeight();
 
     // Generate LED mapping based on numLeds
     output->mapping.reserve(input.numLeds);
