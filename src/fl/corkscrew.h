@@ -69,8 +69,17 @@ struct CorkscrewInput {
     }
     
     uint16_t calculateHeight() const {
-        // Height = number of turns
-        return static_cast<uint16_t>(fl::ceil(totalTurns));
+        // Calculate optimal height to minimize empty pixels
+        uint16_t width = calculateWidth();
+        uint16_t height_from_turns = static_cast<uint16_t>(fl::ceil(totalTurns));
+        
+        // If the grid would have more pixels than LEDs, adjust height to better match
+        if (width * height_from_turns > numLeds) {
+            // Calculate height that better matches LED count
+            return static_cast<uint16_t>(fl::ceil(static_cast<float>(numLeds) / static_cast<float>(width)));
+        }
+        
+        return height_from_turns;
     }
 };
 

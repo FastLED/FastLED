@@ -65,7 +65,7 @@ Corkscrew corkscrew(corkscrewInput);
 
 // fl::vector<vec3f> mapCorkScrew = makeCorkScrew(args);
 fl::ScreenMap screenMap;
-fl::Grid<CRGB> frameBuffer;
+fl::Grid<CRGB> frameBuffer; 
 
 
 
