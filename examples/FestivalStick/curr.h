@@ -105,7 +105,7 @@ void setup() {
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);
 
     CRGB *leds = frameBuffer.data();
-    size_t num_leds = frameBuffer.size();
+    //size_t num_leds = frameBuffer.size();
 
     CLEDController *controller =
         &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
@@ -155,7 +155,7 @@ void draw(float pos) {
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
-                Tile2x2_u8_wrap::Data data = pos_tile.at(dx, dy);
+                Tile2x2_u8_wrap::Entry data = pos_tile.at(dx, dy);
                 vec2i16 wrapped_pos = data.first; // Already wrapped position
                 uint8_t alpha = data.second;      // Alpha value
 
