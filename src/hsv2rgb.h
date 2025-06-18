@@ -127,6 +127,30 @@ void hsv2rgb_raw(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 #define HUE_MAX 191
 
 
+
+/// Converts an HSV value to RGB using the algorithm from here:
+/// https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB_alternative
+///
+/// @param hsv CHSV struct to convert to RGB
+/// @param rgb CRGB struct to store the result of the conversion (will be modified)
+void hsv2rgb_fullspectrum( const struct CHSV& hsv, struct CRGB& rgb);
+
+/// Inline version of hsv2rgb_fullspectrum which returns a CRGB object.
+inline CRGB hsv2rgb_fullspectrum( const struct CHSV& hsv) {
+    CRGB rgb;
+    hsv2rgb_fullspectrum(hsv, rgb);
+    return rgb;
+}
+
+/// @copybrief hsv2rgb_fullspectrum(const struct CHSV&, struct CRGB&)
+/// @see hsv2rgb_fullspectrum(const struct CHSV&, struct CRGB&)
+/// @param phsv CHSV array to convert to RGB
+/// @param prgb CRGB array to store the result of the conversion (will be modified)
+/// @param numLeds the number of array values to process
+void hsv2rgb_fullspectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
+
+
+
 /// Recover approximate HSV values from RGB.
 /// These values are *approximate*, not exact. Why is this "only" an approximation?
 /// Because not all RGB colors have HSV equivalents!  For example, there

@@ -5,6 +5,8 @@
 #define FASTLED_INTERNAL
 #include <stdint.h>
 
+#include <algorithm>
+
 #include "FastLED.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -475,6 +477,24 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     rgb.b = b;
 }
 
+void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
+  const auto f = [](const int n, const uint8_t h) -> unsigned int {
+    constexpr int kZero = 0 << 8;
+    constexpr int kOne  = 1 << 8;
+    constexpr int kFour = 4 << 8;
+    constexpr int kSix  = 6 << 8;
+
+    const int k = ((n << 8) + 6*h) % kSix;
+    const int k2 = kFour - k;
+    return std::max(kZero, std::min(kOne, std::min(k, k2)));
+  };
+
+  const unsigned int chroma = hsv.v * hsv.s / 255;
+  rgb.r = hsv.v - ((chroma * f(5, hsv.h)) >> 8);
+  rgb.g = hsv.v - ((chroma * f(3, hsv.h)) >> 8);
+  rgb.b = hsv.v - ((chroma * f(1, hsv.h)) >> 8);
+}
+
 
 void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; ++i) {
@@ -494,6 +514,11 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
     }
 }
 
+void hsv2rgb_fullspectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+    for (int i = 0; i < numLeds; ++i) {
+        hsv2rgb_fullspectrum(phsv[i], prgb[i]);
+    }
+}
 
 /// Convert a fractional input into a constant
 #define FIXFRAC8(N,D) (((N)*256)/(D))
