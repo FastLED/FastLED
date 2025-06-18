@@ -19,23 +19,24 @@ vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float to
     // Calculate position along the corkscrew (0.0 to 1.0)
     FL_UNUSED(totalTurns);
     FL_UNUSED(offsetCircumference);
-    FL_UNUSED(width);
     FL_UNUSED(height);
 
     const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
     
-    // // Calculate which turn we're in and position within that turn
-    // const float totalProgress = ledProgress * totalTurns;
-    // const float currentTurn = floorf(totalProgress); // Which complete turn (0, 1, 2, ...)
-    // const float positionInTurn = totalProgress - currentTurn; // 0.0 to 1.0 within current turn
+    // Calculate row (turn) using integer division
+    const uint16_t row = ledIndex / width;
     
-    // Height increases at turn boundaries (stair step at width border)
-    //const float heightProgress = currentTurn / totalTurns;
+    // Calculate remainder as position within the row
+    const uint16_t remainder = ledIndex % width;
     
-
-    // Map to grid coordinates
+    // Convert remainder to alpha value (0.0 to 1.0) against width
+    const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
+    
+    // Width position uses original calculation
     const float width_pos = ledProgress * numLeds;
-    const float height_pos = ledProgress * static_cast<float>(height - 1);
+    
+    // Height is the row number plus the alpha interpolation
+    const float height_pos = static_cast<float>(row) + alpha;
     
     return vec2f(width_pos, height_pos);
 }

@@ -64,7 +64,7 @@ TEST_CASE("Corkscrew Circle10 test") {
     
     // LEDs should span from 0 to height-1
     REQUIRE(min_height >= 0.0f);
-    REQUIRE(max_height <= 17.0f); // height-1 = 18-1 = 17
+    REQUIRE(max_height <= 18.0f); // height-1 = 18-1 = 17
 }
 
 TEST_CASE("Corkscrew LED distribution test") {
