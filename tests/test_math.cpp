@@ -204,4 +204,65 @@ TEST_CASE("fl_min and fl_max type promotion") {
         // Check values (allowing for floating point precision)
         CHECK_LT(min_result, max_result);
     }
+
+    SUBCASE("runtime value verification from type traits") {
+        // Test that the actual values work correctly, not just types
+        short a = 100;
+        int b = 200;
+        auto result = fl::fl_min(a, b);
+        static_assert(fl::is_same<decltype(result), int>::value,
+                      "short + int min should return int");
+        CHECK_EQ(result, 100);
+
+        unsigned int c = 300;
+        int d = 400;
+        auto result2 = fl::fl_max(c, d);
+        static_assert(fl::is_same<decltype(result2), int>::value,
+                      "unsigned int + int max should return int");
+        CHECK_EQ(result2, 400);
+
+        float e = 1.5f;
+        long f = 2;
+        auto result3 = fl::fl_min(e, f);
+        static_assert(fl::is_same<decltype(result3), float>::value,
+                      "float + long min should return float");
+        CHECK_EQ(result3, 1.5f);
+    }
+
+    SUBCASE("runtime value correctness with helper templates") {
+        // Test that our helper logic produces correct runtime values, not just
+        // types
+
+        // Test size-based promotion
+        int8_t small = 100;
+        int32_t large = 200;
+        auto size_result = fl::fl_max(small, large);
+        static_assert(fl::is_same<decltype(size_result), int32_t>::value,
+                      "size promotion should work");
+        CHECK_EQ(size_result, 200);
+
+        // Test rank-based promotion (int vs long same size case)
+        int rank_low = 300;
+        long rank_high = 400;
+        auto rank_result = fl::fl_max(rank_low, rank_high);
+        static_assert(fl::is_same<decltype(rank_result), long>::value,
+                      "rank promotion should work");
+        CHECK_EQ(rank_result, 400);
+
+        // Test signedness-based promotion
+        int16_t signed_val = 500;
+        uint16_t unsigned_val = 600;
+        auto sign_result = fl::fl_max(signed_val, unsigned_val);
+        static_assert(fl::is_same<decltype(sign_result), int16_t>::value,
+                      "signedness promotion should work");
+        CHECK_EQ(sign_result, 600); // Values should still work correctly
+
+        // Test floating point promotion
+        int int_val = 700;
+        float float_val = 750.5f;
+        auto float_result = fl::fl_max(int_val, float_val);
+        static_assert(fl::is_same<decltype(float_result), float>::value,
+                      "float promotion should work");
+        CHECK_EQ(float_result, 750.5f);
+    }
 }
