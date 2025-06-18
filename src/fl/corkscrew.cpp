@@ -14,7 +14,7 @@ namespace fl {
 namespace {
 
 // New helper function to calculate individual LED position
-vec2f calculateLedPosition(uint16_t ledIndex, uint16_t numLeds, float totalTurns, float offsetCircumference, uint16_t width, uint16_t height) {
+vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float totalTurns, float offsetCircumference, uint16_t width, uint16_t height) {
     // Calculate position along the corkscrew (0.0 to 1.0)
     const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
     
@@ -33,10 +33,7 @@ vec2f calculateLedPosition(uint16_t ledIndex, uint16_t numLeds, float totalTurns
     const float width_pos = normalizedAngle * static_cast<float>(width - 1) + offsetCircumference;
     const float height_pos = ledProgress * static_cast<float>(height - 1);
     
-    // Handle width wrapping for offset circumference
-    const float final_width = fmodf(width_pos, static_cast<float>(width));
-    
-    return vec2f(final_width, height_pos);
+    return vec2f(width_pos, height_pos);
 }
 
 void generateState(const Corkscrew::Input &input, CorkscrewState *output) {
@@ -58,13 +55,13 @@ vec2f Corkscrew::at_exact(uint16_t i) const {
     }
     
     // Compute position on-the-fly
-    vec2f position = calculateLedPosition(i, mInput.numLeds, mInput.totalTurns, 
+    vec2f position = calculateLedPositionExtended(i, mInput.numLeds, mInput.totalTurns, 
                                          mInput.offsetCircumference, mState.width, mState.height);
     
     // Apply inversion if requested
     if (mInput.invert) {
         uint16_t invertedIndex = mInput.numLeds - 1 - i;
-        position = calculateLedPosition(invertedIndex, mInput.numLeds, mInput.totalTurns, 
+        position = calculateLedPositionExtended(invertedIndex, mInput.numLeds, mInput.totalTurns, 
                                        mInput.offsetCircumference, mState.width, mState.height);
     }
 
