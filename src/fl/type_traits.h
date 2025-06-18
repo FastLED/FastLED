@@ -488,13 +488,35 @@ template <> struct type_rank<long double> {
 //-------------------------------------------------------------------------------
 
 // Primary template - fallback
-template <typename T, typename U> struct common_type_impl {
+template <typename T, typename U, typename = void> struct common_type_impl {
     using type = T;
 };
 
 // Same type specialization - handles all cases where T == U
 template <typename T> struct common_type_impl<T, T> { 
     using type = T; 
+};
+
+// Float/double specializations - only exist when T is numeric but not the same type, otherwise compilation fails
+template <typename T> 
+struct common_type_impl<T, float, typename enable_if<(is_integral<T>::value || is_floating_point<T>::value) && !is_same<T, float>::value>::type> { 
+    using type = float;
+};
+
+template <typename T> 
+struct common_type_impl<T, double, typename enable_if<(is_integral<T>::value || is_floating_point<T>::value) && !is_same<T, double>::value>::type> { 
+    using type = double;
+};
+
+// Symmetric specializations - when first type is float/double and second is numeric but not the same type
+template <typename T> 
+struct common_type_impl<float, T, typename enable_if<(is_integral<T>::value || is_floating_point<T>::value) && !is_same<T, float>::value>::type> { 
+    using type = float;
+};
+
+template <typename T> 
+struct common_type_impl<double, T, typename enable_if<(is_integral<T>::value || is_floating_point<T>::value) && !is_same<T, double>::value>::type> { 
+    using type = double;
 };
 
 // Different size promotions - larger type wins
@@ -617,48 +639,7 @@ template <> struct common_type_impl<long double, float> { using type = long doub
 template <> struct common_type_impl<double, long double> { using type = long double; };
 template <> struct common_type_impl<long double, double> { using type = long double; };
 
-// Integer with float - float wins
-template <> struct common_type_impl<int, float> { using type = float; };
-template <> struct common_type_impl<float, int> { using type = float; };
-template <> struct common_type_impl<long, double> { using type = double; };
-template <> struct common_type_impl<double, long> { using type = double; };
-template <> struct common_type_impl<float, unsigned char> { using type = float; };
-template <> struct common_type_impl<unsigned char, float> { using type = float; };
-
-// Add more common combinations
-template <> struct common_type_impl<signed char, float> { using type = float; };
-template <> struct common_type_impl<float, signed char> { using type = float; };
-template <> struct common_type_impl<short, float> { using type = float; };
-template <> struct common_type_impl<float, short> { using type = float; };
-template <> struct common_type_impl<unsigned short, float> { using type = float; };
-template <> struct common_type_impl<float, unsigned short> { using type = float; };
-template <> struct common_type_impl<unsigned int, float> { using type = float; };
-template <> struct common_type_impl<float, unsigned int> { using type = float; };
-template <> struct common_type_impl<long long, float> { using type = float; };
-template <> struct common_type_impl<float, long long> { using type = float; };
-template <> struct common_type_impl<unsigned long, float> { using type = float; };
-template <> struct common_type_impl<float, unsigned long> { using type = float; };
-template <> struct common_type_impl<unsigned long long, float> { using type = float; };
-template <> struct common_type_impl<float, unsigned long long> { using type = float; };
-
-template <> struct common_type_impl<signed char, double> { using type = double; };
-template <> struct common_type_impl<double, signed char> { using type = double; };
-template <> struct common_type_impl<unsigned char, double> { using type = double; };
-template <> struct common_type_impl<double, unsigned char> { using type = double; };
-template <> struct common_type_impl<short, double> { using type = double; };
-template <> struct common_type_impl<double, short> { using type = double; };
-template <> struct common_type_impl<unsigned short, double> { using type = double; };
-template <> struct common_type_impl<double, unsigned short> { using type = double; };
-template <> struct common_type_impl<int, double> { using type = double; };
-template <> struct common_type_impl<double, int> { using type = double; };
-template <> struct common_type_impl<unsigned int, double> { using type = double; };
-template <> struct common_type_impl<double, unsigned int> { using type = double; };
-template <> struct common_type_impl<long long, double> { using type = double; };
-template <> struct common_type_impl<double, long long> { using type = double; };
-template <> struct common_type_impl<unsigned long, double> { using type = double; };
-template <> struct common_type_impl<double, unsigned long> { using type = double; };
-template <> struct common_type_impl<unsigned long long, double> { using type = double; };
-template <> struct common_type_impl<double, unsigned long long> { using type = double; };
+// Integer with float/double specializations removed - now handled by partial specializations above
 
 template <typename T, typename U> struct common_type {
     using type = typename common_type_impl<T, U>::type;
