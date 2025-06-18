@@ -205,3 +205,95 @@ TEST_CASE("fl_min and fl_max type promotion") {
         CHECK_LT(min_result, max_result);
     }
 }
+
+TEST_CASE("common_type_impl behavior") {
+    SUBCASE("same types return same type") {
+        static_assert(fl::is_same<fl::common_type_t<int, int>, int>::value, "int + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<short, short>, short>::value, "short + short should return short");
+        static_assert(fl::is_same<fl::common_type_t<long, long>, long>::value, "long + long should return long");
+        static_assert(fl::is_same<fl::common_type_t<float, float>, float>::value, "float + float should return float");
+    }
+
+    SUBCASE("different size promotions with generic types") {
+        // Smaller to larger promotions
+        static_assert(fl::is_same<fl::common_type_t<short, int>, int>::value, "short + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<int, short>, int>::value, "int + short should return int");
+        static_assert(fl::is_same<fl::common_type_t<int, long>, long>::value, "int + long should return long");
+        static_assert(fl::is_same<fl::common_type_t<long, int>, long>::value, "long + int should return long");
+        static_assert(fl::is_same<fl::common_type_t<long, long long>, long long>::value, "long + long long should return long long");
+    }
+
+    SUBCASE("mixed signedness same size with generic types") {
+        // These should use the partial specialization to choose signed version
+        static_assert(fl::is_same<fl::common_type_t<short, unsigned short>, short>::value, "short + unsigned short should return short");
+        static_assert(fl::is_same<fl::common_type_t<unsigned short, short>, short>::value, "unsigned short + short should return short");
+        static_assert(fl::is_same<fl::common_type_t<int, unsigned int>, int>::value, "int + unsigned int should return int");
+        static_assert(fl::is_same<fl::common_type_t<unsigned int, int>, int>::value, "unsigned int + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<long, unsigned long>, long>::value, "long + unsigned long should return long");
+    }
+
+    SUBCASE("float/double promotions with generic types") {
+        // Float always wins over integers
+        static_assert(fl::is_same<fl::common_type_t<int, float>, float>::value, "int + float should return float");
+        static_assert(fl::is_same<fl::common_type_t<float, int>, float>::value, "float + int should return float");
+        static_assert(fl::is_same<fl::common_type_t<short, float>, float>::value, "short + float should return float");
+        static_assert(fl::is_same<fl::common_type_t<long, float>, float>::value, "long + float should return float");
+        
+        // Double wins over float
+        static_assert(fl::is_same<fl::common_type_t<float, double>, double>::value, "float + double should return double");
+        static_assert(fl::is_same<fl::common_type_t<double, float>, double>::value, "double + float should return double");
+        static_assert(fl::is_same<fl::common_type_t<int, double>, double>::value, "int + double should return double");
+    }
+
+    SUBCASE("sized types with generic types mixed") {
+        // Verify sized types work with generic types
+        static_assert(fl::is_same<fl::common_type_t<int8_t, int>, int>::value, "int8_t + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<int, int8_t>, int>::value, "int + int8_t should return int");
+        static_assert(fl::is_same<fl::common_type_t<uint16_t, int>, int>::value, "uint16_t + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<short, int32_t>, int32_t>::value, "short + int32_t should return int32_t");
+    }
+
+    SUBCASE("cross signedness different sizes with generic types") {
+        // Larger type wins when different sizes
+        static_assert(fl::is_same<fl::common_type_t<char, unsigned int>, unsigned int>::value, "char + unsigned int should return unsigned int");
+        static_assert(fl::is_same<fl::common_type_t<unsigned char, int>, int>::value, "unsigned char + int should return int");
+        static_assert(fl::is_same<fl::common_type_t<short, unsigned long>, unsigned long>::value, "short + unsigned long should return unsigned long");
+    }
+
+    SUBCASE("explicit sized type combinations") {
+        // Test the explicit sized type specializations we added
+        static_assert(fl::is_same<fl::common_type_t<int8_t, int16_t>, int16_t>::value, "int8_t + int16_t should return int16_t");
+        static_assert(fl::is_same<fl::common_type_t<uint8_t, uint32_t>, uint32_t>::value, "uint8_t + uint32_t should return uint32_t");
+        static_assert(fl::is_same<fl::common_type_t<int16_t, uint32_t>, uint32_t>::value, "int16_t + uint32_t should return uint32_t");
+        static_assert(fl::is_same<fl::common_type_t<uint16_t, int32_t>, int32_t>::value, "uint16_t + int32_t should return int32_t");
+    }
+
+    SUBCASE("mixed signedness same size with sized types") {
+        // Test partial specialization with sized types
+        static_assert(fl::is_same<fl::common_type_t<int16_t, uint16_t>, int16_t>::value, "int16_t + uint16_t should return int16_t");
+        static_assert(fl::is_same<fl::common_type_t<uint16_t, int16_t>, int16_t>::value, "uint16_t + int16_t should return int16_t");
+        static_assert(fl::is_same<fl::common_type_t<int32_t, uint32_t>, int32_t>::value, "int32_t + uint32_t should return int32_t");
+        static_assert(fl::is_same<fl::common_type_t<int64_t, uint64_t>, int64_t>::value, "int64_t + uint64_t should return int64_t");
+    }
+
+    SUBCASE("runtime value verification") {
+        // Test that the actual values work correctly, not just types
+        short a = 100;
+        int b = 200;
+        auto result = fl::fl_min(a, b);
+        static_assert(fl::is_same<decltype(result), int>::value, "short + int min should return int");
+        CHECK_EQ(result, 100);
+
+        unsigned int c = 300;
+        int d = 400;
+        auto result2 = fl::fl_max(c, d);
+        static_assert(fl::is_same<decltype(result2), int>::value, "unsigned int + int max should return int");
+        CHECK_EQ(result2, 400);
+
+        float e = 1.5f;
+        long f = 2;
+        auto result3 = fl::fl_min(e, f);
+        static_assert(fl::is_same<decltype(result3), float>::value, "float + long min should return float");
+        CHECK_EQ(result3, 1.5f);
+    }
+}

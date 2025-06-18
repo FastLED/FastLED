@@ -484,7 +484,7 @@ template <> struct type_rank<long double> {
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
-// Common type trait for type promotion - explicit specializations for integer types
+// Common type trait for type promotion - generic template-based approach
 //-------------------------------------------------------------------------------
 
 // Primary template - fallback
@@ -533,87 +533,52 @@ struct common_type_impl<uint8_t, int8_t, void> {
     // "no type named 'type' in 'struct fl::common_type_impl<unsigned char, signed char, void>'"
 };
 
-// Integer mixed signedness - when same size but different signedness, choose signed
-// (but not for int8_t/uint8_t which are handled above)
+// Generic integer promotion logic
 template <typename T, typename U>
 struct common_type_impl<T, U, typename enable_if<
     is_integral<T>::value && is_integral<U>::value &&
-    sizeof(T) == sizeof(U) &&
-    is_signed<T>::value != is_signed<U>::value &&
+    !is_same<T, U>::value &&
     !((is_same<T, int8_t>::value && is_same<U, uint8_t>::value) ||
       (is_same<T, uint8_t>::value && is_same<U, int8_t>::value))
 >::type> {
-    using type = typename conditional<is_signed<T>::value, T, U>::type;
+private:
+    static constexpr bool same_size = (sizeof(T) == sizeof(U));
+    static constexpr bool t_larger = (sizeof(T) > sizeof(U));
+    static constexpr bool u_larger = (sizeof(U) > sizeof(T));
+    static constexpr bool t_signed = is_signed<T>::value;
+    static constexpr bool u_signed = is_signed<U>::value;
+    static constexpr bool mixed_signedness = (t_signed != u_signed);
+    static constexpr bool t_higher_rank = (type_rank<T>::value > type_rank<U>::value);
+    static constexpr bool u_higher_rank = (type_rank<U>::value > type_rank<T>::value);
+    
+public:
+    // Logic:
+    // 1. If different sizes: larger type wins
+    // 2. If same size but different type rank: higher rank wins (e.g., long vs int)
+    // 3. If same size, same rank but different signedness: signed type wins
+    // 4. Fallback: first type
+    using type = typename conditional<
+        t_larger, T,
+        typename conditional<
+            u_larger, U,
+            // same_size case
+            typename conditional<
+                same_size && t_higher_rank, T,
+                typename conditional<
+                    same_size && u_higher_rank, U,
+                    // same size and same rank, check signedness
+                    typename conditional<
+                        mixed_signedness && t_signed, T,
+                        typename conditional<
+                            mixed_signedness && u_signed, U,
+                            T  // fallback (shouldn't happen for valid integer pairs)
+                        >::type
+                    >::type
+                >::type
+            >::type
+        >::type
+    >::type;
 };
-
-// Different size promotions - larger type wins
-template <> struct common_type_impl<int8_t, int16_t> { using type = int16_t; };
-template <> struct common_type_impl<int16_t, int8_t> { using type = int16_t; };
-template <> struct common_type_impl<int8_t, int32_t> { using type = int32_t; };
-template <> struct common_type_impl<int32_t, int8_t> { using type = int32_t; };
-template <> struct common_type_impl<int8_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, int8_t> { using type = int64_t; };
-
-template <> struct common_type_impl<uint8_t, uint16_t> { using type = uint16_t; };
-template <> struct common_type_impl<uint16_t, uint8_t> { using type = uint16_t; };
-template <> struct common_type_impl<uint8_t, uint32_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint32_t, uint8_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint8_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, uint8_t> { using type = uint64_t; };
-
-template <> struct common_type_impl<int16_t, int32_t> { using type = int32_t; };
-template <> struct common_type_impl<int32_t, int16_t> { using type = int32_t; };
-template <> struct common_type_impl<int16_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, int16_t> { using type = int64_t; };
-
-template <> struct common_type_impl<uint16_t, uint32_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint32_t, uint16_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint16_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, uint16_t> { using type = uint64_t; };
-
-template <> struct common_type_impl<int32_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, int32_t> { using type = int64_t; };
-
-template <> struct common_type_impl<uint32_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, uint32_t> { using type = uint64_t; };
-
-// Mixed signedness same-size cases now handled by partial specialization above
-// Keep only int64_t vs uint64_t since it's already correct  
-template <> struct common_type_impl<int64_t, uint64_t> { using type = int64_t; };
-template <> struct common_type_impl<uint64_t, int64_t> { using type = int64_t; };
-
-// Cross signedness with different sizes - larger type wins unless mixed sign same size
-template <> struct common_type_impl<int8_t, uint16_t> { using type = uint16_t; };
-template <> struct common_type_impl<uint16_t, int8_t> { using type = uint16_t; };
-template <> struct common_type_impl<int8_t, uint32_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint32_t, int8_t> { using type = uint32_t; };
-template <> struct common_type_impl<int8_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, int8_t> { using type = uint64_t; };
-
-template <> struct common_type_impl<uint8_t, int16_t> { using type = int16_t; };
-template <> struct common_type_impl<int16_t, uint8_t> { using type = int16_t; };
-template <> struct common_type_impl<uint8_t, int32_t> { using type = int32_t; };
-template <> struct common_type_impl<int32_t, uint8_t> { using type = int32_t; };
-template <> struct common_type_impl<uint8_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, uint8_t> { using type = int64_t; };
-
-template <> struct common_type_impl<int16_t, uint32_t> { using type = uint32_t; };
-template <> struct common_type_impl<uint32_t, int16_t> { using type = uint32_t; };
-template <> struct common_type_impl<int16_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, int16_t> { using type = uint64_t; };
-
-template <> struct common_type_impl<uint16_t, int32_t> { using type = int32_t; };
-template <> struct common_type_impl<int32_t, uint16_t> { using type = int32_t; };
-template <> struct common_type_impl<uint16_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, uint16_t> { using type = int64_t; };
-
-template <> struct common_type_impl<int32_t, uint64_t> { using type = uint64_t; };
-template <> struct common_type_impl<uint64_t, int32_t> { using type = uint64_t; };
-
-template <> struct common_type_impl<uint32_t, int64_t> { using type = int64_t; };
-template <> struct common_type_impl<int64_t, uint32_t> { using type = int64_t; };
-
-// Floating point specializations (floats always win over integers)
 
 // Mixed floating point sizes - larger wins
 template <> struct common_type_impl<float, double> { using type = double; };
@@ -622,8 +587,6 @@ template <> struct common_type_impl<float, long double> { using type = long doub
 template <> struct common_type_impl<long double, float> { using type = long double; };
 template <> struct common_type_impl<double, long double> { using type = long double; };
 template <> struct common_type_impl<long double, double> { using type = long double; };
-
-// Integer with float/double specializations removed - now handled by partial specializations above
 
 template <typename T, typename U> struct common_type {
     using type = typename common_type_impl<T, U>::type;
