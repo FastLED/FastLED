@@ -164,11 +164,30 @@ TEST_CASE("fl_min and fl_max type promotion") {
         auto min_result = fl::fl_min(a, b);
         auto max_result = fl::fl_max(a, b);
         
-        // Should promote to larger type that can handle both
+        // int8_t and uint8_t should promote to short to safely handle both values
+        static_assert(fl::is_same<decltype(min_result), short>::value, "fl_min should return short");
+        static_assert(fl::is_same<decltype(max_result), short>::value, "fl_max should return short");
+        
         // Basic functionality check: min should be less than max
         CHECK_EQ(min_result, 50);
         CHECK_EQ(max_result, 200);
         CHECK_LT(min_result, max_result);
+    }
+
+    SUBCASE("int32_t and uint32_t should promote to long long") {
+        int32_t a = 1000000;
+        uint32_t b = 2000000;
+        
+        auto min_result = fl::fl_min(a, b);
+        auto max_result = fl::fl_max(a, b);
+        
+        // int32_t and uint32_t should promote to long long to safely handle both values
+        static_assert(fl::is_same<decltype(min_result), long long>::value, "fl_min should return long long");
+        static_assert(fl::is_same<decltype(max_result), long long>::value, "fl_max should return long long");
+        
+        // Check values
+        CHECK_EQ(min_result, 1000000);
+        CHECK_EQ(max_result, 2000000);
     }
 
     SUBCASE("edge case: floating point vs large integer") {
