@@ -23,6 +23,13 @@ static vec2i16 wrap_x(const vec2i16 &v, const uint16_t width) {
 }
 } // namespace
 
+Tile2x2_u8_wrap::Tile2x2_u8_wrap() {
+    mData[0][0] = {vec2i16(0, 0), 0};
+    mData[0][1] = {vec2i16(0, 1), 0};
+    mData[1][0] = {vec2i16(1, 0), 0};
+    mData[1][1] = {vec2i16(1, 1), 0};
+}
+
 void Tile2x2_u8::Rasterize(const Slice<const Tile2x2_u8> &tiles,
                            XYRasterU8Sparse *out_raster) {
     out_raster->rasterize(tiles);
@@ -55,18 +62,27 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width) {
                 from.at(1, 1)};
 }
 
-Tile2x2_u8_wrap::Data &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) {
+Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
-    return tile[y][x];
+    return mData[y][x];
 }
 
-const Tile2x2_u8_wrap::Data &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) const {
+
+Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Data& data) {
+    mData[0][0] = data[0][0];
+    mData[0][1] = data[0][1];
+    mData[1][0] = data[1][0];
+    mData[1][1] = data[1][1];
+}
+
+
+const Tile2x2_u8_wrap::Entry &Tile2x2_u8_wrap::at(uint16_t x, uint16_t y) const {
     // Wrap around the edges
     x = (x + 2) % 2;
     y = (y + 2) % 2;
-    return tile[y][x];
+    return mData[y][x];
 }
 
 Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width,
@@ -142,7 +158,7 @@ fl::vector_fixed<Tile2x2_u8_wrap, 2> Tile2x2_u8_wrap::Interpolate(const Tile2x2_
             float alpha_float = alpha_a + t * (alpha_b - alpha_a);
             uint8_t interpolated_alpha = static_cast<uint8_t>(alpha_float + 0.5f); // Round to nearest
             
-            interpolated.tile[y][x] = {pos, interpolated_alpha};
+            interpolated.mData[y][x] = {pos, interpolated_alpha};
         }
     }
     

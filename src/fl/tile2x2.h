@@ -92,21 +92,24 @@ class Tile2x2_u8_wrap {
     // the width of the cylinder and the y-coordinate wraps around the height.
     // This converts a tile2x2 to a wrapped x,y version.
   public:
-    using Data = fl::pair<vec2i16, uint8_t>;  // absolute position, alpha
+    using Entry = fl::pair<vec2i16, uint8_t>;  // absolute position, alpha
+    using Data = Entry[2][2];
 
-    Tile2x2_u8_wrap() = default;
+    Tile2x2_u8_wrap();
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width);
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, uint16_t width, uint16_t height);
 
+    Tile2x2_u8_wrap(const Data& data);
+
     // Returns the absolute position and the alpha.
-    Data &at(uint16_t x, uint16_t y);
-    const Data &at(uint16_t x, uint16_t y) const;
+    Entry &at(uint16_t x, uint16_t y);
+    const Entry &at(uint16_t x, uint16_t y) const;
 
     // Interpolates between two wrapped tiles and returns up to 2 interpolated tiles
     static vector_fixed<Tile2x2_u8_wrap, 2> Interpolate(const Tile2x2_u8_wrap& a, const Tile2x2_u8_wrap& b, float t);
 
   private:
-    Data tile[2][2] = {}; // zero filled.
+    Data mData = {};
 };
 
 } // namespace fl

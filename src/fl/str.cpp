@@ -244,7 +244,7 @@ Str &Str::append(const XYMap &map) {
 }
 
 Str &Str::append(const Tile2x2_u8_wrap &tile) {
-    Tile2x2_u8_wrap::Data data[4] = {
+    Tile2x2_u8_wrap::Entry data[4] = {
         tile.at(0, 0),
         tile.at(0, 1),
         tile.at(1, 0),
