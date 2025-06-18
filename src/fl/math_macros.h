@@ -1,18 +1,38 @@
 #pragma once
 
+#include "fl/compiler_control.h"
+
 namespace fl {
+
+// Fun fact, we can't define any function by the name of min,max,abs because
+// on some platforms these are macros. Therefore we can only use fl_min, fl_max, fl_abs.
 // This is needed for math macro ABS to work optimally.
 template <typename T> inline T fl_abs(T value) {
     return value < 0 ? -value : value;
 }
+
+// Template functions for MIN and MAX to avoid statement repetition
+template <typename T, typename U> inline T fl_min(T a, U b) {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(sign-compare)
+    return (a < b) ? a : b;
+    FL_DISABLE_WARNING_POP
+}
+
+template <typename T, typename U> inline T fl_max(T a, U b) {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(sign-compare)
+    return (a > b) ? a : b;
+    FL_DISABLE_WARNING_POP
+}
 } // namespace fl
 
 #ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX(a, b) fl::fl_max(a, b)
 #endif
 
 #ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MIN(a, b) fl::fl_min(a, b)
 #endif
 
 #ifndef ABS
