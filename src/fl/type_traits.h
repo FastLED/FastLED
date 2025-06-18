@@ -519,17 +519,18 @@ struct common_type_impl<double, T, typename enable_if<(is_integral<T>::value || 
     using type = double;
 };
 
-// Explicitly forbid int8_t and uint8_t combinations - no type member causes compilation error
+// Explicitly forbid int8_t and uint8_t combinations 
+// No type member = clear compilation error when accessed
 template <>
 struct common_type_impl<int8_t, uint8_t, void> {
-    // Intentionally no 'type' member - this will cause compilation to fail with a clear error
-    // when someone tries to access ::type
+    // Intentionally no 'type' member - will cause error: 
+    // "no type named 'type' in 'struct fl::common_type_impl<signed char, unsigned char, void>'"
 };
 
 template <>
 struct common_type_impl<uint8_t, int8_t, void> {
-    // Intentionally no 'type' member - this will cause compilation to fail with a clear error
-    // when someone tries to access ::type
+    // Intentionally no 'type' member - will cause error:
+    // "no type named 'type' in 'struct fl::common_type_impl<unsigned char, signed char, void>'"
 };
 
 // Integer mixed signedness - when same size but different signedness, choose signed
@@ -546,107 +547,71 @@ struct common_type_impl<T, U, typename enable_if<
 };
 
 // Different size promotions - larger type wins
-template <> struct common_type_impl<signed char, short> { using type = short; };
-template <> struct common_type_impl<short, signed char> { using type = short; };
-template <> struct common_type_impl<signed char, int> { using type = int; };
-template <> struct common_type_impl<int, signed char> { using type = int; };
-template <> struct common_type_impl<signed char, long> { using type = long; };
-template <> struct common_type_impl<long, signed char> { using type = long; };
-template <> struct common_type_impl<signed char, long long> { using type = long long; };
-template <> struct common_type_impl<long long, signed char> { using type = long long; };
+template <> struct common_type_impl<int8_t, int16_t> { using type = int16_t; };
+template <> struct common_type_impl<int16_t, int8_t> { using type = int16_t; };
+template <> struct common_type_impl<int8_t, int32_t> { using type = int32_t; };
+template <> struct common_type_impl<int32_t, int8_t> { using type = int32_t; };
+template <> struct common_type_impl<int8_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, int8_t> { using type = int64_t; };
 
-template <> struct common_type_impl<unsigned char, unsigned short> { using type = unsigned short; };
-template <> struct common_type_impl<unsigned short, unsigned char> { using type = unsigned short; };
-template <> struct common_type_impl<unsigned char, unsigned int> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned int, unsigned char> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned char, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, unsigned char> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned char, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, unsigned char> { using type = unsigned long long; };
+template <> struct common_type_impl<uint8_t, uint16_t> { using type = uint16_t; };
+template <> struct common_type_impl<uint16_t, uint8_t> { using type = uint16_t; };
+template <> struct common_type_impl<uint8_t, uint32_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint32_t, uint8_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint8_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, uint8_t> { using type = uint64_t; };
 
-template <> struct common_type_impl<short, int> { using type = int; };
-template <> struct common_type_impl<int, short> { using type = int; };
-template <> struct common_type_impl<short, long> { using type = long; };
-template <> struct common_type_impl<long, short> { using type = long; };
-template <> struct common_type_impl<short, long long> { using type = long long; };
-template <> struct common_type_impl<long long, short> { using type = long long; };
+template <> struct common_type_impl<int16_t, int32_t> { using type = int32_t; };
+template <> struct common_type_impl<int32_t, int16_t> { using type = int32_t; };
+template <> struct common_type_impl<int16_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, int16_t> { using type = int64_t; };
 
-template <> struct common_type_impl<unsigned short, unsigned int> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned int, unsigned short> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned short, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, unsigned short> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned short, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, unsigned short> { using type = unsigned long long; };
+template <> struct common_type_impl<uint16_t, uint32_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint32_t, uint16_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint16_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, uint16_t> { using type = uint64_t; };
 
-template <> struct common_type_impl<int, long> { using type = long; };
-template <> struct common_type_impl<long, int> { using type = long; };
-template <> struct common_type_impl<int, long long> { using type = long long; };
-template <> struct common_type_impl<long long, int> { using type = long long; };
+template <> struct common_type_impl<int32_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, int32_t> { using type = int64_t; };
 
-template <> struct common_type_impl<unsigned int, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, unsigned int> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned int, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, unsigned int> { using type = unsigned long long; };
-
-template <> struct common_type_impl<long, long long> { using type = long long; };
-template <> struct common_type_impl<long long, long> { using type = long long; };
-
-template <> struct common_type_impl<unsigned long, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, unsigned long> { using type = unsigned long long; };
+template <> struct common_type_impl<uint32_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, uint32_t> { using type = uint64_t; };
 
 // Mixed signedness same-size cases now handled by partial specialization above
-// Keep only long long vs unsigned long long since it's already correct  
-template <> struct common_type_impl<long long, unsigned long long> { using type = long long; };
-template <> struct common_type_impl<unsigned long long, long long> { using type = long long; };
+// Keep only int64_t vs uint64_t since it's already correct  
+template <> struct common_type_impl<int64_t, uint64_t> { using type = int64_t; };
+template <> struct common_type_impl<uint64_t, int64_t> { using type = int64_t; };
 
 // Cross signedness with different sizes - larger type wins unless mixed sign same size
-template <> struct common_type_impl<signed char, unsigned short> { using type = unsigned short; };
-template <> struct common_type_impl<unsigned short, signed char> { using type = unsigned short; };
-template <> struct common_type_impl<signed char, unsigned int> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned int, signed char> { using type = unsigned int; };
-template <> struct common_type_impl<signed char, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, signed char> { using type = unsigned long; };
-template <> struct common_type_impl<signed char, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, signed char> { using type = unsigned long long; };
+template <> struct common_type_impl<int8_t, uint16_t> { using type = uint16_t; };
+template <> struct common_type_impl<uint16_t, int8_t> { using type = uint16_t; };
+template <> struct common_type_impl<int8_t, uint32_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint32_t, int8_t> { using type = uint32_t; };
+template <> struct common_type_impl<int8_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, int8_t> { using type = uint64_t; };
 
-template <> struct common_type_impl<unsigned char, short> { using type = short; };
-template <> struct common_type_impl<short, unsigned char> { using type = short; };
-template <> struct common_type_impl<unsigned char, int> { using type = int; };
-template <> struct common_type_impl<int, unsigned char> { using type = int; };
-template <> struct common_type_impl<unsigned char, long> { using type = long; };
-template <> struct common_type_impl<long, unsigned char> { using type = long; };
-template <> struct common_type_impl<unsigned char, long long> { using type = long long; };
-template <> struct common_type_impl<long long, unsigned char> { using type = long long; };
+template <> struct common_type_impl<uint8_t, int16_t> { using type = int16_t; };
+template <> struct common_type_impl<int16_t, uint8_t> { using type = int16_t; };
+template <> struct common_type_impl<uint8_t, int32_t> { using type = int32_t; };
+template <> struct common_type_impl<int32_t, uint8_t> { using type = int32_t; };
+template <> struct common_type_impl<uint8_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, uint8_t> { using type = int64_t; };
 
-template <> struct common_type_impl<short, unsigned int> { using type = unsigned int; };
-template <> struct common_type_impl<unsigned int, short> { using type = unsigned int; };
-template <> struct common_type_impl<short, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, short> { using type = unsigned long; };
-template <> struct common_type_impl<short, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, short> { using type = unsigned long long; };
+template <> struct common_type_impl<int16_t, uint32_t> { using type = uint32_t; };
+template <> struct common_type_impl<uint32_t, int16_t> { using type = uint32_t; };
+template <> struct common_type_impl<int16_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, int16_t> { using type = uint64_t; };
 
-template <> struct common_type_impl<unsigned short, int> { using type = int; };
-template <> struct common_type_impl<int, unsigned short> { using type = int; };
-template <> struct common_type_impl<unsigned short, long> { using type = long; };
-template <> struct common_type_impl<long, unsigned short> { using type = long; };
-template <> struct common_type_impl<unsigned short, long long> { using type = long long; };
-template <> struct common_type_impl<long long, unsigned short> { using type = long long; };
+template <> struct common_type_impl<uint16_t, int32_t> { using type = int32_t; };
+template <> struct common_type_impl<int32_t, uint16_t> { using type = int32_t; };
+template <> struct common_type_impl<uint16_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, uint16_t> { using type = int64_t; };
 
-template <> struct common_type_impl<int, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<unsigned long, int> { using type = unsigned long; };
-template <> struct common_type_impl<int, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, int> { using type = unsigned long long; };
+template <> struct common_type_impl<int32_t, uint64_t> { using type = uint64_t; };
+template <> struct common_type_impl<uint64_t, int32_t> { using type = uint64_t; };
 
-template <> struct common_type_impl<unsigned int, long> { using type = long; };
-template <> struct common_type_impl<long, unsigned int> { using type = long; };
-template <> struct common_type_impl<unsigned int, long long> { using type = long long; };
-template <> struct common_type_impl<long long, unsigned int> { using type = long long; };
-
-template <> struct common_type_impl<long, unsigned long long> { using type = unsigned long long; };
-template <> struct common_type_impl<unsigned long long, long> { using type = unsigned long long; };
-
-template <> struct common_type_impl<unsigned long, long long> { using type = long long; };
-template <> struct common_type_impl<long long, unsigned long> { using type = long long; };
+template <> struct common_type_impl<uint32_t, int64_t> { using type = int64_t; };
+template <> struct common_type_impl<int64_t, uint32_t> { using type = int64_t; };
 
 // Floating point specializations (floats always win over integers)
 
