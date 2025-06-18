@@ -368,6 +368,157 @@ template <typename T> struct is_integral<T &> {
     static constexpr bool value = is_integral<T>::value;
 };
 
+//-------------------------------------------------------------------------------
+// is_floating_point trait
+//-------------------------------------------------------------------------------
+template <typename T> struct is_floating_point {
+    static constexpr bool value = false;
+};
+template <> struct is_floating_point<float> {
+    static constexpr bool value = true;
+};
+template <> struct is_floating_point<double> {
+    static constexpr bool value = true;
+};
+template <> struct is_floating_point<long double> {
+    static constexpr bool value = true;
+};
+
+template <typename T> struct is_floating_point<const T> {
+    static constexpr bool value = is_floating_point<T>::value;
+};
+
+template <typename T> struct is_floating_point<volatile T> {
+    static constexpr bool value = is_floating_point<T>::value;
+};
+
+template <typename T> struct is_floating_point<T &> {
+    static constexpr bool value = is_floating_point<T>::value;
+};
+
+//-------------------------------------------------------------------------------
+// is_signed trait
+//-------------------------------------------------------------------------------
+template <typename T> struct is_signed {
+    static constexpr bool value = false;
+};
+template <> struct is_signed<signed char> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<short> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<int> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<long> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<long long> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<float> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<double> {
+    static constexpr bool value = true;
+};
+template <> struct is_signed<long double> {
+    static constexpr bool value = true;
+};
+
+//-------------------------------------------------------------------------------
+// Type size ranking for promotion rules
+//-------------------------------------------------------------------------------
+template <typename T> struct type_rank {
+    static constexpr int value = 0;
+};
+template <> struct type_rank<bool> {
+    static constexpr int value = 1;
+};
+template <> struct type_rank<signed char> {
+    static constexpr int value = 2;
+};
+template <> struct type_rank<unsigned char> {
+    static constexpr int value = 2;
+};
+template <> struct type_rank<char> {
+    static constexpr int value = 2;
+};
+template <> struct type_rank<short> {
+    static constexpr int value = 3;
+};
+template <> struct type_rank<unsigned short> {
+    static constexpr int value = 3;
+};
+template <> struct type_rank<int> {
+    static constexpr int value = 4;
+};
+template <> struct type_rank<unsigned int> {
+    static constexpr int value = 4;
+};
+template <> struct type_rank<long> {
+    static constexpr int value = 5;
+};
+template <> struct type_rank<unsigned long> {
+    static constexpr int value = 5;
+};
+template <> struct type_rank<long long> {
+    static constexpr int value = 6;
+};
+template <> struct type_rank<unsigned long long> {
+    static constexpr int value = 6;
+};
+template <> struct type_rank<float> {
+    static constexpr int value = 10;
+};
+template <> struct type_rank<double> {
+    static constexpr int value = 11;
+};
+template <> struct type_rank<long double> {
+    static constexpr int value = 12;
+};
+
+//-------------------------------------------------------------------------------
+// Common type trait for type promotion
+//-------------------------------------------------------------------------------
+template <typename T, typename U> struct common_type_impl {
+private:
+    // Remove cv-qualifiers and references for comparison
+    using T_clean = typename remove_cv<typename remove_reference<T>::type>::type;
+    using U_clean = typename remove_cv<typename remove_reference<U>::type>::type;
+    
+    // If types are the same, return that type
+    static constexpr bool same_type = is_same<T_clean, U_clean>::value;
+    
+    // If either is floating point, floating point wins
+    static constexpr bool t_is_float = is_floating_point<T_clean>::value;
+    static constexpr bool u_is_float = is_floating_point<U_clean>::value;
+    static constexpr bool either_float = t_is_float || u_is_float;
+    
+    // Type ranking for promotion
+    static constexpr int t_rank = type_rank<T_clean>::value;
+    static constexpr int u_rank = type_rank<U_clean>::value;
+    static constexpr bool t_higher_rank = t_rank > u_rank;
+    
+public:
+    using type = typename conditional<
+        same_type, T_clean,
+        typename conditional<
+            either_float,
+            typename conditional<t_is_float && !u_is_float, T_clean,
+                               typename conditional<!t_is_float && u_is_float, U_clean,
+                                                  typename conditional<t_higher_rank, T_clean, U_clean>::type>::type>::type,
+            typename conditional<t_higher_rank, T_clean, U_clean>::type>::type>::type;
+};
+
+template <typename T, typename U> struct common_type {
+    using type = typename common_type_impl<T, U>::type;
+};
+
+template <typename T, typename U>
+using common_type_t = typename common_type<T, U>::type;
+
 // This uses template magic to maybe generate a type for the given condition. If
 // that type doesn't exist then a type will fail to be generated, and the
 // compiler will skip the consideration of a target function. This is useful for

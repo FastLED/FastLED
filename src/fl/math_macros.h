@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/compiler_control.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -12,14 +13,15 @@ template <typename T> inline T fl_abs(T value) {
 }
 
 // Template functions for MIN and MAX to avoid statement repetition
-template <typename T, typename U> inline T fl_min(T a, U b) {
+// Returns the most promotable type between the two arguments
+template <typename T, typename U> inline common_type_t<T, U> fl_min(T a, U b) {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(sign-compare)
     return (a < b) ? a : b;
     FL_DISABLE_WARNING_POP
 }
 
-template <typename T, typename U> inline T fl_max(T a, U b) {
+template <typename T, typename U> inline common_type_t<T, U> fl_max(T a, U b) {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING(sign-compare)
     return (a > b) ? a : b;
