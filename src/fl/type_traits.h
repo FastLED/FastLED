@@ -484,7 +484,70 @@ template <> struct type_rank<long double> {
 // for the basic types above, so they automatically inherit these specializations
 
 //-------------------------------------------------------------------------------
-// Common type trait for type promotion - generic template-based approach
+// Helper templates for integer type promotion logic
+//-------------------------------------------------------------------------------
+
+// Helper: Choose type based on size (larger wins)
+template <typename T, typename U>
+struct choose_by_size {
+    using type = typename conditional<
+        (sizeof(T) > sizeof(U)), T,
+        typename conditional<
+            (sizeof(U) > sizeof(T)), U,
+            void  // same size - handled elsewhere
+        >::type
+    >::type;
+};
+
+// Helper: Choose type based on type rank when same size (higher rank wins)
+template <typename T, typename U>
+struct choose_by_rank {
+    using type = typename conditional<
+        (type_rank<T>::value > type_rank<U>::value), T,
+        typename conditional<
+            (type_rank<U>::value > type_rank<T>::value), U,
+            void  // same rank - handled elsewhere
+        >::type
+    >::type;
+};
+
+// Helper: Choose type based on signedness when same size and rank (signed wins)
+template <typename T, typename U>
+struct choose_by_signedness {
+    static constexpr bool t_signed = is_signed<T>::value;
+    static constexpr bool u_signed = is_signed<U>::value;
+    static constexpr bool mixed_signedness = (t_signed != u_signed);
+    
+    using type = typename conditional<
+        mixed_signedness && t_signed, T,
+        typename conditional<
+            mixed_signedness && u_signed, U,
+            T  // same signedness - just pick first
+        >::type
+    >::type;
+};
+
+// Helper: Main integer promotion logic dispatcher
+template <typename T, typename U>
+struct integer_promotion_impl {
+    static constexpr bool same_size = (sizeof(T) == sizeof(U));
+    static constexpr bool same_rank = (type_rank<T>::value == type_rank<U>::value);
+    
+    using by_size_result = typename choose_by_size<T, U>::type;
+    using by_rank_result = typename choose_by_rank<T, U>::type;
+    using by_signedness_result = typename choose_by_signedness<T, U>::type;
+    
+    using type = typename conditional<
+        !same_size, by_size_result,
+        typename conditional<
+            same_size && !same_rank, by_rank_result,
+            by_signedness_result  // same size and rank
+        >::type
+    >::type;
+};
+
+//-------------------------------------------------------------------------------
+// Common type trait for type promotion - now much cleaner!
 //-------------------------------------------------------------------------------
 
 // Primary template - fallback
@@ -533,7 +596,7 @@ struct common_type_impl<uint8_t, int8_t, void> {
     // "no type named 'type' in 'struct fl::common_type_impl<unsigned char, signed char, void>'"
 };
 
-// Generic integer promotion logic
+// Generic integer promotion logic - now much cleaner!
 template <typename T, typename U>
 struct common_type_impl<T, U, typename enable_if<
     is_integral<T>::value && is_integral<U>::value &&
@@ -541,43 +604,7 @@ struct common_type_impl<T, U, typename enable_if<
     !((is_same<T, int8_t>::value && is_same<U, uint8_t>::value) ||
       (is_same<T, uint8_t>::value && is_same<U, int8_t>::value))
 >::type> {
-private:
-    static constexpr bool same_size = (sizeof(T) == sizeof(U));
-    static constexpr bool t_larger = (sizeof(T) > sizeof(U));
-    static constexpr bool u_larger = (sizeof(U) > sizeof(T));
-    static constexpr bool t_signed = is_signed<T>::value;
-    static constexpr bool u_signed = is_signed<U>::value;
-    static constexpr bool mixed_signedness = (t_signed != u_signed);
-    static constexpr bool t_higher_rank = (type_rank<T>::value > type_rank<U>::value);
-    static constexpr bool u_higher_rank = (type_rank<U>::value > type_rank<T>::value);
-    
-public:
-    // Logic:
-    // 1. If different sizes: larger type wins
-    // 2. If same size but different type rank: higher rank wins (e.g., long vs int)
-    // 3. If same size, same rank but different signedness: signed type wins
-    // 4. Fallback: first type
-    using type = typename conditional<
-        t_larger, T,
-        typename conditional<
-            u_larger, U,
-            // same_size case
-            typename conditional<
-                same_size && t_higher_rank, T,
-                typename conditional<
-                    same_size && u_higher_rank, U,
-                    // same size and same rank, check signedness
-                    typename conditional<
-                        mixed_signedness && t_signed, T,
-                        typename conditional<
-                            mixed_signedness && u_signed, U,
-                            T  // fallback (shouldn't happen for valid integer pairs)
-                        >::type
-                    >::type
-                >::type
-            >::type
-        >::type
-    >::type;
+    using type = typename integer_promotion_impl<T, U>::type;
 };
 
 // Mixed floating point sizes - larger wins
