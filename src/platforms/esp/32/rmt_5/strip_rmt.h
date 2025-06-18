@@ -6,6 +6,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// NOTE: LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS controls the memory block size.
+// See codebase.
 class IRmtStrip
 {
 public:

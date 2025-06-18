@@ -15,6 +15,8 @@
 #include "esp_check.h"
 #include "fl/namespace.h"
 
+#define AUTO_MEMORY_BLOCK_SIZE 0
+
 FASTLED_NAMESPACE_BEGIN
 
 namespace {  // anonymous namespace
@@ -34,7 +36,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
         .reset = reset};
 
     // is always going to fail, so it's disabled for now.
-    uint32_t memory_block_symbols = with_dma ? 1024 : 0;
+    uint32_t memory_block_symbols = with_dma ? 1024 : AUTO_MEMORY_BLOCK_SIZE;
     led_color_component_format_t color_component_format =
         is_rgbw ? LED_STRIP_COLOR_COMPONENT_FMT_RGBW : LED_STRIP_COLOR_COMPONENT_FMT_RGB;
 
