@@ -12,6 +12,8 @@ to test that the forward mapping works correctly first.
 
 */
 
+#include "FastLED.h"
+
 #include "fl/assert.h"
 #include "fl/corkscrew.h"
 #include "fl/grid.h"
@@ -20,15 +22,19 @@ to test that the forward mapping works correctly first.
 #include "fl/sstream.h"
 #include "fl/warn.h"
 #include "noise.h"
-#include <FastLED.h>
+
 // #include "vec3.h"
 
 using namespace fl;
 
-#define PIN_DATA 9
-#define PIN_CLOCK 7
+#ifndef PIN_DATA
+#define PIN_DATA 1  // Universally available pin
+#endif
 
-#define NUM_LEDS 34
+#ifndef PIN_CLOCK
+#define PIN_CLOCK 2  // Universally available pin
+#endif
+
 #define CORKSCREW_TURNS 19.5 // Default to 19 turns
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
@@ -105,14 +111,7 @@ void setup() {
     controller->setScreenMap(screenMap);
 }
 
-void loop() {
-    uint32_t now = millis();
-    // fl::clear(leds);
-    fl::clear(frameBuffer);
-
-    // Update the corkscrew mapping with auto-advance or manual position control
-    float combinedPosition = 0.0f;
-
+float get_position() {
     if (autoAdvance.value()) {
         // Check if auto-advance was just enabled
         // Auto-advance mode: increment smoothly from current position
@@ -130,10 +129,11 @@ void loop() {
             combinedPosition = 1.0f;
     }
 
-    float pos = combinedPosition * (corkscrew.size() - 1);
+    return combinedPosition;
+}
 
-    FL_WARN("pos: " << pos);
 
+void draw(float pos) {
     if (allWhite) {
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
             frameBuffer.data()[i] = CRGB(8, 8, 8);
@@ -167,5 +167,17 @@ void loop() {
         frameBuffer.at(pos_i16.x, pos_i16.y) =
             CRGB::Blue; // Draw a blue pixel at (w, h)
     }
+}
+
+void loop() {
+    uint32_t now = millis();
+    fl::clear(frameBuffer);
+
+    // Update the corkscrew mapping with auto-advance or manual position control
+    float combinedPosition = get_position();
+    float pos = combinedPosition * (corkscrew.size() - 1);
+
+    FL_WARN("pos: " << pos);
+    draw(pos);
     FastLED.show();
 }
