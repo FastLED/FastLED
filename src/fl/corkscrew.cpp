@@ -67,6 +67,9 @@ vec2f Corkscrew::at_exact(uint16_t i) const {
         position = calculateLedPosition(invertedIndex, mInput.numLeds, mInput.totalTurns, 
                                        mInput.offsetCircumference, mState.width, mState.height);
     }
+
+    // now wrap the x-position
+    position.x = fmodf(position.x, static_cast<float>(mState.width));
     
     return position;
 }
