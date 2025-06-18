@@ -4,14 +4,18 @@
  * @file corkscrew.h
  * @brief Corkscrew projection utilities
  *
- * You want to draw on a rectangular surface, and have it map to a GOD DAMN
- * CORKSCREW! Well guess what, this is the file for you.
+ * Provides math to project a cork screw onto a rectangular surface.
+ * This allows drawing into a normal rectangle, and then have it mapped
+ * correctly to the corkscrew.
+ * 
+ * Construction:
+ * Take a stick and wrap as dense as possible. Measure the number of turns.
+ * That's it.
  *
- * Corkscrew projection maps from Corkscrew angle height, (θ, h)  to Cylindrical
- * cartesian (w, h) space, where w = one turn of the Corkscrew. The corkscrew at
- * (0) will map to the first index in the cylinder map at (0, 0). The last value
- * is probly not at the max pixel value at (width - 1, height - 1), but could
- * be.
+ * Corkscrew will provide you a width and height for the rectangular grid. There
+ * are constexpr functions to calculate the width and height so you can statically
+ * allocate the CRGB buffer to draw into.
+ *
  *
  *
  * Inputs:
