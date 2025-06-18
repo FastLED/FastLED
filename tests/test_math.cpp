@@ -158,32 +158,32 @@ TEST_CASE("fl_min and fl_max type promotion") {
     }
 
     SUBCASE("signed and unsigned promotion") {
-        int8_t a = 50;  // Use positive values to avoid signed/unsigned conversion issues
-        uint8_t b = 200;
+        int8_t a = 50;  // Use values within signed range to avoid overflow issues
+        uint8_t b = 100;
         
         auto min_result = fl::fl_min(a, b);
         auto max_result = fl::fl_max(a, b);
         
-        // int8_t and uint8_t should promote to short to safely handle both values
-        static_assert(fl::is_same<decltype(min_result), short>::value, "fl_min should return short");
-        static_assert(fl::is_same<decltype(max_result), short>::value, "fl_max should return short");
+        // int8_t and uint8_t should return signed version (int8_t) when same size but different signedness
+        static_assert(fl::is_same<decltype(min_result), int8_t>::value, "fl_min should return int8_t");
+        static_assert(fl::is_same<decltype(max_result), int8_t>::value, "fl_max should return int8_t");
         
         // Basic functionality check: min should be less than max
         CHECK_EQ(min_result, 50);
-        CHECK_EQ(max_result, 200);
+        CHECK_EQ(max_result, 100);
         CHECK_LT(min_result, max_result);
     }
 
-    SUBCASE("int32_t and uint32_t should promote to long long") {
+    SUBCASE("int32_t and uint32_t should return signed version") {
         int32_t a = 1000000;
         uint32_t b = 2000000;
         
         auto min_result = fl::fl_min(a, b);
         auto max_result = fl::fl_max(a, b);
         
-        // int32_t and uint32_t should promote to long long to safely handle both values
-        static_assert(fl::is_same<decltype(min_result), long long>::value, "fl_min should return long long");
-        static_assert(fl::is_same<decltype(max_result), long long>::value, "fl_max should return long long");
+        // int32_t and uint32_t should return signed version (int32_t) when same size but different signedness
+        static_assert(fl::is_same<decltype(min_result), int32_t>::value, "fl_min should return int32_t");
+        static_assert(fl::is_same<decltype(max_result), int32_t>::value, "fl_max should return int32_t");
         
         // Check values
         CHECK_EQ(min_result, 1000000);

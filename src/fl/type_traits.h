@@ -519,6 +519,16 @@ struct common_type_impl<double, T, typename enable_if<(is_integral<T>::value || 
     using type = double;
 };
 
+// Integer mixed signedness - when same size but different signedness, choose signed
+template <typename T, typename U>
+struct common_type_impl<T, U, typename enable_if<
+    is_integral<T>::value && is_integral<U>::value &&
+    sizeof(T) == sizeof(U) &&
+    is_signed<T>::value != is_signed<U>::value
+>::type> {
+    using type = typename conditional<is_signed<T>::value, T, U>::type;
+};
+
 // Different size promotions - larger type wins
 template <> struct common_type_impl<signed char, short> { using type = short; };
 template <> struct common_type_impl<short, signed char> { using type = short; };
@@ -568,15 +578,8 @@ template <> struct common_type_impl<long long, long> { using type = long long; }
 template <> struct common_type_impl<unsigned long, unsigned long long> { using type = unsigned long long; };
 template <> struct common_type_impl<unsigned long long, unsigned long> { using type = unsigned long long; };
 
-// Mixed signedness - promote to larger signed type that can hold both values  
-template <> struct common_type_impl<signed char, unsigned char> { using type = short; };
-template <> struct common_type_impl<unsigned char, signed char> { using type = short; };
-template <> struct common_type_impl<short, unsigned short> { using type = int; };
-template <> struct common_type_impl<unsigned short, short> { using type = int; };
-template <> struct common_type_impl<int, unsigned int> { using type = long long; };
-template <> struct common_type_impl<unsigned int, int> { using type = long long; };
-template <> struct common_type_impl<long, unsigned long> { using type = long long; };
-template <> struct common_type_impl<unsigned long, long> { using type = long long; };
+// Mixed signedness same-size cases now handled by partial specialization above
+// Keep only long long vs unsigned long long since it's already correct  
 template <> struct common_type_impl<long long, unsigned long long> { using type = long long; };
 template <> struct common_type_impl<unsigned long long, long long> { using type = long long; };
 
