@@ -5,9 +5,8 @@
 #define FASTLED_INTERNAL
 #include <stdint.h>
 
-#include <algorithm>
-
 #include "FastLED.h"
+#include "fl/math_macros.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -486,7 +485,7 @@ void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
 
     const int k = ((n << 8) + 6*h) % kSix;
     const int k2 = kFour - k;
-    return std::max(kZero, std::min(kOne, std::min(k, k2)));
+    return MAX(kZero, MIN(kOne, MIN(k, k2)));
   };
 
   const unsigned int chroma = hsv.v * hsv.s / 255;
