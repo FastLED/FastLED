@@ -492,17 +492,10 @@ template <typename T, typename U> struct common_type_impl {
     using type = T;
 };
 
-// Same type specializations
-template <> struct common_type_impl<signed char, signed char> { using type = signed char; };
-template <> struct common_type_impl<unsigned char, unsigned char> { using type = unsigned char; };
-template <> struct common_type_impl<short, short> { using type = short; };
-template <> struct common_type_impl<unsigned short, unsigned short> { using type = unsigned short; };
-template <> struct common_type_impl<int, int> { using type = int; };
-template <> struct common_type_impl<unsigned int, unsigned int> { using type = unsigned int; };
-template <> struct common_type_impl<long, long> { using type = long; };
-template <> struct common_type_impl<unsigned long, unsigned long> { using type = unsigned long; };
-template <> struct common_type_impl<long long, long long> { using type = long long; };
-template <> struct common_type_impl<unsigned long long, unsigned long long> { using type = unsigned long long; };
+// Same type specialization - handles all cases where T == U
+template <typename T> struct common_type_impl<T, T> { 
+    using type = T; 
+};
 
 // Different size promotions - larger type wins
 template <> struct common_type_impl<signed char, short> { using type = short; };
@@ -615,9 +608,6 @@ template <> struct common_type_impl<unsigned long, long long> { using type = lon
 template <> struct common_type_impl<long long, unsigned long> { using type = long long; };
 
 // Floating point specializations (floats always win over integers)
-template <> struct common_type_impl<float, float> { using type = float; };
-template <> struct common_type_impl<double, double> { using type = double; };
-template <> struct common_type_impl<long double, long double> { using type = long double; };
 
 // Mixed floating point sizes - larger wins
 template <> struct common_type_impl<float, double> { using type = double; };
