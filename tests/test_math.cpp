@@ -157,16 +157,16 @@ TEST_CASE("fl_min and fl_max type promotion") {
         CHECK_EQ(max_result, 10);
     }
 
-    SUBCASE("signed and unsigned promotion") {
-        int8_t a = 50;  // Use values within signed range to avoid overflow issues
-        uint8_t b = 100;
+    SUBCASE("signed and unsigned promotion with larger types") {
+        int16_t a = 50;  // Use int16_t and uint16_t instead of int8_t/uint8_t
+        uint16_t b = 100;
         
         auto min_result = fl::fl_min(a, b);
         auto max_result = fl::fl_max(a, b);
         
-        // int8_t and uint8_t should return signed version (int8_t) when same size but different signedness
-        static_assert(fl::is_same<decltype(min_result), int8_t>::value, "fl_min should return int8_t");
-        static_assert(fl::is_same<decltype(max_result), int8_t>::value, "fl_max should return int8_t");
+        // int16_t and uint16_t should return signed version (int16_t) when same size but different signedness
+        static_assert(fl::is_same<decltype(min_result), int16_t>::value, "fl_min should return int16_t");
+        static_assert(fl::is_same<decltype(max_result), int16_t>::value, "fl_max should return int16_t");
         
         // Basic functionality check: min should be less than max
         CHECK_EQ(min_result, 50);

@@ -519,12 +519,28 @@ struct common_type_impl<double, T, typename enable_if<(is_integral<T>::value || 
     using type = double;
 };
 
+// Explicitly forbid int8_t and uint8_t combinations - no type member causes compilation error
+template <>
+struct common_type_impl<int8_t, uint8_t, void> {
+    // Intentionally no 'type' member - this will cause compilation to fail with a clear error
+    // when someone tries to access ::type
+};
+
+template <>
+struct common_type_impl<uint8_t, int8_t, void> {
+    // Intentionally no 'type' member - this will cause compilation to fail with a clear error
+    // when someone tries to access ::type
+};
+
 // Integer mixed signedness - when same size but different signedness, choose signed
+// (but not for int8_t/uint8_t which are handled above)
 template <typename T, typename U>
 struct common_type_impl<T, U, typename enable_if<
     is_integral<T>::value && is_integral<U>::value &&
     sizeof(T) == sizeof(U) &&
-    is_signed<T>::value != is_signed<U>::value
+    is_signed<T>::value != is_signed<U>::value &&
+    !((is_same<T, int8_t>::value && is_same<U, uint8_t>::value) ||
+      (is_same<T, uint8_t>::value && is_same<U, int8_t>::value))
 >::type> {
     using type = typename conditional<is_signed<T>::value, T, U>::type;
 };
