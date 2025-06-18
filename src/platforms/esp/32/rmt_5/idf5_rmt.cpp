@@ -41,7 +41,7 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;
         convert_fastled_timings_to_timedeltas(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
-        mLedStrip = IRmtStrip::Create(mPin, pixels.size(), is_rgbw, t0h, t0l, t1h, t1l, 280, IRmtStrip::DMA_AUTO);
+        mLedStrip = IRmtStrip::Create(mPin, pixels.size(), is_rgbw, t0h, t0l, t1h, t1l, 280, static_cast<IRmtStrip::DmaMode>(mDmaMode));
         
     } else {
         FASTLED_ASSERT(

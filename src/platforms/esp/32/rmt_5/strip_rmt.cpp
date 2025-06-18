@@ -75,7 +75,17 @@ public:
     RmtStrip(int pin, uint32_t led_count, bool is_rgbw, uint32_t th0, uint32_t tl0, uint32_t th1, uint32_t tl1, uint32_t reset, IRmtStrip::DmaMode dma_mode, uint8_t interrupt_priority)
         : mIsRgbw(is_rgbw), mLedCount(led_count)
     {
-        bool with_dma = dma_mode == IRmtStrip::DMA_ENABLED;
+        bool with_dma;
+        if (dma_mode == IRmtStrip::DMA_AUTO) {
+            // Auto-detect DMA support: DMA is available on ESP32-S3/P4 and other newer chips
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
+            with_dma = true;
+#else
+            with_dma = false;
+#endif
+        } else {
+            with_dma = dma_mode == IRmtStrip::DMA_ENABLED;
+        }
         led_strip_handle_t led_strip = configure_led_with_timings(pin, led_count, is_rgbw, th0, tl0, th1, tl1, reset, with_dma, interrupt_priority);
         mStrip = led_strip;
     }
