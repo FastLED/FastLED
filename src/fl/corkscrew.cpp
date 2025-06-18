@@ -6,6 +6,7 @@
 #include "fl/warn.h"
 #include "fl/tile2x2.h"
 #include "fl/math_macros.h"
+#include "fl/unused.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -16,21 +17,24 @@ namespace {
 // New helper function to calculate individual LED position
 vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float totalTurns, float offsetCircumference, uint16_t width, uint16_t height) {
     // Calculate position along the corkscrew (0.0 to 1.0)
+    FL_UNUSED(totalTurns);
+    FL_UNUSED(offsetCircumference);
+    FL_UNUSED(width);
+    FL_UNUSED(height);
+
     const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
     
-    // Calculate which turn we're in and position within that turn
-    const float totalProgress = ledProgress * totalTurns;
-    const float currentTurn = floorf(totalProgress); // Which complete turn (0, 1, 2, ...)
-    const float positionInTurn = totalProgress - currentTurn; // 0.0 to 1.0 within current turn
+    // // Calculate which turn we're in and position within that turn
+    // const float totalProgress = ledProgress * totalTurns;
+    // const float currentTurn = floorf(totalProgress); // Which complete turn (0, 1, 2, ...)
+    // const float positionInTurn = totalProgress - currentTurn; // 0.0 to 1.0 within current turn
     
     // Height increases at turn boundaries (stair step at width border)
     //const float heightProgress = currentTurn / totalTurns;
     
-    // Width position based on position within current turn
-    const float normalizedAngle = positionInTurn; // 0 to 1 within current turn
-    
+
     // Map to grid coordinates
-    const float width_pos = normalizedAngle * static_cast<float>(width - 1) + offsetCircumference;
+    const float width_pos = ledProgress * numLeds;
     const float height_pos = ledProgress * static_cast<float>(height - 1);
     
     return vec2f(width_pos, height_pos);
