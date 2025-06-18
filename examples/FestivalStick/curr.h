@@ -150,6 +150,7 @@ void draw(float pos) {
 
     if (splatRendering) {
         Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
+        FL_WARN("pos_tile: " << pos_tile);
         const CRGB color = CRGB::Blue;
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {

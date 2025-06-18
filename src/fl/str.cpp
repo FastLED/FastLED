@@ -7,6 +7,7 @@
 #include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
+#include "fl/tile2x2.h"
 
 #ifdef FASTLED_TESTING
 #include <cstdio> // ok include
@@ -238,6 +239,33 @@ Str &Str::append(const XYMap &map) {
     append(map.getWidth());
     append(",");
     append(map.getHeight());
+    append(")");
+    return *this;
+}
+
+Str &Str::append(const Tile2x2_u8_wrap &tile) {
+    Tile2x2_u8_wrap::Data data[4] = {
+        tile.at(0, 0),
+        tile.at(0, 1),
+        tile.at(1, 0),
+        tile.at(1, 1),
+    };
+
+    append("Tile2x2_u8_wrap(");
+    for (int i = 0; i < 4; i++) {
+        vec2i16 pos = data[i].first;
+        uint8_t alpha = data[i].second;
+        append("(");
+        append(pos.x);
+        append(",");
+        append(pos.y);
+        append(",");
+        append(alpha);
+        append(")");
+        if (i < 3) {
+            append(",");
+        }
+    }
     append(")");
     return *this;
 }

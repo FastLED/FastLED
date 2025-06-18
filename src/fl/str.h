@@ -23,6 +23,7 @@ namespace fl { // Mandatory namespace for this class since it has name
 
 class Str;
 using string = fl::Str; // std-like string
+class Tile2x2_u8_wrap;
 
 template <typename T> struct rect;
 template <typename T> struct vec2;
@@ -567,6 +568,8 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str &append(const FFTBins &str);
 
     Str &append(const XYMap &map);
+
+    Str &append(const Tile2x2_u8_wrap &tile);
 
     template <typename Key, typename Hash, typename KeyEqual>
     Str &append(const HashSet<Key, Hash, KeyEqual> &set) {
