@@ -485,7 +485,7 @@ void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
 
     const int k = ((n << 8) + 6*h) % kSix;
     const int k2 = kFour - k;
-    return MAX(kZero, MIN(kOne, MIN(k, k2)));
+    return fl::fl_max(kZero, fl::fl_min(kOne, fl::fl_min(k, k2)));
   };
 
   const unsigned int chroma = hsv.v * hsv.s / 255;
