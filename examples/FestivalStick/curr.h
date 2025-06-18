@@ -27,6 +27,8 @@ to test that the forward mapping works correctly first.
 
 using namespace fl;
 
+
+
 #ifndef PIN_DATA
 #define PIN_DATA 1  // Universally available pin
 #endif
@@ -35,7 +37,14 @@ using namespace fl;
 #define PIN_CLOCK 2  // Universally available pin
 #endif
 
+
+#ifdef TEST
+#define NUM_LEDS  4
+#define CORKSCREW_TURNS 2 // Default to 19 turns
+#else
+#define NUM_LEDS  288
 #define CORKSCREW_TURNS 19.5 // Default to 19 turns
+#endif
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
@@ -111,7 +120,7 @@ void setup() {
     controller->setScreenMap(screenMap);
 }
 
-float get_position() {
+float get_position(uint32_t now) {
     if (autoAdvance.value()) {
         // Check if auto-advance was just enabled
         // Auto-advance mode: increment smoothly from current position
@@ -120,16 +129,15 @@ float get_position() {
                           0.3f; // Make it 1/20th the original speed
         currentPosition = fmodf(currentPosition + increment, 1.0f);
         lastUpdateTime = now;
-        combinedPosition = currentPosition;
+        return currentPosition;
     } else {
         // Manual mode: use the dual slider control
-        combinedPosition = positionCoarse.value() + positionFine.value() + positionExtraFine.value();
+        float combinedPosition = positionCoarse.value() + positionFine.value() + positionExtraFine.value();
         // Clamp to ensure we don't exceed 1.0
         if (combinedPosition > 1.0f)
             combinedPosition = 1.0f;
+        return combinedPosition;
     }
-
-    return combinedPosition;
 }
 
 
@@ -174,7 +182,7 @@ void loop() {
     fl::clear(frameBuffer);
 
     // Update the corkscrew mapping with auto-advance or manual position control
-    float combinedPosition = get_position();
+    float combinedPosition = get_position(now);
     float pos = combinedPosition * (corkscrew.size() - 1);
 
     FL_WARN("pos: " << pos);
