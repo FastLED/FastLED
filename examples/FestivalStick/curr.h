@@ -170,7 +170,7 @@ void draw(float pos) {
         // None splat rendering, looks aweful.
         vec2f pos_vec2f = corkscrew.at_exact(pos);
         FL_WARN("pos_vec2f: " << pos_vec2f);
-        vec2i16 pos_i16 = vec2i16(round(pos_vec2f.x), round(pos_vec2f.y));
+        vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
         frameBuffer.at(pos_i16.x, pos_i16.y) =
