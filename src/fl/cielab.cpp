@@ -107,6 +107,10 @@ static void rgb_to_lab_u16_fixed(uint8_t r, uint8_t g, uint8_t b,
     // 6) Scale/clamp into uint16_t range
     //    Lq ∈ [0…100<<16] → outL [0…65535]
     //    aq, bq ∈ [–128<<16…+127<<16] → shift by +128 and map to [0…65535]
+    
+    // Clamp Lq to non-negative values before scaling
+    if (Lq < 0) Lq = 0;
+    
     outL = uint16_t(((int64_t)Lq * 65535) / (100 << 16));
     outA = uint16_t((((int64_t)aq + (128LL << 16)) * 65535) / (255LL << 16));
     outB = uint16_t((((int64_t)bq + (128LL << 16)) * 65535) / (255LL << 16));
@@ -119,7 +123,7 @@ static uint8_t lin_to_srgb_u8(int32_t lin_q16) {
     // clamp input to table range
     if (lin_q16 <= 0)
         return 0;
-    if (lin_q16 >= 65535 << 16 >> 0)
+    if (lin_q16 >= int32_t(srgb_to_lin_tab[255]))
         return 255;
     // search for nearest entry
     for (int i = 0; i < 255; ++i) {
@@ -131,7 +135,9 @@ static uint8_t lin_to_srgb_u8(int32_t lin_q16) {
                                                      : uint8_t(i + 1);
         }
     }
-    return 255;
+    // If we reach here, the value is very small and not found in table
+    // This should return 0 (black), not 255 (white)
+    return 0;
 }
 
 // Main inverse: CIELAB_u16 → sRGB_u8

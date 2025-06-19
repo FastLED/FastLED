@@ -125,6 +125,8 @@
         "climits": "cpp",
         "locale": "cpp",
         "queue": "cpp",
-        "cstdbool": "cpp"
+        "cstdbool": "cpp",
+        "source_location": "cpp",
+        "text_encoding": "cpp"
     }
 }
