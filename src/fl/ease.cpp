@@ -4,6 +4,8 @@
 #include "fl/ease.h"
 #include "lib8tion.h" // This is the problematic header that's hard to include
 
+#include "lib8tion/intmap.h"
+
 namespace fl {
 
 // 8-bit easing functions
@@ -13,11 +15,48 @@ uint8_t easeInQuad8(uint8_t i) {
     return scale8(i, i);
 }
 
-uint8_t easeInOutQuad8(uint8_t i) { return ease8InOutQuad(i); }
+uint8_t easeInOutQuad8(uint8_t i) {
+    constexpr uint16_t MAX   = 0xFF;             // 255
+    constexpr uint16_t HALF  = (MAX + 1) >> 1;   // 128
+    constexpr uint16_t DENOM = MAX;              // divisor for scaling
+    constexpr uint16_t ROUND = DENOM >> 1;       // for rounding
 
-uint8_t easeInOutCubic8(uint8_t i) { return ease8InOutCubic(i); }
+    if (i < HALF) {
+        // first half: y = 2·(i/MAX)² → y_i = 2·i² / MAX
+        uint32_t t   = i;
+        uint32_t num = 2 * t * t + ROUND;        // 2*i², +half for rounding
+        return uint8_t(num / DENOM);
+    } else {
+        // second half: y = 1 − 2·(1−i/MAX)²
+        // → y_i = MAX − (2·(MAX−i)² / MAX)
+        uint32_t d   = MAX - i;
+        uint32_t num = 2 * d * d + ROUND;        // 2*(MAX−i)², +half for rounding
+        return uint8_t(MAX - (num / DENOM));
+    }
+}
 
-uint8_t easeInOutApprox8(uint8_t i) { return ease8InOutApprox(i); }
+uint8_t easeInOutCubic8(uint8_t i) {
+    constexpr uint16_t MAX   = 0xFF;               // 255
+    constexpr uint16_t HALF  = (MAX + 1) >> 1;     // 128
+    constexpr uint32_t DENOM = (uint32_t)MAX * MAX; // 255*255 = 65025
+    constexpr uint32_t ROUND = DENOM >> 1;         // for rounding
+
+    if (i < HALF) {
+        // first half: y = 4·(i/MAX)³ → y_i = 4·i³ / MAX²
+        uint32_t ii   = i;
+        uint32_t cube = ii * ii * ii;              // i³
+        uint32_t num  = 4 * cube + ROUND;          // 4·i³, +half denom for rounding
+        return uint8_t(num / DENOM);
+    } else {
+        // second half: y = 1 − ((−2·t+2)³)/2
+        // where t = i/MAX; equivalently:
+        // y_i = MAX − (4·(MAX−i)³ / MAX²)
+        uint32_t d    = MAX - i;
+        uint32_t cube = d * d * d;                  // (MAX−i)³
+        uint32_t num  = 4 * cube + ROUND;
+        return uint8_t(MAX - (num / DENOM));
+    }
+}
 
 // 16-bit easing functions
 uint16_t easeInQuad16(uint16_t i) {
@@ -46,7 +85,6 @@ uint16_t easeInOutQuad16(uint16_t x) {
     }
 }
 
-
 uint16_t easeInOutCubic16(uint16_t x) {
     const uint32_t MAX   = 0xFFFF;                  // 65535
     const uint32_t HALF  = (MAX + 1) >> 1;          // 32768
@@ -68,6 +106,5 @@ uint16_t easeInOutCubic16(uint16_t x) {
         return (uint16_t)(MAX - (num / M2));
     }
 }
-
 
 } // namespace fl

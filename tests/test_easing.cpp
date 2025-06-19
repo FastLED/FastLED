@@ -83,40 +83,6 @@ TEST_CASE("8-bit easing functions") {
 #endif
     }
 
-    SUBCASE("easeInOutApprox8") {
-        SUBCASE("boundary values") {
-            CHECK_CLOSE(easeInOutApprox8(0), 0, 1);
-            CHECK_CLOSE(easeInOutApprox8(255), 255, 1);
-            CHECK_CLOSE(easeInOutApprox8(128), 128, 1);
-        }
-
-        SUBCASE("symmetry") {
-            for (uint8_t i = 0; i < 128; ++i) {
-                uint8_t forward = easeInOutApprox8(i);
-                uint8_t backward = easeInOutApprox8(255 - i);
-                CHECK_CLOSE(forward, 255 - backward, 1);
-            }
-        }
-
-        SUBCASE("monotonicity") {
-            uint8_t prev = 0;
-            for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = easeInOutApprox8(i);
-                CHECK_GE(current, prev);
-                prev = current;
-            }
-        }
-
-        SUBCASE("approximation accuracy") {
-            // should be within a few percent of cubic
-            for (uint16_t i = 0; i <= 255; i += 8) {
-                uint8_t approx = easeInOutApprox8(i);
-                uint8_t cubic = easeInOutCubic8(i);
-                int16_t diff = std::abs((int16_t)approx - (int16_t)cubic);
-                CHECK_LE(diff, 8); // should be within ~3% (8/255)
-            }
-        }
-    }
 }
 
 #endif
