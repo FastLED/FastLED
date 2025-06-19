@@ -8,107 +8,108 @@ FASTLED_USING_NAMESPACE
 
 #if 0
 
-TEST_CASE("ease8InOutQuad") {
-    SUBCASE("boundary values") {
-        CHECK_EQ(ease8InOutQuad(0), 0);
-        CHECK_EQ(ease8InOutQuad(255), 255);
-        CHECK_EQ(ease8InOutQuad(128), 128);  // midpoint should be unchanged
-    }
-    
-    SUBCASE("symmetry") {
-        // ease-in-out should be symmetric around midpoint
-        for (uint8_t i = 0; i < 128; ++i) {
-            uint8_t forward = ease8InOutQuad(i);
-            uint8_t backward = ease8InOutQuad(255 - i);
-            CHECK_EQ(forward, 255 - backward);
+TEST_CASE("8-bit easing functions") {
+    SUBCASE("ease8InOutQuad") {
+        SUBCASE("boundary values") {
+            CHECK_EQ(ease8InOutQuad(0), 0);
+            CHECK_EQ(ease8InOutQuad(255), 255);
+            CHECK_EQ(ease8InOutQuad(128), 128);  // midpoint should be unchanged
+        }
+        
+        SUBCASE("symmetry") {
+            // ease-in-out should be symmetric around midpoint
+            for (uint8_t i = 0; i < 128; ++i) {
+                uint8_t forward = ease8InOutQuad(i);
+                uint8_t backward = ease8InOutQuad(255 - i);
+                CHECK_EQ(forward, 255 - backward);
+            }
+        }
+        
+        SUBCASE("monotonicity") {
+            // function should be non-decreasing
+            uint8_t prev = 0;
+            for (uint16_t i = 0; i <= 255; ++i) {
+                uint8_t current = ease8InOutQuad(i);
+                CHECK_GE(current, prev);
+                prev = current;
+            }
+        }
+        
+        SUBCASE("first quarter should be slower than linear") {
+            // ease-in portion should start slower than linear
+            uint8_t quarter = ease8InOutQuad(64);  // 64 = 255/4
+            CHECK_LT(quarter, 64);  // should be less than linear progression
         }
     }
-    
-    SUBCASE("monotonicity") {
-        // function should be non-decreasing
-        uint8_t prev = 0;
-        for (uint16_t i = 0; i <= 255; ++i) {
-            uint8_t current = ease8InOutQuad(i);
-            CHECK_GE(current, prev);
-            prev = current;
+
+    SUBCASE("ease8InOutCubic") {
+        SUBCASE("boundary values") {
+            CHECK_EQ(ease8InOutCubic(0), 0);
+            CHECK_EQ(ease8InOutCubic(255), 255);
+            CHECK_EQ(ease8InOutCubic(128), 128);
+        }
+        
+        SUBCASE("symmetry") {
+            for (uint8_t i = 0; i < 128; ++i) {
+                uint8_t forward = ease8InOutCubic(i);
+                uint8_t backward = ease8InOutCubic(255 - i);
+                CHECK_EQ(forward, 255 - backward);
+            }
+        }
+        
+        SUBCASE("monotonicity") {
+            uint8_t prev = 0;
+            for (uint16_t i = 0; i <= 255; ++i) {
+                uint8_t current = ease8InOutCubic(i);
+                CHECK_GE(current, prev);
+                prev = current;
+            }
+        }
+        
+        SUBCASE("more pronounced than quadratic") {
+            // cubic should be more pronounced than quadratic in ease-in portion
+            uint8_t quarter = 64;
+            uint8_t quad_result = ease8InOutQuad(quarter);
+            uint8_t cubic_result = ease8InOutCubic(quarter);
+            CHECK_LT(cubic_result, quad_result);
         }
     }
-    
-    SUBCASE("first quarter should be slower than linear") {
-        // ease-in portion should start slower than linear
-        uint8_t quarter = ease8InOutQuad(64);  // 64 = 255/4
-        CHECK_LT(quarter, 64);  // should be less than linear progression
+
+    SUBCASE("ease8InOutApprox") {
+        SUBCASE("boundary values") {
+            CHECK_EQ(ease8InOutApprox(0), 0);
+            CHECK_EQ(ease8InOutApprox(255), 255);
+            CHECK_EQ(ease8InOutApprox(128), 128);
+        }
+        
+        SUBCASE("symmetry") {
+            for (uint8_t i = 0; i < 128; ++i) {
+                uint8_t forward = ease8InOutApprox(i);
+                uint8_t backward = ease8InOutApprox(255 - i);
+                CHECK_EQ(forward, 255 - backward);
+            }
+        }
+        
+        SUBCASE("monotonicity") {
+            uint8_t prev = 0;
+            for (uint16_t i = 0; i <= 255; ++i) {
+                uint8_t current = ease8InOutApprox(i);
+                CHECK_GE(current, prev);
+                prev = current;
+            }
+        }
+        
+        SUBCASE("approximation accuracy") {
+            // should be within a few percent of cubic
+            for (uint16_t i = 0; i <= 255; i += 8) {
+                uint8_t approx = ease8InOutApprox(i);
+                uint8_t cubic = ease8InOutCubic(i);
+                int16_t diff = std::abs((int16_t)approx - (int16_t)cubic);
+                CHECK_LE(diff, 8);  // should be within ~3% (8/255)
+            }
+        }
     }
 }
-
-TEST_CASE("ease8InOutCubic") {
-    SUBCASE("boundary values") {
-        CHECK_EQ(ease8InOutCubic(0), 0);
-        CHECK_EQ(ease8InOutCubic(255), 255);
-        CHECK_EQ(ease8InOutCubic(128), 128);
-    }
-    
-    SUBCASE("symmetry") {
-        for (uint8_t i = 0; i < 128; ++i) {
-            uint8_t forward = ease8InOutCubic(i);
-            uint8_t backward = ease8InOutCubic(255 - i);
-            CHECK_EQ(forward, 255 - backward);
-        }
-    }
-    
-    SUBCASE("monotonicity") {
-        uint8_t prev = 0;
-        for (uint16_t i = 0; i <= 255; ++i) {
-            uint8_t current = ease8InOutCubic(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
-    
-    SUBCASE("more pronounced than quadratic") {
-        // cubic should be more pronounced than quadratic in ease-in portion
-        uint8_t quarter = 64;
-        uint8_t quad_result = ease8InOutQuad(quarter);
-        uint8_t cubic_result = ease8InOutCubic(quarter);
-        CHECK_LT(cubic_result, quad_result);
-    }
-}
-
-TEST_CASE("ease8InOutApprox") {
-    SUBCASE("boundary values") {
-        CHECK_EQ(ease8InOutApprox(0), 0);
-        CHECK_EQ(ease8InOutApprox(255), 255);
-        CHECK_EQ(ease8InOutApprox(128), 128);
-    }
-    
-    SUBCASE("symmetry") {
-        for (uint8_t i = 0; i < 128; ++i) {
-            uint8_t forward = ease8InOutApprox(i);
-            uint8_t backward = ease8InOutApprox(255 - i);
-            CHECK_EQ(forward, 255 - backward);
-        }
-    }
-    
-    SUBCASE("monotonicity") {
-        uint8_t prev = 0;
-        for (uint16_t i = 0; i <= 255; ++i) {
-            uint8_t current = ease8InOutApprox(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
-    
-    SUBCASE("approximation accuracy") {
-        // should be within a few percent of cubic
-        for (uint16_t i = 0; i <= 255; i += 8) {
-            uint8_t approx = ease8InOutApprox(i);
-            uint8_t cubic = ease8InOutCubic(i);
-            int16_t diff = std::abs((int16_t)approx - (int16_t)cubic);
-            CHECK_LE(diff, 8);  // should be within ~3% (8/255)
-        }
-    }
-}
-
 
 TEST_CASE("ease16InOutQuad") {
     SUBCASE("boundary values") {
