@@ -263,30 +263,25 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
 
     // Helper function to test ToVideoRGB_8bit() hue preservation
 
-    auto test_video_rgb_hue_preservation = [](const CRGB &color, int tolerance, bool handle_wraparound = true) {
+    auto test_video_rgb_hue_preservation = [](const CRGB &color, int tolerance) {
         HSV16 hsv_original(color);
         uint16_t original_hue = hsv_original.h;
 
         CRGB video_result = hsv_original.ToVideoRGB_8bit();
         HSV16 hsv_video_result(video_result);
         uint16_t result_hue = hsv_video_result.h;
+        // Special handling for hue around 0 (red) - check for wraparound
+        uint16_t hue_diff = (original_hue > result_hue)
+                                ? (original_hue - result_hue)
+                                : (result_hue - original_hue);
+        // Also check wraparound case (difference near 65535)
+        uint16_t hue_diff_wraparound = 65535 - hue_diff;
+        uint16_t min_hue_diff = (hue_diff < hue_diff_wraparound)
+                                    ? hue_diff
+                                    : hue_diff_wraparound;
 
-        if (handle_wraparound) {
-            // Special handling for hue around 0 (red) - check for wraparound
-            uint16_t hue_diff = (original_hue > result_hue)
-                                    ? (original_hue - result_hue)
-                                    : (result_hue - original_hue);
-            // Also check wraparound case (difference near 65535)
-            uint16_t hue_diff_wraparound = 65535 - hue_diff;
-            uint16_t min_hue_diff = (hue_diff < hue_diff_wraparound)
-                                        ? hue_diff
-                                        : hue_diff_wraparound;
-
-            CHECK(min_hue_diff <= tolerance);
-        } else {
-            // Standard hue difference check
-            CHECK_CLOSE(original_hue, result_hue, tolerance);
-        }
+        CHECK(min_hue_diff <= tolerance);
+        
     };
 
     // Test that ToVideoRGB_8bit() preserves the hue while applying gamma
