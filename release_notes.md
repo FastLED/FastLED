@@ -3,6 +3,15 @@ FastLED 3.10.1
   * New LED chipset: SM16824E
     * 3-Wire
     * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
+  * HSV -> CRGB default conversion function can now be overriden.
+    * If you just want to change it for your sketch you can use this:
+      * `#define FASTLED_HSV_CONVERSION_RAINBOW` (default)
+      * `#define FASTLED_HSV_CONVERSION_SPECTRUM`
+      * `#define FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
+    * To change for the entire engine (recommended) then set these as build flags:
+      * `-DFASTLED_HSV_CONVERSION_RAINBOW`
+      * `-DFASTLED_HSV_CONVERSION_SPECTRUM`
+      * `-FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
 
 
 FastLED 3.10.0
