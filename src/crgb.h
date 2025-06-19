@@ -112,8 +112,6 @@ struct CRGB {
     static void downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
     static void upscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
 
-    // BETA FEATURE! LET US KNOW WHAT YOU THINK!
-    //
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // Does it look washed out and under-saturated?
     //
@@ -124,6 +122,7 @@ struct CRGB {
     // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
     // work well with WS2812 (and other RGB8) led displays.
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
+    // Note that when both boost_saturation and boost_contrast are true 
     CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
     static void colorBoost(const CRGB* src, CRGB* dst, size_t count);
 
@@ -200,6 +199,10 @@ struct CRGB {
     {
         hsv2rgb_dispatch( rhs, *this);
     }
+
+    /// Allow construction from a fl::HSV16 color
+    /// Enables automatic conversion from HSV16 to CRGB
+    CRGB(const fl::HSV16& rhs);
 
     /// Allow assignment from one RGB struct to another
     FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) = default;

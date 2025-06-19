@@ -14,6 +14,10 @@ struct HSV16 {
     HSV16(uint16_t h, uint16_t s, uint16_t v) : h(h), s(s), v(v) {}
     HSV16(const CRGB& rgb);
     CRGB ToRGB() const;
+    
+    /// Automatic conversion operator to CRGB
+    /// Allows HSV16 to be automatically converted to CRGB
+    operator CRGB() const { return ToRGB(); }
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // Do you want a function to simulate gamma correction but doesn't

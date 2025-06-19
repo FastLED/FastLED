@@ -101,6 +101,11 @@ fl::HSV16 CRGB::toHSV16() const {
     return fl::HSV16(*this);
 }
 
+// Constructor implementation for HSV16 -> CRGB automatic conversion
+CRGB::CRGB(const fl::HSV16& rhs) {
+    *this = rhs.ToRGB();
+}
+
 CRGB &CRGB::nscale8(uint8_t scaledown) {
     nscale8x3(r, g, b, scaledown);
     return *this;
