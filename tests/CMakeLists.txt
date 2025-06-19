@@ -82,6 +82,16 @@ set(COMMON_COMPILE_FLAGS
     -Werror=cast-align
     -Werror=class-memaccess
     -Werror=misleading-indentation
+    -Werror=uninitialized
+    -Werror=maybe-uninitialized
+    -Werror=array-bounds
+    -Werror=strict-overflow=2
+    -Werror=null-dereference
+    -Werror=logical-op
+    -Werror=format-security
+    #-Werror=shadow
+    -Werror=unused-function
+    #-Werror=deprecated-declarations
     -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
     -Wno-comment
     # ignore Arduino/PlatformIO-specific PROGMEM macro
@@ -97,6 +107,12 @@ set(CXX_SPECIFIC_FLAGS
     -Werror=float-equal
     -Werror=mismatched-tags
     -Werror=switch-enum
+    #-Werror=old-style-cast
+    -Werror=zero-as-null-pointer-constant
+    -Werror=delete-non-virtual-dtor
+    #-Werror=useless-cast
+    -Werror=redundant-move
+    #-Werror=sign-conversion
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -127,6 +143,11 @@ set(UNIT_TEST_COMPILE_FLAGS
     #-Werror=unused-parameter
     #-Werror=unused-variable
     #-Werror=unused-value
+    -Werror=uninitialized
+    -Werror=maybe-uninitialized
+    -Werror=array-bounds
+    -Werror=null-dereference
+    -Werror=deprecated-declarations
 
     # Not supported in gcc.
     #-Werror=infinite-recursion
@@ -142,6 +163,8 @@ set(UNIT_TEST_CXX_FLAGS
     #-Werror=sign-compare
     #-Werror=float-equal
     #-Werror=conversion
+    -Werror=delete-non-virtual-dtor
+    -Werror=zero-as-null-pointer-constant
 )
 
 set(COMMON_COMPILE_DEFINITIONS
