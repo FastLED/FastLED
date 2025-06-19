@@ -65,12 +65,9 @@ UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
-// Noise generation variables
-static uint16_t noise_x = 0;
-static uint16_t noise_y = 0;
-static uint16_t noise_z = 0;
-static uint8_t noise_scale = 30;
-static uint8_t noise_speed = 20;
+// Color boost controls
+UICheckbox boostSaturation("Boost Saturation", true);
+UICheckbox boostContrast("Boost Contrast", false);
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
@@ -156,14 +153,14 @@ float get_position(uint32_t now) {
 
 void fillFrameBufferNoise() {
     // Get current UI values
-    noise_scale = noiseScale.value();
-    noise_speed = noiseSpeed.value();
+    uint8_t noise_scale = noiseScale.value();
+    uint8_t noise_speed = noiseSpeed.value();
     
     // Derive noise coordinates from current time instead of forward iteration
     uint32_t now = millis();
-    noise_z = now * noise_speed / 10;  // Primary time dimension
-    noise_x = now * noise_speed / 80;  // Slow drift in x
-    noise_y = now * noise_speed / 160; // Even slower drift in y (opposite direction)
+    uint16_t noise_z = now * noise_speed / 10;  // Primary time dimension
+    uint16_t noise_x = now * noise_speed / 80;  // Slow drift in x
+    uint16_t noise_y = now * noise_speed / 160; // Even slower drift in y (opposite direction)
     
     int width = frameBuffer.width();
     int height = frameBuffer.height();
@@ -201,7 +198,7 @@ void fillFrameBufferNoise() {
             uint8_t bri = data;
             
             // Add color cycling if enabled - also derive from time
-            static uint8_t ihue = 0;
+            uint8_t ihue = 0;
             if(colorLoop) {
                 ihue = (now / 100) % 256;  // Derive hue from time instead of incrementing
                 index += ihue;
@@ -216,6 +213,12 @@ void fillFrameBufferNoise() {
             
             // Get color from palette and set pixel
             CRGB color = ColorFromPalette(noisePalette, index, bri);
+            
+            // Apply color boost if enabled
+            if (boostSaturation.value() || boostContrast.value()) {
+                color = color.colorBoost(boostSaturation.value(), boostContrast.value());
+            }
+            
             frameBuffer.at(x, y) = color;
         }
     }
@@ -227,15 +230,24 @@ void drawNoise(uint32_t now) {
 
 void draw(float pos) {
     if (allWhite) {
+        CRGB whiteColor = CRGB(8, 8, 8);
+        // Apply color boost if enabled
+        if (boostSaturation.value() || boostContrast.value()) {
+            whiteColor = whiteColor.colorBoost(boostSaturation.value(), boostContrast.value());
+        }
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
-            frameBuffer.data()[i] = CRGB(8, 8, 8);
+            frameBuffer.data()[i] = whiteColor;
         }
     }
 
     if (splatRendering) {
         Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         FL_WARN("pos_tile: " << pos_tile);
-        const CRGB color = CRGB::Blue;
+        CRGB color = CRGB::Blue;
+        // Apply color boost if enabled
+        if (boostSaturation.value() || boostContrast.value()) {
+            color = color.colorBoost(boostSaturation.value(), boostContrast.value());
+        }
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
@@ -255,10 +267,16 @@ void draw(float pos) {
         vec2f pos_vec2f = corkscrew.at_exact(pos);
         FL_WARN("pos_vec2f: " << pos_vec2f);
         vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
+        
+        CRGB color = CRGB::Blue;
+        // Apply color boost if enabled
+        if (boostSaturation.value() || boostContrast.value()) {
+            color = color.colorBoost(boostSaturation.value(), boostContrast.value());
+        }
+        
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
-        frameBuffer.at(pos_i16.x, pos_i16.y) =
-            CRGB::Blue; // Draw a blue pixel at (w, h)
+        frameBuffer.at(pos_i16.x, pos_i16.y) = color; // Draw a blue pixel at (w, h)
     }
 }
 
