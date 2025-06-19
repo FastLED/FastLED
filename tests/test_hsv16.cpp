@@ -263,7 +263,7 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
 
     // Helper function to test ToVideoRGB_8bit() hue preservation
 
-    auto test_video_rgb_hue_preservation = [](const CRGB &color, int tolerance, bool handle_wraparound = false) {
+    auto test_video_rgb_hue_preservation = [](const CRGB &color, int tolerance, bool handle_wraparound = true) {
         HSV16 hsv_original(color);
         uint16_t original_hue = hsv_original.h;
 
@@ -294,22 +294,21 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
     // on empirically observed maximum hue differences.
 
     SUBCASE("Orange - Low hue error") {
-        // Test with a vibrant orange color - observed ~14 units max hue error
+        // Test with a vibrant orange color - wraparound helped reduce tolerance
         test_video_rgb_hue_preservation(CRGB(255, 128, 0),
-                                        15); // Observed: ~14 units max
+                                        10); // Optimized: was 15, now 10 with wraparound
     }
 
     SUBCASE("Blue-Green - Moderate hue error") {
-        // Test with a blue-green color - observed ~14 units max hue error
+        // Test with a blue-green color - exactly 14 units max error observed
         test_video_rgb_hue_preservation(CRGB(0, 200, 150),
-                                        15); // Observed: ~14 units max
+                                        14); // Optimized: was 15, now 14 with wraparound
     }
 
     SUBCASE("Purple - Very low hue error") {
-        // Test with a purple color - observed very small hue error (~5 units
-        // max)
+        // Test with a purple color - exactly 4 units max error observed
         test_video_rgb_hue_preservation(CRGB(180, 50, 200),
-                                        5); // Typically very small error
+                                        4); // Optimized: was 5, now 4 with wraparound
     }
 
     SUBCASE("Warm Yellow - Highest hue error case") {
@@ -324,7 +323,6 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
         // Test edge case: Very saturated red (hue around 0) - handle wraparound
         // Special case due to hue wraparound at 0/65535 boundary
         test_video_rgb_hue_preservation(
-            CRGB(255, 30, 30), 8,
-            true); // Small tolerance for red wraparound case
+            CRGB(255, 30, 30), 5); // Optimized: was 8, now 5 with wraparound default
     }
 }
