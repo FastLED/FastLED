@@ -122,28 +122,16 @@ TEST_CASE("8-bit easing functions") {
 #endif
 
 TEST_CASE("easing function special values") {
-    #if 0
+
     SUBCASE("quarter points") {
         // Test specific values that are common in animations
-
-
-        
-        // 8-bit quarter points
-        CHECK_LT(ease8InOutQuad(64), 64);   // ease-in should be slower
-        CHECK_GT(ease8InOutQuad(192), 192); // ease-out should be faster
-        
-        CHECK_LT(ease8InOutCubic(64), ease8InOutQuad(64));   // cubic more pronounced
-        CHECK_GT(ease8InOutCubic(192), ease8InOutQuad(192)); // cubic more pronounced
-
-
         // 16-bit quarter points
         CHECK_LT(easeInOutQuad16(16384), 16384);
         CHECK_GT(easeInOutQuad16(49152), 49152);
 
-        CHECK_LT(ease16InOutCubic(16384), easeInOutQuad16(16384));
-        CHECK_GT(ease16InOutCubic(49152), easeInOutQuad16(49152));
+        CHECK_LT(easeInOutCubic16(16384), easeInOutQuad16(16384));
+        CHECK_GT(easeInOutCubic16(49152), easeInOutQuad16(49152));
     }
-#endif
 
 }
 
