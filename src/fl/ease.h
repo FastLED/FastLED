@@ -5,6 +5,7 @@
 namespace fl {
 
 enum EaseType {
+    EASE_NONE,
     EASE_IN_QUAD,
     EASE_IN_OUT_QUAD,
     EASE_IN_OUT_CUBIC,
@@ -46,17 +47,67 @@ uint16_t easeInOutCubic16(uint16_t i);
 
 inline uint16_t ease16(EaseType type, uint16_t i) {
     switch (type) {
+        case EASE_NONE: return i;
         case EASE_IN_QUAD: return easeInQuad16(i);
         case EASE_IN_OUT_QUAD: return easeInOutQuad16(i);
         case EASE_IN_OUT_CUBIC: return easeInOutCubic16(i);
     }
 }
 
+inline void ease16(EaseType type, uint16_t* src, uint16_t* dst, uint16_t count) {
+    switch (type) {
+        case EASE_NONE: return;
+        case EASE_IN_QUAD: {
+            for (uint16_t i = 0; i < count; i++) {
+                dst[i] = easeInQuad16(src[i]);
+            }
+            break;
+        }
+        case EASE_IN_OUT_QUAD: {
+            for (uint16_t i = 0; i < count; i++) {  
+                dst[i] = easeInOutQuad16(src[i]);
+            }
+            break;
+        }
+        case EASE_IN_OUT_CUBIC: {
+            for (uint16_t i = 0; i < count; i++) {
+                dst[i] = easeInOutCubic16(src[i]);
+            }
+            break;
+        }
+    }
+}
+
 inline uint8_t ease8(EaseType type, uint8_t i) {
     switch (type) {
+        case EASE_NONE: return i;
         case EASE_IN_QUAD: return easeInQuad8(i);
         case EASE_IN_OUT_QUAD: return easeInOutQuad8(i);
         case EASE_IN_OUT_CUBIC: return easeInOutCubic8(i);
+    }
+}
+
+inline void ease8(EaseType type, uint8_t* src, uint8_t* dst, uint8_t count) {
+    switch (type) {
+        case EASE_NONE: return;
+        case EASE_IN_QUAD: {
+            for (uint8_t i = 0; i < count; i++) {
+                dst[i] = easeInQuad8(src[i]);
+            }
+            break;
+        }
+        case EASE_IN_OUT_QUAD: {
+            for (uint8_t i = 0; i < count; i++) {
+                dst[i] = easeInOutQuad8(src[i]);
+            }
+            break;
+        }
+        case EASE_IN_OUT_CUBIC: {
+            for (uint8_t i = 0; i < count; i++) {
+                dst[i] = easeInOutCubic8(src[i]);
+            }
+            break;
+        }
     }
 }
 
