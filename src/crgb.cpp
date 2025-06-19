@@ -91,6 +91,12 @@ CRGB CRGB::toVideoRGB_8bit() const {
     return hsv.ToVideoRGB_8bit();
 }
 
+void CRGB::fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count) {
+    for (size_t i = 0; i < count; i++) {
+        dst[i] = src[i].toVideoRGB_8bit();
+    }
+}
+
 CRGB &CRGB::nscale8(uint8_t scaledown) {
     nscale8x3(r, g, b, scaledown);
     return *this;

@@ -118,6 +118,7 @@ struct CRGB {
     // This attempts to preserve the hue while increasing saturation, which should
     // work well with WS2812 (and other RGB8) led displays.
     CRGB toVideoRGB_8bit() const;
+    static void fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count);
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
