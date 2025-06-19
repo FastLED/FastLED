@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_transition_ramp.dir/link.d CMakeFiles/test_transition_ramp.dir/test_transition_ramp.cpp.o -o .build/bin/test_transition_ramp  .build/lib/libfastled.a .build/lib/libdoctest_main.a

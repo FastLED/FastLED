@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_circular_buffer.dir/link.d CMakeFiles/test_circular_buffer.dir/test_circular_buffer.cpp.o -o .build/bin/test_circular_buffer  .build/lib/libfastled.a .build/lib/libdoctest_main.a

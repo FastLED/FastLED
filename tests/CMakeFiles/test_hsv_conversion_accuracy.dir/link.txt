@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_hsv_conversion_accuracy.dir/link.d CMakeFiles/test_hsv_conversion_accuracy.dir/test_hsv_conversion_accuracy.cpp.o -o .build/bin/test_hsv_conversion_accuracy  .build/lib/libfastled.a .build/lib/libdoctest_main.a

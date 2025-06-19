@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_fft.dir/link.d CMakeFiles/test_fft.dir/test_fft.cpp.o -o .build/bin/test_fft  .build/lib/libfastled.a .build/lib/libdoctest_main.a

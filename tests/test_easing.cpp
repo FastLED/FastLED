@@ -49,7 +49,7 @@ TEST_CASE("8-bit easing functions") {
             CHECK_CLOSE(ease8InOutCubic(128), 128, 1);
         }
         
-        #if 0
+        #if 1
         SUBCASE("symmetry") {
             for (uint8_t i = 0; i < 128; ++i) {
                 uint8_t forward = ease8InOutCubic(i);
@@ -59,7 +59,7 @@ TEST_CASE("8-bit easing functions") {
         }
         #endif
         
-        #if 0
+        #if 1
         SUBCASE("monotonicity") {
             uint8_t prev = 0;
             for (uint16_t i = 0; i <= 255; ++i) {
@@ -70,7 +70,7 @@ TEST_CASE("8-bit easing functions") {
         }
         #endif
         
-        #if 0
+        #if 1
         SUBCASE("more pronounced than quadratic") {
             // cubic should be more pronounced than quadratic in ease-in portion
             uint8_t quarter = 64;
@@ -119,7 +119,7 @@ TEST_CASE("8-bit easing functions") {
 
 #endif
 
-#if 0
+#if 1
 
 TEST_CASE("ease16InOutQuad") {
     SUBCASE("boundary values") {

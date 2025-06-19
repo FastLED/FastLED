@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_algorithm.dir/link.d CMakeFiles/test_algorithm.dir/test_algorithm.cpp.o -o .build/bin/test_algorithm  .build/lib/libfastled.a .build/lib/libdoctest_main.a
