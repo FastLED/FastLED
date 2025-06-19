@@ -16,8 +16,10 @@ struct CIELAB16 {
         : L(l), A(a), B(b) {}
     // Conversion from CRGB
     CIELAB16(const CRGB& c);
+    CRGB ToRGB() const;
 
     static void Fill(const CRGB* c, CIELAB16* lab, int numLeds);
+    static void Fill(const CIELAB16* c, CRGB* lab, int numLeds);
 };
 
 

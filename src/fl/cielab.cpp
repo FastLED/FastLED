@@ -116,13 +116,103 @@ static void rgb_to_lab_u16_fixed(
 }
 
 
+
+// Forward declarations of table and helpers from rgb_to_lab_u16_fixed
+
+// Invert linear-light Q16.16 → sRGB_u8 by searching the table
+static uint8_t lin_to_srgb_u8(int32_t lin_q16) {
+    // clamp input to table range
+    if (lin_q16 <= 0)   return 0;
+    if (lin_q16 >= 65535<<16 >> 0) return 255;
+    // search for nearest entry
+    for (int i = 0; i < 255; ++i) {
+        int32_t v0 = int32_t(srgb_to_lin_tab[i]);
+        int32_t v1 = int32_t(srgb_to_lin_tab[i+1]);
+        if (lin_q16 >= v0 && lin_q16 <= v1) {
+            // pick closer endpoint
+            return ( (lin_q16 - v0) < (v1 - lin_q16) ) ? uint8_t(i) : uint8_t(i+1);
+        }
+    }
+    return 255;
+}
+
+// Main inverse: CIELAB_u16 → sRGB_u8
+static void lab_to_rgb_u8_fixed(
+    uint16_t  inL, uint16_t  inA, uint16_t  inB,
+    uint8_t  &outR, uint8_t  &outG, uint8_t  &outB
+) {
+    // 1) unpack into Q16.16 Lab* values
+    //    L* in [0…65535] → Lq in [0…100<<16]
+    int32_t Lq = int32_t((int64_t)inL * (100<<16) / 65535);
+    //    a*, b* in [–128<<16…+127<<16]
+    int32_t aq = int32_t((int64_t)inA * (255<<16) / 65535) - (128<<16);
+    int32_t bq = int32_t((int64_t)inB * (255<<16) / 65535) - (128<<16);
+
+    // 2) recover fY, fX, fZ
+    //    Lq = 116·fy – 16<<16  →  fy = (Lq + 16<<16) / 116
+    int32_t fy = int32_t((Lq + (16<<16)) / 116);
+    int32_t fx = fy + aq / 500;    // fx = fy + a*/500
+    int32_t fz = fy - bq / 200;    // fz = fy – b*/200
+
+    // 3) invert f → t in Q16.16
+    //    constant delta = cbrt(0.008856)*65536 ≈ 13592
+    const int32_t delta = 13592;
+    auto inv_f = [&](int32_t f) {
+        if (f > delta) {
+            // t = f^3
+            int64_t y2 = (int64_t)f * f >> 16;
+            return int32_t((y2 * f) >> 16);
+        } else {
+            // t = (f – 16/116) / 7.787
+            // 16/116 ≈ 9033 (Q16.16), 7.787 ≈ 50955/65536
+            return int32_t(((int64_t)(f - 9033) << 16) / 50955);
+        }
+    };
+    int32_t Y = inv_f(fy);
+    int32_t X = inv_f(fx);
+    int32_t Z = inv_f(fz);
+
+    // 4) denormalize by D65 white point (Q16.16)
+    //    Xn=0.95047→62254, Yn=1.0→65536, Zn=1.08883→71307
+    X = int32_t((int64_t)X * 62254 >> 16);
+    // Y = Y * 65536 >> 16 is no-op
+    Z = int32_t((int64_t)Z * 71307 >> 16);
+
+    // 5) XYZ → linear RGB (Q16.16)
+    //    inverse matrix of RGB→XYZ
+    const int32_t MxX = 212119, MxY = -100147, MxZ =  -32653;
+    const int32_t MyX = -63438, MyY =  122915, MyZ =   2722;
+    const int32_t MzX =   3645, MzY =  -13365, MzZ =   69287;
+    int32_t Rlin = int32_t(( (int64_t)MxX*X + (int64_t)MxY*Y + (int64_t)MxZ*Z ) >> 16);
+    int32_t Glin = int32_t(( (int64_t)MyX*X + (int64_t)MyY*Y + (int64_t)MyZ*Z ) >> 16);
+    int32_t Blin = int32_t(( (int64_t)MzX*X + (int64_t)MzY*Y + (int64_t)MzZ*Z ) >> 16);
+
+    // 6) γ-encode back to sRGB_u8
+    outR = lin_to_srgb_u8(Rlin);
+    outG = lin_to_srgb_u8(Glin);
+    outB = lin_to_srgb_u8(Blin);
+}
+
+
 CIELAB16::CIELAB16(const CRGB& c) {
     rgb_to_lab_u16_fixed(c.r, c.g, c.b, L, A, B);
+}
+
+CRGB CIELAB16::ToRGB() const {
+    CRGB c;
+    lab_to_rgb_u8_fixed(L, A, B, c.r, c.g, c.b);
+    return c;
 }
 
 void CIELAB16::Fill(const CRGB* c, CIELAB16* lab, int numLeds) {
     for (int i = 0; i < numLeds; i++) {
         rgb_to_lab_u16_fixed(c[i].r, c[i].g, c[i].b, lab[i].L, lab[i].A, lab[i].B);
+    }
+}
+
+void CIELAB16::Fill(const CIELAB16* c, CRGB* lab, int numLeds) {
+    for (int i = 0; i < numLeds; i++) {
+        lab_to_rgb_u8_fixed(c[i].L, c[i].A, c[i].B, lab[i].r, lab[i].g, lab[i].b);
     }
 }
 
