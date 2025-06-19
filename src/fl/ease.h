@@ -1,5 +1,13 @@
 #pragma once
 
+/*
+This are accurate and tested easing functions.
+
+Note that the easing functions in lib8tion.h are tuned are implemented wrong, such as easeInOutCubic8 and easeInOutCubic16.
+Modern platforms are so fast that the extra performance is not needed, but accuracy is important.
+
+*/
+
 #include "fl/stdint.h"
 
 namespace fl {
@@ -40,6 +48,15 @@ uint16_t easeInOutQuad16(uint16_t i);
 /// 16-bit cubic ease-in/ease-out function
 /// Takes an input value 0-65535 and returns an eased value 0-65535
 uint16_t easeInOutCubic16(uint16_t i);
+
+
+uint16_t ease16(EaseType type, uint16_t i);
+void ease16(EaseType type, uint16_t* src, uint16_t* dst, uint16_t count);
+uint8_t ease8(EaseType type, uint8_t i);
+void ease8(EaseType type, uint8_t* src, uint8_t* dst, uint8_t count);
+
+
+//////// INLINE FUNCTIONS ////////
 
 inline uint16_t ease16(EaseType type, uint16_t i) {
     switch (type) {
