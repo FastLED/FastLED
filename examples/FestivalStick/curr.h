@@ -61,6 +61,20 @@ UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.00
 UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
+UICheckbox useNoise("Use Noise Pattern", true);
+UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
+UISlider noiseSpeed("Noise Speed", 20, 1, 100, 1);
+
+// Noise generation variables
+static uint16_t noise_x = 0;
+static uint16_t noise_y = 0;
+static uint16_t noise_z = 0;
+static uint8_t noise_scale = 30;
+static uint8_t noise_speed = 20;
+
+// Color palette for noise
+CRGBPalette16 noisePalette = PartyColors_p;
+uint8_t colorLoop = 1;
 
 // Option 1: Runtime Corkscrew (flexible, configurable at runtime)
 Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS, 0);
@@ -118,6 +132,11 @@ void setup() {
 
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
+    
+    // Initialize noise coordinates to random values (from NoisePlusPalette example)
+    noise_x = random16();
+    noise_y = random16();
+    noise_z = random16();
 }
 
 float get_position(uint32_t now) {
@@ -140,6 +159,74 @@ float get_position(uint32_t now) {
     }
 }
 
+void fillFrameBufferNoise() {
+    // Get current UI values
+    noise_scale = noiseScale.value();
+    noise_speed = noiseSpeed.value();
+    
+    int width = frameBuffer.width();
+    int height = frameBuffer.height();
+    
+    // Data smoothing for low speeds (from NoisePlusPalette example)
+    uint8_t dataSmoothing = 0;
+    if(noise_speed < 50) {
+        dataSmoothing = 200 - (noise_speed * 4);
+    }
+    
+    // Generate noise for each pixel in the frame buffer
+    for(int x = 0; x < width; x++) {
+        for(int y = 0; y < height; y++) {
+            // Calculate offsets for this pixel
+            int xoffset = noise_scale * x;
+            int yoffset = noise_scale * y;
+            
+            // Generate 8-bit noise value using 3D Perlin noise
+            uint8_t data = inoise8(noise_x + xoffset, noise_y + yoffset, noise_z);
+            
+            // Expand the range from ~16-238 to 0-255 (from NoisePlusPalette)
+            data = qsub8(data, 16);
+            data = qadd8(data, scale8(data, 39));
+            
+            // Apply data smoothing if enabled
+            if(dataSmoothing) {
+                CRGB oldColor = frameBuffer.at(x, y);
+                uint8_t olddata = (oldColor.r + oldColor.g + oldColor.b) / 3; // Simple brightness extraction
+                uint8_t newdata = scale8(olddata, dataSmoothing) + scale8(data, 256 - dataSmoothing);
+                data = newdata;
+            }
+            
+            // Map noise to color using palette (adapted from NoisePlusPalette)
+            uint8_t index = data;
+            uint8_t bri = data;
+            
+            // Add color cycling if enabled
+            static uint8_t ihue = 0;
+            if(colorLoop) {
+                index += ihue;
+            }
+            
+            // Enhance brightness (from NoisePlusPalette example)
+            if(bri > 127) {
+                bri = 255;
+            } else {
+                bri = dim8_raw(bri * 2);
+            }
+            
+            // Get color from palette and set pixel
+            CRGB color = ColorFromPalette(noisePalette, index, bri);
+            frameBuffer.at(x, y) = color;
+        }
+    }
+    
+    // Update noise coordinates for next frame
+    noise_z += noise_speed;
+    noise_x += noise_speed / 8;
+    noise_y -= noise_speed / 16;
+}
+
+void drawNoise(uint32_t now) {
+    fillFrameBufferNoise();
+}
 
 void draw(float pos) {
     if (allWhite) {
@@ -187,6 +274,13 @@ void loop() {
     float pos = combinedPosition * (corkscrew.size() - 1);
 
     FL_WARN("pos: " << pos);
-    draw(pos);
+    
+    if (useNoise.value()) {
+        drawNoise(now);
+    } else {
+        draw(pos);
+    }
+    
     FastLED.show();
 }
+
