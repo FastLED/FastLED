@@ -137,11 +137,11 @@ TEST_CASE("easing function special values") {
 
 
         // 16-bit quarter points
-        CHECK_LT(ease16InOutQuad(16384), 16384);
-        CHECK_GT(ease16InOutQuad(49152), 49152);
+        CHECK_LT(easeInOutQuad16(16384), 16384);
+        CHECK_GT(easeInOutQuad16(49152), 49152);
 
-        CHECK_LT(ease16InOutCubic(16384), ease16InOutQuad(16384));
-        CHECK_GT(ease16InOutCubic(49152), ease16InOutQuad(49152));
+        CHECK_LT(ease16InOutCubic(16384), easeInOutQuad16(16384));
+        CHECK_GT(ease16InOutCubic(49152), easeInOutQuad16(49152));
     }
 #endif
 
@@ -253,7 +253,7 @@ TEST_CASE("easeInOutCubic16") {
 
     SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
-        uint16_t quad_result = ease16InOutQuad(quarter);
+        uint16_t quad_result = easeInOutQuad16(quarter);
         uint16_t cubic_result = ease16InOutCubic(quarter);
         CHECK_LT(cubic_result, quad_result);
     }
@@ -304,14 +304,14 @@ TEST_CASE("easing function ordering") {
 
     SUBCASE("16-bit: cubic should be more pronounced than quadratic") {
         for (uint32_t i = 8192; i < 32768; i += 4096) {  // test ease-in portion
-            uint16_t quad = ease16InOutQuad(i);
+            uint16_t quad = easeInOutQuad16(i);
             uint16_t cubic = ease16InOutCubic(i);
             CHECK_LE(cubic, quad);
         }
 
 
         for (uint32_t i = 32768; i < 57344; i += 4096) {  // test ease-out portion
-            uint16_t quad = ease16InOutQuad(i);
+            uint16_t quad = easeInOutQuad16(i);
             uint16_t cubic = ease16InOutCubic(i);
             CHECK_GE(cubic, quad);
         }
