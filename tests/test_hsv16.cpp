@@ -282,7 +282,7 @@ TEST_CASE("Exhaustive round trip") {
         HSV16 hsv_original(color); \
         uint16_t original_hue = hsv_original.h; \
         \
-        CRGB video_result = hsv_original.ToVideoRGB_8bit(); \
+        CRGB video_result = hsv_original.colorBoost(); \
         HSV16 hsv_video_result(video_result); \
         uint16_t result_hue = hsv_video_result.h; \
         /* Special handling for hue around 0 (red) - check for wraparound */ \
@@ -299,11 +299,11 @@ TEST_CASE("Exhaustive round trip") {
         CHECK_LE(hue_diff_8bit, hue_tolerance); \
     } while(0)
 
-TEST_CASE("ToVideoRGB_8bit() preserves hue - easy cases") {
+TEST_CASE("colorBoost() preserves hue - easy cases") {
 
-    // Helper function to test ToVideoRGB_8bit() hue preservation
+    // Helper function to test colorBoost() hue preservation
 
-    // Test that ToVideoRGB_8bit() preserves the hue while applying gamma
+    // Test that colorBoost() preserves the hue while applying gamma
     // correction to saturation. Each color uses a fine-grained tolerance based
     // on empirically observed maximum hue differences.
 
@@ -336,7 +336,7 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue - easy cases") {
     }
 }
 
-TEST_CASE("ToVideoRGB_8bit() preserves hue - hard cases") {
+TEST_CASE("colorBoost() preserves hue - hard cases") {
 
     SUBCASE("Low Saturation Colors - Hue Instability") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(130, 128, 125), 0);

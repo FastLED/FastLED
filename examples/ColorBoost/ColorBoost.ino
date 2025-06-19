@@ -7,7 +7,8 @@
 
 using namespace fl;
 
-UITitle title("Rgb8Video");
+UITitle title("ColorBoost");
+UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
 
@@ -79,7 +80,7 @@ void rainbowWave() {
                 leds[xyMap(x, y)] = original_color;
             } else {
                 // Lower half - transformed colors
-                leds[xyMap(x, y)] = original_color.toVideoRGB_8bit();
+                leds[xyMap(x, y)] = original_color.colorBoost();
             }
         }
     }

@@ -86,14 +86,14 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
     fl::upscale(src, dst, w, h, dstXY);
 }
 
-CRGB CRGB::toVideoRGB_8bit() const {
+CRGB CRGB::colorBoost() const {
     fl::HSV16 hsv(*this);
-    return hsv.ToVideoRGB_8bit();
+    return hsv.colorBoost();
 }
 
 void CRGB::fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count) {
     for (size_t i = 0; i < count; i++) {
-        dst[i] = src[i].toVideoRGB_8bit();
+        dst[i] = src[i].colorBoost();
     }
 }
 

@@ -185,7 +185,7 @@ static uint16_t gamma_correct_16(uint16_t x) {
     return map32_to_16(x32);
 }
 
-CRGB HSV16::ToVideoRGB_8bit() const {
+CRGB HSV16::colorBoost() const {
     HSV16 hsv = *this;
     uint16_t inv_sat = 65535 - hsv.s;
     inv_sat = gamma_correct_16(inv_sat);
