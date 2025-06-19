@@ -1,4 +1,3 @@
-
 // g++ --std=c++11 test.cpp
 
 #include "test.h"
@@ -19,4 +18,10 @@ TEST_CASE("map8_to_32") {
     CHECK_EQ(map8_to_32(0), 0);
     CHECK_EQ(map8_to_32(1), 0x1010101);
     CHECK_EQ(map8_to_32(0xff), 0xffffffff);
+}
+
+TEST_CASE("map16_to_32") {
+    CHECK_EQ(map16_to_32(0), 0);
+    CHECK_EQ(map16_to_32(1), 0x10001);
+    CHECK_EQ(map16_to_32(0xffff), 0xffffffff);
 }

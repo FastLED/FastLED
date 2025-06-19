@@ -26,6 +26,10 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
     return uint16_t(x) * 0x101;
 }
 
+LIB8STATIC_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
+    return uint32_t(x) * 0x10001;
+}
+
 // map16_to_8: map 16-bit values to 8-bit values
 //   This function maps 16-bit values to 8-bit values.
 LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
