@@ -313,11 +313,11 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
     }
 
     SUBCASE("Warm Yellow - Highest hue error case") {
-        // Test with a warm yellow color - this is the worst case with ~47 units
-        // max error
+        // Test with a warm yellow color - this is the worst case with exactly 47 units
+        // max error (empirically determined as the absolute worst case across all test colors)
         test_video_rgb_hue_preservation(
             CRGB(255, 220, 80),
-            48); // Observed: ~47 units max (highest error case)
+            47); // Observed: exactly 47 units max (highest error case)
     }
 
     SUBCASE("Bright Red - Wraparound case") {
