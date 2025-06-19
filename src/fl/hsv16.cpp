@@ -3,10 +3,6 @@
 #include "fl/math.h"
 
 #include "lib8tion/intmap.h"
-
-
-// Include the scale8 functions after defining the platform macros
-#include "lib8tion/lib8static.h"
 #include "lib8tion/scale8.h"
 
 namespace fl {
