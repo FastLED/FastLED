@@ -188,6 +188,9 @@ def compile_fastled(specific_test: str | None = None) -> None:
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     run_command(cmake_configure_command, cwd=BUILD_DIR)
 
+    if specific_test is not None and specific_test.startswith("test_"):
+        specific_test = specific_test[5:]
+
     # Build the project
     if specific_test:
         cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test}"
