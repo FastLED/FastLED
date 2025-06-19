@@ -218,33 +218,4 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b, dark_primary_tolerance);
     }
 
-    SUBCASE("Basic Functionality Verification") {
-        // Test that the basic conversion functions exist and work
-        
-        // Test that we can create HSV16 from RGB
-        CRGB test_color(100, 150, 200);
-        HSV16 hsv_from_rgb(test_color);
-        
-        // HSV16 should have reasonable values (not zero or max unless expected)
-        CHECK(hsv_from_rgb.h <= 65535);
-        CHECK(hsv_from_rgb.s <= 65535);
-        CHECK(hsv_from_rgb.v <= 65535);
-        
-        // Test that we can convert HSV16 back to RGB
-        CRGB rgb_from_hsv = hsv_from_rgb.ToRGB();
-        
-        // The result should be in valid RGB range
-        CHECK(rgb_from_hsv.r <= 255);
-        CHECK(rgb_from_hsv.g <= 255);
-        CHECK(rgb_from_hsv.b <= 255);
-        
-        // Test direct HSV16 constructor
-        HSV16 direct_hsv(32768, 32768, 32768);  // Half values
-        CRGB result_direct = direct_hsv.ToRGB();
-        
-        // Should produce some reasonable color
-        CHECK(result_direct.r <= 255);
-        CHECK(result_direct.g <= 255);  
-        CHECK(result_direct.b <= 255);
-    }
 }
