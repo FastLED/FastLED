@@ -8,9 +8,11 @@
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "fl/tile2x2.h"
+#include "fl/compiler_control.h"
 
 #ifdef FASTLED_TESTING
 #include <cstdio> // ok include
+
 #endif
 
 namespace fl {
@@ -22,8 +24,8 @@ static void ftoa(float value, char *buffer, int precision = 2) {
     FASTLED_UNUSED(precision);
 
 #ifdef FASTLED_TESTING
-    // use sprintf during testing
-    sprintf(buffer, "%f", value);
+    // use snprintf during testing
+    snprintf(buffer, 64, "%f", value);
     return;
 
 #else
