@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lib8tion/config.h"
 #include "scale8.h"
 #include "lib8tion/lib8static.h"
 #include "intmap.h"

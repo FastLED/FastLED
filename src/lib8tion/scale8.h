@@ -1,9 +1,10 @@
 #pragma once
 
-#include "lib8static.h"
+#include "lib8tion/config.h"
 #include "crgb.h"
 #include "fl/namespace.h"
 #include "fastled_config.h"
+#include "lib8static.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -536,6 +537,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
 #error "No implementation for scale16by8 available."
 #endif
 }
+
 
 /// Scale a 16-bit unsigned value by an 16-bit value, which is treated
 /// as the numerator of a fraction whose denominator is 65536.
