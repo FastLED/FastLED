@@ -231,7 +231,7 @@ TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
     printf("----  -----------     ------------    ----------------\n");
     
     // Test hue sweep at full saturation and brightness
-    for (int hue = 0; hue < 256; hue += 32) {
+    for (int hue = 0; hue < 256; hue += 1) {
         CHSV hsv(hue, 255, 255);
         
         CRGB rainbow_rgb, spectrum_rgb, fullspectrum_rgb;
@@ -246,4 +246,7 @@ TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
                fullspectrum_rgb.r, fullspectrum_rgb.g, fullspectrum_rgb.b);
     }
     printf("\n");
-} 
+}
+
+
+
