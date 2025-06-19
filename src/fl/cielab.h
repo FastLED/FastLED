@@ -18,8 +18,8 @@ struct CIELAB16 {
     CIELAB16(const CRGB& c);
     CRGB ToRGB() const;
 
-    static void Fill(const CRGB* c, CIELAB16* lab, int numLeds);
-    static void Fill(const CIELAB16* c, CRGB* lab, int numLeds);
+    static void Fill(const CRGB* c, CIELAB16* lab, size_t numLeds);
+    static void Fill(const CIELAB16* c, CRGB* lab, size_t numLeds);
 };
 
 

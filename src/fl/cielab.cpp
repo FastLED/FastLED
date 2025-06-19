@@ -204,14 +204,14 @@ CRGB CIELAB16::ToRGB() const {
     return c;
 }
 
-void CIELAB16::Fill(const CRGB* c, CIELAB16* lab, int numLeds) {
-    for (int i = 0; i < numLeds; i++) {
+void CIELAB16::Fill(const CRGB* c, CIELAB16* lab, size_t numLeds) {
+    for (size_t i = 0; i < numLeds; i++) {
         rgb_to_lab_u16_fixed(c[i].r, c[i].g, c[i].b, lab[i].L, lab[i].A, lab[i].B);
     }
 }
 
-void CIELAB16::Fill(const CIELAB16* c, CRGB* lab, int numLeds) {
-    for (int i = 0; i < numLeds; i++) {
+void CIELAB16::Fill(const CIELAB16* c, CRGB* lab, size_t numLeds) {
+    for (size_t i = 0; i < numLeds; i++) {
         lab_to_rgb_u8_fixed(c[i].L, c[i].A, c[i].B, lab[i].r, lab[i].g, lab[i].b);
     }
 }
