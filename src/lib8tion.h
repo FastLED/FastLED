@@ -463,6 +463,48 @@ LIB8STATIC uint16_t ease16InOutQuad( uint16_t i)
 }
 
 
+/// 16-bit cubic ease-in / ease-out function.
+/// Equivalent to ease8InOutCubic() but for 16-bit values.
+/// Formula: 3(x^2) - 2(x^3)
+LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
+{
+    uint32_t ii  = scale16( i, i);        // i^2 (16-bit result)
+    uint32_t iii = scale16( ii, i);       // i^3 (16-bit result)
+
+    uint32_t r1 = (3 * ii) - (2 * iii);
+
+    // Clamp to 16-bit range
+    if( r1 > 65535 ) {
+        return 65535;
+    }
+    return (uint16_t)r1;
+}
+
+
+/// Fast, rough 16-bit ease-in/ease-out function.
+/// 16-bit equivalent of ease8InOutApprox().
+/// Shaped approximately like ease16InOutCubic(),
+/// but executes faster with a piecewise linear approximation.
+LIB8STATIC uint16_t ease16InOutApprox( uint16_t i)
+{
+    if( i < 16384) {  // 16384 = 65536/4, equivalent to 64 in 8-bit
+        // start with slope 0.5
+        i /= 2;
+    } else if( i > (65535 - 16384)) {  // equivalent to i > (255 - 64) in 8-bit
+        // end with slope 0.5
+        i = 65535 - i;
+        i /= 2;
+        i = 65535 - i;
+    } else {
+        // in the middle, use slope 1.5
+        i -= 16384;
+        i += (i / 2);
+        i += 8192;  // 8192 = 16384/2, equivalent to 32 in 8-bit
+    }
+
+    return i;
+}
+
 /// 8-bit cubic ease-in / ease-out function. 
 /// Takes around 18 cycles on AVR.
 LIB8STATIC fract8 ease8InOutCubic( fract8 i)

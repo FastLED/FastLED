@@ -131,7 +131,9 @@ map8	KEYWORD2
 ease8InOutQuad	KEYWORD2
 ease8InOutCubic	KEYWORD2
 ease8InOutApprox	KEYWORD2
-ease8InOutApprox	KEYWORD2
+ease16InOutQuad	KEYWORD2
+ease16InOutCubic	KEYWORD2
+ease16InOutApprox	KEYWORD2
 triwave8	KEYWORD2
 quadwave8	KEYWORD2
 cubicwave8	KEYWORD2
