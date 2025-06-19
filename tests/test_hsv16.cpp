@@ -9,9 +9,9 @@
 using namespace fl;
 
 // Tolerance constants for color comparison
-static const int low = 2;      // For high-precision comparisons (red, exact matches)
-static const int medium = 5;   // For medium-precision comparisons (grayscale)
-static const int high = 10;    // For low-precision comparisons (green, blue, white)
+static const int low = 0;      // For high-precision comparisons (red, exact matches)
+static const int medium = 0;   // For medium-precision comparisons (grayscale)
+static const int high = 8;    // For low-precision comparisons (green, blue, white)
 
 TEST_CASE("RGB to HSV16 to RGB") {
     
