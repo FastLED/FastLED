@@ -13,7 +13,16 @@ from ci.running_process import RunningProcess
 
 _PIO_CHECK_ENABLED = False
 
-_IS_GITHUB = os.environ.get('GITHUB_ACTIONS') == 'true'
+# Default to non-interactive mode for safety unless explicitly in interactive environment
+# This prevents hanging on prompts when running in automated environments
+_IS_GITHUB = True  # Default to non-interactive behavior
+if os.environ.get('FASTLED_INTERACTIVE') == 'true':
+    _IS_GITHUB = False  # Only enable interactive mode if explicitly requested
+
+# Set environment variable to ensure all subprocesses also run in non-interactive mode
+os.environ['FASTLED_CI_NO_INTERACTIVE'] = 'true'
+if not _IS_GITHUB:
+    os.environ.pop('FASTLED_CI_NO_INTERACTIVE', None)  # Remove if interactive mode is enabled
 
 
 def run_command(cmd: List[str], **kwargs: Any) -> None:
@@ -33,6 +42,8 @@ def parse_args() -> argparse.Namespace:
                        help='Specific C++ test to run')
     parser.add_argument("--clang", action="store_true", help="Use Clang compiler")
     parser.add_argument("--clean", action="store_true", help="Clean build before compiling")
+    parser.add_argument("--no-interactive", action="store_true", help="Force non-interactive mode (no confirmation prompts)")
+    parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
     return parser.parse_args()
 
 
@@ -140,6 +151,24 @@ def main() -> None:
         watchdog.start()
         
         args = parse_args()
+        
+        # Handle --no-interactive flag
+        if args.no_interactive:
+            global _IS_GITHUB
+            _IS_GITHUB = True
+            os.environ['FASTLED_CI_NO_INTERACTIVE'] = 'true'
+            os.environ['GITHUB_ACTIONS'] = 'true'  # This ensures all subprocess also run in non-interactive mode
+        
+        # Handle --interactive flag
+        if args.interactive:
+            _IS_GITHUB = False
+            os.environ.pop('FASTLED_CI_NO_INTERACTIVE', None)
+            os.environ.pop('GITHUB_ACTIONS', None)
+            
+        # Validate conflicting arguments
+        if args.no_interactive and args.interactive:
+            print("Error: --interactive and --no-interactive cannot be used together", file=sys.stderr)
+            sys.exit(1)
         
         # Change to script directory
         os.chdir(Path(__file__).parent)

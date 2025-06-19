@@ -5,6 +5,7 @@ files are built faster.
 """
 
 import argparse
+import os
 import sys
 import time
 import warnings
@@ -186,6 +187,13 @@ def parse_args():
     args, unknown = parser.parse_known_args()
     if unknown:
         warnings.warn(f"Unknown arguments: {unknown}")
+
+    # Check for FASTLED_CI_NO_INTERACTIVE environment variable
+    # This allows test.py and other scripts to force non-interactive mode
+    if os.environ.get("FASTLED_CI_NO_INTERACTIVE") == "true":
+        args.interactive = False
+        args.no_interactive = True
+
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
         warnings.warn(

@@ -57,8 +57,8 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     uint32_t v = hsv.v;
 
     if (s == 0) {
-        // Grayscale case
-        uint8_t gray = (v * 255) / 65535;
+        // Grayscale case - use precise mapping instead of division
+        uint8_t gray = map16_to_8(v);
         return CRGB{gray, gray, gray};
     }
 
@@ -66,8 +66,9 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     uint32_t sector = (h * 6) / 65536;
     uint32_t sector_pos = (h * 6) % 65536; // Position within sector (0-65535)
 
-    // Calculate intermediate values using fixed-point arithmetic
-    uint32_t c = (v * s) / 65535;           // Chroma
+    // Calculate intermediate values using precise mapping
+    // c = v * s, scaled from 32-bit back to 16-bit with proper rounding
+    uint32_t c = map32_to_16((uint32_t)v * s);
     
     // Calculate x = c * (1 - |((sector_pos / 65536) * 2 - 1)|)
     // This is the correct HSV to RGB intermediate value calculation
@@ -75,10 +76,12 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     uint32_t x;
     if (sector & 1) {
         // For odd sectors (1, 3, 5), we want decreasing values
-        x = (c * (65535 - f)) / 65535;
+        // x = c * (65535 - f) / 65535, using precise mapping
+        x = map32_to_16((uint32_t)c * (65535 - f));
     } else {
-        // For even sectors (0, 2, 4), we want increasing values
-        x = (c * f) / 65535;
+        // For even sectors (0, 2, 4), we want increasing values  
+        // x = c * f / 65535, using precise mapping
+        x = map32_to_16((uint32_t)c * f);
     }
     
     uint32_t m = v - c;
