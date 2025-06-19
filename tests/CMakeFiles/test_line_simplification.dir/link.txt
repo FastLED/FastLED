@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_line_simplification.dir/link.d CMakeFiles/test_line_simplification.dir/test_line_simplification.cpp.o -o .build/bin/test_line_simplification  .build/lib/libfastled.a .build/lib/libdoctest_main.a

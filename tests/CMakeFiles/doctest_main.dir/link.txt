@@ -1,0 +1,2 @@
+/usr/bin/ar rcT .build/lib/libdoctest_main.a CMakeFiles/doctest_main.dir/doctest_main.cpp.o
+/usr/bin/ranlib .build/lib/libdoctest_main.a

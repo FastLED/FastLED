@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_lut.dir/link.d CMakeFiles/test_lut.dir/test_lut.cpp.o -o .build/bin/test_lut  .build/lib/libfastled.a .build/lib/libdoctest_main.a

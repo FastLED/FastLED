@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_rectangular_buffer.dir/link.d CMakeFiles/test_rectangular_buffer.dir/test_rectangular_buffer.cpp.o -o .build/bin/test_rectangular_buffer  .build/lib/libfastled.a .build/lib/libdoctest_main.a
