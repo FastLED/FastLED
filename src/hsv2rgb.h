@@ -3,9 +3,6 @@
 #ifndef __INC_HSV2RGB_H
 #define __INC_HSV2RGB_H
 
-#include "FastLED.h"
-
-#include "pixeltypes.h"
 
 /// @file hsv2rgb.h
 /// Functions to convert from the HSV colorspace to the RGB colorspace
@@ -61,6 +58,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+struct CRGB;
+struct CHSV;
 
 
 
@@ -70,6 +69,8 @@ FASTLED_NAMESPACE_BEGIN
 /// @param prgb CRGB array to store the result of the conversion (will be modified)
 /// @param numLeds the number of array values to process
 void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
+void hsv2rgb_rainbow( const struct CHSV& hsv, struct CRGB& rgb);
+CRGB hsv2rgb_rainbow( const struct CHSV& hsv);
 
 /// Max hue accepted for the hsv2rgb_rainbow() function
 #define HUE_MAX_RAINBOW 255
@@ -89,11 +90,7 @@ void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 void hsv2rgb_spectrum( const struct CHSV& hsv, struct CRGB& rgb);
 
 /// Inline version of hsv2rgb_spectrum which returns a CRGB object.
-inline CRGB hsv2rgb_spectrum( const struct CHSV& hsv) {
-    CRGB rgb;
-    hsv2rgb_spectrum(hsv, rgb);
-    return rgb;
-}
+CRGB hsv2rgb_spectrum( const struct CHSV& hsv);
 
 /// @copybrief hsv2rgb_spectrum(const struct CHSV&, struct CRGB&)
 /// @see hsv2rgb_spectrum(const struct CHSV&, struct CRGB&)
@@ -130,17 +127,14 @@ void hsv2rgb_raw(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 
 /// Converts an HSV value to RGB using the algorithm from here:
 /// https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_RGB_alternative
+/// By Shawn Silverman
 ///
 /// @param hsv CHSV struct to convert to RGB
 /// @param rgb CRGB struct to store the result of the conversion (will be modified)
 void hsv2rgb_fullspectrum( const struct CHSV& hsv, struct CRGB& rgb);
 
-/// Inline version of hsv2rgb_fullspectrum which returns a CRGB object.
-inline CRGB hsv2rgb_fullspectrum( const struct CHSV& hsv) {
-    CRGB rgb;
-    hsv2rgb_fullspectrum(hsv, rgb);
-    return rgb;
-}
+/// version of hsv2rgb_fullspectrum which returns a CRGB object.
+CRGB hsv2rgb_fullspectrum( const struct CHSV& hsv);
 
 /// @copybrief hsv2rgb_fullspectrum(const struct CHSV&, struct CRGB&)
 /// @see hsv2rgb_fullspectrum(const struct CHSV&, struct CRGB&)

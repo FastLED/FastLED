@@ -11,6 +11,8 @@
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
 #include "fl/template_magic.h"
+#include "hsv2rgb.h"
+
 
 
 namespace fl {
@@ -33,22 +35,48 @@ FASTLED_NAMESPACE_BEGIN
 
 struct CRGB;
 
-/// @defgroup PixelTypes Pixel Data Types (CRGB/CHSV)
-/// @brief Structs that hold pixel color data
-/// @{
 
-/// Forward declaration of hsv2rgb_rainbow here,
-/// to avoid circular dependencies.
-///
-/// Convert an HSV value to RGB using a visually balanced rainbow. 
-/// This "rainbow" yields better yellow and orange than a straight
-/// mathematical "spectrum".
-///
-/// ![FastLED 'Rainbow' Hue Chart](https://raw.githubusercontent.com/FastLED/FastLED/gh-pages/images/HSV-rainbow-with-desc.jpg)
-///
-/// @param hsv CHSV struct to convert to RGB. Max hue supported is HUE_MAX_RAINBOW
-/// @param rgb CRGB struct to store the result of the conversion (will be modified)
-void hsv2rgb_rainbow( const struct CHSV& hsv, struct CRGB& rgb);
+
+/// HSV conversion function selection based on compile-time defines
+/// This allows users to configure which HSV conversion algorithm to use
+/// by setting one of the following defines:
+/// - FASTLED_HSV_CONVERSION_SPECTRUM: Use spectrum conversion
+/// - FASTLED_HSV_CONVERSION_FULL_SPECTRUM: Use full spectrum conversion  
+/// - FASTLED_HSV_CONVERSION_RAINBOW: Use rainbow conversion (explicit)
+/// - Default (no define): Use rainbow conversion (backward compatibility)
+
+
+
+/// Array-based HSV conversion function selection using the same compile-time defines
+/// @param phsv CHSV array to convert to RGB
+/// @param prgb CRGB array to store the result of the conversion (will be modified)
+/// @param numLeds the number of array values to process
+FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
+{
+#if defined(FASTLED_HSV_CONVERSION_SPECTRUM)
+    hsv2rgb_spectrum(phsv, prgb, numLeds);
+#elif defined(FASTLED_HSV_CONVERSION_FULL_SPECTRUM)
+    hsv2rgb_fullspectrum(phsv, prgb, numLeds);
+#elif defined(FASTLED_HSV_CONVERSION_RAINBOW)
+    hsv2rgb_rainbow(phsv, prgb, numLeds);
+#else
+    // Default to rainbow for backward compatibility
+    hsv2rgb_rainbow(phsv, prgb, numLeds);
+#endif
+}
+
+FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const struct CHSV& hsv, struct CRGB& rgb)
+{
+#if defined(FASTLED_HSV_CONVERSION_SPECTRUM)
+    hsv2rgb_spectrum(hsv, rgb);
+#elif defined(FASTLED_HSV_CONVERSION_FULL_SPECTRUM)
+    hsv2rgb_fullspectrum(hsv, rgb);
+#elif defined(FASTLED_HSV_CONVERSION_RAINBOW)
+    hsv2rgb_rainbow(hsv, rgb);
+#else
+    hsv2rgb_rainbow(hsv, rgb);
+#endif
+}
 
 
 /// Representation of an RGB pixel (Red, Green, Blue)
@@ -146,7 +174,7 @@ struct CRGB {
     /// Allow construction from a CHSV color
     FASTLED_FORCE_INLINE CRGB(const CHSV& rhs)
     {
-        hsv2rgb_rainbow( rhs, *this);
+        hsv2rgb_dispatch( rhs, *this);
     }
 
     /// Allow assignment from one RGB struct to another
@@ -180,7 +208,7 @@ struct CRGB {
     /// @param val color value (brightness)
     FASTLED_FORCE_INLINE CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val)
     {
-        hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
+        hsv2rgb_dispatch( CHSV(hue, sat, val), *this);
         return *this;
     }
 
@@ -189,14 +217,14 @@ struct CRGB {
     /// @param hue color hue
     FASTLED_FORCE_INLINE CRGB& setHue (uint8_t hue)
     {
-        hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
+        hsv2rgb_dispatch( CHSV(hue, 255, 255), *this);
         return *this;
     }
 
     /// Allow assignment from HSV color
     FASTLED_FORCE_INLINE CRGB& operator= (const CHSV& rhs)
     {
-        hsv2rgb_rainbow( rhs, *this);
+        hsv2rgb_dispatch( rhs, *this);
         return *this;
     }
 

@@ -8,6 +8,8 @@
 #include "FastLED.h"
 #include "fl/math_macros.h"
 
+#include "hsv2rgb.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 /// HSV to RGB implementation in raw C, platform independent
@@ -38,6 +40,13 @@ void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 /// Divide the color wheel into four sections, 64 elements each
 /// @todo I believe this is mis-named, and should be HSV_SECTION_4
 #define HSV_SECTION_3 (0x40)
+
+/// Inline version of hsv2rgb_spectrum which returns a CRGB object.
+CRGB hsv2rgb_spectrum( const struct CHSV& hsv) {
+    CRGB rgb;
+    hsv2rgb_spectrum(hsv, rgb);
+    return rgb;
+}
 
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
 {
@@ -248,6 +257,12 @@ void hsv2rgb_spectrum( const struct CHSV& hsv, CRGB& rgb)
 #define K170 170
 #define K85  85
 /// @endcond
+
+CRGB hsv2rgb_rainbow( const struct CHSV& hsv) {
+    CRGB rgb;
+    hsv2rgb_rainbow(hsv, rgb);
+    return rgb;
+}
 
 void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 {
