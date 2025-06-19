@@ -268,14 +268,14 @@ TEST_CASE("easing function ordering") {
 
     SUBCASE("8-bit: cubic should be more pronounced than quadratic") {
         for (uint16_t i = 32; i < 128; i += 16) { // test ease-in portion
-            uint8_t quad = ease8InOutQuad(i);
-            uint8_t cubic = ease8InOutCubic(i);
+            uint8_t quad = easeInOutQuad8(i);
+            uint8_t cubic = easeInOutCubic8(i);
             CHECK_LE(cubic, quad);
         }
 
         for (uint16_t i = 128; i < 224; i += 16) { // test ease-out portion
-            uint8_t quad = ease8InOutQuad(i);
-            uint8_t cubic = ease8InOutCubic(i);
+            uint8_t quad = easeInOutQuad8(i);
+            uint8_t cubic = easeInOutCubic8(i);
             CHECK_GE(cubic, quad);
         }
     }
