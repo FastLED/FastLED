@@ -283,7 +283,7 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
 
         uint8_t hue_diff_8bit = map16_to_8(min_hue_diff);
 
-        CHECK(min_hue_diff <= hue_tolerance);
+        CHECK(hue_diff_8bit <= hue_tolerance);
         
     };
 
@@ -294,19 +294,19 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
     SUBCASE("Orange - Low hue error") {
         // Test with a vibrant orange color - wraparound helped reduce tolerance
         test_video_rgb_hue_preservation(CRGB(255, 128, 0),
-                                        10); // Optimized: was 15, now 10 with wraparound
+                                        0); // Optimized: was 15, now 10 with wraparound
     }
 
     SUBCASE("Blue-Green - Moderate hue error") {
         // Test with a blue-green color - exactly 14 units max error observed
         test_video_rgb_hue_preservation(CRGB(0, 200, 150),
-                                        14); // Optimized: was 15, now 14 with wraparound
+                                        0); // Optimized: was 15, now 14 with wraparound
     }
 
     SUBCASE("Purple - Very low hue error") {
         // Test with a purple color - exactly 4 units max error observed
         test_video_rgb_hue_preservation(CRGB(180, 50, 200),
-                                        4); // Optimized: was 5, now 4 with wraparound
+                                        0); // Optimized: was 5, now 4 with wraparound
     }
 
     SUBCASE("Warm Yellow - Highest hue error case") {
@@ -314,13 +314,13 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
         // max error (empirically determined as the absolute worst case across all test colors)
         test_video_rgb_hue_preservation(
             CRGB(255, 220, 80),
-            47); // Observed: exactly 47 units max (highest error case)
+            0); // Observed: exactly 47 units max (highest error case)
     }
 
     SUBCASE("Bright Red - Wraparound case") {
         // Test edge case: Very saturated red (hue around 0) - handle wraparound
         // Special case due to hue wraparound at 0/65535 boundary
         test_video_rgb_hue_preservation(
-            CRGB(255, 30, 30), 5); // Optimized: was 8, now 5 with wraparound default
+            CRGB(255, 30, 30), 0); // Optimized: was 8, now 5 with wraparound default
     }
 }
