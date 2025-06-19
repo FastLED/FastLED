@@ -110,6 +110,14 @@ struct CRGB {
     /// Downscale an CRGB matrix (or strip) to the smaller size.
     static void downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
     static void upscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
+
+    // Are you using WS2812 (or other RGB8 LEDS) to display video?
+    // Do you want a function to simulate gamma correction but doesn't
+    // decimate the color? This will apply color saturation without
+    // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
+    // This attempts to preserve the hue while increasing saturation, which should
+    // work well with WS2812 (and other RGB8) led displays.
+    CRGB toVideoRGB_8bit() const;
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)

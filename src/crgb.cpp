@@ -11,6 +11,7 @@
 #include "lib8tion/math8.h"
 
 #include "fl/namespace.h"
+#include "fl/hsv16.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -83,6 +84,11 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
     uint16_t w = srcXY.getWidth();
     uint16_t h = srcXY.getHeight();
     fl::upscale(src, dst, w, h, dstXY);
+}
+
+CRGB CRGB::toVideoRGB_8bit() const {
+    fl::HSV16 hsv(*this);
+    return hsv.ToVideoRGB_8bit();
 }
 
 CRGB &CRGB::nscale8(uint8_t scaledown) {
