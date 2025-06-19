@@ -260,6 +260,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
     }
 }
 
+
 #define TEST_VIDEO_RGB_HUE_PRESERVATION(color, hue_tolerance) \
     do { \
         HSV16 hsv_original(color); \
@@ -279,6 +280,11 @@ TEST_CASE("RGB to HSV16 to RGB") {
         \
         uint8_t hue_diff_8bit = map16_to_8(min_hue_diff); \
         \
+        printf("original rgb: %d, %d, %d\n", color.r, color.g, color.b); \
+        printf("video rgb: %d, %d, %d\n", video_result.r, video_result.g, video_result.b); \
+        printf("hue diff: %d\n", hue_diff); \
+        printf("hue diff 8bit: %d\n", hue_diff_8bit); \
+        printf("hue tolerance: %d\n", hue_tolerance); \
         CHECK_LE(hue_diff_8bit, hue_tolerance); \
     } while(0)
 
