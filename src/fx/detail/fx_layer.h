@@ -33,7 +33,7 @@ class FxLayer : public fl::Referent {
 
         if (!running) {
             // Clear the frame
-            memset(frame->rgb(), 0, frame->size() * sizeof(CRGB));
+            memset((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
             fx->resume(now);
             running = true;
         }
