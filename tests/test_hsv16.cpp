@@ -7,6 +7,11 @@
 
 using namespace fl;
 
+
+static int diff(uint8_t a, uint8_t b) {
+    return ABS(a - b);
+}
+
 TEST_CASE("RGB to HSV16 to RGB") {
     
     SUBCASE("Primary Colors - Good Conversion") {
@@ -16,25 +21,25 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB red(255, 0, 0);
         HSV16 hsv_red(red);
         CRGB red_result = hsv_red.ToRGB();
-        CHECK(ABS((int)red_result.r - (int)red.r) <= 2);
-        CHECK(ABS((int)red_result.g - (int)red.g) <= 2);
-        CHECK(ABS((int)red_result.b - (int)red.b) <= 2);
+        CHECK(diff(red_result.r, red.r) <= 2);
+        CHECK(diff(red_result.g, red.g) <= 2);
+        CHECK(diff(red_result.b, red.b) <= 2);
 
         // Pure green - small acceptable error
         CRGB green(0, 255, 0);
         HSV16 hsv_green(green);
         CRGB green_result = hsv_green.ToRGB();
-        CHECK(ABS((int)green_result.r - (int)green.r) <= 10);
-        CHECK(ABS((int)green_result.g - (int)green.g) <= 10);
-        CHECK(ABS((int)green_result.b - (int)green.b) <= 10);
+        CHECK(diff(green_result.r, green.r) <= 10);
+        CHECK(diff(green_result.g, green.g) <= 10);
+        CHECK(diff(green_result.b, green.b) <= 10);
 
         // Pure blue - small acceptable error  
         CRGB blue(0, 0, 255);
         HSV16 hsv_blue(blue);
         CRGB blue_result = hsv_blue.ToRGB();
-        CHECK(ABS((int)blue_result.r - (int)blue.r) <= 10);
-        CHECK(ABS((int)blue_result.g - (int)blue.g) <= 10);
-        CHECK(ABS((int)blue_result.b - (int)blue.b) <= 10);
+        CHECK(diff(blue_result.r, blue.r) <= 10);
+        CHECK(diff(blue_result.g, blue.g) <= 10);
+        CHECK(diff(blue_result.b, blue.b) <= 10);
 
         // Test black - perfect conversion
         CRGB black(0, 0, 0);
@@ -50,31 +55,31 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB white(255, 255, 255);
         HSV16 hsv_white(white);
         CRGB white_result = hsv_white.ToRGB();
-        CHECK(ABS((int)white_result.r - (int)white.r) <= 10);
-        CHECK(ABS((int)white_result.g - (int)white.g) <= 10);
-        CHECK(ABS((int)white_result.b - (int)white.b) <= 10);
+        CHECK(diff(white_result.r, white.r) <= 10);
+        CHECK(diff(white_result.g, white.g) <= 10);
+        CHECK(diff(white_result.b, white.b) <= 10);
 
         // Test various shades of gray - these should convert well
         CRGB gray50(50, 50, 50);
         HSV16 hsv_gray50(gray50);
         CRGB gray50_result = hsv_gray50.ToRGB();
-        CHECK(ABS((int)gray50_result.r - (int)gray50.r) <= 5);
-        CHECK(ABS((int)gray50_result.g - (int)gray50.g) <= 5);
-        CHECK(ABS((int)gray50_result.b - (int)gray50.b) <= 5);
+        CHECK(diff(gray50_result.r, gray50.r) <= 5);
+        CHECK(diff(gray50_result.g, gray50.g) <= 5);
+        CHECK(diff(gray50_result.b, gray50.b) <= 5);
 
         CRGB gray128(128, 128, 128);
         HSV16 hsv_gray128(gray128);
         CRGB gray128_result = hsv_gray128.ToRGB();
-        CHECK(ABS((int)gray128_result.r - (int)gray128.r) <= 5);
-        CHECK(ABS((int)gray128_result.g - (int)gray128.g) <= 5);
-        CHECK(ABS((int)gray128_result.b - (int)gray128.b) <= 5);
+        CHECK(diff(gray128_result.r, gray128.r) <= 5);
+        CHECK(diff(gray128_result.g, gray128.g) <= 5);
+        CHECK(diff(gray128_result.b, gray128.b) <= 5);
 
         CRGB gray200(200, 200, 200);
         HSV16 hsv_gray200(gray200);
         CRGB gray200_result = hsv_gray200.ToRGB();
-        CHECK(ABS((int)gray200_result.r - (int)gray200.r) <= 5);
-        CHECK(ABS((int)gray200_result.g - (int)gray200.g) <= 5);
-        CHECK(ABS((int)gray200_result.b - (int)gray200.b) <= 5);
+        CHECK(diff(gray200_result.r, gray200.r) <= 5);
+        CHECK(diff(gray200_result.g, gray200.g) <= 5);
+        CHECK(diff(gray200_result.b, gray200.b) <= 5);
     }
 
     SUBCASE("HSV16 Constructor Values") {
@@ -100,8 +105,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
         // Test zero saturation (should produce grayscale)
         HSV16 hsv_gray_direct(32768, 0, 32768);  // Any hue, no saturation, half value
         CRGB gray_direct_result = hsv_gray_direct.ToRGB();
-        CHECK(ABS((int)gray_direct_result.r - (int)gray_direct_result.g) <= 2);
-        CHECK(ABS((int)gray_direct_result.g - (int)gray_direct_result.b) <= 2);
+        CHECK(diff(gray_direct_result.r, gray_direct_result.g) <= 2);
+        CHECK(diff(gray_direct_result.g, gray_direct_result.b) <= 2);
         CHECK(gray_direct_result.r >= 120);  // Should be around 128
         CHECK(gray_direct_result.r <= 135);
     }
