@@ -195,24 +195,24 @@ static void lab_to_rgb_u8_fixed(
 
 
 CIELAB16::CIELAB16(const CRGB& c) {
-    rgb_to_lab_u16_fixed(c.r, c.g, c.b, L, A, B);
+    rgb_to_lab_u16_fixed(c.r, c.g, c.b, l, a, b);
 }
 
 CRGB CIELAB16::ToRGB() const {
     CRGB c;
-    lab_to_rgb_u8_fixed(L, A, B, c.r, c.g, c.b);
+    lab_to_rgb_u8_fixed(l, a, b, c.r, c.g, c.b);
     return c;
 }
 
 void CIELAB16::Fill(const CRGB* c, CIELAB16* lab, size_t numLeds) {
     for (size_t i = 0; i < numLeds; i++) {
-        rgb_to_lab_u16_fixed(c[i].r, c[i].g, c[i].b, lab[i].L, lab[i].A, lab[i].B);
+        rgb_to_lab_u16_fixed(c[i].r, c[i].g, c[i].b, lab[i].l, lab[i].a, lab[i].b);
     }
 }
 
 void CIELAB16::Fill(const CIELAB16* c, CRGB* lab, size_t numLeds) {
     for (size_t i = 0; i < numLeds; i++) {
-        lab_to_rgb_u8_fixed(c[i].L, c[i].A, c[i].B, lab[i].r, lab[i].g, lab[i].b);
+        lab_to_rgb_u8_fixed(c[i].l, c[i].a, c[i].b, lab[i].r, lab[i].g, lab[i].b);
     }
 }
 
