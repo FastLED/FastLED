@@ -3,6 +3,7 @@
 
 #include "lib8tion/intmap.h"
 #include "lib8tion/scale8.h"
+#include "fl/ease.h"
 
 namespace fl {
 
@@ -194,7 +195,7 @@ CRGB HSV16::colorBoost(bool boost_saturation, bool boost_contrast) const {
     }
     
     if (boost_contrast) {
-        hsv.v = gamma_correct_16(hsv.v);
+        hsv.v = fl::easeInOutQuad16(hsv.v);
     }
     
     return hsv.ToRGB();
