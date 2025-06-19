@@ -122,7 +122,8 @@ struct CRGB {
     // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
     // work well with WS2812 (and other RGB8) led displays.
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
-    // Note that when both boost_saturation and boost_contrast are true 
+    // Note that when both boost_saturation and boost_contrast are true the resulting
+    // pixel will be nearly the same as if you had used gamma correction pow = 2.0.
     CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
     static void colorBoost(const CRGB* src, CRGB* dst, size_t count);
 
