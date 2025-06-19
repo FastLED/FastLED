@@ -1,4 +1,7 @@
 #include <FastLED.h>
+#include "fl/ease.h"
+
+using namespace fl;
 
 // Matrix configuration
 #define MATRIX_WIDTH 100
@@ -18,11 +21,22 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructSerpentine(MATRIX_WIDTH, MATRIX_HEIGHT);
 
 UITitle title("EaseInOut");
-UIDescription description("Use the xPosition slider to see the ease function curve, when easeTypeIsQuadratic is checked, the curve will be quadratic, when it is unchecked, the curve will be cubic.");
+UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=In-Out Quad, 3=In-Out Cubic.");
 
 // UI Slider that goes from 0 to 1.0
 UISlider xPosition("xPosition", 0.0f, 0.0f, 1.0f, 0.01f);
-UICheckbox easeType("easeTypeIsQuadratic", true);
+UINumberField easeTypeNumber("Ease Type", 2, 0, 3);
+
+EaseType getEaseType(int value) {
+    switch (value) {
+        case 0: return EASE_NONE;
+        case 1: return EASE_IN_QUAD;
+        case 2: return EASE_IN_OUT_QUAD;
+        case 3: return EASE_IN_OUT_CUBIC;
+    }
+    FL_ASSERT(false, "Invalid ease type");
+    return EASE_IN_OUT_QUAD;
+}
 
 void setup() {
     Serial.begin(115200);
@@ -56,8 +70,9 @@ void loop() {
     // Convert slider value to 16-bit input for ease function
     uint16_t easeInput = map(sliderValue * 1000, 0, 1000, 0, 65535);
 
-    // Apply ease16InOutQuad function
-    uint16_t easeOutput = easeType ? ease16InOutQuad(easeInput) : ease16InOutCubic(easeInput);
+    // Get the selected ease type and apply it
+    EaseType selectedEaseType = getEaseType(easeTypeNumber.value());
+    uint16_t easeOutput = ease16(selectedEaseType, easeInput);
 
     // Map eased output to Y coordinate (0 to height-1)
     uint8_t y = map(easeOutput, 0, 65535, 0, MATRIX_HEIGHT - 1);
