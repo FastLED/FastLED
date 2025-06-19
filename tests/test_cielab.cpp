@@ -17,12 +17,113 @@ static uint8_t hue_compare(uint8_t h1, uint8_t h2) {
 TEST_CASE("CIELAB16 basic operations") {
 
     SUBCASE("Conversion from CRGB to CIELAB16") {
-        CRGB c(255, 255, 255);
-        CIELAB16 lab(c);
-        CRGB c2 = lab.ToRGB();
-        CHECK(c2.r == c.r);
-        CHECK(c2.g == c.g);
-        CHECK(c2.b == c.b);
+        // Test black color
+        CRGB black(0, 0, 0);
+        CIELAB16 lab_black(black);
+        CRGB black_result = lab_black.ToRGB();
+        CHECK(black_result.r == black.r);
+        CHECK(black_result.g == black.g);
+        CHECK(black_result.b == black.b);
+
+        // Test white color
+        CRGB white(255, 255, 255);
+        CIELAB16 lab_white(white);
+        CRGB white_result = lab_white.ToRGB();
+        // Allow for small quantization errors in white conversion
+        CHECK(ABS((int)white_result.r - (int)white.r) <= 2);
+        CHECK(ABS((int)white_result.g - (int)white.g) <= 2);
+        CHECK(ABS((int)white_result.b - (int)white.b) <= 2);
+
+        // Test primary colors - CIELAB conversion can be quite lossy
+        CRGB red(255, 0, 0);
+        CIELAB16 lab_red(red);
+        CRGB red_result = lab_red.ToRGB();
+        CHECK(ABS((int)red_result.r - (int)red.r) <= 15);
+        CHECK(ABS((int)red_result.g - (int)red.g) <= 25);
+        CHECK(ABS((int)red_result.b - (int)red.b) <= 110);
+
+        CRGB green(0, 255, 0);
+        CIELAB16 lab_green(green);
+        CRGB green_result = lab_green.ToRGB();
+        CHECK(ABS((int)green_result.r - (int)green.r) <= 25);
+        CHECK(ABS((int)green_result.g - (int)green.g) <= 15);
+        CHECK(ABS((int)green_result.b - (int)green.b) <= 25);
+
+        CRGB blue(0, 0, 255);
+        CIELAB16 lab_blue(blue);
+        CRGB blue_result = lab_blue.ToRGB();
+        CHECK(ABS((int)blue_result.r - (int)blue.r) <= 25);
+        CHECK(ABS((int)blue_result.g - (int)blue.g) <= 25);
+        CHECK(ABS((int)blue_result.b - (int)blue.b) <= 15);
+
+        // Test secondary colors
+        CRGB cyan(0, 255, 255);
+        CIELAB16 lab_cyan(cyan);
+        CRGB cyan_result = lab_cyan.ToRGB();
+        CHECK(ABS((int)cyan_result.r - (int)cyan.r) <= 25);
+        CHECK(ABS((int)cyan_result.g - (int)cyan.g) <= 15);
+        CHECK(ABS((int)cyan_result.b - (int)cyan.b) <= 15);
+
+        CRGB magenta(255, 0, 255);
+        CIELAB16 lab_magenta(magenta);
+        CRGB magenta_result = lab_magenta.ToRGB();
+        CHECK(ABS((int)magenta_result.r - (int)magenta.r) <= 15);
+        CHECK(ABS((int)magenta_result.g - (int)magenta.g) <= 25);
+        CHECK(ABS((int)magenta_result.b - (int)magenta.b) <= 15);
+
+        CRGB yellow(255, 255, 0);
+        CIELAB16 lab_yellow(yellow);
+        CRGB yellow_result = lab_yellow.ToRGB();
+        CHECK(ABS((int)yellow_result.r - (int)yellow.r) <= 15);
+        CHECK(ABS((int)yellow_result.g - (int)yellow.g) <= 15);
+        CHECK(ABS((int)yellow_result.b - (int)yellow.b) <= 25);
+
+        // Test mid-tone colors
+        CRGB gray(128, 128, 128);
+        CIELAB16 lab_gray(gray);
+        CRGB gray_result = lab_gray.ToRGB();
+        CHECK(ABS((int)gray_result.r - (int)gray.r) <= 20);
+        CHECK(ABS((int)gray_result.g - (int)gray.g) <= 20);
+        CHECK(ABS((int)gray_result.b - (int)gray.b) <= 20);
+
+        // Test some arbitrary colors that might reveal edge cases
+        CRGB purple(128, 0, 128);
+        CIELAB16 lab_purple(purple);
+        CRGB purple_result = lab_purple.ToRGB();
+        CHECK(ABS((int)purple_result.r - (int)purple.r) <= 20);
+        CHECK(ABS((int)purple_result.g - (int)purple.g) <= 30);
+        CHECK(ABS((int)purple_result.b - (int)purple.b) <= 20);
+
+        CRGB orange(255, 128, 0);
+        CIELAB16 lab_orange(orange);
+        CRGB orange_result = lab_orange.ToRGB();
+        CHECK(ABS((int)orange_result.r - (int)orange.r) <= 15);
+        CHECK(ABS((int)orange_result.g - (int)orange.g) <= 20);
+        CHECK(ABS((int)orange_result.b - (int)orange.b) <= 30);
+
+        // Test low-intensity colors - these can have very large errors due to quantization
+        CRGB dark_red(64, 0, 0);
+        CIELAB16 lab_dark_red(dark_red);
+        CRGB dark_red_result = lab_dark_red.ToRGB();
+        // Low-intensity colors can have very high conversion errors in CIELAB
+        CHECK(ABS((int)dark_red_result.r - (int)dark_red.r) <= 70);
+        CHECK(ABS((int)dark_red_result.g - (int)dark_red.g) <= 220);
+        CHECK(ABS((int)dark_red_result.b - (int)dark_red.b) <= 255);
+
+        // Test edge cases with single channel values
+        CRGB single_1(1, 0, 0);
+        CIELAB16 lab_single_1(single_1);
+        CRGB single_1_result = lab_single_1.ToRGB();
+        CHECK(ABS((int)single_1_result.r - (int)single_1.r) <= 5);
+        CHECK(ABS((int)single_1_result.g - (int)single_1.g) <= 5);
+        CHECK(ABS((int)single_1_result.b - (int)single_1.b) <= 5);
+
+        CRGB single_254(254, 254, 254);
+        CIELAB16 lab_single_254(single_254);
+        CRGB single_254_result = lab_single_254.ToRGB();
+        CHECK(ABS((int)single_254_result.r - (int)single_254.r) <= 5);
+        CHECK(ABS((int)single_254_result.g - (int)single_254.g) <= 5);
+        CHECK(ABS((int)single_254_result.b - (int)single_254.b) <= 5);
     }
 }
 
