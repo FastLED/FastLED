@@ -12,6 +12,8 @@ FastLED 3.10.1
       * `-DFASTLED_HSV_CONVERSION_RAINBOW`
       * `-DFASTLED_HSV_CONVERSION_SPECTRUM`
       * `-FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
+  * CRGB::toVideoRGB_8bit()
+    * This is an alternative to gamma correction that preserves the hue but boosts the saturation, use it with WS2812 and other RGB8 controllers.
 
 
 FastLED 3.10.0
