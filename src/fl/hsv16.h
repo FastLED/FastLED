@@ -2,6 +2,7 @@
 
 #include "fl/stdint.h"
 #include "crgb.h"
+#include "fl/ease.h"
 
 namespace fl {
 
@@ -20,10 +21,10 @@ struct HSV16 {
     operator CRGB() const { return ToRGB(); }
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
-    // Do you want a function to simulate gamma correction but doesn't
     // decimate the color? Use colorBoost() to boost the saturation.
     // This works great for WS2812 and any other RGB8 LEDs.
-    CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
+    // Default saturation function is similar to gamma correction.
+    CRGB colorBoost(EaseType saturation_function = EASE_IN_QUAD, EaseType luminance_function = EASE_NONE) const;
 };
 
 }  // namespace fl

@@ -11,8 +11,8 @@ UITitle title("ColorBoost");
 UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component), for best results use the legacy gfx mode using ?gfx=0 at the url up top.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
-UICheckbox boostSaturation("Boost Saturation", true);
-UICheckbox boostContrast("Boost Contrast", false);
+UINumberField saturationFunction("Saturation Function", 1, 0, 3);
+UINumberField luminanceFunction("Luminance Function", 0, 0, 3);
 
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
@@ -49,6 +49,17 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 }
 
+EaseType getEaseType(int value) {
+    switch (value) {
+        case 0: return EASE_NONE;
+        case 1: return EASE_IN_QUAD;
+        case 2: return EASE_IN_OUT_QUAD;
+        case 3: return EASE_IN_OUT_CUBIC;
+    }
+    FL_ASSERT(false, "Invalid ease type");
+    return EASE_NONE;
+}
+
 // Animated rainbow wave effect optimized for video display
 void rainbowWave() {
     static uint16_t time = 0;
@@ -82,7 +93,9 @@ void rainbowWave() {
                 leds[xyMap(x, y)] = original_color;
             } else if (y > NUM_STRIPS / 3) {
                 // Middle half - transformed colors
-                leds[xyMap(x, y)] = original_color.colorBoost(boostSaturation, boostContrast);
+                EaseType sat_ease = getEaseType(saturationFunction.value());
+                EaseType lum_ease = getEaseType(luminanceFunction.value());
+                leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
             } else {
                 // Lower half - transformed colors
                 float r = original_color.r / 255.f;

@@ -86,14 +86,14 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
     fl::upscale(src, dst, w, h, dstXY);
 }
 
-CRGB CRGB::colorBoost(bool boost_saturation, bool boost_contrast) const {
+CRGB CRGB::colorBoost(fl::EaseType saturation_function, fl::EaseType luminance_function) const {
     fl::HSV16 hsv(*this);
-    return hsv.colorBoost(boost_saturation, boost_contrast);
+    return hsv.colorBoost(saturation_function, luminance_function);
 }
 
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, bool boost_saturation, bool boost_contrast) {
+void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, fl::EaseType saturation_function, fl::EaseType luminance_function) {
     for (size_t i = 0; i < count; i++) {
-        dst[i] = src[i].colorBoost(boost_saturation, boost_contrast);
+        dst[i] = src[i].colorBoost(saturation_function, luminance_function);
     }
 }
 

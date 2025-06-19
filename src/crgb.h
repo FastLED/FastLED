@@ -12,6 +12,7 @@
 #include "fl/force_inline.h"
 #include "fl/template_magic.h"
 #include "hsv2rgb.h"
+#include "fl/ease.h"
 
 
 
@@ -124,8 +125,8 @@ struct CRGB {
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     // Note that when both boost_saturation and boost_contrast are true the resulting
     // pixel will be nearly the same as if you had used gamma correction pow = 2.0.
-    CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
-    static void colorBoost(const CRGB* src, CRGB* dst, size_t count, bool boost_saturation = true, bool boost_contrast = false);
+    CRGB colorBoost(fl::EaseType saturation_function = fl::EASE_NONE, fl::EaseType luminance_function = fl::EASE_NONE) const;
+    static void colorBoost(const CRGB* src, CRGB* dst, size_t count, fl::EaseType saturation_function = fl::EASE_NONE, fl::EaseType luminance_function = fl::EASE_NONE);
 
     // Want to do advanced color manipulation in HSV and write back to CRGB?
     // You want to use HSV16, which is much better at preservering the color

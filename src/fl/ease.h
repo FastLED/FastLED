@@ -51,6 +51,7 @@ inline uint16_t ease16(EaseType type, uint16_t i) {
         case EASE_IN_QUAD: return easeInQuad16(i);
         case EASE_IN_OUT_QUAD: return easeInOutQuad16(i);
         case EASE_IN_OUT_CUBIC: return easeInOutCubic16(i);
+        default: return i;
     }
 }
 

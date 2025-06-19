@@ -178,23 +178,17 @@ CRGB HSV16::ToRGB() const {
     return HSV16toRGB(*this);
 }
 
-static uint16_t gamma_correct_16(uint16_t x) {
-    uint32_t x32 = x;
-    x32 = x32 * x32;
-    return map32_to_16(x32);
-}
-
-CRGB HSV16::colorBoost(bool boost_saturation, bool boost_contrast) const {
+CRGB HSV16::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
     HSV16 hsv = *this;
     
-    if (boost_saturation) {
+    if (saturation_function != EASE_NONE) {
         uint16_t inv_sat = 65535 - hsv.s;
-        inv_sat = gamma_correct_16(inv_sat);
+        inv_sat = ease16(saturation_function, inv_sat);
         hsv.s = (65535 - inv_sat);
     }
     
-    if (boost_contrast) {
-        hsv.v = fl::easeInOutQuad16(hsv.v);
+    if (luminance_function != EASE_NONE) {
+        hsv.v = ease16(luminance_function, hsv.v);
     }
     
     return hsv.ToRGB();
