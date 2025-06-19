@@ -7,6 +7,10 @@
 
 using namespace fl;
 
+UITitle title("Rgb8Video");
+
+UISlider satSlider("Saturation", 60, 0, 255, 1);
+
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
 // Uses CRGB::toVideoRGB_8bit() to boost saturation for better LED display.
@@ -18,14 +22,15 @@ using namespace fl;
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 #define NUM_LEDS_PER_STRIP 100
-#define NUM_STRIPS 2
-#define TOTAL_LEDS (NUM_LEDS_PER_STRIP * NUM_STRIPS) // Two strips combined
+#define NUM_STRIPS 100 // Changed from 2 to 100 for 100x100 matrix
+#define TOTAL_LEDS (NUM_LEDS_PER_STRIP * NUM_STRIPS) // 100x100 = 10,000 LEDs
 #define BRIGHTNESS 255
 
 // Combined LED array for both strips
 CRGB leds[TOTAL_LEDS];
 
 // fl::ScreenMap screenmap(lut.data(), lut.size());
+// fl::ScreenMap screenmap(TOTAL_LEDS);
 fl::XYMap xyMap =
     fl::XYMap::constructRectangularGrid(NUM_LEDS_PER_STRIP, NUM_STRIPS);
 
@@ -33,7 +38,6 @@ void setup() {
 
     // tell FastLED about the LED strip configuration
     // First strip (original RGB) - indices 0-199
-    // fl::ScreenMap screenmap(TOTAL_LEDS);
 
     FastLED.addLeds<LED_TYPE, DATA_PIN_2, COLOR_ORDER>(leds, TOTAL_LEDS)
         .setCorrection(TypicalLEDStrip)
@@ -50,30 +54,34 @@ void rainbowWave() {
     time += 2;
     hueOffset += 1;
 
+    // Iterate through the entire 100x100 matrix
+    for (uint16_t y = 0; y < NUM_STRIPS; y++) {
+        for (uint16_t x = 0; x < NUM_LEDS_PER_STRIP; x++) {
+            // Create a wave pattern using sine function based on position and
+            // time
+            uint8_t wave = sin8(time + (x * 8));
 
+            // Calculate hue based on position and time for rainbow effect
+            uint8_t hue = hueOffset + (x * 255 / NUM_LEDS_PER_STRIP);
 
-    for (uint16_t i = 0; i < NUM_LEDS_PER_STRIP; i++) {
-        // Create a wave pattern using sine function
-        uint8_t wave = sin8(time + (i * 8));
+            // Use wave for both saturation and brightness variation
+            // uint8_t sat = 255 - (wave / 4); // Subtle saturation variation
+            uint8_t bri = 128 + (wave / 2); // Brightness wave from 128 to 255
 
-        // Calculate hue based on position and time for rainbow effect
-        uint8_t hue = hueOffset + (i * 255 / NUM_LEDS_PER_STRIP);
+            // Create the original color using HSV
+            CRGB original_color = CHSV(hue, satSlider.value(), bri);
 
-        // Use wave for both saturation and brightness variation
-        uint8_t sat = 255 - (wave / 4); // Subtle saturation variation
-        uint8_t bri = 128 + (wave / 2); // Brightness wave from 128 to 255
-
-        // Create the original color using HSV
-        CRGB original_color = CHSV(hue, sat, bri);
-
-        // Store original color in first strip
-        // leds_original[i] = original_color;
-
-        // Convert to video RGB for better display on WS2812 LEDs and store
-        // in second strip
-        // leds[i] = original_color.toVideoRGB_8bit();
-        leds[xyMap(i, 0)] = original_color;
-        leds[xyMap(i, 1)] = original_color.toVideoRGB_8bit();
+            // Upper half (rows 0-49): original colors
+            // Lower half (rows 50-99): transformed colors using
+            // toVideoRGB_8bit()
+            if (y > NUM_STRIPS / 2) {
+                // Upper half - original colors
+                leds[xyMap(x, y)] = original_color;
+            } else {
+                // Lower half - transformed colors
+                leds[xyMap(x, y)] = original_color.toVideoRGB_8bit();
+            }
+        }
     }
 }
 
