@@ -13,10 +13,6 @@ static const int low = 2;      // For high-precision comparisons (red, exact mat
 static const int medium = 5;   // For medium-precision comparisons (grayscale)
 static const int high = 10;    // For low-precision comparisons (green, blue, white)
 
-static int diff(uint8_t a, uint8_t b) {
-    return ABS(a - b);
-}
-
 TEST_CASE("RGB to HSV16 to RGB") {
     
     SUBCASE("Primary Colors - Good Conversion") {
@@ -26,25 +22,25 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB red(255, 0, 0);
         HSV16 hsv_red(red);
         CRGB red_result = hsv_red.ToRGB();
-        CHECK(diff(red_result.r, red.r) <= low);
-        CHECK(diff(red_result.g, red.g) <= low);
-        CHECK(diff(red_result.b, red.b) <= low);
+        CHECK_CLOSE(red_result.r, red.r, low);
+        CHECK_CLOSE(red_result.g, red.g, low);
+        CHECK_CLOSE(red_result.b, red.b, low);
 
         // Pure green - small acceptable error
         CRGB green(0, 255, 0);
         HSV16 hsv_green(green);
         CRGB green_result = hsv_green.ToRGB();
-        CHECK(diff(green_result.r, green.r) <= high);
-        CHECK(diff(green_result.g, green.g) <= high);
-        CHECK(diff(green_result.b, green.b) <= high);
+        CHECK_CLOSE(green_result.r, green.r, high);
+        CHECK_CLOSE(green_result.g, green.g, high);
+        CHECK_CLOSE(green_result.b, green.b, high);
 
         // Pure blue - small acceptable error  
         CRGB blue(0, 0, 255);
         HSV16 hsv_blue(blue);
         CRGB blue_result = hsv_blue.ToRGB();
-        CHECK(diff(blue_result.r, blue.r) <= high);
-        CHECK(diff(blue_result.g, blue.g) <= high);
-        CHECK(diff(blue_result.b, blue.b) <= high);
+        CHECK_CLOSE(blue_result.r, blue.r, high);
+        CHECK_CLOSE(blue_result.g, blue.g, high);
+        CHECK_CLOSE(blue_result.b, blue.b, high);
 
         // Test black - perfect conversion
         CRGB black(0, 0, 0);
@@ -60,31 +56,31 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB white(255, 255, 255);
         HSV16 hsv_white(white);
         CRGB white_result = hsv_white.ToRGB();
-        CHECK(diff(white_result.r, white.r) <= high);
-        CHECK(diff(white_result.g, white.g) <= high);
-        CHECK(diff(white_result.b, white.b) <= high);
+        CHECK_CLOSE(white_result.r, white.r, high);
+        CHECK_CLOSE(white_result.g, white.g, high);
+        CHECK_CLOSE(white_result.b, white.b, high);
 
         // Test various shades of gray - these should convert well
         CRGB gray50(50, 50, 50);
         HSV16 hsv_gray50(gray50);
         CRGB gray50_result = hsv_gray50.ToRGB();
-        CHECK(diff(gray50_result.r, gray50.r) <= medium);
-        CHECK(diff(gray50_result.g, gray50.g) <= medium);
-        CHECK(diff(gray50_result.b, gray50.b) <= medium);
+        CHECK_CLOSE(gray50_result.r, gray50.r, medium);
+        CHECK_CLOSE(gray50_result.g, gray50.g, medium);
+        CHECK_CLOSE(gray50_result.b, gray50.b, medium);
 
         CRGB gray128(128, 128, 128);
         HSV16 hsv_gray128(gray128);
         CRGB gray128_result = hsv_gray128.ToRGB();
-        CHECK(diff(gray128_result.r, gray128.r) <= medium);
-        CHECK(diff(gray128_result.g, gray128.g) <= medium);
-        CHECK(diff(gray128_result.b, gray128.b) <= medium);
+        CHECK_CLOSE(gray128_result.r, gray128.r, medium);
+        CHECK_CLOSE(gray128_result.g, gray128.g, medium);
+        CHECK_CLOSE(gray128_result.b, gray128.b, medium);
 
         CRGB gray200(200, 200, 200);
         HSV16 hsv_gray200(gray200);
         CRGB gray200_result = hsv_gray200.ToRGB();
-        CHECK(diff(gray200_result.r, gray200.r) <= medium);
-        CHECK(diff(gray200_result.g, gray200.g) <= medium);
-        CHECK(diff(gray200_result.b, gray200.b) <= medium);
+        CHECK_CLOSE(gray200_result.r, gray200.r, medium);
+        CHECK_CLOSE(gray200_result.g, gray200.g, medium);
+        CHECK_CLOSE(gray200_result.b, gray200.b, medium);
     }
 
     SUBCASE("HSV16 Constructor Values") {
@@ -110,8 +106,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
         // Test zero saturation (should produce grayscale)
         HSV16 hsv_gray_direct(32768, 0, 32768);  // Any hue, no saturation, half value
         CRGB gray_direct_result = hsv_gray_direct.ToRGB();
-        CHECK(diff(gray_direct_result.r, gray_direct_result.g) <= low);
-        CHECK(diff(gray_direct_result.g, gray_direct_result.b) <= low);
+        CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g, low);
+        CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b, low);
         CHECK(gray_direct_result.r >= 120);  // Should be around 128
         CHECK(gray_direct_result.r <= 135);
     }
