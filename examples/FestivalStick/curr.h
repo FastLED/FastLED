@@ -61,6 +61,9 @@ UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.00
 UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
+UICheckbox useNoise("Use Noise Pattern", false);
+UISlider noiseScale("Noise Scale", 20.0f, 1.0f, 100.0f, 1.0f);
+UISlider noiseTimeScale("Noise Time Scale", 100.0f, 10.0f, 1000.0f, 10.0f);
 
 // Option 1: Runtime Corkscrew (flexible, configurable at runtime)
 Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS, 0);
@@ -140,6 +143,35 @@ float get_position(uint32_t now) {
     }
 }
 
+void drawNoise(uint32_t now) {
+    // Generate noise pattern across the entire frame buffer
+    int width = frameBuffer.width();
+    int height = frameBuffer.height();
+    
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            // Scale coordinates for noise sampling
+            float nx = x * noiseScale.value();
+            float ny = y * noiseScale.value();
+            float nz = now / noiseTimeScale.value();
+            
+            // Generate 3D noise value
+            uint16_t noise_value = inoise16(nx, ny, nz);
+            
+            // Convert noise to brightness (0-255)
+            uint8_t brightness = map(noise_value, 0, 65535, 64, 255);
+            
+            // Create a hue that varies with position and time
+            uint8_t hue = (x * 16 + y * 8 + now / 50) % 256;
+            
+            // Create saturation that varies with noise
+            uint8_t sat = map(noise_value, 0, 65535, 180, 255);
+            
+            // Set the pixel color
+            frameBuffer.at(x, y) = CHSV(hue, sat, brightness);
+        }
+    }
+}
 
 void draw(float pos) {
     if (allWhite) {
@@ -187,6 +219,12 @@ void loop() {
     float pos = combinedPosition * (corkscrew.size() - 1);
 
     FL_WARN("pos: " << pos);
-    draw(pos);
+    
+    if (useNoise.value()) {
+        drawNoise(now);
+    } else {
+        draw(pos);
+    }
+    
     FastLED.show();
 }
