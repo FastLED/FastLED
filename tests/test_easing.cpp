@@ -1,4 +1,4 @@
-#include "FastLED.h"
+#include "fl/ease.h"
 #include "lib8tion/intmap.h"
 #include "test.h"
 #include <cmath>
@@ -9,19 +9,19 @@ FASTLED_USING_NAMESPACE
 #if 1
 
 TEST_CASE("8-bit easing functions") {
-    SUBCASE("ease8InOutQuad") {
+    SUBCASE("easeInOutQuad8") {
         SUBCASE("boundary values") {
-            CHECK_CLOSE(ease8InOutQuad(0), 0, 1);
-            CHECK_CLOSE(ease8InOutQuad(255), 255, 1);
-            CHECK_CLOSE(ease8InOutQuad(128), 128,
+            CHECK_CLOSE(easeInOutQuad8(0), 0, 1);
+            CHECK_CLOSE(easeInOutQuad8(255), 255, 1);
+            CHECK_CLOSE(easeInOutQuad8(128), 128,
                         1); // midpoint should be unchanged
         }
 
         SUBCASE("symmetry") {
             // ease-in-out should be symmetric around midpoint
             for (uint8_t i = 0; i < 128; ++i) {
-                uint8_t forward = ease8InOutQuad(i);
-                uint8_t backward = ease8InOutQuad(255 - i);
+                uint8_t forward = easeInOutQuad8(i);
+                uint8_t backward = easeInOutQuad8(255 - i);
                 CHECK_CLOSE(forward, 255 - backward, 1);
             }
         }
@@ -30,7 +30,7 @@ TEST_CASE("8-bit easing functions") {
             // function should be non-decreasing
             uint8_t prev = 0;
             for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = ease8InOutQuad(i);
+                uint8_t current = easeInOutQuad8(i);
                 CHECK_GE(current, prev);
                 prev = current;
             }
@@ -38,24 +38,24 @@ TEST_CASE("8-bit easing functions") {
 
         SUBCASE("first quarter should be slower than linear") {
             // ease-in portion should start slower than linear
-            uint8_t quarter = ease8InOutQuad(64); // 64 = 255/4
+            uint8_t quarter = easeInOutQuad8(64); // 64 = 255/4
             CHECK_LT(quarter, 64); // should be less than linear progression
         }
     }
 
-    SUBCASE("ease8InOutCubic") {
+    SUBCASE("easeInOutCubic8") {
         SUBCASE("boundary values") {
-            CHECK_CLOSE(ease8InOutCubic(0), 0, 1);
-            CHECK_CLOSE(ease8InOutCubic(255), 255, 1);
-            CHECK_CLOSE(ease8InOutCubic(128), 128, 1);
+            CHECK_CLOSE(easeInOutCubic8(0), 0, 1);
+            CHECK_CLOSE(easeInOutCubic8(255), 255, 1);
+            CHECK_CLOSE(easeInOutCubic8(128), 128, 1);
         }
 
 #if 1
         SUBCASE("symmetry") {
             const int kTolerance = 2; // This is too high, come back to this.
             for (uint8_t i = 0; i < 128; ++i) {
-                uint8_t forward = ease8InOutCubic(i);
-                uint8_t backward = ease8InOutCubic(255 - i);
+                uint8_t forward = easeInOutCubic8(i);
+                uint8_t backward = easeInOutCubic8(255 - i);
                 CHECK_CLOSE(forward, 255 - backward, kTolerance);
             }
         }
@@ -83,17 +83,17 @@ TEST_CASE("8-bit easing functions") {
 #endif
     }
 
-    SUBCASE("ease8InOutApprox") {
+    SUBCASE("easeInOutApprox8") {
         SUBCASE("boundary values") {
-            CHECK_CLOSE(ease8InOutApprox(0), 0, 1);
-            CHECK_CLOSE(ease8InOutApprox(255), 255, 1);
-            CHECK_CLOSE(ease8InOutApprox(128), 128, 1);
+            CHECK_CLOSE(easeInOutApprox8(0), 0, 1);
+            CHECK_CLOSE(easeInOutApprox8(255), 255, 1);
+            CHECK_CLOSE(easeInOutApprox8(128), 128, 1);
         }
 
         SUBCASE("symmetry") {
             for (uint8_t i = 0; i < 128; ++i) {
-                uint8_t forward = ease8InOutApprox(i);
-                uint8_t backward = ease8InOutApprox(255 - i);
+                uint8_t forward = easeInOutApprox8(i);
+                uint8_t backward = easeInOutApprox8(255 - i);
                 CHECK_CLOSE(forward, 255 - backward, 1);
             }
         }
@@ -101,7 +101,7 @@ TEST_CASE("8-bit easing functions") {
         SUBCASE("monotonicity") {
             uint8_t prev = 0;
             for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = ease8InOutApprox(i);
+                uint8_t current = easeInOutApprox8(i);
                 CHECK_GE(current, prev);
                 prev = current;
             }
@@ -110,8 +110,8 @@ TEST_CASE("8-bit easing functions") {
         SUBCASE("approximation accuracy") {
             // should be within a few percent of cubic
             for (uint16_t i = 0; i <= 255; i += 8) {
-                uint8_t approx = ease8InOutApprox(i);
-                uint8_t cubic = ease8InOutCubic(i);
+                uint8_t approx = easeInOutApprox8(i);
+                uint8_t cubic = easeInOutCubic8(i);
                 int16_t diff = std::abs((int16_t)approx - (int16_t)cubic);
                 CHECK_LE(diff, 8); // should be within ~3% (8/255)
             }
@@ -147,36 +147,36 @@ TEST_CASE("easing function special values") {
 
 }
 
-TEST_CASE("ease16InOutQuad") {
+TEST_CASE("easeInOutQuad16") {
     SUBCASE("boundary values") {
-        CHECK_EQ(ease16InOutQuad(0), 0);
-        CHECK_EQ(ease16InOutQuad(65535), 65535);
-        CHECK_EQ(ease16InOutQuad(32768), 32769); // midpoint
+        CHECK_EQ(easeInOutQuad16(0), 0);
+        CHECK_EQ(easeInOutQuad16(65535), 65535);
+        CHECK_EQ(easeInOutQuad16(32768), 32769); // midpoint
         
         // Test values very close to boundaries
-        CHECK_EQ(ease16InOutQuad(1), 0);
-        CHECK_EQ(ease16InOutQuad(65534), 65535);
+        CHECK_EQ(easeInOutQuad16(1), 0);
+        CHECK_EQ(easeInOutQuad16(65534), 65535);
         
         // Test edge cases around midpoint
-        CHECK_EQ(ease16InOutQuad(32767), 32766);
-        CHECK_EQ(ease16InOutQuad(32769), 32771);
+        CHECK_EQ(easeInOutQuad16(32767), 32766);
+        CHECK_EQ(easeInOutQuad16(32769), 32771);
     }
 
     SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic easing
-        CHECK_EQ(ease16InOutQuad(16384), 8192);   // 25% input -> 12.5% output
-        CHECK_EQ(ease16InOutQuad(32768), 32769);  // 50% input -> 50% output (midpoint)
-        CHECK_EQ(ease16InOutQuad(49152), 57345);  // 75% input -> actual measured output
+        CHECK_EQ(easeInOutQuad16(16384), 8192);   // 25% input -> 12.5% output
+        CHECK_EQ(easeInOutQuad16(32768), 32769);  // 50% input -> 50% output (midpoint)
+        CHECK_EQ(easeInOutQuad16(49152), 57345);  // 75% input -> actual measured output
         
         // Additional quartile boundary checks
-        CHECK_LT(ease16InOutQuad(16384), 16384);  // ease-in should be slower than linear
-        CHECK_GT(ease16InOutQuad(49152), 49152);  // ease-out should be faster than linear
+        CHECK_LT(easeInOutQuad16(16384), 16384);  // ease-in should be slower than linear
+        CHECK_GT(easeInOutQuad16(49152), 49152);  // ease-out should be faster than linear
     }
 
     SUBCASE("symmetry") {
         for (uint16_t i = 0; i < 32768; i += 256) {
-            uint16_t forward = ease16InOutQuad(i);
-            uint16_t backward = ease16InOutQuad(65535 - i);
+            uint16_t forward = easeInOutQuad16(i);
+            uint16_t backward = easeInOutQuad16(65535 - i);
             CHECK_EQ(forward, 65535 - backward);
         }
     }
@@ -184,7 +184,7 @@ TEST_CASE("ease16InOutQuad") {
     SUBCASE("monotonicity") {
         uint16_t prev = 0;
         for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = ease16InOutQuad(i);
+            uint16_t current = easeInOutQuad16(i);
             CHECK_GE(current, prev);
             prev = current;
         }
@@ -197,8 +197,8 @@ TEST_CASE("ease16InOutQuad") {
             uint8_t input8 = i;
             uint16_t input16 = map8_to_16(input8);
 
-            uint8_t result8 = ease8InOutQuad(input8);
-            uint16_t result16 = ease16InOutQuad(input16);
+            uint8_t result8 = easeInOutQuad8(input8);
+            uint16_t result16 = easeInOutQuad16(input16);
             uint8_t scaled_result16 = map16_to_8(result16);
 
             // Should be within 1 due to precision differences
@@ -211,19 +211,19 @@ TEST_CASE("ease16InOutQuad") {
 
 
 
-TEST_CASE("ease16InOutCubic") {
+TEST_CASE("easeInOutCubic16") {
 
 
     SUBCASE("boundary values") {
-        CHECK_EQ(ease16InOutCubic(0), 0);
-        CHECK_EQ(ease16InOutCubic(65535), 65535);
-        CHECK_EQ(ease16InOutCubic(32768), 32768);
+        CHECK_EQ(easeInOutCubic16(0), 0);
+        CHECK_EQ(easeInOutCubic16(65535), 65535);
+        CHECK_EQ(easeInOutCubic16(32768), 32768);
     }
 
     SUBCASE("quartile values") {
-        CHECK_EQ(ease16InOutCubic(16384), 10240);
-        CHECK_EQ(ease16InOutCubic(32768), 32768);
-        CHECK_EQ(ease16InOutCubic(49152), 55296);
+        CHECK_EQ(easeInOutCubic16(16384), 10240);
+        CHECK_EQ(easeInOutCubic16(32768), 32768);
+        CHECK_EQ(easeInOutCubic16(49152), 55296);
     }
 
 
@@ -231,8 +231,8 @@ TEST_CASE("ease16InOutCubic") {
     SUBCASE("symmetry") {
         const int kTolerance = 2;  // Note that this is too high.
         for (uint16_t i = 0; i < 32768; i += 256) {
-            uint16_t forward = ease16InOutCubic(i);
-            uint16_t backward = ease16InOutCubic(65535 - i);
+            uint16_t forward = easeInOutCubic16(i);
+            uint16_t backward = easeInOutCubic16(65535 - i);
             // CHECK_EQ(forward, 65535 - backward);
             CHECK_CLOSE(forward, 65535 - backward, kTolerance);
         }
@@ -243,7 +243,7 @@ TEST_CASE("ease16InOutCubic") {
     SUBCASE("monotonicity") {
         uint16_t prev = 0;
         for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = ease16InOutCubic(i);
+            uint16_t current = easeInOutCubic16(i);
             CHECK_GE(current, prev);
             prev = current;
         }
