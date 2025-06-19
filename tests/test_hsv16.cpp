@@ -5,16 +5,15 @@
 #include "fl/hsv16.h"
 #include "fl/math.h"
 
-
 using namespace fl;
 
 TEST_CASE("RGB to HSV16 to RGB") {
-    
+
     SUBCASE("Primary Colors - Good Conversion") {
         // Test colors that convert well with HSV16
-        
+
         // Pure red - perfect conversion - expect exact match
-        const int red_tolerance = 0;  // Reduced from 1 to 0 - try for perfect
+        const int red_tolerance = 0; // Reduced from 1 to 0 - try for perfect
         CRGB red(255, 0, 0);
         HSV16 hsv_red(red);
         CRGB red_result = hsv_red.ToRGB();
@@ -23,7 +22,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(red_result.b, red.b, red_tolerance);
 
         // Pure green - try for even better accuracy
-        const int green_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
+        const int green_tolerance = 0; // Reduced from 2 to 0 - try for perfect!
         CRGB green(0, 255, 0);
         HSV16 hsv_green(green);
         CRGB green_result = hsv_green.ToRGB();
@@ -32,7 +31,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(green_result.b, green.b, green_tolerance);
 
         // Pure blue - try for even better accuracy
-        const int blue_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
+        const int blue_tolerance = 0; // Reduced from 2 to 0 - try for perfect!
         CRGB blue(0, 0, 255);
         HSV16 hsv_blue(blue);
         CRGB blue_result = hsv_blue.ToRGB();
@@ -51,7 +50,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
 
     SUBCASE("White and Grayscale - Good Conversion") {
         // Test white - try for perfect accuracy
-        const int white_tolerance = 0;  // Reduced from 1 to 0 - try for perfect!
+        const int white_tolerance = 0; // Reduced from 1 to 0 - try for perfect!
         CRGB white(255, 255, 255);
         HSV16 hsv_white(white);
         CRGB white_result = hsv_white.ToRGB();
@@ -60,99 +59,131 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(white_result.b, white.b, white_tolerance);
 
         // Test various shades of gray - some require tolerance 1
-        const int gray_tolerance = 1;  // Gray128 and Gray200 are off by exactly 1
-        
+        const int gray_tolerance =
+            1; // Gray128 and Gray200 are off by exactly 1
+
         CRGB gray50(50, 50, 50);
         HSV16 hsv_gray50(gray50);
         CRGB gray50_result = hsv_gray50.ToRGB();
-        CHECK_CLOSE(gray50_result.r, gray50.r, 0);  // Gray50 is perfect - use tolerance 0
+        CHECK_CLOSE(gray50_result.r, gray50.r,
+                    0); // Gray50 is perfect - use tolerance 0
         CHECK_CLOSE(gray50_result.g, gray50.g, 0);
         CHECK_CLOSE(gray50_result.b, gray50.b, 0);
 
         CRGB gray128(128, 128, 128);
         HSV16 hsv_gray128(gray128);
         CRGB gray128_result = hsv_gray128.ToRGB();
-        CHECK_CLOSE(gray128_result.r, gray128.r, gray_tolerance);  // Gray128 needs tolerance 1
+        CHECK_CLOSE(gray128_result.r, gray128.r,
+                    gray_tolerance); // Gray128 needs tolerance 1
         CHECK_CLOSE(gray128_result.g, gray128.g, gray_tolerance);
         CHECK_CLOSE(gray128_result.b, gray128.b, gray_tolerance);
 
         CRGB gray200(200, 200, 200);
         HSV16 hsv_gray200(gray200);
         CRGB gray200_result = hsv_gray200.ToRGB();
-        CHECK_CLOSE(gray200_result.r, gray200.r, gray_tolerance);  // Gray200 needs tolerance 1
+        CHECK_CLOSE(gray200_result.r, gray200.r,
+                    gray_tolerance); // Gray200 needs tolerance 1
         CHECK_CLOSE(gray200_result.g, gray200.g, gray_tolerance);
         CHECK_CLOSE(gray200_result.b, gray200.b, gray_tolerance);
     }
 
     SUBCASE("HSV16 Constructor Values") {
         // Test direct HSV16 construction with known values
-        const int direct_construction_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
-        
-        HSV16 hsv_red_direct(0, 65535, 65535);  // Red: H=0, S=max, V=max
+        const int direct_construction_tolerance =
+            0; // Reduced from 2 to 0 - try for perfect!
+
+        HSV16 hsv_red_direct(0, 65535, 65535); // Red: H=0, S=max, V=max
         CRGB red_direct_result = hsv_red_direct.ToRGB();
-        CHECK(red_direct_result.r >= 255 - direct_construction_tolerance);  // Should be close to 255
-        CHECK(red_direct_result.g <= direct_construction_tolerance);        // Should be close to 0
-        CHECK(red_direct_result.b <= direct_construction_tolerance);        // Should be close to 0
+        CHECK(red_direct_result.r >=
+              255 - direct_construction_tolerance); // Should be close to 255
+        CHECK(red_direct_result.g <=
+              direct_construction_tolerance); // Should be close to 0
+        CHECK(red_direct_result.b <=
+              direct_construction_tolerance); // Should be close to 0
 
-        HSV16 hsv_green_direct(21845, 65535, 65535);  // Green: H=1/3*65535, S=max, V=max
+        HSV16 hsv_green_direct(21845, 65535,
+                               65535); // Green: H=1/3*65535, S=max, V=max
         CRGB green_direct_result = hsv_green_direct.ToRGB();
-        CHECK(green_direct_result.r <= direct_construction_tolerance);      // Should be close to 0
-        CHECK(green_direct_result.g >= 255 - direct_construction_tolerance); // Should be close to 255
-        CHECK(green_direct_result.b <= direct_construction_tolerance);      // Should be close to 0
+        CHECK(green_direct_result.r <=
+              direct_construction_tolerance); // Should be close to 0
+        CHECK(green_direct_result.g >=
+              255 - direct_construction_tolerance); // Should be close to 255
+        CHECK(green_direct_result.b <=
+              direct_construction_tolerance); // Should be close to 0
 
-        HSV16 hsv_blue_direct(43690, 65535, 65535);  // Blue: H=2/3*65535, S=max, V=max  
+        HSV16 hsv_blue_direct(43690, 65535,
+                              65535); // Blue: H=2/3*65535, S=max, V=max
         CRGB blue_direct_result = hsv_blue_direct.ToRGB();
-        CHECK(blue_direct_result.r <= direct_construction_tolerance);       // Should be close to 0
-        CHECK(blue_direct_result.g <= direct_construction_tolerance);       // Should be close to 0
-        CHECK(blue_direct_result.b >= 255 - direct_construction_tolerance); // Should be close to 255
+        CHECK(blue_direct_result.r <=
+              direct_construction_tolerance); // Should be close to 0
+        CHECK(blue_direct_result.g <=
+              direct_construction_tolerance); // Should be close to 0
+        CHECK(blue_direct_result.b >=
+              255 - direct_construction_tolerance); // Should be close to 255
 
         // Test zero saturation (should produce grayscale)
-        const int grayscale_direct_tolerance = 0;  // Keep at 0 - already perfect
-        HSV16 hsv_gray_direct(32768, 0, 32768);  // Any hue, no saturation, half value
+        const int grayscale_direct_tolerance = 0; // Keep at 0 - already perfect
+        HSV16 hsv_gray_direct(32768, 0,
+                              32768); // Any hue, no saturation, half value
         CRGB gray_direct_result = hsv_gray_direct.ToRGB();
-        CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g, grayscale_direct_tolerance);
-        CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b, grayscale_direct_tolerance);
-        CHECK(gray_direct_result.r >= 128 - 1);  // Reduced from 2 to 1 - even tighter
+        CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g,
+                    grayscale_direct_tolerance);
+        CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b,
+                    grayscale_direct_tolerance);
+        CHECK(gray_direct_result.r >=
+              128 - 1); // Reduced from 2 to 1 - even tighter
         CHECK(gray_direct_result.r <= 128 + 1);
     }
 
     SUBCASE("Secondary Colors - Good Conversion") {
-        // These secondary colors should now convert accurately with the fixed HSV16 implementation
-        
+        // These secondary colors should now convert accurately with the fixed
+        // HSV16 implementation
+
         // Yellow should preserve both red and green components
-        const int yellow_tolerance = 0;  // Reduced from 1 to 0 - perfect conversion!
+        const int yellow_tolerance =
+            0; // Reduced from 1 to 0 - perfect conversion!
         CRGB yellow(255, 255, 0);
         HSV16 hsv_yellow(yellow);
         CRGB yellow_result = hsv_yellow.ToRGB();
-        CHECK_CLOSE(yellow_result.r, yellow.r, yellow_tolerance);   // Red should be preserved
-        CHECK_CLOSE(yellow_result.g, yellow.g, yellow_tolerance);   // Green should be preserved
-        CHECK_CLOSE(yellow_result.b, yellow.b, yellow_tolerance);   // Blue should stay 0
+        CHECK_CLOSE(yellow_result.r, yellow.r,
+                    yellow_tolerance); // Red should be preserved
+        CHECK_CLOSE(yellow_result.g, yellow.g,
+                    yellow_tolerance); // Green should be preserved
+        CHECK_CLOSE(yellow_result.b, yellow.b,
+                    yellow_tolerance); // Blue should stay 0
 
         // Cyan should preserve both green and blue components
-        const int cyan_tolerance = 0;   // Reduced from 1 to 0 - perfect conversion!
+        const int cyan_tolerance =
+            0; // Reduced from 1 to 0 - perfect conversion!
         CRGB cyan(0, 255, 255);
         HSV16 hsv_cyan(cyan);
         CRGB cyan_result = hsv_cyan.ToRGB();
-        CHECK_CLOSE(cyan_result.r, cyan.r, cyan_tolerance);         // Red should stay 0
-        CHECK_CLOSE(cyan_result.g, cyan.g, cyan_tolerance);         // Green should be preserved
-        CHECK_CLOSE(cyan_result.b, cyan.b, cyan_tolerance);         // Blue should be preserved
+        CHECK_CLOSE(cyan_result.r, cyan.r, cyan_tolerance); // Red should stay 0
+        CHECK_CLOSE(cyan_result.g, cyan.g,
+                    cyan_tolerance); // Green should be preserved
+        CHECK_CLOSE(cyan_result.b, cyan.b,
+                    cyan_tolerance); // Blue should be preserved
 
         // Magenta should preserve both red and blue components
-        const int magenta_tolerance = 0; // Reduced from 1 to 0 - perfect conversion!
+        const int magenta_tolerance =
+            0; // Reduced from 1 to 0 - perfect conversion!
         CRGB magenta(255, 0, 255);
         HSV16 hsv_magenta(magenta);
         CRGB magenta_result = hsv_magenta.ToRGB();
-        CHECK_CLOSE(magenta_result.r, magenta.r, magenta_tolerance); // Red should be preserved
-        CHECK_CLOSE(magenta_result.g, magenta.g, magenta_tolerance); // Green should stay 0
-        CHECK_CLOSE(magenta_result.b, magenta.b, magenta_tolerance); // Blue should be preserved
+        CHECK_CLOSE(magenta_result.r, magenta.r,
+                    magenta_tolerance); // Red should be preserved
+        CHECK_CLOSE(magenta_result.g, magenta.g,
+                    magenta_tolerance); // Green should stay 0
+        CHECK_CLOSE(magenta_result.b, magenta.b,
+                    magenta_tolerance); // Blue should be preserved
     }
 
     SUBCASE("Low-Value Problematic Colors") {
-        // Test very dark colors that are known to be problematic for HSV conversion
-        // These colors often reveal quantization and rounding issues
-        
+        // Test very dark colors that are known to be problematic for HSV
+        // conversion These colors often reveal quantization and rounding issues
+
         // Very dark red - near black but not black
-        const int dark_primary_tolerance = 0;  // Try for perfect conversion
+        const int dark_primary_tolerance = 0; // Try for perfect conversion
         CRGB dark_red(10, 0, 0);
         HSV16 hsv_dark_red(dark_red);
         CRGB dark_red_result = hsv_dark_red.ToRGB();
@@ -177,23 +208,29 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(dark_blue_result.b, dark_blue.b, dark_primary_tolerance);
 
         // Barely visible gray - single digit values
-        const int barely_visible_tolerance = 0;  // Try for perfect conversion
+        const int barely_visible_tolerance = 0; // Try for perfect conversion
         CRGB barely_gray1(1, 1, 1);
         HSV16 hsv_barely_gray1(barely_gray1);
         CRGB barely_gray1_result = hsv_barely_gray1.ToRGB();
-        CHECK_CLOSE(barely_gray1_result.r, barely_gray1.r, barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray1_result.g, barely_gray1.g, barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray1_result.b, barely_gray1.b, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray1_result.r, barely_gray1.r,
+                    barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray1_result.g, barely_gray1.g,
+                    barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray1_result.b, barely_gray1.b,
+                    barely_visible_tolerance);
 
         CRGB barely_gray5(5, 5, 5);
         HSV16 hsv_barely_gray5(barely_gray5);
         CRGB barely_gray5_result = hsv_barely_gray5.ToRGB();
-        CHECK_CLOSE(barely_gray5_result.r, barely_gray5.r, barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray5_result.g, barely_gray5.g, barely_visible_tolerance);
-        CHECK_CLOSE(barely_gray5_result.b, barely_gray5.b, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray5_result.r, barely_gray5.r,
+                    barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray5_result.g, barely_gray5.g,
+                    barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray5_result.b, barely_gray5.b,
+                    barely_visible_tolerance);
 
         // Low saturation, low value - muddy browns/grays
-        const int muddy_tolerance = 1;  // These may need tolerance 1
+        const int muddy_tolerance = 1; // These may need tolerance 1
         CRGB muddy_brown(15, 10, 8);
         HSV16 hsv_muddy_brown(muddy_brown);
         CRGB muddy_brown_result = hsv_muddy_brown.ToRGB();
@@ -213,83 +250,90 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CRGB dark_saturated_red(20, 1, 1);
         HSV16 hsv_dark_saturated_red(dark_saturated_red);
         CRGB dark_saturated_red_result = hsv_dark_saturated_red.ToRGB();
-        CHECK_CLOSE(dark_saturated_red_result.r, dark_saturated_red.r, dark_primary_tolerance);
-        CHECK_CLOSE(dark_saturated_red_result.g, dark_saturated_red.g, dark_primary_tolerance);
-        CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b, dark_primary_tolerance);
+        CHECK_CLOSE(dark_saturated_red_result.r, dark_saturated_red.r,
+                    dark_primary_tolerance);
+        CHECK_CLOSE(dark_saturated_red_result.g, dark_saturated_red.g,
+                    dark_primary_tolerance);
+        CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b,
+                    dark_primary_tolerance);
     }
+}
 
-    SUBCASE("ToVideoRGB_8bit() preserves hue") {
-        // Test that ToVideoRGB_8bit() preserves the hue while applying gamma correction
-        // to saturation. Each color uses a fine-grained tolerance based on empirically
-        // observed maximum hue differences.
-        
-        // Test with a vibrant orange color - low hue error
-        CRGB orange(255, 128, 0);
-        HSV16 hsv_orange(orange);
-        uint16_t original_hue_orange = hsv_orange.h;
-        
-        CRGB video_orange = hsv_orange.ToVideoRGB_8bit();
-        HSV16 hsv_video_orange(video_orange);
-        uint16_t result_hue_orange = hsv_video_orange.h;
-        
-        const int orange_tolerance = 15;  // Observed: ~14 units max
-        CHECK_CLOSE(original_hue_orange, result_hue_orange, orange_tolerance);
-        
-        // Test with a blue-green color - moderate hue error  
-        CRGB blue_green(0, 200, 150);
-        HSV16 hsv_blue_green(blue_green);
-        uint16_t original_hue_blue_green = hsv_blue_green.h;
-        
-        CRGB video_blue_green = hsv_blue_green.ToVideoRGB_8bit();
-        HSV16 hsv_video_blue_green(video_blue_green);
-        uint16_t result_hue_blue_green = hsv_video_blue_green.h;
-        
-        const int blue_green_tolerance = 15;  // Observed: ~14 units max
-        CHECK_CLOSE(original_hue_blue_green, result_hue_blue_green, blue_green_tolerance);
-        
-        // Test with a purple color - low hue error
-        CRGB purple(180, 50, 200);
-        HSV16 hsv_purple(purple);
-        uint16_t original_hue_purple = hsv_purple.h;
-        
-        CRGB video_purple = hsv_purple.ToVideoRGB_8bit();
-        HSV16 hsv_video_purple(video_purple);
-        uint16_t result_hue_purple = hsv_video_purple.h;
-        
-        const int purple_tolerance = 5;  // Typically very small error
-        CHECK_CLOSE(original_hue_purple, result_hue_purple, purple_tolerance);
-        
-        // Test with a warm yellow color - highest hue error case
-        CRGB warm_yellow(255, 220, 80);
-        HSV16 hsv_warm_yellow(warm_yellow);
-        uint16_t original_hue_warm_yellow = hsv_warm_yellow.h;
-        
-        CRGB video_warm_yellow = hsv_warm_yellow.ToVideoRGB_8bit();
-        HSV16 hsv_video_warm_yellow(video_warm_yellow);
-        uint16_t result_hue_warm_yellow = hsv_video_warm_yellow.h;
-        
-        const int warm_yellow_tolerance = 48;  // Observed: ~47 units max (highest error case)
-        CHECK_CLOSE(original_hue_warm_yellow, result_hue_warm_yellow, warm_yellow_tolerance);
-        
-        // Test edge case: Very saturated red (hue around 0) - handle wraparound
-        CRGB bright_red(255, 30, 30);
-        HSV16 hsv_bright_red(bright_red);
-        uint16_t original_hue_bright_red = hsv_bright_red.h;
-        
-        CRGB video_bright_red = hsv_bright_red.ToVideoRGB_8bit();
-        HSV16 hsv_video_bright_red(video_bright_red);
-        uint16_t result_hue_bright_red = hsv_video_bright_red.h;
-        
-        // Special handling for hue around 0 (red) - check for wraparound
-        uint16_t hue_diff = (original_hue_bright_red > result_hue_bright_red) ? 
-                           (original_hue_bright_red - result_hue_bright_red) : 
-                           (result_hue_bright_red - original_hue_bright_red);
-        // Also check wraparound case (difference near 65535)
-        uint16_t hue_diff_wraparound = 65535 - hue_diff;
-        uint16_t min_hue_diff = (hue_diff < hue_diff_wraparound) ? hue_diff : hue_diff_wraparound;
-        
-        const int bright_red_tolerance = 8;  // Small tolerance for red wraparound case
-        CHECK(min_hue_diff <= bright_red_tolerance);
-    }
+TEST_CASE("ToVideoRGB_8bit() preserves hue") {
+    // Test that ToVideoRGB_8bit() preserves the hue while applying gamma
+    // correction to saturation. Each color uses a fine-grained tolerance based
+    // on empirically observed maximum hue differences.
 
+    // Test with a vibrant orange color - low hue error
+    CRGB orange(255, 128, 0);
+    HSV16 hsv_orange(orange);
+    uint16_t original_hue_orange = hsv_orange.h;
+
+    CRGB video_orange = hsv_orange.ToVideoRGB_8bit();
+    HSV16 hsv_video_orange(video_orange);
+    uint16_t result_hue_orange = hsv_video_orange.h;
+
+    const int orange_tolerance = 15; // Observed: ~14 units max
+    CHECK_CLOSE(original_hue_orange, result_hue_orange, orange_tolerance);
+
+    // Test with a blue-green color - moderate hue error
+    CRGB blue_green(0, 200, 150);
+    HSV16 hsv_blue_green(blue_green);
+    uint16_t original_hue_blue_green = hsv_blue_green.h;
+
+    CRGB video_blue_green = hsv_blue_green.ToVideoRGB_8bit();
+    HSV16 hsv_video_blue_green(video_blue_green);
+    uint16_t result_hue_blue_green = hsv_video_blue_green.h;
+
+    const int blue_green_tolerance = 15; // Observed: ~14 units max
+    CHECK_CLOSE(original_hue_blue_green, result_hue_blue_green,
+                blue_green_tolerance);
+
+    // Test with a purple color - low hue error
+    CRGB purple(180, 50, 200);
+    HSV16 hsv_purple(purple);
+    uint16_t original_hue_purple = hsv_purple.h;
+
+    CRGB video_purple = hsv_purple.ToVideoRGB_8bit();
+    HSV16 hsv_video_purple(video_purple);
+    uint16_t result_hue_purple = hsv_video_purple.h;
+
+    const int purple_tolerance = 5; // Typically very small error
+    CHECK_CLOSE(original_hue_purple, result_hue_purple, purple_tolerance);
+
+    // Test with a warm yellow color - highest hue error case
+    CRGB warm_yellow(255, 220, 80);
+    HSV16 hsv_warm_yellow(warm_yellow);
+    uint16_t original_hue_warm_yellow = hsv_warm_yellow.h;
+
+    CRGB video_warm_yellow = hsv_warm_yellow.ToVideoRGB_8bit();
+    HSV16 hsv_video_warm_yellow(video_warm_yellow);
+    uint16_t result_hue_warm_yellow = hsv_video_warm_yellow.h;
+
+    const int warm_yellow_tolerance =
+        48; // Observed: ~47 units max (highest error case)
+    CHECK_CLOSE(original_hue_warm_yellow, result_hue_warm_yellow,
+                warm_yellow_tolerance);
+
+    // Test edge case: Very saturated red (hue around 0) - handle wraparound
+    CRGB bright_red(255, 30, 30);
+    HSV16 hsv_bright_red(bright_red);
+    uint16_t original_hue_bright_red = hsv_bright_red.h;
+
+    CRGB video_bright_red = hsv_bright_red.ToVideoRGB_8bit();
+    HSV16 hsv_video_bright_red(video_bright_red);
+    uint16_t result_hue_bright_red = hsv_video_bright_red.h;
+
+    // Special handling for hue around 0 (red) - check for wraparound
+    uint16_t hue_diff = (original_hue_bright_red > result_hue_bright_red)
+                            ? (original_hue_bright_red - result_hue_bright_red)
+                            : (result_hue_bright_red - original_hue_bright_red);
+    // Also check wraparound case (difference near 65535)
+    uint16_t hue_diff_wraparound = 65535 - hue_diff;
+    uint16_t min_hue_diff =
+        (hue_diff < hue_diff_wraparound) ? hue_diff : hue_diff_wraparound;
+
+    const int bright_red_tolerance =
+        8; // Small tolerance for red wraparound case
+    CHECK(min_hue_diff <= bright_red_tolerance);
 }
