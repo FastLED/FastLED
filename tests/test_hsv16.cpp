@@ -260,6 +260,22 @@ TEST_CASE("RGB to HSV16 to RGB") {
     }
 }
 
+TEST_CASE("Exhaustive round trip") {
+    const int step = 4;
+    for (int r = 0; r < 256; r+=step) {
+        for (int g = 0; g < 256; g+=step) {
+            for (int b = 0; b < 256; b+=step) {
+                CRGB rgb(r, g, b);
+                HSV16 hsv(rgb);
+                CRGB rgb_result = hsv.ToRGB();
+                REQUIRE_CLOSE(rgb_result.r, rgb.r, 1);
+                REQUIRE_CLOSE(rgb_result.g, rgb.g, 1);
+                REQUIRE_CLOSE(rgb_result.b, rgb.b, 1);
+            }
+        }
+    }
+}
+
 
 #define TEST_VIDEO_RGB_HUE_PRESERVATION(color, hue_tolerance) \
     do { \
@@ -280,11 +296,6 @@ TEST_CASE("RGB to HSV16 to RGB") {
         \
         uint8_t hue_diff_8bit = map16_to_8(min_hue_diff); \
         \
-        printf("original rgb: %d, %d, %d\n", color.r, color.g, color.b); \
-        printf("video rgb: %d, %d, %d\n", video_result.r, video_result.g, video_result.b); \
-        printf("hue diff: %d\n", hue_diff); \
-        printf("hue diff 8bit: %d\n", hue_diff_8bit); \
-        printf("hue tolerance: %d\n", hue_tolerance); \
         CHECK_LE(hue_diff_8bit, hue_tolerance); \
     } while(0)
 
