@@ -1,8 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <string.h>
 
+#include "fl/stdint.h"
 #include "crgb.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"
@@ -11,51 +10,23 @@
 #include "fx/frame.h"
 #include "fx/fx.h"
 
-// #include <assert.h>
 
 namespace fl {
 
 FASTLED_SMART_PTR(FxLayer);
 class FxLayer : public fl::Referent {
   public:
-    void setFx(fl::Ptr<Fx> newFx) {
-        if (newFx != fx) {
-            release();
-            fx = newFx;
-        }
-    }
+    void setFx(fl::Ptr<Fx> newFx);
 
-    void draw(uint32_t now) {
-        // assert(fx);
-        if (!frame) {
-            frame = FramePtr::New(fx->getNumLeds());
-        }
+    void draw(uint32_t now);
 
-        if (!running) {
-            // Clear the frame
-            memset((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
-            fx->resume(now);
-            running = true;
-        }
-        Fx::DrawContext context = {now, frame->rgb()};
-        fx->draw(context);
-    }
+    void pause(uint32_t now);
 
-    void pause(uint32_t now) {
-        if (fx && running) {
-            fx->pause(now);
-            running = false;
-        }
-    }
+    void release();
 
-    void release() {
-        pause(0);
-        fx.reset();
-    }
+    fl::Ptr<Fx> getFx();
 
-    fl::Ptr<Fx> getFx() { return fx; }
-
-    CRGB *getSurface() { return frame->rgb(); }
+    CRGB *getSurface();
 
   private:
     fl::Ptr<Frame> frame;
