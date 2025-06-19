@@ -97,6 +97,10 @@ void CRGB::fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count) {
     }
 }
 
+fl::HSV16 CRGB::toHSV16() const {
+    return fl::HSV16(*this);
+}
+
 CRGB &CRGB::nscale8(uint8_t scaledown) {
     nscale8x3(r, g, b, scaledown);
     return *this;

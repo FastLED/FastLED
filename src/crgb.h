@@ -18,6 +18,7 @@
 namespace fl {
 class Str;
 class XYMap;
+struct HSV16;
 }
 
 FASTLED_NAMESPACE_BEGIN
@@ -125,6 +126,11 @@ struct CRGB {
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
     static void fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count);
+
+    // Want to do advanced color manipulation in HSV and write back to CRGB?
+    // You want to use HSV16, which is much better at preservering the color
+    // space than CHSV.
+    fl::HSV16 toHSV16() const;
     
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
