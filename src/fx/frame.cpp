@@ -16,7 +16,7 @@ namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb() {
     mRgb.resize(pixels_count);
-    memset(mRgb.data(), 0, pixels_count * sizeof(CRGB));
+    memset((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
 }
 
 Frame::~Frame() {

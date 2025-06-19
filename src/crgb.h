@@ -111,12 +111,18 @@ struct CRGB {
     static void downscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
     static void upscale(const CRGB* src, const fl::XYMap& srcXY, CRGB* dst, const fl::XYMap& dstXY);
 
+    // BETA FEATURE! LET US KNOW WHAT YOU THINK!
+    //
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
-    // Do you want a function to simulate gamma correction but doesn't
-    // decimate the color? This will apply color saturation without
+    // Does it look washed out and under-saturated?
+    //
+    // Have you tried gamma correction but hate how it decimates the color into 8 colors per component?
+    //
+    // This is an alternative to gamma correction that preserves the hue but boosts the saturation.
+    //
     // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
-    // This attempts to preserve the hue while increasing saturation, which should
     // work well with WS2812 (and other RGB8) led displays.
+    // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     CRGB toVideoRGB_8bit() const;
     static void fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count);
     
