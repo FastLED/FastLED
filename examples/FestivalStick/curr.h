@@ -63,7 +63,7 @@ UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
-UISlider noiseSpeed("Noise Speed", 20, 1, 100, 1);
+UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // Noise generation variables
 static uint16_t noise_x = 0;
@@ -132,11 +132,6 @@ void setup() {
 
     // Set the screen map for the controller
     controller->setScreenMap(screenMap);
-    
-    // Initialize noise coordinates to random values (from NoisePlusPalette example)
-    noise_x = random16();
-    noise_y = random16();
-    noise_z = random16();
 }
 
 float get_position(uint32_t now) {
@@ -163,6 +158,12 @@ void fillFrameBufferNoise() {
     // Get current UI values
     noise_scale = noiseScale.value();
     noise_speed = noiseSpeed.value();
+    
+    // Derive noise coordinates from current time instead of forward iteration
+    uint32_t now = millis();
+    noise_z = now * noise_speed / 10;  // Primary time dimension
+    noise_x = now * noise_speed / 80;  // Slow drift in x
+    noise_y = now * noise_speed / 160; // Even slower drift in y (opposite direction)
     
     int width = frameBuffer.width();
     int height = frameBuffer.height();
@@ -199,9 +200,10 @@ void fillFrameBufferNoise() {
             uint8_t index = data;
             uint8_t bri = data;
             
-            // Add color cycling if enabled
+            // Add color cycling if enabled - also derive from time
             static uint8_t ihue = 0;
             if(colorLoop) {
+                ihue = (now / 100) % 256;  // Derive hue from time instead of incrementing
                 index += ihue;
             }
             
@@ -217,11 +219,6 @@ void fillFrameBufferNoise() {
             frameBuffer.at(x, y) = color;
         }
     }
-    
-    // Update noise coordinates for next frame
-    noise_z += noise_speed;
-    noise_x += noise_speed / 8;
-    noise_y -= noise_speed / 16;
 }
 
 void drawNoise(uint32_t now) {
