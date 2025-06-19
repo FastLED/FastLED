@@ -6,8 +6,6 @@
 
 FASTLED_USING_NAMESPACE
 
-#if 1
-
 TEST_CASE("8-bit easing functions") {
     SUBCASE("easeInOutQuad8") {
         SUBCASE("boundary values") {
@@ -50,7 +48,6 @@ TEST_CASE("8-bit easing functions") {
             CHECK_CLOSE(easeInOutCubic8(128), 128, 1);
         }
 
-#if 1
         SUBCASE("symmetry") {
             const int kTolerance = 2; // This is too high, come back to this.
             for (uint8_t i = 0; i < 128; ++i) {
@@ -59,33 +56,25 @@ TEST_CASE("8-bit easing functions") {
                 CHECK_CLOSE(forward, 255 - backward, kTolerance);
             }
         }
-#endif
 
-#if 0
         SUBCASE("monotonicity") {
             uint8_t prev = 0;
             for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = ease8InOutCubic(i);
+                uint8_t current = easeInOutCubic8(i);
                 CHECK_GE(current, prev);
                 prev = current;
             }
         }
-#endif
 
-#if 0
         SUBCASE("more pronounced than quadratic") {
             // cubic should be more pronounced than quadratic in ease-in portion
             uint8_t quarter = 64;
-            uint8_t quad_result = ease8InOutQuad(quarter);
-            uint8_t cubic_result = ease8InOutCubic(quarter);
+            uint8_t quad_result = easeInOutQuad8(quarter);
+            uint8_t cubic_result = easeInOutCubic8(quarter);
             CHECK_LT(cubic_result, quad_result);
         }
-#endif
     }
-
 }
-
-#endif
 
 TEST_CASE("easing function special values") {
 
@@ -206,15 +195,14 @@ TEST_CASE("easeInOutCubic16") {
         CHECK_LT(cubic_result, quad_result);
     }
 
-#if 0
 
     SUBCASE("scaling consistency with 8-bit") {
         for (uint16_t i = 0; i <= 255; ++i) {
             uint8_t input8 = i;
             uint16_t input16 = map8_to_16(input8);
 
-            uint8_t result8 = ease8InOutCubic(input8);
-            uint16_t result16 = ease16InOutCubic(input16);
+            uint8_t result8 = easeInOutCubic8(input8);
+            uint16_t result16 = easeInOutCubic16(input16);
             uint8_t scaled_result16 = map16_to_8(result16);
 
             // Should be within 2 due to precision differences in cubic
@@ -225,7 +213,6 @@ TEST_CASE("easeInOutCubic16") {
         }
     }
 
-#endif
 }
 
 TEST_CASE("easing function ordering") {
