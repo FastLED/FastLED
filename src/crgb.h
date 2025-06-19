@@ -201,6 +201,10 @@ struct CRGB {
         hsv2rgb_dispatch( rhs, *this);
     }
 
+    /// Allow construction from a fl::HSV16 color
+    /// Enables automatic conversion from HSV16 to CRGB
+    CRGB(const fl::HSV16& rhs);
+
     /// Allow assignment from one RGB struct to another
     FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) = default;
 
