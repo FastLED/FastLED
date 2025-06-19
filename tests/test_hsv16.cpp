@@ -147,6 +147,77 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(magenta_result.b, magenta.b, magenta_tolerance); // Blue should be preserved
     }
 
+    SUBCASE("Low-Value Problematic Colors") {
+        // Test very dark colors that are known to be problematic for HSV conversion
+        // These colors often reveal quantization and rounding issues
+        
+        // Very dark red - near black but not black
+        const int dark_primary_tolerance = 0;  // Try for perfect conversion
+        CRGB dark_red(10, 0, 0);
+        HSV16 hsv_dark_red(dark_red);
+        CRGB dark_red_result = hsv_dark_red.ToRGB();
+        CHECK_CLOSE(dark_red_result.r, dark_red.r, dark_primary_tolerance);
+        CHECK_CLOSE(dark_red_result.g, dark_red.g, dark_primary_tolerance);
+        CHECK_CLOSE(dark_red_result.b, dark_red.b, dark_primary_tolerance);
+
+        // Very dark green
+        CRGB dark_green(0, 10, 0);
+        HSV16 hsv_dark_green(dark_green);
+        CRGB dark_green_result = hsv_dark_green.ToRGB();
+        CHECK_CLOSE(dark_green_result.r, dark_green.r, dark_primary_tolerance);
+        CHECK_CLOSE(dark_green_result.g, dark_green.g, dark_primary_tolerance);
+        CHECK_CLOSE(dark_green_result.b, dark_green.b, dark_primary_tolerance);
+
+        // Very dark blue
+        CRGB dark_blue(0, 0, 10);
+        HSV16 hsv_dark_blue(dark_blue);
+        CRGB dark_blue_result = hsv_dark_blue.ToRGB();
+        CHECK_CLOSE(dark_blue_result.r, dark_blue.r, dark_primary_tolerance);
+        CHECK_CLOSE(dark_blue_result.g, dark_blue.g, dark_primary_tolerance);
+        CHECK_CLOSE(dark_blue_result.b, dark_blue.b, dark_primary_tolerance);
+
+        // Barely visible gray - single digit values
+        const int barely_visible_tolerance = 0;  // Try for perfect conversion
+        CRGB barely_gray1(1, 1, 1);
+        HSV16 hsv_barely_gray1(barely_gray1);
+        CRGB barely_gray1_result = hsv_barely_gray1.ToRGB();
+        CHECK_CLOSE(barely_gray1_result.r, barely_gray1.r, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray1_result.g, barely_gray1.g, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray1_result.b, barely_gray1.b, barely_visible_tolerance);
+
+        CRGB barely_gray5(5, 5, 5);
+        HSV16 hsv_barely_gray5(barely_gray5);
+        CRGB barely_gray5_result = hsv_barely_gray5.ToRGB();
+        CHECK_CLOSE(barely_gray5_result.r, barely_gray5.r, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray5_result.g, barely_gray5.g, barely_visible_tolerance);
+        CHECK_CLOSE(barely_gray5_result.b, barely_gray5.b, barely_visible_tolerance);
+
+        // Low saturation, low value - muddy browns/grays
+        const int muddy_tolerance = 1;  // These may need tolerance 1
+        CRGB muddy_brown(15, 10, 8);
+        HSV16 hsv_muddy_brown(muddy_brown);
+        CRGB muddy_brown_result = hsv_muddy_brown.ToRGB();
+        CHECK_CLOSE(muddy_brown_result.r, muddy_brown.r, muddy_tolerance);
+        CHECK_CLOSE(muddy_brown_result.g, muddy_brown.g, muddy_tolerance);
+        CHECK_CLOSE(muddy_brown_result.b, muddy_brown.b, muddy_tolerance);
+
+        // Edge case: slightly unequal very dark values
+        CRGB dark_unequal(3, 2, 1);
+        HSV16 hsv_dark_unequal(dark_unequal);
+        CRGB dark_unequal_result = hsv_dark_unequal.ToRGB();
+        CHECK_CLOSE(dark_unequal_result.r, dark_unequal.r, muddy_tolerance);
+        CHECK_CLOSE(dark_unequal_result.g, dark_unequal.g, muddy_tolerance);
+        CHECK_CLOSE(dark_unequal_result.b, dark_unequal.b, muddy_tolerance);
+
+        // Very dark but colorful - low value, high saturation
+        CRGB dark_saturated_red(20, 1, 1);
+        HSV16 hsv_dark_saturated_red(dark_saturated_red);
+        CRGB dark_saturated_red_result = hsv_dark_saturated_red.ToRGB();
+        CHECK_CLOSE(dark_saturated_red_result.r, dark_saturated_red.r, dark_primary_tolerance);
+        CHECK_CLOSE(dark_saturated_red_result.g, dark_saturated_red.g, dark_primary_tolerance);
+        CHECK_CLOSE(dark_saturated_red_result.b, dark_saturated_red.b, dark_primary_tolerance);
+    }
+
     SUBCASE("Basic Functionality Verification") {
         // Test that the basic conversion functions exist and work
         
