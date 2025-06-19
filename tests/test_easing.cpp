@@ -132,7 +132,6 @@ TEST_CASE("easing function special values") {
         CHECK_LT(easeInOutCubic16(16384), easeInOutQuad16(16384));
         CHECK_GT(easeInOutCubic16(49152), easeInOutQuad16(49152));
     }
-
 }
 
 TEST_CASE("easeInOutQuad16") {
@@ -140,11 +139,11 @@ TEST_CASE("easeInOutQuad16") {
         CHECK_EQ(easeInOutQuad16(0), 0);
         CHECK_EQ(easeInOutQuad16(65535), 65535);
         CHECK_EQ(easeInOutQuad16(32768), 32768); // midpoint
-        
+
         // Test values very close to boundaries
         CHECK_EQ(easeInOutQuad16(1), 0);
         CHECK_EQ(easeInOutQuad16(65534), 65535);
-        
+
         // Test edge cases around midpoint
         CHECK_EQ(easeInOutQuad16(32767), 32767);
         CHECK_EQ(easeInOutQuad16(32769), 32770);
@@ -152,13 +151,17 @@ TEST_CASE("easeInOutQuad16") {
 
     SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic easing
-        CHECK_EQ(easeInOutQuad16(16384), 8192);   // 25% input -> 12.5% output
-        CHECK_EQ(easeInOutQuad16(32768), 32768);  // 50% input -> 50% output (midpoint)
-        CHECK_EQ(easeInOutQuad16(49152), 57344);  // 75% input -> actual measured output
-        
+        CHECK_EQ(easeInOutQuad16(16384), 8192); // 25% input -> 12.5% output
+        CHECK_EQ(easeInOutQuad16(32768),
+                 32768); // 50% input -> 50% output (midpoint)
+        CHECK_EQ(easeInOutQuad16(49152),
+                 57344); // 75% input -> actual measured output
+
         // Additional quartile boundary checks
-        CHECK_LT(easeInOutQuad16(16384), 16384);  // ease-in should be slower than linear
-        CHECK_GT(easeInOutQuad16(49152), 49152);  // ease-out should be faster than linear
+        CHECK_LT(easeInOutQuad16(16384),
+                 16384); // ease-in should be slower than linear
+        CHECK_GT(easeInOutQuad16(49152),
+                 49152); // ease-out should be faster than linear
     }
 
     SUBCASE("symmetry") {
@@ -197,10 +200,7 @@ TEST_CASE("easeInOutQuad16") {
     }
 }
 
-
-
 TEST_CASE("easeInOutCubic16") {
-
 
     SUBCASE("boundary values") {
         CHECK_EQ(easeInOutCubic16(0), 0);
@@ -214,10 +214,8 @@ TEST_CASE("easeInOutCubic16") {
         CHECK_EQ(easeInOutCubic16(49152), 61440);
     }
 
-
-
     SUBCASE("symmetry") {
-        const int kTolerance = 2;  // Note that this is too high.
+        const int kTolerance = 2; // Note that this is too high.
         for (uint16_t i = 0; i < 32768; i += 256) {
             uint16_t forward = easeInOutCubic16(i);
             uint16_t backward = easeInOutCubic16(65535 - i);
@@ -225,8 +223,6 @@ TEST_CASE("easeInOutCubic16") {
             CHECK_CLOSE(forward, 65535 - backward, kTolerance);
         }
     }
-
-
 
     SUBCASE("monotonicity") {
         uint16_t prev = 0;
@@ -236,8 +232,6 @@ TEST_CASE("easeInOutCubic16") {
             prev = current;
         }
     }
-
-
 
     SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
@@ -265,12 +259,10 @@ TEST_CASE("easeInOutCubic16") {
         }
     }
 
-    #endif
+#endif
 }
 
-
 TEST_CASE("easing function ordering") {
-
 
 #if 0
 
@@ -288,57 +280,57 @@ TEST_CASE("easing function ordering") {
         }
     }
 
-        
+#endif
 
     SUBCASE("16-bit: cubic should be more pronounced than quadratic") {
-        for (uint32_t i = 8192; i < 32768; i += 4096) {  // test ease-in portion
+        for (uint32_t i = 8192; i < 32768; i += 4096) { // test ease-in portion
             uint16_t quad = easeInOutQuad16(i);
-            uint16_t cubic = ease16InOutCubic(i);
+            uint16_t cubic = easeInOutCubic16(i);
             CHECK_LE(cubic, quad);
         }
 
-
-        for (uint32_t i = 32768; i < 57344; i += 4096) {  // test ease-out portion
+        for (uint32_t i = 32768; i < 57344;
+             i += 4096) { // test ease-out portion
             uint16_t quad = easeInOutQuad16(i);
-            uint16_t cubic = ease16InOutCubic(i);
+            uint16_t cubic = easeInOutCubic16(i);
             CHECK_GE(cubic, quad);
         }
-
-
     }
-
-#endif
 }
 
 TEST_CASE("easeInQuad16") {
     SUBCASE("boundary values") {
         CHECK_EQ(easeInQuad16(0), 0);
         CHECK_EQ(easeInQuad16(65535), 65535);
-        
+
         // Test values very close to boundaries
-        CHECK_EQ(easeInQuad16(1), 0);        // (1 * 1) / 65535 = 0
+        CHECK_EQ(easeInQuad16(1), 0);         // (1 * 1) / 65535 = 0
         CHECK_EQ(easeInQuad16(65534), 65533); // (65534 * 65534) / 65535 = 65533
     }
 
     SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic ease-in
         // Expected values calculated as (input * input) / 65535
-        CHECK_EQ(easeInQuad16(16384), 4096);   // 25% input -> ~6.25% output: (16384^2)/65535 = 4096
-        CHECK_EQ(easeInQuad16(32768), 16384);  // 50% input -> 25% output: (32768^2)/65535 = 16384  
-        CHECK_EQ(easeInQuad16(49152), 36864);  // 75% input -> ~56.25% output: (49152^2)/65535 = 36864
-        
+        CHECK_EQ(easeInQuad16(16384),
+                 4096); // 25% input -> ~6.25% output: (16384^2)/65535 = 4096
+        CHECK_EQ(easeInQuad16(32768),
+                 16384); // 50% input -> 25% output: (32768^2)/65535 = 16384
+        CHECK_EQ(easeInQuad16(49152),
+                 36864); // 75% input -> ~56.25% output: (49152^2)/65535 = 36864
+
         // Additional test points
-        CHECK_EQ(easeInQuad16(8192), 1024);    // 12.5% input -> ~1.56% output
-        CHECK_EQ(easeInQuad16(57344), 50176);  // 87.5% input -> ~76.56% output
+        CHECK_EQ(easeInQuad16(8192), 1024);   // 12.5% input -> ~1.56% output
+        CHECK_EQ(easeInQuad16(57344), 50176); // 87.5% input -> ~76.56% output
     }
 
     SUBCASE("mathematical precision") {
-        // Test specific values where we can verify the exact mathematical result
-        CHECK_EQ(easeInQuad16(256), 1);        // (256 * 256) / 65535 = 1
-        CHECK_EQ(easeInQuad16(512), 4);        // (512 * 512) / 65535 = 4
-        CHECK_EQ(easeInQuad16(1024), 16);      // (1024 * 1024) / 65535 = 16
-        CHECK_EQ(easeInQuad16(2048), 64);      // (2048 * 2048) / 65535 = 64
-        CHECK_EQ(easeInQuad16(4096), 256);     // (4096 * 4096) / 65535 = 256
+        // Test specific values where we can verify the exact mathematical
+        // result
+        CHECK_EQ(easeInQuad16(256), 1);    // (256 * 256) / 65535 = 1
+        CHECK_EQ(easeInQuad16(512), 4);    // (512 * 512) / 65535 = 4
+        CHECK_EQ(easeInQuad16(1024), 16);  // (1024 * 1024) / 65535 = 16
+        CHECK_EQ(easeInQuad16(2048), 64);  // (2048 * 2048) / 65535 = 64
+        CHECK_EQ(easeInQuad16(4096), 256); // (4096 * 4096) / 65535 = 256
     }
 
     SUBCASE("monotonicity") {
@@ -354,34 +346,35 @@ TEST_CASE("easeInQuad16") {
     SUBCASE("ease-in behavior") {
         // For ease-in, early values should be less than linear progression
         // while later values should be greater than linear progression
-        
+
         // First quarter should be significantly slower than linear
-        uint16_t quarter_linear = 16384;  // 25% of 65535
+        uint16_t quarter_linear = 16384; // 25% of 65535
         uint16_t quarter_eased = easeInQuad16(16384);
         CHECK_LT(quarter_eased, quarter_linear);
         CHECK_LT(quarter_eased, quarter_linear / 2); // Should be much slower
-        
+
         // Third quarter should still be slower than linear for ease-in
         // (ease-in accelerates but doesn't surpass linear until very late)
-        uint16_t three_quarter_linear = 49152;  // 75% of 65535
+        uint16_t three_quarter_linear = 49152; // 75% of 65535
         uint16_t three_quarter_eased = easeInQuad16(49152);
         CHECK_LT(three_quarter_eased, three_quarter_linear);
-        
+
         // The acceleration should be visible in the differences
-        uint16_t early_diff = easeInQuad16(8192) - easeInQuad16(0);      // 0-12.5%
-        uint16_t late_diff = easeInQuad16(57344) - easeInQuad16(49152);  // 75-87.5%
-        CHECK_GT(late_diff, early_diff * 10); // Late differences should be much larger
+        uint16_t early_diff = easeInQuad16(8192) - easeInQuad16(0); // 0-12.5%
+        uint16_t late_diff =
+            easeInQuad16(57344) - easeInQuad16(49152); // 75-87.5%
+        CHECK_GT(late_diff,
+                 early_diff * 10); // Late differences should be much larger
     }
 
     SUBCASE("specific known values") {
         // Test some additional specific values for regression testing
-        CHECK_EQ(easeInQuad16(65535/4), 4095);    // Quarter point
-        CHECK_EQ(easeInQuad16(65535/2), 16383);   // Half point  
-        CHECK_EQ(easeInQuad16(65535*3/4), 36863); // Three-quarter point
-        
+        CHECK_EQ(easeInQuad16(65535 / 4), 4095);      // Quarter point
+        CHECK_EQ(easeInQuad16(65535 / 2), 16383);     // Half point
+        CHECK_EQ(easeInQuad16(65535 * 3 / 4), 36863); // Three-quarter point
+
         // Edge cases near boundaries
-        CHECK_EQ(easeInQuad16(255), 0);           // Small value should round to 0
-        CHECK_EQ(easeInQuad16(65280), 65025);     // Near-max value
+        CHECK_EQ(easeInQuad16(255), 0);       // Small value should round to 0
+        CHECK_EQ(easeInQuad16(65280), 65025); // Near-max value
     }
 }
-
