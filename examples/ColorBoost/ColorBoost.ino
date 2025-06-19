@@ -4,6 +4,7 @@
 /// @example Rgb8Video.ino
 
 #include "FastLED.h"
+#include "fl/ease.h"
 
 using namespace fl;
 
@@ -24,8 +25,8 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 3);
 // #define CLK_PIN   4
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define NUM_LEDS_PER_STRIP 100
-#define NUM_STRIPS 100 // Changed from 2 to 100 for 100x100 matrix
+#define NUM_LEDS_PER_STRIP 16
+#define NUM_STRIPS 16 // Changed from 2 to 100 for 100x100 matrix
 #define TOTAL_LEDS (NUM_LEDS_PER_STRIP * NUM_STRIPS) // 100x100 = 10,000 LEDs
 #define BRIGHTNESS 255
 
@@ -62,11 +63,10 @@ EaseType getEaseType(int value) {
 
 // Animated rainbow wave effect optimized for video display
 void rainbowWave() {
-    static uint16_t time = 0;
-    static uint8_t hueOffset = 0;
-
-    time += 2;
-    hueOffset += 1;
+    // Use millis() for consistent timing across different devices
+    // Scale down millis() to get appropriate animation speed
+    uint16_t time = millis() / 16;  // Adjust divisor to control wave speed
+    uint8_t hueOffset = millis() / 32; // Adjust divisor to control hue rotation speed
 
     // Iterate through the entire 100x100 matrix
     for (uint16_t y = 0; y < NUM_STRIPS; y++) {
