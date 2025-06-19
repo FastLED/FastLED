@@ -67,21 +67,49 @@ static HSV16 RGBtoHSV16(const CRGB &rgb) {
             }
         } else if (mx == g) {
             // Hue in green sector (60-180 degrees)
-            uint32_t numerator = (uint32_t)(b - r) * 65535;
-            uint32_t sector_offset = 65535 / 3;  // 60 degrees
-            if (delta <= 42) {
-                hue_calc = sector_offset + numerator / (6 * delta);
+            // Handle signed arithmetic properly to avoid integer underflow
+            int32_t signed_diff = (int32_t)b - (int32_t)r;
+            uint32_t sector_offset = 65535 / 3;  // 60 degrees (120 degrees in 16-bit space)
+            
+            if (signed_diff >= 0) {
+                // Positive case: b >= r
+                uint32_t numerator = (uint32_t)signed_diff * 65535;
+                if (delta <= 42) {
+                    hue_calc = sector_offset + numerator / (6 * delta);
+                } else {
+                    hue_calc = sector_offset + numerator / delta / 6;
+                }
             } else {
-                hue_calc = sector_offset + numerator / delta / 6;
+                // Negative case: b < r  
+                uint32_t numerator = (uint32_t)(-signed_diff) * 65535;
+                if (delta <= 42) {
+                    hue_calc = sector_offset - numerator / (6 * delta);
+                } else {
+                    hue_calc = sector_offset - numerator / delta / 6;
+                }
             }
         } else { // mx == b
             // Hue in blue sector (180-300 degrees)
-            uint32_t numerator = (uint32_t)(r - g) * 65535;
-            uint32_t sector_offset = (2 * 65535) / 3;  // 240 degrees
-            if (delta <= 42) {
-                hue_calc = sector_offset + numerator / (6 * delta);
+            // Handle signed arithmetic properly to avoid integer underflow
+            int32_t signed_diff = (int32_t)r - (int32_t)g;
+            uint32_t sector_offset = (2 * 65535) / 3;  // 240 degrees (240 degrees in 16-bit space)
+            
+            if (signed_diff >= 0) {
+                // Positive case: r >= g
+                uint32_t numerator = (uint32_t)signed_diff * 65535;
+                if (delta <= 42) {
+                    hue_calc = sector_offset + numerator / (6 * delta);
+                } else {
+                    hue_calc = sector_offset + numerator / delta / 6;
+                }
             } else {
-                hue_calc = sector_offset + numerator / delta / 6;
+                // Negative case: r < g
+                uint32_t numerator = (uint32_t)(-signed_diff) * 65535;
+                if (delta <= 42) {
+                    hue_calc = sector_offset - numerator / (6 * delta);
+                } else {
+                    hue_calc = sector_offset - numerator / delta / 6;
+                }
             }
         }
         

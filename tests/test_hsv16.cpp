@@ -351,7 +351,7 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue - hard cases") {
 
     SUBCASE("Medium Saturation, Medium Value - Gamma Sensitive") {
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 120, 60), 0);
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 80);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(90, 120, 180), 0);
         TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 90, 150), 0);
     }
