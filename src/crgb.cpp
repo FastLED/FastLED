@@ -91,7 +91,7 @@ CRGB CRGB::colorBoost(bool boost_saturation, bool boost_contrast) const {
     return hsv.colorBoost(boost_saturation, boost_contrast);
 }
 
-void CRGB::fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count) {
+void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count) {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i].colorBoost();
     }

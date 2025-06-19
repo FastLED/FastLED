@@ -125,7 +125,7 @@ struct CRGB {
     // work well with WS2812 (and other RGB8) led displays.
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
-    static void fillVideoRGB_8bit(const CRGB* src, CRGB* dst, size_t count);
+    static void colorBoost(const CRGB* src, CRGB* dst, size_t count);
 
     // Want to do advanced color manipulation in HSV and write back to CRGB?
     // You want to use HSV16, which is much better at preservering the color
