@@ -115,10 +115,15 @@ static void rgb_to_lab_u16_fixed(
     outB = uint16_t((((int64_t)bq + (128LL << 16)) * 65535) / (255LL << 16));
 }
 
-CIELAB_16 rgb_to_cielab_16(uint8_t r, uint8_t g, uint8_t b) {
-    CIELAB_16 lab;
-    rgb_to_lab_u16_fixed(r, g, b, lab.L, lab.A, lab.B);
-    return lab;
+
+CIELAB16::CIELAB16(const CRGB& c) {
+    rgb_to_lab_u16_fixed(c.r, c.g, c.b, L, A, B);
+}
+
+void CIELAB16::Fill(const CRGB* c, CIELAB16* lab, int numLeds) {
+    for (int i = 0; i < numLeds; i++) {
+        rgb_to_lab_u16_fixed(c[i].r, c[i].g, c[i].b, lab[i].L, lab[i].A, lab[i].B);
+    }
 }
 
 
