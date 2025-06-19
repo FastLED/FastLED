@@ -322,100 +322,55 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue - easy cases") {
 TEST_CASE("ToVideoRGB_8bit() preserves hue - hard cases") {
 
     SUBCASE("Low Saturation Colors - Hue Instability") {
-        // Very low saturation colors can have unstable hue values
-        // These are problematic because small changes in RGB can cause large
-        // hue shifts
-        TEST_VIDEO_RGB_HUE_PRESERVATION(
-            CRGB(130, 128, 125), 3); // Nearly gray with slight brown tint
-        TEST_VIDEO_RGB_HUE_PRESERVATION(
-            CRGB(100, 98, 102), 3); // Nearly gray with slight purple tint
-        TEST_VIDEO_RGB_HUE_PRESERVATION(
-            CRGB(85, 87, 83), 3); // Nearly gray with slight green tint
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(130, 128, 125), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(100, 98, 102), 3);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(85, 87, 83), 0);
     }
 
     SUBCASE("Very Dark Colors - Low Value Instability") {
-        // Very dark colors are problematic because quantization errors are
-        // magnified Small RGB differences become large relative changes in dark
-        // colors
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 10, 8),
-                                        1); // Dark muddy brown
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(12, 8, 20), 1); // Dark purple
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 15, 12), 1); // Dark greenish
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(20, 12, 8),
-                                        1); // Dark reddish brown
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 10, 8), 1);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(12, 8, 20), 1);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 15, 12), 1);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(20, 12, 8), 1);
     }
 
     SUBCASE("Hue Boundary Colors - Transition Regions") {
-        // Colors near hue boundaries between primary colors can be sensitive
-        // These test the transitions: red->yellow, yellow->green, green->cyan,
-        // etc.
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 64, 0),
-                                        0); // Red-orange boundary
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(192, 255, 0),
-                                        0); // Yellow-green boundary
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 255, 128),
-                                        0); // Green-cyan boundary
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 128, 255),
-                                        0); // Cyan-blue boundary
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(128, 0, 255),
-                                        0); // Blue-magenta boundary
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 0, 128),
-                                        0); // Magenta-red boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 64, 0), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(192, 255, 0), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 255, 128), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 128, 255), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(128, 0, 255), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 0, 128), 0);
     }
 
     SUBCASE("Medium Saturation, Medium Value - Gamma Sensitive") {
-        // Mid-range colors that are most affected by gamma correction
-        // These have enough saturation to be affected but not enough to be
-        // stable
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 120, 60),
-                                        0); // Brownish orange
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 80); // Olive green
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(90, 120, 180), 0); // Steel blue
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 90, 150),
-                                        0); // Mauve/dusty rose
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 120, 60), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 80);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(90, 120, 180), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 90, 150), 0);
     }
 
     SUBCASE("Single Component Dominant - Extreme Ratios") {
-        // Colors where one component dominates, creating extreme RGB ratios
-        // These can be sensitive to gamma correction on the smaller components
-        TEST_VIDEO_RGB_HUE_PRESERVATION(
-            CRGB(250, 10, 5), 0); // Intense red with tiny other components
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 240, 12),
-                                        0); // Intense green with small others
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 8, 245),
-                                        0); // Intense blue with tiny others
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 8),
-                                        0); // Bright yellow with minimal blue
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(250, 10, 5), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 240, 12), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 8, 245), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 8), 0);
     }
 
     SUBCASE("Pastel Colors - High Value, Low Saturation") {
-        // Pastel colors combine the instability of low saturation with high
-        // brightness Gamma correction can shift these significantly
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 200), 0); // Light pink
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 200),
-                                        0); // Light mint green
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 255),
-                                        0); // Light periwinkle blue
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 255, 200),
-                                        0); // Light cream yellow
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 255),
-                                        0); // Light lavender
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 255), 0); // Light aqua
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 200), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 200), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 255), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 255, 200), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 255), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 255), 0);
     }
 
     SUBCASE("Problematic RGB Combinations - Known Difficult Cases") {
-        // Specific RGB combinations that are empirically known to be
-        // problematic These were identified as causing the largest hue shifts
-        // in testing
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(77, 150, 200),
-                                        0); // Sky blue - moderate saturation
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 150, 77),
-                                        0); // Tan/beige - tricky brown region
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(150, 77, 200),
-                                        0); // Orchid purple - mid-range values
-        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(33, 66, 99),
-                                        0); // Dark slate blue - low overall
-        TEST_VIDEO_RGB_HUE_PRESERVATION(
-            CRGB(99, 33, 66), 0); // Dark maroon - challenging red region
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(77, 150, 200), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 150, 77), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(150, 77, 200), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(33, 66, 99), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(99, 33, 66), 0);
     }
 }
