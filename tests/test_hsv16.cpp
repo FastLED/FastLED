@@ -220,11 +220,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
 
     SUBCASE("ToVideoRGB_8bit() preserves hue") {
         // Test that ToVideoRGB_8bit() preserves the hue while applying gamma correction
-        // to saturation. The hue should remain the same within tolerance.
+        // to saturation. Each color uses a fine-grained tolerance based on empirically
+        // observed maximum hue differences.
         
-        const int hue_tolerance = 47;  // Minimum tolerance needed - determined empirically from test failures
-        
-        // Test with a vibrant orange color
+        // Test with a vibrant orange color - low hue error
         CRGB orange(255, 128, 0);
         HSV16 hsv_orange(orange);
         uint16_t original_hue_orange = hsv_orange.h;
@@ -233,9 +232,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
         HSV16 hsv_video_orange(video_orange);
         uint16_t result_hue_orange = hsv_video_orange.h;
         
-        CHECK_CLOSE(original_hue_orange, result_hue_orange, hue_tolerance);
+        const int orange_tolerance = 15;  // Observed: ~14 units max
+        CHECK_CLOSE(original_hue_orange, result_hue_orange, orange_tolerance);
         
-        // Test with a blue-green color
+        // Test with a blue-green color - moderate hue error  
         CRGB blue_green(0, 200, 150);
         HSV16 hsv_blue_green(blue_green);
         uint16_t original_hue_blue_green = hsv_blue_green.h;
@@ -244,9 +244,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
         HSV16 hsv_video_blue_green(video_blue_green);
         uint16_t result_hue_blue_green = hsv_video_blue_green.h;
         
-        CHECK_CLOSE(original_hue_blue_green, result_hue_blue_green, hue_tolerance);
+        const int blue_green_tolerance = 15;  // Observed: ~14 units max
+        CHECK_CLOSE(original_hue_blue_green, result_hue_blue_green, blue_green_tolerance);
         
-        // Test with a purple color
+        // Test with a purple color - low hue error
         CRGB purple(180, 50, 200);
         HSV16 hsv_purple(purple);
         uint16_t original_hue_purple = hsv_purple.h;
@@ -255,9 +256,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
         HSV16 hsv_video_purple(video_purple);
         uint16_t result_hue_purple = hsv_video_purple.h;
         
-        CHECK_CLOSE(original_hue_purple, result_hue_purple, hue_tolerance);
+        const int purple_tolerance = 5;  // Typically very small error
+        CHECK_CLOSE(original_hue_purple, result_hue_purple, purple_tolerance);
         
-        // Test with a warm yellow color
+        // Test with a warm yellow color - highest hue error case
         CRGB warm_yellow(255, 220, 80);
         HSV16 hsv_warm_yellow(warm_yellow);
         uint16_t original_hue_warm_yellow = hsv_warm_yellow.h;
@@ -266,9 +268,10 @@ TEST_CASE("RGB to HSV16 to RGB") {
         HSV16 hsv_video_warm_yellow(video_warm_yellow);
         uint16_t result_hue_warm_yellow = hsv_video_warm_yellow.h;
         
-        CHECK_CLOSE(original_hue_warm_yellow, result_hue_warm_yellow, hue_tolerance);
+        const int warm_yellow_tolerance = 48;  // Observed: ~47 units max (highest error case)
+        CHECK_CLOSE(original_hue_warm_yellow, result_hue_warm_yellow, warm_yellow_tolerance);
         
-        // Test edge case: Very saturated red (hue around 0)
+        // Test edge case: Very saturated red (hue around 0) - handle wraparound
         CRGB bright_red(255, 30, 30);
         HSV16 hsv_bright_red(bright_red);
         uint16_t original_hue_bright_red = hsv_bright_red.h;
@@ -285,7 +288,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
         uint16_t hue_diff_wraparound = 65535 - hue_diff;
         uint16_t min_hue_diff = (hue_diff < hue_diff_wraparound) ? hue_diff : hue_diff_wraparound;
         
-        CHECK(min_hue_diff <= hue_tolerance);
+        const int bright_red_tolerance = 8;  // Small tolerance for red wraparound case
+        CHECK(min_hue_diff <= bright_red_tolerance);
     }
 
 }
