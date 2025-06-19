@@ -260,32 +260,31 @@ TEST_CASE("RGB to HSV16 to RGB") {
     }
 }
 
-TEST_CASE("ToVideoRGB_8bit() preserves hue") {
+#define TEST_VIDEO_RGB_HUE_PRESERVATION(color, hue_tolerance) \
+    do { \
+        HSV16 hsv_original(color); \
+        uint16_t original_hue = hsv_original.h; \
+        \
+        CRGB video_result = hsv_original.ToVideoRGB_8bit(); \
+        HSV16 hsv_video_result(video_result); \
+        uint16_t result_hue = hsv_video_result.h; \
+        /* Special handling for hue around 0 (red) - check for wraparound */ \
+        uint16_t hue_diff = (original_hue > result_hue) \
+                                ? (original_hue - result_hue) \
+                                : (result_hue - original_hue); \
+        /* Also check wraparound case (difference near 65535) */ \
+        uint16_t hue_diff_wraparound = 65535 - hue_diff; \
+        uint16_t min_hue_diff = \
+            (hue_diff < hue_diff_wraparound) ? hue_diff : hue_diff_wraparound; \
+        \
+        uint8_t hue_diff_8bit = map16_to_8(min_hue_diff); \
+        \
+        CHECK(hue_diff_8bit <= hue_tolerance); \
+    } while(0)
+
+TEST_CASE("ToVideoRGB_8bit() preserves hue - easy cases") {
 
     // Helper function to test ToVideoRGB_8bit() hue preservation
-
-    auto test_video_rgb_hue_preservation = [](const CRGB &color, uint8_t hue_tolerance) {
-        HSV16 hsv_original(color);
-        uint16_t original_hue = hsv_original.h;
-
-        CRGB video_result = hsv_original.ToVideoRGB_8bit();
-        HSV16 hsv_video_result(video_result);
-        uint16_t result_hue = hsv_video_result.h;
-        // Special handling for hue around 0 (red) - check for wraparound
-        uint16_t hue_diff = (original_hue > result_hue)
-                                ? (original_hue - result_hue)
-                                : (result_hue - original_hue);
-        // Also check wraparound case (difference near 65535)
-        uint16_t hue_diff_wraparound = 65535 - hue_diff;
-        uint16_t min_hue_diff = (hue_diff < hue_diff_wraparound)
-                                    ? hue_diff
-                                    : hue_diff_wraparound;
-
-        uint8_t hue_diff_8bit = map16_to_8(min_hue_diff);
-
-        CHECK(hue_diff_8bit <= hue_tolerance);
-        
-    };
 
     // Test that ToVideoRGB_8bit() preserves the hue while applying gamma
     // correction to saturation. Each color uses a fine-grained tolerance based
@@ -293,34 +292,130 @@ TEST_CASE("ToVideoRGB_8bit() preserves hue") {
 
     SUBCASE("Orange - Low hue error") {
         // Test with a vibrant orange color - wraparound helped reduce tolerance
-        test_video_rgb_hue_preservation(CRGB(255, 128, 0),
-                                        0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 128, 0), 0);
     }
 
     SUBCASE("Blue-Green - Moderate hue error") {
         // Test with a blue-green color - exactly 14 units max error observed
-        test_video_rgb_hue_preservation(CRGB(0, 200, 150),
-                                        0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 200, 150), 0);
     }
 
     SUBCASE("Purple - Very low hue error") {
         // Test with a purple color - exactly 4 units max error observed
-        test_video_rgb_hue_preservation(CRGB(180, 50, 200),
-                                        0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 50, 200), 0);
     }
 
     SUBCASE("Warm Yellow - Highest hue error case") {
-        // Test with a warm yellow color - this is the worst case with exactly 47 units
-        // max error (empirically determined as the absolute worst case across all test colors)
-        test_video_rgb_hue_preservation(
-            CRGB(255, 220, 80),
-            0);
+        // Test with a warm yellow color - this is the worst case with exactly
+        // 47 units max error (empirically determined as the absolute worst case
+        // across all test colors)
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 220, 80), 0);
     }
 
     SUBCASE("Bright Red - Wraparound case") {
         // Test edge case: Very saturated red (hue around 0) - handle wraparound
         // Special case due to hue wraparound at 0/65535 boundary
-        test_video_rgb_hue_preservation(
-            CRGB(255, 30, 30), 0);
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 30, 30), 0);
+    }
+}
+
+TEST_CASE("ToVideoRGB_8bit() preserves hue - hard cases") {
+
+    SUBCASE("Low Saturation Colors - Hue Instability") {
+        // Very low saturation colors can have unstable hue values
+        // These are problematic because small changes in RGB can cause large
+        // hue shifts
+        TEST_VIDEO_RGB_HUE_PRESERVATION(
+            CRGB(130, 128, 125), 5); // Nearly gray with slight brown tint
+        TEST_VIDEO_RGB_HUE_PRESERVATION(
+            CRGB(100, 98, 102), 8); // Nearly gray with slight purple tint
+        TEST_VIDEO_RGB_HUE_PRESERVATION(
+            CRGB(85, 87, 83), 10); // Nearly gray with slight green tint
+    }
+
+    SUBCASE("Very Dark Colors - Low Value Instability") {
+        // Very dark colors are problematic because quantization errors are
+        // magnified Small RGB differences become large relative changes in dark
+        // colors
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 10, 8),
+                                        15); // Dark muddy brown
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(12, 8, 20), 12); // Dark purple
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 15, 12), 18); // Dark greenish
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(20, 12, 8),
+                                        10); // Dark reddish brown
+    }
+
+    SUBCASE("Hue Boundary Colors - Transition Regions") {
+        // Colors near hue boundaries between primary colors can be sensitive
+        // These test the transitions: red->yellow, yellow->green, green->cyan,
+        // etc.
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 64, 0),
+                                        3); // Red-orange boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(192, 255, 0),
+                                        4); // Yellow-green boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 255, 128),
+                                        2); // Green-cyan boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(0, 128, 255),
+                                        3); // Cyan-blue boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(128, 0, 255),
+                                        5); // Blue-magenta boundary
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 0, 128),
+                                        2); // Magenta-red boundary
+    }
+
+    SUBCASE("Medium Saturation, Medium Value - Gamma Sensitive") {
+        // Mid-range colors that are most affected by gamma correction
+        // These have enough saturation to be affected but not enough to be
+        // stable
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 120, 60),
+                                        6); // Brownish orange
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(120, 180, 90), 80); // Olive green
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(90, 120, 180), 3); // Steel blue
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(180, 90, 150),
+                                        7); // Mauve/dusty rose
+    }
+
+    SUBCASE("Single Component Dominant - Extreme Ratios") {
+        // Colors where one component dominates, creating extreme RGB ratios
+        // These can be sensitive to gamma correction on the smaller components
+        TEST_VIDEO_RGB_HUE_PRESERVATION(
+            CRGB(250, 10, 5), 8); // Intense red with tiny other components
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(8, 240, 12),
+                                        6); // Intense green with small others
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(15, 8, 245),
+                                        4); // Intense blue with tiny others
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 8),
+                                        5); // Bright yellow with minimal blue
+    }
+
+    SUBCASE("Pastel Colors - High Value, Low Saturation") {
+        // Pastel colors combine the instability of low saturation with high
+        // brightness Gamma correction can shift these significantly
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 200), 8); // Light pink
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 200),
+                                        6); // Light mint green
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 200, 255),
+                                        4); // Light periwinkle blue
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 255, 200),
+                                        3); // Light cream yellow
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(255, 200, 255),
+                                        7); // Light lavender
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 255, 255), 5); // Light aqua
+    }
+
+    SUBCASE("Problematic RGB Combinations - Known Difficult Cases") {
+        // Specific RGB combinations that are empirically known to be
+        // problematic These were identified as causing the largest hue shifts
+        // in testing
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(77, 150, 200),
+                                        8); // Sky blue - moderate saturation
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(200, 150, 77),
+                                        12); // Tan/beige - tricky brown region
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(150, 77, 200),
+                                        9); // Orchid purple - mid-range values
+        TEST_VIDEO_RGB_HUE_PRESERVATION(CRGB(33, 66, 99),
+                                        15); // Dark slate blue - low overall
+        TEST_VIDEO_RGB_HUE_PRESERVATION(
+            CRGB(99, 33, 66), 18); // Dark maroon - challenging red region
     }
 }
