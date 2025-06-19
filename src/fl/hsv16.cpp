@@ -69,10 +69,17 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
     // Calculate intermediate values using fixed-point arithmetic
     uint32_t c = (v * s) / 65535;           // Chroma
     
-    // Calculate x = c * (1 - |((sector_pos / 32768) % 2) - 1|)
-    uint32_t normalized_pos = sector_pos / 1024; // Scale to 0-63 range
-    uint32_t triangle_wave = (normalized_pos <= 32) ? normalized_pos : (64 - normalized_pos);
-    uint32_t x = (c * triangle_wave * 2048) / 65535; // Scale back up
+    // Calculate x = c * (1 - |((sector_pos / 65536) * 2 - 1)|)
+    // This is the correct HSV to RGB intermediate value calculation
+    uint32_t f = sector_pos;  // fractional part (0-65535)
+    uint32_t x;
+    if (sector & 1) {
+        // For odd sectors (1, 3, 5), we want decreasing values
+        x = (c * (65535 - f)) / 65535;
+    } else {
+        // For even sectors (0, 2, 4), we want increasing values
+        x = (c * f) / 65535;
+    }
     
     uint32_t m = v - c;
 
@@ -85,44 +92,6 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
         case 4: r1 = x; g1 = 0; b1 = c; break;
         default: r1 = c; g1 = 0; b1 = x; break;
     }
-
-
-
-// LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
-//     return uint16_t(x) * 0x101;
-// }
-
-// // map16_to_8: map 16-bit values to 8-bit values
-// //   This function maps 16-bit values to 8-bit values.
-// LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
-//     // Tested to be nearly identical to double precision floating point
-//     // doing this operation.
-//     if (x == 0) {
-//         return 0;
-//     }
-//     if (x >= 0xff00) {
-//         return 0xff;
-//     }
-//     return uint8_t((x + 128) >> 8);
-// }
-
-// LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
-//     // Tested to be nearly identical to double precision floating point
-//     // doing this operation.
-//     if (x == 0) {
-//         return 0;
-//     }
-//     if (x >= 0xffff0000) {
-//         return 0xffff;
-//     }
-//     return uint16_t((x + 32768) >> 16);
-// }
-
-// LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
-//     return uint32_t(x) * 0x1010101;
-// }
-
-
 
     // Add baseline and scale to 8-bit using more accurate mapping
     uint8_t R = map16_to_8(uint16_t(r1 + m));

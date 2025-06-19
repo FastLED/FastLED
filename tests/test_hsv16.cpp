@@ -119,45 +119,35 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK(gray_direct_result.r <= 128 + 5);
     }
 
-    SUBCASE("Secondary Colors - Known Limitations") {
-        // Document the known limitations with secondary colors
-        // These are not errors in the test, but limitations of the HSV16 implementation
+    SUBCASE("Secondary Colors - Good Conversion") {
+        // These secondary colors should now convert accurately with the fixed HSV16 implementation
         
-        // Yellow loses green component almost entirely - be very permissive here
-        const int yellow_red_tolerance = 5;    // Red should be mostly preserved
-        const int yellow_green_tolerance = 50; // Green has major loss (known limitation)
-        const int yellow_blue_tolerance = 5;   // Blue should stay near 0
-        
+        // Yellow should preserve both red and green components
+        const int yellow_tolerance = 0;  // Reduced from 1 to 0 - perfect conversion!
         CRGB yellow(255, 255, 0);
         HSV16 hsv_yellow(yellow);
         CRGB yellow_result = hsv_yellow.ToRGB();
-        CHECK(yellow_result.r >= 255 - yellow_red_tolerance);   // Red should be preserved
-        CHECK(yellow_result.g <= yellow_green_tolerance);       // Green is lost (known limitation)
-        CHECK(yellow_result.b <= yellow_blue_tolerance);        // Blue should stay 0
+        CHECK_CLOSE(yellow_result.r, yellow.r, yellow_tolerance);   // Red should be preserved
+        CHECK_CLOSE(yellow_result.g, yellow.g, yellow_tolerance);   // Green should be preserved
+        CHECK_CLOSE(yellow_result.b, yellow.b, yellow_tolerance);   // Blue should stay 0
 
-        // Cyan loses blue component almost entirely
-        const int cyan_red_tolerance = 5;    // Red should stay near 0
-        const int cyan_green_tolerance = 5;  // Green should be mostly preserved
-        const int cyan_blue_tolerance = 50;  // Blue has major loss (known limitation)
-        
+        // Cyan should preserve both green and blue components
+        const int cyan_tolerance = 0;   // Reduced from 1 to 0 - perfect conversion!
         CRGB cyan(0, 255, 255);
         HSV16 hsv_cyan(cyan);
         CRGB cyan_result = hsv_cyan.ToRGB();
-        CHECK(cyan_result.r <= cyan_red_tolerance);              // Red should stay 0
-        CHECK(cyan_result.g >= 255 - cyan_green_tolerance);      // Green should be preserved
-        CHECK(cyan_result.b <= cyan_blue_tolerance);             // Blue is lost (known limitation)
+        CHECK_CLOSE(cyan_result.r, cyan.r, cyan_tolerance);         // Red should stay 0
+        CHECK_CLOSE(cyan_result.g, cyan.g, cyan_tolerance);         // Green should be preserved
+        CHECK_CLOSE(cyan_result.b, cyan.b, cyan_tolerance);         // Blue should be preserved
 
-        // Magenta loses red component almost entirely
-        const int magenta_red_tolerance = 50;  // Red has major loss (known limitation)
-        const int magenta_green_tolerance = 5; // Green should stay near 0
-        const int magenta_blue_tolerance = 5;  // Blue should be mostly preserved
-        
+        // Magenta should preserve both red and blue components
+        const int magenta_tolerance = 0; // Reduced from 1 to 0 - perfect conversion!
         CRGB magenta(255, 0, 255);
         HSV16 hsv_magenta(magenta);
         CRGB magenta_result = hsv_magenta.ToRGB();
-        CHECK(magenta_result.r <= magenta_red_tolerance);        // Red is lost (known limitation)
-        CHECK(magenta_result.g <= magenta_green_tolerance);      // Green should stay 0
-        CHECK(magenta_result.b >= 255 - magenta_blue_tolerance); // Blue should be preserved
+        CHECK_CLOSE(magenta_result.r, magenta.r, magenta_tolerance); // Red should be preserved
+        CHECK_CLOSE(magenta_result.g, magenta.g, magenta_tolerance); // Green should stay 0
+        CHECK_CLOSE(magenta_result.b, magenta.b, magenta_tolerance); // Blue should be preserved
     }
 
     SUBCASE("Basic Functionality Verification") {
