@@ -17,3 +17,8 @@ TEST_CASE("CIELAB16 basic operations") {
         CHECK(c2.b == c.b);
     }
 }
+
+
+TEST_CASE("CIELAB16 video operations") {
+
+}
