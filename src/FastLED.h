@@ -935,6 +935,8 @@ FASTLED_NAMESPACE_END
 #include "fl/leds.h"
 
 #include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription.
+using fl::UITitle;
+using fl::UIDescription;
 using fl::UIButton;  // These names are unique enough that we don't need to namespace them
 using fl::UICheckbox;
 using fl::UINumberField;
