@@ -17,8 +17,8 @@ struct HSV16 {
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // Do you want a function to simulate gamma correction but doesn't
-    // decimate the color? Use colorBoost() to boost the saturation without
-    // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
+    // decimate the color? Use colorBoost() to boost the saturation.
+    // This works great for WS2812 and any other RGB8 LEDs.
     CRGB colorBoost() const;
 };
 

@@ -8,7 +8,7 @@
 using namespace fl;
 
 UITitle title("ColorBoost");
-UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).");
+UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component), for best results use the legacy gfx mode using ?gfx=0 at the url up top.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
 
