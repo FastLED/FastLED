@@ -509,20 +509,34 @@ LIB8STATIC uint16_t ease16InOutApprox( uint16_t i)
 /// Takes around 18 cycles on AVR.
 LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 {
-    uint8_t ii  = scale8_LEAVING_R1_DIRTY(  i, i);
-    uint8_t iii = scale8_LEAVING_R1_DIRTY( ii, i);
-
-    uint16_t r1 = (3 * (uint16_t)(ii)) - ( 2 * (uint16_t)(iii));
-
-    /* the code generated for the above *'s automatically
-       cleans up R1, so there's no need to explicitily call
-       cleanup_R1(); */
-
-    uint8_t result = r1;
-
-    // if we got "256", return 255:
-    if( r1 & 0x100 ) {
+    uint8_t j = i;
+    if( j & 0x80 ) {
+        j = 255 - j;
+    }
+    
+    // Use a formula closer to true cubic behavior that maintains monotonicity
+    // The mathematical cubic is 3x^2 - 2x^3, but we need to adapt for 8-bit precision
+    uint8_t jj  = scale8( j, j );        // j^2 / 255
+    uint8_t jjj = scale8( jj, j );       // j^3 / 255^2
+    
+    // Create a cubic-like approximation: scale the quadratic term and subtract scaled cubic
+    // Using: 2.5 * j^2 - 1.5 * j^3 (approximately)
+    // This approximates the cubic formula while ensuring monotonicity
+    uint16_t quad_scaled = jj + (jj >> 1);  // 1.5 * j^2 (approximately)
+    uint8_t cubic_scaled = jjj;             // j^3
+    
+    // Combine to get cubic-like behavior
+    uint16_t result16 = quad_scaled + jj - cubic_scaled;  // ~2.5*j^2 - j^3
+    
+    uint8_t result;
+    if( result16 > 255 ) {
         result = 255;
+    } else {
+        result = (uint8_t)result16;
+    }
+    
+    if( i & 0x80 ) {
+        result = 255 - result;
     }
     return result;
 }
@@ -853,7 +867,7 @@ LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8
 
 /// @} BeatGenerators
 
-/// @} lib8tion, to exclude timekeeping functions
+/// @} lib8tion, to exclude timekeeping functions from the nested group
 
 
 ///////////////////////////////////////////////////////////////////////
