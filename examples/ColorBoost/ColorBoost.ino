@@ -75,12 +75,27 @@ void rainbowWave() {
             // Upper half (rows 0-49): original colors
             // Lower half (rows 50-99): transformed colors using
             // toVideoRGB_8bit()
-            if (y > NUM_STRIPS / 2) {
+            if (y > NUM_STRIPS / 3 * 2) {
                 // Upper half - original colors
                 leds[xyMap(x, y)] = original_color;
+            } else if (y > NUM_STRIPS / 3) {
+                // Middle half - transformed colors
+                leds[xyMap(x, y)] = original_color.colorBoost();
             } else {
                 // Lower half - transformed colors
-                leds[xyMap(x, y)] = original_color.colorBoost();
+                float r = original_color.r / 255.f;
+                float g = original_color.g / 255.f;
+                float b = original_color.b / 255.f;
+
+                r = pow(r, 2.0);
+                g = pow(g, 2.0);
+                b = pow(b, 2.0);
+
+                r = r * 255.f;
+                g = g * 255.f;
+                b = b * 255.f;
+
+                leds[xyMap(x, y)] = CRGB(r, g, b);
             }
         }
     }
