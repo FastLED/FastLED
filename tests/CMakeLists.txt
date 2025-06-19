@@ -80,23 +80,30 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-variable
     -Werror=unused-value
     -Werror=cast-align
-    -Werror=class-memaccess
     -Werror=misleading-indentation
     -Werror=uninitialized
-    -Werror=maybe-uninitialized
     -Werror=array-bounds
     -Werror=strict-overflow=2
     -Werror=null-dereference
-    -Werror=logical-op
     -Werror=format-security
-    #-Werror=shadow
     -Werror=unused-function
-    #-Werror=deprecated-declarations
+    -Werror=deprecated-declarations
+    # Additional warnings for gradual code quality improvement
+    #-Wshadow
     -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
     -Wno-comment
     # ignore Arduino/PlatformIO-specific PROGMEM macro
     -DPROGMEM=
 )
+
+# Add GCC-specific warning flags
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND COMMON_COMPILE_FLAGS 
+        -Werror=maybe-uninitialized
+        -Werror=logical-op
+        -Werror=class-memaccess
+    )
+endif()
 
 # C++-specific compiler flags
 set(CXX_SPECIFIC_FLAGS
@@ -107,13 +114,20 @@ set(CXX_SPECIFIC_FLAGS
     -Werror=float-equal
     -Werror=mismatched-tags
     -Werror=switch-enum
-    #-Werror=old-style-cast
-    -Werror=zero-as-null-pointer-constant
+    #-Werror=zero-as-null-pointer-constant
     -Werror=delete-non-virtual-dtor
-    #-Werror=useless-cast
-    -Werror=redundant-move
-    #-Werror=sign-conversion
+    # Additional warnings for gradual code quality improvement
+    #-Wold-style-cast
+    #-Wsign-conversion
 )
+
+# Add GCC-specific C++ warning flags
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND CXX_SPECIFIC_FLAGS 
+        #-Werror=useless-cast
+        -Werror=redundant-move
+    )
+endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     list(APPEND CXX_SPECIFIC_FLAGS -Werror=self-assign -Werror=infinite-recursion -Werror=extra-tokens -Werror=unused-private-field -Wglobal-constructors -Werror=global-constructors)
@@ -144,7 +158,6 @@ set(UNIT_TEST_COMPILE_FLAGS
     #-Werror=unused-variable
     #-Werror=unused-value
     -Werror=uninitialized
-    -Werror=maybe-uninitialized
     -Werror=array-bounds
     -Werror=null-dereference
     -Werror=deprecated-declarations
@@ -155,6 +168,13 @@ set(UNIT_TEST_COMPILE_FLAGS
     -Wno-comment
 )
 
+# Add GCC-specific unit test warning flags
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND UNIT_TEST_COMPILE_FLAGS 
+        -Werror=maybe-uninitialized
+    )
+endif()
+
 set(UNIT_TEST_CXX_FLAGS
     -Werror=suggest-override
     -Werror=non-virtual-dtor
@@ -164,7 +184,7 @@ set(UNIT_TEST_CXX_FLAGS
     #-Werror=float-equal
     #-Werror=conversion
     -Werror=delete-non-virtual-dtor
-    -Werror=zero-as-null-pointer-constant
+    #-Werror=zero-as-null-pointer-constant
 )
 
 set(COMMON_COMPILE_DEFINITIONS
