@@ -43,7 +43,7 @@ using namespace fl;
 #define CORKSCREW_TURNS 2 // Default to 19 turns
 #else
 #define NUM_LEDS  288
-#define CORKSCREW_TURNS 19.0 // Default to 19 turns
+#define CORKSCREW_TURNS 19.25 // Default to 19 turns
 #endif
 
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs

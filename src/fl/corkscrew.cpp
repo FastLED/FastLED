@@ -7,6 +7,7 @@
 #include "fl/tile2x2.h"
 #include "fl/math_macros.h"
 #include "fl/unused.h"
+#include "fl/map_range.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -63,15 +64,15 @@ vec2f Corkscrew::at_exact(uint16_t i) const {
     vec2f position = calculateLedPositionExtended(i, mInput.numLeds, mInput.totalTurns, 
                                          mInput.offsetCircumference, mState.width, mState.height);
     
-    // Apply inversion if requested
-    if (mInput.invert) {
-        uint16_t invertedIndex = mInput.numLeds - 1 - i;
-        position = calculateLedPositionExtended(invertedIndex, mInput.numLeds, mInput.totalTurns, 
-                                       mInput.offsetCircumference, mState.width, mState.height);
-    }
+    // // Apply inversion if requested
+    // if (mInput.invert) {
+    //     uint16_t invertedIndex = mInput.numLeds - 1 - i;
+    //     position = calculateLedPositionExtended(invertedIndex, mInput.numLeds, mInput.totalTurns, 
+    //                                    mInput.offsetCircumference, mState.width, mState.height);
+    // }
 
     // now wrap the x-position
-    position.x = fmodf(position.x, static_cast<float>(mState.width));
+    //position.x = fmodf(position.x, static_cast<float>(mState.width));
     
     return position;
 }
@@ -97,15 +98,8 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
         // Interpolate between the two points and return the splat of the result
         vec2f pos1 = at_exact(static_cast<uint16_t>(i_floor));
         vec2f pos2 = at_exact(static_cast<uint16_t>(i_ceil));
-
-        if (pos2.x < pos1.x) {
-            // If the next point is on the other side of the cylinder, we need
-            // to wrap it around and bring it back into the positive direction so we can construct a Tile2x2_u8 wrap with it.
-            pos2.x += mState.width;
-        }
-
-        vec2f interpolated_pos =
-            pos1 * (1.0f - (i - i_floor)) + pos2 * (i - i_floor);
+        float t = i - i_floor;
+        vec2f interpolated_pos = map_range(t, 0.0f, 1.0f, pos1, pos2);
         return splat(interpolated_pos);
     }
 }
@@ -124,7 +118,19 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
     // This is a splatted pixel, but wrapped around the cylinder.
     // This is useful for rendering the corkscrew in a cylindrical way.
     Tile2x2_u8 tile = at_splat_extrapolate(i);
-    return Tile2x2_u8_wrap(tile, mState.width, mState.height);
+    Tile2x2_u8_wrap::Entry data[2][2];
+    vec2i16 origin = tile.origin();
+    for (uint8_t x = 0; x < 2; x++) {
+        for (uint8_t y = 0; y < 2; y++) {
+            // For each pixel in the tile, map it to the cylinder so that each subcomponent
+            // is mapped to the correct position on the cylinder.
+            vec2i16 pos = origin + vec2i16(x, y);
+            // now wrap the x-position
+            pos.x = fmodf(pos.x, static_cast<float>(mState.width));
+            data[x][y] = {pos, tile.at(x, y)};
+        }
+    }
+    return Tile2x2_u8_wrap(data);
 }
 
 // Iterator implementation
