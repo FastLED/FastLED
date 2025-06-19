@@ -2,7 +2,6 @@
 #include "fl/math.h"
 
 #include "lib8tion/intmap.h"
-#include "lib8tion/scale8.h"
 #include "fl/ease.h"
 
 namespace fl {
