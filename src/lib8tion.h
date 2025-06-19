@@ -465,19 +465,33 @@ LIB8STATIC uint16_t ease16InOutQuad( uint16_t i)
 
 /// 16-bit cubic ease-in / ease-out function.
 /// Equivalent to ease8InOutCubic() but for 16-bit values.
-/// Formula: 3(x^2) - 2(x^3)
+/// Formula: 3(x^2) - 2(x^3) applied with proper ease-in-out curve
 LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
 {
-    uint32_t ii  = scale16( i, i);        // i^2 (16-bit result)
-    uint32_t iii = scale16( ii, i);       // i^3 (16-bit result)
-
-    uint32_t r1 = (3 * ii) - (2 * iii);
-
-    // Clamp to 16-bit range
-    if( r1 > 65535 ) {
-        return 65535;
+    uint16_t j = i;
+    if( j & 0x8000 ) {
+        j = 65535 - j;
     }
-    return (uint16_t)r1;
+    
+    // Normalize j to work in 0-32767 range, then apply cubic formula
+    uint16_t jj  = scale16( j, j);        // j^2 scaled
+    uint16_t iii = scale16( jj, j);       // j^3 scaled
+    
+    // Apply cubic formula: 3x^2 - 2x^3
+    // Note: we need to be careful with the arithmetic to avoid overflow
+    uint32_t r1 = (3 * (uint32_t)jj) - (2 * (uint32_t)iii);
+    uint16_t result = (r1 > 65535) ? 65535 : (uint16_t)r1;
+    
+    // Double for full ease-in-out range since we worked with half-range
+    uint32_t result2 = ((uint32_t)result) << 1;
+    if( result2 > 65535 ) {
+        result2 = 65535;
+    }
+    
+    if( i & 0x8000 ) {
+        result2 = 65535 - result2;
+    }
+    return (uint16_t)result2;
 }
 
 
@@ -487,22 +501,31 @@ LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
 /// but executes faster with a piecewise linear approximation.
 LIB8STATIC uint16_t ease16InOutApprox( uint16_t i)
 {
-    if( i < 16384) {  // 16384 = 65536/4, equivalent to 64 in 8-bit
-        // start with slope 0.5
-        i /= 2;
-    } else if( i > (65535 - 16384)) {  // equivalent to i > (255 - 64) in 8-bit
-        // end with slope 0.5
-        i = 65535 - i;
-        i /= 2;
-        i = 65535 - i;
-    } else {
-        // in the middle, use slope 1.5
-        i -= 16384;
-        i += (i / 2);
-        i += 8192;  // 8192 = 16384/2, equivalent to 32 in 8-bit
+    uint16_t j = i;
+    if( j & 0x8000 ) {
+        j = 65535 - j;
     }
-
-    return i;
+    
+    // Apply piecewise linear approximation to normalized input (0 to 32767 range)
+    // This creates an S-curve approximation using three linear segments
+    if( j < 16384 ) {  // First half of ease-in: slower start
+        j = j >> 1;  // Start with slope 0.5
+    } else {  // Second half of ease-in: faster acceleration  
+        j = j - 16384;
+        j = j + (j >> 1);  // Slope 1.5
+        j = j + 8192;      // Add offset from first segment
+    }
+    
+    // Double for full range since we worked in half-range
+    uint32_t result = ((uint32_t)j) << 1;
+    if( result > 65535 ) {
+        result = 65535;
+    }
+    
+    if( i & 0x8000 ) {
+        result = 65535 - result;
+    }
+    return (uint16_t)result;
 }
 
 /// 8-bit cubic ease-in / ease-out function. 
