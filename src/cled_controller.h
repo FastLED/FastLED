@@ -191,13 +191,13 @@ public:
     /// @returns a reference to the controller
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
 
-    CLEDController& setScreenMap(const fl::XYMap& map) {
+    CLEDController& setScreenMap(const fl::XYMap& map, float diameter = -1.f) {
         // EngineEvents::onCanvasUiSet(this, map);
         fl::ScreenMap screenmap = map.toScreenMap();
-        if (screenmap.getDiameter() <= 0.0f) {
+        if (diameter <= 0.0f) {
             // screen map was not set.
             if (map.getTotal() <= (64*64)) {
-                screenmap.setDiameter(.2); // Assume small matrix is being used.
+                screenmap.setDiameter(.1); // Assume small matrix is being used.
             }
         }
         fl::EngineEvents::onCanvasUiSet(this, screenmap);
@@ -209,8 +209,9 @@ public:
         return *this;
     }
 
-    CLEDController& setScreenMap(uint16_t width, uint16_t height) {
-        return setScreenMap(fl::XYMap::constructRectangularGrid(width, height));
+    CLEDController& setScreenMap(uint16_t width, uint16_t height, float diameter = -1.f) {
+        fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
+        return setScreenMap(xymap, diameter);
     }
 
     /// Get the dithering option currently set for this controller

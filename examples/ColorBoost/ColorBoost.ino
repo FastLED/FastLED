@@ -11,6 +11,8 @@ UITitle title("ColorBoost");
 UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component), for best results use the legacy gfx mode using ?gfx=0 at the url up top.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
+UICheckbox boostSaturation("Boost Saturation", true);
+UICheckbox boostContrast("Boost Contrast", false);
 
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
@@ -80,7 +82,7 @@ void rainbowWave() {
                 leds[xyMap(x, y)] = original_color;
             } else if (y > NUM_STRIPS / 3) {
                 // Middle half - transformed colors
-                leds[xyMap(x, y)] = original_color.colorBoost();
+                leds[xyMap(x, y)] = original_color.colorBoost(boostSaturation, boostContrast);
             } else {
                 // Lower half - transformed colors
                 float r = original_color.r / 255.f;

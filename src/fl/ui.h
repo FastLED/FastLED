@@ -201,6 +201,7 @@ class UICheckbox : public UICheckboxImpl {
         impl() = value;
         return *this;
     }
+    bool value() const { return Super::value(); }
 
 
     void onChanged(function<void(UICheckbox &)> callback) {
