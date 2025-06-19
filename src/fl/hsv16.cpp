@@ -1,6 +1,8 @@
 #include "fl/hsv16.h"
 #include "fl/math.h"
 
+#include "lib8tion/intmap.h"
+
 namespace fl {
 
 static HSV16 RGBtoHSV16(const CRGB &rgb) {
@@ -84,10 +86,48 @@ static CRGB HSV16toRGB(const HSV16& hsv) {
         default: r1 = c; g1 = 0; b1 = x; break;
     }
 
-    // Add baseline and scale to 8-bit
-    uint8_t R = ((r1 + m) * 255) / 65535;
-    uint8_t G = ((g1 + m) * 255) / 65535;
-    uint8_t B = ((b1 + m) * 255) / 65535;
+
+
+// LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
+//     return uint16_t(x) * 0x101;
+// }
+
+// // map16_to_8: map 16-bit values to 8-bit values
+// //   This function maps 16-bit values to 8-bit values.
+// LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
+//     // Tested to be nearly identical to double precision floating point
+//     // doing this operation.
+//     if (x == 0) {
+//         return 0;
+//     }
+//     if (x >= 0xff00) {
+//         return 0xff;
+//     }
+//     return uint8_t((x + 128) >> 8);
+// }
+
+// LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
+//     // Tested to be nearly identical to double precision floating point
+//     // doing this operation.
+//     if (x == 0) {
+//         return 0;
+//     }
+//     if (x >= 0xffff0000) {
+//         return 0xffff;
+//     }
+//     return uint16_t((x + 32768) >> 16);
+// }
+
+// LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
+//     return uint32_t(x) * 0x1010101;
+// }
+
+
+
+    // Add baseline and scale to 8-bit using more accurate mapping
+    uint8_t R = map16_to_8(uint16_t(r1 + m));
+    uint8_t G = map16_to_8(uint16_t(g1 + m));
+    uint8_t B = map16_to_8(uint16_t(b1 + m));
 
     return CRGB{R, G, B};
 }
