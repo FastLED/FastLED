@@ -237,16 +237,16 @@ TEST_CASE("easeInOutCubic16") {
         }
     }
 
-#if 0
+
 
     SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
         uint16_t quad_result = easeInOutQuad16(quarter);
-        uint16_t cubic_result = ease16InOutCubic(quarter);
+        uint16_t cubic_result = easeInOutCubic16(quarter);
         CHECK_LT(cubic_result, quad_result);
     }
 
-
+#if 0
 
     SUBCASE("scaling consistency with 8-bit") {
         for (uint16_t i = 0; i <= 255; ++i) {
