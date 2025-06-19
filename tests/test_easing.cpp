@@ -195,7 +195,6 @@ TEST_CASE("easeInOutCubic16") {
         CHECK_LT(cubic_result, quad_result);
     }
 
-
     SUBCASE("scaling consistency with 8-bit") {
         for (uint16_t i = 0; i <= 255; ++i) {
             uint8_t input8 = i;
@@ -212,12 +211,9 @@ TEST_CASE("easeInOutCubic16") {
             CHECK_LE(diff, 2);
         }
     }
-
 }
 
 TEST_CASE("easing function ordering") {
-
-#if 0
 
     SUBCASE("8-bit: cubic should be more pronounced than quadratic") {
         for (uint16_t i = 32; i < 128; i += 16) { // test ease-in portion
@@ -232,8 +228,6 @@ TEST_CASE("easing function ordering") {
             CHECK_GE(cubic, quad);
         }
     }
-
-#endif
 
     SUBCASE("16-bit: cubic should be more pronounced than quadratic") {
         for (uint32_t i = 8192; i < 32768; i += 4096) { // test ease-in portion
