@@ -105,3 +105,77 @@ hsv2rgb_fullspectrum(hsv, rgb3);
 ## Testing
 
 The `examples/HSVTest/HSVTest.ino` file provides a comprehensive test of the different conversion methods. Compile it with different defines to see the differences in output. 
+
+## Detailed Comparison
+
+From `tests/test_hsv_conversion_accuracy.cpp`
+
+```
+=== HSV to RGB Conversion Accuracy Test ===
+Testing RGB -> HSV -> RGB round-trip accuracy
+Sampling every 8th RGB value for comprehensive coverage
+
+
+hsv2rgb_rainbow Error Statistics:
+  Average: 82.197899
+  Median:  64.660652
+  Min:     0.000000
+  Max:     301.333710
+  Samples: 32768
+
+hsv2rgb_spectrum Error Statistics:
+  Average: 96.715103
+  Median:  93.220169
+  Min:     0.000000
+  Max:     278.786652
+  Samples: 32768
+
+hsv2rgb_fullspectrum Error Statistics:
+  Average: 119.301537
+  Median:  119.607689
+  Min:     0.000000
+  Max:     364.731415
+  Samples: 32768
+
+=== Error Comparison ===
+Function            Average    Median     Min        Max
+hsv2rgb_rainbow     82.197899   64.660652   0.000000   301.333710
+hsv2rgb_spectrum    96.715103   93.220169   0.000000   278.786652
+hsv2rgb_fullspectrum119.301537   119.607689   0.000000   364.731415
+
+=== Best Performance Rankings ===
+Lowest Average Error: rainbow (82.197899)
+Lowest Median Error:  rainbow (64.660652)
+Lowest Max Error:     spectrum (278.786652)
+
+
+=== Specific Color Conversion Tests ===
+Color           Original RGB    Rainbow RGB     Spectrum RGB    FullSpectrum RGB
+-------------   -----------     -----------     ------------    ----------------
+Pure Red        (255,  0,  0)   (253,  2,  0)   (251,  0,  0)   (255,  6,  0)
+Pure Green      (  0,255,  0)   (  0,255,  0)   (  0,219, 31)   (  0,255, 64)
+Pure Blue       (  0,  0,255)   (  2,  0,253)   (  0, 27,223)   (  0, 58,255)
+Yellow          (255,255,  0)   (171,170,  0)   ( 59,191,  0)   (128,255,  0)
+Magenta         (255,  0,255)   (253,  2,  0)   (251,  0,  0)   (255,  6,  0)
+Cyan            (  0,255,255)   (  2,  0,253)   (  0, 27,223)   (  0, 58,255)
+White           (255,255,255)   (255,255,255)   (254,254,254)   (255,255,255)
+Black           (  0,  0,  0)   (  0,  0,  0)   (  0,  0,  0)   (  0,  0,  0)
+Gray            (128,128,128)   (128,128,128)   (180,180,180)   (181,181,181)
+Orange          (255,128,  0)   (  0,212, 43)   (  0,171, 79)   (  0,255,160)
+Purple          (128,  0,255)   (130,  0,126)   (111,  0,139)   (230,  0,255)
+Pink            (255,192,203)   (247,191,199)   (249,220,224)   (255,221,232)
+
+
+=== Hue Sweep Conversion Test ===
+Testing full hue range at maximum saturation and brightness
+Hue   Rainbow RGB     Spectrum RGB    FullSpectrum RGB
+----  -----------     ------------    ----------------
+  0   (255,  0,  0)   (251,  0,  0)   (255,  0,  0)
+ 32   (171, 85,  0)   (155, 95,  0)   (255,192,  0)
+ 64   (171,170,  0)   ( 59,191,  0)   (128,255,  0)
+ 96   (  0,255,  0)   (  0,219, 31)   (  0,255, 64)
+128   (  0,171, 85)   (  0,123,127)   (  0,255,255)
+160   (  0,  0,255)   (  0, 27,223)   (  0, 64,255)
+192   ( 85,  0,171)   ( 63,  0,187)   (128,  0,255)
+224   (170,  0, 85)   (159,  0, 91)   (255,  0,192)
+```
