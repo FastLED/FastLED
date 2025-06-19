@@ -26,18 +26,24 @@ uint16_t easeInQuad16(uint16_t i) {
     return scale16(i, i);
 }
 
-uint16_t easeInOutQuad16(uint16_t i) {
+uint16_t easeInOutQuad16(uint16_t x) {
     // 16-bit quadratic ease-in / ease-out function
-    uint16_t j = i;
-    if (j & 0x8000) {
-        j = 65535 - j;
+    constexpr uint32_t MAX    = 0xFFFF;             // 65535
+    constexpr uint32_t HALF   = (MAX + 1) >> 1;     // 32768
+    constexpr uint32_t DENOM  = MAX;                // divisor
+    constexpr uint32_t ROUND  = DENOM >> 1;         // for rounding
+
+    if (x < HALF) {
+        // first half: y = 2·(x/MAX)² → y_i = 2·x² / MAX
+        uint64_t xi  = x;
+        uint64_t num = 2 * xi * xi + ROUND;         // 2*x², +half for rounding
+        return uint16_t(num / DENOM);
+    } else {
+        // second half: y = 1 − 2·(1−x/MAX)² → y_i = MAX − (2·(MAX−x)² / MAX)
+        uint64_t d   = MAX - x;
+        uint64_t num = 2 * d * d + ROUND;           // 2*(MAX−x)², +half for rounding
+        return uint16_t(MAX - (num / DENOM));
     }
-    uint16_t jj = scale16(j, j);
-    uint16_t jj2 = jj << 1;
-    if (i & 0x8000) {
-        jj2 = 65535 - jj2;
-    }
-    return jj2;
 }
 
 

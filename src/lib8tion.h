@@ -450,7 +450,20 @@ LIB8STATIC uint8_t ease8InOutQuad(uint8_t val) {
 
 LIB8STATIC uint16_t ease16InOutQuad( uint16_t i)
 {
-    return fl::easeInOutQuad16(i);
+    // This is the legacy version, there is a slightly more accurate version in fl/ease.cpp
+    // with fl::easeInOutQuad16. However the difference is minimal.
+    //
+    // 16-bit quadratic ease-in / ease-out function
+    uint16_t j = i;
+    if (j & 0x8000) {
+        j = 65535 - j;
+    }
+    uint16_t jj = scale16(j, j);
+    uint16_t jj2 = jj << 1;
+    if (i & 0x8000) {
+        jj2 = 65535 - jj2;
+    }
+    return jj2;
 }
 
 LIB8STATIC uint16_t ease16InOutCubic(uint16_t i)  {

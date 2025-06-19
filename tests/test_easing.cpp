@@ -151,22 +151,22 @@ TEST_CASE("easeInOutQuad16") {
     SUBCASE("boundary values") {
         CHECK_EQ(easeInOutQuad16(0), 0);
         CHECK_EQ(easeInOutQuad16(65535), 65535);
-        CHECK_EQ(easeInOutQuad16(32768), 32769); // midpoint
+        CHECK_EQ(easeInOutQuad16(32768), 32768); // midpoint
         
         // Test values very close to boundaries
         CHECK_EQ(easeInOutQuad16(1), 0);
         CHECK_EQ(easeInOutQuad16(65534), 65535);
         
         // Test edge cases around midpoint
-        CHECK_EQ(easeInOutQuad16(32767), 32766);
-        CHECK_EQ(easeInOutQuad16(32769), 32771);
+        CHECK_EQ(easeInOutQuad16(32767), 32767);
+        CHECK_EQ(easeInOutQuad16(32769), 32770);
     }
 
     SUBCASE("quartile values") {
         // Test specific quartile values for 16-bit quadratic easing
         CHECK_EQ(easeInOutQuad16(16384), 8192);   // 25% input -> 12.5% output
-        CHECK_EQ(easeInOutQuad16(32768), 32769);  // 50% input -> 50% output (midpoint)
-        CHECK_EQ(easeInOutQuad16(49152), 57345);  // 75% input -> actual measured output
+        CHECK_EQ(easeInOutQuad16(32768), 32768);  // 50% input -> 50% output (midpoint)
+        CHECK_EQ(easeInOutQuad16(49152), 57344);  // 75% input -> actual measured output
         
         // Additional quartile boundary checks
         CHECK_LT(easeInOutQuad16(16384), 16384);  // ease-in should be slower than linear
