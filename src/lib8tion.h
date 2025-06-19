@@ -484,38 +484,6 @@ LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
 }
 
 
-/// Fast, rough 16-bit ease-in/ease-out function.
-/// 16-bit equivalent of ease8InOutApprox().
-/// Shaped approximately like ease16InOutCubic(),
-/// but executes faster with a piecewise linear approximation.
-LIB8STATIC uint16_t ease16InOutApprox( uint16_t i)
-{
-    uint16_t j = i;
-    if( j & 0x8000 ) {
-        j = 65535 - j;
-    }
-    
-    // Apply piecewise linear approximation to normalized input (0 to 32767 range)
-    // This creates an S-curve approximation using three linear segments
-    if( j < 16384 ) {  // First half of ease-in: slower start
-        j = j >> 1;  // Start with slope 0.5
-    } else {  // Second half of ease-in: faster acceleration  
-        j = j - 16384;
-        j = j + (j >> 1);  // Slope 1.5
-        j = j + 8192;      // Add offset from first segment
-    }
-    
-    // Double for full range since we worked in half-range
-    uint32_t result = ((uint32_t)j) << 1;
-    if( result > 65535 ) {
-        result = 65535;
-    }
-    
-    if( i & 0x8000 ) {
-        result = 65535 - result;
-    }
-    return (uint16_t)result;
-}
 
 /// 8-bit cubic ease-in / ease-out function. 
 /// Takes around 18 cycles on AVR.

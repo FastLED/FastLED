@@ -280,65 +280,6 @@ TEST_CASE("ease16InOutCubic") {
     #endif
 }
 
-TEST_CASE("ease16InOutApprox") {
-
-#if 0
-
-    SUBCASE("boundary values") {
-        CHECK_EQ(ease16InOutApprox(0), 0);
-        CHECK_EQ(ease16InOutApprox(65535), 65535);
-        CHECK_EQ(ease16InOutApprox(32768), 32768);
-    }
-
-    SUBCASE("symmetry") {
-        for (uint16_t i = 0; i < 32768; i += 256) {
-            uint16_t forward = ease16InOutApprox(i);
-            uint16_t backward = ease16InOutApprox(65535 - i);
-            CHECK_EQ(forward, 65535 - backward);
-        }
-    }
-
-
-
-    SUBCASE("monotonicity") {
-        uint16_t prev = 0;
-        for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = ease16InOutApprox(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
-
-
-    SUBCASE("approximation accuracy") {
-        // should be within a reasonable range of cubic
-        for (uint32_t i = 0; i <= 65535; i += 2048) {
-            uint16_t approx = ease16InOutApprox(i);
-            uint16_t cubic = ease16InOutCubic(i);
-            int32_t diff = std::abs((int32_t)approx - (int32_t)cubic);
-            CHECK_LE(diff, 2048); // should be within ~3% (2048/65535)
-        }
-    }
-
-
-    SUBCASE("scaling consistency with 8-bit") {
-        const int kTolerance = 2;  // Note that this is too high.
-        for (uint16_t i = 0; i <= 255; ++i) {
-            uint8_t input8 = i;
-            uint16_t input16 = map8_to_16(input8);
-
-            uint8_t result8 = ease8InOutApprox(input8);
-            uint16_t result16 = ease16InOutApprox(input16);
-            uint8_t scaled_result16 = map16_to_8(result16);
-
-            // Should be within 1 due to precision differences
-            int16_t diff =
-                std::abs((int16_t)result8 - (int16_t)scaled_result16);
-            CHECK_LE(diff, 2);
-        }
-    }
-    #endif
-}
 
 TEST_CASE("easing function ordering") {
 
