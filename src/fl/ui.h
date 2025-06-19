@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stdint.h>
@@ -22,7 +21,7 @@ namespace fl {
 
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : public UISliderImpl {
+class UISlider : protected UISliderImpl {
   public:
     FL_NO_COPY(UISlider)
     using Super = UISliderImpl;
@@ -102,7 +101,7 @@ class UISlider : public UISliderImpl {
 
 // template operator for >= against a jsSliderImpl
 
-class UIButton : public UIButtonImpl {
+class UIButton : protected UIButtonImpl {
   public:
     FL_NO_COPY(UIButton)
     using Super = UIButtonImpl;
@@ -187,7 +186,7 @@ class UIButton : public UIButtonImpl {
     fl::scoped_ptr<Button> mRealButton;
 };
 
-class UICheckbox : public UICheckboxImpl {
+class UICheckbox : protected UICheckboxImpl {
   public:
     FL_NO_COPY(UICheckbox);
     using Super = UICheckboxImpl;
@@ -242,7 +241,7 @@ class UICheckbox : public UICheckboxImpl {
     Listener mListener;
 };
 
-class UINumberField : public UINumberFieldImpl {
+class UINumberField : protected UINumberFieldImpl {
   public:
     FL_NO_COPY(UINumberField);
     using Super = UINumberFieldImpl;
@@ -303,21 +302,21 @@ class UINumberField : public UINumberFieldImpl {
     Super &impl() { return *this; }
 };
 
-class UITitle : public UITitleImpl {
+class UITitle : protected UITitleImpl {
   public:
     FL_NO_COPY(UITitle);
     UITitle(const char *name) : UITitleImpl(name) {}
     ~UITitle() {}
 };
 
-class UIDescription : public UIDescriptionImpl {
+class UIDescription : protected UIDescriptionImpl {
   public:
     FL_NO_COPY(UIDescription);
     UIDescription(const char *name) : UIDescriptionImpl(name) {}
     ~UIDescription() {}
 };
 
-class UIAudio : public UIAudioImpl {
+class UIAudio : protected UIAudioImpl {
   public:
     FL_NO_COPY(UIAudio)
     using Super = UIAudioImpl;
