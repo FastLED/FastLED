@@ -222,7 +222,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         // Test that ToVideoRGB_8bit() preserves the hue while applying gamma correction
         // to saturation. The hue should remain the same within tolerance.
         
-        const int hue_tolerance = 200;  // Allow some tolerance for hue preservation
+        const int hue_tolerance = 47;  // Minimum tolerance needed - determined empirically from test failures
         
         // Test with a vibrant orange color
         CRGB orange(255, 128, 0);
