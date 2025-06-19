@@ -19,7 +19,7 @@ struct HSV16 {
     // Do you want a function to simulate gamma correction but doesn't
     // decimate the color? Use colorBoost() to boost the saturation.
     // This works great for WS2812 and any other RGB8 LEDs.
-    CRGB colorBoost() const;
+    CRGB colorBoost(bool boost_saturation = true, bool boost_contrast = false) const;
 };
 
 }  // namespace fl

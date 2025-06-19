@@ -1,4 +1,3 @@
-
 #include "fl/hsv16.h"
 #include "fl/math.h"
 
@@ -185,11 +184,19 @@ static uint16_t gamma_correct_16(uint16_t x) {
     return map32_to_16(x32);
 }
 
-CRGB HSV16::colorBoost() const {
+CRGB HSV16::colorBoost(bool boost_saturation, bool boost_contrast) const {
     HSV16 hsv = *this;
-    uint16_t inv_sat = 65535 - hsv.s;
-    inv_sat = gamma_correct_16(inv_sat);
-    hsv.s = (65535 - inv_sat);
+    
+    if (boost_saturation) {
+        uint16_t inv_sat = 65535 - hsv.s;
+        inv_sat = gamma_correct_16(inv_sat);
+        hsv.s = (65535 - inv_sat);
+    }
+    
+    if (boost_contrast) {
+        hsv.v = gamma_correct_16(hsv.v);
+    }
+    
     return hsv.ToRGB();
 }
 
