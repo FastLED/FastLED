@@ -1,6 +1,6 @@
 {
     "terminal.integrated.defaultProfile.windows": "Git Bash",
-    "terminal.integrated.windowsUseConptyDll": true,
+    "terminal.integrated.shellIntegration.enabled": false,
     "terminal.integrated.profiles.windows": {
         "Command Prompt": {
             "path": "C:\\Windows\\System32\\cmd.exe"
