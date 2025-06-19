@@ -68,7 +68,7 @@ static int32_t f_q16(int32_t t) {
 }
 
 // Main conversion: sRGB_u8 → CIELAB_u16
-void rgb_to_lab_u16_fixed(
+static void rgb_to_lab_u16_fixed(
     uint8_t  r, uint8_t  g, uint8_t  b,
     uint16_t &outL, uint16_t &outA, uint16_t &outB
 ) {
@@ -114,5 +114,12 @@ void rgb_to_lab_u16_fixed(
     outA = uint16_t((((int64_t)aq + (128LL << 16)) * 65535) / (255LL << 16));
     outB = uint16_t((((int64_t)bq + (128LL << 16)) * 65535) / (255LL << 16));
 }
+
+CIELAB_16 rgb_to_cielab_16(uint8_t r, uint8_t g, uint8_t b) {
+    CIELAB_16 lab;
+    rgb_to_lab_u16_fixed(r, g, b, lab.L, lab.A, lab.B);
+    return lab;
+}
+
 
 }  // namespace fl
