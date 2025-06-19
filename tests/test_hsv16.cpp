@@ -14,7 +14,7 @@ TEST_CASE("RGB to HSV16 to RGB") {
         // Test colors that convert well with HSV16
         
         // Pure red - perfect conversion - expect exact match
-        const int red_tolerance = 1;  // Start tight to see actual differences
+        const int red_tolerance = 0;  // Reduced from 1 to 0 - try for perfect
         CRGB red(255, 0, 0);
         HSV16 hsv_red(red);
         CRGB red_result = hsv_red.ToRGB();
@@ -22,9 +22,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(red_result.g, red.g, red_tolerance);
         CHECK_CLOSE(red_result.b, red.b, red_tolerance);
 
-        // Pure green - expect some error due to HSV16 quantization
-        // Runtime showed actual error of 8, so set tolerance to 8
-        const int green_tolerance = 8;  // Adjusted based on runtime failure
+        // Pure green - try for even better accuracy
+        const int green_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
         CRGB green(0, 255, 0);
         HSV16 hsv_green(green);
         CRGB green_result = hsv_green.ToRGB();
@@ -32,9 +31,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(green_result.g, green.g, green_tolerance);
         CHECK_CLOSE(green_result.b, green.b, green_tolerance);
 
-        // Pure blue - expect some error due to HSV16 quantization
-        // Runtime showed actual error of 8, so set tolerance to 8
-        const int blue_tolerance = 8;  // Adjusted based on runtime failure
+        // Pure blue - try for even better accuracy
+        const int blue_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
         CRGB blue(0, 0, 255);
         HSV16 hsv_blue(blue);
         CRGB blue_result = hsv_blue.ToRGB();
@@ -52,8 +50,8 @@ TEST_CASE("RGB to HSV16 to RGB") {
     }
 
     SUBCASE("White and Grayscale - Good Conversion") {
-        // Test white - expect some quantization error
-        const int white_tolerance = 3;  // Start conservative
+        // Test white - try for perfect accuracy
+        const int white_tolerance = 0;  // Reduced from 1 to 0 - try for perfect!
         CRGB white(255, 255, 255);
         HSV16 hsv_white(white);
         CRGB white_result = hsv_white.ToRGB();
@@ -61,35 +59,34 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK_CLOSE(white_result.g, white.g, white_tolerance);
         CHECK_CLOSE(white_result.b, white.b, white_tolerance);
 
-        // Test various shades of gray - these should convert well
-        const int gray_tolerance = 2;  // Start tight
+        // Test various shades of gray - some require tolerance 1
+        const int gray_tolerance = 1;  // Gray128 and Gray200 are off by exactly 1
         
         CRGB gray50(50, 50, 50);
         HSV16 hsv_gray50(gray50);
         CRGB gray50_result = hsv_gray50.ToRGB();
-        CHECK_CLOSE(gray50_result.r, gray50.r, gray_tolerance);
-        CHECK_CLOSE(gray50_result.g, gray50.g, gray_tolerance);
-        CHECK_CLOSE(gray50_result.b, gray50.b, gray_tolerance);
+        CHECK_CLOSE(gray50_result.r, gray50.r, 0);  // Gray50 is perfect - use tolerance 0
+        CHECK_CLOSE(gray50_result.g, gray50.g, 0);
+        CHECK_CLOSE(gray50_result.b, gray50.b, 0);
 
         CRGB gray128(128, 128, 128);
         HSV16 hsv_gray128(gray128);
         CRGB gray128_result = hsv_gray128.ToRGB();
-        CHECK_CLOSE(gray128_result.r, gray128.r, gray_tolerance);
+        CHECK_CLOSE(gray128_result.r, gray128.r, gray_tolerance);  // Gray128 needs tolerance 1
         CHECK_CLOSE(gray128_result.g, gray128.g, gray_tolerance);
         CHECK_CLOSE(gray128_result.b, gray128.b, gray_tolerance);
 
         CRGB gray200(200, 200, 200);
         HSV16 hsv_gray200(gray200);
         CRGB gray200_result = hsv_gray200.ToRGB();
-        CHECK_CLOSE(gray200_result.r, gray200.r, gray_tolerance);
+        CHECK_CLOSE(gray200_result.r, gray200.r, gray_tolerance);  // Gray200 needs tolerance 1
         CHECK_CLOSE(gray200_result.g, gray200.g, gray_tolerance);
         CHECK_CLOSE(gray200_result.b, gray200.b, gray_tolerance);
     }
 
     SUBCASE("HSV16 Constructor Values") {
         // Test direct HSV16 construction with known values
-        // Runtime showed actual error of 8, so set tolerance to 8
-        const int direct_construction_tolerance = 8;  // Adjusted based on runtime failure
+        const int direct_construction_tolerance = 0;  // Reduced from 2 to 0 - try for perfect!
         
         HSV16 hsv_red_direct(0, 65535, 65535);  // Red: H=0, S=max, V=max
         CRGB red_direct_result = hsv_red_direct.ToRGB();
@@ -110,13 +107,13 @@ TEST_CASE("RGB to HSV16 to RGB") {
         CHECK(blue_direct_result.b >= 255 - direct_construction_tolerance); // Should be close to 255
 
         // Test zero saturation (should produce grayscale)
-        const int grayscale_direct_tolerance = 1;  // Should be very precise for grayscale
+        const int grayscale_direct_tolerance = 0;  // Keep at 0 - already perfect
         HSV16 hsv_gray_direct(32768, 0, 32768);  // Any hue, no saturation, half value
         CRGB gray_direct_result = hsv_gray_direct.ToRGB();
         CHECK_CLOSE(gray_direct_result.r, gray_direct_result.g, grayscale_direct_tolerance);
         CHECK_CLOSE(gray_direct_result.g, gray_direct_result.b, grayscale_direct_tolerance);
-        CHECK(gray_direct_result.r >= 128 - 5);  // Should be around 128, allow some range
-        CHECK(gray_direct_result.r <= 128 + 5);
+        CHECK(gray_direct_result.r >= 128 - 1);  // Reduced from 2 to 1 - even tighter
+        CHECK(gray_direct_result.r <= 128 + 1);
     }
 
     SUBCASE("Secondary Colors - Good Conversion") {
