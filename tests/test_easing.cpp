@@ -152,6 +152,25 @@ TEST_CASE("ease16InOutQuad") {
         CHECK_EQ(ease16InOutQuad(0), 0);
         CHECK_EQ(ease16InOutQuad(65535), 65535);
         CHECK_EQ(ease16InOutQuad(32768), 32769); // midpoint
+        
+        // Test values very close to boundaries
+        CHECK_EQ(ease16InOutQuad(1), 0);
+        CHECK_EQ(ease16InOutQuad(65534), 65535);
+        
+        // Test edge cases around midpoint
+        CHECK_EQ(ease16InOutQuad(32767), 32766);
+        CHECK_EQ(ease16InOutQuad(32769), 32771);
+    }
+
+    SUBCASE("quartile values") {
+        // Test specific quartile values for 16-bit quadratic easing
+        CHECK_EQ(ease16InOutQuad(16384), 8192);   // 25% input -> 12.5% output
+        CHECK_EQ(ease16InOutQuad(32768), 32769);  // 50% input -> 50% output (midpoint)
+        CHECK_EQ(ease16InOutQuad(49152), 57345);  // 75% input -> actual measured output
+        
+        // Additional quartile boundary checks
+        CHECK_LT(ease16InOutQuad(16384), 16384);  // ease-in should be slower than linear
+        CHECK_GT(ease16InOutQuad(49152), 49152);  // ease-out should be faster than linear
     }
 
     SUBCASE("symmetry") {
@@ -238,6 +257,7 @@ TEST_CASE("ease16InOutCubic") {
         uint16_t cubic_result = ease16InOutCubic(quarter);
         CHECK_LT(cubic_result, quad_result);
     }
+
 
 
     SUBCASE("scaling consistency with 8-bit") {
