@@ -81,6 +81,7 @@ set(COMMON_COMPILE_FLAGS
     -Werror=unused-value
     -Werror=cast-align
     -Werror=class-memaccess
+    -Werror=misleading-indentation
     -DFASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
     -Wno-comment
     # ignore Arduino/PlatformIO-specific PROGMEM macro
