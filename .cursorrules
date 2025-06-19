@@ -1,0 +1,41 @@
+# FastLED Project Rules for Cursor
+
+## MCP Server Configuration
+This project includes a custom MCP server (`mcp_server.py`) that provides tools for:
+- Running tests with various options
+- Compiling examples for different platforms  
+- Code fingerprinting and change detection
+- Linting and formatting
+- Project information and status
+
+To use the MCP server, run: `uv run mcp_server.py`
+
+## Project Structure
+- `src/` - Main FastLED library source code
+- `examples/` - Arduino examples demonstrating FastLED usage
+- `tests/` - Test files and infrastructure
+- `ci/` - Continuous integration scripts
+- `docs/` - Documentation
+
+## Key Commands
+- `uv run test.py` - Run all tests
+- `uv run test.py --cpp` - Run C++ tests only
+- `uv run test.py TestName` - Run specific C++ test
+  - For example: running test_xypath.cpp would be uv run test.py xypath
+- `./lint` - Run code formatting/linting
+- `./compile uno` - Compile for uno
+
+## Development Guidelines
+- Follow existing code style and patterns
+- Run tests before committing changes
+- Use the MCP server tools for common tasks
+- Check examples when making API changes
+
+## Testing
+The project uses a comprehensive test suite including:
+- C++ unit tests
+- Platform compilation tests  
+- Code quality checks (ruff, clang-format)
+- Example compilation verification
+
+Use `bash test` as specified in user rules for running unit tests. 
