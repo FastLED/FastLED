@@ -14,6 +14,12 @@ struct HSV16 {
     HSV16(uint16_t h, uint16_t s, uint16_t v) : h(h), s(s), v(v) {}
     HSV16(const CRGB& rgb);
     CRGB ToRGB() const;
+
+    // Are you using WS2812 (or other RGB8 LEDS) to display video?
+    // Do you want a function to simulate gamma correction but doesn't
+    // decimate the color? This will apply color saturation without
+    // decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component).
+    CRGB ToVideoRGB_8bit() const;
 };
 
 }  // namespace fl

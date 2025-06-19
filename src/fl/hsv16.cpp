@@ -151,4 +151,18 @@ CRGB HSV16::ToRGB() const {
     return HSV16toRGB(*this);
 }
 
+static uint16_t gamma_correct_16(uint16_t x) {
+    uint32_t x32 = x;
+    x32 = x32 * x32;
+    return map32_to_16(x32);
+}
+
+CRGB HSV16::ToVideoRGB_8bit() const {
+    HSV16 hsv = *this;
+    uint16_t inv_sat = 65535 - hsv.s;
+    inv_sat = gamma_correct_16(inv_sat);
+    hsv.s = (65535 - inv_sat);
+    return hsv.ToRGB();
+}
+
 } // namespace fl
