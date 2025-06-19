@@ -128,8 +128,11 @@ struct CRGB {
     }
 
     /// Default constructor
-    /// @warning Default values are UNITIALIZED!
-    FASTLED_FORCE_INLINE CRGB() = default;
+    FASTLED_FORCE_INLINE CRGB() {
+        r = 0;
+        g = 0;
+        b = 0;
+    }
 
     /// Allow construction from red, green, and blue
     /// @param ir input red value
