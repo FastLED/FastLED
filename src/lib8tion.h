@@ -468,30 +468,19 @@ LIB8STATIC uint16_t ease16InOutQuad( uint16_t i)
 /// Formula: 3(x^2) - 2(x^3) applied with proper ease-in-out curve
 LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
 {
-    uint16_t j = i;
-    if( j & 0x8000 ) {
-        j = 65535 - j;
-    }
-    
-    // Normalize j to work in 0-32767 range, then apply cubic formula
-    uint16_t jj  = scale16( j, j);        // j^2 scaled
-    uint16_t iii = scale16( jj, j);       // j^3 scaled
+    // Apply the cubic formula directly, similar to the 8-bit version
+    // scale16(a, b) computes (a * b) / 65536
+    uint32_t ii  = scale16( i, i);        // i^2 scaled to 16-bit
+    uint32_t iii = scale16( ii, i);       // i^3 scaled to 16-bit
     
     // Apply cubic formula: 3x^2 - 2x^3
-    // Note: we need to be careful with the arithmetic to avoid overflow
-    uint32_t r1 = (3 * (uint32_t)jj) - (2 * (uint32_t)iii);
-    uint16_t result = (r1 > 65535) ? 65535 : (uint16_t)r1;
+    uint32_t r1 = (3 * ii) - (2 * iii);
     
-    // Double for full ease-in-out range since we worked with half-range
-    uint32_t result2 = ((uint32_t)result) << 1;
-    if( result2 > 65535 ) {
-        result2 = 65535;
+    // Clamp result to 16-bit range
+    if( r1 > 65535 ) {
+        return 65535;
     }
-    
-    if( i & 0x8000 ) {
-        result2 = 65535 - result2;
-    }
-    return (uint16_t)result2;
+    return (uint16_t)r1;
 }
 
 

@@ -190,14 +190,18 @@ TEST_CASE("ease16InOutQuad") {
     }
 }
 
-#if 0
+
 
 TEST_CASE("ease16InOutCubic") {
+
+
     SUBCASE("boundary values") {
         CHECK_EQ(ease16InOutCubic(0), 0);
         CHECK_EQ(ease16InOutCubic(65535), 65535);
         CHECK_EQ(ease16InOutCubic(32768), 32768);
     }
+
+#if 0
 
     SUBCASE("symmetry") {
         for (uint16_t i = 0; i < 32768; i += 256) {
@@ -223,7 +227,7 @@ TEST_CASE("ease16InOutCubic") {
         CHECK_LT(cubic_result, quad_result);
     }
 
-#if 0
+
     SUBCASE("scaling consistency with 8-bit") {
         for (uint16_t i = 0; i <= 255; ++i) {
             uint8_t input8 = i;
@@ -345,4 +349,3 @@ TEST_CASE("easing function ordering") {
 #endif
 }
 
-#endif
