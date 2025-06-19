@@ -91,9 +91,9 @@ CRGB CRGB::colorBoost(bool boost_saturation, bool boost_contrast) const {
     return hsv.colorBoost(boost_saturation, boost_contrast);
 }
 
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count) {
+void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, bool boost_saturation, bool boost_contrast) {
     for (size_t i = 0; i < count; i++) {
-        dst[i] = src[i].colorBoost();
+        dst[i] = src[i].colorBoost(boost_saturation, boost_contrast);
     }
 }
 
