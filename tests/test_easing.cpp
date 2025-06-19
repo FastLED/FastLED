@@ -219,7 +219,7 @@ TEST_CASE("ease16InOutCubic") {
         }
     }
 
-#if 0
+
 
     SUBCASE("monotonicity") {
         uint16_t prev = 0;
@@ -229,6 +229,8 @@ TEST_CASE("ease16InOutCubic") {
             prev = current;
         }
     }
+
+#if 0
 
     SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
