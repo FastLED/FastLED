@@ -5,6 +5,7 @@
 
 #include "FastLED.h"
 #include "lib8tion/types.h"
+#include "fl/deprecated.h"
 
 #ifndef __INC_LED_SYSDEFS_H
 #error WTH?  led_sysdefs needs to be included first
@@ -452,14 +453,27 @@ LIB8STATIC uint16_t ease16InOutQuad( uint16_t i)
     return fl::easeInOutQuad16(i);
 }
 
+LIB8STATIC uint16_t ease16InOutCubic(uint16_t i)  {
+    // This function produces wrong results, use fl::easeInOutCubic16 instead
+    //
+    // 16-bit cubic ease-in / ease-out function
+    // Equivalent to ease8InOutCubic() but for 16-bit values
+    // Formula: 3(x^2) - 2(x^3) applied with proper ease-in-out curve
 
-LIB8STATIC uint16_t ease16InOutCubic( uint16_t i)
-{
-    return fl::easeInOutCubic16(i);
+    // Apply the cubic formula directly, similar to the 8-bit version
+    // scale16(a, b) computes (a * b) / 65536
+    uint32_t ii = scale16(i, i);   // i^2 scaled to 16-bit
+    uint32_t iii = scale16(ii, i); // i^3 scaled to 16-bit
+
+    // Apply cubic formula: 3x^2 - 2x^3
+    uint32_t r1 = (3 * ii) - (2 * iii);
+
+    // Clamp result to 16-bit range
+    if (r1 > 65535) {
+        return 65535;
+    }
+    return (uint16_t)r1;
 }
-
-
-
 
 
 /// 8-bit cubic ease-in / ease-out function. 

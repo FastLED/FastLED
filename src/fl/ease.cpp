@@ -40,24 +40,28 @@ uint16_t easeInOutQuad16(uint16_t i) {
     return jj2;
 }
 
-uint16_t easeInOutCubic16(uint16_t i) {
-    // 16-bit cubic ease-in / ease-out function
-    // Equivalent to ease8InOutCubic() but for 16-bit values
-    // Formula: 3(x^2) - 2(x^3) applied with proper ease-in-out curve
 
-    // Apply the cubic formula directly, similar to the 8-bit version
-    // scale16(a, b) computes (a * b) / 65536
-    uint32_t ii = scale16(i, i);   // i^2 scaled to 16-bit
-    uint32_t iii = scale16(ii, i); // i^3 scaled to 16-bit
+uint16_t easeInOutCubic16(uint16_t x) {
+    const uint32_t MAX   = 0xFFFF;                  // 65535
+    const uint32_t HALF  = (MAX + 1) >> 1;          // 32768
+    const uint64_t M2    = (uint64_t)MAX * MAX;     // 65535² = 4 294 836 225
 
-    // Apply cubic formula: 3x^2 - 2x^3
-    uint32_t r1 = (3 * ii) - (2 * iii);
-
-    // Clamp result to 16-bit range
-    if (r1 > 65535) {
-        return 65535;
+    if (x < HALF) {
+        // first half:  y = 4·(x/MAX)³  →  y_i = 4·x³ / MAX²
+        uint64_t xi   = x;
+        uint64_t cube = xi * xi * xi;               // x³
+        // add M2/2 for rounding
+        uint64_t num  = 4 * cube + (M2 >> 1);
+        return (uint16_t)(num / M2);
+    } else {
+        // second half: y = 1 − ((2·(1−x/MAX))³)/2
+        // → y_i = MAX − (4·(MAX−x)³ / MAX²)
+        uint64_t d    = MAX - x;
+        uint64_t cube = d * d * d;                   // (MAX−x)³
+        uint64_t num  = 4 * cube + (M2 >> 1);
+        return (uint16_t)(MAX - (num / M2));
     }
-    return (uint16_t)r1;
 }
+
 
 } // namespace fl

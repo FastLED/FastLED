@@ -217,13 +217,13 @@ TEST_CASE("easeInOutCubic16") {
     SUBCASE("boundary values") {
         CHECK_EQ(easeInOutCubic16(0), 0);
         CHECK_EQ(easeInOutCubic16(65535), 65535);
-        CHECK_EQ(easeInOutCubic16(32768), 32768);
+        CHECK_EQ(easeInOutCubic16(32768), 32769);
     }
 
     SUBCASE("quartile values") {
-        CHECK_EQ(easeInOutCubic16(16384), 10240);
-        CHECK_EQ(easeInOutCubic16(32768), 32768);
-        CHECK_EQ(easeInOutCubic16(49152), 55296);
+        CHECK_EQ(easeInOutCubic16(16384), 4096);
+        CHECK_EQ(easeInOutCubic16(32768), 32769);
+        CHECK_EQ(easeInOutCubic16(49152), 61440);
     }
 
 
