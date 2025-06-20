@@ -1,4 +1,3 @@
-
 #include "audio.h"
 #include "fl/thread_local.h"
 
@@ -129,6 +128,20 @@ void AudioSample::fft(FFTBins *out) {
     args.sample_rate =
         FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
     get_flex_fft().run(sample, out, args);
+}
+
+bool AudioSample::isValid() const {
+    return mImpl != nullptr;
+}
+
+const AudioSample::VectorPCM &AudioSampleImpl::pcm() const {
+    return mSignedPcm;
+}
+
+float AudioSampleImpl::zcf() const {
+    // Implement the zero crossing factor calculation
+    // This is a placeholder implementation
+    return static_cast<float>(mZeroCrossings) / mSignedPcm.size();
 }
 
 } // namespace fl
