@@ -167,13 +167,73 @@ The implementation leverages several optimization strategies for real-time perfo
 
 The corkscrew mapping system supports multiple hardware platforms:
 
-**ESP32**: Takes advantage of dual-core processing for parallel rendering operations.
+**Teensy**: Optimized for Teensy 3.x and 4.x platforms with ARM Cortex-M processors, taking advantage of hardware floating-point units and increased memory capacity.
 
+**ESP32**: Takes advantage of dual-core processing for parallel rendering operations and hardware floating-point acceleration.
 
+**Chrome Browser**: Full-featured implementation for web-based development, testing, and real-time visualization through WebAssembly compilation.
 
-**Desktop**: Full-featured implementation for development and testing environments.
+### 5.4 Cartesian Coordinate Projection Algorithm
 
-### 5.4 Web Integration
+The `Corkscrew.readFrom()` method implements a remarkably efficient projection technique that operates entirely in cartesian/rectangular coordinate space without requiring trigonometric functions. This approach challenges conventional expectations about cylindrical mapping implementations.
+
+**Linear Projection Technique**: For each LED position `i`, the algorithm computes rectangular coordinates by treating the helical arrangement as a linearized grid:
+
+```cpp
+// Calculate row (turn) using integer division
+const uint16_t row = ledIndex / width;
+
+// Calculate remainder as position within the row  
+const uint16_t remainder = ledIndex % width;
+
+// Convert remainder to fractional position within row
+const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
+
+// Final rectangular coordinates
+const float width_pos = ledProgress * numLeds;
+const float height_pos = static_cast<float>(row) + alpha;
+```
+
+**Cylindrical Line Extension**: The core insight is that each LED position corresponds to a point on the "unwrapped" cylindrical surface. When projecting from a source grid to the corkscrew arrangement, the algorithm:
+
+1. **Extends the LED position** as a straight line on the conceptual cylinder map sphere
+2. **Performs interpolation** along this extended line in rectangular coordinate space  
+3. **Projects resulting points** directly onto the cylindrical plane using X,Y cartesian coordinates
+
+**Integer-Space Operations**: The implementation operates primarily in integer and floating-point space rather than angular coordinates:
+
+- **Row calculation**: Uses integer division (`ledIndex / width`) to determine the helical turn
+- **Position within turn**: Uses modulo operation (`ledIndex % width`) for circumferential position
+- **Fractional interpolation**: Converts integer remainder to normalized position (`alpha`)
+- **Coordinate mapping**: Direct cartesian projection without sine/cosine calculations
+
+**Multi-Sampling Enhancement**: The `readFromMulti()` variant extends this approach using `Tile2x2_u8_wrap` structures:
+
+```cpp
+// Get wrapped tile for sub-pixel accuracy
+Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
+
+// Sample from 4 corners with weighted interpolation
+for (uint8_t x = 0; x < 2; x++) {
+    for (uint8_t y = 0; y < 2; y++) {
+        const auto& entry = tile.at(x, y);
+        vec2i16 pos = entry.first;    // rectangular position
+        uint8_t weight = entry.second; // interpolation weight
+        // ... weighted color accumulation
+    }
+}
+```
+
+**Performance Implications**: This cartesian-based approach delivers significant computational advantages:
+
+- **No trigonometric overhead**: Eliminates expensive sine/cosine calculations entirely
+- **Integer arithmetic dominance**: Primary operations use fast integer division and modulo
+- **Cache-friendly memory access**: Sequential LED indexing maps to predictable memory patterns  
+- **Sub-pixel accuracy**: Achieves precise interpolation through weighted rectangular sampling
+
+The technique demonstrates that complex cylindrical projections can be achieved through elegant coordinate space transformations, avoiding the computational complexity typically associated with angular parameterization while maintaining mathematical rigor and visual fidelity.
+
+### 5.5 Web Integration
 
 The system generates ScreenMap data structures that describe the 3D spatial arrangement of LEDs for web-based visualization tools. This enables real-time preview of patterns in browser environments while maintaining accurate geometric representation.
 
