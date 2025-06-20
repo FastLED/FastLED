@@ -6,6 +6,21 @@
 
 FASTLED_USING_NAMESPACE
 
+// Common array of easing types used across multiple test cases
+static const fl::EaseType ALL_EASING_TYPES[] = {
+    fl::EASE_NONE,
+    fl::EASE_IN_QUAD,
+    fl::EASE_OUT_QUAD,
+    fl::EASE_IN_OUT_QUAD,
+    fl::EASE_IN_CUBIC,
+    fl::EASE_OUT_CUBIC,
+    fl::EASE_IN_OUT_CUBIC,
+    fl::EASE_IN_SINE,
+    fl::EASE_OUT_SINE,
+    fl::EASE_IN_OUT_SINE
+};
+static const size_t NUM_EASING_TYPES = sizeof(ALL_EASING_TYPES) / sizeof(ALL_EASING_TYPES[0]);
+
 TEST_CASE("8-bit easing functions") {
     SUBCASE("easeInOutQuad8") {
         SUBCASE("boundary values") {
@@ -290,23 +305,9 @@ TEST_CASE("easeInQuad16") {
 }
 
 TEST_CASE("All easing functions boundary tests") {
-    // Test all easing types through the generic ease functions
-    const fl::EaseType types[] = {
-        fl::EASE_NONE,
-        fl::EASE_IN_QUAD,
-        fl::EASE_OUT_QUAD,
-        fl::EASE_IN_OUT_QUAD,
-        fl::EASE_IN_CUBIC,
-        fl::EASE_OUT_CUBIC,
-        fl::EASE_IN_OUT_CUBIC,
-        fl::EASE_IN_SINE,
-        fl::EASE_OUT_SINE,
-        fl::EASE_IN_OUT_SINE
-    };
-    
     SUBCASE("8-bit easing functions boundary conditions") {
-        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-            fl::EaseType type = types[i];
+        for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
+            fl::EaseType type = ALL_EASING_TYPES[i];
             uint8_t result_0 = fl::ease8(type, 0);
             uint8_t result_255 = fl::ease8(type, 255);
             
@@ -317,8 +318,8 @@ TEST_CASE("All easing functions boundary tests") {
     }
     
     SUBCASE("16-bit easing functions boundary conditions") {
-        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-            fl::EaseType type = types[i];
+        for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
+            fl::EaseType type = ALL_EASING_TYPES[i];
             uint16_t result_0 = fl::ease16(type, 0);
             uint16_t result_max = fl::ease16(type, 65535);
             
@@ -330,23 +331,9 @@ TEST_CASE("All easing functions boundary tests") {
 }
 
 TEST_CASE("All easing functions monotonicity tests") {
-    // Test all easing types through the generic ease functions
-    const fl::EaseType types[] = {
-        fl::EASE_NONE,
-        fl::EASE_IN_QUAD,
-        fl::EASE_OUT_QUAD,
-        fl::EASE_IN_OUT_QUAD,
-        fl::EASE_IN_CUBIC,
-        fl::EASE_OUT_CUBIC,
-        fl::EASE_IN_OUT_CUBIC,
-        fl::EASE_IN_SINE,
-        fl::EASE_OUT_SINE,
-        fl::EASE_IN_OUT_SINE
-    };
-    
     SUBCASE("8-bit easing functions monotonicity") {
-        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-            fl::EaseType type = types[i];
+        for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
+            fl::EaseType type = ALL_EASING_TYPES[i];
             
             // Function should be non-decreasing
             uint8_t prev = 0;
@@ -360,8 +347,8 @@ TEST_CASE("All easing functions monotonicity tests") {
     }
     
     SUBCASE("16-bit easing functions monotonicity") {
-        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
-            fl::EaseType type = types[i];
+        for (size_t i = 0; i < NUM_EASING_TYPES; ++i) {
+            fl::EaseType type = ALL_EASING_TYPES[i];
             
             // Function should be non-decreasing
             uint16_t prev = 0;
@@ -376,20 +363,6 @@ TEST_CASE("All easing functions monotonicity tests") {
 }
 
 TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
-    // Test consistency between 8-bit and 16-bit versions of all easing functions
-    const fl::EaseType types[] = {
-        fl::EASE_NONE,
-        fl::EASE_IN_QUAD,
-        fl::EASE_OUT_QUAD,
-        fl::EASE_IN_OUT_QUAD,
-        fl::EASE_IN_CUBIC,
-        fl::EASE_OUT_CUBIC,
-        fl::EASE_IN_OUT_CUBIC,
-        fl::EASE_IN_SINE,
-        fl::EASE_OUT_SINE,
-        fl::EASE_IN_OUT_SINE
-    };
-    
     // Define expected tolerances for different easing types
     const int tolerances[] = {
         1, // EASE_NONE - should be perfect
@@ -405,8 +378,8 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
     };
     
     SUBCASE("8-bit vs 16-bit scaling consistency") {
-        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
-            fl::EaseType type = types[type_idx];
+        for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
+            fl::EaseType type = ALL_EASING_TYPES[type_idx];
             int tolerance = tolerances[type_idx];
             
             // Track maximum difference found for this easing type
@@ -445,8 +418,8 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
     }
     
     SUBCASE("Boundary values consistency") {
-        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
-            fl::EaseType type = types[type_idx];
+        for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
+            fl::EaseType type = ALL_EASING_TYPES[type_idx];
             
             // Test boundary values (0 and max) - these should be exact
             uint8_t result8_0 = fl::ease8(type, 0);
@@ -470,8 +443,8 @@ TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
     }
     
     SUBCASE("Midpoint consistency") {
-        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
-            fl::EaseType type = types[type_idx];
+        for (size_t type_idx = 0; type_idx < NUM_EASING_TYPES; ++type_idx) {
+            fl::EaseType type = ALL_EASING_TYPES[type_idx];
             
             // Test midpoint values - should be relatively close
             uint8_t result8_mid = fl::ease8(type, 128);
