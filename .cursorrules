@@ -31,6 +31,28 @@ To use the MCP server, run: `uv run mcp_server.py`
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+## Code Standards
+
+### Avoid std:: Prefixed Functions
+**DO NOT use `std::` prefixed functions or headers in the codebase.** This project provides its own STL-equivalent implementations under the `fl::` namespace.
+
+**Examples of what to avoid and use instead:**
+
+**Headers:**
+- ❌ `#include <type_traits>` → ✅ `#include "fl/type_traits.h"`
+- ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
+- ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
+
+**Functions and classes:**
+- ❌ `std::move()` → ✅ `fl::move()`
+- ❌ `std::forward()` → ✅ `fl::forward()`
+- ❌ `std::vector` → ✅ `fl::vector`
+- ❌ `std::enable_if` → ✅ `fl::enable_if`
+
+**Why:** The project maintains its own implementations to ensure compatibility across all supported platforms and to avoid bloating the library with unnecessary STL dependencies.
+
+**Before using any standard library functionality, check if there's a `fl::` equivalent in the `src/fl/` directory first.**
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests
