@@ -405,21 +405,11 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
   public:
     FL_NO_COPY(UIDropdown)
     using Super = UIDropdownImpl;
-    
-    // Constructor with array of options and count
-    UIDropdown(const char *name, const fl::Str* options, size_t count)
-        : UIDropdownImpl(name, options, count), mListener(this) {}
-    
-    // Constructor with fl::vector of options
-    UIDropdown(const char *name, const fl::vector<fl::Str>& options)
+
+    // Constructor with fl::Slice<fl::Str> (fl::string) options
+    UIDropdown(const char *name, fl::Slice<fl::Str> options)
         : UIDropdownImpl(name, options), mListener(this) {}
 
-#if FASTLED_HAS_INITIALIZER_LIST
-    // Constructor with initializer_list (only available if C++11 support exists)
-    UIDropdown(const char *name, fl::initializer_list<fl::Str> options)
-        : UIDropdownImpl(name, options), mListener(this) {}
-#endif
-    
     ~UIDropdown() {}
     
     fl::Str value() const { return Super::value(); }
