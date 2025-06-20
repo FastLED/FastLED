@@ -5,6 +5,9 @@
 #include "fl/math_macros.h"
 #include <math.h>
 
+// Feature detection macro for exp function availability
+#define FASTLED_HAS_EXP 1
+
 namespace fl {
 
 template <typename T> inline T floor(T value) {
