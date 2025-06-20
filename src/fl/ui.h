@@ -414,6 +414,10 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     UIDropdown(const char *name, const fl::vector<fl::Str>& options)
         : UIDropdownImpl(name, options), mListener(this) {}
 
+    // Constructor with fl::Slice<fl::Str> (fl::string) options
+    UIDropdown(const char *name, fl::Slice<fl::Str> options)
+        : UIDropdownImpl(name, options), mListener(this) {}
+
 #if FASTLED_HAS_INITIALIZER_LIST
     // Constructor with initializer_list (only available if C++11 support exists)
     UIDropdown(const char *name, fl::initializer_list<fl::Str> options)

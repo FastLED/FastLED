@@ -1,4 +1,4 @@
-#pragma once
+THIS SHOULD BE A LINTER ERROR#pragma once
 
 #include <stdint.h>
 
@@ -250,6 +250,18 @@ class UIDropdownImpl {
     
     // Constructor with fl::vector of options
     UIDropdownImpl(const char *name, const fl::vector<fl::Str>& options) 
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (size_t i = 0; i < options.size(); ++i) {
+            mOptions.push_back(options[i]);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::Str("No options"));
+        }
+    }
+
+    // Constructor with fl::Slice<fl::Str> (fl::string) options
+    UIDropdownImpl(const char *name, fl::Slice<fl::Str> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (size_t i = 0; i < options.size(); ++i) {
