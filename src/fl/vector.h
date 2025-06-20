@@ -95,12 +95,12 @@ template <typename T, size_t N> class FixedVector {
         assign_array(other.memory(), other.current_size);
     }
 
-    template <size_t M> FixedVector(const T (&values)[M]) : current_size(M) {
+    template <size_t M> FixedVector(T (&values)[M]) : current_size(0) {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
     }
 
-#if FASTLED_USE_STD_INITIALIZER_LIST
+#if FASTLED_HAS_INITIALIZER_LIST
     // Initializer list constructor (C++11 and later) - uses std::initializer_list
     FixedVector(fl::initializer_list<T> init) : current_size(0) {
         if (init.size() > N) {
@@ -113,19 +113,6 @@ template <typename T, size_t N> class FixedVector {
             for (const auto& value : init) {
                 push_back(value);
             }
-        }
-    }
-#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
-    // For AVR: variadic template constructor for brace initialization
-    template<typename... Args>
-    FixedVector(Args... args) : current_size(0) {
-        static_assert(sizeof...(args) > 0, "At least one argument required");
-        T temp_array[] = {static_cast<T>(args)...};
-        constexpr size_t num_args = sizeof...(args);
-        
-        size_t count = num_args > N ? N : num_args;
-        for (size_t i = 0; i < count; ++i) {
-            push_back(temp_array[i]);
         }
     }
 #endif
@@ -389,25 +376,12 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         assign(begin, end);
     }
 
-#if FASTLED_USE_STD_INITIALIZER_LIST
+#if FASTLED_HAS_INITIALIZER_LIST
     // Initializer list constructor (C++11 and later) - uses std::initializer_list
     HeapVector(fl::initializer_list<T> init) {
         reserve(init.size());
         for (const auto& value : init) {
             push_back(value);
-        }
-    }
-#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
-    // For AVR: variadic template constructor for brace initialization
-    template<typename... Args>
-    HeapVector(Args... args) {
-        static_assert(sizeof...(args) > 0, "At least one argument required");
-        T temp_array[] = {static_cast<T>(args)...};
-        constexpr size_t num_args = sizeof...(args);
-        
-        reserve(num_args);
-        for (size_t i = 0; i < num_args; ++i) {
-            push_back(temp_array[i]);
         }
     }
 #endif
@@ -888,7 +862,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
     }
 
-#if FASTLED_USE_STD_INITIALIZER_LIST
+#if FASTLED_HAS_INITIALIZER_LIST
     // Initializer list constructor (C++11 and later) - uses std::initializer_list
     InlinedVector(fl::initializer_list<T> init) : mUsingHeap(false) {
         if (init.size() > INLINED_SIZE) {
@@ -900,26 +874,6 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         } else {
             for (const auto& value : init) {
                 mFixed.push_back(value);
-            }
-        }
-    }
-#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
-    // For AVR: variadic template constructor for brace initialization
-    template<typename... Args>
-    InlinedVector(Args... args) : mUsingHeap(false) {
-        static_assert(sizeof...(args) > 0, "At least one argument required");
-        T temp_array[] = {static_cast<T>(args)...};
-        constexpr size_t num_args = sizeof...(args);
-        
-        if (num_args > INLINED_SIZE) {
-            mHeap.reserve(num_args);
-            for (size_t i = 0; i < num_args; ++i) {
-                mHeap.push_back(temp_array[i]);
-            }
-            mUsingHeap = true;
-        } else {
-            for (size_t i = 0; i < num_args; ++i) {
-                mFixed.push_back(temp_array[i]);
             }
         }
     }
