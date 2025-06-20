@@ -89,8 +89,7 @@ fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
 
 
 
-fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
-fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
+
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
@@ -200,9 +199,8 @@ void setup() {
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
-    renderModeDropdown.setSelectedIndex(0); // Noise
     
-    // Add onChange callbacks for dropdowns
+    // Add onChange callback for palette dropdown
     paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
         fl::Str selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
@@ -216,16 +214,6 @@ void setup() {
             noisePalette = ForestColors_p;
         } else if (selectedPalette == "Rainbow") {
             noisePalette = RainbowColors_p;
-        }
-    });
-    
-    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
-        fl::Str mode = dropdown.value();
-        // Simple example of using getOption()
-        for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
-            if(dropdown.getOption(i) == mode) {
-                FL_WARN("Render mode changed to: " << mode);
-            }
         }
     });
 }
