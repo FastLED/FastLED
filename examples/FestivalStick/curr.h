@@ -1,14 +1,21 @@
 /*
-Basic cork screw test.
+Festival Stick - Corkscrew LED Mapping Demo
 
-This test is forward mapping, in which we test that
-the corkscrew is mapped to cylinder cartesian coordinates.
+This example demonstrates proper corkscrew LED mapping for a festival stick
+(19+ turns, 288 LEDs) using the new Corkscrew ScreenMap functionality.
 
-Most of the time, you'll want the reverse mapping, that is
-drawing to a rectangular grid, and then mapping that to a corkscrew.
+Key Features:
+- Uses Corkscrew.toScreenMap() for accurate web interface visualization
+- Draws patterns into a rectangular grid (frameBuffer)
+- Maps the rectangular grid to the corkscrew LED positions using readFrom()
+- Supports both noise patterns and manual LED positioning
+- Proper color boost and brightness controls
 
-However, to make sure the above mapping works correctly, we have
-to test that the forward mapping works correctly first.
+Workflow:
+1. Draw patterns into frameBuffer (rectangular grid for easy 2D drawing)
+2. Use corkscrew.readFrom(frameBuffer) to map grid to corkscrew LED positions
+3. Display the corkscrew buffer directly via FastLED
+4. Web interface shows actual corkscrew spiral shape via ScreenMap
 
 */
 
@@ -140,11 +147,18 @@ void setup() {
     // CLEDController *controller =
     //     &FastLED.addLeds<WS2812, 3, BGR>(stripLeds, NUM_LEDS);
 
-    fl::ScreenMap screenMap = xyMap.toScreenMap();
-    screenMap.setDiameter(.2f);
+    // NEW: Create ScreenMap directly from Corkscrew using toScreenMap()
+    // This maps each LED index to its exact position on the corkscrew spiral
+    // instead of using a rectangular grid mapping
+    fl::ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
+    
+    // OLD WAY (rectangular grid - not accurate for corkscrew visualization):
+    // fl::ScreenMap screenMap = xyMap.toScreenMap();
+    // screenMap.setDiameter(.2f);
 
-    // Set the screen map for the controller
-    controller->setScreenMap(screenMap);
+    // Set the corkscrew screen map for the controller
+    // This allows the web interface to display the actual corkscrew spiral shape
+    controller->setScreenMap(corkscrewScreenMap);
 }
 
 float get_position(uint32_t now) {
