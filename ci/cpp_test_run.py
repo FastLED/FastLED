@@ -294,10 +294,10 @@ def main() -> None:
         else:
             cmd = "ctest --test-dir tests/.build"
             if not _VERBOSE:
-                # Show progress and summary by default, with output on failure
-                cmd += " --progress --output-on-failure"
+                # Show progress, verbose summaries, and output on failure by default
+                cmd += " --verbose --progress --output-on-failure"
             else:
-                # Full verbose mode when explicitly requested
+                # Full verbose mode when explicitly requested (same flags for consistency)
                 cmd += " --verbose --progress --output-on-failure"
             if only_run_failed_test:
                 cmd += " --rerun-failed"

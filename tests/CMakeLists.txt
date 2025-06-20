@@ -320,4 +320,4 @@ if(CLEAN_ORPHANED_BINARIES)
 endif()
 
 # Add verbose output for tests
-set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+set(CMAKE_CTEST_ARGUMENTS "--verbose --output-on-failure")
