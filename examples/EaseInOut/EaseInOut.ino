@@ -31,11 +31,26 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructSerpentine(MATRIX_WIDTH, MATRIX_HEIGHT);
 
 UITitle title("EaseInOut");
-UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine. Use the 16-bit checkbox to toggle between 16-bit (checked) and 8-bit (unchecked) precision.");
+UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type dropdown to select different easing functions. Use the 16-bit checkbox to toggle between 16-bit (checked) and 8-bit (unchecked) precision.");
 
 // UI Controls
 UISlider xPosition("xPosition", 0.0f, 0.0f, 1.0f, 0.01f);
-UINumberField easeTypeNumber("Ease Type", 2, 0, 9);
+
+// Create dropdown with descriptive ease function names
+fl::Str easeOptions[] = {
+    "None", 
+    "In Quad", 
+    "Out Quad", 
+    "In-Out Quad", 
+    "In Cubic", 
+    "Out Cubic", 
+    "In-Out Cubic", 
+    "In Sine", 
+    "Out Sine", 
+    "In-Out Sine"
+};
+UIDropdown easeTypeDropdown("Ease Type", easeOptions, 10);
+
 UICheckbox use16Bit("16-bit", true); // Default checked for 16-bit precision
 
 EaseType getEaseType(int value) {
@@ -72,6 +87,9 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
     FastLED.setCorrection(TypicalLEDStrip);
     FastLED.setDither(BRIGHTNESS < 255);
+
+    // Set default dropdown selection to "In-Out Quad" (index 3)
+    easeTypeDropdown.setSelectedIndex(3);
 }
 
 void loop() {
@@ -84,8 +102,8 @@ void loop() {
     // Map slider value to X coordinate (0 to width-1)
     uint8_t x = map(sliderValue * 1000, 0, 1000, 0, MATRIX_WIDTH - 1);
 
-    // Get the selected ease type
-    EaseType selectedEaseType = getEaseType(easeTypeNumber.value());
+    // Get the selected ease type using the dropdown index
+    EaseType selectedEaseType = getEaseType(easeTypeDropdown.value_int());
     
     uint8_t y;
     if (use16Bit.value()) {
