@@ -103,8 +103,6 @@ function forwardMap(ledIndex, totalLEDs, totalTurns):
 
 ### 4.2 Sub-Pixel Rendering Algorithm
 
-# ZACHS NOTE: mention which direction: corkscrew -> grid or the other way around?
-
 To achieve sub-pixel accuracy, we introduce a tile-based multi-sampling approach. For a given floating-point position *p*, we compute a 2×2 tile of contributing pixels with associated weights:
 
 ```
@@ -123,10 +121,6 @@ function computeTile(position):
 ```
 
 ### 4.3 Multi-Sampling Integration
-
-
-# ZACHS NOTE: which direction is this going? corksrew -> grid or the other way around.
-
 
 When rendering from a high-resolution source to the LED array, we employ super-sampling to reduce aliasing artifacts:
 
@@ -149,8 +143,6 @@ function multiSample(sourceGrid, targetPosition, sampleRadius):
 ## 5. Implementation
 
 ## 5.1 Memory safety
-
-# ZACHS NOTE: FILL THIS IN
 
 ### 5.4 Web Integration
 
@@ -180,8 +172,6 @@ Visual quality was assessed through:
 ## 8. Limitations and Future Work
 
 ## 9. Conclusion
-
-# ZACHS NOTE: UPDATE THIS NOW THAT IV'E TRIMMED THIS SECTION
 
 We have presented Corkscrew Mapping, a novel technique for visualizing 2D graphics patterns on helically-arranged LED strips. Our mathematical framework provides both theoretical rigor and practical performance, enabling real-time applications in diverse contexts from festival installations to architectural lighting.
 
