@@ -7,6 +7,7 @@
 #include "platforms/wasm/ui/button.h"
 #include "platforms/wasm/ui/checkbox.h"
 #include "platforms/wasm/ui/description.h"
+#include "platforms/wasm/ui/dropdown.h"
 #include "platforms/wasm/ui/number_field.h"
 #include "platforms/wasm/ui/slider.h"
 #include "platforms/wasm/ui/title.h"
@@ -40,6 +41,7 @@ namespace fl {
 #define FASTLED_HAS_UI_TITLE 1
 #define FASTLED_HAS_UI_DESCRIPTION 1
 #define FASTLED_HAS_UI_AUDIO 1
+#define FASTLED_HAS_UI_DROPDOWN 1
 
 typedef jsNumberFieldImpl UINumberFieldImpl;
 typedef jsSliderImpl UISliderImpl;
@@ -48,5 +50,6 @@ typedef jsButtonImpl UIButtonImpl;
 typedef jsTitleImpl UITitleImpl;
 typedef jsDescriptionImpl UIDescriptionImpl;
 typedef jsAudioImpl UIAudioImpl;
+typedef jsDropdownImpl UIDropdownImpl;
 
 } // namespace fl

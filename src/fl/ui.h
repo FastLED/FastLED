@@ -326,6 +326,83 @@ class UIAudio : protected UIAudioImpl {
     bool hasNext() { return Super::hasNext(); }
 };
 
+class UIDropdown : protected UIDropdownImpl {
+  public:
+    FL_NO_COPY(UIDropdown)
+    using Super = UIDropdownImpl;
+    
+    // Constructor with array of options and count
+    UIDropdown(const char *name, const fl::Str* options, size_t count)
+        : UIDropdownImpl(name, options, count), mListener(this) {}
+    
+    // Constructor with fl::vector of options
+    UIDropdown(const char *name, const fl::vector<fl::Str>& options)
+        : UIDropdownImpl(name, options), mListener(this) {}
+
+#if FASTLED_HAS_INITIALIZER_LIST
+    // Constructor with initializer_list (only available if C++11 support exists)
+    UIDropdown(const char *name, std::initializer_list<fl::Str> options)
+        : UIDropdownImpl(name, options), mListener(this) {}
+#endif
+    
+    ~UIDropdown() {}
+    
+    fl::Str value() const { return Super::value(); }
+    int value_int() const { return Super::value_int(); }
+    
+    void setSelectedIndex(int index) { 
+        Super::setSelectedIndex(index); 
+    }
+    
+    size_t getOptionCount() const { return Super::getOptionCount(); }
+    fl::Str getOption(size_t index) const { return Super::getOption(index); }
+    
+    operator fl::Str() const { return value(); }
+    operator int() const { return value_int(); }
+    
+    UIDropdown &operator=(int index) {
+        setSelectedIndex(index);
+        return *this;
+    }
+
+    int onChanged(function<void(UIDropdown &)> callback) {
+        int out = mCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+        return out;
+    }
+    void clearCallbacks() { mCallbacks.clear(); }
+
+  protected:
+    struct Listener : public EngineEvents::Listener {
+        Listener(UIDropdown *owner) : mOwner(owner) {
+            EngineEvents::addListener(this);
+        }
+        ~Listener() {
+            if (added) {
+                EngineEvents::removeListener(this);
+            }
+        }
+        void addToEngineEventsOnce() {
+            if (added) {
+                return;
+            }
+            EngineEvents::addListener(this);
+            added = true;
+        }
+        void onBeginFrame() override;
+
+      private:
+        UIDropdown *mOwner;
+        bool added = false;
+    };
+
+  private:
+    FunctionList<UIDropdown &> mCallbacks;
+    int mLastFrameValue = -1;
+    bool mLastFrameValueValid = false;
+    Listener mListener;
+};
+
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >=)                       \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, <=)                       \
@@ -338,5 +415,6 @@ FASTLED_UI_DEFINE_OPERATORS(UISlider);
 FASTLED_UI_DEFINE_OPERATORS(UINumberField);
 FASTLED_UI_DEFINE_OPERATORS(UICheckbox);
 FASTLED_UI_DEFINE_OPERATORS(UIButton);
+FASTLED_UI_DEFINE_OPERATORS(UIDropdown);
 
 } // end namespace fl
