@@ -131,8 +131,7 @@ def run_tests(specific_test: str | None = None) -> None:
             is_crash = failure_match is not None
 
             if is_crash:
-                if _VERBOSE:
-                    print("Test crashed. Re-running with GDB to get stack trace...")
+                print("Test crashed. Re-running with GDB to get stack trace...")
                 _, gdb_stdout = run_command(test_path, use_gdb=True)
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
 
@@ -153,6 +152,10 @@ def run_tests(specific_test: str | None = None) -> None:
                     print(f"Test {test_file} crashed with return code {failure_match.group(1)}")
                 else:
                     print(f"Test {test_file} crashed with return code {return_code}")
+                # Always show crash output, even in non-verbose mode
+                if not _VERBOSE:
+                    print("Test output:")
+                    print(stdout)
             else:
                 print(f"Test {test_file} failed with return code {return_code}")
                 if not _VERBOSE:
@@ -164,13 +167,18 @@ def run_tests(specific_test: str | None = None) -> None:
             if return_code != 0:
                 failed_tests.append(FailedTest(test_file, return_code, stdout))
     if failed_tests:
-        if not _VERBOSE:
-            print("Failed tests:")
+        print("Failed tests summary:")
         for failed_test in failed_tests:
+            print(f"Test {failed_test.name} failed with return code {failed_test.return_code}")
             if not _VERBOSE:
-                print(f"Test {failed_test.name} failed with return code {failed_test.return_code}")
+                print("Output:")
+                # Show indented output for better readability
+                for line in failed_test.stdout.splitlines():
+                    print(f"  {line}")
+                print()  # Add spacing between failed tests
             else:
-                print(f"Test {failed_test.name} failed with return code {failed_test.return_code}\n{failed_test.stdout}")
+                print(failed_test.stdout)
+                print("-" * 40)
         tests_failed = len(failed_tests)
         failed_test_names = [test.name for test in failed_tests]
         print(f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}")
