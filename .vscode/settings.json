@@ -15,6 +15,21 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": true,
     "editor.formatOnSave": false,
+    "files.exclude": {
+        "**/.build": true,
+        "**/build": true,
+        "**/.pio": true,
+        "**/.pioenvs": true,
+        "**/.piolibdeps": true,
+        "**/.platformio": true,
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
+        "**/.mypy_cache": true,
+        "**/.cache": true,
+        "**/tmp": true,
+        "**/ignore": true
+    },
     "files.associations": {
         "*.embeddedhtml": "html",
         "compare": "cpp",
