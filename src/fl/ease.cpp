@@ -96,25 +96,39 @@ uint8_t easeOutCubic8(uint8_t i) {
 
 uint8_t easeInSine8(uint8_t i) {
     // ease-in sine: 1 - cos(t * π/2)
-    // For 8-bit: use sin8 lookup table for efficiency
-    // Map i from [0,255] to [64,255] in sin8 space (quarter to full wave)
-    // Then invert: 255 - result to get ease-in behavior
-    uint8_t angle = map8(i, 64, 255);               // Map to quarter-wave range
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 255) return 255;
+    
+    // For 8-bit: use cos8 lookup table for efficiency
+    // Map i from [0,255] to [0,64] in cos8 space (0 to quarter wave)
+    // Formula: 1 - cos(t * π/2) where t goes from 0 to 1
+    uint8_t angle = map8(i, 0, 64);                 // Map to quarter-wave range
     return 255 - cos8(angle);
 }
 
 uint8_t easeOutSine8(uint8_t i) {
     // ease-out sine: sin(t * π/2)
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 255) return 255;
+    
     // For 8-bit: use sin8 lookup table for efficiency
     // Map i from [0,255] to [0,64] in sin8 space (zero to quarter wave)
+    // Formula: sin(t * π/2) where t goes from 0 to 1
     uint8_t angle = map8(i, 0, 64);                 // Map to quarter-wave range
     return sin8(angle);
 }
 
 uint8_t easeInOutSine8(uint8_t i) {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 255) return 255;
+    
     // For 8-bit: use cos8 lookup table
     // Map i from [0,255] to [0,128] in cos8 space (0 to half wave)
+    // Formula: (1 - cos(π*t)) / 2 where t goes from 0 to 1
     uint8_t angle = map8(i, 0, 128);                // Map to half-wave range
     return (255 - cos8(angle)) >> 1;                // (255 - cos) / 2
 }
@@ -207,27 +221,39 @@ uint16_t easeOutCubic16(uint16_t i) {
 
 uint16_t easeInSine16(uint16_t i) {
     // ease-in sine: 1 - cos(t * π/2)
-    // For 16-bit: use sin16 lookup table for efficiency
-    // Map i from [0,65535] to [16384,65535] in sin16 space (quarter to full wave)
-    // uint16_t angle = map16(i, 16384, 65535);        // Map to quarter-wave range
-    uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 16384, 65535);
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 65535) return 65535;
+    
+    // For 16-bit: use cos16 lookup table for efficiency
+    // Map i from [0,65535] to [0,16384] in cos16 space (0 to quarter wave)
+    // Formula: 1 - cos(t * π/2) where t goes from 0 to 1
+    uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 0, 16384);
     return 65535 - cos16(angle);
 }
 
 uint16_t easeOutSine16(uint16_t i) {
     // ease-out sine: sin(t * π/2)
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 65535) return 65535;
+    
     // For 16-bit: use sin16 lookup table for efficiency
     // Map i from [0,65535] to [0,16384] in sin16 space (zero to quarter wave)
-    //uint16_t angle = map16(i, 0, 16384);            // Map to quarter-wave range
+    // Formula: sin(t * π/2) where t goes from 0 to 1
     uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 0, 16384);
     return sin16(angle);
 }
 
 uint16_t easeInOutSine16(uint16_t i) {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
+    // Handle boundary conditions explicitly
+    if (i == 0) return 0;
+    if (i == 65535) return 65535;
+    
     // For 16-bit: use cos16 lookup table
     // Map i from [0,65535] to [0,32768] in cos16 space (0 to half wave)
-    //uint16_t angle = map16(i, 0, 32768);            // Map to half-wave range
+    // Formula: (1 - cos(π*t)) / 2 where t goes from 0 to 1
     uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 0, 32768);
     return (65535 - cos16(angle)) >> 1;             // (65535 - cos) / 2
 }

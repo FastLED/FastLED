@@ -325,3 +325,165 @@ TEST_CASE("easeInQuad16") {
         CHECK_EQ(easeInQuad16(65280), 65025); // Near-max value
     }
 }
+
+TEST_CASE("All easing functions boundary tests") {
+    SUBCASE("8-bit easing functions boundary conditions") {
+        // Test all individual 8-bit functions
+        SUBCASE("easeInQuad8 boundaries") {
+            CHECK_EQ(easeInQuad8(0), 0);
+            CHECK_EQ(easeInQuad8(255), 255);
+        }
+        
+        SUBCASE("easeOutQuad8 boundaries") {
+            CHECK_EQ(easeOutQuad8(0), 0);
+            CHECK_EQ(easeOutQuad8(255), 255);
+        }
+        
+        SUBCASE("easeInOutQuad8 boundaries") {
+            CHECK_EQ(easeInOutQuad8(0), 0);
+            CHECK_EQ(easeInOutQuad8(255), 255);
+        }
+        
+        SUBCASE("easeInCubic8 boundaries") {
+            CHECK_EQ(easeInCubic8(0), 0);
+            CHECK_EQ(easeInCubic8(255), 255);
+        }
+        
+        SUBCASE("easeOutCubic8 boundaries") {
+            CHECK_EQ(easeOutCubic8(0), 0);
+            CHECK_EQ(easeOutCubic8(255), 255);
+        }
+        
+        SUBCASE("easeInOutCubic8 boundaries") {
+            CHECK_EQ(easeInOutCubic8(0), 0);
+            CHECK_EQ(easeInOutCubic8(255), 255);
+        }
+        
+        SUBCASE("easeInSine8 boundaries") {
+            uint8_t result_0 = easeInSine8(0);
+            uint8_t result_255 = easeInSine8(255);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_255, 255);
+        }
+        
+        SUBCASE("easeOutSine8 boundaries") {
+            uint8_t result_0 = easeOutSine8(0);
+            uint8_t result_255 = easeOutSine8(255);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_255, 255);
+        }
+        
+        SUBCASE("easeInOutSine8 boundaries") {
+            uint8_t result_0 = easeInOutSine8(0);
+            uint8_t result_255 = easeInOutSine8(255);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_255, 255);
+        }
+    }
+    
+    SUBCASE("16-bit easing functions boundary conditions") {
+        // Test all individual 16-bit functions
+        SUBCASE("easeInQuad16 boundaries") {
+            CHECK_EQ(easeInQuad16(0), 0);
+            CHECK_EQ(easeInQuad16(65535), 65535);
+        }
+        
+        SUBCASE("easeOutQuad16 boundaries") {
+            CHECK_EQ(easeOutQuad16(0), 0);
+            CHECK_EQ(easeOutQuad16(65535), 65535);
+        }
+        
+        SUBCASE("easeInOutQuad16 boundaries") {
+            CHECK_EQ(easeInOutQuad16(0), 0);
+            CHECK_EQ(easeInOutQuad16(65535), 65535);
+        }
+        
+        SUBCASE("easeInCubic16 boundaries") {
+            CHECK_EQ(easeInCubic16(0), 0);
+            CHECK_EQ(easeInCubic16(65535), 65535);
+        }
+        
+        SUBCASE("easeOutCubic16 boundaries") {
+            CHECK_EQ(easeOutCubic16(0), 0);
+            CHECK_EQ(easeOutCubic16(65535), 65535);
+        }
+        
+        SUBCASE("easeInOutCubic16 boundaries") {
+            CHECK_EQ(easeInOutCubic16(0), 0);
+            CHECK_EQ(easeInOutCubic16(65535), 65535);
+        }
+        
+        SUBCASE("easeInSine16 boundaries") {
+            uint16_t result_0 = easeInSine16(0);
+            uint16_t result_max = easeInSine16(65535);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_max, 65535);
+        }
+        
+        SUBCASE("easeOutSine16 boundaries") {
+            uint16_t result_0 = easeOutSine16(0);
+            uint16_t result_max = easeOutSine16(65535);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_max, 65535);
+        }
+        
+        SUBCASE("easeInOutSine16 boundaries") {
+            uint16_t result_0 = easeInOutSine16(0);
+            uint16_t result_max = easeInOutSine16(65535);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_max, 65535);
+        }
+    }
+    
+    SUBCASE("Generic ease8 function boundary conditions") {
+        // Test all easing types through the generic ease8 function
+        const fl::EaseType types[] = {
+            fl::EASE_NONE,
+            fl::EASE_IN_QUAD,
+            fl::EASE_OUT_QUAD,
+            fl::EASE_IN_OUT_QUAD,
+            fl::EASE_IN_CUBIC,
+            fl::EASE_OUT_CUBIC,
+            fl::EASE_IN_OUT_CUBIC,
+            fl::EASE_IN_SINE,
+            fl::EASE_OUT_SINE,
+            fl::EASE_IN_OUT_SINE
+        };
+        
+        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
+            fl::EaseType type = types[i];
+            uint8_t result_0 = fl::ease8(type, 0);
+            uint8_t result_255 = fl::ease8(type, 255);
+            
+            INFO("Testing EaseType " << (int)type);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_255, 255);
+        }
+    }
+    
+    SUBCASE("Generic ease16 function boundary conditions") {
+        // Test all easing types through the generic ease16 function
+        const fl::EaseType types[] = {
+            fl::EASE_NONE,
+            fl::EASE_IN_QUAD,
+            fl::EASE_OUT_QUAD,
+            fl::EASE_IN_OUT_QUAD,
+            fl::EASE_IN_CUBIC,
+            fl::EASE_OUT_CUBIC,
+            fl::EASE_IN_OUT_CUBIC,
+            fl::EASE_IN_SINE,
+            fl::EASE_OUT_SINE,
+            fl::EASE_IN_OUT_SINE
+        };
+        
+        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
+            fl::EaseType type = types[i];
+            uint16_t result_0 = fl::ease16(type, 0);
+            uint16_t result_max = fl::ease16(type, 65535);
+            
+            INFO("Testing EaseType " << (int)type);
+            CHECK_EQ(result_0, 0);
+            CHECK_EQ(result_max, 65535);
+        }
+    }
+}
