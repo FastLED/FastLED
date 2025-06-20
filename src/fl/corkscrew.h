@@ -175,6 +175,7 @@ class Corkscrew {
     Corkscrew(const Corkscrew &) = default;
     Corkscrew(Corkscrew &&) = default;
 
+    vec2f at_no_wrap(uint16_t i) const;
     vec2f at_exact(uint16_t i) const;
 
     // This is the future api.

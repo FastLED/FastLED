@@ -308,7 +308,7 @@ void draw(float pos) {
         }
     } else {
         // None splat rendering, looks aweful.
-        vec2f pos_vec2f = corkscrew.at_exact(pos);
+        vec2f pos_vec2f = corkscrew.at_no_wrap(pos);
         vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
         
         CRGB color = CRGB::Blue;

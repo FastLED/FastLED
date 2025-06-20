@@ -57,7 +57,7 @@ Corkscrew::Corkscrew(const Corkscrew::Input &input) : mInput(input) {
     fl::generateState(mInput, &mState);
 }
 
-vec2f Corkscrew::at_exact(uint16_t i) const {
+vec2f Corkscrew::at_no_wrap(uint16_t i) const {
     if (i >= mInput.numLeds) {
         // Handle out-of-bounds access, possibly by returning a default value
         return vec2f(0, 0);
@@ -80,6 +80,16 @@ vec2f Corkscrew::at_exact(uint16_t i) const {
     return position;
 }
 
+vec2f Corkscrew::at_exact(uint16_t i) const {
+    // Get the unwrapped position
+    vec2f position = at_no_wrap(i);
+    
+    // Apply cylindrical wrapping to the x-position (like at_wrap does)
+    position.x = fmodf(position.x, static_cast<float>(mState.width));
+    
+    return position;
+}
+
 
 Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     if (i >= mInput.numLeds) {
@@ -95,12 +105,12 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     float i_ceil = ceilf(i);
     if (ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
         // If the index is the same, just return the splat of that index
-        vec2f position = at_exact(static_cast<uint16_t>(i_floor));
+        vec2f position = at_no_wrap(static_cast<uint16_t>(i_floor));
         return splat(position);
     } else {
         // Interpolate between the two points and return the splat of the result
-        vec2f pos1 = at_exact(static_cast<uint16_t>(i_floor));
-        vec2f pos2 = at_exact(static_cast<uint16_t>(i_ceil));
+        vec2f pos1 = at_no_wrap(static_cast<uint16_t>(i_floor));
+        vec2f pos2 = at_no_wrap(static_cast<uint16_t>(i_ceil));
         float t = i - i_floor;
         vec2f interpolated_pos = map_range(t, 0.0f, 1.0f, pos1, pos2);
         return splat(interpolated_pos);
@@ -174,7 +184,7 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid) {
     // Iterate through each LED in the corkscrew
     for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
         // Get the rectangular coordinates for this corkscrew LED
-        vec2f rect_pos = at_exact(static_cast<uint16_t>(led_idx));
+        vec2f rect_pos = at_no_wrap(static_cast<uint16_t>(led_idx));
         
         // Convert to integer coordinates for indexing
         vec2i16 coord(static_cast<int16_t>(rect_pos.x + 0.5f), 
@@ -267,7 +277,7 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
 
 // Iterator implementation
 vec2f CorkscrewState::iterator::operator*() const {
-    return corkscrew_->at_exact(static_cast<uint16_t>(position_));
+    return corkscrew_->at_no_wrap(static_cast<uint16_t>(position_));
 }
 
 fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
@@ -276,10 +286,10 @@ fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
     
     // For each LED index, calculate its position and set it in the ScreenMap
     for (uint16_t i = 0; i < mInput.numLeds; ++i) {
-        // Get the 2D position for this LED index in the cylindrical mapping
+        // Get the wrapped 2D position for this LED index in the cylindrical mapping
         vec2f position = at_exact(i);
         
-        // Set the position in the ScreenMap
+        // Set the wrapped position in the ScreenMap
         screenMap.set(i, position);
     }
     

@@ -58,7 +58,7 @@ TEST_CASE("Corkscrew Circle10 test") {
     float min_height = 999.0f;
     Corkscrew corkscrew_festival(input_festival);
     for (uint16_t i = 0; i < corkscrew_festival.size(); ++i) {
-        vec2f pos = corkscrew_festival.at_exact(i);
+        vec2f pos = corkscrew_festival.at_no_wrap(i);
         max_height = MAX(max_height, pos.y);
         min_height = MIN(min_height, pos.y);
     }
@@ -77,7 +77,7 @@ TEST_CASE("Corkscrew LED distribution test") {
     // Count how many LEDs map to each row
     fl::vector<int> row_counts(output.height, 0);
     for (uint16_t i = 0; i < corkscrew.size(); ++i) {
-        vec2f pos = corkscrew.at_exact(i);
+        vec2f pos = corkscrew.at_no_wrap(i);
         int row = static_cast<int>(pos.y);
         if (row >= 0 && row < output.height) {
             row_counts[row]++;
@@ -109,10 +109,10 @@ TEST_CASE("Corkscrew two turns test") {
     fl::vector<int> row_counts(output_two_turns.height, 0);
     
     // Unrolled loop for 4 LEDs
-    vec2f pos0 = corkscrew_two_turns.at_exact(0);
-    vec2f pos1 = corkscrew_two_turns.at_exact(1);
-    vec2f pos2 = corkscrew_two_turns.at_exact(2);
-    vec2f pos3 = corkscrew_two_turns.at_exact(3);
+    vec2f pos0 = corkscrew_two_turns.at_no_wrap(0);
+    vec2f pos1 = corkscrew_two_turns.at_no_wrap(1);
+    vec2f pos2 = corkscrew_two_turns.at_no_wrap(2);
+    vec2f pos3 = corkscrew_two_turns.at_no_wrap(3);
 
     FL_WARN("pos0: " << pos0);
     FL_WARN("pos1: " << pos1);
@@ -296,8 +296,8 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     // The important thing is that we get some color data
     
     // Test that coordinates mapping makes sense by checking a specific LED
-    vec2f pos0 = corkscrew.at_exact(0);
-    vec2f pos5 = corkscrew.at_exact(5);
+    vec2f pos0 = corkscrew.at_no_wrap(0);
+    vec2f pos5 = corkscrew.at_no_wrap(5);
     
     // Positions should be different
     bool positions_different = (pos0.x != pos5.x) || (pos0.y != pos5.y);
@@ -374,12 +374,12 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
     fl::ScreenMap screenMapCustom = corkscrew.toScreenMap(1.2f);
     REQUIRE_EQ(screenMapCustom.getDiameter(), 1.2f);
     
-    // Verify that each LED index maps to the same position as at_exact()
+    // Verify that each LED index maps to the same position as at_exact() (wrapped)
     for (uint16_t i = 0; i < 8; ++i) {
         vec2f corkscrewPos = corkscrew.at_exact(i);
         vec2f screenMapPos = screenMap[i];
         
-        // Positions should match exactly
+        // Positions should match exactly (both are wrapped)
         REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.x, screenMapPos.x));
         REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.y, screenMapPos.y));
     }
