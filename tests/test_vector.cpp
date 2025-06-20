@@ -1,10 +1,10 @@
-
 // g++ --std=c++11 test.cpp
 
 #include <random>
 
 #include "test.h"
 #include "fl/vector.h"
+#include "fl/initializer_list.h"
 
 #include "fl/namespace.h"
 
@@ -422,3 +422,83 @@ TEST_CASE("HeapVector") {
         }
     }
 }
+
+#if FASTLED_HAS_INITIALIZER_LIST
+TEST_CASE("Initializer list constructors") {
+    FASTLED_USING_NAMESPACE;
+    
+    SUBCASE("FixedVector initializer list") {
+        fl::FixedVector<int, 10> vec{1, 2, 3, 4, 5};  
+        
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+        CHECK(vec[3] == 4);
+        CHECK(vec[4] == 5);
+    }
+    
+    SUBCASE("FixedVector initializer list with overflow") {
+        // Test that overflow is handled gracefully - only first N elements are taken
+        fl::FixedVector<int, 3> vec{1, 2, 3, 4, 5, 6, 7};
+        
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+    }
+    
+    SUBCASE("HeapVector initializer list") {
+        fl::HeapVector<int> vec{10, 20, 30, 40};
+        
+        CHECK(vec.size() == 4);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+        CHECK(vec[3] == 40);
+    }
+    
+    SUBCASE("InlinedVector initializer list - small size") {
+        fl::InlinedVector<int, 10> vec{1, 2, 3};
+        
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+    }
+    
+    SUBCASE("InlinedVector initializer list - large size") {
+        fl::InlinedVector<int, 3> vec{1, 2, 3, 4, 5, 6};  // Should trigger heap mode
+        
+        CHECK(vec.size() == 6);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+        CHECK(vec[3] == 4);
+        CHECK(vec[4] == 5);
+        CHECK(vec[5] == 6);
+    }
+    
+    SUBCASE("fl::vector initializer list") {
+        fl::vector<int> vec{100, 200, 300};  // This uses HeapVector
+        
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 100);
+        CHECK(vec[1] == 200);
+        CHECK(vec[2] == 300);
+    }
+    
+    SUBCASE("Empty initializer list") {
+        fl::FixedVector<int, 5> fixed_vec{};
+        fl::HeapVector<int> heap_vec{};
+        fl::InlinedVector<int, 3> inlined_vec{};
+        
+        CHECK(fixed_vec.size() == 0);
+        CHECK(fixed_vec.empty());
+        CHECK(heap_vec.size() == 0);
+        CHECK(heap_vec.empty());
+        CHECK(inlined_vec.size() == 0);
+        CHECK(inlined_vec.empty());
+    }
+}
+#endif

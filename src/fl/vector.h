@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "fl/functional.h"
+#include "fl/initializer_list.h"
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -98,6 +99,36 @@ template <typename T, size_t N> class FixedVector {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
     }
+
+#if FASTLED_USE_STD_INITIALIZER_LIST
+    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    FixedVector(fl::initializer_list<T> init) : current_size(0) {
+        if (init.size() > N) {
+            // Only assign the first N elements if the list is too long
+            auto it = init.begin();
+            for (size_t i = 0; i < N && it != init.end(); ++i, ++it) {
+                push_back(*it);
+            }
+        } else {
+            for (const auto& value : init) {
+                push_back(value);
+            }
+        }
+    }
+#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
+    // For AVR: variadic template constructor for brace initialization
+    template<typename... Args>
+    FixedVector(Args... args) : current_size(0) {
+        static_assert(sizeof...(args) > 0, "At least one argument required");
+        T temp_array[] = {static_cast<T>(args)...};
+        constexpr size_t num_args = sizeof...(args);
+        
+        size_t count = num_args > N ? N : num_args;
+        for (size_t i = 0; i < count; ++i) {
+            push_back(temp_array[i]);
+        }
+    }
+#endif
 
     FixedVector &operator=(const FixedVector &other) {
         if (this != &other) {
@@ -357,6 +388,29 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         T *end = &values[N];
         assign(begin, end);
     }
+
+#if FASTLED_USE_STD_INITIALIZER_LIST
+    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    HeapVector(fl::initializer_list<T> init) {
+        reserve(init.size());
+        for (const auto& value : init) {
+            push_back(value);
+        }
+    }
+#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
+    // For AVR: variadic template constructor for brace initialization
+    template<typename... Args>
+    HeapVector(Args... args) {
+        static_assert(sizeof...(args) > 0, "At least one argument required");
+        T temp_array[] = {static_cast<T>(args)...};
+        constexpr size_t num_args = sizeof...(args);
+        
+        reserve(num_args);
+        for (size_t i = 0; i < num_args; ++i) {
+            push_back(temp_array[i]);
+        }
+    }
+#endif
 
     // Destructor
     ~HeapVector() { 
@@ -833,6 +887,43 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
             mFixed.resize(size);
         }
     }
+
+#if FASTLED_USE_STD_INITIALIZER_LIST
+    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    InlinedVector(fl::initializer_list<T> init) : mUsingHeap(false) {
+        if (init.size() > INLINED_SIZE) {
+            mHeap.reserve(init.size());
+            for (const auto& value : init) {
+                mHeap.push_back(value);
+            }
+            mUsingHeap = true;
+        } else {
+            for (const auto& value : init) {
+                mFixed.push_back(value);
+            }
+        }
+    }
+#elif FASTLED_HAS_INITIALIZER_LIST && !FASTLED_USE_STD_INITIALIZER_LIST
+    // For AVR: variadic template constructor for brace initialization
+    template<typename... Args>
+    InlinedVector(Args... args) : mUsingHeap(false) {
+        static_assert(sizeof...(args) > 0, "At least one argument required");
+        T temp_array[] = {static_cast<T>(args)...};
+        constexpr size_t num_args = sizeof...(args);
+        
+        if (num_args > INLINED_SIZE) {
+            mHeap.reserve(num_args);
+            for (size_t i = 0; i < num_args; ++i) {
+                mHeap.push_back(temp_array[i]);
+            }
+            mUsingHeap = true;
+        } else {
+            for (size_t i = 0; i < num_args; ++i) {
+                mFixed.push_back(temp_array[i]);
+            }
+        }
+    }
+#endif
 
     InlinedVector &operator=(const InlinedVector &other) {
         if (this != &other) {
