@@ -1,4 +1,3 @@
-
 #include "audio.h"
 #include "fl/thread_local.h"
 
@@ -14,6 +13,29 @@ FFT &get_flex_fft() {
 }
 
 } // namespace
+
+// AudioSample implementations
+AudioSample::AudioSample() {}
+
+AudioSample::AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
+
+AudioSample::AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
+
+bool AudioSample::isValid() const { 
+    return mImpl != nullptr; 
+}
+
+AudioSample::const_iterator AudioSample::begin() const { 
+    return pcm().begin(); 
+}
+
+AudioSample::const_iterator AudioSample::end() const { 
+    return pcm().end(); 
+}
+
+AudioSample::operator bool() const { 
+    return isValid(); 
+}
 
 const AudioSample::VectorPCM &AudioSample::pcm() const {
     if (isValid()) {
@@ -88,10 +110,45 @@ float AudioSample::rms() const {
     return rms;
 }
 
+void AudioSample::fft(FFTBins *out) {
+    fl::Slice<const int16_t> sample = pcm();
+    FFT_Args args;
+    args.samples = sample.size();
+    args.bands = out->size();
+    args.fmin = FFT_Args::DefaultMinFrequency();
+    args.fmax = FFT_Args::DefaultMaxFrequency();
+    args.sample_rate =
+        FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
+    get_flex_fft().run(sample, out, args);
+}
+
+// SoundLevelMeter implementations
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
     : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
       dbfs_floor_global_(INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
       current_spl_(spl_floor) {}
+
+void SoundLevelMeter::processBlock(fl::Slice<const int16_t> samples) {
+    processBlock(samples.data(), samples.size());
+}
+
+double SoundLevelMeter::getDBFS() const { 
+    return current_dbfs_; 
+}
+
+double SoundLevelMeter::getSPL() const { 
+    return current_spl_; 
+}
+
+void SoundLevelMeter::setFloorSPL(double spl_floor) {
+    spl_floor_ = spl_floor;
+    offset_ = spl_floor_ - dbfs_floor_global_;
+}
+
+void SoundLevelMeter::resetFloor() {
+    dbfs_floor_global_ = INFINITY_DOUBLE; // infinity<double>
+    offset_ = 0.0;
+}
 
 void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     // 1) compute block power → dBFS
@@ -119,16 +176,40 @@ void SoundLevelMeter::processBlock(const int16_t *samples, size_t count) {
     current_spl_ = dbfs + offset_;
 }
 
-void AudioSample::fft(FFTBins *out) {
-    fl::Slice<const int16_t> sample = pcm();
-    FFT_Args args;
-    args.samples = sample.size();
-    args.bands = out->size();
-    args.fmin = FFT_Args::DefaultMinFrequency();
-    args.fmax = FFT_Args::DefaultMaxFrequency();
-    args.sample_rate =
-        FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
-    get_flex_fft().run(sample, out, args);
+// AudioSampleImpl implementations
+AudioSampleImpl::~AudioSampleImpl() {}
+
+template <typename It> 
+void AudioSampleImpl::assign(It begin, It end) {
+    mSignedPcm.assign(begin, end);
+    // calculate zero crossings
+    initZeroCrossings();
+}
+
+const AudioSampleImpl::VectorPCM &AudioSampleImpl::pcm() const { 
+    return mSignedPcm; 
+}
+
+float AudioSampleImpl::zcf() const {
+    const size_t n = pcm().size();
+    if (n < 2) {
+        return 0.f;
+    }
+    return float(mZeroCrossings) / (n - 1);
+}
+
+void AudioSampleImpl::initZeroCrossings() {
+    mZeroCrossings = 0;
+    if (mSignedPcm.size() > 1) {
+        for (size_t i = 1; i < mSignedPcm.size(); ++i) {
+            const bool crossed =
+                (mSignedPcm[i - 1] < 0 && mSignedPcm[i] >= 0) ||
+                (mSignedPcm[i - 1] >= 0 && mSignedPcm[i] < 0);
+            if (crossed) {
+                ++mZeroCrossings;
+            }
+        }
+    }
 }
 
 } // namespace fl
