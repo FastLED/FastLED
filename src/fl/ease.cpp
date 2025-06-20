@@ -244,9 +244,8 @@ uint16_t easeInSine16(uint16_t i) {
     // Handle boundary conditions explicitly
     if (i == 0)
         return 0;
-    if (i == 65535)
-        return 65535;
-
+    // Remove the hard-coded boundary for 65535 and let math handle it
+        
     // For 16-bit: use cos32 for efficiency and accuracy
     // Map i from [0,65535] to [0,4194304] in cos32 space (zero to quarter wave)
     // Formula: 1 - cos(t * π/2) where t goes from 0 to 1
@@ -256,10 +255,19 @@ uint16_t easeInSine16(uint16_t i) {
 
     // Convert cos32 output and apply easing formula: 1 - cos(t * π/2)
     // cos32 output range is [-2147418112, 2147418112]
-    // We want: (2147418112 - cos_result), then scale to [0, 65535]
-    int64_t adjusted = 2147418112LL - (int64_t)cos_result;
-    return (uint16_t)((uint64_t)adjusted * 65535ULL /
-                      4294836224ULL); // 4294836224 = 2 * 2147418112
+    // At t=0: cos(0) = 2147418112, result should be 0
+    // At t=1: cos(π/2) = 0, result should be 65535
+    
+    const int64_t MAX_COS32 = 2147418112LL;
+    
+    // Calculate: (MAX_COS32 - cos_result) and scale to [0, 65535]
+    int64_t adjusted = MAX_COS32 - (int64_t)cos_result;
+    
+    // Scale from [0, 2147418112] to [0, 65535]
+    uint64_t result = (uint64_t)adjusted * 65535ULL + (MAX_COS32 >> 1); // Add half for rounding
+    uint16_t final_result = (uint16_t)(result / (uint64_t)MAX_COS32);
+    
+    return final_result;
 }
 
 uint16_t easeOutSine16(uint16_t i) {
