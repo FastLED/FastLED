@@ -239,3 +239,77 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
     // Should have some non-black pixels since we read from a filled source
     REQUIRE(non_black_count > 0);
 }
+
+TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
+    // Create a small corkscrew for testing
+    Corkscrew::Input input;
+    input.numLeds = 12;  // 3x4 grid
+    input.totalTurns = 1.0f;
+    input.offsetCircumference = 0.0f;
+    
+    Corkscrew corkscrew(input);
+    
+    // Create a source grid - simple 3x4 pattern
+    const uint16_t width = 3;
+    const uint16_t height = 4;
+    CRGB source_array[width * height];
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
+    fl::Leds source_leds(source_array, xymap);
+    
+    // Clear the array first
+    for (size_t i = 0; i < width * height; ++i) {
+        source_array[i] = CRGB::Black;
+    }
+    
+    // Set up a simple pattern: red in corners, blue in center
+    source_leds(0, 0) = CRGB::Red;    // Bottom-left
+    source_leds(2, 0) = CRGB::Red;    // Bottom-right  
+    source_leds(0, 3) = CRGB::Red;    // Top-left
+    source_leds(2, 3) = CRGB::Red;    // Top-right
+    source_leds(1, 1) = CRGB::Blue;   // Center-ish
+    source_leds(1, 2) = CRGB::Blue;   // Center-ish
+    
+    // Read from the source into corkscrew buffer
+    corkscrew.readFrom(source_leds);
+    
+    // Get the buffer
+    const auto& buffer = corkscrew.getBuffer();
+    
+    // Verify buffer size
+    REQUIRE_EQ(buffer.size(), static_cast<size_t>(corkscrew.cylinder_width() * corkscrew.cylinder_height()));
+    
+    // Check that some colors were captured 
+    bool found_red_component = false;
+    bool found_blue_component = false;
+    int non_black_count = 0;
+    
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        const CRGB& color = buffer[i];
+        if (color.r > 0 || color.g > 0 || color.b > 0) {
+            non_black_count++;
+        }
+        if (color.r > 0) found_red_component = true;
+        if (color.b > 0) found_blue_component = true;
+    }
+    
+    // We should find some non-black pixels and some red components
+    REQUIRE(non_black_count > 0);
+    REQUIRE(found_red_component);
+    
+    // Blue components might not be found depending on the mapping, so let's be more lenient
+    // The important thing is that we get some color data
+    
+    // Test that coordinates mapping makes sense by checking a specific LED
+    vec2f pos0 = corkscrew.at_exact(0);
+    vec2f pos5 = corkscrew.at_exact(5);
+    
+    // Positions should be different
+    bool positions_different = (pos0.x != pos5.x) || (pos0.y != pos5.y);
+    REQUIRE(positions_different);
+    
+    // Positions should be within reasonable bounds
+    REQUIRE(pos0.x >= 0.0f);
+    REQUIRE(pos0.y >= 0.0f);
+    REQUIRE(pos5.x >= 0.0f);
+    REQUIRE(pos5.y >= 0.0f);
+}

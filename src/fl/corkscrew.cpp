@@ -156,6 +156,9 @@ void Corkscrew::readFrom(const fl::Leds& source_leds) {
     // Initialize the buffer if not already done
     initializeBuffer();
     
+    // Clear buffer first
+    clearBuffer();
+    
     // Iterate through each LED in the corkscrew
     for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
         // Get the rectangular coordinates for this corkscrew LED
