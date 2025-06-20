@@ -9,11 +9,11 @@
 using namespace fl;
 
 UITitle title("ColorBoost");
-UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component), for best results use the legacy gfx mode using ?gfx=0 at the url up top.");
+UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine. Use legacy gfx mode (?gfx=0) for best results.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
-UINumberField saturationFunction("Saturation Function", 1, 0, 3);
-UINumberField luminanceFunction("Luminance Function", 0, 0, 3);
+UINumberField saturationFunction("Saturation Function", 1, 0, 9);
+UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
@@ -54,8 +54,14 @@ EaseType getEaseType(int value) {
     switch (value) {
         case 0: return EASE_NONE;
         case 1: return EASE_IN_QUAD;
-        case 2: return EASE_IN_OUT_QUAD;
-        case 3: return EASE_IN_OUT_CUBIC;
+        case 2: return EASE_OUT_QUAD;
+        case 3: return EASE_IN_OUT_QUAD;
+        case 4: return EASE_IN_CUBIC;
+        case 5: return EASE_OUT_CUBIC;
+        case 6: return EASE_IN_OUT_CUBIC;
+        case 7: return EASE_IN_SINE;
+        case 8: return EASE_OUT_SINE;
+        case 9: return EASE_IN_OUT_SINE;
     }
     FL_ASSERT(false, "Invalid ease type");
     return EASE_NONE;

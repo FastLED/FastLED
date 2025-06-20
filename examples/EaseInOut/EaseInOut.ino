@@ -21,18 +21,24 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructSerpentine(MATRIX_WIDTH, MATRIX_HEIGHT);
 
 UITitle title("EaseInOut");
-UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=In-Out Quad, 3=In-Out Cubic.");
+UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine.");
 
 // UI Slider that goes from 0 to 1.0
 UISlider xPosition("xPosition", 0.0f, 0.0f, 1.0f, 0.01f);
-UINumberField easeTypeNumber("Ease Type", 2, 0, 3);
+UINumberField easeTypeNumber("Ease Type", 2, 0, 9);
 
 EaseType getEaseType(int value) {
     switch (value) {
         case 0: return EASE_NONE;
         case 1: return EASE_IN_QUAD;
-        case 2: return EASE_IN_OUT_QUAD;
-        case 3: return EASE_IN_OUT_CUBIC;
+        case 2: return EASE_OUT_QUAD;
+        case 3: return EASE_IN_OUT_QUAD;
+        case 4: return EASE_IN_CUBIC;
+        case 5: return EASE_OUT_CUBIC;
+        case 6: return EASE_IN_OUT_CUBIC;
+        case 7: return EASE_IN_SINE;
+        case 8: return EASE_OUT_SINE;
+        case 9: return EASE_IN_OUT_SINE;
     }
     FL_ASSERT(false, "Invalid ease type");
     return EASE_IN_OUT_QUAD;
