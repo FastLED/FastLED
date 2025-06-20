@@ -287,7 +287,7 @@ clean: .build/bin/fastled/clean
 CMakeFiles/doctest_main.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/doctest_main.dir/build.make CMakeFiles/doctest_main.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/doctest_main.dir/build.make CMakeFiles/doctest_main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=46 "Built target doctest_main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=47 "Built target doctest_main"
 .PHONY : CMakeFiles/doctest_main.dir/all
 
 # Build rule for subdir invocation for target.
@@ -304,7 +304,7 @@ doctest_main: CMakeFiles/doctest_main.dir/rule
 # codegen rule for target.
 CMakeFiles/doctest_main.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/doctest_main.dir/build.make CMakeFiles/doctest_main.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=46 "Finished codegen for target doctest_main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=47 "Finished codegen for target doctest_main"
 .PHONY : CMakeFiles/doctest_main.dir/codegen
 
 # clean rule for target.
@@ -749,12 +749,12 @@ CMakeFiles/test_frame.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_frame.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame.dir/build.make CMakeFiles/test_frame.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame.dir/build.make CMakeFiles/test_frame.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Built target test_frame"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=61 "Built target test_frame"
 .PHONY : CMakeFiles/test_frame.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/test_frame.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 47
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 48
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_frame.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 0
 .PHONY : CMakeFiles/test_frame.dir/rule
@@ -766,7 +766,7 @@ test_frame: CMakeFiles/test_frame.dir/rule
 # codegen rule for target.
 CMakeFiles/test_frame.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame.dir/build.make CMakeFiles/test_frame.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Finished codegen for target test_frame"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=61 "Finished codegen for target test_frame"
 .PHONY : CMakeFiles/test_frame.dir/codegen
 
 # clean rule for target.
@@ -782,7 +782,7 @@ CMakeFiles/test_frame_tracker.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_frame_tracker.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame_tracker.dir/build.make CMakeFiles/test_frame_tracker.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame_tracker.dir/build.make CMakeFiles/test_frame_tracker.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=61 "Built target test_frame_tracker"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=62 "Built target test_frame_tracker"
 .PHONY : CMakeFiles/test_frame_tracker.dir/all
 
 # Build rule for subdir invocation for target.
@@ -799,7 +799,7 @@ test_frame_tracker: CMakeFiles/test_frame_tracker.dir/rule
 # codegen rule for target.
 CMakeFiles/test_frame_tracker.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_frame_tracker.dir/build.make CMakeFiles/test_frame_tracker.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=61 "Finished codegen for target test_frame_tracker"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=62 "Finished codegen for target test_frame_tracker"
 .PHONY : CMakeFiles/test_frame_tracker.dir/codegen
 
 # clean rule for target.
@@ -815,7 +815,7 @@ CMakeFiles/test_function.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_function.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_function.dir/build.make CMakeFiles/test_function.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_function.dir/build.make CMakeFiles/test_function.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=62 "Built target test_function"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=63 "Built target test_function"
 .PHONY : CMakeFiles/test_function.dir/all
 
 # Build rule for subdir invocation for target.
@@ -832,7 +832,7 @@ test_function: CMakeFiles/test_function.dir/rule
 # codegen rule for target.
 CMakeFiles/test_function.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_function.dir/build.make CMakeFiles/test_function.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=62 "Finished codegen for target test_function"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=63 "Finished codegen for target test_function"
 .PHONY : CMakeFiles/test_function.dir/codegen
 
 # clean rule for target.
@@ -848,7 +848,7 @@ CMakeFiles/test_fx.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_fx.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx.dir/build.make CMakeFiles/test_fx.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx.dir/build.make CMakeFiles/test_fx.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=63 "Built target test_fx"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=64 "Built target test_fx"
 .PHONY : CMakeFiles/test_fx.dir/all
 
 # Build rule for subdir invocation for target.
@@ -865,7 +865,7 @@ test_fx: CMakeFiles/test_fx.dir/rule
 # codegen rule for target.
 CMakeFiles/test_fx.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx.dir/build.make CMakeFiles/test_fx.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=63 "Finished codegen for target test_fx"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=64 "Finished codegen for target test_fx"
 .PHONY : CMakeFiles/test_fx.dir/codegen
 
 # clean rule for target.
@@ -881,7 +881,7 @@ CMakeFiles/test_fx2d_blend.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_fx2d_blend.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx2d_blend.dir/build.make CMakeFiles/test_fx2d_blend.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx2d_blend.dir/build.make CMakeFiles/test_fx2d_blend.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=64 "Built target test_fx2d_blend"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=65 "Built target test_fx2d_blend"
 .PHONY : CMakeFiles/test_fx2d_blend.dir/all
 
 # Build rule for subdir invocation for target.
@@ -898,7 +898,7 @@ test_fx2d_blend: CMakeFiles/test_fx2d_blend.dir/rule
 # codegen rule for target.
 CMakeFiles/test_fx2d_blend.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx2d_blend.dir/build.make CMakeFiles/test_fx2d_blend.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=64 "Finished codegen for target test_fx2d_blend"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=65 "Finished codegen for target test_fx2d_blend"
 .PHONY : CMakeFiles/test_fx2d_blend.dir/codegen
 
 # clean rule for target.
@@ -914,7 +914,7 @@ CMakeFiles/test_fx_engine.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_fx_engine.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_engine.dir/build.make CMakeFiles/test_fx_engine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_engine.dir/build.make CMakeFiles/test_fx_engine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=65 "Built target test_fx_engine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=66 "Built target test_fx_engine"
 .PHONY : CMakeFiles/test_fx_engine.dir/all
 
 # Build rule for subdir invocation for target.
@@ -931,7 +931,7 @@ test_fx_engine: CMakeFiles/test_fx_engine.dir/rule
 # codegen rule for target.
 CMakeFiles/test_fx_engine.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_engine.dir/build.make CMakeFiles/test_fx_engine.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=65 "Finished codegen for target test_fx_engine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=66 "Finished codegen for target test_fx_engine"
 .PHONY : CMakeFiles/test_fx_engine.dir/codegen
 
 # clean rule for target.
@@ -947,7 +947,7 @@ CMakeFiles/test_fx_time.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_fx_time.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_time.dir/build.make CMakeFiles/test_fx_time.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_time.dir/build.make CMakeFiles/test_fx_time.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=66 "Built target test_fx_time"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=67 "Built target test_fx_time"
 .PHONY : CMakeFiles/test_fx_time.dir/all
 
 # Build rule for subdir invocation for target.
@@ -964,7 +964,7 @@ test_fx_time: CMakeFiles/test_fx_time.dir/rule
 # codegen rule for target.
 CMakeFiles/test_fx_time.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_fx_time.dir/build.make CMakeFiles/test_fx_time.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=66 "Finished codegen for target test_fx_time"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=67 "Finished codegen for target test_fx_time"
 .PHONY : CMakeFiles/test_fx_time.dir/codegen
 
 # clean rule for target.
@@ -980,7 +980,7 @@ CMakeFiles/test_grid.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_grid.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_grid.dir/build.make CMakeFiles/test_grid.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_grid.dir/build.make CMakeFiles/test_grid.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=67 "Built target test_grid"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=68 "Built target test_grid"
 .PHONY : CMakeFiles/test_grid.dir/all
 
 # Build rule for subdir invocation for target.
@@ -997,7 +997,7 @@ test_grid: CMakeFiles/test_grid.dir/rule
 # codegen rule for target.
 CMakeFiles/test_grid.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_grid.dir/build.make CMakeFiles/test_grid.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=67 "Finished codegen for target test_grid"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=68 "Finished codegen for target test_grid"
 .PHONY : CMakeFiles/test_grid.dir/codegen
 
 # clean rule for target.
@@ -1013,7 +1013,7 @@ CMakeFiles/test_hashmap.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_hashmap.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap.dir/build.make CMakeFiles/test_hashmap.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap.dir/build.make CMakeFiles/test_hashmap.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=68 "Built target test_hashmap"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=69 "Built target test_hashmap"
 .PHONY : CMakeFiles/test_hashmap.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1030,7 +1030,7 @@ test_hashmap: CMakeFiles/test_hashmap.dir/rule
 # codegen rule for target.
 CMakeFiles/test_hashmap.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap.dir/build.make CMakeFiles/test_hashmap.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=68 "Finished codegen for target test_hashmap"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=69 "Finished codegen for target test_hashmap"
 .PHONY : CMakeFiles/test_hashmap.dir/codegen
 
 # clean rule for target.
@@ -1046,7 +1046,7 @@ CMakeFiles/test_hashmap_lru.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_hashmap_lru.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap_lru.dir/build.make CMakeFiles/test_hashmap_lru.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap_lru.dir/build.make CMakeFiles/test_hashmap_lru.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=69 "Built target test_hashmap_lru"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=70 "Built target test_hashmap_lru"
 .PHONY : CMakeFiles/test_hashmap_lru.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1063,7 +1063,7 @@ test_hashmap_lru: CMakeFiles/test_hashmap_lru.dir/rule
 # codegen rule for target.
 CMakeFiles/test_hashmap_lru.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hashmap_lru.dir/build.make CMakeFiles/test_hashmap_lru.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=69 "Finished codegen for target test_hashmap_lru"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=70 "Finished codegen for target test_hashmap_lru"
 .PHONY : CMakeFiles/test_hashmap_lru.dir/codegen
 
 # clean rule for target.
@@ -1079,7 +1079,7 @@ CMakeFiles/test_hsv16.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_hsv16.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv16.dir/build.make CMakeFiles/test_hsv16.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv16.dir/build.make CMakeFiles/test_hsv16.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=70 "Built target test_hsv16"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=71 "Built target test_hsv16"
 .PHONY : CMakeFiles/test_hsv16.dir/all
 
 # Build rule for subdir invocation for target.
@@ -1096,7 +1096,7 @@ test_hsv16: CMakeFiles/test_hsv16.dir/rule
 # codegen rule for target.
 CMakeFiles/test_hsv16.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv16.dir/build.make CMakeFiles/test_hsv16.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=70 "Finished codegen for target test_hsv16"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=71 "Finished codegen for target test_hsv16"
 .PHONY : CMakeFiles/test_hsv16.dir/codegen
 
 # clean rule for target.
@@ -1112,12 +1112,12 @@ CMakeFiles/test_hsv_conversion_accuracy.dir/all: CMakeFiles/doctest_main.dir/all
 CMakeFiles/test_hsv_conversion_accuracy.dir/all: .build/bin/fastled/CMakeFiles/fastled.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv_conversion_accuracy.dir/build.make CMakeFiles/test_hsv_conversion_accuracy.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv_conversion_accuracy.dir/build.make CMakeFiles/test_hsv_conversion_accuracy.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=71 "Built target test_hsv_conversion_accuracy"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Built target test_hsv_conversion_accuracy"
 .PHONY : CMakeFiles/test_hsv_conversion_accuracy.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/test_hsv_conversion_accuracy.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 48
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 47
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_hsv_conversion_accuracy.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 0
 .PHONY : CMakeFiles/test_hsv_conversion_accuracy.dir/rule
@@ -1129,7 +1129,7 @@ test_hsv_conversion_accuracy: CMakeFiles/test_hsv_conversion_accuracy.dir/rule
 # codegen rule for target.
 CMakeFiles/test_hsv_conversion_accuracy.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_hsv_conversion_accuracy.dir/build.make CMakeFiles/test_hsv_conversion_accuracy.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=71 "Finished codegen for target test_hsv_conversion_accuracy"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Finished codegen for target test_hsv_conversion_accuracy"
 .PHONY : CMakeFiles/test_hsv_conversion_accuracy.dir/codegen
 
 # clean rule for target.
@@ -2101,12 +2101,12 @@ CMakeFiles/test_xypath.dir/clean:
 .build/bin/fastled/CMakeFiles/FastLED_fx.dir/all:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fx.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fx.dir/depend
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fx.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fx.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=27,28,29,30,31,32,33 "Built target FastLED_fx"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=28,29,30,31,32,33 "Built target FastLED_fx"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fx.dir/all
 
 # Build rule for subdir invocation for target.
 .build/bin/fastled/CMakeFiles/FastLED_fx.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 .build/bin/fastled/CMakeFiles/FastLED_fx.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 0
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fx.dir/rule
@@ -2118,7 +2118,7 @@ FastLED_fx: .build/bin/fastled/CMakeFiles/FastLED_fx.dir/rule
 # codegen rule for target.
 .build/bin/fastled/CMakeFiles/FastLED_fx.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fx.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fx.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=27,28,29,30,31,32,33 "Finished codegen for target FastLED_fx"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=28,29,30,31,32,33 "Finished codegen for target FastLED_fx"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fx.dir/codegen
 
 # clean rule for target.
@@ -2165,12 +2165,12 @@ FastLED_platforms: .build/bin/fastled/CMakeFiles/FastLED_platforms.dir/rule
 .build/bin/fastled/CMakeFiles/FastLED_fl.dir/all:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fl.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fl.dir/depend
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fl.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fl.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 "Built target FastLED_fl"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 "Built target FastLED_fl"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fl.dir/all
 
 # Build rule for subdir invocation for target.
 .build/bin/fastled/CMakeFiles/FastLED_fl.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 20
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 21
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 .build/bin/fastled/CMakeFiles/FastLED_fl.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 0
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fl.dir/rule
@@ -2182,7 +2182,7 @@ FastLED_fl: .build/bin/fastled/CMakeFiles/FastLED_fl.dir/rule
 # codegen rule for target.
 .build/bin/fastled/CMakeFiles/FastLED_fl.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_fl.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_fl.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26 "Finished codegen for target FastLED_fl"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27 "Finished codegen for target FastLED_fl"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_fl.dir/codegen
 
 # clean rule for target.
@@ -2197,12 +2197,12 @@ FastLED_fl: .build/bin/fastled/CMakeFiles/FastLED_fl.dir/rule
 .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/all:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/depend
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=43 "Built target FastLED_sensors"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=43,44 "Built target FastLED_sensors"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/all
 
 # Build rule for subdir invocation for target.
 .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/tests/CMakeFiles 0
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/rule
@@ -2214,7 +2214,7 @@ FastLED_sensors: .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/rule
 # codegen rule for target.
 .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=43 "Finished codegen for target FastLED_sensors"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=43,44 "Finished codegen for target FastLED_sensors"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/codegen
 
 # clean rule for target.
@@ -2229,7 +2229,7 @@ FastLED_sensors: .build/bin/fastled/CMakeFiles/FastLED_sensors.dir/rule
 .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/all:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/depend
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=44,45 "Built target FastLED_third_party"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=45,46 "Built target FastLED_third_party"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/all
 
 # Build rule for subdir invocation for target.
@@ -2246,7 +2246,7 @@ FastLED_third_party: .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/rule
 # codegen rule for target.
 .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/build.make .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=44,45 "Finished codegen for target FastLED_third_party"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=45,46 "Finished codegen for target FastLED_third_party"
 .PHONY : .build/bin/fastled/CMakeFiles/FastLED_third_party.dir/codegen
 
 # clean rule for target.
@@ -2298,7 +2298,7 @@ FastLED_core: .build/bin/fastled/CMakeFiles/FastLED_core.dir/rule
 .build/bin/fastled/CMakeFiles/fastled.dir/all: .build/bin/fastled/CMakeFiles/FastLED_core.dir/all
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/fastled.dir/build.make .build/bin/fastled/CMakeFiles/fastled.dir/depend
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/fastled.dir/build.make .build/bin/fastled/CMakeFiles/fastled.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=47 "Built target fastled"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Built target fastled"
 .PHONY : .build/bin/fastled/CMakeFiles/fastled.dir/all
 
 # Build rule for subdir invocation for target.
@@ -2315,7 +2315,7 @@ fastled: .build/bin/fastled/CMakeFiles/fastled.dir/rule
 # codegen rule for target.
 .build/bin/fastled/CMakeFiles/fastled.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f .build/bin/fastled/CMakeFiles/fastled.dir/build.make .build/bin/fastled/CMakeFiles/fastled.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num=47 "Finished codegen for target fastled"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/workspace/tests/CMakeFiles --progress-num= "Finished codegen for target fastled"
 .PHONY : .build/bin/fastled/CMakeFiles/fastled.dir/codegen
 
 # clean rule for target.
