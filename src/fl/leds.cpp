@@ -1,8 +1,7 @@
-
-
 #ifndef __AVR__
 
 #include "fl/leds.h"
+#include "fl/corkscrew.h"
 #include "crgb.h"
 #include "fl/assert.h"
 #include "fl/xymap.h"
@@ -43,6 +42,11 @@ const CRGB *Leds::operator[](int y) const {
 
 Leds::Leds(CRGB *leds, uint16_t width, uint16_t height)
     : Leds(leds, XYMap::constructRectangularGrid(width, height)) {}
+
+void Leds::draw(Corkscrew& corkscrew) {
+    // Read from this Leds object and populate the corkscrew's internal rectangular buffer
+    corkscrew.readFrom(*this);
+}
 
 } // namespace fl
 
