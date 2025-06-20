@@ -92,8 +92,7 @@ def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
         print("Compilation failed:")
         print(output)  # Always show output on failure
         sys.exit(1)
-    if _VERBOSE:
-        print("Compilation successful.")
+    print("Compilation successful.")
 
 
 def run_tests(specific_test: str | None = None) -> None:
@@ -102,8 +101,7 @@ def run_tests(specific_test: str | None = None) -> None:
         print(f"Test directory not found: {test_dir}")
         sys.exit(1)
 
-    if _VERBOSE:
-        print("Running tests...")
+    print("Running tests...")
     failed_tests: list[FailedTest] = []
     files = os.listdir(test_dir)
     # filter out all pdb files (windows) and only keep test_ executables
@@ -121,8 +119,7 @@ def run_tests(specific_test: str | None = None) -> None:
     for test_file in files:
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
-            if _VERBOSE:
-                print(f"Running test: {test_file}")
+            print(f"Running test: {test_file}")
             return_code, stdout = run_command(test_path)
 
             output = stdout
@@ -141,29 +138,26 @@ def run_tests(specific_test: str | None = None) -> None:
                 print(f"Cause: {crash_info.cause}")
                 print(f"Stack: {crash_info.stack}")
 
-            if _VERBOSE:
-                print("Test output:")
-                print(stdout)
+            
+            print("Test output:")
+            print(stdout)
             if return_code == 0:
-                if _VERBOSE:
-                    print("Test passed")
+                print("Test passed")
             elif is_crash:
                 if failure_match:
                     print(f"Test {test_file} crashed with return code {failure_match.group(1)}")
                 else:
                     print(f"Test {test_file} crashed with return code {return_code}")
                 # Always show crash output, even in non-verbose mode
-                if not _VERBOSE:
-                    print("Test output:")
-                    print(stdout)
+                print("Test output:")
+                print(stdout)
             else:
                 print(f"Test {test_file} failed with return code {return_code}")
-                if not _VERBOSE:
-                    print("Test output:")
-                    print(stdout)  # Show output on failure even in non-verbose mode
 
-            if _VERBOSE:
-                print("-" * 40)
+                print("Test output:")
+                print(stdout)  # Show output on failure even in non-verbose mode
+
+            print("-" * 40)
             if return_code != 0:
                 failed_tests.append(FailedTest(test_file, return_code, stdout))
     if failed_tests:
