@@ -482,6 +482,7 @@ audio::-webkit-media-controls-mute-button {
 
 /* Add hover functionality to show the label immediately */
 #canvas-label.hover-show {
-    opacity: 1;
-    transition: opacity 0.2s ease-in-out;
+    opacity: 1 !important;
+    transition: opacity 0.2s ease-in-out !important;
+    animation: none !important; /* Cancel any running animation */
 }

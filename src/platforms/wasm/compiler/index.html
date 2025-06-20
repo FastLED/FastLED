@@ -75,95 +75,150 @@
 <script type="module">
     import { loadFastLED } from './index.js';
     
-    document.getElementById('myCanvas').addEventListener('click', function() {
-        const output = document.getElementById('output');
-        const popup = document.getElementById('output-popup');
-        const overlay = document.getElementById('popup-overlay');
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded - setting up mouseover events');
         
-        // Move the output element to the popup
-        popup.appendChild(output);
-        
-        // Show the popup and overlay with animation
-        overlay.style.opacity = '0';
-        overlay.style.display = 'block';
-        popup.style.display = 'block';
-        
-        // Trigger reflow
-        void overlay.offsetWidth;
-        
-        // Fade in
-        overlay.style.opacity = '1';
-        
-        // Close popup when clicking overlay
-        overlay.onclick = function() {
-            // Fade out
-            overlay.style.opacity = '0';
-            
-            setTimeout(() => {
-                popup.style.display = 'none';
-                overlay.style.display = 'none';
-                
-                // Remove and re-add the animation class to trigger it again
-                const label = document.getElementById('canvas-label');
-                label.classList.remove('show-animation');
-                // Force reflow to ensure animation restarts
-                void label.offsetWidth;
-                label.classList.add('show-animation');
-            }, 200); // Match the transition duration
-        };
-    });
-
-    // Add mouseover and mouseout event listeners for the canvas
-    document.getElementById('myCanvas').addEventListener('mouseover', function() {
+        const canvas = document.getElementById('myCanvas');
+        const canvasContainer = document.getElementById('canvas-container');
         const label = document.getElementById('canvas-label');
-        label.classList.add('hover-show');
-    });
-
-    document.getElementById('myCanvas').addEventListener('mouseout', function() {
-        const label = document.getElementById('canvas-label');
-        label.classList.remove('hover-show');
-    });
-
-    // Also add event listeners to the canvas container for better UX
-    document.getElementById('canvas-container').addEventListener('mouseover', function() {
-        const label = document.getElementById('canvas-label');
-        label.classList.add('hover-show');
-    });
-
-    document.getElementById('canvas-container').addEventListener('mouseout', function() {
-        const label = document.getElementById('canvas-label');
-        label.classList.remove('hover-show');
-    });
-
-    document.getElementById('output').addEventListener('click', function() {
-        if (document.querySelector('.toast-notification')) {
-            return; // We are already showing a toast notification
+        
+        console.log('Canvas element:', canvas);
+        console.log('Canvas container element:', canvasContainer);
+        console.log('Label element:', label);
+        
+        if (!canvas || !canvasContainer || !label) {
+            console.error('One or more required elements not found');
+            return;
         }
-
-        const text = this.textContent;
         
-        navigator.clipboard.writeText(text).then(() => {
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.textContent = 'Copied to clipboard';
-            document.body.appendChild(toast);
-            
-            // Force reflow
-            void toast.offsetHeight;
-            
-            toast.classList.add('toast-notification-show');
-            
-            setTimeout(() => {
-                toast.classList.add('toast-notification-hide');
-                toast.addEventListener('transitionend', () => {
-                    if (toast.parentElement) {
-                        document.body.removeChild(toast);
-                    }
-                }, {once: true});
-            }, 2000);
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
+        // Add mouseover and mouseout event listeners for the canvas
+        canvas.addEventListener('mouseover', function() {
+            console.log('Canvas mouseover event triggered');
+            label.classList.add('hover-show');
+            // Fallback: directly set style as well
+            label.style.opacity = '1';
+            label.style.transition = 'opacity 0.2s ease-in-out';
+            console.log('Added hover-show class, current classes:', label.className);
         });
+
+        canvas.addEventListener('mouseout', function() {
+            console.log('Canvas mouseout event triggered');
+            label.classList.remove('hover-show');
+            // Fallback: reset style
+            label.style.opacity = '';
+            label.style.transition = '';
+            console.log('Removed hover-show class, current classes:', label.className);
+        });
+
+        // Also add event listeners to the canvas container for better UX
+        canvasContainer.addEventListener('mouseover', function() {
+            console.log('Canvas container mouseover event triggered');
+            label.classList.add('hover-show');
+            // Fallback: directly set style as well
+            label.style.opacity = '1';
+            label.style.transition = 'opacity 0.2s ease-in-out';
+            console.log('Added hover-show class, current classes:', label.className);
+        });
+
+        canvasContainer.addEventListener('mouseout', function() {
+            console.log('Canvas container mouseout event triggered');
+            label.classList.remove('hover-show');
+            // Fallback: reset style
+            label.style.opacity = '';
+            label.style.transition = '';
+            console.log('Removed hover-show class, current classes:', label.className);
+        });
+        
+        // Click event listener for canvas
+        canvas.addEventListener('click', function() {
+            const output = document.getElementById('output');
+            const popup = document.getElementById('output-popup');
+            const overlay = document.getElementById('popup-overlay');
+            
+            // Move the output element to the popup
+            popup.appendChild(output);
+            
+            // Show the popup and overlay with animation
+            overlay.style.opacity = '0';
+            overlay.style.display = 'block';
+            popup.style.display = 'block';
+            
+            // Trigger reflow
+            void overlay.offsetWidth;
+            
+            // Fade in
+            overlay.style.opacity = '1';
+            
+            // Close popup when clicking overlay
+            overlay.onclick = function() {
+                // Fade out
+                overlay.style.opacity = '0';
+                
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    overlay.style.display = 'none';
+                    
+                    // Remove and re-add the animation class to trigger it again
+                    const label = document.getElementById('canvas-label');
+                    label.classList.remove('show-animation');
+                    // Force reflow to ensure animation restarts
+                    void label.offsetWidth;
+                    label.classList.add('show-animation');
+                }, 200); // Match the transition duration
+            };
+        });
+        
+        // Click event listener for output
+        document.getElementById('output').addEventListener('click', function() {
+            if (document.querySelector('.toast-notification')) {
+                return; // We are already showing a toast notification
+            }
+
+            const text = this.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.textContent = 'Copied to clipboard';
+                document.body.appendChild(toast);
+                
+                // Force reflow
+                void toast.offsetHeight;
+                
+                toast.classList.add('toast-notification-show');
+                
+                setTimeout(() => {
+                    toast.classList.add('toast-notification-hide');
+                    toast.addEventListener('transitionend', () => {
+                        if (toast.parentElement) {
+                            document.body.removeChild(toast);
+                        }
+                    }, {once: true});
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+        
+        // Test function to verify hover functionality
+        window.testHoverFunctionality = function() {
+            console.log('Testing hover functionality...');
+            const label = document.getElementById('canvas-label');
+            if (label) {
+                console.log('Showing label for test...');
+                label.classList.add('hover-show');
+                label.style.opacity = '1';
+                setTimeout(() => {
+                    console.log('Hiding label after test...');
+                    label.classList.remove('hover-show');
+                    label.style.opacity = '';
+                }, 2000);
+            } else {
+                console.error('Label element not found!');
+            }
+        };
+        
+        console.log('Mouseover functionality setup complete. Test it by calling testHoverFunctionality() in console.');
     });
 
     async function loadThreeJs() {
