@@ -35,6 +35,9 @@ class jsDropdownImpl {
     fl::Str getOption(size_t index) const;
     const fl::Str &groupName() const { return mGroup; }
 
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
+
     jsDropdownImpl &operator=(int index) {
         setSelectedIndex(index);
         return *this;
