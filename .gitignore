@@ -51,3 +51,4 @@ activate
 temp
 .tools_cache
 .cache
+ci/ci/scrapers/screenshot
