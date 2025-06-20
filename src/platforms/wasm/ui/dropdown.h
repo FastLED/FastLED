@@ -9,11 +9,9 @@ namespace fl {
 
 class jsDropdownImpl {
   public:
-    // Constructor with array of options and count
-    jsDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
-    
-    // Constructor with fl::vector of options
-    jsDropdownImpl(const fl::string &name, const fl::vector<fl::string>& options);
+
+    // Constructor with fl::Slice<fl::string> for arrays and containers.
+    jsDropdownImpl(const fl::string &name, fl::Slice<fl::string> options);
 
     // Constructor with initializer_list (FastLED requires C++11 support)
     jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
@@ -42,6 +40,9 @@ class jsDropdownImpl {
     }
 
   private:
+    // Private constructor with array of options and count (used by template constructor)
+    jsDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
+    
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
     void commonInit(const fl::string &name);
 

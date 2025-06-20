@@ -236,17 +236,10 @@ class UIAudioImpl {
 #if !FASTLED_HAS_UI_DROPDOWN
 class UIDropdownImpl {
   public:
-    // Constructor with array of options and count
-    UIDropdownImpl(const char *name, const fl::string* options, size_t count) 
-        : mSelectedIndex(0) {
-        FASTLED_UNUSED(name);
-        for (size_t i = 0; i < count; ++i) {
-            mOptions.push_back(options[i]);
-        }
-        if (mOptions.empty()) {
-            mOptions.push_back(fl::string("No options"));
-        }
-    }
+    // Constructor with array of options (size determined automatically)
+    template<size_t N>
+    UIDropdownImpl(const char *name, const fl::string (&options)[N]) 
+        : UIDropdownImpl(name, options, N) {}
     
     // Constructor with fl::vector of options
     UIDropdownImpl(const char *name, const fl::vector<fl::string>& options) 
@@ -260,7 +253,7 @@ class UIDropdownImpl {
         }
     }
 
-    // Constructor with fl::Slice<fl::string> (fl::string) options
+    // Constructor with fl::Slice<fl::string>
     UIDropdownImpl(const char *name, fl::Slice<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
@@ -271,7 +264,6 @@ class UIDropdownImpl {
             mOptions.push_back(fl::string("No options"));
         }
     }
-
 
     // Constructor with initializer_list (only available if C++11 support exists)
     UIDropdownImpl(const char *name, fl::initializer_list<fl::string> options) 
@@ -314,6 +306,18 @@ class UIDropdownImpl {
     void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
+    // Private constructor with array of options and count (used by template constructor)
+    UIDropdownImpl(const char *name, const fl::string* options, size_t count) 
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (size_t i = 0; i < count; ++i) {
+            mOptions.push_back(options[i]);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::string("No options"));
+        }
+    }
+
     fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
 };

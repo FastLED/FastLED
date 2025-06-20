@@ -48,6 +48,18 @@ jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::vector<fl::string>& op
     commonInit(name);
 }
 
+// Constructor with fl::Slice<fl::string>
+jsDropdownImpl::jsDropdownImpl(const Str &name, fl::Slice<fl::string> options) 
+    : mSelectedIndex(0) {
+    for (size_t i = 0; i < options.size(); ++i) {
+        mOptions.push_back(options[i]);
+    }
+    if (mOptions.empty()) {
+        mOptions.push_back(fl::string("No options"));
+    }
+    commonInit(name);
+}
+
 // Constructor with initializer_list (only available if C++11 support exists)
 jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::string> options) 
     : mSelectedIndex(0) {

@@ -406,8 +406,13 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     FL_NO_COPY(UIDropdown)
     using Super = UIDropdownImpl;
 
-    // Constructor with fl::Slice<fl::string> (fl::string) options
+
+    // Constructor with fl::Slice<fl::string> for arrays and containers.
     UIDropdown(const char *name, fl::Slice<fl::string> options)
+        : UIDropdownImpl(name, options), mListener(this) {}
+
+    // Constructor with initializer_list
+    UIDropdown(const char *name, fl::initializer_list<fl::string> options)
         : UIDropdownImpl(name, options), mListener(this) {}
 
     ~UIDropdown() {}
