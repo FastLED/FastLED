@@ -6,7 +6,6 @@
 #include "fl/vector.h"
 #include "fl/initializer_list.h"
 
-#include "fl/namespace.h"
 
 using namespace fl;
 
@@ -52,7 +51,6 @@ TEST_CASE("Fixed vector simple") {
 }
 
 TEST_CASE("Fixed vector insert") {
-    FASTLED_USING_NAMESPACE;
     fl::FixedVector<int, 5> vec;
 
     SUBCASE("Insert at beginning") {
@@ -110,7 +108,6 @@ TEST_CASE("Fixed vector insert") {
 }
 
 TEST_CASE("Fixed vector find_if with predicate") {
-    FASTLED_USING_NAMESPACE;
     fl::FixedVector<int, 5> vec;
 
     SUBCASE("Find even number") {
@@ -153,7 +150,6 @@ TEST_CASE("Fixed vector find_if with predicate") {
 }
 
 TEST_CASE("fl::FixedVector construction and destruction") {
-    FASTLED_USING_NAMESPACE;
     
     static int live_object_count = 0;
 
@@ -240,7 +236,6 @@ TEST_CASE("fl::FixedVector construction and destruction") {
 }
 
 TEST_CASE("Fixed vector advanced") {
-    FASTLED_USING_NAMESPACE;
     fl::FixedVector<int, 5> vec;
 
     SUBCASE("Pop back") {
@@ -304,7 +299,6 @@ TEST_CASE("Fixed vector advanced") {
 }
 
 TEST_CASE("Fixed vector with custom type") {
-    FASTLED_USING_NAMESPACE;
     struct Point {
         int x, y;
         Point(int x = 0, int y = 0) : x(x), y(y) {}
@@ -423,9 +417,8 @@ TEST_CASE("HeapVector") {
     }
 }
 
-#if FASTLED_HAS_INITIALIZER_LIST
+
 TEST_CASE("Initializer list constructors") {
-    FASTLED_USING_NAMESPACE;
     
     SUBCASE("FixedVector initializer list") {
         fl::FixedVector<int, 10> vec{1, 2, 3, 4, 5};  
@@ -501,4 +494,3 @@ TEST_CASE("Initializer list constructors") {
         CHECK(inlined_vec.empty());
     }
 }
-#endif
