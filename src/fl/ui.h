@@ -19,18 +19,19 @@
 
 namespace fl {
 
-// Base class for UI elements that provides group functionality
+// Base class for UI elements that provides string-based group functionality
 class UIBase {
   public:
-    UIBase() : mGroup(nullptr) {}
+    UIBase() {}
     virtual ~UIBase() {}
     
-    void setGroup(UIGroup* group) { mGroup = group; }
-    UIGroup* getGroup() const { return mGroup; }
-    bool hasGroup() const { return mGroup != nullptr; }
+    void setGroup(const fl::Str& groupName) { mGroupName = groupName; }
+    void setGroup(const char* groupName) { mGroupName = fl::Str(groupName); }
+    fl::Str getGroup() const { return mGroupName; }
+    bool hasGroup() const { return !mGroupName.empty(); }
 
   private:
-    UIGroup* mGroup;
+    fl::Str mGroupName;
 };
 
 // If the platform is missing ui components, provide stubs.
@@ -411,22 +412,6 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
     Listener mListener;
-};
-
-class UIGroup : protected UIGroupImpl {
-  public:
-    FL_NO_COPY(UIGroup);
-    using Super = UIGroupImpl;
-    
-    // Constructor takes fl::Str as the only parameter for grouping name
-    UIGroup(const fl::Str& groupName) : UIGroupImpl(groupName.c_str()) {}
-    ~UIGroup() {}
-    
-    // Get the group name
-    fl::Str name() const { return Super::name(); }
-    
-    // Implicit conversion to string for convenience
-    operator fl::Str() const { return name(); }
 };
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \

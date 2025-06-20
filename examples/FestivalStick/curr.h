@@ -60,9 +60,6 @@ UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface. ");
 
-// UI Group for noise-related controls
-UIGroup noiseGroup("Noise Controls");
-
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
@@ -73,20 +70,17 @@ UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 
-// Noise controls (grouped under noiseGroup)
+// Noise controls (will be grouped under "Noise Controls")
 UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
-
-// Color boost controls
-UINumberField saturationFunction("Saturation Function", 1, 0, 9);
-UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 // UIDropdown examples - noise-related color palette
 fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
 
-fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
+// UIDropdown examples - render mode
+fl::Str renderModeOptions[] = {"Noise", "Corkscrew", "Solid"};
 fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
 
 // Color palette for noise
@@ -173,18 +167,34 @@ void setup() {
     controller->setScreenMap(corkscrewScreenMap);
     
     // Associate noise-related UI elements with the noise group
-    useNoise.setGroup(&noiseGroup);
-    noiseScale.setGroup(&noiseGroup);
-    noiseSpeed.setGroup(&noiseGroup);
-    paletteDropdown.setGroup(&noiseGroup);
+    useNoise.setGroup("Noise Controls");
+    noiseScale.setGroup("Noise Controls");
+    noiseSpeed.setGroup("Noise Controls");
+    paletteDropdown.setGroup("Noise Controls");
     
-    // Demonstrate UIGroup functionality for noise controls
-    FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
-    FL_WARN("  Associated UI elements with group:");
-    FL_WARN("  - useNoise: " << (useNoise.hasGroup() ? "has group" : "no group"));
-    FL_WARN("  - noiseScale: " << (noiseScale.hasGroup() ? "has group" : "no group"));
-    FL_WARN("  - noiseSpeed: " << (noiseSpeed.hasGroup() ? "has group" : "no group"));
-    FL_WARN("  - paletteDropdown: " << (paletteDropdown.hasGroup() ? "has group" : "no group"));
+    // Associate other UI elements with appropriate groups
+    speed.setGroup("Motion Controls");
+    positionCoarse.setGroup("Position Controls");
+    positionFine.setGroup("Position Controls");
+    positionExtraFine.setGroup("Position Controls");
+    brightness.setGroup("Visual Controls");
+    splatRendering.setGroup("Visual Controls");
+    autoAdvance.setGroup("Motion Controls");
+    
+    // Demonstrate string-based grouping functionality
+    FL_WARN("String-based UI Grouping initialized:");
+    FL_WARN("  Noise Controls group:");
+    FL_WARN("    - useNoise: " << (useNoise.hasGroup() ? useNoise.getGroup() : "no group"));
+    FL_WARN("    - noiseScale: " << (noiseScale.hasGroup() ? noiseScale.getGroup() : "no group"));
+    FL_WARN("    - noiseSpeed: " << (noiseSpeed.hasGroup() ? noiseSpeed.getGroup() : "no group"));
+    FL_WARN("    - paletteDropdown: " << (paletteDropdown.hasGroup() ? paletteDropdown.getGroup() : "no group"));
+    FL_WARN("  Motion Controls group:");
+    FL_WARN("    - speed: " << (speed.hasGroup() ? speed.getGroup() : "no group"));
+    FL_WARN("    - autoAdvance: " << (autoAdvance.hasGroup() ? autoAdvance.getGroup() : "no group"));
+    FL_WARN("  Position Controls group:");
+    FL_WARN("    - positionCoarse: " << (positionCoarse.hasGroup() ? positionCoarse.getGroup() : "no group"));
+    FL_WARN("  Visual Controls group:");
+    FL_WARN("    - brightness: " << (brightness.hasGroup() ? brightness.getGroup() : "no group"));
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
