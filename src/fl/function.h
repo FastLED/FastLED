@@ -1,9 +1,10 @@
 #pragma once
 #include "fl/ptr.h"
 #include "fl/template_magic.h"
+#include "fl/compiler_control.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
@@ -106,4 +107,4 @@ template <typename R, typename... Args> class function<R(Args...)> {
 
 } // namespace fl
 
-#pragma GCC diagnostic pop
+FL_DISABLE_WARNING_POP

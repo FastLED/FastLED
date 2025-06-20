@@ -2,6 +2,7 @@
 #pragma once
 
 #include "fl/math.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -363,10 +364,10 @@ template <typename T> struct line_xy {
         float dy = b.y - a.y;
         float len_sq = dx * dx + dy * dy;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING(float-equal)
         const bool is_zero = (len_sq == 0.0f);
-#pragma GCC diagnostic pop
+        FL_DISABLE_WARNING_POP
 
         if (is_zero) {
             // a == b, the segment is a point

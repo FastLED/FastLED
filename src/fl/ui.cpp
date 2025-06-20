@@ -1,8 +1,9 @@
 #include "fl/ui.h"
 #include <stdint.h>
+#include "fl/compiler_control.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
@@ -97,4 +98,4 @@ void UIDropdown::Listener::onBeginFrame() {
 
 } // end namespace fl
 
-#pragma GCC diagnostic pop
+FL_DISABLE_WARNING_POP
