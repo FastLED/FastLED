@@ -74,7 +74,7 @@ UICheckbox splatRendering("Splat Rendering", true);
 
 // Noise controls (grouped under noiseGroup)
 UICheckbox useNoise("Use Noise Pattern", true);
-UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
+UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 
