@@ -53,6 +53,15 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **Before using any standard library functionality, check if there's a `fl::` equivalent in the `src/fl/` directory first.**
 
+### Debug Printing
+**Use `FL_WARN` for debug printing throughout the codebase.** This ensures consistent debug output that works in both unit tests and live application testing.
+
+**Usage:**
+- ✅ `FL_WARN("Debug message: " << message);`
+- ❌ `FL_WARN("Value: %d", value);`
+
+**Why:** `FL_WARN` provides a unified logging interface that works across all platforms and testing environments, including unit tests and Arduino sketches.
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests
