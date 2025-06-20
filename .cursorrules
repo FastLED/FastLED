@@ -31,6 +31,17 @@ To use the MCP server, run: `uv run mcp_server.py`
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+## Debug Printing
+For debug output, use `FL_WARN` which works consistently across:
+- Unit tests
+- Live application testing
+- All platforms and build configurations
+
+Example usage:
+```cpp
+FL_WARN("Debug message: value = %d", someValue);
+```
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests
