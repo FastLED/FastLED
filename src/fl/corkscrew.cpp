@@ -197,12 +197,8 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid) {
         // Sample from the source fl::Grid using its at() method
         CRGB sampled_color = source_grid.at(coord.x, coord.y);
         
-        // Store in our rectangular buffer using row-major indexing
-        size_t buffer_idx = static_cast<size_t>(coord.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(coord.x);
-        
-        if (buffer_idx < mCorkscrewLeds.size()) {
-            mCorkscrewLeds[buffer_idx] = sampled_color;
-        }
+        // Store the sampled color directly at the LED index position
+        mCorkscrewLeds[led_idx] = sampled_color;
     }
 }
 
