@@ -77,15 +77,19 @@ UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
+// UIDropdown examples - noise-related color palette
+fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
+fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
+
+// Create UIGroup for noise controls using variadic constructor
+// This automatically assigns all specified controls to the "Noise Controls" group
+UIGroup noiseGroup("Noise Controls", useNoise, noiseScale, noiseSpeed, paletteDropdown);
+
 
 
 // Color boost controls
 UINumberField saturationFunction("Saturation Function", 1, 0, 9);
 UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
-
-// UIDropdown examples - noise-related color palette
-fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
 
 
 
@@ -149,19 +153,8 @@ void setup() {
     constexpr int height = CORKSCREW_HEIGHT; // = 18
 
 
-    // Add noise-related controls to the noiseGroup
-    // noiseGroup.addControl(&useNoise);
-    // noiseGroup.addControl(&noiseScale);
-    // noiseGroup.addControl(&noiseSpeed);
-
-    // // Add paletteDropdown to the noiseGroup
-    // noiseGroup.addControl(&paletteDropdown);
-    // // Add paletteDropdown to the noiseGroup
-    // noiseGroup.addControl(&paletteDropdown);
-    useNoise.setGroup("Noise Controls");
-    noiseScale.setGroup("Noise Controls");
-    noiseSpeed.setGroup("Noise Controls");
-    paletteDropdown.setGroup("Noise Controls");
+    // Noise controls are now automatically grouped by the UIGroup constructor
+    // The noiseGroup variadic constructor automatically called setGroup() on all controls
 
 
     // Or use runtime corkscrew for dynamic sizing
@@ -192,11 +185,12 @@ void setup() {
     controller->setScreenMap(corkscrewScreenMap);
     
     // Demonstrate UIGroup functionality for noise controls
-    //FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
-    //FL_WARN("  This group contains noise pattern controls:");
-    //FL_WARN("  - Use Noise Pattern toggle");
-    //FL_WARN("  - Noise Scale and Speed sliders");
-    //FL_WARN("  - Color Palette selection for noise");
+    FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
+    FL_WARN("  This group contains noise pattern controls:");
+    FL_WARN("  - Use Noise Pattern toggle");
+    FL_WARN("  - Noise Scale and Speed sliders");
+    FL_WARN("  - Color Palette selection for noise");
+    FL_WARN("  UIGroup automatically applied group membership via variadic constructor");
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
