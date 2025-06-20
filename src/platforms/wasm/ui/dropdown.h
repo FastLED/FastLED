@@ -10,31 +10,31 @@ namespace fl {
 class jsDropdownImpl {
   public:
     // Constructor with array of options and count
-    jsDropdownImpl(const fl::Str &name, const fl::Str* options, size_t count);
+    jsDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
     
     // Constructor with fl::vector of options
-    jsDropdownImpl(const fl::Str &name, const fl::vector<fl::Str>& options);
+    jsDropdownImpl(const fl::string &name, const fl::vector<fl::string>& options);
 
     // Constructor with initializer_list (FastLED requires C++11 support)
-    jsDropdownImpl(const fl::Str &name, fl::initializer_list<fl::Str> options);
+    jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
     ~jsDropdownImpl();
-    jsDropdownImpl &Group(const fl::Str &name) {
+    jsDropdownImpl &Group(const fl::string &name) {
         mGroup = name;
         return *this;
     };
 
-    const fl::Str &name() const;
+    const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    fl::Str value() const;
+    fl::string value() const;
     int value_int() const;
     void setSelectedIndex(int index);
     size_t getOptionCount() const { return mOptions.size(); }
-    fl::Str getOption(size_t index) const;
-    const fl::Str &groupName() const { return mGroup; }
+    fl::string getOption(size_t index) const;
+    const fl::string &groupName() const { return mGroup; }
 
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
     jsDropdownImpl &operator=(int index) {
         setSelectedIndex(index);
@@ -43,12 +43,12 @@ class jsDropdownImpl {
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
-    void commonInit(const fl::Str &name);
+    void commonInit(const fl::string &name);
 
     jsUiInternalPtr mInternal;
-    fl::vector<fl::Str> mOptions;
+    fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
-    fl::Str mGroup;
+    fl::string mGroup;
 };
 
 } // namespace fl

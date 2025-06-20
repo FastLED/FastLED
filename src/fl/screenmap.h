@@ -18,7 +18,7 @@
 
 namespace fl {
 
-class Str;
+class string;
 class JsonDocument;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
@@ -76,16 +76,16 @@ class ScreenMap {
     vec2f getBounds() const;
 
     static bool ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<Str, ScreenMap, 16> *segmentMaps,
-                          Str *err = nullptr);
+                          FixedMap<string, ScreenMap, 16> *segmentMaps,
+                          string *err = nullptr);
 
     static bool ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
-                          Str *err = nullptr);
+                          string *err = nullptr);
 
-    static void toJsonStr(const FixedMap<Str, ScreenMap, 16> &,
-                          Str *jsonBuffer);
-    static void toJson(const FixedMap<Str, ScreenMap, 16> &, JsonDocument *doc);
+    static void toJsonStr(const FixedMap<string, ScreenMap, 16> &,
+                          string *jsonBuffer);
+    static void toJson(const FixedMap<string, ScreenMap, 16> &, JsonDocument *doc);
 
   private:
     static const vec2f &empty();

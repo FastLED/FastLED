@@ -219,8 +219,8 @@ TEST_CASE("HashMap with standard iterator access") {
 
 TEST_CASE("HashMap equivalence to std::unordered_map") {
     // Create both map types with the same operations
-    HashMap<int, fl::Str> custom_map;
-    std::unordered_map<int, fl::Str> std_map;
+    HashMap<int, fl::string> custom_map;
+    std::unordered_map<int, fl::string> std_map;
     
     // Test insertion
     custom_map.insert(1, "one");
@@ -275,21 +275,21 @@ TEST_CASE("HashMap equivalence to std::unordered_map") {
     
     // Test iteration (collect all keys and values)
     for (int i = 10; i < 20; ++i) {
-        fl::Str val = "val";
+        fl::string val = "val";
         val.append(i);
         custom_map.insert(i, val);
         std_map.insert({i, val});
     }
     
     std::set<int> custom_keys;
-    std::set<fl::Str> custom_values;
+    std::set<fl::string> custom_values;
     for (auto kv : custom_map) {
         custom_keys.insert(kv.first);
         custom_values.insert(kv.second);
     }
     
     std::set<int> std_keys;
-    std::set<fl::Str> std_values;
+    std::set<fl::string> std_values;
     for (auto& kv : std_map) {
         std_keys.insert(kv.first);
         std_values.insert(kv.second);

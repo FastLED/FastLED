@@ -54,7 +54,7 @@ class XYPathParams : public Referent {
 // Base class for the actual path generator.
 class XYPathGenerator : public Referent {
   public:
-    virtual const Str name() const = 0;
+    virtual const string name() const = 0;
     virtual vec2f compute(float alpha) = 0;
     // No writes when returning false.
     virtual bool hasDrawBounds(rect<int16_t> *bounds) {
@@ -123,7 +123,7 @@ class PointPath : public XYPathGenerator {
     PointPath(float x, float y);
     PointPath(vec2f p);
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
     void set(float x, float y);
     void set(vec2f p);
 
@@ -136,7 +136,7 @@ class LinePath : public XYPathGenerator {
     LinePath(const LinePathParamsPtr &params = NewPtr<LinePathParams>());
     LinePath(float x0, float y0, float x1, float y1);
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
     void set(float x0, float y0, float x1, float y1);
     void set(const LinePathParams &p);
 
@@ -151,21 +151,21 @@ class CirclePath : public XYPathGenerator {
   public:
     CirclePath();
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 };
 
 class HeartPath : public XYPathGenerator {
   public:
     HeartPath();
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 };
 
 class ArchimedeanSpiralPath : public XYPathGenerator {
   public:
     ArchimedeanSpiralPath(uint8_t turns = 3, float radius = 1.0f);
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 
     void setTurns(uint8_t turns);
     void setRadius(float radius);
@@ -185,7 +185,7 @@ class RosePath : public XYPathGenerator {
     RosePath(const Ptr<RosePathParams> &p = NewPtr<RosePathParams>());
     RosePath(uint8_t n = 3, uint8_t d = 1);
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 
     RosePathParams &params();
     const RosePathParams &params() const;
@@ -204,7 +204,7 @@ class PhyllotaxisPath : public XYPathGenerator {
     PhyllotaxisPath(
         const Ptr<PhyllotaxisParams> &p = NewPtr<PhyllotaxisParams>());
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 
     PhyllotaxisParams &params();
     const PhyllotaxisParams &params() const;
@@ -222,7 +222,7 @@ class GielisCurvePath : public XYPathGenerator {
     GielisCurvePath(
         const Ptr<GielisCurveParams> &p = NewPtr<GielisCurveParams>());
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 
     GielisCurveParams &params();
     const GielisCurveParams &params() const;
@@ -258,7 +258,7 @@ class CatmullRomPath : public XYPathGenerator {
     size_t size() const;
 
     vec2f compute(float alpha) override;
-    const Str name() const override;
+    const string name() const override;
 
     CatmullRomParams &params();
     const CatmullRomParams &params() const;

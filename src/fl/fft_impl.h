@@ -22,9 +22,9 @@ class FFTImpl : public fl::Referent {
     // Result indicating success or failure of the FFTImpl run (in which case
     // there will be an error message).
     struct Result {
-        Result(bool ok, const Str &error) : ok(ok), error(error) {}
+        Result(bool ok, const string &error) : ok(ok), error(error) {}
         bool ok = false;
-        fl::Str error;
+        fl::string error;
     };
     // Default values for the FFTImpl.
     FFTImpl(const FFT_Args &args);
@@ -36,7 +36,7 @@ class FFTImpl : public fl::Referent {
     Result run(const AudioSample &sample, FFTBins *out);
     Result run(Slice<const int16_t> sample, FFTBins *out);
     // Info on what the frequency the bins represent
-    fl::Str info() const;
+    fl::string info() const;
 
     // Detail.
     static int DefaultSamples() { return 512; }

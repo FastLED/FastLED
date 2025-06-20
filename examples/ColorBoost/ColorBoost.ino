@@ -20,7 +20,7 @@ UIDescription description("ColorBoost is a function that boosts the saturation o
 UISlider satSlider("Saturation", 60, 0, 255, 1);
 
 // Create dropdown with descriptive ease function names
-fl::Str easeOptions[] = {
+fl::string easeOptions[] = {
     "None", 
     "In Quad", 
     "Out Quad", 

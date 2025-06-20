@@ -226,7 +226,7 @@ float StringFormatter::parseFloat(const char *str, size_t len) {
     return string_functions::atoff(str, len);
 }
 
-Str &Str::append(const FFTBins &str) {
+string &string::append(const FFTBins &str) {
     append("\n FFTImpl Bins:\n  ");
     append(str.bins_raw);
     append("\n");
@@ -236,7 +236,7 @@ Str &Str::append(const FFTBins &str) {
     return *this;
 }
 
-Str &Str::append(const XYMap &map) {
+string &string::append(const XYMap &map) {
     append("XYMap(");
     append(map.getWidth());
     append(",");
@@ -245,7 +245,7 @@ Str &Str::append(const XYMap &map) {
     return *this;
 }
 
-Str &Str::append(const Tile2x2_u8_wrap &tile) {
+string &string::append(const Tile2x2_u8_wrap &tile) {
     Tile2x2_u8_wrap::Entry data[4] = {
         tile.at(0, 0),
         tile.at(0, 1),
@@ -272,7 +272,7 @@ Str &Str::append(const Tile2x2_u8_wrap &tile) {
     return *this;
 }
 
-void Str::swap(Str &other) {
+void string::swap(string &other) {
     if (this != &other) {
         fl::swap(mLength, other.mLength);
         char temp[FASTLED_STR_INLINED_SIZE];
@@ -283,7 +283,7 @@ void Str::swap(Str &other) {
     }
 }
 
-void Str::compileTimeAssertions() {
+void string::compileTimeAssertions() {
     static_assert(FASTLED_STR_INLINED_SIZE > 0,
                   "FASTLED_STR_INLINED_SIZE must be greater than 0");
     static_assert(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
@@ -291,7 +291,7 @@ void Str::compileTimeAssertions() {
                   "must be through a build define and not an include define.");
 }
 
-Str &Str::append(const CRGB &rgb) {
+string &string::append(const CRGB &rgb) {
     append("CRGB(");
     append(rgb.r);
     append(",");

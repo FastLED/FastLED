@@ -8,21 +8,21 @@ namespace fl {
 
 class jsCheckboxImpl {
   public:
-    jsCheckboxImpl(const fl::Str &, bool value);
+    jsCheckboxImpl(const fl::string &, bool value);
     ~jsCheckboxImpl();
-    jsCheckboxImpl &Group(const fl::Str &name) {
+    jsCheckboxImpl &Group(const fl::string &name) {
         mGroup = name;
         return *this;
     };
 
-    const fl::Str &name() const;
+    const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     bool value() const;
     void setValue(bool value);
-    const fl::Str &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mGroup; }
     
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
     jsCheckboxImpl &operator=(bool value) {
         setValue(value);
@@ -38,7 +38,7 @@ class jsCheckboxImpl {
 
     jsUiInternalPtr mInternal;
     bool mValue;
-    fl::Str mGroup;
+    fl::string mGroup;
 };
 
 } // namespace fl

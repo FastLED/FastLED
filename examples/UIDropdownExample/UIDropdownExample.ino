@@ -6,11 +6,11 @@
 CRGB leds[NUM_LEDS];
 
 // Create dropdown with array of options
-fl::Str options[] = {"Red", "Green", "Blue", "White", "Rainbow"};
+fl::string options[] = {"Red", "Green", "Blue", "White", "Rainbow"};
 fl::UIDropdown colorDropdown("Color", options, 5);
 
 // Create dropdown with vector of options
-fl::vector<fl::Str> patternOptions;
+fl::vector<fl::string> patternOptions;
 fl::UIDropdown patternDropdown("Pattern", patternOptions);
 
 // On platforms with C++11 support, you can also use initializer lists:
@@ -24,9 +24,9 @@ void setup() {
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
     
     // Initialize pattern options
-    patternOptions.push_back(fl::Str("Solid"));
-    patternOptions.push_back(fl::Str("Fade"));
-    patternOptions.push_back(fl::Str("Strobe"));
+    patternOptions.push_back(fl::string("Solid"));
+    patternOptions.push_back(fl::string("Fade"));
+    patternOptions.push_back(fl::string("Strobe"));
     
     // Set initial selections
     colorDropdown.setSelectedIndex(0);   // Red
@@ -60,8 +60,8 @@ void setup() {
 
 void loop() {
     // Get current selections
-    fl::Str currentColor = colorDropdown.value();
-    fl::Str currentPattern = patternDropdown.value();
+    fl::string currentColor = colorDropdown.value();
+    fl::string currentPattern = patternDropdown.value();
     int colorIndex = colorDropdown.value_int();
     
     // Apply color based on selection
@@ -101,7 +101,7 @@ void loop() {
         Serial.print("Current settings - Color index: ");
         Serial.print(int(colorDropdown));  // Uses operator int()
         Serial.print(", Pattern: ");
-        Serial.println(fl::Str(patternDropdown).c_str());  // Uses operator fl::Str()
+        Serial.println(fl::string(patternDropdown).c_str());  // Uses operator fl::string()
         lastPrint = millis();
     }
 }

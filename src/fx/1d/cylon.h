@@ -47,7 +47,7 @@ class Cylon : public Fx1d {
         }
     }
 
-    fl::Str fxName() const override { return "Cylon"; }
+    fl::string fxName() const override { return "Cylon"; }
 
   private:
     uint8_t hue = 0;

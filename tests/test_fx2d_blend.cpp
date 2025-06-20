@@ -22,7 +22,7 @@ class SolidColorFx2d : public fl::Fx2d {
         : fl::Fx2d(fl::XYMap::constructRectangularGrid(width, height)),
           mColor(color) {}
 
-    fl::Str fxName() const override { return "SolidColorFx2d"; }
+    fl::string fxName() const override { return "SolidColorFx2d"; }
 
     void draw(Fx::DrawContext context) override {
         for (uint16_t i = 0; i < mXyMap.getTotal(); i++) {
@@ -50,7 +50,7 @@ class TestFx2D : public fl::Fx2d {
         }
     }
 
-    fl::Str fxName() const override { return "TestFx2D"; }
+    fl::string fxName() const override { return "TestFx2D"; }
 
     void draw(Fx::DrawContext context) override {
         for (uint16_t i = 0; i < mXyMap.getTotal(); i++) {

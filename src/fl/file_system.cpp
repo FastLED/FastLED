@@ -96,7 +96,7 @@ void FileSystem::end() {
 }
 
 bool FileSystem::readJson(const char *path, JsonDocument *doc) {
-    Str text;
+    string text;
     if (!readText(path, &text)) {
         return false;
     }
@@ -104,8 +104,8 @@ bool FileSystem::readJson(const char *path, JsonDocument *doc) {
 }
 
 bool FileSystem::readScreenMaps(const char *path,
-                                FixedMap<Str, ScreenMap, 16> *out, Str *error) {
-    Str text;
+                                FixedMap<string, ScreenMap, 16> *out, string *error) {
+    string text;
     if (!readText(path, &text)) {
         FASTLED_WARN("Failed to read file: " << path);
         if (error) {
@@ -114,7 +114,7 @@ bool FileSystem::readScreenMaps(const char *path,
         }
         return false;
     }
-    Str err;
+    string err;
     bool ok = ScreenMap::ParseJson(text.c_str(), out, &err);
     if (!ok) {
         FASTLED_WARN("Failed to parse screen map: " << err.c_str());
@@ -125,8 +125,8 @@ bool FileSystem::readScreenMaps(const char *path,
 }
 
 bool FileSystem::readScreenMap(const char *path, const char *name,
-                               ScreenMap *out, Str *error) {
-    Str text;
+                               ScreenMap *out, string *error) {
+    string text;
     if (!readText(path, &text)) {
         FASTLED_WARN("Failed to read file: " << path);
         if (error) {
@@ -135,7 +135,7 @@ bool FileSystem::readScreenMap(const char *path, const char *name,
         }
         return false;
     }
-    Str err;
+    string err;
     bool ok = ScreenMap::ParseJson(text.c_str(), name, out, &err);
     if (!ok) {
         FASTLED_WARN("Failed to parse screen map: " << err.c_str());
@@ -155,14 +155,14 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps,
     Video video(pixelsPerFrame, fps, nFrameHistory);
     FileHandlePtr file = openRead(path);
     if (!file) {
-        video.setError(fl::Str("Could not open file: ").append(path));
+        video.setError(fl::string("Could not open file: ").append(path));
         return video;
     }
     video.begin(file);
     return video;
 }
 
-bool FileSystem::readText(const char *path, fl::Str *out) {
+bool FileSystem::readText(const char *path, fl::string *out) {
     FileHandlePtr file = openRead(path);
     if (!file) {
         FASTLED_WARN("Failed to open file: " << path);

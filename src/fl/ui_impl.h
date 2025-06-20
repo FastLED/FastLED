@@ -79,7 +79,7 @@ class UISliderImpl {
     int as_int() const { return static_cast<int>(mValue); }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
     UISliderImpl &operator=(float value) {
         setValue(value);
@@ -111,13 +111,13 @@ class UIButtonImpl {
     int clickedCount() const { return 0; }
     operator bool() const { return false; }
     void click() {}
-    fl::Str name() const { return mName; }
+    fl::string name() const { return mName; }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
-    fl::Str mName;
+    fl::string mName;
 };
 
 #endif
@@ -143,7 +143,7 @@ class UICheckboxImpl {
     bool value() const { return mValue; }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     void setValue(bool value) { mValue = value; }
@@ -176,7 +176,7 @@ class UINumberFieldImpl {
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     double mValue;
@@ -194,7 +194,7 @@ class UITitleImpl {
     ~UITitleImpl() {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -207,7 +207,7 @@ class UIDescriptionImpl {
     ~UIDescriptionImpl() {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -229,7 +229,7 @@ class UIAudioImpl {
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 #endif
 
@@ -237,61 +237,61 @@ class UIAudioImpl {
 class UIDropdownImpl {
   public:
     // Constructor with array of options and count
-    UIDropdownImpl(const char *name, const fl::Str* options, size_t count) 
+    UIDropdownImpl(const char *name, const fl::string* options, size_t count) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (size_t i = 0; i < count; ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
-            mOptions.push_back(fl::Str("No options"));
+            mOptions.push_back(fl::string("No options"));
         }
     }
     
     // Constructor with fl::vector of options
-    UIDropdownImpl(const char *name, const fl::vector<fl::Str>& options) 
+    UIDropdownImpl(const char *name, const fl::vector<fl::string>& options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (size_t i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
-            mOptions.push_back(fl::Str("No options"));
+            mOptions.push_back(fl::string("No options"));
         }
     }
 
-    // Constructor with fl::Slice<fl::Str> (fl::string) options
-    UIDropdownImpl(const char *name, fl::Slice<fl::Str> options) 
+    // Constructor with fl::Slice<fl::string> (fl::string) options
+    UIDropdownImpl(const char *name, fl::Slice<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (size_t i = 0; i < options.size(); ++i) {
             mOptions.push_back(options[i]);
         }
         if (mOptions.empty()) {
-            mOptions.push_back(fl::Str("No options"));
+            mOptions.push_back(fl::string("No options"));
         }
     }
 
 
     // Constructor with initializer_list (only available if C++11 support exists)
-    UIDropdownImpl(const char *name, fl::initializer_list<fl::Str> options) 
+    UIDropdownImpl(const char *name, fl::initializer_list<fl::string> options) 
         : mSelectedIndex(0) {
         FASTLED_UNUSED(name);
         for (const auto& option : options) {
             mOptions.push_back(option);
         }
         if (mOptions.empty()) {
-            mOptions.push_back(fl::Str("No options"));
+            mOptions.push_back(fl::string("No options"));
         }
     }
 
     ~UIDropdownImpl() {}
     
-    fl::Str value() const { 
+    fl::string value() const { 
         if (mSelectedIndex < mOptions.size()) {
             return mOptions[mSelectedIndex]; 
         }
-        return fl::Str("Invalid");
+        return fl::string("Invalid");
     }
     
     int value_int() const { return static_cast<int>(mSelectedIndex); }
@@ -303,18 +303,18 @@ class UIDropdownImpl {
     }
     
     size_t getOptionCount() const { return mOptions.size(); }
-    fl::Str getOption(size_t index) const {
+    fl::string getOption(size_t index) const {
         if (index < mOptions.size()) {
             return mOptions[index];
         }
-        return fl::Str("Invalid");
+        return fl::string("Invalid");
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
-    fl::vector<fl::Str> mOptions;
+    fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
 };
 #endif
@@ -331,10 +331,10 @@ class UIGroupImpl {
         FASTLED_UNUSED(name); 
     }
     ~UIGroupImpl() {}
-    fl::Str name() const { return mGroupName; }
+    fl::string name() const { return mGroupName; }
 
   private:
-    fl::Str mGroupName;
+    fl::string mGroupName;
 };
 
 #endif

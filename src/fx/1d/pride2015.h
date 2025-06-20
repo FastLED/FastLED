@@ -21,7 +21,7 @@ class Pride2015 : public Fx1d {
     Pride2015(uint16_t num_leds) : Fx1d(num_leds) {}
 
     void draw(Fx::DrawContext context) override;
-    fl::Str fxName() const override { return "Pride2015"; }
+    fl::string fxName() const override { return "Pride2015"; }
 
   private:
     uint16_t mPseudotime = 0;

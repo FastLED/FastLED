@@ -22,7 +22,7 @@ class jsUiInternal : public fl::Referent {
         fl::function<void(const FLArduinoJson::JsonVariantConst &)>;
     using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
 
-    jsUiInternal(const fl::Str &name, UpdateFunction updateFunc,
+    jsUiInternal(const fl::string &name, UpdateFunction updateFunc,
                  ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
@@ -34,7 +34,7 @@ class jsUiInternal : public fl::Referent {
         }
     }
 
-    const fl::Str &name() const;
+    const fl::string &name() const;
     void update(const FLArduinoJson::JsonVariantConst &json);
     void toJson(FLArduinoJson::JsonObject &json) const;
     int id() const;
@@ -45,7 +45,7 @@ class jsUiInternal : public fl::Referent {
     static int nextId();
     static std::atomic<uint32_t> sNextId;
     int mId;
-    fl::Str mName;
+    fl::string mName;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;

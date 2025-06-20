@@ -17,7 +17,7 @@
 
 
 namespace fl {
-class Str;
+class string;
 class XYMap;
 struct HSV16;
 }
@@ -430,7 +430,7 @@ struct CRGB {
     }
 #endif
 
-    fl::Str toString() const;
+    fl::string toString() const;
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
@@ -813,5 +813,3 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
 
 FASTLED_NAMESPACE_END
-
-

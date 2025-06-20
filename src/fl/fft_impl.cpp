@@ -103,7 +103,7 @@ class FFTContext {
         }
     }
 
-    fl::Str info() const {
+    fl::string info() const {
         // Calculate frequency delta
         float delta_f = (m_cq_cfg.fmax - m_cq_cfg.fmin) / m_cq_cfg.bands;
         fl::StrStream ss;
@@ -131,12 +131,12 @@ FFTImpl::FFTImpl(const FFT_Args &args) {
 
 FFTImpl::~FFTImpl() { mContext.reset(); }
 
-fl::Str FFTImpl::info() const {
+fl::string FFTImpl::info() const {
     if (mContext) {
         return mContext->info();
     } else {
         FASTLED_WARN("FFTImpl context is not initialized");
-        return fl::Str();
+        return fl::string();
     }
 }
 

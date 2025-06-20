@@ -49,7 +49,7 @@ class ScaleUp : public Fx2d {
     void expand(const CRGB *input, CRGB *output, uint16_t width,
                 uint16_t height, XYMap mXyMap);
 
-    fl::Str fxName() const override { return "scale_up"; }
+    fl::string fxName() const override { return "scale_up"; }
 
   private:
     // No expansion needed. Also useful for debugging.

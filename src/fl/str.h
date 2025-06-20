@@ -1,5 +1,9 @@
 #pragma once
 
+/// std::string compatible string class.
+// fl::string has inlined memory and copy on write semantics.
+
+
 #include <stdint.h>
 #include <string.h>
 
@@ -21,8 +25,8 @@ FASTLED_NAMESPACE_END;
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
 
-class Str;
-using string = fl::Str; // std-like string
+class string;
+using Str = fl::string;  // backwards compatibility
 class Tile2x2_u8_wrap;
 
 template <typename T> struct rect;
@@ -55,7 +59,7 @@ struct FFTBins;
 // If write() or append() is called then the internal data structure
 // will grow to accomodate the new data with extra space for future,
 // like a vector.
-class Str;
+
 
 ///////////////////////////////////////////////////////
 // Implementation details.
@@ -387,48 +391,48 @@ template <size_t SIZE = 64> class StrN {
     StringHolderPtr mData;
 };
 
-class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
+class string : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
-    Str() : StrN<FASTLED_STR_INLINED_SIZE>() {}
-    Str(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
-    Str(const Str &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
+    string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
+    string(const string &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     template <size_t M>
-    Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
-    Str &operator=(const Str &other) {
+    string(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    string &operator=(const string &other) {
         copy(other);
         return *this;
     }
 
-    bool operator>(const Str &other) const {
+    bool operator>(const string &other) const {
         return strcmp(c_str(), other.c_str()) > 0;
     }
 
-    bool operator>=(const Str &other) const {
+    bool operator>=(const string &other) const {
         return strcmp(c_str(), other.c_str()) >= 0;
     }
 
-    bool operator<(const Str &other) const {
+    bool operator<(const string &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
-    bool operator<=(const Str &other) const {
+    bool operator<=(const string &other) const {
         return strcmp(c_str(), other.c_str()) <= 0;
     }
 
-    bool operator==(const Str &other) const {
+    bool operator==(const string &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
     }
 
-    bool operator!=(const Str &other) const {
+    bool operator!=(const string &other) const {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    Str &operator+=(const Str &other) {
+    string &operator+=(const string &other) {
         append(other.c_str(), other.size());
         return *this;
     }
 
-    template <typename T> Str &operator+=(const T &val) {
+    template <typename T> string &operator+=(const T &val) {
         append(val);
         return *this;
     }
@@ -438,12 +442,12 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     // types like int8_t, int16_t, int32_t, int64_t etc. In such a has just case
     // the value to int32_t and then append it.
     template <typename T, typename = fl::enable_if_t<fl::is_integral<T>::value>>
-    Str &append(const T &val) {
+    string &append(const T &val) {
         write(int32_t(val));
         return *this;
     }
 
-    template <typename T> Str &append(const Slice<T> &slice) {
+    template <typename T> string &append(const Slice<T> &slice) {
         append("[");
         for (size_t i = 0; i < slice.size(); ++i) {
             if (i > 0) {
@@ -455,55 +459,55 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> Str &append(const fl::HeapVector<T> &vec) {
+    template <typename T> string &append(const fl::HeapVector<T> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
     template <typename T, size_t N>
-    Str &append(const fl::InlinedVector<T, N> &vec) {
+    string &append(const fl::InlinedVector<T, N> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
-    Str &append(const char *str) {
+    string &append(const char *str) {
         write(str, strlen(str));
         return *this;
     }
-    Str &append(const char *str, size_t len) {
+    string &append(const char *str, size_t len) {
         write(str, len);
         return *this;
     }
-    // Str& append(char c) { write(&c, 1); return *this; }
-    Str &append(const int8_t &c) {
+    // string& append(char c) { write(&c, 1); return *this; }
+    string &append(const int8_t &c) {
         const char *str = reinterpret_cast<const char *>(&c);
         write(str, 1);
         return *this;
     }
-    Str &append(const uint8_t &c) {
+    string &append(const uint8_t &c) {
         write(uint16_t(c));
         return *this;
     }
-    Str &append(const uint16_t &val) {
+    string &append(const uint16_t &val) {
         write(val);
         return *this;
     }
-    Str &append(const int16_t &val) {
+    string &append(const int16_t &val) {
         write(int32_t(val));
         return *this;
     }
-    Str &append(const uint32_t &val) {
+    string &append(const uint32_t &val) {
         write(val);
         return *this;
     }
-    Str &append(const int32_t &c) {
+    string &append(const int32_t &c) {
         write(c);
         return *this;
     }
 
-    Str &append(const bool &val) {
+    string &append(const bool &val) {
         if (val) {
             return append("true");
         } else {
@@ -511,7 +515,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         }
     }
 
-    template <typename T> Str &append(const rect<T> &rect) {
+    template <typename T> string &append(const rect<T> &rect) {
         append(rect.mMin.x);
         append(",");
         append(rect.mMin.y);
@@ -522,7 +526,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> Str &append(const vec2<T> &pt) {
+    template <typename T> string &append(const vec2<T> &pt) {
         append("(");
         append(pt.x);
         append(",");
@@ -531,7 +535,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    template <typename T> Str &append(const vec3<T> &pt) {
+    template <typename T> string &append(const vec3<T> &pt) {
         append("(");
         append(pt.x);
         append(",");
@@ -544,35 +548,35 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         
 
     template <typename T, size_t N>
-    Str &append(const fl::FixedVector<T, N> &vec) {
+    string &append(const fl::FixedVector<T, N> &vec) {
         Slice<const T> slice(vec.data(), vec.size());
         append(slice);
         return *this;
     }
 
-    Str &append(const CRGB &c);
+    string &append(const CRGB &c);
 
-    Str &append(const float &_val) {
+    string &append(const float &_val) {
         // round to nearest hundredth
         StringFormatter::appendFloat(_val, this);
         return *this;
     }
 
-    Str &append(const double &val) { return append(float(val)); }
+    string &append(const double &val) { return append(float(val)); }
 
-    Str &append(const StrN &str) {
+    string &append(const StrN &str) {
         write(str.c_str(), str.size());
         return *this;
     }
 
-    Str &append(const FFTBins &str);
+    string &append(const FFTBins &str);
 
-    Str &append(const XYMap &map);
+    string &append(const XYMap &map);
 
-    Str &append(const Tile2x2_u8_wrap &tile);
+    string &append(const Tile2x2_u8_wrap &tile);
 
     template <typename Key, typename Hash, typename KeyEqual>
-    Str &append(const HashSet<Key, Hash, KeyEqual> &set) {
+    string &append(const HashSet<Key, Hash, KeyEqual> &set) {
         append("{");
         for (auto it = set.begin(); it != set.end(); ++it) {
             if (it != set.begin()) {
@@ -587,7 +591,7 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     const char *data() const { return c_str(); }
 
-    void swap(Str &other);
+    void swap(string &other);
 
   private:
     enum {

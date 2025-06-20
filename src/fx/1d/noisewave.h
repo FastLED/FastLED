@@ -33,7 +33,7 @@ class NoiseWave : public Fx1d {
         }
     }
 
-    fl::Str fxName() const override { return "NoiseWave"; }
+    fl::string fxName() const override { return "NoiseWave"; }
 
   private:
     NoiseGenerator noiseGeneratorRed;

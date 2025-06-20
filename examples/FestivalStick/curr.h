@@ -78,7 +78,7 @@ UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
-fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
+fl::string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
 
 // Create UIGroup for noise controls using variadic constructor
@@ -93,7 +93,7 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 
 
-fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
+fl::string renderModeOptions[] = {"Noise", "Position", "Mixed"};
 fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
 
 // Color palette for noise
@@ -198,7 +198,7 @@ void setup() {
     
     // Add onChange callbacks for dropdowns
     paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
-        fl::Str selectedPalette = dropdown.value();
+        fl::string selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
         if (selectedPalette == "Party") {
             noisePalette = PartyColors_p;
@@ -214,7 +214,7 @@ void setup() {
     });
     
     renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
-        fl::Str mode = dropdown.value();
+        fl::string mode = dropdown.value();
         // Simple example of using getOption()
         for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
             if(dropdown.getOption(i) == mode) {

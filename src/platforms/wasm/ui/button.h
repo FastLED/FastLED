@@ -10,22 +10,22 @@ namespace fl {
 
 class jsButtonImpl {
   public:
-    jsButtonImpl(const fl::Str &name);
+    jsButtonImpl(const fl::string &name);
     ~jsButtonImpl();
-    jsButtonImpl &Group(const fl::Str &name) {
+    jsButtonImpl &Group(const fl::string &name) {
         mGroup = name;
         return *this;
     }
 
-    const fl::Str &name() const;
+    const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const { return mClickedCount; }
-    const fl::Str &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mGroup; }
     
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
     void click() { mPressed = true; }
 
@@ -56,7 +56,7 @@ class jsButtonImpl {
     bool mPressedLast = false;
     bool mClickedHappened = false;
     int mClickedCount = 0;
-    fl::Str mGroup;
+    fl::string mGroup;
 };
 
 } // namespace fl

@@ -50,7 +50,7 @@ using namespace fl;
 namespace doctest {
     template<> struct StringMaker<CRGB> {
         static String convert(const CRGB& value) {
-            fl::Str out = value.toString();
+            fl::string out = value.toString();
             return out.c_str();
         }
     };
@@ -63,7 +63,7 @@ namespace doctest {
 
     template<typename T> struct StringMaker<vec2<T>> {
         static String convert(const vec2<T>& value) {
-            fl::Str out;
+            fl::string out;
             out += "vec2(";
             out += value.x;
             out += ", ";
@@ -83,7 +83,7 @@ namespace doctest {
 
     template<typename T> struct StringMaker<rect<T>> {
         static String convert(const rect<T>& value) {
-            fl::Str out;
+            fl::string out;
             out += "rect(";
             out += " (";
             out += value.mMin.x;
@@ -101,7 +101,7 @@ namespace doctest {
 
     template<typename Key, typename Hash, typename KeyEqual> struct StringMaker<fl::hash_set<Key, Hash, KeyEqual>> {
         static String convert(const fl::hash_set<Key, Hash, KeyEqual>& value) {
-            fl::Str out;
+            fl::string out;
             out.append(value);
             return out.c_str();
         }
@@ -110,7 +110,7 @@ namespace doctest {
     template<typename T, typename Alloc>
     struct StringMaker<fl::vector<T, Alloc>> {
         static String convert(const fl::vector<T, Alloc>& value) {
-            fl::Str out;
+            fl::string out;
             out.append(value);
             return out.c_str();
         }

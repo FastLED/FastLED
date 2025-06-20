@@ -40,7 +40,7 @@ class DemoReel100 : public Fx1d {
         EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
     }
 
-    fl::Str fxName() const override { return "DemoReel100"; }
+    fl::string fxName() const override { return "DemoReel100"; }
 
   private:
     uint8_t current_pattern_number = 0;

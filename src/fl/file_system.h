@@ -47,12 +47,12 @@ class FileSystem {
     Video
     openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f,
               size_t nFrameHistory = 0); // Null if video could not be opened.
-    bool readText(const char *path, Str *out);
+    bool readText(const char *path, string *out);
     bool readJson(const char *path, JsonDocument *doc);
-    bool readScreenMaps(const char *path, FixedMap<Str, ScreenMap, 16> *out,
-                        Str *error = nullptr);
+    bool readScreenMaps(const char *path, FixedMap<string, ScreenMap, 16> *out,
+                        string *error = nullptr);
     bool readScreenMap(const char *path, const char *name, ScreenMap *out,
-                       Str *error = nullptr);
+                       string *error = nullptr);
     void close(FileHandlePtr file);
 
   private:

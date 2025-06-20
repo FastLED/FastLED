@@ -53,7 +53,7 @@ TEST_CASE("fft tester 512") {
         CHECK(almost_equal);
     }
 
-    fl::Str info = fft.info();
+    fl::string info = fft.info();
     FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }
@@ -91,7 +91,7 @@ TEST_CASE("fft tester 256") {
         CHECK(almost_equal);
     }
 
-    fl::Str info = fft.info();
+    fl::string info = fft.info();
     FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }
@@ -136,7 +136,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
         }
         CHECK(almost_equal);
     }
-    fl::Str info = fft.info();
+    fl::string info = fft.info();
     FASTLED_WARN("FFTImpl info: " << info);
     FASTLED_WARN("Done");
 }

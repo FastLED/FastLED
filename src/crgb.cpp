@@ -15,8 +15,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-fl::Str CRGB::toString() const {
-    fl::Str out;
+fl::string CRGB::toString() const {
+    fl::string out;
     out.append("CRGB(");
     out.append(int16_t(r));
     out.append(",");

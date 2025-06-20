@@ -9,7 +9,7 @@
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
 
-using fl::Str;
+using fl::string;
 
 TEST_CASE("ScreenMap basic functionality") {
     // Create a screen map for 3 LEDs

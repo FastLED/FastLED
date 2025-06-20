@@ -16,23 +16,23 @@ namespace fl {
 class Tile2x2_u8;
 
 template <typename T> struct StrStreamHelper {
-    static void append(Str &str, const T &n) { str.append(n); }
+    static void append(string &str, const T &n) { str.append(n); }
 };
 
 template <> struct StrStreamHelper<int> {
-    static void append(Str &str, const int &n) { str.append(int32_t(n)); }
+    static void append(string &str, const int &n) { str.append(int32_t(n)); }
 };
 
 template <> struct StrStreamHelper<uint8_t> {
-    static void append(Str &str, const uint8_t &n) { str.append(uint16_t(n)); }
+    static void append(string &str, const uint8_t &n) { str.append(uint16_t(n)); }
 };
 
 template <> struct StrStreamHelper<char> {
-    static void append(Str &str, const char &n) { str.append(uint16_t(n)); }
+    static void append(string &str, const char &n) { str.append(uint16_t(n)); }
 };
 
 template <> struct StrStreamHelper<unsigned int> {
-    static void append(Str &str, const unsigned int &n) {
+    static void append(string &str, const unsigned int &n) {
         str.append(uint32_t(n));
     }
 };
@@ -40,13 +40,13 @@ template <> struct StrStreamHelper<unsigned int> {
 class StrStream {
   public:
     StrStream() = default;
-    StrStream(const Str &str) : mStr(str) {}
+    StrStream(const string &str) : mStr(str) {}
 
     void setTreatCharAsInt(bool treatCharAsInt) {
         mTreatCharAsInt = treatCharAsInt;
     }
 
-    const Str &str() const { return mStr; }
+    const string &str() const { return mStr; }
     const char *c_str() const { return mStr.c_str(); }
 
     StrStream &operator<<(const CRGB &rgb) {
@@ -79,7 +79,7 @@ class StrStream {
     }
 
     // << operator section
-    StrStream &operator<<(const Str &str) {
+    StrStream &operator<<(const string &str) {
         mStr.append(str);
         return *this;
     }
@@ -152,7 +152,7 @@ class StrStream {
     }
 
     // assignment operator completely replaces the current string
-    StrStream &operator=(const Str &str) {
+    StrStream &operator=(const string &str) {
         mStr = str;
         return *this;
     }
@@ -172,7 +172,7 @@ class StrStream {
     void clear() { mStr.clear(); }
 
   private:
-    Str mStr;
+    string mStr;
     bool mTreatCharAsInt = true;
 };
 
@@ -185,7 +185,7 @@ class FakeStrStream {
     template <typename T> FakeStrStream &operator=(const T &) { return *this; }
 
     FakeStrStream &operator<<(const CRGB &) { return *this; }
-    FakeStrStream &operator<<(const Str &) { return *this; }
+    FakeStrStream &operator<<(const string &) { return *this; }
     FakeStrStream &operator<<(char) { return *this; }
 
 #if FASTLED_STRSTREAM_USES_SIZE_T
@@ -198,7 +198,7 @@ class FakeStrStream {
     FakeStrStream &operator<<(uint32_t) { return *this; }
     FakeStrStream &operator<<(int32_t) { return *this; }
 
-    FakeStrStream &operator=(const Str &) { return *this; }
+    FakeStrStream &operator=(const string &) { return *this; }
     FakeStrStream &operator=(const CRGB &) { return *this; }
     FakeStrStream &operator=(uint16_t) { return *this; }
     FakeStrStream &operator=(uint8_t) { return *this; }

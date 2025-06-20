@@ -25,13 +25,13 @@ class UIBase {
     UIBase() {}
     virtual ~UIBase() {}
     
-    virtual void setGroup(const fl::Str& groupName) { mGroupName = groupName; }
-    virtual void setGroup(const char* groupName) { mGroupName = fl::Str(groupName); }
-    fl::Str getGroup() const { return mGroupName; }
+    virtual void setGroup(const fl::string& groupName) { mGroupName = groupName; }
+    virtual void setGroup(const char* groupName) { mGroupName = fl::string(groupName); }
+    fl::string getGroup() const { return mGroupName; }
     bool hasGroup() const { return !mGroupName.empty(); }
 
   private:
-    fl::Str mGroupName;
+    fl::string mGroupName;
 };
 
 // If the platform is missing ui components, provide stubs.
@@ -75,13 +75,13 @@ class UISlider : protected UISliderImpl, public UIBase {
     }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 
     int onChanged(function<void(UISlider &)> callback) {
@@ -161,12 +161,12 @@ class UIButton : protected UIButtonImpl, public UIBase {
     void click() { Super::click(); }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
     
     int onChanged(function<void(UIButton &)> callback) {
@@ -236,12 +236,12 @@ class UICheckbox : protected UICheckboxImpl, public UIBase {
     bool value() const { return Super::value(); }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 
     void onChanged(function<void(UICheckbox &)> callback) {
@@ -304,12 +304,12 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
     }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 
     void onChanged(function<void(UINumberField &)> callback) {
@@ -357,12 +357,12 @@ class UITitle : protected UITitleImpl, public UIBase {
     ~UITitle() {}
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<UITitleImpl*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 };
 
@@ -373,12 +373,12 @@ class UIDescription : protected UIDescriptionImpl, public UIBase {
     ~UIDescription() {}
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<UIDescriptionImpl*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 };
 
@@ -392,12 +392,12 @@ class UIAudio : protected UIAudioImpl, public UIBase {
     bool hasNext() { return Super::hasNext(); }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 };
 
@@ -406,13 +406,13 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     FL_NO_COPY(UIDropdown)
     using Super = UIDropdownImpl;
 
-    // Constructor with fl::Slice<fl::Str> (fl::string) options
-    UIDropdown(const char *name, fl::Slice<fl::Str> options)
+    // Constructor with fl::Slice<fl::string> (fl::string) options
+    UIDropdown(const char *name, fl::Slice<fl::string> options)
         : UIDropdownImpl(name, options), mListener(this) {}
 
     ~UIDropdown() {}
     
-    fl::Str value() const { return Super::value(); }
+    fl::string value() const { return Super::value(); }
     int value_int() const { return Super::value_int(); }
     
     void setSelectedIndex(int index) { 
@@ -420,9 +420,9 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     }
     
     size_t getOptionCount() const { return Super::getOptionCount(); }
-    fl::Str getOption(size_t index) const { return Super::getOption(index); }
+    fl::string getOption(size_t index) const { return Super::getOption(index); }
     
-    operator fl::Str() const { return value(); }
+    operator fl::string() const { return value(); }
     operator int() const { return value_int(); }
     
     UIDropdown &operator=(int index) {
@@ -431,12 +431,12 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     }
     
     // Override setGroup to also update the implementation
-    void setGroup(const fl::Str& groupName) override { 
+    void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         static_cast<Super*>(this)->setGroupInternal(groupName);
     }
     void setGroup(const char* groupName) override { 
-        setGroup(fl::Str(groupName)); 
+        setGroup(fl::string(groupName)); 
     }
 
     int onChanged(function<void(UIDropdown &)> callback) {
@@ -482,12 +482,12 @@ class UIGroup : protected UIGroupImpl {
     FL_NO_COPY(UIGroup);
     using Super = UIGroupImpl;
     
-    // Constructor takes fl::Str as the only parameter for grouping name
-    UIGroup(const fl::Str& groupName) : UIGroupImpl(groupName.c_str()) {}
+    // Constructor takes fl::string as the only parameter for grouping name
+    UIGroup(const fl::string& groupName) : UIGroupImpl(groupName.c_str()) {}
     
     // Variadic template constructor: first argument is group name, remaining are UI elements
     template<typename... UIElements>
-    UIGroup(const fl::Str& groupName, UIElements&... elements) 
+    UIGroup(const fl::string& groupName, UIElements&... elements) 
         : UIGroupImpl(groupName.c_str()) {
         // Add all UI elements to this group
         add(elements...);
@@ -496,10 +496,10 @@ class UIGroup : protected UIGroupImpl {
     ~UIGroup() {}
     
     // Get the group name
-    fl::Str name() const { return Super::name(); }
+    fl::string name() const { return Super::name(); }
     
     // Implicit conversion to string for convenience
-    operator fl::Str() const { return name(); }
+    operator fl::string() const { return name(); }
 
     // Add control to the group
     template<typename T>

@@ -128,7 +128,7 @@ class TwinkleFox : public Fx1d {
     }
 
     void chooseNextColorPalette(CRGBPalette16 &pal);
-    fl::Str fxName() const override { return "TwinkleFox"; }
+    fl::string fxName() const override { return "TwinkleFox"; }
 
   private:
     CRGB backgroundColor;

@@ -49,7 +49,7 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<Str, ScreenMap, 16> *segmentMaps, Str *err) {
+                          FixedMap<string, ScreenMap, 16> *segmentMaps, string *err) {
 #if !FASTLED_ENABLE_JSON
     if (err) {
         *err = "JSON not enabled";
@@ -57,7 +57,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     return false;
 #else
     JsonDocument doc;
-    Str _err;
+    string _err;
     if (!err) {
         err = &_err;
     }
@@ -93,14 +93,14 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           const char *screenMapName, ScreenMap *screenmap,
-                          Str *err) {
+                          string *err) {
 #if !FASTLED_ENABLE_JSON
     if (err) {
         *err = "JSON not enabled";
     }
     return false;
 #else
-    FixedMap<Str, ScreenMap, 16> segmentMaps;
+    FixedMap<string, ScreenMap, 16> segmentMaps;
     bool ok = ParseJson(jsonStrScreenMap, &segmentMaps, err);
     if (!ok) {
         return false;
@@ -112,7 +112,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
         *screenmap = segmentMaps[screenMapName];
         return true;
     }
-    Str _err = "ScreenMap not found: ";
+    string _err = "ScreenMap not found: ";
     _err.append(screenMapName);
     if (err) {
         *err = _err;
@@ -122,7 +122,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 #endif
 }
 
-void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
+void ScreenMap::toJson(const FixedMap<string, ScreenMap, 16> &segmentMaps,
                        JsonDocument *_doc) {
 
 #if !FASTLED_ENABLE_JSON
@@ -157,8 +157,8 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
 #endif
 }
 
-void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16> &segmentMaps,
-                          Str *jsonBuffer) {
+void ScreenMap::toJsonStr(const FixedMap<string, ScreenMap, 16> &segmentMaps,
+                          string *jsonBuffer) {
 #if !FASTLED_ENABLE_JSON
     return;
 #else

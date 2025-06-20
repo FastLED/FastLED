@@ -342,7 +342,7 @@ FastLED 3.9.5
   * We are doing this because we keep getting conflicts with our files and classes conflict with power users who have lots of code.The arduino build system likes to put all the headers into the global space so the chance of collisions goes up dramatically with the number of dependencies one has and we are tired of playing wack a mole with fixing this.
     * Example: https://github.com/FastLED/FastLED/issues/1775
 * Stl-like Containers: We have some exciting features coming up for you. In this release we are providing some of the containers necessary for complex embedded black-magic.
-  * `fl::Str`: a copy on write String with inlined memory, which overflows to the heap after 64 characters. Lightning fast to copy around and keep your characters on the stack and prevent heap allocation. Check it out in `fl/str.h`. If 64 characters is too large for your needs then you can change it with a build-level define.
+  * `fl::string`: a copy on write String with inlined memory, which overflows to the heap after 64 characters. Lightning fast to copy around and keep your characters on the stack and prevent heap allocation. Check it out in `fl/str.h`. If 64 characters is too large for your needs then you can change it with a build-level define.
   * `fl/vector.h`:
     * `fl::FixedVector`: Inlined vector which won't ever overflow.
     * `fl::HeapVector`: Do you need overflow in your vector or a drop in replacement for `std::vector`? Use this.

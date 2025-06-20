@@ -40,7 +40,7 @@ class RedSquare : public Fx2d {
         }
     }
 
-    fl::Str fxName() const override { return "red_square"; }
+    fl::string fxName() const override { return "red_square"; }
 };
 
 } // namespace fl

@@ -32,10 +32,10 @@ XYRasterU8Sparse &get_tls_raster() {
 } // namespace
 
 namespace xypath_detail {
-fl::Str unique_missing_name(const char *prefix) {
+fl::string unique_missing_name(const char *prefix) {
     static int sUniqueName = 0;
     int id = ++sUniqueName;
-    Str name = prefix;
+    string name = prefix;
     name += id;
     return name;
 }
@@ -52,7 +52,7 @@ void XYPath::setDrawBounds(uint16_t width, uint16_t height) {
 
 void XYPath::setScale(float scale) { mPathRenderer->setScale(scale); }
 
-Str XYPath::name() const { return mPath->name(); }
+string XYPath::name() const { return mPath->name(); }
 Tile2x2_u8 XYPath::at_subpixel(float alpha) {
     return mPathRenderer->at_subpixel(alpha);
 }

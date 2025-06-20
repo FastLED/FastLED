@@ -183,8 +183,8 @@ FASTLED_DEFINE_FAST_HASH(bool)
 //-----------------------------------------------------------------------------
 // Convenience for std::string → uint32_t
 //----------------------------------------------------------------------------
-template <> struct Hash<fl::Str> {
-    uint32_t operator()(const fl::Str &key) const noexcept {
+template <> struct Hash<fl::string> {
+    uint32_t operator()(const fl::string &key) const noexcept {
         return MurmurHash3_x86_32(key.data(), key.size());
     }
 };

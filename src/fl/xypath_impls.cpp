@@ -189,14 +189,14 @@ vec2f GielisCurvePath::compute(float alpha) {
     return vec2f{x, y};
 }
 
-const Str CirclePath::name() const { return "CirclePath"; }
+const string CirclePath::name() const { return "CirclePath"; }
 
 vec2f PointPath::compute(float alpha) {
     FASTLED_UNUSED(alpha);
     return mPoint;
 }
 
-const Str PointPath::name() const { return "PointPath"; }
+const string PointPath::name() const { return "PointPath"; }
 
 void PointPath::set(float x, float y) { set(vec2f(x, y)); }
 
@@ -206,7 +206,7 @@ PointPath::PointPath(float x, float y) : mPoint(x, y) {}
 
 PointPath::PointPath(vec2f p) : mPoint(p) {}
 
-const Str LinePath::name() const { return "LinePath"; }
+const string LinePath::name() const { return "LinePath"; }
 
 LinePathParams &LinePath::params() { return *mParams; }
 
@@ -214,9 +214,9 @@ const LinePathParams &LinePath::params() const { return *mParams; }
 
 LinePath::LinePath(const LinePathParamsPtr &params) : mParams(params) {}
 
-const Str HeartPath::name() const { return "HeartPath"; }
+const string HeartPath::name() const { return "HeartPath"; }
 
-const Str ArchimedeanSpiralPath::name() const {
+const string ArchimedeanSpiralPath::name() const {
     return "ArchimedeanSpiralPath";
 }
 
@@ -224,7 +224,7 @@ void ArchimedeanSpiralPath::setTurns(uint8_t turns) { mTurns = turns; }
 
 void ArchimedeanSpiralPath::setRadius(float radius) { mRadius = radius; }
 
-const Str RosePath::name() const { return "RosePath"; }
+const string RosePath::name() const { return "RosePath"; }
 
 void RosePath::setN(uint8_t n) { params().n = n; }
 
@@ -236,7 +236,7 @@ RosePathParams &RosePath::params() { return *mParams; }
 
 const RosePathParams &RosePath::params() const { return *mParams; }
 
-const Str PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
+const string PhyllotaxisPath::name() const { return "PhyllotaxisPath"; }
 
 PhyllotaxisPath::PhyllotaxisPath(const Ptr<PhyllotaxisParams> &p)
     : mParams(p) {}
@@ -248,7 +248,7 @@ const PhyllotaxisParams &PhyllotaxisPath::params() const { return *mParams; }
 GielisCurvePath::GielisCurvePath(const Ptr<GielisCurveParams> &p)
     : mParams(p) {}
 
-const Str GielisCurvePath::name() const { return "GielisCurvePath"; }
+const string GielisCurvePath::name() const { return "GielisCurvePath"; }
 void GielisCurvePath::setA(float a) { params().a = a; }
 void GielisCurvePath::setB(float b) { params().b = b; }
 void GielisCurvePath::setM(float m) { params().m = m; }
@@ -359,6 +359,6 @@ vec2f CatmullRomPath::interpolate(const vec2f &p0, const vec2f &p1,
     return vec2f(x, y);
 }
 
-const Str CatmullRomPath::name() const { return "CatmullRomPath"; }
+const string CatmullRomPath::name() const { return "CatmullRomPath"; }
 
 } // namespace fl

@@ -37,7 +37,7 @@ class Fx : public fl::Referent {
     }
 
     // Get the name of the current fx.
-    virtual fl::Str fxName() const = 0;
+    virtual fl::string fxName() const = 0;
 
     // Called when the fx is paused, usually when a transition has finished.
     virtual void pause(uint32_t now) { FASTLED_UNUSED(now); }

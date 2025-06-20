@@ -97,7 +97,7 @@ class Fire2012 : public Fx1d {
         }
     }
 
-    fl::Str fxName() const override { return "Fire2012"; }
+    fl::string fxName() const override { return "Fire2012"; }
 
   private:
     fl::vector<uint8_t, fl::allocator_psram<uint8_t>> heat;

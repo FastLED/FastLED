@@ -25,37 +25,37 @@ void jsDropdownImpl::commonInit(const Str &name) {
 }
 
 // Constructor with array of options and count
-jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::Str* options, size_t count) 
+jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::string* options, size_t count) 
     : mSelectedIndex(0) {
     for (size_t i = 0; i < count; ++i) {
         mOptions.push_back(options[i]);
     }
     if (mOptions.empty()) {
-        mOptions.push_back(fl::Str("No options"));
+        mOptions.push_back(fl::string("No options"));
     }
     commonInit(name);
 }
 
 // Constructor with fl::vector of options
-jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::vector<fl::Str>& options) 
+jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::vector<fl::string>& options) 
     : mSelectedIndex(0) {
     for (size_t i = 0; i < options.size(); ++i) {
         mOptions.push_back(options[i]);
     }
     if (mOptions.empty()) {
-        mOptions.push_back(fl::Str("No options"));
+        mOptions.push_back(fl::string("No options"));
     }
     commonInit(name);
 }
 
 // Constructor with initializer_list (only available if C++11 support exists)
-jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::Str> options) 
+jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::string> options) 
     : mSelectedIndex(0) {
     for (const auto& option : options) {
         mOptions.push_back(option);
     }
     if (mOptions.empty()) {
-        mOptions.push_back(fl::Str("No options"));
+        mOptions.push_back(fl::string("No options"));
     }
     commonInit(name);
 }
@@ -77,11 +77,11 @@ void jsDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
     }
 }
 
-fl::Str jsDropdownImpl::value() const { 
+fl::string jsDropdownImpl::value() const { 
     if (mSelectedIndex < mOptions.size()) {
         return mOptions[mSelectedIndex]; 
     }
-    return fl::Str("Invalid");
+    return fl::string("Invalid");
 }
 
 int jsDropdownImpl::value_int() const { 
@@ -94,11 +94,11 @@ void jsDropdownImpl::setSelectedIndex(int index) {
     }
 }
 
-fl::Str jsDropdownImpl::getOption(size_t index) const {
+fl::string jsDropdownImpl::getOption(size_t index) const {
     if (index < mOptions.size()) {
         return mOptions[index];
     }
-    return fl::Str("Invalid");
+    return fl::string("Invalid");
 }
 
 void jsDropdownImpl::updateInternal(

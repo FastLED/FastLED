@@ -3,7 +3,7 @@
 
 namespace fl {
 
-bool parseJson(const char *json, fl::JsonDocument *doc, Str *_error) {
+bool parseJson(const char *json, fl::JsonDocument *doc, string *_error) {
 #if !FASTLED_ENABLE_JSON
     if (_error) {
         *_error = "JSON not enabled";
@@ -21,7 +21,7 @@ bool parseJson(const char *json, fl::JsonDocument *doc, Str *_error) {
 #endif
 }
 
-void toJson(const fl::JsonDocument &doc, Str *jsonBuffer) {
+void toJson(const fl::JsonDocument &doc, string *jsonBuffer) {
 #if !FASTLED_ENABLE_JSON
     return;
 #else

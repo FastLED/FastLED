@@ -37,7 +37,7 @@ UIDescription description("Use the xPosition slider to see the ease function cur
 UISlider xPosition("xPosition", 0.0f, 0.0f, 1.0f, 0.01f);
 
 // Create dropdown with descriptive ease function names
-fl::Str easeOptions[] = {
+fl::string easeOptions[] = {
     "None", 
     "In Quad", 
     "Out Quad", 

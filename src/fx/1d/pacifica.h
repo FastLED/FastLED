@@ -17,7 +17,7 @@ class Pacifica : public Fx1d {
     Pacifica(uint16_t num_leds) : Fx1d(num_leds) {}
 
     void draw(DrawContext context) override;
-    fl::Str fxName() const override { return "Pacifica"; }
+    fl::string fxName() const override { return "Pacifica"; }
 
   private:
     uint16_t sCIStart1 = 0, sCIStart2 = 0, sCIStart3 = 0, sCIStart4 = 0;

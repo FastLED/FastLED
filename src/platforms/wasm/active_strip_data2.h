@@ -31,7 +31,7 @@ class ActiveStripData2 : public fl::EngineEvents::Listener {
     void updateScreenMap(int id, const fl::ScreenMap &screenmap);
     size_t getPixelDataSize_C(int stripIndex);
     const uint8_t *getPixelData_Uint8_C(int stripIndex);
-    fl::Str infoJsonString();
+    fl::string infoJsonString();
 
     const StripDataMap &getData() const { return mStripMap; }
 

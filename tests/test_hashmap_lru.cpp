@@ -112,7 +112,7 @@ TEST_CASE("Test HashMapLRU") {
         CHECK(*tiny_lru.find_value(2) == 200);
         
         // Test with string keys
-        HashMapLru<fl::Str, int> str_lru(2);
+        HashMapLru<fl::string, int> str_lru(2);
         str_lru.insert("one", 1);
         str_lru.insert("two", 2);
         CHECK(*str_lru.find_value("one") == 1);

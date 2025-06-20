@@ -32,7 +32,7 @@ FASTLED_SMART_PTR(XYPathGenerator);
 FASTLED_SMART_PTR(XYPathFunction);
 
 namespace xypath_detail {
-fl::Str unique_missing_name(const char *prefix = "XYCustomPath: ");
+fl::string unique_missing_name(const char *prefix = "XYCustomPath: ");
 } // namespace xypath_detail
 
 class XYPath : public Referent {
@@ -108,7 +108,7 @@ class XYPath : public Referent {
                    AlphaFunction *optional_alpha_gen = nullptr);
 
     void setScale(float scale);
-    Str name() const;
+    string name() const;
     // Overloaded to allow transform to be passed in.
     vec2f at(float alpha, const TransformFloat &tx);
     xy_brightness at_brightness(float alpha) {
@@ -142,8 +142,8 @@ class XYPathFunction : public XYPathGenerator {
   public:
     XYPathFunction(fl::function<vec2f(float)> f) : mFunction(f) {}
     vec2f compute(float alpha) override { return mFunction(alpha); }
-    const Str name() const override { return mName; }
-    void setName(const Str &name) { mName = name; }
+    const string name() const override { return mName; }
+    void setName(const string &name) { mName = name; }
 
     fl::rect<int16_t> drawBounds() const { return mDrawBounds; }
     void setDrawBounds(const fl::rect<int16_t> &bounds) { mDrawBounds = bounds; }
@@ -157,7 +157,7 @@ class XYPathFunction : public XYPathGenerator {
 
   private:
     fl::function<vec2f(float)> mFunction;
-    fl::Str mName = "XYPathFunction Unnamed";
+    fl::string mName = "XYPathFunction Unnamed";
     fl::rect<int16_t> mDrawBounds;
 };
 

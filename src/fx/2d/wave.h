@@ -164,7 +164,7 @@ class WaveFx : public Fx2d {
         mWaveSim.update();
     }
 
-    fl::Str fxName() const override { return "WaveFx"; }
+    fl::string fxName() const override { return "WaveFx"; }
 
     WaveSimulation2D mWaveSim;
     WaveCrgbMapPtr mCrgbMap;
