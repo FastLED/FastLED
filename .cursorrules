@@ -41,14 +41,11 @@ To use the MCP server, run: `uv run mcp_server.py`
 **Headers:**
 - ❌ `#include <type_traits>` → ✅ `#include "fl/type_traits.h"`
 - ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
-- ❌ `#include <utility>` → ✅ `#include "fl/utility.h"`
-- ❌ `#include <memory>` → ✅ `#include "fl/memory.h"`
 - ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
 
 **Functions and classes:**
 - ❌ `std::move()` → ✅ `fl::move()`
 - ❌ `std::forward()` → ✅ `fl::forward()`
-- ❌ `std::unique_ptr` → ✅ `fl::unique_ptr`
 - ❌ `std::vector` → ✅ `fl::vector`
 - ❌ `std::enable_if` → ✅ `fl::enable_if`
 
