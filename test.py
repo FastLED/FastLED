@@ -44,6 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--clean", action="store_true", help="Clean build before compiling")
     parser.add_argument("--no-interactive", action="store_true", help="Force non-interactive mode (no confirmation prompts)")
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode (allows confirmation prompts)")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output showing all test details")
     return parser.parse_args()
 
 
@@ -225,6 +226,8 @@ def main() -> None:
             cmd_list.append(args.test)
         if args.clean:
             cmd_list.append("--clean")
+        if args.verbose:
+            cmd_list.append("--verbose")
 
         cmd_str_cpp = subprocess.list2cmdline(cmd_list)
 

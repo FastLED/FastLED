@@ -8,6 +8,8 @@ from dataclasses import dataclass
 
 from ci.paths import PROJECT_ROOT
 
+# Global verbose flag
+_VERBOSE = False
 
 @dataclass
 class FailedTest:
@@ -47,7 +49,8 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                print(line, end="")  # Print in real-time
+                if _VERBOSE:
+                    print(line, end="")  # Only print in real-time if verbose
 
         os.unlink(gdb_script.name)
         output = "\n".join(captured_lines)
@@ -69,7 +72,8 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
                 break
             if line:
                 captured_lines.append(line.rstrip())
-                print(line, end="")  # Print in real-time
+                if _VERBOSE:
+                    print(line, end="")  # Only print in real-time if verbose
 
         output = "\n".join(captured_lines)
         return process.returncode, output
@@ -77,16 +81,19 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
 
 def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
     os.chdir(str(PROJECT_ROOT))
-    print("Compiling tests...")
+    if _VERBOSE:
+        print("Compiling tests...")
     command = ["uv", "run", "ci/cpp_test_compile.py"]
     if clean:
         command.append("--clean")
     command.extend(unknown_args)
-    return_code, _ = run_command(" ".join(command))
+    return_code, output = run_command(" ".join(command))
     if return_code != 0:
         print("Compilation failed:")
+        print(output)  # Always show output on failure
         sys.exit(1)
-    print("Compilation successful.")
+    if _VERBOSE:
+        print("Compilation successful.")
 
 
 def run_tests(specific_test: str | None = None) -> None:
@@ -95,7 +102,8 @@ def run_tests(specific_test: str | None = None) -> None:
         print(f"Test directory not found: {test_dir}")
         sys.exit(1)
 
-    print("Running tests...")
+    if _VERBOSE:
+        print("Running tests...")
     failed_tests: list[FailedTest] = []
     files = os.listdir(test_dir)
     # filter out all pdb files (windows) and only keep test_ executables
@@ -113,7 +121,8 @@ def run_tests(specific_test: str | None = None) -> None:
     for test_file in files:
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
-            print(f"Running test: {test_file}")
+            if _VERBOSE:
+                print(f"Running test: {test_file}")
             return_code, stdout = run_command(test_path)
 
             output = stdout
@@ -122,7 +131,8 @@ def run_tests(specific_test: str | None = None) -> None:
             is_crash = failure_match is not None
 
             if is_crash:
-                print("Test crashed. Re-running with GDB to get stack trace...")
+                if _VERBOSE:
+                    print("Test crashed. Re-running with GDB to get stack trace...")
                 _, gdb_stdout = run_command(test_path, use_gdb=True)
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
 
@@ -132,33 +142,41 @@ def run_tests(specific_test: str | None = None) -> None:
                 print(f"Cause: {crash_info.cause}")
                 print(f"Stack: {crash_info.stack}")
 
-            print("Test output:")
-            print(stdout)
+            if _VERBOSE:
+                print("Test output:")
+                print(stdout)
             if return_code == 0:
-                print("Test passed")
+                if _VERBOSE:
+                    print("Test passed")
             elif is_crash:
                 if failure_match:
-                    print(f"Test crashed with return code {failure_match.group(1)}")
+                    print(f"Test {test_file} crashed with return code {failure_match.group(1)}")
                 else:
-                    print(f"Test crashed with return code {return_code}")
+                    print(f"Test {test_file} crashed with return code {return_code}")
             else:
-                print(f"Test failed with return code {return_code}")
+                print(f"Test {test_file} failed with return code {return_code}")
+                if not _VERBOSE:
+                    print("Test output:")
+                    print(stdout)  # Show output on failure even in non-verbose mode
 
-            print("-" * 40)
+            if _VERBOSE:
+                print("-" * 40)
             if return_code != 0:
                 failed_tests.append(FailedTest(test_file, return_code, stdout))
     if failed_tests:
+        if not _VERBOSE:
+            print("Failed tests:")
         for failed_test in failed_tests:
-            print(
-                f"Test {failed_test.name} failed with return code {failed_test.return_code}\n{failed_test.stdout}"
-            )
+            if not _VERBOSE:
+                print(f"Test {failed_test.name} failed with return code {failed_test.return_code}")
+            else:
+                print(f"Test {failed_test.name} failed with return code {failed_test.return_code}\n{failed_test.stdout}")
         tests_failed = len(failed_tests)
         failed_test_names = [test.name for test in failed_tests]
-        print(
-            f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}"
-        )
+        print(f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}")
         sys.exit(1)
-    print("All tests passed.")
+    if _VERBOSE:
+        print("All tests passed.")
 
 
 @dataclass
@@ -232,6 +250,11 @@ def parse_args() -> argparse.Namespace:
         help="Use Clang compiler",
         action="store_true",
     )
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true",
+        help="Enable verbose output showing all test details",
+    )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
     return args
@@ -239,6 +262,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    
+    # Set global verbose flag
+    global _VERBOSE
+    _VERBOSE = args.verbose
+    
     run_only = args.run_only
     compile_only = args.compile_only
     specific_test = args.test
@@ -255,7 +283,11 @@ def main() -> None:
         if specific_test:
             run_tests(specific_test)
         else:
-            cmd = "ctest --test-dir tests/.build --output-on-failure"
+            cmd = "ctest --test-dir tests/.build"
+            if not _VERBOSE:
+                cmd += " --output-on-failure"
+            else:
+                cmd += " --verbose --output-on-failure"
             if only_run_failed_test:
                 cmd += " --rerun-failed"
             rtn, stdout = run_command(cmd)
