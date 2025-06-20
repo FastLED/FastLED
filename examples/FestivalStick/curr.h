@@ -1,4 +1,4 @@
-/*
+THIS SHOULD BE A LINTER ERROR/*
 Festival Stick - Corkscrew LED Mapping Demo
 
 This example demonstrates proper corkscrew LED mapping for a festival stick

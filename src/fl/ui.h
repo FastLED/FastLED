@@ -59,7 +59,10 @@ class UISlider : protected UISliderImpl {
         return *this;
     }
 
-
+    // Group functionality
+    void setGroup(UIGroup* group) { Super::setGroup(group); }
+    UIGroup* getGroup() const { return Super::getGroup(); }
+    bool hasGroup() const { return Super::hasGroup(); }
 
     int onChanged(function<void(UISlider &)> callback) {
         int out = mCallbacks.add(callback);
@@ -136,6 +139,12 @@ class UIButton : protected UIButtonImpl {
     }
 
     void click() { Super::click(); }
+    
+    // Group functionality
+    void setGroup(UIGroup* group) { Super::setGroup(group); }
+    UIGroup* getGroup() const { return Super::getGroup(); }
+    bool hasGroup() const { return Super::hasGroup(); }
+    
     int onChanged(function<void(UIButton &)> callback) {
         int id = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
@@ -202,6 +211,10 @@ class UICheckbox : protected UICheckboxImpl {
     }
     bool value() const { return Super::value(); }
 
+    // Group functionality
+    void setGroup(UIGroup* group) { Super::setGroup(group); }
+    UIGroup* getGroup() const { return Super::getGroup(); }
+    bool hasGroup() const { return Super::hasGroup(); }
 
     void onChanged(function<void(UICheckbox &)> callback) {
         mCallbacks.add(callback);
@@ -262,7 +275,10 @@ class UINumberField : protected UINumberFieldImpl {
         return *this;
     }
 
-
+    // Group functionality
+    void setGroup(UIGroup* group) { Super::setGroup(group); }
+    UIGroup* getGroup() const { return Super::getGroup(); }
+    bool hasGroup() const { return Super::hasGroup(); }
 
     void onChanged(function<void(UINumberField &)> callback) {
         mCallbacks.add(callback);
@@ -364,6 +380,11 @@ class UIDropdown : protected UIDropdownImpl {
         setSelectedIndex(index);
         return *this;
     }
+
+    // Group functionality
+    void setGroup(UIGroup* group) { Super::setGroup(group); }
+    UIGroup* getGroup() const { return Super::getGroup(); }
+    bool hasGroup() const { return Super::hasGroup(); }
 
     int onChanged(function<void(UIDropdown &)> callback) {
         int out = mCallbacks.add(callback);
