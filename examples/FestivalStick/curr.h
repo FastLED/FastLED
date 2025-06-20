@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR/*
+/*
 Festival Stick - Corkscrew LED Mapping Demo
 
 This example demonstrates proper corkscrew LED mapping for a festival stick
@@ -172,12 +172,19 @@ void setup() {
     // This allows the web interface to display the actual corkscrew spiral shape
     controller->setScreenMap(corkscrewScreenMap);
     
+    // Associate noise-related UI elements with the noise group
+    useNoise.setGroup(&noiseGroup);
+    noiseScale.setGroup(&noiseGroup);
+    noiseSpeed.setGroup(&noiseGroup);
+    paletteDropdown.setGroup(&noiseGroup);
+    
     // Demonstrate UIGroup functionality for noise controls
     FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
-    FL_WARN("  This group contains noise pattern controls:");
-    FL_WARN("  - Use Noise Pattern toggle");
-    FL_WARN("  - Noise Scale and Speed sliders");
-    FL_WARN("  - Color Palette selection for noise");
+    FL_WARN("  Associated UI elements with group:");
+    FL_WARN("  - useNoise: " << (useNoise.hasGroup() ? "has group" : "no group"));
+    FL_WARN("  - noiseScale: " << (noiseScale.hasGroup() ? "has group" : "no group"));
+    FL_WARN("  - noiseSpeed: " << (noiseSpeed.hasGroup() ? "has group" : "no group"));
+    FL_WARN("  - paletteDropdown: " << (paletteDropdown.hasGroup() ? "has group" : "no group"));
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
