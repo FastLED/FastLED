@@ -1,5 +1,13 @@
 /// @file    Animartrix.ino
-/// @brief   Demonstrates Stefan Petricks Animartrix effects.
+/// @brief   Demo of the Animatrix effects
+/// @example Animartrix.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
+///
 /// @author  Stefan Petrick
 /// @author  Zach Vorhies (FastLED adaptation)
 ///

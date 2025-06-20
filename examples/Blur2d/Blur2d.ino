@@ -1,3 +1,13 @@
+/// @file    Blur2d.ino
+/// @brief   Demonstrates 2D blur effects on LED matrix
+/// @example Blur2d.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
+
 // UIDescription: This example shows how to blur a strip of LEDs in 2d.
 
 #include "fl/ui.h"
