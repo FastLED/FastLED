@@ -137,29 +137,29 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
 void Corkscrew::initializeBuffer() const {
     if (!mBufferInitialized) {
         size_t buffer_size = static_cast<size_t>(mState.width) * static_cast<size_t>(mState.height);
-        mRectangularBuffer.resize(buffer_size, CRGB::Black);
+        mCorkscrewLeds.resize(buffer_size, CRGB::Black);
         mBufferInitialized = true;
     }
 }
 
 fl::vector<CRGB>& Corkscrew::getBuffer() {
     initializeBuffer();
-    return mRectangularBuffer;
+    return mCorkscrewLeds;
 }
 
 const fl::vector<CRGB>& Corkscrew::getBuffer() const {
     initializeBuffer();
-    return mRectangularBuffer;
+    return mCorkscrewLeds;
 }
 
 CRGB* Corkscrew::data() {
     initializeBuffer();
-    return mRectangularBuffer.data();
+    return mCorkscrewLeds.data();
 }
 
 const CRGB* Corkscrew::data() const {
     initializeBuffer();
-    return mRectangularBuffer.data();
+    return mCorkscrewLeds.data();
 }
 
 void Corkscrew::readFrom(const fl::Leds& source_leds) {
@@ -188,23 +188,81 @@ void Corkscrew::readFrom(const fl::Leds& source_leds) {
         // Store in our rectangular buffer using row-major indexing
         size_t buffer_idx = static_cast<size_t>(coord.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(coord.x);
         
-        if (buffer_idx < mRectangularBuffer.size()) {
-            mRectangularBuffer[buffer_idx] = sampled_color;
+        if (buffer_idx < mCorkscrewLeds.size()) {
+            mCorkscrewLeds[buffer_idx] = sampled_color;
         }
     }
 }
 
 void Corkscrew::clearBuffer() {
     initializeBuffer();
-    for (size_t i = 0; i < mRectangularBuffer.size(); ++i) {
-        mRectangularBuffer[i] = CRGB::Black;
+    for (size_t i = 0; i < mCorkscrewLeds.size(); ++i) {
+        mCorkscrewLeds[i] = CRGB::Black;
     }
 }
 
 void Corkscrew::fillBuffer(const CRGB& color) {
     initializeBuffer();
-    for (size_t i = 0; i < mRectangularBuffer.size(); ++i) {
-        mRectangularBuffer[i] = color;
+    for (size_t i = 0; i < mCorkscrewLeds.size(); ++i) {
+        mCorkscrewLeds[i] = color;
+    }
+}
+
+void Corkscrew::readFromMulti(const fl::Leds& target_leds) const {
+    // Ensure buffer is initialized
+    initializeBuffer();
+    
+    // Get access to the raw LED array from fl::Leds
+    CRGB* leds_array = const_cast<CRGB*>(target_leds.rgb());
+    
+    // Iterate through each LED in the corkscrew
+    for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
+        // Get the wrapped tile for this LED position
+        Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
+        
+        // Accumulate color from the 4 sample points with their weights
+        uint32_t r_accum = 0, g_accum = 0, b_accum = 0;
+        uint32_t total_weight = 0;
+        
+        // Sample from each of the 4 corners of the tile
+        for (uint8_t x = 0; x < 2; x++) {
+            for (uint8_t y = 0; y < 2; y++) {
+                const auto& entry = tile.at(x, y);
+                vec2i16 pos = entry.first;   // position is the first element of the pair
+                uint8_t weight = entry.second; // weight is the second element of the pair
+                
+                // Bounds check for the rectangular buffer
+                if (pos.x >= 0 && pos.x < static_cast<int16_t>(mState.width) && 
+                    pos.y >= 0 && pos.y < static_cast<int16_t>(mState.height)) {
+                    
+                    // Calculate buffer index using row-major ordering
+                    size_t buffer_idx = static_cast<size_t>(pos.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(pos.x);
+                    
+                    if (buffer_idx < mCorkscrewLeds.size()) {
+                        CRGB sample_color = mCorkscrewLeds[buffer_idx];
+                        
+                        // Accumulate weighted color components
+                        r_accum += static_cast<uint32_t>(sample_color.r) * weight;
+                        g_accum += static_cast<uint32_t>(sample_color.g) * weight;
+                        b_accum += static_cast<uint32_t>(sample_color.b) * weight;
+                        total_weight += weight;
+                    }
+                }
+            }
+        }
+        
+        // Calculate final color by dividing by total weight
+        CRGB final_color = CRGB::Black;
+        if (total_weight > 0) {
+            final_color.r = static_cast<uint8_t>(r_accum / total_weight);
+            final_color.g = static_cast<uint8_t>(g_accum / total_weight);
+            final_color.b = static_cast<uint8_t>(b_accum / total_weight);
+        }
+        
+        // Store the result in the target LED strip (direct array access)
+        if (leds_array != nullptr) {
+            leds_array[led_idx] = final_color;
+        }
     }
 }
 

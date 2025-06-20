@@ -197,6 +197,10 @@ class Corkscrew {
     // by sampling from the XY coordinates mapped to each corkscrew LED position
     void readFrom(const fl::Leds& source_leds);
     
+    // Read from rectangular buffer using multi-sampling and store in target LED strip
+    // Uses Tile2x2_u8_wrap for sub-pixel accurate sampling with proper blending
+    void readFromMulti(const fl::Leds& target_leds) const;
+    
     // Clear the rectangular buffer 
     void clearBuffer();
     
@@ -219,7 +223,7 @@ class Corkscrew {
     State mState; // The resulting cylindrical mapping
     
     // Rectangular buffer for drawing (lazily initialized)
-    mutable fl::vector<CRGB> mRectangularBuffer;
+    mutable fl::vector<CRGB> mCorkscrewLeds;
     mutable bool mBufferInitialized = false;
 };
 
