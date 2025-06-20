@@ -462,8 +462,6 @@ uv run mcp_server.py
 # Run specific TEST_CASE with verbose output
 uv run test.py --cpp algorithm --verbose
 
-# Or run individual TEST_CASE
-./tests/.build/bin/test_algorithm --test-case="reverse an int list"
 ```
 
 ### Test Development Workflow
@@ -503,10 +501,8 @@ When running test executables directly, you can use doctest options:
 5. **Check test output carefully** - doctest provides detailed failure information
 
 ## Environment Setup
-- Tests are compiled with Debug flags (`-g3`, `-O0`)
-- GDB integration available for crash analysis
-- Static analysis warnings enabled as errors
-- Cross-platform support (Linux, macOS, Windows)
+- Have UV in your environment.
+- uv run tests.py, don't try and run the test manually, go through this entry point.
 """
     
     return CallToolResult(
