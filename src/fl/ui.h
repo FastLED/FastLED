@@ -19,9 +19,24 @@
 
 namespace fl {
 
+// Base class for UI elements that provides string-based group functionality
+class UIBase {
+  public:
+    UIBase() {}
+    virtual ~UIBase() {}
+    
+    void setGroup(const fl::Str& groupName) { mGroupName = groupName; }
+    void setGroup(const char* groupName) { mGroupName = fl::Str(groupName); }
+    fl::Str getGroup() const { return mGroupName; }
+    bool hasGroup() const { return !mGroupName.empty(); }
+
+  private:
+    fl::Str mGroupName;
+};
+
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : protected UISliderImpl {
+class UISlider : protected UISliderImpl, public UIBase {
   public:
     FL_NO_COPY(UISlider)
     using Super = UISliderImpl;
@@ -58,8 +73,6 @@ class UISlider : protected UISliderImpl {
         Super::setValue(static_cast<float>(value));
         return *this;
     }
-
-
 
     int onChanged(function<void(UISlider &)> callback) {
         int out = mCallbacks.add(callback);
@@ -101,7 +114,7 @@ class UISlider : protected UISliderImpl {
 
 // template operator for >= against a jsSliderImpl
 
-class UIButton : protected UIButtonImpl {
+class UIButton : protected UIButtonImpl, public UIBase {
   public:
     FL_NO_COPY(UIButton)
     using Super = UIButtonImpl;
@@ -136,6 +149,7 @@ class UIButton : protected UIButtonImpl {
     }
 
     void click() { Super::click(); }
+    
     int onChanged(function<void(UIButton &)> callback) {
         int id = mCallbacks.add(callback);
         mListener.addToEngineEventsOnce();
@@ -186,7 +200,7 @@ class UIButton : protected UIButtonImpl {
     fl::scoped_ptr<Button> mRealButton;
 };
 
-class UICheckbox : protected UICheckboxImpl {
+class UICheckbox : protected UICheckboxImpl, public UIBase {
   public:
     FL_NO_COPY(UICheckbox);
     using Super = UICheckboxImpl;
@@ -201,7 +215,6 @@ class UICheckbox : protected UICheckboxImpl {
         return *this;
     }
     bool value() const { return Super::value(); }
-
 
     void onChanged(function<void(UICheckbox &)> callback) {
         mCallbacks.add(callback);
@@ -241,7 +254,7 @@ class UICheckbox : protected UICheckboxImpl {
     Listener mListener;
 };
 
-class UINumberField : protected UINumberFieldImpl {
+class UINumberField : protected UINumberFieldImpl, public UIBase {
   public:
     FL_NO_COPY(UINumberField);
     using Super = UINumberFieldImpl;
@@ -261,8 +274,6 @@ class UINumberField : protected UINumberFieldImpl {
         setValue(static_cast<double>(value));
         return *this;
     }
-
-
 
     void onChanged(function<void(UINumberField &)> callback) {
         mCallbacks.add(callback);
@@ -302,21 +313,21 @@ class UINumberField : protected UINumberFieldImpl {
     Super &impl() { return *this; }
 };
 
-class UITitle : protected UITitleImpl {
+class UITitle : protected UITitleImpl, public UIBase {
   public:
     FL_NO_COPY(UITitle);
     UITitle(const char *name) : UITitleImpl(name) {}
     ~UITitle() {}
 };
 
-class UIDescription : protected UIDescriptionImpl {
+class UIDescription : protected UIDescriptionImpl, public UIBase {
   public:
     FL_NO_COPY(UIDescription);
     UIDescription(const char *name) : UIDescriptionImpl(name) {}
     ~UIDescription() {}
 };
 
-class UIAudio : protected UIAudioImpl {
+class UIAudio : protected UIAudioImpl, public UIBase {
   public:
     FL_NO_COPY(UIAudio)
     using Super = UIAudioImpl;
@@ -326,7 +337,7 @@ class UIAudio : protected UIAudioImpl {
     bool hasNext() { return Super::hasNext(); }
 };
 
-class UIDropdown : protected UIDropdownImpl {
+class UIDropdown : protected UIDropdownImpl, public UIBase {
   public:
     FL_NO_COPY(UIDropdown)
     using Super = UIDropdownImpl;
