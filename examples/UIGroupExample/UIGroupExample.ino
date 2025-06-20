@@ -35,13 +35,13 @@ void setup() {
     
     // Print group names to demonstrate string conversion
     Serial.print("Lighting Group: ");
-    Serial.println(lightingGroup.getGroupName().c_str());
+    Serial.println(lightingGroup.name().c_str());
     
     Serial.print("Effects Group: ");
-    Serial.println(effectsGroup.getGroupName().c_str());
+    Serial.println(effectsGroup.name().c_str());
     
     Serial.print("Color Group: ");
-    Serial.println(colorGroup.getGroupName().c_str());
+    Serial.println(colorGroup.name().c_str());
     
     // Set up button callback
     resetButton.onClicked([]() {

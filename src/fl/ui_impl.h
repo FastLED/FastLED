@@ -296,7 +296,7 @@ class UIGroupImpl {
         FASTLED_UNUSED(name); 
     }
     ~UIGroupImpl() {}
-    fl::Str getGroupName() const { return mGroupName; }
+    fl::Str name() const { return mGroupName; }
 
   private:
     fl::Str mGroupName;

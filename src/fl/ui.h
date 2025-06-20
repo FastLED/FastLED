@@ -413,10 +413,10 @@ class UIGroup : protected UIGroupImpl {
     ~UIGroup() {}
     
     // Get the group name
-    fl::Str getGroupName() const { return Super::getGroupName(); }
+    fl::Str name() const { return Super::name(); }
     
     // Implicit conversion to string for convenience
-    operator fl::Str() const { return getGroupName(); }
+    operator fl::Str() const { return name(); }
 };
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \
