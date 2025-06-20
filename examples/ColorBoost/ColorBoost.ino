@@ -15,11 +15,25 @@
 using namespace fl;
 
 UITitle title("ColorBoost");
-UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine. Use legacy gfx mode (?gfx=0) for best results.");
+UIDescription description("ColorBoost is a function that boosts the saturation of a color without decimating the color from 8 bit -> gamma -> 8 bit (leaving only 8 colors for each component). Use the dropdown menus to select different easing functions for saturation and luminance. Use legacy gfx mode (?gfx=0) for best results.");
 
 UISlider satSlider("Saturation", 60, 0, 255, 1);
-UINumberField saturationFunction("Saturation Function", 1, 0, 9);
-UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
+
+// Create dropdown with descriptive ease function names
+fl::Str easeOptions[] = {
+    "None", 
+    "In Quad", 
+    "Out Quad", 
+    "In-Out Quad", 
+    "In Cubic", 
+    "Out Cubic", 
+    "In-Out Cubic", 
+    "In Sine", 
+    "Out Sine", 
+    "In-Out Sine"
+};
+UIDropdown saturationFunction("Saturation Function", easeOptions, 10);
+UIDropdown luminanceFunction("Luminance Function", easeOptions, 10);
 
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
@@ -54,6 +68,10 @@ void setup() {
         .setScreenMap(xyMap);
     // set master brightness control
     FastLED.setBrightness(BRIGHTNESS);
+
+    // Set default dropdown selections
+    saturationFunction.setSelectedIndex(1); // "In Quad"
+    luminanceFunction.setSelectedIndex(0);  // "None"
 }
 
 EaseType getEaseType(int value) {
@@ -105,8 +123,8 @@ void rainbowWave() {
                 leds[xyMap(x, y)] = original_color;
             } else if (y > NUM_STRIPS / 3) {
                 // Middle half - transformed colors
-                EaseType sat_ease = getEaseType(saturationFunction.value());
-                EaseType lum_ease = getEaseType(luminanceFunction.value());
+                EaseType sat_ease = getEaseType(saturationFunction.value_int());
+                EaseType lum_ease = getEaseType(luminanceFunction.value_int());
                 leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
             } else {
                 // Lower half - transformed colors
