@@ -136,6 +136,37 @@ function createButton(element) {
   return controlDiv;
 }
 
+function createDropdown(element) {
+  const controlDiv = document.createElement('div');
+  controlDiv.className = 'ui-control';
+
+  const label = document.createElement('label');
+  label.textContent = element.name;
+  label.htmlFor = `dropdown-${element.id}`;
+
+  const dropdown = document.createElement('select');
+  dropdown.id = `dropdown-${element.id}`;
+  dropdown.value = element.value;
+
+  // Add options to the dropdown
+  if (element.options && Array.isArray(element.options)) {
+    element.options.forEach((option, index) => {
+      const optionElement = document.createElement('option');
+      optionElement.value = index;
+      optionElement.textContent = option;
+      dropdown.appendChild(optionElement);
+    });
+  }
+
+  // Set the selected option
+  dropdown.selectedIndex = element.value;
+
+  controlDiv.appendChild(label);
+  controlDiv.appendChild(dropdown);
+
+  return controlDiv;
+}
+
 function createUiControlsContainer() {
   const container = document.getElementById(this.uiControlsId);
   if (!container) {
@@ -202,6 +233,8 @@ export class UiManager {
         currentValue = attr === 'true';
       } else if (element.type === 'number') {
         currentValue = parseFloat(element.value);
+      } else if (element.tagName === 'SELECT') {
+        currentValue = parseInt(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
         // Handle audio input - get all accumulated sample blocks
         if (window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples) {
@@ -310,6 +343,8 @@ export class UiManager {
         control = createNumberField(data);
       } else if (data.type === 'audio') {
         control = createAudioField(data);
+      } else if (data.type === 'dropdown') {
+        control = createDropdown(data);
       }
 
       // AI hallucinated this:
@@ -329,6 +364,8 @@ export class UiManager {
         uiControlsContainer.appendChild(control);
         if (data.type === 'button') {
           this.uiElements[data.id] = control.querySelector('button');
+        } else if (data.type === 'dropdown') {
+          this.uiElements[data.id] = control.querySelector('select');
         } else {
           this.uiElements[data.id] = control.querySelector('input');
         }
