@@ -8,8 +8,7 @@ namespace fl {
 
 class jsNumberFieldImpl {
   public:
-    jsNumberFieldImpl(const fl::Str &, double value, double min = 0,
-                      double max = 100);
+    jsNumberFieldImpl(const fl::Str &name, double value, double min, double max);
     ~jsNumberFieldImpl();
     jsNumberFieldImpl &Group(const fl::Str &name) {
         mGroup = name;
@@ -21,6 +20,9 @@ class jsNumberFieldImpl {
     double value() const;
     void setValue(double value);
     const fl::Str &groupName() const { return mGroup; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
 
     jsNumberFieldImpl &operator=(double value) {
         setValue(value);

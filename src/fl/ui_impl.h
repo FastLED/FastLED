@@ -77,6 +77,9 @@ class UISliderImpl {
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
     int as_int() const { return static_cast<int>(mValue); }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 
     UISliderImpl &operator=(float value) {
         setValue(value);
@@ -109,6 +112,9 @@ class UIButtonImpl {
     operator bool() const { return false; }
     void click() {}
     fl::Str name() const { return mName; }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     fl::Str mName;
@@ -135,6 +141,9 @@ class UICheckboxImpl {
         return *this;
     }
     bool value() const { return mValue; }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     void setValue(bool value) { mValue = value; }
@@ -165,6 +174,9 @@ class UINumberFieldImpl {
         setValue(static_cast<double>(value));
         return *this;
     }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     double mValue;
@@ -180,6 +192,9 @@ class UITitleImpl {
   public:
     UITitleImpl(const char *name) { FASTLED_UNUSED(name); }
     ~UITitleImpl() {}
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -190,6 +205,9 @@ class UIDescriptionImpl {
   public:
     UIDescriptionImpl(const char *name) { FASTLED_UNUSED(name); }
     ~UIDescriptionImpl() {}
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -209,6 +227,9 @@ class UIAudioImpl {
         FASTLED_WARN("Audio sample not implemented");
         return false;
     }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 };
 #endif
 
@@ -277,6 +298,9 @@ class UIDropdownImpl {
         }
         return fl::Str("Invalid");
     }
+    
+    // Stub method for group setting (does nothing on non-WASM platforms)
+    void setGroupInternal(const fl::Str& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     fl::vector<fl::Str> mOptions;

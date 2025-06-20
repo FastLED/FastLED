@@ -23,6 +23,9 @@ class jsButtonImpl {
     bool clicked() const;
     int clickedCount() const { return mClickedCount; }
     const fl::Str &groupName() const { return mGroup; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
 
     void click() { mPressed = true; }
 

@@ -24,6 +24,9 @@ class jsSliderImpl {
     float getMin() const { return mMin; }
     void setValue(float value);
     const fl::Str &groupName() const { return mGroup; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::Str &groupName) { mGroup = groupName; }
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
