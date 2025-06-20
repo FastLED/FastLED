@@ -79,7 +79,7 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
 fl::string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
+fl::UIDropdown paletteDropdown("Color Palette", paletteOptions);
 
 // Create UIGroup for noise controls using variadic constructor
 // This automatically assigns all specified controls to the "Noise Controls" group
@@ -94,7 +94,7 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 
 fl::string renderModeOptions[] = {"Noise", "Position", "Mixed"};
-fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
+fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
