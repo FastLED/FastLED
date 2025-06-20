@@ -10,8 +10,8 @@ from datetime import datetime
 from playwright.async_api import async_playwright  # type: ignore
 
 HERE = Path(__file__).parent
-PROJECT_ROOT = HERE
-SCREENSHOTS_DIR = PROJECT_ROOT / "screenshots"
+PROJECT_ROOT = HERE.parent  # ci folder is one level down from project root
+SCREENSHOTS_DIR = HERE / "screenshots"
 
 # Ensure screenshots directory exists
 SCREENSHOTS_DIR.mkdir(exist_ok=True)
