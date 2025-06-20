@@ -152,6 +152,16 @@ const fl::vector<CRGB>& Corkscrew::getBuffer() const {
     return mRectangularBuffer;
 }
 
+CRGB* Corkscrew::data() {
+    initializeBuffer();
+    return mRectangularBuffer.data();
+}
+
+const CRGB* Corkscrew::data() const {
+    initializeBuffer();
+    return mRectangularBuffer.data();
+}
+
 void Corkscrew::readFrom(const fl::Leds& source_leds) {
     // Initialize the buffer if not already done
     initializeBuffer();

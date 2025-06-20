@@ -313,3 +313,49 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     REQUIRE(pos5.x >= 0.0f);
     REQUIRE(pos5.y >= 0.0f);
 }
+
+TEST_CASE("Corkscrew CRGB* data access") {
+    // Create a corkscrew
+    Corkscrew::Input input;
+    input.numLeds = 6;
+    input.totalTurns = 1.0f;
+    input.offsetCircumference = 0.0f;
+    
+    Corkscrew corkscrew(input);
+    
+    // Get raw CRGB* access - this should trigger lazy allocation
+    CRGB* data_ptr = corkscrew.data();
+    REQUIRE(data_ptr != nullptr);
+    
+    // Verify buffer was allocated with correct size
+    size_t expected_size = static_cast<size_t>(corkscrew.cylinder_width()) * static_cast<size_t>(corkscrew.cylinder_height());
+    
+    // All pixels should be initialized to black
+    for (size_t i = 0; i < expected_size; ++i) {
+        REQUIRE_EQ(data_ptr[i].r, 0);
+        REQUIRE_EQ(data_ptr[i].g, 0);
+        REQUIRE_EQ(data_ptr[i].b, 0);
+    }
+    
+    // Const access should also work
+    const Corkscrew& const_corkscrew = corkscrew;
+    const CRGB* const_data_ptr = const_corkscrew.data();
+    REQUIRE(const_data_ptr != nullptr);
+    REQUIRE(const_data_ptr == data_ptr); // Should be the same buffer
+    
+    // Modify a pixel via the raw pointer
+    if (expected_size > 0) {
+        data_ptr[0] = CRGB::Red;
+        
+        // Verify the change is reflected
+        REQUIRE_EQ(data_ptr[0].r, 255);
+        REQUIRE_EQ(data_ptr[0].g, 0);
+        REQUIRE_EQ(data_ptr[0].b, 0);
+        
+        // And verify it's also reflected in the buffer access
+        const auto& buffer = corkscrew.getBuffer();
+        REQUIRE_EQ(buffer[0].r, 255);
+        REQUIRE_EQ(buffer[0].g, 0);
+        REQUIRE_EQ(buffer[0].b, 0);
+    }
+}
