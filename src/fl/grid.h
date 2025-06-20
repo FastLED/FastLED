@@ -3,7 +3,6 @@
 
 #include "fl/slice.h"
 #include "fl/vector.h"
-#include "fl/corkscrew.h"
 
 namespace fl {
 
@@ -26,9 +25,6 @@ template <typename T> class Grid {
                                     width, height);
     }
 
-    void draw(Corkscrew &corkscrew, bool use_multi_sampling = true) {
-        corkscrew.readFrom(*this, use_multi_sampling);
-    }
 
     void clear() {
         for (uint32_t i = 0; i < mWidth * mHeight; ++i) {
