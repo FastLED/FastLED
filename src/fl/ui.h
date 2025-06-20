@@ -416,7 +416,7 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
 
 #if FASTLED_HAS_INITIALIZER_LIST
     // Constructor with initializer_list (only available if C++11 support exists)
-    UIDropdown(const char *name, std::initializer_list<fl::Str> options)
+    UIDropdown(const char *name, fl::initializer_list<fl::Str> options)
         : UIDropdownImpl(name, options), mListener(this) {}
 #endif
     

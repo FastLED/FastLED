@@ -17,7 +17,7 @@ class jsDropdownImpl {
 
 #if FASTLED_HAS_INITIALIZER_LIST
     // Constructor with initializer_list (only available if C++11 support exists)
-    jsDropdownImpl(const fl::Str &name, std::initializer_list<fl::Str> options);
+    jsDropdownImpl(const fl::Str &name, fl::initializer_list<fl::Str> options);
 #endif
     
     ~jsDropdownImpl();

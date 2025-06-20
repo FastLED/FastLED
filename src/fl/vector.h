@@ -101,7 +101,7 @@ template <typename T, size_t N> class FixedVector {
     }
 
 #if FASTLED_HAS_INITIALIZER_LIST
-    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    // Initializer list constructor (C++11 and later) - uses fl::initializer_list
     FixedVector(fl::initializer_list<T> init) : current_size(0) {
         if (init.size() > N) {
             // Only assign the first N elements if the list is too long
@@ -377,7 +377,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 
 #if FASTLED_HAS_INITIALIZER_LIST
-    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    // Initializer list constructor (C++11 and later) - uses fl::initializer_list
     HeapVector(fl::initializer_list<T> init) {
         reserve(init.size());
         for (const auto& value : init) {
@@ -863,7 +863,7 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
     }
 
 #if FASTLED_HAS_INITIALIZER_LIST
-    // Initializer list constructor (C++11 and later) - uses std::initializer_list
+    // Initializer list constructor (C++11 and later) - uses fl::initializer_list
     InlinedVector(fl::initializer_list<T> init) : mUsingHeap(false) {
         if (init.size() > INLINED_SIZE) {
             mHeap.reserve(init.size());
