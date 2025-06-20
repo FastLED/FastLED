@@ -10,7 +10,7 @@ from datetime import datetime
 from playwright.async_api import async_playwright  # type: ignore
 
 HERE = Path(__file__).parent
-PROJECT_ROOT = HERE.parent  # ci folder is one level down from project root
+PROJECT_ROOT = HERE.parent.parent.parent  # scrapers is 3 levels down from project root
 SCREENSHOTS_DIR = HERE / "screenshots"
 
 # Ensure screenshots directory exists

@@ -3,7 +3,7 @@
 ## Overview
 This document summarizes the investigation of existing Python code in the FastLED project, particularly focusing on Playwright integration and web scraping capabilities for the FastLED online tool.
 
-**Location**: All scripts are located in the `ci/` directory alongside the existing testing infrastructure, including the original Playwright implementation in `ci/wasm_test.py`.
+**Location**: All scripts are located in the `ci/ci/scrapers/` directory, organized within the CI infrastructure alongside the existing testing infrastructure, including the original Playwright implementation in `ci/wasm_test.py`.
 
 ## Existing Python Infrastructure
 
@@ -160,7 +160,7 @@ fl::ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
 
 ## Results
 
-✅ **Successfully captured screenshot**: `ci/screenshots/festival_stick_20250620_224055.png` (82KB)
+✅ **Successfully captured screenshot**: `ci/ci/scrapers/screenshots/festival_stick_20250620_224055.png` (82KB)
 
 The script successfully:
 1. Navigated to https://fastled.onrender.com/docs
@@ -170,28 +170,28 @@ The script successfully:
 
 ## Files Created/Modified
 
-- `ci/scrape_festival_stick.py` - Main web scraping script with Playwright automation
-- `ci/run_fastled_scraper.py` - Utility script for easy execution with different configurations
-- `ci/screenshots/` - Directory containing captured images
-- `ci/screenshots/festival_stick_20250620_224055.png` - Successfully captured screenshot (82KB)
-- `ci/fastled_python_investigation.md` - This documentation file
+- `ci/ci/scrapers/scrape_festival_stick.py` - Main web scraping script with Playwright automation
+- `ci/ci/scrapers/run_fastled_scraper.py` - Utility script for easy execution with different configurations
+- `ci/ci/scrapers/screenshots/` - Directory containing captured images
+- `ci/ci/scrapers/screenshots/festival_stick_20250620_224055.png` - Successfully captured screenshot (82KB)
+- `ci/ci/scrapers/fastled_python_investigation.md` - This documentation file
 
 ## Usage Examples
 
 ```bash
 # Run the scraper directly from project root
-python3 ci/scrape_festival_stick.py
+python3 ci/ci/scrapers/scrape_festival_stick.py
 
 # Use the utility script with options
-python3 ci/run_fastled_scraper.py --example FestivalStick --headless --timeout 60
+python3 ci/ci/scrapers/run_fastled_scraper.py --example FestivalStick --headless --timeout 60
 
 # Make scripts executable and run from project root
-chmod +x ci/scrape_festival_stick.py ci/run_fastled_scraper.py
-./ci/scrape_festival_stick.py
-./ci/run_fastled_scraper.py --help
+chmod +x ci/ci/scrapers/scrape_festival_stick.py ci/ci/scrapers/run_fastled_scraper.py
+./ci/ci/scrapers/scrape_festival_stick.py
+./ci/ci/scrapers/run_fastled_scraper.py --help
 
-# Or run from within the ci directory
-cd ci
+# Or run from within the scrapers directory
+cd ci/ci/scrapers
 python3 scrape_festival_stick.py
 python3 run_fastled_scraper.py --help
 ```
