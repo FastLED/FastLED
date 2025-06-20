@@ -21,14 +21,129 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
-
 #include <Arduino.h>
 #include <FastLED.h>
+
+#include "fl/sketch_macros.h"
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+
+// Memory-constrained version for Arduino Uno, TeensyLC, etc.
+// Simplified audio visualization with smaller matrix and basic FFT
+
+#include "fl/audio.h"
+#include "fl/fft.h"
+#include "fl/math.h"
+#include "fl/ui.h"
+#include "fl/xypath.h"
+#include "fx.h"
+
+using namespace fl;
+
+#define CONSTRAINED_HEIGHT 8
+#define CONSTRAINED_WIDTH 16
+#define CONSTRAINED_NUM_LEDS ((CONSTRAINED_WIDTH) * (CONSTRAINED_HEIGHT))
+#define IS_SERPINTINE false
+
+UITitle title("Audio Visualization (Memory Efficient)");
+UIDescription description("Simplified audio visualization for memory-constrained platforms.");
+UICheckbox enableFFT("Enable FFT visualization", true);
+UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
+
+UIAudio audio("Audio");
+
+CRGB leds[CONSTRAINED_NUM_LEDS];
+XYMap ledsXY(CONSTRAINED_WIDTH, CONSTRAINED_HEIGHT, IS_SERPINTINE);
+
+FFTBins fftOut(CONSTRAINED_WIDTH); // Match width for FFT bins
+
+MaxFadeTracker audioFadeTracker(0.1, 0.1, 0.17, 44100);
+
+void setup() {
+    Serial.begin(115200);
+    
+    auto screenmap = ledsXY.toScreenMap();
+    screenmap.setDiameter(.2);
+    
+    FastLED.addLeds<NEOPIXEL, 2>(leds, CONSTRAINED_NUM_LEDS).setScreenMap(screenmap);
+    
+    FL_WARN("Audio visualization setup complete (memory efficient version)");
+}
+
+void shiftUp() {
+    // Fade each LED
+    if (fadeToBlack.as_int()) {
+        for (int i = 0; i < CONSTRAINED_NUM_LEDS; ++i) {
+            leds[i].fadeToBlackBy(fadeToBlack.as_int());
+        }
+    }
+
+    // Shift rows up
+    for (int y = CONSTRAINED_HEIGHT - 1; y > 0; --y) {
+        for (int x = 0; x < CONSTRAINED_WIDTH; ++x) {
+            leds[ledsXY(x, y)] = leds[ledsXY(x, y - 1)];
+        }
+    }
+    
+    // Clear bottom row
+    for (int x = 0; x < CONSTRAINED_WIDTH; ++x) {
+        leds[ledsXY(x, 0)] = CRGB::Black;
+    }
+}
+
+void loop() {
+    while (AudioSample sample = audio.next()) {
+        shiftUp();
+        
+        // Process audio with fade tracker
+        float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
+        
+        if (enableFFT) {
+            // Run FFT
+            sample.fft(&fftOut);
+            
+            // Display FFT results on bottom row
+            for (int i = 0; i < CONSTRAINED_WIDTH && i < static_cast<int>(fftOut.bins_raw.size()); ++i) {
+                float v = fftOut.bins_db[i];
+                v = fl::map_range<float, float>(v, 45, 70, 0, 1.0f);
+                v = fl::clamp(v, 0.0f, 1.0f);
+                
+                uint8_t heatIndex = fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
+                CRGB color = ColorFromPalette(HeatColors_p, heatIndex);
+                color.fadeToBlackBy(255 - heatIndex);
+                
+                leds[ledsXY(i, 0)] = color;
+            }
+        } else {
+            // Simple volume visualization
+            int16_t maxSample = 0;
+            for (size_t i = 0; i < sample.pcm().size(); ++i) {
+                int16_t s = abs(sample.pcm()[i]);
+                if (s > maxSample) maxSample = s;
+            }
+            
+            float volume = fl::map_range<float, float>(maxSample, 0.0f, 32768.0f, 0.0f, 1.0f);
+            volume = fl::clamp(volume, 0.0f, 1.0f);
+            int volumeWidth = volume * CONSTRAINED_WIDTH;
+            
+            for (int x = 0; x < volumeWidth && x < CONSTRAINED_WIDTH; ++x) {
+                leds[ledsXY(x, 0)] = CRGB(0, 255, 0);
+            }
+        }
+        
+        // Show fade tracker result
+        if (fade > 0.0f) {
+            int fadeX = fl::clamp(int(fade * CONSTRAINED_WIDTH), 0, CONSTRAINED_WIDTH - 1);
+            leds[ledsXY(fadeX, CONSTRAINED_HEIGHT / 2)] = CRGB(255, 255, 0);
+        }
+    }
+
+    FastLED.show();
+}
+
+#else
+
+// Full-featured version for platforms with more memory
 
 #include "fl/audio.h"
 #include "fl/downscale.h"
@@ -115,15 +230,15 @@ void setup() {
 
     decayTimeSeconds.onChanged([](float value) {
         audioFadeTracker.setDecayTime(value);
-        FASTLED_WARN("Fade time seconds: " << value);
+        FL_WARN("Fade time seconds: " << value);
     });
     attackTimeSeconds.onChanged([](float value) {
         audioFadeTracker.setAttackTime(value);
-        FASTLED_WARN("Attack time seconds: " << value);
+        FL_WARN("Attack time seconds: " << value);
     });
     outputTimeSec.onChanged([](float value) {
         audioFadeTracker.setOutputTime(value);
-        FASTLED_WARN("Output time seconds: " << value);
+        FL_WARN("Output time seconds: " << value);
     });
     FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal())
         .setScreenMap(screenmap);
@@ -161,7 +276,7 @@ bool doFrame() {
 
 void loop() {
     if (triggered) {
-        FASTLED_WARN("Triggered");
+        FL_WARN("Triggered");
     }
     // fl::clear(framebuffer);
     // fl::clear(framebuffer);
@@ -179,11 +294,11 @@ void loop() {
         }
         float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
         shiftUp();
-        // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
+        // FL_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
-        // FASTLED_WARN("")
+        // FL_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
-        // FASTLED_WARN("getDBFS: " << dbfs);
+        // FL_WARN("getDBFS: " << dbfs);
         int32_t max = 0;
         for (int i = 0; i < sample.pcm().size(); ++i) {
             int32_t x = ABS(sample.pcm()[i]);
@@ -196,7 +311,7 @@ void loop() {
         anim = fl::clamp(anim, 0.0f, 1.0f);
 
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
-        // FASTLED_WARN("x: " << x);
+        // FL_WARN("x: " << x);
 
         // fft.run(sample.pcm(), &fftOut);
         sample.fft(&fftOut);
@@ -215,13 +330,13 @@ void loop() {
                 uint8_t heatIndex =
                     fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
 
-                // FASTLED_WARN(v);
+                // FL_WARN(v);
 
                 // Use FastLED's built-in HeatColors palette
                 auto c = ColorFromPalette(HeatColors_p, heatIndex);
                 c.fadeToBlackBy(255 - heatIndex);
                 framebuffer[frameBufferXY(x, 0)] = c;
-                // FASTLED_WARN("y: " << i << " b: " << b);
+                // FL_WARN("y: " << i << " b: " << b);
             }
         }
 
@@ -231,7 +346,7 @@ void loop() {
 
         if (enableRMS) {
             float rms = sample.rms();
-            FASTLED_WARN("RMS: " << rms);
+            FL_WARN("RMS: " << rms);
             rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
             framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
@@ -252,4 +367,4 @@ void loop() {
     FastLED.show();
 }
 
-#endif  // __AVR__
+#endif  // SKETCH_HAS_LOTS_OF_MEMORY
