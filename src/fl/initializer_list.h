@@ -3,11 +3,11 @@
 #include <stddef.h>
 #include "fl/namespace.h"
 
-// Define if initializer_list is available
-// Check for C++11 and if std::initializer_list exists
-#if defined(__AVR__)
-// Emulated initializer_list for AVR platforms
+// FastLED always provides initializer_list functionality
 #define FASTLED_HAS_INITIALIZER_LIST 1
+
+#if defined(__AVR__)
+// Custom initializer_list implementation for AVR platforms
 namespace fl {
     template<typename T>
     class initializer_list {
@@ -41,7 +41,16 @@ namespace fl {
         // Allow compiler access to private constructor
         template<typename U> friend class initializer_list;
     };
-    
+}
+#else
+// Use std::initializer_list for other platforms
+#include <initializer_list>
+namespace fl {
+    using std::initializer_list;
+}
+#endif
+
+namespace fl {
     // Helper functions to match std::initializer_list interface
     template<typename T>
     constexpr const T* begin(initializer_list<T> il) {
@@ -52,11 +61,4 @@ namespace fl {
     constexpr const T* end(initializer_list<T> il) {
         return il.end();
     }
-}
-#else
-#include <initializer_list>
-#define FASTLED_HAS_INITIALIZER_LIST 1
-namespace fl {
-    using std::initializer_list;
-}
-#endif 
+} 
