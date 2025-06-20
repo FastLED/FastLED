@@ -141,38 +141,6 @@ function multiSample(sourceGrid, targetPosition, sampleRadius):
 
 ## 5.1 Memory safety
 
-# ZACHS NOTE: FILL THIS IN
-
-The FastLED implementation employs several memory safety mechanisms to ensure robust operation in embedded environments:
-
-**Bounds Checking**: All array accesses are validated against LED count and grid dimensions before indexing. Invalid coordinates are clamped to valid ranges rather than causing buffer overflows.
-
-**Stack Allocation**: The corkscrew mapping uses stack-allocated data structures where possible to avoid heap fragmentation common in long-running embedded applications.
-
-**Compile-time Validation**: Template parameters are validated at compile time to catch configuration errors early in the development cycle.
-
-**Safe Defaults**: The system provides safe fallback behavior when invalid parameters are detected, defaulting to linear mapping rather than failing catastrophically.
-
-### 5.2 Performance Optimization
-
-The implementation leverages several optimization strategies for real-time performance:
-
-**Lookup Table Generation**: Pre-computed mapping tables are generated at initialization to avoid repeated trigonometric calculations during rendering.
-
-**SIMD Utilization**: Where available, SIMD instructions accelerate the multi-sampling operations for improved throughput.
-
-**Memory Layout**: Data structures are organized to maximize cache efficiency during sequential LED updates.
-
-### 5.3 Platform Compatibility
-
-The corkscrew mapping system supports multiple hardware platforms:
-
-**Teensy**: Optimized for Teensy 3.x and 4.x platforms with ARM Cortex-M processors, taking advantage of hardware floating-point units and increased memory capacity.
-
-**ESP32**: Takes advantage of dual-core processing for parallel rendering operations and hardware floating-point acceleration.
-
-**Chrome Browser**: Full-featured implementation for web-based development, testing, and real-time visualization through WebAssembly compilation.
-
 ### 5.4 Cartesian Coordinate Projection Algorithm
 
 The `Corkscrew.readFrom()` method implements a remarkably efficient projection technique that operates entirely in cartesian/rectangular coordinate space without requiring trigonometric functions. This approach challenges conventional expectations about cylindrical mapping implementations.
