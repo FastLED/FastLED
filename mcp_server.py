@@ -2,30 +2,43 @@
 
 # /// script
 # dependencies = [
-#   "mcp",
+#   "mcp>=1.0.0",
 # ]
 # ///
 
 """
 FastLED MCP Server - Provides tools for working with the FastLED project
+
+To use this server, make sure you have the MCP library installed:
+pip install mcp
+
+Or use with uv:
+uv add mcp
+uv run mcp_server.py
 """
 
 import asyncio
 import json
 import subprocess
 import sys
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional
 
-from mcp import ClientSession, StdioServerTransport
-from mcp.server import Server
-from mcp.types import (
-    CallToolRequest,
-    CallToolResult,
-    ListToolsRequest,
-    TextContent,
-    Tool,
-)
+try:
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server 
+    from mcp.types import (
+        CallToolResult,
+        TextContent,
+        Tool,
+    )
+    MCP_AVAILABLE = True
+except ImportError:
+    print("Error: MCP library not found.")
+    print("Please install it with: pip install mcp")
+    print("Or with uv: uv add mcp")
+    sys.exit(1)
 
 # Initialize the MCP server
 server = Server("fastled-mcp-server")
@@ -48,7 +61,11 @@ async def list_tools() -> List[Tool]:
                     },
                     "specific_test": {
                         "type": "string",
-                        "description": "Name of specific C++ test to run (when test_type is 'specific')"
+                        "description": "Name of specific C++ test to run (without 'test_' prefix, e.g. 'algorithm' for test_algorithm.cpp)"
+                    },
+                    "test_case": {
+                        "type": "string", 
+                        "description": "Specific TEST_CASE name to run within a test file (requires doctest filtering)"
                     },
                     "use_clang": {
                         "type": "boolean",
@@ -59,9 +76,31 @@ async def list_tools() -> List[Tool]:
                         "type": "boolean",
                         "description": "Clean build before compiling",
                         "default": False
+                    },
+                    "verbose": {
+                        "type": "boolean",
+                        "description": "Enable verbose output showing all test details",
+                        "default": False
                     }
                 },
                 "required": ["test_type"]
+            }
+        ),
+        Tool(
+            name="list_test_cases",
+            description="List TEST_CASEs available in FastLED test files",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "test_file": {
+                        "type": "string",
+                        "description": "Specific test file to analyze (without 'test_' prefix and '.cpp' extension, e.g. 'algorithm')"
+                    },
+                    "search_pattern": {
+                        "type": "string",
+                        "description": "Search pattern to filter TEST_CASE names"
+                    }
+                }
             }
         ),
         Tool(
@@ -173,6 +212,14 @@ async def list_tools() -> List[Tool]:
                 },
                 "required": ["command"]
             }
+        ),
+        Tool(
+            name="test_instructions",
+            description="Get detailed instructions on how to run TEST_CASEs in FastLED",
+            inputSchema={
+                "type": "object",
+                "properties": {}
+            }
         )
     ]
 
@@ -185,6 +232,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
     try:
         if name == "run_tests":
             return await run_tests(arguments, project_root)
+        elif name == "list_test_cases":
+            return await list_test_cases(arguments, project_root)
         elif name == "compile_examples":
             return await compile_examples(arguments, project_root)
         elif name == "code_fingerprint":
@@ -197,6 +246,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await project_info(arguments, project_root)
         elif name == "run_specific_command":
             return await run_specific_command(arguments, project_root)
+        elif name == "test_instructions":
+            return await test_instructions(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -212,8 +263,10 @@ async def run_tests(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
     """Run FastLED tests."""
     test_type = arguments.get("test_type", "all")
     specific_test = arguments.get("specific_test")
+    test_case = arguments.get("test_case")
     use_clang = arguments.get("use_clang", False)
     clean = arguments.get("clean", False)
+    verbose = arguments.get("verbose", False)
     
     cmd = ["uv", "run", "test.py"]
     
@@ -228,10 +281,236 @@ async def run_tests(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
     
     if clean:
         cmd.append("--clean")
+        
+    if verbose:
+        cmd.append("--verbose")
+    
+    # For individual TEST_CASE execution, we need to use a different approach
+    if test_case and specific_test:
+        # Run the specific test executable with doctest filtering
+        test_executable = f"tests/.build/bin/test_{specific_test}"
+        cmd = [test_executable, f"--test-case={test_case}"]
+        if verbose:
+            cmd.append("--verbose")
     
     result = await run_command(cmd, project_root)
+    
+    # Add helpful context about what was run
+    context = f"Command executed: {' '.join(cmd)}\n"
+    if test_case:
+        context += f"Running specific TEST_CASE: {test_case} from test_{specific_test}\n"
+    context += "\n"
+    
     return CallToolResult(
-        content=[TextContent(type="text", text=result)]
+        content=[TextContent(type="text", text=context + result)]
+    )
+
+async def list_test_cases(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """List TEST_CASEs in FastLED test files."""
+    test_file = arguments.get("test_file")
+    search_pattern = arguments.get("search_pattern", "")
+    
+    tests_dir = project_root / "tests"
+    
+    if not tests_dir.exists():
+        return CallToolResult(
+            content=[TextContent(type="text", text="Tests directory not found")],
+            isError=True
+        )
+    
+    test_cases = {}
+    
+    if test_file:
+        # Analyze specific test file
+        test_path = tests_dir / f"test_{test_file}.cpp"
+        if not test_path.exists():
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Test file not found: test_{test_file}.cpp")],
+                isError=True
+            )
+        test_cases[test_file] = extract_test_cases(test_path, search_pattern)
+    else:
+        # Analyze all test files
+        for test_path in tests_dir.glob("test_*.cpp"):
+            test_name = test_path.stem[5:]  # Remove "test_" prefix
+            cases = extract_test_cases(test_path, search_pattern)
+            if cases:  # Only include files with test cases
+                test_cases[test_name] = cases
+    
+    # Format output
+    if not test_cases:
+        return CallToolResult(
+            content=[TextContent(type="text", text="No TEST_CASEs found matching criteria")]
+        )
+    
+    result_text = "FastLED TEST_CASEs:\n"
+    result_text += "=" * 50 + "\n\n"
+    
+    total_cases = 0
+    for test_name, cases in sorted(test_cases.items()):
+        result_text += f"📁 {test_name} ({len(cases)} TEST_CASEs):\n"
+        for i, case in enumerate(cases, 1):
+            result_text += f"   {i:2d}. {case}\n"
+        result_text += "\n"
+        total_cases += len(cases)
+    
+    result_text += f"Total: {total_cases} TEST_CASEs across {len(test_cases)} files\n\n"
+    
+    # Add usage instructions
+    result_text += "Usage Examples:\n"
+    result_text += "• Run specific test file: uv run test.py --cpp algorithm\n"
+    result_text += "• Run with verbose output: uv run test.py --cpp algorithm --verbose\n"
+    if test_cases:
+        first_test = list(test_cases.keys())[0]
+        if test_cases[first_test]:
+            first_case = test_cases[first_test][0]
+            result_text += f"• Run specific TEST_CASE: ./tests/.build/bin/test_{first_test} --test-case='{first_case}'\n"
+    
+    return CallToolResult(
+        content=[TextContent(type="text", text=result_text)]
+    )
+
+def extract_test_cases(file_path: Path, search_pattern: str = "") -> List[str]:
+    """Extract TEST_CASE names from a test file."""
+    test_cases = []
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Find TEST_CASE macros using regex
+        pattern = r'TEST_CASE\s*\(\s*"([^"]+)"'
+        matches = re.findall(pattern, content)
+        
+        for match in matches:
+            if not search_pattern or search_pattern.lower() in match.lower():
+                test_cases.append(match)
+    
+    except Exception as e:
+        # Silently skip files that can't be read
+        pass
+    
+    return test_cases
+
+async def test_instructions(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Provide detailed instructions on running TEST_CASEs."""
+    
+    instructions = """
+# FastLED TEST_CASE Execution Guide
+
+## Overview
+FastLED uses the **doctest** framework for C++ unit testing. Tests are organized in files named `test_*.cpp` in the `tests/` directory. Each file can contain multiple `TEST_CASE` macros.
+
+## Test Structure
+- **Test Files**: Located in `tests/test_*.cpp` (e.g., `test_algorithm.cpp`, `test_easing.cpp`)
+- **TEST_CASEs**: Individual test functions defined with `TEST_CASE("name")` macro
+- **SUBCASEs**: Nested test sections within TEST_CASEs using `SUBCASE("name")`
+
+## Running Tests
+
+### 1. Run All Tests
+```bash
+uv run test.py
+# or using the user rule:
+bash test
+```
+
+### 2. Run Only C++ Tests
+```bash
+uv run test.py --cpp
+```
+
+### 3. Run Specific Test File
+```bash
+uv run test.py --cpp <test_name>
+```
+Example: `uv run test.py --cpp algorithm` (runs `test_algorithm.cpp`)
+
+### 4. Run with Verbose Output
+```bash
+uv run test.py --cpp <test_name> --verbose
+```
+
+### 5. Run Specific TEST_CASE
+First compile the tests, then run the executable with doctest filters:
+```bash
+# Compile tests first
+uv run test.py --cpp <test_name>
+
+# Run specific TEST_CASE
+./tests/.build/bin/test_<test_name> --test-case="TEST_CASE_NAME"
+```
+
+### 6. Using MCP Server Tools
+```bash
+# Start MCP server
+uv run mcp_server.py
+
+# Available MCP tools:
+# - run_tests: Run tests with various options
+# - list_test_cases: List available TEST_CASEs
+# - test_instructions: Show this guide
+```
+
+## Example Workflows
+
+### Debug a Specific Algorithm Test
+```bash
+# List available TEST_CASEs in algorithm tests
+# (use MCP list_test_cases tool with test_file: "algorithm")
+
+# Run specific TEST_CASE with verbose output
+uv run test.py --cpp algorithm --verbose
+
+# Or run individual TEST_CASE
+./tests/.build/bin/test_algorithm --test-case="reverse an int list"
+```
+
+### Test Development Workflow
+```bash
+# Clean build and run specific test
+uv run test.py --cpp easing --clean --verbose
+
+# Check for specific TEST_CASE patterns
+# (use MCP list_test_cases tool with search_pattern)
+
+# Run failed tests only
+cd tests/.build && ctest --rerun-failed
+```
+
+## Doctest Command Line Options
+When running test executables directly, you can use doctest options:
+- `--test-case=<name>`: Run specific TEST_CASE
+- `--test-case-exclude=<name>`: Exclude specific TEST_CASE
+- `--subcase=<name>`: Run specific SUBCASE
+- `--list-test-cases`: List all TEST_CASEs in the executable
+- `--verbose`: Show detailed output
+- `--success`: Show successful assertions too
+
+## Common Test File Names
+- `test_algorithm.cpp`: Algorithm utilities
+- `test_easing.cpp`: Easing functions
+- `test_hsv16.cpp`: HSV color space tests
+- `test_math.cpp`: Mathematical functions
+- `test_vector.cpp`: Vector container tests
+- `test_fx.cpp`: Effects framework tests
+
+## Tips
+1. **Use `--verbose`** to see detailed test output and assertions
+2. **Use `--clean`** when testing after code changes
+3. **List TEST_CASEs first** to see what's available before running
+4. **Individual TEST_CASE execution** is useful for debugging specific functionality
+5. **Check test output carefully** - doctest provides detailed failure information
+
+## Environment Setup
+- Tests are compiled with Debug flags (`-g3`, `-O0`)
+- GDB integration available for crash analysis
+- Static analysis warnings enabled as errors
+- Cross-platform support (Linux, macOS, Windows)
+"""
+    
+    return CallToolResult(
+        content=[TextContent(type="text", text=instructions.strip())]
     )
 
 async def compile_examples(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
@@ -399,10 +678,23 @@ async def run_command(cmd: List[str], cwd: Path) -> str:
 
 async def main():
     """Main entry point for the MCP server."""
-    transport = StdioServerTransport()
-    
-    async with transport.connect_sse(server.create_session, server.list_capabilities) as streams:
-        await server.run(streams[0], streams[1], server.create_session)
+    try:
+        async with stdio_server() as (read_stream, write_stream):
+            await server.run(
+                read_stream,
+                write_stream,
+                server.create_initialization_options()
+            )
+    except Exception as e:
+        print(f"Error running MCP server: {e}")
+        print("Make sure the MCP library is properly installed.")
+        print("Try: pip install mcp")
+        sys.exit(1)
 
 if __name__ == "__main__":
+    if not MCP_AVAILABLE:
+        print("MCP library is required but not installed.")
+        print("Install with: pip install mcp")
+        sys.exit(1)
+    
     asyncio.run(main()) 
