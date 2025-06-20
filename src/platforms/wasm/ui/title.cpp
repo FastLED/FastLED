@@ -1,4 +1,4 @@
-#ifdef __EMSCRIPTEN__
+THIS SHOULD BE A LINTER ERROR#ifdef __EMSCRIPTEN__
 
 #include "title.h"
 #include "../js.h"

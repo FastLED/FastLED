@@ -8,7 +8,7 @@ namespace fl {
 
 class jsTitleImpl {
   public:
-    jsTitleImpl(const fl::string &name);
+    jsTitleImpl(const fl::string &text);
     ~jsTitleImpl();
     jsTitleImpl &Group(const fl::string &name) {
         mGroup = name;
@@ -16,6 +16,7 @@ class jsTitleImpl {
     }
 
     const fl::string &name() const;
+    const fl::string &text() const { return mText; }
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::string &groupName() const { return mGroup; }
     
@@ -25,6 +26,7 @@ class jsTitleImpl {
   private:
     jsUiInternalPtr mInternal;
     fl::string mGroup;
+    fl::string mText;
 };
 
 } // namespace fl
