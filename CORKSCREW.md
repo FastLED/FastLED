@@ -81,15 +81,8 @@ The optimal grid dimensions are determined by:
 - *w* = ⌈*n* / *k*⌉ (LEDs per turn, rounded up)
 - *h* = min(⌈*k*⌉, ⌈*n* / *w*⌉) (minimize unused pixels)
 
-### 3.4 Inverse Mapping
 
-For interactive applications, we require the inverse mapping *f*⁻¹: ℝ² → ℝ that determines which LED(s) correspond to a given cylindrical coordinate. This is non-trivial due to the discrete nature of LED positions and the potential for multiple LEDs to map to similar coordinates.
 
-We define the inverse mapping as:
-
-*f*⁻¹(*u*, *v*) = argmin_*i* ||*f*(*i*) - (*u*, *v*)||₂
-
-With tie-breaking rules for cases where multiple LEDs map to identical grid positions.
 
 ## 4. Algorithm Design
 
@@ -110,6 +103,8 @@ function forwardMap(ledIndex, totalLEDs, totalTurns):
 
 ### 4.2 Sub-Pixel Rendering Algorithm
 
+# ZACHS NOTE: mention which direction: corkscrew -> grid or the other way around?
+
 To achieve sub-pixel accuracy, we introduce a tile-based multi-sampling approach. For a given floating-point position *p*, we compute a 2×2 tile of contributing pixels with associated weights:
 
 ```
@@ -128,6 +123,10 @@ function computeTile(position):
 ```
 
 ### 4.3 Multi-Sampling Integration
+
+
+# ZACHS NOTE: which direction is this going? corksrew -> grid or the other way around.
+
 
 When rendering from a high-resolution source to the LED array, we employ super-sampling to reduce aliasing artifacts:
 
@@ -149,28 +148,9 @@ function multiSample(sourceGrid, targetPosition, sampleRadius):
 
 ## 5. Implementation
 
-### 5.1 System Architecture
+## 5.1 Memory safety
 
-Our implementation consists of three primary components:
-
-1. **CorkscrewInput**: Parameterizes the helical geometry
-2. **CorkscrewState**: Maintains computed mapping state and grid dimensions  
-3. **Corkscrew**: Provides the main API for forward/inverse transformations
-
-The system is designed for both compile-time optimization (using constexpr functions) and runtime flexibility.
-
-### 5.2 Memory Management
-
-To address the constraints of embedded systems, our implementation employs lazy initialization of internal buffers. The rectangular grid buffer is only allocated when first accessed, and dimensions are computed using constexpr functions to enable static allocation when parameters are known at compile time.
-
-### 5.3 Performance Optimizations
-
-Several optimizations ensure real-time performance:
-
-- **Compile-time dimension calculation** eliminates runtime computation overhead
-- **Lazy buffer initialization** reduces memory footprint until needed
-- **Direct buffer access** provides O(1) LED indexing
-- **SIMD-optimized color blending** accelerates multi-sampling operations
+# ZACHS NOTE: FILL THIS IN
 
 ### 5.4 Web Integration
 
@@ -195,81 +175,13 @@ Visual quality was assessed through:
 2. **Shape preservation**: Evaluating geometric accuracy of rendered shapes
 3. **Color uniformity**: Assessing consistency across the helical surface
 
-Results demonstrate significant improvement over linear mapping:
-- 95% reduction in visible discontinuities
-- 87% improvement in shape preservation scores
-- 92% consistency in color distribution
 
-### 6.3 Performance Analysis
-
-Performance evaluation on embedded platforms (ESP32, Teensy 4.0) shows:
-- Forward mapping: 0.3μs per LED (average)
-- Sub-pixel rendering: 1.2μs per sample point
-- Complete frame update: 15ms for 288 LEDs with multi-sampling
-
-These results enable real-time performance at 60+ FPS for typical installations.
-
-### 6.4 Comparison with Alternative Approaches
-
-We compared against three alternative methods:
-1. **Linear mapping**: Direct LED indexing without geometric consideration
-2. **Manual adjustment**: Artist-specified per-pattern corrections
-3. **UV unwrapping**: Traditional texture mapping approaches
-
-Our method achieves superior visual quality while maintaining computational efficiency and eliminating the need for per-pattern adjustments.
-
-## 7. Applications and Results
-
-### 7.1 Festival Installations
-
-The technique has been successfully deployed in multiple festival installations, including:
-- **Burning Man 2023**: 12 corkscrew structures with real-time generative content
-- **Electric Forest**: Interactive installations responding to music
-- **Lightning in a Bottle**: Large-scale architectural integration
-
-Artist feedback indicates 90% reduction in pattern development time and significant improvement in visual impact.
-
-### 7.2 Wearable Technology
-
-Integration with wearable LED garments demonstrates the technique's versatility:
-- **Smart clothing**: Seamless pattern flow across helical seams
-- **Performance costumes**: Real-time response to dancer movement
-- **Interactive accessories**: Touch-responsive pattern generation
-
-### 7.3 Architectural Lighting
-
-Large-scale architectural applications showcase scalability:
-- **Building facades**: Helical LED strips following architectural curves
-- **Bridge installations**: Long-span corkscrew arrays
-- **Interior design**: Decorative lighting with complex geometries
 
 ## 8. Limitations and Future Work
 
-### 8.1 Current Limitations
-
-Several limitations warrant future investigation:
-
-1. **Non-uniform LED spacing**: Current algorithm assumes uniform distribution
-2. **Complex helical geometries**: Limited to single-axis helical wrapping
-3. **Dynamic reconfiguration**: Runtime geometry changes require full recomputation
-
-### 8.2 Future Directions
-
-Promising directions for future work include:
-
-1. **Adaptive sampling**: Dynamic adjustment of sampling density based on pattern complexity
-2. **Multi-helix support**: Extending to complex braided and interleaved configurations
-3. **Temporal coherence**: Optimizing for smooth animation transitions
-4. **Machine learning integration**: Automatic parameter optimization for new installations
-
-### 8.3 Theoretical Extensions
-
-The mathematical framework suggests several theoretical extensions:
-- **Non-Euclidean helical spaces**: Extending to hyperbolic and spherical geometries
-- **Probabilistic mapping**: Handling uncertainty in LED positioning
-- **Multi-scale representations**: Hierarchical approaches for very large installations
-
 ## 9. Conclusion
+
+# ZACHS NOTE: UPDATE THIS NOW THAT IV'E TRIMMED THIS SECTION
 
 We have presented Corkscrew Mapping, a novel technique for visualizing 2D graphics patterns on helically-arranged LED strips. Our mathematical framework provides both theoretical rigor and practical performance, enabling real-time applications in diverse contexts from festival installations to architectural lighting.
 
@@ -283,29 +195,3 @@ The key contributions include:
 The technique addresses a significant gap in LED visualization tools and has already demonstrated practical value in real-world installations. As LED installations continue to grow in complexity and scale, techniques like Corkscrew Mapping will become increasingly essential for creating compelling visual experiences.
 
 Future work will extend the framework to handle more complex geometries and integrate machine learning approaches for automatic optimization. We anticipate that the mathematical foundations established here will inspire further research in discrete-to-continuous mapping problems across various domains.
-
-## Acknowledgments
-
-We thank the FastLED community for their invaluable feedback and testing. Special recognition goes to the festival artists and installation teams who provided real-world validation of our techniques. This work was supported in part by grants from the Digital Arts Foundation and the Interactive Media Consortium.
-
-## References
-
-[1] Davis, M. 2021. "Optimization Techniques for Embedded LED Systems." *ACM Transactions on Graphics* 40, 4, Article 123.
-
-[2] Floater, M. S., and Hormann, K. 2005. "Surface Parameterization: A Tutorial and Survey." *Advances in Multiresolution for Geometric Modelling*, 157-186.
-
-[3] Greene, N. 1986. "Environment Mapping and Other Applications of World Projections." *IEEE Computer Graphics and Applications* 6, 11, 21-29.
-
-[4] Johnson, R. 2020. "Curved Surface LED Mapping Techniques." *Journal of Digital Installation Art* 15, 3, 45-62.
-
-[5] Liu, X., Chen, Y., and Wang, Z. 2019. "Discrete-to-Continuous Mappings in Architectural Lighting Design." *ACM SIGGRAPH Asia 2019 Technical Briefs*, Article 15.
-
-[6] Miller, J., and Thompson, A. 2017. "Performance Requirements for Large-Scale LED Installations." *Computer Graphics Forum* 36, 7, 234-245.
-
-[7] Sanders, P., Kumar, A., and Lee, S. 2018. "Geometric Transformations for LED Matrix Displays." *Proceedings of the International Conference on Computer Graphics Theory and Applications*, 112-119.
-
-[8] Szeliski, R., and Shum, H.-Y. 1997. "Creating Full View Panoramic Image Mosaics and Environment Maps." *Computer Graphics (SIGGRAPH '97 Proceedings)*, 251-258.
-
----
-
-*Manuscript received 15 February 2024; accepted 1 April 2024; published online 15 May 2024.*
