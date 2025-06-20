@@ -4,15 +4,25 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - 'README.md'
-      - '**/README.md'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'test'
+      - 'test.py'
   pull_request_target:
     branches:
       - master
-    paths-ignore:
-      - 'README.md'
-      - '**/README.md'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'test'
+      - 'test.py'
 
 jobs:
   build:
@@ -50,4 +60,3 @@ jobs:
             ./test
           fi
         shell: bash
-
