@@ -2,17 +2,15 @@
 
 ## Overview
 
-The FastLED corkscrew projection system combines `computeTile` (implemented through the `splat` function) and `multiSample` (implemented in `readFromMulti`) to create a sophisticated pipeline that maps from a 2D XY grid to corkscrew LED arrangements with sub-pixel accuracy.
+The FastLED corkscrew allows the user to write to a regular rectangular buffer and have it displayd on a dense corkscrew of LEDs.
 
-Simply put, write to an XY grid and that image can be mapped onto a corkscrew. Dense 144LED @ 3.28 are cheap and readily avialable. They have
-brightness, density and can be mapped over organic material like a common
-walking stick.
+Dense 144LED @ 3.28 are cheap and readily avialable. They are cheap, have high density.
 
 ## Pipeline Components
 
 ### 1. User Paints to XY Grid
 
-Users create patterns on a 2D rectangular grid (`fl::Grid<CRGB>`) using standard XY coordinates. This grid represents the "unwrapped" cylindrical surface of the corkscrew.
+Users create patterns on a 2D rectangular grid (`fl::Grid<CRGB>`) using standard XY coordinates.
 
 ```cpp
 // Grid dimensions calculated from corkscrew parameters
