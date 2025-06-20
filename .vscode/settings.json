@@ -11,6 +11,9 @@
         }
     },
     "files.eol": "\n", // Unix
+    "files.autoDetectEol": false, // Prevent VS Code from auto-detecting and changing EOL
+    "files.insertFinalNewline": true, // Ensure files end with a newline
+    "files.trimFinalNewlines": true, // Remove extra newlines at the end
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
     "editor.detectIndentation": true,
