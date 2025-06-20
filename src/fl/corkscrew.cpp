@@ -9,6 +9,7 @@
 #include "fl/unused.h"
 #include "fl/map_range.h"
 #include "fl/leds.h"
+#include "fl/grid.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -162,7 +163,7 @@ const CRGB* Corkscrew::data() const {
     return mCorkscrewLeds.data();
 }
 
-void Corkscrew::readFrom(const fl::Leds& source_leds) {
+void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid) {
     // Initialize the buffer if not already done
     initializeBuffer();
     
@@ -178,12 +179,12 @@ void Corkscrew::readFrom(const fl::Leds& source_leds) {
         vec2i16 coord(static_cast<int16_t>(rect_pos.x + 0.5f), 
                       static_cast<int16_t>(rect_pos.y + 0.5f));
         
-        // Clamp coordinates to buffer bounds
-        coord.x = MAX(0, MIN(coord.x, static_cast<int16_t>(mState.width) - 1));
-        coord.y = MAX(0, MIN(coord.y, static_cast<int16_t>(mState.height) - 1));
+        // Clamp coordinates to grid bounds
+        coord.x = MAX(0, MIN(coord.x, static_cast<int16_t>(source_grid.width()) - 1));
+        coord.y = MAX(0, MIN(coord.y, static_cast<int16_t>(source_grid.height()) - 1));
         
-        // Sample from the source fl::Leds using its XY mapping
-        CRGB sampled_color = source_leds(coord.x, coord.y);
+        // Sample from the source fl::Grid using its at() method
+        CRGB sampled_color = source_grid.at(coord.x, coord.y);
         
         // Store in our rectangular buffer using row-major indexing
         size_t buffer_idx = static_cast<size_t>(coord.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(coord.x);
@@ -208,12 +209,9 @@ void Corkscrew::fillBuffer(const CRGB& color) {
     }
 }
 
-void Corkscrew::readFromMulti(const fl::Leds& target_leds) const {
+void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
     // Ensure buffer is initialized
     initializeBuffer();
-    
-    // Get access to the raw LED array from fl::Leds
-    CRGB* leds_array = const_cast<CRGB*>(target_leds.rgb());
     
     // Iterate through each LED in the corkscrew
     for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
@@ -259,9 +257,9 @@ void Corkscrew::readFromMulti(const fl::Leds& target_leds) const {
             final_color.b = static_cast<uint8_t>(b_accum / total_weight);
         }
         
-        // Store the result in the target LED strip (direct array access)
-        if (leds_array != nullptr) {
-            leds_array[led_idx] = final_color;
+        // Store the result in the target grid (using linear indexing)
+        if (led_idx < target_grid.size()) {
+            mCorkscrewLeds[led_idx] = final_color;
         }
     }
 }

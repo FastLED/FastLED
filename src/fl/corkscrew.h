@@ -47,8 +47,9 @@
 
 namespace fl {
 
-// Forward declaration
+// Forward declarations
 class Leds;
+template<typename T> class Grid;
 
 // Simple constexpr functions for compile-time corkscrew dimension calculation
 constexpr uint16_t calculateCorkscrewWidth(float totalTurns, uint16_t numLeds) {
@@ -193,13 +194,13 @@ class Corkscrew {
     CRGB* data();
     const CRGB* data() const;
     
-    // Read from fl::Leds object and populate our internal rectangular buffer
+    // Read from fl::Grid<CRGB> object and populate our internal rectangular buffer
     // by sampling from the XY coordinates mapped to each corkscrew LED position
-    void readFrom(const fl::Leds& source_leds);
+    void readFrom(const fl::Grid<CRGB>& source_grid);
     
-    // Read from rectangular buffer using multi-sampling and store in target LED strip
+    // Read from rectangular buffer using multi-sampling and store in target grid
     // Uses Tile2x2_u8_wrap for sub-pixel accurate sampling with proper blending
-    void readFromMulti(const fl::Leds& target_leds) const;
+    void readFromMulti(const fl::Grid<CRGB>& target_grid) const;
     
     // Clear the rectangular buffer 
     void clearBuffer();

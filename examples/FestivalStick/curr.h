@@ -133,14 +133,12 @@ void setup() {
     frameBuffer.reset(width, height);
     XYMap xyMap = XYMap::constructRectangularGrid(width, height, 0);
 
-    CRGB *leds = frameBuffer.data();
-    //size_t num_leds = frameBuffer.size();
-
+    // Use the corkscrew's internal buffer for the LED strip
     CLEDController *controller =
-        &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(leds, NUM_LEDS);
+        &FastLED.addLeds<APA102HD, PIN_DATA, PIN_CLOCK, BGR>(corkscrew.data(), NUM_LEDS);
 
     // CLEDController *controller =
-    //     &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
+    //     &FastLED.addLeds<WS2812, 3, BGR>(stripLeds, NUM_LEDS);
 
     fl::ScreenMap screenMap = xyMap.toScreenMap();
     screenMap.setDiameter(.2f);
@@ -324,6 +322,12 @@ void loop() {
     } else {
         draw(pos);
     }
+    
+    // Use the new readFrom workflow:
+    // 1. Read directly from the frameBuffer Grid into the corkscrew's internal buffer
+    corkscrew.readFrom(frameBuffer);
+    
+    // The corkscrew's buffer is now populated and FastLED will display it directly
     
     FastLED.setBrightness(brightness.value());
     FastLED.show();

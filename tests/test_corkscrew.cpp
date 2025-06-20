@@ -203,23 +203,22 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
         REQUIRE(buffer[i] == CRGB::Black);
     }
     
-    // Create a source fl::Leds object with a checkerboard pattern
-    CRGB source_data[width * height];
-    fl::Leds source_leds(source_data, width, height);
+    // Create a source fl::Grid<CRGB> object with a checkerboard pattern
+    fl::Grid<CRGB> source_grid(width, height);
     
     // Fill source with checkerboard pattern
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             if ((x + y) % 2 == 0) {
-                source_leds(x, y) = CRGB::Blue;
+                source_grid(x, y) = CRGB::Blue;
             } else {
-                source_leds(x, y) = CRGB::Green;
+                source_grid(x, y) = CRGB::Green;
             }
         }
     }
     
-    // Read from the source leds into our internal buffer
-    corkscrew.readFrom(source_leds);
+    // Read from the source grid into our internal buffer
+    corkscrew.readFrom(source_grid);
     
     // Verify that the buffer has been populated with colors from the source
     // Note: Not every pixel in the rectangular buffer may be written to by the corkscrew mapping
@@ -252,25 +251,21 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     // Create a source grid - simple 3x4 pattern
     const uint16_t width = 3;
     const uint16_t height = 4;
-    CRGB source_array[width * height];
-    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(width, height);
-    fl::Leds source_leds(source_array, xymap);
+    fl::Grid<CRGB> source_grid(width, height);
     
-    // Clear the array first
-    for (size_t i = 0; i < width * height; ++i) {
-        source_array[i] = CRGB::Black;
-    }
+    // Grid initializes to black by default, but let's be explicit
+    source_grid.clear();
     
     // Set up a simple pattern: red in corners, blue in center
-    source_leds(0, 0) = CRGB::Red;    // Bottom-left
-    source_leds(2, 0) = CRGB::Red;    // Bottom-right  
-    source_leds(0, 3) = CRGB::Red;    // Top-left
-    source_leds(2, 3) = CRGB::Red;    // Top-right
-    source_leds(1, 1) = CRGB::Blue;   // Center-ish
-    source_leds(1, 2) = CRGB::Blue;   // Center-ish
+    source_grid(0, 0) = CRGB::Red;    // Bottom-left
+    source_grid(2, 0) = CRGB::Red;    // Bottom-right  
+    source_grid(0, 3) = CRGB::Red;    // Top-left
+    source_grid(2, 3) = CRGB::Red;    // Top-right
+    source_grid(1, 1) = CRGB::Blue;   // Center-ish
+    source_grid(1, 2) = CRGB::Blue;   // Center-ish
     
     // Read from the source into corkscrew buffer
-    corkscrew.readFrom(source_leds);
+    corkscrew.readFrom(source_grid);
     
     // Get the buffer
     const auto& buffer = corkscrew.getBuffer();

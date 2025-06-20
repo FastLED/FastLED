@@ -5,9 +5,6 @@
 
 namespace fl {
 
-// Forward declaration
-class Corkscrew;
-
 // Leds definition.
 // Drawing operations on a block of leds requires information about the layout
 // of the leds. Hence this class.
@@ -50,8 +47,7 @@ class Leds {
         }
     }
 
-    // Draw function for Corkscrew objects
-    void draw(Corkscrew& corkscrew);
+
 
   protected:
     static CRGB &empty(); // Allows safe out of bounds access.
