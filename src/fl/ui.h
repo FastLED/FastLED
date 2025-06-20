@@ -428,6 +428,12 @@ class UIGroup : protected UIGroupImpl {
     
     // Implicit conversion to string for convenience
     operator fl::Str() const { return name(); }
+
+    // Add control to the group
+    template<typename T>
+    void addControl(T* control) {
+        control->setGroup(name());
+    }
 };
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \

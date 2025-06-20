@@ -60,8 +60,7 @@ UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface. ");
 
-// UI Group for noise-related controls
-UIGroup noiseGroup("Noise Controls");
+
 
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
@@ -78,6 +77,8 @@ UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
+
+
 // Color boost controls
 UINumberField saturationFunction("Saturation Function", 1, 0, 9);
 UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
@@ -85,6 +86,8 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 // UIDropdown examples - noise-related color palette
 fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
+
+
 
 fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
 fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
@@ -145,6 +148,22 @@ void setup() {
     constexpr int width = CORKSCREW_WIDTH;   // = 16
     constexpr int height = CORKSCREW_HEIGHT; // = 18
 
+
+    // Add noise-related controls to the noiseGroup
+    // noiseGroup.addControl(&useNoise);
+    // noiseGroup.addControl(&noiseScale);
+    // noiseGroup.addControl(&noiseSpeed);
+
+    // // Add paletteDropdown to the noiseGroup
+    // noiseGroup.addControl(&paletteDropdown);
+    // // Add paletteDropdown to the noiseGroup
+    // noiseGroup.addControl(&paletteDropdown);
+    useNoise.setGroup("Noise Controls");
+    noiseScale.setGroup("Noise Controls");
+    noiseSpeed.setGroup("Noise Controls");
+    paletteDropdown.setGroup("Noise Controls");
+
+
     // Or use runtime corkscrew for dynamic sizing
     // int width = corkscrew.cylinder_width();
     // int height = corkscrew.cylinder_height();
@@ -173,11 +192,11 @@ void setup() {
     controller->setScreenMap(corkscrewScreenMap);
     
     // Demonstrate UIGroup functionality for noise controls
-    FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
-    FL_WARN("  This group contains noise pattern controls:");
-    FL_WARN("  - Use Noise Pattern toggle");
-    FL_WARN("  - Noise Scale and Speed sliders");
-    FL_WARN("  - Color Palette selection for noise");
+    //FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
+    //FL_WARN("  This group contains noise pattern controls:");
+    //FL_WARN("  - Use Noise Pattern toggle");
+    //FL_WARN("  - Noise Scale and Speed sliders");
+    //FL_WARN("  - Color Palette selection for noise");
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party

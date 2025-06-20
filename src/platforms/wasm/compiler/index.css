@@ -32,6 +32,70 @@ body {
     display: flex;
 }
 
+/* UI Group Styling */
+.ui-group {
+    width: 100%;
+    margin: 15px 0;
+    background-color: #1A1A1A;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ui-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #2A2A2A;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #333;
+    transition: background-color 0.2s ease;
+}
+
+.ui-group-header:hover {
+    background-color: #333;
+}
+
+.ui-group-title {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #E0E0E0;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+.ui-group-toggle {
+    font-size: 1.2em;
+    color: #B0B0B0;
+    transition: transform 0.3s ease;
+}
+
+.ui-group.collapsed .ui-group-toggle {
+    transform: rotate(-90deg);
+}
+
+.ui-group-content {
+    padding: 16px;
+    transition: all 0.3s ease;
+    max-height: 1000px;
+    overflow: hidden;
+}
+
+.ui-group.collapsed .ui-group-content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Ungrouped items container */
+.ui-ungrouped {
+    width: 100%;
+}
+
 .ui-control {
     margin: 10px 0;
     display: flex;
@@ -39,6 +103,17 @@ body {
     align-items: center;
     width: 100%;
     gap: 10px;
+}
+
+/* Special styling for controls within groups */
+.ui-group .ui-control {
+    margin: 8px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ui-group .ui-control:last-child {
+    border-bottom: none;
 }
 
 .ui-control input[type="range"] {

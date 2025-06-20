@@ -217,6 +217,79 @@ export class UiManager {
     this.uiElements = {};
     this.previousUiState = {};
     this.uiControlsId = uiControlsId;
+    this.groups = new Map(); // Track created groups
+    this.ungroupedContainer = null; // Container for ungrouped items
+  }
+
+  // Create a collapsible group container
+  createGroupContainer(groupName) {
+    if (this.groups.has(groupName)) {
+      return this.groups.get(groupName);
+    }
+
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'ui-group';
+    groupDiv.id = `group-${groupName}`;
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'ui-group-header';
+    
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'ui-group-title';
+    titleSpan.textContent = groupName;
+    
+    const toggleSpan = document.createElement('span');
+    toggleSpan.className = 'ui-group-toggle';
+    toggleSpan.textContent = '▼';
+    
+    headerDiv.appendChild(titleSpan);
+    headerDiv.appendChild(toggleSpan);
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'ui-group-content';
+    
+    // Add click handler for collapse/expand
+    headerDiv.addEventListener('click', () => {
+      groupDiv.classList.toggle('collapsed');
+    });
+    
+    groupDiv.appendChild(headerDiv);
+    groupDiv.appendChild(contentDiv);
+    
+    const groupInfo = {
+      container: groupDiv,
+      content: contentDiv,
+      name: groupName
+    };
+    
+    this.groups.set(groupName, groupInfo);
+    return groupInfo;
+  }
+
+  // Create or get the ungrouped items container
+  createUngroupedContainer() {
+    if (this.ungroupedContainer) {
+      return this.ungroupedContainer;
+    }
+
+    const ungroupedDiv = document.createElement('div');
+    ungroupedDiv.className = 'ui-ungrouped';
+    ungroupedDiv.id = 'ungrouped-items';
+    
+    this.ungroupedContainer = ungroupedDiv;
+    return ungroupedDiv;
+  }
+
+  // Clear all UI elements and groups
+  clearUiElements() {
+    const uiControlsContainer = document.getElementById(this.uiControlsId);
+    if (uiControlsContainer) {
+      uiControlsContainer.innerHTML = '';
+    }
+    this.groups.clear();
+    this.ungroupedContainer = null;
+    this.uiElements = {};
+    this.previousUiState = {};
   }
 
   // Returns a Json object if there are changes, otherwise null.
@@ -313,68 +386,107 @@ export class UiManager {
   addUiElements(jsonData) {
     console.log('UI elements added:', jsonData);
     const uiControlsContainer = document.getElementById(this.uiControlsId) || createUiControlsContainer();
+    
+    // Clear existing UI elements
+    this.clearUiElements();
+    
     let foundUi = false;
+    const groupedElements = new Map();
+    const ungroupedElements = [];
+
+    // First pass: organize elements by group
     jsonData.forEach((data) => {
       console.log('data:', data);
       const { group } = data;
-      const hasGroup = group !== '' && group !== undefined;
+      const hasGroup = group !== '' && group !== undefined && group !== null;
+      
       if (hasGroup) {
         console.log(`Group ${group} found, for item ${data.name}`);
-      }
-
-      if (data.type === 'title') {
-        setTitle(data);
-        return; // Skip creating UI control for title
-      }
-
-      if (data.type === 'description') {
-        setDescription(data);
-        return; // Skip creating UI control for description
-      }
-
-      let control;
-      if (data.type === 'slider') {
-        control = createSlider(data);
-      } else if (data.type === 'checkbox') {
-        control = createCheckbox(data);
-      } else if (data.type === 'button') {
-        control = createButton(data);
-      } else if (data.type === 'number') {
-        control = createNumberField(data);
-      } else if (data.type === 'audio') {
-        control = createAudioField(data);
-      } else if (data.type === 'dropdown') {
-        control = createDropdown(data);
-      }
-
-      // AI hallucinated this:
-      // if (hasGroup) {
-      //   const groupContainer = document.getElementById(group);
-      //   if (!groupContainer) {
-      //     console.error(`Group ${group} not found in the HTML`);
-      //     return;
-      //   }
-      //   groupContainer.appendChild(control);
-      // } else {
-      //   uiControlsContainer.appendChild(control);
-      // }
-
-      if (control) {
-        foundUi = true;
-        uiControlsContainer.appendChild(control);
-        if (data.type === 'button') {
-          this.uiElements[data.id] = control.querySelector('button');
-        } else if (data.type === 'dropdown') {
-          this.uiElements[data.id] = control.querySelector('select');
-        } else {
-          this.uiElements[data.id] = control.querySelector('input');
+        if (!groupedElements.has(group)) {
+          groupedElements.set(group, []);
         }
-        this.previousUiState[data.id] = data.value;
+        groupedElements.get(group).push(data);
+      } else {
+        ungroupedElements.push(data);
       }
     });
+
+    // Second pass: create groups and add elements
+    // Add ungrouped elements first
+    if (ungroupedElements.length > 0) {
+      const ungroupedContainer = this.createUngroupedContainer();
+      uiControlsContainer.appendChild(ungroupedContainer);
+      
+      ungroupedElements.forEach((data) => {
+        const control = this.createControlElement(data);
+        if (control) {
+          foundUi = true;
+          ungroupedContainer.appendChild(control);
+          this.registerControlElement(control, data);
+        }
+      });
+    }
+
+    // Add grouped elements
+    for (const [groupName, elements] of groupedElements) {
+      const groupInfo = this.createGroupContainer(groupName);
+      uiControlsContainer.appendChild(groupInfo.container);
+      
+      elements.forEach((data) => {
+        const control = this.createControlElement(data);
+        if (control) {
+          foundUi = true;
+          groupInfo.content.appendChild(control);
+          this.registerControlElement(control, data);
+        }
+      });
+    }
+
     if (foundUi) {
       console.log('UI elements added, showing UI controls container');
       uiControlsContainer.classList.add('active');
     }
+  }
+
+  // Create a control element based on data type
+  createControlElement(data) {
+    if (data.type === 'title') {
+      setTitle(data);
+      return null; // Skip creating UI control for title
+    }
+
+    if (data.type === 'description') {
+      setDescription(data);
+      return null; // Skip creating UI control for description
+    }
+
+    let control;
+    if (data.type === 'slider') {
+      control = createSlider(data);
+    } else if (data.type === 'checkbox') {
+      control = createCheckbox(data);
+    } else if (data.type === 'button') {
+      control = createButton(data);
+    } else if (data.type === 'number') {
+      control = createNumberField(data);
+    } else if (data.type === 'audio') {
+      control = createAudioField(data);
+    } else if (data.type === 'dropdown') {
+      control = createDropdown(data);
+    }
+
+    return control;
+  }
+
+  // Register a control element for state tracking
+  registerControlElement(control, data) {
+    if (data.type === 'button') {
+      this.uiElements[data.id] = control.querySelector('button');
+    } else if (data.type === 'dropdown') {
+      this.uiElements[data.id] = control.querySelector('select');
+    } else {
+      this.uiElements[data.id] = control.querySelector('input');
+    }
+    this.previousUiState[data.id] = data.value;
   }
 }
