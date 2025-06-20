@@ -171,15 +171,30 @@ void fillFrameBufferNoise() {
         dataSmoothing = 200 - (noise_speed * 4);
     }
     
-    // Generate noise for each pixel in the frame buffer
+    // Generate noise for each pixel in the frame buffer using cylindrical mapping
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
-            // Calculate offsets for this pixel
-            int xoffset = noise_scale * x;
-            int yoffset = noise_scale * y;
+            // Convert rectangular coordinates to cylindrical coordinates
+            // Map x to angle (0 to 2*PI), y remains as height
+            float angle = (float(x) / float(width)) * 2.0f * PI;
             
-            // Generate 8-bit noise value using 3D Perlin noise
-            uint8_t data = inoise8(noise_x + xoffset, noise_y + yoffset, noise_z);
+            // Convert cylindrical coordinates to cartesian for noise sampling
+            // Use a cylinder radius for the noise sampling - adjust this value to control
+            // how "tight" or "loose" the cylindrical mapping appears
+            float cylinder_radius = 100.0f; // Adjust this value to change the cylinder size in noise space
+            
+            // Calculate cartesian coordinates on the cylinder surface
+            float noise_x_cyl = cos(angle) * cylinder_radius;
+            float noise_y_cyl = sin(angle) * cylinder_radius;
+            float noise_z_height = float(y) * noise_scale; // Height component
+            
+            // Apply noise scale and time-based offsets
+            int xoffset = int(noise_x_cyl * noise_scale / 100.0f) + noise_x;
+            int yoffset = int(noise_y_cyl * noise_scale / 100.0f) + noise_y;
+            int zoffset = int(noise_z_height) + noise_z;
+            
+            // Generate 8-bit noise value using 3D Perlin noise with cylindrical coordinates
+            uint8_t data = inoise8(xoffset, yoffset, zoffset);
             
             // Expand the range from ~16-238 to 0-255 (from NoisePlusPalette)
             data = qsub8(data, 16);
