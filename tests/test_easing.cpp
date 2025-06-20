@@ -24,15 +24,7 @@ TEST_CASE("8-bit easing functions") {
             }
         }
 
-        SUBCASE("monotonicity") {
-            // function should be non-decreasing
-            uint8_t prev = 0;
-            for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = easeInOutQuad8(i);
-                CHECK_GE(current, prev);
-                prev = current;
-            }
-        }
+
 
         SUBCASE("first quarter should be slower than linear") {
             // ease-in portion should start slower than linear
@@ -57,14 +49,7 @@ TEST_CASE("8-bit easing functions") {
             }
         }
 
-        SUBCASE("monotonicity") {
-            uint8_t prev = 0;
-            for (uint16_t i = 0; i <= 255; ++i) {
-                uint8_t current = easeInOutCubic8(i);
-                CHECK_GE(current, prev);
-                prev = current;
-            }
-        }
+
 
         SUBCASE("more pronounced than quadratic") {
             // cubic should be more pronounced than quadratic in ease-in portion
@@ -127,14 +112,7 @@ TEST_CASE("easeInOutQuad16") {
         }
     }
 
-    SUBCASE("monotonicity") {
-        uint16_t prev = 0;
-        for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = easeInOutQuad16(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
+
 
     SUBCASE("scaling consistency with 8-bit") {
         const int kTolerance = 2; // Note that this is too high.
@@ -179,14 +157,7 @@ TEST_CASE("easeInOutCubic16") {
         }
     }
 
-    SUBCASE("monotonicity") {
-        uint16_t prev = 0;
-        for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = easeInOutCubic16(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
+
 
     SUBCASE("more pronounced than quadratic") {
         uint16_t quarter = 16384;
@@ -280,15 +251,7 @@ TEST_CASE("easeInQuad16") {
         CHECK_EQ(easeInQuad16(4096), 256); // (4096 * 4096) / 65535 = 256
     }
 
-    SUBCASE("monotonicity") {
-        // Function should be non-decreasing (ease-in starts slow, accelerates)
-        uint16_t prev = 0;
-        for (uint32_t i = 0; i <= 65535; i += 256) {
-            uint16_t current = easeInQuad16(i);
-            CHECK_GE(current, prev);
-            prev = current;
-        }
-    }
+
 
     SUBCASE("ease-in behavior") {
         // For ease-in, early values should be less than linear progression
@@ -362,6 +325,52 @@ TEST_CASE("All easing functions boundary tests") {
             INFO("Testing EaseType " << (int)type);
             CHECK_EQ(result_0, 0);
             CHECK_EQ(result_max, 65535);
+        }
+    }
+}
+
+TEST_CASE("All easing functions monotonicity tests") {
+    // Test all easing types through the generic ease functions
+    const fl::EaseType types[] = {
+        fl::EASE_NONE,
+        fl::EASE_IN_QUAD,
+        fl::EASE_OUT_QUAD,
+        fl::EASE_IN_OUT_QUAD,
+        fl::EASE_IN_CUBIC,
+        fl::EASE_OUT_CUBIC,
+        fl::EASE_IN_OUT_CUBIC,
+        fl::EASE_IN_SINE,
+        fl::EASE_OUT_SINE,
+        fl::EASE_IN_OUT_SINE
+    };
+    
+    SUBCASE("8-bit easing functions monotonicity") {
+        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
+            fl::EaseType type = types[i];
+            
+            // Function should be non-decreasing
+            uint8_t prev = 0;
+            for (uint16_t input = 0; input <= 255; ++input) {
+                uint8_t current = fl::ease8(type, input);
+                INFO("Testing EaseType " << (int)type << " at input " << input);
+                CHECK_GE(current, prev);
+                prev = current;
+            }
+        }
+    }
+    
+    SUBCASE("16-bit easing functions monotonicity") {
+        for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
+            fl::EaseType type = types[i];
+            
+            // Function should be non-decreasing
+            uint16_t prev = 0;
+            for (uint32_t input = 0; input <= 65535; input += 256) {
+                uint16_t current = fl::ease16(type, input);
+                INFO("Testing EaseType " << (int)type << " at input " << input);
+                CHECK_GE(current, prev);
+                prev = current;
+            }
         }
     }
 }
