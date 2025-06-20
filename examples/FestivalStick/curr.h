@@ -57,6 +57,7 @@ UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
 UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.0001f);
+UISlider brightness("Brightness", 255, 0, 255, 1);
 
 UICheckbox autoAdvance("Auto Advance", true);
 UICheckbox allWhite("All White", false);
@@ -327,6 +328,7 @@ void loop() {
         draw(pos);
     }
     
+    FastLED.setBrightness(brightness.value());
     FastLED.show();
 }
 
