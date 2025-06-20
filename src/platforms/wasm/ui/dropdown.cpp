@@ -36,18 +36,6 @@ jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::string* options, size_
     commonInit(name);
 }
 
-// Constructor with fl::vector of options
-jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::vector<fl::string>& options) 
-    : mSelectedIndex(0) {
-    for (size_t i = 0; i < options.size(); ++i) {
-        mOptions.push_back(options[i]);
-    }
-    if (mOptions.empty()) {
-        mOptions.push_back(fl::string("No options"));
-    }
-    commonInit(name);
-}
-
 // Constructor with fl::Slice<fl::string>
 jsDropdownImpl::jsDropdownImpl(const Str &name, fl::Slice<fl::string> options) 
     : mSelectedIndex(0) {
@@ -83,7 +71,7 @@ void jsDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["id"] = mInternal->id();
     json["value"] = static_cast<int>(mSelectedIndex);
     
-    FLArduinoJson::JsonArray options = json.createNestedArray("options");
+    FLArduinoJson::JsonArray options = json["options"].to<FLArduinoJson::JsonArray>();
     for (size_t i = 0; i < mOptions.size(); ++i) {
         options.add(mOptions[i].c_str());
     }

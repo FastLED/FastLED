@@ -332,6 +332,7 @@ void fillFrameBufferNoise() {
 }
 
 void drawNoise(uint32_t now) {
+    FL_UNUSED(now);
     fillFrameBufferNoise();
 }
 
