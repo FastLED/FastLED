@@ -54,11 +54,12 @@ using namespace fl;
 #define IS_SERPINTINE false
 #define TIME_ANIMATION 1000 // ms
 
-UITitle title("Simple control of an xy path");
-UIDescription description("This is more of a test for new features.");
+UITitle title("Audio Reactive Analysis Demo");
+UIDescription description("Manual audio reactive demo with FL_WARN output for analysis.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
 UICheckbox enableRMS("Enable RMS visualization", false);
 UICheckbox enableFFT("Enable FFT visualization", true);
+UICheckbox enableManualDemo("Enable Manual Audio Demo", true);
 UICheckbox freeze("Freeze frame", false);
 UIButton advanceFrame("Advance frame");
 UISlider decayTimeSeconds("Fade time Seconds", .1, 0, 4, .02);
@@ -80,6 +81,21 @@ XYMap ledsXY(WIDTH / 2, HEIGHT / 2,
              IS_SERPINTINE); // Framebuffer is regular rectangle LED matrix.
 
 FFTBins fftOut(WIDTH); // 2x width due to super sampling.
+
+// Manual Audio Demo Variables
+struct AudioReactiveState {
+    float peak_level = 0.0f;
+    float rms_level = 0.0f;
+    float smoothed_level = 0.0f;
+    float bass_level = 0.0f;
+    float mid_level = 0.0f;
+    float treble_level = 0.0f;
+    float beat_detection = 0.0f;
+    uint32_t sample_count = 0;
+    uint32_t last_print_time = 0;
+};
+
+AudioReactiveState audioState;
 
 // CRGB framebuffer[NUM_LEDS];
 // CRGB framebuffer[WIDTH_2X * HEIGHT_2X];  // 2x super sampling.
@@ -104,6 +120,72 @@ float rms(Slice<const int16_t> data) {
     return rms;
 }
 
+void analyzeAudioFrequencies(const FFTBins& fft, AudioReactiveState& state) {
+    // Analyze different frequency bands
+    int bassEnd = fft.bins_raw.size() * 0.1;    // 0-10% = bass
+    int midEnd = fft.bins_raw.size() * 0.4;     // 10-40% = mid
+    // 40-100% = treble
+    
+    float bassSum = 0.0f;
+    float midSum = 0.0f;
+    float trebleSum = 0.0f;
+    
+    // Bass frequencies
+    for (int i = 0; i < bassEnd; i++) {
+        bassSum += fft.bins_db[i];
+    }
+    
+    // Mid frequencies
+    for (int i = bassEnd; i < midEnd; i++) {
+        midSum += fft.bins_db[i];
+    }
+    
+    // Treble frequencies
+    for (int i = midEnd; i < fft.bins_raw.size(); i++) {
+        trebleSum += fft.bins_db[i];
+    }
+    
+    // Average the bands
+    state.bass_level = bassSum / bassEnd;
+    state.mid_level = midSum / (midEnd - bassEnd);
+    state.treble_level = trebleSum / (fft.bins_raw.size() - midEnd);
+    
+    // Simple beat detection based on bass energy change
+    static float lastBassLevel = 0.0f;
+    float bassChange = state.bass_level - lastBassLevel;
+    state.beat_detection = (bassChange > 5.0f) ? 1.0f : 0.0f;
+    lastBassLevel = state.bass_level;
+}
+
+void printAudioAnalysis(const AudioReactiveState& state) {
+    uint32_t currentTime = millis();
+    
+    // Print analysis every 100ms to avoid spam
+    if (currentTime - state.last_print_time < 100) {
+        return;
+    }
+    
+    FL_WARN("=== AUDIO REACTIVE ANALYSIS ===");
+    FL_WARN("Sample #: " << state.sample_count);
+    FL_WARN("Peak Level: " << state.peak_level << " (0.0-1.0)");
+    FL_WARN("RMS Level: " << state.rms_level << " (0.0-1.0)");
+    FL_WARN("Smoothed Level: " << state.smoothed_level << " (0.0-1.0)");
+    FL_WARN("Bass Level: " << state.bass_level << " dB");
+    FL_WARN("Mid Level: " << state.mid_level << " dB");
+    FL_WARN("Treble Level: " << state.treble_level << " dB");
+    FL_WARN("Beat Detection: " << (state.beat_detection > 0.5f ? "BEAT!" : "---"));
+    
+    // Convert to visual indicators
+    int peakBars = (int)(state.peak_level * 20);
+    int rmsBars = (int)(state.rms_level * 20);
+    int smoothBars = (int)(state.smoothed_level * 20);
+    
+    FL_WARN("Peak   [" << String(peakBars, '#').c_str() << "]");
+    FL_WARN("RMS    [" << String(rmsBars, '#').c_str() << "]");
+    FL_WARN("Smooth [" << String(smoothBars, '#').c_str() << "]");
+    FL_WARN("================================");
+}
+
 void setup() {
     Serial.begin(115200);
     // auto screenmap = frameBufferXY.toScreenMap();
@@ -115,18 +197,21 @@ void setup() {
 
     decayTimeSeconds.onChanged([](float value) {
         audioFadeTracker.setDecayTime(value);
-        FASTLED_WARN("Fade time seconds: " << value);
+        FL_WARN("Fade time seconds: " << value);
     });
     attackTimeSeconds.onChanged([](float value) {
         audioFadeTracker.setAttackTime(value);
-        FASTLED_WARN("Attack time seconds: " << value);
+        FL_WARN("Attack time seconds: " << value);
     });
     outputTimeSec.onChanged([](float value) {
         audioFadeTracker.setOutputTime(value);
-        FASTLED_WARN("Output time seconds: " << value);
+        FL_WARN("Output time seconds: " << value);
     });
     FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal())
         .setScreenMap(screenmap);
+        
+    FL_WARN("Audio Reactive Demo Started!");
+    FL_WARN("Enable 'Manual Audio Demo' to see audio analysis output");
 }
 
 void shiftUp() {
@@ -161,7 +246,7 @@ bool doFrame() {
 
 void loop() {
     if (triggered) {
-        FASTLED_WARN("Triggered");
+        FL_WARN("Triggered");
     }
     // fl::clear(framebuffer);
     // fl::clear(framebuffer);
@@ -177,13 +262,47 @@ void loop() {
         if (!do_frame) {
             continue;
         }
+        
+        // Manual Audio Demo Analysis
+        if (enableManualDemo) {
+            audioState.sample_count++;
+            
+            // Calculate peak level
+            int32_t peak = 0;
+            for (int i = 0; i < sample.pcm().size(); ++i) {
+                int32_t x = ABS(sample.pcm()[i]);
+                if (x > peak) {
+                    peak = x;
+                }
+            }
+            audioState.peak_level = fl::map_range<float, float>(peak, 0.0f, 32768.0f, 0.0f, 1.0f);
+            audioState.peak_level = fl::clamp(audioState.peak_level, 0.0f, 1.0f);
+            
+            // Calculate RMS level
+            audioState.rms_level = sample.rms();
+            audioState.rms_level = fl::map_range<float, float>(audioState.rms_level, 0.0f, 32768.0f, 0.0f, 1.0f);
+            audioState.rms_level = fl::clamp(audioState.rms_level, 0.0f, 1.0f);
+            
+            // Get smoothed level from fade tracker
+            audioState.smoothed_level = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
+            
+            // Analyze FFT frequencies
+            sample.fft(&fftOut);
+            analyzeAudioFrequencies(fftOut, audioState);
+            
+            // Print analysis
+            printAudioAnalysis(audioState);
+            audioState.last_print_time = millis();
+        }
+        
+        // Original visualization code (unchanged)
         float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
         shiftUp();
-        // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
+        // FL_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
-        // FASTLED_WARN("")
+        // FL_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
-        // FASTLED_WARN("getDBFS: " << dbfs);
+        // FL_WARN("getDBFS: " << dbfs);
         int32_t max = 0;
         for (int i = 0; i < sample.pcm().size(); ++i) {
             int32_t x = ABS(sample.pcm()[i]);
@@ -196,12 +315,12 @@ void loop() {
         anim = fl::clamp(anim, 0.0f, 1.0f);
 
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
-        // FASTLED_WARN("x: " << x);
+        // FL_WARN("x: " << x);
 
         // fft.run(sample.pcm(), &fftOut);
         sample.fft(&fftOut);
 
-        // FASTLED_ASSERT(fftOut.bins_raw.size() == WIDTH_2X,
+        // FL_ASSERT(fftOut.bins_raw.size() == WIDTH_2X,
         //                "FFT bins size mismatch");
 
         if (enableFFT) {
@@ -215,13 +334,13 @@ void loop() {
                 uint8_t heatIndex =
                     fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
 
-                // FASTLED_WARN(v);
+                // FL_WARN(v);
 
                 // Use FastLED's built-in HeatColors palette
                 auto c = ColorFromPalette(HeatColors_p, heatIndex);
                 c.fadeToBlackBy(255 - heatIndex);
                 framebuffer[frameBufferXY(x, 0)] = c;
-                // FASTLED_WARN("y: " << i << " b: " << b);
+                // FL_WARN("y: " << i << " b: " << b);
             }
         }
 
@@ -231,7 +350,7 @@ void loop() {
 
         if (enableRMS) {
             float rms = sample.rms();
-            FASTLED_WARN("RMS: " << rms);
+            FL_WARN("RMS: " << rms);
             rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
             framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
