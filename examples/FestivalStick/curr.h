@@ -87,6 +87,8 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
 
+fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
+fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
 
 
 
@@ -199,8 +201,9 @@ void setup() {
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
+    renderModeDropdown.setSelectedIndex(0); // Noise
     
-    // Add onChange callback for palette dropdown
+    // Add onChange callbacks for dropdowns
     paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
         fl::Str selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
@@ -214,6 +217,16 @@ void setup() {
             noisePalette = ForestColors_p;
         } else if (selectedPalette == "Rainbow") {
             noisePalette = RainbowColors_p;
+        }
+    });
+    
+    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
+        fl::Str mode = dropdown.value();
+        // Simple example of using getOption()
+        for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
+            if(dropdown.getOption(i) == mode) {
+                FL_WARN("Render mode changed to: " << mode);
+            }
         }
     });
 }
