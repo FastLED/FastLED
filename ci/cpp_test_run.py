@@ -75,12 +75,14 @@ def run_command(command, use_gdb=False) -> tuple[int, str]:
         return process.returncode, output
 
 
-def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
+def compile_tests(clean: bool = False, verbose: bool = False, unknown_args: list[str] = []) -> None:
     os.chdir(str(PROJECT_ROOT))
     print("Compiling tests...")
     command = ["uv", "run", "ci/cpp_test_compile.py"]
     if clean:
         command.append("--clean")
+    if verbose:
+        command.append("--verbose")
     command.extend(unknown_args)
     return_code, _ = run_command(" ".join(command))
     if return_code != 0:
@@ -232,6 +234,11 @@ def parse_args() -> argparse.Namespace:
         help="Use Clang compiler",
         action="store_true",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose compilation output",
+    )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
     return args
@@ -249,7 +256,7 @@ def main() -> None:
         passthrough_args = args.unknown
         if use_clang:
             passthrough_args.append("--use-clang")
-        compile_tests(clean=args.clean, unknown_args=passthrough_args)
+        compile_tests(clean=args.clean, verbose=args.verbose, unknown_args=passthrough_args)
 
     if not compile_only:
         if specific_test:
