@@ -21,6 +21,37 @@ template <typename T> inline T ceil(T value) {
     return static_cast<T>(::ceil(static_cast<float>(value)));
 }
 
+// Exponential function - binds to standard library exp if available
+template <typename T> inline T exp(T value) {
+#if defined(__has_include)
+    #if __has_include(<cmath>)
+        // Use std::exp from <cmath> if available
+        return static_cast<T>(::exp(static_cast<double>(value)));
+    #elif __has_include(<math.h>)
+        // Use exp from <math.h> if available
+        return static_cast<T>(::exp(static_cast<double>(value)));
+    #else
+        // Fallback implementation using Taylor series approximation
+        // e^x ≈ 1 + x + x²/2! + x³/3! + x⁴/4! + x⁵/5! + ...
+        // This is a simple approximation for small values
+        double x = static_cast<double>(value);
+        if (x > 10.0) return static_cast<T>(22026.465794806718); // e^10 approx
+        if (x < -10.0) return static_cast<T>(0.0000453999297625); // e^-10 approx
+        
+        double result = 1.0;
+        double term = 1.0;
+        for (int i = 1; i < 10; ++i) {
+            term *= x / i;
+            result += term;
+        }
+        return static_cast<T>(result);
+    #endif
+#else
+    // If __has_include is not supported, assume math.h is available
+    return static_cast<T>(::exp(static_cast<double>(value)));
+#endif
+}
+
 // Constexpr version for compile-time evaluation (compatible with older C++ standards)
 constexpr int ceil_constexpr(float value) {
     return static_cast<int>((value > static_cast<int>(value)) ? static_cast<int>(value) + 1 : static_cast<int>(value));
