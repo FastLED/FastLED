@@ -1,12 +1,18 @@
-name: nrf52840_sense
+name: adafruit_feather_nrf52840_sense
 
 on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
   pull_request_target:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
 
 
 jobs:
