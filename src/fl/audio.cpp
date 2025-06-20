@@ -1,6 +1,6 @@
-
 #include "audio.h"
 #include "fl/thread_local.h"
+#include <vector>
 
 namespace fl {
 
@@ -128,5 +128,76 @@ void AudioSample::fft(FFTBins *out) {
         FFT_Args::DefaultSampleRate(); // TODO: get sample rate from AudioSample
     get_flex_fft().run(sample, out, args);
 }
+
+bool AudioSample::isValid() const {
+    return mImpl != nullptr;
+}
+
+const AudioSample::VectorPCM &AudioSampleImpl::pcm() const {
+    return mSignedPcm;
+}
+
+float AudioSampleImpl::zcf() const {
+    // Implement the zero crossing factor calculation
+    // This is a placeholder implementation
+    return static_cast<float>(mZeroCrossings) / mSignedPcm.size();
+}
+
+AudioSample::AudioSample() : mImpl(AudioSampleImplPtr()) {}
+
+AudioSample::AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
+
+AudioSample::AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
+
+AudioSample::operator bool() const {
+    return isValid();
+}
+
+double SoundLevelMeter::getDBFS() const {
+    return current_dbfs_;
+}
+
+double SoundLevelMeter::getSPL() const {
+    return current_spl_;
+}
+
+void SoundLevelMeter::setFloorSPL(double spl_floor) {
+    spl_floor_ = spl_floor;
+    offset_ = spl_floor_ - dbfs_floor_global_;
+}
+
+void SoundLevelMeter::resetFloor() {
+    dbfs_floor_global_ = INFINITY_DOUBLE;
+    offset_ = 0.0;
+}
+
+template <typename It>
+void AudioSampleImpl::assign(It begin, It end) {
+    mSignedPcm.assign(begin, end);
+    initZeroCrossings();
+}
+
+template void AudioSampleImpl::assign<AudioSample::VectorPCM::const_iterator>(AudioSample::VectorPCM::const_iterator, AudioSample::VectorPCM::const_iterator);
+template void AudioSampleImpl::assign<std::vector<int16_t>::iterator>(std::vector<int16_t>::iterator, std::vector<int16_t>::iterator);
+
+void SoundLevelMeter::processBlock(fl::Slice<const int16_t> samples) {
+    processBlock(samples.data(), samples.size());
+}
+
+using const_iterator = AudioSample::const_iterator;
+
+void AudioSampleImpl::initZeroCrossings() {
+    mZeroCrossings = 0;
+    if (mSignedPcm.empty()) return;
+    for (size_t i = 1; i < mSignedPcm.size(); ++i) {
+        if ((mSignedPcm[i - 1] < 0 && mSignedPcm[i] >= 0) ||
+            (mSignedPcm[i - 1] >= 0 && mSignedPcm[i] < 0)) {
+            ++mZeroCrossings;
+        }
+    }
+}
+
+// Ensure vtable generation by implementing all virtual methods
+AudioSampleImpl::~AudioSampleImpl() = default;
 
 } // namespace fl
