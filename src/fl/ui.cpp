@@ -7,9 +7,14 @@
 namespace fl {
 
 void UISlider::setValue(float value) {
-
-    if (value != Super::value()) {
+    float oldValue = Super::value();
+    if (value != oldValue) {
         Super::setValue(value);
+        // Update the last frame value to keep state consistent
+        mLastFrameValue = value;
+        mLastFramevalueValid = true;
+        // Invoke callbacks to notify listeners (including JavaScript components)
+        mCallbacks.invoke(*this);
     }
 }
 
