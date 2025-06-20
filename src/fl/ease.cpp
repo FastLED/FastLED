@@ -125,32 +125,20 @@ uint8_t easeInSine8(uint8_t i) {
 
 uint8_t easeOutSine8(uint8_t i) {
     // ease-out sine: sin(t * π/2)
-    // Handle boundary conditions explicitly
-    if (i == 0)
-        return 0;
-    if (i == 255)
-        return 255;
-
-    // For 8-bit: use sin8 lookup table for efficiency
-    // Map i from [0,255] to [0,64] in sin8 space (zero to quarter wave)
-    // Formula: sin(t * π/2) where t goes from 0 to 1
-    uint8_t angle = map8(i, 0, 64); // Map to quarter-wave range
-    return sin8(angle);
+    // Delegate to 16-bit version for consistency and accuracy
+    // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back
+    uint16_t input16 = map8_to_16(i);
+    uint16_t result16 = easeOutSine16(input16);
+    return map16_to_8(result16);
 }
 
 uint8_t easeInOutSine8(uint8_t i) {
     // ease-in-out sine: -(cos(π*t) - 1) / 2
-    // Handle boundary conditions explicitly
-    if (i == 0)
-        return 0;
-    if (i == 255)
-        return 255;
-
-    // For 8-bit: use cos8 lookup table
-    // Map i from [0,255] to [0,128] in cos8 space (0 to half wave)
-    // Formula: (1 - cos(π*t)) / 2 where t goes from 0 to 1
-    uint8_t angle = map8(i, 0, 128); // Map to half-wave range
-    return (255 - cos8(angle)) >> 1; // (255 - cos) / 2
+    // Delegate to 16-bit version for consistency and accuracy
+    // Scale 8-bit input to 16-bit range, call 16-bit function, scale result back
+    uint16_t input16 = map8_to_16(i);
+    uint16_t result16 = easeInOutSine16(input16);
+    return map16_to_8(result16);
 }
 
 // 16-bit easing functions
