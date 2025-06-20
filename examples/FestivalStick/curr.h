@@ -196,18 +196,17 @@ void fillFrameBufferNoise() {
             float angle = (float(x) / float(width)) * 2.0f * PI;
             
             // Convert cylindrical coordinates to cartesian for noise sampling
-            // Use a cylinder radius for the noise sampling - adjust this value to control
-            // how "tight" or "loose" the cylindrical mapping appears
-            float cylinder_radius = 100.0f; // Adjust this value to change the cylinder size in noise space
+            // Use the noise_scale to control the cylinder size in noise space
+            float cylinder_radius = noise_scale; // Use the existing noise_scale parameter
             
             // Calculate cartesian coordinates on the cylinder surface
             float noise_x_cyl = cos(angle) * cylinder_radius;
             float noise_y_cyl = sin(angle) * cylinder_radius;
             float noise_z_height = float(y) * noise_scale; // Height component
             
-            // Apply noise scale and time-based offsets
-            int xoffset = int(noise_x_cyl * noise_scale / 100.0f) + noise_x;
-            int yoffset = int(noise_y_cyl * noise_scale / 100.0f) + noise_y;
+            // Apply time-based offsets
+            int xoffset = int(noise_x_cyl) + noise_x;
+            int yoffset = int(noise_y_cyl) + noise_y;
             int zoffset = int(noise_z_height) + noise_z;
             
             // Generate 8-bit noise value using 3D Perlin noise with cylindrical coordinates
