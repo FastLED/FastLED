@@ -198,11 +198,11 @@ class Corkscrew {
     
     // Read from fl::Grid<CRGB> object and populate our internal rectangular buffer
     // by sampling from the XY coordinates mapped to each corkscrew LED position
-    void readFrom(const fl::Grid<CRGB>& source_grid);
+    // use_multi_sampling = true will use multi-sampling to sample from the source grid,
+    // this will give a little bit better accuracy and the screenmap will be more accurate.
+    void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = false);
     
-    // Read from rectangular buffer using multi-sampling and store in target grid
-    // Uses Tile2x2_u8_wrap for sub-pixel accurate sampling with proper blending
-    void readFromMulti(const fl::Grid<CRGB>& target_grid) const;
+
     
     // Clear the rectangular buffer 
     void clearBuffer();
@@ -222,6 +222,10 @@ class Corkscrew {
     // extends past the width. This extended Tile2x2 is designed
     // to be wrapped around with a Tile2x2_u8_wrap.
     Tile2x2_u8 at_splat_extrapolate(float i) const;
+
+    // Read from rectangular buffer using multi-sampling and store in target grid
+    // Uses Tile2x2_u8_wrap for sub-pixel accurate sampling with proper blending
+    void readFromMulti(const fl::Grid<CRGB>& target_grid) const;
     
     // Initialize the rectangular buffer if not already done
     void initializeBuffer() const;

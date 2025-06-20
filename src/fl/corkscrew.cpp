@@ -174,7 +174,14 @@ const CRGB* Corkscrew::data() const {
     return mCorkscrewLeds.data();
 }
 
-void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid) {
+void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling) {
+
+    if (use_multi_sampling) {
+        readFromMulti(source_grid);
+        return;
+    }
+
+
     // Initialize the buffer if not already done
     initializeBuffer();
     
@@ -216,9 +223,12 @@ void Corkscrew::fillBuffer(const CRGB& color) {
     }
 }
 
-void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
+void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
     // Ensure buffer is initialized
     initializeBuffer();
+    
+    // Clear buffer first
+    const_cast<Corkscrew*>(this)->clearBuffer();
     
     // Iterate through each LED in the corkscrew
     for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
@@ -236,22 +246,18 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
                 vec2i16 pos = entry.first;   // position is the first element of the pair
                 uint8_t weight = entry.second; // weight is the second element of the pair
                 
-                // Bounds check for the rectangular buffer
-                if (pos.x >= 0 && pos.x < static_cast<int16_t>(mState.width) && 
-                    pos.y >= 0 && pos.y < static_cast<int16_t>(mState.height)) {
+                // Bounds check for the source grid
+                if (pos.x >= 0 && pos.x < static_cast<int16_t>(source_grid.width()) && 
+                    pos.y >= 0 && pos.y < static_cast<int16_t>(source_grid.height())) {
                     
-                    // Calculate buffer index using row-major ordering
-                    size_t buffer_idx = static_cast<size_t>(pos.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(pos.x);
+                    // Sample from the source grid
+                    CRGB sample_color = source_grid.at(pos.x, pos.y);
                     
-                    if (buffer_idx < mCorkscrewLeds.size()) {
-                        CRGB sample_color = mCorkscrewLeds[buffer_idx];
-                        
-                        // Accumulate weighted color components
-                        r_accum += static_cast<uint32_t>(sample_color.r) * weight;
-                        g_accum += static_cast<uint32_t>(sample_color.g) * weight;
-                        b_accum += static_cast<uint32_t>(sample_color.b) * weight;
-                        total_weight += weight;
-                    }
+                    // Accumulate weighted color components
+                    r_accum += static_cast<uint32_t>(sample_color.r) * weight;
+                    g_accum += static_cast<uint32_t>(sample_color.g) * weight;
+                    b_accum += static_cast<uint32_t>(sample_color.b) * weight;
+                    total_weight += weight;
                 }
             }
         }
@@ -264,8 +270,8 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
             final_color.b = static_cast<uint8_t>(b_accum / total_weight);
         }
         
-        // Store the result in the target grid (using linear indexing)
-        if (led_idx < target_grid.size()) {
+        // Store the result in the LED buffer at the LED index position
+        if (led_idx < mCorkscrewLeds.size()) {
             mCorkscrewLeds[led_idx] = final_color;
         }
     }
