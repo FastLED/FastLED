@@ -113,6 +113,28 @@
         };
     });
 
+    // Add mouseover and mouseout event listeners for the canvas
+    document.getElementById('myCanvas').addEventListener('mouseover', function() {
+        const label = document.getElementById('canvas-label');
+        label.classList.add('hover-show');
+    });
+
+    document.getElementById('myCanvas').addEventListener('mouseout', function() {
+        const label = document.getElementById('canvas-label');
+        label.classList.remove('hover-show');
+    });
+
+    // Also add event listeners to the canvas container for better UX
+    document.getElementById('canvas-container').addEventListener('mouseover', function() {
+        const label = document.getElementById('canvas-label');
+        label.classList.add('hover-show');
+    });
+
+    document.getElementById('canvas-container').addEventListener('mouseout', function() {
+        const label = document.getElementById('canvas-label');
+        label.classList.remove('hover-show');
+    });
+
     document.getElementById('output').addEventListener('click', function() {
         if (document.querySelector('.toast-notification')) {
             return; // We are already showing a toast notification
