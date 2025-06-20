@@ -31,6 +31,7 @@ void loop() {}
 #include <FastLED.h>
 
 #include "fl/audio.h"
+#include "fl/audio_reactive.h"
 #include "fl/downscale.h"
 #include "fl/draw_visitor.h"
 #include "fl/fft.h"
@@ -40,7 +41,6 @@ void loop() {}
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fx.h"
 #include "fx/time.h"
 
 // Sketch.
@@ -68,7 +68,7 @@ UISlider outputTimeSec("outputTimeSec", .17, 0, 2, .01);
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
 
-MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(),
+fl::MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(),
                                 decayTimeSeconds.value(), outputTimeSec.value(),
                                 44100);
 
