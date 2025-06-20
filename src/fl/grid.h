@@ -3,8 +3,10 @@
 
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/corkscrew.h"
 
 namespace fl {
+
 
 template <typename T> class Grid {
   public:
@@ -22,6 +24,10 @@ template <typename T> class Grid {
         }
         mSlice = fl::MatrixSlice<T>(mData.data(), width, height, 0, 0,
                                     width, height);
+    }
+
+    void draw(Corkscrew &corkscrew, bool use_multi_sampling = true) {
+        corkscrew.readFrom(*this, use_multi_sampling);
     }
 
     void clear() {

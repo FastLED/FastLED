@@ -200,7 +200,7 @@ class Corkscrew {
     // by sampling from the XY coordinates mapped to each corkscrew LED position
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
-    void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = false);
+    void readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampling = true);
     
 
     

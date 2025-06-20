@@ -341,7 +341,7 @@ void loop() {
     // 1. Read directly from the frameBuffer Grid into the corkscrew's internal buffer
     // use_multi_sampling = true will use multi-sampling to sample from the source grid,
     // this will give a little bit better accuracy and the screenmap will be more accurate.
-    corkscrew.readFrom(frameBuffer, true);
+    frameBuffer.draw(corkscrew, true);
     
     // The corkscrew's buffer is now populated and FastLED will display it directly
     
