@@ -175,7 +175,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
             storage_[i] = 0;
         }
         if (move_constructor_) {
-            move_constructor_(get_storage(), other.storage_);
+            move_constructor_(get_storage(), other.get_storage());
         }
         other.invoker_ = nullptr;
         other.destructor_ = nullptr;
@@ -229,7 +229,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
             }
             
             if (move_constructor_) {
-                move_constructor_(get_storage(), other.storage_);
+                move_constructor_(get_storage(), other.get_storage());
             }
             
             other.invoker_ = nullptr;
