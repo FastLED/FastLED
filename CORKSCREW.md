@@ -167,9 +167,9 @@ The implementation leverages several optimization strategies for real-time perfo
 
 The corkscrew mapping system supports multiple hardware platforms:
 
-**Arduino**: Optimized for 8-bit and 32-bit Arduino platforms with memory-constrained environments.
-
 **ESP32**: Takes advantage of dual-core processing for parallel rendering operations.
+
+
 
 **Desktop**: Full-featured implementation for development and testing environments.
 
