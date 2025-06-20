@@ -100,8 +100,6 @@ function forwardMap(ledIndex, totalLEDs, totalTurns):
 
 ### 4.2 Sub-Pixel Rendering Algorithm
 
-# ZACHS NOTE: mention which direction: corkscrew -> grid or the other way around?
-
 To achieve sub-pixel accuracy when mapping from cylindrical grid coordinates back to LED positions (grid → corkscrew), we introduce a tile-based multi-sampling approach. For a given floating-point position *p*, we compute a 2×2 tile of contributing pixels with associated weights:
 
 ```
@@ -120,8 +118,6 @@ function computeTile(position):
 ```
 
 ### 4.3 Multi-Sampling Integration
-
-# ZACHS NOTE: which direction is this going? corksrew -> grid or the other way around.
 
 When rendering from a high-resolution cylindrical grid to the physical LED array (grid → corkscrew), we employ super-sampling to reduce aliasing artifacts:
 
@@ -220,9 +216,64 @@ The optimized implementation reduces CPU utilization by 35% compared to naive tr
 
 ## 8. Limitations and Future Work
 
-## 9. Conclusion
+### 8.1 Computational Optimization
 
-# ZACHS NOTE: UPDATE THIS NOW THAT IV'E TRIMMED THIS SECTION
+Current implementations rely heavily on floating-point arithmetic, which presents both performance and precision challenges on embedded systems. Analysis of the corkscrew mapping pipeline reveals several computational bottlenecks:
+
+**Float-Intensive Operations**: The core mapping algorithms extensively use `float` types for:
+- Trigonometric calculations (sin, cos) in helical parameterization
+- Progress ratios and fractional positioning
+- Multi-sampling weight computations
+- Bilinear interpolation coefficients
+- Sub-pixel tile coordinate calculations
+
+**Integer Optimizations**: Strategic use of `uint16_t` representations currently optimizes:
+- LED index storage and iteration
+- Grid coordinate discretization  
+- Lookup table indexing for pre-computed values
+- Memory-efficient storage of mapping tables
+
+### 8.2 Fixed-Point Arithmetic Research
+
+Future work will investigate migration to Q16.16 fixed-point arithmetic to address floating-point limitations:
+
+**Performance Benefits**: Fixed-point operations execute 2-5x faster on integer-only microcontrollers, enabling higher frame rates on resource-constrained platforms like Arduino Uno.
+
+**Precision Analysis**: Q16.16 format provides 16 bits of fractional precision (approximately 5 decimal places), sufficient for sub-pixel accuracy in typical LED installations while maintaining deterministic behavior.
+
+**Conversion Strategy**: Systematic replacement of critical float operations:
+```
+// Current float approach
+float progress = (float)ledIndex / (totalLEDs - 1);
+float angle = progress * totalTurns * 2.0f * PI;
+
+// Proposed Q16.16 approach  
+q16_t progress = q16_div(int_to_q16(ledIndex), int_to_q16(totalLEDs - 1));
+q16_t angle = q16_mul(q16_mul(progress, int_to_q16(totalTurns)), Q16_TWO_PI);
+```
+
+**Memory Efficiency**: Fixed-point arithmetic eliminates floating-point unit dependencies, reducing code size by an estimated 15-20% and enabling deployment on even more constrained platforms.
+
+### 8.3 Algorithmic Improvements
+
+**Adaptive Precision**: Future implementations will dynamically adjust computational precision based on LED density and viewing distance, using lower precision for distant installations where sub-pixel accuracy provides diminishing returns.
+
+**Hardware-Specific Optimization**: Platform-specific optimizations including:
+- ESP32 dual-core parallelization of mapping calculations
+- ARM Cortex-M4 DSP instruction utilization for vector operations
+- AVR assembly optimization for critical path trigonometric functions
+
+### 8.4 Extended Geometric Support
+
+Beyond computational optimization, future work will address:
+
+**Non-Cylindrical Helices**: Extension to conical and variable-radius helical arrangements common in artistic installations.
+
+**Multi-Helix Configurations**: Support for braided and interleaved helical patterns requiring more sophisticated coordinate transformations.
+
+**Dynamic Geometry**: Real-time adaptation to mechanically deforming helical structures using sensor feedback integration.
+
+## 9. Conclusion
 
 We have presented Corkscrew Mapping, a comprehensive technique for visualizing 2D graphics patterns on helically-arranged LED strips. Our mathematical framework provides both theoretical foundation and practical implementation, enabling real-time applications across diverse contexts from festival installations to architectural lighting.
 
