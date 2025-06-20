@@ -6,6 +6,7 @@
 
 #include "fl/map_range.h"
 #include "lib8tion/intmap.h"
+#include "fl/sin32.h"
 
 namespace fl {
 
@@ -241,42 +242,23 @@ uint16_t easeOutCubic16(uint16_t i) {
 uint16_t easeInSine16(uint16_t i) {
     // ease-in sine: 1 - cos(t * π/2)
     // Handle boundary conditions explicitly
-    static const uint16_t easeInSine16Table[257] = {
-        0,     1,     5,     11,    20,    31,    44,    60,    79,    100,
-        123,   149,   178,   208,   242,   277,   316,   356,   399,   445,
-        493,   543,   596,   652,   709,   770,   832,   897,   965,   1035,
-        1107,  1182,  1259,  1339,  1421,  1505,  1592,  1682,  1773,  1867,
-        1964,  2063,  2164,  2268,  2374,  2482,  2593,  2706,  2822,  2940,
-        3060,  3183,  3308,  3435,  3565,  3697,  3831,  3968,  4106,  4248,
-        4391,  4537,  4685,  4836,  4989,  5144,  5301,  5460,  5622,  5786,
-        5953,  6121,  6292,  6465,  6640,  6818,  6998,  7179,  7364,  7550,
-        7738,  7929,  8122,  8317,  8514,  8713,  8915,  9118,  9324,  9532,
-        9741,  9953,  10168, 10384, 10602, 10822, 11045, 11269, 11496, 11724,
-        11955, 12187, 12422, 12658, 12897, 13137, 13380, 13624, 13871, 14119,
-        14369, 14622, 14876, 15132, 15390, 15650, 15911, 16175, 16440, 16708,
-        16977, 17248, 17521, 17795, 18071, 18350, 18630, 18911, 19195, 19480,
-        19767, 20056, 20346, 20638, 20932, 21227, 21524, 21823, 22124, 22426,
-        22729, 23035, 23341, 23650, 23960, 24272, 24585, 24900, 25216, 25534,
-        25853, 26174, 26496, 26820, 27145, 27471, 27799, 28129, 28460, 28792,
-        29126, 29461, 29797, 30135, 30474, 30814, 31156, 31499, 31843, 32189,
-        32536, 32884, 33233, 33583, 33935, 34288, 34642, 34997, 35354, 35711,
-        36070, 36429, 36790, 37152, 37515, 37879, 38244, 38610, 38978, 39346,
-        39715, 40085, 40456, 40828, 41201, 41575, 41949, 42325, 42701, 43079,
-        43457, 43836, 44216, 44596, 44978, 45360, 45743, 46127, 46511, 46896,
-        47282, 47669, 48056, 48444, 48832, 49222, 49611, 50002, 50393, 50784,
-        51176, 51569, 51962, 52356, 52750, 53144, 53539, 53935, 54331, 54727,
-        55124, 55521, 55919, 56317, 56715, 57114, 57513, 57912, 58312, 58711,
-        59111, 59512, 59912, 60313, 60714, 61115, 61516, 61918, 62319, 62721,
-        63123, 63525, 63927, 64329, 64731, 65133, 65535};
-    if (i == 0xFFFF) return 0xFFFF;
-    // Integer-only ease-in sine with linear interpolation
-    uint16_t idx  = i >> 8;           // high 8 bits for index (0..255)
-    uint16_t frac = i & 0xFF;         // low 8 bits for fractional part
-    uint16_t y0   = easeInSine16Table[idx];
-    uint16_t y1   = easeInSine16Table[idx + 1];
-    uint32_t diff = (uint32_t)y1 - y0;
-    // interpolate: y0 + diff * frac / 256, with rounding
-    return y0 + uint16_t((diff * frac + 0x80) >> 8);
+    if (i == 0)
+        return 0;
+    if (i == 65535)
+        return 65535;
+
+    // For 16-bit: use cos32 for efficiency and accuracy
+    // Map i from [0,65535] to [0,4194304] in cos32 space (zero to quarter wave)
+    // Formula: 1 - cos(t * π/2) where t goes from 0 to 1
+    // sin32/cos32 quarter cycle is 16777216/4 = 4194304
+    uint32_t angle = ((uint64_t)i * 4194304ULL) / 65535ULL;
+    int32_t cos_result = fl::cos32(angle);
+    
+    // Convert cos32 output and apply easing formula: 1 - cos(t * π/2)
+    // cos32 output range is [-2147418112, 2147418112]
+    // We want: (2147418112 - cos_result), then scale to [0, 65535]
+    int64_t adjusted = 2147418112LL - (int64_t)cos_result;
+    return (uint16_t)((uint64_t)adjusted * 65535ULL / 4294836224ULL); // 4294836224 = 2 * 2147418112
 }
 
 uint16_t easeOutSine16(uint16_t i) {
@@ -287,11 +269,17 @@ uint16_t easeOutSine16(uint16_t i) {
     if (i == 65535)
         return 65535;
 
-    // For 16-bit: use sin16 lookup table for efficiency
-    // Map i from [0,65535] to [0,16384] in sin16 space (zero to quarter wave)
+    // For 16-bit: use sin32 for efficiency and accuracy
+    // Map i from [0,65535] to [0,4194304] in sin32 space (zero to quarter wave)
     // Formula: sin(t * π/2) where t goes from 0 to 1
-    uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 0, 16384);
-    return sin16(angle);
+    // sin32 quarter cycle is 16777216/4 = 4194304
+    uint32_t angle = ((uint64_t)i * 4194304ULL) / 65535ULL;
+    int32_t sin_result = fl::sin32(angle);
+    
+    // Convert sin32 output range [-2147418112, 2147418112] to [0, 65535]
+    // sin32 output is in range -32767*65536 to +32767*65536
+    // For ease-out sine, we only use positive portion [0, 2147418112] -> [0, 65535]
+    return (uint16_t)((uint64_t)sin_result * 65535ULL / 2147418112ULL);
 }
 
 uint16_t easeInOutSine16(uint16_t i) {
@@ -302,11 +290,18 @@ uint16_t easeInOutSine16(uint16_t i) {
     if (i == 65535)
         return 65535;
 
-    // For 16-bit: use cos16 lookup table
-    // Map i from [0,65535] to [0,32768] in cos16 space (0 to half wave)
+    // For 16-bit: use cos32 for efficiency and accuracy
+    // Map i from [0,65535] to [0,8388608] in cos32 space (0 to half wave)
     // Formula: (1 - cos(π*t)) / 2 where t goes from 0 to 1
-    uint16_t angle = map_range<uint16_t, uint16_t>(i, 0, 65535, 0, 32768);
-    return (65535 - cos16(angle)) >> 1; // (65535 - cos) / 2
+    // sin32/cos32 half cycle is 16777216/2 = 8388608
+    uint32_t angle = ((uint64_t)i * 8388608ULL) / 65535ULL;
+    int32_t cos_result = fl::cos32(angle);
+    
+    // Convert cos32 output and apply easing formula: (1 - cos(π*t)) / 2
+    // cos32 output range is [-2147418112, 2147418112]
+    // We want: (2147418112 - cos_result) / 2, then scale to [0, 65535]
+    int64_t adjusted = (2147418112LL - (int64_t)cos_result) / 2;
+    return (uint16_t)((uint64_t)adjusted * 65535ULL / 2147418112ULL);
 }
 
 } // namespace fl
