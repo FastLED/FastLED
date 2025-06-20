@@ -494,6 +494,15 @@ class UIGroup : protected UIGroupImpl {
     
     // Constructor takes fl::Str as the only parameter for grouping name
     UIGroup(const fl::Str& groupName) : UIGroupImpl(groupName.c_str()) {}
+    
+    // Variadic template constructor: first argument is group name, remaining are UI elements
+    template<typename... UIElements>
+    UIGroup(const fl::Str& groupName, UIElements&... elements) 
+        : UIGroupImpl(groupName.c_str()) {
+        // Add all UI elements to this group
+        add(elements...);
+    }
+    
     ~UIGroup() {}
     
     // Get the group name
@@ -506,6 +515,21 @@ class UIGroup : protected UIGroupImpl {
     template<typename T>
     void addControl(T* control) {
         control->setGroup(name());
+    }
+
+private:
+    // Helper method to add multiple controls using variadic templates
+    template<typename T>
+    void add(T& control) {
+        // Base case: add single control
+        control.setGroup(name());
+    }
+    
+    template<typename T, typename... Rest>
+    void add(T& control, Rest&... rest) {
+        // Recursive case: add first control, then recurse with remaining
+        control.setGroup(name());
+        add(rest...);
     }
 };
 
