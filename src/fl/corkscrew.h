@@ -189,8 +189,9 @@ class Corkscrew {
     fl::vector<CRGB>& getBuffer();
     const fl::vector<CRGB>& getBuffer() const;
     
-    // Draw function that maps corkscrew LEDs to target Leds by sampling from rectangular buffer
-    void draw(fl::Leds& target_leds) const;
+    // Read from fl::Leds object and populate our internal rectangular buffer
+    // by sampling from the XY coordinates mapped to each corkscrew LED position
+    void readFrom(const fl::Leds& source_leds);
     
     // Clear the rectangular buffer 
     void clearBuffer();

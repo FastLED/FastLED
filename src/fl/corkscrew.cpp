@@ -152,38 +152,31 @@ const fl::vector<CRGB>& Corkscrew::getBuffer() const {
     return mRectangularBuffer;
 }
 
-void Corkscrew::draw(fl::Leds& target_leds) const {
-    if (!mBufferInitialized || mRectangularBuffer.empty()) {
-        // If buffer not initialized or empty, fill target with black
-        for (size_t i = 0; i < mInput.numLeds; ++i) {
-            if (i < target_leds.xymap().getTotal()) {
-                target_leds.rgb()[i] = CRGB::Black;
-            }
-        }
-        return;
-    }
+void Corkscrew::readFrom(const fl::Leds& source_leds) {
+    // Initialize the buffer if not already done
+    initializeBuffer();
     
-    // Iterate through each LED in the corkscrew and sample from rectangular buffer
+    // Iterate through each LED in the corkscrew
     for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
         // Get the rectangular coordinates for this corkscrew LED
         vec2f rect_pos = at_exact(static_cast<uint16_t>(led_idx));
         
-        // Convert to integer coordinates for sampling (using simple rounding)
-        int x = static_cast<int>(rect_pos.x + 0.5f);
-        int y = static_cast<int>(rect_pos.y + 0.5f);
+        // Convert to integer coordinates for indexing
+        vec2i16 coord(static_cast<int16_t>(rect_pos.x + 0.5f), 
+                      static_cast<int16_t>(rect_pos.y + 0.5f));
         
         // Clamp coordinates to buffer bounds
-        x = MAX(0, MIN(x, static_cast<int>(mState.width) - 1));
-        y = MAX(0, MIN(y, static_cast<int>(mState.height) - 1));
+        coord.x = MAX(0, MIN(coord.x, static_cast<int16_t>(mState.width) - 1));
+        coord.y = MAX(0, MIN(coord.y, static_cast<int16_t>(mState.height) - 1));
         
-        // Sample from rectangular buffer using row-major indexing
-        size_t buffer_idx = static_cast<size_t>(y) * static_cast<size_t>(mState.width) + static_cast<size_t>(x);
+        // Sample from the source fl::Leds using its XY mapping
+        CRGB sampled_color = source_leds(coord.x, coord.y);
         
-        // Set the corkscrew LED if within bounds
-        if (led_idx < target_leds.xymap().getTotal() && buffer_idx < mRectangularBuffer.size()) {
-            target_leds.rgb()[led_idx] = mRectangularBuffer[buffer_idx];
-        } else if (led_idx < target_leds.xymap().getTotal()) {
-            target_leds.rgb()[led_idx] = CRGB::Black;
+        // Store in our rectangular buffer using row-major indexing
+        size_t buffer_idx = static_cast<size_t>(coord.y) * static_cast<size_t>(mState.width) + static_cast<size_t>(coord.x);
+        
+        if (buffer_idx < mRectangularBuffer.size()) {
+            mRectangularBuffer[buffer_idx] = sampled_color;
         }
     }
 }

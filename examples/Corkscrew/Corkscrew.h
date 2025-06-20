@@ -10,6 +10,27 @@ drawing to a rectangular grid, and then mapping that to a corkscrew.
 However, to make sure the above mapping works correctly, we have
 to test that the forward mapping works correctly first.
 
+NEW: Rectangular Buffer Support
+===============================
+You can now draw into a rectangular fl::Leds grid and read that 
+into the corkscrew's internal buffer for display:
+
+Example usage:
+```cpp
+// Create a rectangular grid to draw into
+CRGB grid_buffer[width * height];
+fl::Leds grid(grid_buffer, width, height);
+
+// Draw your 2D patterns into the grid
+grid(x, y) = CRGB::Red;  // etc.
+
+// Read from the grid into the corkscrew's internal buffer
+corkscrew.readFrom(grid);
+
+// Access the populated buffer
+auto& buffer = corkscrew.getBuffer();
+// The buffer now contains the corkscrew mapping of your 2D pattern
+```
 */
 
 #include "fl/assert.h"

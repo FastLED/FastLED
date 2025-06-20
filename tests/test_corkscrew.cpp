@@ -203,26 +203,39 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
         REQUIRE(buffer[i] == CRGB::Black);
     }
     
-    // Create a checkerboard pattern in the rectangular buffer
+    // Create a source fl::Leds object with a checkerboard pattern
+    CRGB source_data[width * height];
+    fl::Leds source_leds(source_data, width, height);
+    
+    // Fill source with checkerboard pattern
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            size_t idx = y * width + x;
             if ((x + y) % 2 == 0) {
-                buffer[idx] = CRGB::Blue;
+                source_leds(x, y) = CRGB::Blue;
             } else {
-                buffer[idx] = CRGB::Green;
+                source_leds(x, y) = CRGB::Green;
             }
         }
     }
     
-    // Create target LED array and Leds object, then draw from the rectangular buffer
-    CRGB target_leds[16];
-    fl::Leds leds(target_leds, 16, 1); // Linear arrangement for corkscrew
-    corkscrew.draw(leds);
+    // Read from the source leds into our internal buffer
+    corkscrew.readFrom(source_leds);
     
-    // Verify that all target LEDs have been set (should be either blue or green)
-    for (size_t i = 0; i < 16; ++i) {
-        REQUIRE((target_leds[i] == CRGB::Blue || target_leds[i] == CRGB::Green));
-        REQUIRE(target_leds[i] != CRGB::Black); // Should not be black since we filled the buffer
+    // Verify that the buffer has been populated with colors from the source
+    // Note: Not every pixel in the rectangular buffer may be written to by the corkscrew mapping
+    bool found_blue = false;
+    bool found_green = false;
+    int non_black_count = 0;
+    
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        if (buffer[i] == CRGB::Blue) found_blue = true;
+        if (buffer[i] == CRGB::Green) found_green = true;
+        if (buffer[i] != CRGB::Black) non_black_count++;
     }
+    
+    // Should have found both colors in our checkerboard pattern
+    REQUIRE(found_blue);
+    REQUIRE(found_green);
+    // Should have some non-black pixels since we read from a filled source
+    REQUIRE(non_black_count > 0);
 }
