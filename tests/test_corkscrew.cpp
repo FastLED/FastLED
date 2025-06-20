@@ -215,9 +215,10 @@ TEST_CASE("TestCorkscrewBufferFunctionality") {
         }
     }
     
-    // Create target LED array and draw from the rectangular buffer
+    // Create target LED array and Leds object, then draw from the rectangular buffer
     CRGB target_leds[16];
-    corkscrew.draw(target_leds);
+    fl::Leds leds(target_leds, 16, 1); // Linear arrangement for corkscrew
+    corkscrew.draw(leds);
     
     // Verify that all target LEDs have been set (should be either blue or green)
     for (size_t i = 0; i < 16; ++i) {

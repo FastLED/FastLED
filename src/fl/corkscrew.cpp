@@ -8,6 +8,7 @@
 #include "fl/math_macros.h"
 #include "fl/unused.h"
 #include "fl/map_range.h"
+#include "fl/leds.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -151,11 +152,13 @@ const fl::vector<CRGB>& Corkscrew::getBuffer() const {
     return mRectangularBuffer;
 }
 
-void Corkscrew::draw(CRGB* target_leds) const {
+void Corkscrew::draw(fl::Leds& target_leds) const {
     if (!mBufferInitialized || mRectangularBuffer.empty()) {
         // If buffer not initialized or empty, fill target with black
         for (size_t i = 0; i < mInput.numLeds; ++i) {
-            target_leds[i] = CRGB::Black;
+            if (i < target_leds.xymap().getTotal()) {
+                target_leds.rgb()[i] = CRGB::Black;
+            }
         }
         return;
     }
@@ -176,10 +179,11 @@ void Corkscrew::draw(CRGB* target_leds) const {
         // Sample from rectangular buffer using row-major indexing
         size_t buffer_idx = static_cast<size_t>(y) * static_cast<size_t>(mState.width) + static_cast<size_t>(x);
         
-        if (buffer_idx < mRectangularBuffer.size()) {
-            target_leds[led_idx] = mRectangularBuffer[buffer_idx];
-        } else {
-            target_leds[led_idx] = CRGB::Black;
+        // Set the corkscrew LED if within bounds
+        if (led_idx < target_leds.xymap().getTotal() && buffer_idx < mRectangularBuffer.size()) {
+            target_leds.rgb()[led_idx] = mRectangularBuffer[buffer_idx];
+        } else if (led_idx < target_leds.xymap().getTotal()) {
+            target_leds.rgb()[led_idx] = CRGB::Black;
         }
     }
 }

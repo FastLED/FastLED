@@ -47,6 +47,9 @@
 
 namespace fl {
 
+// Forward declaration
+class Leds;
+
 // Simple constexpr functions for compile-time corkscrew dimension calculation
 constexpr uint16_t calculateCorkscrewWidth(float totalTurns, uint16_t numLeds) {
     return static_cast<uint16_t>(ceil_constexpr(static_cast<float>(numLeds) / totalTurns));
@@ -186,8 +189,8 @@ class Corkscrew {
     fl::vector<CRGB>& getBuffer();
     const fl::vector<CRGB>& getBuffer() const;
     
-    // Draw function that maps corkscrew LEDs to target array by sampling from rectangular buffer
-    void draw(CRGB* target_leds) const;
+    // Draw function that maps corkscrew LEDs to target Leds by sampling from rectangular buffer
+    void draw(fl::Leds& target_leds) const;
     
     // Clear the rectangular buffer 
     void clearBuffer();
