@@ -51,7 +51,7 @@ using namespace fl;
 
 UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
-    "Tests the ability to map a cork screw onto a 2D cylindrical surface");
+    "Tests the ability to map a cork screw onto a 2D cylindrical surface. ");
 
 UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
@@ -66,8 +66,8 @@ UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // Color boost controls
-UICheckbox boostSaturation("Boost Saturation", true);
-UICheckbox boostContrast("Boost Contrast", false);
+UINumberField saturationFunction("Saturation Function", 1, 0, 9);
+UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
@@ -80,6 +80,23 @@ Corkscrew corkscrew(corkscrewInput);
 // Simple position tracking - one variable for both modes
 static float currentPosition = 0.0f;
 static uint32_t lastUpdateTime = 0;
+
+EaseType getEaseType(int value) {
+    switch (value) {
+        case 0: return EASE_NONE;
+        case 1: return EASE_IN_QUAD;
+        case 2: return EASE_OUT_QUAD;
+        case 3: return EASE_IN_OUT_QUAD;
+        case 4: return EASE_IN_CUBIC;
+        case 5: return EASE_OUT_CUBIC;
+        case 6: return EASE_IN_OUT_CUBIC;
+        case 7: return EASE_IN_SINE;
+        case 8: return EASE_OUT_SINE;
+        case 9: return EASE_IN_OUT_SINE;
+    }
+    FL_ASSERT(false, "Invalid ease type");
+    return EASE_NONE;
+}
 
 // Option 2: Constexpr dimensions for compile-time array sizing
 constexpr uint16_t CORKSCREW_WIDTH =
@@ -171,15 +188,30 @@ void fillFrameBufferNoise() {
         dataSmoothing = 200 - (noise_speed * 4);
     }
     
-    // Generate noise for each pixel in the frame buffer
+    // Generate noise for each pixel in the frame buffer using cylindrical mapping
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
-            // Calculate offsets for this pixel
-            int xoffset = noise_scale * x;
-            int yoffset = noise_scale * y;
+            // Convert rectangular coordinates to cylindrical coordinates
+            // Map x to angle (0 to 2*PI), y remains as height
+            float angle = (float(x) / float(width)) * 2.0f * PI;
             
-            // Generate 8-bit noise value using 3D Perlin noise
-            uint8_t data = inoise8(noise_x + xoffset, noise_y + yoffset, noise_z);
+            // Convert cylindrical coordinates to cartesian for noise sampling
+            // Use a cylinder radius for the noise sampling - adjust this value to control
+            // how "tight" or "loose" the cylindrical mapping appears
+            float cylinder_radius = 100.0f; // Adjust this value to change the cylinder size in noise space
+            
+            // Calculate cartesian coordinates on the cylinder surface
+            float noise_x_cyl = cos(angle) * cylinder_radius;
+            float noise_y_cyl = sin(angle) * cylinder_radius;
+            float noise_z_height = float(y) * noise_scale; // Height component
+            
+            // Apply noise scale and time-based offsets
+            int xoffset = int(noise_x_cyl * noise_scale / 100.0f) + noise_x;
+            int yoffset = int(noise_y_cyl * noise_scale / 100.0f) + noise_y;
+            int zoffset = int(noise_z_height) + noise_z;
+            
+            // Generate 8-bit noise value using 3D Perlin noise with cylindrical coordinates
+            uint8_t data = inoise8(xoffset, yoffset, zoffset);
             
             // Expand the range from ~16-238 to 0-255 (from NoisePlusPalette)
             data = qsub8(data, 16);
@@ -214,10 +246,10 @@ void fillFrameBufferNoise() {
             // Get color from palette and set pixel
             CRGB color = ColorFromPalette(noisePalette, index, bri);
             
-            // Apply color boost if enabled
-            if (boostSaturation.value() || boostContrast.value()) {
-                color = color.colorBoost(boostSaturation.value(), boostContrast.value());
-            }
+            // Apply color boost using ease functions
+            EaseType sat_ease = getEaseType(saturationFunction.value());
+            EaseType lum_ease = getEaseType(luminanceFunction.value());
+            color = color.colorBoost(sat_ease, lum_ease);
             
             frameBuffer.at(x, y) = color;
         }
@@ -231,10 +263,10 @@ void drawNoise(uint32_t now) {
 void draw(float pos) {
     if (allWhite) {
         CRGB whiteColor = CRGB(8, 8, 8);
-        // Apply color boost if enabled
-        if (boostSaturation.value() || boostContrast.value()) {
-            whiteColor = whiteColor.colorBoost(boostSaturation.value(), boostContrast.value());
-        }
+        // Apply color boost using ease functions
+        EaseType sat_ease = getEaseType(saturationFunction.value());
+        EaseType lum_ease = getEaseType(luminanceFunction.value());
+        whiteColor = whiteColor.colorBoost(sat_ease, lum_ease);
         for (size_t i = 0; i < frameBuffer.size(); ++i) {
             frameBuffer.data()[i] = whiteColor;
         }
@@ -244,10 +276,10 @@ void draw(float pos) {
         Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
         FL_WARN("pos_tile: " << pos_tile);
         CRGB color = CRGB::Blue;
-        // Apply color boost if enabled
-        if (boostSaturation.value() || boostContrast.value()) {
-            color = color.colorBoost(boostSaturation.value(), boostContrast.value());
-        }
+        // Apply color boost using ease functions
+        EaseType sat_ease = getEaseType(saturationFunction.value());
+        EaseType lum_ease = getEaseType(luminanceFunction.value());
+        color = color.colorBoost(sat_ease, lum_ease);
         // Draw each pixel in the 2x2 tile using the new wrapping API
         for (int dx = 0; dx < 2; ++dx) {
             for (int dy = 0; dy < 2; ++dy) {
@@ -269,10 +301,10 @@ void draw(float pos) {
         vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
         
         CRGB color = CRGB::Blue;
-        // Apply color boost if enabled
-        if (boostSaturation.value() || boostContrast.value()) {
-            color = color.colorBoost(boostSaturation.value(), boostContrast.value());
-        }
+        // Apply color boost using ease functions
+        EaseType sat_ease = getEaseType(saturationFunction.value());
+        EaseType lum_ease = getEaseType(luminanceFunction.value());
+        color = color.colorBoost(sat_ease, lum_ease);
         
         // Now map the cork screw position to the cylindrical buffer that we
         // will draw.
