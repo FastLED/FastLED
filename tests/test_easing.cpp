@@ -374,3 +374,119 @@ TEST_CASE("All easing functions monotonicity tests") {
         }
     }
 }
+
+TEST_CASE("All easing functions 8-bit vs 16-bit consistency tests") {
+    // Test consistency between 8-bit and 16-bit versions of all easing functions
+    const fl::EaseType types[] = {
+        fl::EASE_NONE,
+        fl::EASE_IN_QUAD,
+        fl::EASE_OUT_QUAD,
+        fl::EASE_IN_OUT_QUAD,
+        fl::EASE_IN_CUBIC,
+        fl::EASE_OUT_CUBIC,
+        fl::EASE_IN_OUT_CUBIC,
+        fl::EASE_IN_SINE,
+        fl::EASE_OUT_SINE,
+        fl::EASE_IN_OUT_SINE
+    };
+    
+    // Define expected tolerances for different easing types
+    const int tolerances[] = {
+        1, // EASE_NONE - should be perfect
+        2, // EASE_IN_QUAD - basic precision differences
+        2, // EASE_OUT_QUAD - basic precision differences  
+        2, // EASE_IN_OUT_QUAD - basic precision differences
+        3, // EASE_IN_CUBIC - higher tolerance for cubic calculations
+        3, // EASE_OUT_CUBIC - higher tolerance for cubic calculations
+        3, // EASE_IN_OUT_CUBIC - higher tolerance for cubic calculations
+        4, // EASE_IN_SINE - sine functions have more precision loss
+        4, // EASE_OUT_SINE - sine functions have more precision loss
+        4  // EASE_IN_OUT_SINE - sine functions have more precision loss
+    };
+    
+    SUBCASE("8-bit vs 16-bit scaling consistency") {
+        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
+            fl::EaseType type = types[type_idx];
+            int tolerance = tolerances[type_idx];
+            
+            // Track maximum difference found for this easing type
+            int max_diff = 0;
+            uint8_t worst_input = 0;
+            
+            // Test all 8-bit input values
+            for (uint16_t i = 0; i <= 255; ++i) {
+                uint8_t input8 = i;
+                uint16_t input16 = map8_to_16(input8);
+                
+                uint8_t result8 = fl::ease8(type, input8);
+                uint16_t result16 = fl::ease16(type, input16);
+                uint8_t scaled_result16 = map16_to_8(result16);
+                
+                int16_t diff = std::abs((int16_t)result8 - (int16_t)scaled_result16);
+                
+                // Track the worst case for reporting
+                if (diff > max_diff) {
+                    max_diff = diff;
+                    worst_input = input8;
+                }
+                
+                INFO("Testing EaseType " << (int)type 
+                     << " at input " << (int)input8 
+                     << " (8-bit result: " << (int)result8
+                     << ", 16-bit scaled result: " << (int)scaled_result16
+                     << ", diff: " << diff << ")");
+                CHECK_LE(diff, tolerance);
+            }
+            
+            // Log the maximum difference found for this easing type
+            INFO("EaseType " << (int)type << " maximum difference: " << max_diff 
+                 << " at input " << (int)worst_input);
+        }
+    }
+    
+    SUBCASE("Boundary values consistency") {
+        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
+            fl::EaseType type = types[type_idx];
+            
+            // Test boundary values (0 and max) - these should be exact
+            uint8_t result8_0 = fl::ease8(type, 0);
+            uint16_t result16_0 = fl::ease16(type, 0);
+            uint8_t scaled_result16_0 = map16_to_8(result16_0);
+            
+            uint8_t result8_255 = fl::ease8(type, 255);
+            uint16_t result16_65535 = fl::ease16(type, 65535);
+            uint8_t scaled_result16_255 = map16_to_8(result16_65535);
+            
+            INFO("Testing EaseType " << (int)type << " boundary values");
+            CHECK_EQ(result8_0, scaled_result16_0);
+            CHECK_EQ(result8_255, scaled_result16_255);
+            
+            // Both should map to exact boundaries
+            CHECK_EQ(result8_0, 0);
+            CHECK_EQ(result8_255, 255);
+            CHECK_EQ(scaled_result16_0, 0);
+            CHECK_EQ(scaled_result16_255, 255);
+        }
+    }
+    
+    SUBCASE("Midpoint consistency") {
+        for (size_t type_idx = 0; type_idx < sizeof(types) / sizeof(types[0]); ++type_idx) {
+            fl::EaseType type = types[type_idx];
+            
+            // Test midpoint values - should be relatively close
+            uint8_t result8_mid = fl::ease8(type, 128);
+            uint16_t result16_mid = fl::ease16(type, 32768);
+            uint8_t scaled_result16_mid = map16_to_8(result16_mid);
+            
+            int16_t diff = std::abs((int16_t)result8_mid - (int16_t)scaled_result16_mid);
+            
+            INFO("Testing EaseType " << (int)type << " midpoint consistency"
+                 << " (8-bit: " << (int)result8_mid
+                 << ", 16-bit scaled: " << (int)scaled_result16_mid
+                 << ", diff: " << diff << ")");
+                 
+            // Use the same tolerance as the general test
+            CHECK_LE(diff, tolerances[type_idx]);
+        }
+    }
+}
