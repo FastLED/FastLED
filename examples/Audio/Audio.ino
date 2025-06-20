@@ -178,12 +178,12 @@ void loop() {
             continue;
         }
         float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
+        FL_WARN("Audio reactive fade tracker output: " << fade);
         shiftUp();
-        // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
+        FL_WARN("Audio sample size: " << sample.pcm().size());
         soundLevelMeter.processBlock(sample.pcm());
-        // FASTLED_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
-        // FASTLED_WARN("getDBFS: " << dbfs);
+        FL_WARN("Audio reactive dBFS level: " << dbfs);
         int32_t max = 0;
         for (int i = 0; i < sample.pcm().size(); ++i) {
             int32_t x = ABS(sample.pcm()[i]);
@@ -194,56 +194,63 @@ void loop() {
         float anim =
             fl::map_range<float, float>(max, 0.0f, 32768.0f, 0.0f, 1.0f);
         anim = fl::clamp(anim, 0.0f, 1.0f);
+        FL_WARN("Audio reactive animation level: " << anim << " (max PCM: " << max << ")");
 
         x = fl::map_range<float, float>(anim, 0.0f, 1.0f, 0.0f, WIDTH - 1);
+        FL_WARN("Audio reactive X position: " << x);
         // FASTLED_WARN("x: " << x);
 
         // fft.run(sample.pcm(), &fftOut);
         sample.fft(&fftOut);
-
-        // FASTLED_ASSERT(fftOut.bins_raw.size() == WIDTH_2X,
-        //                "FFT bins size mismatch");
+        FL_WARN("Audio reactive FFT processed, bin count: " << fftOut.bins_raw.size());
 
         if (enableFFT) {
             auto max_x = fftOut.bins_raw.size() - 1;
+            float max_fft_db = 0.0f;
+            float avg_fft_db = 0.0f;
             for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
                 auto x = i;
                 auto v = fftOut.bins_db[i];
+                if (v > max_fft_db) max_fft_db = v;
+                avg_fft_db += v;
                 // Map audio intensity to a position in the heat palette (0-255)
                 v = fl::map_range<float, float>(v, 45, 70, 0, 1.f);
                 v = fl::clamp(v, 0.0f, 1.0f);
                 uint8_t heatIndex =
                     fl::map_range<float, uint8_t>(v, 0, 1, 0, 255);
 
-                // FASTLED_WARN(v);
-
                 // Use FastLED's built-in HeatColors palette
                 auto c = ColorFromPalette(HeatColors_p, heatIndex);
                 c.fadeToBlackBy(255 - heatIndex);
                 framebuffer[frameBufferXY(x, 0)] = c;
-                // FASTLED_WARN("y: " << i << " b: " << b);
             }
+            avg_fft_db /= fftOut.bins_raw.size();
+            FL_WARN("Audio reactive FFT analysis - Max dB: " << max_fft_db << ", Avg dB: " << avg_fft_db);
         }
 
         if (enableVolumeVis) {
+            FL_WARN("Audio reactive volume visualization at X: " << x << ", Y: " << HEIGHT / 2);
             framebuffer[frameBufferXY(x, HEIGHT / 2)] = CRGB(0, 255, 0);
         }
 
         if (enableRMS) {
             float rms = sample.rms();
-            FASTLED_WARN("RMS: " << rms);
+            FL_WARN("Audio reactive RMS raw: " << rms);
             rms = fl::map_range<float, float>(rms, 0.0f, 32768.0f, 0.0f, 1.0f);
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
+            FL_WARN("Audio reactive RMS mapped to width: " << rms << " (Y: " << HEIGHT * 3 / 4 << ")");
             framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
         }
         if (true) {
             uint16_t fade_width = fade * (WIDTH - 1);
             uint16_t h = HEIGHT / 4;
+            FL_WARN("Audio reactive fade visualization - Width: " << fade_width << ", Height: " << h);
             // yellow
             int index = frameBufferXY(fade_width, h);
             auto c = CRGB(255, 255, 0);
             framebuffer[index] = c;
         }
+        FL_WARN("Audio reactive frame processing complete");
     }
 
     // now downscale the framebuffer to the led matrix
