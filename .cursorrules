@@ -79,6 +79,26 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns.
 
+### Container Parameter Types
+**Prefer `fl::Slice<T>` over `fl::Vector<T>` or arrays for function parameters.** `fl::Slice<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
+
+**Examples:**
+- ✅ `void processData(fl::Slice<const uint8_t> data)` - accepts arrays, vectors, and other containers
+- ❌ `void processData(fl::Vector<uint8_t>& data)` - only accepts fl::Vector
+- ❌ `void processData(uint8_t* data, size_t length)` - requires manual length tracking
+
+**Benefits:**
+- **Automatic conversion:** `fl::Slice<T>` can automatically convert from `fl::Vector<T>`, C-style arrays, and other container types
+- **Type safety:** Maintains compile-time type checking while being more flexible than raw pointers
+- **Performance:** Zero-cost abstraction that avoids unnecessary copying or allocation
+- **Consistency:** Provides a uniform interface for working with contiguous data
+
+**When to use `fl::Vector<T>` instead:**
+- When you need ownership and dynamic resizing capabilities
+- When storing data as a class member that needs to persist
+
+**Why:** Using `fl::Slice<T>` for parameters makes functions more reusable and avoids forcing callers to convert their data to specific container types.
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests
