@@ -4,15 +4,29 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - 'README.md'
-      - '**/README.md'
+    paths:
+      - 'src/**'
+      - 'examples/wasm/**'
+      - 'examples/WasmScreenCoords/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
   pull_request_target:
     branches:
       - master
-    paths-ignore:
-      - 'README.md'
-      - '**/README.md'
+    paths:
+      - 'src/**'
+      - 'examples/wasm/**'
+      - 'examples/WasmScreenCoords/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
 
 jobs:
   build:
@@ -92,4 +106,3 @@ jobs:
         run: |
           uv run ci/wasm_test.py
         continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
-
