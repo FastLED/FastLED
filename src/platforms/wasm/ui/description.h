@@ -15,6 +15,8 @@ class jsDescriptionImpl {
         return *this;
     }
 
+    const fl::string &text() const { return mText; }
+
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::string &groupName() const { return mGroup; }
@@ -25,6 +27,7 @@ class jsDescriptionImpl {
   private:
     jsUiInternalPtr mInternal;
     fl::string mGroup;
+    fl::string mText;
 };
 
 } // namespace fl

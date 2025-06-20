@@ -8,7 +8,7 @@ namespace fl {
 
 class jsTitleImpl {
   public:
-    jsTitleImpl(const fl::string &name);
+    jsTitleImpl(const fl::string &text);
     ~jsTitleImpl();
     jsTitleImpl &Group(const fl::string &name) {
         mGroup = name;
@@ -18,6 +18,7 @@ class jsTitleImpl {
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::string &groupName() const { return mGroup; }
+    const fl::string &text() const { return mText; }
     
     // Method to allow parent UIBase class to set the group
     void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
@@ -25,6 +26,7 @@ class jsTitleImpl {
   private:
     jsUiInternalPtr mInternal;
     fl::string mGroup;
+    fl::string mText;
 };
 
 } // namespace fl

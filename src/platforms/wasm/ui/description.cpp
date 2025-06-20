@@ -9,7 +9,7 @@ using namespace fl;
 
 namespace fl {
 
-jsDescriptionImpl::jsDescriptionImpl(const Str &text) {
+jsDescriptionImpl::jsDescriptionImpl(const Str &text): mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
     jsUiInternal::ToJsonFunction to_json_fcn =
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
