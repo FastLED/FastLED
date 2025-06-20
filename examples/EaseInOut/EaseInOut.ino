@@ -21,11 +21,12 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructSerpentine(MATRIX_WIDTH, MATRIX_HEIGHT);
 
 UITitle title("EaseInOut");
-UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine.");
+UIDescription description("Use the xPosition slider to see the ease function curve. Use the Ease Type number field to select different easing functions: 0=None, 1=In Quad, 2=Out Quad, 3=In-Out Quad, 4=In Cubic, 5=Out Cubic, 6=In-Out Cubic, 7=In Sine, 8=Out Sine, 9=In-Out Sine. Use the 16-bit checkbox to toggle between 16-bit (checked) and 8-bit (unchecked) precision.");
 
-// UI Slider that goes from 0 to 1.0
+// UI Controls
 UISlider xPosition("xPosition", 0.0f, 0.0f, 1.0f, 0.01f);
 UINumberField easeTypeNumber("Ease Type", 2, 0, 9);
+UICheckbox use16Bit("16-bit", true); // Default checked for 16-bit precision
 
 EaseType getEaseType(int value) {
     switch (value) {
@@ -73,15 +74,21 @@ void loop() {
     // Map slider value to X coordinate (0 to width-1)
     uint8_t x = map(sliderValue * 1000, 0, 1000, 0, MATRIX_WIDTH - 1);
 
-    // Convert slider value to 16-bit input for ease function
-    uint16_t easeInput = map(sliderValue * 1000, 0, 1000, 0, 65535);
-
-    // Get the selected ease type and apply it
+    // Get the selected ease type
     EaseType selectedEaseType = getEaseType(easeTypeNumber.value());
-    uint16_t easeOutput = ease16(selectedEaseType, easeInput);
-
-    // Map eased output to Y coordinate (0 to height-1)
-    uint8_t y = map(easeOutput, 0, 65535, 0, MATRIX_HEIGHT - 1);
+    
+    uint8_t y;
+    if (use16Bit.value()) {
+        // Use 16-bit precision
+        uint16_t easeInput = map(sliderValue * 1000, 0, 1000, 0, 65535);
+        uint16_t easeOutput = ease16(selectedEaseType, easeInput);
+        y = map(easeOutput, 0, 65535, 0, MATRIX_HEIGHT - 1);
+    } else {
+        // Use 8-bit precision
+        uint8_t easeInput = map(sliderValue * 1000, 0, 1000, 0, 255);
+        uint8_t easeOutput = ease8(selectedEaseType, easeInput);
+        y = map(easeOutput, 0, 255, 0, MATRIX_HEIGHT - 1);
+    }
 
     // Draw white dot at the calculated position
     if (x < MATRIX_WIDTH && y < MATRIX_HEIGHT) {
