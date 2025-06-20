@@ -7,7 +7,6 @@
 // Check for C++11 and if std::initializer_list exists
 #if defined(__AVR__)
 // Emulated initializer_list for AVR platforms
-#define FASTLED_HAS_INITIALIZER_LIST 1
 namespace fl {
     template<typename T>
     class initializer_list {
@@ -55,7 +54,6 @@ namespace fl {
 }
 #else
 #include <initializer_list>
-#define FASTLED_HAS_INITIALIZER_LIST 1
 namespace fl {
     using std::initializer_list;
 }

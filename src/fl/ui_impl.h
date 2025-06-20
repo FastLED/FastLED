@@ -272,7 +272,7 @@ class UIDropdownImpl {
         }
     }
 
-#if FASTLED_HAS_INITIALIZER_LIST
+
     // Constructor with initializer_list (only available if C++11 support exists)
     UIDropdownImpl(const char *name, fl::initializer_list<fl::Str> options) 
         : mSelectedIndex(0) {
@@ -284,8 +284,7 @@ class UIDropdownImpl {
             mOptions.push_back(fl::Str("No options"));
         }
     }
-#endif
-    
+
     ~UIDropdownImpl() {}
     
     fl::Str value() const { 

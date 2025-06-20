@@ -48,7 +48,6 @@ jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::vector<fl::Str>& optio
     commonInit(name);
 }
 
-#if FASTLED_HAS_INITIALIZER_LIST
 // Constructor with initializer_list (only available if C++11 support exists)
 jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::Str> options) 
     : mSelectedIndex(0) {
@@ -60,7 +59,6 @@ jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::Str> op
     }
     commonInit(name);
 }
-#endif
 
 jsDropdownImpl::~jsDropdownImpl() { jsUiManager::removeComponent(mInternal); }
 

@@ -15,10 +15,8 @@ class jsDropdownImpl {
     // Constructor with fl::vector of options
     jsDropdownImpl(const fl::Str &name, const fl::vector<fl::Str>& options);
 
-#if FASTLED_HAS_INITIALIZER_LIST
-    // Constructor with initializer_list (only available if C++11 support exists)
+    // Constructor with initializer_list (FastLED requires C++11 support)
     jsDropdownImpl(const fl::Str &name, fl::initializer_list<fl::Str> options);
-#endif
     
     ~jsDropdownImpl();
     jsDropdownImpl &Group(const fl::Str &name) {
