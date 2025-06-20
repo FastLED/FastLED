@@ -4,6 +4,10 @@
 
 The FastLED corkscrew projection system combines `computeTile` (implemented through the `splat` function) and `multiSample` (implemented in `readFromMulti`) to create a sophisticated pipeline that maps from a 2D XY grid to corkscrew LED arrangements with sub-pixel accuracy.
 
+Simply put, write to an XY grid and that image can be mapped onto a corkscrew. Dense 144LED @ 3.28 are cheap and readily avialable. They have
+brightness, density and can be mapped over organic material like a common
+walking stick.
+
 ## Pipeline Components
 
 ### 1. User Paints to XY Grid
@@ -193,4 +197,9 @@ The weighted sampling naturally provides anti-aliasing:
 - **Memory**: O(W×H) for grid (O(N) for corkscrew LEDs where O(N) <= O(WxH) == O(WxW))
 - **Computation**: O(N) with 4 samples per LED (constant factor)
 - **Quality**: Sub-pixel accurate with built-in anti-aliasing
-- **Flexibility**: Works with any helical LED arrangement
+
+
+## Future Work
+
+Often led strips are soldered together. These leaves a gap between the other
+leds on the strip. This gab should be accounted for to maximize spatial accuracy with rendering straight lines (e.g. text).
