@@ -298,7 +298,7 @@ def main() -> None:
                 cmd += " --progress --output-on-failure"
             else:
                 # Full verbose mode when explicitly requested
-                cmd += " --verbose --output-on-failure"
+                cmd += " --verbose --progress --output-on-failure"
             if only_run_failed_test:
                 cmd += " --rerun-failed"
             rtn, stdout = run_command(cmd)
