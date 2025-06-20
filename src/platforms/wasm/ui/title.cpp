@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__
 
 #include "title.h"
 #include "../js.h"
@@ -20,6 +20,10 @@ jsTitleImpl::jsTitleImpl(const Str &text) : mText(text) {
 }
 
 jsTitleImpl::~jsTitleImpl() {}
+
+const fl::string &jsTitleImpl::name() const {
+    return mInternal->name();
+}
 
 void jsTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = mInternal->name();
