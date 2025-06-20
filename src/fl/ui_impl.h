@@ -1,10 +1,11 @@
-THIS SHOULD BE A LINTER ERROR#pragma once
+#pragma once
 
 #include <stdint.h>
 
 #include "fl/audio.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
+#include "fl/slice.h"
 #include "fl/str.h"
 #include "fl/template_magic.h"
 #include "fl/unused.h"
