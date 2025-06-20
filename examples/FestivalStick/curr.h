@@ -273,16 +273,7 @@ void drawNoise(uint32_t now) {
 }
 
 void draw(float pos) {
-    if (allWhite) {
-        CRGB whiteColor = CRGB(8, 8, 8);
-        // Apply color boost using ease functions
-        EaseType sat_ease = getEaseType(saturationFunction.value());
-        EaseType lum_ease = getEaseType(luminanceFunction.value());
-        whiteColor = whiteColor.colorBoost(sat_ease, lum_ease);
-        for (size_t i = 0; i < frameBuffer.size(); ++i) {
-            frameBuffer.data()[i] = whiteColor;
-        }
-    }
+
 
     if (splatRendering) {
         Tile2x2_u8_wrap pos_tile = corkscrew.at_wrap(pos);
@@ -326,6 +317,13 @@ void draw(float pos) {
 void loop() {
     uint32_t now = millis();
     fl::clear(frameBuffer);
+
+    if (allWhite) {
+        CRGB whiteColor = CRGB(8, 8, 8);
+        for (size_t i = 0; i < frameBuffer.size(); ++i) {
+            frameBuffer.data()[i] = whiteColor;
+        }
+    }
 
     // Update the corkscrew mapping with auto-advance or manual position control
     float combinedPosition = get_position(now);
