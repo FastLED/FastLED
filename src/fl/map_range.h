@@ -6,9 +6,10 @@
 #include "fl/clamp.h"
 #include "fl/force_inline.h"
 #include "fl/math_macros.h"
+#include "fl/compiler_control.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
@@ -114,4 +115,4 @@ inline bool equals(double d, double d2) { return ALMOST_EQUAL_DOUBLE(d, d2); }
 
 } // namespace fl
 
-#pragma GCC diagnostic pop
+FL_DISABLE_WARNING_POP

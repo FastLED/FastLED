@@ -6,9 +6,10 @@
 #include "fl/transform.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/trig8.h"
+#include "fl/compiler_control.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
@@ -158,4 +159,4 @@ Matrix3x3f TransformFloat::compile() const {
 
 } // namespace fl
 
-#pragma GCC diagnostic pop
+FL_DISABLE_WARNING_POP
