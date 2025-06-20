@@ -1,4 +1,12 @@
-
+/// @file    Audio.ino
+/// @brief   Audio visualization example with XY mapping
+/// @example Audio.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 /*
 This demo is best viewed using the FastLED compiler.

@@ -1,3 +1,13 @@
+/// @file    FxWater.ino
+/// @brief   Water effect with XYMap
+/// @example FxWater.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
+
 // Author: sutaburosu
 
 // based on https://web.archive.org/web/20160418004149/http://freespace.virgin.net/hugo.elias/graphics/x_water.htm

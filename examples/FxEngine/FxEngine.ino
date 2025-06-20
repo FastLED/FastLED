@@ -1,8 +1,12 @@
 /// @file    FxEngine.ino
-/// @brief   Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix.
-///          This example is compatible with the new FastLED wasm compiler. Install it by running
-///          `pip install fastled` then running `fastled` in this sketch directory.
+/// @brief   Demonstrates FxEngine for switching between effects
 /// @example FxEngine.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
 using namespace fl;

@@ -1,8 +1,6 @@
-
-
-/// @file    NoiseRing.ino
-/// @brief   Shows how to use a circular noise generator to have a continuous noise effect on a ring of LEDs.
-/// @author  Zach Vorhies
+/// @file    FxNoiseRing.ino
+/// @brief   Noise effect on circular ring with ScreenMap
+/// @example FxNoiseRing.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
 /// 1. Install Fastled: `pip install fastled`

@@ -1,3 +1,12 @@
+/// @file    FxFire2012.ino
+/// @brief   Fire2012 effect with ScreenMap
+/// @example FxFire2012.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012

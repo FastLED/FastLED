@@ -1,12 +1,14 @@
 /// @file    WasmScreenCoords.ino
-/// @brief   Simple test for screen coordinates in the web compiled version of FastLED.
-/// @author  Zach Vorhies
+/// @brief   Demonstrates screen coordinate mapping for web display
+/// @example WasmScreenCoords.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
 /// 1. Install Fastled: `pip install fastled`
 /// 2. cd into this examples page.
 /// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
+#include <Arduino.h>
 
 // printf
 #include <stdio.h>

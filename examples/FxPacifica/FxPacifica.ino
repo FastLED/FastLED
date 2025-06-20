@@ -1,6 +1,12 @@
-/// @file    Pacifica.ino
-/// @brief   Gentle, blue-green ocean wave animation
-/// @example Pacifica.ino
+/// @file    FxPacifica.ino
+/// @brief   Pacifica ocean effect with ScreenMap
+/// @example FxPacifica.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 //
 //  "Pacifica"

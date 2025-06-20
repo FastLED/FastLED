@@ -1,7 +1,12 @@
-/// @file    NoisePlusPalette.ino
-/// @brief   Demonstrates how to mix noise generation with color palettes on a
-/// 2D LED matrix
-/// @example NoisePlusPalette.ino
+/// @file    FxNoisePlusPalette.ino
+/// @brief   Noise plus palette effect with XYMap
+/// @example FxNoisePlusPalette.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 #ifndef COMPILE_NOISEPLUSPALETTE
 #if defined(__AVR__)

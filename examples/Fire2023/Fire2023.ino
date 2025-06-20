@@ -1,3 +1,13 @@
+/// @file    Fire2023.ino
+/// @brief   Enhanced fire effect with ScreenMap
+/// @example Fire2023.ino
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
+
 /*This is a fire effect based on the famous Fire2012; but with various small improvements.
 Perlin noise is being used to make a fire layer and a smoke layer;
 and the overlay of both can make a quite realistic effect.
