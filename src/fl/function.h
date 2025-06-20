@@ -24,11 +24,14 @@ template <typename> class function;
 
 template <typename R, typename... Args> class function<R(Args...)> {
   private:
-    // Storage for small object optimization
-    static constexpr size_t STORAGE_SIZE = 3 * sizeof(void*);
-    static constexpr size_t STORAGE_ALIGN = alignof(void*);
+    // Aligned storage for small object optimization (similar to InlinedMemoryBlock in vector.h)
+    typedef uintptr_t MemoryType;
+    static constexpr size_t STORAGE_CAPACITY = 3;  // Store up to 3 pointer-sized objects
+    static constexpr size_t TOTAL_BYTES = STORAGE_CAPACITY * sizeof(MemoryType);
+    static constexpr size_t STORAGE_ALIGN = sizeof(MemoryType);
     
-    alignas(STORAGE_ALIGN) char storage_[STORAGE_SIZE];
+    // Properly aligned storage block
+    alignas(STORAGE_ALIGN) MemoryType storage_[STORAGE_CAPACITY];
     
     // Type-erased function pointers for operations
     R (*invoker_)(const void* storage, Args... args);
@@ -38,10 +41,19 @@ template <typename R, typename... Args> class function<R(Args...)> {
     
     bool uses_heap_;
     
+    // Get properly aligned memory pointer
+    void* get_storage() {
+        return static_cast<void*>(storage_);
+    }
+    
+    const void* get_storage() const {
+        return static_cast<const void*>(storage_);
+    }
+    
     // Helper to determine if a type fits in our storage
     template<typename T>
     static constexpr bool fits_in_storage() {
-        return sizeof(T) <= STORAGE_SIZE && alignof(T) <= STORAGE_ALIGN;
+        return sizeof(T) <= TOTAL_BYTES && alignof(T) <= STORAGE_ALIGN;
     }
     
     // Helper templates for void return type handling
@@ -128,11 +140,16 @@ template <typename R, typename... Args> class function<R(Args...)> {
   public:
     function() 
         : invoker_(nullptr), destructor_(nullptr), 
-          copy_constructor_(nullptr), move_constructor_(nullptr), uses_heap_(false) {}
+          copy_constructor_(nullptr), move_constructor_(nullptr), uses_heap_(false) {
+        // Initialize storage to zero
+        for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+            storage_[i] = 0;
+        }
+    }
     
     ~function() {
         if (destructor_) {
-            destructor_(storage_);
+            destructor_(get_storage());
         }
     }
 
@@ -140,8 +157,12 @@ template <typename R, typename... Args> class function<R(Args...)> {
         : invoker_(other.invoker_), destructor_(other.destructor_),
           copy_constructor_(other.copy_constructor_), move_constructor_(other.move_constructor_),
           uses_heap_(other.uses_heap_) {
+        // Initialize storage to zero
+        for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+            storage_[i] = 0;
+        }
         if (copy_constructor_) {
-            copy_constructor_(storage_, other.storage_);
+            copy_constructor_(get_storage(), other.get_storage());
         }
     }
 
@@ -149,8 +170,12 @@ template <typename R, typename... Args> class function<R(Args...)> {
         : invoker_(other.invoker_), destructor_(other.destructor_),
           copy_constructor_(other.copy_constructor_), move_constructor_(other.move_constructor_),
           uses_heap_(other.uses_heap_) {
+        // Initialize storage to zero
+        for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+            storage_[i] = 0;
+        }
         if (move_constructor_) {
-            move_constructor_(storage_, other.storage_);
+            move_constructor_(get_storage(), other.storage_);
         }
         other.invoker_ = nullptr;
         other.destructor_ = nullptr;
@@ -162,7 +187,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
         if (this != &other) {
             // Destroy current content
             if (destructor_) {
-                destructor_(storage_);
+                destructor_(get_storage());
             }
             
             // Copy from other
@@ -172,8 +197,13 @@ template <typename R, typename... Args> class function<R(Args...)> {
             move_constructor_ = other.move_constructor_;
             uses_heap_ = other.uses_heap_;
             
+            // Initialize storage to zero
+            for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+                storage_[i] = 0;
+            }
+            
             if (copy_constructor_) {
-                copy_constructor_(storage_, other.storage_);
+                copy_constructor_(get_storage(), other.get_storage());
             }
         }
         return *this;
@@ -183,7 +213,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
         if (this != &other) {
             // Destroy current content
             if (destructor_) {
-                destructor_(storage_);
+                destructor_(get_storage());
             }
             
             // Move from other
@@ -193,8 +223,13 @@ template <typename R, typename... Args> class function<R(Args...)> {
             move_constructor_ = other.move_constructor_;
             uses_heap_ = other.uses_heap_;
             
+            // Initialize storage to zero
+            for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+                storage_[i] = 0;
+            }
+            
             if (move_constructor_) {
-                move_constructor_(storage_, other.storage_);
+                move_constructor_(get_storage(), other.storage_);
             }
             
             other.invoker_ = nullptr;
@@ -212,9 +247,14 @@ template <typename R, typename... Args> class function<R(Args...)> {
     function(Func&& f) {
         using DecayedFunc = decay_t<Func>;
         
+        // Initialize storage to zero
+        for (size_t i = 0; i < STORAGE_CAPACITY; ++i) {
+            storage_[i] = 0;
+        }
+        
         if (fits_in_storage<DecayedFunc>()) {
             // Store inline
-            new (storage_) DecayedFunc(fl::forward<Func>(f));
+            new (get_storage()) DecayedFunc(fl::forward<Func>(f));
             invoker_ = &invoke_small<DecayedFunc>;
             destructor_ = &destruct_small<DecayedFunc>;
             copy_constructor_ = &copy_construct_small<DecayedFunc>;
@@ -222,7 +262,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
             uses_heap_ = false;
         } else {
             // Store on heap
-            DecayedFunc** f_ptr = reinterpret_cast<DecayedFunc**>(storage_);
+            DecayedFunc** f_ptr = reinterpret_cast<DecayedFunc**>(get_storage());
             *f_ptr = new DecayedFunc(fl::forward<Func>(f));
             invoker_ = &invoke_heap<DecayedFunc>;
             destructor_ = &destruct_heap<DecayedFunc>;
@@ -293,7 +333,7 @@ template <typename R, typename... Args> class function<R(Args...)> {
 
     // Invocation
     R operator()(Args... args) const { 
-        return invoker_(storage_, args...); 
+        return invoker_(get_storage(), args...); 
     }
 
     explicit operator bool() const { 
@@ -306,8 +346,8 @@ template <typename R, typename... Args> class function<R(Args...)> {
                (invoker_ == nullptr || 
                 (uses_heap_ == other.uses_heap_ && 
                  (uses_heap_ ? 
-                  *reinterpret_cast<const void* const*>(storage_) == *reinterpret_cast<const void* const*>(other.storage_) :
-                  storage_ == other.storage_)));
+                  *reinterpret_cast<const void* const*>(get_storage()) == *reinterpret_cast<const void* const*>(other.get_storage()) :
+                  get_storage() == other.get_storage())));
     }
 
     bool operator!=(const function& other) const {
