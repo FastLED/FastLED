@@ -403,6 +403,22 @@ class UIDropdown : protected UIDropdownImpl {
     Listener mListener;
 };
 
+class UIGroup : protected UIGroupImpl {
+  public:
+    FL_NO_COPY(UIGroup);
+    using Super = UIGroupImpl;
+    
+    // Constructor takes fl::Str as the only parameter for grouping name
+    UIGroup(const fl::Str& groupName) : UIGroupImpl(groupName.c_str()) {}
+    ~UIGroup() {}
+    
+    // Get the group name
+    fl::Str name() const { return Super::name(); }
+    
+    // Implicit conversion to string for convenience
+    operator fl::Str() const { return name(); }
+};
+
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS)                                  \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >=)                       \
     FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, <=)                       \

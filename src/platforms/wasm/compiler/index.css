@@ -184,11 +184,76 @@ h1 {
     border-radius: 4px;
 }
 
+/* Dropdown (Select) Styling */
+.ui-control select {
+    width: 100%;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 16px;
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    
+    /* Custom arrow styling */
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0E0E0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+.ui-control select:hover {
+    border-color: #666;
+    background-color: #333;
+}
+
+.ui-control select:focus {
+    outline: none;
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+}
+
+.ui-control select:active {
+    background-color: #333;
+}
+
+/* Option styling for dark theme */
+.ui-control select option {
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    padding: 8px 12px;
+}
+
+.ui-control select option:hover {
+    background-color: #1E90FF;
+}
+
+.ui-control select option:checked {
+    background-color: #1E90FF;
+    color: white;
+}
+
+/* Firefox-specific option styling */
+@-moz-document url-prefix() {
+    .ui-control select option {
+        background-color: #2E2E2E;
+        color: #E0E0E0;
+    }
+    
+    .ui-control select option:checked {
+        background-color: #1E90FF;
+    }
+}
+
 .ui-control button {
     width: 100%;
     margin: 0;
 }
-
 
 .popup {
     display: none;

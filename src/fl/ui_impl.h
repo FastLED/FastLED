@@ -284,4 +284,24 @@ class UIDropdownImpl {
 };
 #endif
 
+#ifndef FASTLED_HAS_UI_GROUP
+#define FASTLED_HAS_UI_GROUP 0
+#endif
+
+#if !FASTLED_HAS_UI_GROUP
+
+class UIGroupImpl {
+  public:
+    UIGroupImpl(const char *name) : mGroupName(name) { 
+        FASTLED_UNUSED(name); 
+    }
+    ~UIGroupImpl() {}
+    fl::Str name() const { return mGroupName; }
+
+  private:
+    fl::Str mGroupName;
+};
+
+#endif
+
 } // end namespace fl
