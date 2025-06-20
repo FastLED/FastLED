@@ -1,4 +1,7 @@
 
+#if 0 // EXPLICITLY DISABLED
+
+
 #include "wled.h"
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -2069,3 +2072,4 @@ const char AudioReactive::UDP_SYNC_HEADER_v1[] PROGMEM = "00001"; // old sync he
 
 static AudioReactive ar_module;
 REGISTER_USERMOD(ar_module);
+#endif
