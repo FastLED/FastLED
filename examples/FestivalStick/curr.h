@@ -237,11 +237,11 @@ void fillFrameBufferNoise() {
             }
             
             // Enhance brightness (from NoisePlusPalette example)
-            if(bri > 127) {
-                bri = 255;
-            } else {
-                bri = dim8_raw(bri * 2);
-            }
+            // if(bri > 127) {
+            //     //bri = 255;
+            // } else {
+            //     //bri = dim8_raw(bri * 2);
+            // }
             
             // Get color from palette and set pixel
             CRGB color = ColorFromPalette(noisePalette, index, bri);
@@ -297,7 +297,6 @@ void draw(float pos) {
     } else {
         // None splat rendering, looks aweful.
         vec2f pos_vec2f = corkscrew.at_exact(pos);
-        FL_WARN("pos_vec2f: " << pos_vec2f);
         vec2i16 pos_i16 = vec2i16(pos_vec2f.x, pos_vec2f.y);
         
         CRGB color = CRGB::Blue;
@@ -320,8 +319,6 @@ void loop() {
     float combinedPosition = get_position(now);
     float pos = combinedPosition * (corkscrew.size() - 1);
 
-    FL_WARN("pos: " << pos);
-    
     if (useNoise.value()) {
         drawNoise(now);
     } else {
