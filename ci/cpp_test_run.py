@@ -302,9 +302,9 @@ def main() -> None:
             if only_run_failed_test:
                 cmd += " --rerun-failed"
             rtn, stdout = run_command(cmd)
+            # Always show the ctest output to display the test summary
+            print(stdout)
             if rtn != 0:
-                print("Failed tests:")
-                print(stdout)
                 sys.exit(1)
 
 
