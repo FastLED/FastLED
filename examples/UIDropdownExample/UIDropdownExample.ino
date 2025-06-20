@@ -16,6 +16,9 @@ fl::UIDropdown patternDropdown("Pattern", patternOptions);
 // On platforms with C++11 support, you can also use initializer lists:
 // fl::UIDropdown modeDropdown("Mode", {"Solid", "Fade", "Strobe"});
 
+// Group related LED control UI elements using UIGroup template multi-argument constructor
+fl::UIGroup ledControls("LED Controls", colorDropdown, patternDropdown);
+
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);

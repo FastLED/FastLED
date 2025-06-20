@@ -28,6 +28,9 @@ UISlider saturationSlider("Saturation", 255, 0, 255, 1);
 UISlider valueSlider("Value", 255, 0, 255, 1);
 UICheckbox autoHue("Auto Hue", true);
 
+// Group related HSV control UI elements using UIGroup template multi-argument constructor
+UIGroup hsvControls("HSV Controls", hueSlider, saturationSlider, valueSlider, autoHue);
+
 void setup() {
     //FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     // fl::ScreenMap screenMap(NUM_LEDS);

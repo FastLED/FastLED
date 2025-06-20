@@ -174,6 +174,11 @@ bool wasRainbowCubeClicked = false;
 bool wasBorderWaveClicked = false;
 bool wasSpiralClicked = false;
 
+// Group related UI elements using UIGroup template multi-argument constructor
+UIGroup effectTriggers("Effect Triggers", simulatedHeartbeat, triggerStarburst, triggerRainbowCube, triggerBorderWave, triggerSpiral);
+UIGroup automationControls("Automation", starburstPulsesEnabled, simulatedBiometricsEnabled);
+UIGroup displayControls("Display", sliderDecay, allWhite);
+
 void setup() {
     Serial.begin(115200);
 

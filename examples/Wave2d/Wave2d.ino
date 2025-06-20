@@ -50,6 +50,10 @@ UISlider dampening("Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
 UICheckbox halfDuplex("Half Duplex", true);
 UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
 
+// Group related UI elements using UIGroup template multi-argument constructor
+UIGroup waveSimControls("Wave Simulation", slider, dampening, halfDuplex, superSample, xCyclical);
+UIGroup triggerControls("Trigger Controls", button, autoTrigger, extraFrames);
+
 WaveSimulation2D waveSim(WIDTH, HEIGHT, SUPER_SAMPLE_4X);
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);

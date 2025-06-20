@@ -68,6 +68,11 @@ UISlider outputTimeSec("outputTimeSec", .17, 0, 2, .01);
 UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
 
+// Group related UI elements using UIGroup template multi-argument constructor
+UIGroup visualizationControls("Visualization", enableVolumeVis, enableRMS, enableFFT);
+UIGroup audioProcessingControls("Audio Processing", decayTimeSeconds, attackTimeSeconds, outputTimeSec);
+UIGroup generalControls("General Controls", freeze, advanceFrame, fadeToBlack);
+
 MaxFadeTracker audioFadeTracker(attackTimeSeconds.value(),
                                 decayTimeSeconds.value(), outputTimeSec.value(),
                                 44100);

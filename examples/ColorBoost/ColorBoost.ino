@@ -35,6 +35,9 @@ fl::Str easeOptions[] = {
 UIDropdown saturationFunction("Saturation Function", easeOptions, 10);
 UIDropdown luminanceFunction("Luminance Function", easeOptions, 10);
 
+// Group related color boost UI elements using UIGroup template multi-argument constructor
+UIGroup colorBoostControls("Color Boost", satSlider, saturationFunction, luminanceFunction);
+
 // Rgb8Video
 // Animated, ever-changing rainbows optimized for video display.
 // Uses CRGB::toVideoRGB_8bit() to boost saturation for better LED display.

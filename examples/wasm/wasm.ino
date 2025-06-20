@@ -96,6 +96,11 @@ UIButton changeFx("Switch between Noise & Animartrix");
 UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
+// Group related UI elements using UIGroup template multi-argument constructor
+UIGroup noiseControls("Noise Controls", speed, changePallete, changePalletTime, scale, changePalette);
+UIGroup animartrixControls("Animartrix Controls", fxIndex, changeFx);
+UIGroup displayControls("Display Controls", brightness, isOff, timeSpeed);
+
 // Animartrix is a visualizer.
 Animartrix animartrix(xyMap, POLAR_WAVES);
 
@@ -153,5 +158,3 @@ void loop() {
     FastLED.show();
     frame++;
 }
-
-
