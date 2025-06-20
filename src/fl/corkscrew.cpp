@@ -10,6 +10,7 @@
 #include "fl/map_range.h"
 #include "fl/leds.h"
 #include "fl/grid.h"
+#include "fl/screenmap.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -267,6 +268,22 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& target_grid) const {
 // Iterator implementation
 vec2f CorkscrewState::iterator::operator*() const {
     return corkscrew_->at_exact(static_cast<uint16_t>(position_));
+}
+
+fl::ScreenMap Corkscrew::toScreenMap(float diameter) const {
+    // Create a ScreenMap with the correct number of LEDs
+    fl::ScreenMap screenMap(mInput.numLeds, diameter);
+    
+    // For each LED index, calculate its position and set it in the ScreenMap
+    for (uint16_t i = 0; i < mInput.numLeds; ++i) {
+        // Get the 2D position for this LED index in the cylindrical mapping
+        vec2f position = at_exact(i);
+        
+        // Set the position in the ScreenMap
+        screenMap.set(i, position);
+    }
+    
+    return screenMap;
 }
 
 } // namespace fl

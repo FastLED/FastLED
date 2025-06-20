@@ -49,6 +49,7 @@ namespace fl {
 
 // Forward declarations
 class Leds;
+class ScreenMap;
 template<typename T> class Grid;
 
 // Simple constexpr functions for compile-time corkscrew dimension calculation
@@ -207,6 +208,10 @@ class Corkscrew {
     
     // Fill the rectangular buffer with a color
     void fillBuffer(const CRGB& color);
+
+    // Create and return a fully constructed ScreenMap for this corkscrew
+    // Each LED index will be mapped to its exact position on the cylindrical surface
+    fl::ScreenMap toScreenMap(float diameter = 0.5f) const;
 
     /// For testing
     static State generateState(const Input &input);

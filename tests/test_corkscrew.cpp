@@ -7,7 +7,8 @@
 #include "fl/sstream.h"
 
 #include "fl/corkscrew.h"
-#include "fl/grid.h"
+#include "fl/grid.h" 
+#include "fl/screenmap.h"
 #include "fl/tile2x2.h" // Ensure this header is included for Tile2x2_u8
 
 #define NUM_LEDS 288
@@ -352,5 +353,66 @@ TEST_CASE("Corkscrew CRGB* data access") {
         REQUIRE_EQ(buffer[0].r, 255);
         REQUIRE_EQ(buffer[0].g, 0);
         REQUIRE_EQ(buffer[0].b, 0);
+    }
+}
+
+TEST_CASE("Corkscrew ScreenMap functionality") {
+    // Create a simple corkscrew for testing
+    fl::Corkscrew::Input input(2.0f, 8, 0.0f); // 2 turns, 8 LEDs
+    fl::Corkscrew corkscrew(input);
+    
+    // Test default diameter
+    fl::ScreenMap screenMap = corkscrew.toScreenMap();
+    
+    // Verify the ScreenMap has the correct number of LEDs
+    REQUIRE_EQ(screenMap.getLength(), 8);
+    
+    // Verify default diameter
+    REQUIRE_EQ(screenMap.getDiameter(), 0.5f);
+    
+    // Test custom diameter
+    fl::ScreenMap screenMapCustom = corkscrew.toScreenMap(1.2f);
+    REQUIRE_EQ(screenMapCustom.getDiameter(), 1.2f);
+    
+    // Verify that each LED index maps to the same position as at_exact()
+    for (uint16_t i = 0; i < 8; ++i) {
+        vec2f corkscrewPos = corkscrew.at_exact(i);
+        vec2f screenMapPos = screenMap[i];
+        
+        // Positions should match exactly
+        REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.x, screenMapPos.x));
+        REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.y, screenMapPos.y));
+    }
+    
+    // Test that different LED indices have different positions (at least some of them)
+    bool positions_differ = false;
+    for (uint16_t i = 1; i < 8; ++i) {
+        vec2f pos0 = screenMap[0];
+        vec2f posI = screenMap[i];
+        if (!ALMOST_EQUAL_FLOAT(pos0.x, posI.x) || !ALMOST_EQUAL_FLOAT(pos0.y, posI.y)) {
+            positions_differ = true;
+            break;
+        }
+    }
+    REQUIRE(positions_differ); // At least some positions should be different
+    
+    // Test ScreenMap bounds
+    vec2f bounds = screenMap.getBounds();
+    REQUIRE(bounds.x > 0.0f); // Should have some width
+    REQUIRE(bounds.y >= 0.0f); // Should have some height (or 0 for single row)
+    
+    // Test a larger corkscrew to ensure it works with more complex cases
+    fl::Corkscrew::Input input_large(19.0f, 288, 0.0f); // FestivalStick case
+    fl::Corkscrew corkscrew_large(input_large);
+    fl::ScreenMap screenMap_large = corkscrew_large.toScreenMap(0.8f);
+    
+    REQUIRE_EQ(screenMap_large.getLength(), 288);
+    REQUIRE_EQ(screenMap_large.getDiameter(), 0.8f);
+    
+    // Verify all positions are valid (non-negative)
+    for (uint16_t i = 0; i < 288; ++i) {
+        vec2f pos = screenMap_large[i];
+        REQUIRE(pos.x >= 0.0f);
+        REQUIRE(pos.y >= 0.0f);
     }
 }

@@ -10,6 +10,24 @@ drawing to a rectangular grid, and then mapping that to a corkscrew.
 However, to make sure the above mapping works correctly, we have
 to test that the forward mapping works correctly first.
 
+NEW: ScreenMap Support
+=====================
+You can now create a ScreenMap directly from a Corkscrew, which maps
+each LED index to its exact position on the cylindrical surface.
+This is useful for web interfaces and visualization:
+
+Example usage:
+```cpp
+// Create a corkscrew
+Corkscrew corkscrew(corkscrewInput);
+
+// Create ScreenMap with 0.5cm LED diameter
+fl::ScreenMap screenMap = corkscrew.toScreenMap(0.5f);
+
+// Use with FastLED controller for web visualization
+controller->setScreenMap(screenMap);
+```
+
 NEW: Rectangular Buffer Support
 ===============================
 You can now draw into a rectangular fl::Leds grid and read that 
@@ -100,11 +118,17 @@ void setup() {
     CLEDController *controller =
         &FastLED.addLeds<WS2812, 3, BGR>(leds, num_leds);
 
-    fl::ScreenMap screenMap = xyMap.toScreenMap();
-    screenMap.setDiameter(.2f);
+    // NEW: Create ScreenMap directly from Corkscrew using toScreenMap()
+    // This maps each LED index to its exact position on the cylindrical surface
+    fl::ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
+    
+    // Alternative: Create ScreenMap from rectangular XYMap (old way)
+    // fl::ScreenMap screenMap = xyMap.toScreenMap();
+    // screenMap.setDiameter(.2f);
 
-    // Set the screen map for the controller
-    controller->setScreenMap(screenMap);
+    // Set the corkscrew screen map for the controller
+    // This allows the web interface to display the actual corkscrew shape
+    controller->setScreenMap(corkscrewScreenMap);
 }
 
 void loop() {
