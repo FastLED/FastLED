@@ -49,25 +49,11 @@ namespace fl {
 // Forward declaration for UIGroup
 class UIGroup;
 
-// Base class for UI elements that provides group functionality
-class UIBaseImpl {
-  public:
-    UIBaseImpl() : mGroup(nullptr) {}
-    ~UIBaseImpl() {}
-    
-    void setGroup(UIGroup* group) { mGroup = group; }
-    UIGroup* getGroup() const { return mGroup; }
-    bool hasGroup() const { return mGroup != nullptr; }
-
-  private:
-    UIGroup* mGroup;
-};
-
 // If the platform is missing ui components, provide stubs.
 
 #if !FASTLED_HAS_UI_SLIDER
 
-class UISliderImpl : public UIBaseImpl {
+class UISliderImpl {
   public:
     // If step is -1, it will be calculated as (max - min) / 100
     UISliderImpl(const char *name, float value = 128.0f, float min = 1,
@@ -82,7 +68,6 @@ class UISliderImpl : public UIBaseImpl {
             mValue = max;
         }
     }
-    ~UISliderImpl() {}
     float value() const { return mValue; }
     float getMax() const { return mMax; }
     float getMin() const { return mMin; }
@@ -116,7 +101,7 @@ class UISliderImpl : public UIBaseImpl {
 
 #if !FASTLED_HAS_UI_BUTTON
 
-class UIButtonImpl : public UIBaseImpl {
+class UIButtonImpl {
   public:
     UIButtonImpl(const char *name) { FASTLED_UNUSED(name); }
     ~UIButtonImpl() {}
@@ -135,7 +120,7 @@ class UIButtonImpl : public UIBaseImpl {
 
 #if !FASTLED_HAS_UI_CHECKBOX
 
-class UICheckboxImpl : public UIBaseImpl {
+class UICheckboxImpl {
   public:
     UICheckboxImpl(const char *name, bool value = false) : mValue(value) {
         FASTLED_UNUSED(name);
@@ -162,7 +147,7 @@ class UICheckboxImpl : public UIBaseImpl {
 
 #if !FASTLED_HAS_UI_NUMBER_FIELD
 
-class UINumberFieldImpl : public UIBaseImpl {
+class UINumberFieldImpl {
   public:
     UINumberFieldImpl(const char *name, double value, double min = 0,
                       double max = 100)
@@ -230,7 +215,7 @@ class UIAudioImpl {
 #endif
 
 #if !FASTLED_HAS_UI_DROPDOWN
-class UIDropdownImpl : public UIBaseImpl {
+class UIDropdownImpl {
   public:
     // Constructor with array of options and count
     UIDropdownImpl(const char *name, const fl::Str* options, size_t count) 
