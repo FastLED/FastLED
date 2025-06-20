@@ -8,6 +8,7 @@
 #include "fl/str.h"
 #include "fl/template_magic.h"
 #include "fl/unused.h"
+#include "fl/vector.h"
 #include "fl/warn.h"
 #include "platforms/ui_defs.h"
 
@@ -37,6 +38,10 @@
 
 #ifndef FASTLED_HAS_UI_AUDIO
 #define FASTLED_HAS_UI_AUDIO 0
+#endif
+
+#ifndef FASTLED_HAS_UI_DROPDOWN
+#define FASTLED_HAS_UI_DROPDOWN 0
 #endif
 
 namespace fl {
@@ -204,6 +209,78 @@ class UIAudioImpl {
         FASTLED_WARN("Audio sample not implemented");
         return false;
     }
+};
+#endif
+
+#if !FASTLED_HAS_UI_DROPDOWN
+class UIDropdownImpl {
+  public:
+    // Constructor with array of options and count
+    UIDropdownImpl(const char *name, const fl::Str* options, size_t count) 
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (size_t i = 0; i < count; ++i) {
+            mOptions.push_back(options[i]);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::Str("No options"));
+        }
+    }
+    
+    // Constructor with fl::vector of options
+    UIDropdownImpl(const char *name, const fl::vector<fl::Str>& options) 
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (size_t i = 0; i < options.size(); ++i) {
+            mOptions.push_back(options[i]);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::Str("No options"));
+        }
+    }
+
+#if FASTLED_HAS_INITIALIZER_LIST
+    // Constructor with initializer_list (only available if C++11 support exists)
+    UIDropdownImpl(const char *name, std::initializer_list<fl::Str> options) 
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (const auto& option : options) {
+            mOptions.push_back(option);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::Str("No options"));
+        }
+    }
+#endif
+    
+    ~UIDropdownImpl() {}
+    
+    fl::Str value() const { 
+        if (mSelectedIndex < mOptions.size()) {
+            return mOptions[mSelectedIndex]; 
+        }
+        return fl::Str("Invalid");
+    }
+    
+    int value_int() const { return static_cast<int>(mSelectedIndex); }
+    
+    void setSelectedIndex(int index) { 
+        if (index >= 0 && index < static_cast<int>(mOptions.size())) {
+            mSelectedIndex = static_cast<size_t>(index);
+        }
+    }
+    
+    size_t getOptionCount() const { return mOptions.size(); }
+    fl::Str getOption(size_t index) const {
+        if (index < mOptions.size()) {
+            return mOptions[index];
+        }
+        return fl::Str("Invalid");
+    }
+
+  private:
+    fl::vector<fl::Str> mOptions;
+    size_t mSelectedIndex;
 };
 #endif
 

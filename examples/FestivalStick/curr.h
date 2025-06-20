@@ -77,6 +77,13 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 UINumberField saturationFunction("Saturation Function", 1, 0, 9);
 UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
+// UIDropdown examples - simple usage
+fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
+fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
+
+fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
+fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
+
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
 uint8_t colorLoop = 1;
@@ -159,6 +166,36 @@ void setup() {
     // Set the corkscrew screen map for the controller
     // This allows the web interface to display the actual corkscrew spiral shape
     controller->setScreenMap(corkscrewScreenMap);
+    
+    // Set initial dropdown selections
+    paletteDropdown.setSelectedIndex(0);    // Party
+    renderModeDropdown.setSelectedIndex(0); // Noise
+    
+    // Add onChange callbacks for dropdowns
+    paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
+        fl::Str selectedPalette = dropdown.value();
+        if (selectedPalette == "Party") {
+            noisePalette = PartyColors_p;
+        } else if (selectedPalette == "Heat") {
+            noisePalette = HeatColors_p;
+        } else if (selectedPalette == "Ocean") {
+            noisePalette = OceanColors_p;
+        } else if (selectedPalette == "Forest") {
+            noisePalette = ForestColors_p;
+        } else if (selectedPalette == "Rainbow") {
+            noisePalette = RainbowColors_p;
+        }
+    });
+    
+    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
+        fl::Str mode = dropdown.value();
+        // Simple example of using getOption()
+        for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
+            if(dropdown.getOption(i) == mode) {
+                FL_WARN("Render mode changed to: " << mode);
+            }
+        }
+    });
 }
 
 float get_position(uint32_t now) {

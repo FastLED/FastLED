@@ -1,5 +1,3 @@
-
-
 #include "fl/ui.h"
 #include <stdint.h>
 
@@ -72,6 +70,20 @@ void UINumberField::Listener::onBeginFrame() {
         return;
     }
     double value = owner.value();
+    if (value != owner.mLastFrameValue) {
+        owner.mCallbacks.invoke(owner);
+        owner.mLastFrameValue = value;
+    }
+}
+
+void UIDropdown::Listener::onBeginFrame() {
+    UIDropdown &owner = *mOwner;
+    if (!owner.mLastFrameValueValid) {
+        owner.mLastFrameValue = owner.value_int();
+        owner.mLastFrameValueValid = true;
+        return;
+    }
+    int value = owner.value_int();
     if (value != owner.mLastFrameValue) {
         owner.mCallbacks.invoke(owner);
         owner.mLastFrameValue = value;
