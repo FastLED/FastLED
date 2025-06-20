@@ -1,12 +1,18 @@
-name: teensy41 ObjectFLED
+name: teensy41_ofled
 
 on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
   pull_request_target:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '**/README.md'
 
 jobs:
   build:
