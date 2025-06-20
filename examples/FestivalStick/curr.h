@@ -85,10 +85,11 @@ UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
 // UIDropdown examples - noise-related color palette
 fl::Str paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-fl::UIDropdown paletteDropdown("Color Palette", paletteOptions, 5);
-
 fl::Str renderModeOptions[] = {"Noise", "Position", "Mixed"};
-fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions, 3);
+
+// Declare dropdowns but don't initialize them yet (will be done in setup())
+fl::UIDropdown* paletteDropdown = nullptr;
+fl::UIDropdown* renderModeDropdown = nullptr;
 
 
 
@@ -149,6 +150,9 @@ void setup() {
     constexpr int width = CORKSCREW_WIDTH;   // = 16
     constexpr int height = CORKSCREW_HEIGHT; // = 18
 
+    // Create dropdowns now that we're in setup() and string arrays are guaranteed to be initialized
+    paletteDropdown = new fl::UIDropdown("Color Palette", paletteOptions, 5);
+    renderModeDropdown = new fl::UIDropdown("Render Mode", renderModeOptions, 3);
 
     // Add noise-related controls to the noiseGroup
     // noiseGroup.addControl(&useNoise);
@@ -162,7 +166,7 @@ void setup() {
     useNoise.setGroup("Noise Controls");
     noiseScale.setGroup("Noise Controls");
     noiseSpeed.setGroup("Noise Controls");
-    paletteDropdown.setGroup("Noise Controls");
+    paletteDropdown->setGroup("Noise Controls");
 
 
     // Or use runtime corkscrew for dynamic sizing
@@ -200,11 +204,11 @@ void setup() {
     //FL_WARN("  - Color Palette selection for noise");
     
     // Set initial dropdown selections
-    paletteDropdown.setSelectedIndex(0);    // Party
-    renderModeDropdown.setSelectedIndex(0); // Noise
+    paletteDropdown->setSelectedIndex(0);    // Party
+    renderModeDropdown->setSelectedIndex(0); // Noise
     
     // Add onChange callbacks for dropdowns
-    paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
+    paletteDropdown->onChanged([](fl::UIDropdown &dropdown) {
         fl::Str selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
         if (selectedPalette == "Party") {
@@ -220,7 +224,7 @@ void setup() {
         }
     });
     
-    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
+    renderModeDropdown->onChanged([](fl::UIDropdown &dropdown) {
         fl::Str mode = dropdown.value();
         // Simple example of using getOption()
         for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
