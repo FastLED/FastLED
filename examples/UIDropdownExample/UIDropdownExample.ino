@@ -5,16 +5,17 @@
 
 CRGB leds[NUM_LEDS];
 
-// Create dropdown with array of options
+// Create dropdown with array of options (size automatically determined)
 fl::string options[] = {"Red", "Green", "Blue", "White", "Rainbow"};
-fl::UIDropdown colorDropdown("Color", options, 5);
+fl::UIDropdown colorDropdown("Color", options);
 
 // Create dropdown with vector of options
 fl::vector<fl::string> patternOptions;
 fl::UIDropdown patternDropdown("Pattern", patternOptions);
 
 // On platforms with C++11 support, you can also use initializer lists:
-// fl::UIDropdown modeDropdown("Mode", {"Solid", "Fade", "Strobe"});
+// Note: Arduino AVR may have issues with initializer lists, so this is commented out for compatibility
+// fl::UIDropdown modeDropdown("Mode", {fl::string("Solid"), fl::string("Fade"), fl::string("Strobe")});
 
 // Group related LED control UI elements using UIGroup template multi-argument constructor
 fl::UIGroup ledControls("LED Controls", colorDropdown, patternDropdown);
