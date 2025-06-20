@@ -177,3 +177,52 @@ TEST_CASE("Constexpr corkscrew dimension calculation") {
     static_assert(simple_width == 10, "Simple width should be 10");
     static_assert(simple_height == 10, "Simple height should be 10");
 }
+
+TEST_CASE("TestCorkscrewBufferFunctionality") {
+    // Create a Corkscrew with 16 LEDs and 4 turns for simple testing
+    fl::Corkscrew::Input input(4.0f, 16, 0, false);
+    fl::Corkscrew corkscrew(input);
+    
+    // Get the rectangular buffer dimensions
+    uint16_t width = corkscrew.cylinder_width();
+    uint16_t height = corkscrew.cylinder_height();
+    
+    // Get the buffer and verify it's lazily initialized
+    fl::vector<CRGB>& buffer = corkscrew.getBuffer();
+    REQUIRE(buffer.size() == width * height);
+    
+    // Fill the buffer with a simple pattern
+    corkscrew.fillBuffer(CRGB::Red);
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        REQUIRE(buffer[i] == CRGB::Red);
+    }
+    
+    // Clear the buffer
+    corkscrew.clearBuffer();
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        REQUIRE(buffer[i] == CRGB::Black);
+    }
+    
+    // Create a checkerboard pattern in the rectangular buffer
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            size_t idx = y * width + x;
+            if ((x + y) % 2 == 0) {
+                buffer[idx] = CRGB::Blue;
+            } else {
+                buffer[idx] = CRGB::Green;
+            }
+        }
+    }
+    
+    // Create target LED array and Leds object, then draw from the rectangular buffer
+    CRGB target_leds[16];
+    fl::Leds leds(target_leds, 16, 1); // Linear arrangement for corkscrew
+    corkscrew.draw(leds);
+    
+    // Verify that all target LEDs have been set (should be either blue or green)
+    for (size_t i = 0; i < 16; ++i) {
+        REQUIRE((target_leds[i] == CRGB::Blue || target_leds[i] == CRGB::Green));
+        REQUIRE(target_leds[i] != CRGB::Black); // Should not be black since we filled the buffer
+    }
+}

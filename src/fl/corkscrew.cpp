@@ -8,6 +8,7 @@
 #include "fl/math_macros.h"
 #include "fl/unused.h"
 #include "fl/map_range.h"
+#include "fl/leds.h"
 
 #define TWO_PI (PI * 2.0)
 
@@ -112,8 +113,6 @@ Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
     return output;
 }
 
-
-
 Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
     // This is a splatted pixel, but wrapped around the cylinder.
     // This is useful for rendering the corkscrew in a cylindrical way.
@@ -131,6 +130,76 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
         }
     }
     return Tile2x2_u8_wrap(data);
+}
+
+// New rectangular buffer functionality implementation
+
+void Corkscrew::initializeBuffer() const {
+    if (!mBufferInitialized) {
+        size_t buffer_size = static_cast<size_t>(mState.width) * static_cast<size_t>(mState.height);
+        mRectangularBuffer.resize(buffer_size, CRGB::Black);
+        mBufferInitialized = true;
+    }
+}
+
+fl::vector<CRGB>& Corkscrew::getBuffer() {
+    initializeBuffer();
+    return mRectangularBuffer;
+}
+
+const fl::vector<CRGB>& Corkscrew::getBuffer() const {
+    initializeBuffer();
+    return mRectangularBuffer;
+}
+
+void Corkscrew::draw(fl::Leds& target_leds) const {
+    if (!mBufferInitialized || mRectangularBuffer.empty()) {
+        // If buffer not initialized or empty, fill target with black
+        for (size_t i = 0; i < mInput.numLeds; ++i) {
+            if (i < target_leds.xymap().getTotal()) {
+                target_leds.rgb()[i] = CRGB::Black;
+            }
+        }
+        return;
+    }
+    
+    // Iterate through each LED in the corkscrew and sample from rectangular buffer
+    for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
+        // Get the rectangular coordinates for this corkscrew LED
+        vec2f rect_pos = at_exact(static_cast<uint16_t>(led_idx));
+        
+        // Convert to integer coordinates for sampling (using simple rounding)
+        int x = static_cast<int>(rect_pos.x + 0.5f);
+        int y = static_cast<int>(rect_pos.y + 0.5f);
+        
+        // Clamp coordinates to buffer bounds
+        x = MAX(0, MIN(x, static_cast<int>(mState.width) - 1));
+        y = MAX(0, MIN(y, static_cast<int>(mState.height) - 1));
+        
+        // Sample from rectangular buffer using row-major indexing
+        size_t buffer_idx = static_cast<size_t>(y) * static_cast<size_t>(mState.width) + static_cast<size_t>(x);
+        
+        // Set the corkscrew LED if within bounds
+        if (led_idx < target_leds.xymap().getTotal() && buffer_idx < mRectangularBuffer.size()) {
+            target_leds.rgb()[led_idx] = mRectangularBuffer[buffer_idx];
+        } else if (led_idx < target_leds.xymap().getTotal()) {
+            target_leds.rgb()[led_idx] = CRGB::Black;
+        }
+    }
+}
+
+void Corkscrew::clearBuffer() {
+    initializeBuffer();
+    for (size_t i = 0; i < mRectangularBuffer.size(); ++i) {
+        mRectangularBuffer[i] = CRGB::Black;
+    }
+}
+
+void Corkscrew::fillBuffer(const CRGB& color) {
+    initializeBuffer();
+    for (size_t i = 0; i < mRectangularBuffer.size(); ++i) {
+        mRectangularBuffer[i] = color;
+    }
 }
 
 // Iterator implementation
