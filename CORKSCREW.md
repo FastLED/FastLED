@@ -1,300 +1,196 @@
-# Corkscrew Mapping: A Novel Cylindrical Projection Technique for Helical LED Strip Visualization
+# Corkscrew Pipeline: computeTile and multiSample Integration
 
-## Abstract
+## Overview
 
-We present Corkscrew Mapping, a novel mathematical projection technique that enables efficient 2D rendering of patterns onto helically-wrapped LED strips. Traditional LED installations arranged in spiral configurations suffer from severe visual distortion when displaying patterns designed for planar surfaces. Our method introduces a bidirectional mapping between helical 3D space and cylindrical 2D coordinates, enabling artists and developers to create visually coherent patterns using familiar rectangular drawing paradigms. We demonstrate that our approach achieves sub-pixel accuracy through multi-sampling techniques and provides real-time performance suitable for live installations. The technique has been successfully deployed in festival installations with over 288 LEDs arranged in complex helical geometries, showing significant improvement in pattern fidelity compared to naive linear mapping approaches.
+The FastLED corkscrew projection system combines `computeTile` (implemented through the `splat` function) and `multiSample` (implemented in `readFromMulti`) to create a sophisticated pipeline that maps from a 2D XY grid to corkscrew LED arrangements with sub-pixel accuracy.
 
-**Keywords:** LED visualization, geometric mapping, cylindrical projection, real-time graphics, installation art
+## Pipeline Components
 
-## 1. Introduction
+### 1. User Paints to XY Grid
 
-The proliferation of programmable LED strips in artistic installations, wearable technology, and architectural lighting has created new challenges in computer graphics. While traditional LED arrays assume planar or simple geometric arrangements, contemporary installations increasingly employ complex 3D configurations including helical wrapping around cylindrical structures—what we term "corkscrew" arrangements.
-
-The fundamental problem arises when attempting to display 2D graphics patterns on these helical LED arrangements. Direct linear indexing of LEDs results in severe visual discontinuities at the helical boundaries, destroying the coherence of intended patterns. Existing approaches either ignore the 3D geometry entirely, leading to broken patterns, or require complex manual adjustment of each pattern for specific installations.
-
-We introduce Corkscrew Mapping, a systematic mathematical framework that:
-
-1. **Provides bidirectional transformation** between linear LED indices and cylindrical coordinates
-2. **Enables standard 2D graphics techniques** to be applied directly to helical LED arrangements
-3. **Supports sub-pixel rendering** through novel multi-sampling algorithms
-4. **Offers compile-time optimization** for embedded systems with constrained resources
-5. **Integrates seamlessly with web-based visualization tools** through automatic ScreenMap generation
-
-Our contributions include:
-- A mathematical formalization of the helical-to-cylindrical mapping problem
-- Efficient algorithms for forward and inverse transformations
-- Sub-pixel accurate rendering techniques using tile-based sampling
-- Comprehensive evaluation on real-world installations
-- Open-source implementation integrated with the FastLED library ecosystem
-
-## 2. Mathematical Framework
-
-### 2.1 Problem Formulation
-
-Consider an LED strip of length *n* wrapped helically around a cylinder of radius *r* with total angular span *θ* = *k* × 2π, where *k* represents the number of complete turns. The fundamental challenge is establishing a mapping *f*: ℕ → ℝ² that transforms linear LED indices to 2D cylindrical coordinates while preserving visual coherence.
-
-Let *L* = {*l₀*, *l₁*, ..., *lₙ₋₁*} represent the sequence of LEDs, and *C* ⊂ ℝ² represent the cylindrical coordinate space with dimensions *w* × *h*. We seek to define:
-
-*f*: {0, 1, ..., *n*-1} → [0, *w*) × [0, *h*)
-
-such that patterns drawn in *C* appear visually coherent when displayed on *L*.
-
-### 3.2 Helical Parameterization
-
-The position of LED *lᵢ* in 3D helical space can be parameterized as:
-
-**p**ᵢ = (*r* cos(*θᵢ*), *r* sin(*θᵢ*), *zᵢ*)
-
-where:
-- *θᵢ* = (*i* / (*n* - 1)) × *k* × 2π (angular position)
-- *zᵢ* = (*i* / (*n* - 1)) × *h_total* (vertical position)
-
-The cylindrical projection maps this 3D position to 2D coordinates (*u*, *v*) where:
-- *u* = (*θᵢ* / 2π) mod 1 (normalized angular coordinate)
-- *v* = *zᵢ* / *h_total* (normalized vertical coordinate)
-
-### 2.3 Discrete Grid Mapping
-
-To enable practical rendering, we discretize the cylindrical space into a rectangular grid of dimensions *w* × *h*. The mapping becomes:
-
-*f*(*i*) = (⌊*u* × *w*⌋, ⌊*v* × *h*⌋)
-
-The optimal grid dimensions are determined by:
-- *w* = ⌈*n* / *k*⌉ (LEDs per turn, rounded up)
-- *h* = min(⌈*k*⌉, ⌈*n* / *w*⌉) (minimize unused pixels)
-
-## 4. Algorithm Design
-
-### 4.1 Forward Mapping Algorithm
-
-The forward mapping algorithm computes cylindrical coordinates for a given LED index with computational complexity O(1):
-
-```
-function forwardMap(ledIndex, totalLEDs, totalTurns):
-    progress = ledIndex / (totalLEDs - 1)
-    angularProgress = progress * totalTurns
-    
-    u = (angularProgress mod 1.0) * gridWidth
-    v = angularProgress * gridHeight / totalTurns
-    
-    return (u, v)
-```
-
-### 4.2 Sub-Pixel Rendering Algorithm
-
-To achieve sub-pixel accuracy when mapping from cylindrical grid coordinates back to LED positions (grid → corkscrew), we introduce a tile-based multi-sampling approach. For a given floating-point position *p*, we compute a 2×2 tile of contributing pixels with associated weights:
-
-```
-function computeTile(position):
-    basePos = floor(position)
-    fractional = position - basePos
-    
-    weights = [
-        (1-fractional.x) * (1-fractional.y),  // top-left
-        fractional.x * (1-fractional.y),      // top-right
-        (1-fractional.x) * fractional.y,      // bottom-left
-        fractional.x * fractional.y           // bottom-right
-    ]
-    
-    return Tile2x2(basePos, weights)
-```
-
-### 4.3 Multi-Sampling Integration
-
-When rendering from a high-resolution cylindrical grid to the physical LED array (grid → corkscrew), we employ super-sampling to reduce aliasing artifacts:
-
-```
-function multiSample(sourceGrid, targetPosition, sampleRadius):
-    totalColor = (0, 0, 0)
-    totalWeight = 0
-    
-    for offset in samplePattern(sampleRadius):
-        samplePos = targetPosition + offset
-        if inBounds(sourceGrid, samplePos):
-            weight = gaussianWeight(offset, sampleRadius)
-            color = bilinearSample(sourceGrid, samplePos)
-            totalColor += color * weight
-            totalWeight += weight
-    
-    return totalColor / totalWeight
-```
-
-## 5. Implementation
-
-## 5.1 Memory safety
-
-### 5.4 Cartesian Coordinate Projection Algorithm
-
-The `Corkscrew.readFrom()` method implements a remarkably efficient projection technique that operates entirely in cartesian/rectangular coordinate space without requiring trigonometric functions. This approach challenges conventional expectations about cylindrical mapping implementations.
-
-**Linear Projection Technique**: For each LED position `i`, the algorithm computes rectangular coordinates by treating the helical arrangement as a linearized grid:
+Users create patterns on a 2D rectangular grid (`fl::Grid<CRGB>`) using standard XY coordinates. This grid represents the "unwrapped" cylindrical surface of the corkscrew.
 
 ```cpp
-// Calculate row (turn) using integer division
-const uint16_t row = ledIndex / width;
-
-// Calculate remainder as position within the row  
-const uint16_t remainder = ledIndex % width;
-
-// Convert remainder to fractional position within row
-const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
-
-// Final rectangular coordinates
-const float width_pos = ledProgress * numLeds;
-const float height_pos = static_cast<float>(row) + alpha;
+// Grid dimensions calculated from corkscrew parameters
+uint16_t width = input.calculateWidth();   // LEDs per turn
+uint16_t height = input.calculateHeight(); // Total vertical segments
+fl::Grid<CRGB> sourceGrid(width, height);
 ```
 
-**Cylindrical Line Extension**: The core insight is that each LED position corresponds to a point on the "unwrapped" cylindrical surface. When projecting from a source grid to the corkscrew arrangement, the algorithm:
+### 2. LED Projection: Corkscrew → XY Grid
 
-1. **Extends the LED position** as a straight line on the conceptual cylinder map sphere
-2. **Performs interpolation** along this extended line in rectangular coordinate space  
-3. **Projects resulting points** directly onto the cylindrical plane using X,Y cartesian coordinates
-
-**Integer-Space Operations**: The implementation operates primarily in integer and floating-point space rather than angular coordinates:
-
-- **Row calculation**: Uses integer division (`ledIndex / width`) to determine the helical turn
-- **Position within turn**: Uses modulo operation (`ledIndex % width`) for circumferential position
-- **Fractional interpolation**: Converts integer remainder to normalized position (`alpha`)
-- **Coordinate mapping**: Direct cartesian projection without sine/cosine calculations
-
-**Multi-Sampling Enhancement**: The `readFromMulti()` variant extends this approach using `Tile2x2_u8_wrap` structures:
+Each LED in the corkscrew has a corresponding floating-point position on the XY grid:
 
 ```cpp
-// Get wrapped tile for sub-pixel accuracy
-Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
+// From corkscrew.cpp - calculateLedPositionExtended
+vec2f calculateLedPosition(uint16_t ledIndex, uint16_t numLeds, uint16_t width) {
+    const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
+    const uint16_t row = ledIndex / width;  // Which turn (vertical position)
+    const uint16_t remainder = ledIndex % width;  // Position within turn
+    const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
+    
+    const float width_pos = ledProgress * numLeds;
+    const float height_pos = static_cast<float>(row) + alpha;
+    
+    return vec2f(width_pos, height_pos);
+}
+```
 
-// Sample from 4 corners with weighted interpolation
-for (uint8_t x = 0; x < 2; x++) {
-    for (uint8_t y = 0; y < 2; y++) {
-        const auto& entry = tile.at(x, y);
-        vec2i16 pos = entry.first;    // rectangular position
-        uint8_t weight = entry.second; // interpolation weight
-        // ... weighted color accumulation
+### 3. computeTile: Splat Pixel Rendering
+
+The `splat` function implements the "computeTile" concept by converting floating-point positions to `Tile2x2_u8` structures representing neighbor intensities:
+
+```cpp
+// From splat.cpp
+Tile2x2_u8 splat(vec2f xy) {
+    // 1) Get integer cell indices
+    int16_t cx = static_cast<int16_t>(floorf(xy.x));
+    int16_t cy = static_cast<int16_t>(floorf(xy.y));
+    
+    // 2) Calculate fractional offsets [0..1)
+    float fx = xy.x - cx;
+    float fy = xy.y - cy;
+    
+    // 3) Compute bilinear weights for 4 neighbors
+    float w_ll = (1 - fx) * (1 - fy); // lower-left
+    float w_lr = fx * (1 - fy);       // lower-right  
+    float w_ul = (1 - fx) * fy;       // upper-left
+    float w_ur = fx * fy;             // upper-right
+    
+    // 4) Build Tile2x2_u8 with weights as intensities [0..255]
+    Tile2x2_u8 out(vec2<int16_t>(cx, cy));
+    out.lower_left()  = to_uint8(w_ll);
+    out.lower_right() = to_uint8(w_lr);
+    out.upper_left()  = to_uint8(w_ul);
+    out.upper_right() = to_uint8(w_ur);
+    
+    return out;
+}
+```
+
+### 4. Tile2x2_u8: Neighbor Intensity Representation
+
+The `Tile2x2_u8` structure represents the sampling strength from the four nearest neighbors:
+
+```cpp
+class Tile2x2_u8 {
+    uint8_t mTile[2][2];        // 4 neighbor intensities [0..255]
+    vec2<int16_t> mOrigin;      // Base grid coordinate (cx, cy)
+    
+    // Access methods for the 4 neighbors:
+    uint8_t& lower_left();   // (0,0) - weight for pixel at (cx, cy)
+    uint8_t& lower_right();  // (1,0) - weight for pixel at (cx+1, cy)  
+    uint8_t& upper_left();   // (0,1) - weight for pixel at (cx, cy+1)
+    uint8_t& upper_right();  // (1,1) - weight for pixel at (cx+1, cy+1)
+};
+```
+
+### 5. Cylindrical Wrapping with Tile2x2_u8_wrap
+
+For corkscrew mapping, the tile needs cylindrical wrapping:
+
+```cpp
+// From corkscrew.cpp - at_wrap()
+Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
+    Tile2x2_u8 tile = at_splat_extrapolate(i);  // Get base tile
+    Tile2x2_u8_wrap::Entry data[2][2];
+    vec2i16 origin = tile.origin();
+    
+    for (uint8_t x = 0; x < 2; x++) {
+        for (uint8_t y = 0; y < 2; y++) {
+            vec2i16 pos = origin + vec2i16(x, y);
+            // Apply cylindrical wrapping to x-coordinate
+            pos.x = fmodf(pos.x, static_cast<float>(mState.width));
+            data[x][y] = {pos, tile.at(x, y)};  // {position, intensity}
+        }
+    }
+    return Tile2x2_u8_wrap(data);
+}
+```
+
+### 6. multiSample: Weighted Color Sampling
+
+The `readFromMulti` method implements the "multiSample" concept by using tile intensities to determine sampling strength:
+
+```cpp
+// From corkscrew.cpp - readFromMulti()
+void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
+    for (size_t led_idx = 0; led_idx < mInput.numLeds; ++led_idx) {
+        // Get wrapped tile for this LED position
+        Tile2x2_u8_wrap tile = at_wrap(static_cast<float>(led_idx));
+        
+        uint32_t r_accum = 0, g_accum = 0, b_accum = 0;
+        uint32_t total_weight = 0;
+        
+        // Sample from each of the 4 neighbors
+        for (uint8_t x = 0; x < 2; x++) {
+            for (uint8_t y = 0; y < 2; y++) {
+                const auto& entry = tile.at(x, y);
+                vec2i16 pos = entry.first;      // Grid position
+                uint8_t weight = entry.second;  // Sampling intensity [0..255]
+                
+                if (inBounds(source_grid, pos)) {
+                    CRGB sample_color = source_grid.at(pos.x, pos.y);
+                    
+                    // Weighted accumulation
+                    r_accum += static_cast<uint32_t>(sample_color.r) * weight;
+                    g_accum += static_cast<uint32_t>(sample_color.g) * weight;
+                    b_accum += static_cast<uint32_t>(sample_color.b) * weight;
+                    total_weight += weight;
+                }
+            }
+        }
+        
+        // Final color = weighted average
+        CRGB final_color = CRGB::Black;
+        if (total_weight > 0) {
+            final_color.r = static_cast<uint8_t>(r_accum / total_weight);
+            final_color.g = static_cast<uint8_t>(g_accum / total_weight);
+            final_color.b = static_cast<uint8_t>(b_accum / total_weight);
+        }
+        
+        mCorkscrewLeds[led_idx] = final_color;
     }
 }
 ```
 
-**Performance Implications**: This cartesian-based approach delivers significant computational advantages:
+## Complete Pipeline Flow
 
-- **No trigonometric overhead**: Eliminates expensive sine/cosine calculations entirely
-- **Integer arithmetic dominance**: Primary operations use fast integer division and modulo
-- **Cache-friendly memory access**: Sequential LED indexing maps to predictable memory patterns  
-- **Sub-pixel accuracy**: Achieves precise interpolation through weighted rectangular sampling
-
-The technique demonstrates that complex cylindrical projections can be achieved through elegant coordinate space transformations, avoiding the computational complexity typically associated with angular parameterization while maintaining mathematical rigor and visual fidelity.
-
-### 5.5 Web Integration
-
-The system generates ScreenMap data structures that describe the 3D spatial arrangement of LEDs for web-based visualization tools. This enables real-time preview of patterns in browser environments while maintaining accurate geometric representation.
-
-## 6. Evaluation
-
-### 6.1 Experimental Setup
-
-We evaluated our technique using several test configurations:
-
-- **Festival Stick**: 288 LEDs, 19.25 turns, 30cm length
-- **Wearable Helix**: 144 LEDs, 12 turns, 15cm length  
-- **Architectural Column**: 576 LEDs, 8 turns, 2m length
-
-Each configuration was tested with both synthetic patterns (geometric shapes, gradients) and real-world content (text, logos, animations).
-
-### 6.2 Visual Quality Assessment
-
-Visual quality was assessed through:
-1. **Pattern continuity**: Measuring visual breaks at helical boundaries
-2. **Shape preservation**: Evaluating geometric accuracy of rendered shapes
-3. **Color uniformity**: Assessing consistency across the helical surface
-
-## 7. Performance Analysis
-
-### 7.1 Computational Complexity
-
-The forward mapping algorithm achieves O(1) complexity per LED, making it suitable for real-time applications. Memory usage scales linearly with LED count, requiring approximately 8 bytes per LED for mapping tables.
-
-### 7.2 Benchmark Results
-
-Performance testing on representative hardware platforms demonstrates:
-
-- **Arduino Uno**: 60fps for 144 LED configurations
-- **ESP32**: 120fps for 288 LED configurations  
-- **Desktop**: >1000fps for arbitrary LED counts
-
-### 7.3 Power Consumption
-
-The optimized implementation reduces CPU utilization by 35% compared to naive trigonometric recalculation, resulting in measurable power savings for battery-operated installations.
-
-## 8. Limitations and Future Work
-
-### 8.1 Computational Optimization
-
-Current implementations rely heavily on floating-point arithmetic, which presents both performance and precision challenges on embedded systems. Analysis of the corkscrew mapping pipeline reveals several computational bottlenecks:
-
-**Float-Intensive Operations**: The core mapping algorithms extensively use `float` types for:
-- Trigonometric calculations (sin, cos) in helical parameterization
-- Progress ratios and fractional positioning
-- Multi-sampling weight computations
-- Bilinear interpolation coefficients
-- Sub-pixel tile coordinate calculations
-
-**Integer Optimizations**: Strategic use of `uint16_t` representations currently optimizes:
-- LED index storage and iteration
-- Grid coordinate discretization  
-- Lookup table indexing for pre-computed values
-- Memory-efficient storage of mapping tables
-
-### 8.2 Fixed-Point Arithmetic Research
-
-Future work will investigate migration to Q16.16 fixed-point arithmetic to address floating-point limitations:
-
-**Performance Benefits**: Fixed-point operations execute 2-5x faster on integer-only microcontrollers, enabling higher frame rates on resource-constrained platforms like Arduino Uno.
-
-**Precision Analysis**: Q16.16 format provides 16 bits of fractional precision (approximately 5 decimal places), sufficient for sub-pixel accuracy in typical LED installations while maintaining deterministic behavior.
-
-**Conversion Strategy**: Systematic replacement of critical float operations:
 ```
-// Current float approach
-float progress = (float)ledIndex / (totalLEDs - 1);
-float angle = progress * totalTurns * 2.0f * PI;
-
-// Proposed Q16.16 approach  
-q16_t progress = q16_div(int_to_q16(ledIndex), int_to_q16(totalLEDs - 1));
-q16_t angle = q16_mul(q16_mul(progress, int_to_q16(totalTurns)), Q16_TWO_PI);
+1. User draws → XY Grid (CRGB values at integer coordinates)
+                    ↓
+2. LED projection → vec2f position on grid (floating-point)
+                    ↓  
+3. computeTile    → Tile2x2_u8 (4 neighbor intensities)
+   (splat)           ↓
+4. Wrap for       → Tile2x2_u8_wrap (cylindrical coordinates + intensities)
+   cylinder          ↓
+5. multiSample    → Weighted sampling from 4 neighbors
+   (readFromMulti)   ↓
+6. Final LED color → CRGB value for corkscrew LED
 ```
 
-**Memory Efficiency**: Fixed-point arithmetic eliminates floating-point unit dependencies, reducing code size by an estimated 15-20% and enabling deployment on even more constrained platforms.
+## Key Insights
 
-### 8.3 Algorithmic Improvements
+### Sub-Pixel Accuracy
+The system achieves sub-pixel accuracy by:
+- Using floating-point LED positions on the grid
+- Converting to bilinear weights for 4 nearest neighbors
+- Performing weighted color sampling instead of nearest-neighbor
 
-**Adaptive Precision**: Future implementations will dynamically adjust computational precision based on LED density and viewing distance, using lower precision for distant installations where sub-pixel accuracy provides diminishing returns.
+### Cylindrical Mapping
+- X-coordinates wrap around the cylinder circumference
+- Y-coordinates represent vertical position along the helix
+- Width = LEDs per turn, Height = total vertical segments
 
-**Hardware-Specific Optimization**: Platform-specific optimizations including:
-- ESP32 dual-core parallelization of mapping calculations
-- ARM Cortex-M4 DSP instruction utilization for vector operations
-- AVR assembly optimization for critical path trigonometric functions
+### Anti-Aliasing
+The weighted sampling naturally provides anti-aliasing:
+- Sharp grid patterns become smoothly interpolated on the corkscrew
+- Reduces visual artifacts from the discrete→continuous→discrete mapping
 
-### 8.4 Extended Geometric Support
+## Performance Characteristics
 
-Beyond computational optimization, future work will address:
-
-**Non-Cylindrical Helices**: Extension to conical and variable-radius helical arrangements common in artistic installations.
-
-**Multi-Helix Configurations**: Support for braided and interleaved helical patterns requiring more sophisticated coordinate transformations.
-
-**Dynamic Geometry**: Real-time adaptation to mechanically deforming helical structures using sensor feedback integration.
-
-## 9. Conclusion
-
-We have presented Corkscrew Mapping, a comprehensive technique for visualizing 2D graphics patterns on helically-arranged LED strips. Our mathematical framework provides both theoretical foundation and practical implementation, enabling real-time applications across diverse contexts from festival installations to architectural lighting.
-
-The key contributions include:
-- A complete mathematical framework for bidirectional helical-to-cylindrical mapping
-- Efficient O(1) algorithms optimized for embedded systems
-- Sub-pixel accurate rendering through multi-sampling techniques
-- Memory-safe implementation with robust error handling
-- Platform-agnostic design supporting Arduino to desktop environments
-- Comprehensive performance analysis demonstrating real-world viability
-
-The technique successfully addresses the visual discontinuity problem that has limited helical LED installations, achieving sub-pixel accuracy while maintaining real-time performance constraints. Real-world deployments have validated both the mathematical approach and practical implementation across multiple hardware platforms.
-
-Future work will explore extension to non-cylindrical helical geometries, integration of machine learning for automatic parameter optimization, and development of authoring tools for complex 3D LED arrangements. The mathematical foundations established here provide a solid basis for addressing increasingly sophisticated LED installation geometries in interactive media and architectural applications.
+- **Memory**: O(W×H) for grid (O(N) for corkscrew LEDs where O(N) <= O(WxH) == O(WxW))
+- **Computation**: O(N) with 4 samples per LED (constant factor)
+- **Quality**: Sub-pixel accurate with built-in anti-aliasing
+- **Flexibility**: Works with any helical LED arrangement
