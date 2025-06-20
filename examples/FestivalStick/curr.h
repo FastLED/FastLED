@@ -60,20 +60,33 @@ UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
     "Tests the ability to map a cork screw onto a 2D cylindrical surface. ");
 
-UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
+// UI Groups for organizing controls
+UIGroup positionGroup("Position Controls");
+UIGroup motionGroup("Motion & Speed");
+UIGroup visualGroup("Visual Settings");
+UIGroup noiseGroup("Noise Controls");
+UIGroup colorGroup("Color Controls");
+
+// Position controls (grouped under positionGroup)
 UISlider positionCoarse("Position Coarse (10x)", 0.0f, 0.0f, 1.0f, 0.01f);
 UISlider positionFine("Position Fine (1x)", 0.0f, 0.0f, 0.1f, 0.001f);
 UISlider positionExtraFine("Position Extra Fine (0.1x)", 0.0f, 0.0f, 0.01f, 0.0001f);
-UISlider brightness("Brightness", 255, 0, 255, 1);
 
+// Motion controls (grouped under motionGroup)
+UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 UICheckbox autoAdvance("Auto Advance", true);
+
+// Visual settings (grouped under visualGroup)
+UISlider brightness("Brightness", 255, 0, 255, 1);
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
+
+// Noise controls (grouped under noiseGroup)
 UICheckbox useNoise("Use Noise Pattern", true);
 UISlider noiseScale("Noise Scale", 30, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
-// Color boost controls
+// Color controls (grouped under colorGroup)
 UINumberField saturationFunction("Saturation Function", 1, 0, 9);
 UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
@@ -166,6 +179,14 @@ void setup() {
     // Set the corkscrew screen map for the controller
     // This allows the web interface to display the actual corkscrew spiral shape
     controller->setScreenMap(corkscrewScreenMap);
+    
+    // Demonstrate UIGroup functionality
+    FL_WARN("UI Groups initialized:");
+    FL_WARN("  " << positionGroup.name() << " - for precise position control");
+    FL_WARN("  " << motionGroup.name() << " - for speed and auto-advance");
+    FL_WARN("  " << visualGroup.name() << " - for brightness and rendering");
+    FL_WARN("  " << noiseGroup.name() << " - for noise pattern parameters");
+    FL_WARN("  " << colorGroup.name() << " - for color enhancement and palettes");
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
@@ -384,4 +405,3 @@ void loop() {
     FastLED.setBrightness(brightness.value());
     FastLED.show();
 }
-
