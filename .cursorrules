@@ -62,6 +62,23 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **Why:** `FL_WARN` provides a unified logging interface that works across all platforms and testing environments, including unit tests and Arduino sketches.
 
+### Naming Conventions
+**Follow these naming conventions for consistency across the codebase:**
+
+**Simple Objects:**
+- ✅ Use lowercase class names for simple objects (e.g., `fl::vec2f`, `fl::point`, `fl::rect`)
+- ❌ Avoid: `fl::Vec2f`, `fl::Point`, `fl::Rect`
+
+**Complex Objects:**
+- ✅ Use CamelCase with uppercase first character for complex objects (e.g., `Raster`, `Controller`, `Canvas`)
+- ❌ Avoid: `raster`, `controller`, `canvas`
+
+**Pixel Types:**
+- ✅ Use ALL CAPS for pixel types (e.g., `CRGB`, `CHSV`, `HSV16`, `RGB24`)
+- ❌ Avoid: `crgb`, `Crgb`, `chsv`, `Chsv`
+
+**Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns.
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests
