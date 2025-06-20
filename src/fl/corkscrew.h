@@ -43,6 +43,7 @@
 #include "fl/pair.h"
 #include "fl/tile2x2.h"
 #include "fl/vector.h"
+#include "crgb.h"
 
 namespace fl {
 
@@ -180,6 +181,20 @@ class Corkscrew {
     int16_t cylinder_width() const { return mState.width; }
     int16_t cylinder_height() const { return mState.height; }
 
+    // New functionality: rectangular buffer and drawing
+    // Get access to the rectangular buffer (lazily initialized)
+    fl::vector<CRGB>& getBuffer();
+    const fl::vector<CRGB>& getBuffer() const;
+    
+    // Draw function that maps corkscrew LEDs to target array by sampling from rectangular buffer
+    void draw(CRGB* target_leds) const;
+    
+    // Clear the rectangular buffer 
+    void clearBuffer();
+    
+    // Fill the rectangular buffer with a color
+    void fillBuffer(const CRGB& color);
+
     /// For testing
     static State generateState(const Input &input);
 
@@ -188,9 +203,16 @@ class Corkscrew {
     // extends past the width. This extended Tile2x2 is designed
     // to be wrapped around with a Tile2x2_u8_wrap.
     Tile2x2_u8 at_splat_extrapolate(float i) const;
+    
+    // Initialize the rectangular buffer if not already done
+    void initializeBuffer() const;
 
     Input mInput; // The input parameters defining the corkscrew
     State mState; // The resulting cylindrical mapping
+    
+    // Rectangular buffer for drawing (lazily initialized)
+    mutable fl::vector<CRGB> mRectangularBuffer;
+    mutable bool mBufferInitialized = false;
 };
 
 } // namespace fl
