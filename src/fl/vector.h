@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <string.h>
 
+// Include initializer_list if C++11 is available
+#if __cplusplus >= 201103L
+#include <initializer_list>
+#endif
+
 #include "fl/functional.h"
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
@@ -98,6 +103,23 @@ template <typename T, size_t N> class FixedVector {
         static_assert(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
     }
+
+#if __cplusplus >= 201103L
+    // Initializer list constructor (C++11 and later)
+    FixedVector(std::initializer_list<T> init) : current_size(0) {
+        if (init.size() > N) {
+            // Only assign the first N elements if the list is too long
+            auto it = init.begin();
+            for (size_t i = 0; i < N && it != init.end(); ++i, ++it) {
+                push_back(*it);
+            }
+        } else {
+            for (const auto& value : init) {
+                push_back(value);
+            }
+        }
+    }
+#endif
 
     FixedVector &operator=(const FixedVector &other) {
         if (this != &other) {
@@ -357,6 +379,16 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         T *end = &values[N];
         assign(begin, end);
     }
+
+#if __cplusplus >= 201103L
+    // Initializer list constructor (C++11 and later)
+    HeapVector(std::initializer_list<T> init) {
+        reserve(init.size());
+        for (const auto& value : init) {
+            push_back(value);
+        }
+    }
+#endif
 
     // Destructor
     ~HeapVector() { 
@@ -833,6 +865,23 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
             mFixed.resize(size);
         }
     }
+
+#if __cplusplus >= 201103L
+    // Initializer list constructor (C++11 and later)
+    InlinedVector(std::initializer_list<T> init) : mUsingHeap(false) {
+        if (init.size() > INLINED_SIZE) {
+            mHeap.reserve(init.size());
+            for (const auto& value : init) {
+                mHeap.push_back(value);
+            }
+            mUsingHeap = true;
+        } else {
+            for (const auto& value : init) {
+                mFixed.push_back(value);
+            }
+        }
+    }
+#endif
 
     InlinedVector &operator=(const InlinedVector &other) {
         if (this != &other) {
