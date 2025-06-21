@@ -62,7 +62,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
             // FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "NULL"));
             // FL_WARN("*** updateEngineState lambda JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
             auto& manager = getInternalManager();
-            FL_WARN("*** updateEngineState lambda: manager pointer=" << manager.get());
+            // FL_WARN("*** updateEngineState lambda: manager pointer=" << manager.get());
             if (manager) {
                 // FL_WARN("*** updateEngineState lambda: manager exists, calling updateUiComponents");
                 // FL_WARN("*** updateEngineState lambda: PASSING JSON TO MANAGER: " << (jsonStr ? jsonStr : "NULL"));

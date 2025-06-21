@@ -188,11 +188,11 @@ void JsonUiManager::onPlatformPreLoop() {
     if (!mHasPendingUpdate) {
         return;
     }
-    FL_WARN("*** onPlatformPreLoop: Processing pending update");
+    // FL_WARN("*** onPlatformPreLoop: Processing pending update");
     executeUiUpdates(mPendingJsonUpdate);
     mPendingJsonUpdate.clear();
     mHasPendingUpdate = false;
-    FL_WARN("*** onPlatformPreLoop: Update processed and cleared");
+    // FL_WARN("*** onPlatformPreLoop: Update processed and cleared");
 }
 
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {

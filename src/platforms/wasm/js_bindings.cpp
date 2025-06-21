@@ -19,7 +19,7 @@
 namespace fl {
 
 static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
-    FASTLED_DBG("jsSetCanvasSize1");
+    // FASTLED_DBG("jsSetCanvasSize1");
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
@@ -31,7 +31,7 @@ static void jsSetCanvasSizeJson(const char* jsonString, size_t jsonSize) {
 }
 
 static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
-    FASTLED_DBG("Begin jsSetCanvasSize json serialization");
+    // FASTLED_DBG("Begin jsSetCanvasSize json serialization");
     FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
@@ -48,10 +48,10 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
     if (diameter > 0.0f) {
         doc["diameter"] = diameter;
     }
-    FASTLED_DBG("Finished json dict building.");
+    // FASTLED_DBG("Finished json dict building.");
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
-    FASTLED_DBG("End jsSetCanvasSize json serialization");
+    // FASTLED_DBG("End jsSetCanvasSize json serialization");
     jsSetCanvasSizeJson(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
@@ -135,13 +135,13 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
                 }
             };
         globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
-            console.log("*** JS→C++: onFastLedUiUpdateFunction called with:", jsonString);
+            // console.log("*** JS→C++: onFastLedUiUpdateFunction called with:", jsonString);
             if (typeof jsonString === 'string' && jsonString !== null) {
-                    console.log("*** JS→C++: Calling C++ jsUpdateUiComponents");
+                    // console.log("*** JS→C++: Calling C++ jsUpdateUiComponents");
                     Module.jsUpdateUiComponents(jsonString);
-                    console.log("*** JS→C++: C++ jsUpdateUiComponents call completed");
+                    // console.log("*** JS→C++: C++ jsUpdateUiComponents call completed");
                 } else {
-                console.error("*** JS→C++: Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
+                    console.error("*** JS→C++: Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
                 }
             };
 

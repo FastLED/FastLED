@@ -402,7 +402,7 @@ export class JsonUiManager {
       
       // For non-audio elements, only include if changed
       if (this.previousUiState[id] !== currentValue) {
-        console.log(`*** UI CHANGE: '${id}' changed from ${this.previousUiState[id]} to ${currentValue} ***`);
+        // console.log(`*** UI CHANGE: '${id}' changed from ${this.previousUiState[id]} to ${currentValue} ***`);
         changes[id] = currentValue;
         hasChanges = true;
         this.previousUiState[id] = currentValue;
@@ -410,13 +410,13 @@ export class JsonUiManager {
     }
 
     if (hasChanges) {
-      // Transform to backend format: {"2": 0.95} → {"id_2": {"value": 0.95}}
+      // Transform to backend format: {"2": 0.95} → {"2": {"value": 0.95}}
       const transformedChanges = {};
       for (const [id, value] of Object.entries(changes)) {
         const key = `${id}`;
         transformedChanges[key] = { value: value };
       }
-      console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
+      // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
       
       // Check if there's audio data in the changes
       const audioKeys = Object.keys(changes).filter(key => 
