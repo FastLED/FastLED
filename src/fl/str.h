@@ -378,7 +378,7 @@ template <size_t SIZE = 64> class StrN {
         return out;
     }
 
-    StrN substr(size_t start, size_t end) {
+     StrN substr(size_t start, size_t end) {
         return substring(start, end);
     }
 

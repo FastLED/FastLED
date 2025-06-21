@@ -214,11 +214,66 @@ function setDescription(descData) {
 
 export class JsonUiManager {
   constructor(uiControlsId) {
+    console.log('*** JsonUiManager JS: CONSTRUCTOR CALLED ***');
     this.uiElements = {};
     this.previousUiState = {};
     this.uiControlsId = uiControlsId;
     this.groups = new Map(); // Track created groups
     this.ungroupedContainer = null; // Container for ungrouped items
+  }
+
+  // Method called by C++ backend to update UI components
+  updateUiComponents(jsonString) {
+    console.log('*** JS BACKEND UPDATE RECEIVED:', jsonString);
+    
+    try {
+      const updates = JSON.parse(jsonString);
+      
+      // Process each update
+      for (const [elementId, updateData] of Object.entries(updates)) {
+        // Strip 'id_' prefix if present to match our element storage
+        const actualElementId = elementId.startsWith('id_') ? elementId.substring(3) : elementId;
+        
+        const element = this.uiElements[actualElementId];
+        if (element) {
+          // Extract value from update data
+          const value = updateData.value !== undefined ? updateData.value : updateData;
+          
+          // Update the element based on its type
+          if (element.type === 'checkbox') {
+            element.checked = Boolean(value);
+          } else if (element.type === 'range') {
+            element.value = value;
+            // Also update the display value if it exists
+            const valueDisplay = element.parentElement.querySelector('span');
+            if (valueDisplay) {
+              valueDisplay.textContent = value;
+            }
+          } else if (element.type === 'number') {
+            element.value = value;
+          } else if (element.tagName === 'SELECT') {
+            element.selectedIndex = value;
+          } else if (element.type === 'submit') {
+            element.setAttribute('data-pressed', value ? 'true' : 'false');
+            if (value) {
+              element.classList.add('active');
+            } else {
+              element.classList.remove('active');
+            }
+          } else {
+            element.value = value;
+          }
+          
+          // Update our internal state tracking
+          this.previousUiState[actualElementId] = value;
+          console.log(`*** JS BACKEND UPDATED UI: '${actualElementId}' = ${value} ***`);
+        } else {
+          console.warn(`*** JS BACKEND UPDATE FAILED: Element '${actualElementId}' not found ***`);
+        }
+      }
+    } catch (error) {
+      console.error('*** JS BACKEND UPDATE ERROR:', error, 'JSON:', jsonString);
+    }
   }
 
   // Create a collapsible group container
@@ -296,6 +351,7 @@ export class JsonUiManager {
   processUiChanges() {
     const changes = {}; // Json object to store changes.
     let hasChanges = false;
+    
     for (const id in this.uiElements) {
       const element = this.uiElements[id];
       let currentValue;
@@ -346,6 +402,7 @@ export class JsonUiManager {
       
       // For non-audio elements, only include if changed
       if (this.previousUiState[id] !== currentValue) {
+        console.log(`*** UI CHANGE: '${id}' changed from ${this.previousUiState[id]} to ${currentValue} ***`);
         changes[id] = currentValue;
         hasChanges = true;
         this.previousUiState[id] = currentValue;
@@ -353,8 +410,13 @@ export class JsonUiManager {
     }
 
     if (hasChanges) {
-      // Log the final JSON that will be sent to FastLED
-      // console.log('Sending UI changes to FastLED:');
+      // Transform to backend format: {"2": 0.95} → {"id_2": {"value": 0.95}}
+      const transformedChanges = {};
+      for (const [id, value] of Object.entries(changes)) {
+        const key = `${id}`;
+        transformedChanges[key] = { value: value };
+      }
+      console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
       
       // Check if there's audio data in the changes
       const audioKeys = Object.keys(changes).filter(key => 
@@ -367,20 +429,15 @@ export class JsonUiManager {
         // For each audio element, log summary info but not the full array
         audioKeys.forEach(key => {
           const audioData = changes[key];
-          //console.log(`  Audio ${key}: ${audioData.length} samples`);
-          
-          // Create a copy of changes with abbreviated audio data for logging
-          const changesCopy = {...changes};
-          changesCopy[key] = `[${audioData.length} samples]`;
-          //console.log(JSON.stringify(changesCopy, null, 2));
+          console.log(`*** Audio ${key}: ${audioData.length} samples ***`);
         });
-      } else {
-        // No audio data, log the full changes object
-        //console.log(JSON.stringify(changes, null, 2));
       }
+      
+      // Return the transformed format
+      return transformedChanges;
     }
     
-    return hasChanges ? changes : null;
+    return null;
   }
 
   addUiElements(jsonData) {
@@ -488,5 +545,6 @@ export class JsonUiManager {
       this.uiElements[data.id] = control.querySelector('input');
     }
     this.previousUiState[data.id] = data.value;
+    console.log(`*** REGISTERED UI ELEMENT: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length} ***`);
   }
 }

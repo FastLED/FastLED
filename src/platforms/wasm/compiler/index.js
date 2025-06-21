@@ -462,6 +462,16 @@ async function onModuleLoaded(fastLedLoader) {
       // Load the module
       fastLedLoader().then(async (instance) => {
         console.log('Module loaded, running FastLED...');
+        
+        // Expose the updateUiComponents method to the C++ module
+        instance._jsUiManager_updateUiComponents = function(jsonString) {
+          if (window.uiManagerInstance && window.uiManagerInstance.updateUiComponents) {
+            window.uiManagerInstance.updateUiComponents(jsonString);
+          } else {
+            console.error('*** UI BINDING ERROR: uiManagerInstance not available ***');
+          }
+        };
+        
         // Wait for the files.json to load.
         let filesJson = null;
         try {
@@ -493,6 +503,10 @@ async function localLoadFastLed(options) {
     console.log('Loading FastLED with options:', options);
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
     uiManager = new JsonUiManager(uiControlsId);
+    
+    // Expose UI manager method to C++ module - this will be called by the WASM binding
+    window.uiManagerInstance = uiManager;
+    
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
     const fastLedLoader = options.fastled;
