@@ -26,7 +26,6 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler);
 
 /**
  * Add a UI component to the global component registry.
- * This is a free function replacement for jsUiManager::addComponent.
  * 
  * @param component WeakPtr to the JsonUiInternal component to add
  */
@@ -35,7 +34,6 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component);
 
 /**
  * Remove a UI component from the global component registry.
- * This is a free function replacement for jsUiManager::removeComponent.
  * 
  * @param component WeakPtr to the JsonUiInternal component to remove
  */
