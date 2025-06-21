@@ -1,4 +1,4 @@
-#pragma once
+THIS SHOULD BE A LINTER ERROR#pragma once
 
 #ifndef FASTLED_ENABLE_JSON
 #ifdef __AVR__
