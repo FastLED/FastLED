@@ -413,7 +413,7 @@ export class JsonUiManager {
       // Transform to backend format: {"2": 0.95} → {"id_2": {"value": 0.95}}
       const transformedChanges = {};
       for (const [id, value] of Object.entries(changes)) {
-        const key = `id_${id}`;
+        const key = `${id}`;
         transformedChanges[key] = { value: value };
       }
       console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
