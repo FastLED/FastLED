@@ -11,6 +11,7 @@
 #include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/str.h"
+#include "fl/mutex.h"
 
 namespace fl {
 
