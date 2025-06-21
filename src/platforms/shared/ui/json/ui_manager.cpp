@@ -13,6 +13,8 @@ FL_DISABLE_WARNING(deprecated-declarations)
 namespace fl {
 
 
+// Constructor is inline in header, just add logging to destructor
+
 JsonUiManager::~JsonUiManager() {
     FL_WARN("*** JsonUiManager: DESTRUCTOR CALLED ***");
     fl::EngineEvents::removeListener(this);
@@ -47,6 +49,7 @@ void JsonUiManager::updateUiComponents(const char *jsonStr) {
     deserializeJson(doc, jsonStr);
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
+    FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
 }
 
 void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
@@ -70,8 +73,10 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
         
         for (auto &component : components) {
             int id = component->id();
+            //char idBuffer[32];
+            //sprintf(idBuffer, "id_%d", id);
             string idStr = "";
-            idStr += id;  // Use to_string instead of append
+            idStr += id;
             FL_WARN("*** LOOKING FOR KEY: '" << idStr.c_str() << "' for component ID " << id);
             
             if (obj.containsKey(idStr.c_str())) {
@@ -88,12 +93,15 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void JsonUiManager::onPlatformPreLoop() {
+    //FL_WARN("*** onPlatformPreLoop CALLED: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     if (!mHasPendingUpdate) {
         return;
     }
+    FL_WARN("*** onPlatformPreLoop: Processing pending update");
     executeUiUpdates(mPendingJsonUpdate);
     mPendingJsonUpdate.clear();
     mHasPendingUpdate = false;
+    FL_WARN("*** onPlatformPreLoop: Update processed and cleared");
 }
 
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
@@ -105,6 +113,7 @@ void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
 }
 
 void JsonUiManager::onEndShowLeds() {
+   // FL_WARN("*** onEndShowLeds CALLED ***");
     bool shouldUpdate = false;
     {
         fl::lock_guard lock(mMutex);

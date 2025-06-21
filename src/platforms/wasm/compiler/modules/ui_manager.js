@@ -224,7 +224,7 @@ export class JsonUiManager {
 
   // Method called by C++ backend to update UI components
   updateUiComponents(jsonString) {
-    console.log('*** JS BACKEND UPDATE RECEIVED:', jsonString);
+    console.log('*** C++→JS: Backend update received:', jsonString);
     
     try {
       const updates = JSON.parse(jsonString);
@@ -266,13 +266,13 @@ export class JsonUiManager {
           
           // Update our internal state tracking
           this.previousUiState[actualElementId] = value;
-          console.log(`*** JS BACKEND UPDATED UI: '${actualElementId}' = ${value} ***`);
+          console.log(`*** C++→JS: Updated UI element '${actualElementId}' = ${value} ***`);
         } else {
-          console.warn(`*** JS BACKEND UPDATE FAILED: Element '${actualElementId}' not found ***`);
+          console.warn(`*** C++→JS: Element '${actualElementId}' not found ***`);
         }
       }
     } catch (error) {
-      console.error('*** JS BACKEND UPDATE ERROR:', error, 'JSON:', jsonString);
+      console.error('*** C++→JS: Update error:', error, 'JSON:', jsonString);
     }
   }
 
@@ -413,7 +413,7 @@ export class JsonUiManager {
       // Transform to backend format: {"2": 0.95} → {"id_2": {"value": 0.95}}
       const transformedChanges = {};
       for (const [id, value] of Object.entries(changes)) {
-        const key = `${id}`;
+        const key = `id_${id}`;
         transformedChanges[key] = { value: value };
       }
       console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));

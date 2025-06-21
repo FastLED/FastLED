@@ -19,8 +19,12 @@ static JsonUiUpdateInput g_updateEngineState;
 static bool g_uiSystemInitialized = false;
 
 void jsUpdateUiComponents(const std::string &jsonStr) {
+    FL_WARN("*** jsUpdateUiComponents ENTRY: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
+    
     // Ensure UI system is initialized when first used
     ensureWasmUiSystemInitialized();
+    
+    FL_WARN("*** jsUpdateUiComponents AFTER INIT: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     
     if (g_updateEngineState) {
         FL_WARN("*** WASM CALLING BACKEND: " << jsonStr.c_str());
@@ -34,9 +38,11 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
 // Ensure the UI system is initialized - called when needed
 void ensureWasmUiSystemInitialized() {
     FL_WARN("*** CODE UPDATE VERIFICATION: This message confirms the C++ code has been rebuilt! ***");
+    FL_WARN("*** ensureWasmUiSystemInitialized ENTRY: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     
     // Return early if already initialized - CRITICAL FIX
     if (g_uiSystemInitialized) {
+        FL_WARN("*** ensureWasmUiSystemInitialized: Already initialized, returning early");
         return;
     }
     
@@ -44,14 +50,14 @@ void ensureWasmUiSystemInitialized() {
         FL_WARN("*** WASM INITIALIZING UI SYSTEM ***");
         
         // Test if fl::updateJs is accessible
-        fl::updateJs("[]");  // Valid empty JSON array
+        //fl::updateJs("[]");  // Valid empty JSON array
         
         JsonUiUpdateOutput updateJsHandler = [](const char* jsonStr) {
             fl::updateJs(jsonStr);
         };
         
         // Test the lambda
-        updateJsHandler("[]");  // Valid empty JSON array
+        //updateJsHandler("[]");  // Valid empty JSON array
         
         g_updateEngineState = setJsonUiHandlers(updateJsHandler);
         g_uiSystemInitialized = true;
@@ -62,6 +68,8 @@ void ensureWasmUiSystemInitialized() {
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
+                         &jsUpdateUiComponents);
+    emscripten::function("jsUpdateUiComponents",
                          &jsUpdateUiComponents);
 }
 

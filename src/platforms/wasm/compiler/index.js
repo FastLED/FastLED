@@ -464,7 +464,9 @@ async function onModuleLoaded(fastLedLoader) {
         console.log('Module loaded, running FastLED...');
         
         // Expose the updateUiComponents method to the C++ module
+        // This should be called BY C++ TO UPDATE the frontend, not the other way around
         instance._jsUiManager_updateUiComponents = function(jsonString) {
+          console.log('*** C++ CALLING JS: updateUiComponents with:', jsonString);
           if (window.uiManagerInstance && window.uiManagerInstance.updateUiComponents) {
             window.uiManagerInstance.updateUiComponents(jsonString);
           } else {

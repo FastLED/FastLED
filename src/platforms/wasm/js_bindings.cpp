@@ -135,13 +135,13 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
                 }
             };
         globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
-            console.log("onFastLedUiUpdateFunction called with:", typeof jsonString, jsonString ? jsonString.substring(0, 100) : "null");
+            console.log("*** JS→C++: onFastLedUiUpdateFunction called with:", jsonString);
             if (typeof jsonString === 'string' && jsonString !== null) {
-                    console.log("Calling Module._jsUiManager_updateUiComponents");
-                    Module._jsUiManager_updateUiComponents(jsonString);
-                    console.log("Module._jsUiManager_updateUiComponents call completed");
+                    console.log("*** JS→C++: Calling C++ jsUpdateUiComponents");
+                    Module.jsUpdateUiComponents(jsonString);
+                    console.log("*** JS→C++: C++ jsUpdateUiComponents call completed");
                 } else {
-                console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
+                console.error("*** JS→C++: Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
                 }
             };
 
