@@ -22,7 +22,7 @@ class jsCheckboxImpl {
     const fl::string &groupName() const { return mGroup; }
     
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
+    void setGroup(const fl::string &groupName) { mGroup = groupName; }
 
     jsCheckboxImpl &operator=(bool value) {
         setValue(value);
