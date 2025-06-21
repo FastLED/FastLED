@@ -62,7 +62,7 @@ class jsUiManager : fl::EngineEvents::Listener {
         }
     }
 
-    std::vector<jsUiInternalPtr> getComponents();
+    fl::vector<jsUiInternalPtr> getComponents();
     void toJson(FLArduinoJson::JsonArray &json);
 
     jsUIRefSet mComponents;

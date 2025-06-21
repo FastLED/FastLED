@@ -1,16 +1,12 @@
 
-#if defined(__EMSCRIPTEN__)
-
-#include <cctype>
-#include <cstdint>
-#include <string>
-
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 
 #include "fl/json.h"
 #include "fl/thread_local.h"
 #include "fl/warn.h"
 #include "platforms/wasm/ui/audio.h"
+#include "fl/string.h"
 #include "platforms/wasm/ui/ui_manager.h"
 
 using namespace fl;
@@ -27,8 +23,8 @@ jsAudioImpl::jsAudioImpl(const Str &name) {
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsAudioImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+                                     fl::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }
@@ -44,8 +40,11 @@ void jsAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["id"] = mInternal->id();
 }
 
-static void parseJsonStringToInt16Vector(const std::string &jsonStr,
-                                         std::vector<int16_t> *audioData) {
+static bool isdigit(char c) { return c >= '0' && c <= '9'; }
+static bool isspace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+
+static void parseJsonStringToInt16Vector(const fl::string &jsonStr,
+                                         fl::vector<int16_t> *audioData) {
     audioData->clear();
 
     size_t i = 0, n = jsonStr.size();
@@ -58,7 +57,7 @@ static void parseJsonStringToInt16Vector(const std::string &jsonStr,
 
     while (i < n) {
         // skip whitespace
-        while (i < n && std::isspace(jsonStr[i]))
+        while (i < n && isspace(jsonStr[i]))
             ++i;
         // check for closing ']'
         if (i < n && jsonStr[i] == ']')
@@ -76,7 +75,7 @@ static void parseJsonStringToInt16Vector(const std::string &jsonStr,
         // accumulate digits
         int value = 0;
         bool hasDigits = false;
-        while (i < n && std::isdigit(static_cast<unsigned char>(jsonStr[i]))) {
+        while (i < n && isdigit(static_cast<unsigned char>(jsonStr[i]))) {
             hasDigits = true;
             value = value * 10 + (jsonStr[i] - '0');
             ++i;
@@ -91,7 +90,7 @@ static void parseJsonStringToInt16Vector(const std::string &jsonStr,
         audioData->push_back(static_cast<int16_t>(value));
 
         // skip whitespace
-        while (i < n && std::isspace(jsonStr[i]))
+        while (i < n && isspace(jsonStr[i]))
             ++i;
         // skip comma (if any)
         if (i < n && jsonStr[i] == ',')
@@ -107,8 +106,6 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
     // std::vector<int16_t> audio_data;
     mAudioDataBuffer.clear();
     parseJsonStringToInt16Vector(mSerializeBuffer, &mAudioDataBuffer);
-    // kJsAudioSamples;
-    int offset = 0;
     int size = mAudioDataBuffer.size();
     // take in the data and break it up into chunks of kJsAudioSamples
     for (int i = 0; i < size; i += kJsAudioSamples) {

@@ -291,7 +291,7 @@ template <size_t SIZE = 64> class StrN {
         return c_str_mutable()[index];
     }
 
-    const char &operator[](size_t index) const {
+    char operator[](size_t index) const {
         if (index >= mLength) {
             static char dummy = '\0';
             return dummy;
