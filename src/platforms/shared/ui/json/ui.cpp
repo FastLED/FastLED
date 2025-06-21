@@ -8,11 +8,13 @@ namespace fl {
 // Provide stub implementations for the weak symbols
 __attribute__((weak)) void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
     // Default stub implementation - do nothing
+    FL_WARN("addJsonUiComponent is not implemented, received component: " << component);
     (void)component;
 }
 
 __attribute__((weak)) void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
     // Default stub implementation - do nothing
+    FL_WARN("removeJsonUiComponent is not implemented, received component: " << component);
     (void)component;
 }
 

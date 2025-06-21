@@ -3,7 +3,7 @@
 #ifdef __EMSCRIPTEN__
 #define FASTLED_USE_JSON_UI 1
 #else
-#define FASTLED_USE_JSON_UI 1
+#define FASTLED_USE_JSON_UI 0
 #endif  // __EMSCRIPTEN__
 
 
