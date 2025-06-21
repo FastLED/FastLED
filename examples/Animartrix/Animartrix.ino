@@ -70,6 +70,11 @@ using namespace fl;
 #define LED_DIAMETER 0.15  // .15 cm or 1.5mm
 
 
+#define POWER_LIMITER_ACTIVE
+#define POWER_VOLTS 5
+#define POWER_MILLIAMPS 2000
+
+
 CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 
@@ -82,8 +87,18 @@ UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS - 1);
 UINumberField colorOrder("Color Order", 0, 0, 5);
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
+
+
 Animartrix animartrix(xyMap, FIRST_ANIMATION);
 FxEngine fxEngine(NUM_LEDS);
+
+const bool kPowerLimiterActive = false;
+
+void setup_max_power() {
+    if (kPowerLimiterActive) {
+        FastLED.setMaxPowerInVoltsAndMilliamps(POWER_VOLTS, POWER_MILLIAMPS);  // Set max power to 2 amps
+    }
+}
 
 
 void setup() {
@@ -96,6 +111,7 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screen_map);
     FastLED.setBrightness(brightness);
+    setup_max_power();
     fxEngine.addFx(animartrix);
 
     colorOrder.onChanged([](int value) {
