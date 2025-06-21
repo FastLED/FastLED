@@ -12,7 +12,7 @@ class jsSliderImpl {
                  float max = 255.0f, float step = -1.f);
     ~jsSliderImpl();
     jsSliderImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
     }
 
@@ -23,10 +23,7 @@ class jsSliderImpl {
     float getMax() const { return mMax; }
     float getMin() const { return mMin; }
     void setValue(float value);
-    const fl::string &groupName() const { return mGroup; }
-    
-    // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
+    const fl::string &groupName() const { return mInternal->group(); }
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
@@ -49,7 +46,6 @@ class jsSliderImpl {
     float mMax;
     float mValue;
     float mStep;
-    fl::string mGroup;
 };
 
 } // namespace fl

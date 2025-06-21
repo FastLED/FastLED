@@ -9,8 +9,8 @@ using namespace fl;
 namespace fl {
 
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
-                           ToJsonFunction toJsonFunc)
-    : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
+                           ToJsonFunction toJsonFunc, const fl::string &group)
+    : mName(name), mGroup(group), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
       mId(nextId()), mMutex() {}
 
 const Str &jsUiInternal::name() const { return mName; }
@@ -27,6 +27,13 @@ void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
     }
 }
 int jsUiInternal::id() const { return mId; }
+
+const fl::string &jsUiInternal::group() const { return mGroup; }
+
+void jsUiInternal::setGroup(const fl::string &group) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    mGroup = group;
+}
 
 bool jsUiInternal::clearFunctions() {
     std::lock_guard<std::mutex> lock(mMutex);

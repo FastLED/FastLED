@@ -23,7 +23,7 @@ class jsUiInternal : public fl::Referent {
     using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
 
     jsUiInternal(const fl::string &name, UpdateFunction updateFunc,
-                 ToJsonFunction toJsonFunc);
+                 ToJsonFunction toJsonFunc, const fl::string &group = "");
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {
@@ -39,6 +39,9 @@ class jsUiInternal : public fl::Referent {
     void toJson(FLArduinoJson::JsonObject &json) const;
     int id() const;
 
+    const fl::string &group() const;
+    void setGroup(const fl::string &group);
+
     bool clearFunctions();
 
   private:
@@ -46,6 +49,7 @@ class jsUiInternal : public fl::Referent {
     static std::atomic<uint32_t> sNextId;
     int mId;
     fl::string mName;
+    fl::string mGroup;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;
