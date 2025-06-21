@@ -1,5 +1,8 @@
 # Testing
 
+  * REPO SYNC MODE: When there is a compiler error there isn't a hard failure. The compiler error needs to get propagate back to the top.
+
+
   * Esp32 testing
     * https://github.com/marketplace/actions/esp32-qemu-runner will run a sketch for X seconds and see's if it crashes
       * There's specific tests we'd like to run with this including the WS2812 and APA102 tests to test the clockless and clocked drivers
