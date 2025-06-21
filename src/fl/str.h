@@ -7,6 +7,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef __EMSCRIPTEN__
+#include <string>
+#endif
+
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -597,6 +601,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string &append(const XYMap &map);
 
     string &append(const Tile2x2_u8_wrap &tile);
+
+    #ifdef __EMSCRIPTEN__
+    string &append(const std::string &str) {
+        write(str.c_str(), str.size());
+        return *this;
+    }
+    #endif
 
     template <typename Key, typename Hash, typename KeyEqual>
     string &append(const HashSet<Key, Hash, KeyEqual> &set) {
