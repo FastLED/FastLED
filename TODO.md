@@ -40,18 +40,5 @@
     * https://github.com/sutaburosu/FastLED4-ESP32-playpen
 
 
-# SM16824E
-
-  * T0H: .3
-  * T0L: .9
-  * T1H: .9
-  * T1L: .3
-  * TRES: 1.6
-  * TRST: 200
-
-
-### FastLED
-
-  * T1: 300
-  * T2: 900
-  * T3: 0
+# Animartrix: try using sinf, cosf and other found trip instead of trying to go
+full double precision.

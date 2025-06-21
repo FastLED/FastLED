@@ -54,8 +54,8 @@ void loop() {}
 using namespace fl;
 
 
-#define LED_PIN 3
-#define BRIGHTNESS 96
+#define LED_PIN 6
+#define BRIGHTNESS 32
 #define COLOR_ORDER GRB
 
 #define MATRIX_WIDTH 32
