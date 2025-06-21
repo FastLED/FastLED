@@ -3,7 +3,7 @@
 #include "description.h"
 #include "../js.h"
 #include "ui_internal.h"
-#include "ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 
 using namespace fl;
 
@@ -16,7 +16,7 @@ jsDescriptionImpl::jsDescriptionImpl(const Str &text): mText(text) {
             static_cast<jsDescriptionImpl *>(this)->toJson(json);
         });
     mInternal = jsUiInternalPtr::New("description", update_fcn, to_json_fcn);
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
 jsDescriptionImpl::~jsDescriptionImpl() {}

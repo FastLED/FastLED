@@ -5,7 +5,7 @@
 #include "fl/namespace.h"
 
 #include "platforms/wasm/ui/button.h"
-#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 
 using namespace fl;
 
@@ -23,11 +23,11 @@ jsButtonImpl::jsButtonImpl(const Str &name) : mPressed(false) {
         });
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
     mUpdater.init(this);
 }
 
-jsButtonImpl::~jsButtonImpl() { jsUiManager::removeComponent(mInternal); }
+jsButtonImpl::~jsButtonImpl() { removeUiComponent(mInternal); }
 
 bool jsButtonImpl::clicked() const { return mClickedHappened; }
 

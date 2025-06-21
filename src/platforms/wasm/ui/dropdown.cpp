@@ -2,8 +2,9 @@
 
 #include "platforms/wasm/ui/dropdown.h"
 #include "fl/json.h"
-#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 #include <string.h>
+#include "fl/slice.h"
 
 using namespace fl;
 
@@ -21,7 +22,7 @@ void jsDropdownImpl::commonInit(const Str &name) {
         });
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
 // Constructor with array of options and count
@@ -60,7 +61,7 @@ jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::string>
     commonInit(name);
 }
 
-jsDropdownImpl::~jsDropdownImpl() { jsUiManager::removeComponent(mInternal); }
+jsDropdownImpl::~jsDropdownImpl() { removeUiComponent(mInternal); }
 
 const Str &jsDropdownImpl::name() const { return mInternal->name(); }
 

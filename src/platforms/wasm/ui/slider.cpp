@@ -4,7 +4,7 @@
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
-#include "ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 #include "fl/math_macros.h"
 
 using namespace fl;
@@ -27,10 +27,10 @@ jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
         });
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
-jsSliderImpl::~jsSliderImpl() { jsUiManager::removeComponent(mInternal); }
+jsSliderImpl::~jsSliderImpl() { removeUiComponent(mInternal); }
 
 const Str &jsSliderImpl::name() const { return mInternal->name(); }
 

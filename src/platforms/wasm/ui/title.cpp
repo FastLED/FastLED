@@ -3,7 +3,7 @@
 #include "title.h"
 #include "../js.h"
 #include "ui_internal.h"
-#include "ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 
 using namespace fl;
 
@@ -16,7 +16,7 @@ jsTitleImpl::jsTitleImpl(const Str &text) : mText(text) {
             static_cast<jsTitleImpl *>(this)->toJson(json);
         });
     mInternal = jsUiInternalPtr::New("title", update_fcn, to_json_fcn);
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
 jsTitleImpl::~jsTitleImpl() {}

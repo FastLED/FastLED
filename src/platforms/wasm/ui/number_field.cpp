@@ -9,7 +9,7 @@
 #include "platforms/wasm/js.h"
 #include "platforms/wasm/ui/number_field.h"
 #include "ui_internal.h"
-#include "ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 
 using namespace fl;
 
@@ -28,11 +28,11 @@ jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double value, double min,
         });
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
 jsNumberFieldImpl::~jsNumberFieldImpl() {
-    jsUiManager::removeComponent(mInternal);
+    removeUiComponent(mInternal);
 }
 
 const Str &jsNumberFieldImpl::name() const { return mInternal->name(); }

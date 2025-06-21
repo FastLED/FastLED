@@ -3,7 +3,7 @@
 
 #include "platforms/wasm/ui/checkbox.h"
 #include "fl/json.h"
-#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
 #include <string.h>
 
 using namespace fl;
@@ -23,10 +23,10 @@ jsCheckboxImpl::jsCheckboxImpl(const Str &name, bool value) : mValue(value) {
     // fl::move(toJsonFunc));
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
 }
 
-jsCheckboxImpl::~jsCheckboxImpl() { jsUiManager::removeComponent(mInternal); }
+jsCheckboxImpl::~jsCheckboxImpl() { removeUiComponent(mInternal); }
 
 const Str &jsCheckboxImpl::name() const { return mInternal->name(); }
 

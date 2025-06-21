@@ -7,7 +7,8 @@
 #include "fl/warn.h"
 #include "platforms/wasm/ui/audio.h"
 #include "fl/string.h"
-#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/ui/ui_deps.h"
+#include "platforms/wasm/ui/ui_deps.h"
 
 using namespace fl;
 
@@ -25,11 +26,11 @@ jsAudioImpl::jsAudioImpl(const Str &name) {
         });
     mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    jsUiManager::addComponent(mInternal);
+    addUiComponent(mInternal);
     mUpdater.init(this);
 }
 
-jsAudioImpl::~jsAudioImpl() { jsUiManager::removeComponent(mInternal); }
+jsAudioImpl::~jsAudioImpl() { removeUiComponent(mInternal); }
 
 const Str &jsAudioImpl::name() const { return mInternal->name(); }
 
