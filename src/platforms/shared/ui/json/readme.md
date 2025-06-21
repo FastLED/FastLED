@@ -23,7 +23,7 @@ The JsonUI system makes extensive use of FastLED's Internal Template Library (IT
 - `fl::function<T>`: Function objects for callbacks
 - `fl::vector<T>`: Dynamic arrays for component storage
 - `fl::string`: String handling
-- `fl::mutex` / `fl::scoped_lock`: Thread-safe operations
+- `fl::mutex` / `fl::lock_guard`: Thread-safe operations
 - `fl::EngineEvents::Listener`: Lifecycle event handling
 - `fl::Singleton<T>`: Singleton pattern for managers
 - `fl::FixedSet<T, N>`: Fixed-size sets for component tracking

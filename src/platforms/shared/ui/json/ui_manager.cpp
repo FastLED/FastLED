@@ -14,18 +14,18 @@ FL_DISABLE_WARNING(deprecated-declarations)
 namespace fl {
 
 void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
-    fl::scoped_lock lock(mMutex);
+    fl::lock_guard lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
 }
 
 void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
-    fl::scoped_lock lock(mMutex);
+    fl::lock_guard lock(mMutex);
     mComponents.erase(component);
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
-    fl::scoped_lock lock(mMutex);
+    fl::lock_guard lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {
@@ -77,7 +77,7 @@ void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
 void JsonUiManager::onEndShowLeds() {
     bool shouldUpdate = false;
     {
-        fl::scoped_lock lock(mMutex);
+        fl::lock_guard lock(mMutex);
         shouldUpdate = mItemsAdded;
         mItemsAdded = false;
     }

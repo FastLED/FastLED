@@ -9,7 +9,6 @@
 namespace fl {
 
 template <typename T> class MutexFake;
-template <typename MutexType> class LockGuardFake;
 class MutexReal;
 
 #if FASTLED_MULTITHREADED
@@ -17,8 +16,6 @@ using mutex = MutexReal;
 #else
 using mutex = MutexFake<void>;
 #endif
-
-template <typename MutexType> using lock_guard = LockGuardFake<MutexType>;
 
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 
@@ -50,25 +47,6 @@ template <typename T> class MutexFake {
     }
 };
 
-template <typename MutexType> class LockGuardFake {
-  public:
-    explicit LockGuardFake(MutexType& mutex) : mMutex(mutex) {
-        mMutex.lock();
-    }
-    
-    ~LockGuardFake() {
-        mMutex.unlock();
-    }
-    
-    // Non-copyable and non-movable
-    LockGuardFake(const LockGuardFake&) = delete;
-    LockGuardFake& operator=(const LockGuardFake&) = delete;
-    LockGuardFake(LockGuardFake&&) = delete;
-    LockGuardFake& operator=(LockGuardFake&&) = delete;
-    
-  private:
-    MutexType& mMutex;
-};
 
 #if FASTLED_MULTITHREADED
 class MutexReal : public std::mutex {
@@ -89,21 +67,21 @@ class MutexReal : public std::mutex {
 #endif
 
 template<typename MutexType>
-class scoped_lock {
+class lock_guard {
   public:
-    scoped_lock(MutexType& mutex) : mMutex(mutex) {
+    lock_guard(MutexType& mutex) : mMutex(mutex) {
         mMutex.lock();
     }
 
-    ~scoped_lock() {
+    ~lock_guard() {
         mMutex.unlock();
     }
 
     // Non-copyable and non-movable
-    scoped_lock(const scoped_lock&) = delete;
-    scoped_lock& operator=(const scoped_lock&) = delete;
-    scoped_lock(scoped_lock&&) = delete;
-    scoped_lock& operator=(scoped_lock&&) = delete;
+    lock_guard(const lock_guard&) = delete;
+    lock_guard& operator=(const lock_guard&) = delete;
+    lock_guard(lock_guard&&) = delete;
+    lock_guard& operator=(lock_guard&&) = delete;
 
   private:
     MutexType& mMutex;
