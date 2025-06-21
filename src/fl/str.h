@@ -7,6 +7,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef __EMSCRIPTEN__
+#include <string>
+#endif
+
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -407,6 +411,16 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+#ifdef __EMSCRIPTEN__
+    string(const std::string &str) {
+        copy(str.c_str(), str.size());
+    }
+    string &operator=(const std::string &str) {
+        copy(str.c_str(), str.size());
+        return *this;
+    }
+#endif
+
     bool operator>(const string &other) const {
         return strcmp(c_str(), other.c_str()) > 0;
     }
@@ -597,6 +611,13 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string &append(const XYMap &map);
 
     string &append(const Tile2x2_u8_wrap &tile);
+
+    #ifdef __EMSCRIPTEN__
+    string &append(const std::string &str) {
+        write(str.c_str(), str.size());
+        return *this;
+    }
+    #endif
 
     template <typename Key, typename Hash, typename KeyEqual>
     string &append(const HashSet<Key, Hash, KeyEqual> &set) {
