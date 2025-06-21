@@ -158,7 +158,8 @@ class StrStream {
     }
 
     StrStream &operator=(const char *str) {
-        mStr = str;
+        mStr.clear();
+        mStr.append(str);
         return *this;
     }
 
