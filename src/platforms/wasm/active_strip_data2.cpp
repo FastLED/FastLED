@@ -8,6 +8,7 @@
 #include "fl/slice.h"
 
 #include "fl/map.h"
+#include "fl/json.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
 
