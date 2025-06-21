@@ -15,13 +15,13 @@ jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
 
 const Str &jsUiInternal::name() const { return mName; }
 void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     if (mUpdateFunc) {
         mUpdateFunc(json);
     }
 }
 void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
-    std::lock_guard<std::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     if (mtoJsonFunc) {
         mtoJsonFunc(json);
     }
@@ -31,12 +31,12 @@ int jsUiInternal::id() const { return mId; }
 const fl::string &jsUiInternal::group() const { return mGroup; }
 
 void jsUiInternal::setGroup(const fl::string &group) {
-    std::lock_guard<std::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     mGroup = group;
 }
 
 bool jsUiInternal::clearFunctions() {
-    std::lock_guard<std::mutex> lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
     mUpdateFunc =
         UpdateFunction([](const FLArduinoJson::JsonVariantConst &) {});

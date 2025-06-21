@@ -41,13 +41,13 @@ class FileData : public fl::Referent {
     FileData() = default;
 
     void append(const uint8_t *data, size_t len) {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         mData.insert(mData.end(), data, data + len);
         mCapacity = MAX(mCapacity, mData.size());
     }
 
     size_t read(size_t pos, uint8_t *dst, size_t len) {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         if (pos >= mData.size()) {
             return 0;
         }
@@ -60,24 +60,24 @@ class FileData : public fl::Referent {
     }
 
     bool ready(size_t pos) {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         return mData.size() == mCapacity || pos < mData.size();
     }
 
     size_t bytesRead() const {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         return mData.size();
     }
 
     size_t capacity() const {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         return mCapacity;
     }
 
   private:
     std::vector<uint8_t> mData;
     size_t mCapacity = 0;
-    mutable std::mutex mMutex;
+    mutable fl::mutex mMutex;
 };
 
 typedef std::map<Str, FileDataPtr> FileMap;
@@ -86,7 +86,7 @@ static FileMap gFileMap;
 // threads. With an std::map items remain valid while not erased. So we only
 // need to protect the map itself for thread safety. The values in the map are
 // safe to access without a lock.
-static std::mutex gFileMapMutex;
+static fl::mutex gFileMapMutex;
 
 class WasmFileHandle : public fl::FileHandle {
   private:
@@ -182,7 +182,7 @@ class FsImplWasm : public fl::FsImpl {
         Str path(_path);
         FileHandlePtr out;
         {
-            std::lock_guard<std::mutex> lock(gFileMapMutex);
+            fl::lock_guard<fl::mutex> lock(gFileMapMutex);
             auto it = gFileMap.find(path);
             if (it != gFileMap.end()) {
                 auto &data = it->second;
@@ -199,7 +199,7 @@ class FsImplWasm : public fl::FsImpl {
 };
 
 FileDataPtr _findIfExists(const Str &path) {
-    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    fl::lock_guard<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return it->second;
@@ -208,7 +208,7 @@ FileDataPtr _findIfExists(const Str &path) {
 }
 
 FileDataPtr _findOrCreate(const Str &path, size_t len) {
-    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    fl::lock_guard<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return it->second;
@@ -219,7 +219,7 @@ FileDataPtr _findOrCreate(const Str &path, size_t len) {
 }
 
 FileDataPtr _createIfNotExists(const Str &path, size_t len) {
-    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    fl::lock_guard<fl::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return FileDataPtr::Null();
