@@ -3,16 +3,21 @@
 #include "fl/thread.h"
 
 #if FASTLED_MULTITHREADED
-#warning                                                                       \
-    "Mutex is not implemented, using the fake version with no synchronization"
+#include <mutex>
 #endif
 
 namespace fl {
 
 template <typename T> class MutexFake;
 template <typename MutexType> class LockGuardFake;
+class MutexReal;
 
+#if FASTLED_MULTITHREADED
+using mutex = MutexReal;
+#else
 using mutex = MutexFake<void>;
+#endif
+
 template <typename MutexType> using lock_guard = LockGuardFake<MutexType>;
 
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
@@ -64,5 +69,23 @@ template <typename MutexType> class LockGuardFake {
   private:
     MutexType& mMutex;
 };
+
+#if FASTLED_MULTITHREADED
+class MutexReal : public std::mutex {
+  public:
+    MutexReal() = default;
+    
+    // Non-copyable and non-movable (inherited from std::mutex)
+    MutexReal(const MutexReal&) = delete;
+    MutexReal& operator=(const MutexReal&) = delete;
+    MutexReal(MutexReal&&) = delete;
+    MutexReal& operator=(MutexReal&&) = delete;
+    
+    // Mutex operations are inherited from std::mutex:
+    // - void lock()
+    // - void unlock()
+    // - bool try_lock()
+};
+#endif
 
 } // namespace fl
