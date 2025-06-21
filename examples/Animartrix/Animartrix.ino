@@ -82,7 +82,7 @@ XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 UITitle title("Animartrix");
 UIDescription description("Demo of the Animatrix effects. @author of fx is StefanPetrick");
 
-UISlider brightness("Brightness", 255, 0, 255);
+UISlider brightness("Brightness", BRIGHTNESS, 0, 255);
 UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS - 1);
 UINumberField colorOrder("Color Order", 0, 0, 5);
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
