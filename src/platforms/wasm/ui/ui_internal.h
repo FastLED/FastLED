@@ -28,6 +28,10 @@ class jsUiInternal : public fl::Referent {
     void toJson(FLArduinoJson::JsonObject &json) const;
     int id() const;
 
+    // Group functionality
+    void setGroup(const fl::string &groupName);
+    const fl::string &groupName() const;
+
     bool clearFunctions();
 
   private:
@@ -36,6 +40,7 @@ class jsUiInternal : public fl::Referent {
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     int mId;
+    fl::string mGroup;
     mutable fl::mutex mMutex;
 };
 

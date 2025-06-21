@@ -12,7 +12,7 @@ class jsNumberFieldImpl {
     jsNumberFieldImpl(const fl::string &name, double value, double min, double max);
     ~jsNumberFieldImpl();
     jsNumberFieldImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
     }
 
@@ -20,10 +20,10 @@ class jsNumberFieldImpl {
     void toJson(FLArduinoJson::JsonObject &json) const;
     double value() const;
     void setValue(double value);
-    const fl::string &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mInternal->groupName(); }
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mGroup = groupName; }
+    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
     jsNumberFieldImpl &operator=(double value) {
         setValue(value);
@@ -46,7 +46,6 @@ class jsNumberFieldImpl {
     double mValue;
     double mMin;
     double mMax;
-    fl::string mGroup;
 };
 
 } // namespace fl

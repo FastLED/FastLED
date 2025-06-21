@@ -67,7 +67,7 @@ const Str &jsDropdownImpl::name() const { return mInternal->name(); }
 
 void jsDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
+    json["group"] = mInternal->groupName().c_str();
     json["type"] = "dropdown";
     json["id"] = mInternal->id();
     json["value"] = static_cast<int>(mSelectedIndex);
