@@ -1,17 +1,37 @@
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
-#include "fl/namespace.h"
+#include <memory>
+#include <stdio.h>
 
+#include "fl/atomic.h"
+#include "fl/mutex.h"
 #include "ui_internal.h"
+#include "fl/compiler_control.h"
 
 using namespace fl;
 
 namespace fl {
 
+namespace {
+    fl::atomic<uint32_t> sNextId(0);
+}
+
+
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc, const fl::string &group)
-    : mName(name), mGroup(group), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
-      mId(nextId()), mMutex() {}
+    : mName(name), mGroup(group), mUpdateFunc(updateFunc),
+      mtoJsonFunc(toJsonFunc), mId(nextId()), mMutex() {}
+
+
+jsUiInternal::~jsUiInternal() {
+    const bool functions_exist = mUpdateFunc || mtoJsonFunc;
+    if (functions_exist) {
+        clearFunctions();
+        printf("Warning: %s: The owner of the jsUiInternal should clear "
+               "the functions, not this destructor.\n",
+               mName.c_str());
+    }
+}
 
 const Str &jsUiInternal::name() const { return mName; }
 void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
@@ -45,10 +65,9 @@ bool jsUiInternal::clearFunctions() {
 }
 
 int jsUiInternal::nextId() {
-    return sNextId.fetch_add(1, std::memory_order_seq_cst);
+    return sNextId.fetch_add(1);
 }
 
-std::atomic<uint32_t> jsUiInternal::sNextId(0);
 
 } // namespace fl
 
