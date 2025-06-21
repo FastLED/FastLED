@@ -110,13 +110,15 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 
     fl::string type_str = fl::getJsonTypeStr(doc);
 
-    //FL_WARN("*** JSON TYPE: " << type_str);
+    int type = fl::getJsonType(doc);
+
+    FL_WARN("*** JSON TYPE: " << type_str);
 
     
 
     //FL_WARN("*** DOC IS json object: " << doc.is<FLArduinoJson::JsonObject>());
 
-    if (doc.is<FLArduinoJson::JsonObject>()) {
+    if (type == fl::JSON_OBJECT) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         // FL_WARN("*** JSON OBJECT HAS " << obj.size() << " KEYS");
 
@@ -144,9 +146,9 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
                 //  1. test if it's an object, if it is then test if it has the key "value", if so the grab the value of it, else
                 //     just update the component with the object
 
-                auto type = fl::getJsonType(v);
+                auto value_type = fl::getJsonType(v);
 
-                if (type == fl::JSON_OBJECT) {
+                if (value_type == fl::JSON_OBJECT) {
                     //FL_WARN("*** VARIANT IS AN OBJECT, UPDATING COMPONENT WITH: " << fl::getJsonTypeStr(v));
                     auto obj = v.as<FLArduinoJson::JsonObjectConst>();
                     if (obj.containsKey("value")) {
