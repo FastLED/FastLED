@@ -4,20 +4,31 @@
 #include <stdio.h>
 
 #include "fl/atomic.h"
-#include "fl/mutex.h"
-#include "ui_internal.h"
 #include "fl/compiler_control.h"
+#include "fl/mutex.h"
 #include "fl/warn.h"
+#include "ui_internal.h"
 
 using namespace fl;
 
 namespace fl {
 
-
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc)
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
       mId(nextId()), mMutex() {}
+
+jsUiInternal::~jsUiInternal() {
+    const bool functions_exist = mUpdateFunc || mtoJsonFunc;
+    if (functions_exist) {
+        clearFunctions();
+        // printf("Warning: %s: The owner of the jsUiInternal should clear "
+        //        "the functions, not this destructor.\n",
+        //        mName.c_str());
+        FL_WARN("Warning: " << mName << ": The owner of the jsUiInternal should clear "
+               "the functions, not this destructor.");
+    }
+}
 
 const Str &jsUiInternal::name() const { return mName; }
 void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
@@ -47,7 +58,6 @@ int jsUiInternal::nextId() {
     static fl::atomic<uint32_t> sNextId(0);
     return sNextId.fetch_add(1);
 }
-
 
 } // namespace fl
 
