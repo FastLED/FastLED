@@ -617,13 +617,6 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     string &append(const Tile2x2_u8_wrap &tile);
 
-    #ifdef __EMSCRIPTEN__
-    string &append(const std::string &str) {
-        write(str.c_str(), str.size());
-        return *this;
-    }
-    #endif
-
     template <typename Key, typename Hash, typename KeyEqual>
     string &append(const HashSet<Key, Hash, KeyEqual> &set) {
         append("{");
