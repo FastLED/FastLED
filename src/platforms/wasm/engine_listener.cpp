@@ -13,6 +13,7 @@
 
 #include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/js.h"
+#include "platforms/wasm/js_bindings.h"
 
 namespace fl {
 
