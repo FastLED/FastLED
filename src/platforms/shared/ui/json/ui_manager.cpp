@@ -43,12 +43,28 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     return out;
 }
 
-void JsonUiManager::updateUiComponents(const char *jsonStr) {
+void JsonUiManager::updateUiComponents(const char* jsonStr) {
+    FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
+    FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
+    FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
+    FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());
+    
+    if (!jsonStr) {
+        FL_WARN("*** JsonUiManager::updateUiComponents: NULL JSON string provided");
+        return;
+    }
+
     FL_WARN("*** BACKEND RECEIVED UI UPDATE: " << (jsonStr ? jsonStr : "NULL"));
+    FL_WARN("*** JsonUiManager pointer: " << this);
+    FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
+    
     FLArduinoJson::JsonDocument doc;
-    deserializeJson(doc, jsonStr);
+    auto result = deserializeJson(doc, jsonStr);
+    FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
+    FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
 }
 
@@ -93,7 +109,8 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void JsonUiManager::onPlatformPreLoop() {
-    //FL_WARN("*** onPlatformPreLoop CALLED: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
+    // Don't re-enable this, it fills the screen with spam.
+    //FL_WARN("*** onPlatformPreLoop CALLED: JsonUiManager=" << this << ", mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     if (!mHasPendingUpdate) {
         return;
     }

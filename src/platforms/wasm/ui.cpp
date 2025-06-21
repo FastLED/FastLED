@@ -18,8 +18,23 @@ namespace fl {
 static JsonUiUpdateInput g_updateEngineState;
 static bool g_uiSystemInitialized = false;
 
+// Add a debug function to track when g_updateEngineState changes
+static void logUpdateEngineStateChange(const char* location) {
+    FL_WARN("*** " << location << ": g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
+}
+
 void jsUpdateUiComponents(const std::string &jsonStr) {
+    FL_WARN("*** jsUpdateUiComponents ENTRY ***");
+    FL_WARN("*** jsUpdateUiComponents RECEIVED JSON: " << jsonStr.c_str());
+    FL_WARN("*** jsUpdateUiComponents JSON LENGTH: " << jsonStr.length());
     FL_WARN("*** jsUpdateUiComponents ENTRY: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
+    
+    // Test the lambda directly by calling setJsonUiHandlers again to see if it works
+    if (!g_updateEngineState) {
+        FL_WARN("*** WASM: g_updateEngineState is NULL, trying to reinitialize");
+        // Force reinitialize
+        g_uiSystemInitialized = false;
+    }
     
     // Ensure UI system is initialized when first used
     ensureWasmUiSystemInitialized();
@@ -27,11 +42,12 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     FL_WARN("*** jsUpdateUiComponents AFTER INIT: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     
     if (g_updateEngineState) {
-        FL_WARN("*** WASM CALLING BACKEND: " << jsonStr.c_str());
+        FL_WARN("*** WASM CALLING BACKEND WITH JSON: " << jsonStr.c_str());
         g_updateEngineState(jsonStr.c_str());
         FL_WARN("*** WASM BACKEND CALL COMPLETED");
     } else {
         FL_WARN("*** WASM ERROR: No engine state updater available");
+        FL_WARN("*** WASM ERROR: Cannot process JSON: " << jsonStr.c_str());
     }
 }
 
@@ -60,6 +76,7 @@ void ensureWasmUiSystemInitialized() {
         //updateJsHandler("[]");  // Valid empty JSON array
         
         g_updateEngineState = setJsonUiHandlers(updateJsHandler);
+        logUpdateEngineStateChange("AFTER setJsonUiHandlers");
         g_uiSystemInitialized = true;
         
         FL_WARN("*** WASM UI SYSTEM INITIALIZED ***");
