@@ -68,6 +68,11 @@ class FFT {
     FFT();
     ~FFT();
 
+    FFT(FFT &&) = default;
+    FFT &operator=(FFT &&) = default;
+    FFT(const FFT & other);
+    FFT &operator=(const FFT & other);
+
     void run(const Slice<const int16_t> &sample, FFTBins *out,
              const FFT_Args &args = FFT_Args());
 

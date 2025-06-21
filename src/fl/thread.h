@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef FASTLED_MULTITHREADED
-#if defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 #define FASTLED_MULTITHREADED 1
 #else
 #define FASTLED_MULTITHREADED 0

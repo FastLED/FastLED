@@ -48,8 +48,10 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
 class HashMap {
   public:
-    HashMap(size_t initial_capacity = FASTLED_HASHMAP_INLINED_COUNT,
-            float max_load = 0.7f)
+    HashMap() : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
+    HashMap(size_t initial_capacity) : HashMap(initial_capacity, 0.7f) {}
+
+    HashMap(size_t initial_capacity, float max_load)
         : _buckets(next_power_of_two(initial_capacity)), _size(0),
           _tombstones(0), _occupied(next_power_of_two(initial_capacity)),
           _deleted(next_power_of_two(initial_capacity)) {

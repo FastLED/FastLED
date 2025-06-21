@@ -1,8 +1,8 @@
 
 #include "fl/fft.h"
+#include "fl/compiler_control.h"
 #include "fl/fft_impl.h"
 #include "fl/hash_map_lru.h"
-#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -20,6 +20,18 @@ struct FFT::HashMap : public fl::HashMapLru<FFT_Args, Ptr<FFTImpl>> {
 FFT::FFT() { mMap.reset(new HashMap(8)); };
 
 FFT::~FFT() = default;
+
+FFT::FFT(const FFT &other) {
+    // copy the map
+    mMap.reset();
+    mMap.reset(new HashMap(*other.mMap));
+}
+
+FFT &FFT::operator=(const FFT &other) {
+    mMap.reset();
+    mMap.reset(new HashMap(*other.mMap));
+    return *this;
+}
 
 void FFT::run(const Slice<const int16_t> &sample, FFTBins *out,
               const FFT_Args &args) {
@@ -45,8 +57,6 @@ FFTImpl &FFT::get_or_create(const FFT_Args &args) {
     (*mMap)[args] = fft;
     return *fft;
 }
-
-
 
 bool FFT_Args::operator==(const FFT_Args &other) const {
     FL_DISABLE_WARNING_PUSH

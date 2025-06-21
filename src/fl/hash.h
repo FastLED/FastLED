@@ -132,8 +132,13 @@ template <typename T> struct FastHash<vec2<T>> {
 };
 
 template <typename T> struct Hash<T *> {
-    uint32_t operator()(const T *key) const noexcept {
-        return fast_hash32(key, sizeof(T *));
+    uint32_t operator()(T *key) const noexcept {
+        if (sizeof(T *) == sizeof(uint32_t)) {
+            uint32_t key_u = reinterpret_cast<uintptr_t>(key);
+            return fast_hash32(key_u);
+        } else {
+            return MurmurHash3_x86_32(key, sizeof(T *));
+        }
     }
 };
 
@@ -178,6 +183,7 @@ FASTLED_DEFINE_FAST_HASH(int32_t)
 FASTLED_DEFINE_FAST_HASH(float)
 FASTLED_DEFINE_FAST_HASH(double)
 FASTLED_DEFINE_FAST_HASH(bool)
+
 // FASTLED_DEFINE_FAST_HASH(int)
 
 //-----------------------------------------------------------------------------
@@ -188,5 +194,7 @@ template <> struct Hash<fl::string> {
         return MurmurHash3_x86_32(key.data(), key.size());
     }
 };
+
+
 
 } // namespace fl
