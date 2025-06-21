@@ -1,13 +1,16 @@
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 
-#include "fl/json.h"
+
+
 #include "fl/thread_local.h"
 #include "fl/warn.h"
 #include "platforms/wasm/ui/audio.h"
 #include "fl/string.h"
 #include "platforms/wasm/ui/ui_deps.h"
 #include "platforms/wasm/ui/ui_deps.h"
+#include "fl/json.h"
+
+#if FASTLED_ENABLE_JSON
 
 using namespace fl;
 
@@ -139,4 +142,4 @@ bool jsAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

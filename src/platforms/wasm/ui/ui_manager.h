@@ -8,27 +8,15 @@
 #include "fl/set.h"
 
 #include "fl/json.h"
-#include "platforms/wasm/js.h"
+#include "fl/function.h"
+#include "platforms/wasm/ui/ui_internal.h"
 
 namespace fl {
-namespace ui_detail {
-
-#ifdef __EMSCRIPTEN__
-// use std::string when in emscripten, else the js engine can't bind to this
-// class.
-#include <string>
-using string = std::string;
-#else
-using string = fl::string;
-#endif
-
-} // namespace ui_detail
-
-class jsUiInternal;
 
 class UiManager : fl::EngineEvents::Listener {
   public:
-    UiManager() { fl::EngineEvents::addListener(this); }
+    using Callback = fl::function<void(const char *)>;
+    UiManager(Callback updateJs) : mUpdateJs(updateJs) { fl::EngineEvents::addListener(this); }
     ~UiManager() { fl::EngineEvents::removeListener(this); }
 
     void addComponent(fl::WeakPtr<jsUiInternal> component);
@@ -37,6 +25,8 @@ class UiManager : fl::EngineEvents::Listener {
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
     void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
+
+    Callback mUpdateJs;
 
   private:
     
@@ -51,18 +41,7 @@ class UiManager : fl::EngineEvents::Listener {
         mHasPendingUpdate = false;
     }
 
-    void onEndShowLeds() override {
-        if (mItemsAdded) {
-            FLArduinoJson::JsonDocument doc;
-            FLArduinoJson::JsonArray jarray =
-                doc.to<FLArduinoJson::JsonArray>();
-            toJson(jarray);
-            fl::string buff;
-            FLArduinoJson::serializeJson(doc, buff);
-            fl::updateJs(buff.c_str());
-            mItemsAdded = false;
-        }
-    }
+    void onEndShowLeds() override;
 
     fl::vector<jsUiInternalPtr> getComponents();
     void toJson(FLArduinoJson::JsonArray &json);
@@ -73,20 +52,6 @@ class UiManager : fl::EngineEvents::Listener {
     bool mItemsAdded = false;
     FLArduinoJson::JsonDocument mPendingJsonUpdate;
     bool mHasPendingUpdate = false;
-};
-
-class jsUiManager : public UiManager {
-  public:
-    // Called from the JS engine.
-    static void jsUpdateUiComponents(const fl::ui_detail::string &jsonStr) {
-        instance().updateUiComponents(jsonStr.c_str());
-    }
-    static jsUiManager &instance();
-
-  private:
-    friend class fl::Singleton<jsUiManager>;
-    jsUiManager() = default;
-    ~jsUiManager() = default;
 };
 
 } // namespace fl

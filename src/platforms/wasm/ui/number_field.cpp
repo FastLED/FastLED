@@ -1,6 +1,4 @@
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
-#include <memory>
 
 #include "fl/json.h"
 #include "fl/math_macros.h"
@@ -9,6 +7,10 @@
 #include "platforms/wasm/ui/number_field.h"
 #include "ui_internal.h"
 #include "platforms/wasm/ui/ui_deps.h"
+
+#include "fl/json.h"
+
+#if FASTLED_ENABLE_JSON
 
 using namespace fl;
 

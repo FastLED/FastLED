@@ -1,10 +1,12 @@
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
-
 #include "fl/json.h"
 #include "fl/namespace.h"
 
 #include "platforms/wasm/ui/button.h"
 #include "platforms/wasm/ui/ui_deps.h"
+
+#include "fl/json.h"
+
+#if FASTLED_ENABLE_JSON
 
 using namespace fl;
 

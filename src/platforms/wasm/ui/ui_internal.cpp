@@ -1,6 +1,4 @@
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
-#include <memory>
 #include <stdio.h>
 
 #include "fl/atomic.h"
@@ -8,6 +6,10 @@
 #include "fl/mutex.h"
 #include "fl/warn.h"
 #include "ui_internal.h"
+
+#include "fl/json.h"
+
+#if FASTLED_ENABLE_JSON
 
 using namespace fl;
 
@@ -71,4 +73,4 @@ int jsUiInternal::nextId() {
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

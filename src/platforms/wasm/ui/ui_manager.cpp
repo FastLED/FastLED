@@ -1,21 +1,16 @@
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-#include <emscripten/html5.h>
-#endif
+
+
 
 #include "fl/json.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "ui_manager.h"
+#include "fl/json.h"
 
-
-#include "fl/namespace.h"
+#if FASTLED_ENABLE_JSON
 
 namespace fl {
 
@@ -30,9 +25,7 @@ void UiManager::removeComponent(WeakPtr<jsUiInternal> component) {
     mComponents.erase(component);
 }
 
-jsUiManager &jsUiManager::instance() {
-    return fl::Singleton<jsUiManager>::instance();
-}
+
 
 fl::vector<jsUiInternalPtr> UiManager::getComponents() {
     fl::vector<jsUiInternalPtr> components;
@@ -97,14 +90,20 @@ void UiManager::toJson(FLArduinoJson::JsonArray &json) {
     }
 }
 
-
-#ifdef __EMSCRIPTEN__
-EMSCRIPTEN_BINDINGS(js_interface) {
-    emscripten::function("_jsUiManager_updateUiComponents",
-                         &jsUiManager::jsUpdateUiComponents);
+void UiManager::onEndShowLeds() {
+    if (mItemsAdded) {
+        FLArduinoJson::JsonDocument doc;
+        FLArduinoJson::JsonArray jarray =
+            doc.to<FLArduinoJson::JsonArray>();
+        toJson(jarray);
+        fl::string buff;
+        FLArduinoJson::serializeJson(doc, buff);
+        mUpdateJs(buff.c_str());
+        mItemsAdded = false;
+    }
 }
-#endif
+
+
 
 } // namespace fl
-
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_ENABLE_JSON

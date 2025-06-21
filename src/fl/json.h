@@ -12,6 +12,21 @@
 #include "third_party/arduinojson/json.h"
 #endif
 
+#if !FASTLED_ENABLE_JSON
+// Allow forward declare.
+namespace FLArduinoJson {
+class JsonObject {};
+class JsonVariantConst {};
+class JsonVariant {};
+class JsonDocument {
+  public:
+    void clear() {}
+};
+class JsonArray {};
+template <typename T, typename U> void serializeJson(T &doc, U &buff) {}
+} // namespace FLArduinoJson
+#endif
+
 namespace fl {
 
 class string;

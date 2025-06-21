@@ -4,6 +4,9 @@
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
 #include "fl/math_macros.h"
+#include "fl/json.h"
+
+
 
 namespace fl {
 

@@ -3,6 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
+#include "fl/json.h"
 
 namespace fl {
 
