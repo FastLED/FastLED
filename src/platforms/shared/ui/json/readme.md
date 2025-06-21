@@ -1,38 +1,63 @@
 # JsonUI Implementation Guide
 
-The JsonUI system provides a platform-agnostic way to create interactive UI components that communicate via JSON. This guide explains how to integrate JsonUI into your platform.
+The JsonUI system provides a platform-agnostic way to create interactive UI components that communicate via JSON. This guide explains how to integrate JsonUI into your platform and use the available UI components.
 
 ## Overview
 
-JsonUI components emit JSON events when they are added, destroyed, or updated. A JsonUIManager manages internal state and handles bidirectional communication between the sketch and the platform.
+JsonUI components emit JSON events when they are added, destroyed, or updated. The system provides both low-level JSON implementation classes and high-level UI components for easier integration. Components automatically register themselves and communicate with the platform through a simplified handler system.
 
 ## Architecture
 
 The JsonUI system consists of several key components:
 
-- **JsonUiInternal**: Core component that holds the JSON serialization and update callbacks
-- **JsonUiManager**: Platform-agnostic manager that tracks components and handles JSON communication
-- **Platform Implementation**: Platform-specific code that bridges JsonUiManager to the platform's UI system
-- **UI Components**: High-level components (Slider, Button, etc.) that users interact with
+- **JsonUiInternal**: Core component that holds JSON serialization and update callbacks
+- **JsonUiManager**: Platform-agnostic manager that tracks components and handles JSON communication  
+- **Implementation Classes**: Low-level classes like `JsonSliderImpl`, `JsonButtonImpl`, etc.
+- **High-Level Components**: User-friendly wrappers like `fl::UISlider`, `fl::UIButton`, etc.
+- **Handler System**: Simplified integration using `setJsonUiHandlers()`
 
-## ITL Dependencies
+## FastLED ITL Dependencies
 
 The JsonUI system makes extensive use of FastLED's Internal Template Library (ITL):
 
-- `fl::WeakPtr<T>`: Weak references allow UI elements to be removed on the client side and removed by the UIManager on the next frame.
-- `fl::function<T>`: Function objects for callbacks
-- `fl::vector<T>`: Dynamic arrays for component storage
-- `fl::string`: String handling
+- `fl::WeakPtr<T>`: Weak references for safe component cleanup
+- `fl::function<T>`: Function objects for callbacks and event handling
+- `fl::vector<T>`: Dynamic arrays for component and option storage
+- `fl::string`: String handling throughout the system
 - `fl::mutex` / `fl::lock_guard`: Thread-safe operations
-- `fl::EngineEvents::Listener`: Lifecycle event handling
-- `fl::Singleton<T>`: Singleton pattern for managers
+- `fl::EngineEvents::Listener`: Lifecycle event handling and timing
+- `fl::scoped_ptr<T>`: Smart pointer management
 - `fl::FixedSet<T, N>`: Fixed-size sets for component tracking
 
-## Platform Integration Steps
+## Platform Integration
 
-### 1. Create a Platform-Specific UI Manager
+### Simple Integration (Recommended)
 
-Your platform needs a UI manager that inherits from `JsonUiManager`:
+The easiest way to integrate JsonUI is using the simplified handler system:
+
+```cpp
+#include "platforms/shared/ui/json/ui.h"
+
+// Define your platform's UI update function
+void sendToUI(const char* jsonStr) {
+    // Platform-specific code to send JSON to your UI system
+    // This is called when components are added/updated
+}
+
+// Initialize the JsonUI system
+auto updateEngineState = fl::setJsonUiHandlers(sendToUI);
+
+// Handle updates from your platform UI
+void handleUIUpdate(const std::string& jsonStr) {
+    if (updateEngineState) {
+        updateEngineState(jsonStr.c_str());
+    }
+}
+```
+
+### Manual Integration (Advanced)
+
+For more control, you can create a custom JsonUiManager:
 
 ```cpp
 #include "platforms/shared/ui/json/ui_manager.h"
@@ -41,68 +66,27 @@ class MyPlatformUiManager : public fl::JsonUiManager {
 public:
     MyPlatformUiManager() : JsonUiManager(myUpdateJsFunction) {}
     
-    static MyPlatformUiManager& instance() {
-        return fl::Singleton<MyPlatformUiManager>::instance();
-    }
-    
 private:
     static void myUpdateJsFunction(const char* jsonStr) {
-        // Platform-specific code to send JSON to your UI system
-        // This is called when components are added/updated
+        // Platform-specific JSON transmission
     }
 };
-```
 
-### 2. Implement the Required Interface Functions
-
-Define these global functions that UI components will call:
-
-```cpp
+// Global functions for component registration
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    MyPlatformUiManager::instance().addComponent(component);
+    // Your implementation
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    MyPlatformUiManager::instance().removeComponent(component);
+    // Your implementation  
 }
 ```
 
-These functions have `__attribute__((weak))` declarations, so your implementation will override the default no-op versions.
-
-### 3. Handle JSON Updates from Platform UI
-
-When your platform UI sends updates back to the sketch:
-
-```cpp
-void handleUiUpdate(const std::string& jsonStr) {
-    MyPlatformUiManager::instance().updateUiComponents(jsonStr.c_str());
-}
-```
-
-The JSON format for updates should be:
-```json
-{
-    "id_123": {"value": 42},
-    "id_456": {"pressed": true}
-}
-```
-
-Where `id_XXX` corresponds to component IDs returned by `JsonUiInternal::id()`.
-
-### 4. Engine Events Integration
-
-The JsonUiManager automatically integrates with FastLED's EngineEvents system:
-
-- **onEndShowLeds()**: Triggers JSON export when new components are added
-- **onPlatformPreLoop()**: Processes pending JSON updates from the platform
-
-*todo: make onPlatformPreLoop a setable behavior*
-
-ommunication Protocol
+## Communication Protocol
 
 ### Component Registration (Sketch → Platform)
 
-When components are added, the JsonUiManager sends a JSON array:
+When components are added, the system sends a JSON array:
 
 ```json
 [
@@ -113,6 +97,7 @@ When components are added, the JsonUiManager sends a JSON array:
         "value": 128,
         "min": 0,
         "max": 255,
+        "step": 1,
         "group": "lighting"
     },
     {
@@ -136,51 +121,199 @@ Platform UI sends updates back using component IDs:
 }
 ```
 
+## Available UI Components
+
+The system provides these built-in components:
+
+### High-Level Components (Recommended)
+
+- **fl::UISlider**: Numeric input with min/max/step controls
+- **fl::UIButton**: Click/press detection with event callbacks
+- **fl::UICheckbox**: Boolean toggle switches  
+- **fl::UIDropdown**: Selection from a list of options
+- **fl::UINumberField**: Numeric text input fields
+- **fl::UITitle**: Display-only text headers
+- **fl::UIDescription**: Display-only descriptive text
+- **fl::UIAudio**: Audio streaming and visualization
+
+### Implementation Classes (Low-Level)
+
+- **JsonSliderImpl**: Core slider implementation
+- **JsonButtonImpl**: Core button implementation
+- **JsonCheckboxImpl**: Core checkbox implementation
+- **JsonDropdownImpl**: Core dropdown implementation
+- **JsonNumberFieldImpl**: Core number field implementation
+- **JsonTitleImpl**: Core title implementation
+- **JsonDescriptionImpl**: Core description implementation
+- **JsonAudioImpl**: Core audio implementation
+
+## Usage Examples
+
+### Basic Slider Example
+
+```cpp
+#include <FastLED.h>
+
+// Using high-level API (recommended)
+fl::UISlider brightness("Brightness", 128, 0, 255, 1);
+
+void setup() {
+    // Component automatically registers itself
+    brightness.Group("LED Controls");
+}
+
+void loop() {
+    // Get current value
+    uint8_t currentBrightness = brightness.as<uint8_t>();
+    FastLED.setBrightness(currentBrightness);
+    
+    // Or use normalized value
+    float normalized = brightness.value_normalized(); // 0.0 to 1.0
+}
+```
+
+### Dropdown with Options
+
+```cpp
+// Using initializer list (C++11+)
+fl::UIDropdown colorMode("Color Mode", {"Solid", "Rainbow", "Fire"});
+
+// Using array
+fl::string modes[] = {"Red", "Green", "Blue"};
+fl::UIDropdown colorSelect("Color", modes, 3);
+
+void setup() {
+    colorMode.setSelectedIndex(0);
+    
+    // Add callback for changes
+    colorMode.onChanged([](fl::UIDropdown& dropdown) {
+        Serial.print("Mode changed to: ");
+        Serial.println(dropdown.value().c_str());
+    });
+}
+```
+
+### Button with Event Handling
+
+```cpp
+fl::UIButton resetButton("Reset");
+
+void setup() {
+    resetButton.onClicked([]() {
+        Serial.println("Reset button clicked!");
+        // Perform reset action
+    });
+}
+
+void loop() {
+    // Check for clicks
+    if (resetButton.clicked()) {
+        // Handle click event
+    }
+}
+```
+
+### Grouping Components
+
+```cpp
+fl::UISlider brightness("Brightness", 128, 0, 255);
+fl::UISlider speed("Speed", 50, 1, 100);
+fl::UICheckbox enabled("Enabled", true);
+
+void setup() {
+    // Group related controls
+    brightness.Group("LED Settings");
+    speed.Group("LED Settings"); 
+    enabled.Group("LED Settings");
+}
+```
+
+## Engine Events Integration
+
+The JsonUiManager automatically integrates with FastLED's EngineEvents system:
+
+- **onEndShowLeds()**: Triggers JSON export when new components are added
+- **onPlatformPreLoop()**: Processes pending JSON updates from the platform
+- **onPlatformPreLoop2()**: Handles component-specific updates (buttons, audio)
+
+This ensures UI updates are synchronized with the main rendering loop.
+
+## Thread Safety
+
+The JsonUiManager uses `fl::mutex` for thread-safe operations:
+
+- Component registration/removal is thread-safe
+- JSON updates are deferred to the main loop via EngineEvents  
+- Component state updates use mutex locks during JSON operations
+- On platforms without threading, mutex operations are no-ops
+
+## Error Handling
+
+- Weak pointers prevent crashes when components are destroyed
+- Invalid JSON updates are silently ignored  
+- Components automatically clean up on destruction
+- Pending components are stored safely until handlers are available
+
 ## Complete WASM Example
 
 The WASM platform provides a complete reference implementation:
 
 ```cpp
-// Required interface implementation
-void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    // YOUR UI MANAGER GETS CALLED HERE.
+// platforms/wasm/ui.cpp
+namespace fl {
+
+static JsonUiUpdateInput g_updateEngineState;
+
+void jsUpdateUiComponents(const std::string &jsonStr) {
+    if (g_updateEngineState) {
+        g_updateEngineState(jsonStr.c_str());
+    }
 }
 
-void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    // YOUR UI MANAGER GETS CALLED HERE.
+__attribute__((constructor))
+static void initializeWasmUiSystem() {
+    g_updateEngineState = setJsonUiHandlers(fl::updateJs);
 }
+
+} // namespace fl
 ```
 
-## Thread Safety
+## Platform-Specific Configuration
 
-The JsonUiManager uses `fl::mutex` for thread-safe operations. Key considerations:
+JsonUI is automatically enabled on WASM platforms and can be enabled on others:
 
-- Component registration/removal is thread-safe
-- JSON updates are deferred to the main loop via EngineEvents
-- Component state updates use mutex locks during JSON operations
-- If your platform doesn't have threading then the mutex will be a fake implementation.
+```cpp
+// In your platform configuration
+#define FASTLED_USE_JSON_UI 1
 
-## Error Handling
+// This enables these components:
+#define FASTLED_HAS_UI_BUTTON 1
+#define FASTLED_HAS_UI_SLIDER 1
+#define FASTLED_HAS_UI_CHECKBOX 1
+#define FASTLED_HAS_UI_NUMBER_FIELD 1
+#define FASTLED_HAS_UI_TITLE 1
+#define FASTLED_HAS_UI_DESCRIPTION 1
+#define FASTLED_HAS_UI_AUDIO 1
+#define FASTLED_HAS_UI_DROPDOWN 1
+```
 
-- Weak pointers prevent crashes when components are destroyed
-- Invalid JSON updates are silently ignored
-- Components automatically clean up on destruction
+## Best Practices
 
-## Available UI Components
+1. **Use High-Level Components**: Prefer `fl::UISlider` over `JsonSliderImpl` 
+2. **Group Related Controls**: Use the `Group()` method to organize UI elements
+3. **Handle Updates Asynchronously**: Let EngineEvents manage timing
+4. **Use Weak References**: Components use weak pointers for safe cleanup
+5. **Set Up Handlers Early**: Call `setJsonUiHandlers()` during initialization
+6. **Check for Null Handlers**: Verify update functions exist before calling
 
-The system provides these built-in components:
+## Migration from Older Versions
 
-- **JsonSlider**: Numeric input with min/max/step
-- **JsonButton**: Click/press detection  
-- **JsonCheckbox**: Boolean toggle
-- **JsonDropdown**: Selection from options
-- **JsonNumberField**: Numeric text input
-- **JsonAudio**: Audio-related controls
-- **JsonTitle**: Display-only text header
-- **JsonDescription**: Display-only text description
+If migrating from older JsonUI implementations:
 
-Each component follows the same pattern:
-1. Create JsonUiInternal with update/toJson callbacks
-2. Call addJsonUiComponent() in constructor
-3. Call removeJsonUiComponent() in destructor
-4. Implement JSON serialization and update handling
+1. Replace manual `JsonUiManager` inheritance with `setJsonUiHandlers()`
+2. Use high-level `fl::UI*` components instead of `Json*Impl` classes
+3. Remove manual `addJsonUiComponent()` calls - components auto-register
+4. Update JSON parsing to use the new simplified API
+5. Check that component names and types match expected JSON format
+
+The new system maintains backward compatibility with the JSON protocol while providing a much simpler integration path for new platforms.
