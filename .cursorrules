@@ -1,5 +1,16 @@
 # FastLED Project Rules for Cursor
 
+## Cursor Configuration
+
+### Post-Change Hooks
+Run linting after every code change:
+```yaml
+post_change_hooks:
+  - command: "bash lint"
+    description: "Run code formatting and linting"
+    working_directory: "."
+```
+
 ## MCP Server Configuration
 This project includes a custom MCP server (`mcp_server.py`) that provides tools for:
 - Running tests with various options
@@ -30,6 +41,9 @@ To use the MCP server, run: `uv run mcp_server.py`
 - Run tests before committing changes
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
+
+### C++ Design Patterns
+**Shared Implementation Pattern:** When writing a lot of code that applies the same operation on a bunch of C++ objects, try and determine if those objects share a common base class or internal object. If so consider whether it's appropriate to move the implementation into a shared space.
 
 ## Code Standards
 
