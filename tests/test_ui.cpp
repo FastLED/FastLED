@@ -13,25 +13,9 @@ FASTLED_USING_NAMESPACE
 TEST_CASE("compile ui test") {
 }
 
-TEST_CASE("external handlers without updateJs") {
-    // Test variables to track handler calls
-    fl::WeakPtr<fl::JsonUiInternal> lastAddedComponent;
-    fl::WeakPtr<fl::JsonUiInternal> lastRemovedComponent;
-    int addCallCount = 0;
-    int removeCallCount = 0;
-    
-    // Set up handlers WITHOUT updateJs callback - should use external handlers
-    auto updateEngineState = fl::setJsonUiHandlers(
-        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
-            lastAddedComponent = component;
-            addCallCount++;
-        },
-        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
-            lastRemovedComponent = component;
-            removeCallCount++;
-        },
-        fl::JsonUiUpdateJsHandler{} // Empty updateJs handler
-    );
+TEST_CASE("no updateJs handler") {
+    // Set up handler WITHOUT updateJs callback - should return empty function
+    auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
     // Should return empty function when no updateJs handler
     CHECK(!updateEngineState);
@@ -42,31 +26,19 @@ TEST_CASE("external handlers without updateJs") {
     auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
     fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
     
-    // Test addJsonUiComponent - should call external handler
+    // Test addJsonUiComponent - should go to pending since no manager
     fl::addJsonUiComponent(weakComponent);
-    CHECK(addCallCount == 1);
-    CHECK(lastAddedComponent == weakComponent);
     
-    // Test removeJsonUiComponent - should call external handler
+    // Test removeJsonUiComponent - should remove from pending
     fl::removeJsonUiComponent(weakComponent);
-    CHECK(removeCallCount == 1);
-    CHECK(lastRemovedComponent == weakComponent);
 }
 
 TEST_CASE("internal manager with updateJs") {
     // Test variables to track handler calls
-    int addCallCount = 0;
-    int removeCallCount = 0;
     int updateJsCallCount = 0;
     
-    // Set up handlers WITH updateJs callback - should use internal JsonUiManager, not external handlers
+    // Set up handler WITH updateJs callback - should use internal JsonUiManager
     auto updateEngineState = fl::setJsonUiHandlers(
-        [&](fl::WeakPtr<fl::JsonUiInternal>) {
-            addCallCount++; // This should NOT be called
-        },
-        [&](fl::WeakPtr<fl::JsonUiInternal>) {
-            removeCallCount++; // This should NOT be called
-        },
         [&](const char*) { 
             updateJsCallCount++; // This might be called by internal manager
         }
@@ -81,13 +53,11 @@ TEST_CASE("internal manager with updateJs") {
     auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
     fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
     
-    // Test addJsonUiComponent - should NOT call external add handler since internal manager is used
+    // Test addJsonUiComponent - should add to internal manager
     fl::addJsonUiComponent(weakComponent);
-    CHECK(addCallCount == 0); // External handler should not be called
     
-    // Test removeJsonUiComponent - should NOT call external remove handler since internal manager is used
+    // Test removeJsonUiComponent - should remove from internal manager
     fl::removeJsonUiComponent(weakComponent);
-    CHECK(removeCallCount == 0); // External handler should not be called
     
     // Test the returned updateEngineState function
     // This should not crash and should call the internal manager
@@ -96,12 +66,8 @@ TEST_CASE("internal manager with updateJs") {
 
 TEST_CASE("pending component storage without updateJs") {
     // Clear any existing handlers
-    auto updateEngineState = fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
+    auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     CHECK(!updateEngineState); // Should return empty function
-    
-    // Test variables to track handler calls
-    fl::WeakPtr<fl::JsonUiInternal> lastAddedComponent;
-    int addCallCount = 0;
     
     // Create mock components for testing
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
@@ -116,58 +82,43 @@ TEST_CASE("pending component storage without updateJs") {
     fl::addJsonUiComponent(weakComponent1);
     fl::addJsonUiComponent(weakComponent2);
     
-    // Now set external handlers without updateJs - pending components should be flushed to external handler
+    // Now set handler with updateJs - pending components should be flushed to internal manager
     updateEngineState = fl::setJsonUiHandlers(
-        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
-            lastAddedComponent = component;
-            addCallCount++;
-        },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
-        fl::JsonUiUpdateJsHandler{} // Empty updateJs handler
-    );
-    
-    // Should return empty function when no updateJs handler
-    CHECK(!updateEngineState);
-    
-    // Should have received 2 add calls from flushing pending components to external handler
-    CHECK(addCallCount == 2);
-}
-
-TEST_CASE("pending component storage with updateJs") {
-    // Clear any existing handlers
-    auto updateEngineState = fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
-    CHECK(!updateEngineState); // Should return empty function
-    
-    // Test variables to track handler calls
-    int addCallCount = 0;
-    
-    // Create mock components for testing
-    auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
-    auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
-    
-    auto mockComponent1 = fl::NewPtr<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
-    auto mockComponent2 = fl::NewPtr<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent1(mockComponent1);
-    fl::WeakPtr<fl::JsonUiInternal> weakComponent2(mockComponent2);
-    
-    // Add components before handlers are set - should go to pending storage
-    fl::addJsonUiComponent(weakComponent1);
-    fl::addJsonUiComponent(weakComponent2);
-    
-    // Now set handlers WITH updateJs - pending components should be flushed to internal manager, NOT external handler
-    updateEngineState = fl::setJsonUiHandlers(
-        [&](fl::WeakPtr<fl::JsonUiInternal>) {
-            addCallCount++; // This should NOT be called
-        },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
         [](const char*) { /* updateJs callback - triggers internal manager */ }
     );
     
     // Should return valid function when updateJs handler is provided
     CHECK(updateEngineState);
     
-    // Should NOT have received any add calls since internal manager handles it
-    CHECK(addCallCount == 0);
+    // Test the returned updateEngineState function
+    updateEngineState("{\"test\": \"data\"}");
+}
+
+TEST_CASE("pending component storage with updateJs") {
+    // Clear any existing handlers
+    auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
+    CHECK(!updateEngineState); // Should return empty function
+    
+    // Create mock components for testing
+    auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
+    auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
+    
+    auto mockComponent1 = fl::NewPtr<fl::JsonUiInternal>("test_id_1", updateFunc, toJsonFunc);
+    auto mockComponent2 = fl::NewPtr<fl::JsonUiInternal>("test_id_2", updateFunc, toJsonFunc);
+    fl::WeakPtr<fl::JsonUiInternal> weakComponent1(mockComponent1);
+    fl::WeakPtr<fl::JsonUiInternal> weakComponent2(mockComponent2);
+    
+    // Add components before handlers are set - should go to pending storage
+    fl::addJsonUiComponent(weakComponent1);
+    fl::addJsonUiComponent(weakComponent2);
+    
+    // Now set handlers WITH updateJs - pending components should be flushed to internal manager
+    updateEngineState = fl::setJsonUiHandlers(
+        [](const char*) { /* updateJs callback - triggers internal manager */ }
+    );
+    
+    // Should return valid function when updateJs handler is provided
+    CHECK(updateEngineState);
     
     // Test the returned updateEngineState function
     updateEngineState("{\"test\": \"data\"}");
@@ -175,10 +126,8 @@ TEST_CASE("pending component storage with updateJs") {
 
 TEST_CASE("pending component cleanup with destroyed components") {
     // Clear any existing handlers
-    auto updateEngineState = fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
+    auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     CHECK(!updateEngineState); // Should return empty function
-    
-    int addCallCount = 0;
     
     // Create scope for component that will be destroyed
     {
@@ -200,27 +149,18 @@ TEST_CASE("pending component cleanup with destroyed components") {
     fl::WeakPtr<fl::JsonUiInternal> weakValidComponent(validComponent);
     fl::addJsonUiComponent(weakValidComponent);
     
-    // Set handlers without updateJs - should only flush valid components to external handler
+    // Set handler with updateJs - should only flush valid components to internal manager
     updateEngineState = fl::setJsonUiHandlers(
-        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
-            // Only valid components should reach here
-            CHECK(component.operator bool()); // Should be valid
-            addCallCount++;
-        },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
-        fl::JsonUiUpdateJsHandler{} // Empty updateJs handler
+        [](const char*) { /* updateJs callback */ }
     );
     
-    // Should return empty function when no updateJs handler
-    CHECK(!updateEngineState);
-    
-    // Should only receive 1 add call for the valid component
-    CHECK(addCallCount == 1);
+    // Should return valid function when updateJs handler is provided
+    CHECK(updateEngineState);
 }
 
 TEST_CASE("null handlers behavior") {
-    // Test with null handlers (should not crash)
-    auto updateEngineState = fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
+    // Test with null handler (should not crash)
+    auto updateEngineState = fl::setJsonUiHandlers(fl::function<void(const char*)>{});
     
     // Should return empty function when no updateJs handler
     CHECK(!updateEngineState);
@@ -240,8 +180,6 @@ TEST_CASE("updateEngineState function behavior") {
     // Test with valid updateJs handler
     int updateJsCallCount = 0;
     auto updateEngineState = fl::setJsonUiHandlers(
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
         [&](const char* jsonStr) { 
             updateJsCallCount++;
             // Verify we receive the JSON string
@@ -265,4 +203,32 @@ TEST_CASE("updateEngineState function behavior") {
     // Verify the function works without crashing
     updateEngineState("{}");
     updateEngineState("{\"invalid\": \"json\"}");
+}
+
+TEST_CASE("manager replacement") {
+    // Create a manager with one handler
+    int firstCallCount = 0;
+    auto updateEngineState1 = fl::setJsonUiHandlers(
+        [&](const char*) { firstCallCount++; }
+    );
+    CHECK(updateEngineState1);
+    
+    // Add a component to the first manager
+    auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
+    auto toJsonFunc = [](FLArduinoJson::JsonObject&) { /* do nothing */ };
+    auto mockComponent = fl::NewPtr<fl::JsonUiInternal>("test_id", updateFunc, toJsonFunc);
+    fl::WeakPtr<fl::JsonUiInternal> weakComponent(mockComponent);
+    fl::addJsonUiComponent(weakComponent);
+    
+    // Replace with a different handler
+    int secondCallCount = 0;
+    auto updateEngineState2 = fl::setJsonUiHandlers(
+        [&](const char*) { secondCallCount++; }
+    );
+    CHECK(updateEngineState2);
+    
+    // The component should have been transferred to the new manager
+    // Both update functions should work
+    updateEngineState1("{\"test1\": \"data\"}");
+    updateEngineState2("{\"test2\": \"data\"}");
 }

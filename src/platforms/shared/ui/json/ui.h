@@ -10,20 +10,13 @@ class WeakPtr;
 class JsonUiInternal;
 class JsonUiManager;
 
-// Handler function types for UI component management
-using JsonUiAddHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
-using JsonUiRemoveHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
-using JsonUiUpdateJsHandler = fl::function<void(const char*)>;
-
 /**
- * Set the global handlers for adding and removing UI components, and the updateJs callback.
+ * Set the global handler for sending UI updates to JavaScript.
  * 
- * @param addHandler Function to call when a UI component needs to be added
- * @param removeHandler Function to call when a UI component needs to be removed
  * @param updateJsHandler Function to call when UI needs to send updates to JavaScript
  * @return Function to call when you want to update the engine state with JSON data
  */
-fl::function<void(const char*)> setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler);
+fl::function<void(const char*)> setJsonUiHandlers(const fl::function<void(const char*)>& updateJsHandler);
 
 /**
  * Add a UI component to the global component registry.

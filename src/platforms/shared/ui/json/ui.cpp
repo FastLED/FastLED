@@ -15,33 +15,13 @@ static fl::vector_inlined<fl::WeakPtr<JsonUiInternal>, 32>& getPendingComponents
     return pending;
 }
 
-// Use lazy initialization to avoid global constructors
-static JsonUiAddHandler& getAddHandler() {
-    static JsonUiAddHandler handler;
-    return handler;
-}
-
-static JsonUiRemoveHandler& getRemoveHandler() {
-    static JsonUiRemoveHandler handler;
-    return handler;
-}
-
-static JsonUiUpdateJsHandler& getUpdateJsHandler() {
-    static JsonUiUpdateJsHandler handler;
-    return handler;
-}
-
 // Internal JsonUiManager instance
 static fl::scoped_ptr<JsonUiManager>& getInternalManager() {
     static fl::scoped_ptr<JsonUiManager> manager;
     return manager;
 }
 
-fl::function<void(const char*)> setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler) {
-    getAddHandler() = addHandler;
-    getRemoveHandler() = removeHandler;
-    getUpdateJsHandler() = updateJsHandler;
-    
+fl::function<void(const char*)> setJsonUiHandlers(const fl::function<void(const char*)>& updateJsHandler) {
     // Create internal JsonUiManager only if updateJsHandler is valid (not empty)
     if (updateJsHandler) {
         auto& manager = getInternalManager();
@@ -71,23 +51,12 @@ fl::function<void(const char*)> setJsonUiHandlers(const JsonUiAddHandler& addHan
             }
         };
     } else {
-        // No updateJs handler, clear any existing internal manager and use external handlers if available
+        // No updateJs handler, clear any existing internal manager
         auto& manager = getInternalManager();
         manager.reset(); // Clear the internal manager
+        FL_WARN("No updateJs handler provided, cleared internal JsonUiManager");
         
-        auto& pending = getPendingComponents();
-        if (addHandler && !pending.empty()) {
-            FL_WARN("Flushing " << pending.size() << " pending UI components to external add handler");
-            for (const auto& component : pending) {
-                // Only add components that are still valid (not destroyed)
-                if (component) {
-                    addHandler(component);
-                }
-            }
-            pending.clear();
-        }
-        
-        // Return an empty function since external handlers manage state
+        // Return an empty function since no manager exists
         return fl::function<void(const char*)>{};
     }
 }
@@ -100,16 +69,10 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
         return;
     }
     
-    // Fall back to external handler
-    const auto& handler = getAddHandler();
-    if (!handler) {
-        // Handler not set yet, store in pending list
-        auto& pending = getPendingComponents();
-        pending.push_back(component);
-        FL_WARN("addJsonUiComponent handler not set, component stored in pending list: " << component);
-        return;
-    }
-    handler(component);
+    // No manager exists, store in pending list
+    auto& pending = getPendingComponents();
+    pending.push_back(component);
+    FL_WARN("addJsonUiComponent: no manager exists, component stored in pending list: " << component);
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
@@ -120,10 +83,7 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
         return;
     }
     
-    // Fall back to external handler logic
-    const auto& handler = getRemoveHandler();
-    
-    // Always try to remove from pending list first, regardless of handler state
+    // No manager exists, try to remove from pending list
     auto& pending = getPendingComponents();
     auto it = pending.find_if([&component](const fl::WeakPtr<JsonUiInternal>& pending_component) {
         return pending_component == component;
@@ -132,16 +92,9 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     if (it != pending.end()) {
         pending.erase(it);
         FL_WARN("Removed component from pending list: " << component);
-        // If we found it in pending, we're done - it was never actually added via handler
-        return;
+    } else {
+        FL_WARN("removeJsonUiComponent: no manager exists and component not in pending list: " << component);
     }
-    
-    // Not in pending list, try to remove via handler
-    if (!handler) {
-        FL_WARN("removeJsonUiComponent handler not set, component will be ignored: " << component);
-        return;
-    }
-    handler(component);
 }
 
 } // namespace fl
