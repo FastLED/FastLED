@@ -19,8 +19,8 @@ void jsDropdownImpl::commonInit(const Str &name) {
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsDropdownImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+                                     fl::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

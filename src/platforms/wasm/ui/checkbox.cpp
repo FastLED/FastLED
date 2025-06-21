@@ -19,10 +19,10 @@ jsCheckboxImpl::jsCheckboxImpl(const Str &name, bool value) : mValue(value) {
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsCheckboxImpl *>(this)->toJson(json);
         });
-    // mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-    // std::move(toJsonFunc));
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    // mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    // fl::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+                                     fl::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

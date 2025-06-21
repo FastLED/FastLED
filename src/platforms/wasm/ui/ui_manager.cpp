@@ -36,8 +36,8 @@ jsUiManager &jsUiManager::instance() {
     return fl::Singleton<jsUiManager>::instance();
 }
 
-std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
-    std::vector<jsUiInternalPtr> components;
+fl::vector<jsUiInternalPtr> jsUiManager::getComponents() {
+    fl::vector<jsUiInternalPtr> components;
     {
         fl::lock_guard<fl::mutex> lock(mMutex);
 
@@ -88,7 +88,7 @@ void jsUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
-    std::vector<jsUiInternalPtr> components = instance().getComponents();
+    fl::vector<jsUiInternalPtr> components = instance().getComponents();
     for (const auto &component : components) {
         FLArduinoJson::JsonObject componentJson =
             json.add<FLArduinoJson::JsonObject>();

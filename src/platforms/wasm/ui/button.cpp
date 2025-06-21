@@ -21,8 +21,8 @@ jsButtonImpl::jsButtonImpl(const Str &name) : mPressed(false) {
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsButtonImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+                                     fl::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }

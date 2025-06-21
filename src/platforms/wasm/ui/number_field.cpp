@@ -26,8 +26,8 @@ jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double value, double min,
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsNumberFieldImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+                                     fl::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

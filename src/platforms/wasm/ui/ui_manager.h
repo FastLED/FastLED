@@ -26,7 +26,7 @@ class jsUiManager : fl::EngineEvents::Listener {
     static void removeComponent(fl::WeakPtr<jsUiInternal> component);
 
     // Called from the JS engine.
-    static void jsUpdateUiComponents(const std::string &jsonStr) {
+    static void jsUpdateUiComponents(const fl::string &jsonStr) {
         updateUiComponents(jsonStr.c_str());
     }
     // Internal representation.
@@ -50,7 +50,6 @@ class jsUiManager : fl::EngineEvents::Listener {
 
     void onEndShowLeds() override {
         if (mItemsAdded) {
-            // std::string jsonStr = toJsonStr();
             FLArduinoJson::JsonDocument doc;
             FLArduinoJson::JsonArray jarray =
                 doc.to<FLArduinoJson::JsonArray>();

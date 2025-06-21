@@ -100,10 +100,9 @@ static void parseJsonStringToInt16Vector(const fl::string &jsonStr,
 
 void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
-    // std::string s = value.as<std::string>();
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);
-    // std::vector<int16_t> audio_data;
+    // fl::vector<int16_t> audio_data;
     mAudioDataBuffer.clear();
     parseJsonStringToInt16Vector(mSerializeBuffer, &mAudioDataBuffer);
     int size = mAudioDataBuffer.size();
