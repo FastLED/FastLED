@@ -10,10 +10,7 @@ class jsNumberFieldImpl {
   public:
     jsNumberFieldImpl(const fl::string &name, double value, double min, double max);
     ~jsNumberFieldImpl();
-    jsNumberFieldImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;

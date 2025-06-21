@@ -11,10 +11,7 @@ class jsSliderImpl {
     jsSliderImpl(const fl::string &name, float value = 128.0f, float min = 0.0f,
                  float max = 255.0f, float step = -1.f);
     ~jsSliderImpl();
-    jsSliderImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;

@@ -10,10 +10,7 @@ class jsTitleImpl {
   public:
     jsTitleImpl(const fl::string &text);
     ~jsTitleImpl();
-    jsTitleImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
