@@ -29,23 +29,29 @@ void jsUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
 
 jsUiManager::jsUiManager(): JsonUiManager(fl::updateJs) {
     // Register our handlers for UI component management
-    setJsonUiHandlers(
-        [](fl::WeakPtr<JsonUiInternal> component) {
-            jsUiManager::instance().addComponent(component);
-        },
-        [](fl::WeakPtr<JsonUiInternal> component) {
-            jsUiManager::instance().removeComponent(component);
-        }
-    );
+    // setJsonUiHandlers returns a function that can be used to update engine state
+    auto updateEngineState = setJsonUiHandlers(fl::updateJs);
+    FL_WARN("jsUiManager: initialized with updateJs handler");
+    
+    // Store the engine state update function (could be used later if needed)
+    // For now, we rely on the direct jsUpdateUiComponents call from JS
 }
 
+// Startup function to ensure the jsUiManager is initialized at program startup
+// Use GCC constructor attribute to prevent linker elimination
+__attribute__((constructor))
+__attribute__((used))
+static void initializeWasmUiManager() {
+    FL_WARN("initializeWasmUiManager: ensuring jsUiManager singleton is created");
+    // Force creation of the singleton instance
+    jsUiManager::instance();
+    FL_WARN("initializeWasmUiManager: jsUiManager singleton initialized");
+}
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
                          &jsUiManager::jsUpdateUiComponents);
 }
-
-
 
 } // namespace fl
 
