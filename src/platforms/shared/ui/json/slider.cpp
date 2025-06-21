@@ -2,8 +2,12 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "platforms/wasm/js.h"
 #include "platforms/shared/ui/json/ui.h"
+#include "platforms/wasm/js.h"
+
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING(deprecated-declarations)
 
 #if FASTLED_ENABLE_JSON
 
@@ -12,7 +16,7 @@ using namespace fl;
 namespace fl {
 
 JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
-                             float max, float step)
+                               float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     if (ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
         mStep = (mMax - mMin) / 100.0f;
@@ -27,7 +31,7 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
             static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
-                                     fl::move(toJsonFunc));
+                                       fl::move(toJsonFunc));
     addJsonUiComponent(mInternal);
 }
 
@@ -75,10 +79,13 @@ void JsonSliderImpl::setValue(float value) {
     mValue = value;
 }
 
-const fl::string &JsonSliderImpl::groupName() const { return mInternal->groupName(); }
+const fl::string &JsonSliderImpl::groupName() const {
+    return mInternal->groupName();
+}
 
-void JsonSliderImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
-
+void JsonSliderImpl::setGroup(const fl::string &groupName) {
+    mInternal->setGroup(groupName);
+}
 
 int JsonSliderImpl::as_int() const { return static_cast<int>(mValue); }
 
@@ -94,17 +101,32 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 
 void JsonSliderImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    FL_WARN("*** SLIDER UPDATE: " << name() << " " << fl::getJsonTypeStr(value));
+    FL_WARN("*** SLIDER UPDATE: " << name() << " "
+                                  << fl::getJsonTypeStr(value));
     if (value.is<float>()) {
         float newValue = value.as<float>();
         setValue(newValue);
     } else if (value.is<int>()) {
         int newValue = value.as<int>();
         setValue(static_cast<float>(newValue));
+    } else if (value.is<::FLArduinoJson::JsonObject>()) {
+        auto obj = value.as<FLArduinoJson::JsonObjectConst>();
+        if (obj.containsKey("value")) {
+            float newValue = obj["value"].as<float>();
+            setValue(newValue);
+        } else {
+            char buff[128] = {};
+            FLArduinoJson::serializeJson(value, buff, sizeof(buff));
+            FL_WARN("*** SLIDER UPDATE ERROR: "
+                    << name() << " " << fl::getJsonTypeStr(value)
+                    << " is not a float or int. Serialized JSON: " << buff);
+        }
     } else {
-        //char buff[128] = {};
-        
-        FL_WARN("*** SLIDER UPDAT ERROR: " << name() << " " << fl::getJsonTypeStr(value) << " is not a float or int");
+        char buff[128] = {};
+        FLArduinoJson::serializeJson(value, buff, sizeof(buff));
+        FL_WARN("*** SLIDER UPDATE ERROR: "
+                << name() << " " << fl::getJsonTypeStr(value)
+                << " is not a float or int. Serialized JSON: " << buff);
     }
 }
 
