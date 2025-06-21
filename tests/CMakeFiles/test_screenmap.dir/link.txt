@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_screenmap.dir/link.d CMakeFiles/test_screenmap.dir/test_screenmap.cpp.o -o .build/bin/test_screenmap  .build/lib/libfastled.a .build/lib/libdoctest_main.a

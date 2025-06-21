@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_corkscrew.dir/link.d CMakeFiles/test_corkscrew.dir/test_corkscrew.cpp.o -o .build/bin/test_corkscrew  .build/lib/libfastled.a .build/lib/libdoctest_main.a

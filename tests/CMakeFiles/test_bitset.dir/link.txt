@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_bitset.dir/link.d CMakeFiles/test_bitset.dir/test_bitset.cpp.o -o .build/bin/test_bitset  .build/lib/libfastled.a .build/lib/libdoctest_main.a

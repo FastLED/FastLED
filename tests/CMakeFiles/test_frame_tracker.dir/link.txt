@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_frame_tracker.dir/link.d CMakeFiles/test_frame_tracker.dir/test_frame_tracker.cpp.o -o .build/bin/test_frame_tracker  .build/lib/libfastled.a .build/lib/libdoctest_main.a

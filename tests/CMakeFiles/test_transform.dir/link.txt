@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_transform.dir/link.d CMakeFiles/test_transform.dir/test_transform.cpp.o -o .build/bin/test_transform  .build/lib/libfastled.a .build/lib/libdoctest_main.a

@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_videofx_wrapper.dir/link.d CMakeFiles/test_videofx_wrapper.dir/test_videofx_wrapper.cpp.o -o .build/bin/test_videofx_wrapper  .build/lib/libfastled.a .build/lib/libdoctest_main.a

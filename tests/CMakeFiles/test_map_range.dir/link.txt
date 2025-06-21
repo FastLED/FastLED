@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_map_range.dir/link.d CMakeFiles/test_map_range.dir/test_map_range.cpp.o -o .build/bin/test_map_range  .build/lib/libfastled.a .build/lib/libdoctest_main.a

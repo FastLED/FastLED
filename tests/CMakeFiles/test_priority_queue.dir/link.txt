@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_priority_queue.dir/link.d CMakeFiles/test_priority_queue.dir/test_priority_queue.cpp.o -o .build/bin/test_priority_queue  .build/lib/libfastled.a .build/lib/libdoctest_main.a

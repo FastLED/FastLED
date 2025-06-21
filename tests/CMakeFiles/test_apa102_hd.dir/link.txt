@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_apa102_hd.dir/link.d CMakeFiles/test_apa102_hd.dir/test_apa102_hd.cpp.o -o .build/bin/test_apa102_hd  .build/lib/libfastled.a .build/lib/libdoctest_main.a

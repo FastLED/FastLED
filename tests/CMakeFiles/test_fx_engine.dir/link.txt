@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_fx_engine.dir/link.d CMakeFiles/test_fx_engine.dir/test_fx_engine.cpp.o -o .build/bin/test_fx_engine  .build/lib/libfastled.a .build/lib/libdoctest_main.a

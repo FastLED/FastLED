@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_xypath.dir/link.d CMakeFiles/test_xypath.dir/test_xypath.cpp.o -o .build/bin/test_xypath  .build/lib/libfastled.a .build/lib/libdoctest_main.a

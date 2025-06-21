@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_type_traits.dir/link.d CMakeFiles/test_type_traits.dir/test_type_traits.cpp.o -o .build/bin/test_type_traits  .build/lib/libfastled.a .build/lib/libdoctest_main.a

@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_fixed_set.dir/link.d CMakeFiles/test_fixed_set.dir/test_fixed_set.cpp.o -o .build/bin/test_fixed_set  .build/lib/libfastled.a .build/lib/libdoctest_main.a

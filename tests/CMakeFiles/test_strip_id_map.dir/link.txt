@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_strip_id_map.dir/link.d CMakeFiles/test_strip_id_map.dir/test_strip_id_map.cpp.o -o .build/bin/test_strip_id_map  .build/lib/libfastled.a .build/lib/libdoctest_main.a

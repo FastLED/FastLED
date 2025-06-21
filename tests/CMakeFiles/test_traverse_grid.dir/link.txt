@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_traverse_grid.dir/link.d CMakeFiles/test_traverse_grid.dir/test_traverse_grid.cpp.o -o .build/bin/test_traverse_grid  .build/lib/libfastled.a .build/lib/libdoctest_main.a
