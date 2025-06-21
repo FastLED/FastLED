@@ -6,7 +6,8 @@ namespace fl {
 
 class JsonUiInternal;
 
-// Define these functions if you want to use the JsonUiManager class.
+// Define these functions if you want to use the JsonUi.
+
 /**
  * Add a UI component to the global component registry.
  * This is a free function replacement for JsonUiManager::addComponent.
