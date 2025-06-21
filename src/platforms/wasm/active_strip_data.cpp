@@ -65,12 +65,24 @@ Str ActiveStripData::infoJsonString() {
     return jsonBuffer;
 }
 
-
-
+/// WARNING: For some reason the following code must be here, when
+/// it was moved to embind.cpp frame data stopped being updated.
 // gcc constructor to get the
 // ActiveStripData instance created.
 __attribute__((constructor)) void __init_ActiveStripData() {
     ActiveStripData::Instance();
+}
+
+static ActiveStripData *getActiveStripDataRef() {
+    ActiveStripData *instance = &fl::Singleton<ActiveStripData>::instance();
+    return instance;
+}
+
+
+EMSCRIPTEN_BINDINGS(engine_events_constructors) {
+    emscripten::class_<ActiveStripData>("ActiveStripData")
+        .constructor(&getActiveStripDataRef, emscripten::allow_raw_pointers())
+        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
 }
 
 } // namespace fl

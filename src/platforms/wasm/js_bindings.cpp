@@ -111,6 +111,8 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
     }
 }
 
+
+
 EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
     jsFillInMissingScreenMaps(active_strips);
     Str json_str = active_strips.infoJsonString();
