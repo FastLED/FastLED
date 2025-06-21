@@ -17,7 +17,7 @@
 #include "fl/screenmap.h"
 #include "fl/str.h"
 #include "js.h"
-#include "ui/ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 // extern setup and loop which will be supplied by the sketch.
 extern void setup();
