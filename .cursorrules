@@ -72,10 +72,42 @@ To use the MCP server, run: `uv run mcp_server.py`
 - ❌ `#include <cstdint>` → ✅ `#include "fl/stdint.h"`
 
 **Functions and classes:**
+
+**Type Traits & Metaprogramming:**
 - ❌ `std::move()` → ✅ `fl::move()`
 - ❌ `std::forward()` → ✅ `fl::forward()`
-- ❌ `std::vector` → ✅ `fl::vector`
 - ❌ `std::enable_if` → ✅ `fl::enable_if`
+- ❌ `std::is_same` → ✅ `fl::is_same`
+- ❌ `std::is_base_of` → ✅ `fl::is_base_of`
+- ❌ `std::remove_reference` → ✅ `fl::remove_reference`
+- ❌ `std::conditional` → ✅ `fl::conditional`
+- ❌ `std::decay` → ✅ `fl::decay`
+
+**Containers:**
+- ❌ `std::vector` → ✅ `fl::vector` (or `fl::HeapVector`, `fl::FixedVector`, `fl::InlinedVector`)
+- ❌ `std::map` → ✅ `fl::SortedHeapMap` or `fl::FixedMap`
+- ❌ `std::unordered_map` → ✅ `fl::HashMap`
+- ❌ `std::unordered_set` → ✅ `fl::HashSet`
+- ❌ `std::set` → ✅ `fl::SortedHeapVector`
+- ❌ `std::span` → ✅ `fl::Slice`
+
+**Algorithms:**
+- ❌ `std::reverse()` → ✅ `fl::reverse()`
+- ❌ `std::max_element()` → ✅ `fl::max_element()`
+- ❌ `std::min_element()` → ✅ `fl::min_element()`
+- ❌ `std::equal()` → ✅ `fl::equal()`
+- ❌ `std::fill()` → ✅ `fl::fill()`
+
+**Smart Types:**
+- ❌ `std::optional` → ✅ `fl::Optional`
+- ❌ `std::variant` → ✅ `fl::Variant`
+- ❌ `std::pair` → ✅ `fl::Pair`
+- ❌ `std::string` → ✅ `fl::string`
+- ❌ `std::unique_ptr` → ✅ `fl::scoped_ptr`
+- ❌ `std::shared_ptr` → ✅ `fl::Ptr`
+
+**Function Objects:**
+- ❌ `std::less` → ✅ `fl::less`
 
 **Why:** The project maintains its own implementations to ensure compatibility across all supported platforms and to avoid bloating the library with unnecessary STL dependencies.
 
