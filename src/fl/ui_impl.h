@@ -79,7 +79,7 @@ class UISliderImpl {
     int as_int() const { return static_cast<int>(mValue); }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
     UISliderImpl &operator=(float value) {
         setValue(value);
@@ -114,7 +114,7 @@ class UIButtonImpl {
     fl::string name() const { return mName; }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     fl::string mName;
@@ -143,7 +143,7 @@ class UICheckboxImpl {
     bool value() const { return mValue; }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     void setValue(bool value) { mValue = value; }
@@ -176,7 +176,7 @@ class UINumberFieldImpl {
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     double mValue;
@@ -194,7 +194,7 @@ class UITitleImpl {
     ~UITitleImpl() {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -207,7 +207,7 @@ class UIDescriptionImpl {
     ~UIDescriptionImpl() {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 
 #endif
@@ -229,7 +229,7 @@ class UIAudioImpl {
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };
 #endif
 
@@ -303,7 +303,7 @@ class UIDropdownImpl {
     }
     
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroupInternal(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
     // Private constructor with array of options and count (used by template constructor)

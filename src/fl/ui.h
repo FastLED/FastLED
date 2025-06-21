@@ -78,7 +78,7 @@ class UISlider : protected UISliderImpl, public UIBase {
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -163,7 +163,7 @@ class UIButton : protected UIButtonImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -238,7 +238,7 @@ class UICheckbox : protected UICheckboxImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -306,7 +306,7 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -359,7 +359,7 @@ class UITitle : protected UITitleImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<UITitleImpl*>(this)->setGroupInternal(groupName);
+        static_cast<UITitleImpl*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -375,7 +375,7 @@ class UIDescription : protected UIDescriptionImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<UIDescriptionImpl*>(this)->setGroupInternal(groupName);
+        static_cast<UIDescriptionImpl*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -394,7 +394,7 @@ class UIAudio : protected UIAudioImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -438,7 +438,7 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroupInternal(groupName);
+        static_cast<Super*>(this)->setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
