@@ -410,6 +410,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         copy(other);
         return *this;
     }
+    
+    string &operator=(const char *str) {
+        copy(str, strlen(str));
+        return *this;
+    }
 
 #ifdef __EMSCRIPTEN__
     string(const std::string &str) {
