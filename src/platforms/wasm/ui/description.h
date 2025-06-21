@@ -15,6 +15,11 @@ class jsDescriptionImpl {
         return *this;
     }
 
+    // Method called by UI wrapper classes for group functionality
+    void setGroupInternal(const fl::string &name) {
+        mInternal->setGroup(name);
+    }
+
     const fl::string &text() const { return mText; }
 
     const fl::string &name() const;

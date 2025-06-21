@@ -15,6 +15,11 @@ class jsCheckboxImpl {
         return *this;
     };
 
+    // Method called by UI wrapper classes for group functionality
+    void setGroupInternal(const fl::string &name) {
+        mInternal->setGroup(name);
+    }
+
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     bool value() const;
