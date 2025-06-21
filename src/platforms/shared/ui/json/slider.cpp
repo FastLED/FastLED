@@ -2,7 +2,9 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
+#ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js.h"
+#endif
 #include "platforms/shared/ui/json/ui.h"
 
 #if FASTLED_ENABLE_JSON

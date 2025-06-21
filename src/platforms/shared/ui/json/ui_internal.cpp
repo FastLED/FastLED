@@ -66,7 +66,7 @@ bool JsonUiInternal::clearFunctions() {
 }
 
 int JsonUiInternal::nextId() {
-    static fl::atomic<uint32_t> sNextId(0);
+    static fl::atomic<uint32_t> sNextId(1);
     return sNextId.fetch_add(1);
 }
 
