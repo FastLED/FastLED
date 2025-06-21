@@ -39,9 +39,37 @@ To use the MCP server, run: `uv run mcp_server.py`
 **Examples of what to avoid and use instead:**
 
 **Headers:**
+
+**Core Language Support:**
 - ❌ `#include <type_traits>` → ✅ `#include "fl/type_traits.h"`
 - ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
+- ❌ `#include <functional>` → ✅ `#include "fl/functional.h"`
+- ❌ `#include <initializer_list>` → ✅ `#include "fl/initializer_list.h"`
+
+**Containers:**
 - ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
+- ❌ `#include <map>` → ✅ `#include "fl/map.h"`
+- ❌ `#include <unordered_map>` → ✅ `#include "fl/hash_map.h"`
+- ❌ `#include <unordered_set>` → ✅ `#include "fl/hash_set.h"`
+- ❌ `#include <set>` → ✅ `#include "fl/set.h"`
+- ❌ `#include <span>` → ✅ `#include "fl/slice.h"`
+
+**Utilities & Smart Types:**
+- ❌ `#include <optional>` → ✅ `#include "fl/optional.h"`
+- ❌ `#include <variant>` → ✅ `#include "fl/variant.h"`
+- ❌ `#include <utility>` → ✅ `#include "fl/pair.h"` (for std::pair)
+- ❌ `#include <string>` → ✅ `#include "fl/string.h"`
+- ❌ `#include <memory>` → ✅ `#include "fl/scoped_ptr.h"` or `#include "fl/ptr.h"`
+
+**Stream/IO:**
+- ❌ `#include <sstream>` → ✅ `#include "fl/sstream.h"`
+
+**Threading:**
+- ❌ `#include <thread>` → ✅ `#include "fl/thread.h"`
+
+**Math & System:**
+- ❌ `#include <cmath>` → ✅ `#include "fl/math.h"`
+- ❌ `#include <cstdint>` → ✅ `#include "fl/stdint.h"`
 
 **Functions and classes:**
 - ❌ `std::move()` → ✅ `fl::move()`
@@ -80,15 +108,15 @@ To use the MCP server, run: `uv run mcp_server.py`
 **Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns.
 
 ### Container Parameter Types
-**Prefer `fl::Slice<T>` over `fl::Vector<T>` or arrays for function parameters.** `fl::Slice<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
+**Prefer `fl::span<T>` over `fl::Vector<T>` or arrays for function parameters.** `fl::span<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
 
 **Examples:**
-- ✅ `void processData(fl::Slice<const uint8_t> data)` - accepts arrays, vectors, and other containers
+- ✅ `void processData(fl::span<const uint8_t> data)` - accepts arrays, vectors, and other containers
 - ❌ `void processData(fl::Vector<uint8_t>& data)` - only accepts fl::Vector
 - ❌ `void processData(uint8_t* data, size_t length)` - requires manual length tracking
 
 **Benefits:**
-- **Automatic conversion:** `fl::Slice<T>` can automatically convert from `fl::Vector<T>`, C-style arrays, and other container types
+- **Automatic conversion:** `fl::span<T>` can automatically convert from `fl::Vector<T>`, C-style arrays, and other container types
 - **Type safety:** Maintains compile-time type checking while being more flexible than raw pointers
 - **Performance:** Zero-cost abstraction that avoids unnecessary copying or allocation
 - **Consistency:** Provides a uniform interface for working with contiguous data
@@ -97,7 +125,7 @@ To use the MCP server, run: `uv run mcp_server.py`
 - When you need ownership and dynamic resizing capabilities
 - When storing data as a class member that needs to persist
 
-**Why:** Using `fl::Slice<T>` for parameters makes functions more reusable and avoids forcing callers to convert their data to specific container types.
+**Why:** Using `fl::span<T>` for parameters makes functions more reusable and avoids forcing callers to convert their data to specific container types.
 
 ## Testing
 The project uses a comprehensive test suite including:
