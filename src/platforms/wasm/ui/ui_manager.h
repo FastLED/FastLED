@@ -30,8 +30,8 @@ class jsUiInternal;
 
 class jsUiManager : fl::EngineEvents::Listener {
   public:
-    static void addComponent(fl::WeakPtr<jsUiInternal> component);
-    static void removeComponent(fl::WeakPtr<jsUiInternal> component);
+    void addComponent(fl::WeakPtr<jsUiInternal> component);
+    void removeComponent(fl::WeakPtr<jsUiInternal> component);
 
     // Called from the JS engine.
     static void jsUpdateUiComponents(const fl::ui_detail::string &jsonStr) {
@@ -39,6 +39,8 @@ class jsUiManager : fl::EngineEvents::Listener {
     }
     // Internal representation.
     static void updateUiComponents(const char *jsonStr);
+
+    static jsUiManager &instance();
 
   private:
     static void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);
@@ -75,7 +77,7 @@ class jsUiManager : fl::EngineEvents::Listener {
     jsUIRefSet mComponents;
     fl::mutex mMutex;
 
-    static jsUiManager &instance();
+
     bool mItemsAdded = false;
     FLArduinoJson::JsonDocument mPendingJsonUpdate;
     bool mHasPendingUpdate = false;

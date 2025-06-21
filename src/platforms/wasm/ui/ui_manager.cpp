@@ -20,14 +20,14 @@
 namespace fl {
 
 void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
-    fl::lock_guard<fl::mutex> lock(instance().mMutex);
-    instance().mComponents.insert(component);
-    instance().mItemsAdded = true;
+    fl::lock_guard<fl::mutex> lock(mMutex);
+    mComponents.insert(component);
+    mItemsAdded = true;
 }
 
 void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
-    fl::lock_guard<fl::mutex> lock(instance().mMutex);
-    instance().mComponents.erase(component);
+    fl::lock_guard<fl::mutex> lock(mMutex);
+    mComponents.erase(component);
 }
 
 jsUiManager &jsUiManager::instance() {

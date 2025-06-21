@@ -8,11 +8,11 @@ namespace fl {
 
 
 void addUiComponent(fl::WeakPtr<jsUiInternal> component) {
-    jsUiManager::addComponent(component);
+    jsUiManager::instance().addComponent(component);
 }
 
 void removeUiComponent(fl::WeakPtr<jsUiInternal> component) {
-    jsUiManager::removeComponent(component);
+    jsUiManager::instance().removeComponent(component);
 }
 
 } // namespace fl
