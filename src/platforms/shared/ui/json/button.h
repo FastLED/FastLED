@@ -12,38 +12,25 @@ class JsonButtonImpl {
   public:
     JsonButtonImpl(const fl::string &name);
     ~JsonButtonImpl();
-    JsonButtonImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+    JsonButtonImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     bool isPressed() const;
     bool clicked() const;
-    int clickedCount() const { return mClickedCount; }
-    const fl::string &groupName() const { return mInternal->groupName(); }
+    int clickedCount() const;
+    const fl::string &groupName() const;
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
-    void click() { mPressed = true; }
+    void click();
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(JsonButtonImpl *owner) {
-            mOwner = owner;
-            fl::EngineEvents::addListener(this);
-        }
-        ~Updater() { fl::EngineEvents::removeListener(this); }
-        void onPlatformPreLoop2() override {
-            mOwner->mClickedHappened =
-                mOwner->mPressed && (mOwner->mPressed != mOwner->mPressedLast);
-            mOwner->mPressedLast = mOwner->mPressed;
-            if (mOwner->mClickedHappened) {
-                mOwner->mClickedCount++;
-            }
-        }
+        void init(JsonButtonImpl *owner);
+        ~Updater();
+        void onPlatformPreLoop2() override;
         JsonButtonImpl *mOwner = nullptr;
     };
 

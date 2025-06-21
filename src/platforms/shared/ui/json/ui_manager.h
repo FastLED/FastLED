@@ -32,14 +32,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     
     typedef fl::FixedSet<fl::WeakPtr<JsonUiInternal>, 64> JsonUIRefSet;
 
-    void onPlatformPreLoop() override {
-        if (!mHasPendingUpdate) {
-            return;
-        }
-        executeUiUpdates(mPendingJsonUpdate);
-        mPendingJsonUpdate.clear();
-        mHasPendingUpdate = false;
-    }
+    void onPlatformPreLoop() override;
 
     void onEndShowLeds() override;
 

@@ -3,8 +3,6 @@
 #include "platforms/shared/ui/json/ui.h"
 #include <string.h>
 
-#include "fl/json.h"
-
 #if FASTLED_ENABLE_JSON
 
 using namespace fl;
@@ -29,6 +27,11 @@ JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
 
 JsonCheckboxImpl::~JsonCheckboxImpl() { removeJsonUiComponent(mInternal); }
 
+JsonCheckboxImpl &JsonCheckboxImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
 void JsonCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
@@ -42,6 +45,20 @@ void JsonCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
 bool JsonCheckboxImpl::value() const { return mValue; }
 
 void JsonCheckboxImpl::setValue(bool value) { mValue = value; }
+
+const fl::string &JsonCheckboxImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonCheckboxImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+
+JsonCheckboxImpl &JsonCheckboxImpl::operator=(bool value) {
+    setValue(value);
+    return *this;
+}
+
+JsonCheckboxImpl &JsonCheckboxImpl::operator=(int value) {
+    setValue(value != 0);
+    return *this;
+}
 
 void JsonCheckboxImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {

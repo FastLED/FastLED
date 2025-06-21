@@ -22,6 +22,13 @@ JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
 
 JsonDescriptionImpl::~JsonDescriptionImpl() {}
 
+JsonDescriptionImpl &JsonDescriptionImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
+const fl::string &JsonDescriptionImpl::text() const { return mText; }
+
 void JsonDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = mInternal->name();
     json["type"] = "description";
@@ -31,6 +38,10 @@ void JsonDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
 }
 
 const string &JsonDescriptionImpl::name() const { return mInternal->name(); }
+
+const fl::string &JsonDescriptionImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonDescriptionImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
 } // namespace fl
 

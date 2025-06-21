@@ -22,6 +22,11 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
 
 JsonTitleImpl::~JsonTitleImpl() {}
 
+JsonTitleImpl &JsonTitleImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 void JsonTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = mInternal->name();
     json["type"] = "title";
@@ -31,6 +36,12 @@ void JsonTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
 }
 
 const string &JsonTitleImpl::name() const { return mInternal->name(); }
+
+const fl::string &JsonTitleImpl::groupName() const { return mInternal->groupName(); }
+
+const fl::string &JsonTitleImpl::text() const { return mText; }
+
+void JsonTitleImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
 } // namespace fl
 

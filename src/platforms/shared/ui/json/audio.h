@@ -18,28 +18,22 @@ class JsonAudioImpl {
   public:
     JsonAudioImpl(const fl::string &name);
     ~JsonAudioImpl();
-    JsonAudioImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+    JsonAudioImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     AudioSample next();
     bool hasNext();
-    const fl::string &groupName() const { return mInternal->groupName(); }
+    const fl::string &groupName() const;
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(JsonAudioImpl *owner) {
-            mOwner = owner;
-            fl::EngineEvents::addListener(this);
-        }
-        ~Updater() { fl::EngineEvents::removeListener(this); }
-        void onPlatformPreLoop2() override {}
+        void init(JsonAudioImpl *owner);
+        ~Updater();
+        void onPlatformPreLoop2() override;
         JsonAudioImpl *mOwner = nullptr;
     };
 

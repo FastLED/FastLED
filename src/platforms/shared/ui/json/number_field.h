@@ -14,33 +14,24 @@ class JsonNumberFieldImpl {
   public:
     JsonNumberFieldImpl(const fl::string &name, double value, double min, double max);
     ~JsonNumberFieldImpl();
-    JsonNumberFieldImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+    JsonNumberFieldImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     double value() const;
     void setValue(double value);
-    const fl::string &groupName() const { return mInternal->groupName(); }
+    const fl::string &groupName() const;
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
-    JsonNumberFieldImpl &operator=(double value) {
-        setValue(value);
-        return *this;
-    }
-    JsonNumberFieldImpl &operator=(int value) {
-        setValue(static_cast<double>(value));
-        return *this;
-    }
+    JsonNumberFieldImpl &operator=(double value);
+    JsonNumberFieldImpl &operator=(int value);
     // Use ALMOST_EQUAL_FLOAT for floating-point comparison
-    bool operator==(double v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
-    bool operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
-    bool operator!=(double v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
-    bool operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
+    bool operator==(double v) const;
+    bool operator==(int v) const;
+    bool operator!=(double v) const;
+    bool operator!=(int v) const;
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);

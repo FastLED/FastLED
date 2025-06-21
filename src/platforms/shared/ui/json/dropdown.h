@@ -18,27 +18,21 @@ class JsonDropdownImpl {
     JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
     ~JsonDropdownImpl();
-    JsonDropdownImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    };
+    JsonDropdownImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     fl::string value() const;
     int value_int() const;
     void setSelectedIndex(int index);
-    size_t getOptionCount() const { return mOptions.size(); }
+    size_t getOptionCount() const;
     fl::string getOption(size_t index) const;
-    const fl::string &groupName() const { return mInternal->groupName(); }
+    const fl::string &groupName() const;
 
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
-    JsonDropdownImpl &operator=(int index) {
-        setSelectedIndex(index);
-        return *this;
-    }
+    JsonDropdownImpl &operator=(int index);
 
   private:
     // Private constructor with array of options and count (used by template constructor)

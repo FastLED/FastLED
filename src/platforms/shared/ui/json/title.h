@@ -12,18 +12,15 @@ class JsonTitleImpl {
   public:
     JsonTitleImpl(const fl::string &text);
     ~JsonTitleImpl();
-    JsonTitleImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+    JsonTitleImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    const fl::string &groupName() const { return mInternal->groupName(); }
-    const fl::string &text() const { return mText; }
+    const fl::string &groupName() const;
+    const fl::string &text() const;
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
   private:
     JsonUiInternalPtr mInternal;

@@ -29,7 +29,25 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
 
 JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(mInternal); }
 
+JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 const fl::string &JsonAudioImpl::name() const { return mInternal->name(); }
+
+const fl::string &JsonAudioImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonAudioImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+
+void JsonAudioImpl::Updater::init(JsonAudioImpl *owner) {
+    mOwner = owner;
+    fl::EngineEvents::addListener(this);
+}
+
+JsonAudioImpl::Updater::~Updater() { fl::EngineEvents::removeListener(this); }
+
+void JsonAudioImpl::Updater::onPlatformPreLoop2() {}
 
 void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
