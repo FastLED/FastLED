@@ -20,6 +20,7 @@
 #include "fl/ptr.h"
 #include "fl/str.h"
 #include "fl/warn.h"
+#include "fl/mutex.h"
 #include "platforms/wasm/js.h"
 
 using namespace fl;
