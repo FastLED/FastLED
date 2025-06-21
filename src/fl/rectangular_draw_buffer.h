@@ -1,4 +1,4 @@
-
+THIS SHOULD BE A LINTER ERROR
 #pragma once
 
 #include <stdint.h>
@@ -8,6 +8,7 @@
 #include "fl/scoped_ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/algorithm.h"
 
 namespace fl {
 

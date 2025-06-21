@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/algorithm.h"
+
 namespace fl {
 
 template <typename Key, typename Value> struct Pair {
@@ -7,6 +9,18 @@ template <typename Key, typename Value> struct Pair {
     Value second = Value();
     Pair() = default;
     Pair(const Key &k, const Value &v) : first(k), second(v) {}
+    
+    // Move constructor
+    Pair(Pair &&other) noexcept : first(fl::move(other.first)), second(fl::move(other.second)) {}
+    
+    // Move assignment operator
+    Pair &operator=(Pair &&other) noexcept {
+        if (this != &other) {
+            first = fl::move(other.first);
+            second = fl::move(other.second);
+        }
+        return *this;
+    }
 };
 
 // std compatibility

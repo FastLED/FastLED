@@ -1,8 +1,8 @@
-
 #pragma once
 
 #include "fl/math.h"
 #include "fl/compiler_control.h"
+#include "fl/algorithm.h"
 
 namespace fl {
 
@@ -19,6 +19,20 @@ template <typename T> struct vec3 {
     explicit constexpr vec3(U xyz) : x(xyz), y(xyz), z(xyz) {}
 
     constexpr vec3(const vec3 &p) : x(p.x), y(p.y), z(p.z) {}
+    
+    // Move constructor
+    constexpr vec3(vec3 &&p) noexcept : x(fl::move(p.x)), y(fl::move(p.y)), z(fl::move(p.z)) {}
+    
+    // Move assignment operator
+    vec3 &operator=(vec3 &&p) noexcept {
+        if (this != &p) {
+            x = fl::move(p.x);
+            y = fl::move(p.y);
+            z = fl::move(p.z);
+        }
+        return *this;
+    }
+    
     vec3 &operator*=(const float &f) {
         x *= f;
         y *= f;
@@ -184,6 +198,19 @@ template <typename T> struct vec2 {
     template <typename U> explicit constexpr vec2(U xy) : x(xy), y(xy) {}
 
     constexpr vec2(const vec2 &p) : x(p.x), y(p.y) {}
+    
+    // Move constructor
+    constexpr vec2(vec2 &&p) noexcept : x(fl::move(p.x)), y(fl::move(p.y)) {}
+    
+    // Move assignment operator
+    vec2 &operator=(vec2 &&p) noexcept {
+        if (this != &p) {
+            x = fl::move(p.x);
+            y = fl::move(p.y);
+        }
+        return *this;
+    }
+    
     vec2 &operator*=(const float &f) {
         x *= f;
         y *= f;
@@ -345,6 +372,18 @@ template <typename T> struct line_xy {
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
         : start(start_x, start_y), end(end_x, end_y) {}
+    
+    // Move constructor
+    line_xy(line_xy &&other) noexcept : start(fl::move(other.start)), end(fl::move(other.end)) {}
+    
+    // Move assignment operator
+    line_xy &operator=(line_xy &&other) noexcept {
+        if (this != &other) {
+            start = fl::move(other.start);
+            end = fl::move(other.end);
+        }
+        return *this;
+    }
 
     bool empty() const { return (start == end); }
 
@@ -405,6 +444,18 @@ template <typename T> struct rect {
 
     rect(T min_x, T min_y, T max_x, T max_y)
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
+    
+    // Move constructor
+    rect(rect &&other) noexcept : mMin(fl::move(other.mMin)), mMax(fl::move(other.mMax)) {}
+    
+    // Move assignment operator
+    rect &operator=(rect &&other) noexcept {
+        if (this != &other) {
+            mMin = fl::move(other.mMin);
+            mMax = fl::move(other.mMax);
+        }
+        return *this;
+    }
 
     uint16_t width() const { return mMax.x - mMin.x; }
 
