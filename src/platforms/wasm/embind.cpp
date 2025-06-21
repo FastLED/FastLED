@@ -5,9 +5,8 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
-#include "ui_manager.h"
-#include "fl/namespace.h"
-#include "active_strip_data.h"
+#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/wasm/active_strip_data.h"
 
 namespace fl {
 
