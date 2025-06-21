@@ -39,7 +39,7 @@ const Str &jsNumberFieldImpl::name() const { return mInternal->name(); }
 
 void jsNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mInternal->group().c_str();
+    json["group"] = mGroup.c_str();
     json["type"] = "number";
     json["id"] = mInternal->id();
     json["value"] = mValue;

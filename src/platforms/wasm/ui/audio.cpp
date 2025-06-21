@@ -35,7 +35,7 @@ const Str &jsAudioImpl::name() const { return mInternal->name(); }
 
 void jsAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mInternal->group().c_str();
+    json["group"] = mGroup.c_str();
     json["type"] = "audio";
     json["id"] = mInternal->id();
 }

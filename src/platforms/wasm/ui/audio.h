@@ -18,14 +18,19 @@ class jsAudioImpl {
   public:
     jsAudioImpl(const fl::string &name);
     ~jsAudioImpl();
-
-    void setGroup(const fl::string& name);
+    jsAudioImpl &Group(const fl::string &name) {
+        mGroup = name;
+        return *this;
+    }
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     AudioSample next();
     bool hasNext();
-    const fl::string &groupName() const { return mInternal->group(); }
+    const fl::string &groupName() const { return mGroup; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
   private:
     struct Updater : fl::EngineEvents::Listener {
@@ -43,6 +48,7 @@ class jsAudioImpl {
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
     jsUiInternalPtr mInternal;
+    fl::string mGroup;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
     fl::string mSerializeBuffer;
     fl::vector<int16_t> mAudioDataBuffer;

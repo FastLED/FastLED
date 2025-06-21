@@ -8,6 +8,7 @@
 #include "fl/ptr.h"
 #include "fl/str.h"
 #include "fl/mutex.h"
+#include <stdio.h>
 
 namespace fl {
 
@@ -20,23 +21,27 @@ class jsUiInternal : public fl::Referent {
     using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
 
     jsUiInternal(const fl::string &name, UpdateFunction updateFunc,
-                 ToJsonFunction toJsonFunc, const fl::string &group = "");
-    ~jsUiInternal();
+                 ToJsonFunction toJsonFunc);
+    ~jsUiInternal() {
+        const bool functions_exist = mUpdateFunc || mtoJsonFunc;
+        if (functions_exist) {
+            clearFunctions();
+            printf("Warning: %s: The owner of the jsUiInternal should clear "
+                   "the functions, not this destructor.\n",
+                   mName.c_str());
+        }
+    }
 
     const fl::string &name() const;
     void update(const FLArduinoJson::JsonVariantConst &json);
     void toJson(FLArduinoJson::JsonObject &json) const;
     int id() const;
 
-    const fl::string &group() const;
-    void setGroup(const fl::string &group);
-
     bool clearFunctions();
 
   private:
     static int nextId();
     fl::string mName;
-    fl::string mGroup;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     int mId;

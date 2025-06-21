@@ -17,9 +17,10 @@ class jsDropdownImpl {
     jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
     ~jsDropdownImpl();
-
-
-    void setGroup(const fl::string& name);
+    jsDropdownImpl &Group(const fl::string &name) {
+        mGroup = name;
+        return *this;
+    };
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
@@ -28,7 +29,10 @@ class jsDropdownImpl {
     void setSelectedIndex(int index);
     size_t getOptionCount() const { return mOptions.size(); }
     fl::string getOption(size_t index) const;
-        const fl::string &groupName() const { return mInternal->group(); }
+    const fl::string &groupName() const { return mGroup; }
+
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
     jsDropdownImpl &operator=(int index) {
         setSelectedIndex(index);
@@ -45,6 +49,7 @@ class jsDropdownImpl {
     jsUiInternalPtr mInternal;
     fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
+    fl::string mGroup;
 };
 
 } // namespace fl

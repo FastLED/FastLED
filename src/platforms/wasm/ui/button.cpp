@@ -35,7 +35,7 @@ const Str &jsButtonImpl::name() const { return mInternal->name(); }
 
 void jsButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mInternal->group().c_str();
+    json["group"] = mGroup.c_str();
     json["type"] = "button";
     json["id"] = mInternal->id();
     json["pressed"] = mPressed;

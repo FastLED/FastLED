@@ -10,17 +10,23 @@ class jsDescriptionImpl {
   public:
     jsDescriptionImpl(const fl::string &name);
     ~jsDescriptionImpl();
-
-    void setGroup(const fl::string& name);
+    jsDescriptionImpl &Group(const fl::string &name) {
+        mGroup = name;
+        return *this;
+    }
 
     const fl::string &text() const { return mText; }
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    const fl::string &groupName() const { return mInternal->group(); }
+    const fl::string &groupName() const { return mGroup; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
   private:
     jsUiInternalPtr mInternal;
+    fl::string mGroup;
     fl::string mText;
 };
 

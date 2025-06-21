@@ -15,19 +15,9 @@ namespace fl {
 
 
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
-                           ToJsonFunction toJsonFunc, const fl::string &group)
-    : mName(name), mGroup(group), mUpdateFunc(updateFunc),
-      mtoJsonFunc(toJsonFunc), mId(nextId()), mMutex() {}
-
-
-jsUiInternal::~jsUiInternal() {
-    const bool functions_exist = mUpdateFunc || mtoJsonFunc;
-    if (functions_exist) {
-        clearFunctions();
-        FL_WARN("Warning: " << mName << ": The owner of the jsUiInternal should clear "
-               "the functions, not this destructor.");
-    }
-}
+                           ToJsonFunction toJsonFunc)
+    : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
+      mId(nextId()), mMutex() {}
 
 const Str &jsUiInternal::name() const { return mName; }
 void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
@@ -44,6 +34,7 @@ void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
 }
 int jsUiInternal::id() const { return mId; }
 
+<<<<<<< HEAD
 const fl::string &jsUiInternal::group() const { return mGroup; }
 
 void jsUiInternal::setGroup(const fl::string &group) {
@@ -51,6 +42,8 @@ void jsUiInternal::setGroup(const fl::string &group) {
     mGroup = group;
 }
 
+=======
+>>>>>>> parent of da7182a67d (Update setGroup method in UI components to use internal group setter)
 bool jsUiInternal::clearFunctions() {
     fl::lock_guard<fl::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;

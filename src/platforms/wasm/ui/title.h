@@ -10,17 +10,22 @@ class jsTitleImpl {
   public:
     jsTitleImpl(const fl::string &text);
     ~jsTitleImpl();
-
-  void setGroup(const fl::string& name);
-
+    jsTitleImpl &Group(const fl::string &name) {
+        mGroup = name;
+        return *this;
+    }
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    const fl::string &groupName() const { return mInternal->group(); }
+    const fl::string &groupName() const { return mGroup; }
     const fl::string &text() const { return mText; }
+    
+    // Method to allow parent UIBase class to set the group
+    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
 
   private:
     jsUiInternalPtr mInternal;
+    fl::string mGroup;
     fl::string mText;
 };
 
