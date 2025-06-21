@@ -171,14 +171,14 @@ EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
 }
 
 EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
-    printf("updateJs: ENTRY - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
-    FASTLED_DBG("updateJs: ENTRY - jsonStr=" << (jsonStr ? jsonStr : "NULL"));
+    // printf("updateJs: ENTRY - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
+    // FASTLED_DBG("updateJs: ENTRY - jsonStr=" << (jsonStr ? jsonStr : "NULL"));
     
     EM_ASM_({
             globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {
-                console.log(new Date().toLocaleTimeString());
-            console.log("Missing globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
-                console.log("Added ui elements:", jsonData);
+                //console.log(new Date().toLocaleTimeString());
+                console.log("Missing globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
+                //console.log("Added ui elements:", jsonData);
             };
             var jsonStr = UTF8ToString($0);
             var data = null;

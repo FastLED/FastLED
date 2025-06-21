@@ -214,7 +214,7 @@ function setDescription(descData) {
 
 export class JsonUiManager {
   constructor(uiControlsId) {
-    console.log('*** JsonUiManager JS: CONSTRUCTOR CALLED ***');
+    // console.log('*** JsonUiManager JS: CONSTRUCTOR CALLED ***');
     this.uiElements = {};
     this.previousUiState = {};
     this.uiControlsId = uiControlsId;
@@ -224,7 +224,7 @@ export class JsonUiManager {
 
   // Method called by C++ backend to update UI components
   updateUiComponents(jsonString) {
-    console.log('*** C++→JS: Backend update received:', jsonString);
+    // console.log('*** C++→JS: Backend update received:', jsonString);
     
     try {
       const updates = JSON.parse(jsonString);
@@ -266,9 +266,9 @@ export class JsonUiManager {
           
           // Update our internal state tracking
           this.previousUiState[actualElementId] = value;
-          console.log(`*** C++→JS: Updated UI element '${actualElementId}' = ${value} ***`);
+          // console.log(`*** C++→JS: Updated UI element '${actualElementId}' = ${value} ***`);
         } else {
-          console.warn(`*** C++→JS: Element '${actualElementId}' not found ***`);
+          // console.warn(`*** C++→JS: Element '${actualElementId}' not found ***`);
         }
       }
     } catch (error) {
