@@ -53,6 +53,10 @@ void jsButtonImpl::updateInternal(
     mPressed = value.as<bool>();
 }
 
+void jsButtonImpl::setGroupIternal(const fl::string& name) {
+    mInternal->setGroup(name);
+}
+
 } // namespace fl
 
 #endif // __EMSCRIPTEN__

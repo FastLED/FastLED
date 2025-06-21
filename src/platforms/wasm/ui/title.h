@@ -11,6 +11,8 @@ class jsTitleImpl {
     jsTitleImpl(const fl::string &text);
     ~jsTitleImpl();
 
+  void setGroupIternal(const fl::string& name);
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
