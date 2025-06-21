@@ -1,3 +1,4 @@
+#include "platforms/shared/ui/json/slider.h"
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
