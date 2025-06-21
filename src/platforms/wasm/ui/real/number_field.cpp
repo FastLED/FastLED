@@ -3,8 +3,7 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "platforms/wasm/js.h"
-#include "platforms/wasm/ui/number_field.h"
+#include "platforms/wasm/ui/real/number_field.h"
 #include "ui_internal.h"
 #include "platforms/wasm/ui/ui_deps.h"
 

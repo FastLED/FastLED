@@ -3,14 +3,14 @@
 #include "fl/stdint.h"
 
 #include "platforms/wasm/js_bindings.h"
-#include "platforms/wasm/ui/audio.h"
-#include "platforms/wasm/ui/button.h"
-#include "platforms/wasm/ui/checkbox.h"
-#include "platforms/wasm/ui/description.h"
-#include "platforms/wasm/ui/dropdown.h"
-#include "platforms/wasm/ui/number_field.h"
-#include "platforms/wasm/ui/slider.h"
-#include "platforms/wasm/ui/title.h"
+#include "platforms/wasm/ui/real/audio.h"
+#include "platforms/wasm/ui/real/button.h"
+#include "platforms/wasm/ui/real/checkbox.h"
+#include "platforms/wasm/ui/real/description.h"
+#include "platforms/wasm/ui/real/dropdown.h"
+#include "platforms/wasm/ui/real/number_field.h"
+#include "platforms/wasm/ui/real/slider.h"
+#include "platforms/wasm/ui/real/title.h"
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.

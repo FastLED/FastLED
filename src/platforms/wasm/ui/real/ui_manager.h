@@ -9,7 +9,7 @@
 
 #include "fl/json.h"
 #include "fl/function.h"
-#include "platforms/wasm/ui/ui_internal.h"
+#include "platforms/wasm/ui/real/ui_internal.h"
 
 namespace fl {
 

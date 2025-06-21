@@ -2,25 +2,25 @@
 
 #include "fl/engine_events.h"
 #include "fl/str.h"
-#include "platforms/wasm/ui/ui_internal.h"
+#include "platforms/wasm/ui/real/ui_internal.h"
 #include "fl/json.h"
+
 
 namespace fl {
 
-class jsDescriptionImpl {
+class jsTitleImpl {
   public:
-    jsDescriptionImpl(const fl::string &name);
-    ~jsDescriptionImpl();
-    jsDescriptionImpl &Group(const fl::string &name) {
+    jsTitleImpl(const fl::string &text);
+    ~jsTitleImpl();
+    jsTitleImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
 
-    const fl::string &text() const { return mText; }
-
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     const fl::string &groupName() const { return mInternal->groupName(); }
+    const fl::string &text() const { return mText; }
     
     // Method to allow parent UIBase class to set the group
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
