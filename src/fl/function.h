@@ -10,7 +10,7 @@ namespace fl {
 
 //----------------------------------------------------------------------------
 // More or less a drop in replacement for std::function
-// function<R(Args...)>: type‐erasing “std::function” replacement
+// function<R(Args...)>: type‐erasing "std::function" replacement
 // Supports free functions, lambdas/functors, member functions (const &
 // non‑const)
 //----------------------------------------------------------------------------
@@ -67,14 +67,13 @@ template <typename R, typename... Args> class function<R(Args...)> {
         return *this;
     }
 
-    // doesn't work with our containers.
-    // function& operator=(function&& o) noexcept {
-    //     if (this != &o) {
-    //         callable_ = o.callable_;
-    //         o.callable_.reset(nullptr);
-    //     }
-    //     return *this;
-    // }
+    function& operator=(function&& o) noexcept {
+        if (this != &o) {
+            callable_.swap(o.callable_);
+            o.callable_.reset();
+        }
+        return *this;
+    }
 
     // 1) generic constructor for lambdas, free functions, functors
     template <typename F,
