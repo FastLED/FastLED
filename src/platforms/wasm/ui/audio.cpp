@@ -1,13 +1,11 @@
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__)
 
 #include <cctype>
 #include <cstdint>
 #include <string>
-#include <vector>
 
-#include "fl/json.h"
-#include "fl/namespace.h"
+
 
 #include "fl/json.h"
 #include "fl/thread_local.h"

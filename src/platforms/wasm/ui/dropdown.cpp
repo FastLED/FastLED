@@ -1,4 +1,4 @@
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 #include "platforms/wasm/ui/dropdown.h"
 #include "fl/json.h"

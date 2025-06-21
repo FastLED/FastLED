@@ -1,5 +1,5 @@
 
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 #include "fl/json.h"
 #include "fl/namespace.h"

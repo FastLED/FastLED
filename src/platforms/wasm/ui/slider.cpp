@@ -1,4 +1,4 @@
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 #include <sstream>
 #include <string.h>
@@ -8,6 +8,7 @@
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
+#include "fl/math_macros.h"
 
 using namespace fl;
 
@@ -16,7 +17,7 @@ namespace fl {
 jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
                            float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
-    if (mStep == -1.f) {
+    if (ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
         mStep = (mMax - mMin) / 100.0f;
     }
     auto updateFunc = jsUiInternal::UpdateFunction(
@@ -64,8 +65,10 @@ void jsSliderImpl::updateInternal(
 }
 
 void jsSliderImpl::setValue(float value) {
-    mValue = std::max(mMin, std::min(mMax, value));
-    if (mValue != value) {
+    mValue = MAX(mMin, MIN(mMax, value));
+    // ALMOST_EQUAL_FLOAT is defined in fl/math_macros.h
+    // if (mValue != value) {
+    if (!ALMOST_EQUAL_FLOAT(mValue, value)) {
         // The value was outside the range so print out a warning that we
         // clamped.
         const Str &name = mInternal->name();

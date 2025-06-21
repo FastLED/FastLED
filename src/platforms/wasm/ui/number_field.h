@@ -3,6 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
@@ -26,10 +27,11 @@ class jsNumberFieldImpl {
         setValue(static_cast<double>(value));
         return *this;
     }
-    bool operator==(double v) const { return value() == v; }
-    bool operator==(int v) const { return value() == v; }
-    bool operator!=(double v) const { return value() != v; }
-    bool operator!=(int v) const { return value() != v; }
+    // Use ALMOST_EQUAL_FLOAT for floating-point comparison
+    bool operator==(double v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
+    bool operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
+    bool operator!=(double v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
+    bool operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
