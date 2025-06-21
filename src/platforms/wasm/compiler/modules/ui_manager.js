@@ -212,7 +212,7 @@ function setDescription(descData) {
 }
 
 
-export class UiManager {
+export class JsonUiManager {
   constructor(uiControlsId) {
     this.uiElements = {};
     this.previousUiState = {};

@@ -14,18 +14,18 @@ FL_DISABLE_WARNING(deprecated-declarations)
 
 namespace fl {
 
-void UiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
+void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
     fl::scoped_lock lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
 }
 
-void UiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
+void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
     fl::scoped_lock lock(mMutex);
     mComponents.erase(component);
 }
 
-fl::vector<JsonUiInternalPtr> UiManager::getComponents() {
+fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     fl::scoped_lock lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
@@ -36,14 +36,14 @@ fl::vector<JsonUiInternalPtr> UiManager::getComponents() {
     return out;
 }
 
-void UiManager::updateUiComponents(const char *jsonStr) {
+void JsonUiManager::updateUiComponents(const char *jsonStr) {
     FLArduinoJson::JsonDocument doc;
     deserializeJson(doc, jsonStr);
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
 }
 
-void UiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
+void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     auto components = getComponents();
     if (doc.is<FLArduinoJson::JsonObject>()) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
@@ -58,7 +58,7 @@ void UiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     }
 }
 
-void UiManager::toJson(FLArduinoJson::JsonArray &json) {
+void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
     auto components = getComponents();
     for (auto &component : components) {
         auto obj = json.add<FLArduinoJson::JsonObject>();
@@ -66,7 +66,7 @@ void UiManager::toJson(FLArduinoJson::JsonArray &json) {
     }
 }
 
-void UiManager::onEndShowLeds() {
+void JsonUiManager::onEndShowLeds() {
     bool shouldUpdate = false;
     {
         fl::scoped_lock lock(mMutex);

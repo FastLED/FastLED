@@ -18,29 +18,29 @@
 
 namespace fl {
 
-JsonUiManager &JsonUiManager::instance() {
-    return fl::Singleton<JsonUiManager>::instance();
+jsUiManager &jsUiManager::instance() {
+    return fl::Singleton<jsUiManager>::instance();
 }
 
-void JsonUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
+void jsUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
     instance().updateUiComponents(jsonStr.c_str());
 }
 
-JsonUiManager::JsonUiManager(): UiManager(fl::updateJs) {}
+jsUiManager::jsUiManager(): JsonUiManager(fl::updateJs) {}
 
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
-                         &JsonUiManager::jsUpdateUiComponents);
+                         &jsUiManager::jsUpdateUiComponents);
 }
 
 
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    JsonUiManager::instance().addComponent(component);
+    jsUiManager::instance().addComponent(component);
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    JsonUiManager::instance().removeComponent(component);
+    jsUiManager::instance().removeComponent(component);
 }
 
 

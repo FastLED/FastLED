@@ -9,7 +9,7 @@
 /* eslint-disable no-continue */
 /* eslint-disable import/extensions */
 
-import { UiManager } from './modules/ui_manager.js';
+import { JsonUiManager } from './modules/ui_manager.js';
 import { GraphicsManager } from './modules/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
 import { isDenseGrid } from './modules/graphics_utils.js';
@@ -492,7 +492,7 @@ async function localLoadFastLed(options) {
     print = customPrintFunction;
     console.log('Loading FastLED with options:', options);
     frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
-    uiManager = new UiManager(uiControlsId);
+    uiManager = new JsonUiManager(uiControlsId);
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
     const fastLedLoader = options.fastled;

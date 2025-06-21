@@ -13,11 +13,11 @@
 
 namespace fl {
 
-class UiManager : fl::EngineEvents::Listener {
+class JsonUiManager : fl::EngineEvents::Listener {
   public:
     using Callback = fl::function<void(const char *)>;
-    UiManager(Callback updateJs) : mUpdateJs(updateJs) { fl::EngineEvents::addListener(this); }
-    ~UiManager() { fl::EngineEvents::removeListener(this); }
+    JsonUiManager(Callback updateJs) : mUpdateJs(updateJs) { fl::EngineEvents::addListener(this); }
+    ~JsonUiManager() { fl::EngineEvents::removeListener(this); }
 
     void addComponent(fl::WeakPtr<JsonUiInternal> component);
     void removeComponent(fl::WeakPtr<JsonUiInternal> component);
