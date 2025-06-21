@@ -27,7 +27,7 @@ class JsonSliderImpl {
     // Method to allow parent UIBase class to set the group
     void setGroup(const fl::string &groupName);
 
-    template <typename T> T as() const;
+    template <typename T> T as() const { return static_cast<T>(mValue); }
 
     int as_int() const;
 

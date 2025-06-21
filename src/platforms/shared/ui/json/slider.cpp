@@ -79,7 +79,6 @@ const fl::string &JsonSliderImpl::groupName() const { return mInternal->groupNam
 
 void JsonSliderImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-template <typename T> T JsonSliderImpl::as() const { return static_cast<T>(mValue); }
 
 int JsonSliderImpl::as_int() const { return static_cast<int>(mValue); }
 
