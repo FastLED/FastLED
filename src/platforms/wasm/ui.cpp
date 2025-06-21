@@ -22,6 +22,12 @@ JsonUiManager &JsonUiManager::instance() {
     return fl::Singleton<JsonUiManager>::instance();
 }
 
+void JsonUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
+    instance().updateUiComponents(jsonStr.c_str());
+}
+
+JsonUiManager::JsonUiManager(): UiManager(fl::updateJs) {}
+
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",

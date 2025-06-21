@@ -11,7 +11,7 @@
 
 #include "fl/json.h"
 #include "platforms/wasm/js.h"
-#include "platforms/wasm/ui/ui_manager.h"
+#include "platforms/shared/ui/json/ui_manager.h"
 
 namespace fl {
 
@@ -19,14 +19,12 @@ namespace fl {
 class JsonUiManager : public UiManager {
   public:
     // Called from the JS engine.
-    static void jsUpdateUiComponents(const std::string &jsonStr) {
-        instance().updateUiComponents(jsonStr.c_str());
-    }
+    static void jsUpdateUiComponents(const std::string &jsonStr);
     static JsonUiManager &instance();
 
   private:
     friend class fl::Singleton<JsonUiManager>;
-    JsonUiManager(): UiManager(fl::updateJs) {}
+    JsonUiManager();
     ~JsonUiManager() = default;
 };
 
