@@ -132,7 +132,6 @@ void loop() {
     if (changeFx) {
         fxEngine.nextFx();
     }
-    static int frame = 0;
     // We use the dynamic version here which allows the change time to respond
     // to changes from the UI element.
     EVERY_N_MILLISECONDS_DYNAMIC(changePalletTime.as<int>() * 1000) {
@@ -156,5 +155,4 @@ void loop() {
 
     fxEngine.draw(now, leds);
     FastLED.show();
-    frame++;
 }
