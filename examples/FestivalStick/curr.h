@@ -73,28 +73,30 @@ UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
 
 // Noise controls (grouped under noiseGroup)
-UICheckbox useNoise("Use Noise Pattern", true);
+
 UISlider noiseScale("Noise Scale", 100, 10, 200, 5);
 UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
-fl::string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-fl::UIDropdown paletteDropdown("Color Palette", paletteOptions);
-
-// Create UIGroup for noise controls using variadic constructor
-// This automatically assigns all specified controls to the "Noise Controls" group
-UIGroup noiseGroup("Noise Controls", useNoise, noiseScale, noiseSpeed, paletteDropdown);
+string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
+string renderModeOptions[] = {"Noise", "Position"};
 
 
+UIDropdown paletteDropdown("Color Palette", paletteOptions);
+UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
 
 // Color boost controls
 UINumberField saturationFunction("Saturation Function", 1, 0, 9);
 UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
 
+// Create UIGroup for noise controls using variadic constructor
+// This automatically assigns all specified controls to the "Noise Controls" group
+UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
+UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
+UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 
 
-fl::string renderModeOptions[] = {"Noise", "Position", "Mixed"};
-fl::UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
+
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
@@ -127,9 +129,9 @@ EaseType getEaseType(int value) {
 
 // Option 2: Constexpr dimensions for compile-time array sizing
 constexpr uint16_t CORKSCREW_WIDTH =
-    fl::calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
+    calculateCorkscrewWidth(CORKSCREW_TURNS, NUM_LEDS);
 constexpr uint16_t CORKSCREW_HEIGHT =
-    fl::calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
+    calculateCorkscrewHeight(CORKSCREW_TURNS, NUM_LEDS);
 
 // Now you can use these for array initialization:
 // CRGB frameBuffer[CORKSCREW_WIDTH * CORKSCREW_HEIGHT];  // Compile-time sized
@@ -140,12 +142,12 @@ constexpr uint16_t CORKSCREW_HEIGHT =
 // - 5cm width (50mm)
 // - 2mm LED inner diameter
 // - 24 LEDs per turn
-// fl::ScreenMap screenMap = makeCorkScrew(NUM_LEDS,
+// ScreenMap screenMap = makeCorkScrew(NUM_LEDS,
 // 300.0f, 50.0f, 2.0f, 24.0f);
 
-// fl::vector<vec3f> mapCorkScrew = makeCorkScrew(args);
-fl::ScreenMap screenMap;
-fl::Grid<CRGB> frameBuffer;
+// vector<vec3f> mapCorkScrew = makeCorkScrew(args);
+ScreenMap screenMap;
+Grid<CRGB> frameBuffer;
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)
@@ -174,10 +176,10 @@ void setup() {
     // NEW: Create ScreenMap directly from Corkscrew using toScreenMap()
     // This maps each LED index to its exact position on the corkscrew spiral
     // instead of using a rectangular grid mapping
-    fl::ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
+    ScreenMap corkscrewScreenMap = corkscrew.toScreenMap(0.2f);
     
     // OLD WAY (rectangular grid - not accurate for corkscrew visualization):
-    // fl::ScreenMap screenMap = xyMap.toScreenMap();
+    // ScreenMap screenMap = xyMap.toScreenMap();
     // screenMap.setDiameter(.2f);
 
     // Set the corkscrew screen map for the controller
@@ -197,8 +199,8 @@ void setup() {
     renderModeDropdown.setSelectedIndex(0); // Noise
     
     // Add onChange callbacks for dropdowns
-    paletteDropdown.onChanged([](fl::UIDropdown &dropdown) {
-        fl::string selectedPalette = dropdown.value();
+    paletteDropdown.onChanged([](UIDropdown &dropdown) {
+        string selectedPalette = dropdown.value();
         FL_WARN("Noise palette changed to: " << selectedPalette);
         if (selectedPalette == "Party") {
             noisePalette = PartyColors_p;
@@ -213,8 +215,8 @@ void setup() {
         }
     });
     
-    renderModeDropdown.onChanged([](fl::UIDropdown &dropdown) {
-        fl::string mode = dropdown.value();
+    renderModeDropdown.onChanged([](UIDropdown &dropdown) {
+        string mode = dropdown.value();
         // Simple example of using getOption()
         for(size_t i = 0; i < dropdown.getOptionCount(); i++) {
             if(dropdown.getOption(i) == mode) {
@@ -380,7 +382,7 @@ void draw(float pos) {
 
 void loop() {
     uint32_t now = millis();
-    fl::clear(frameBuffer);
+    clear(frameBuffer);
 
     if (allWhite) {
         CRGB whiteColor = CRGB(8, 8, 8);
@@ -393,7 +395,7 @@ void loop() {
     float combinedPosition = get_position(now);
     float pos = combinedPosition * (corkscrew.size() - 1);
 
-    if (useNoise.value()) {
+    if (renderModeDropdown.value()) {
         drawNoise(now);
     } else {
         draw(pos);
