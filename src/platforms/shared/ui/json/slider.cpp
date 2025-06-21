@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR#include "platforms/shared/ui/json/slider.h"
+#include "platforms/shared/ui/json/slider.h"
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -78,8 +78,6 @@ void JsonSliderImpl::setValue(float value) {
 const fl::string &JsonSliderImpl::groupName() const { return mInternal->groupName(); }
 
 void JsonSliderImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
-
-template <typename T> T JsonSliderImpl::as() const { return static_cast<T>(mValue); }
 
 int JsonSliderImpl::as_int() const { return static_cast<int>(mValue); }
 
