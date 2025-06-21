@@ -411,6 +411,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
+#ifdef __EMSCRIPTEN__
+    string(const std::string &str) {
+        copy(str.c_str(), str.size());
+    }
+#endif
+
     bool operator>(const string &other) const {
         return strcmp(c_str(), other.c_str()) > 0;
     }
