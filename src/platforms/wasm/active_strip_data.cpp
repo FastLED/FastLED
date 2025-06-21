@@ -65,10 +65,6 @@ Str ActiveStripData::infoJsonString() {
     return jsonBuffer;
 }
 
-static ActiveStripData *getActiveStripDataRef() {
-    ActiveStripData *instance = &fl::Singleton<ActiveStripData>::instance();
-    return instance;
-}
 
 
 // gcc constructor to get the
