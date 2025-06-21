@@ -1,8 +1,10 @@
 #include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/ui_internal.h"
+#include "platforms/shared/ui/json/ui_manager.h"
 #include "fl/warn.h"
 #include "fl/ptr.h"
 #include "fl/vector.h"
+#include "fl/scoped_ptr.h"
 
 namespace fl {
 
@@ -23,9 +25,28 @@ static JsonUiRemoveHandler& getRemoveHandler() {
     return handler;
 }
 
-void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler) {
+static JsonUiUpdateJsHandler& getUpdateJsHandler() {
+    static JsonUiUpdateJsHandler handler;
+    return handler;
+}
+
+// Internal JsonUiManager instance
+static fl::scoped_ptr<JsonUiManager>& getInternalManager() {
+    static fl::scoped_ptr<JsonUiManager> manager;
+    return manager;
+}
+
+void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler) {
     getAddHandler() = addHandler;
     getRemoveHandler() = removeHandler;
+    getUpdateJsHandler() = updateJsHandler;
+    
+    // Create internal JsonUiManager if updateJsHandler is provided
+    if (updateJsHandler) {
+        auto& manager = getInternalManager();
+        manager.reset(new JsonUiManager(updateJsHandler));
+        FL_WARN("Created internal JsonUiManager with updateJs callback");
+    }
     
     // Flush any pending components to the new handlers
     auto& pending = getPendingComponents();
@@ -35,6 +56,11 @@ void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHan
             // Only add components that are still valid (not destroyed)
             if (component) {
                 addHandler(component);
+                // Also add to internal manager if it exists
+                auto& manager = getInternalManager();
+                if (manager) {
+                    manager->addComponent(component);
+                }
             }
         }
         pending.clear();
@@ -51,6 +77,12 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
         return;
     }
     handler(component);
+    
+    // Also add to internal manager if it exists
+    auto& manager = getInternalManager();
+    if (manager) {
+        manager->addComponent(component);
+    }
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
@@ -75,6 +107,12 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
         return;
     }
     handler(component);
+    
+    // Also remove from internal manager if it exists
+    auto& manager = getInternalManager();
+    if (manager) {
+        manager->removeComponent(component);
+    }
 }
 
 } // namespace fl

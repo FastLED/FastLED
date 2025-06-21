@@ -29,7 +29,8 @@ TEST_CASE("function handlers") {
         [&](fl::WeakPtr<fl::JsonUiInternal> component) {
             lastRemovedComponent = component;
             removeCallCount++;
-        }
+        },
+        [](const char*) { /* empty updateJs callback for testing */ }
     );
     
     // Create a mock component for testing
@@ -49,7 +50,7 @@ TEST_CASE("function handlers") {
     CHECK(lastRemovedComponent == weakComponent);
     
     // Test with null handlers (should not crash)
-    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{});
+    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
     
     // These should not crash and should produce warnings
     fl::addJsonUiComponent(weakComponent);
@@ -62,7 +63,7 @@ TEST_CASE("function handlers") {
 
 TEST_CASE("pending component storage") {
     // Clear any existing handlers
-    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{});
+    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
     
     // Test variables to track handler calls
     fl::WeakPtr<fl::JsonUiInternal> lastAddedComponent;
@@ -87,14 +88,15 @@ TEST_CASE("pending component storage") {
             lastAddedComponent = component;
             addCallCount++;
         },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ }
+        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
+        [](const char*) { /* empty updateJs callback for testing */ }
     );
     
     // Should have received 2 add calls from flushing pending components
     CHECK(addCallCount == 2);
     
     // Test removing component from pending storage before handlers are set
-    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{});
+    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
     
     auto mockComponent3 = fl::NewPtr<fl::JsonUiInternal>("test_id_3", updateFunc, toJsonFunc);
     fl::WeakPtr<fl::JsonUiInternal> weakComponent3(mockComponent3);
@@ -111,7 +113,8 @@ TEST_CASE("pending component storage") {
         [&](fl::WeakPtr<fl::JsonUiInternal>) {
             finalAddCallCount++;
         },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ }
+        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
+        [](const char*) { /* empty updateJs callback for testing */ }
     );
     
     // Should receive no add calls since the pending component was removed
@@ -120,7 +123,7 @@ TEST_CASE("pending component storage") {
 
 TEST_CASE("pending component cleanup with destroyed components") {
     // Clear any existing handlers
-    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{});
+    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{}, fl::JsonUiUpdateJsHandler{});
     
     int addCallCount = 0;
     
@@ -151,7 +154,8 @@ TEST_CASE("pending component cleanup with destroyed components") {
             CHECK(component.operator bool()); // Should be valid
             addCallCount++;
         },
-        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ }
+        [](fl::WeakPtr<fl::JsonUiInternal>) { /* do nothing */ },
+        [](const char*) { /* empty updateJs callback for testing */ }
     );
     
     // Should only receive 1 add call for the valid component
