@@ -378,12 +378,8 @@ template <size_t SIZE = 64> class StrN {
         return out;
     }
 
-    StrN substr(size_t start, size_t end, const char *str) {
-        StrN out;
-        out.copy(c_str(), start);
-        out.write(str, strlen(str));
-        out.write(c_str() + end, mLength - end);
-        return out;
+    StrN substr(size_t start, size_t end) {
+        return substring(start, end);
     }
 
     StrN trim() const {
