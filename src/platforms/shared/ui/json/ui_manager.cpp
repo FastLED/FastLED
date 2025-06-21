@@ -84,7 +84,7 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 
     if (type == fl::JSON_OBJECT) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
-        bool found = false;
+        bool any_found = false;
         int id = -1;
         for (auto &component : components) {
             id = component->id();
@@ -94,13 +94,13 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             if (obj.containsKey(idStr.c_str())) {
                 const FLArduinoJson::JsonVariantConst v = obj[idStr.c_str()];
                 component->update(v);
-                found = true;
+                any_found = true;
                 break;
             }
         }
-        if (!found) {
-            FL_WARN_IF(id != -1, "*** ERROR: could not find component with id: " << id);
-        }
+
+        FL_WARN_IF(!any_found, "*** ERROR: could not find any components in the JSON update mapping into internal component ids");
+
     } else {
         FL_WARN("JSON document is not an object, cannot execute UI updates");
     }
