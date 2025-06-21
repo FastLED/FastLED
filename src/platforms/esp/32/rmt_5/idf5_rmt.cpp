@@ -37,18 +37,17 @@ RmtController5::~RmtController5() {
 }
 
 static IRmtStrip::DmaMode convertDmaMode(RmtController5::DmaMode dma_mode) {
-    // switch (dma_mode) {
-    //     case RmtController5::DMA_AUTO:
-    //         return IRmtStrip::DMA_AUTO;
-    //     case RmtController5::DMA_ENABLED:
-    //         return IRmtStrip::DMA_ENABLED;
-    //     case RmtController5::DMA_DISABLED:
-    //         return IRmtStrip::DMA_DISABLED;
-    //     default:
-    //         FL_ASSERT(false, "Invalid DMA mode");
-    //         return IRmtStrip::DMA_AUTO;
-    // }
-    return IRmtStrip::DMA_DISABLED;
+    switch (dma_mode) {
+        case RmtController5::DMA_AUTO:
+            return IRmtStrip::DMA_AUTO;
+        case RmtController5::DMA_ENABLED:
+            return IRmtStrip::DMA_ENABLED;
+        case RmtController5::DMA_DISABLED:
+            return IRmtStrip::DMA_DISABLED;
+        default:
+            FL_ASSERT(false, "Invalid DMA mode");
+            return IRmtStrip::DMA_AUTO;
+    }
 }
 
 void RmtController5::loadPixelData(PixelIterator &pixels) {
