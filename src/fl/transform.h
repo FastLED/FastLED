@@ -39,6 +39,11 @@ struct Transform16 {
     //     return Transform16::ToBounds(map.getWidth(), map.getHeight());
     // }
     Transform16() = default;
+    
+    // Use default move constructor and assignment operator for POD data
+    Transform16(Transform16 &&other) noexcept = default;
+    Transform16 &operator=(Transform16 &&other) noexcept = default;
+    
     alpha16 scale_x = 0xffff;
     alpha16 scale_y = 0xffff;
     alpha16 offset_x = 0;
@@ -69,10 +74,17 @@ class TransformFloatImpl : public Referent {
 
 // Future usage.
 struct Matrix3x3f {
+    Matrix3x3f() = default;
+    Matrix3x3f(const Matrix3x3f &) = default;
+    Matrix3x3f &operator=(const Matrix3x3f &) = default;
+    Matrix3x3f(Matrix3x3f &&) noexcept = default;
+    Matrix3x3f &operator=(Matrix3x3f &&) noexcept = default;
+    
     static Matrix3x3f Identity() {
         Matrix3x3f m;
         return m;
     }
+    
     vec2<float> transform(const vec2<float> &xy) const {
         vec2<float> out;
         out.x = m[0][0] * xy.x + m[0][1] * xy.y + m[0][2];

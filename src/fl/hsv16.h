@@ -14,6 +14,13 @@ struct HSV16 {
     HSV16() = default;
     HSV16(uint16_t h, uint16_t s, uint16_t v) : h(h), s(s), v(v) {}
     HSV16(const CRGB& rgb);
+    
+    // Rule of 5 for POD data
+    HSV16(const HSV16 &other) = default;
+    HSV16 &operator=(const HSV16 &other) = default;
+    HSV16(HSV16 &&other) noexcept = default;
+    HSV16 &operator=(HSV16 &&other) noexcept = default;
+    
     CRGB ToRGB() const;
     
     /// Automatic conversion operator to CRGB

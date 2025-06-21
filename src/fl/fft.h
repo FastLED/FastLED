@@ -3,6 +3,7 @@
 #include "fl/scoped_ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
+#include "fl/move.h"
 
 namespace fl {
 
@@ -14,6 +15,30 @@ struct FFTBins {
     FFTBins(size_t n) : mSize(n) {
         bins_raw.reserve(n);
         bins_db.reserve(n);
+    }
+    
+    // Copy constructor and assignment
+    FFTBins(const FFTBins &other) : bins_raw(other.bins_raw), bins_db(other.bins_db), mSize(other.mSize) {}
+    FFTBins &operator=(const FFTBins &other) {
+        if (this != &other) {
+            mSize = other.mSize;
+            bins_raw = other.bins_raw;
+            bins_db = other.bins_db;
+        }
+        return *this;
+    }
+    
+    // Move constructor and assignment
+    FFTBins(FFTBins &&other) noexcept 
+        : bins_raw(fl::move(other.bins_raw)), bins_db(fl::move(other.bins_db)), mSize(other.mSize) {}
+    
+    FFTBins &operator=(FFTBins &&other) noexcept {
+        if (this != &other) {
+            bins_raw = fl::move(other.bins_raw);
+            bins_db = fl::move(other.bins_db);
+            mSize = other.mSize;
+        }
+        return *this;
     }
 
     void clear() {
@@ -58,6 +83,12 @@ struct FFT_Args {
         this->fmax = fmax;
         this->sample_rate = sample_rate;
     }
+    
+    // Rule of 5 for POD data
+    FFT_Args(const FFT_Args &other) = default;
+    FFT_Args &operator=(const FFT_Args &other) = default;
+    FFT_Args(FFT_Args &&other) noexcept = default;
+    FFT_Args &operator=(FFT_Args &&other) noexcept = default;
 
     bool operator==(const FFT_Args &other) const ;
     bool operator!=(const FFT_Args &other) const { return !(*this == other); }

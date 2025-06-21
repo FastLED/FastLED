@@ -1,8 +1,8 @@
-
 #pragma once
 
 #include "fl/math.h"
 #include "fl/compiler_control.h"
+#include "fl/move.h"
 
 namespace fl {
 
@@ -18,7 +18,10 @@ template <typename T> struct vec3 {
     template <typename U>
     explicit constexpr vec3(U xyz) : x(xyz), y(xyz), z(xyz) {}
 
-    constexpr vec3(const vec3 &p) : x(p.x), y(p.y), z(p.z) {}
+    constexpr vec3(const vec3 &p) = default;
+    constexpr vec3(vec3 &&p) noexcept = default;
+    vec3 &operator=(vec3 &&p) noexcept = default;
+    
     vec3 &operator*=(const float &f) {
         x *= f;
         y *= f;
@@ -183,7 +186,10 @@ template <typename T> struct vec2 {
 
     template <typename U> explicit constexpr vec2(U xy) : x(xy), y(xy) {}
 
-    constexpr vec2(const vec2 &p) : x(p.x), y(p.y) {}
+    constexpr vec2(const vec2 &p) = default;
+    constexpr vec2(vec2 &&p) noexcept = default;
+    vec2 &operator=(vec2 &&p) noexcept = default;
+    
     vec2 &operator*=(const float &f) {
         x *= f;
         y *= f;
@@ -345,6 +351,11 @@ template <typename T> struct line_xy {
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
         : start(start_x, start_y), end(end_x, end_y) {}
+    
+    line_xy(const line_xy &other) = default;
+    line_xy &operator=(const line_xy &other) = default;
+    line_xy(line_xy &&other) noexcept = default;
+    line_xy &operator=(line_xy &&other) noexcept = default;
 
     bool empty() const { return (start == end); }
 
@@ -405,6 +416,11 @@ template <typename T> struct rect {
 
     rect(T min_x, T min_y, T max_x, T max_y)
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
+    
+    rect(const rect &other) = default;
+    rect &operator=(const rect &other) = default;
+    rect(rect &&other) noexcept = default;
+    rect &operator=(rect &&other) noexcept = default;
 
     uint16_t width() const { return mMax.x - mMin.x; }
 

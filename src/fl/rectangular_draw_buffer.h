@@ -14,6 +14,13 @@ namespace fl {
 struct DrawItem {
     DrawItem() = default;
     DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw);
+    
+    // Rule of 5 for POD data
+    DrawItem(const DrawItem &other) = default;
+    DrawItem &operator=(const DrawItem &other) = default;
+    DrawItem(DrawItem &&other) noexcept = default;
+    DrawItem &operator=(DrawItem &&other) noexcept = default;
+    
     uint8_t mPin = 0;
     uint32_t mNumBytes = 0;
     bool mIsRgbw = false;
