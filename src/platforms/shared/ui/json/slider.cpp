@@ -130,18 +130,6 @@ void JsonSliderImpl::updateInternal(
     } else if (value.is<int>()) {
         int newValue = value.as<int>();
         setValue(static_cast<float>(newValue));
-    } else if (value.is<::FLArduinoJson::JsonObject>()) {
-        auto obj = value.as<FLArduinoJson::JsonObjectConst>();
-        if (obj.containsKey("value")) {
-            float newValue = obj["value"].as<float>();
-            setValue(newValue);
-        } else {
-            char buff[128] = {};
-            FLArduinoJson::serializeJson(value, buff, sizeof(buff));
-            FL_WARN("*** SLIDER UPDATE ERROR: "
-                    << name() << " " << fl::getJsonTypeStr(value)
-                    << " is not a float or int. Serialized JSON: " << buff);
-        }
     } else {
         // Fallback, just resort to parsing the string itself.
         char buff[128] = {};

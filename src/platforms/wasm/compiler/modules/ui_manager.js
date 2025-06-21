@@ -410,11 +410,11 @@ export class JsonUiManager {
     }
 
     if (hasChanges) {
-      // Transform to backend format: {"2": 0.95} → {"2": {"value": 0.95}}
+      // Send changes directly without wrapping in "value" objects
       const transformedChanges = {};
       for (const [id, value] of Object.entries(changes)) {
         const key = `${id}`;
-        transformedChanges[key] = { value: value };
+        transformedChanges[key] = value;
       }
       // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
       

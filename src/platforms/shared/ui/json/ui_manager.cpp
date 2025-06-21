@@ -70,8 +70,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
     FLArduinoJson::JsonDocument doc;
-    auto result = deserializeJson(doc, jsonStr);
-    // FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    deserializeJson(doc, jsonStr);
     
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
@@ -141,29 +140,8 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
                 //FL_WARN("*** FOUND MATCH! UPDATING COMPONENT: ID " << id);
                 //component->update(obj[idStr.c_str()]);
                 const FLArduinoJson::JsonVariantConst v = obj[idStr.c_str()];  
-                // LET'S LOG THE TYPE OF THE VARIANT
-                //FL_WARN("*** VARIANT TYPE: " << fl::getJsonTypeStr(v));
-                // if is object then test for "value" as the key and then grab the value of it
-                // ai handle this
-                //  1. test if it's an object, if it is then test if it has the key "value", if so the grab the value of it, else
-                //     just update the component with the object
-
-                auto value_type = fl::getJsonType(v);
-
-                if (value_type == fl::JSON_OBJECT) {
-                    //FL_WARN("*** VARIANT IS AN OBJECT, UPDATING COMPONENT WITH: " << fl::getJsonTypeStr(v));
-                    auto obj = v.as<FLArduinoJson::JsonObjectConst>();
-                    if (obj.containsKey("value")) {
-                        //FL_WARN("*** OBJECT HAS VALUE KEY, UPDATING COMPONENT WITH: " << obj["value"].as<float>());
-                        component->update(obj["value"]);
-                    } else {
-                        FL_WARN("*** OBJECT HAS NO VALUE KEY, UNEXPECTED!");
-                        component->update(v);
-                    }
-                } else {
-                    FL_WARN("*** VARIANT IS NOT AN OBJECT, UPDATING COMPONENT WITH: " << fl::getJsonTypeStr(v));
-                    component->update(v);
-                }
+                //FL_WARN("*** UPDATING COMPONENT: ID " << id << " with direct value");
+                component->update(v);
 
                 // FL_WARN("*** VARIANT IS OBJECT: " << v.is<FLArduinoJson::JsonObject>());
                 break;
