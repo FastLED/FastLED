@@ -29,15 +29,11 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     FL_WARN("*** jsUpdateUiComponents JSON LENGTH: " << jsonStr.length());
     FL_WARN("*** jsUpdateUiComponents ENTRY: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     
-    // Test the lambda directly by calling setJsonUiHandlers again to see if it works
-    if (!g_updateEngineState) {
-        FL_WARN("*** WASM: g_updateEngineState is NULL, trying to reinitialize");
-        // Force reinitialize
-        g_uiSystemInitialized = false;
+    // Only initialize if not already initialized - don't force reinitialization
+    if (!g_uiSystemInitialized) {
+        FL_WARN("*** WASM: UI system not initialized, initializing for first time");
+        ensureWasmUiSystemInitialized();
     }
-    
-    // Ensure UI system is initialized when first used
-    ensureWasmUiSystemInitialized();
     
     FL_WARN("*** jsUpdateUiComponents AFTER INIT: g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     

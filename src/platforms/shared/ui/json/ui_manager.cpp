@@ -17,6 +17,15 @@ namespace fl {
 
 JsonUiManager::~JsonUiManager() {
     FL_WARN("*** JsonUiManager: DESTRUCTOR CALLED ***");
+    FL_WARN("*************************************************************");
+    FL_WARN("*** CRITICAL ERROR: JsonUiManager DESTRUCTOR IS RUNNING! ***");
+    FL_WARN("*** THIS SHOULD NOT HAPPEN DURING UI UPDATES!             ***");
+    FL_WARN("*** THE UI MANAGER IS BEING DESTROYED AND RECREATED!      ***");
+    FL_WARN("*** THIS IS THE ROOT CAUSE OF THE UI UPDATE BUG!          ***");
+    FL_WARN("*************************************************************");
+    // FL_WARN("*** STACK TRACE: JsonUiManager destructor at " << this);
+    FL_WARN("*** Component count being lost: " << mComponents.size());
+    FL_WARN("*************************************************************");
     fl::EngineEvents::removeListener(this);
 }
 
