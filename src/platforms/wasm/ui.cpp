@@ -27,21 +27,21 @@ void jsUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
     instance().updateUiComponents(jsonStr.c_str());
 }
 
-jsUiManager::jsUiManager(): JsonUiManager(fl::updateJs) {}
+jsUiManager::jsUiManager(): JsonUiManager(fl::updateJs) {
+    // Register our handlers for UI component management
+    setJsonUiAddHandler([](fl::WeakPtr<JsonUiInternal> component) {
+        jsUiManager::instance().addComponent(component);
+    });
+    
+    setJsonUiRemoveHandler([](fl::WeakPtr<JsonUiInternal> component) {
+        jsUiManager::instance().removeComponent(component);
+    });
+}
 
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
                          &jsUiManager::jsUpdateUiComponents);
-}
-
-
-EMSCRIPTEN_KEEPALIVE void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
-    jsUiManager::instance().addComponent(component);
-}
-
-EMSCRIPTEN_KEEPALIVE void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
-    jsUiManager::instance().removeComponent(component);
 }
 
 
