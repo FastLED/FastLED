@@ -2,7 +2,7 @@
 
 #include "fl/thread.h"
 #if FASTLED_USE_THREAD_LOCAL
-#include "fl/map.h"
+#include "fl/hash_map.h"
 #endif
 
 #if FASTLED_USE_THREAD_LOCAL
@@ -81,7 +81,7 @@ template <typename T> class ThreadLocalReal {
     // Each instance gets its own thread-local storage map
     // We use the instance address as the key to distinguish between different ThreadLocal instances
     ThreadStorage& getStorage() const {
-        thread_local static fl::map<const void*, ThreadStorage> storageMap;
+        thread_local static fl::unordered_map<const void*, ThreadStorage> storageMap;
         return storageMap[this];
     }
     
