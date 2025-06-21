@@ -17,10 +17,7 @@ class jsDropdownImpl {
     jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
     ~jsDropdownImpl();
-    jsDropdownImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    };
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;

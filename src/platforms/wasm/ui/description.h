@@ -10,10 +10,7 @@ class jsDescriptionImpl {
   public:
     jsDescriptionImpl(const fl::string &name);
     ~jsDescriptionImpl();
-    jsDescriptionImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+
 
     const fl::string &text() const { return mText; }
 

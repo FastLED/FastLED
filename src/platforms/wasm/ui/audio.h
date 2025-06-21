@@ -19,10 +19,7 @@ class jsAudioImpl {
   public:
     jsAudioImpl(const fl::string &name);
     ~jsAudioImpl();
-    jsAudioImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
