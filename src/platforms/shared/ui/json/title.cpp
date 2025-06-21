@@ -1,6 +1,6 @@
 #include "title.h"
 #include "ui_internal.h"
-#include "platforms/wasm/ui/ui_deps.h"
+#include "platforms/shared/ui/json/ui_deps.h"
 
 #include "fl/json.h"
 

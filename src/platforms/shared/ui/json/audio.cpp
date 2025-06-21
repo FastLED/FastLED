@@ -2,8 +2,7 @@
 #include "fl/warn.h"
 #include "platforms/shared/ui/json/audio.h"
 #include "fl/string.h"
-#include "platforms/wasm/ui/ui_deps.h"
-#include "platforms/wasm/ui/ui_deps.h"
+#include "platforms/shared/ui/json/ui_deps.h"
 #include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON

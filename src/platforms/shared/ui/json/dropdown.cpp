@@ -1,6 +1,6 @@
 #include "platforms/shared/ui/json/dropdown.h"
 #include "fl/json.h"
-#include "platforms/wasm/ui/ui_deps.h"
+#include "platforms/shared/ui/json/ui_deps.h"
 #include <string.h>
 #include "fl/slice.h"
 

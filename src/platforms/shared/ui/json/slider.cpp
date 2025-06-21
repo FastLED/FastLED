@@ -2,7 +2,7 @@
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
-#include "platforms/wasm/ui/ui_deps.h"
+#include "platforms/shared/ui/json/ui_deps.h"
 #include "fl/math_macros.h"
 
 #include "fl/json.h"
