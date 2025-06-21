@@ -16,7 +16,7 @@ namespace fl {
 namespace ui_detail {
 
 #ifdef __EMSCRIPTEN__
-// use std::string when in emscripten
+// use std::string when in emscripten, else the js engine can't bind to this class.
 #include <string>
 using string = std::string;
 #else
