@@ -10,7 +10,7 @@ using namespace fl;
 
 namespace fl {
 
-JsonDescriptionImpl::JsonDescriptionImpl(const Str &text): mText(text) {
+JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
     JsonUiInternal::UpdateFunction update_fcn;
     JsonUiInternal::ToJsonFunction to_json_fcn =
         JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
@@ -30,7 +30,7 @@ void JsonDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["text"] = text();
 }
 
-const Str &JsonDescriptionImpl::name() const { return mInternal->name(); }
+const string &JsonDescriptionImpl::name() const { return mInternal->name(); }
 
 } // namespace fl
 

@@ -14,7 +14,7 @@ using namespace fl;
 
 namespace fl {
 
-JsonUiInternal::JsonUiInternal(const Str &name, UpdateFunction updateFunc,
+JsonUiInternal::JsonUiInternal(const string &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc)
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
       mId(nextId()), mGroup(), mMutex() {}
@@ -31,7 +31,7 @@ JsonUiInternal::~JsonUiInternal() {
     }
 }
 
-const Str &JsonUiInternal::name() const { return mName; }
+const string &JsonUiInternal::name() const { return mName; }
 void JsonUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mUpdateFunc) {

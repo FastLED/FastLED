@@ -49,7 +49,7 @@ void UiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         for (auto &component : components) {
             int id = component->id();
-            Str idStr = "id_";
+            string idStr = "id_";
             idStr.append(id);
             if (obj.containsKey(idStr.c_str())) {
                 component->update(obj[idStr.c_str()]);
@@ -77,7 +77,7 @@ void UiManager::onEndShowLeds() {
         FLArduinoJson::JsonDocument doc;
         auto json = doc.to<FLArduinoJson::JsonArray>();
         toJson(json);
-        Str jsonStr;
+        string jsonStr;
         serializeJson(doc, jsonStr);
         mUpdateJs(jsonStr.c_str());
     }

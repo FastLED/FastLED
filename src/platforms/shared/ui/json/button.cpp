@@ -12,7 +12,7 @@ using namespace fl;
 
 namespace fl {
 
-JsonButtonImpl::JsonButtonImpl(const Str &name) : mPressed(false) {
+JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
         [this](const FLArduinoJson::JsonVariantConst &value) {
             static_cast<JsonButtonImpl *>(this)->updateInternal(value);
@@ -32,7 +32,7 @@ JsonButtonImpl::~JsonButtonImpl() { removeUiComponent(mInternal); }
 
 bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
-const Str &JsonButtonImpl::name() const { return mInternal->name(); }
+const string &JsonButtonImpl::name() const { return mInternal->name(); }
 
 void JsonButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
