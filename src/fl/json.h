@@ -86,6 +86,21 @@ inline JsonType getJsonType(const T& v) {
     return JSON_NULL;  // fallback
 }
 
+template<typename T>
+inline const char* getJsonTypeStr(const T& v) {
+    JsonType type = getJsonType(v);
+    switch(type) {
+        case JSON_OBJECT:  return "object";
+        case JSON_ARRAY:   return "array";
+        case JSON_STRING:  return "string";
+        case JSON_INTEGER: return "integer";
+        case JSON_FLOAT:   return "float";
+        case JSON_BOOLEAN: return "boolean";
+        case JSON_NULL:    return "null";
+        default:           return "unknown";
+    }
+}
+
 #else
 
 // Stub version when JSON is disabled
