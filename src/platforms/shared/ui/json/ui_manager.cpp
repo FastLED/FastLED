@@ -79,7 +79,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
 }
 
-void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
+void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     // First, let's test the API with a simple known JSON string
     FL_WARN("*** API TEST: Testing JsonDocument.is<JsonObject>() with known string");
     const char* testJson = "{\"test\":\"value\"}";
@@ -93,53 +93,39 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
     }
     
     // Now test with the exact JSON string from our serialization
-    FL_WARN("*** API TEST: Testing with our exact JSON string");
-    const char* ourTestJson = "{\"2\":{\"value\":0.18}}";
-    FLArduinoJson::JsonDocument ourTestDoc;
-    auto ourTestResult = deserializeJson(ourTestDoc, ourTestJson);
-    FL_WARN("*** API TEST: Our parse result=" << (ourTestResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
-    FL_WARN("*** API TEST: ourTestDoc.is<JsonObject>()=" << (ourTestDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
-    if (ourTestDoc.is<FLArduinoJson::JsonObject>()) {
-        auto obj = ourTestDoc.as<FLArduinoJson::JsonObjectConst>();
-        FL_WARN("*** API TEST: Our object has " << obj.size() << " keys");
-    }
+    // FL_WARN("*** API TEST: Testing with our exact JSON string");
+    // const char* ourTestJson = "{\"2\":{\"value\":0.18}}";
+    // FLArduinoJson::JsonDocument ourTestDoc;
+    // auto ourTestResult = deserializeJson(ourTestDoc, ourTestJson);
+    // FL_WARN("*** API TEST: Our parse result=" << (ourTestResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    // FL_WARN("*** API TEST: ourTestDoc.is<JsonObject>()=" << (ourTestDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
+    // if (ourTestDoc.is<FLArduinoJson::JsonObject>()) {
+    //     auto obj = ourTestDoc.as<FLArduinoJson::JsonObjectConst>();
+    //     FL_WARN("*** API TEST: Our object has " << obj.size() << " keys");
+    // }
     
     auto components = getComponents();
-    FL_WARN("*** EXECUTING UI UPDATES: " << components.size() << " components available");
+    //FL_WARN("*** EXECUTING UI UPDATES: " << components.size() << " components available");
     
-    // serialize the doc to a string
-    string jsonStr;
-    serializeJson(_doc, jsonStr);
-    FL_WARN("*** JSON DOCUMENT: " << jsonStr.c_str());
-    // now serialize a new doc from the string
-    FLArduinoJson::JsonDocument doc;
-    auto result = deserializeJson(doc, jsonStr.c_str());  // Use .c_str() to get const char*
-    FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
-    FL_WARN("*** JSON DOCUMENT: " << doc.as<FLArduinoJson::JsonObjectConst>().size() << " keys");
-
 
     fl::string type_str = fl::getJsonTypeStr(doc);
 
-    FL_WARN("*** JSON TYPE: " << type_str);
+    //FL_WARN("*** JSON TYPE: " << type_str);
 
     
 
-    FL_WARN("*** DOC IS json object: " << doc.is<FLArduinoJson::JsonObject>());
+    //FL_WARN("*** DOC IS json object: " << doc.is<FLArduinoJson::JsonObject>());
 
     if (doc.is<FLArduinoJson::JsonObject>()) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
-        FL_WARN("*** JSON OBJECT HAS " << obj.size() << " KEYS");
-        
-        // Log all available keys in the JSON
-        for (auto kv : obj) {
-            FL_WARN("*** JSON KEY FOUND: '" << kv.key().c_str() << "'");
-        }
+        // FL_WARN("*** JSON OBJECT HAS " << obj.size() << " KEYS");
+
         
         // Log all available component IDs
-        for (auto &component : components) {
-            int id = component->id();
-            FL_WARN("*** COMPONENT AVAILABLE: ID " << id);
-        }
+        // for (auto &component : components) {
+        //     int id = component->id();
+        //     FL_WARN("*** COMPONENT AVAILABLE: ID " << id);
+        // }
         
         for (auto &component : components) {
             int id = component->id();
@@ -147,18 +133,44 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
             //sprintf(idBuffer, "id_%d", id);
             string idStr = "";
             idStr += id;
-            FL_WARN("*** LOOKING FOR KEY: '" << idStr.c_str() << "' for component ID " << id);
-            
             if (obj.containsKey(idStr.c_str())) {
-                FL_WARN("*** FOUND MATCH! UPDATING COMPONENT: ID " << id);
+                //FL_WARN("*** FOUND MATCH! UPDATING COMPONENT: ID " << id);
                 //component->update(obj[idStr.c_str()]);
                 const FLArduinoJson::JsonVariantConst v = obj[idStr.c_str()];  
                 // LET'S LOG THE TYPE OF THE VARIANT
-                FL_WARN("*** VARIANT TYPE: " << fl::getJsonTypeStr(v));
-                component->update(v);
-                FL_WARN("*** COMPONENT UPDATE COMPLETED: ID " << id);
+                //FL_WARN("*** VARIANT TYPE: " << fl::getJsonTypeStr(v));
+                // if is object then test for "value" as the key and then grab the value of it
+                // ai handle this
+                //  1. test if it's an object, if it is then test if it has the key "value", if so the grab the value of it, else
+                //     just update the component with the object
+
+                auto type = fl::getJsonType(v);
+
+                if (type == fl::JSON_OBJECT) {
+                    //FL_WARN("*** VARIANT IS AN OBJECT, UPDATING COMPONENT WITH: " << fl::getJsonTypeStr(v));
+                    auto obj = v.as<FLArduinoJson::JsonObjectConst>();
+                    if (obj.containsKey("value")) {
+                        //FL_WARN("*** OBJECT HAS VALUE KEY, UPDATING COMPONENT WITH: " << obj["value"].as<float>());
+                        component->update(obj["value"]);
+                    } else {
+                        FL_WARN("*** OBJECT HAS NO VALUE KEY, UNEXPECTED!");
+                        component->update(v);
+                    }
+                } else {
+                    FL_WARN("*** VARIANT IS NOT AN OBJECT, UPDATING COMPONENT WITH: " << fl::getJsonTypeStr(v));
+                    component->update(v);
+                }
+
+                // FL_WARN("*** VARIANT IS OBJECT: " << v.is<FLArduinoJson::JsonObject>());
+                break;
+
+                // auto obj = v.as<FLArduinoJson::JsonObjectConst>();
+                // FL_WARN("*** OBJECT HAS " << obj.size() << " KEYS");
+                // auto value = obj["value"];
+                // component->update(value);
+                // FL_WARN("*** COMPONENT UPDATE COMPLETED: ID " << id);
             } else {
-                FL_WARN("*** NO MATCH: Component ID " << id << " (key '" << idStr.c_str() << "') not found in JSON");
+                //FL_WARN("*** NO MATCH: Component ID " << id << " (key '" << idStr.c_str() << "') not found in JSON");
             }
         }
     } else {
