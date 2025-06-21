@@ -39,6 +39,8 @@ To use the MCP server, run: `uv run mcp_server.py`
 **Examples of what to avoid and use instead:**
 
 **Headers:**
+- ❌ `#include <stdint.h>` → ✅ `#include "fl/stdint.h"`
+- ❌ `#include <cstdint>` → ✅ `#include "fl/stdint.h"`
 - ❌ `#include <type_traits>` → ✅ `#include "fl/type_traits.h"`
 - ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
 - ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
