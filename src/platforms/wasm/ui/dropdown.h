@@ -18,7 +18,7 @@ class jsDropdownImpl {
     
     ~jsDropdownImpl();
     jsDropdownImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
     };
 
@@ -29,10 +29,7 @@ class jsDropdownImpl {
     void setSelectedIndex(int index);
     size_t getOptionCount() const { return mOptions.size(); }
     fl::string getOption(size_t index) const;
-    const fl::string &groupName() const { return mGroup; }
-
-    // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
+        const fl::string &groupName() const { return mInternal->group(); }
 
     jsDropdownImpl &operator=(int index) {
         setSelectedIndex(index);
@@ -49,7 +46,6 @@ class jsDropdownImpl {
     jsUiInternalPtr mInternal;
     fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
-    fl::string mGroup;
 };
 
 } // namespace fl

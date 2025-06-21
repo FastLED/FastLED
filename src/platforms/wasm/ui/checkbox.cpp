@@ -32,7 +32,7 @@ const Str &jsCheckboxImpl::name() const { return mInternal->name(); }
 
 void jsCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
+    json["group"] = mInternal->group().c_str();
     json["type"] = "checkbox";
     json["id"] = mInternal->id();
     json["value"] = mValue;
