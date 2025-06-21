@@ -5,6 +5,7 @@
 #include "ui_manager.h"
 #include "fl/compiler_control.h"
 #include "fl/warn.h"
+#include "fl/assert.h"
 
 FL_DISABLE_WARNING(deprecated-declarations)
 
@@ -26,6 +27,7 @@ JsonUiManager::~JsonUiManager() {
     // FL_WARN("*** STACK TRACE: JsonUiManager destructor at " << this);
     FL_WARN("*** Component count being lost: " << mComponents.size());
     FL_WARN("*************************************************************");
+    // FL_ASSERT(false, "JsonUiManager destructor should not be running during UI updates");
     fl::EngineEvents::removeListener(this);
 }
 
@@ -77,10 +79,44 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
 }
 
-void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
+void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
+    // First, let's test the API with a simple known JSON string
+    FL_WARN("*** API TEST: Testing JsonDocument.is<JsonObject>() with known string");
+    const char* testJson = "{\"test\":\"value\"}";
+    FLArduinoJson::JsonDocument testDoc;
+    auto testResult = deserializeJson(testDoc, testJson);
+    FL_WARN("*** API TEST: Parse result=" << (testResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    FL_WARN("*** API TEST: testDoc.is<JsonObject>()=" << (testDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
+    if (testDoc.is<FLArduinoJson::JsonObject>()) {
+        auto obj = testDoc.as<FLArduinoJson::JsonObjectConst>();
+        FL_WARN("*** API TEST: Object has " << obj.size() << " keys");
+    }
+    
+    // Now test with the exact JSON string from our serialization
+    FL_WARN("*** API TEST: Testing with our exact JSON string");
+    const char* ourTestJson = "{\"2\":{\"value\":0.18}}";
+    FLArduinoJson::JsonDocument ourTestDoc;
+    auto ourTestResult = deserializeJson(ourTestDoc, ourTestJson);
+    FL_WARN("*** API TEST: Our parse result=" << (ourTestResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    FL_WARN("*** API TEST: ourTestDoc.is<JsonObject>()=" << (ourTestDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
+    if (ourTestDoc.is<FLArduinoJson::JsonObject>()) {
+        auto obj = ourTestDoc.as<FLArduinoJson::JsonObjectConst>();
+        FL_WARN("*** API TEST: Our object has " << obj.size() << " keys");
+    }
+    
     auto components = getComponents();
     FL_WARN("*** EXECUTING UI UPDATES: " << components.size() << " components available");
     
+    // serialize the doc to a string
+    string jsonStr;
+    serializeJson(_doc, jsonStr);
+    FL_WARN("*** JSON DOCUMENT: " << jsonStr.c_str());
+    // now serialize a new doc from the string
+    FLArduinoJson::JsonDocument doc;
+    auto result = deserializeJson(doc, jsonStr.c_str());  // Use .c_str() to get const char*
+    FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    FL_WARN("*** JSON DOCUMENT: " << doc.as<FLArduinoJson::JsonObjectConst>().size() << " keys");
+
     if (doc.is<FLArduinoJson::JsonObject>()) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         FL_WARN("*** JSON OBJECT HAS " << obj.size() << " KEYS");
