@@ -7,6 +7,7 @@
 #include "fl/mutex.h"
 #include "ui_internal.h"
 #include "fl/compiler_control.h"
+#include "fl/warn.h"
 
 using namespace fl;
 
@@ -27,9 +28,8 @@ jsUiInternal::~jsUiInternal() {
     const bool functions_exist = mUpdateFunc || mtoJsonFunc;
     if (functions_exist) {
         clearFunctions();
-        printf("Warning: %s: The owner of the jsUiInternal should clear "
-               "the functions, not this destructor.\n",
-               mName.c_str());
+        FL_WARN("Warning: " << mName << ": The owner of the jsUiInternal should clear "
+               "the functions, not this destructor.");
     }
 }
 

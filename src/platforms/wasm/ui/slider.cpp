@@ -1,8 +1,5 @@
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
-#include <sstream>
-#include <string.h>
-
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -72,10 +69,7 @@ void jsSliderImpl::setValue(float value) {
         // The value was outside the range so print out a warning that we
         // clamped.
         const Str &name = mInternal->name();
-        int id = mInternal->id();
-        printf("Warning: UISlider %s with id %d value %f was clamped to range "
-               "[%f, %f] -> %f\n",
-               name.c_str(), id, value, mMin, mMax, mValue);
+        FL_WARN("Warning: UISlider " << name << " with id " << mInternal->id() << " value " << value << " was clamped to range " << mMin << ", " << mMax << " -> " << mValue);
     }
 }
 

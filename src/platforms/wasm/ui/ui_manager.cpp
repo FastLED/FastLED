@@ -1,9 +1,5 @@
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-#include <emscripten/html5.h>
 
 
 
@@ -56,7 +52,8 @@ void jsUiManager::updateUiComponents(const char *jsonStr) {
     FLArduinoJson::DeserializationError error =
         FLArduinoJson::deserializeJson(doc, jsonStr);
     if (error) {
-        printf("Error: Failed to parse JSON string: %s\n", error.c_str());
+
+        FL_WARN("Error: Failed to parse JSON string: " << error.c_str());
         return;
     }
     auto &self = instance();
@@ -91,15 +88,10 @@ void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
             json.add<FLArduinoJson::JsonObject>();
         component->toJson(componentJson);
         if (componentJson.size() == 0) {
-            printf("Warning: Empty JSON from component\n");
+            FL_WARN("Empty JSON from component");
             json.remove(json.size() - 1);
         }
     }
-}
-
-EMSCRIPTEN_BINDINGS(js_interface) {
-    emscripten::function("_jsUiManager_updateUiComponents",
-                         &jsUiManager::jsUpdateUiComponents);
 }
 
 } // namespace fl
