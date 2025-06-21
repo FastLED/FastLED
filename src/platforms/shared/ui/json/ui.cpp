@@ -16,12 +16,9 @@ static JsonUiRemoveHandler& getRemoveHandler() {
     return handler;
 }
 
-void setJsonUiAddHandler(const JsonUiAddHandler& handler) {
-    getAddHandler() = handler;
-}
-
-void setJsonUiRemoveHandler(const JsonUiRemoveHandler& handler) {
-    getRemoveHandler() = handler;
+void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler) {
+    getAddHandler() = addHandler;
+    getRemoveHandler() = removeHandler;
 }
 
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {

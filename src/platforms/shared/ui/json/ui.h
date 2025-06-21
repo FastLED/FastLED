@@ -14,18 +14,12 @@ using JsonUiAddHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
 using JsonUiRemoveHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
 
 /**
- * Set the global handler for adding UI components.
+ * Set the global handlers for adding and removing UI components.
  * 
- * @param handler Function to call when a UI component needs to be added
+ * @param addHandler Function to call when a UI component needs to be added
+ * @param removeHandler Function to call when a UI component needs to be removed
  */
-void setJsonUiAddHandler(const JsonUiAddHandler& handler);
-
-/**
- * Set the global handler for removing UI components.
- * 
- * @param handler Function to call when a UI component needs to be removed
- */
-void setJsonUiRemoveHandler(const JsonUiRemoveHandler& handler);
+void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler);
 
 /**
  * Add a UI component to the global component registry.

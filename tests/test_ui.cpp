@@ -21,15 +21,16 @@ TEST_CASE("function handlers") {
     int removeCallCount = 0;
     
     // Set up handlers that track calls
-    fl::setJsonUiAddHandler([&](fl::WeakPtr<fl::JsonUiInternal> component) {
-        lastAddedComponent = component;
-        addCallCount++;
-    });
-    
-    fl::setJsonUiRemoveHandler([&](fl::WeakPtr<fl::JsonUiInternal> component) {
-        lastRemovedComponent = component;
-        removeCallCount++;
-    });
+    fl::setJsonUiHandlers(
+        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
+            lastAddedComponent = component;
+            addCallCount++;
+        },
+        [&](fl::WeakPtr<fl::JsonUiInternal> component) {
+            lastRemovedComponent = component;
+            removeCallCount++;
+        }
+    );
     
     // Create a mock component for testing
     auto updateFunc = [](const FLArduinoJson::JsonVariantConst&) { /* do nothing */ };
@@ -48,8 +49,7 @@ TEST_CASE("function handlers") {
     CHECK(lastRemovedComponent == weakComponent);
     
     // Test with null handlers (should not crash)
-    fl::setJsonUiAddHandler(fl::JsonUiAddHandler{});
-    fl::setJsonUiRemoveHandler(fl::JsonUiRemoveHandler{});
+    fl::setJsonUiHandlers(fl::JsonUiAddHandler{}, fl::JsonUiRemoveHandler{});
     
     // These should not crash and should produce warnings
     fl::addJsonUiComponent(weakComponent);
