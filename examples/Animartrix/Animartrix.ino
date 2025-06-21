@@ -31,6 +31,8 @@ This is the famouse Animartrix demo by Stefan Petrick. The effects are generated
 using polor polar coordinates. The effects are very complex and powerful.
 */
 
+#include "FastLED.h"
+
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
 void setup() {}
@@ -85,6 +87,9 @@ FxEngine fxEngine(NUM_LEDS);
 
 
 void setup() {
+    Serial.begin(115200);
+    FL_WARN("*** SETUP ***");
+
     auto screen_map = xyMap.toScreenMap();
     screen_map.setDiameter(LED_DIAMETER);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
@@ -107,6 +112,7 @@ void setup() {
 }
 
 void loop() {
+    FL_WARN("*** LOOP ***");
     FastLED.setBrightness(brightness);
     fxEngine.setSpeed(timeSpeed);
     static int lastFxIndex = -1;
