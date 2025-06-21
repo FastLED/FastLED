@@ -10,38 +10,29 @@ namespace fl {
 
 class JsonSliderImpl {
   public:
-    JsonSliderImpl(const fl::string &name, float value = 128.0f, float min = 0.0f,
-                 float max = 255.0f, float step = -1.f);
+    JsonSliderImpl(const fl::string &name, float value, float min,
+                 float max, float step);
     ~JsonSliderImpl();
-    JsonSliderImpl &Group(const fl::string &name) {
-        mInternal->setGroup(name);
-        return *this;
-    }
+    JsonSliderImpl &Group(const fl::string &name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
     float value() const;
     float value_normalized() const;
-    float getMax() const { return mMax; }
-    float getMin() const { return mMin; }
+    float getMax() const;
+    float getMin() const;
     void setValue(float value);
-    const fl::string &groupName() const { return mInternal->groupName(); }
+    const fl::string &groupName() const;
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+    void setGroup(const fl::string &groupName);
 
-    template <typename T> T as() const { return static_cast<T>(mValue); }
+    template <typename T> T as() const;
 
-    int as_int() const { return static_cast<int>(mValue); }
+    int as_int() const;
 
-    JsonSliderImpl &operator=(float value) {
-        setValue(value);
-        return *this;
-    }
-    JsonSliderImpl &operator=(int value) {
-        setValue(static_cast<float>(value));
-        return *this;
-    }
+    JsonSliderImpl &operator=(float value);
+    JsonSliderImpl &operator=(int value);
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);

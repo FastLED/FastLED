@@ -3,7 +3,6 @@
 #include "fl/mutex.h"
 #include "fl/namespace.h"
 #include "ui_manager.h"
-#include "fl/json.h"
 #include "fl/compiler_control.h"
 
 
@@ -56,6 +55,15 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
             }
         }
     }
+}
+
+void JsonUiManager::onPlatformPreLoop() {
+    if (!mHasPendingUpdate) {
+        return;
+    }
+    executeUiUpdates(mPendingJsonUpdate);
+    mPendingJsonUpdate.clear();
+    mHasPendingUpdate = false;
 }
 
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {

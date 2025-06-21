@@ -4,8 +4,6 @@
 #include <string.h>
 #include "fl/slice.h"
 
-#include "fl/json.h"
-
 #if FASTLED_ENABLE_JSON
 
 using namespace fl;
@@ -56,6 +54,11 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<
 
 JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(mInternal); }
 
+JsonDropdownImpl &JsonDropdownImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
 void JsonDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
@@ -88,11 +91,22 @@ void JsonDropdownImpl::setSelectedIndex(int index) {
     }
 }
 
+size_t JsonDropdownImpl::getOptionCount() const { return mOptions.size(); }
+
 fl::string JsonDropdownImpl::getOption(size_t index) const {
     if (index < mOptions.size()) {
         return mOptions[index];
     }
     return fl::string();
+}
+
+const fl::string &JsonDropdownImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonDropdownImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+
+JsonDropdownImpl &JsonDropdownImpl::operator=(int index) {
+    setSelectedIndex(index);
+    return *this;
 }
 
 void JsonDropdownImpl::updateInternal(

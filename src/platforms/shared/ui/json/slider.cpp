@@ -4,9 +4,6 @@
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
 #include "platforms/shared/ui/json/ui.h"
-#include "fl/math_macros.h"
-
-#include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -36,6 +33,11 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
 
 JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(mInternal); }
 
+JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
 void JsonSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
@@ -60,6 +62,10 @@ float JsonSliderImpl::value_normalized() const {
     return (mValue - mMin) / (mMax - mMin);
 }
 
+float JsonSliderImpl::getMax() const { return mMax; }
+
+float JsonSliderImpl::getMin() const { return mMin; }
+
 void JsonSliderImpl::setValue(float value) {
     if (value < mMin) {
         value = mMin;
@@ -67,6 +73,24 @@ void JsonSliderImpl::setValue(float value) {
         value = mMax;
     }
     mValue = value;
+}
+
+const fl::string &JsonSliderImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonSliderImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+
+template <typename T> T JsonSliderImpl::as() const { return static_cast<T>(mValue); }
+
+int JsonSliderImpl::as_int() const { return static_cast<int>(mValue); }
+
+JsonSliderImpl &JsonSliderImpl::operator=(float value) {
+    setValue(value);
+    return *this;
+}
+
+JsonSliderImpl &JsonSliderImpl::operator=(int value) {
+    setValue(static_cast<float>(value));
+    return *this;
 }
 
 void JsonSliderImpl::updateInternal(

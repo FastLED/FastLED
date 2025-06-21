@@ -5,8 +5,6 @@
 #include "ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 
-#include "fl/json.h"
-
 #if FASTLED_ENABLE_JSON
 
 using namespace fl;
@@ -32,6 +30,11 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
 
 JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(mInternal); }
 
+JsonNumberFieldImpl &JsonNumberFieldImpl::Group(const fl::string &name) {
+    mInternal->setGroup(name);
+    return *this;
+}
+
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
 void JsonNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
@@ -54,6 +57,28 @@ void JsonNumberFieldImpl::setValue(double value) {
     }
     mValue = value;
 }
+
+const fl::string &JsonNumberFieldImpl::groupName() const { return mInternal->groupName(); }
+
+void JsonNumberFieldImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+
+JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(double value) {
+    setValue(value);
+    return *this;
+}
+
+JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(int value) {
+    setValue(static_cast<double>(value));
+    return *this;
+}
+
+bool JsonNumberFieldImpl::operator==(double v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
+
+bool JsonNumberFieldImpl::operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
+
+bool JsonNumberFieldImpl::operator!=(double v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
+
+bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<double>(v)); }
 
 void JsonNumberFieldImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
