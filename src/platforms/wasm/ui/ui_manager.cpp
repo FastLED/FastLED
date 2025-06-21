@@ -22,13 +22,13 @@
 namespace fl {
 
 void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
-    std::lock_guard<std::mutex> lock(instance().mMutex);
+    fl::lock_guard<fl::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
 void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
-    std::lock_guard<std::mutex> lock(instance().mMutex);
+    fl::lock_guard<fl::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
 
@@ -39,7 +39,7 @@ jsUiManager &jsUiManager::instance() {
 std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
     std::vector<jsUiInternalPtr> components;
     {
-        std::lock_guard<std::mutex> lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
 
         components.reserve(mComponents.size());
         for (auto it = mComponents.begin(); it != mComponents.end();) {

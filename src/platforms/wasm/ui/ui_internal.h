@@ -52,7 +52,7 @@ class jsUiInternal : public fl::Referent {
     fl::string mGroup;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
-    mutable std::mutex mMutex;
+    mutable fl::mutex mMutex;
 };
 
 } // namespace fl

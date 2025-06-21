@@ -66,7 +66,7 @@ class jsUiManager : fl::EngineEvents::Listener {
     void toJson(FLArduinoJson::JsonArray &json);
 
     jsUIRefSet mComponents;
-    std::mutex mMutex;
+    fl::mutex mMutex;
 
     static jsUiManager &instance();
     bool mItemsAdded = false;
