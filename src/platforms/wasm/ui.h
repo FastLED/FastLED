@@ -12,4 +12,10 @@ namespace fl {
  */
 void jsUpdateUiComponents(const std::string &jsonStr);
 
+/**
+ * Ensure the WASM UI system is initialized. This function is called
+ * automatically when needed but can also be called explicitly.
+ */
+void ensureWasmUiSystemInitialized();
+
 } // namespace fl
