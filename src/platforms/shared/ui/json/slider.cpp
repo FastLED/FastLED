@@ -99,31 +99,9 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
     return *this;
 }
 
-static bool tryParseFloat(const char* buff, float* newValue) {
-    FL_WARN("*** SLIDER UPDATE: TRYING TO PARSE FLOAT FROM: " << buff);
-    if (strstr(buff, "value") == nullptr) {
-        FL_WARN("*** SLIDER UPDATE ERROR: FAILED TO PARSE FLOAT FROM: " << buff);
-        return false;
-    }
-    const char* colonPos = strchr(buff, ':');
-    if (colonPos == nullptr) {
-        FL_WARN("*** SLIDER UPDATE ERROR: FAILED TO PARSE FLOAT FROM: " << buff);
-        return false;
-    }
-    // Move past the colon and any whitespace
-    colonPos++;
-    while (*colonPos == ' ' || *colonPos == '\t') {
-        colonPos++;
-    }
-    // Convert the string to a float
-    *newValue = strtof(colonPos, nullptr);
-    return true;
-}
 
 void JsonSliderImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    //FL_WARN("*** SLIDER UPDATE: " << name() << " "
-    //                              << fl::getJsonTypeStr(value));
     if (value.is<float>()) {
         float newValue = value.as<float>();
         setValue(newValue);
@@ -131,16 +109,9 @@ void JsonSliderImpl::updateInternal(
         int newValue = value.as<int>();
         setValue(static_cast<float>(newValue));
     } else {
-        // Fallback, just resort to parsing the string itself.
-        char buff[128] = {};
-        FLArduinoJson::serializeJson(value, buff, sizeof(buff));
-        // FL_WARN("*** SLIDER UPDATE ERROR: "
-        //         << name() << " " << fl::getJsonTypeStr(value)
-        //         << " is not a float or int. Serialized JSON: " << buff);
-        bool ok = tryParseFloat(buff, &mValue);
-        if (!ok) {
-            FL_WARN("*** SLIDER UPDATE ERROR: FAILED TO PARSE FLOAT FROM: " << buff);
-        }
+        FL_ASSERT(false, "*** SLIDER UPDATE ERROR: "
+                    << name() << " " << fl::getJsonTypeStr(value)
+                    << " is not a float or int.");
     }
 }
 
