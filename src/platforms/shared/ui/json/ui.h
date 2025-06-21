@@ -4,8 +4,6 @@ namespace fl {
 
 template<typename T>
 class WeakPtr;
-class JsonUiInternal;
-
 // Forward declare the JsonUiInternal class.
 class JsonUiInternal;
 
