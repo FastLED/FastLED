@@ -545,6 +545,6 @@ export class JsonUiManager {
       this.uiElements[data.id] = control.querySelector('input');
     }
     this.previousUiState[data.id] = data.value;
-    console.log(`*** REGISTERED UI ELEMENT: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length} ***`);
+    //console.log(`*** REGISTERED UI ELEMENT: ID '${data.id}' (${data.type}) - Total: ${Object.keys(this.uiElements).length} ***`);
   }
 }

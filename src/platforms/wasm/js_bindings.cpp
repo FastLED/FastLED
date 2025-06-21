@@ -197,8 +197,8 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
 
     }, jsonStr);
     
-    printf("updateJs: EXIT\n");
-    FASTLED_DBG("updateJs: EXIT");
+    //printf("updateJs: EXIT\n");
+    //FASTLED_DBG("updateJs: EXIT");
 }
 
 

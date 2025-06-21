@@ -37,21 +37,12 @@ extern "C" void checkUpdateEngineState() {
 }
 
 void jsUpdateUiComponents(const std::string &jsonStr) {
-    FL_WARN("*** jsUpdateUiComponents ENTRY ***");
-    FL_WARN("*** jsUpdateUiComponents RECEIVED JSON: " << jsonStr.c_str());
-    FL_WARN("*** jsUpdateUiComponents JSON LENGTH: " << jsonStr.length());
-    FL_WARN("*** jsUpdateUiComponents ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    // FL_WARN("*** jsUpdateUiComponents ENTRY ***");
+    // FL_WARN("*** jsUpdateUiComponents RECEIVED JSON: " << jsonStr.c_str());
+    // FL_WARN("*** jsUpdateUiComponents JSON LENGTH: " << jsonStr.length());
+    // FL_WARN("*** jsUpdateUiComponents ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
     
-    // Add detailed debugging for the function object
-    if (getUpdateEngineState()) {
-        FL_WARN("*** g_updateEngineState is VALID - checking internal state");
-        // Try to check if the function's internal callable is valid
-        // This will help us understand if the function wrapper is valid but the internal callable is corrupted
-    } else {
-        FL_WARN("*** g_updateEngineState is NULL - function object has been corrupted!");
-        FL_WARN("*** This should not happen after successful initialization!");
-        FL_WARN("*** Checking if we need to reinitialize...");
-    }
+
     
     // Only initialize if not already initialized - don't force reinitialization
     if (!getUiSystemInitialized()) {
@@ -59,20 +50,21 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
         ensureWasmUiSystemInitialized();
     }
     
-    FL_WARN("*** jsUpdateUiComponents AFTER INIT: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    //FL_WARN("*** jsUpdateUiComponents AFTER INIT: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
     
     if (getUpdateEngineState()) {
-        FL_WARN("*** WASM CALLING BACKEND WITH JSON: " << jsonStr.c_str());
+        //FL_WARN("*** WASM CALLING BACKEND WITH JSON: " << jsonStr.c_str());
         try {
             getUpdateEngineState()(jsonStr.c_str());
-            FL_WARN("*** WASM BACKEND CALL COMPLETED SUCCESSFULLY");
+            //FL_WARN("*** WASM BACKEND CALL COMPLETED SUCCESSFULLY");
         } catch (...) {
             FL_WARN("*** WASM BACKEND CALL THREW EXCEPTION!");
         }
     } else {
-        FL_WARN("*** WASM ERROR: No engine state updater available");
-        FL_WARN("*** WASM ERROR: Cannot process JSON: " << jsonStr.c_str());
-        FL_WARN("*** ATTEMPTING EMERGENCY REINITIALIZATION...");
+        FL_WARN("*** WASM ERROR: No engine state updater available, attempting emergency reinitialization...");
+        //FL_WARN("*** WASM ERROR: No engine state updater available");
+        //FL_WARN("*** WASM ERROR: Cannot process JSON: " << jsonStr.c_str());
+        //FL_WARN("*** ATTEMPTING EMERGENCY REINITIALIZATION...");
         
         // Try to reinitialize as a recovery mechanism
         getUiSystemInitialized() = false;  // Force reinitialization
@@ -82,12 +74,8 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
         
         if (getUpdateEngineState()) {
             FL_WARN("*** EMERGENCY REINIT SUCCESSFUL - retrying JSON processing");
-            try {
-                getUpdateEngineState()(jsonStr.c_str());
-                FL_WARN("*** EMERGENCY RETRY COMPLETED SUCCESSFULLY");
-            } catch (...) {
-                FL_WARN("*** EMERGENCY RETRY THREW EXCEPTION!");
-            }
+            getUpdateEngineState()(jsonStr.c_str());
+            FL_WARN("*** EMERGENCY RETRY COMPLETED SUCCESSFULLY");
         } else {
             FL_WARN("*** EMERGENCY REINIT FAILED - g_updateEngineState still NULL");
         }
@@ -96,8 +84,8 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
 
 // Ensure the UI system is initialized - called when needed
 void ensureWasmUiSystemInitialized() {
-    FL_WARN("*** CODE UPDATE VERIFICATION: This message confirms the C++ code has been rebuilt! ***");
-    FL_WARN("*** ensureWasmUiSystemInitialized ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    // FL_WARN("*** CODE UPDATE VERIFICATION: This message confirms the C++ code has been rebuilt! ***");
+    // FL_WARN("*** ensureWasmUiSystemInitialized ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
     
     // Return early if already initialized - CRITICAL FIX
     if (getUiSystemInitialized()) {
@@ -118,21 +106,21 @@ void ensureWasmUiSystemInitialized() {
         // Test the lambda
         //updateJsHandler("[]");  // Valid empty JSON array
         
-        FL_WARN("*** ABOUT TO CALL setJsonUiHandlers");
-        FL_WARN("*** BEFORE setJsonUiHandlers: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+        // FL_WARN("*** ABOUT TO CALL setJsonUiHandlers");
+        // FL_WARN("*** BEFORE setJsonUiHandlers: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
         
         auto tempResult = setJsonUiHandlers(updateJsHandler);
-        FL_WARN("*** setJsonUiHandlers RETURNED: " << (tempResult ? "VALID" : "NULL"));
+        // FL_WARN("*** setJsonUiHandlers RETURNED: " << (tempResult ? "VALID" : "NULL"));
         
-        FL_WARN("*** ABOUT TO ASSIGN TO g_updateEngineState");
+        // FL_WARN("*** ABOUT TO ASSIGN TO g_updateEngineState");
         getUpdateEngineState() = tempResult;
-        FL_WARN("*** ASSIGNMENT COMPLETED");
+        // FL_WARN("*** ASSIGNMENT COMPLETED");
         
-        logUpdateEngineStateChange("AFTER setJsonUiHandlers");
+        // logUpdateEngineStateChange("AFTER setJsonUiHandlers");
         getUiSystemInitialized() = true;
         
-        FL_WARN("*** WASM UI SYSTEM INITIALIZED ***");
-        FL_WARN("*** FINAL CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+        // FL_WARN("*** WASM UI SYSTEM INITIALIZED ***");
+        // FL_WARN("*** FINAL CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
     }
 }
 

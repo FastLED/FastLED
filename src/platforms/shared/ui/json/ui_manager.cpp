@@ -17,16 +17,16 @@ namespace fl {
 // Constructor is inline in header, just add logging to destructor
 
 JsonUiManager::~JsonUiManager() {
-    FL_WARN("*** JsonUiManager: DESTRUCTOR CALLED ***");
-    FL_WARN("*************************************************************");
-    FL_WARN("*** CRITICAL ERROR: JsonUiManager DESTRUCTOR IS RUNNING! ***");
-    FL_WARN("*** THIS SHOULD NOT HAPPEN DURING UI UPDATES!             ***");
-    FL_WARN("*** THE UI MANAGER IS BEING DESTROYED AND RECREATED!      ***");
-    FL_WARN("*** THIS IS THE ROOT CAUSE OF THE UI UPDATE BUG!          ***");
-    FL_WARN("*************************************************************");
-    // FL_WARN("*** STACK TRACE: JsonUiManager destructor at " << this);
-    FL_WARN("*** Component count being lost: " << mComponents.size());
-    FL_WARN("*************************************************************");
+    // FL_WARN("*** JsonUiManager: DESTRUCTOR CALLED ***");
+    // FL_WARN("*************************************************************");
+    // FL_WARN("*** CRITICAL ERROR: JsonUiManager DESTRUCTOR IS RUNNING! ***");
+    // FL_WARN("*** THIS SHOULD NOT HAPPEN DURING UI UPDATES!             ***");
+    // FL_WARN("*** THE UI MANAGER IS BEING DESTROYED AND RECREATED!      ***");
+    // FL_WARN("*** THIS IS THE ROOT CAUSE OF THE UI UPDATE BUG!          ***");
+    // FL_WARN("*************************************************************");
+    // // FL_WARN("*** STACK TRACE: JsonUiManager destructor at " << this);
+    // FL_WARN("*** Component count being lost: " << mComponents.size());
+    // FL_WARN("*************************************************************");
     // FL_ASSERT(false, "JsonUiManager destructor should not be running during UI updates");
     fl::EngineEvents::removeListener(this);
 }
@@ -35,7 +35,7 @@ void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
     fl::lock_guard lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
-    FL_WARN("*** COMPONENT REGISTERED: ID " << (component.lock() ? component.lock()->id() : -1) << " (Total: " << mComponents.size() << ")");
+    // FL_WARN("*** COMPONENT REGISTERED: ID " << (component.lock() ? component.lock()->id() : -1) << " (Total: " << mComponents.size() << ")");
 }
 
 void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
@@ -55,42 +55,44 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
 }
 
 void JsonUiManager::updateUiComponents(const char* jsonStr) {
-    FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
-    FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
-    FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
-    FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());
+    // FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
+    // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
+    // FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
+    // FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());
     
     if (!jsonStr) {
         FL_WARN("*** JsonUiManager::updateUiComponents: NULL JSON string provided");
         return;
     }
 
-    FL_WARN("*** BACKEND RECEIVED UI UPDATE: " << (jsonStr ? jsonStr : "NULL"));
-    FL_WARN("*** JsonUiManager pointer: " << this);
-    FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
+    // FL_WARN("*** BACKEND RECEIVED UI UPDATE: " << (jsonStr ? jsonStr : "NULL"));
+    // FL_WARN("*** JsonUiManager pointer: " << this);
+    // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     
     FLArduinoJson::JsonDocument doc;
     auto result = deserializeJson(doc, jsonStr);
-    FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    // FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
     
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
-    FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
-    FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
+    // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
+    // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
 }
 
 void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     // First, let's test the API with a simple known JSON string
-    FL_WARN("*** API TEST: Testing JsonDocument.is<JsonObject>() with known string");
-    const char* testJson = "{\"test\":\"value\"}";
-    FLArduinoJson::JsonDocument testDoc;
-    auto testResult = deserializeJson(testDoc, testJson);
-    FL_WARN("*** API TEST: Parse result=" << (testResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
-    FL_WARN("*** API TEST: testDoc.is<JsonObject>()=" << (testDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
-    if (testDoc.is<FLArduinoJson::JsonObject>()) {
-        auto obj = testDoc.as<FLArduinoJson::JsonObjectConst>();
-        FL_WARN("*** API TEST: Object has " << obj.size() << " keys");
-    }
+    // FL_WARN("*** API TEST: Testing JsonDocument.is<JsonObject>() with known string");
+    // const char* testJson = "{\"test\":\"value\"}";
+    // FLArduinoJson::JsonDocument testDoc;
+    // auto testResult = deserializeJson(testDoc, testJson);
+    // FL_WARN("*** API TEST: Parse result=" << (testResult == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
+    // FL_WARN("*** API TEST: testDoc.is<JsonObject>()=" << (testDoc.is<FLArduinoJson::JsonObject>() ? "true" : "false"));
+    auto type = getJsonType(doc);
+    //if (testDoc.is<FLArduinoJson::JsonObject>()) {
+    // if (type == fl::JSON_OBJECT) {
+    //     auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
+    //     //FL_WARN("*** API TEST: Object has " << obj.size() << " keys");
+    // }
     
     // Now test with the exact JSON string from our serialization
     // FL_WARN("*** API TEST: Testing with our exact JSON string");
@@ -108,11 +110,11 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     //FL_WARN("*** EXECUTING UI UPDATES: " << components.size() << " components available");
     
 
-    fl::string type_str = fl::getJsonTypeStr(doc);
+    // fl::string type_str = fl::getJsonTypeStr(doc);
 
-    int type = fl::getJsonType(doc);
+    // int type = fl::getJsonType(doc);
 
-    FL_WARN("*** JSON TYPE: " << type_str);
+    // FL_WARN("*** JSON TYPE: " << type_str);
 
     
 

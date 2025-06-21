@@ -22,20 +22,20 @@ static fl::scoped_ptr<JsonUiManager>& getInternalManager() {
 }
 
 JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
-    FL_WARN("setJsonUiHandlers: ENTRY - updateJsHandler is " << (updateJsHandler ? "VALID" : "NULL/EMPTY"));
+    // FL_WARN("setJsonUiHandlers: ENTRY - updateJsHandler is " << (updateJsHandler ? "VALID" : "NULL/EMPTY"));
     
     // Create internal JsonUiManager only if updateJsHandler is valid (not empty)
     if (updateJsHandler) {
-        FL_WARN("setJsonUiHandlers: updateJsHandler is valid, creating JsonUiManager");
+        // FL_WARN("setJsonUiHandlers: updateJsHandler is valid, creating JsonUiManager");
         auto& manager = getInternalManager();
-        FL_WARN("setJsonUiHandlers: Old manager pointer=" << manager.get());
+        // FL_WARN("setJsonUiHandlers: Old manager pointer=" << manager.get());
         
         // Only create a new manager if one doesn't exist
         // This prevents destroying existing components when called multiple times
         if (!manager) {
             manager.reset(new JsonUiManager(updateJsHandler));
-            FL_WARN("setJsonUiHandlers: New manager pointer=" << manager.get());
-            FL_WARN("Created internal JsonUiManager with updateJs callback");
+            // FL_WARN("setJsonUiHandlers: New manager pointer=" << manager.get());
+            // FL_WARN("Created internal JsonUiManager with updateJs callback");
             
             // Flush any pending components to the internal manager
             auto& pending = getPendingComponents();
@@ -49,30 +49,30 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
                 }
                 pending.clear();
             } else {
-                FL_WARN("setJsonUiHandlers: No pending components to flush");
+                // FL_WARN("setJsonUiHandlers: No pending components to flush");
             }
         } else {
             FL_WARN("setJsonUiHandlers: Manager already exists, reusing existing manager");
         }
         
         // Return a function that allows updating the engine state
-        FL_WARN("setJsonUiHandlers: Creating and returning updateEngineState lambda");
+        // FL_WARN("setJsonUiHandlers: Creating and returning updateEngineState lambda");
         auto result = fl::function<void(const char*)>([](const char* jsonStr) {
-            FL_WARN("*** updateEngineState lambda CALLED ***");
-            FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "NULL"));
-            FL_WARN("*** updateEngineState lambda JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
+            // FL_WARN("*** updateEngineState lambda CALLED ***");
+            // FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "NULL"));
+            // FL_WARN("*** updateEngineState lambda JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
             auto& manager = getInternalManager();
             FL_WARN("*** updateEngineState lambda: manager pointer=" << manager.get());
             if (manager) {
-                FL_WARN("*** updateEngineState lambda: manager exists, calling updateUiComponents");
-                FL_WARN("*** updateEngineState lambda: PASSING JSON TO MANAGER: " << (jsonStr ? jsonStr : "NULL"));
+                // FL_WARN("*** updateEngineState lambda: manager exists, calling updateUiComponents");
+                // FL_WARN("*** updateEngineState lambda: PASSING JSON TO MANAGER: " << (jsonStr ? jsonStr : "NULL"));
                 manager->updateUiComponents(jsonStr);
-                FL_WARN("*** updateEngineState lambda: updateUiComponents completed");
+                // FL_WARN("*** updateEngineState lambda: updateUiComponents completed");
             } else {
                 FL_WARN("*** updateEngineState lambda: NO MANAGER EXISTS!");
             }
         });
-        FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "NULL") << ")");
+        // FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "NULL") << ")");
         return result;
     } else {
         FL_WARN("setJsonUiHandlers: updateJsHandler is NULL/EMPTY");
@@ -88,16 +88,16 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
 }
 
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    FL_WARN("addJsonUiComponent: ENTRY - component=" << component);
+    // FL_WARN("addJsonUiComponent: ENTRY - component=" << component);
     
     // Check if we have an internal manager first
     auto& manager = getInternalManager();
-    FL_WARN("addJsonUiComponent: manager exists=" << (manager ? "true" : "false"));
+    // FL_WARN("addJsonUiComponent: manager exists=" << (manager ? "true" : "false"));
     
     if (manager) {
-        FL_WARN("addJsonUiComponent: Adding component to existing manager");
+        // FL_WARN("addJsonUiComponent: Adding component to existing manager");
         manager->addComponent(component);
-        FL_WARN("addJsonUiComponent: Component added to manager, RETURNING");
+        // FL_WARN("addJsonUiComponent: Component added to manager, RETURNING");
         return;
     }
     
@@ -108,12 +108,12 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     extern void ensureWasmUiSystemInitialized();
     ensureWasmUiSystemInitialized();
     
-    FL_WARN("addJsonUiComponent: After WASM initialization, checking manager again");
+    // FL_WARN("addJsonUiComponent: After WASM initialization, checking manager again");
     // Check again after initialization
     if (manager) {
-        FL_WARN("addJsonUiComponent: Manager now exists after initialization, adding component");
+        // FL_WARN("addJsonUiComponent: Manager now exists after initialization, adding component");
         manager->addComponent(component);
-        FL_WARN("addJsonUiComponent: Component added after initialization, RETURNING");
+        // FL_WARN("addJsonUiComponent: Component added after initialization, RETURNING");
         return;
     } else {
         FL_WARN("addJsonUiComponent: Manager STILL doesn't exist after initialization!");
@@ -121,10 +121,10 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
 #endif
     
     // Still no manager exists, store in pending list
-    FL_WARN("addJsonUiComponent: No manager exists, storing in pending list");
+    // FL_WARN("addJsonUiComponent: No manager exists, storing in pending list");
     auto& pending = getPendingComponents();
     pending.push_back(component);
-    FL_WARN("addJsonUiComponent: no manager exists, component stored in pending list: " << component);
+    // FL_WARN("addJsonUiComponent: no manager exists, component stored in pending list: " << component);
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
@@ -143,9 +143,9 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     
     if (it != pending.end()) {
         pending.erase(it);
-        FL_WARN("Removed component from pending list: " << component);
+        // FL_WARN("Removed component from pending list: " << component);
     } else {
-        FL_WARN("removeJsonUiComponent: no manager exists and component not in pending list: " << component);
+        // FL_WARN("removeJsonUiComponent: no manager exists and component not in pending list: " << component);
     }
 }
 
