@@ -5,6 +5,7 @@
 #include "fl/ptr.h"
 #include "fl/vector.h"
 #include "fl/scoped_ptr.h"
+#include "fl/function.h"
 
 namespace fl {
 
@@ -36,7 +37,7 @@ static fl::scoped_ptr<JsonUiManager>& getInternalManager() {
     return manager;
 }
 
-void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler) {
+fl::function<void(const char*)> setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler) {
     getAddHandler() = addHandler;
     getRemoveHandler() = removeHandler;
     getUpdateJsHandler() = updateJsHandler;
@@ -59,6 +60,16 @@ void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHan
             }
             pending.clear();
         }
+        
+        // Return a function that allows updating the engine state
+        return [](const char* jsonStr) {
+            auto& manager = getInternalManager();
+            if (manager) {
+                manager->updateUiComponents(jsonStr);
+            } else {
+                FL_WARN("updateEngineState called but no internal JsonUiManager exists");
+            }
+        };
     } else {
         // No updateJs handler, clear any existing internal manager and use external handlers if available
         auto& manager = getInternalManager();
@@ -75,6 +86,9 @@ void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHan
             }
             pending.clear();
         }
+        
+        // Return an empty function since external handlers manage state
+        return fl::function<void(const char*)>{};
     }
 }
 

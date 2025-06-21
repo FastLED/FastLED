@@ -21,8 +21,9 @@ using JsonUiUpdateJsHandler = fl::function<void(const char*)>;
  * @param addHandler Function to call when a UI component needs to be added
  * @param removeHandler Function to call when a UI component needs to be removed
  * @param updateJsHandler Function to call when UI needs to send updates to JavaScript
+ * @return Function to call when you want to update the engine state with JSON data
  */
-void setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler);
+fl::function<void(const char*)> setJsonUiHandlers(const JsonUiAddHandler& addHandler, const JsonUiRemoveHandler& removeHandler, const JsonUiUpdateJsHandler& updateJsHandler);
 
 /**
  * Add a UI component to the global component registry.
