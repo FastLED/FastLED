@@ -14,8 +14,12 @@ namespace fl {
 
 // Static storage for the engine state update function
 static JsonUiUpdateInput g_updateEngineState;
+static bool g_uiSystemInitialized = false;
 
 void jsUpdateUiComponents(const std::string &jsonStr) {
+    // Ensure UI system is initialized when first used
+    ensureWasmUiSystemInitialized();
+    
     if (g_updateEngineState) {
         g_updateEngineState(jsonStr.c_str());
     } else {
@@ -23,17 +27,17 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     }
 }
 
-// Startup function to ensure the wasm UI system is initialized at program startup
-// Use GCC constructor attribute to prevent linker elimination
-__attribute__((constructor))
-__attribute__((used))
-static void initializeWasmUiSystem() {
-    FL_WARN("initializeWasmUiSystem: setting up generic UI handlers");
-    
-    // Set up the generic UI system with updateJs as the output handler
-    g_updateEngineState = setJsonUiHandlers(fl::updateJs);
-    
-    FL_WARN("initializeWasmUiSystem: wasm UI system initialized");
+// Ensure the UI system is initialized - called when needed
+void ensureWasmUiSystemInitialized() {
+    if (!g_uiSystemInitialized) {
+        FL_WARN("ensureWasmUiSystemInitialized: setting up generic UI handlers");
+        
+        // Set up the generic UI system with updateJs as the output handler
+        g_updateEngineState = setJsonUiHandlers(fl::updateJs);
+        g_uiSystemInitialized = true;
+        
+        FL_WARN("ensureWasmUiSystemInitialized: wasm UI system initialized");
+    }
 }
 
 EMSCRIPTEN_BINDINGS(js_interface) {

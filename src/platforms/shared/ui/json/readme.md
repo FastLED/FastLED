@@ -17,7 +17,7 @@ The JsonUI system consists of several key components:
 
 ## ITL Dependencies
 
-The JsonUI system makes extensive use of FastLED's Internal Template Library (ITL):
+The JsonUI system makes extensive use of FastLED's Internal Template Library:
 
 - `fl::WeakPtr<T>`: Weak references allow UI elements to be removed on the client side and removed by the UIManager on the next frame.
 - `fl::function<T>`: Function objects for callbacks

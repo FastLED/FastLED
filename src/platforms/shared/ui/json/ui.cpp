@@ -69,7 +69,20 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
         return;
     }
     
-    // No manager exists, store in pending list
+    // No manager exists, try to initialize platform-specific UI system
+#ifdef __EMSCRIPTEN__
+    // For WASM, ensure UI system is initialized
+    extern void ensureWasmUiSystemInitialized();
+    ensureWasmUiSystemInitialized();
+    
+    // Check again after initialization
+    if (manager) {
+        manager->addComponent(component);
+        return;
+    }
+#endif
+    
+    // Still no manager exists, store in pending list
     auto& pending = getPendingComponents();
     pending.push_back(component);
     FL_WARN("addJsonUiComponent: no manager exists, component stored in pending list: " << component);
