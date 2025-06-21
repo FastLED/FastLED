@@ -19,6 +19,7 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "fl/str.h"
+#include "fl/json.h"
 #include "js.h"
 #include "platforms/wasm/engine_listener.h"
 
