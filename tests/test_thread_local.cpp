@@ -1,10 +1,12 @@
 #include "test.h"
 #include "fl/thread_local.h"
-
-#include <pthread.h>
-#include <unistd.h>  // for usleep
 #include "fl/vector.h"
 #include "fl/string.h"
+
+#if FASTLED_USE_THREAD_LOCAL
+#include <pthread.h>
+#include <unistd.h>  // for usleep
+#endif
 
 using namespace fl;
 
