@@ -29,13 +29,14 @@ void jsUiManager::jsUpdateUiComponents(const std::string &jsonStr) {
 
 jsUiManager::jsUiManager(): JsonUiManager(fl::updateJs) {
     // Register our handlers for UI component management
-    setJsonUiAddHandler([](fl::WeakPtr<JsonUiInternal> component) {
-        jsUiManager::instance().addComponent(component);
-    });
-    
-    setJsonUiRemoveHandler([](fl::WeakPtr<JsonUiInternal> component) {
-        jsUiManager::instance().removeComponent(component);
-    });
+    setJsonUiHandlers(
+        [](fl::WeakPtr<JsonUiInternal> component) {
+            jsUiManager::instance().addComponent(component);
+        },
+        [](fl::WeakPtr<JsonUiInternal> component) {
+            jsUiManager::instance().removeComponent(component);
+        }
+    );
 }
 
 
