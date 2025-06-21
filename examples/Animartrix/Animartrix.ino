@@ -54,12 +54,12 @@ void loop() {}
 using namespace fl;
 
 
-#define LED_PIN 6
+#define LED_PIN 3
 #define BRIGHTNESS 32
 #define COLOR_ORDER GRB
 
-#define MATRIX_WIDTH 32
-#define MATRIX_HEIGHT 32
+#define MATRIX_WIDTH 16
+#define MATRIX_HEIGHT 16
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
@@ -129,6 +129,7 @@ void setup() {
 
 void loop() {
     FL_WARN("*** LOOP ***");
+    uint32_t start = millis();
     FastLED.setBrightness(brightness);
     fxEngine.setSpeed(timeSpeed);
     static int lastFxIndex = -1;
@@ -137,7 +138,11 @@ void loop() {
         animartrix.fxSet(fxIndex);
     }
     fxEngine.draw(millis(), leds);
+    uint32_t end = millis();
+    FL_WARN("*** LOOP TIME: " << (end - start) << "ms");
     FastLED.show();
+    uint32_t end2 = millis();
+    FL_WARN("*** LOOP + DRAW TIME: " << (end2 - start) << "ms");
 }
 
 
