@@ -19,7 +19,7 @@ class jsDropdownImpl {
     ~jsDropdownImpl();
 
 
-    void setGroupIternal(const fl::string& name);
+    void setGroup(const fl::string& name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;

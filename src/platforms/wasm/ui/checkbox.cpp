@@ -48,7 +48,7 @@ void jsCheckboxImpl::updateInternal(
     mValue = value.as<bool>();
 }
 
-void jsCheckboxImpl::setGroupIternal(const fl::string& name) {
+void jsCheckboxImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

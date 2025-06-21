@@ -58,7 +58,7 @@ void jsNumberFieldImpl::updateInternal(
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-void jsNumberFieldImpl::setGroupIternal(const fl::string& name) {
+void jsNumberFieldImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

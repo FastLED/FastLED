@@ -29,7 +29,7 @@ void jsTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["text"] = text();
 }
 
-void jsTitleImpl::setGroupIternal(const fl::string& name) {
+void jsTitleImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

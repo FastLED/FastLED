@@ -139,7 +139,7 @@ AudioSample jsAudioImpl::next() {
 
 bool jsAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
 
-void jsAudioImpl::setGroupIternal(const fl::string& name) {
+void jsAudioImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

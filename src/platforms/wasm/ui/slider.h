@@ -12,7 +12,7 @@ class jsSliderImpl {
                  float max = 255.0f, float step = -1.f);
     ~jsSliderImpl();
 
-    void setGroupIternal(const fl::string& name);
+    void setGroup(const fl::string& name);
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;

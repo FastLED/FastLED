@@ -30,7 +30,7 @@ void jsDescriptionImpl::toJson(FLArduinoJson::JsonObject &json) const {
 }
 
 
-void jsDescriptionImpl::setGroupIternal(const fl::string& name) {
+void jsDescriptionImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

@@ -79,7 +79,7 @@ void jsSliderImpl::setValue(float value) {
     }
 }
 
-void jsSliderImpl::setGroupIternal(const fl::string& name) {
+void jsSliderImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

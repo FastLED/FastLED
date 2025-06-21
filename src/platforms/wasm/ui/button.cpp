@@ -53,7 +53,7 @@ void jsButtonImpl::updateInternal(
     mPressed = value.as<bool>();
 }
 
-void jsButtonImpl::setGroupIternal(const fl::string& name) {
+void jsButtonImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 

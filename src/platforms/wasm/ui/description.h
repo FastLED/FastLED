@@ -11,7 +11,7 @@ class jsDescriptionImpl {
     jsDescriptionImpl(const fl::string &name);
     ~jsDescriptionImpl();
 
-    void setGroupIternal(const fl::string& name);
+    void setGroup(const fl::string& name);
 
     const fl::string &text() const { return mText; }
 

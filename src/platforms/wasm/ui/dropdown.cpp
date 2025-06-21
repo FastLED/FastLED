@@ -108,7 +108,7 @@ void jsDropdownImpl::updateInternal(
     setSelectedIndex(index);
 }
 
-void jsDropdownImpl::setGroupIternal(const fl::string& name) {
+void jsDropdownImpl::setGroup(const fl::string& name) {
     mInternal->setGroup(name);
 }
 
