@@ -135,9 +135,6 @@ AudioSample jsAudioImpl::next() {
 
 bool jsAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
 
-void jsAudioImpl::setGroup(const fl::string& name) {
-    mInternal->setGroup(name);
-}
 
 
 } // namespace fl

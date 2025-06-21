@@ -58,10 +58,6 @@ void jsNumberFieldImpl::updateInternal(
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
-void jsNumberFieldImpl::setGroup(const fl::string& name) {
-    mInternal->setGroup(name);
-}
-
 } // namespace fl
 
 #endif // __EMSCRIPTEN__

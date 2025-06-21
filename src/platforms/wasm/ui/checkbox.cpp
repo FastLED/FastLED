@@ -48,10 +48,6 @@ void jsCheckboxImpl::updateInternal(
     mValue = value.as<bool>();
 }
 
-void jsCheckboxImpl::setGroup(const fl::string& name) {
-    mInternal->setGroup(name);
-}
-
 
 } // namespace fl
 

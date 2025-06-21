@@ -73,10 +73,6 @@ void jsSliderImpl::setValue(float value) {
     }
 }
 
-void jsSliderImpl::setGroup(const fl::string& name) {
-    mInternal->setGroup(name);
-}
-
 } // namespace fl
 
 #endif // __EMSCRIPTEN__

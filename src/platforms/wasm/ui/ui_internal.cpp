@@ -34,16 +34,6 @@ void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
 }
 int jsUiInternal::id() const { return mId; }
 
-<<<<<<< HEAD
-const fl::string &jsUiInternal::group() const { return mGroup; }
-
-void jsUiInternal::setGroup(const fl::string &group) {
-    fl::lock_guard<fl::mutex> lock(mMutex);
-    mGroup = group;
-}
-
-=======
->>>>>>> parent of da7182a67d (Update setGroup method in UI components to use internal group setter)
 bool jsUiInternal::clearFunctions() {
     fl::lock_guard<fl::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;

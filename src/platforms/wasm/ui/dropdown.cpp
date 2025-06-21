@@ -108,10 +108,6 @@ void jsDropdownImpl::updateInternal(
     setSelectedIndex(index);
 }
 
-void jsDropdownImpl::setGroup(const fl::string& name) {
-    mInternal->setGroup(name);
-}
-
 } // namespace fl
 
 #endif // __EMSCRIPTEN__
