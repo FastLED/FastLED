@@ -2,7 +2,12 @@
 
 
 
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/bind.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+#endif
 
 #include "fl/json.h"
 #include "fl/map.h"
@@ -93,6 +98,14 @@ void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
         }
     }
 }
+
+
+#ifdef __EMSCRIPTEN__
+EMSCRIPTEN_BINDINGS(js_interface) {
+    emscripten::function("_jsUiManager_updateUiComponents",
+                         &jsUiManager::jsUpdateUiComponents);
+}
+#endif
 
 } // namespace fl
 

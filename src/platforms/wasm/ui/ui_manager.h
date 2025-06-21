@@ -13,6 +13,18 @@
 #include "platforms/wasm/js.h"
 
 namespace fl {
+namespace ui_detail {
+
+#ifdef __EMSCRIPTEN__
+// use std::string when in emscripten
+#include <string>
+using string = std::string;
+#else
+using string = fl::string;
+#endif
+
+} // namespace detail
+
 
 class jsUiInternal;
 
@@ -22,7 +34,7 @@ class jsUiManager : fl::EngineEvents::Listener {
     static void removeComponent(fl::WeakPtr<jsUiInternal> component);
 
     // Called from the JS engine.
-    static void jsUpdateUiComponents(const fl::string &jsonStr) {
+    static void jsUpdateUiComponents(const fl::ui_detail::string &jsonStr) {
         updateUiComponents(jsonStr.c_str());
     }
     // Internal representation.
