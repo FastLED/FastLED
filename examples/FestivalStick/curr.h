@@ -29,6 +29,7 @@ Workflow:
 #include "fl/sstream.h"
 #include "fl/warn.h"
 #include "noise.h"
+#include "fl/array.h"
 
 // #include "vec3.h"
 
@@ -82,12 +83,67 @@ string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
 string renderModeOptions[] = {"Noise", "Position"};
 
 
+
+
 UIDropdown paletteDropdown("Color Palette", paletteOptions);
 UIDropdown renderModeDropdown("Render Mode", renderModeOptions);
 
+
+// fl::array<fl::pair<int, fl::string>> easeInfo = {
+//     pair(EASE_IN_QUAD, "EASE_IN_QUAD"),
+//     pair(EASE_OUT_QUAD, "EASE_OUT_QUAD"),
+//     pair(EASE_IN_OUT_QUAD, "EASE_IN_OUT_QUAD"),
+//     pair(EASE_IN_CUBIC, "EASE_IN_CUBIC"),
+//     pair(EASE_OUT_CUBIC, "EASE_OUT_CUBIC"),
+//     pair(EASE_IN_OUT_CUBIC, "EASE_IN_OUT_CUBIC"),
+//     pair(EASE_IN_SINE, "EASE_IN_SINE"),
+//     pair(EASE_OUT_SINE, "EASE_OUT_SINE"),
+//     pair(EASE_IN_OUT_SINE, "EASE_IN_OUT_SINE")
+// };
+
+
+fl::vector<fl::string> easeInfo = {
+    "EASE_NONE",
+    "EASE_IN_QUAD",
+    "EASE_OUT_QUAD",
+    "EASE_IN_OUT_QUAD",
+    "EASE_IN_CUBIC",
+    "EASE_OUT_CUBIC",
+    "EASE_IN_OUT_CUBIC",
+    "EASE_IN_SINE",
+    "EASE_OUT_SINE",
+    "EASE_IN_OUT_SINE"
+};
+
+EaseType getEaseType(fl::string value) {
+    if (value == "EASE_NONE") {
+        return EASE_NONE;
+    } else if (value == "EASE_IN_QUAD") {
+        return EASE_IN_QUAD;
+    } else if (value == "EASE_OUT_QUAD") {
+        return EASE_OUT_QUAD;
+    } else if (value == "EASE_IN_OUT_QUAD") {
+        return EASE_IN_OUT_QUAD;
+    } else if (value == "EASE_IN_CUBIC") {
+        return EASE_IN_CUBIC;
+    } else if (value == "EASE_OUT_CUBIC") {
+        return EASE_OUT_CUBIC;
+    } else if (value == "EASE_IN_OUT_CUBIC") {
+        return EASE_IN_OUT_CUBIC;
+    } else if (value == "EASE_IN_SINE") {
+        return EASE_IN_SINE;
+    } else if (value == "EASE_OUT_SINE") {
+        return EASE_OUT_SINE;
+    } else if (value == "EASE_IN_OUT_SINE") {
+        return EASE_IN_OUT_SINE;
+    } else {
+        return EASE_NONE;
+    }
+}
+
 // Color boost controls
-UINumberField saturationFunction("Saturation Function", 1, 0, 9);
-UINumberField luminanceFunction("Luminance Function", 0, 0, 9);
+UIDropdown saturationFunction("Saturation Function", easeInfo.begin(), easeInfo.end());
+UIDropdown luminanceFunction("Luminance Function", easeInfo.begin(), easeInfo.end());
 
 // Create UIGroup for noise controls using variadic constructor
 // This automatically assigns all specified controls to the "Noise Controls" group
@@ -110,22 +166,8 @@ Corkscrew corkscrew(corkscrewInput);
 static float currentPosition = 0.0f;
 static uint32_t lastUpdateTime = 0;
 
-EaseType getEaseType(int value) {
-    switch (value) {
-        case 0: return EASE_NONE;
-        case 1: return EASE_IN_QUAD;
-        case 2: return EASE_OUT_QUAD;
-        case 3: return EASE_IN_OUT_QUAD;
-        case 4: return EASE_IN_CUBIC;
-        case 5: return EASE_OUT_CUBIC;
-        case 6: return EASE_IN_OUT_CUBIC;
-        case 7: return EASE_IN_SINE;
-        case 8: return EASE_OUT_SINE;
-        case 9: return EASE_IN_OUT_SINE;
-    }
-    FL_ASSERT(false, "Invalid ease type");
-    return EASE_NONE;
-}
+
+
 
 // Option 2: Constexpr dimensions for compile-time array sizing
 constexpr uint16_t CORKSCREW_WIDTH =

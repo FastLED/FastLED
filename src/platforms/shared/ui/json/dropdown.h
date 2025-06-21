@@ -17,6 +17,15 @@ class JsonDropdownImpl {
     // Constructor with initializer_list (FastLED requires C++11 support)
     JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
+    template<typename Iterator>
+    JsonDropdownImpl(const fl::string &name, Iterator begin, Iterator end)
+        : mSelectedIndex(0) {
+        for (Iterator it = begin; it != end; ++it) {
+            mOptions.push_back(*it);
+        }
+        commonInit(name);
+    }
+    
     ~JsonDropdownImpl();
     JsonDropdownImpl &Group(const fl::string &name);
 

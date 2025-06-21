@@ -253,6 +253,18 @@ class UIDropdownImpl {
         }
     }
 
+    template<typename Iterator>
+    UIDropdownImpl(const char *name, Iterator begin, Iterator end)
+        : mSelectedIndex(0) {
+        FASTLED_UNUSED(name);
+        for (Iterator it = begin; it != end; ++it) {
+            mOptions.push_back(*it);
+        }
+        if (mOptions.empty()) {
+            mOptions.push_back(fl::string("No options"));
+        }
+    }
+
     // Constructor with fl::Slice<fl::string>
     UIDropdownImpl(const char *name, fl::Slice<fl::string> options) 
         : mSelectedIndex(0) {

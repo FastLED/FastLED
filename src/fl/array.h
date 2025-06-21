@@ -5,6 +5,8 @@
 #include "fl/inplacenew.h"
 #include "fl/type_traits.h"
 
+#include "fl/initializer_list.h"
+
 namespace fl {
 
 /**
@@ -36,6 +38,13 @@ template <typename T, size_t N> class array {
     explicit array(const T &value) {
         // std::fill_n(begin(), N, value);
         fill_n(data_, N, value);
+    }
+
+    // Initializer list constructor
+    array(fl::initializer_list<T> list) {
+        for (size_t i = 0; i < N && i < list.size(); ++i) {
+            data_[i] = list[i];
+        }
     }
 
     // Copy constructor
