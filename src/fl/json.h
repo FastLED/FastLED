@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR#pragma once
+#pragma once
 
 #ifndef FASTLED_ENABLE_JSON
 #ifdef __AVR__
@@ -37,8 +37,8 @@ class JsonDocument {};
 class JsonDocument : public ::FLArduinoJson::JsonDocument {};
 #endif
 
-// Enum for JSON serialized types
-enum SerializedType {
+// Enum for JSON types
+enum JsonType {
     JSON_NULL = 0,
     JSON_OBJECT,
     JSON_ARRAY,
@@ -51,11 +51,11 @@ enum SerializedType {
 #if FASTLED_ENABLE_JSON
 
 // Function to get the type of a JsonVariant
-// Usage: SerializedType t = fl::jsonType(variant);
+// Usage: JsonType t = fl::getJsonType(variant);
 //
 // Example:
 //   JsonVariant v = doc["foo"];
-//   SerializedType t = fl::jsonType(v);
+//   JsonType t = fl::getJsonType(v);
 //   switch(t) {
 //     case JSON_OBJECT:  Serial.println("object");  break;
 //     case JSON_ARRAY:   Serial.println("array");   break;
@@ -63,10 +63,10 @@ enum SerializedType {
 //     case JSON_FLOAT:   Serial.println("float");   break;
 //     case JSON_BOOLEAN: Serial.println("boolean"); break;
 //     case JSON_STRING:  Serial.println("string");  break;
-//     default:           Serial.println("null");    break;
+//     case JSON_NULL:    Serial.println("null");    break;
 //   }
 template<typename T>
-inline SerializedType jsonType(const T& v) {
+inline JsonType getJsonType(const T& v) {
     if (v.isNull()) {
         return JSON_NULL;
     } else if (v.template is<::FLArduinoJson::JsonObject>() || v.template is<::FLArduinoJson::JsonObjectConst>()) {
@@ -90,7 +90,7 @@ inline SerializedType jsonType(const T& v) {
 
 // Stub version when JSON is disabled
 template<typename T>
-inline SerializedType jsonType(const T&) {
+inline JsonType getJsonType(const T&) {
     return JSON_NULL;
 }
 
@@ -103,42 +103,3 @@ bool parseJson(const char *json, JsonDocument *doc, string *error = nullptr);
 void toJson(const JsonDocument &doc, string *jsonBuffer);
 
 } // namespace fl
-
-#if FASTLED_ENABLE_JSON
-
-// Extended JsonVariant types with built-in type() method
-// 
-// These provide the exact .type() method syntax requested:
-//
-// Usage Option 1: Use JsonVariantWithType directly
-//   JsonVariantWithType v = doc["foo"];  
-//   SerializedType t = v.type();
-//
-// Usage Option 2: Use AUTO_JSON_TYPE macro for existing JsonVariant
-//   JsonVariant v = doc["foo"];
-//   SerializedType t = AUTO_JSON_TYPE(v).type();
-//
-namespace FLArduinoJson {
-
-// Helper class to add type() method to JsonVariant
-template<typename Base>
-class JsonVariantTypeExtension : public Base {
-public:
-    using Base::Base;  // Inherit constructors
-    
-    fl::SerializedType type() const {
-        return fl::jsonType(*this);
-    }
-};
-
-// Convenient typedefs
-using JsonVariantWithType = JsonVariantTypeExtension<JsonVariant>;
-using JsonVariantConstWithType = JsonVariantTypeExtension<JsonVariantConst>;
-
-}
-
-// Macro to provide convenient .type() syntax for existing JsonVariant objects
-// Usage: AUTO_JSON_TYPE(variant) gives you a version with .type() method
-#define AUTO_JSON_TYPE(v) (::FLArduinoJson::JsonVariantTypeExtension<decltype(v)>(v))
-
-#endif
