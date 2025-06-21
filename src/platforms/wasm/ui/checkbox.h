@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
@@ -8,37 +10,25 @@ namespace fl {
 
 class jsCheckboxImpl {
   public:
-    jsCheckboxImpl(const fl::string &, bool value);
+    jsCheckboxImpl(const fl::string &name, bool *value);
     ~jsCheckboxImpl();
     jsCheckboxImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
-    };
+    }
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    bool value() const;
-    void setValue(bool value);
-    const fl::string &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mInternal->groupName(); }
     
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
-
-    jsCheckboxImpl &operator=(bool value) {
-        setValue(value);
-        return *this;
-    }
-    jsCheckboxImpl &operator=(int value) {
-        setValue(value != 0);
-        return *this;
-    }
+    void setGroupInternal(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
     jsUiInternalPtr mInternal;
-    bool mValue;
-    fl::string mGroup;
+    bool *mValue;
 };
 
 } // namespace fl

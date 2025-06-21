@@ -22,6 +22,8 @@ void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
 }
 void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
     std::lock_guard<std::mutex> lock(mMutex);
+    // Add the group information to all UI elements
+    json["group"] = mGroup.c_str();
     if (mtoJsonFunc) {
         mtoJsonFunc(json);
     }

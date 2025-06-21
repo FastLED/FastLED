@@ -1,20 +1,23 @@
 #ifdef __EMSCRIPTEN__
 
-#include "platforms/wasm/ui/dropdown.h"
 #include "fl/json.h"
+#include "fl/namespace.h"
+
+#include "platforms/wasm/ui/dropdown.h"
 #include "platforms/wasm/ui/ui_manager.h"
-#include <string.h>
 
 using namespace fl;
 
 namespace fl {
 
-// Common initialization function
-void jsDropdownImpl::commonInit(const Str &name) {
+jsDropdownImpl::jsDropdownImpl(const Str &name, int *value,
+                               const fl::vector<fl::string> &options)
+    : mValue(value), mOptions(options) {
     auto updateFunc = jsUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsDropdownImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<jsDropdownImpl *>(this)->updateInternal(value);
         });
+
     auto toJsonFunc =
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsDropdownImpl *>(this)->toJson(json);
@@ -24,88 +27,39 @@ void jsDropdownImpl::commonInit(const Str &name) {
     jsUiManager::addComponent(mInternal);
 }
 
-// Constructor with array of options and count
-jsDropdownImpl::jsDropdownImpl(const Str &name, const fl::string* options, size_t count) 
-    : mSelectedIndex(0) {
-    for (size_t i = 0; i < count; ++i) {
-        mOptions.push_back(options[i]);
-    }
-    if (mOptions.empty()) {
-        mOptions.push_back(fl::string("No options"));
-    }
-    commonInit(name);
+jsDropdownImpl::~jsDropdownImpl() {
+    jsUiManager::removeComponent(mInternal);
 }
 
-// Constructor with fl::Slice<fl::string>
-jsDropdownImpl::jsDropdownImpl(const Str &name, fl::Slice<fl::string> options) 
-    : mSelectedIndex(0) {
-    for (size_t i = 0; i < options.size(); ++i) {
-        mOptions.push_back(options[i]);
-    }
-    if (mOptions.empty()) {
-        mOptions.push_back(fl::string("No options"));
-    }
-    commonInit(name);
+int jsDropdownImpl::value() const { return *mValue; }
+
+void jsDropdownImpl::setValue(int value) { *mValue = value; }
+
+const fl::vector<fl::string> &jsDropdownImpl::options() const {
+    return mOptions;
 }
 
-// Constructor with initializer_list (only available if C++11 support exists)
-jsDropdownImpl::jsDropdownImpl(const Str &name, fl::initializer_list<fl::string> options) 
-    : mSelectedIndex(0) {
-    for (const auto& option : options) {
-        mOptions.push_back(option);
-    }
-    if (mOptions.empty()) {
-        mOptions.push_back(fl::string("No options"));
-    }
-    commonInit(name);
+void jsDropdownImpl::setOptions(const fl::vector<fl::string> &options) {
+    mOptions = options;
 }
-
-jsDropdownImpl::~jsDropdownImpl() { jsUiManager::removeComponent(mInternal); }
 
 const Str &jsDropdownImpl::name() const { return mInternal->name(); }
 
 void jsDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
     json["type"] = "dropdown";
     json["id"] = mInternal->id();
-    json["value"] = static_cast<int>(mSelectedIndex);
-    
-    FLArduinoJson::JsonArray options = json["options"].to<FLArduinoJson::JsonArray>();
-    for (size_t i = 0; i < mOptions.size(); ++i) {
-        options.add(mOptions[i].c_str());
-    }
-}
+    json["value"] = *mValue;
 
-fl::string jsDropdownImpl::value() const { 
-    if (mSelectedIndex < mOptions.size()) {
-        return mOptions[mSelectedIndex]; 
+    FLArduinoJson::JsonArray optionsArray = json.createNestedArray("options");
+    for (const auto &option : mOptions) {
+        optionsArray.add(option.c_str());
     }
-    return fl::string("Invalid");
-}
-
-int jsDropdownImpl::value_int() const { 
-    return static_cast<int>(mSelectedIndex); 
-}
-
-void jsDropdownImpl::setSelectedIndex(int index) {
-    if (index >= 0 && index < static_cast<int>(mOptions.size())) {
-        mSelectedIndex = static_cast<size_t>(index);
-    }
-}
-
-fl::string jsDropdownImpl::getOption(size_t index) const {
-    if (index < mOptions.size()) {
-        return mOptions[index];
-    }
-    return fl::string("Invalid");
 }
 
 void jsDropdownImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    // We expect value to be an integer representing the selected index
-    int index = value.as<int>();
-    setSelectedIndex(index);
+    *mValue = value.as<int>();
 }
 
 } // namespace fl

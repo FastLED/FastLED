@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "fl/vector.h"
@@ -9,47 +11,36 @@ namespace fl {
 
 class jsDropdownImpl {
   public:
-
-    // Constructor with fl::Slice<fl::string> for arrays and containers.
-    jsDropdownImpl(const fl::string &name, fl::Slice<fl::string> options);
-
-    // Constructor with initializer_list (FastLED requires C++11 support)
-    jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
-    
+    jsDropdownImpl(const fl::string &name, int *value,
+                   const fl::vector<fl::string> &options);
     ~jsDropdownImpl();
     jsDropdownImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
-    };
+    }
 
     const fl::string &name() const;
     void toJson(FLArduinoJson::JsonObject &json) const;
-    fl::string value() const;
-    int value_int() const;
-    void setSelectedIndex(int index);
-    size_t getOptionCount() const { return mOptions.size(); }
-    fl::string getOption(size_t index) const;
-    const fl::string &groupName() const { return mGroup; }
-
+    int value() const;
+    void setValue(int value);
+    const fl::vector<fl::string> &options() const;
+    void setOptions(const fl::vector<fl::string> &options);
+    const fl::string &groupName() const { return mInternal->groupName(); }
+    
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
+    void setGroupInternal(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-    jsDropdownImpl &operator=(int index) {
-        setSelectedIndex(index);
+    jsDropdownImpl &operator=(int value) {
+        setValue(value);
         return *this;
     }
 
   private:
-    // Private constructor with array of options and count (used by template constructor)
-    jsDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
-    
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
-    void commonInit(const fl::string &name);
 
     jsUiInternalPtr mInternal;
+    int *mValue;
     fl::vector<fl::string> mOptions;
-    size_t mSelectedIndex;
-    fl::string mGroup;
 };
 
 } // namespace fl

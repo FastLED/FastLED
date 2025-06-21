@@ -1,5 +1,4 @@
-
-#ifdef __EMSCRIPTEN__
+THIS SHOULD BE A LINTER ERROR#ifdef __EMSCRIPTEN__
 
 #include <cctype>
 #include <cstdint>
@@ -19,7 +18,8 @@ using namespace fl;
 
 namespace fl {
 
-jsAudioImpl::jsAudioImpl(const Str &name) {
+jsAudioImpl::jsAudioImpl(const Str &name, int sampleRate, int channels)
+    : mSampleRate(sampleRate), mChannels(channels) {
     auto updateFunc = jsUiInternal::UpdateFunction(
         [this](const FLArduinoJson::JsonVariantConst &value) {
             static_cast<jsAudioImpl *>(this)->updateInternal(value);
@@ -29,8 +29,7 @@ jsAudioImpl::jsAudioImpl(const Str &name) {
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsAudioImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc),
-                                     std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }
@@ -41,9 +40,10 @@ const Str &jsAudioImpl::name() const { return mInternal->name(); }
 
 void jsAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
     json["type"] = "audio";
     json["id"] = mInternal->id();
+    json["sampleRate"] = mSampleRate;
+    json["channels"] = mChannels;
 }
 
 static void parseJsonStringToInt16Vector(const std::string &jsonStr,
@@ -140,6 +140,12 @@ AudioSample jsAudioImpl::next() {
 }
 
 bool jsAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
+
+void jsAudioImpl::onData(const float *samples, size_t nSamples, int sampleRate,
+                         int nChannels) {
+    // Implementation for handling audio data
+    // This would typically process the audio samples and update the UI
+}
 
 } // namespace fl
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "platforms/wasm/ui/ui_internal.h"
@@ -8,10 +10,10 @@ namespace fl {
 
 class jsNumberFieldImpl {
   public:
-    jsNumberFieldImpl(const fl::string &name, double value, double min, double max);
+    jsNumberFieldImpl(const fl::string &name, double *value);
     ~jsNumberFieldImpl();
     jsNumberFieldImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
     }
 
@@ -19,10 +21,10 @@ class jsNumberFieldImpl {
     void toJson(FLArduinoJson::JsonObject &json) const;
     double value() const;
     void setValue(double value);
-    const fl::string &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mInternal->groupName(); }
     
     // Method to allow parent UIBase class to set the group
-    void setGroupInternal(const fl::string &groupName) { mGroup = groupName; }
+    void setGroupInternal(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
     jsNumberFieldImpl &operator=(double value) {
         setValue(value);
@@ -41,10 +43,7 @@ class jsNumberFieldImpl {
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
     jsUiInternalPtr mInternal;
-    double mValue;
-    double mMin;
-    double mMax;
-    fl::string mGroup;
+    double *mValue;
 };
 
 } // namespace fl

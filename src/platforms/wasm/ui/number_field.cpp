@@ -1,4 +1,3 @@
-
 #ifdef __EMSCRIPTEN__
 
 #include <memory>
@@ -15,13 +14,13 @@ using namespace fl;
 
 namespace fl {
 
-jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double value, double min,
-                                     double max)
-    : mValue(value), mMin(min), mMax(max) {
+jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double *value)
+    : mValue(value) {
     auto updateFunc = jsUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsNumberFieldImpl *>(this)->updateInternal(json);
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<jsNumberFieldImpl *>(this)->updateInternal(value);
         });
+
     auto toJsonFunc =
         jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
             static_cast<jsNumberFieldImpl *>(this)->toJson(json);
@@ -35,27 +34,22 @@ jsNumberFieldImpl::~jsNumberFieldImpl() {
     jsUiManager::removeComponent(mInternal);
 }
 
+double jsNumberFieldImpl::value() const { return *mValue; }
+
+void jsNumberFieldImpl::setValue(double value) { *mValue = value; }
+
 const Str &jsNumberFieldImpl::name() const { return mInternal->name(); }
 
 void jsNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
     json["type"] = "number";
     json["id"] = mInternal->id();
-    json["value"] = mValue;
-    json["min"] = mMin;
-    json["max"] = mMax;
-}
-
-double jsNumberFieldImpl::value() const { return mValue; }
-
-void jsNumberFieldImpl::setValue(double value) {
-    mValue = MAX(mMin, MIN(mMax, value));
+    json["value"] = *mValue;
 }
 
 void jsNumberFieldImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    mValue = MAX(mMin, MIN(mMax, value.as<double>()));
+    *mValue = value.as<double>();
 }
 
 } // namespace fl
