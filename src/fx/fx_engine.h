@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <string.h>
-
 #include "crgb.h"
 #include "fl/map.h"
 #include "fl/namespace.h"
@@ -14,6 +11,7 @@
 #include "fx/fx.h"
 #include "fx/time.h"
 #include "fx/video.h"
+#include "fl/stdint.h"
 
 // Forward declaration
 class TimeFunction;

@@ -32,19 +32,19 @@ JsonUiManager::~JsonUiManager() {
 }
 
 void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
-    fl::lock_guard lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
     // FL_WARN("*** COMPONENT REGISTERED: ID " << (component.lock() ? component.lock()->id() : -1) << " (Total: " << mComponents.size() << ")");
 }
 
 void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
-    fl::lock_guard lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.erase(component);
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
-    fl::lock_guard lock(mMutex);
+    fl::lock_guard<fl::mutex> lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
         if (auto ptr = component.lock()) {
@@ -131,7 +131,7 @@ void JsonUiManager::onEndShowLeds() {
    // FL_WARN("*** onEndShowLeds CALLED ***");
     bool shouldUpdate = false;
     {
-        fl::lock_guard lock(mMutex);
+        fl::lock_guard<fl::mutex> lock(mMutex);
         shouldUpdate = mItemsAdded;
         mItemsAdded = false;
     }
