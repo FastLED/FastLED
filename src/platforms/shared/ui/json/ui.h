@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fl/function.h"
+
 namespace fl {
 
 template<typename T>
@@ -7,10 +9,23 @@ class WeakPtr;
 // Forward declare the JsonUiInternal class.
 class JsonUiInternal;
 
-// Define these functions if you want to use the JsonUi.
+// Handler function types for UI component management
+using JsonUiAddHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
+using JsonUiRemoveHandler = fl::function<void(fl::WeakPtr<JsonUiInternal>)>;
 
-void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
-void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
+/**
+ * Set the global handler for adding UI components.
+ * 
+ * @param handler Function to call when a UI component needs to be added
+ */
+void setJsonUiAddHandler(const JsonUiAddHandler& handler);
+
+/**
+ * Set the global handler for removing UI components.
+ * 
+ * @param handler Function to call when a UI component needs to be removed
+ */
+void setJsonUiRemoveHandler(const JsonUiRemoveHandler& handler);
 
 /**
  * Add a UI component to the global component registry.
