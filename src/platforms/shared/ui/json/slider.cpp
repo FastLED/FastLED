@@ -94,12 +94,17 @@ JsonSliderImpl &JsonSliderImpl::operator=(int value) {
 
 void JsonSliderImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
+    FL_WARN("*** SLIDER UPDATE: " << name() << " " << fl::getJsonTypeStr(value));
     if (value.is<float>()) {
         float newValue = value.as<float>();
         setValue(newValue);
     } else if (value.is<int>()) {
         int newValue = value.as<int>();
         setValue(static_cast<float>(newValue));
+    } else {
+        //char buff[128] = {};
+        
+        FL_WARN("*** SLIDER UPDAT ERROR: " << name() << " " << fl::getJsonTypeStr(value) << " is not a float or int");
     }
 }
 

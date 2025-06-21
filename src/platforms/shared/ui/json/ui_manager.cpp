@@ -117,6 +117,15 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
     FL_WARN("*** JSON PARSE RESULT: " << (result == FLArduinoJson::DeserializationError::Ok ? "SUCCESS" : "FAILED"));
     FL_WARN("*** JSON DOCUMENT: " << doc.as<FLArduinoJson::JsonObjectConst>().size() << " keys");
 
+
+    fl::string type_str = fl::getJsonTypeStr(doc);
+
+    FL_WARN("*** JSON TYPE: " << type_str);
+
+    
+
+    FL_WARN("*** DOC IS json object: " << doc.is<FLArduinoJson::JsonObject>());
+
     if (doc.is<FLArduinoJson::JsonObject>()) {
         auto obj = doc.as<FLArduinoJson::JsonObjectConst>();
         FL_WARN("*** JSON OBJECT HAS " << obj.size() << " KEYS");
@@ -142,7 +151,11 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &_doc) {
             
             if (obj.containsKey(idStr.c_str())) {
                 FL_WARN("*** FOUND MATCH! UPDATING COMPONENT: ID " << id);
-                component->update(obj[idStr.c_str()]);
+                //component->update(obj[idStr.c_str()]);
+                const FLArduinoJson::JsonVariantConst v = obj[idStr.c_str()];  
+                // LET'S LOG THE TYPE OF THE VARIANT
+                FL_WARN("*** VARIANT TYPE: " << fl::getJsonTypeStr(v));
+                component->update(v);
                 FL_WARN("*** COMPONENT UPDATE COMPLETED: ID " << id);
             } else {
                 FL_WARN("*** NO MATCH: Component ID " << id << " (key '" << idStr.c_str() << "') not found in JSON");
