@@ -28,6 +28,7 @@ namespace fl { // Mandatory namespace for this class since it has name
 class string;
 using Str = fl::string;  // backwards compatibility
 class Tile2x2_u8_wrap;
+class JsonUiInternal;
 
 template <typename T> struct rect;
 template <typename T> struct vec2;
@@ -37,6 +38,9 @@ template <typename T, typename Allocator> class HeapVector;
 template <typename T, size_t N> class InlinedVector;
 template <typename T, size_t N> class FixedVector;
 template <size_t N> class StrN;
+
+template <typename T> class WeakPtr;
+template <typename T> class Ptr;
 
 template <typename T> struct Hash;
 
@@ -545,7 +549,26 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         append(")");
         return *this;
     }
-        
+    
+    
+    template <typename T> string &append(const WeakPtr<T> &val) {
+        Ptr<T> ptr = val.lock();
+        append(ptr);
+        return *this;
+    }
+
+    template <typename T> string &append(const Ptr<T>& val) {
+        // append(val->toString());
+        if (!val) {
+            append("null");
+        } else {
+            T* ptr = val.get();
+            append(*ptr);
+        }
+        return *this;
+    }
+
+    string &append(const JsonUiInternal& val);
 
     template <typename T, size_t N>
     string &append(const fl::FixedVector<T, N> &vec) {

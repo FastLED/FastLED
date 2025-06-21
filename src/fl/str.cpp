@@ -9,6 +9,7 @@
 #include "fl/xymap.h"
 #include "fl/tile2x2.h"
 #include "fl/compiler_control.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 #ifdef FASTLED_TESTING
 #include <cstdio> // ok include
@@ -306,6 +307,11 @@ void StringFormatter::appendFloat(const float &val, StrN<64> *dst) {
     char buf[64] = {0};
     string_functions::ftoa(val, buf);
     dst->write(buf, strlen(buf));
+}
+
+string &string::append(const JsonUiInternal& val) {
+    append(val.name());
+    return *this;
 }
 
 } // namespace fl

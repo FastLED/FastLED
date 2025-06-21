@@ -3,10 +3,8 @@
 #include "fl/warn.h"
 #include "fl/ptr.h"
 
-
 namespace fl {
 __attribute__((weak)) void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-
     FL_WARN("addJsonUiComponent is not implemented, received component: " << component);
 }
 
