@@ -159,7 +159,7 @@ class StrStream {
 
     StrStream &operator=(const char *str) {
         mStr.clear();
-        mStr.append(str);
+        mStr.append(str.c_str());
         return *this;
     }
 
