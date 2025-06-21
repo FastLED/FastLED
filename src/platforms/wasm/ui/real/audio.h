@@ -14,11 +14,11 @@ enum {
     kJsAudioSamples = 512,
 };
 
-class jsAudioImpl {
+class JsonAudioImpl {
   public:
-    jsAudioImpl(const fl::string &name);
-    ~jsAudioImpl();
-    jsAudioImpl &Group(const fl::string &name) {
+    JsonAudioImpl(const fl::string &name);
+    ~JsonAudioImpl();
+    JsonAudioImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -34,20 +34,20 @@ class jsAudioImpl {
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(jsAudioImpl *owner) {
+        void init(JsonAudioImpl *owner) {
             mOwner = owner;
             fl::EngineEvents::addListener(this);
         }
         ~Updater() { fl::EngineEvents::removeListener(this); }
         void onPlatformPreLoop2() override {}
-        jsAudioImpl *mOwner = nullptr;
+        JsonAudioImpl *mOwner = nullptr;
     };
 
     Updater mUpdater;
 
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
     fl::string mSerializeBuffer;
     fl::vector<int16_t> mAudioDataBuffer;

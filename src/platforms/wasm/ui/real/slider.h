@@ -8,12 +8,12 @@
 
 namespace fl {
 
-class jsSliderImpl {
+class JsonSliderImpl {
   public:
-    jsSliderImpl(const fl::string &name, float value = 128.0f, float min = 0.0f,
+    JsonSliderImpl(const fl::string &name, float value = 128.0f, float min = 0.0f,
                  float max = 255.0f, float step = -1.f);
-    ~jsSliderImpl();
-    jsSliderImpl &Group(const fl::string &name) {
+    ~JsonSliderImpl();
+    JsonSliderImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -34,11 +34,11 @@ class jsSliderImpl {
 
     int as_int() const { return static_cast<int>(mValue); }
 
-    jsSliderImpl &operator=(float value) {
+    JsonSliderImpl &operator=(float value) {
         setValue(value);
         return *this;
     }
-    jsSliderImpl &operator=(int value) {
+    JsonSliderImpl &operator=(int value) {
         setValue(static_cast<float>(value));
         return *this;
     }
@@ -46,7 +46,7 @@ class jsSliderImpl {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     float mMin;
     float mMax;
     float mValue;

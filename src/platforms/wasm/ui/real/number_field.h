@@ -10,11 +10,11 @@
 
 namespace fl {
 
-class jsNumberFieldImpl {
+class JsonNumberFieldImpl {
   public:
-    jsNumberFieldImpl(const fl::string &name, double value, double min, double max);
-    ~jsNumberFieldImpl();
-    jsNumberFieldImpl &Group(const fl::string &name) {
+    JsonNumberFieldImpl(const fl::string &name, double value, double min, double max);
+    ~JsonNumberFieldImpl();
+    JsonNumberFieldImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -28,11 +28,11 @@ class jsNumberFieldImpl {
     // Method to allow parent UIBase class to set the group
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-    jsNumberFieldImpl &operator=(double value) {
+    JsonNumberFieldImpl &operator=(double value) {
         setValue(value);
         return *this;
     }
-    jsNumberFieldImpl &operator=(int value) {
+    JsonNumberFieldImpl &operator=(int value) {
         setValue(static_cast<double>(value));
         return *this;
     }
@@ -45,7 +45,7 @@ class jsNumberFieldImpl {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     double mValue;
     double mMin;
     double mMax;

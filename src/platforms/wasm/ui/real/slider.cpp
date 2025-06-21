@@ -1,5 +1,3 @@
-
-
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -15,65 +13,69 @@ using namespace fl;
 
 namespace fl {
 
-jsSliderImpl::jsSliderImpl(const Str &name, float value, float min, float max,
-                           float step)
+JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
+                             float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     if (ALMOST_EQUAL_FLOAT(mStep, -1.f)) {
         mStep = (mMax - mMin) / 100.0f;
     }
-    auto updateFunc = jsUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsSliderImpl *>(this)->updateInternal(json);
+    auto updateFunc = JsonUiInternal::UpdateFunction(
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonSliderImpl *>(this)->updateInternal(value);
         });
+
     auto toJsonFunc =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsSliderImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonSliderImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addUiComponent(mInternal);
 }
 
-jsSliderImpl::~jsSliderImpl() { removeUiComponent(mInternal); }
+JsonSliderImpl::~JsonSliderImpl() { removeUiComponent(mInternal); }
 
-const Str &jsSliderImpl::name() const { return mInternal->name(); }
+const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 
-void jsSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["type"] = "slider";
     json["group"] = mInternal->groupName().c_str();
+    json["type"] = "slider";
     json["id"] = mInternal->id();
+    json["value"] = mValue;
     json["min"] = mMin;
     json["max"] = mMax;
-    json["value"] = mValue;
-    json["step"] = mStep;
+    if (mStep > 0) {
+        json["step"] = mStep;
+    }
 }
 
-float jsSliderImpl::value() const { return mValue; }
+float JsonSliderImpl::value() const { return mValue; }
 
-float jsSliderImpl::value_normalized() const {
+float JsonSliderImpl::value_normalized() const {
     if (ALMOST_EQUAL(mMax, mMin, 0.0001f)) {
         return 0;
     }
     return (mValue - mMin) / (mMax - mMin);
 }
 
-void jsSliderImpl::updateInternal(
-    const FLArduinoJson::JsonVariantConst &value) {
-    // We expect jsonStr to actually be a value string, so simply parse it.
-    float v = value.as<float>();
-    setValue(v);
+void JsonSliderImpl::setValue(float value) {
+    if (value < mMin) {
+        value = mMin;
+    } else if (value > mMax) {
+        value = mMax;
+    }
+    mValue = value;
 }
 
-void jsSliderImpl::setValue(float value) {
-    mValue = MAX(mMin, MIN(mMax, value));
-    // ALMOST_EQUAL_FLOAT is defined in fl/math_macros.h
-    // if (mValue != value) {
-    if (!ALMOST_EQUAL_FLOAT(mValue, value)) {
-        // The value was outside the range so print out a warning that we
-        // clamped.
-        const Str &name = mInternal->name();
-        FL_WARN("Warning: UISlider " << name << " with id " << mInternal->id() << " value " << value << " was clamped to range " << mMin << ", " << mMax << " -> " << mValue);
+void JsonSliderImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
+    if (value.is<float>()) {
+        float newValue = value.as<float>();
+        setValue(newValue);
+    } else if (value.is<int>()) {
+        int newValue = value.as<int>();
+        setValue(static_cast<float>(newValue));
     }
 }
 

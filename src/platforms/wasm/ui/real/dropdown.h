@@ -8,17 +8,17 @@
 
 namespace fl {
 
-class jsDropdownImpl {
+class JsonDropdownImpl {
   public:
 
     // Constructor with fl::Slice<fl::string> for arrays and containers.
-    jsDropdownImpl(const fl::string &name, fl::Slice<fl::string> options);
+    JsonDropdownImpl(const fl::string &name, fl::Slice<fl::string> options);
 
     // Constructor with initializer_list (FastLED requires C++11 support)
-    jsDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
+    JsonDropdownImpl(const fl::string &name, fl::initializer_list<fl::string> options);
     
-    ~jsDropdownImpl();
-    jsDropdownImpl &Group(const fl::string &name) {
+    ~JsonDropdownImpl();
+    JsonDropdownImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     };
@@ -35,19 +35,19 @@ class jsDropdownImpl {
     // Method to allow parent UIBase class to set the group
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-    jsDropdownImpl &operator=(int index) {
+    JsonDropdownImpl &operator=(int index) {
         setSelectedIndex(index);
         return *this;
     }
 
   private:
     // Private constructor with array of options and count (used by template constructor)
-    jsDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
+    JsonDropdownImpl(const fl::string &name, const fl::string* options, size_t count);
     
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
     void commonInit(const fl::string &name);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     fl::vector<fl::string> mOptions;
     size_t mSelectedIndex;
 };

@@ -8,11 +8,11 @@
 
 namespace fl {
 
-class jsButtonImpl {
+class JsonButtonImpl {
   public:
-    jsButtonImpl(const fl::string &name);
-    ~jsButtonImpl();
-    jsButtonImpl &Group(const fl::string &name) {
+    JsonButtonImpl(const fl::string &name);
+    ~JsonButtonImpl();
+    JsonButtonImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -31,7 +31,7 @@ class jsButtonImpl {
 
   private:
     struct Updater : fl::EngineEvents::Listener {
-        void init(jsButtonImpl *owner) {
+        void init(JsonButtonImpl *owner) {
             mOwner = owner;
             fl::EngineEvents::addListener(this);
         }
@@ -44,14 +44,14 @@ class jsButtonImpl {
                 mOwner->mClickedCount++;
             }
         }
-        jsButtonImpl *mOwner = nullptr;
+        JsonButtonImpl *mOwner = nullptr;
     };
 
     Updater mUpdater;
 
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     bool mPressed = false;
     bool mPressedLast = false;
     bool mClickedHappened = false;

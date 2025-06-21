@@ -8,11 +8,11 @@
 
 namespace fl {
 
-class jsTitleImpl {
+class JsonTitleImpl {
   public:
-    jsTitleImpl(const fl::string &text);
-    ~jsTitleImpl();
-    jsTitleImpl &Group(const fl::string &name) {
+    JsonTitleImpl(const fl::string &text);
+    ~JsonTitleImpl();
+    JsonTitleImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -26,7 +26,7 @@ class jsTitleImpl {
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
   private:
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     fl::string mText;
 };
 

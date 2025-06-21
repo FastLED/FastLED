@@ -16,18 +16,18 @@
 namespace fl {
 
 
-class jsUiManager : public UiManager {
+class JsonUiManager : public UiManager {
   public:
     // Called from the JS engine.
     static void jsUpdateUiComponents(const std::string &jsonStr) {
         instance().updateUiComponents(jsonStr.c_str());
     }
-    static jsUiManager &instance();
+    static JsonUiManager &instance();
 
   private:
-    friend class fl::Singleton<jsUiManager>;
-    jsUiManager(): UiManager(fl::updateJs) {}
-    ~jsUiManager() = default;
+    friend class fl::Singleton<JsonUiManager>;
+    JsonUiManager(): UiManager(fl::updateJs) {}
+    ~JsonUiManager() = default;
 };
 
 } // namespace fl

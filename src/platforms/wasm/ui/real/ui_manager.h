@@ -19,8 +19,8 @@ class UiManager : fl::EngineEvents::Listener {
     UiManager(Callback updateJs) : mUpdateJs(updateJs) { fl::EngineEvents::addListener(this); }
     ~UiManager() { fl::EngineEvents::removeListener(this); }
 
-    void addComponent(fl::WeakPtr<jsUiInternal> component);
-    void removeComponent(fl::WeakPtr<jsUiInternal> component);
+    void addComponent(fl::WeakPtr<JsonUiInternal> component);
+    void removeComponent(fl::WeakPtr<JsonUiInternal> component);
 
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
@@ -30,7 +30,7 @@ class UiManager : fl::EngineEvents::Listener {
 
   private:
     
-    typedef fl::FixedSet<fl::WeakPtr<jsUiInternal>, 64> jsUIRefSet;
+    typedef fl::FixedSet<fl::WeakPtr<JsonUiInternal>, 64> JsonUIRefSet;
 
     void onPlatformPreLoop() override {
         if (!mHasPendingUpdate) {
@@ -43,10 +43,10 @@ class UiManager : fl::EngineEvents::Listener {
 
     void onEndShowLeds() override;
 
-    fl::vector<jsUiInternalPtr> getComponents();
+    fl::vector<JsonUiInternalPtr> getComponents();
     void toJson(FLArduinoJson::JsonArray &json);
 
-    jsUIRefSet mComponents;
+    JsonUIRefSet mComponents;
     fl::mutex mMutex;
 
     bool mItemsAdded = false;

@@ -4,25 +4,25 @@
 
 namespace fl {
 
-class jsUiInternal;
+class JsonUiInternal;
 
-// Free function replacements for jsUiManager::addComponent and jsUiManager::removeComponent
-// These provide the exact same functionality without requiring the jsUiManager class
+// Free function replacements for JsonUiManager::addComponent and JsonUiManager::removeComponent
+// These provide the exact same functionality without requiring the JsonUiManager class
 
 /**
  * Add a UI component to the global component registry.
- * This is a free function replacement for jsUiManager::addComponent.
+ * This is a free function replacement for JsonUiManager::addComponent.
  * 
- * @param component WeakPtr to the jsUiInternal component to add
+ * @param component WeakPtr to the JsonUiInternal component to add
  */
-void addUiComponent(fl::WeakPtr<jsUiInternal> component);
+void addUiComponent(fl::WeakPtr<JsonUiInternal> component);
 
 /**
  * Remove a UI component from the global component registry.
- * This is a free function replacement for jsUiManager::removeComponent.
+ * This is a free function replacement for JsonUiManager::removeComponent.
  * 
- * @param component WeakPtr to the jsUiInternal component to remove
+ * @param component WeakPtr to the JsonUiInternal component to remove
  */
-void removeUiComponent(fl::WeakPtr<jsUiInternal> component);
+void removeUiComponent(fl::WeakPtr<JsonUiInternal> component);
 
 } // namespace fl

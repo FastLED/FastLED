@@ -11,27 +11,27 @@ using namespace fl;
 
 namespace fl {
 
-jsCheckboxImpl::jsCheckboxImpl(const Str &name, bool value) : mValue(value) {
-    auto updateFunc = jsUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsCheckboxImpl *>(this)->updateInternal(json);
+JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
+    : mValue(value) {
+    auto updateFunc = JsonUiInternal::UpdateFunction(
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonCheckboxImpl *>(this)->updateInternal(value);
         });
+
     auto toJsonFunc =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsCheckboxImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonCheckboxImpl *>(this)->toJson(json);
         });
-    // mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
-    // fl::move(toJsonFunc));
-    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addUiComponent(mInternal);
 }
 
-jsCheckboxImpl::~jsCheckboxImpl() { removeUiComponent(mInternal); }
+JsonCheckboxImpl::~JsonCheckboxImpl() { removeUiComponent(mInternal); }
 
-const Str &jsCheckboxImpl::name() const { return mInternal->name(); }
+const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 
-void jsCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "checkbox";
@@ -39,16 +39,17 @@ void jsCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["value"] = mValue;
 }
 
-bool jsCheckboxImpl::value() const { return mValue; }
+bool JsonCheckboxImpl::value() const { return mValue; }
 
-void jsCheckboxImpl::setValue(bool value) { mValue = value; }
+void JsonCheckboxImpl::setValue(bool value) { mValue = value; }
 
-void jsCheckboxImpl::updateInternal(
+void JsonCheckboxImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    // We expect jsonStr to be a boolean value string, so parse it accordingly
-    mValue = value.as<bool>();
+    if (value.is<bool>()) {
+        bool newValue = value.as<bool>();
+        setValue(newValue);
+    }
 }
-
 
 } // namespace fl
 

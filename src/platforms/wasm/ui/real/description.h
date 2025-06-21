@@ -7,11 +7,11 @@
 
 namespace fl {
 
-class jsDescriptionImpl {
+class JsonDescriptionImpl {
   public:
-    jsDescriptionImpl(const fl::string &name);
-    ~jsDescriptionImpl();
-    jsDescriptionImpl &Group(const fl::string &name) {
+    JsonDescriptionImpl(const fl::string &name);
+    ~JsonDescriptionImpl();
+    JsonDescriptionImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     }
@@ -26,7 +26,7 @@ class jsDescriptionImpl {
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
   private:
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     fl::string mText;
 };
 

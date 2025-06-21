@@ -12,29 +12,29 @@ using namespace fl;
 
 namespace fl {
 
-jsButtonImpl::jsButtonImpl(const Str &name) : mPressed(false) {
-    auto updateFunc = jsUiInternal::UpdateFunction(
+JsonButtonImpl::JsonButtonImpl(const Str &name) : mPressed(false) {
+    auto updateFunc = JsonUiInternal::UpdateFunction(
         [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<jsButtonImpl *>(this)->updateInternal(value);
+            static_cast<JsonButtonImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsButtonImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonButtonImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addUiComponent(mInternal);
     mUpdater.init(this);
 }
 
-jsButtonImpl::~jsButtonImpl() { removeUiComponent(mInternal); }
+JsonButtonImpl::~JsonButtonImpl() { removeUiComponent(mInternal); }
 
-bool jsButtonImpl::clicked() const { return mClickedHappened; }
+bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 
-const Str &jsButtonImpl::name() const { return mInternal->name(); }
+const Str &JsonButtonImpl::name() const { return mInternal->name(); }
 
-void jsButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "button";
@@ -42,16 +42,16 @@ void jsButtonImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["pressed"] = mPressed;
 }
 
-bool jsButtonImpl::isPressed() const {
-    // Due to ordering of operations, mPressedLast is always equal to
-    // mPressed. So we kind of fudge a little on the isPressed() event
-    // here;
-    return mPressed || mClickedHappened;
+bool JsonButtonImpl::isPressed() const {
+    return mPressed;
 }
 
-void jsButtonImpl::updateInternal(
+void JsonButtonImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    mPressed = value.as<bool>();
+    if (value.is<bool>()) {
+        bool newPressed = value.as<bool>();
+        mPressed = newPressed;
+    }
 }
 
 } // namespace fl
