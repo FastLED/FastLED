@@ -33,7 +33,11 @@ void ensureWasmUiSystemInitialized() {
         FL_WARN("ensureWasmUiSystemInitialized: setting up generic UI handlers");
         
         // Set up the generic UI system with updateJs as the output handler
-        g_updateEngineState = setJsonUiHandlers(fl::updateJs);
+        // Wrap fl::updateJs in a fl::function to match the expected signature
+        JsonUiUpdateOutput updateJsWrapper = [](const char* jsonStr) {
+            fl::updateJs(jsonStr);
+        };
+        g_updateEngineState = setJsonUiHandlers(updateJsWrapper);
         g_uiSystemInitialized = true;
         
         FL_WARN("ensureWasmUiSystemInitialized: wasm UI system initialized");
