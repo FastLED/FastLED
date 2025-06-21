@@ -37,7 +37,7 @@ const Str &jsSliderImpl::name() const { return mInternal->name(); }
 void jsSliderImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
     json["type"] = "slider";
-    json["group"] = mGroup.c_str();
+    json["group"] = mInternal->groupName().c_str();
     json["id"] = mInternal->id();
     json["min"] = mMin;
     json["max"] = mMax;

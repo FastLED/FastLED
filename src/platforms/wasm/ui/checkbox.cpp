@@ -1,4 +1,3 @@
-
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)
 
 #include "platforms/wasm/ui/checkbox.h"
@@ -32,7 +31,7 @@ const Str &jsCheckboxImpl::name() const { return mInternal->name(); }
 
 void jsCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
-    json["group"] = mGroup.c_str();
+    json["group"] = mInternal->groupName().c_str();
     json["type"] = "checkbox";
     json["id"] = mInternal->id();
     json["value"] = mValue;

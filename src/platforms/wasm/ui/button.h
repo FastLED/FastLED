@@ -13,7 +13,7 @@ class jsButtonImpl {
     jsButtonImpl(const fl::string &name);
     ~jsButtonImpl();
     jsButtonImpl &Group(const fl::string &name) {
-        mGroup = name;
+        mInternal->setGroup(name);
         return *this;
     }
 
@@ -22,10 +22,10 @@ class jsButtonImpl {
     bool isPressed() const;
     bool clicked() const;
     int clickedCount() const { return mClickedCount; }
-    const fl::string &groupName() const { return mGroup; }
+    const fl::string &groupName() const { return mInternal->groupName(); }
     
     // Method to allow parent UIBase class to set the group
-    void setGroup(const fl::string &groupName) { mGroup = groupName; }
+    void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
     void click() { mPressed = true; }
 
@@ -56,7 +56,6 @@ class jsButtonImpl {
     bool mPressedLast = false;
     bool mClickedHappened = false;
     int mClickedCount = 0;
-    fl::string mGroup;
 };
 
 } // namespace fl
