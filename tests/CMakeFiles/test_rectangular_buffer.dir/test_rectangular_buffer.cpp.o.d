@@ -36,7 +36,8 @@ CMakeFiles/test_rectangular_buffer.dir/test_rectangular_buffer.cpp.o: \
   /workspace/tests/../src/fl/force_inline.h \
   /workspace/tests/../src/fl/template_magic.h \
   /workspace/tests/../src/fl/type_traits.h \
-  /workspace/tests/../src/hsv2rgb.h /workspace/tests/../src/fl/str.h \
+  /workspace/tests/../src/hsv2rgb.h /workspace/tests/../src/fl/ease.h \
+  /workspace/tests/../src/fl/stdint.h /workspace/tests/../src/fl/str.h \
   /usr/include/string.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
@@ -146,6 +147,8 @@ CMakeFiles/test_rectangular_buffer.dir/test_rectangular_buffer.cpp.o: \
   /workspace/tests/../src/fl/deprecated.h \
   /workspace/tests/../src/fl/vector.h \
   /workspace/tests/../src/fl/functional.h \
+  /workspace/tests/../src/fl/initializer_list.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/initializer_list \
   /workspace/tests/../src/fl/insert_result.h \
   /workspace/tests/../src/fl/warn.h /workspace/tests/../src/fl/dbg.h \
   /usr/include/stdio.h /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \
@@ -172,7 +175,6 @@ CMakeFiles/test_rectangular_buffer.dir/test_rectangular_buffer.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/alloc_traits.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/alloc_traits.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_vector.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/initializer_list \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_bvector.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functional_hash.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/refwrap.h \

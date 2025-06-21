@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/workspace/tests/cmake_install.cmake",
+		"/workspace/tests/.build/bin/fastled/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -42,6 +42,7 @@
 /workspace/tests/CMakeFiles/test_str.dir
 /workspace/tests/CMakeFiles/test_strip_id_map.dir
 /workspace/tests/CMakeFiles/test_strstream.dir
+/workspace/tests/CMakeFiles/test_thread_local_usage.dir
 /workspace/tests/CMakeFiles/test_tile2x2.dir
 /workspace/tests/CMakeFiles/test_transform.dir
 /workspace/tests/CMakeFiles/test_transition_ramp.dir

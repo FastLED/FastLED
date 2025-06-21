@@ -166,7 +166,8 @@ CMakeFiles/test_hashmap.dir/test_hashmap.cpp.o: \
   /workspace/tests/../src/fl/force_inline.h \
   /workspace/tests/../src/fl/template_magic.h \
   /workspace/tests/../src/fl/type_traits.h \
-  /workspace/tests/../src/hsv2rgb.h /workspace/tests/../src/fl/str.h \
+  /workspace/tests/../src/hsv2rgb.h /workspace/tests/../src/fl/ease.h \
+  /workspace/tests/../src/fl/stdint.h /workspace/tests/../src/fl/str.h \
   /usr/include/string.h /usr/include/strings.h \
   /workspace/tests/../src/fl/geometry.h \
   /workspace/tests/../src/fl/math.h /workspace/tests/../src/fl/clamp.h \
@@ -222,6 +223,7 @@ CMakeFiles/test_hashmap.dir/test_hashmap.cpp.o: \
   /workspace/tests/../src/fl/deprecated.h \
   /workspace/tests/../src/fl/vector.h \
   /workspace/tests/../src/fl/functional.h \
+  /workspace/tests/../src/fl/initializer_list.h \
   /workspace/tests/../src/fl/insert_result.h \
   /workspace/tests/../src/fl/warn.h /workspace/tests/../src/fl/dbg.h \
   /usr/include/stdio.h /usr/lib/llvm-20/lib/clang/20/include/stdarg.h \

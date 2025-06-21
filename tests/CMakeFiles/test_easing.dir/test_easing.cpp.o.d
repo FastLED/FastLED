@@ -1,9 +1,17 @@
 CMakeFiles/test_easing.dir/test_easing.cpp.o: \
-  /workspace/tests/test_easing.cpp /workspace/tests/test.h \
-  /workspace/tests/doctest.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ciso646 \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
+  /workspace/tests/test_easing.cpp /workspace/tests/../src/fl/ease.h \
+  /workspace/tests/../src/fl/stdint.h \
+  /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
+  /usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h \
+  /usr/lib/llvm-20/lib/clang/20/include/stdint.h /usr/include/stdint.h \
+  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
   /usr/include/features.h /usr/include/features-time64.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/bits/timesize.h \
@@ -11,10 +19,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/long-double.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/pstl_config.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stdint.h /usr/include/stdint.h \
-  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
   /usr/include/x86_64-linux-gnu/bits/types.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
   /usr/include/x86_64-linux-gnu/bits/time64.h \
@@ -22,13 +26,30 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+  /workspace/tests/../src/fl/array.h /usr/include/string.h \
+  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+  /usr/include/strings.h /workspace/tests/../src/fl/inplacenew.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/new \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++config.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/os_defines.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/cpu_defines.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/pstl/pstl_config.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
+  /workspace/tests/../src/fl/type_traits.h \
+  /workspace/tests/../src/fl/namespace.h /usr/include/alloca.h \
+  /workspace/tests/../src/fl/pair.h \
+  /workspace/tests/../src/lib8tion/intmap.h \
+  /workspace/tests/../src/lib8tion/lib8static.h /workspace/tests/test.h \
+  /workspace/tests/doctest.h \
+  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ciso646 \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/vector \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/requires_hosted.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_algobase.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/functexcept.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_defines.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cpp_type_traits.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/version.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/type_traits.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/ext/numeric_traits.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_pair.h \
@@ -50,7 +71,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/backward/binders.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/debug/formatter.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/typeinfo \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/hash_bytes.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/predefined_ops.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bit \
@@ -58,7 +78,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/allocator.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/c++allocator.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/new_allocator.h \
-  /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/new \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/memoryfwd.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_construct.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/stl_uninitialized.h \
@@ -79,15 +98,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/exception \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/exception_ptr.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/cxxabi_init_exception.h \
-  /usr/lib/llvm-20/lib/clang/20/include/stddef.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_header_macro.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_ptrdiff_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_size_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_wchar_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_null.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_nullptr_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_max_align_t.h \
-  /usr/lib/llvm-20/lib/clang/20/include/__stddef_offsetof.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/nested_exception.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/x86_64-linux-gnu/c++/14/bits/gthr-default.h \
@@ -116,8 +126,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
   /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
@@ -183,7 +191,6 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/include/x86_64-linux-gnu/sys/select.h \
   /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/alloca.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/std_abs.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/cstdio \
@@ -228,13 +235,11 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/istream \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/bits/istream.tcc \
   /workspace/tests/../src/crgb.h /workspace/tests/../src/chsv.h \
-  /workspace/tests/../src/fl/namespace.h /workspace/tests/../src/color.h \
+  /workspace/tests/../src/color.h \
   /workspace/tests/../src/lib8tion/types.h \
   /workspace/tests/../src/fl/force_inline.h \
   /workspace/tests/../src/fl/template_magic.h \
-  /workspace/tests/../src/fl/type_traits.h \
   /workspace/tests/../src/hsv2rgb.h /workspace/tests/../src/fl/str.h \
-  /usr/include/string.h /usr/include/strings.h \
   /workspace/tests/../src/fl/geometry.h \
   /workspace/tests/../src/fl/math.h /workspace/tests/../src/fl/clamp.h \
   /workspace/tests/../src/fl/map_range.h \
@@ -270,17 +275,16 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /workspace/tests/../src/fl/scoped_ptr.h \
   /workspace/tests/../src/fl/allocator.h \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../../include/c++/14/stdlib.h \
-  /workspace/tests/../src/fl/inplacenew.h \
   /workspace/tests/../src/fl/unused.h \
   /workspace/tests/../src/fl/deprecated.h \
   /workspace/tests/../src/fl/vector.h \
   /workspace/tests/../src/fl/functional.h \
+  /workspace/tests/../src/fl/initializer_list.h \
   /workspace/tests/../src/fl/insert_result.h \
   /workspace/tests/../src/fl/lut.h /workspace/tests/../src/fl/xypath.h \
   /workspace/tests/../src/fl/function.h \
   /workspace/tests/../src/fl/leds.h /workspace/tests/../src/fl/xymap.h \
-  /workspace/tests/../src/fl/xmap.h /workspace/tests/../src/fl/pair.h \
-  /workspace/tests/../src/fl/tile2x2.h \
+  /workspace/tests/../src/fl/xmap.h /workspace/tests/../src/fl/tile2x2.h \
   /workspace/tests/../src/fl/slice.h \
   /workspace/tests/../src/fl/transform.h \
   /workspace/tests/../src/fl/xypath_impls.h \
@@ -293,65 +297,4 @@ CMakeFiles/test_easing.dir/test_easing.cpp.o: \
   /workspace/tests/../src/fl/bitset.h \
   /workspace/tests/../src/fl/bitset_dynamic.h \
   /workspace/tests/../src/fl/variant.h /workspace/tests/../src/fl/hash.h \
-  /workspace/tests/../src/fl/optional.h \
-  /workspace/tests/../src/FastLED.h /workspace/tests/../src/cpp_compat.h \
-  /workspace/tests/../src/fl/register.h \
-  /workspace/tests/../src/fastled_config.h \
-  /workspace/tests/../src/led_sysdefs.h \
-  /workspace/tests/../src/platforms/stub/led_sysdefs_stub.h \
-  /workspace/tests/../src/platforms/stub/led_sysdefs_stub_generic.h \
-  /workspace/tests/../src/fastled_delay.h \
-  /workspace/tests/../src/fl/types.h /workspace/tests/../src/bitswap.h \
-  /workspace/tests/../src/controller.h \
-  /workspace/tests/../src/cpixel_ledcontroller.h \
-  /workspace/tests/../src/pixeltypes.h \
-  /workspace/tests/../src/lib8tion.h \
-  /workspace/tests/../src/lib8tion/lib8static.h \
-  /workspace/tests/../src/lib8tion/qfx.h \
-  /workspace/tests/../src/lib8tion/memmove.h \
-  /workspace/tests/../src/lib8tion/config.h \
-  /workspace/tests/../src/lib8tion/math8.h \
-  /workspace/tests/../src/lib8tion/scale8.h \
-  /workspace/tests/../src/lib8tion/intmap.h \
-  /workspace/tests/../src/lib8tion/random8.h \
-  /workspace/tests/../src/lib8tion/trig8.h \
-  /workspace/tests/../src/eorder.h /workspace/tests/../src/crgb.hpp \
-  /workspace/tests/../src/pixel_controller.h \
-  /workspace/tests/../src/rgbw.h \
-  /workspace/tests/../src/fl/five_bit_hd_gamma.h \
-  /workspace/tests/../src/dither_mode.h \
-  /workspace/tests/../src/pixel_iterator.h \
-  /workspace/tests/../src/cled_controller.h \
-  /workspace/tests/../src/fl/engine_events.h \
-  /workspace/tests/../src/fl/screenmap.h \
-  /workspace/tests/../src/fl/map.h \
-  /workspace/tests/../src/fl/singleton.h \
-  /workspace/tests/../src/fl/virtual_if_not_avr.h \
-  /workspace/tests/../src/fastpin.h \
-  /workspace/tests/../src/fastspi_types.h /workspace/tests/../src/dmx.h \
-  /workspace/tests/../src/platforms.h \
-  /workspace/tests/../src/platforms/stub/fastled_stub.h \
-  /workspace/tests/../src/platforms/stub/fastspi_stub.h \
-  /workspace/tests/../src/platforms/stub/fastspi_stub_generic.h \
-  /workspace/tests/../src/platforms/stub/clockless_stub.h \
-  /workspace/tests/../src/platforms/stub/clockless_stub_generic.h \
-  /workspace/tests/../src/fastled_progmem.h \
-  /workspace/tests/../src/platforms/null_progmem.h \
-  /workspace/tests/../src/colorutils.h \
-  /workspace/tests/../src/fl/colorutils.h \
-  /workspace/tests/../src/fl/blur.h \
-  /workspace/tests/../src/fl/colorutils_misc.h \
-  /workspace/tests/../src/fl/fill.h /workspace/tests/../src/pixelset.h \
-  /workspace/tests/../src/colorpalettes.h \
-  /workspace/tests/../src/noise.h /workspace/tests/../src/power_mgt.h \
-  /workspace/tests/../src/fastspi.h \
-  /workspace/tests/../src/fastspi_bitbang.h \
-  /workspace/tests/../src/chipsets.h /workspace/tests/../src/fl/clear.h \
-  /workspace/tests/../src/fl/stdint.h /workspace/tests/../src/fl/ui.h \
-  /workspace/tests/../src/fl/audio.h /workspace/tests/../src/fl/fft.h \
-  /workspace/tests/../src/fl/function_list.h \
-  /workspace/tests/../src/fl/ui_impl.h \
-  /workspace/tests/../src/platforms/ui_defs.h \
-  /workspace/tests/../src/sensors/button.h \
-  /workspace/tests/../src/sensors/digital_pin.h \
-  /workspace/tests/../src/fl/sketch_macros.h
+  /workspace/tests/../src/fl/optional.h

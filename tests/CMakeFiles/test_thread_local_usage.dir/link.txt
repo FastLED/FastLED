@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Xlinker --dependency-file=CMakeFiles/test_thread_local_usage.dir/link.d CMakeFiles/test_thread_local_usage.dir/test_thread_local_usage.cpp.o -o .build/bin/test_thread_local_usage  .build/lib/libfastled.a .build/lib/libdoctest_main.a
