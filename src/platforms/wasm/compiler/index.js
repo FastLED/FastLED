@@ -462,6 +462,17 @@ async function onModuleLoaded(fastLedLoader) {
       // Load the module
       fastLedLoader().then(async (instance) => {
         console.log('Module loaded, running FastLED...');
+        
+        // Expose the UI manager's updateUiComponents method to the module
+        if (uiManager && typeof uiManager.updateUiComponents === 'function') {
+          instance._jsUiManager_updateUiComponents = function(jsonString) {
+            uiManager.updateUiComponents(jsonString);
+          };
+          console.log('UI manager updateUiComponents method exposed to module');
+        } else {
+          console.error('UI manager or updateUiComponents method not available');
+        }
+        
         // Wait for the files.json to load.
         let filesJson = null;
         try {

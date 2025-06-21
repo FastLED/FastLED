@@ -489,4 +489,61 @@ export class JsonUiManager {
     }
     this.previousUiState[data.id] = data.value;
   }
+
+  // Update UI components from backend JSON updates
+  updateUiComponents(jsonString) {
+    try {
+      const updates = JSON.parse(jsonString);
+      console.log('Updating UI components with:', updates);
+      
+      for (const [elementId, value] of Object.entries(updates)) {
+        const element = this.uiElements[elementId];
+        if (!element) {
+          console.warn(`UI element with id ${elementId} not found`);
+          continue;
+        }
+
+        // Update the element based on its type
+        if (element.type === 'checkbox') {
+          element.checked = value;
+          this.previousUiState[elementId] = value;
+        } else if (element.type === 'range') {
+          // This is a slider
+          element.value = value;
+          // Update the value display if it exists
+          const controlDiv = element.closest('.ui-control');
+          if (controlDiv) {
+            const valueDisplay = controlDiv.querySelector('span');
+            if (valueDisplay) {
+              valueDisplay.textContent = value;
+            }
+          }
+          this.previousUiState[elementId] = parseFloat(value);
+        } else if (element.type === 'number') {
+          element.value = value;
+          this.previousUiState[elementId] = parseFloat(value);
+        } else if (element.tagName === 'SELECT') {
+          // This is a dropdown
+          element.selectedIndex = parseInt(value);
+          this.previousUiState[elementId] = parseInt(value);
+        } else if (element.type === 'submit') {
+          // This is a button - set pressed state
+          const isPressed = Boolean(value);
+          element.setAttribute('data-pressed', isPressed.toString());
+          if (isPressed) {
+            element.classList.add('active');
+          } else {
+            element.classList.remove('active');
+          }
+          this.previousUiState[elementId] = isPressed;
+        } else {
+          // Default case - try to set value
+          element.value = value;
+          this.previousUiState[elementId] = parseFloat(value);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating UI components:', error);
+    }
+  }
 }
