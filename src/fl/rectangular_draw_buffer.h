@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR
+
 #pragma once
 
 #include <stdint.h>
@@ -15,6 +15,22 @@ namespace fl {
 struct DrawItem {
     DrawItem() = default;
     DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw);
+    
+    // Move constructor
+    DrawItem(DrawItem &&other) noexcept 
+        : mPin(fl::move(other.mPin)), mNumBytes(fl::move(other.mNumBytes)), 
+          mIsRgbw(fl::move(other.mIsRgbw)) {}
+    
+    // Move assignment operator
+    DrawItem &operator=(DrawItem &&other) noexcept {
+        if (this != &other) {
+            mPin = fl::move(other.mPin);
+            mNumBytes = fl::move(other.mNumBytes);
+            mIsRgbw = fl::move(other.mIsRgbw);
+        }
+        return *this;
+    }
+    
     uint8_t mPin = 0;
     uint32_t mNumBytes = 0;
     bool mIsRgbw = false;

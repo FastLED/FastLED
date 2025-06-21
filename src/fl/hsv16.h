@@ -1,4 +1,4 @@
-#pragma once
+THIS SHOULD BE A LINTER ERROR#pragma once
 
 #include "fl/stdint.h"
 #include "crgb.h"
