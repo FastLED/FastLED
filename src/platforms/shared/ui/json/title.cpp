@@ -17,7 +17,9 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New("title", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    if (addJsonUiComponent) {
+        addJsonUiComponent(mInternal);
+    }
 }
 
 JsonTitleImpl::~JsonTitleImpl() {}

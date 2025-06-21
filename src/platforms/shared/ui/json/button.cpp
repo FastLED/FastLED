@@ -22,11 +22,17 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    if (addJsonUiComponent) {
+        addJsonUiComponent(mInternal);
+    }
     mUpdater.init(this);
 }
 
-JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(mInternal); }
+JsonButtonImpl::~JsonButtonImpl() { 
+    if (removeJsonUiComponent) {
+        removeJsonUiComponent(mInternal); 
+    }
+}
 
 JsonButtonImpl &JsonButtonImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

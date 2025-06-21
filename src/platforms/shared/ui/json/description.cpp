@@ -17,7 +17,9 @@ JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
             static_cast<JsonDescriptionImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New("description", update_fcn, to_json_fcn);
-    addJsonUiComponent(mInternal);
+    if (addJsonUiComponent) {
+        addJsonUiComponent(mInternal);
+    }
 }
 
 JsonDescriptionImpl::~JsonDescriptionImpl() {}

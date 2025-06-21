@@ -30,10 +30,16 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addJsonUiComponent(mInternal);
+    if (addJsonUiComponent) {
+        addJsonUiComponent(mInternal);
+    }
 }
 
-JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(mInternal); }
+JsonSliderImpl::~JsonSliderImpl() { 
+    if (removeJsonUiComponent) {
+        removeJsonUiComponent(mInternal); 
+    }
+}
 
 JsonSliderImpl &JsonSliderImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);

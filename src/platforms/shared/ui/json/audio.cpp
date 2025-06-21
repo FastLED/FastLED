@@ -24,10 +24,16 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     mUpdater.init(this);
-    addJsonUiComponent(mInternal);
+    if (addJsonUiComponent) {
+        addJsonUiComponent(mInternal);
+    }
 }
 
-JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(mInternal); }
+JsonAudioImpl::~JsonAudioImpl() { 
+    if (removeJsonUiComponent) {
+        removeJsonUiComponent(mInternal); 
+    }
+}
 
 JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
     mInternal->setGroup(name);
