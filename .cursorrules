@@ -108,20 +108,20 @@ To use the MCP server, run: `uv run mcp_server.py`
 **Why:** These conventions help distinguish between different categories of objects and maintain consistency with existing FastLED patterns.
 
 ### Container Parameter Types
-**Prefer `fl::span<T>` over `fl::Vector<T>` or arrays for function parameters.** `fl::span<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
+**Prefer `fl::span<T>` over `fl::vector<T>` or arrays for function parameters.** `fl::span<T>` provides a non-owning view that automatically converts from various container types, making APIs more flexible and efficient.
 
 **Examples:**
 - ✅ `void processData(fl::span<const uint8_t> data)` - accepts arrays, vectors, and other containers
-- ❌ `void processData(fl::Vector<uint8_t>& data)` - only accepts fl::Vector
+- ❌ `void processData(fl::vector<uint8_t>& data)` - only accepts fl::Vector
 - ❌ `void processData(uint8_t* data, size_t length)` - requires manual length tracking
 
 **Benefits:**
-- **Automatic conversion:** `fl::span<T>` can automatically convert from `fl::Vector<T>`, C-style arrays, and other container types
+- **Automatic conversion:** `fl::span<T>` can automatically convert from `fl::vector<T>`, C-style arrays, and other container types
 - **Type safety:** Maintains compile-time type checking while being more flexible than raw pointers
 - **Performance:** Zero-cost abstraction that avoids unnecessary copying or allocation
 - **Consistency:** Provides a uniform interface for working with contiguous data
 
-**When to use `fl::Vector<T>` instead:**
+**When to use `fl::vector<T>` instead:**
 - When you need ownership and dynamic resizing capabilities
 - When storing data as a class member that needs to persist
 
@@ -134,4 +134,4 @@ The project uses a comprehensive test suite including:
 - Code quality checks (ruff, clang-format)
 - Example compilation verification
 
-Use `bash test` as specified in user rules for running unit tests. 
+Use `bash test` as specified in user rules for running unit tests. This will also compile for avr for Arduino uno against the blink sketch.
