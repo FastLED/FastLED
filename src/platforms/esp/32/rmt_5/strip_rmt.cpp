@@ -79,12 +79,8 @@ public:
     {
         bool with_dma;
         if (dma_mode == IRmtStrip::DMA_AUTO) {
-            // Auto-detect DMA support: DMA is available on ESP32-S3/P4 and other newer chips
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
-            with_dma = true;
-#else
+            // DMA is buggy on ESP32S3
             with_dma = false;
-#endif
         } else {
             with_dma = dma_mode == IRmtStrip::DMA_ENABLED;
         }
