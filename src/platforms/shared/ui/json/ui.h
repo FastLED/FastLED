@@ -9,8 +9,8 @@ class JsonUiInternal;
 
 // Define these functions if you want to use the JsonUi.
 
-__attribute__((weak)) void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
-__attribute__((weak)) void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
+void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
+void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component);
 
 /**
  * Add a UI component to the global component registry.

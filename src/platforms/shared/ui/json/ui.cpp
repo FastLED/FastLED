@@ -19,19 +19,13 @@ __attribute__((weak)) void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInter
 }
 
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    if (addJsonUiComponentPlatform) {
-        addJsonUiComponentPlatform(component);
-    } else {
-        FL_WARN("addJsonUiComponent is not implemented, received component: " << component);
-    }
+    // Let the linker resolve weak vs strong symbol automatically
+    addJsonUiComponentPlatform(component);
 }
 
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
-    if (removeJsonUiComponentPlatform) {
-        removeJsonUiComponentPlatform(component);
-    } else {
-        FL_WARN("removeJsonUiComponent is not implemented, received component: " << component);
-    }
+    // Let the linker resolve weak vs strong symbol automatically
+    removeJsonUiComponentPlatform(component);
 }
 
 } // namespace fl
