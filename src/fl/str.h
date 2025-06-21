@@ -419,6 +419,11 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         copy(str.c_str(), str.size());
         return *this;
     }
+    // append
+    string &append(const std::string &str) {
+        write(str.c_str(), str.size());
+        return *this;
+    }
 #endif
 
     bool operator>(const string &other) const {

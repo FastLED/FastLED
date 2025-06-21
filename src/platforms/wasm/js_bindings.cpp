@@ -135,8 +135,11 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
                 }
             };
         globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
+            console.log("onFastLedUiUpdateFunction called with:", typeof jsonString, jsonString ? jsonString.substring(0, 100) : "null");
             if (typeof jsonString === 'string' && jsonString !== null) {
+                    console.log("Calling Module._jsUiManager_updateUiComponents");
                     Module._jsUiManager_updateUiComponents(jsonString);
+                    console.log("Module._jsUiManager_updateUiComponents call completed");
                 } else {
                 console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
                 }

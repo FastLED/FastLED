@@ -29,7 +29,7 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     FL_WARN("jsUpdateUiComponents: After ensureWasmUiSystemInitialized() - g_updateEngineState=" << (g_updateEngineState ? "VALID" : "NULL"));
     
     if (g_updateEngineState) {
-        FL_WARN("jsUpdateUiComponents: Calling g_updateEngineState with JSON: " << jsonStr.substr(0, 100) << "...");
+        FL_WARN("jsUpdateUiComponents: Calling g_updateEngineState with JSON: " << jsonStr.substr(0, 100).c_str() << "...");
         g_updateEngineState(jsonStr.c_str());
         FL_WARN("jsUpdateUiComponents: g_updateEngineState call completed");
     } else {
@@ -42,8 +42,8 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
 void ensureWasmUiSystemInitialized() {
     FL_WARN("ensureWasmUiSystemInitialized: ENTRY - g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false"));
     
-    if (!g_uiSystemInitialized) {
-        FL_WARN("ensureWasmUiSystemInitialized: setting up generic UI handlers");
+    if (!g_uiSystemInitialized || !g_updateEngineState) {
+        FL_WARN("ensureWasmUiSystemInitialized: setting up generic UI handlers (g_uiSystemInitialized=" << (g_uiSystemInitialized ? "true" : "false") << ", g_updateEngineState=" << (g_updateEngineState ? "valid" : "null") << ")");
         
         // Set up the generic UI system with updateJs as the output handler
         // Wrap the C function in a function object
