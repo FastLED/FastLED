@@ -3,7 +3,7 @@
 #include "fl/engine_events.h"
 #include "fl/str.h"
 #include "fl/vector.h"
-#include "platforms/wasm/ui/real/ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/json.h"
 
 namespace fl {

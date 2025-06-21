@@ -1,15 +1,15 @@
 #pragma once
 
 #include "fl/singleton.h"
-#include "platforms/wasm/engine_listener.h"
 
 #include "fl/map.h"
 #include "fl/ptr.h"
 #include "fl/set.h"
+#include "fl/engine_events.h"
 
 #include "fl/json.h"
 #include "fl/function.h"
-#include "platforms/wasm/ui/real/ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 namespace fl {
 

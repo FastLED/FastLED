@@ -1,7 +1,7 @@
 #include "fl/json.h"
 #include "fl/namespace.h"
 
-#include "platforms/wasm/ui/real/button.h"
+#include "platforms/shared/ui/json/button.h"
 #include "platforms/wasm/ui/ui_deps.h"
 
 #include "fl/json.h"

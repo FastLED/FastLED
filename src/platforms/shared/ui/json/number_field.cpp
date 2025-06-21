@@ -1,7 +1,7 @@
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "platforms/wasm/ui/real/number_field.h"
+#include "platforms/shared/ui/json/number_field.h"
 #include "ui_internal.h"
 #include "platforms/wasm/ui/ui_deps.h"
 

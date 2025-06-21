@@ -1,5 +1,5 @@
 #include "platforms/wasm/ui/ui_deps.h"
-#include "platforms/wasm/ui/real/ui_internal.h"
+#include "platforms/shared/ui/json/ui_internal.h"
 
 #include "fl/unused.h"
 
