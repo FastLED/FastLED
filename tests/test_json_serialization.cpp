@@ -2,6 +2,7 @@
 
 #include "fl/json.h"
 #include "fl/namespace.h"
+#include "fl/dbg.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -104,6 +105,119 @@ TEST_CASE("JSON serialization error handling") {
     // Should fail to parse
     CHECK_FALSE(parseResult);
     CHECK(!error.empty());
+}
+
+TEST_CASE("JSON type detection and printing") {
+    // Test with the user's JSON string {"2": "3"}
+    const char* jsonStr = R"({"2": "3"})";
+    
+    fl::JsonDocument testDoc;
+    fl::string error;
+    
+    bool parseResult = fl::parseJson(jsonStr, &testDoc, &error);
+    CHECK(parseResult);
+    CHECK(error.empty());
+    
+    // Print the type of the root document
+    FL_WARN("Root document type: ");
+    if (testDoc.is<FLArduinoJson::JsonObject>()) {
+        FL_WARN("object");
+        CHECK(true); // Verify we detected object correctly
+    } else if (testDoc.is<FLArduinoJson::JsonArray>()) {
+        FL_WARN("array");
+        CHECK(false); // Should not be array
+    } else {
+        FL_WARN("other type or null");
+        CHECK(false); // Should be object
+    }
+    
+    // Test individual value types within the object
+    auto obj = testDoc.as<FLArduinoJson::JsonObjectConst>();
+    auto valueVariant = obj["2"];
+    
+    FL_WARN("Value '2' type: ");
+    if (valueVariant.is<FLArduinoJson::JsonObjectConst>()) {
+        FL_WARN("object");
+        CHECK(false); // Should not be object
+    } else if (valueVariant.is<FLArduinoJson::JsonArrayConst>()) {
+        FL_WARN("array");
+        CHECK(false); // Should not be array
+    } else if (valueVariant.is<int>()) {
+        FL_WARN("integer");
+        CHECK(false); // Should not be integer (it's a string "3")
+    } else if (valueVariant.is<float>()) {
+        FL_WARN("float");
+        CHECK(false); // Should not be float
+    } else if (valueVariant.is<bool>()) {
+        FL_WARN("boolean");
+        CHECK(false); // Should not be boolean
+    } else if (valueVariant.is<const char*>()) {
+        FL_WARN("string");
+        CHECK(true); // Should be string "3"
+    } else if (valueVariant.isNull()) {
+        FL_WARN("null");
+        CHECK(false); // Should not be null
+    } else {
+        FL_WARN("undefined type");
+        CHECK(false); // Should not be undefined
+    }
+}
+
+TEST_CASE("JSON type detection comprehensive") {
+    // Test multiple JSON types in one document
+    const char* complexJson = R"({
+        "str": "hello",
+        "num": 42,
+        "float": 3.14,
+        "bool": true,
+        "null_val": null,
+        "array": [1, 2, 3],
+        "object": {"nested": "value"}
+    })";
+    
+    fl::JsonDocument testDoc;
+    fl::string error;
+    
+    bool parseResult = fl::parseJson(complexJson, &testDoc, &error);
+    CHECK(parseResult);
+    CHECK(error.empty());
+    
+    auto obj = testDoc.as<FLArduinoJson::JsonObjectConst>();
+    
+    // Test string type
+    auto strVal = obj["str"];
+    CHECK(strVal.is<const char*>());
+    FL_WARN("str field type: string");
+    
+    // Test integer type  
+    auto numVal = obj["num"];
+    CHECK(numVal.is<int>());
+    FL_WARN("num field type: integer");
+    
+    // Test float type
+    auto floatVal = obj["float"];
+    CHECK(floatVal.is<float>());
+    FL_WARN("float field type: float");
+    
+    // Test boolean type
+    auto boolVal = obj["bool"];
+    CHECK(boolVal.is<bool>());
+    FL_WARN("bool field type: boolean");
+    
+    // Test null type
+    auto nullVal = obj["null_val"];
+    CHECK(nullVal.isNull());
+    FL_WARN("null_val field type: null");
+    
+    // Test array type
+    auto arrayVal = obj["array"];
+    CHECK(arrayVal.is<FLArduinoJson::JsonArrayConst>());
+    FL_WARN("array field type: array");
+    
+    // Test nested object type
+    auto objectVal = obj["object"];
+    CHECK(objectVal.is<FLArduinoJson::JsonObjectConst>());
+    FL_WARN("object field type: object");
 }
 
 #else
