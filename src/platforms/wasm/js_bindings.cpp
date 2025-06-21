@@ -168,7 +168,9 @@ EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
 }
 
 EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
-    printf("updateJs: %s\n", jsonStr);
+    printf("updateJs: ENTRY - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
+    FASTLED_DBG("updateJs: ENTRY - jsonStr=" << (jsonStr ? jsonStr : "NULL"));
+    
     EM_ASM_({
             globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {
                 console.log(new Date().toLocaleTimeString());
@@ -191,6 +193,9 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
             }
 
     }, jsonStr);
+    
+    printf("updateJs: EXIT\n");
+    FASTLED_DBG("updateJs: EXIT");
 }
 
 
