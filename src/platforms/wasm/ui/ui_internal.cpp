@@ -13,11 +13,6 @@ using namespace fl;
 
 namespace fl {
 
-namespace {
-    fl::atomic<uint32_t> sNextId(0);
-}
-
-
 jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc, const fl::string &group)
     : mName(name), mGroup(group), mUpdateFunc(updateFunc),
@@ -65,6 +60,7 @@ bool jsUiInternal::clearFunctions() {
 }
 
 int jsUiInternal::nextId() {
+    static fl::atomic<uint32_t> sNextId{};
     return sNextId.fetch_add(1);
 }
 
