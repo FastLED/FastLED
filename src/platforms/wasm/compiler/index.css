@@ -179,6 +179,48 @@ h1 {
     margin-bottom: 20px;
 }
 
+/* Wide screen desktop layout - UI controls on the right */
+@media (min-width: 1200px) {
+    #main-container {
+        max-width: 1400px; /* Increase max width for wide screens */
+    }
+    
+    #top-row {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 40px; /* Space between canvas and UI controls */
+        justify-content: center;
+    }
+    
+    #canvas-container {
+        flex: 0 0 auto;
+        order: 1; /* Canvas on the left */
+    }
+    
+    #ui-controls {
+        flex: 0 0 auto;
+        order: 2; /* UI controls on the right */
+        margin-top: 0; /* Remove top margin since we're side-by-side */
+        max-width: 400px; /* Limit width of UI controls */
+        min-width: 320px; /* Ensure minimum width for usability */
+        align-self: flex-start; /* Align to top instead of center */
+        height: fit-content; /* Don't stretch to full height */
+    }
+    
+    /* Adjust UI groups for better side layout */
+    .ui-group {
+        margin: 10px 0; /* Reduce vertical margin */
+    }
+    
+    /* Make sure canvas maintains its aspect ratio in wide layout */
+    #myCanvas {
+        max-width: 640px; /* Maintain reasonable size on wide screens */
+        max-height: 640px;
+        width: auto;
+        height: auto;
+    }
+}
+
 #canvas-container {
     flex: 0 0 auto;
 }
