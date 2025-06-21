@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 
 #include "fl/atomic.h"
@@ -15,49 +14,49 @@ using namespace fl;
 
 namespace fl {
 
-jsUiInternal::jsUiInternal(const Str &name, UpdateFunction updateFunc,
+JsonUiInternal::JsonUiInternal(const Str &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc)
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
       mId(nextId()), mGroup(), mMutex() {}
 
-jsUiInternal::~jsUiInternal() {
+JsonUiInternal::~JsonUiInternal() {
     const bool functions_exist = mUpdateFunc || mtoJsonFunc;
     if (functions_exist) {
         clearFunctions();
-        // printf("Warning: %s: The owner of the jsUiInternal should clear "
+        // printf("Warning: %s: The owner of the JsonUiInternal should clear "
         //        "the functions, not this destructor.\n",
         //        mName.c_str());
-        FL_WARN("Warning: " << mName << ": The owner of the jsUiInternal should clear "
+        FL_WARN("Warning: " << mName << ": The owner of the JsonUiInternal should clear "
                "the functions, not this destructor.");
     }
 }
 
-const Str &jsUiInternal::name() const { return mName; }
-void jsUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
+const Str &JsonUiInternal::name() const { return mName; }
+void JsonUiInternal::update(const FLArduinoJson::JsonVariantConst &json) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mUpdateFunc) {
         mUpdateFunc(json);
     }
 }
-void jsUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonUiInternal::toJson(FLArduinoJson::JsonObject &json) const {
     fl::lock_guard<fl::mutex> lock(mMutex);
     if (mtoJsonFunc) {
         mtoJsonFunc(json);
     }
 }
-int jsUiInternal::id() const { return mId; }
+int JsonUiInternal::id() const { return mId; }
 
-void jsUiInternal::setGroup(const fl::string &groupName) { 
+void JsonUiInternal::setGroup(const fl::string &groupName) { 
     fl::lock_guard<fl::mutex> lock(mMutex);
     mGroup = groupName; 
 }
 
-const fl::string &jsUiInternal::groupName() const { 
+const fl::string &JsonUiInternal::groupName() const { 
     fl::lock_guard<fl::mutex> lock(mMutex);
     return mGroup; 
 }
 
-bool jsUiInternal::clearFunctions() {
+bool JsonUiInternal::clearFunctions() {
     fl::lock_guard<fl::mutex> lock(mMutex);
     bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
     mUpdateFunc =
@@ -66,7 +65,7 @@ bool jsUiInternal::clearFunctions() {
     return wasCleared;
 }
 
-int jsUiInternal::nextId() {
+int JsonUiInternal::nextId() {
     static fl::atomic<uint32_t> sNextId(0);
     return sNextId.fetch_add(1);
 }

@@ -6,11 +6,11 @@
 
 namespace fl {
 
-class jsCheckboxImpl {
+class JsonCheckboxImpl {
   public:
-    jsCheckboxImpl(const fl::string &, bool value);
-    ~jsCheckboxImpl();
-    jsCheckboxImpl &Group(const fl::string &name) {
+    JsonCheckboxImpl(const fl::string &, bool value);
+    ~JsonCheckboxImpl();
+    JsonCheckboxImpl &Group(const fl::string &name) {
         mInternal->setGroup(name);
         return *this;
     };
@@ -24,11 +24,11 @@ class jsCheckboxImpl {
     // Method to allow parent UIBase class to set the group
     void setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
 
-    jsCheckboxImpl &operator=(bool value) {
+    JsonCheckboxImpl &operator=(bool value) {
         setValue(value);
         return *this;
     }
-    jsCheckboxImpl &operator=(int value) {
+    JsonCheckboxImpl &operator=(int value) {
         setValue(value != 0);
         return *this;
     }
@@ -36,7 +36,7 @@ class jsCheckboxImpl {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
 
-    jsUiInternalPtr mInternal;
+    JsonUiInternalPtr mInternal;
     bool mValue;
 };
 

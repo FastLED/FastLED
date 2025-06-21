@@ -1,5 +1,3 @@
-
-
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
@@ -15,29 +13,28 @@ using namespace fl;
 
 namespace fl {
 
-jsNumberFieldImpl::jsNumberFieldImpl(const Str &name, double value, double min,
-                                     double max)
+JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
+                                        double min, double max)
     : mValue(value), mMin(min), mMax(max) {
-    auto updateFunc = jsUiInternal::UpdateFunction(
-        [this](const FLArduinoJson::JsonVariantConst &json) {
-            static_cast<jsNumberFieldImpl *>(this)->updateInternal(json);
+    auto updateFunc = JsonUiInternal::UpdateFunction(
+        [this](const FLArduinoJson::JsonVariantConst &value) {
+            static_cast<JsonNumberFieldImpl *>(this)->updateInternal(value);
         });
+
     auto toJsonFunc =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsNumberFieldImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonNumberFieldImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     addUiComponent(mInternal);
 }
 
-jsNumberFieldImpl::~jsNumberFieldImpl() {
-    removeUiComponent(mInternal);
-}
+JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeUiComponent(mInternal); }
 
-const Str &jsNumberFieldImpl::name() const { return mInternal->name(); }
+const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 
-void jsNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "number";
@@ -47,15 +44,26 @@ void jsNumberFieldImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["max"] = mMax;
 }
 
-double jsNumberFieldImpl::value() const { return mValue; }
+double JsonNumberFieldImpl::value() const { return mValue; }
 
-void jsNumberFieldImpl::setValue(double value) {
-    mValue = MAX(mMin, MIN(mMax, value));
+void JsonNumberFieldImpl::setValue(double value) {
+    if (value < mMin) {
+        value = mMin;
+    } else if (value > mMax) {
+        value = mMax;
+    }
+    mValue = value;
 }
 
-void jsNumberFieldImpl::updateInternal(
+void JsonNumberFieldImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
-    mValue = MAX(mMin, MIN(mMax, value.as<double>()));
+    if (value.is<double>()) {
+        double newValue = value.as<double>();
+        setValue(newValue);
+    } else if (value.is<int>()) {
+        int newValue = value.as<int>();
+        setValue(static_cast<double>(newValue));
+    }
 }
 
 } // namespace fl

@@ -15,15 +15,15 @@
 
 namespace fl {
 
-jsUiManager &jsUiManager::instance() {
-    return fl::Singleton<jsUiManager>::instance();
+JsonUiManager &JsonUiManager::instance() {
+    return fl::Singleton<JsonUiManager>::instance();
 }
 
 
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
-                         &jsUiManager::jsUpdateUiComponents);
+                         &JsonUiManager::jsUpdateUiComponents);
 }
 
 } // namespace fl

@@ -1,31 +1,30 @@
-
 #include "platforms/wasm/ui/ui_deps.h"
 #include "platforms/wasm/ui/real/ui_internal.h"
 
 #include "fl/unused.h"
 
 #ifdef __EMSCRIPTEN__
-
-namespace fl {
 #include "platforms/wasm/ui.h"
-void addUiComponent(fl::WeakPtr<jsUiInternal> component) {
-    jsUiManager::instance().addComponent(component);
+namespace fl {
+
+void addUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+    JsonUiManager::instance().addComponent(component);
 }
 
-void removeUiComponent(fl::WeakPtr<jsUiInternal> component) {
-    jsUiManager::instance().removeComponent(component);
+void removeUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+    JsonUiManager::instance().removeComponent(component);
 }
 } // namespace fl
 
 #else
 
 namespace fl {
-void addUiComponent(fl::WeakPtr<jsUiInternal> component) {
+void addUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     FL_UNUSED(component);
     // do nothing
 }
 
-void removeUiComponent(fl::WeakPtr<jsUiInternal> component) {
+void removeUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     FL_UNUSED(component);
     // do nothing
 }

@@ -12,17 +12,17 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(jsUiInternal);
+FASTLED_SMART_PTR(JsonUiInternal);
 
-class jsUiInternal : public fl::Referent {
+class JsonUiInternal : public fl::Referent {
   public:
     using UpdateFunction =
         fl::function<void(const FLArduinoJson::JsonVariantConst &)>;
     using ToJsonFunction = fl::function<void(FLArduinoJson::JsonObject &)>;
 
-    jsUiInternal(const fl::string &name, UpdateFunction updateFunc,
+    JsonUiInternal(const fl::string &name, UpdateFunction updateFunc,
                  ToJsonFunction toJsonFunc);
-    ~jsUiInternal();
+    ~JsonUiInternal();
 
     const fl::string &name() const;
     void update(const FLArduinoJson::JsonVariantConst &json);

@@ -43,13 +43,13 @@ namespace fl {
 #define FASTLED_HAS_UI_AUDIO 1
 #define FASTLED_HAS_UI_DROPDOWN 1
 
-typedef jsNumberFieldImpl UINumberFieldImpl;
-typedef jsSliderImpl UISliderImpl;
-typedef jsCheckboxImpl UICheckboxImpl;
-typedef jsButtonImpl UIButtonImpl;
-typedef jsTitleImpl UITitleImpl;
-typedef jsDescriptionImpl UIDescriptionImpl;
-typedef jsAudioImpl UIAudioImpl;
-typedef jsDropdownImpl UIDropdownImpl;
+typedef JsonNumberFieldImpl UINumberFieldImpl;
+typedef JsonSliderImpl UISliderImpl;
+typedef JsonCheckboxImpl UICheckboxImpl;
+typedef JsonButtonImpl UIButtonImpl;
+typedef JsonTitleImpl UITitleImpl;
+typedef JsonDescriptionImpl UIDescriptionImpl;
+typedef JsonAudioImpl UIAudioImpl;
+typedef JsonDropdownImpl UIDropdownImpl;
 
 } // namespace fl

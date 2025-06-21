@@ -1,7 +1,3 @@
-
-
-
-
 #include "fl/thread_local.h"
 #include "fl/warn.h"
 #include "platforms/wasm/ui/real/audio.h"
@@ -16,31 +12,35 @@ using namespace fl;
 
 namespace fl {
 
-jsAudioImpl::jsAudioImpl(const Str &name) {
-    auto updateFunc = jsUiInternal::UpdateFunction(
+JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
+    auto updateFunc = JsonUiInternal::UpdateFunction(
         [this](const FLArduinoJson::JsonVariantConst &value) {
-            static_cast<jsAudioImpl *>(this)->updateInternal(value);
+            static_cast<JsonAudioImpl *>(this)->updateInternal(value);
         });
 
     auto toJsonFunc =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsAudioImpl *>(this)->toJson(json);
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New(name, fl::move(updateFunc),
+    mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
     mUpdater.init(this);
+    addUiComponent(mInternal);
 }
 
-jsAudioImpl::~jsAudioImpl() { removeUiComponent(mInternal); }
+JsonAudioImpl::~JsonAudioImpl() { removeUiComponent(mInternal); }
 
-const Str &jsAudioImpl::name() const { return mInternal->name(); }
+const fl::string &JsonAudioImpl::name() const { return mInternal->name(); }
 
-void jsAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = name();
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "audio";
     json["id"] = mInternal->id();
+    json["audioSamples"] = kJsAudioSamples;
+    if (!mSerializeBuffer.empty()) {
+        json["audioData"] = mSerializeBuffer.c_str();
+    }
 }
 
 static bool isdigit(char c) { return c >= '0' && c <= '9'; }
@@ -101,7 +101,7 @@ static void parseJsonStringToInt16Vector(const fl::string &jsonStr,
     }
 }
 
-void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
+void JsonAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);
@@ -122,7 +122,7 @@ void jsAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
     }
 }
 
-AudioSample jsAudioImpl::next() {
+AudioSample JsonAudioImpl::next() {
     Ptr<AudioSampleImpl> out;
     if (mAudioSampleImpls.empty()) {
         // FASTLED_WARN("No audio samples available");
@@ -136,9 +136,7 @@ AudioSample jsAudioImpl::next() {
     return AudioSample(out);
 }
 
-bool jsAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
-
-
+bool JsonAudioImpl::hasNext() { return !mAudioSampleImpls.empty(); }
 
 } // namespace fl
 

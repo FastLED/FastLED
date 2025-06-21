@@ -1,5 +1,3 @@
-
-
 #include "title.h"
 #include "ui_internal.h"
 #include "platforms/wasm/ui/ui_deps.h"
@@ -12,19 +10,19 @@ using namespace fl;
 
 namespace fl {
 
-jsTitleImpl::jsTitleImpl(const Str &text) : mText(text) {
-    jsUiInternal::UpdateFunction update_fcn;
-    jsUiInternal::ToJsonFunction to_json_fcn =
-        jsUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
-            static_cast<jsTitleImpl *>(this)->toJson(json);
+JsonTitleImpl::JsonTitleImpl(const Str &text) : mText(text) {
+    JsonUiInternal::UpdateFunction update_fcn;
+    JsonUiInternal::ToJsonFunction to_json_fcn =
+        JsonUiInternal::ToJsonFunction([this](FLArduinoJson::JsonObject &json) {
+            static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
-    mInternal = jsUiInternalPtr::New("title", update_fcn, to_json_fcn);
+    mInternal = JsonUiInternalPtr::New("title", update_fcn, to_json_fcn);
     addUiComponent(mInternal);
 }
 
-jsTitleImpl::~jsTitleImpl() {}
+JsonTitleImpl::~JsonTitleImpl() {}
 
-void jsTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
+void JsonTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["name"] = mInternal->name();
     json["type"] = "title";
     json["group"] = mInternal->groupName().c_str();
@@ -32,7 +30,7 @@ void jsTitleImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["text"] = text();
 }
 
-
+const Str &JsonTitleImpl::name() const { return mInternal->name(); }
 
 } // namespace fl
 

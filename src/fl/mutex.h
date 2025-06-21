@@ -88,4 +88,25 @@ class MutexReal : public std::mutex {
 };
 #endif
 
+template<typename MutexType>
+class scoped_lock {
+  public:
+    scoped_lock(MutexType& mutex) : mMutex(mutex) {
+        mMutex.lock();
+    }
+
+    ~scoped_lock() {
+        mMutex.unlock();
+    }
+
+    // Non-copyable and non-movable
+    scoped_lock(const scoped_lock&) = delete;
+    scoped_lock& operator=(const scoped_lock&) = delete;
+    scoped_lock(scoped_lock&&) = delete;
+    scoped_lock& operator=(scoped_lock&&) = delete;
+
+  private:
+    MutexType& mMutex;
+};
+
 } // namespace fl
