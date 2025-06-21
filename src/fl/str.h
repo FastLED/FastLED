@@ -364,6 +364,10 @@ template <size_t SIZE = 64> class StrN {
     }
 
     StrN substring(size_t start, size_t end) const {
+        // short cut, it's the same string
+        if (start == 0 && end == mLength) {
+            return *this;
+        }
         if (start >= mLength) {
             return StrN();
         }
@@ -467,6 +471,19 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     template <typename T> string &operator+=(const T &val) {
         append(val);
         return *this;
+    }
+
+    char front() const {
+        if (empty()) {
+            return '\0';
+        }
+        return c_str()[0];
+    }
+    char back() const {
+        if (empty()) {
+            return '\0';
+        }
+        return c_str()[size() - 1];
     }
 
     // Generic integral append: only enabled if T is an integral type. This is
