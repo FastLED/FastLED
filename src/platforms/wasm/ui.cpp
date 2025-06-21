@@ -11,6 +11,7 @@
 #include "fl/map.h"
 #include "fl/namespace.h"
 #include "platforms/wasm/ui.h"
+#include "platforms/wasm/js_bindings.h"
 
 #include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/ui_internal.h"
