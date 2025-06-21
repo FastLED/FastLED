@@ -32,13 +32,15 @@ template <typename T, typename Deleter = PointerDeleter<T>> class scoped_ptr {
 
     // Disable copy semantics (no copying allowed)
     scoped_ptr(const scoped_ptr &) = delete;
-    scoped_ptr &operator=(const scoped_ptr &) = delete;
-
-    // Move constructor
-    scoped_ptr(scoped_ptr &&other) noexcept
-        : ptr_(other.ptr_), deleter_(other.deleter_) {
-        other.ptr_ = nullptr;
-        other.deleter_ = {};
+    scoped_ptr(scoped_ptr &&) = default;
+    scoped_ptr &operator=(const scoped_ptr &&other) {
+        if (this != &other) {
+            deleter_(ptr_);
+            ptr_ = other.ptr_;
+            deleter_ = other.deleter_;
+            other.ptr_ = nullptr;
+            other.deleter_ = {};
+        }
     }
 
     // // Move assignment operator
