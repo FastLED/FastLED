@@ -1,6 +1,7 @@
 #include "platforms/shared/ui/json/ui_deps.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "fl/warn.h"
+#include "fl/ptr.h"
 
 
 namespace fl {

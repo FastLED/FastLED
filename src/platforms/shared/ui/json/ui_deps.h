@@ -1,9 +1,12 @@
 #pragma once
 
-#include "fl/ptr.h"
-
 namespace fl {
 
+template<typename T>
+class WeakPtr;
+class JsonUiInternal;
+
+// Forward declare the JsonUiInternal class.
 class JsonUiInternal;
 
 // Define these functions if you want to use the JsonUi.
