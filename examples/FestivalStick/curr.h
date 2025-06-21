@@ -395,7 +395,8 @@ void loop() {
     float combinedPosition = get_position(now);
     float pos = combinedPosition * (corkscrew.size() - 1);
 
-    if (renderModeDropdown.value()) {
+
+    if (renderModeDropdown.value() == "Noise") {
         drawNoise(now);
     } else {
         draw(pos);
