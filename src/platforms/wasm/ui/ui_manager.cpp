@@ -19,13 +19,13 @@
 
 namespace fl {
 
-void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
+void UiManager::addComponent(WeakPtr<jsUiInternal> component) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
 }
 
-void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
+void UiManager::removeComponent(WeakPtr<jsUiInternal> component) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.erase(component);
 }
@@ -34,7 +34,7 @@ jsUiManager &jsUiManager::instance() {
     return fl::Singleton<jsUiManager>::instance();
 }
 
-fl::vector<jsUiInternalPtr> jsUiManager::getComponents() {
+fl::vector<jsUiInternalPtr> UiManager::getComponents() {
     fl::vector<jsUiInternalPtr> components;
     {
         fl::lock_guard<fl::mutex> lock(mMutex);
@@ -52,7 +52,7 @@ fl::vector<jsUiInternalPtr> jsUiManager::getComponents() {
     return components;
 }
 
-void jsUiManager::updateUiComponents(const char *jsonStr) {
+void UiManager::updateUiComponents(const char *jsonStr) {
     FLArduinoJson::JsonDocument doc;
     FLArduinoJson::DeserializationError error =
         FLArduinoJson::deserializeJson(doc, jsonStr);
@@ -61,33 +61,31 @@ void jsUiManager::updateUiComponents(const char *jsonStr) {
         FL_WARN("Error: Failed to parse JSON string: " << error.c_str());
         return;
     }
-    auto &self = instance();
-    self.mPendingJsonUpdate = doc;
-    self.mHasPendingUpdate = true;
+    mPendingJsonUpdate = doc;
+    mHasPendingUpdate = true;
 }
 
-void jsUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
-    auto &self = instance();
+void UiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     for (FLArduinoJson::JsonPairConst kv :
          doc.as<FLArduinoJson::JsonObjectConst>()) {
         int id = atoi(kv.key().c_str());
         // double loop to avoid copying the value
-        for (auto it = self.mComponents.begin();
-             it != self.mComponents.end();) {
+        for (auto it = mComponents.begin();
+             it != mComponents.end();) {
             if (auto component = it->lock()) {
                 ++it;
                 if (component->id() == id) {
                     component->update(kv.value());
                 }
             } else {
-                self.mComponents.erase(it);
+                mComponents.erase(it);
             }
         }
     }
 }
 
-void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
-    fl::vector<jsUiInternalPtr> components = instance().getComponents();
+void UiManager::toJson(FLArduinoJson::JsonArray &json) {
+    fl::vector<jsUiInternalPtr> components = getComponents();
     for (const auto &component : components) {
         FLArduinoJson::JsonObject componentJson =
             json.add<FLArduinoJson::JsonObject>();
