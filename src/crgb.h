@@ -149,12 +149,17 @@ struct CRGB {
         return raw[x];
     }
 
+    #if defined(__AVR__)
+    // Saves a surprising amount of memory on AVR devices.
+    CRGB() = default;
+    #else
     /// Default constructor
     FASTLED_FORCE_INLINE CRGB() {
         r = 0;
         g = 0;
         b = 0;
     }
+    #endif
 
     /// Allow construction from red, green, and blue
     /// @param ir input red value
