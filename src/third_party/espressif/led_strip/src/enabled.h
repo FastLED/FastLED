@@ -53,8 +53,10 @@
 
 // Note that FASTLED_RMT5 is a legacy name,
 // so we keep it because "RMT" is specific to ESP32
+#ifndef FASTLED_RMT5
 #if FASTLED_ESP32_HAS_RMT5 && !defined(FASTLED_RMT5)
 #define FASTLED_RMT5 1
 #else
 #define FASTLED_RMT5 0
+#endif
 #endif
