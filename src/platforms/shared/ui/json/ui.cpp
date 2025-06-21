@@ -5,6 +5,17 @@
 
 namespace fl {
 
+// Provide stub implementations for the weak symbols
+__attribute__((weak)) void addJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
+    // Default stub implementation - do nothing
+    (void)component;
+}
+
+__attribute__((weak)) void removeJsonUiComponentPlatform(fl::WeakPtr<JsonUiInternal> component) {
+    // Default stub implementation - do nothing
+    (void)component;
+}
+
 void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     if (addJsonUiComponentPlatform) {
         addJsonUiComponentPlatform(component);

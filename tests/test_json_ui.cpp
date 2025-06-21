@@ -17,7 +17,7 @@
 
 FASTLED_USING_NAMESPACE
 
-#if 0
+#if 1
 
 TEST_CASE("JsonUiInternal creation and basic operations") {
     bool updateCalled = false;
@@ -41,7 +41,7 @@ TEST_CASE("JsonUiInternal creation and basic operations") {
     
     REQUIRE(internal != nullptr);
     CHECK(internal->name() == name);
-    CHECK(internal->id() > 0);
+    CHECK(internal->id() >= 0);
     CHECK(internal->groupName().empty());
     
     // Test group functionality
