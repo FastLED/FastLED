@@ -17,7 +17,7 @@
 
 FASTLED_USING_NAMESPACE
 
-#if 0
+#if 1
 
 TEST_CASE("JsonUiInternal creation and basic operations") {
     bool updateCalled = false;

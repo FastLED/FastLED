@@ -66,7 +66,7 @@ void JsonDropdownImpl::toJson(FLArduinoJson::JsonObject &json) const {
     json["group"] = mInternal->groupName().c_str();
     json["type"] = "dropdown";
     json["id"] = mInternal->id();
-    json["selectedIndex"] = static_cast<int>(mSelectedIndex);
+    json["value"] = static_cast<int>(mSelectedIndex);
     
     FLArduinoJson::JsonArray optionsArray = json["options"].to<FLArduinoJson::JsonArray>();
     for (const auto &option : mOptions) {
