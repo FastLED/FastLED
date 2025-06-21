@@ -2,7 +2,7 @@
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
 #include "platforms/wasm/js.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 #include "fl/math_macros.h"
 
 #include "fl/json.h"
@@ -30,10 +30,10 @@ JsonSliderImpl::JsonSliderImpl(const fl::string &name, float value, float min,
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
-JsonSliderImpl::~JsonSliderImpl() { removeUiComponent(mInternal); }
+JsonSliderImpl::~JsonSliderImpl() { removeJsonUiComponent(mInternal); }
 
 const fl::string &JsonSliderImpl::name() const { return mInternal->name(); }
 

@@ -1,6 +1,6 @@
 #include "description.h"
 #include "ui_internal.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 
 #include "fl/json.h"
 
@@ -17,7 +17,7 @@ JsonDescriptionImpl::JsonDescriptionImpl(const string &text): mText(text) {
             static_cast<JsonDescriptionImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New("description", update_fcn, to_json_fcn);
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
 JsonDescriptionImpl::~JsonDescriptionImpl() {}

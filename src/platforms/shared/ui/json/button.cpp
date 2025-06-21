@@ -2,7 +2,7 @@
 #include "fl/namespace.h"
 
 #include "platforms/shared/ui/json/button.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 
 #include "fl/json.h"
 
@@ -24,11 +24,11 @@ JsonButtonImpl::JsonButtonImpl(const string &name) : mPressed(false) {
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
     mUpdater.init(this);
 }
 
-JsonButtonImpl::~JsonButtonImpl() { removeUiComponent(mInternal); }
+JsonButtonImpl::~JsonButtonImpl() { removeJsonUiComponent(mInternal); }
 
 bool JsonButtonImpl::clicked() const { return mClickedHappened; }
 

@@ -3,7 +3,7 @@
 #include "fl/namespace.h"
 #include "platforms/shared/ui/json/number_field.h"
 #include "ui_internal.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 
 #include "fl/json.h"
 
@@ -27,10 +27,10 @@ JsonNumberFieldImpl::JsonNumberFieldImpl(const fl::string &name, double value,
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
-JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeUiComponent(mInternal); }
+JsonNumberFieldImpl::~JsonNumberFieldImpl() { removeJsonUiComponent(mInternal); }
 
 const fl::string &JsonNumberFieldImpl::name() const { return mInternal->name(); }
 

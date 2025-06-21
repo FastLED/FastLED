@@ -1,6 +1,6 @@
 #include "platforms/shared/ui/json/checkbox.h"
 #include "fl/json.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 #include <string.h>
 
 #include "fl/json.h"
@@ -24,10 +24,10 @@ JsonCheckboxImpl::JsonCheckboxImpl(const fl::string &name, bool value)
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
-JsonCheckboxImpl::~JsonCheckboxImpl() { removeUiComponent(mInternal); }
+JsonCheckboxImpl::~JsonCheckboxImpl() { removeJsonUiComponent(mInternal); }
 
 const fl::string &JsonCheckboxImpl::name() const { return mInternal->name(); }
 

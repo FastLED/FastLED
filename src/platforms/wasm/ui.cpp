@@ -29,11 +29,11 @@ EMSCRIPTEN_BINDINGS(js_interface) {
 }
 
 
-void addUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     JsonUiManager::instance().addComponent(component);
 }
 
-void removeUiComponent(fl::WeakPtr<JsonUiInternal> component) {
+void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     JsonUiManager::instance().removeComponent(component);
 }
 

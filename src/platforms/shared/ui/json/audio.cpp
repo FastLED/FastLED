@@ -2,7 +2,7 @@
 #include "fl/warn.h"
 #include "platforms/shared/ui/json/audio.h"
 #include "fl/string.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 #include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
@@ -24,10 +24,10 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
     mUpdater.init(this);
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
-JsonAudioImpl::~JsonAudioImpl() { removeUiComponent(mInternal); }
+JsonAudioImpl::~JsonAudioImpl() { removeJsonUiComponent(mInternal); }
 
 const fl::string &JsonAudioImpl::name() const { return mInternal->name(); }
 

@@ -1,6 +1,6 @@
 #include "title.h"
 #include "ui_internal.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 
 #include "fl/json.h"
 
@@ -17,7 +17,7 @@ JsonTitleImpl::JsonTitleImpl(const string &text) : mText(text) {
             static_cast<JsonTitleImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New("title", update_fcn, to_json_fcn);
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
 JsonTitleImpl::~JsonTitleImpl() {}

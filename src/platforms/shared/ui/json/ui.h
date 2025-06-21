@@ -17,7 +17,7 @@ class JsonUiInternal;
  * 
  * @param component WeakPtr to the JsonUiInternal component to add
  */
-void addUiComponent(fl::WeakPtr<JsonUiInternal> component) __attribute__((weak));
+void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) __attribute__((weak));
 
 
 /**
@@ -26,7 +26,7 @@ void addUiComponent(fl::WeakPtr<JsonUiInternal> component) __attribute__((weak))
  * 
  * @param component WeakPtr to the JsonUiInternal component to remove
  */
-void removeUiComponent(fl::WeakPtr<JsonUiInternal> component) __attribute__((weak));
+void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) __attribute__((weak));
 
 
 } // namespace fl

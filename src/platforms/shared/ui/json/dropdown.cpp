@@ -1,6 +1,6 @@
 #include "platforms/shared/ui/json/dropdown.h"
 #include "fl/json.h"
-#include "platforms/shared/ui/json/ui_deps.h"
+#include "platforms/shared/ui/json/ui.h"
 #include <string.h>
 #include "fl/slice.h"
 
@@ -24,7 +24,7 @@ void JsonDropdownImpl::commonInit(const fl::string &name) {
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
                                      fl::move(toJsonFunc));
-    addUiComponent(mInternal);
+    addJsonUiComponent(mInternal);
 }
 
 // Constructor with array of options and count
@@ -54,7 +54,7 @@ JsonDropdownImpl::JsonDropdownImpl(const fl::string &name, fl::initializer_list<
     commonInit(name);
 }
 
-JsonDropdownImpl::~JsonDropdownImpl() { removeUiComponent(mInternal); }
+JsonDropdownImpl::~JsonDropdownImpl() { removeJsonUiComponent(mInternal); }
 
 const fl::string &JsonDropdownImpl::name() const { return mInternal->name(); }
 
