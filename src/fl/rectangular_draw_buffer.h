@@ -8,7 +8,6 @@
 #include "fl/scoped_ptr.h"
 #include "fl/slice.h"
 #include "fl/vector.h"
-#include "fl/algorithm.h"
 
 namespace fl {
 
@@ -16,20 +15,11 @@ struct DrawItem {
     DrawItem() = default;
     DrawItem(uint8_t pin, uint16_t numLeds, bool is_rgbw);
     
-    // Move constructor
-    DrawItem(DrawItem &&other) noexcept 
-        : mPin(fl::move(other.mPin)), mNumBytes(fl::move(other.mNumBytes)), 
-          mIsRgbw(fl::move(other.mIsRgbw)) {}
-    
-    // Move assignment operator
-    DrawItem &operator=(DrawItem &&other) noexcept {
-        if (this != &other) {
-            mPin = fl::move(other.mPin);
-            mNumBytes = fl::move(other.mNumBytes);
-            mIsRgbw = fl::move(other.mIsRgbw);
-        }
-        return *this;
-    }
+    // Rule of 5 for POD data
+    DrawItem(const DrawItem &other) = default;
+    DrawItem &operator=(const DrawItem &other) = default;
+    DrawItem(DrawItem &&other) noexcept = default;
+    DrawItem &operator=(DrawItem &&other) noexcept = default;
     
     uint8_t mPin = 0;
     uint32_t mNumBytes = 0;

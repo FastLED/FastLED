@@ -13,7 +13,6 @@ expensive trig functions are needed. Same with scale and offset.
 #include "fl/ptr.h"
 #include "fl/xymap.h"
 #include "lib8tion/types.h"
-#include "fl/algorithm.h"
 
 namespace fl {
 
@@ -41,23 +40,9 @@ struct Transform16 {
     // }
     Transform16() = default;
     
-    // Move constructor
-    Transform16(Transform16 &&other) noexcept 
-        : scale_x(fl::move(other.scale_x)), scale_y(fl::move(other.scale_y)),
-          offset_x(fl::move(other.offset_x)), offset_y(fl::move(other.offset_y)),
-          rotation(fl::move(other.rotation)) {}
-    
-    // Move assignment operator
-    Transform16 &operator=(Transform16 &&other) noexcept {
-        if (this != &other) {
-            scale_x = fl::move(other.scale_x);
-            scale_y = fl::move(other.scale_y);
-            offset_x = fl::move(other.offset_x);
-            offset_y = fl::move(other.offset_y);
-            rotation = fl::move(other.rotation);
-        }
-        return *this;
-    }
+    // Use default move constructor and assignment operator for POD data
+    Transform16(Transform16 &&other) noexcept = default;
+    Transform16 &operator=(Transform16 &&other) noexcept = default;
     
     alpha16 scale_x = 0xffff;
     alpha16 scale_y = 0xffff;
@@ -89,30 +74,15 @@ class TransformFloatImpl : public Referent {
 
 // Future usage.
 struct Matrix3x3f {
+    Matrix3x3f() = default;
+    Matrix3x3f(const Matrix3x3f &) = default;
+    Matrix3x3f &operator=(const Matrix3x3f &) = default;
+    Matrix3x3f(Matrix3x3f &&) noexcept = default;
+    Matrix3x3f &operator=(Matrix3x3f &&) noexcept = default;
+    
     static Matrix3x3f Identity() {
         Matrix3x3f m;
         return m;
-    }
-    
-    // Move constructor
-    Matrix3x3f(Matrix3x3f &&other) noexcept {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                m[i][j] = fl::move(other.m[i][j]);
-            }
-        }
-    }
-    
-    // Move assignment operator
-    Matrix3x3f &operator=(Matrix3x3f &&other) noexcept {
-        if (this != &other) {
-            for (int i = 0; i < 3; ++i) {
-                for (int j = 0; j < 3; ++j) {
-                    m[i][j] = fl::move(other.m[i][j]);
-                }
-            }
-        }
-        return *this;
     }
     
     vec2<float> transform(const vec2<float> &xy) const {

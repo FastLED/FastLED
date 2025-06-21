@@ -8,12 +8,23 @@
 #include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
+#include "fl/move.h"
 
 namespace fl {
 
 // Draws a uint8_t value to a CRGB array, blending it with the existing color.
 struct XYDrawComposited {
     XYDrawComposited(const CRGB &color, const XYMap &xymap, CRGB *out);
+    
+    // Copy constructor (assignment deleted due to const members)
+    XYDrawComposited(const XYDrawComposited &other) = default;
+    XYDrawComposited &operator=(const XYDrawComposited &other) = delete;
+    
+    // Move constructor (assignment deleted due to const members)
+    XYDrawComposited(XYDrawComposited &&other) noexcept 
+        : mColor(fl::move(other.mColor)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
+    XYDrawComposited &operator=(XYDrawComposited &&other) noexcept = delete;
+    
     void draw(const vec2<int16_t> &pt, uint32_t index, uint8_t value);
     const CRGB mColor;
     const XYMap mXYMap;
@@ -22,6 +33,16 @@ struct XYDrawComposited {
 
 struct XYDrawGradient {
     XYDrawGradient(const Gradient &gradient, const XYMap &xymap, CRGB *out);
+    
+    // Copy constructor (assignment deleted due to const members)
+    XYDrawGradient(const XYDrawGradient &other) = default;
+    XYDrawGradient &operator=(const XYDrawGradient &other) = delete;
+    
+    // Move constructor (assignment deleted due to const members)
+    XYDrawGradient(XYDrawGradient &&other) noexcept 
+        : mGradient(fl::move(other.mGradient)), mXYMap(fl::move(other.mXYMap)), mOut(other.mOut) {}
+    XYDrawGradient &operator=(XYDrawGradient &&other) noexcept = delete;
+    
     void draw(const vec2<int16_t> &pt, uint32_t index, uint8_t value);
     const Gradient mGradient;
     const XYMap mXYMap;

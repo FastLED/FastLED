@@ -1,9 +1,8 @@
-THIS SHOULD BE A LINTER ERROR#pragma once
+#pragma once
 
 #include "fl/stdint.h"
 #include "crgb.h"
 #include "fl/ease.h"
-#include "fl/algorithm.h"
 
 namespace fl {
 
@@ -16,18 +15,11 @@ struct HSV16 {
     HSV16(uint16_t h, uint16_t s, uint16_t v) : h(h), s(s), v(v) {}
     HSV16(const CRGB& rgb);
     
-    // Move constructor
-    HSV16(HSV16 &&other) noexcept : h(fl::move(other.h)), s(fl::move(other.s)), v(fl::move(other.v)) {}
-    
-    // Move assignment operator
-    HSV16 &operator=(HSV16 &&other) noexcept {
-        if (this != &other) {
-            h = fl::move(other.h);
-            s = fl::move(other.s);
-            v = fl::move(other.v);
-        }
-        return *this;
-    }
+    // Rule of 5 for POD data
+    HSV16(const HSV16 &other) = default;
+    HSV16 &operator=(const HSV16 &other) = default;
+    HSV16(HSV16 &&other) noexcept = default;
+    HSV16 &operator=(HSV16 &&other) noexcept = default;
     
     CRGB ToRGB() const;
     

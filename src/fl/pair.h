@@ -10,10 +10,10 @@ template <typename Key, typename Value> struct Pair {
     Pair() = default;
     Pair(const Key &k, const Value &v) : first(k), second(v) {}
     
-    // Move constructor
+    // Rule of 5: copy constructor, copy assignment, move constructor, move assignment, destructor
+    Pair(const Pair &other) = default;
+    Pair &operator=(const Pair &other) = default;
     Pair(Pair &&other) noexcept : first(fl::move(other.first)), second(fl::move(other.second)) {}
-    
-    // Move assignment operator
     Pair &operator=(Pair &&other) noexcept {
         if (this != &other) {
             first = fl::move(other.first);

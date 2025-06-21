@@ -82,6 +82,12 @@ struct CorkscrewInput {
         : totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
           invert(invertMapping) {}
     
+    // Rule of 5 for POD data
+    CorkscrewInput(const CorkscrewInput &other) = default;
+    CorkscrewInput &operator=(const CorkscrewInput &other) = default;
+    CorkscrewInput(CorkscrewInput &&other) noexcept = default;
+    CorkscrewInput &operator=(CorkscrewInput &&other) noexcept = default;
+    
     // Calculate optimal width and height based on number of turns and LEDs
     uint16_t calculateWidth() const {
         // Width = LEDs per turn
@@ -109,6 +115,12 @@ struct CorkscrewState {
     uint16_t height = 0; // Height of cylindrical map (total vertical segments)
     // Removed mapping vector - positions now computed on-the-fly
     CorkscrewState() = default;
+    
+    // Rule of 5 for POD data
+    CorkscrewState(const CorkscrewState &other) = default;
+    CorkscrewState &operator=(const CorkscrewState &other) = default;
+    CorkscrewState(CorkscrewState &&other) noexcept = default;
+    CorkscrewState &operator=(CorkscrewState &&other) noexcept = default;
 
     class iterator {
       public:

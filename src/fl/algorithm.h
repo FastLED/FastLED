@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/type_traits.h"
+#include "fl/move.h"
 
 namespace fl {
 
