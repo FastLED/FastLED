@@ -1,14 +1,15 @@
 
+
 #ifdef __EMSCRIPTEN__
 
+
+
+#include <emscripten/val.h>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
-
-#include <memory>
-#include <stdio.h>
 
 #include "fl/map.h"
 #include "fl/singleton.h"
@@ -69,11 +70,6 @@ static ActiveStripData *getActiveStripDataRef() {
     return instance;
 }
 
-EMSCRIPTEN_BINDINGS(engine_events_constructors) {
-    emscripten::class_<ActiveStripData>("ActiveStripData")
-        .constructor(&getActiveStripDataRef, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
-}
 
 // gcc constructor to get the
 // ActiveStripData instance created.
