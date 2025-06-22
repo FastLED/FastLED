@@ -138,6 +138,12 @@ def parse_args():
         nargs="?",
     )
     parser.add_argument(
+        "positional_examples",
+        type=str,
+        help="Examples to compile (positional arguments after board name)",
+        nargs="*",
+    )
+    parser.add_argument(
         "--examples", type=str, help="Comma-separated list of examples to compile"
     )
     parser.add_argument(
@@ -264,11 +270,23 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     for board in boards:
         projects.append(get_board(board, no_project_options=args.no_project_options))
     extra_examples: dict[Board, list[Path]] = {}
-    if args.examples is None:
+    # Handle both positional and named examples
+    if args.positional_examples:
+        # Convert positional examples, handling both "examples/Blink" and "Blink" formats
+        examples = []
+        for example in args.positional_examples:
+            # Remove "examples/" prefix if present
+            if example.startswith("examples/"):
+                example = example[len("examples/") :]
+            examples.append(example)
+    elif args.examples:
+        examples = args.examples.split(",")
+    else:
+        examples = DEFAULT_EXAMPLES
+        # Only add extra examples when using defaults
         for b, _examples in EXTRA_EXAMPLES.items():
             resolved_examples = [resolve_example_path(example) for example in _examples]
             extra_examples[b] = resolved_examples
-    examples = args.examples.split(",") if args.examples else DEFAULT_EXAMPLES
     examples_paths = [resolve_example_path(example) for example in examples]
     # now process example exclusions.
     if args.exclude_examples:
