@@ -10,6 +10,7 @@
 
 #include <FastLED.h>
 #include "fl/ease.h"
+#include "fl/leds.h"
 
 using namespace fl;
 
@@ -25,7 +26,8 @@ using namespace fl;
 
 #define MATRIX_SERPENTINE true
 
-CRGB leds[NUM_LEDS];
+// Use LedsXY for splat rendering instead of regular CRGB array
+LedsXY<MATRIX_WIDTH, MATRIX_HEIGHT> leds;
 
 // Create XYMap for serpentine 100x100 matrix
 XYMap xyMap = XYMap::constructSerpentine(MATRIX_WIDTH, MATRIX_HEIGHT);
@@ -93,7 +95,7 @@ void setup() {
 }
 
 void loop() {
-    // Clear the matrix
+    // Clear the matrix using fl::clear for LedsXY
     fl::clear(leds);
 
     // Get the current slider value (0.0 to 1.0)
@@ -118,9 +120,9 @@ void loop() {
         y = map(easeOutput, 0, 255, 0, MATRIX_HEIGHT - 1);
     }
 
-    // Draw white dot at the calculated position
+    // Draw white dot at the calculated position using splat rendering
     if (x < MATRIX_WIDTH && y < MATRIX_HEIGHT) {
-        leds[xyMap(x, y)] = CRGB::White;
+        leds(x, y) = CRGB::White;
     }
 
     FastLED.show();
