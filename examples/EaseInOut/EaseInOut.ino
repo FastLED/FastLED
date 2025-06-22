@@ -49,7 +49,7 @@ fl::string easeOptions[] = {
     "Out Sine", 
     "In-Out Sine"
 };
-UIDropdown easeTypeDropdown("Ease Type", easeOptions, 10);
+UIDropdown easeTypeDropdown("Ease Type", easeOptions);
 
 UICheckbox use16Bit("16-bit", true); // Default checked for 16-bit precision
 
