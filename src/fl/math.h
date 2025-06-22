@@ -1,8 +1,6 @@
 #pragma once
 
-#include "fl/clamp.h"
-#include "fl/map_range.h"
-#include "fl/math_macros.h"
+
 #include <math.h>
 
 // Exponential function - binds to standard library exp if available
@@ -23,6 +21,11 @@
 #endif // __has_include
 
 #endif // FASTLED_HAS_EXP
+
+
+#include "fl/clamp.h"
+#include "fl/map_range.h"
+#include "fl/math_macros.h"
 
 namespace fl {
 
