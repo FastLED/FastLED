@@ -180,6 +180,7 @@ UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
 UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
 UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
+UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
 
 
 
