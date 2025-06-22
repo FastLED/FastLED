@@ -12,7 +12,8 @@
 #include "fl/grid.h"
 #include "fl/screenmap.h"
 
-#define TWO_PI (PI * 2.0)
+
+
 
 namespace fl {
 

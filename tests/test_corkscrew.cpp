@@ -13,8 +13,6 @@
 
 #define NUM_LEDS 288
 
-#define TWO_PI (PI * 2.0)
-
 using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
