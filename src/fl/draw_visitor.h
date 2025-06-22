@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "crgb.h"
 #include "fl/geometry.h"

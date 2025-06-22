@@ -1,7 +1,7 @@
 #ifndef __CM3_REGS
 #define __CM3_REGS
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #ifdef __cplusplus
 #define   __I     volatile             /*!< Defines 'read only' permissions                 */

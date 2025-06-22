@@ -2,7 +2,7 @@
 
 #include "crgb.h"
 #include "fl/colorutils_misc.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 /// ANSI: signed short _Accum.  8 bits int, 7 bits fraction
 /// @see accum88

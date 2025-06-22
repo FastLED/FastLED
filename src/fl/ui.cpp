@@ -1,5 +1,5 @@
 #include "fl/ui.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

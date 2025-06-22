@@ -3,7 +3,7 @@
 
 #include "test.h"
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "test.h"
 #include "fx/1d/cylon.h"

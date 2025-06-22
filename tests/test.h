@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <vector>
 #include <set>
 #include <string>

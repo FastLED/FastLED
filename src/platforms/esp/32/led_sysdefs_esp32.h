@@ -1,5 +1,5 @@
 #pragma once
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "sdkconfig.h"
 #ifndef ESP32
 #define ESP32
@@ -48,4 +48,3 @@ typedef unsigned long prog_uint32_t;
 
 // These can be overridden
 #   define FASTLED_ESP32_RAW_PIN_ORDER
-

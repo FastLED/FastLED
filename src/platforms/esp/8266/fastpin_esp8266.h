@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN

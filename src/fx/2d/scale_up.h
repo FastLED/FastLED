@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/upscale.h"
 #include "fl/ptr.h"

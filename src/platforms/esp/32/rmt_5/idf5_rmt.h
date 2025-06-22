@@ -5,7 +5,7 @@
 #if FASTLED_RMT5
 
 #include "pixel_iterator.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -50,4 +50,3 @@ FASTLED_NAMESPACE_END
 
 
 #endif  // FASTLED_RMT5
-

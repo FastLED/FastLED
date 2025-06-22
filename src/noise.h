@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "crgb.h"
 #include "fl/namespace.h"
@@ -265,4 +265,3 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 /// @} Noise
 
 FASTLED_NAMESPACE_END
-

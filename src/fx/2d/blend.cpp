@@ -8,7 +8,7 @@ are blended by the the max luminance of the components.
 #include "colorutils.h"
 #include "pixelset.h"
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 namespace fl {
 

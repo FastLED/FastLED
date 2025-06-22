@@ -1,6 +1,6 @@
 // Based on works and code by Shawn Silverman.
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/clamp.h"
 #include "fl/namespace.h"

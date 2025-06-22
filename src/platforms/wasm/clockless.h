@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <vector>
 
 #include "platforms/wasm/compiler/Arduino.h"

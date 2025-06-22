@@ -2,7 +2,7 @@
 
 #include "crgb.h"
 #include "fl/namespace.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 namespace fl {
 

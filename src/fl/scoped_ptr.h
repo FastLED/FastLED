@@ -2,7 +2,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/allocator.h"
 #include "fl/inplacenew.h"

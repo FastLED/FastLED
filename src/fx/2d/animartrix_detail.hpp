@@ -28,7 +28,7 @@ License CC BY-NC 3.0
 
 #include "fl/vector.h"
 #include <math.h> // ok include
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #ifndef ANIMARTRIX_INTERNAL
 #error                                                                         \

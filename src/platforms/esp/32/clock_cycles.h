@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "hal/cpu_hal.h"

@@ -54,6 +54,7 @@ BANNED_HEADERS_CORE = [
     "cwchar",
     "cuchar",
     "cstdint",
+    "stdint.h",
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
     "Arduino.h",

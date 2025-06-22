@@ -5,7 +5,7 @@
 #include <emscripten/html5.h>
 
 #include <memory>
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <stdio.h>
 #include <string>
 

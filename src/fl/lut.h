@@ -7,7 +7,7 @@ LUT - Look up table implementation for various types.
 #include "fl/allocator.h"
 #include "fl/force_inline.h"
 #include "fl/ptr.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/geometry.h"
 #include "fl/namespace.h"

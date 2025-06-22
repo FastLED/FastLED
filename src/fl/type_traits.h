@@ -5,7 +5,7 @@ Provides eanble_if and is_derived for compilers before C++14.
 */
 
 #include <stddef.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/namespace.h"
 #include "fl/move.h"

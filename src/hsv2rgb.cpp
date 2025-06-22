@@ -3,7 +3,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "FastLED.h"
 #include "fl/math_macros.h"

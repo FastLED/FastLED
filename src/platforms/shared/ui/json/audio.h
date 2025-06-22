@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/audio.h"
 #include "fl/engine_events.h"

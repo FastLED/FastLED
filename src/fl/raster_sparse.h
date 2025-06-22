@@ -8,7 +8,7 @@ not allocate memory for the entire grid. This is useful for large grids where
 only a small number of pixels are set.
 */
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/geometry.h"
 #include "fl/grid.h"

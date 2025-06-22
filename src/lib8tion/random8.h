@@ -3,7 +3,7 @@
 #ifndef __INC_LIB8TION_RANDOM_H
 #define __INC_LIB8TION_RANDOM_H
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "lib8tion/lib8static.h"
 

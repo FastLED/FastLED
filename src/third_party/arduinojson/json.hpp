@@ -286,7 +286,7 @@ template <typename T1, typename T2>
 class InvalidConversion;  // Error here? See https://arduinojson.org/v7/invalid-conversion/
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #include <stddef.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <stdlib.h>
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {

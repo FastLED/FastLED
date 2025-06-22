@@ -13,7 +13,7 @@
 
 #include "i2s_esp32dev.h"
 #include "fl/namespace.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <string.h> // for memset
 
 #include "platforms/esp/esp_version.h"

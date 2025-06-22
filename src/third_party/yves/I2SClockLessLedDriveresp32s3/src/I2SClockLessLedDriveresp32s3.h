@@ -14,7 +14,7 @@
 #include "esp_intr_alloc.h"
 #include "esp_memory_utils.h"
 #include "esp_pm.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <stdio.h> // ok include
 #include <string.h>
 // #include "esp_lcd_panel_io_interface.h"

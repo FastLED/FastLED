@@ -6,7 +6,7 @@ are blended by the the max luminance of the components.
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/namespace.h"
 #include "fl/ptr.h"

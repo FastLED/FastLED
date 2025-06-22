@@ -4,7 +4,7 @@
 #include "fl/file_system.h"
 #include "fx/video/frame_interpolator.h"
 #include "fx/video/pixel_stream.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/namespace.h"
 

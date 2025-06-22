@@ -1,6 +1,6 @@
 #ifndef __FASTPIN_ARM_K20_H
 #define __FASTPIN_ARM_K20_H
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 

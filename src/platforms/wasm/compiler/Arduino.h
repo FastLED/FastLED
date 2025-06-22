@@ -6,7 +6,7 @@
 #include "fl/str.h"
 #include <algorithm>
 #include <random>
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <stdio.h>
 #include <string>
 

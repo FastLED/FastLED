@@ -1,6 +1,6 @@
 
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #define FASTLED_INTERNAL
 

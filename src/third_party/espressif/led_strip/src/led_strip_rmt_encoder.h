@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "driver/rmt_encoder.h"
 #include "led_strip_types.h"
 

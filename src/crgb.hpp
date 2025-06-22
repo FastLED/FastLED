@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "chsv.h"
 #include "crgb.h"
 #include "lib8tion.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 
 inline uint32_t Adafruit_DotStar_ColorHSV(uint16_t hue, uint8_t sat, uint8_t val) {

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 /// @addtogroup lib8tion
 /// @{

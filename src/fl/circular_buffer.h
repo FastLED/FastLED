@@ -4,7 +4,7 @@
 #include "fl/namespace.h"
 #include "fl/ptr.h" // Assuming this provides `scoped_array` or similar
 #include <stddef.h> // For size_t
-#include <stdint.h> // For standard integer types
+#include "fl/stdint.h" // For standard integer types
 
 namespace fl {
 

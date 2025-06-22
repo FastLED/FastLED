@@ -4,7 +4,7 @@
 #error "why is this being included?"
 #endif
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/namespace.h"
 #include "fl/unused.h"
 
@@ -26,4 +26,3 @@ public:
 
 
 FASTLED_NAMESPACE_END
-

@@ -5,7 +5,7 @@
 
 #include "fl/namespace.h"
 #include "lib8static.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 FASTLED_NAMESPACE_BEGIN
 

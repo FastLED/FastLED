@@ -1,5 +1,5 @@
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <string.h>
 
 #include "fl/clamp.h"

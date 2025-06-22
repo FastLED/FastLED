@@ -1,6 +1,6 @@
 #ifdef ESP32
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5

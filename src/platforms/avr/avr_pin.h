@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN>
 class _AVRPIN {

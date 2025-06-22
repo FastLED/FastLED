@@ -6,7 +6,7 @@
 #include "fl/slice.h"
 #include "fl/vector.h"
 #include <math.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 
 namespace fl {
 

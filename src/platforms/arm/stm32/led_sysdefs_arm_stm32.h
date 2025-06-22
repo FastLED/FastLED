@@ -4,7 +4,7 @@
 #if defined(STM32F10X_MD) || defined(STM32F2XX)
 
 #include <application.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/namespace.h"
 

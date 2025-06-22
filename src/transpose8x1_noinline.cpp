@@ -1,7 +1,7 @@
 /// @file transpose8x1_noinline.cpp
 /// Defines the 8x1 transposition function
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "transpose8x1_noinline.h"
 

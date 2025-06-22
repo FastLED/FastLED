@@ -3,7 +3,7 @@
 #include "fl/bitset_dynamic.h"
 #include "fl/type_traits.h"
 #include "fl/variant.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 namespace fl {
 

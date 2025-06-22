@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <math.h>
 #include <string.h>
 

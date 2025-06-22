@@ -1,7 +1,7 @@
 #ifndef __INC_M0_CLOCKLESS_H
 #define __INC_M0_CLOCKLESS_H
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #ifdef __cplusplus
 extern "C" {

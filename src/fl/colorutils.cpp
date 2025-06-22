@@ -6,7 +6,7 @@
 /// refactored.
 
 #include <math.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "FastLED.h"
 #include "fl/assert.h"

@@ -8,7 +8,7 @@ Based on works and code by Shawn Silverman.
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/math_macros.h" // if needed for MAX/MIN macros
 #include "fl/namespace.h"

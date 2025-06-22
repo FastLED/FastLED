@@ -4,7 +4,7 @@
 // fl::string has inlined memory and copy on write semantics.
 
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <string.h>
 
 #ifdef __EMSCRIPTEN__

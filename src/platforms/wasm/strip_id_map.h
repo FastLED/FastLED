@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <stdio.h>
 
 #include "fl/map.h"

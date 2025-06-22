@@ -1,9 +1,9 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "fl/namespace.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #if defined(ARDUNIO_CORE_SPI)
 #endif
@@ -105,5 +105,3 @@ FASTLED_NAMESPACE_END
 
 
 #endif
-
-

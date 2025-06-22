@@ -3,7 +3,7 @@
 
 #include "fl/str.h"
 #include "fl/template_magic.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <string.h>
 
 namespace fl {

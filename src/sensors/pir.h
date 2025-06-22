@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #include "digital_pin.h"
 #include "fl/ptr.h"

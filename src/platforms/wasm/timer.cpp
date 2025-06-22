@@ -1,6 +1,6 @@
 #ifdef __EMSCRIPTEN__
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <thread>
 
 #include <emscripten.h>

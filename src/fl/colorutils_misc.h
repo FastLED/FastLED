@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 // TODO: Figure out how to namespace these.
 typedef uint32_t TProgmemRGBPalette16[16]; ///< CRGBPalette16 entries stored in

@@ -15,7 +15,7 @@
 /// Fast, efficient 8-bit math functions specifically
 /// designed for high-performance LED programming. 
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/qfx.h"
 #include "lib8tion/memmove.h"
