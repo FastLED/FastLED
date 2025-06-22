@@ -80,7 +80,7 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
 string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-string renderModeOptions[] = {"Noise", "Position"};
+string renderModeOptions[] = {"Noise", "Position", "Fire"};
 
 
 
@@ -145,9 +145,39 @@ EaseType getEaseType(fl::string value) {
 UIDropdown saturationFunction("Saturation Function", easeInfo.begin(), easeInfo.end());
 UIDropdown luminanceFunction("Luminance Function", easeInfo.begin(), easeInfo.end());
 
+// Fire-related UI controls (added for cylindrical fire effect)
+UISlider fireScaleXY("Fire Scale", 8, 1, 100, 1);              
+UISlider fireSpeedY("Fire SpeedY", 1.3, 1, 6, .1);             
+UISlider fireScaleX("Fire ScaleX", .3, 0.1, 3, .01);           
+UISlider fireInvSpeedZ("Fire Inverse SpeedZ", 20, 1, 100, 1);  
+UINumberField firePalette("Fire Palette", 0, 0, 2);             
+
+// Fire color palettes (from FireCylinder)
+DEFINE_GRADIENT_PALETTE(firepal){
+    0,   0,   0,   0,  
+    32,  255, 0,   0,  
+    190, 255, 255, 0,  
+    255, 255, 255, 255 
+};
+
+DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
+    0,   0,   0,   0,  
+    32,  0,   70,  0,  
+    190, 57,  255, 20, 
+    255, 255, 255, 255 
+};
+
+DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
+    0,   0,   0,   0,   
+    32,  0,   0,   70,  
+    128, 20,  57,  255, 
+    255, 255, 255, 255  
+};
+
 // Create UIGroup for noise controls using variadic constructor
 // This automatically assigns all specified controls to the "Noise Controls" group
 UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
+UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
 UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 
@@ -238,7 +268,7 @@ void setup() {
     
     // Set initial dropdown selections
     paletteDropdown.setSelectedIndex(0);    // Party
-    renderModeDropdown.setSelectedIndex(0); // Noise
+    renderModeDropdown.setSelectedIndex(0); // Fire (new default)
     
     // Add onChange callbacks for dropdowns
     paletteDropdown.onChanged([](UIDropdown &dropdown) {
@@ -422,6 +452,83 @@ void draw(float pos) {
     }
 }
 
+CRGBPalette16 getFirePalette() {
+    int paletteIndex = (int)firePalette.value();
+    switch (paletteIndex) {
+    case 0:
+        return firepal;               
+    case 1:
+        return electricGreenFirePal;  
+    case 2:
+        return electricBlueFirePal;   
+    default:
+        return firepal;               
+    }
+}
+
+uint8_t getFirePaletteIndex(uint32_t millis32, int width, int max_width, int height, int max_height,
+                        uint32_t y_speed) {
+    uint16_t scale = fireScaleXY.as<uint16_t>();
+    
+    float xf = (float)width / (float)max_width;  
+    uint8_t x = (uint8_t)(xf * 255);            
+    
+    uint32_t cosx = cos8(x);  
+    uint32_t sinx = sin8(x);  
+    
+    float trig_scale = scale * fireScaleX.value();
+    cosx *= trig_scale;
+    sinx *= trig_scale;
+    
+    uint32_t y = height * scale + y_speed;
+    
+    uint16_t z = millis32 / fireInvSpeedZ.as<uint16_t>();
+
+    uint16_t noise16 = inoise16(cosx << 8, sinx << 8, y << 8, z << 8);
+    
+    uint8_t noise_val = noise16 >> 8;
+    
+    int8_t subtraction_factor = abs8(height - (max_height - 1)) * 255 /
+                                (max_height - 1);
+    
+    return qsub8(noise_val, subtraction_factor);
+}
+
+void fillFrameBufferFire(uint32_t now) {
+    CRGBPalette16 myPal = getFirePalette();
+    
+    // Calculate the current y-offset for animation (makes the fire move)
+    uint32_t y_speed = now * fireSpeedY.value();
+    
+    int width = frameBuffer.width();
+    int height = frameBuffer.height();
+    
+    // Loop through every pixel in our cylindrical matrix
+    for (int w = 0; w < width; w++) {
+        for (int h = 0; h < height; h++) {
+            // Calculate which color to use from our palette for this pixel
+            uint8_t palette_index =
+                getFirePaletteIndex(now, w, width, h, height, y_speed);
+            
+            // Get the actual RGB color from the palette
+            CRGB color = ColorFromPalette(myPal, palette_index, 255);
+            
+            // Apply color boost using ease functions
+            EaseType sat_ease = getEaseType(saturationFunction.value());
+            EaseType lum_ease = getEaseType(luminanceFunction.value());
+            color = color.colorBoost(sat_ease, lum_ease);
+            
+            // Set the pixel in the frame buffer
+            // Flip coordinates to make fire rise from bottom
+            frameBuffer.at((width - 1) - w, (height - 1) - h) = color;
+        }
+    }
+}
+
+void drawFire(uint32_t now) {
+    fillFrameBufferFire(now);
+}
+
 void loop() {
     uint32_t now = millis();
     clear(frameBuffer);
@@ -440,6 +547,8 @@ void loop() {
 
     if (renderModeDropdown.value() == "Noise") {
         drawNoise(now);
+    } else if (renderModeDropdown.value() == "Fire") {
+        drawFire(now);
     } else {
         draw(pos);
     }
