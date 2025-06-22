@@ -40,8 +40,6 @@ void loop() {}
 #else
 
 
-#include <stdio.h>
-#include <string>
 
 #include <FastLED.h>
 #include "fl/json.h"
