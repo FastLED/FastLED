@@ -78,7 +78,7 @@ class UISlider : protected UISliderImpl, public UIBase {
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        static_cast<Super*>(this)->setGroup(groupName);
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -163,7 +163,8 @@ class UIButton : protected UIButtonImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -238,7 +239,8 @@ class UICheckbox : protected UICheckboxImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -306,7 +308,8 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -353,13 +356,15 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
 class UITitle : protected UITitleImpl, public UIBase {
   public:
     FL_NO_COPY(UITitle);
+    using Super = UITitleImpl;
     UITitle(const char *name) : UITitleImpl(name) {}
     ~UITitle() {}
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<UITitleImpl*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -369,13 +374,15 @@ class UITitle : protected UITitleImpl, public UIBase {
 class UIDescription : protected UIDescriptionImpl, public UIBase {
   public:
     FL_NO_COPY(UIDescription);
+    using Super = UIDescriptionImpl;
     UIDescription(const char *name) : UIDescriptionImpl(name) {}
     ~UIDescription() {}
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<UIDescriptionImpl*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -394,7 +401,8 @@ class UIAudio : protected UIAudioImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -441,7 +449,8 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
-        static_cast<Super*>(this)->setGroup(groupName);
+        // Update the implementation's group if it has the method (WASM platforms)
+        Super::setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
