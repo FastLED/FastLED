@@ -79,6 +79,8 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
+fl::string getAnimartrixName(int animation);
+
 class FastLEDANIMartRIX;
 class Animartrix : public Fx2d {
   public:
@@ -101,7 +103,7 @@ class Animartrix : public Fx2d {
   private:
     friend void AnimartrixLoop(Animartrix &self, uint32_t now);
     friend class FastLEDANIMartRIX;
-    static const char *getAnimationName(AnimartrixAnim animation);
+    static const char *getAnimartrixName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
     fl::scoped_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
@@ -154,7 +156,7 @@ void Animartrix::fxSet(int fx) {
     }
     fx = fx % NUM_ANIMATIONS;
     current_animation = static_cast<AnimartrixAnim>(fx);
-    FASTLED_DBG("Setting animation to " << getAnimationName(current_animation));
+    FASTLED_DBG("Setting animation to " << getAnimartrixName(current_animation));
 }
 
 void AnimartrixLoop(Animartrix &self, uint32_t now) {
@@ -244,6 +246,13 @@ static const AnimartrixEntry ANIMATION_TABLE[] = {
      &FastLEDANIMartRIX::SM10},
 };
 
+fl::string getAnimartrixName(int animation) {
+    if (animation < 0 || animation >= NUM_ANIMATIONS) {
+        return "UNKNOWN";
+    }
+    return ANIMATION_TABLE[animation].name;
+}
+
 void FastLEDANIMartRIX::loop() {
     for (const auto &entry : ANIMATION_TABLE) {
         if (entry.anim == data->current_animation) {
@@ -255,7 +264,7 @@ void FastLEDANIMartRIX::loop() {
     FASTLED_DBG("Animation not found for " << int(data->current_animation));
 }
 
-const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
+const char *Animartrix::getAnimartrixName(AnimartrixAnim animation) {
     for (const auto &entry : ANIMATION_TABLE) {
         if (entry.anim == animation) {
             return entry.name;
