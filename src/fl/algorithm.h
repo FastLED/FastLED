@@ -167,4 +167,37 @@ void fill(Iterator first, Iterator last, const T& value) {
     }
 }
 
+template <typename Iterator, typename T>
+Iterator find(Iterator first, Iterator last, const T& value) {
+    while (first != last) {
+        if (*first == value) {
+            return first;
+        }
+        ++first;
+    }
+    return last;
+}
+
+template <typename Iterator, typename UnaryPredicate>
+Iterator find_if(Iterator first, Iterator last, UnaryPredicate pred) {
+    while (first != last) {
+        if (pred(*first)) {
+            return first;
+        }
+        ++first;
+    }
+    return last;
+}
+
+template <typename Iterator, typename UnaryPredicate>
+Iterator find_if_not(Iterator first, Iterator last, UnaryPredicate pred) {
+    while (first != last) {
+        if (!pred(*first)) {
+            return first;
+        }
+        ++first;
+    }
+    return last;
+}
+
 } // namespace fl
