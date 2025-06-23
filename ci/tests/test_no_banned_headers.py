@@ -1,6 +1,8 @@
 import os
 import unittest
+from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+from typing import List, Optional
 
 from ci.paths import PROJECT_ROOT
 
@@ -64,55 +66,180 @@ EXCLUDED_FILES = [
 ]
 
 
-class TestNoBannedHeaders(unittest.TestCase):
+class FileProcessorCallback(ABC):
+    """Abstract base class for file processing callbacks."""
 
-    def check_file(self, file_path: str) -> list[str]:
-        failings: list[str] = []
-        banned_headers_list = []
-        if file_path.startswith(PLATFORMS_DIR):
-            # continue  # Skip the platforms directory
-            if file_path.startswith(PLATFORMS_ESP_DIR):
-                banned_headers_list = BANNED_HEADERS_ESP
-            else:
-                return failings
-        if len(banned_headers_list) == 0:
-            return failings
-        with open(file_path, "r", encoding="utf-8") as f:
+    @abstractmethod
+    def should_process_file(self, file_path: str) -> bool:
+        """Predicate to determine if a file should be processed.
 
-            for line_number, line in enumerate(f, 1):
-                if line.startswith("//"):
-                    continue
-                for header in banned_headers_list:
-                    if (
-                        f"#include <{header}>" in line or f'#include "{header}"' in line
-                    ) and "// ok include" not in line:
-                        failings.append(
-                            f"Found banned header '{header}' in {file_path}:{line_number}"
-                        )
-        return failings
+        Args:
+            file_path: Path to the file to check
 
-    def test_no_banned_headers(self) -> None:
-        """Searches through the program files to check for banned headers, excluding src/platforms."""
+        Returns:
+            True if the file should be processed, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def check_file_content(self, file_path: str, content: str) -> List[str]:
+        """Check the file content and return any issues found.
+
+        Args:
+            file_path: Path to the file being checked
+            content: Content of the file as a string
+
+        Returns:
+            List of error messages, empty if no issues found
+        """
+        pass
+
+
+class GenericFileSearcher:
+    """Generic file searcher that processes files using a callback pattern."""
+
+    def __init__(self, max_workers: Optional[int] = None):
+        self.max_workers = max_workers or NUM_WORKERS
+
+    def search_directory(
+        self, start_dir: str, callback: FileProcessorCallback
+    ) -> List[str]:
+        """Search a directory and process files using the provided callback.
+
+        Args:
+            start_dir: Directory to start searching from
+            callback: Callback class to handle file processing
+
+        Returns:
+            List of all issues found across all files
+        """
         files_to_check = []
-        for root, _, files in os.walk(SRC_ROOT):
-            for file in files:
-                if file.endswith(
-                    (".cpp", ".h", ".hpp")
-                ):  # Add or remove file extensions as needed
-                    file_path = os.path.join(root, file)
-                    if not any(
-                        file_path.endswith(excluded) for excluded in EXCLUDED_FILES
-                    ):
-                        files_to_check.append(file_path)
 
-        all_failings = []
-        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+        # Collect all files that should be processed
+        for root, _, files in os.walk(start_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if callback.should_process_file(file_path):
+                    files_to_check.append(file_path)
+
+        # Process files in parallel
+        all_issues = []
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = [
-                executor.submit(self.check_file, file_path)
+                executor.submit(self._process_single_file, file_path, callback)
                 for file_path in files_to_check
             ]
             for future in futures:
-                all_failings.extend(future.result())
+                all_issues.extend(future.result())
+
+        return all_issues
+
+    def _process_single_file(
+        self, file_path: str, callback: FileProcessorCallback
+    ) -> List[str]:
+        """Process a single file using the callback.
+
+        Args:
+            file_path: Path to the file to process
+            callback: Callback to use for processing
+
+        Returns:
+            List of issues found in this file
+        """
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            return callback.check_file_content(file_path, content)
+        except Exception as e:
+            return [f"Error processing file {file_path}: {str(e)}"]
+
+
+class BannedHeadersCallback(FileProcessorCallback):
+    """Callback class for checking banned headers."""
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed for banned headers."""
+        # Check file extension
+        if not file_path.endswith((".cpp", ".h", ".hpp")):
+            return False
+
+        # Check if file is in excluded list
+        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
+            return False
+
+        return True
+
+    def check_file_content(self, file_path: str, content: str) -> List[str]:
+        """Check file content for banned headers."""
+        failings = []
+        banned_headers_list = []
+
+        # Determine which banned headers to check for based on file location
+        if file_path.startswith(PLATFORMS_DIR):
+            if file_path.startswith(PLATFORMS_ESP_DIR):
+                banned_headers_list = BANNED_HEADERS_ESP
+            else:
+                return failings  # Skip other platform directories
+        else:
+            banned_headers_list = BANNED_HEADERS_CORE
+
+        if len(banned_headers_list) == 0:
+            return failings
+
+        # Check each line for banned headers
+        for line_number, line in enumerate(content.splitlines(), 1):
+            if line.strip().startswith("//"):
+                continue
+
+            for header in banned_headers_list:
+                if (
+                    f"#include <{header}>" in line or f'#include "{header}"' in line
+                ) and "// ok include" not in line:
+                    failings.append(
+                        f"Found banned header '{header}' in {file_path}:{line_number}"
+                    )
+
+        return failings
+
+
+class TestNoBannedHeaders(unittest.TestCase):
+
+    def test_no_banned_headers(self) -> None:
+        """Searches through the program files to check for banned headers."""
+        searcher = GenericFileSearcher()
+        callback = BannedHeadersCallback()
+
+        # Test directories as requested
+        test_directories = [
+            os.path.join(SRC_ROOT, "fl"),
+            os.path.join(SRC_ROOT, "fx"),
+            os.path.join(SRC_ROOT, "sensors"),
+        ]
+
+        all_failings = []
+
+        # Search each directory
+        for directory in test_directories:
+            if os.path.exists(directory):
+                directory_failings = searcher.search_directory(directory, callback)
+                all_failings.extend(directory_failings)
+
+        # Also check the main src directory files (not subdirectories)
+        main_src_files = []
+        for file in os.listdir(SRC_ROOT):
+            file_path = os.path.join(SRC_ROOT, file)
+            if os.path.isfile(file_path) and callback.should_process_file(file_path):
+                main_src_files.append(file_path)
+
+        # Process main src files
+        for file_path in main_src_files:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                file_failings = callback.check_file_content(file_path, content)
+                all_failings.extend(file_failings)
+            except Exception as e:
+                all_failings.append(f"Error processing file {file_path}: {str(e)}")
 
         if all_failings:
             msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
