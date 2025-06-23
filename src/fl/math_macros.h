@@ -88,11 +88,3 @@ template <typename T, typename U> inline common_type_t<T, U> fl_max(T a, U b) {
 #ifndef M_PI
 #define M_PI PI
 #endif
-
-#ifndef TWO_PI
-#define TWO_PI (PI * 2.0)
-#endif
-
-#ifndef HALF_PI
-#define HALF_PI (PI * 0.5)
-#endif
