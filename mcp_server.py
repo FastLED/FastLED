@@ -633,7 +633,7 @@ async def project_info(arguments: Dict[str, Any], project_root: Path) -> CallToo
                 info.append(f"\n🔄 Git status: {len(git_result.strip().split())} files modified")
             else:
                 info.append("\n✅ Git status: Working tree clean")
-        except:
+        except Exception:
             info.append("\n❓ Git status: Unable to determine")
     
     return CallToolResult(
