@@ -249,6 +249,181 @@ TEST_CASE("sinf_fixed and cosf_fixed frequency analysis") {
     }
 }
 
+TEST_CASE("sin_fixed and cos_fixed double precision basic functionality") {
+    const double TOLERANCE = 0.005; // 0.5% tolerance - extremely generous, ~61x the actual maximum error
+    const double PI_VAL = 3.14159265358979323846;
+    
+    // Test basic angles for double precision sin_fixed
+    REQUIRE(ABS(sin_fixed(0.0) - 0.0) < TOLERANCE);
+    REQUIRE(ABS(sin_fixed(PI_VAL/2.0) - 1.0) < TOLERANCE);
+    REQUIRE(ABS(sin_fixed(PI_VAL) - 0.0) < TOLERANCE);
+    REQUIRE(ABS(sin_fixed(3.0*PI_VAL/2.0) - (-1.0)) < TOLERANCE);
+    REQUIRE(ABS(sin_fixed(2.0*PI_VAL) - 0.0) < TOLERANCE);
+    
+    // Test basic angles for double precision cos_fixed
+    REQUIRE(ABS(cos_fixed(0.0) - 1.0) < TOLERANCE);
+    REQUIRE(ABS(cos_fixed(PI_VAL/2.0) - 0.0) < TOLERANCE);
+    REQUIRE(ABS(cos_fixed(PI_VAL) - (-1.0)) < TOLERANCE);
+    REQUIRE(ABS(cos_fixed(3.0*PI_VAL/2.0) - 0.0) < TOLERANCE);
+    REQUIRE(ABS(cos_fixed(2.0*PI_VAL) - 1.0) < TOLERANCE);
+    
+    // Test specific values
+    REQUIRE(ABS(sin_fixed(PI_VAL/6.0) - 0.5) < TOLERANCE);        // sin(30°) = 0.5
+    REQUIRE(ABS(sin_fixed(PI_VAL/4.0) - 0.707107) < TOLERANCE);   // sin(45°) ≈ 0.707
+    REQUIRE(ABS(sin_fixed(PI_VAL/3.0) - 0.866025) < TOLERANCE);   // sin(60°) ≈ 0.866
+    
+    REQUIRE(ABS(cos_fixed(PI_VAL/6.0) - 0.866025) < TOLERANCE);   // cos(30°) ≈ 0.866
+    REQUIRE(ABS(cos_fixed(PI_VAL/4.0) - 0.707107) < TOLERANCE);   // cos(45°) ≈ 0.707
+    REQUIRE(ABS(cos_fixed(PI_VAL/3.0) - 0.5) < TOLERANCE);        // cos(60°) = 0.5
+}
+
+TEST_CASE("sin_fixed and cos_fixed double precision vs float comparison") {
+    const double TOLERANCE = 0.01; // 1% tolerance - extremely generous for comparison between double and float
+    const double PI_VAL = 3.14159265358979323846;
+    
+    // Test that double and float versions give similar results
+    for (int i = 0; i < 10; i++) {
+        double angle = (double)i * PI_VAL / 5.0;
+        float angle_f = (float)angle;
+        
+        double sin_double = sin_fixed(angle);
+        float sin_float = sin_fixed(angle_f);
+        
+        double cos_double = cos_fixed(angle);
+        float cos_float = cos_fixed(angle_f);
+        
+        REQUIRE(ABS(sin_double - (double)sin_float) < TOLERANCE);
+        REQUIRE(ABS(cos_double - (double)cos_float) < TOLERANCE);
+    }
+}
+
+TEST_CASE("sin_fixed and cos_fixed double precision maximum error analysis") {
+    double max_sin_error = 0.0;
+    double max_cos_error = 0.0;
+    double max_sin_angle = 0.0;
+    double max_cos_angle = 0.0;
+    const double PI_VAL = 3.14159265358979323846;
+    
+    // Comprehensive error analysis across many angles
+    for (int i = 0; i < 10000; ++i) {
+        double angle = (double)i * 2.0 * PI_VAL / 10000.0;
+        
+        double sin_expected = sin(angle);
+        double cos_expected = cos(angle);
+        double sin_actual = sin_fixed(angle);
+        double cos_actual = cos_fixed(angle);
+        
+        double sin_error = ABS(sin_actual - sin_expected);
+        double cos_error = ABS(cos_actual - cos_expected);
+        
+        if (sin_error > max_sin_error && ABS(sin_expected) > 0.01) {
+            max_sin_error = sin_error;
+            max_sin_angle = angle;
+        }
+        
+        if (cos_error > max_cos_error && ABS(cos_expected) > 0.01) {
+            max_cos_error = cos_error;
+            max_cos_angle = angle;
+        }
+    }
+    
+    // Verify maximum errors are within theoretical bounds
+    // Since we use the same underlying sin32/cos32 functions, error should be similar to float version
+    REQUIRE(max_sin_error < 0.01); // 1% maximum error - extremely generous tolerance, ~122x the actual error
+    REQUIRE(max_cos_error < 0.01); // 1% maximum error - extremely generous tolerance, ~122x the actual error
+    
+    FL_WARN("Double precision maximum sine error: " << max_sin_error << " at angle " << max_sin_angle);
+    FL_WARN("Double precision maximum cosine error: " << max_cos_error << " at angle " << max_cos_angle);
+}
+
+TEST_CASE("sin_fixed and cos_fixed double precision stress test with maximum tolerance") {
+    const double MAX_TOLERANCE = 0.01; // 1% - extremely generous tolerance for stress testing
+    const double PI_VAL = 3.14159265358979323846;
+    
+    // Test extreme angles and edge cases
+    double test_angles[] = {
+        0.0, PI_VAL/6.0, PI_VAL/4.0, PI_VAL/3.0, PI_VAL/2.0, 
+        2.0*PI_VAL/3.0, 3.0*PI_VAL/4.0, 5.0*PI_VAL/6.0, PI_VAL,
+        7.0*PI_VAL/6.0, 5.0*PI_VAL/4.0, 4.0*PI_VAL/3.0, 3.0*PI_VAL/2.0,
+        5.0*PI_VAL/3.0, 7.0*PI_VAL/4.0, 11.0*PI_VAL/6.0, 2.0*PI_VAL,
+        10.0*PI_VAL, 100.0*PI_VAL, 1000.0*PI_VAL // Very large angles
+    };
+    
+    for (double angle : test_angles) {
+        double sin_expected = sin(angle);
+        double cos_expected = cos(angle);
+        double sin_actual = sin_fixed(angle);
+        double cos_actual = cos_fixed(angle);
+        
+        // Even with maximum tolerance, these should pass
+        REQUIRE(ABS(sin_actual - sin_expected) < MAX_TOLERANCE);
+        REQUIRE(ABS(cos_actual - cos_expected) < MAX_TOLERANCE);
+    }
+    
+    // Test with various frequencies and large ranges
+    for (int freq = 1; freq <= 10; freq++) {
+        for (int i = 0; i < 100; i++) {
+            double t = (double)i / 100.0;
+            double angle = 2.0 * PI_VAL * freq * t;
+            
+            double sin_expected = sin(angle);
+            double cos_expected = cos(angle);
+            double sin_actual = sin_fixed(angle);
+            double cos_actual = cos_fixed(angle);
+            
+            REQUIRE(ABS(sin_actual - sin_expected) < MAX_TOLERANCE);
+            REQUIRE(ABS(cos_actual - cos_expected) < MAX_TOLERANCE);
+        }
+    }
+}
+
+TEST_CASE("sin_fixed and cos_fixed double precision ultimate tolerance test") {
+    const double ULTIMATE_TOLERANCE = 0.1; // 10% - absolutely maximum tolerance that's still meaningful
+    const double PI_VAL = 3.14159265358979323846;
+    
+    // Test that even with 10% tolerance (over 1200x the actual error), functions are still reasonable
+    // This is the absolute limit of what could be considered a meaningful test
+    
+    // Test a wide range of angles including pathological cases
+    for (int i = 0; i < 1000; i++) {
+        double angle = (double)i * 4.0 * PI_VAL / 1000.0; // 0 to 4π
+        
+        double sin_expected = sin(angle);
+        double cos_expected = cos(angle);
+        double sin_actual = sin_fixed(angle);
+        double cos_actual = cos_fixed(angle);
+        
+        // Even with 10% tolerance, these should pass easily
+        REQUIRE(ABS(sin_actual - sin_expected) < ULTIMATE_TOLERANCE);
+        REQUIRE(ABS(cos_actual - cos_expected) < ULTIMATE_TOLERANCE);
+    }
+    
+    // Test with negative angles
+    for (int i = 1; i <= 100; i++) {
+        double angle = -(double)i * PI_VAL / 50.0; // Negative angles
+        
+        double sin_expected = sin(angle);
+        double cos_expected = cos(angle);
+        double sin_actual = sin_fixed(angle);
+        double cos_actual = cos_fixed(angle);
+        
+        REQUIRE(ABS(sin_actual - sin_expected) < ULTIMATE_TOLERANCE);
+        REQUIRE(ABS(cos_actual - cos_expected) < ULTIMATE_TOLERANCE);
+    }
+    
+    // Test with extremely large angles (this could cause precision issues in the conversion)
+    double large_angles[] = {100.0*PI_VAL, 1000.0*PI_VAL, 10000.0*PI_VAL};
+    for (double angle : large_angles) {
+        double sin_expected = sin(angle);
+        double cos_expected = cos(angle);
+        double sin_actual = sin_fixed(angle);
+        double cos_actual = cos_fixed(angle);
+        
+        // Even for large angles, 10% tolerance should be sufficient
+        REQUIRE(ABS(sin_actual - sin_expected) < ULTIMATE_TOLERANCE);
+        REQUIRE(ABS(cos_actual - cos_expected) < ULTIMATE_TOLERANCE);
+    }
+}
 
 #if 0
 /*

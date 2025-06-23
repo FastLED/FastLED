@@ -122,4 +122,30 @@ FASTLED_FORCE_INLINE static float cosf_fixed(float angle_radians) {
     return (float)cos32(angle_cos32) * COS32_TO_FLOAT;
 }
 
+// Double precision version of sin_fixed
+FASTLED_FORCE_INLINE static double sin_fixed(double angle_radians) {
+    // Convert radians to sin32 angle format (0 to 16777216 is one full cycle)
+    // 2π radians = 16777216 in sin32 format
+    constexpr double RADIANS_TO_SIN32 = 16777216.0 / (2.0 * 3.14159265358979323846);
+    uint32_t angle_sin32 = (uint32_t)(angle_radians * RADIANS_TO_SIN32);
+    
+    // Call sin32 and convert result back to double
+    // sin32 output range is [-2147418112, 2147418112] which maps to [-1.0, 1.0]
+    constexpr double SIN32_TO_DOUBLE = 1.0 / 2147418112.0;
+    return (double)sin32(angle_sin32) * SIN32_TO_DOUBLE;
+}
+
+// Double precision version of cos_fixed
+FASTLED_FORCE_INLINE static double cos_fixed(double angle_radians) {
+    // Convert radians to cos32 angle format (0 to 16777216 is one full cycle)
+    // 2π radians = 16777216 in cos32 format
+    constexpr double RADIANS_TO_COS32 = 16777216.0 / (2.0 * 3.14159265358979323846);
+    uint32_t angle_cos32 = (uint32_t)(angle_radians * RADIANS_TO_COS32);
+    
+    // Call cos32 and convert result back to double
+    // cos32 output range is [-2147418112, 2147418112] which maps to [-1.0, 1.0]
+    constexpr double COS32_TO_DOUBLE = 1.0 / 2147418112.0;
+    return (double)cos32(angle_cos32) * COS32_TO_DOUBLE;
+}
+
 } // namespace fl
