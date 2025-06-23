@@ -18,7 +18,7 @@ class JsonCheckboxImpl {
     void setValue(bool value);
     const fl::string &groupName() const;
     
-    // Method to allow parent UIBase class to set the group
+    // Method to allow parent UIElement class to set the group
     void setGroup(const fl::string &groupName);
 
     JsonCheckboxImpl &operator=(bool value);

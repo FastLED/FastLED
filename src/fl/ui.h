@@ -20,10 +20,10 @@
 namespace fl {
 
 // Base class for UI elements that provides string-based group functionality
-class UIBase {
+class UIElement {
   public:
-    UIBase() {}
-    virtual ~UIBase() {}
+    UIElement() {}
+    virtual ~UIElement() {}
     
     virtual void setGroup(const fl::string& groupName) { mGroupName = groupName; }
     virtual void setGroup(const char* groupName) { mGroupName = fl::string(groupName); }
@@ -36,7 +36,7 @@ class UIBase {
 
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : public UIBase {
+class UISlider : public UIElement {
   public:
     FL_NO_COPY(UISlider)
     // If step is -1, it will be calculated as (max - min) / 100
@@ -75,7 +75,7 @@ class UISlider : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -125,7 +125,7 @@ class UISlider : public UIBase {
 
 // template operator for >= against a jsSliderImpl
 
-class UIButton : public UIBase {
+class UIButton : public UIElement {
   public:
     FL_NO_COPY(UIButton)
     UIButton(const char *name) : mImpl(name), mListener(this) {}
@@ -162,7 +162,7 @@ class UIButton : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -222,7 +222,7 @@ class UIButton : public UIBase {
     fl::scoped_ptr<Button> mRealButton;
 };
 
-class UICheckbox : public UIBase {
+class UICheckbox : public UIElement {
   public:
     FL_NO_COPY(UICheckbox);
     UICheckbox(const char *name, bool value = false)
@@ -239,7 +239,7 @@ class UICheckbox : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -286,7 +286,7 @@ class UICheckbox : public UIBase {
     Listener mListener;
 };
 
-class UINumberField : public UIBase {
+class UINumberField : public UIElement {
   public:
     FL_NO_COPY(UINumberField);
     UINumberField(const char *name, double value, double min = 0,
@@ -308,7 +308,7 @@ class UINumberField : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -355,7 +355,7 @@ class UINumberField : public UIBase {
     FunctionList<UINumberField &> mCallbacks;
 };
 
-class UITitle : public UIBase {
+class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
     UITitle(const char *name) : mImpl(name) {}
@@ -363,7 +363,7 @@ class UITitle : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -375,7 +375,7 @@ class UITitle : public UIBase {
     UITitleImpl mImpl;
 };
 
-class UIDescription : public UIBase {
+class UIDescription : public UIElement {
   public:
     FL_NO_COPY(UIDescription);
     UIDescription(const char *name) : mImpl(name) {}
@@ -383,7 +383,7 @@ class UIDescription : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -395,7 +395,7 @@ class UIDescription : public UIBase {
     UIDescriptionImpl mImpl;
 };
 
-class UIAudio : public UIBase {
+class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)
     UIAudio(const char *name) : mImpl(name) {}
@@ -405,7 +405,7 @@ class UIAudio : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
@@ -417,7 +417,7 @@ class UIAudio : public UIBase {
     UIAudioImpl mImpl;
 };
 
-class UIDropdown : public UIBase {
+class UIDropdown : public UIElement {
   public:
     FL_NO_COPY(UIDropdown)
 
@@ -456,7 +456,7 @@ class UIDropdown : public UIBase {
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
-        UIBase::setGroup(groupName); 
+        UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
