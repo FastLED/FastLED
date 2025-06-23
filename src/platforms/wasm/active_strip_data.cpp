@@ -1,12 +1,7 @@
-
-
 #ifdef __EMSCRIPTEN__
-
-
 
 #include <emscripten/val.h>
 #include <emscripten.h>
-#include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
@@ -74,18 +69,24 @@ __attribute__((constructor)) void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
 
-static ActiveStripData *getActiveStripDataRef() {
-    ActiveStripData *instance = &fl::Singleton<ActiveStripData>::instance();
-    return instance;
-}
-
-
-EMSCRIPTEN_BINDINGS(engine_events_constructors) {
-    emscripten::class_<ActiveStripData>("ActiveStripData")
-        .constructor(&getActiveStripDataRef, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
-}
-
 } // namespace fl
+
+// C binding wrappers
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE fl::ActiveStripData* getActiveStripData() {
+        return &fl::ActiveStripData::Instance();
+    }
+    
+    EMSCRIPTEN_KEEPALIVE uint8_t* getPixelData_Uint8_Raw(int stripIndex, size_t* outSize) {
+        fl::ActiveStripData& instance = fl::ActiveStripData::Instance();
+        fl::SliceUint8 stripData;
+        if (instance.mStripMap.get(stripIndex, &stripData)) {
+            *outSize = stripData.size();
+            return const_cast<uint8_t*>(stripData.data());
+        }
+        *outSize = 0;
+        return nullptr;
+    }
+}
 
 #endif
