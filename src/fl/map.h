@@ -8,6 +8,7 @@
 #include "fl/namespace.h"
 #include "fl/pair.h"
 #include "fl/template_magic.h"
+#include "fl/type_traits.h"
 #include "fl/vector.h"
 
 namespace fl {
@@ -233,110 +234,171 @@ template <typename Key, typename Value, size_t N> class FixedMap {
 template <typename Key, typename Value, typename Less = fl::DefaultLess<Key>>
 class SortedHeapMap {
   public:
-    struct Pair {
-        Key first;
-        Value second;
-
-        Pair(const Key &k = Key(), const Value &v = Value())
-            : first(k), second(v) {}
-    };
+    // Standard typedefs to match std::map interface
+    using key_type = Key;
+    using mapped_type = Value;
+    using value_type = fl::Pair<Key, Value>;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using key_compare = Less;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
 
   private:
-
     struct PairLess {
         Less less;
-        bool operator()(const Pair &a, const Pair &b) const {
+        bool operator()(const value_type &a, const value_type &b) const {
             return less(a.first, b.first);
         }
     };
 
-    SortedHeapVector<Pair, PairLess> data;
+    SortedHeapVector<value_type, PairLess> data;
+
+    // Value comparison class for std::map compatibility
+    class value_compare {
+        friend class SortedHeapMap;
+        Less comp_;
+        value_compare(Less c) : comp_(c) {}
+    public:
+        bool operator()(const value_type& x, const value_type& y) const {
+            return comp_(x.first, y.first);
+        }
+    };
 
   public:
-    typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
-    typedef typename SortedHeapVector<Pair, PairLess>::const_iterator
-        const_iterator;
-    typedef Pair value_type;
+    typedef typename SortedHeapVector<value_type, PairLess>::iterator iterator;
+    typedef typename SortedHeapVector<value_type, PairLess>::const_iterator const_iterator;
 
+    // Constructors
     SortedHeapMap(Less less = Less()) : data(PairLess{less}) {}
+    SortedHeapMap(const SortedHeapMap& other) = default;
+    SortedHeapMap& operator=(const SortedHeapMap& other) = default;
 
-    void setMaxSize(size_t n) { data.setMaxSize(n); }
-
-    void reserve(size_t n) { data.reserve(n); }
-
-    bool insert(const Key &key, const Value &value,
-                InsertResult *result = nullptr) {
-        return data.insert(Pair(key, value), result);
-    }
-
-    void update(const Key &key, const Value &value) {
-        if (!insert(key, value)) {
-            iterator it = find(key);
-            it->second = value;
-        }
-    }
-
-    void swap(SortedHeapMap &other) { data.swap(other.data); }
-
-    Value &at(const Key &key) {
-        iterator it = find(key);
-        return it->second;
-    }
-
-    // Matches FixedMap<>::get(...).
-    bool get(const Key &key, Value *value) const {
-        const_iterator it = find(key);
-        if (it != end()) {
-            *value = it->second;
-            return true;
-        }
-        return false;
-    }
-
-    bool has(const Key &key) const { return data.has(Pair(key)); }
-
-    bool contains(const Key &key) const { return has(key); }
-
-    bool operator==(const SortedHeapMap &other) const {
-        if (size() != other.size()) {
-            return false;
-        }
-        for (const_iterator it = begin(), other_it = other.begin(); it != end();
-             ++it, ++other_it) {
-            if (it->first != other_it->first ||
-                it->second != other_it->second) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    bool operator!=(const SortedHeapMap &other) const {
-        return !(*this == other);
-    }
-
-    size_t size() const { return data.size(); }
-    bool empty() const { return data.empty(); }
-    bool full() const { return data.full(); }
-    size_t capacity() const { return data.capacity(); }
-    void clear() { data.clear(); }
-
-    // begin, dend
+    // Iterators
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
     const_iterator begin() const { return data.begin(); }
     const_iterator end() const { return data.end(); }
+    const_iterator cbegin() const { return data.begin(); }
+    const_iterator cend() const { return data.end(); }
 
-    iterator find(const Key &key) { return data.find(Pair(key)); }
-    const_iterator find(const Key &key) const { return data.find(Pair(key)); }
+    // Capacity
+    size_t size() const { return data.size(); }
+    bool empty() const { return data.empty(); }
+    bool full() const { return data.full(); }
+    size_t capacity() const { return data.capacity(); }
+    size_t max_size() const { return data.capacity(); }
 
-    bool erase(const Key &key) { return data.erase(Pair(key)); }
-    bool erase(iterator it) { return data.erase(it); }
+    // FastLED specific methods
+    void setMaxSize(size_t n) { data.setMaxSize(n); }
+    void reserve(size_t n) { data.reserve(n); }
 
-    iterator lower_bound(const Key &key) { return data.lower_bound(Pair(key)); }
+    // Element access
+    Value &operator[](const Key &key) {
+        iterator it = find(key);
+        if (it != end()) {
+            return it->second;
+        }
+        value_type pair(key, Value());
+        bool ok = data.insert(pair);
+        FASTLED_ASSERT(ok, "Failed to insert into SortedHeapMap");
+        return data.find(pair)->second; // TODO: optimize.
+    }
+
+    Value &at(const Key &key) {
+        iterator it = find(key);
+        FASTLED_ASSERT(it != end(), "SortedHeapMap::at: key not found");
+        return it->second;
+    }
+
+    const Value &at(const Key &key) const {
+        const_iterator it = find(key);
+        FASTLED_ASSERT(it != end(), "SortedHeapMap::at: key not found");
+        return it->second;
+    }
+
+    // Modifiers
+    void clear() { data.clear(); }
+
+    fl::Pair<iterator, bool> insert(const value_type& value) {
+        InsertResult result;
+        bool success = data.insert(value, &result);
+        iterator it = success ? data.find(value) : data.end();
+        return fl::Pair<iterator, bool>(it, success);
+    }
+
+    bool insert(const Key &key, const Value &value, InsertResult *result = nullptr) {
+        return data.insert(value_type(key, value), result);
+    }
+
+    template<class... Args>
+    fl::Pair<iterator, bool> emplace(Args&&... args) {
+        value_type pair(fl::forward<Args>(args)...);
+        InsertResult result;
+        bool success = data.insert(pair, &result);
+        iterator it = success ? data.find(pair) : data.end();
+        return fl::Pair<iterator, bool>(it, success);
+    }
+
+    iterator erase(const_iterator pos) {
+        Key key = pos->first;
+        data.erase(*pos);
+        return upper_bound(key);
+    }
+
+    size_type erase(const Key& key) {
+        return data.erase(value_type(key, Value())) ? 1 : 0;
+    }
+
+    bool erase(iterator it) { 
+        return data.erase(it); 
+    }
+
+    void swap(SortedHeapMap &other) { 
+        data.swap(other.data); 
+    }
+
+    // Lookup
+    size_type count(const Key& key) const {
+        return contains(key) ? 1 : 0;
+    }
+
+    iterator find(const Key &key) { 
+        return data.find(value_type(key, Value())); 
+    }
+
+    const_iterator find(const Key &key) const { 
+        return data.find(value_type(key, Value())); 
+    }
+
+    bool contains(const Key &key) const { 
+        return has(key); 
+    }
+
+    bool has(const Key &key) const { 
+        return data.has(value_type(key, Value())); 
+    }
+
+    fl::Pair<iterator, iterator> equal_range(const Key& key) {
+        iterator lower = lower_bound(key);
+        iterator upper = upper_bound(key);
+        return fl::Pair<iterator, iterator>(lower, upper);
+    }
+
+    fl::Pair<const_iterator, const_iterator> equal_range(const Key& key) const {
+        const_iterator lower = lower_bound(key);
+        const_iterator upper = upper_bound(key);
+        return fl::Pair<const_iterator, const_iterator>(lower, upper);
+    }
+
+    iterator lower_bound(const Key &key) { 
+        return data.lower_bound(value_type(key, Value())); 
+    }
 
     const_iterator lower_bound(const Key &key) const {
-        return data.lower_bound(Pair(key));
+        return data.lower_bound(value_type(key, Value()));
     }
 
     iterator upper_bound(const Key &key) {
@@ -355,21 +417,67 @@ class SortedHeapMap {
         return it;
     }
 
-    Pair &front() { return data.front(); }
-    const Pair &front() const { return data.front(); }
-    Pair &back() { return data.back(); }
-    const Pair &back() const { return data.back(); }
+    // Observers
+    key_compare key_comp() const {
+        return key_compare();
+    }
 
-    Value &operator[](const Key &key) {
-        iterator it = find(key);
-        if (it != end()) {
-            return it->second;
+    value_compare value_comp() const {
+        return value_compare(key_comp());
+    }
+
+    // Additional methods
+    value_type &front() { return data.front(); }
+    const value_type &front() const { return data.front(); }
+    value_type &back() { return data.back(); }
+    const value_type &back() const { return data.back(); }
+
+    void update(const Key &key, const Value &value) {
+        if (!insert(key, value)) {
+            iterator it = find(key);
+            it->second = value;
         }
-        Pair pair(key, Value());
-        bool ok = data.insert(pair);
-        FASTLED_ASSERT(ok, "Failed to insert into SortedHeapMap");
-        return data.find(pair)->second; // TODO: optimize.
+    }
+
+    // Matches FixedMap<>::get(...).
+    bool get(const Key &key, Value *value) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            *value = it->second;
+            return true;
+        }
+        return false;
+    }
+
+    // Comparison operators
+    bool operator==(const SortedHeapMap &other) const {
+        if (size() != other.size()) {
+            return false;
+        }
+        for (const_iterator it = begin(), other_it = other.begin(); it != end();
+             ++it, ++other_it) {
+            if (it->first != other_it->first ||
+                it->second != other_it->second) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator!=(const SortedHeapMap &other) const {
+        return !(*this == other);
     }
 };
+
+} // namespace fl
+
+// Drop-in replacement for std::map
+// Note: We use "fl_map" instead of "map" because Arduino.h defines a map() function
+// which would conflict with fl::map usage in sketches that include Arduino.h and
+// are using `using namespace fl`
+namespace fl {
+
+template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
+using fl_map = SortedHeapMap<Key, T, Compare>;
 
 } // namespace fl
