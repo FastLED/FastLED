@@ -36,41 +36,40 @@ class UIBase {
 
 // If the platform is missing ui components, provide stubs.
 
-class UISlider : protected UISliderImpl, public UIBase {
+class UISlider : public UIBase {
   public:
     FL_NO_COPY(UISlider)
-    using Super = UISliderImpl;
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
              float max = 255, float step = -1.f)
-        : UISliderImpl(name, value, min, max, step), mListener(this) {}
-    float value() const { return Super::value(); }
+        : mImpl(name, value, min, max, step), mListener(this) {}
+    float value() const { return mImpl.value(); }
     float value_normalized() const {
-        float min = Super::getMin();
-        float max = Super::getMax();
+        float min = mImpl.getMin();
+        float max = mImpl.getMax();
         if (ALMOST_EQUAL(max, min, 0.0001f)) {
             return 0;
         }
         return (value() - min) / (max - min);
     }
-    float getMax() const { return Super::getMax(); }
+    float getMax() const { return mImpl.getMax(); }
     void setValue(float value);
-    operator float() const { return Super::value(); }
-    operator uint8_t() const { return static_cast<uint8_t>(Super::value()); }
-    operator uint16_t() const { return static_cast<uint16_t>(Super::value()); }
-    operator int() const { return static_cast<int>(Super::value()); }
+    operator float() const { return mImpl.value(); }
+    operator uint8_t() const { return static_cast<uint8_t>(mImpl.value()); }
+    operator uint16_t() const { return static_cast<uint16_t>(mImpl.value()); }
+    operator int() const { return static_cast<int>(mImpl.value()); }
     template <typename T> T as() const {
-        return static_cast<T>(Super::value());
+        return static_cast<T>(mImpl.value());
     }
 
-    int as_int() const { return static_cast<int>(Super::value()); }
+    int as_int() const { return static_cast<int>(mImpl.value()); }
 
     UISlider &operator=(float value) {
-        Super::setValue(value);
+        mImpl.setValue(value);
         return *this;
     }
     UISlider &operator=(int value) {
-        Super::setValue(static_cast<float>(value));
+        mImpl.setValue(static_cast<float>(value));
         return *this;
     }
     
@@ -78,7 +77,7 @@ class UISlider : protected UISliderImpl, public UIBase {
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -92,6 +91,8 @@ class UISlider : protected UISliderImpl, public UIBase {
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
+    UISliderImpl mImpl;
+
     struct Listener : public EngineEvents::Listener {
         Listener(UISlider *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
@@ -124,14 +125,13 @@ class UISlider : protected UISliderImpl, public UIBase {
 
 // template operator for >= against a jsSliderImpl
 
-class UIButton : protected UIButtonImpl, public UIBase {
+class UIButton : public UIBase {
   public:
     FL_NO_COPY(UIButton)
-    using Super = UIButtonImpl;
-    UIButton(const char *name) : UIButtonImpl(name), mListener(this) {}
+    UIButton(const char *name) : mImpl(name), mListener(this) {}
     ~UIButton() {}
     bool isPressed() const {
-        if (Super::isPressed()) {
+        if (mImpl.isPressed()) {
             return true;
         }
         // If we have a real button, check if it's pressed
@@ -142,7 +142,7 @@ class UIButton : protected UIButtonImpl, public UIBase {
         return false;
     }
     bool clicked() const {
-        if (Super::clicked()) {
+        if (mImpl.clicked()) {
             return true;
         }
         if (mRealButton) {
@@ -151,20 +151,20 @@ class UIButton : protected UIButtonImpl, public UIBase {
         }
         return false;
     }
-    int clickedCount() const { return Super::clickedCount(); }
+    int clickedCount() const { return mImpl.clickedCount(); }
     operator bool() const { return clicked(); }
 
     void addRealButton(const Button& pin) {
         mRealButton.reset(new Button(pin));
     }
 
-    void click() { Super::click(); }
+    void click() { mImpl.click(); }
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -190,6 +190,8 @@ class UIButton : protected UIButtonImpl, public UIBase {
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
+    UIButtonImpl mImpl;
+
     struct Listener : public EngineEvents::Listener {
         Listener(UIButton *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
@@ -220,27 +222,26 @@ class UIButton : protected UIButtonImpl, public UIBase {
     fl::scoped_ptr<Button> mRealButton;
 };
 
-class UICheckbox : protected UICheckboxImpl, public UIBase {
+class UICheckbox : public UIBase {
   public:
     FL_NO_COPY(UICheckbox);
-    using Super = UICheckboxImpl;
     UICheckbox(const char *name, bool value = false)
-        : UICheckboxImpl(name, value), mListener(this) {}
+        : mImpl(name, value), mListener(this) {}
     ~UICheckbox() {}
 
     operator bool() const { return value(); }
     explicit operator int() const { return static_cast<int>(value()); }
     UICheckbox &operator=(bool value) {
-        impl() = value;
+        mImpl = value;
         return *this;
     }
-    bool value() const { return Super::value(); }
+    bool value() const { return mImpl.value(); }
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -253,6 +254,8 @@ class UICheckbox : protected UICheckboxImpl, public UIBase {
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
+    UICheckboxImpl mImpl;
+
     struct Listener : public EngineEvents::Listener {
         Listener(UICheckbox *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
@@ -277,25 +280,23 @@ class UICheckbox : protected UICheckboxImpl, public UIBase {
     };
 
   private:
-    Super &impl() { return *this; }
     FunctionList<UICheckbox &> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
 };
 
-class UINumberField : protected UINumberFieldImpl, public UIBase {
+class UINumberField : public UIBase {
   public:
     FL_NO_COPY(UINumberField);
-    using Super = UINumberFieldImpl;
     UINumberField(const char *name, double value, double min = 0,
                   double max = 100)
-        : UINumberFieldImpl(name, value, min, max), mListener(this) {}
+        : mImpl(name, value, min, max), mListener(this) {}
     ~UINumberField() {}
-    double value() const { return Super::value(); }
-    void setValue(double value) { Super::setValue(value); }
-    operator double() const { return Super::value(); }
-    operator int() const { return static_cast<int>(Super::value()); }
+    double value() const { return mImpl.value(); }
+    void setValue(double value) { mImpl.setValue(value); }
+    operator double() const { return mImpl.value(); }
+    operator int() const { return static_cast<int>(mImpl.value()); }
     UINumberField &operator=(double value) {
         setValue(value);
         return *this;
@@ -309,7 +310,7 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -320,6 +321,9 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
         mListener.addToEngineEventsOnce();
     }
     void clearCallbacks() { mCallbacks.clear(); }
+
+  protected:
+    UINumberFieldImpl mImpl;
 
   private:
     struct Listener : public EngineEvents::Listener {
@@ -349,95 +353,98 @@ class UINumberField : protected UINumberFieldImpl, public UIBase {
     double mLastFrameValue = 0;
     bool mLastFrameValueValid = false;
     FunctionList<UINumberField &> mCallbacks;
-
-    Super &impl() { return *this; }
 };
 
-class UITitle : protected UITitleImpl, public UIBase {
+class UITitle : public UIBase {
   public:
     FL_NO_COPY(UITitle);
-    using Super = UITitleImpl;
-    UITitle(const char *name) : UITitleImpl(name) {}
+    UITitle(const char *name) : mImpl(name) {}
     ~UITitle() {}
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
     }
+
+  protected:
+    UITitleImpl mImpl;
 };
 
-class UIDescription : protected UIDescriptionImpl, public UIBase {
+class UIDescription : public UIBase {
   public:
     FL_NO_COPY(UIDescription);
-    using Super = UIDescriptionImpl;
-    UIDescription(const char *name) : UIDescriptionImpl(name) {}
+    UIDescription(const char *name) : mImpl(name) {}
     ~UIDescription() {}
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
     }
+
+  protected:
+    UIDescriptionImpl mImpl;
 };
 
-class UIAudio : protected UIAudioImpl, public UIBase {
+class UIAudio : public UIBase {
   public:
     FL_NO_COPY(UIAudio)
-    using Super = UIAudioImpl;
-    UIAudio(const char *name) : UIAudioImpl(name) {}
+    UIAudio(const char *name) : mImpl(name) {}
     ~UIAudio() {}
-    AudioSample next() { return Super::next(); }
-    bool hasNext() { return Super::hasNext(); }
+    AudioSample next() { return mImpl.next(); }
+    bool hasNext() { return mImpl.hasNext(); }
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
     }
+
+  protected:
+    UIAudioImpl mImpl;
 };
 
-class UIDropdown : protected UIDropdownImpl, public UIBase {
+class UIDropdown : public UIBase {
   public:
     FL_NO_COPY(UIDropdown)
-    using Super = UIDropdownImpl;
 
     template<typename Iterator>
     UIDropdown(const char *name, Iterator begin, Iterator end)
-        : UIDropdownImpl(name, begin, end), mListener(this) {}
+        : mImpl(name, begin, end), mListener(this) {}
 
     // Constructor with fl::Slice<fl::string> for arrays and containers.
     UIDropdown(const char *name, fl::Slice<fl::string> options)
-        : UIDropdownImpl(name, options), mListener(this) {}
+        : mImpl(name, options), mListener(this) {}
 
     // Constructor with initializer_list
     UIDropdown(const char *name, fl::initializer_list<fl::string> options)
-        : UIDropdownImpl(name, options), mListener(this) {}
+        : mImpl(name, options), mListener(this) {}
 
     ~UIDropdown() {}
     
-    fl::string value() const { return Super::value(); }
-    int as_int() const { return as_int(); }
+    fl::string value() const { return mImpl.value(); }
+    int as_int() const { return mImpl.value_int(); }
     fl::string as_string() const { return value(); }
     
     void setSelectedIndex(int index) { 
-        Super::setSelectedIndex(index); 
+        mImpl.setSelectedIndex(index); 
     }
     
-    size_t getOptionCount() const { return Super::getOptionCount(); }
-    fl::string getOption(size_t index) const { return Super::getOption(index); }
+    size_t getOptionCount() const { return mImpl.getOptionCount(); }
+    fl::string getOption(size_t index) const { return mImpl.getOption(index); }
     
     operator fl::string() const { return value(); }
     operator int() const { return as_int(); }
@@ -451,7 +458,7 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     void setGroup(const fl::string& groupName) override { 
         UIBase::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
-        Super::setGroup(groupName);
+        mImpl.setGroup(groupName);
     }
     void setGroup(const char* groupName) override { 
         setGroup(fl::string(groupName)); 
@@ -465,6 +472,8 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     void clearCallbacks() { mCallbacks.clear(); }
 
   protected:
+    UIDropdownImpl mImpl;
+
     struct Listener : public EngineEvents::Listener {
         Listener(UIDropdown *owner) : mOwner(owner) {
             EngineEvents::addListener(this);
@@ -495,18 +504,17 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     Listener mListener;
 };
 
-class UIGroup : protected UIGroupImpl {
+class UIGroup {
   public:
     FL_NO_COPY(UIGroup);
-    using Super = UIGroupImpl;
     
     // Constructor takes fl::string as the only parameter for grouping name
-    UIGroup(const fl::string& groupName) : UIGroupImpl(groupName.c_str()) {}
+    UIGroup(const fl::string& groupName) : mImpl(groupName.c_str()) {}
     
     // Variadic template constructor: first argument is group name, remaining are UI elements
     template<typename... UIElements>
     UIGroup(const fl::string& groupName, UIElements&... elements) 
-        : UIGroupImpl(groupName.c_str()) {
+        : mImpl(groupName.c_str()) {
         // Add all UI elements to this group
         add(elements...);
     }
@@ -514,7 +522,7 @@ class UIGroup : protected UIGroupImpl {
     ~UIGroup() {}
     
     // Get the group name
-    fl::string name() const { return Super::name(); }
+    fl::string name() const { return mImpl.name(); }
     
     // Implicit conversion to string for convenience
     operator fl::string() const { return name(); }
@@ -524,6 +532,9 @@ class UIGroup : protected UIGroupImpl {
     void addControl(T* control) {
         control->setGroup(name());
     }
+
+  protected:
+    UIGroupImpl mImpl;
 
 private:
     // Helper method to add multiple controls using variadic templates

@@ -8,9 +8,9 @@ FL_DISABLE_WARNING(float-equal)
 namespace fl {
 
 void UISlider::setValue(float value) {
-    float oldValue = Super::value();
+    float oldValue = mImpl.value();
     if (value != oldValue) {
-        Super::setValue(value);
+        mImpl.setValue(value);
         // Update the last frame value to keep state consistent
         mLastFrameValue = value;
         mLastFramevalueValid = true;
@@ -89,7 +89,7 @@ void UIDropdown::Listener::onBeginFrame() {
         owner.mLastFrameValueValid = true;
         return;
     }
-    int value = owner.value_int();
+    int value = owner.as_int();
     if (value != owner.mLastFrameValue) {
         owner.mCallbacks.invoke(owner);
         owner.mLastFrameValue = value;
