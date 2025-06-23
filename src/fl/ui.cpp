@@ -85,7 +85,7 @@ void UINumberField::Listener::onBeginFrame() {
 void UIDropdown::Listener::onBeginFrame() {
     UIDropdown &owner = *mOwner;
     if (!owner.mLastFrameValueValid) {
-        owner.mLastFrameValue = owner.value_int();
+        owner.mLastFrameValue = owner.as_int();
         owner.mLastFrameValueValid = true;
         return;
     }

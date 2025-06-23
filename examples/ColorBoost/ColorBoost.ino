@@ -126,8 +126,8 @@ void rainbowWave() {
                 leds[xyMap(x, y)] = original_color;
             } else if (y > NUM_STRIPS / 3) {
                 // Middle half - transformed colors
-                EaseType sat_ease = getEaseType(saturationFunction.value_int());
-                EaseType lum_ease = getEaseType(luminanceFunction.value_int());
+                EaseType sat_ease = getEaseType(saturationFunction.as_int());
+                EaseType lum_ease = getEaseType(luminanceFunction.as_int());
                 leds[xyMap(x, y)] = original_color.colorBoost(sat_ease, lum_ease);
             } else {
                 // Lower half - transformed colors

@@ -429,7 +429,8 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     ~UIDropdown() {}
     
     fl::string value() const { return Super::value(); }
-    int value_int() const { return Super::value_int(); }
+    int as_int() const { return as_int(); }
+    fl::string as_string() const { return value(); }
     
     void setSelectedIndex(int index) { 
         Super::setSelectedIndex(index); 
@@ -439,7 +440,7 @@ class UIDropdown : protected UIDropdownImpl, public UIBase {
     fl::string getOption(size_t index) const { return Super::getOption(index); }
     
     operator fl::string() const { return value(); }
-    operator int() const { return value_int(); }
+    operator int() const { return as_int(); }
     
     UIDropdown &operator=(int index) {
         setSelectedIndex(index);

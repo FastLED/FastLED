@@ -105,7 +105,7 @@ void loop() {
     uint8_t x = map(sliderValue * 1000, 0, 1000, 0, MATRIX_WIDTH - 1);
 
     // Get the selected ease type using the dropdown index
-    EaseType selectedEaseType = getEaseType(easeTypeDropdown.value_int());
+    EaseType selectedEaseType = getEaseType(easeTypeDropdown.as_int());
     
     uint8_t y;
     if (use16Bit.value()) {
