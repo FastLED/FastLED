@@ -57,12 +57,19 @@ License CC BY-NC 3.0
 #include "crgb.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
+#include "fl/math.h"
 
-#ifndef FL_SIN_F
-#define FL_SIN_F(x) sinf(x)
+
+#ifndef FL_USE_OPTIMIZED_MATH
+#define FL_USE_OPTIMIZED_MATH 1
 #endif
 
-#ifndef FL_COS_F
+#if FL_USE_OPTIMIZED_MATH
+#include "fl/sin32.h"
+#define FL_SIN_F(x) fl::sinf_fixed(x)
+#define FL_COS_F(x) fl::cosf_fixed(x)
+#else
+#define FL_SIN_F(x) sinf(x)
 #define FL_COS_F(x) cosf(x)
 #endif
 
