@@ -8,6 +8,7 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
+#include "FastLED.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 void setup() {
@@ -19,7 +20,7 @@ void loop() {
 }
 #else
 
-#include "FastLED.h"
+
 #include "Arduino.h"
 
 #include "fx/2d/noisepalette.h"
