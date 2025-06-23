@@ -34,8 +34,10 @@ void loop() {}
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
+#include "fl/unused.h"
 #include "fx_audio.h"
 #include "fx/time.h"
+
 
 // Sketch.
 #include "fl/function.h"
@@ -158,10 +160,6 @@ void loop() {
     if (triggered) {
         FASTLED_WARN("Triggered");
     }
-    // fl::clear(framebuffer);
-    // fl::clear(framebuffer);
-
-    static uint32_t frame = 0;
 
     // x = pointX.as_int();
     y = HEIGHT / 2;
@@ -178,6 +176,7 @@ void loop() {
         soundLevelMeter.processBlock(sample.pcm());
         // FASTLED_WARN("")
         auto dbfs = soundLevelMeter.getDBFS();
+        FASTLED_UNUSED(dbfs);
         // FASTLED_WARN("getDBFS: " << dbfs);
         int32_t max = 0;
         for (int i = 0; i < sample.pcm().size(); ++i) {
@@ -201,6 +200,7 @@ void loop() {
 
         if (enableFFT) {
             auto max_x = fftOut.bins_raw.size() - 1;
+            FASTLED_UNUSED(max_x);
             for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
                 auto x = i;
                 auto v = fftOut.bins_db[i];
