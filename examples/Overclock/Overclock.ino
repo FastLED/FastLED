@@ -10,7 +10,7 @@
 
 /// @brief   Demonstrates how to overclock a FastLED setup
 
-
+#include <FastLED.h>
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // To effectively test the overclock feature we need
 // a large enough dataset to test against. Unfortunately
@@ -25,7 +25,7 @@ void loop() {}
 
 #include "fx/2d/noisepalette.h"
 #include "fx/fx.h"
-#include <FastLED.h>
+
 
 using namespace fl;
 

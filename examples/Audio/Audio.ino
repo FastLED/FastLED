@@ -4,7 +4,7 @@
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
 /// 1. Install Fastled: `pip install fastled`
-/// 2. cd into this examples page.
+/// 2. cd into this examples page.  
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
@@ -21,14 +21,14 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
+#include <Arduino.h>
+#include <FastLED.h>
+
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
 void setup() {}
 void loop() {}
 #else
-
-#include <Arduino.h>
-#include <FastLED.h>
 
 #include "fl/audio.h"
 #include "fl/downscale.h"
