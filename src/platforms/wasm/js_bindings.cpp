@@ -1,5 +1,35 @@
 #ifdef __EMSCRIPTEN__
 
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+//
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT BINDINGS 🚨
+//
+// DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
+// 
+// This file is a BRIDGE between C++ and JavaScript. Any changes to:
+// - Function names
+// - Parameter types  
+// - Return types
+// - Function signatures
+// - EM_ASM macro contents
+//
+// Will BREAK the JavaScript side and cause SILENT RUNTIME FAILURES!
+//
+// Before making ANY changes:
+// 1. Understand that this affects BOTH C++ AND JavaScript code
+// 2. Plan to update JavaScript Module.cwrap() calls simultaneously  
+// 3. Test extensively with real WASM builds (not just compilation)
+// 4. Verify globalThis.FastLED_* callback functions still work
+//
+// Key JavaScript integration points in this file:
+// - globalThis.FastLED_onStripUpdate()
+// - globalThis.FastLED_onFrame() 
+// - globalThis.FastLED_onStripAdded()
+// - globalThis.FastLED_onUiElementsAdded()
+// - Module.cwrap('jsUpdateUiComponents', ...)
+//
+// ⚠️⚠️⚠️ REMEMBER: Changes here affect the JavaScript runtime! ⚠️⚠️⚠️
+
 // DO NOT clang-format this file!! It will destroy the EM_ASM_ macros.
 // clang-format off
 

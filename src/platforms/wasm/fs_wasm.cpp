@@ -1,6 +1,36 @@
 
 #ifdef __EMSCRIPTEN__
 
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript FILE SYSTEM BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+//
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT FILE SYSTEM BINDINGS 🚨
+//
+// DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
+//
+// This file manages file system operations between C++ and JavaScript for WASM builds.
+// Any changes to:
+// - EMSCRIPTEN_BINDINGS macro contents
+// - extern "C" EMSCRIPTEN_KEEPALIVE function signatures
+// - fastled_declare_files() parameter types
+// - File operation function names or parameters
+//
+// Will BREAK JavaScript file loading and cause SILENT RUNTIME FAILURES!
+//
+// Key integration points that MUST remain synchronized:
+// - EMSCRIPTEN_BINDINGS(_fastled_declare_files)
+// - fastled_declare_files(std::string jsonStr) 
+// - extern "C" jsInjectFile(), jsAppendFile(), jsDeclareFile()
+// - JavaScript Module._fastled_declare_files() calls
+// - JSON file declaration format parsing
+//
+// Before making ANY changes:
+// 1. Understand this affects file loading for animations and data
+// 2. Test with real WASM builds that load external files
+// 3. Verify JSON parsing for file declarations works correctly
+// 4. Check that file operations remain accessible from JavaScript
+//
+// ⚠️⚠️⚠️ REMEMBER: File system errors prevent resource loading! ⚠️⚠️⚠️
+
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers

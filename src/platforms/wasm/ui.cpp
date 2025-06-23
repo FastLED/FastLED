@@ -1,5 +1,33 @@
 #if defined(__EMSCRIPTEN__)
 
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript UI BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+//
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT UI BINDINGS 🚨
+//
+// DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
+//
+// This file bridges C++ UI updates with JavaScript UI components. Any changes to:
+// - jsUpdateUiComponents() function signature
+// - extern "C" wrapper functions
+// - Parameter types (const char* vs std::string)
+// - EMSCRIPTEN_KEEPALIVE function signatures
+//
+// Will BREAK the JavaScript UI system and cause SILENT RUNTIME FAILURES!
+//
+// Key integration points that MUST remain synchronized:
+// - extern "C" jsUpdateUiComponents(const char* jsonStr)  
+// - fl::jsUpdateUiComponents(const std::string &jsonStr)
+// - JavaScript Module.cwrap('jsUpdateUiComponents', null, ['string'])
+// - globalThis.onFastLedUiUpdateFunction callbacks
+//
+// Before making ANY changes:
+// 1. Understand this affects UI rendering in the browser
+// 2. Test with real WASM builds that include UI components
+// 3. Verify JSON parsing works correctly on both sides
+// 4. Check that UI update callbacks still fire properly
+//
+// ⚠️⚠️⚠️ REMEMBER: UI failures are often silent and hard to debug! ⚠️⚠️⚠️
+
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>

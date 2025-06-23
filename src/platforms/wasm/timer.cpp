@@ -1,5 +1,35 @@
 #ifdef __EMSCRIPTEN__
 
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript TIMING BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+//
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT TIMING BINDINGS 🚨
+//
+// DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
+//
+// This file provides critical timing functions for WASM builds. Any changes to:
+// - EMSCRIPTEN_KEEPALIVE timing function signatures
+// - millis(), micros(), delay(), delayMicroseconds(), yield() signatures
+// - Return types or parameters
+// - Function names
+//
+// Will BREAK JavaScript timing operations and cause SILENT RUNTIME FAILURES!
+//
+// Key integration points that MUST remain synchronized:
+// - extern "C" uint32_t millis()
+// - extern "C" uint32_t micros()
+// - extern "C" void delay(int ms)
+// - extern "C" void delayMicroseconds(int micros)
+// - extern "C" void yield()
+// - JavaScript Module.cwrap() calls for timing functions
+//
+// Before making ANY changes:
+// 1. Understand this affects ALL timing-dependent animations and sketches
+// 2. Test with real WASM builds that use delays and timing
+// 3. Verify timing accuracy remains consistent
+// 4. Check that animations still run at correct speeds
+//
+// ⚠️⚠️⚠️ REMEMBER: Timing errors break ALL animations and effects! ⚠️⚠️⚠️
+
 #include "fl/stdint.h"
 #include <thread>
 

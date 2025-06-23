@@ -141,6 +141,42 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **Why:** Using `fl::span<T>` for parameters makes functions more reusable and avoids forcing callers to convert their data to specific container types.
 
+## ⚠️ CRITICAL WARNING: C++ ↔ JavaScript Bindings
+
+**🚨 EXTREMELY IMPORTANT: DO NOT MODIFY FUNCTION SIGNATURES IN WEBASSEMBLY BINDINGS WITHOUT EXTREME CAUTION! 🚨**
+
+The FastLED project includes WebAssembly (WASM) bindings that bridge C++ and JavaScript code. **Changing function signatures in these bindings is a major source of runtime errors and build failures.**
+
+### Key Binding Files (⚠️ HIGH RISK ZONE ⚠️):
+- `src/platforms/wasm/js_bindings.cpp` - Main JavaScript interface via EM_ASM
+- `src/platforms/wasm/ui.cpp` - UI update bindings with extern "C" wrappers  
+- `src/platforms/wasm/active_strip_data.cpp` - Strip data bindings via EMSCRIPTEN_BINDINGS
+- `src/platforms/wasm/fs_wasm.cpp` - File system bindings via EMSCRIPTEN_BINDINGS
+
+### Before Making ANY Changes to These Files:
+
+1. **🛑 STOP and consider if the change is absolutely necessary**
+2. **📖 Read the warning comments at the top of each binding file**  
+3. **🧪 Test extensively on WASM target after any changes**
+4. **🔗 Verify both C++ and JavaScript sides remain synchronized**
+5. **📝 Update corresponding JavaScript code if function signatures change**
+
+### Common Binding Errors:
+- **Parameter type mismatches** (e.g., `const char*` vs `std::string`)
+- **Return type changes** that break JavaScript expectations
+- **Function name changes** without updating JavaScript calls
+- **Missing `extern "C"` wrappers** for EMSCRIPTEN_KEEPALIVE functions
+- **EMSCRIPTEN_BINDINGS macro changes** without updating JS Module calls
+
+### If You Must Modify Bindings:
+1. **Update BOTH sides simultaneously** (C++ and JavaScript)
+2. **Maintain backward compatibility** when possible
+3. **Add detailed comments** explaining the interface contract
+4. **Test thoroughly** with real WASM builds, not just compilation
+5. **Update documentation** and interface specs
+
+**Remember: The bindings are a CONTRACT between C++ and JavaScript. Breaking this contract causes silent failures and mysterious bugs that are extremely difficult to debug.**
+
 ## Testing
 The project uses a comprehensive test suite including:
 - C++ unit tests

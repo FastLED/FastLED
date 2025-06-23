@@ -1,5 +1,34 @@
 #ifdef __EMSCRIPTEN__
 
+// ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript SETUP/LOOP BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
+//
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT SETUP/LOOP BINDINGS 🚨
+//
+// DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
+//
+// This file exposes the Arduino-style setup() and loop() functions to JavaScript.
+// Any changes to:
+// - extern "C" extern_setup() function signature
+// - extern "C" extern_loop() function signature  
+// - EMSCRIPTEN_KEEPALIVE function signatures
+// - Return types or parameters
+//
+// Will BREAK JavaScript sketch execution and cause SILENT RUNTIME FAILURES!
+//
+// Key integration points that MUST remain synchronized:
+// - extern "C" int extern_setup()
+// - extern "C" int extern_loop()
+// - JavaScript Module.cwrap() calls for setup/loop
+// - Arduino sketch execution lifecycle
+//
+// Before making ANY changes:
+// 1. Understand this controls the main sketch execution loop
+// 2. Test with real WASM builds that run Arduino sketches
+// 3. Verify setup() and loop() are called correctly from JavaScript
+// 4. Check that engine events still fire properly
+//
+// ⚠️⚠️⚠️ REMEMBER: These functions control the main application lifecycle! ⚠️⚠️⚠️
+
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
