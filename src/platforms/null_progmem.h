@@ -12,3 +12,5 @@
 #define FL_PGM_READ_WORD_NEAR(x) (*((const uint16_t *)(x)))
 #define FL_PGM_READ_DWORD_NEAR(x) (*((const uint32_t *)(x)))
 #define FL_ALIGN_PROGMEM
+
+#define FL_PROGMEM_USES_NULL 1
