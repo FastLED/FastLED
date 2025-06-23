@@ -12,6 +12,7 @@
 #include "fl/unused.h"
 #include "platforms/ui_defs.h"
 #include "sensors/button.h"
+#include "fl/virtual_if_not_avr.h"
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \
@@ -23,10 +24,9 @@ namespace fl {
 class UIElement {
   public:
     UIElement() {}
-    virtual ~UIElement() {}
-    
+    VIRTUAL_IF_NOT_AVR ~UIElement() {}
     virtual void setGroup(const fl::string& groupName) { mGroupName = groupName; }
-    virtual void setGroup(const char* groupName) { mGroupName = fl::string(groupName); }
+
     fl::string getGroup() const { return mGroupName; }
     bool hasGroup() const { return !mGroupName.empty(); }
 
@@ -79,9 +79,7 @@ class UISlider : public UIElement {
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
-    }
+
 
     int onChanged(function<void(UISlider &)> callback) {
         int out = mCallbacks.add(callback);
@@ -166,9 +164,6 @@ class UIButton : public UIElement {
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
-    }
     
     int onChanged(function<void(UIButton &)> callback) {
         int id = mCallbacks.add(callback);
@@ -243,9 +238,7 @@ class UICheckbox : public UIElement {
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
-    }
+
 
     void onChanged(function<void(UICheckbox &)> callback) {
         mCallbacks.add(callback);
@@ -312,9 +305,7 @@ class UINumberField : public UIElement {
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
-    }
+
 
     void onChanged(function<void(UINumberField &)> callback) {
         mCallbacks.add(callback);
@@ -367,9 +358,6 @@ class UITitle : public UIElement {
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
     }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
-    }
 
   protected:
     UITitleImpl mImpl;
@@ -386,9 +374,6 @@ class UIDescription : public UIElement {
         UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
-    }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
     }
 
   protected:
@@ -408,9 +393,6 @@ class UIAudio : public UIElement {
         UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
-    }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
     }
 
   protected:
@@ -459,9 +441,6 @@ class UIDropdown : public UIElement {
         UIElement::setGroup(groupName); 
         // Update the implementation's group if it has the method (WASM platforms)
         mImpl.setGroup(groupName);
-    }
-    void setGroup(const char* groupName) override { 
-        setGroup(fl::string(groupName)); 
     }
 
     int onChanged(function<void(UIDropdown &)> callback) {
