@@ -47,6 +47,7 @@ using namespace fl;
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE false
 #define TIME_ANIMATION 1000 // ms
+#define PIN_DATA 3
 
 UITitle title("Simple control of an xy path");
 UIDescription description("This is more of a test for new features.");
@@ -119,7 +120,7 @@ void setup() {
         audioFadeTracker.setOutputTime(value);
         FASTLED_WARN("Output time seconds: " << value);
     });
-    FastLED.addLeds<NEOPIXEL, 2>(leds, ledsXY.getTotal())
+    FastLED.addLeds<NEOPIXEL, PIN_DATA>(leds, ledsXY.getTotal())
         .setScreenMap(screenmap);
 }
 
