@@ -138,7 +138,7 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
             // console.log("*** JS→C++: onFastLedUiUpdateFunction called with:", jsonString);
             if (typeof jsonString === 'string' && jsonString !== null) {
                     // console.log("*** JS→C++: Calling C++ jsUpdateUiComponents");
-                    Module.jsUpdateUiComponents(jsonString);
+                    Module.cwrap('jsUpdateUiComponents', null, ['string'])(jsonString);
                     // console.log("*** JS→C++: C++ jsUpdateUiComponents call completed");
                 } else {
                     console.error("*** JS→C++: Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
