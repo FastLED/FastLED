@@ -57,7 +57,7 @@ using namespace fl;
 // #define CM_BETWEEN_LEDS 1.0 // 1cm between LEDs
 // #define CM_LED_DIAMETER 0.5 // 0.5cm LED diameter
 
-UITitle festivalStickTitle("Festuvak Stick");
+UITitle festivalStickTitle("Festival Stick");
 UIDescription festivalStickDescription(
     "# Festival Stick Demo\n\n"
     "This example demonstrates **proper corkscrew LED mapping** for a festival stick using FastLED's advanced mapping capabilities.\n\n"
