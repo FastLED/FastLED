@@ -26,8 +26,8 @@ to test that the forward mapping works correctly first.
 using namespace fl;
 
 
-#define PIN_DATA 9
-#define PIN_CLOCK 7
+#define PIN_DATA 3
+#define PIN_CLOCK 4
 
 
 #define NUM_LEDS 288
