@@ -28,6 +28,19 @@
             <div id="canvas-container">
                 <canvas id="myCanvas" width="16" height="16"></canvas>
                 <div id="canvas-label">stdout</div>
+                <!-- Gear icon and dropdown menu -->
+                <div id="gear-menu-container">
+                    <button id="gear-icon" class="gear-button" aria-label="Graphics Options">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.07a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+                    <div id="gear-dropdown" class="gear-dropdown">
+                        <div class="gear-dropdown-item" data-value="gfx-simple">gfx - simple</div>
+                        <div class="gear-dropdown-item" data-value="gfx-bloom">gfx - bloom</div>
+                    </div>
+                </div>
             </div>        
             <div id="ui-controls"></div>
         </div>
@@ -143,6 +156,82 @@
             console.error('Failed to copy text: ', err);
         });
     });
+
+    // Gear menu functionality
+    const gearIcon = document.getElementById('gear-icon');
+    const gearDropdown = document.getElementById('gear-dropdown');
+    let isDropdownOpen = false;
+
+    // Toggle dropdown when gear icon is clicked
+    gearIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        isDropdownOpen = !isDropdownOpen;
+        
+        if (isDropdownOpen) {
+            gearDropdown.classList.add('show');
+        } else {
+            gearDropdown.classList.remove('show');
+        }
+    });
+
+    // Handle dropdown item clicks
+    const dropdownItems = document.querySelectorAll('.gear-dropdown-item');
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const selectedValue = this.getAttribute('data-value');
+            console.log('Graphics option selected:', selectedValue);
+            
+            // Close dropdown
+            isDropdownOpen = false;
+            gearDropdown.classList.remove('show');
+            
+            // Handle the selected option
+            handleGraphicsOptionChange(selectedValue);
+        });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!gearIcon.contains(e.target) && !gearDropdown.contains(e.target)) {
+            isDropdownOpen = false;
+            gearDropdown.classList.remove('show');
+        }
+    });
+
+    // Handle graphics option changes
+    function handleGraphicsOptionChange(option) {
+        // Determine URL parameter based on selection
+        let gfxParam = '';
+        if (option === 'gfx-simple') {
+            gfxParam = '0'; // Force fast renderer
+        } else if (option === 'gfx-bloom') {
+            gfxParam = '1'; // Force ThreeJS renderer with bloom
+        }
+        
+        // Update URL and reload page with new graphics setting
+        const url = new URL(window.location);
+        if (gfxParam) {
+            url.searchParams.set('gfx', gfxParam);
+        } else {
+            url.searchParams.delete('gfx');
+        }
+        
+        // Show a brief notification before reloading
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = `Switching to ${option.replace('-', ' ')}...`;
+        document.body.appendChild(toast);
+        
+        // Force reflow
+        void toast.offsetHeight;
+        toast.classList.add('toast-notification-show');
+        
+        // Reload with new graphics setting after brief delay
+        setTimeout(() => {
+            window.location.href = url.toString();
+        }, 500);
+    }
 
     async function loadThreeJs() {
         console.log('Using ThreeJS modules:', window.threeJsModules);
