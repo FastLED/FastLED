@@ -58,6 +58,14 @@ License CC BY-NC 3.0
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 
+#ifndef FL_SIN_F
+#define FL_SIN_F(x) sinf(x)
+#endif
+
+#ifndef FL_COS_F
+#define FL_COS_F(x) cosf(x)
+#endif
+
 // Setting this to 1 means you agree to the licensing terms of the ANIMartRIX
 // library for non commercial use only.
 #if defined(FASTLED_ANIMARTRIX_LICENSING_AGREEMENT) ||                         \
@@ -77,6 +85,8 @@ License CC BY-NC 3.0
 #endif
 
 #define num_oscillators 10
+
+
 
 namespace animartrix_detail {
 FASTLED_USING_NAMESPACE
@@ -299,7 +309,7 @@ class ANIMartRIX {
                                             // rotation, returns    0 to 2 * PI
 
             move.directional[i] =
-                sinf(move.radial[i]); // directional offsets or factors, returns
+                FL_SIN_F(move.radial[i]); // directional offsets or factors, returns
                                       // -1 to 1
 
             move.noise_angle[i] =
@@ -348,10 +358,10 @@ class ANIMartRIX {
         // convert polar coordinates back to cartesian ones
 
         float newx = (animation.offset_x + animation.center_x -
-                      (cosf(animation.angle) * animation.dist)) *
+                      (FL_COS_F(animation.angle) * animation.dist)) *
                      animation.scale_x;
         float newy = (animation.offset_y + animation.center_y -
-                      (sinf(animation.angle) * animation.dist)) *
+                      (FL_SIN_F(animation.angle) * animation.dist)) *
                      animation.scale_y;
         float newz = (animation.offset_z + animation.z) * animation.scale_z;
 
@@ -3240,8 +3250,8 @@ class ANIMartRIX {
 
                 animation.dist =
                     distance[x][y] +
-                    4 * sinf(move.directional[5] * PI + (float)x / 2) +
-                    4 * cosf(move.directional[6] * PI + float(y) / 2);
+                    4 * FL_SIN_F(move.directional[5] * PI + (float)x / 2) +
+                    4 * FL_COS_F(move.directional[6] * PI + float(y) / 2);
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 5;
                 animation.scale_x = 0.06;
@@ -3253,7 +3263,7 @@ class ANIMartRIX {
                 show1 = render_value(animation);
 
                 animation.dist = (10 + move.directional[0]) *
-                                 sinf(-move.radial[5] + move.radial[0] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[0] +
                                       (distance[x][y] / (3)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 5;
@@ -3266,7 +3276,7 @@ class ANIMartRIX {
                 show2 = render_value(animation);
 
                 animation.dist = (10 + move.directional[1]) *
-                                 sinf(-move.radial[5] + move.radial[1] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[1] +
                                       (distance[x][y] / (3)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 500;
@@ -3279,7 +3289,7 @@ class ANIMartRIX {
                 show3 = render_value(animation);
 
                 animation.dist = (10 + move.directional[2]) *
-                                 sinf(-move.radial[5] + move.radial[2] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[2] +
                                       (distance[x][y] / (3)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 500;
@@ -3335,7 +3345,7 @@ class ANIMartRIX {
                 float f = 10 + 2 * move.directional[0];
 
                 animation.dist = (f + move.directional[0]) *
-                                 sinf(-move.radial[5] + move.radial[0] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[0] +
                                       (distance[x][y] / (s)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 5;
@@ -3348,7 +3358,7 @@ class ANIMartRIX {
                 show2 = render_value(animation);
 
                 animation.dist = (f + move.directional[1]) *
-                                 sinf(-move.radial[5] + move.radial[1] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[1] +
                                       (distance[x][y] / (s)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 500;
@@ -3361,7 +3371,7 @@ class ANIMartRIX {
                 show3 = render_value(animation);
 
                 animation.dist = (f + move.directional[2]) *
-                                 sinf(-move.radial[5] + move.radial[2] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[2] +
                                       (distance[x][y] / (s)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 5000;
@@ -3374,7 +3384,7 @@ class ANIMartRIX {
                 show4 = render_value(animation);
 
                 animation.dist = (f + move.directional[3]) *
-                                 sinf(-move.radial[5] + move.radial[3] +
+                                 FL_SIN_F(-move.radial[5] + move.radial[3] +
                                       (distance[x][y] / (s)));
                 animation.angle = 1 * polar_theta[x][y];
                 animation.z = 2000;
@@ -3665,7 +3675,7 @@ class ANIMartRIX {
                 float s = 1.5;
 
                 animation.dist = distance[x][y] +
-                                 sinf(0.5 * distance[x][y] - move.radial[3]);
+                                 FL_SIN_F(0.5 * distance[x][y] - move.radial[3]);
                 animation.angle = polar_theta[x][y];
                 animation.z = 5;
                 animation.scale_x = 0.1 * s;
@@ -3711,7 +3721,7 @@ class ANIMartRIX {
                 float s = 0.8;
 
                 animation.dist = distance[x][y] +
-                                 sinf(0.25 * distance[x][y] - move.radial[3]);
+                                 FL_SIN_F(0.25 * distance[x][y] - move.radial[3]);
                 animation.angle = polar_theta[x][y];
                 animation.z = 5;
                 animation.scale_x = 0.1 * s;
@@ -3723,7 +3733,7 @@ class ANIMartRIX {
                 show1 = render_value(animation);
 
                 animation.dist = distance[x][y] +
-                                 sinf(0.24 * distance[x][y] - move.radial[4]);
+                                 FL_SIN_F(0.24 * distance[x][y] - move.radial[4]);
                 animation.angle = polar_theta[x][y];
                 animation.z = 10;
                 animation.scale_x = 0.1 * s;
@@ -3776,7 +3786,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     2 + distance[x][y] +
-                    2 * sinf(0.25 * distance[x][y] - move.radial[3]);
+                    2 * FL_SIN_F(0.25 * distance[x][y] - move.radial[3]);
                 animation.angle = polar_theta[x][y];
                 animation.z = 5;
                 animation.scale_x = 0.1 * s;
@@ -3789,7 +3799,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     2 + distance[x][y] +
-                    2 * sinf(0.24 * distance[x][y] - move.radial[4]);
+                    2 * FL_SIN_F(0.24 * distance[x][y] - move.radial[4]);
                 animation.angle = polar_theta[x][y];
                 animation.z = 10;
                 animation.scale_x = 0.1 * s;
@@ -3853,7 +3863,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     3 + distance[x][y] +
-                    3 * sinf(0.25 * distance[x][y] - move.radial[3]);
+                    3 * FL_SIN_F(0.25 * distance[x][y] - move.radial[3]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[0] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -3867,7 +3877,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     4 + distance[x][y] +
-                    4 * sinf(0.24 * distance[x][y] - move.radial[4]);
+                    4 * FL_SIN_F(0.24 * distance[x][y] - move.radial[4]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[1] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -3881,7 +3891,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     5 + distance[x][y] +
-                    5 * sinf(0.23 * distance[x][y] - move.radial[5]);
+                    5 * FL_SIN_F(0.23 * distance[x][y] - move.radial[5]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[2] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -3895,7 +3905,7 @@ class ANIMartRIX {
 
                 show4 = colordodge(show1, show2);
 
-                float rad = sinf(PI / 2 +
+                float rad = FL_SIN_F(PI / 2 +
                                  distance[x][y] / 14); // better radial filter?!
 
                 /*
@@ -3997,7 +4007,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     3 + distance[x][y] +
-                    3 * sinf(0.25 * distance[x][y] - move.radial[3]);
+                    3 * FL_SIN_F(0.25 * distance[x][y] - move.radial[3]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[0] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -4011,7 +4021,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     4 + distance[x][y] +
-                    4 * sinf(0.24 * distance[x][y] - move.radial[4]);
+                    4 * FL_SIN_F(0.24 * distance[x][y] - move.radial[4]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[1] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -4025,7 +4035,7 @@ class ANIMartRIX {
 
                 animation.dist =
                     5 + distance[x][y] +
-                    5 * sinf(0.23 * distance[x][y] - move.radial[5]);
+                    5 * FL_SIN_F(0.23 * distance[x][y] - move.radial[5]);
                 animation.angle = polar_theta[x][y] + move.noise_angle[2] +
                                   move.noise_angle[6];
                 animation.z = 5;
@@ -4039,7 +4049,7 @@ class ANIMartRIX {
 
                 show4 = colordodge(show1, show2);
 
-                float rad = sinf(PI / 2 +
+                float rad = FL_SIN_F(PI / 2 +
                                  distance[x][y] / 14); // better radial filter?!
 
                 /*
