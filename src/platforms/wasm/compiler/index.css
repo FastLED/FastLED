@@ -237,7 +237,7 @@ h1 {
     width: 100%;
     max-width: 1000px; /* Match the max-width of main-container */
     box-sizing: border-box;
-    text-align: center;
+    text-align: left;
     margin: 10px auto; /* Center horizontally */
     padding: 0 20px;
     color: #B0B0B0;  /* Changed from #666 to a lighter gray for better contrast */
