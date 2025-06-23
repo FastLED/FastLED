@@ -8,9 +8,6 @@
 // Animated, ever-changing rainbows.
 // by Mark Kriegsman
 
-#if FASTLED_VERSION < 3001000
-#error "Requires FastLED 3.1 or later; check github for latest code."
-#endif
 
 #define DATA_PIN    3
 //#define CLK_PIN   4
