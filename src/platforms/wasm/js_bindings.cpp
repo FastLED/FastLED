@@ -145,23 +145,16 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
                 }
             };
 
-       var getPixelDataRaw = Module.cwrap('getPixelData_Uint8_Raw', 'number', ['number', 'number']);
-            var allocateSize = Module._malloc(4); // Allocate space for size_t*
+       globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
+            var activeStrips = globalThis.FastLED_onFrameData;
 
             var jsonStr = UTF8ToString($0);
             var jsonData = JSON.parse(jsonStr);
             for (var i = 0; i < jsonData.length; i++) {
                 var stripData = jsonData[i];
-                var dataPtr = getPixelDataRaw(stripData.strip_id, allocateSize);
-                if (dataPtr !== 0) {
-                    var size = Module.getValue(allocateSize, 'i32');
-                    var pixelData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
-                    jsonData[i].pixel_data = pixelData;
-                } else {
-                    jsonData[i].pixel_data = new Uint8Array(0);
-                }
+            var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
+                jsonData[i].pixel_data = pixelData;
             }
-            Module._free(allocateSize);
 
         globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);
     }, json_str.c_str());
