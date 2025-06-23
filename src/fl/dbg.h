@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/strstream.h"
+#include "fl/sketch_macros.h"
 
 namespace fl {
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
@@ -29,6 +30,8 @@ inline const char *fastled_file_offset(const char *file) {
 
 #ifdef __EMSCRIPTEN__
 #define FASTLED_DBG_USE_PRINTF 1
+#elif !SKETCH_HAS_LOTS_OF_MEMORY
+#define FASTLED_DBG_USE_PRINTF 0
 #endif
 
 #ifndef FASTLED_DBG_USE_PRINTF
