@@ -2,6 +2,8 @@
 
 #if defined(__AVR__)
 #include "avr_test.h"
+#elif defined(ESP8266)
+#include "esp8266_test.h"
 #endif
 
 
