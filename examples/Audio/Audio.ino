@@ -34,7 +34,7 @@ void loop() {}
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fx.h"
+#include "fx_audio.h"
 #include "fx/time.h"
 
 // Sketch.
