@@ -40,11 +40,11 @@ void loop() {}
 #include "fl/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/xypath.h"
-#include "fx.h"
 #include "fx/time.h"
+#include "fl/function.h"
 
 // Sketch.
-#include "fl/function.h"
+#include "fx_audio.h"
 
 using namespace fl;
 

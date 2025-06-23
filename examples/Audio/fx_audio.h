@@ -1,8 +1,4 @@
-#include <algorithm>
-#include <cstdint>
-#include <cmath>
-#include <cassert>
-
+#include "fl/math.h"
 #include "fl/time_alpha.h"
 
 /// Tracks a smoothed peak with attack, decay, and output-inertia time-constants.
@@ -34,8 +30,8 @@ public:
         // 1) block peak
         float peak = 0.0f;
         for (size_t i = 0; i < length; ++i) {
-            float v = std::abs(samples[i]) * (1.0f/32768.0f);
-            peak = std::max(peak, v);
+            float v = ABS(samples[i]) * (1.0f/32768.0f);
+            peak = MAX(peak, v);
         }
 
         // 2) time delta
@@ -43,15 +39,15 @@ public:
 
         // 3) update currentLevel_ with attack/decay
         if (peak > currentLevel_) {
-            float riseFactor = 1.0f - std::exp(-attackRate_ * dt);
+            float riseFactor = 1.0f - fl::exp(-attackRate_ * dt);
             currentLevel_ += (peak - currentLevel_) * riseFactor;
         } else {
-            float decayFactor = std::exp(-decayRate_ * dt);
+            float decayFactor = fl::exp(-decayRate_ * dt);
             currentLevel_ *= decayFactor;
         }
 
         // 4) output inertia: smooth smoothedOutput_ → currentLevel_
-        float outFactor = 1.0f - std::exp(-outputRate_ * dt);
+        float outFactor = 1.0f - fl::exp(-outputRate_ * dt);
         smoothedOutput_ += (currentLevel_ - smoothedOutput_) * outFactor;
 
         return smoothedOutput_;
