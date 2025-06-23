@@ -25,11 +25,7 @@ private:
 
     static RmtController5::DmaMode DefaultDmaMode()
     {
-        #ifdef FASTLED_RMT_USE_DMA
-        return RmtController5::DMA_ENABLED;
-        #else
         return RmtController5::DMA_AUTO;
-        #endif
     }
 
 public:
