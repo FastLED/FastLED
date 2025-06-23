@@ -14,6 +14,65 @@ window.setupAudioAnalysis = function(audioElement) {
   return audioManager.setupAudioAnalysis(audioElement);
 };
 
+/**
+ * Simple markdown to HTML converter
+ * Supports: headers, bold, italic, code, links, lists, and paragraphs
+ */
+function markdownToHtml(markdown) {
+  if (!markdown) return '';
+  
+  let html = markdown;
+  
+  // Convert headers (# ## ### etc.)
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  
+  // Convert bold **text** and __text__
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  
+  // Convert italic *text* and _text_
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  
+  // Convert inline code `code`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  
+  // Convert code blocks ```code```
+  html = html.replace(/```([^`]+)```/g, '<pre><code>$1</code></pre>');
+  
+  // Convert links [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+  
+  // Convert unordered lists (- item or * item)
+  html = html.replace(/^[\-\*] (.+)$/gm, '<li>$1</li>');
+  
+  // Convert ordered lists (1. item, 2. item, etc.)
+  html = html.replace(/^\d+\. (.+)$/gm, '<li class="ordered">$1</li>');
+  
+  // Wrap consecutive <li> elements properly
+  html = html.replace(/(<li(?:\s+class="ordered")?>.*?<\/li>(?:\s*<li(?:\s+class="ordered")?>.*?<\/li>)*)/gs, function(match) {
+    if (match.includes('class="ordered"')) {
+      return '<ol>' + match.replace(/\s+class="ordered"/g, '') + '</ol>';
+    } else {
+      return '<ul>' + match + '</ul>';
+    }
+  });
+  
+  // Convert line breaks to paragraphs (double newlines become paragraph breaks)
+  const paragraphs = html.split(/\n\s*\n/);
+  html = paragraphs.map(p => {
+    const trimmed = p.trim();
+    if (trimmed && !trimmed.startsWith('<h') && !trimmed.startsWith('<ul') && !trimmed.startsWith('<ol') && !trimmed.startsWith('<pre')) {
+      return '<p>' + trimmed.replace(/\n/g, '<br>') + '</p>';
+    }
+    return trimmed;
+  }).join('\n');
+  
+  return html;
+}
+
 function createNumberField(element) {
   const controlDiv = document.createElement('div');
   controlDiv.className = 'ui-control';
@@ -205,7 +264,9 @@ function setDescription(descData) {
         document.body.insertBefore(descElement, document.body.firstChild);
       }
     }
-    descElement.textContent = descData.text;
+    
+    // Always process text as markdown (plain text is valid markdown)
+    descElement.innerHTML = markdownToHtml(descData.text);
   } else {
     console.warn('Invalid description data received:', descData);
   }

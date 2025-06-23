@@ -59,7 +59,18 @@ using namespace fl;
 
 UITitle festivalStickTitle("Corkscrew");
 UIDescription festivalStickDescription(
-    "Tests the ability to map a cork screw onto a 2D cylindrical surface. ");
+    "# Festival Stick Demo\n\n"
+    "This example demonstrates **proper corkscrew LED mapping** for a festival stick using FastLED's advanced mapping capabilities.\n\n"
+    "## Key Features\n"
+    "- **19+ turns** with 288 LEDs total\n"
+    "- Uses `Corkscrew.toScreenMap()` for accurate web interface visualization\n"
+    "- Multiple render modes: **Noise**, **Position**, and **Fire** effects\n"
+    "- Real-time cylindrical surface mapping\n\n"
+    "## How It Works\n"
+    "1. Draws patterns into a rectangular grid (`frameBuffer`)\n"
+    "2. Maps the grid to corkscrew LED positions using `readFrom()`\n"
+    "3. Web interface shows the actual spiral shape via ScreenMap\n\n"
+    "*Select different render modes and adjust parameters to see various effects!*");
 
 
 

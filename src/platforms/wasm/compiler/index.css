@@ -521,3 +521,115 @@ audio::-webkit-media-controls-mute-button {
     animation: labelFade 10s ease-out forwards;
     animation-delay: 0;  /* Delay animation start */
 }
+
+/* Markdown styling for descriptions */
+#fastled-description h1,
+#fastled-description h2,
+#fastled-description h3 {
+    color: #E0E0E0;
+    margin: 1.2em 0 0.6em 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+#fastled-description h1 {
+    font-size: 1.8em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.3em;
+}
+
+#fastled-description h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.2em;
+}
+
+#fastled-description h3 {
+    font-size: 1.3em;
+}
+
+#fastled-description p {
+    margin: 0.8em 0;
+    line-height: 1.6;
+    color: #B0B0B0;
+}
+
+#fastled-description strong {
+    color: #E0E0E0;
+    font-weight: 600;
+}
+
+#fastled-description em {
+    color: #D0D0D0;
+    font-style: italic;
+}
+
+#fastled-description code {
+    background-color: #2A2A2A;
+    color: #F0F0F0;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    border: 1px solid #444;
+}
+
+#fastled-description pre {
+    background-color: #1A1A1A;
+    color: #E0E0E0;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+    border: 1px solid #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#fastled-description pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+#fastled-description a {
+    color: #1E90FF;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+#fastled-description a:hover {
+    color: #66B3FF;
+    border-bottom-color: #66B3FF;
+}
+
+#fastled-description ul,
+#fastled-description ol {
+    margin: 0.8em 0;
+    padding-left: 2em;
+    color: #B0B0B0;
+}
+
+#fastled-description li {
+    margin: 0.4em 0;
+    line-height: 1.5;
+}
+
+#fastled-description ul li {
+    list-style-type: disc;
+}
+
+#fastled-description ol li {
+    list-style-type: decimal;
+}
+
+/* Add some breathing room between elements */
+#fastled-description > *:first-child {
+    margin-top: 0;
+}
+
+#fastled-description > *:last-child {
+    margin-bottom: 0;
+}
