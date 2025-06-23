@@ -1,7 +1,12 @@
 #pragma once
 
+#if !defined(PROGMEM)
 #define PROGMEM
-#define FL_PROGMEM
+#endif
+
+#if !defined(FL_PROGMEM)
+#define FL_PROGMEM PROGMEM
+#endif
 
 #define FL_PGM_READ_BYTE_NEAR(x) (*((const uint8_t *)(x)))
 #define FL_PGM_READ_WORD_NEAR(x) (*((const uint16_t *)(x)))
