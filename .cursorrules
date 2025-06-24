@@ -185,3 +185,70 @@ The project uses a comprehensive test suite including:
 - Example compilation verification
 
 Use `bash test` as specified in user rules for running unit tests. This will also compile for avr for Arduino uno against the blink sketch.
+
+## Debugging and Stack Traces
+
+### Stack Trace Setup
+The FastLED project supports enhanced debugging through stack trace functionality for crash analysis and debugging.
+
+**For Background Agents**: Use the MCP server tool `setup_stack_traces` to automatically install and configure stack trace support:
+
+```bash
+# Via MCP server (recommended for background agents)
+uv run mcp_server.py
+# Then use setup_stack_traces tool with method: "auto"
+```
+
+**Manual Installation**:
+
+**Ubuntu/Debian**:
+```bash
+sudo apt-get update
+sudo apt-get install -y libunwind-dev build-essential cmake
+```
+
+**CentOS/RHEL/Fedora**:
+```bash
+sudo yum install -y libunwind-devel gcc-c++ cmake  # CentOS/RHEL  
+sudo dnf install -y libunwind-devel gcc-c++ cmake  # Fedora
+```
+
+**macOS**:
+```bash
+brew install libunwind
+```
+
+### Available Stack Trace Methods
+1. **LibUnwind** (Recommended) - Enhanced stack traces with symbol resolution
+2. **Execinfo** (Fallback) - Basic stack traces using standard glibc
+3. **Windows** (On Windows) - Windows-specific debugging APIs
+4. **No-op** (Last resort) - Minimal crash handling
+
+The build system automatically detects and configures the best available option.
+
+### Testing Stack Traces
+```bash
+cd tests
+cmake . && make crash_test_standalone crash_test_execinfo
+
+# Test libunwind version
+./.build/bin/crash_test_standalone manual   # Manual stack trace
+./.build/bin/crash_test_standalone nullptr  # Crash test
+
+# Test execinfo version  
+./.build/bin/crash_test_execinfo manual     # Manual stack trace
+./.build/bin/crash_test_execinfo nullptr    # Crash test
+```
+
+### Using in Code
+```cpp
+#include "tests/crash_handler.h"
+
+int main() {
+    setup_crash_handler();  // Enable crash handling
+    // Your code here...
+    return 0;
+}
+```
+
+**For Background Agents**: Always run the `setup_stack_traces` MCP tool when setting up a new environment to ensure proper debugging capabilities are available.

@@ -244,18 +244,44 @@ if(NOT LIBUNWIND_FOUND)
         PATHS /usr/lib /usr/local/lib /opt/homebrew/lib /usr/lib/x86_64-linux-gnu
     )
 
+    find_library(LIBUNWIND_X86_64_LIBRARY 
+        NAMES unwind-x86_64
+        PATHS /usr/lib /usr/local/lib /opt/homebrew/lib /usr/lib/x86_64-linux-gnu
+    )
+
     # Check if both header and library are found
     if(LIBUNWIND_INCLUDE_DIR AND LIBUNWIND_LIBRARY)
         set(LIBUNWIND_FOUND TRUE)
-        set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY})
+        if(LIBUNWIND_X86_64_LIBRARY)
+            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY} ${LIBUNWIND_X86_64_LIBRARY})
+        else()
+            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY})
+        endif()
         set(LIBUNWIND_INCLUDE_DIRS ${LIBUNWIND_INCLUDE_DIR})
     endif()
 endif()
 
 # Set the final flag based on what we found
-if(LIBUNWIND_FOUND AND LIBUNWIND_LIBRARIES AND LIBUNWIND_INCLUDE_DIRS)
+if(LIBUNWIND_FOUND)
     set(USE_LIBUNWIND TRUE)
-    message(STATUS "LibUnwind found: ${LIBUNWIND_LIBRARIES}")
+    # For x86_64 systems, we need both libunwind and libunwind-x86_64
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(LIBUNWIND_LIBRARIES unwind unwind-x86_64 lzma)
+        message(STATUS "LibUnwind found for x86_64: ${LIBUNWIND_LIBRARIES}")
+    else()
+        # Use pkg-config results if available, otherwise use manual search
+        if(PKG_CONFIG_FOUND AND LIBUNWIND_STATIC_LIBRARIES)
+            set(LIBUNWIND_LIBRARIES ${LIBUNWIND_STATIC_LIBRARIES})
+            set(LIBUNWIND_INCLUDE_DIRS ${LIBUNWIND_STATIC_INCLUDE_DIRS})
+            message(STATUS "LibUnwind found via pkg-config: ${LIBUNWIND_LIBRARIES}")
+        elseif(LIBUNWIND_LIBRARIES AND LIBUNWIND_INCLUDE_DIRS)
+            # Add x86_64 library if available
+            if(LIBUNWIND_X86_64_LIBRARY)
+                list(APPEND LIBUNWIND_LIBRARIES ${LIBUNWIND_X86_64_LIBRARY})
+            endif()
+            message(STATUS "LibUnwind found manually: ${LIBUNWIND_LIBRARIES}")
+        endif()
+    endif()
     message(STATUS "LibUnwind headers: ${LIBUNWIND_INCLUDE_DIRS}")
 else()
     set(USE_LIBUNWIND FALSE)
@@ -354,6 +380,8 @@ if(CLEAN_ORPHANED_BINARIES)
         endif()
     endforeach()
 endif()
+
+
 
 # Add verbose output for tests
 set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")

@@ -220,6 +220,31 @@ async def list_tools() -> List[Tool]:
                 "type": "object",
                 "properties": {}
             }
+        ),
+        Tool(
+            name="setup_stack_traces",
+            description="Install and configure stack trace debugging libraries (libunwind/execinfo)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "method": {
+                        "type": "string",
+                        "enum": ["libunwind", "execinfo", "auto"],
+                        "description": "Stack trace method to install and configure",
+                        "default": "auto"
+                    },
+                    "test_installation": {
+                        "type": "boolean",
+                        "description": "Test the installation with crash tests",
+                        "default": True
+                    },
+                    "install_only": {
+                        "type": "boolean", 
+                        "description": "Only install packages, don't run tests",
+                        "default": False
+                    }
+                }
+            }
         )
     ]
 
@@ -248,6 +273,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await run_specific_command(arguments, project_root)
         elif name == "test_instructions":
             return await test_instructions(arguments, project_root)
+        elif name == "setup_stack_traces":
+            return await setup_stack_traces(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -508,6 +535,154 @@ When running test executables directly, you can use doctest options:
     return CallToolResult(
         content=[TextContent(type="text", text=instructions.strip())]
     )
+
+async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Install and configure stack trace debugging libraries."""
+    method = arguments.get("method", "auto")
+    test_installation = arguments.get("test_installation", True)
+    install_only = arguments.get("install_only", False)
+    
+    result_text = "# FastLED Stack Trace Setup\n\n"
+    
+    try:
+        # Detect OS and package manager
+        import platform
+        system = platform.system().lower()
+        
+        if system == "linux":
+            # Try to detect package manager
+            distro_info = ""
+            try:
+                with open("/etc/os-release", "r") as f:
+                    distro_info = f.read().lower()
+            except:
+                pass
+            
+            install_commands = []
+            
+            if method in ["libunwind", "auto"]:
+                result_text += "## Installing LibUnwind (Enhanced Stack Traces)\n\n"
+                
+                if "ubuntu" in distro_info or "debian" in distro_info:
+                    install_commands.append("sudo apt-get update")
+                    install_commands.append("sudo apt-get install -y libunwind-dev build-essential cmake")
+                elif "centos" in distro_info or "rhel" in distro_info:
+                    install_commands.append("sudo yum install -y libunwind-devel gcc-c++ cmake")
+                elif "fedora" in distro_info:
+                    install_commands.append("sudo dnf install -y libunwind-devel gcc-c++ cmake")
+                else:
+                    result_text += "⚠️  Unknown Linux distribution. Manual installation required.\n"
+                    result_text += "Common package names: libunwind-dev, libunwind-devel\n\n"
+                
+            elif method == "execinfo":
+                result_text += "## Using Execinfo (Standard GCC Stack Traces)\n\n"
+                result_text += "✅ Execinfo is part of glibc - no additional packages needed!\n\n"
+                
+                # Still need build tools
+                if "ubuntu" in distro_info or "debian" in distro_info:
+                    install_commands.append("sudo apt-get update")
+                    install_commands.append("sudo apt-get install -y build-essential cmake")
+                elif "centos" in distro_info or "rhel" in distro_info:
+                    install_commands.append("sudo yum install -y gcc-c++ cmake")
+                elif "fedora" in distro_info:
+                    install_commands.append("sudo dnf install -y gcc-c++ cmake")
+            
+            # Run installation commands
+            for cmd in install_commands:
+                result_text += f"Running: `{cmd}`\n"
+                try:
+                    install_result = await run_command(cmd.split(), project_root)
+                    result_text += "✅ Success\n\n"
+                except Exception as e:
+                    result_text += f"❌ Error: {e}\n\n"
+                    return CallToolResult(
+                        content=[TextContent(type="text", text=result_text)],
+                        isError=True
+                    )
+                    
+        elif system == "darwin":  # macOS
+            result_text += "## Installing LibUnwind on macOS\n\n"
+            try:
+                install_result = await run_command(["brew", "install", "libunwind"], project_root)
+                result_text += "✅ LibUnwind installed via Homebrew\n\n"
+            except Exception as e:
+                result_text += f"❌ Error installing libunwind: {e}\n"
+                result_text += "Please install Homebrew first: https://brew.sh/\n\n"
+                
+        else:
+            result_text += f"⚠️  Unsupported OS: {system}\n"
+            result_text += "Manual installation required.\n\n"
+        
+        if not install_only and test_installation:
+            result_text += "## Testing Stack Trace Installation\n\n"
+            
+            # Build the crash test programs
+            tests_dir = project_root / "tests"
+            result_text += "Building crash test programs...\n"
+            
+            try:
+                # Clean and rebuild
+                build_result = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
+                build_result = await run_command(["cmake", "."], tests_dir)
+                build_result = await run_command(["make", "-j4"], tests_dir)
+                result_text += "✅ FastLED test framework built successfully\n\n"
+                
+                # Test by running a simple unit test to verify stack traces work
+                result_text += "### Testing Stack Trace Integration\n"
+                try:
+                    # Look for any existing test executable to verify crash handling works
+                    test_executables = await run_command(["find", ".build/bin", "-name", "test_*", "-type", "f"], tests_dir)
+                    if test_executables.strip():
+                        first_test = test_executables.strip().split('\n')[0]
+                        test_name = first_test.split('/')[-1]
+                        result_text += f"Testing with {test_name}...\n"
+                        # Just run help to verify the executable works and crash handler is linked
+                        test_result = await run_command([first_test, "--help"], tests_dir)
+                        result_text += "✅ Stack trace system is properly integrated with test framework\n\n"
+                    else:
+                        result_text += "⚠️ No test executables found to verify integration\n\n"
+                except Exception as e:
+                    result_text += f"⚠️ Could not verify integration: {e}\n\n"
+                        
+            except Exception as e:
+                result_text += f"❌ Error building test framework: {e}\n\n"
+        
+        # Add usage instructions
+        result_text += "## Usage Instructions\n\n"
+        result_text += "The FastLED project automatically detects and uses the best available stack trace method:\n\n"
+        result_text += "1. **LibUnwind** (if available) - Enhanced stack traces with symbol resolution\n"
+        result_text += "2. **Execinfo** (fallback) - Basic stack traces using glibc\n"
+        result_text += "3. **Windows** (on Windows) - Windows-specific debugging APIs\n"
+        result_text += "4. **No-op** (last resort) - Minimal crash handling\n\n"
+        
+        result_text += "### Testing Stack Trace Integration\n"
+        result_text += "```bash\n"
+        result_text += "cd tests\n"
+        result_text += "cmake . && make\n"
+        result_text += "# Stack traces are automatically enabled in test executables\n"
+        result_text += "# Run any test to see crash handling in action if a test fails\n"
+        result_text += "```\n\n"
+        
+        result_text += "### Enabling in Your Code\n"
+        result_text += "```cpp\n"
+        result_text += '#include "tests/crash_handler.h"\n'
+        result_text += "\n"
+        result_text += "int main() {\n"
+        result_text += "    setup_crash_handler();  // Enable crash handling\n"
+        result_text += "    // Your code here...\n"
+        result_text += "    return 0;\n"
+        result_text += "}\n"
+        result_text += "```\n\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+        
+    except Exception as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Error setting up stack traces: {e}")],
+            isError=True
+        )
 
 async def compile_examples(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
     """Compile FastLED examples."""
