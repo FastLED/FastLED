@@ -3,8 +3,8 @@
 #include "fl/thread.h"
 #if FASTLED_USE_THREAD_LOCAL
 #include "fl/hash_map.h"
-#include <pthread.h>
-#include <memory>
+#include <pthread.h>  // ok include
+#include <memory>  // ok include
 #endif
 
 #if FASTLED_USE_THREAD_LOCAL

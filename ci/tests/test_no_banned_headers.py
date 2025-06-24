@@ -21,6 +21,7 @@ else:
     BANNED_HEADERS_ESP = []
 
 BANNED_HEADERS_COMMON = [
+    "pthread.h",
     "assert.h",
     "iostream",
     "stdio.h",

@@ -3,7 +3,7 @@
 #include "fl/thread.h"
 
 #if FASTLED_MULTITHREADED
-#include <mutex>
+#include <mutex>  // ok include
 #endif
 
 namespace fl {

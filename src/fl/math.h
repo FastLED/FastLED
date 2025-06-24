@@ -11,10 +11,10 @@
 #else
 #if __has_include(<cmath>)
 #define FASTLED_HAS_EXP 1
-#include <cmath>
+#include <cmath>  // ok include
 #elif __has_include(<math.h>)
 #define FASTLED_HAS_EXP 1
-#include <math.h>
+#include <math.h>  // ok include
 #else
 #define FASTLED_HAS_EXP 0
 #endif
