@@ -1,3 +1,4 @@
+#include "FastLED.h"
 
 
 #include <FastLED.h>

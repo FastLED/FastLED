@@ -184,7 +184,7 @@ void swap(array<T, N> &lhs,
     TYPE *NAME = reinterpret_cast<TYPE *>(alloca(sizeof(TYPE) * (SIZE)));      \
     memset(NAME, 0, sizeof(TYPE) * (SIZE))
 #elif __has_include(<cstdlib>)
-#include <cstdlib>
+#include <cstdlib>  // ok include
 #define FASTLED_STACK_ARRAY(TYPE, NAME, SIZE)                                  \
     TYPE *NAME = reinterpret_cast<TYPE *>(alloca(sizeof(TYPE) * (SIZE)));      \
     memset(NAME, 0, sizeof(TYPE) * (SIZE))

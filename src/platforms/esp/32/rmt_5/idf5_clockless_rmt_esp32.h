@@ -26,7 +26,6 @@ private:
     static RmtController5::DmaMode DefaultDmaMode()
     {
         return RmtController5::DMA_AUTO;
-
     }
 
 public:

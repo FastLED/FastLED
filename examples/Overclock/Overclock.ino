@@ -10,7 +10,8 @@
 
 /// @brief   Demonstrates how to overclock a FastLED setup
 
-#include <FastLED.h>
+#include "FastLED.h"
+
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // To effectively test the overclock feature we need
 // a large enough dataset to test against. Unfortunately

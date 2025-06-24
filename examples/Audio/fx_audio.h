@@ -1,5 +1,7 @@
-#include "fl/math.h"
+
+
 #include "fl/time_alpha.h"
+#include "fl/math_macros.h"
 
 /// Tracks a smoothed peak with attack, decay, and output-inertia time-constants.
 class MaxFadeTracker {
