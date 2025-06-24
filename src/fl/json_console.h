@@ -1,0 +1,93 @@
+#pragma once
+
+#include "fl/function.h"
+#include "fl/str.h"
+#include "fl/hash_map.h"
+#include "platforms/shared/ui/json/ui.h"
+
+namespace fl {
+
+/**
+ * JsonConsole provides a console interface to interact with JsonUI components.
+ * It takes two callbacks for reading and writing to a serial interface (or mock functions for testing).
+ * 
+ * Usage:
+ * - Production: JsonConsole console(Serial.available, Serial.read, Serial.println);
+ * - Testing: JsonConsole console(mockAvailable, mockRead, mockPrintln);
+ * 
+ * Console commands:
+ * - "slider: 80" sets a UISlider named "slider" to value 80
+ * - Components are matched by name, not ID
+ */
+class JsonConsole {
+public:
+    // Callback types for serial interface
+    using AvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())
+    using ReadCallback = fl::function<int()>;             // Returns next byte (like Serial.read())  
+    using WriteCallback = fl::function<void(const char*)>; // Writes string (like Serial.println())
+
+    /**
+     * Constructor
+     * @param availableCallback Function that returns number of bytes available to read
+     * @param readCallback Function that reads next byte from input
+     * @param writeCallback Function that writes output strings
+     */
+    JsonConsole(AvailableCallback availableCallback, 
+                ReadCallback readCallback, 
+                WriteCallback writeCallback);
+    
+    /**
+     * Initialize the console with the JsonUI system
+     * This sets up the JsonUI handlers and gets the input function
+     */
+    void init();
+    
+    /**
+     * Process any pending console input and execute commands
+     * Should be called regularly (e.g., in main loop)
+     */
+    void update();
+    
+    /**
+     * Parse and execute a console command
+     * @param command The command string to execute
+     * @return true if command was successfully parsed and executed
+     */
+    bool executeCommand(const fl::string& command);
+    
+    /**
+     * Process JSON from UI system (for testing)
+     * @param jsonStr The JSON string containing component data
+     */
+    void processJsonFromUI(const char* jsonStr);
+    
+    /**
+     * Manually update component mapping from JSON string
+     * This is useful for testing or when component data is available outside the normal JsonUI flow
+     * @param jsonStr JSON array of component data
+     */
+    void updateComponentMapping(const char* jsonStr);
+    
+private:
+    // Serial interface callbacks
+    AvailableCallback mAvailableCallback;
+    ReadCallback mReadCallback; 
+    WriteCallback mWriteCallback;
+    
+    // JsonUI interface
+    JsonUiUpdateInput mUpdateEngineState;
+    
+    // Input buffer for building up commands
+    fl::string mInputBuffer;
+    
+    // Component name to ID mapping (updated when UI sends component list)
+    fl::hash_map<fl::string, int> mComponentNameToId;
+    
+    // Helper methods
+    void readInputFromSerial();
+    void parseCommand(const fl::string& command);
+    bool setSliderValue(const fl::string& name, float value);
+    void writeOutput(const fl::string& message);
+};
+
+} // namespace fl
