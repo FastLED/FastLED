@@ -131,6 +131,7 @@
         "queue": "cpp",
         "cstdbool": "cpp",
         "source_location": "cpp",
-        "text_encoding": "cpp"
+        "text_encoding": "cpp",
+        "__node_handle": "cpp"
     }
 }

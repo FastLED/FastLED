@@ -151,6 +151,7 @@ class UIButton : public UIElement {
     }
     int clickedCount() const { return mImpl.clickedCount(); }
     operator bool() const { return clicked(); }
+    bool value() const { return clicked(); }
 
     void addRealButton(const Button& pin) {
         mRealButton.reset(new Button(pin));
