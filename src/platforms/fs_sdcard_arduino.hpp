@@ -12,6 +12,7 @@
 #include "fl/namespace.h"
 #include "fl/ptr.h"
 #include "fl/file_system.h"
+#include "fl/type_traits.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -23,7 +24,7 @@ private:
     const char* _path;
 
 public:
-    SdFatFileHandle(SdFile file, const char* path) : _file(std::move(file)), _path(path) {}
+    SdFatFileHandle(SdFile file, const char* path) : _file(fl::move(file)), _path(path) {}
     ~SdFatFileHandle() override { _file.close(); }
 
     bool available() const override {
@@ -90,7 +91,7 @@ public:
         if (!file.open(name, oflag)) {
             return Ptr<FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::TakeOwnership(new SdFatFileHandle(std::move(file), name));
+        return Ptr<FileHandle>::TakeOwnership(new SdFatFileHandle(fl::move(file), name));
 #else
 
         #ifdef ESP32
@@ -101,7 +102,7 @@ public:
         if (!file) {
             return fl::Ptr<fl::FileHandle>::TakeOwnership(nullptr);
         }
-        return fl::Ptr<fl::FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
+        return fl::Ptr<fl::FileHandle>::TakeOwnership(new SDFileHandle(fl::move(file), name));
 #endif
     }
 
