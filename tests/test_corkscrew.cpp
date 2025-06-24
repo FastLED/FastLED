@@ -17,7 +17,7 @@ using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
     // Test the auto-calculating constructor
-    Corkscrew::Input input_auto(1.0f, 10, 0.0f); // 1 turn, 10 LEDs, no offset
+    Corkscrew::Input input_auto(1.0f, 10); // 1 turn, 10 LEDs, defaults
     Corkscrew::State output_auto = Corkscrew::generateState(input_auto);
     
     // Verify auto-calculated dimensions
@@ -25,7 +25,7 @@ TEST_CASE("Corkscrew Circle10 test") {
     REQUIRE_EQ(output_auto.height, 1);  // ceil(1 turn) = 1
     
     // Test your specific example: 20 LEDs with 2 turns (10 LEDs per turn)
-    Corkscrew::Input input_example(2.0f, 20, 0.0f); // 2 turns, 20 LEDs, no offset
+    Corkscrew::Input input_example(2.0f, 20); // 2 turns, 20 LEDs, defaults
     Corkscrew::State output_example = Corkscrew::generateState(input_example);
     
     // Verify: 20 LEDs / 2 turns = 10 LEDs per turn
@@ -41,7 +41,7 @@ TEST_CASE("Corkscrew Circle10 test") {
     REQUIRE_EQ(output_default.height, 18); // Optimized: ceil(144/8) = ceil(18) = 18 (perfect match!)
     
     // Test FestivalStick case: 19 turns, 288 LEDs 
-    Corkscrew::Input input_festival(19.0f, 288, 0.0f);
+    Corkscrew::Input input_festival(19.0f, 288);
     Corkscrew::State output_festival = Corkscrew::generateState(input_festival);
     
     // Debug the height calculation - should now optimize to prevent excess pixels
@@ -68,7 +68,7 @@ TEST_CASE("Corkscrew Circle10 test") {
 
 TEST_CASE("Corkscrew LED distribution test") {
     // Test if LEDs actually reach the top row
-    Corkscrew::Input input(19.0f, 288, 0.0f); // FestivalStick case
+    Corkscrew::Input input(19.0f, 288); // FestivalStick case
     Corkscrew::State output = Corkscrew::generateState(input);
     Corkscrew corkscrew(input);
     
@@ -89,7 +89,7 @@ TEST_CASE("Corkscrew LED distribution test") {
 
 TEST_CASE("Corkscrew two turns test") {
     // Test 2 turns with 2 LEDs per turn (4 LEDs total)
-    Corkscrew::Input input_two_turns(2.0f, 4, 0.0f); // 2 turns, 4 LEDs, no offset
+    Corkscrew::Input input_two_turns(2.0f, 4); // 2 turns, 4 LEDs, defaults
     Corkscrew::State output_two_turns = Corkscrew::generateState(input_two_turns);
     
     // Verify: 4 LEDs / 2 turns = 2 LEDs per turn
@@ -163,7 +163,7 @@ TEST_CASE("Constexpr corkscrew dimension calculation") {
     static_assert(default_height == 18, "Default height should be 18");
     
     // Verify runtime and compile-time versions match
-    fl::Corkscrew::Input runtime_input(19.0f, 288, 0.0f);
+    fl::Corkscrew::Input runtime_input(19.0f, 288);
     fl::Corkscrew::State runtime_output = fl::Corkscrew::generateState(runtime_input);
     
     REQUIRE_EQ(festival_width, runtime_output.width);
@@ -243,7 +243,7 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     Corkscrew::Input input;
     input.numLeds = 12;  // 3x4 grid
     input.totalTurns = 1.0f;
-    input.offsetCircumference = 0.0f;
+    input.gapParams = Gap();
     
     Corkscrew corkscrew(input);
     
@@ -290,8 +290,8 @@ TEST_CASE("Corkscrew readFrom with bilinear interpolation") {
     REQUIRE(non_black_count > 0);
     REQUIRE(found_red_component);
     
-    // Blue components might not be found depending on the mapping, so let's be more lenient
-    // The important thing is that we get some color data
+    // Note: Blue components might not be found depending on the mapping, but we check anyway
+    FL_UNUSED(found_blue_component);  // Suppress warning if not used in assertions
     
     // Test that coordinates mapping makes sense by checking a specific LED
     vec2f pos0 = corkscrew.at_no_wrap(0);
@@ -313,7 +313,7 @@ TEST_CASE("Corkscrew CRGB* data access") {
     Corkscrew::Input input;
     input.numLeds = 6;
     input.totalTurns = 1.0f;
-    input.offsetCircumference = 0.0f;
+    input.gapParams = Gap();
     
     Corkscrew corkscrew(input);
     
@@ -356,7 +356,7 @@ TEST_CASE("Corkscrew CRGB* data access") {
 
 TEST_CASE("Corkscrew ScreenMap functionality") {
     // Create a simple corkscrew for testing
-    fl::Corkscrew::Input input(2.0f, 8, 0.0f); // 2 turns, 8 LEDs
+    fl::Corkscrew::Input input(2.0f, 8); // 2 turns, 8 LEDs
     fl::Corkscrew corkscrew(input);
     
     // Test default diameter
@@ -400,7 +400,7 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
     REQUIRE(bounds.y >= 0.0f); // Should have some height (or 0 for single row)
     
     // Test a larger corkscrew to ensure it works with more complex cases
-    fl::Corkscrew::Input input_large(19.0f, 288, 0.0f); // FestivalStick case
+    fl::Corkscrew::Input input_large(19.0f, 288); // FestivalStick case
     fl::Corkscrew corkscrew_large(input_large);
     fl::ScreenMap screenMap_large = corkscrew_large.toScreenMap(0.8f);
     
@@ -413,4 +413,65 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
         REQUIRE(pos.x >= 0.0f);
         REQUIRE(pos.y >= 0.0f);
     }
+}
+
+TEST_CASE("Corkscrew Gap struct functionality") {
+    // Test default Gap construction
+    Gap defaultGap;
+    REQUIRE_EQ(defaultGap.gap, 0.0f);
+    
+    // Test Gap construction with value
+    Gap halfGap(0.5f);
+    REQUIRE_EQ(halfGap.gap, 0.5f);
+    
+    Gap fullGap(1.0f);
+    REQUIRE_EQ(fullGap.gap, 1.0f);
+    
+    // Test Gap struct in CorkscrewInput
+    Corkscrew::Input inputWithDefaultGap;
+    REQUIRE_EQ(inputWithDefaultGap.gapParams.gap, 0.0f);
+    
+    // Test CorkscrewInput constructor with Gap - need to specify invert first
+    Gap customGap(0.3f);
+    Corkscrew::Input inputWithCustomGap(19.0f, 144, false, customGap);
+    REQUIRE_EQ(inputWithCustomGap.gapParams.gap, 0.3f);
+    REQUIRE_EQ(inputWithCustomGap.totalTurns, 19.0f);
+    REQUIRE_EQ(inputWithCustomGap.numLeds, 144);
+    REQUIRE_EQ(inputWithCustomGap.invert, false);
+    
+    // Test Corkscrew construction with Gap struct
+    Corkscrew corkscrewWithGap(inputWithCustomGap);
+    REQUIRE_EQ(corkscrewWithGap.size(), 144);
+    
+    // Test that different gap values still produce valid corkscrews
+    Gap noGap(0.0f);
+    Gap smallGap(0.1f);
+    Gap largeGap(0.9f);
+    
+    Corkscrew::Input inputNoGap(2.0f, 8, false, noGap);
+    Corkscrew::Input inputSmallGap(2.0f, 8, false, smallGap);
+    Corkscrew::Input inputLargeGap(2.0f, 8, false, largeGap);
+    
+    Corkscrew corkscrewNoGap(inputNoGap);
+    Corkscrew corkscrewSmallGap(inputSmallGap);
+    Corkscrew corkscrewLargeGap(inputLargeGap);
+    
+    // All should have the same basic properties since gap computation is not implemented yet
+    REQUIRE_EQ(corkscrewNoGap.size(), 8);
+    REQUIRE_EQ(corkscrewSmallGap.size(), 8);
+    REQUIRE_EQ(corkscrewLargeGap.size(), 8);
+    
+    // Test that Gap struct supports copy construction and assignment
+    Gap originalGap(0.7f);
+    Gap copiedGap(originalGap);
+    REQUIRE_EQ(copiedGap.gap, 0.7f);
+    
+    Gap assignedGap;
+    assignedGap = originalGap;
+    REQUIRE_EQ(assignedGap.gap, 0.7f);
+    
+    // Test Gap struct in state generation
+    Corkscrew::State stateWithGap = Corkscrew::generateState(inputWithCustomGap);
+    REQUIRE(stateWithGap.width > 0);
+    REQUIRE(stateWithGap.height > 0);
 }

@@ -21,12 +21,12 @@
  * Inputs:
  * - Total Height of the Corkscrew in centimeters
  * - Total angle of the Corkscrew (number of veritcal segments × 2π)
- * - Optional offset circumference (default 0)
- *   - Allows pixel-perfect corkscrew with gaps via circumference offsetting
+ * - Optional gap parameters (default Gap with gap = 0.0f)
+ *   - Allows pixel-perfect corkscrew with gaps via gap parameter (0.0 to 1.0)
  *   - Example (accounting for gaps):
- *     - segment 0: offset circumference = 0, circumference = 100
- *     - segment 1: offset circumference = 100.5, circumference = 100
- *     - segment 2: offset circumference = 101, circumference = 100
+ *     - segment 0: gap = 0.0, no gap
+ *     - segment 1: gap = 0.5, half gap
+ *     - segment 2: gap = 1.0, full gap
  *
  * Outputs:
  * - Width and Height of the cylindrical map
@@ -64,22 +64,38 @@ constexpr uint16_t calculateCorkscrewHeight(float totalTurns, uint16_t numLeds) 
 }
 
 /**
+ * Struct representing gap parameters for corkscrew mapping
+ */
+struct Gap {
+    float gap = 0.0f;  // Gap value from 0 to 1, default 0.0f
+    
+    Gap() = default;
+    Gap(float g) : gap(g) {}
+    
+    // Rule of 5 for POD data
+    Gap(const Gap &other) = default;
+    Gap &operator=(const Gap &other) = default;
+    Gap(Gap &&other) noexcept = default;
+    Gap &operator=(Gap &&other) noexcept = default;
+};
+
+/**
  * Generates a mapping from corkscrew to cylindrical coordinates
  * @param input The input parameters defining the corkscrew.
  * @return The resulting cylindrical mapping.
  */
 struct CorkscrewInput {
     float totalTurns = 19.f;   // Default to 19 turns
-    float offsetCircumference = 0; // Optional offset for gap accounting
+    Gap gapParams;             // Gap parameters for gap accounting
     uint16_t numLeds = 144;        // Default to dense 144 leds.
     bool invert = false;           // If true, reverse the mapping order
     
     CorkscrewInput() = default;
     
     // Constructor with turns and LEDs
-    CorkscrewInput(float total_turns, uint16_t leds, float offset = 0,
-                   bool invertMapping = false)
-        : totalTurns(total_turns), offsetCircumference(offset), numLeds(leds),
+    CorkscrewInput(float total_turns, uint16_t leds, bool invertMapping = false, 
+                   const Gap& gap = Gap())
+        : totalTurns(total_turns), gapParams(gap), numLeds(leds),
           invert(invertMapping) {}
     
     // Rule of 5 for POD data

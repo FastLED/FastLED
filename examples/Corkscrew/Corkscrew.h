@@ -86,8 +86,7 @@ UICheckbox splatRendering("Splat Rendering", true);
 // Tested on a 288 led (2x 144 max density led strip) with 19 turns
 // Auto-calculates optimal grid dimensions from turns and LEDs
 Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, // 19 turns
-                                NUM_LEDS,        // 288 leds
-                                0 // offset to account for gaps between segments
+                                NUM_LEDS         // 288 leds
 );
 
 // Corkscrew::State corkscrewMap = fl::Corkscrew::generateMap(corkscrewInput);

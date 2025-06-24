@@ -20,10 +20,10 @@ namespace fl {
 namespace {
 
 // New helper function to calculate individual LED position
-vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float totalTurns, float offsetCircumference, uint16_t width, uint16_t height) {
+vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float totalTurns, const Gap& gapParams, uint16_t width, uint16_t height) {
     // Calculate position along the corkscrew (0.0 to 1.0)
     FL_UNUSED(totalTurns);
-    FL_UNUSED(offsetCircumference);
+    FL_UNUSED(gapParams);
     FL_UNUSED(height);
 
     const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
@@ -66,13 +66,13 @@ vec2f Corkscrew::at_no_wrap(uint16_t i) const {
     
     // Compute position on-the-fly
     vec2f position = calculateLedPositionExtended(i, mInput.numLeds, mInput.totalTurns, 
-                                         mInput.offsetCircumference, mState.width, mState.height);
+                                         mInput.gapParams, mState.width, mState.height);
     
     // // Apply inversion if requested
     // if (mInput.invert) {
     //     uint16_t invertedIndex = mInput.numLeds - 1 - i;
     //     position = calculateLedPositionExtended(invertedIndex, mInput.numLeds, mInput.totalTurns, 
-    //                                    mInput.offsetCircumference, mState.width, mState.height);
+    //                                    mInput.gapParams, mState.width, mState.height);
     // }
 
     // now wrap the x-position

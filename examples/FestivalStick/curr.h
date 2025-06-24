@@ -201,7 +201,7 @@ CRGBPalette16 noisePalette = PartyColors_p;
 uint8_t colorLoop = 1;
 
 // Option 1: Runtime Corkscrew (flexible, configurable at runtime)
-Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS, 0);
+Corkscrew::Input corkscrewInput(CORKSCREW_TURNS, NUM_LEDS);
 Corkscrew corkscrew(corkscrewInput);
 
 // Simple position tracking - one variable for both modes
