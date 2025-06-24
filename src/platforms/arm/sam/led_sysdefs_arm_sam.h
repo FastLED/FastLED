@@ -4,6 +4,11 @@
 
 #define FASTLED_ARM
 
+// SAM platforms don't use PROGMEM
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 0
+#endif
+
 // Setup DUE timer defines/channels/etc...
 #ifndef DUE_TIMER_CHANNEL
 #define DUE_TIMER_GROUP 0

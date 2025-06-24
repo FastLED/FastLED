@@ -11,8 +11,16 @@ void arm_tests() {
 #error "FASTLED_USE_PROGMEM should be either 0 or 1 for ARM platforms"
 #endif
 
-#if SKETCH_HAS_LOTS_OF_MEMORY != 1
-#error "SKETCH_HAS_LOTS_OF_MEMORY should be 1 for most ARM platforms"
+#if defined(ARDUINO_TEENSYLC) || defined(ARDUINO_TEENSY30)
+    // Teensy LC and Teensy 3.0 have limited memory
+    #if SKETCH_HAS_LOTS_OF_MEMORY != 0
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC and Teensy 3.0"
+    #endif
+#else
+    // Most other ARM platforms have lots of memory
+    #if SKETCH_HAS_LOTS_OF_MEMORY != 1
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 1 for most ARM platforms"
+    #endif
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS != 1 && FASTLED_ALLOW_INTERRUPTS != 0
@@ -46,7 +54,7 @@ void arm_tests() {
     #endif
 #endif
 
-#if defined(__MK20DX256__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)
+#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)
     // Teensy platforms that use PROGMEM
     #if FASTLED_USE_PROGMEM != 1
     #error "Teensy K20/K66/MXRT1062 platforms should have FASTLED_USE_PROGMEM set to 1"

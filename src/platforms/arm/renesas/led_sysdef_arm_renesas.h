@@ -20,6 +20,10 @@
 #define cli()  __disable_irq();
 #define sei() __enable_irq();
 
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 0
+#endif
+
 #define FASTLED_NO_PINMAP
 
 typedef volatile uint32_t RoReg;

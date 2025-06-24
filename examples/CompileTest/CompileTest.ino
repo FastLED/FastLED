@@ -52,6 +52,8 @@ void setup() {
     Serial.print("STM32");
     #elif defined(ARDUINO_ARCH_RP2040)
     Serial.print("RP2040");
+    #elif defined(__MK20DX128__)
+    Serial.print("Teensy 3.0");
     #elif defined(__MK20DX256__)
     Serial.print("Teensy 3.2");
     #elif defined(__MK66FX1M0__)
