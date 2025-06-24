@@ -84,6 +84,21 @@ void UINumberField::Listener::onBeginFrame() {
 
 void UIDropdown::Listener::onBeginFrame() {
     UIDropdown &owner = *mOwner;
+    
+    // Check the next button if one is attached
+    bool shouldAdvance = false;
+    if (owner.mNextButton) {
+        if (owner.mNextButton->clicked()) {
+            shouldAdvance = true;
+        }
+    }
+    
+    // If the next button was clicked, advance to the next option
+    if (shouldAdvance) {
+        owner.nextOption();
+        // The option change will be detected below and callbacks will be invoked
+    }
+    
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.as_int();
         owner.mLastFrameValueValid = true;
