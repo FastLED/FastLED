@@ -1596,7 +1596,7 @@ class ANIMartRIX {
                 pixel.blue = radial * show3;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColorInternal(y, x, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
