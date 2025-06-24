@@ -11,10 +11,10 @@ void arm_tests() {
 #error "FASTLED_USE_PROGMEM should be either 0 or 1 for ARM platforms"
 #endif
 
-#if defined(ARDUINO_TEENSYLC) || defined(ARDUINO_TEENSY30)
-    // Teensy LC and Teensy 3.0 have limited memory
+#if defined(ARDUINO_TEENSYLC) || defined(ARDUINO_TEENSY30) || defined(ARDUINO_ARCH_RENESAS_UNO)
+    // Teensy LC, Teensy 3.0, and Renesas UNO have limited memory
     #if SKETCH_HAS_LOTS_OF_MEMORY != 0
-    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC and Teensy 3.0"
+    #error "SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC, Teensy 3.0, and Renesas UNO"
     #endif
 #else
     // Most other ARM platforms have lots of memory
