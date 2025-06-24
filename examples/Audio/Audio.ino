@@ -42,9 +42,6 @@ void loop() {}
 #include "fl/xypath.h"
 #include "fl/unused.h"
 #include "fx/time.h"
-
-
-// Sketch.
 #include "fl/function.h"
 
 // Sketch.
