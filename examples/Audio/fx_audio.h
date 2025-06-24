@@ -1,5 +1,4 @@
-
-
+#pragma once
 #include "fl/time_alpha.h"
 #include "fl/math_macros.h"
 
