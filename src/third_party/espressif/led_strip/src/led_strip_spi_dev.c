@@ -26,6 +26,16 @@
 #define SPI_BYTES_PER_COLOR_BYTE 3
 #define SPI_BITS_PER_COLOR_BYTE (SPI_BYTES_PER_COLOR_BYTE * 8)
 
+// #define FASTLED_ESP32_SPI_HACK_1949 0
+
+// Work-around for: https://github.com/FastLED/FastLED/issues/1949
+// Looks like the SPI controller provided by espressif will attempt
+// to free memory it doesn't own. This hack fixes this but you'll
+// need to make sure you wait long enough for the transaction to complete.
+#ifndef FASTLED_ESP32_SPI_HACK_NO_TRANSACTION_WAIT
+#define FASTLED_ESP32_SPI_HACK_NO_TRANSACTION_WAIT 0
+#endif
+
 static const char *TAG = "led_strip_spi";
 
 typedef struct {
@@ -112,7 +122,9 @@ static esp_err_t spi_led_strip_refresh_wait_done(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
     spi_transaction_t* tx_conf = 0;
+    #if !FASTLED_ESP32_SPI_HACK_NO_TRANSACTION_WAIT
     spi_device_get_trans_result(spi_strip->spi_device, &tx_conf, portMAX_DELAY);
+    #endif
     return ESP_OK;
 }
 
