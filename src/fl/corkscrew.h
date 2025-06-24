@@ -86,8 +86,8 @@ struct Gap {
  */
 struct CorkscrewInput {
     float totalTurns = 19.f;   // Default to 19 turns
-    Gap gapParams;             // Gap parameters for gap accounting
     uint16_t numLeds = 144;        // Default to dense 144 leds.
+    Gap gapParams;             // Gap parameters for gap accounting
     bool invert = false;           // If true, reverse the mapping order
     
     CorkscrewInput() = default;
@@ -95,7 +95,7 @@ struct CorkscrewInput {
     // Constructor with turns and LEDs
     CorkscrewInput(float total_turns, uint16_t leds, bool invertMapping = false, 
                    const Gap& gap = Gap())
-        : totalTurns(total_turns), gapParams(gap), numLeds(leds),
+        : totalTurns(total_turns), numLeds(leds), gapParams(gap),
           invert(invertMapping) {}
     
     // Rule of 5 for POD data
