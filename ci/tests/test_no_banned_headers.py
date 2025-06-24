@@ -2,7 +2,7 @@ import os
 import unittest
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from ci.paths import PROJECT_ROOT
 
@@ -19,8 +19,7 @@ if ENABLE_PARANOID_GNU_HEADER_INSPECTION:
 else:
     BANNED_HEADERS_ESP = []
 
-
-BANNED_HEADERS_CORE = [
+BANNED_HEADERS_COMMON = [
     "assert.h",
     "iostream",
     "stdio.h",
@@ -58,8 +57,9 @@ BANNED_HEADERS_CORE = [
     "cstdint",
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
-    "Arduino.h",
-] + BANNED_HEADERS_ESP
+]
+
+BANNED_HEADERS_CORE = BANNED_HEADERS_COMMON + BANNED_HEADERS_ESP + ["Arduino.h"]
 
 EXCLUDED_FILES = [
     "stub_main.cpp",
@@ -157,6 +157,10 @@ class GenericFileSearcher:
 class BannedHeadersCallback(FileProcessorCallback):
     """Callback class for checking banned headers."""
 
+    def __init__(self, banned_headers_list: List[str]):
+        """Initialize with the list of banned headers to check for."""
+        self.banned_headers_list = banned_headers_list
+
     def should_process_file(self, file_path: str) -> bool:
         """Check if file should be processed for banned headers."""
         # Check file extension
@@ -172,18 +176,8 @@ class BannedHeadersCallback(FileProcessorCallback):
     def check_file_content(self, file_path: str, content: str) -> List[str]:
         """Check file content for banned headers."""
         failings = []
-        banned_headers_list = []
 
-        # Determine which banned headers to check for based on file location
-        if file_path.startswith(PLATFORMS_DIR):
-            if file_path.startswith(PLATFORMS_ESP_DIR):
-                banned_headers_list = BANNED_HEADERS_ESP
-            else:
-                return failings  # Skip other platform directories
-        else:
-            banned_headers_list = BANNED_HEADERS_CORE
-
-        if len(banned_headers_list) == 0:
+        if len(self.banned_headers_list) == 0:
             return failings
 
         # Check each line for banned headers
@@ -191,7 +185,7 @@ class BannedHeadersCallback(FileProcessorCallback):
             if line.strip().startswith("//"):
                 continue
 
-            for header in banned_headers_list:
+            for header in self.banned_headers_list:
                 if (
                     f"#include <{header}>" in line or f'#include "{header}"' in line
                 ) and "// ok include" not in line:
@@ -202,12 +196,62 @@ class BannedHeadersCallback(FileProcessorCallback):
         return failings
 
 
+def _test_no_banned_headers(
+    test_directories: list[str],
+    banned_headers_list: List[str],
+    on_fail: Callable[[str], None],
+) -> None:
+    """Searches through the program files to check for banned headers."""
+    searcher = GenericFileSearcher()
+    callback = BannedHeadersCallback(banned_headers_list)
+
+    all_failings = []
+
+    # Search each directory
+    for directory in test_directories:
+        if os.path.exists(directory):
+            directory_failings = searcher.search_directory(directory, callback)
+            all_failings.extend(directory_failings)
+
+    # Also check the main src directory files (not subdirectories)
+    main_src_files = []
+    for file in os.listdir(SRC_ROOT):
+        file_path = os.path.join(SRC_ROOT, file)
+        if os.path.isfile(file_path) and callback.should_process_file(file_path):
+            main_src_files.append(file_path)
+
+    # Process main src files
+    for file_path in main_src_files:
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            file_failings = callback.check_file_content(file_path, content)
+            all_failings.extend(file_failings)
+        except Exception as e:
+            all_failings.append(f"Error processing file {file_path}: {str(e)}")
+
+    if all_failings:
+        msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
+            all_failings
+        )
+        for failing in all_failings:
+            print(failing)
+
+        on_fail(msg)
+    else:
+        print("No banned headers found.")
+
+
 class TestNoBannedHeaders(unittest.TestCase):
 
-    def test_no_banned_headers(self) -> None:
+    def test_no_banned_headers_src(self) -> None:
         """Searches through the program files to check for banned headers."""
-        searcher = GenericFileSearcher()
-        callback = BannedHeadersCallback()
+
+        def on_fail(msg: str) -> None:
+            self.fail(
+                msg + "\n"
+                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+            )
 
         # Test directories as requested
         test_directories = [
@@ -215,44 +259,11 @@ class TestNoBannedHeaders(unittest.TestCase):
             os.path.join(SRC_ROOT, "fx"),
             os.path.join(SRC_ROOT, "sensors"),
         ]
-
-        all_failings = []
-
-        # Search each directory
-        for directory in test_directories:
-            if os.path.exists(directory):
-                directory_failings = searcher.search_directory(directory, callback)
-                all_failings.extend(directory_failings)
-
-        # Also check the main src directory files (not subdirectories)
-        main_src_files = []
-        for file in os.listdir(SRC_ROOT):
-            file_path = os.path.join(SRC_ROOT, file)
-            if os.path.isfile(file_path) and callback.should_process_file(file_path):
-                main_src_files.append(file_path)
-
-        # Process main src files
-        for file_path in main_src_files:
-            try:
-                with open(file_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                file_failings = callback.check_file_content(file_path, content)
-                all_failings.extend(file_failings)
-            except Exception as e:
-                all_failings.append(f"Error processing file {file_path}: {str(e)}")
-
-        if all_failings:
-            msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
-                all_failings
-            )
-            for failing in all_failings:
-                print(failing)
-            self.fail(
-                msg + "\n"
-                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
-            )
-        else:
-            print("No banned headers found.")
+        _test_no_banned_headers(
+            test_directories=test_directories,
+            banned_headers_list=BANNED_HEADERS_CORE,
+            on_fail=on_fail,
+        )
 
 
 if __name__ == "__main__":
