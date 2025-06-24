@@ -1,4 +1,4 @@
-FastLED 3.10.1
+FastLED 3.10.2
 ==============
   * New LED chipset: SM16824E
     * 3-Wire
@@ -14,6 +14,7 @@ FastLED 3.10.1
       * `-FASTLED_HSV_CONVERSION_FULL_SPECTRUM`
   * CRGB::toVideoRGB_8bit()
     * This is an alternative to gamma correction that preserves the hue but boosts the saturation, use it with WS2812 and other RGB8 controllers.
+  * Animartrix - 30% reduction in computation using selective -O3 and fast-math for the file.
 
 
 FastLED 3.10.0
