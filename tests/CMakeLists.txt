@@ -224,15 +224,42 @@ if(NOT APPLE)
 endif()
 
 # Try to find libunwind, but make it optional
-find_package(LibUnwind QUIET)
+# libunwind doesn't always provide CMake config files, so we'll search manually
 
-# Define a variable to check if we should use libunwind
-set(USE_LIBUNWIND ${LibUnwind_FOUND})
+# First try to find using pkg-config
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(LIBUNWIND QUIET libunwind)
+endif()
 
-if(USE_LIBUNWIND)
-    message(STATUS "LibUnwind found. Using it for better stack traces.")
+# If pkg-config didn't work, try manual search
+if(NOT LIBUNWIND_FOUND)
+    find_path(LIBUNWIND_INCLUDE_DIR 
+        NAMES libunwind.h
+        PATHS /usr/include /usr/local/include /opt/homebrew/include
+    )
+
+    find_library(LIBUNWIND_LIBRARY 
+        NAMES unwind
+        PATHS /usr/lib /usr/local/lib /opt/homebrew/lib /usr/lib/x86_64-linux-gnu
+    )
+
+    # Check if both header and library are found
+    if(LIBUNWIND_INCLUDE_DIR AND LIBUNWIND_LIBRARY)
+        set(LIBUNWIND_FOUND TRUE)
+        set(LIBUNWIND_LIBRARIES ${LIBUNWIND_LIBRARY})
+        set(LIBUNWIND_INCLUDE_DIRS ${LIBUNWIND_INCLUDE_DIR})
+    endif()
+endif()
+
+# Set the final flag based on what we found
+if(LIBUNWIND_FOUND AND LIBUNWIND_LIBRARIES AND LIBUNWIND_INCLUDE_DIRS)
+    set(USE_LIBUNWIND TRUE)
+    message(STATUS "LibUnwind found: ${LIBUNWIND_LIBRARIES}")
+    message(STATUS "LibUnwind headers: ${LIBUNWIND_INCLUDE_DIRS}")
 else()
-    message(STATUS "LibUnwind not found. Falling back to basic stack traces.")
+    set(USE_LIBUNWIND FALSE)
+    message(STATUS "LibUnwind not found. Falling back to basic stack traces with execinfo.")
 endif()
 
 # Enable testing
@@ -279,6 +306,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     target_compile_options(fastled PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_SPECIFIC_FLAGS}>)
     if(USE_LIBUNWIND)
         target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+        target_include_directories(${TEST_NAME} PRIVATE ${LIBUNWIND_INCLUDE_DIRS})
     endif()
     target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     set_target_properties(${TEST_NAME} PROPERTIES
