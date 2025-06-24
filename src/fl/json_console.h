@@ -17,7 +17,10 @@ namespace fl {
  * 
  * Console commands:
  * - "slider: 80" sets a UISlider named "slider" to value 80
- * - Components are matched by name, not ID
+ * - "1: 80" sets a UISlider with ID 1 to value 80
+ * - Components can be matched by either name (string) or ID (integer)
+ * - If the component identifier can be converted to an integer, it's used as ID
+ * - Otherwise, the string key is used to lookup the component by name
  */
 class JsonConsole {
 public:

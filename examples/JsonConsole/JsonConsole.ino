@@ -33,8 +33,13 @@ void setup() {
     
     Serial.println("FastLED JsonConsole Example");
     Serial.println("Commands:");
-    Serial.println("  brightness: <0-255>   - Set LED brightness");
+    Serial.println("  brightness: <0-255>   - Set LED brightness by name");
+    Serial.println("  <id>: <0-255>        - Set LED brightness by component ID");
     Serial.println("  help                  - Show available commands");
+    Serial.println();
+    Serial.println("Examples:");
+    Serial.println("  brightness: 128       - Set brightness to 128 using name");
+    Serial.println("  1: 200                - Set brightness to 200 using ID 1");
     Serial.println();
 }
 

@@ -8,6 +8,7 @@
 #include "fl/warn.h"
 #include "fl/json.h"
 #include "fl/algorithm.h"
+#include "fl/stdint.h"
 
 namespace fl {
 
@@ -63,9 +64,12 @@ bool JsonConsole::executeCommand(const fl::string& command) {
     // Handle help command
     if (trimmed == "help") {
         writeOutput("Available commands:");
-        writeOutput("  <component_name>: <value>  - Set component value");
+        writeOutput("  <component_name>: <value>  - Set component value by name");
+        writeOutput("  <component_id>: <value>    - Set component value by ID");
         writeOutput("  help                       - Show this help");
-        writeOutput("Example: slider: 80");
+        writeOutput("Examples:");
+        writeOutput("  slider: 80    - Set component named 'slider' to 80");
+        writeOutput("  1: 80         - Set component with ID 1 to 80");
         return true;
     }
     
@@ -164,21 +168,33 @@ void JsonConsole::parseCommand(const fl::string& command) {
 }
 
 bool JsonConsole::setSliderValue(const fl::string& name, float value) {
-    // Find component ID by name
-    int* componentIdPtr = mComponentNameToId.find_value(name);
+    int componentId = -1;
     
-    // WORKAROUND: Handle subtle string comparison issue in some environments
-    // Try with a fresh string if the parsed name doesn't work
-    if (!componentIdPtr && name == "slider") {
-        fl::string freshKey = "slider";
-        componentIdPtr = mComponentNameToId.find_value(freshKey);
+    // First, try to convert the name to an integer (numeric ID)
+    const char* cstr = name.c_str();
+    char* endptr;
+    long parsed = strtol(cstr, &endptr, 10);
+    
+    if (endptr != cstr && *endptr == '\0' && parsed >= 0 && parsed <= 2147483647L) {
+        // Successfully parsed as a valid integer ID
+        componentId = static_cast<int>(parsed);
+    } else {
+        // Not a valid integer, try to find component ID by name
+        int* componentIdPtr = mComponentNameToId.find_value(name);
+        
+        // WORKAROUND: Handle subtle string comparison issue in some environments
+        // Try with a fresh string if the parsed name doesn't work
+        if (!componentIdPtr && name == "slider") {
+            fl::string freshKey = "slider";
+            componentIdPtr = mComponentNameToId.find_value(freshKey);
+        }
+        
+        if (!componentIdPtr) {
+            return false; // Component not found
+        }
+        
+        componentId = *componentIdPtr;
     }
-    
-    if (!componentIdPtr) {
-        return false; // Component not found
-    }
-    
-    int componentId = *componentIdPtr;
     
     // Create JSON to update the component
     FLArduinoJson::JsonDocument doc;
