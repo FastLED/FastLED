@@ -18,12 +18,10 @@ uv run mcp_server.py
 """
 
 import asyncio
-import json
-import subprocess
 import sys
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 try:
     from mcp.server import Server
@@ -430,7 +428,7 @@ def extract_test_cases(file_path: Path, search_pattern: str = "") -> List[str]:
             if not search_pattern or search_pattern.lower() in match.lower():
                 test_cases.append(match)
     
-    except Exception as e:
+    except Exception:
         # Silently skip files that can't be read
         pass
     
@@ -700,7 +698,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             try:
                 with open("/etc/os-release", "r") as f:
                     distro_info = f.read().lower()
-            except:
+            except (OSError, IOError):
                 pass
             
             install_commands = []
@@ -736,7 +734,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             for cmd in install_commands:
                 result_text += f"Running: `{cmd}`\n"
                 try:
-                    install_result = await run_command(cmd.split(), project_root)
+                    _ = await run_command(cmd.split(), project_root)
                     result_text += "✅ Success\n\n"
                 except Exception as e:
                     result_text += f"❌ Error: {e}\n\n"
@@ -748,7 +746,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
         elif system == "darwin":  # macOS
             result_text += "## Installing LibUnwind on macOS\n\n"
             try:
-                install_result = await run_command(["brew", "install", "libunwind"], project_root)
+                _ = await run_command(["brew", "install", "libunwind"], project_root)
                 result_text += "✅ LibUnwind installed via Homebrew\n\n"
             except Exception as e:
                 result_text += f"❌ Error installing libunwind: {e}\n"
@@ -767,9 +765,9 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             
             try:
                 # Clean and rebuild
-                build_result = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
-                build_result = await run_command(["cmake", "."], tests_dir)
-                build_result = await run_command(["make", "-j4"], tests_dir)
+                _ = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
+                _ = await run_command(["cmake", "."], tests_dir)
+                _ = await run_command(["make", "-j4"], tests_dir)
                 result_text += "✅ FastLED test framework built successfully\n\n"
                 
                 # Test by running a simple unit test to verify stack traces work
@@ -782,7 +780,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                         test_name = first_test.split('/')[-1]
                         result_text += f"Testing with {test_name}...\n"
                         # Just run help to verify the executable works and crash handler is linked
-                        test_result = await run_command([first_test, "--help"], tests_dir)
+                        _ = await run_command([first_test, "--help"], tests_dir)
                         result_text += "✅ Stack trace system is properly integrated with test framework\n\n"
                     else:
                         result_text += "⚠️ No test executables found to verify integration\n\n"
