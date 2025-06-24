@@ -2,7 +2,8 @@ import os
 import unittest
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, List, Optional
+from dataclasses import dataclass
+from typing import Callable, Dict, List, Optional
 
 from ci.paths import PROJECT_ROOT
 
@@ -66,8 +67,21 @@ EXCLUDED_FILES = [
 ]
 
 
-class FileProcessorCallback(ABC):
-    """Abstract base class for file processing callbacks."""
+@dataclass
+class FileContent:
+    """Container for file content and metadata."""
+
+    path: str
+    content: str
+    lines: List[str]
+
+    def __post_init__(self):
+        if not self.lines:
+            self.lines = self.content.splitlines()
+
+
+class FileContentChecker(ABC):
+    """Abstract base class for checking file content."""
 
     @abstractmethod
     def should_process_file(self, file_path: str) -> bool:
@@ -82,17 +96,134 @@ class FileProcessorCallback(ABC):
         pass
 
     @abstractmethod
-    def check_file_content(self, file_path: str, content: str) -> List[str]:
+    def check_file_content(self, file_content: FileContent) -> List[str]:
         """Check the file content and return any issues found.
 
         Args:
-            file_path: Path to the file being checked
-            content: Content of the file as a string
+            file_content: FileContent object containing path, content, and lines
 
         Returns:
             List of error messages, empty if no issues found
         """
         pass
+
+
+class MultiCheckerFileProcessor:
+    """Processor that can run multiple checkers on files."""
+
+    def __init__(self):
+        pass
+
+    def process_files_with_checkers(
+        self, file_paths: List[str], checkers: List[FileContentChecker]
+    ) -> Dict[str, List[str]]:
+        """Process files with multiple checkers.
+
+        Args:
+            file_paths: List of file paths to process
+            checkers: List of checker instances to run on the files
+
+        Returns:
+            Dictionary mapping checker class name to list of issues found
+        """
+        # Initialize results dictionary for each checker
+        results = {}
+        for checker in checkers:
+            checker_name = checker.__class__.__name__
+            results[checker_name] = []
+
+        # Process each file
+        for file_path in file_paths:
+            # Check if any checker wants to process this file
+            interested_checkers = [
+                checker
+                for checker in checkers
+                if checker.should_process_file(file_path)
+            ]
+
+            # If any checker is interested, read the file once
+            if interested_checkers:
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                    # Create FileContent object with lines split
+                    file_content = FileContent(
+                        path=file_path, content=content, lines=content.splitlines()
+                    )
+
+                    # Pass the file content to all interested checkers
+                    for checker in interested_checkers:
+                        checker_name = checker.__class__.__name__
+                        issues = checker.check_file_content(file_content)
+                        results[checker_name].extend(issues)
+
+                except Exception as e:
+                    # Add error to all interested checkers
+                    error_msg = f"Error reading file {file_path}: {str(e)}"
+                    for checker in interested_checkers:
+                        checker_name = checker.__class__.__name__
+                        results[checker_name].append(error_msg)
+
+        return results
+
+
+class BannedHeadersChecker(FileContentChecker):
+    """Checker class for banned headers."""
+
+    def __init__(self, banned_headers_list: List[str]):
+        """Initialize with the list of banned headers to check for."""
+        self.banned_headers_list = banned_headers_list
+
+    def should_process_file(self, file_path: str) -> bool:
+        """Check if file should be processed for banned headers."""
+        # Check file extension
+        if not file_path.endswith((".cpp", ".h", ".hpp", ".ino")):
+            return False
+
+        # Check if file is in excluded list
+        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
+            return False
+
+        return True
+
+    def check_file_content(self, file_content: FileContent) -> List[str]:
+        """Check file content for banned headers."""
+        failings = []
+
+        if len(self.banned_headers_list) == 0:
+            return failings
+
+        # Check each line for banned headers
+        for line_number, line in enumerate(file_content.lines, 1):
+            if line.strip().startswith("//"):
+                continue
+
+            for header in self.banned_headers_list:
+                if (
+                    f"#include <{header}>" in line or f'#include "{header}"' in line
+                ) and "// ok include" not in line:
+                    failings.append(
+                        f"Found banned header '{header}' in {file_content.path}:{line_number}"
+                    )
+
+        return failings
+
+
+# Legacy compatibility classes
+class FileProcessorCallback(FileContentChecker):
+    """Legacy compatibility wrapper - delegates to FileContentChecker methods."""
+
+    def check_file_content_legacy(self, file_path: str, content: str) -> List[str]:
+        """Legacy method signature for backward compatibility."""
+        file_content = FileContent(path=file_path, content=content, lines=[])
+        return self.check_file_content(file_content)
+
+
+class BannedHeadersCallback(BannedHeadersChecker):
+    """Legacy compatibility class."""
+
+    pass
 
 
 class GenericFileSearcher:
@@ -149,51 +280,39 @@ class GenericFileSearcher:
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
-            return callback.check_file_content(file_path, content)
+            file_content = FileContent(path=file_path, content=content, lines=[])
+            return callback.check_file_content(file_content)
         except Exception as e:
             return [f"Error processing file {file_path}: {str(e)}"]
 
 
-class BannedHeadersCallback(FileProcessorCallback):
-    """Callback class for checking banned headers."""
+def _collect_files_to_check(
+    test_directories: List[str], extensions: List[str] | None = None
+) -> List[str]:
+    """Collect all files to check from the given directories."""
+    if extensions is None:
+        extensions = [".cpp", ".h", ".hpp"]
 
-    def __init__(self, banned_headers_list: List[str]):
-        """Initialize with the list of banned headers to check for."""
-        self.banned_headers_list = banned_headers_list
+    files_to_check = []
 
-    def should_process_file(self, file_path: str) -> bool:
-        """Check if file should be processed for banned headers."""
-        # Check file extension
-        if not file_path.endswith((".cpp", ".h", ".hpp")):
-            return False
+    # Search each directory
+    for directory in test_directories:
+        if os.path.exists(directory):
+            for root, _, files in os.walk(directory):
+                for file in files:
+                    if any(file.endswith(ext) for ext in extensions):
+                        file_path = os.path.join(root, file)
+                        files_to_check.append(file_path)
 
-        # Check if file is in excluded list
-        if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
-            return False
+    # Also check the main src directory files (not subdirectories)
+    for file in os.listdir(SRC_ROOT):
+        file_path = os.path.join(SRC_ROOT, file)
+        if os.path.isfile(file_path) and any(
+            file_path.endswith(ext) for ext in extensions
+        ):
+            files_to_check.append(file_path)
 
-        return True
-
-    def check_file_content(self, file_path: str, content: str) -> List[str]:
-        """Check file content for banned headers."""
-        failings = []
-
-        if len(self.banned_headers_list) == 0:
-            return failings
-
-        # Check each line for banned headers
-        for line_number, line in enumerate(content.splitlines(), 1):
-            if line.strip().startswith("//"):
-                continue
-
-            for header in self.banned_headers_list:
-                if (
-                    f"#include <{header}>" in line or f'#include "{header}"' in line
-                ) and "// ok include" not in line:
-                    failings.append(
-                        f"Found banned header '{header}' in {file_path}:{line_number}"
-                    )
-
-        return failings
+    return files_to_check
 
 
 def _test_no_banned_headers(
@@ -202,33 +321,18 @@ def _test_no_banned_headers(
     on_fail: Callable[[str], None],
 ) -> None:
     """Searches through the program files to check for banned headers."""
-    searcher = GenericFileSearcher()
-    callback = BannedHeadersCallback(banned_headers_list)
+    # Collect files to check
+    files_to_check = _collect_files_to_check(test_directories)
 
-    all_failings = []
+    # Create processor and checker
+    processor = MultiCheckerFileProcessor()
+    checker = BannedHeadersChecker(banned_headers_list)
 
-    # Search each directory
-    for directory in test_directories:
-        if os.path.exists(directory):
-            directory_failings = searcher.search_directory(directory, callback)
-            all_failings.extend(directory_failings)
+    # Process files
+    results = processor.process_files_with_checkers(files_to_check, [checker])
 
-    # Also check the main src directory files (not subdirectories)
-    main_src_files = []
-    for file in os.listdir(SRC_ROOT):
-        file_path = os.path.join(SRC_ROOT, file)
-        if os.path.isfile(file_path) and callback.should_process_file(file_path):
-            main_src_files.append(file_path)
-
-    # Process main src files
-    for file_path in main_src_files:
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            file_failings = callback.check_file_content(file_path, content)
-            all_failings.extend(file_failings)
-        except Exception as e:
-            all_failings.append(f"Error processing file {file_path}: {str(e)}")
+    # Get results for banned headers checker
+    all_failings = results.get("BannedHeadersChecker", []) or []
 
     if all_failings:
         msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
