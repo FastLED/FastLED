@@ -27,3 +27,24 @@
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS /* nothing */
 #endif
+
+// Fast math optimization controls
+#if defined(__GNUC__) || defined(__clang__)
+  #define FL_FAST_MATH_BEGIN _Pragma("GCC push_options") _Pragma("GCC optimize (\"fast-math\")")
+  #define FL_FAST_MATH_END   _Pragma("GCC pop_options")
+#elif defined(_MSC_VER)
+  #define FL_FAST_MATH_BEGIN __pragma(float_control(precise, off))
+  #define FL_FAST_MATH_END   __pragma(float_control(precise, on))
+#else
+  #define FL_FAST_MATH_BEGIN /* nothing */
+  #define FL_FAST_MATH_END   /* nothing */
+#endif
+
+// FL_OPTIMIZATION_LEVEL_O3_BEGIN
+#if defined(__GNUC__) || defined(__clang__)
+  #define FL_OPTIMIZATION_LEVEL_O3_BEGIN _Pragma("GCC push_options") _Pragma("GCC optimize (\"O3\")")
+  #define FL_OPTIMIZATION_LEVEL_O3_END   _Pragma("GCC pop_options")
+#else
+  #define FL_OPTIMIZATION_LEVEL_O3_BEGIN /* nothing */
+  #define FL_OPTIMIZATION_LEVEL_O3_END   /* nothing */
+#endif

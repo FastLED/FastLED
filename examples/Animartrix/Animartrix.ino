@@ -31,13 +31,13 @@ This is the famouse Animartrix demo by Stefan Petrick. The effects are generated
 using polor polar coordinates. The effects are very complex and powerful.
 */
 
-#define FL_USE_OPTIMIZED_MATH 1
+#define FL_ANIMARTRIX_USES_FAST_MATH 1
 
 /* 
-Performence notes:
+Performence notes @64x64:
   * ESP32-S3:
-    * FL_USE_OPTIMIZED_MATH 0: 140ms
-    * FL_USE_OPTIMIZED_MATH 1: 122ms
+    * FL_ANIMARTRIX_USES_FAST_MATH 0: 143ms
+    * FL_ANIMARTRIX_USES_FAST_MATH 1: 90ms
 */
 
 #include "FastLED.h"
@@ -148,10 +148,10 @@ void loop() {
     }
     fxEngine.draw(millis(), leds);
     uint32_t end = millis();
-    FL_WARN("*** LOOP TIME: " << (end - start) << "ms");
+    FL_WARN("*** DRAW TIME: " << (end - start) << "ms");
     FastLED.show();
     uint32_t end2 = millis();
-    FL_WARN("*** LOOP + DRAW TIME: " << (end2 - start) << "ms");
+    FL_WARN("*** SHOW + DRAW TIME: " << (end2 - start) << "ms");
 }
 
 
