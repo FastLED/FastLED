@@ -175,15 +175,22 @@ EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
                 }
             };
 
-       globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
-            var activeStrips = globalThis.FastLED_onFrameData;
-
+       // ActiveStripData is now accessed via ccall mechanism only
             var jsonStr = UTF8ToString($0);
             var jsonData = JSON.parse(jsonStr);
             for (var i = 0; i < jsonData.length; i++) {
                 var stripData = jsonData[i];
-            var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
-                jsonData[i].pixel_data = pixelData;
+                // Use ccall mechanism to get pixel data
+                var sizePtr = Module._malloc(4);
+                var dataPtr = Module.ccall('getStripPixelData', 'number', ['number', 'number'], [stripData.strip_id, sizePtr]);
+                if (dataPtr !== 0) {
+                    var size = Module.getValue(sizePtr, 'i32');
+                    var pixelData = new Uint8Array(Module.HEAPU8.buffer, dataPtr, size);
+                    jsonData[i].pixel_data = pixelData;
+                } else {
+                    jsonData[i].pixel_data = null;
+                }
+                Module._free(sizePtr);
             }
 
         globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);

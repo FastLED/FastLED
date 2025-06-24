@@ -4,24 +4,24 @@
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript STRIP DATA BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️
 //
-// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT STRIP DATA BINDINGS 🚨
+// 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT STRIP DATA CCALL BINDINGS 🚨
 //
 // DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
 //
-// This file manages the critical bridge for LED strip pixel data between C++ and JavaScript.
+// This file manages the critical bridge for LED strip pixel data between C++ and JavaScript
+// using the ccall mechanism only (embind mechanism has been removed).
+//
 // Any changes to:
-// - EMSCRIPTEN_BINDINGS macro contents
-// - ActiveStripData class methods exposed to JS
-// - getPixelData_Uint8() return types or parameters
-// - Constructor signatures in bindings
+// - getStripPixelData() function signature  
+// - Parameter types or return values
+// - EMSCRIPTEN_KEEPALIVE declarations
 //
 // Will BREAK JavaScript pixel data access and cause SILENT RUNTIME FAILURES!
 //
 // Key integration points that MUST remain synchronized:
-// - EMSCRIPTEN_BINDINGS(engine_events_constructors)
-// - ActiveStripData.getPixelData_Uint8() method
-// - JavaScript new Module.ActiveStripData() constructor
-// - JavaScript activeStrips.getPixelData_Uint8(stripIndex) calls
+// - getStripPixelData(int stripIndex, int* outSize) ccall function
+// - JavaScript Module.ccall('getStripPixelData', ...) calls
+// - Parameter and return type consistency between C++ and JS
 //
 // Before making ANY changes:
 // 1. Understand this affects real-time pixel data in the browser
@@ -29,16 +29,13 @@
 // 3. Verify pixel data arrays are properly transferred to JavaScript
 // 4. Check that strip indexing remains consistent
 //
-// ⚠️⚠️⚠️ REMEMBER: Pixel data errors cause corrupted LED displays! ⚠️⚠️⚠️
+// ⚠️⚠️⚠️ REMEMBER: Pixel data errors cause corrupted LED displays! ⚠️⚠️⚭️
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 
 
-// embind headers only needed for original implementation
-#include <emscripten/bind.h>
-#include <emscripten/val.h>
-#include <emscripten/html5.h>
+// embind headers removed - using only ccall mechanism
 
 
 #include "fl/map.h"
@@ -66,20 +63,6 @@ void ActiveStripData::update(int id, uint32_t now, const uint8_t *pixel_data,
 
 void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
     mScreenMap.update(id, screenmap);
-}
-
-
-emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
-    // Efficient, zero copy conversion from internal data to JavaScript.
-    SliceUint8 stripData;
-    if (mStripMap.get(stripIndex, &stripData)) {
-        const uint8_t *data = stripData.data();
-        uint8_t *data_mutable = const_cast<uint8_t *>(data);
-        size_t size = stripData.size();
-        return emscripten::val(
-            emscripten::typed_memory_view(size, data_mutable));
-    }
-    return emscripten::val::undefined();
 }
 
 Str ActiveStripData::infoJsonString() {
@@ -131,20 +114,7 @@ uint8_t* getStripPixelData(int stripIndex, int* outSize) {
 
 
 
-// Original embind implementation  
-// JavaScript usage:
-//   let activeStrips = new Module.ActiveStripData();
-//   let pixelData = activeStrips.getPixelData_Uint8(stripIndex);
-static ActiveStripData *getActiveStripDataRef() {
-    ActiveStripData *instance = &fl::Singleton<ActiveStripData>::instance();
-    return instance;
-}
-
-EMSCRIPTEN_BINDINGS(engine_events_constructors) {
-    emscripten::class_<ActiveStripData>("ActiveStripData")
-        .constructor(&getActiveStripDataRef, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
-}
+// embind implementation removed - now using only ccall mechanism above
 
 
 } // namespace fl

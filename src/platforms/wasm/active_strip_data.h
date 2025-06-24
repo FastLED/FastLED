@@ -11,11 +11,6 @@
 #include "strip_id_map.h"
 
 
-namespace emscripten {
-class val;
-}
-
-
 namespace fl {
 
 typedef fl::Slice<const uint8_t> SliceUint8;
@@ -29,8 +24,6 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     static ActiveStripData &Instance();
     void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
     void updateScreenMap(int id, const fl::ScreenMap &screenmap);
-
-    emscripten::val getPixelData_Uint8(int stripIndex);
 
     fl::string infoJsonString();
 
