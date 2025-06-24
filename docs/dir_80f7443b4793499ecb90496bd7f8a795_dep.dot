@@ -12,6 +12,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave2d"
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
   dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
-  dir_80f7443b4793499ecb90496bd7f8a795->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000096_000035.html" href="dir_000096_000035.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_80f7443b4793499ecb90496bd7f8a795->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000096_000038.html" href="dir_000096_000038.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_80f7443b4793499ecb90496bd7f8a795->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000097_000036.html" href="dir_000097_000036.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_80f7443b4793499ecb90496bd7f8a795->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="1", labeldistance=1.5 headhref="dir_000097_000039.html" href="dir_000097_000039.html" color="steelblue1" fontcolor="steelblue1"];
 }

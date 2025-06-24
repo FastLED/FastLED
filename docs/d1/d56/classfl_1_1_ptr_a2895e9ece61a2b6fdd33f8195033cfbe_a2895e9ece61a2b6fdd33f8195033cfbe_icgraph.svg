@@ -100,19 +100,19 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node22 -->
-<g id="Node000022" class="node">
-<title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d" target="_top" xlink:title=" ">
+<!-- Node23 -->
+<g id="Node000023" class="node">
+<title>Node23</title>
+<g id="a_Node000023"><a xlink:href="../../da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="452,-234 356,-234 356,-215 452,-215 452,-234"/>
 <text text-anchor="middle" x="404" y="-222" font-family="Helvetica,sans-Serif" font-size="10.00">fl::PtrTraits::New</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node22 -->
-<g id="edge18_Node000001_Node000022" class="edge">
-<title>Node1&#45;&gt;Node22</title>
-<g id="a_edge18_Node000001_Node000022"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node23 -->
+<g id="edge18_Node000001_Node000023" class="edge">
+<title>Node1&#45;&gt;Node23</title>
+<g id="a_edge18_Node000001_Node000023"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M501.42,-249.45C482.23,-244.48 460.29,-238.81 442.2,-234.12"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="500.62,-252.86 511.17,-251.97 502.37,-246.08 500.62,-252.86"/>
 </a>
@@ -377,8 +377,8 @@ var sectionId = 'dynsection-1';
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="141,-19 10,-19 10,0 141,0 141,-19"/>
+<g id="a_Node000021"><a xlink:href="../../de/d3f/examples_2_downscale_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9" target="_top" xlink:title=" ">
+<polygon fill="#fff0f0" stroke="red" points="141,-19 10,-19 10,0 141,0 141,-19"/>
 <text text-anchor="middle" x="75.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">NewWaveSimulation2D</text>
 </a>
 </g>

@@ -133,7 +133,7 @@ template&lt;typename XYVisitor&gt; </div>
 <div class="fragment"><div class="line"><span class="lineno">  153</span>                                                      {</div>
 <div class="line"><span class="lineno">  154</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;it : <a class="code hl_variable" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">mSparseGrid</a>) {</div>
 <div class="line"><span class="lineno">  155</span>            <span class="keyword">auto</span> pt = it.first;</div>
-<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.<a class="code hl_function" href="../../d7/de6/class_x_y_map_ae07ab125635a29560f41168e7776377f.html#ae07ab125635a29560f41168e7776377f">has</a>(pt.x, pt.y)) {</div>
+<div class="line"><span class="lineno">  156</span>            <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.has(pt.x, pt.y)) {</div>
 <div class="line"><span class="lineno">  157</span>                <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  158</span>            }</div>
 <div class="line"><span class="lineno">  159</span>            uint32_t index = <a class="code hl_variable" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>(pt.x, pt.y);</div>
@@ -144,7 +144,6 @@ template&lt;typename XYVisitor&gt; </div>
 <div class="line"><span class="lineno">  164</span>        }</div>
 <div class="line"><span class="lineno">  165</span>    }</div>
 <div class="ttc" id="a_blur2d_8ino_aec006558d688505c331eb481e3df4319_html_aec006558d688505c331eb481e3df4319"><div class="ttname"><a href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a></div><div class="ttdeci">XYMap xymap(WIDTH, HEIGHT, SERPENTINE)</div></div>
-<div class="ttc" id="aclass_x_y_map_ae07ab125635a29560f41168e7776377f_html_ae07ab125635a29560f41168e7776377f"><div class="ttname"><a href="../../d7/de6/class_x_y_map_ae07ab125635a29560f41168e7776377f.html#ae07ab125635a29560f41168e7776377f">XYMap::has</a></div><div class="ttdeci">bool has(uint16_t x, uint16_t y) const</div><div class="ttdef"><b>Definition</b> <a href="../../da/d61/xymap_8h_source.html#l00095">xymap.h:95</a></div></div>
 <div class="ttc" id="aclassfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865_html_aca9db41eeaa4e6aff04b757ef5205865"><div class="ttname"><a href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aca9db41eeaa4e6aff04b757ef5205865.html#aca9db41eeaa4e6aff04b757ef5205865">fl::XYRasterU8Sparse::mSparseGrid</a></div><div class="ttdeci">HashMapLarge mSparseGrid</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df9/raster__sparse_8h_source.html#l00217">raster_sparse.h:217</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../d4/df9/raster__sparse_8h_source.html#l00217">mSparseGrid</a>, and <a class="el" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>.</p>
@@ -158,7 +157,7 @@ template&lt;typename XYVisitor&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse.html">XYRasterU8Sparse</a></li>
-    <li class="footer">Generated on Mon Jun 16 2025 06:27:50 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 24 2025 00:58:16 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

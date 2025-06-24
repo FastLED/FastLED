@@ -82,7 +82,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave/Wave.ino"
   Node54 [id="Node000054",label="fl/supersample.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dce/supersample_8h.html",tooltip=" "];
   Node53 -> Node37 [id="edge55_Node000053_Node000037",color="steelblue1",style="solid",tooltip=" "];
   Node53 -> Node55 [id="edge56_Node000053_Node000055",color="steelblue1",style="solid",tooltip=" "];
-  Node55 [id="Node000055",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d44/src_2fx_2fx_8h.html",tooltip=" "];
+  Node55 [id="Node000055",label="fx/fx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d0c/fx_8h.html",tooltip=" "];
   Node55 -> Node4 [id="edge57_Node000055_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node55 -> Node18 [id="edge58_Node000055_Node000018",color="steelblue1",style="solid",tooltip=" "];
   Node55 -> Node19 [id="edge59_Node000055_Node000019",color="steelblue1",style="solid",tooltip=" "];
@@ -196,8 +196,4 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Wave/Wave.ino"
   Node61 -> Node113 [id="edge140_Node000061_Node000113",color="steelblue1",style="solid",tooltip=" "];
   Node113 [id="Node000113",label="fl/leds.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d78/leds_8h.html",tooltip=" "];
   Node113 -> Node37 [id="edge141_Node000113_Node000037",color="steelblue1",style="solid",tooltip=" "];
-  Node61 -> Node37 [id="edge142_Node000061_Node000037",color="steelblue1",style="solid",tooltip=" "];
-  Node61 -> Node46 [id="edge143_Node000061_Node000046",color="steelblue1",style="solid",tooltip=" "];
-  Node61 -> Node26 [id="edge144_Node000061_Node000026",color="steelblue1",style="solid",tooltip=" "];
-  Node61 -> Node3 [id="edge145_Node000061_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

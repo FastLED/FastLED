@@ -14,8 +14,8 @@ digraph "dither_mode.h"
   Node4 [id="Node000004",label="cpixel_ledcontroller.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d57/cpixel__ledcontroller_8h.html",tooltip="defines the templated version of the CLEDController class"];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 [id="Node000005",label="controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dd9/controller_8h.html",tooltip="deprecated: base definitions used by led controllers for writing out led data"];
-  Node1 -> Node130 [id="edge5_Node000001_Node000130",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node130 [id="Node000130",label="pixel_controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d4d/pixel__controller_8h.html",tooltip="Low level pixel data writing class."];
-  Node130 -> Node2 [id="edge6_Node000130_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node130 -> Node4 [id="edge7_Node000130_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node138 [id="edge5_Node000001_Node000138",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node138 [id="Node000138",label="pixel_controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d4d/pixel__controller_8h.html",tooltip="Low level pixel data writing class."];
+  Node138 -> Node2 [id="edge6_Node000138_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node138 -> Node4 [id="edge7_Node000138_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

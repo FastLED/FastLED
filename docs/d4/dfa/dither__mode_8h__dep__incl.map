@@ -2,14 +2,14 @@
 <area shape="rect" id="Node000001" title="Declares dithering options and types." alt="" coords="143,5,259,31"/>
 <area shape="rect" id="Node000002" href="$db/d6d/cled__controller_8h.html" title="base definitions used by led controllers for writing out led data" alt="" coords="85,152,214,177"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,44,177,80,155,152,150,151,172,78,187,42"/>
-<area shape="rect" id="Node000130" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="187,79,320,104"/>
-<area shape="poly" id="edge5_Node000001_Node000130" title=" " alt="" coords="220,40,247,77,243,80,216,43"/>
+<area shape="rect" id="Node000138" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="187,79,320,104"/>
+<area shape="poly" id="edge5_Node000001_Node000138" title=" " alt="" coords="220,40,247,77,243,80,216,43"/>
 <area shape="rect" id="Node000003" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,225,149,251"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,189,91,227,87,223,126,185"/>
 <area shape="rect" id="Node000004" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="173,225,333,251"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="179,183,238,223,235,227,176,187"/>
 <area shape="rect" id="Node000005" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="206,299,301,324"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="256,264,256,299,251,299,251,264"/>
-<area shape="poly" id="edge6_Node000130_Node000002" title=" " alt="" coords="227,114,168,154,165,150,224,110"/>
-<area shape="poly" id="edge7_Node000130_Node000004" title=" " alt="" coords="256,118,256,225,251,225,251,118"/>
+<area shape="poly" id="edge6_Node000138_Node000002" title=" " alt="" coords="227,114,168,154,165,150,224,110"/>
+<area shape="poly" id="edge7_Node000138_Node000004" title=" " alt="" coords="256,118,256,225,251,225,251,118"/>
 </map>

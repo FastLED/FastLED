@@ -12,6 +12,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FxNoiseRing"
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
   dir_7349e89ef19c117195f8e371603e1b1f [label="sensors", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_7349e89ef19c117195f8e371603e1b1f.html",tooltip=""];
-  dir_5ef9feb7298f66ee154d998687951263->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="7", labeldistance=1.5 headhref="dir_000045_000035.html" href="dir_000045_000035.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_5ef9feb7298f66ee154d998687951263->dir_7349e89ef19c117195f8e371603e1b1f [headlabel="1", labeldistance=1.5 headhref="dir_000045_000080.html" href="dir_000045_000080.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_5ef9feb7298f66ee154d998687951263->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="7", labeldistance=1.5 headhref="dir_000046_000036.html" href="dir_000046_000036.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_5ef9feb7298f66ee154d998687951263->dir_7349e89ef19c117195f8e371603e1b1f [headlabel="1", labeldistance=1.5 headhref="dir_000046_000081.html" href="dir_000046_000081.html" color="steelblue1" fontcolor="steelblue1"];
 }

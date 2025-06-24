@@ -17,8 +17,8 @@ digraph "cled_controller.h"
   Node5 -> Node2 [id="edge5_Node000005_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node1 [id="edge6_Node000005_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node5 -> Node3 [id="edge7_Node000005_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 -> Node96 [id="edge8_Node000005_Node000096",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node96 [id="Node000096",label="fastspi.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];
-  Node96 -> Node5 [id="edge9_Node000096_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 -> Node96 [id="edge10_Node000004_Node000096",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node104 [id="edge8_Node000005_Node000104",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node104 [id="Node000104",label="fastspi.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];
+  Node104 -> Node5 [id="edge9_Node000104_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node104 [id="edge10_Node000004_Node000104",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

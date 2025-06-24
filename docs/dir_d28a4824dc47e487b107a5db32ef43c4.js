@@ -13,6 +13,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Chromancer", "dir_63a7680d6f3f38816504e5ce30b76a13.html", "dir_63a7680d6f3f38816504e5ce30b76a13" ],
     [ "ColorPalette", "dir_3e530362afb4b56ed6ea6cf0a9ae71af.html", "dir_3e530362afb4b56ed6ea6cf0a9ae71af" ],
     [ "ColorTemperature", "dir_f14b3bf61e57ddcd04abb3082cceefb6.html", "dir_f14b3bf61e57ddcd04abb3082cceefb6" ],
+    [ "CompileTest", "dir_a05861b8fd6eceda0b5bd14abd963e94.html", "dir_a05861b8fd6eceda0b5bd14abd963e94" ],
     [ "Corkscrew", "dir_dada05b0a611f48c92eb4fcdbe293ddb.html", "dir_dada05b0a611f48c92eb4fcdbe293ddb" ],
     [ "Cylon", "dir_28f79ea112b9e3d7e6ff42754a4ce07c.html", "dir_28f79ea112b9e3d7e6ff42754a4ce07c" ],
     [ "DemoReel100", "dir_16996705dca5e5845caca64f4257e696.html", "dir_16996705dca5e5845caca64f4257e696" ],

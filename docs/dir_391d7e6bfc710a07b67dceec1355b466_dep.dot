@@ -12,6 +12,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/XYPath/src"
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
   dir_acbb946b833f21b16ec30aa21c4c3a72 [label="fx", fillcolor="#edf0f7", color="red", style="filled", URL="dir_acbb946b833f21b16ec30aa21c4c3a72.html",tooltip=""];
-  dir_391d7e6bfc710a07b67dceec1355b466->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000084_000035.html" href="dir_000084_000035.html" color="steelblue1" fontcolor="steelblue1"];
-  dir_391d7e6bfc710a07b67dceec1355b466->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="3", labeldistance=1.5 headhref="dir_000084_000038.html" href="dir_000084_000038.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_391d7e6bfc710a07b67dceec1355b466->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="6", labeldistance=1.5 headhref="dir_000085_000036.html" href="dir_000085_000036.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_391d7e6bfc710a07b67dceec1355b466->dir_acbb946b833f21b16ec30aa21c4c3a72 [headlabel="3", labeldistance=1.5 headhref="dir_000085_000039.html" href="dir_000085_000039.html" color="steelblue1" fontcolor="steelblue1"];
 }

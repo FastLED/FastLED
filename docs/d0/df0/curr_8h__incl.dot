@@ -186,9 +186,4 @@ digraph "/home/runner/work/FastLED/FastLED/examples/FestivalStick/curr.h"
   Node96 -> Node48 [id="edge129_Node000096_Node000048",color="steelblue1",style="solid",tooltip=" "];
   Node96 -> Node60 [id="edge130_Node000096_Node000060",color="steelblue1",style="solid",tooltip=" "];
   Node48 -> Node39 [id="edge131_Node000048_Node000039",color="steelblue1",style="solid",tooltip=" "];
-  Node48 -> Node9 [id="edge132_Node000048_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node48 -> Node31 [id="edge133_Node000048_Node000031",color="steelblue1",style="solid",tooltip=" "];
-  Node48 -> Node44 [id="edge134_Node000048_Node000044",color="steelblue1",style="solid",tooltip=" "];
-  Node48 -> Node2 [id="edge135_Node000048_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node48 -> Node24 [id="edge136_Node000048_Node000024",color="steelblue1",style="solid",tooltip=" "];
 }

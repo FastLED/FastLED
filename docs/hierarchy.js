@@ -683,6 +683,5 @@ var hierarchy =
     [ "Timer", "d8/d08/class_timer.html", null ],
     [ "ToggleButton", "d8/ddd/class_toggle_button.html", null ],
     [ "ui_state", "da/db7/structui__state.html", null ],
-    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ],
-    [ "XYMap", "d7/de6/class_x_y_map.html", null ]
+    [ "WaveEffect", "d6/def/struct_wave_effect.html", null ]
 ];

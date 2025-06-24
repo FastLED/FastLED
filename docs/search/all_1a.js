@@ -109,7 +109,7 @@ var searchData=
   ['remove_5freference_3c_20t_20_26_20_3e_106',['remove_reference&lt; T &amp; &gt;',['../d4/d36/namespacefl.html#db/df6/structfl_1_1remove__reference_3_01_t_01_6_01_4',1,'fl']]],
   ['remove_5freference_3c_20t_20_26_26_20_3e_107',['remove_reference&lt; T &amp;&amp; &gt;',['../d4/d36/namespacefl.html#d3/d5a/structfl_1_1remove__reference_3_01_t_01_6_6_01_4',1,'fl']]],
   ['remove_5freference_5ft_108',['remove_reference_t',['../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5',1,'fl']]],
-  ['removecallback_109',['removeCallback',['../d3/d1d/classfl_1_1_u_i_button_a265629bf88747f9fca5897a2ae8d5955.html#a265629bf88747f9fca5897a2ae8d5955',1,'fl::UIButton::removeCallback()'],['../da/d03/class_u_i_button_a265629bf88747f9fca5897a2ae8d5955.html#a265629bf88747f9fca5897a2ae8d5955',1,'UIButton::removeCallback()']]],
+  ['removecallback_109',['removeCallback',['../d3/d1d/classfl_1_1_u_i_button_a265629bf88747f9fca5897a2ae8d5955.html#a265629bf88747f9fca5897a2ae8d5955',1,'fl::UIButton']]],
   ['removefx_110',['removeFx',['../d4/d60/classfl_1_1_fx_engine_acb1a08ee3735bf9269d8a60370b02315.html#acb1a08ee3735bf9269d8a60370b02315',1,'fl::FxEngine']]],
   ['removelistener_111',['removeListener',['../dd/dbb/class_c_fast_l_e_d_a54515910a8a244f2a9d4617d27a256ee.html#a54515910a8a244f2a9d4617d27a256ee',1,'CFastLED::removeListener()'],['../de/dca/classfl_1_1_engine_events_a34cf730bad7c6b5192b4747676f20881.html#a34cf730bad7c6b5192b4747676f20881',1,'fl::EngineEvents::removeListener()']]],
   ['removeonclick_112',['removeOnClick',['../d3/d85/classfl_1_1_button_a776932efa7397ac0c06c1b0039928cfe.html#a776932efa7397ac0c06c1b0039928cfe',1,'fl::Button']]],

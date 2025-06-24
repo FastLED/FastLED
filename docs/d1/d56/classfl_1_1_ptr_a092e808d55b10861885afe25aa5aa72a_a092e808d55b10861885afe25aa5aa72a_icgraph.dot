@@ -33,6 +33,6 @@ digraph "fl::Ptr::Ptr"
   Node12 [id="Node000012",label="fl::Ptr::New",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d56/classfl_1_1_ptr_a4041b6379499b8faf0626509cbb9d357.html#a4041b6379499b8faf0626509cbb9d357",tooltip=" "];
   Node9 -> Node13 [id="edge14_Node000009_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node13 [id="Node000013",label="fl::NewPtr",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_aa46ba73e92c85e05f9ee42f4008cfbe0.html#aa46ba73e92c85e05f9ee42f4008cfbe0",tooltip=" "];
-  Node8 -> Node27 [id="edge15_Node000008_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node27 [id="Node000027",label="fl::PtrTraits::New",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d",tooltip=" "];
+  Node8 -> Node28 [id="edge15_Node000008_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::PtrTraits::New",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d84/classfl_1_1_ptr_traits_a8f1f367153b1047c93dc60fa54ac117d.html#a8f1f367153b1047c93dc60fa54ac117d",tooltip=" "];
 }

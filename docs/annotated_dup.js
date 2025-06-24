@@ -464,10 +464,6 @@ var annotated_dup =
     [ "UCS2903", "d7/d84/class_u_c_s2903.html", null ],
     [ "UCS2903Controller", "d6/d05/class_u_c_s2903_controller.html", null ],
     [ "ui_state", "da/db7/structui__state.html", "da/db7/structui__state" ],
-    [ "UIButton", "da/d03/class_u_i_button.html", "da/d03/class_u_i_button" ],
-    [ "UICheckbox", "de/d39/class_u_i_checkbox.html", "de/d39/class_u_i_checkbox" ],
-    [ "UINumberField", "db/d12/class_u_i_number_field.html", "db/d12/class_u_i_number_field" ],
-    [ "UISlider", "df/d68/class_u_i_slider.html", "df/d68/class_u_i_slider" ],
     [ "WaveEffect", "d6/def/struct_wave_effect.html", "d6/def/struct_wave_effect" ],
     [ "WS2801Controller", "d9/d95/class_w_s2801_controller.html", "d9/d95/class_w_s2801_controller" ],
     [ "WS2803Controller", "dc/d28/class_w_s2803_controller.html", null ],
@@ -484,6 +480,5 @@ var annotated_dup =
     [ "WS2815Controller", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2816Controller", "dd/dbc/class_w_s2816_controller.html", "dd/dbc/class_w_s2816_controller" ],
-    [ "WS2852", "df/d10/class_w_s2852.html", null ],
-    [ "XYMap", "d7/de6/class_x_y_map.html", "d7/de6/class_x_y_map" ]
+    [ "WS2852", "df/d10/class_w_s2852.html", null ]
 ];

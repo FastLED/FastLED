@@ -4,25 +4,25 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,38,129,81,127,76,240,33"/>
 <area shape="rect" id="Node000003" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="285,167,419,192"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="297,42,349,165,345,167,292,44"/>
-<area shape="rect" id="Node000143" href="$d8/d6c/pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="177,86,295,111"/>
-<area shape="poly" id="edge10_Node000001_Node000143" title=" " alt="" coords="272,44,245,87,241,84,268,41"/>
-<area shape="rect" id="Node000139" href="$d1/d8d/rgbw_8cpp.html" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="371,86,451,111"/>
-<area shape="poly" id="edge14_Node000001_Node000139" title=" " alt="" coords="316,36,393,84,391,88,313,40"/>
+<area shape="rect" id="Node000151" href="$d8/d6c/pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="177,86,295,111"/>
+<area shape="poly" id="edge10_Node000001_Node000151" title=" " alt="" coords="272,44,245,87,241,84,268,41"/>
+<area shape="rect" id="Node000147" href="$d1/d8d/rgbw_8cpp.html" title="Functions for red, green, blue, white (RGBW) output." alt="" coords="371,86,451,111"/>
+<area shape="poly" id="edge14_Node000001_Node000147" title=" " alt="" coords="316,36,393,84,391,88,313,40"/>
 <area shape="rect" id="Node000004" href="$db/d6d/cled__controller_8h.html" title="base definitions used by led controllers for writing out led data" alt="" coords="127,240,257,265"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="315,200,219,242,217,237,313,195"/>
 <area shape="rect" id="Node000006" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="196,328,356,353"/>
 <area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="343,205,284,329,279,326,338,203"/>
-<area shape="rect" id="Node000142" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="408,240,563,265"/>
-<area shape="poly" id="edge7_Node000003_Node000142" title=" " alt="" coords="387,196,465,237,462,242,384,201"/>
+<area shape="rect" id="Node000150" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="408,240,563,265"/>
+<area shape="poly" id="edge7_Node000003_Node000150" title=" " alt="" coords="387,196,465,237,462,242,384,201"/>
 <area shape="rect" id="Node000005" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="28,328,172,353"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="171,277,115,329,111,326,168,273"/>
 <area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="215,273,266,326,262,329,211,277"/>
-<area shape="rect" id="Node000046" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="381,313,590,368"/>
-<area shape="poly" id="edge8_Node000142_Node000046" title=" " alt="" coords="488,279,488,313,483,313,483,279"/>
-<area shape="rect" id="Node000090" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="615,313,815,368"/>
-<area shape="poly" id="edge9_Node000142_Node000090" title=" " alt="" coords="530,268,646,311,644,316,528,273"/>
-<area shape="poly" id="edge13_Node000143_Node000003" title=" " alt="" coords="266,117,336,164,333,169,263,121"/>
-<area shape="poly" id="edge12_Node000143_Node000004" title=" " alt="" coords="206,121,182,142,164,168,161,186,165,205,184,238,180,241,160,207,155,187,159,166,178,138,202,117"/>
-<area shape="rect" id="Node000128" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="173,167,261,192"/>
-<area shape="poly" id="edge11_Node000143_Node000128" title=" " alt="" coords="233,125,223,167,218,166,228,124"/>
+<area shape="rect" id="Node000052" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix." alt="" coords="381,313,590,368"/>
+<area shape="poly" id="edge8_Node000150_Node000052" title=" " alt="" coords="488,279,488,313,483,313,483,279"/>
+<area shape="rect" id="Node000098" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="615,313,815,368"/>
+<area shape="poly" id="edge9_Node000150_Node000098" title=" " alt="" coords="530,268,646,311,644,316,528,273"/>
+<area shape="poly" id="edge13_Node000151_Node000003" title=" " alt="" coords="266,117,336,164,333,169,263,121"/>
+<area shape="poly" id="edge12_Node000151_Node000004" title=" " alt="" coords="206,121,182,142,164,168,161,186,165,205,184,238,180,241,160,207,155,187,159,166,178,138,202,117"/>
+<area shape="rect" id="Node000136" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="173,167,261,192"/>
+<area shape="poly" id="edge11_Node000151_Node000136" title=" " alt="" coords="233,125,223,167,218,166,228,124"/>
 </map>

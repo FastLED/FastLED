@@ -115,46 +115,46 @@ $(function(){initNavTree('d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/dce/_pride2015_8ino_source.html#l00047">47</a> of file <a class="el" href="../../d0/dce/_pride2015_8ino_source.html">Pride2015.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   48</span>{</div>
-<div class="line"><span class="lineno">   49</span>  <span class="keyword">static</span> uint16_t sPseudotime = 0;</div>
-<div class="line"><span class="lineno">   50</span>  <span class="keyword">static</span> uint16_t sLastMillis = 0;</div>
-<div class="line"><span class="lineno">   51</span>  <span class="keyword">static</span> uint16_t sHue16 = 0;</div>
-<div class="line"><span class="lineno">   52</span> </div>
-<div class="line"><span class="lineno">   53</span>  uint8_t sat8 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 87, 220, 250);</div>
-<div class="line"><span class="lineno">   54</span>  uint8_t brightdepth = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 341, 96, 224);</div>
-<div class="line"><span class="lineno">   55</span>  uint16_t brightnessthetainc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 203, (25 * 256), (40 * 256));</div>
-<div class="line"><span class="lineno">   56</span>  uint8_t msmultiplier = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(147, 23, 60);</div>
-<div class="line"><span class="lineno">   57</span> </div>
-<div class="line"><span class="lineno">   58</span>  uint16_t hue16 = sHue16;<span class="comment">//gHue * 256;</span></div>
-<div class="line"><span class="lineno">   59</span>  uint16_t hueinc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(113, 1, 3000);</div>
-<div class="line"><span class="lineno">   60</span>  </div>
-<div class="line"><span class="lineno">   61</span>  uint16_t ms = millis();</div>
-<div class="line"><span class="lineno">   62</span>  uint16_t deltams = ms - sLastMillis ;</div>
-<div class="line"><span class="lineno">   63</span>  sLastMillis  = ms;</div>
-<div class="line"><span class="lineno">   64</span>  sPseudotime += deltams * msmultiplier;</div>
-<div class="line"><span class="lineno">   65</span>  sHue16 += deltams * <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 400, 5,9);</div>
-<div class="line"><span class="lineno">   66</span>  uint16_t brightnesstheta16 = sPseudotime;</div>
-<div class="line"><span class="lineno">   67</span>  </div>
-<div class="line"><span class="lineno">   68</span>  <span class="keywordflow">for</span>( uint16_t i = 0 ; i &lt; <a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>; i++) {</div>
-<div class="line"><span class="lineno">   69</span>    hue16 += hueinc16;</div>
-<div class="line"><span class="lineno">   70</span>    uint8_t hue8 = hue16 / 256;</div>
+<p class="definition">Definition at line <a class="el" href="../../d0/dce/_pride2015_8ino_source.html#l00044">44</a> of file <a class="el" href="../../d0/dce/_pride2015_8ino_source.html">Pride2015.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   45</span>{</div>
+<div class="line"><span class="lineno">   46</span>  <span class="keyword">static</span> uint16_t sPseudotime = 0;</div>
+<div class="line"><span class="lineno">   47</span>  <span class="keyword">static</span> uint16_t sLastMillis = 0;</div>
+<div class="line"><span class="lineno">   48</span>  <span class="keyword">static</span> uint16_t sHue16 = 0;</div>
+<div class="line"><span class="lineno">   49</span> </div>
+<div class="line"><span class="lineno">   50</span>  uint8_t sat8 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 87, 220, 250);</div>
+<div class="line"><span class="lineno">   51</span>  uint8_t brightdepth = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 341, 96, 224);</div>
+<div class="line"><span class="lineno">   52</span>  uint16_t brightnessthetainc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 203, (25 * 256), (40 * 256));</div>
+<div class="line"><span class="lineno">   53</span>  uint8_t msmultiplier = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(147, 23, 60);</div>
+<div class="line"><span class="lineno">   54</span> </div>
+<div class="line"><span class="lineno">   55</span>  uint16_t hue16 = sHue16;<span class="comment">//gHue * 256;</span></div>
+<div class="line"><span class="lineno">   56</span>  uint16_t hueinc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(113, 1, 3000);</div>
+<div class="line"><span class="lineno">   57</span>  </div>
+<div class="line"><span class="lineno">   58</span>  uint16_t ms = millis();</div>
+<div class="line"><span class="lineno">   59</span>  uint16_t deltams = ms - sLastMillis ;</div>
+<div class="line"><span class="lineno">   60</span>  sLastMillis  = ms;</div>
+<div class="line"><span class="lineno">   61</span>  sPseudotime += deltams * msmultiplier;</div>
+<div class="line"><span class="lineno">   62</span>  sHue16 += deltams * <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>( 400, 5,9);</div>
+<div class="line"><span class="lineno">   63</span>  uint16_t brightnesstheta16 = sPseudotime;</div>
+<div class="line"><span class="lineno">   64</span>  </div>
+<div class="line"><span class="lineno">   65</span>  <span class="keywordflow">for</span>( uint16_t i = 0 ; i &lt; <a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>; i++) {</div>
+<div class="line"><span class="lineno">   66</span>    hue16 += hueinc16;</div>
+<div class="line"><span class="lineno">   67</span>    uint8_t hue8 = hue16 / 256;</div>
+<div class="line"><span class="lineno">   68</span> </div>
+<div class="line"><span class="lineno">   69</span>    brightnesstheta16  += brightnessthetainc16;</div>
+<div class="line"><span class="lineno">   70</span>    uint16_t b16 = <a class="code hl_define" href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a>( brightnesstheta16  ) + 32768;</div>
 <div class="line"><span class="lineno">   71</span> </div>
-<div class="line"><span class="lineno">   72</span>    brightnesstheta16  += brightnessthetainc16;</div>
-<div class="line"><span class="lineno">   73</span>    uint16_t b16 = <a class="code hl_define" href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a>( brightnesstheta16  ) + 32768;</div>
-<div class="line"><span class="lineno">   74</span> </div>
-<div class="line"><span class="lineno">   75</span>    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;</div>
-<div class="line"><span class="lineno">   76</span>    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;</div>
-<div class="line"><span class="lineno">   77</span>    bri8 += (255 - brightdepth);</div>
-<div class="line"><span class="lineno">   78</span>    </div>
-<div class="line"><span class="lineno">   79</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> newcolor = <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a>( hue8, sat8, bri8);</div>
+<div class="line"><span class="lineno">   72</span>    uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;</div>
+<div class="line"><span class="lineno">   73</span>    uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;</div>
+<div class="line"><span class="lineno">   74</span>    bri8 += (255 - brightdepth);</div>
+<div class="line"><span class="lineno">   75</span>    </div>
+<div class="line"><span class="lineno">   76</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> newcolor = <a class="code hl_struct" href="../../dc/d53/struct_c_h_s_v.html">CHSV</a>( hue8, sat8, bri8);</div>
+<div class="line"><span class="lineno">   77</span>    </div>
+<div class="line"><span class="lineno">   78</span>    uint16_t pixelnumber = i;</div>
+<div class="line"><span class="lineno">   79</span>    pixelnumber = (<a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>-1) - pixelnumber;</div>
 <div class="line"><span class="lineno">   80</span>    </div>
-<div class="line"><span class="lineno">   81</span>    uint16_t pixelnumber = i;</div>
-<div class="line"><span class="lineno">   82</span>    pixelnumber = (<a class="code hl_define" href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>-1) - pixelnumber;</div>
-<div class="line"><span class="lineno">   83</span>    </div>
-<div class="line"><span class="lineno">   84</span>    <a class="code hl_function" href="../../d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">nblend</a>( <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[pixelnumber], newcolor, 64);</div>
-<div class="line"><span class="lineno">   85</span>  }</div>
-<div class="line"><span class="lineno">   86</span>}</div>
+<div class="line"><span class="lineno">   81</span>    <a class="code hl_function" href="../../d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">nblend</a>( <a class="code hl_variable" href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[pixelnumber], newcolor, 64);</div>
+<div class="line"><span class="lineno">   82</span>  }</div>
+<div class="line"><span class="lineno">   83</span>}</div>
 <div class="ttc" id="a_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00011">Apa102.ino:11</a></div></div>
 <div class="ttc" id="a_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../dd/d0f/_apa102_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d0f/_apa102_8ino_source.html#l00006">Apa102.ino:6</a></div></div>
 <div class="ttc" id="acolorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6_html_aa1e0cd66825220bead12cfc1ab7f33c6"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">nblend</a></div><div class="ttdeci">CRGB &amp; nblend(CRGB &amp;existing, const CRGB &amp;overlay, fract8 amountOfOverlay)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00019">colorutils.cpp:19</a></div></div>
@@ -165,7 +165,7 @@ $(function(){initNavTree('d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00921">beatsin88()</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00011">leds</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00019">nblend()</a>, <a class="el" href="../../dd/d0f/_apa102_8ino_source.html#l00006">NUM_LEDS</a>, and <a class="el" href="../../d3/db9/trig8_8h_source.html#l00103">sin16</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/dce/_pride2015_8ino_source.html#l00038">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/dce/_pride2015_8ino_source.html#l00035">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -190,7 +190,7 @@ $(function(){initNavTree('d0/dce/_pride2015_8ino_a6e24bc1de16730062b4d4be6ad4f8e
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_bc4d95d9770613841270f2596aa32b25.html">Pride2015</a></li><li class="navelem"><a class="el" href="../../d0/dce/_pride2015_8ino.html">Pride2015.ino</a></li>
-    <li class="footer">Generated on Mon Jun 16 2025 06:27:48 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 24 2025 00:58:14 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

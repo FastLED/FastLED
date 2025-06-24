@@ -38,5 +38,7 @@ digraph "fl::PtrTraits::New"
   Node5 -> Node17 [id="edge15_Node000005_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node17 [id="Node000017",label="fl::XYPath::NewLinePath",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/df4/classfl_1_1_x_y_path_a32ddbbb670b08579c9e8d9fb56fcc0ff.html#a32ddbbb670b08579c9e8d9fb56fcc0ff",tooltip=" "];
   Node5 -> Node18 [id="edge16_Node000005_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="NewWaveSimulation2D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d96/examples_2_x_y_path_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9",tooltip=" "];
+  Node18 [id="Node000018",label="NewWaveSimulation2D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d3f/examples_2_downscale_2src_2wave_8cpp_a1490bc485ae20e1825270825721a84e9.html#a1490bc485ae20e1825270825721a84e9",tooltip=" "];
+  Node18 -> Node19 [id="edge17_Node000018_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3b/complex_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
 }

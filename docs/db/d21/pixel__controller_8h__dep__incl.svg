@@ -100,19 +100,19 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node140 -->
-<g id="Node000140" class="node">
-<title>Node140</title>
-<g id="a_Node000140"><a xlink:href="../../d3/dc3/animartrix_8hpp.html" target="_top" xlink:title=" ">
+<!-- Node148 -->
+<g id="Node000148" class="node">
+<title>Node148</title>
+<g id="a_Node000148"><a xlink:href="../../d3/dc3/animartrix_8hpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="401,-151 285,-151 285,-132 401,-132 401,-151"/>
 <text text-anchor="middle" x="343" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">fx/2d/animartrix.hpp</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node140 -->
-<g id="edge6_Node000001_Node000140" class="edge">
-<title>Node1&#45;&gt;Node140</title>
-<g id="a_edge6_Node000001_Node000140"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node148 -->
+<g id="edge6_Node000001_Node000148" class="edge">
+<title>Node1&#45;&gt;Node148</title>
+<g id="a_edge6_Node000001_Node000148"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M250.01,-182.9C272.54,-173.11 303.2,-159.79 323.04,-151.17"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="248.38,-179.79 240.6,-186.98 251.17,-186.21 248.38,-179.79"/>
 </a>
@@ -163,10 +163,10 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node44 -->
-<g id="Node000044" class="node">
-<title>Node44</title>
-<g id="a_Node000044"><a xlink:href="../../d6/d35/_fx_engine_8ino.html" target="_top" xlink:title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix.">
+<!-- Node50 -->
+<g id="Node000050" class="node">
+<title>Node50</title>
+<g id="a_Node000050"><a xlink:href="../../d6/d35/_fx_engine_8ino.html" target="_top" xlink:title="Demonstrates how to use the FxEngine to switch between different effects on a 2D LED matrix.">
 <polygon fill="white" stroke="#666666" points="421.5,-96 264.5,-96 264.5,-55 421.5,-55 421.5,-96"/>
 <text text-anchor="start" x="272.5" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="272.5" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/FxEngine</text>
@@ -174,19 +174,19 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node140&#45;&gt;Node44 -->
-<g id="edge7_Node000140_Node000044" class="edge">
-<title>Node140&#45;&gt;Node44</title>
-<g id="a_edge7_Node000140_Node000044"><a xlink:title=" ">
+<!-- Node148&#45;&gt;Node50 -->
+<g id="edge7_Node000148_Node000050" class="edge">
+<title>Node148&#45;&gt;Node50</title>
+<g id="a_edge7_Node000148_Node000050"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M343,-121.63C343,-113.56 343,-104.15 343,-96.01"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="339.5,-121.87 343,-131.87 346.5,-121.87 339.5,-121.87"/>
 </a>
 </g>
 </g>
-<!-- Node88 -->
-<g id="Node000088" class="node">
-<title>Node88</title>
-<g id="a_Node000088"><a xlink:href="../../d7/dd3/wasm_8ino.html" target="_top" xlink:title="Demonstrates an advanced ino file with multiple effects and UI elements.">
+<!-- Node96 -->
+<g id="Node000096" class="node">
+<title>Node96</title>
+<g id="a_Node000096"><a xlink:href="../../d7/dd3/wasm_8ino.html" target="_top" xlink:title="Demonstrates an advanced ino file with multiple effects and UI elements.">
 <polygon fill="white" stroke="#666666" points="590,-96 440,-96 440,-55 590,-55 590,-96"/>
 <text text-anchor="start" x="448" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="448" y="-73" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/wasm</text>
@@ -194,10 +194,10 @@ var sectionId = 'dynsection-1';
 </a>
 </g>
 </g>
-<!-- Node140&#45;&gt;Node88 -->
-<g id="edge8_Node000140_Node000088" class="edge">
-<title>Node140&#45;&gt;Node88</title>
-<g id="a_edge8_Node000140_Node000088"><a xlink:title=" ">
+<!-- Node148&#45;&gt;Node96 -->
+<g id="edge8_Node000148_Node000096" class="edge">
+<title>Node148&#45;&gt;Node96</title>
+<g id="a_edge8_Node000148_Node000096"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M375.75,-128.32C400.26,-119.19 434.29,-106.53 462.57,-96.01"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="374.35,-125.1 366.2,-131.87 376.79,-131.66 374.35,-125.1"/>
 </a>

@@ -20,7 +20,7 @@ var searchData=
   ['stepditheringfunction_17',['stepDitheringFunction',['../d8/d6c/pixel__iterator_8h_a6a9c7f0f0b88f258a570b4a9c08d2d61.html#a6a9c7f0f0b88f258a570b4a9c08d2d61',1,'pixel_iterator.h']]],
   ['stopcallback_18',['StopCallback',['../d8/dd0/midi___defs_8h_a3d976f6f198f49417d156d8742777a8f.html#a3d976f6f198f49417d156d8742777a8f',1,'midi_Defs.h']]],
   ['string_19',['string',['../d4/d36/namespacefl_a2b855faa541d057b6b02f771c2cda3d7.html#a2b855faa541d057b6b02f771c2cda3d7',1,'fl']]],
-  ['super_20',['Super',['../d7/dfe/classfl_1_1_u_i_checkbox_a6c185956a5853d7f05eb449498411b29.html#a6c185956a5853d7f05eb449498411b29',1,'fl::UICheckbox::Super'],['../d9/d5f/classfl_1_1_u_i_number_field_a3d67076c45423f572139f0fc8cc3187b.html#a3d67076c45423f572139f0fc8cc3187b',1,'fl::UINumberField::Super'],['../de/d39/class_u_i_checkbox_a6c185956a5853d7f05eb449498411b29.html#a6c185956a5853d7f05eb449498411b29',1,'UICheckbox::Super'],['../db/d12/class_u_i_number_field_a3d67076c45423f572139f0fc8cc3187b.html#a3d67076c45423f572139f0fc8cc3187b',1,'UINumberField::Super']]],
+  ['super_20',['Super',['../d7/dfe/classfl_1_1_u_i_checkbox_a6c185956a5853d7f05eb449498411b29.html#a6c185956a5853d7f05eb449498411b29',1,'fl::UICheckbox::Super'],['../d9/d5f/classfl_1_1_u_i_number_field_a3d67076c45423f572139f0fc8cc3187b.html#a3d67076c45423f572139f0fc8cc3187b',1,'fl::UINumberField::Super']]],
   ['systemexclusivecallback_21',['SystemExclusiveCallback',['../d8/dd0/midi___defs_8h_a72b4a10462bbd3b664c3720185c8e9cb.html#a72b4a10462bbd3b664c3720185c8e9cb',1,'midi_Defs.h']]],
   ['systemresetcallback_22',['SystemResetCallback',['../d8/dd0/midi___defs_8h_aa6e986278cb047802e60d256445808f0.html#aa6e986278cb047802e60d256445808f0',1,'midi_Defs.h']]]
 ];

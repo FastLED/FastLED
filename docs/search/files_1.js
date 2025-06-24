@@ -17,5 +17,6 @@ var searchData=
   ['audio_2ecpp_14',['audio.cpp',['../d1/ddc/audio_8cpp.html',1,'']]],
   ['audio_2eh_15',['audio.h',['../da/d09/audio_8h.html',1,'']]],
   ['audio_2eino_16',['Audio.ino',['../dc/d5d/_audio_8ino.html',1,'']]],
-  ['avr_5fdisallowed_2eh_17',['avr_disallowed.h',['../d5/dd1/avr__disallowed_8h.html',1,'']]]
+  ['avr_5fdisallowed_2eh_17',['avr_disallowed.h',['../d5/dd1/avr__disallowed_8h.html',1,'']]],
+  ['avr_5ftest_2eh_18',['avr_test.h',['../df/d84/avr__test_8h.html',1,'']]]
 ];
