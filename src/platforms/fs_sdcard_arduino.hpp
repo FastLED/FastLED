@@ -38,6 +38,7 @@ public:
     const char* path() const override { return _path; }
     void seek(size_t pos) override { _file.seekSet(pos); }
     void close() override { _file.close(); }
+    bool valid() const override { return _file.isOpen(); }
 };
 #else
 class SDFileHandle : public fl::FileHandle {
@@ -60,6 +61,7 @@ public:
     const char* path() const override { return _path; }
     bool seek(size_t pos) override { return _file.seek(pos); }
     void close() override { _file.close(); }
+    bool valid() const override { return _file; }
 };
 #endif
 
