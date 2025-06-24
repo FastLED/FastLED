@@ -27,7 +27,6 @@ on:
         - 'platformio.ini'
         - 'library.json'
         - 'library.properties'
-  
 
 jobs:
   build:
@@ -35,17 +34,15 @@ jobs:
 
     steps:
     - name: Checkout code
-              uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
     - name: Install UV
       run: pip install uv
 
     - name: uv run ci/run_test_wasm_local_compile.py
       run: uv run ci/run_test_wasm_local_compile.py
-
 
     - name: Generate timestamp and random hex
       id: generate_id
