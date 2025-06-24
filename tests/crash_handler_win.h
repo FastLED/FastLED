@@ -16,7 +16,7 @@ namespace crash_handler_win {
 
 inline void print_stacktrace_windows() {
     HANDLE process = GetCurrentProcess();
-    HANDLE thread = GetCurrentThread();
+    // HANDLE thread = GetCurrentThread(); // Unused, commented out
     
     // Initialize symbol handler
     if (!SymInitialize(process, nullptr, TRUE)) {
@@ -83,7 +83,7 @@ inline void print_stacktrace_windows() {
 }
 
 inline LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS* ExceptionInfo) {
-    printf("Exception caught: 0x%08x at address 0x%p\n", 
+    printf("Exception caught: 0x%08lx at address 0x%p\n", 
            ExceptionInfo->ExceptionRecord->ExceptionCode,
            ExceptionInfo->ExceptionRecord->ExceptionAddress);
     
