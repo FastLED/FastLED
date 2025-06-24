@@ -272,6 +272,11 @@ target_compile_options(doctest_main PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_options(doctest_main PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
 target_compile_definitions(doctest_main PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
+# Add Windows debugging libraries for crash handler
+if(WIN32)
+    target_link_libraries(doctest_main dbghelp psapi)
+endif()
+
 # Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 
@@ -286,6 +291,9 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     
     # Set the correct subsystem for Windows
     if(WIN32)
+        # Add Windows debugging libraries for crash handler
+        target_link_libraries(${TEST_NAME} dbghelp psapi)
+        
         if(MSVC)
             set_target_properties(${TEST_NAME} PROPERTIES
                 WIN32_EXECUTABLE FALSE

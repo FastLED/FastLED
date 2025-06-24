@@ -125,3 +125,7 @@ target_compile_definitions(fastled PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 # Ensure full archive linking: force inclusion of all object files.
 target_link_options(fastled PRIVATE "-Wl,--whole-archive" "-Wl,--no-whole-archive")
 
+# Add Windows debugging libraries for crash handler
+if(WIN32)
+    target_link_libraries(fastled dbghelp psapi)
+endif()
