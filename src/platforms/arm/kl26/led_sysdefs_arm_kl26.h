@@ -13,7 +13,7 @@
 
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
-// #define FASTLED_ALLOW_INTERRUPTS 1
+#define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS == 1
@@ -22,6 +22,11 @@
 
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
+#endif
+
+// Define VARIANT_MCK for timing calculations
+#ifndef VARIANT_MCK
+#define VARIANT_MCK F_CPU
 #endif
 
 // Get some system include files
