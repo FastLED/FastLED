@@ -141,6 +141,54 @@ To use the MCP server, run: `uv run mcp_server.py`
 
 **Why:** Using `fl::span<T>` for parameters makes functions more reusable and avoids forcing callers to convert their data to specific container types.
 
+### Exception Handling
+**DO NOT use try-catch blocks or C++ exception handling in the codebase.** FastLED is designed to work on embedded systems like Arduino where exception handling may not be available or desired due to memory and performance constraints.
+
+**Examples of what to avoid and use instead:**
+
+**Avoid Exception Handling:**
+- ❌ `try { ... } catch (const std::exception& e) { ... }` - Exception handling not available on many embedded platforms
+- ❌ `throw std::runtime_error("error message")` - Throwing exceptions not supported
+- ❌ `#include <exception>` or `#include <stdexcept>` - Exception headers not needed
+
+**Use Error Handling Alternatives:**
+- ✅ **Return error codes:** `bool function() { return false; }` or custom error enums
+- ✅ **Optional types:** `fl::optional<T>` for functions that may not return a value
+- ✅ **Assertions:** `FL_ASSERT(condition)` for debug-time validation
+- ✅ **Early returns:** `if (!valid) return false;` for error conditions
+- ✅ **Status objects:** Custom result types that combine success/failure with data
+
+**Examples of proper error handling:**
+```cpp
+// Good: Using return codes
+bool initializeHardware() {
+    if (!setupPins()) {
+        FL_WARN("Failed to setup pins");
+        return false;
+    }
+    return true;
+}
+
+// Good: Using fl::optional
+fl::optional<float> calculateValue(int input) {
+    if (input < 0) {
+        return fl::nullopt;  // No value, indicates error
+    }
+    return fl::make_optional(sqrt(input));
+}
+
+// Good: Using early returns
+void processData(const uint8_t* data, size_t len) {
+    if (!data || len == 0) {
+        FL_WARN("Invalid input data");
+        return;  // Early return on error
+    }
+    // Process data...
+}
+```
+
+**Why:** Many embedded platforms (especially Arduino-compatible boards) don't support C++ exceptions or have them disabled to save memory and improve performance. FastLED must work reliably across all supported platforms.
+
 ## ⚠️ CRITICAL WARNING: C++ ↔ JavaScript Bindings
 
 **🚨 EXTREMELY IMPORTANT: DO NOT MODIFY FUNCTION SIGNATURES IN WEBASSEMBLY BINDINGS WITHOUT EXTREME CAUTION! 🚨**

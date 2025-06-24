@@ -245,6 +245,21 @@ async def list_tools() -> List[Tool]:
                     }
                 }
             }
+        ),
+        Tool(
+            name="coding_standards",
+            description="Get FastLED coding standards and best practices for C++ development",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings"],
+                        "description": "Specific topic to get standards for, or 'all' for complete guide",
+                        "default": "all"
+                    }
+                }
+            }
         )
     ]
 
@@ -275,6 +290,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await test_instructions(arguments, project_root)
         elif name == "setup_stack_traces":
             return await setup_stack_traces(arguments, project_root)
+        elif name == "coding_standards":
+            return await coding_standards(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -534,6 +551,134 @@ When running test executables directly, you can use doctest options:
     
     return CallToolResult(
         content=[TextContent(type="text", text=instructions.strip())]
+    )
+
+async def coding_standards(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Provide FastLED coding standards and best practices."""
+    topic = arguments.get("topic", "all")
+    
+    standards = {
+        "exceptions": """
+# Exception Handling Standards
+
+⚠️ **CRITICAL: DO NOT use try-catch blocks or C++ exception handling in FastLED code**
+
+## Why No Exceptions?
+FastLED is designed for embedded systems like Arduino where:
+- Exception handling may not be available
+- Exceptions consume significant memory and performance
+- Reliable operation across all platforms is required
+
+## What to Avoid:
+❌ `try { ... } catch (const std::exception& e) { ... }`
+❌ `throw std::runtime_error("error message")`
+❌ `#include <exception>` or `#include <stdexcept>`
+
+## Use Instead:
+✅ **Return error codes:** `bool function() { return false; }`
+✅ **Optional types:** `fl::optional<T>`
+✅ **Assertions:** `FL_ASSERT(condition)`
+✅ **Early returns:** `if (!valid) return false;`
+✅ **Status objects:** Custom result types
+
+## Examples:
+```cpp
+// Good: Using return codes
+bool initializeHardware() {
+    if (!setupPins()) {
+        FL_WARN("Failed to setup pins");
+        return false;
+    }
+    return true;
+}
+
+// Good: Using fl::optional
+fl::optional<float> calculateValue(int input) {
+    if (input < 0) {
+        return fl::nullopt;
+    }
+    return fl::make_optional(sqrt(input));
+}
+```
+""",
+        
+        "std_namespace": """
+# Standard Library Namespace Standards
+
+⚠️ **DO NOT use std:: prefixed functions or headers**
+
+FastLED provides its own STL-equivalent implementations under the `fl::` namespace.
+
+## Common Replacements:
+- ❌ `#include <vector>` → ✅ `#include "fl/vector.h"`
+- ❌ `#include <algorithm>` → ✅ `#include "fl/algorithm.h"`
+- ❌ `std::move()` → ✅ `fl::move()`
+- ❌ `std::vector` → ✅ `fl::vector`
+
+**Always check if there's a `fl::` equivalent in `src/fl/` first!**
+""",
+        
+        "naming": """
+# Naming Conventions
+
+**Simple Objects:** lowercase (e.g., `fl::vec2f`, `fl::point`)
+**Complex Objects:** CamelCase (e.g., `Raster`, `Controller`)
+**Pixel Types:** ALL CAPS (e.g., `CRGB`, `CHSV`, `RGB24`)
+""",
+        
+        "containers": """
+# Container Parameter Standards
+
+**Prefer `fl::span<T>` over `fl::vector<T>` for function parameters**
+
+✅ `void processData(fl::span<const uint8_t> data)`
+❌ `void processData(fl::vector<uint8_t>& data)`
+
+Benefits: automatic conversion, type safety, zero-cost abstraction
+""",
+        
+        "debug": """
+# Debug Printing Standards
+
+**Use `FL_WARN` for debug printing throughout the codebase**
+
+✅ `FL_WARN("Debug message: " << message);`
+❌ `FL_WARN("Value: %d", value);`
+
+Provides unified logging across all platforms and testing environments.
+""",
+        
+        "bindings": """
+# WebAssembly Bindings Warning
+
+🚨 **EXTREMELY CRITICAL: DO NOT modify function signatures in WASM bindings!**
+
+High-risk files:
+- `src/platforms/wasm/js_bindings.cpp`
+- `src/platforms/wasm/ui.cpp`
+- `src/platforms/wasm/active_strip_data.cpp`
+
+Changing signatures causes runtime errors that are extremely difficult to debug.
+"""
+    }
+    
+    if topic == "all":
+        result = "# FastLED C++ Coding Standards\n\n"
+        result += "## 🚨 MOST CRITICAL RULES 🚨\n\n"
+        result += "1. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
+        result += "2. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
+        result += "3. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n\n"
+        
+        for section_name, content in standards.items():
+            result += content + "\n" + ("="*50) + "\n\n"
+    
+    elif topic in standards:
+        result = standards[topic]
+    else:
+        result = f"Unknown topic: {topic}. Available topics: {', '.join(standards.keys())}"
+    
+    return CallToolResult(
+        content=[TextContent(type="text", text=result)]
     )
 
 async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
