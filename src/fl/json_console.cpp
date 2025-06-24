@@ -11,10 +11,10 @@
 
 namespace fl {
 
-JsonConsole::JsonConsole(AvailableCallback availableCallback, 
+JsonConsole::JsonConsole(ReadAvailableCallback ReadAvailableCallback, 
                          ReadCallback readCallback, 
                          WriteCallback writeCallback)
-    : mAvailableCallback(availableCallback)
+    : mReadAvailableCallback(ReadAvailableCallback)
     , mReadCallback(readCallback)
     , mWriteCallback(writeCallback) {
 }
@@ -86,12 +86,12 @@ void JsonConsole::processJsonFromUI(const char* jsonStr) {
 }
 
 void JsonConsole::readInputFromSerial() {
-    if (!mAvailableCallback || !mReadCallback) {
+    if (!mReadAvailableCallback || !mReadCallback) {
         return;
     }
     
     // Read available characters
-    while (mAvailableCallback() > 0) {
+    while (mReadAvailableCallback() > 0) {
         int ch = mReadCallback();
         if (ch == -1) {
             break; // No more data
@@ -275,7 +275,7 @@ void JsonConsole::dump(fl::sstream& out) {
     }
     
     // Callback status
-    out << "Available Callback: " << (mAvailableCallback ? "set" : "null") << "\n";
+    out << "Available Callback: " << (mReadAvailableCallback ? "set" : "null") << "\n";
     out << "Read Callback: " << (mReadCallback ? "set" : "null") << "\n";
     out << "Write Callback: " << (mWriteCallback ? "set" : "null") << "\n";
     

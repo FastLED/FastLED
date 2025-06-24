@@ -26,7 +26,7 @@ namespace fl {
 class JsonConsole {
 public:
     // Callback types for serial interface
-    using AvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())
+    using ReadAvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())
     using ReadCallback = fl::function<int()>;             // Returns next byte (like Serial.read())  
     using WriteCallback = fl::function<void(const char*)>; // Writes string (like Serial.println())
 
@@ -36,7 +36,7 @@ public:
      * @param readCallback Function that reads next byte from input
      * @param writeCallback Function that writes output strings
      */
-    JsonConsole(AvailableCallback availableCallback, 
+    JsonConsole(ReadAvailableCallback availableCallback, 
                 ReadCallback readCallback, 
                 WriteCallback writeCallback);
     
@@ -81,7 +81,7 @@ public:
     
 private:
     // Serial interface callbacks
-    AvailableCallback mAvailableCallback;
+    ReadAvailableCallback mReadAvailableCallback;
     ReadCallback mReadCallback; 
     WriteCallback mWriteCallback;
     
