@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -78,4 +80,3 @@ jobs:
       - name: Check build status
         if: failure()
         run: exit 1
-
