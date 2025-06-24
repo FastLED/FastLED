@@ -67,10 +67,12 @@ constexpr uint16_t calculateCorkscrewHeight(float totalTurns, uint16_t numLeds) 
  * Struct representing gap parameters for corkscrew mapping
  */
 struct Gap {
-    float gap = 0.0f;  // Gap value from 0 to 1, default 0.0f
+    int num_leds = 0;   // Number of LEDs after which gap is activated, 0 = no gap
+    float gap = 0.0f;   // Gap value from 0 to 1, represents percentage of width unit to add
     
     Gap() = default;
-    Gap(float g) : gap(g) {}
+    Gap(float g) : num_leds(0), gap(g) {} // Backwards compatibility constructor
+    Gap(int n, float g) : num_leds(n), gap(g) {} // New constructor with num_leds
     
     // Rule of 5 for POD data
     Gap(const Gap &other) = default;

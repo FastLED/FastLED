@@ -475,3 +475,63 @@ TEST_CASE("Corkscrew Gap struct functionality") {
     REQUIRE(stateWithGap.width > 0);
     REQUIRE(stateWithGap.height > 0);
 }
+
+TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap every 1 LED") {
+    // Test case: 2 LEDs, 1 turn, gap of 1.0f every 1 LED
+    Gap gapEvery1(1, 1.0f); // Gap after every 1 LED, adds full 1.0 width unit
+    Corkscrew::Input input(1.0f, 2, false, gapEvery1); // 1 turn, 2 LEDs
+    Corkscrew corkscrew(input);
+    
+    // Get dimensions - accept whatever height the algorithm produces
+    uint16_t width = corkscrew.cylinder_width();
+    uint16_t height = corkscrew.cylinder_height();
+    
+    FL_WARN("User test dimensions: width=" << width << " height=" << height);
+    
+    // Total turns should still be exactly 1
+    REQUIRE_EQ(input.totalTurns, 1.0f);
+    
+    // Get positions for both LEDs (unwrapped and wrapped)
+    vec2f pos0_unwrapped = corkscrew.at_no_wrap(0); // First LED, no gap yet
+    vec2f pos1_unwrapped = corkscrew.at_no_wrap(1); // Second LED, after gap trigger
+    vec2f pos0_wrapped = corkscrew.at_exact(0); // First LED, wrapped
+    vec2f pos1_wrapped = corkscrew.at_exact(1); // Second LED, wrapped
+    
+    FL_WARN("LED0 unwrapped: " << pos0_unwrapped << ", wrapped: " << pos0_wrapped);
+    FL_WARN("LED1 unwrapped: " << pos1_unwrapped << ", wrapped: " << pos1_wrapped);
+    
+    // Both unwrapped positions should be valid
+    REQUIRE(pos0_unwrapped.x >= 0.0f);
+    REQUIRE(pos0_unwrapped.y >= 0.0f);
+    REQUIRE(pos1_unwrapped.x >= 0.0f);
+    REQUIRE(pos1_unwrapped.y >= 0.0f);
+    
+    // Both wrapped positions should be valid
+    REQUIRE(pos0_wrapped.x >= 0.0f);
+    REQUIRE(pos0_wrapped.y >= 0.0f);
+    REQUIRE(pos1_wrapped.x >= 0.0f);
+    REQUIRE(pos1_wrapped.y >= 0.0f);
+    
+    // First LED should be at or near starting position
+    REQUIRE(pos0_unwrapped.x <= static_cast<float>(width));
+    REQUIRE(pos0_unwrapped.y <= input.totalTurns);
+    
+    // Wrapped positions should be within the cylinder width
+    REQUIRE(pos0_wrapped.x < static_cast<float>(width));
+    REQUIRE(pos1_wrapped.x < static_cast<float>(width));
+    
+    // The key test: total height should not exceed the specified turns
+    float maxHeight = MAX(pos0_unwrapped.y, pos1_unwrapped.y);
+    REQUIRE(maxHeight <= input.totalTurns + 0.1f); // Small tolerance for floating point
+    
+    // LEDs should have different unwrapped positions due to gap
+    bool unwrapped_different = (pos0_unwrapped.x != pos1_unwrapped.x) || (pos0_unwrapped.y != pos1_unwrapped.y);
+    REQUIRE(unwrapped_different);
+    
+    // Test the expected gap behavior: LED1 should be "back at starting position" when wrapped
+    // This means LED1 wrapped x-coordinate should be close to LED0's x-coordinate
+    float x_diff = (pos1_wrapped.x > pos0_wrapped.x) ? 
+                   (pos1_wrapped.x - pos0_wrapped.x) : 
+                   (pos0_wrapped.x - pos1_wrapped.x);
+    REQUIRE(x_diff < 0.1f); // LED1 should wrap back to near the starting x position
+}

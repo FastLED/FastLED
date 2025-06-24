@@ -21,27 +21,49 @@ namespace {
 
 // New helper function to calculate individual LED position
 vec2f calculateLedPositionExtended(uint16_t ledIndex, uint16_t numLeds, float totalTurns, const Gap& gapParams, uint16_t width, uint16_t height) {
-    // Calculate position along the corkscrew (0.0 to 1.0)
-    FL_UNUSED(totalTurns);
-    FL_UNUSED(gapParams);
     FL_UNUSED(height);
 
-    const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
+    // Check if gap feature is active AND will actually be triggered
+    bool gapActive = (gapParams.num_leds > 0 && gapParams.gap > 0.0f && numLeds > static_cast<uint16_t>(gapParams.num_leds));
     
-    // Calculate row (turn) using integer division
-    const uint16_t row = ledIndex / width;
+    if (!gapActive) {
+        // Original behavior when no gap or gap never triggers
+        const float ledProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
+        const uint16_t row = ledIndex / width;
+        const uint16_t remainder = ledIndex % width;
+        const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
+        const float width_pos = ledProgress * numLeds;
+        const float height_pos = static_cast<float>(row) + alpha;
+        return vec2f(width_pos, height_pos);
+    }
     
-    // Calculate remainder as position within the row
-    const uint16_t remainder = ledIndex % width;
+    // Simple gap calculation
+    // How many complete gap intervals has this LED passed?
+    int gapIntervals = 0;
+    if (ledIndex >= static_cast<uint16_t>(gapParams.num_leds)) {
+        gapIntervals = ledIndex / static_cast<uint16_t>(gapParams.num_leds);
+    }
     
-    // Convert remainder to alpha value (0.0 to 1.0) against width
-    const float alpha = static_cast<float>(remainder) / static_cast<float>(width);
+    // Calculate the total gap adjustment for this LED
+    float cumulativeGap = static_cast<float>(gapIntervals) * gapParams.gap;
     
-    // Width position uses original calculation
-    const float width_pos = ledProgress * numLeds;
+    // Calculate the total gap that will be added across all LEDs
+    int totalGapIntervals = (numLeds - 1) / gapParams.num_leds;
+    float totalGap = static_cast<float>(totalGapIntervals) * gapParams.gap;
     
-    // Height is the row number plus the alpha interpolation
-    const float height_pos = static_cast<float>(row) + alpha;
+    // Base position without any gaps (0.0 to 1.0 based on LED index)
+    float baseProgress = static_cast<float>(ledIndex) / static_cast<float>(numLeds - 1);
+    
+    // Add the cumulative gap to stretch the width
+    float stretchedProgress = baseProgress + (cumulativeGap / static_cast<float>(width));
+    
+    // Scale everything back down so the total still equals totalTurns
+    float scaleFactor = 1.0f / (1.0f + totalGap / static_cast<float>(width));
+    float finalProgress = stretchedProgress * scaleFactor;
+    
+    // Calculate final positions
+    float width_pos = finalProgress * totalTurns * static_cast<float>(width);
+    float height_pos = finalProgress * totalTurns;
     
     return vec2f(width_pos, height_pos);
 }
