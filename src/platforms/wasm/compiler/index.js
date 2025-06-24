@@ -374,7 +374,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
   console.log('Calling setup function...');
 
   const fileManifest = getFileManifestJson(filesJson, frame_rate);
-  moduleInstance._fastled_declare_files(JSON.stringify(fileManifest));
+  moduleInstance.cwrap('fastled_declare_files', null, ['string'])(JSON.stringify(fileManifest));
   console.log('Files JSON:', filesJson);
 
   const processFile = async (file) => {

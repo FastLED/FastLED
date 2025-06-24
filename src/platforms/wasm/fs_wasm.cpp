@@ -32,7 +32,6 @@
 // ⚠️⚠️⚠️ REMEMBER: File system errors prevent resource loading! ⚠️⚠️⚠️
 
 #include <emscripten.h>
-#include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
@@ -299,9 +298,9 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     return true;
 }
 
-EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
+EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
     fl::JsonDocument doc;
-    fl::parseJson(jsonStr.c_str(), &doc);
+    fl::parseJson(jsonStr, &doc);
     auto files = doc["files"];
     if (files.isNull()) {
         return;
@@ -330,13 +329,7 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
 
 } // extern "C"
 
-EMSCRIPTEN_BINDINGS(_fastled_declare_files) {
-    emscripten::function("_fastled_declare_files", &fastled_declare_files);
-    // emscripten::function("jsAppendFile",
-    // emscripten::select_overload<bool(const char*, const uint8_t*,
-    // size_t)>(&jsAppendFile), emscripten::allow_raw_pointer<arg<0>,
-    // arg<1>>());
-};
+
 
 namespace fl {
 // Platforms eed to implement this to create an instance of the filesystem.
