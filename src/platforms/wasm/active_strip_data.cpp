@@ -6,10 +6,6 @@
 //
 // 🚨 THIS FILE CONTAINS C++ TO JAVASCRIPT STRIP DATA BINDINGS 🚨
 //
-// CONFIGURATION: Define FASTLED_WASM_USE_CCALL to use ccall instead of embind
-// - Default (undefined): Uses EMSCRIPTEN_BINDINGS with ActiveStripData class
-// - FASTLED_WASM_USE_CCALL: Uses extern "C" getStripPixelData() function
-//
 // DO NOT MODIFY FUNCTION SIGNATURES WITHOUT UPDATING CORRESPONDING JAVASCRIPT CODE!
 //
 // This file manages the critical bridge for LED strip pixel data between C++ and JavaScript.
@@ -38,12 +34,12 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 
-#ifndef FASTLED_WASM_USE_CCALL
+
 // embind headers only needed for original implementation
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include <emscripten/html5.h>
-#endif
+
 
 #include "fl/map.h"
 #include "fl/singleton.h"
@@ -72,7 +68,7 @@ void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {
     mScreenMap.update(id, screenmap);
 }
 
-#ifndef FASTLED_WASM_USE_CCALL
+
 emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
     // Efficient, zero copy conversion from internal data to JavaScript.
     SliceUint8 stripData;
@@ -85,7 +81,6 @@ emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
     }
     return emscripten::val::undefined();
 }
-#endif
 
 Str ActiveStripData::infoJsonString() {
     FLArduinoJson::JsonDocument doc;
@@ -110,8 +105,6 @@ __attribute__((constructor)) void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
 
-// Define FASTLED_WASM_USE_CCALL to use ccall instead of embind
-#ifdef FASTLED_WASM_USE_CCALL
 
 // ccall implementation - single exported function
 // JavaScript usage:
@@ -136,7 +129,7 @@ uint8_t* getStripPixelData(int stripIndex, int* outSize) {
     return nullptr;
 }
 
-#else
+
 
 // Original embind implementation  
 // JavaScript usage:
@@ -153,7 +146,6 @@ EMSCRIPTEN_BINDINGS(engine_events_constructors) {
         .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
 }
 
-#endif // FASTLED_WASM_USE_CCALL
 
 } // namespace fl
 

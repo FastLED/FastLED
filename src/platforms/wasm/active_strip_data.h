@@ -10,11 +10,11 @@
 #include "fl/slice.h"
 #include "strip_id_map.h"
 
-#ifndef FASTLED_WASM_USE_CCALL
+
 namespace emscripten {
 class val;
 }
-#endif
+
 
 namespace fl {
 
@@ -29,9 +29,9 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     static ActiveStripData &Instance();
     void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
     void updateScreenMap(int id, const fl::ScreenMap &screenmap);
-#ifndef FASTLED_WASM_USE_CCALL
+
     emscripten::val getPixelData_Uint8(int stripIndex);
-#endif
+
     fl::string infoJsonString();
 
     const StripDataMap &getData() const { return mStripMap; }
