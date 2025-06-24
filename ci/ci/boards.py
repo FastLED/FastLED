@@ -44,6 +44,7 @@ class Board:
     board_build_filesystem_size: str | None = None
     build_flags: list[str] | None = None  # Reserved for future use.
     defines: list[str] | None = None
+    customsdks: list[str] | None = None
     board_partitions: str | None = None  # Reserved for future use.
 
     def __post_init__(self) -> None:
