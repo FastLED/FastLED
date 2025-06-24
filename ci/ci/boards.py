@@ -44,6 +44,7 @@ class Board:
     board_build_filesystem_size: str | None = None
     build_flags: list[str] | None = None  # Reserved for future use.
     defines: list[str] | None = None
+    customsdks: list[str] | None = None
     board_partitions: str | None = None  # Reserved for future use.
 
     def __post_init__(self) -> None:
@@ -76,6 +77,9 @@ class Board:
         if self.defines:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
+        if self.customsdks:
+            for customsdk in self.customsdks:
+                options.append(f"custom_sdkconfig={customsdk}")
         return out
 
     def __repr__(self) -> str:
@@ -161,6 +165,7 @@ ESP32_C2_DEVKITM_1 = Board(
     use_pio_run=True,
     platform="https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip",
     defines=["CONFIG_IDF_TARGET_ESP32C2=1"],
+    customsdks=["CONFIG_IDF_TARGET=\"esp32c2\""],
 )
 
 ESP32_C3_DEVKITM_1 = Board(

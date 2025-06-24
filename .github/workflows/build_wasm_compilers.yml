@@ -4,29 +4,29 @@ on:
     push:
       branches:
         - master
-    paths:
-      - 'src/**'
-      - 'examples/wasm/**'
-      - 'examples/WasmScreenCoords/**'
-      - 'ci/**'
-      - '.github/workflows/**'
-      - 'CMakeLists.txt'
-      - 'platformio.ini'
-      - 'library.json'
-      - 'library.properties'
+      paths:
+        - 'src/**'
+        - 'examples/wasm/**'
+        - 'examples/WasmScreenCoords/**'
+        - 'ci/**'
+        - '.github/workflows/**'
+        - 'CMakeLists.txt'
+        - 'platformio.ini'
+        - 'library.json'
+        - 'library.properties'
     pull_request_target:
       branches:
         - master
-    paths:
-      - 'src/**'
-      - 'examples/wasm/**'
-      - 'examples/WasmScreenCoords/**'
-      - 'ci/**'
-      - '.github/workflows/**'
-      - 'CMakeLists.txt'
-      - 'platformio.ini'
-      - 'library.json'
-      - 'library.properties'
+      paths:
+        - 'src/**'
+        - 'examples/wasm/**'
+        - 'examples/WasmScreenCoords/**'
+        - 'ci/**'
+        - '.github/workflows/**'
+        - 'CMakeLists.txt'
+        - 'platformio.ini'
+        - 'library.json'
+        - 'library.properties'
   
 
 jobs:
