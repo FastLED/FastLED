@@ -132,6 +132,22 @@ Corkscrew::State Corkscrew::generateState(const Corkscrew::Input &input) {
 }
 
 Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
+    if (mCachingEnabled) {
+        // Use cache if enabled
+        initializeCache();
+        
+        // Convert float index to integer for cache lookup
+        size_t cache_index = static_cast<size_t>(i);
+        if (cache_index < mTileCache.size()) {
+            return mTileCache[cache_index];
+        }
+    }
+    
+    // Fall back to dynamic calculation if cache disabled or index out of bounds
+    return calculateTileAtWrap(i);
+}
+
+Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
     // This is a splatted pixel, but wrapped around the cylinder.
     // This is useful for rendering the corkscrew in a cylindrical way.
     Tile2x2_u8 tile = at_splat_extrapolate(i);
@@ -148,6 +164,29 @@ Tile2x2_u8_wrap Corkscrew::at_wrap(float i) const {
         }
     }
     return Tile2x2_u8_wrap(data);
+}
+
+void Corkscrew::setCachingEnabled(bool enabled) {
+    if (!enabled && mCachingEnabled) {
+        // Caching was enabled, now disabling - clear the cache
+        mTileCache.clear();
+        mCacheInitialized = false;
+    }
+    mCachingEnabled = enabled;
+}
+
+void Corkscrew::initializeCache() const {
+    if (!mCacheInitialized && mCachingEnabled) {
+        // Initialize cache with tiles for each LED position
+        mTileCache.resize(mInput.numLeds);
+        
+        // Populate cache lazily
+        for (size_t i = 0; i < mInput.numLeds; ++i) {
+            mTileCache[i] = calculateTileAtWrap(static_cast<float>(i));
+        }
+        
+        mCacheInitialized = true;
+    }
 }
 
 // New rectangular buffer functionality implementation

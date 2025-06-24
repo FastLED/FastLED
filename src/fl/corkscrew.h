@@ -217,6 +217,9 @@ class Corkscrew {
     int16_t cylinder_width() const { return mState.width; }
     int16_t cylinder_height() const { return mState.height; }
 
+    // Caching control
+    void setCachingEnabled(bool enabled);
+
     // New functionality: rectangular buffer and drawing
     // Get access to the rectangular buffer (lazily initialized)
     fl::vector<CRGB>& getBuffer();
@@ -259,6 +262,12 @@ class Corkscrew {
     
     // Initialize the rectangular buffer if not already done
     void initializeBuffer() const;
+    
+    // Initialize the cache if not already done and caching is enabled
+    void initializeCache() const;
+    
+    // Calculate the tile at position i without using cache
+    Tile2x2_u8_wrap calculateTileAtWrap(float i) const;
 
     Input mInput; // The input parameters defining the corkscrew
     State mState; // The resulting cylindrical mapping
@@ -266,6 +275,11 @@ class Corkscrew {
     // Rectangular buffer for drawing (lazily initialized)
     mutable fl::vector<CRGB> mCorkscrewLeds;
     mutable bool mBufferInitialized = false;
+    
+    // Caching for Tile2x2_u8_wrap objects
+    mutable fl::vector<Tile2x2_u8_wrap> mTileCache;
+    mutable bool mCacheInitialized = false;
+    bool mCachingEnabled = true; // Default to enabled
 };
 
 } // namespace fl

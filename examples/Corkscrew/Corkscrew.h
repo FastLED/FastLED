@@ -80,6 +80,7 @@ UISlider speed("Speed", 0.1f, 0.01f, 1.0f, 0.01f);
 
 UICheckbox allWhite("All White", false);
 UICheckbox splatRendering("Splat Rendering", true);
+UICheckbox cachingEnabled("Enable Tile Caching", true);
 
 // CRGB leds[NUM_LEDS];
 
@@ -128,6 +129,9 @@ void setup() {
     // Set the corkscrew screen map for the controller
     // This allows the web interface to display the actual corkscrew shape
     controller->setScreenMap(corkscrewScreenMap);
+    
+    // Initialize caching based on UI setting
+    corkscrew.setCachingEnabled(cachingEnabled.value());
 }
 
 void loop() {
@@ -136,6 +140,13 @@ void loop() {
     pos += speed.value();
     if (pos > corkscrew.size() - 1) {
         pos = 0; // Reset to the beginning
+    }
+
+    // Update caching setting if it changed
+    static bool lastCachingState = cachingEnabled.value();
+    if (lastCachingState != cachingEnabled.value()) {
+        corkscrew.setCachingEnabled(cachingEnabled.value());
+        lastCachingState = cachingEnabled.value();
     }
 
     if (allWhite) {
