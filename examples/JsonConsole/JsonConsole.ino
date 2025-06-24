@@ -1,5 +1,6 @@
 #include <FastLED.h>
 #include "fl/json_console.h"
+#include "fl/scoped_ptr.h"
 
 #define NUM_LEDS 60
 #define DATA_PIN 2
@@ -9,8 +10,8 @@ CRGB leds[NUM_LEDS];
 // Create a UI slider for brightness control
 fl::UISlider brightness("brightness", 128, 0, 255);
 
-// JsonConsole for interactive control
-fl::JsonConsole* console = nullptr;
+// JsonConsole for interactive control (using scoped_ptr for automatic cleanup)
+fl::scoped_ptr<fl::JsonConsole> console;
 
 void setup() {
     Serial.begin(115200);
@@ -22,11 +23,11 @@ void setup() {
     
     // Create JsonConsole with Serial interface
     // In production, this would use Serial.available, Serial.read, Serial.println
-    console = new fl::JsonConsole(
+    console.reset(new fl::JsonConsole(
         []() -> int { return Serial.available(); },
         []() -> int { return Serial.read(); },
         [](const char* msg) { Serial.println(msg); }
-    );
+    ));
     
     // Initialize the console
     console->init();

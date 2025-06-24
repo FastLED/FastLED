@@ -19,6 +19,25 @@ JsonConsole::JsonConsole(ReadAvailableCallback ReadAvailableCallback,
     , mWriteCallback(writeCallback) {
 }
 
+JsonConsole::~JsonConsole() {
+    // Clear input buffer
+    mInputBuffer.clear();
+    
+    // Clear component name mappings
+    mComponentNameToId.clear();
+    
+    // Clear callbacks to prevent any dangling references
+    mReadAvailableCallback = fl::function<int()>{};
+    mReadCallback = fl::function<int()>{};
+    mWriteCallback = fl::function<void(const char*)>{};
+    
+    // Clear the update engine state function
+    mUpdateEngineState = fl::function<void(const char*)>{};
+    
+    // Note: We don't clear the global JsonUI manager since it might be shared
+    // with other components. The manager will handle cleanup automatically.
+}
+
 void JsonConsole::init() {
     // Set up JsonUI handlers - we capture component data but don't send it anywhere
     mUpdateEngineState = setJsonUiHandlers([this](const char* jsonStr) {

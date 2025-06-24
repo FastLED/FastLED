@@ -41,6 +41,12 @@ public:
                 WriteCallback writeCallback);
     
     /**
+     * Destructor - performs cleanup of internal state
+     * Clears input buffer and component mappings
+     */
+    ~JsonConsole();
+    
+    /**
      * Initialize the console with the JsonUI system
      * This sets up the JsonUI handlers and gets the input function
      */
