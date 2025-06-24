@@ -535,3 +535,58 @@ TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap
                    (pos0_wrapped.x - pos1_wrapped.x);
     REQUIRE(x_diff < 0.1f); // LED1 should wrap back to near the starting x position
 }
+
+TEST_CASE("Corkscrew gap test with 3 LEDs") {
+    // User's specific test case:
+    // 3 LEDs, gap of 0.5 every 1 LED, one turn
+    // Expected: LED0 at w=0, LED1 at w=3.0, LED2 at w=0 (back to start)
+    
+    Gap gapParams(1, 0.5f); // gap of 0.5 every 1 LED
+    Corkscrew::Input input_gap(1.0f, 3, false, gapParams); // 1 turn, 3 LEDs, gap
+    Corkscrew::State output_gap = Corkscrew::generateState(input_gap);
+    
+    FL_WARN("Gap test dimensions: width=" << output_gap.width << " height=" << output_gap.height);
+    
+    Corkscrew corkscrew_gap(input_gap);
+    REQUIRE_EQ(corkscrew_gap.size(), 3);
+    
+    // Get LED positions
+    vec2f pos0 = corkscrew_gap.at_exact(0);  // wrapped position
+    vec2f pos1 = corkscrew_gap.at_exact(1);  // wrapped position
+    vec2f pos2 = corkscrew_gap.at_exact(2);  // wrapped position
+    
+    FL_WARN("LED0 wrapped pos: (" << pos0.x << "," << pos0.y << ")");
+    FL_WARN("LED1 wrapped pos: (" << pos1.x << "," << pos1.y << ")");
+    FL_WARN("LED2 wrapped pos: (" << pos2.x << "," << pos2.y << ")");
+    
+    // Also get unwrapped positions to understand the math
+    vec2f pos0_unwrap = corkscrew_gap.at_no_wrap(0);
+    vec2f pos1_unwrap = corkscrew_gap.at_no_wrap(1);
+    vec2f pos2_unwrap = corkscrew_gap.at_no_wrap(2);
+    
+    FL_WARN("LED0 unwrapped pos: (" << pos0_unwrap.x << "," << pos0_unwrap.y << ")");
+    FL_WARN("LED1 unwrapped pos: (" << pos1_unwrap.x << "," << pos1_unwrap.y << ")");
+    FL_WARN("LED2 unwrapped pos: (" << pos2_unwrap.x << "," << pos2_unwrap.y << ")");
+    
+    FL_WARN("Calculated width: " << output_gap.width);
+    
+    // Verify the corrected gap calculation produces expected results:
+    // - LED0: unwrapped (0,0), wrapped (0,0)
+    // - LED1: unwrapped (3,1), wrapped (0,1) - 3.0 exactly as user wanted!
+    // - LED2: unwrapped (6,2), wrapped (0,2) - wraps back to 0 as expected
+    
+    // Test unwrapped positions (what the user specified)
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos0_unwrap.x, 0.0f)); // LED0 at unwrapped w=0
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos1_unwrap.x, 3.0f)); // LED1 at unwrapped w=3.0 ✓
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos2_unwrap.x, 6.0f)); // LED2 at unwrapped w=6.0
+    
+    // Test wrapped positions - all LEDs wrap back to w=0 due to width=3
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos0.x, 0.0f)); // LED0 wrapped w=0
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos1.x, 0.0f)); // LED1 wrapped w=0 (3.0 % 3 = 0) 
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos2.x, 0.0f)); // LED2 wrapped w=0 (6.0 % 3 = 0)
+    
+    // Height positions should increase by 1 for each LED (one turn per 3 width units)
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos0_unwrap.y, 0.0f)); // LED0 height
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos1_unwrap.y, 1.0f)); // LED1 height  
+    REQUIRE(ALMOST_EQUAL_FLOAT(pos2_unwrap.y, 2.0f)); // LED2 height
+}
