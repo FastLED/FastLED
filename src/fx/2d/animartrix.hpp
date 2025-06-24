@@ -128,7 +128,7 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
   public:
     FastLEDANIMartRIX(Animartrix *_data) {
         this->data = _data;
-        this->init(data->getWidth(), data->getWidth());
+        this->init(data->getWidth(), data->getHeight());
     }
 
     void setPixelColor(int x, int y, CRGB pixel) {
