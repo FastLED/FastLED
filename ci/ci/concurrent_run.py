@@ -35,6 +35,7 @@ class ConcurrentRunArgs:
     examples: list[Path]
     skip_init: bool
     defines: list[str]
+    customsdk: str | None
     extra_packages: list[str]
     libs: list[str] | None
     build_dir: str | None
@@ -53,6 +54,7 @@ def concurrent_run(
     examples = args.examples
     skip_init = args.skip_init
     defines = args.defines
+    customsdk = args.customsdk
     extra_packages = args.extra_packages
     build_dir = args.build_dir
     extra_scripts = args.extra_scripts
@@ -72,6 +74,7 @@ def concurrent_run(
     create_build_dir(
         board=first_project,
         defines=defines,
+        customsdk=customsdk,
         no_install_deps=skip_init,
         extra_packages=extra_packages,
         build_dir=build_dir,
@@ -96,6 +99,7 @@ def concurrent_run(
                 create_build_dir,
                 board,
                 defines,
+                customsdk,
                 skip_init,
                 extra_packages,
                 build_dir,
