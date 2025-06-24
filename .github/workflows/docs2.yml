@@ -1,0 +1,57 @@
+name: docs2
+
+on:
+  workflow_dispatch:
+  release:
+    types: released
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+
+      - name: Fetch Repository Reference Info
+        id: repo-info
+        run: |
+          git fetch --prune --unshallow --tags
+          RELEASE_TAG=3.9.15
+          LATEST_TAG=$(git tag | grep -E '^[0-9]' | sort -V | tail -1)
+          GIT_SHA_SHORT=$(sed 's/\(.\{7\}\).*/\1/' <<< "$GITHUB_SHA")
+          PROJECT_NUMBER=${RELEASE_TAG:-${LATEST_TAG:-$GIT_SHA_SHORT}}
+          COMMIT_MSG=$PROJECT_NUMBER
+          if [ "$PROJECT_NUMBER" != "$GIT_SHA_SHORT" ]; then COMMIT_MSG+=" ($GITHUB_SHA)"; fi
+          echo "The project number is \"$PROJECT_NUMBER\" and the commit message is \"$COMMIT_MSG\""
+          echo "project-number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
+          echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+
+      - name: Install UV
+        run: pip install uv
+
+      - name: Update docs with project number
+        working-directory: ./docs
+        run: |
+          sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
+
+
+      - name: Run Docs script
+        run: |
+          uv run ci/docs.py
+
+      - name: Deploy Docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./docs/html
+          destination_dir: docs
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          full_commit_message: Update docs for ${{ steps.repo-info.outputs.commit-message }}
+          # DANGER - NEVER USE FORCE ORPHAN - DOCS IS NOT THE ONLY THING IN THIS BRANCH.
+          #force_orphan: true  # Keep the large documentation from filling up the git history

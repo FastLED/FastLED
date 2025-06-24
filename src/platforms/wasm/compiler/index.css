@@ -1,0 +1,735 @@
+body {
+    background-color: #121212;
+    /* Dark gray background */
+    color: #E0E0E0;
+    /* Light gray text */
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto Condensed', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    opacity: 0;
+    /* Initially hide the content */
+    transition: opacity 0.5s ease-in;
+    /* Fade-in effect */
+}
+
+#ui-controls {
+    flex: 0 0 auto;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 640px;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+#ui-controls.active {
+    display: flex;
+}
+
+/* UI Group Styling */
+.ui-group {
+    width: 100%;
+    margin: 15px 0;
+    background-color: #1A1A1A;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.ui-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background-color: #2A2A2A;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid #333;
+    transition: background-color 0.2s ease;
+}
+
+.ui-group-header:hover {
+    background-color: #333;
+}
+
+.ui-group-title {
+    font-weight: 600;
+    font-size: 1.1em;
+    color: #E0E0E0;
+    text-transform: capitalize;
+    letter-spacing: 0.5px;
+}
+
+.ui-group-toggle {
+    font-size: 1.2em;
+    color: #B0B0B0;
+    transition: transform 0.3s ease;
+}
+
+.ui-group.collapsed .ui-group-toggle {
+    transform: rotate(-90deg);
+}
+
+.ui-group-content {
+    padding: 16px;
+    transition: all 0.3s ease;
+    max-height: 1000px;
+    overflow: hidden;
+}
+
+.ui-group.collapsed .ui-group-content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Ungrouped items container */
+.ui-ungrouped {
+    width: 100%;
+}
+
+.ui-control {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+/* Special styling for controls within groups */
+.ui-group .ui-control {
+    margin: 8px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ui-group .ui-control:last-child {
+    border-bottom: none;
+}
+
+.ui-control input[type="range"] {
+    width: 100%;
+    margin: 0;
+}
+
+.ui-control label {
+    min-width: 120px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+h1 {
+    font-size: 6em;
+    margin-top: 10vh;
+    margin-bottom: 40px;
+    text-align: center;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    position: relative;
+    animation: continuousGlow 4s ease-in-out infinite;
+}
+
+@keyframes continuousGlow {
+    0% {
+        text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+    }
+
+    25% {
+        text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+    }
+
+    50% {
+        text-shadow: 0 0 30px rgba(224, 224, 224, 0.5);
+    }
+
+    75% {
+        text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+    }
+
+    100% {
+        text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+    }
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px; /* Adjust this value as needed */
+    margin: 20px auto;
+}
+
+#top-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Wide screen desktop layout - UI controls on the right */
+@media (min-width: 1200px) {
+    #main-container {
+        max-width: 1400px; /* Increase max width for wide screens */
+    }
+    
+    #top-row {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 40px; /* Space between canvas and UI controls */
+        justify-content: center;
+    }
+    
+    #canvas-container {
+        flex: 0 0 auto;
+        order: 1; /* Canvas on the left */
+    }
+    
+    #ui-controls {
+        flex: 0 0 auto;
+        order: 2; /* UI controls on the right */
+        margin-top: 0; /* Remove top margin since we're side-by-side */
+        max-width: 400px; /* Limit width of UI controls */
+        min-width: 320px; /* Ensure minimum width for usability */
+        align-self: flex-start; /* Align to top instead of center */
+        height: fit-content; /* Don't stretch to full height */
+    }
+    
+    /* Adjust UI groups for better side layout */
+    .ui-group {
+        margin: 10px 0; /* Reduce vertical margin */
+    }
+    
+    /* Make sure canvas maintains its aspect ratio in wide layout */
+    #myCanvas {
+        max-width: 640px; /* Maintain reasonable size on wide screens */
+        max-height: 640px;
+        width: auto;
+        height: auto;
+    }
+}
+
+#canvas-container {
+    flex: 0 0 auto;
+}
+
+#myCanvas {
+    background-color: #1E1E1E;
+    width: 320px;
+    height: 320px;
+    image-rendering: pixelated;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+#fastled-description {
+    width: 100%;
+    max-width: 1000px; /* Match the max-width of main-container */
+    box-sizing: border-box;
+    text-align: left;
+    margin: 10px auto; /* Center horizontally */
+    padding: 0 20px;
+    color: #B0B0B0;  /* Changed from #666 to a lighter gray for better contrast */
+    font-size: 1.1em;
+}
+
+#output {
+    font-size: 1em;
+    padding: 20px;
+    white-space: pre-wrap;
+    width: 100%;
+    background-color: #1E1E1E;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    margin: 0;  /* Add this line to remove margins */
+}
+
+.ui-control {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ui-control label {
+    margin-right: 10px;
+    /* Adjust space between label and checkbox */
+}
+
+.ui-control input[type="checkbox"] {
+    cursor: pointer;
+    transform: scale(1.5);
+    /* Optionally, scale the checkbox for better visibility */
+}
+
+.ui-control button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #1E90FF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.ui-control button:active,
+.ui-control button.active {
+    background-color: #0066CC;
+}
+
+.ui-control input[type="number"] {
+    width: 100%;
+    padding: 5px;
+    margin: 0;
+    font-size: 16px;
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+/* Dropdown (Select) Styling */
+.ui-control select {
+    width: 100%;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 16px;
+    font-family: 'Roboto Condensed', sans-serif;
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    
+    /* Custom arrow styling */
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0E0E0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+.ui-control select:hover {
+    border-color: #666;
+    background-color: #333;
+}
+
+.ui-control select:focus {
+    outline: none;
+    border-color: #1E90FF;
+    box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+}
+
+.ui-control select:active {
+    background-color: #333;
+}
+
+/* Option styling for dark theme */
+.ui-control select option {
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    padding: 8px 12px;
+}
+
+.ui-control select option:hover {
+    background-color: #1E90FF;
+}
+
+.ui-control select option:checked {
+    background-color: #1E90FF;
+    color: white;
+}
+
+/* Firefox-specific option styling */
+@-moz-document url-prefix() {
+    .ui-control select option {
+        background-color: #2E2E2E;
+        color: #E0E0E0;
+    }
+    
+    .ui-control select option:checked {
+        background-color: #1E90FF;
+    }
+}
+
+.ui-control button {
+    width: 100%;
+    margin: 0;
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #1E1E1E;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    max-height: 80vh;
+    width: 80%;
+    max-width: 800px;
+    overflow-y: auto;
+}
+
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+    z-index: 999;
+    transition: opacity 0.2s ease;
+}
+
+#output-popup {
+    /* disable scroll bars */
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+#output {
+    margin: 0;
+    padding: 10px;
+}
+
+.toast-notification {
+    position: fixed;
+    top: 33vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(50, 50, 50, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.toast-notification-show {
+    opacity: 1;
+    transition: opacity 0.1s ease-in;
+}
+
+.toast-notification-hide {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Audio Control Styling */
+.audio-control {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.audio-upload-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #1E90FF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s ease-in-out;
+    width: 100%;
+    margin: 5px 0;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+.audio-upload-button:hover {
+    background-color: #0066CC;
+}
+
+.audio-player {
+    width: 100%;
+    height: 36px;
+    margin-top: 10px;
+    background-color: #2E2E2E;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid #444;
+}
+
+/* Custom styling for audio controls */
+audio::-webkit-media-controls-panel {
+    background-color: #2E2E2E;
+}
+
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display {
+    color: #E0E0E0;
+}
+
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button {
+    filter: invert(100%);
+}
+
+#canvas-container {
+    position: relative;
+}
+
+@keyframes labelFade {
+    0% { opacity: 0; }
+    3% { opacity: 0; }  /* Quick fade in (0.25s) */
+    10% { opacity: 1; } /* Hold for 0.5s */
+    80% { opacity: 1; }  /* Hold for 1s */
+    100% { opacity: 0; } /* Slow fade out (2s) */
+}
+
+#canvas-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(50, 50, 50, .5);
+    color: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 14px;
+    pointer-events: none;
+    opacity: 0;  /* Start hidden */
+    z-index: 10;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Add a new class for when we want to trigger the animation */
+#canvas-label.show-animation {
+    animation: labelFade 10s ease-out forwards;
+    animation-delay: 0;  /* Delay animation start */
+}
+
+/* Gear menu styling */
+#gear-menu-container {
+    position: absolute;
+    top: -15px;
+    right: -45px;
+    z-index: 100;
+}
+
+.gear-button {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background-color: rgba(30, 30, 30, 0.9);
+    color: #E0E0E0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.gear-button:hover {
+    background-color: rgba(50, 50, 50, 0.9);
+    color: #FFFFFF;
+    transform: rotate(90deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.gear-button:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+.gear-button svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease;
+}
+
+.gear-dropdown {
+    position: absolute;
+    top: 45px;
+    right: 0;
+    min-width: 160px;
+    background-color: #1E1E1E;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+}
+
+.gear-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.gear-dropdown-item {
+    padding: 12px 16px;
+    color: #E0E0E0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gear-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.gear-dropdown-item:hover {
+    background-color: #2A2A2A;
+    color: #1E90FF;
+    padding-left: 20px;
+}
+
+.gear-dropdown-item:active {
+    background-color: #333;
+}
+
+/* Add rounded corners to first and last items */
+.gear-dropdown-item:first-child {
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.gear-dropdown-item:last-child {
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+}
+
+/* Markdown styling for descriptions */
+#fastled-description h1,
+#fastled-description h2,
+#fastled-description h3 {
+    color: #E0E0E0;
+    margin: 1.2em 0 0.6em 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+#fastled-description h1 {
+    font-size: 1.8em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 0.3em;
+}
+
+#fastled-description h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.2em;
+}
+
+#fastled-description h3 {
+    font-size: 1.3em;
+}
+
+#fastled-description p {
+    margin: 0.8em 0;
+    line-height: 1.6;
+    color: #B0B0B0;
+}
+
+#fastled-description strong {
+    color: #E0E0E0;
+    font-weight: 600;
+}
+
+#fastled-description em {
+    color: #D0D0D0;
+    font-style: italic;
+}
+
+#fastled-description code {
+    background-color: #2A2A2A;
+    color: #F0F0F0;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+    border: 1px solid #444;
+}
+
+#fastled-description pre {
+    background-color: #1A1A1A;
+    color: #E0E0E0;
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+    border: 1px solid #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#fastled-description pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    font-size: 0.9em;
+    color: inherit;
+}
+
+#fastled-description a {
+    color: #1E90FF;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+#fastled-description a:hover {
+    color: #66B3FF;
+    border-bottom-color: #66B3FF;
+}
+
+#fastled-description ul,
+#fastled-description ol {
+    margin: 0.8em 0;
+    padding-left: 2em;
+    color: #B0B0B0;
+}
+
+#fastled-description li {
+    margin: 0.4em 0;
+    line-height: 1.5;
+}
+
+#fastled-description ul li {
+    list-style-type: disc;
+}
+
+#fastled-description ol li {
+    list-style-type: decimal;
+}
+
+/* Add some breathing room between elements */
+#fastled-description > *:first-child {
+    margin-top: 0;
+}
+
+#fastled-description > *:last-child {
+    margin-bottom: 0;
+}

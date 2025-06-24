@@ -1,0 +1,12 @@
+All of the fonts here are BETA PREVIEW.
+
+If you choose to use these fonts, keep in mind they will break in future versions until this
+api stabalizes.
+
+
+For example, they are missing mapping missing mapping functions to convert ascii symbols to the bit
+patterns which can be applied to an LED strip array.
+
+Therefore, if you want to use these fonts then it's STRONGLY
+encouraged that you just copy them to your own project. If you bind to these headers, then you are on your own
+to fix you project when they change.

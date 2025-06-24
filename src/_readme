@@ -1,0 +1,21 @@
+This is the root folder of FastLED.
+
+Because of the way the Arduino IDE works, every header file put into this
+root folder will become available to all other libraries.
+
+This created horrible problems with header name collisions. Therefore, we mandate that
+all new headers and cpp files that would have gone into this root folder, must now go
+into the fl/ folder. All new classes, function etc must be placed into the fl namespace.
+
+There will be a longer term migration to move all root-wise fastled code into the fl namespace with operations to bring those names into the global space, selectively.
+
+For example:
+
+
+**future example of how CRGB should be structured:**
+```
+// crgb.h -> fl/crgb.h
+//
+#include "fl/crgb.h"
+using fl::CRGB;
+```

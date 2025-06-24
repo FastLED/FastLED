@@ -1,0 +1,61 @@
+{
+    "build": {
+        "arduino": {
+            "ldscript": "linker_script.ld",
+            "flash_layout": "100_0"
+        },
+        "extra_flags": "-DARDUINO_GIGA -DARDUINO_GIGA_PINS -DGIGA_PINS -DGIGA -DCM4_BINARY_START=0x60000000 -DCM4_BINARY_END=0x60040000 -DCM4_RAM_END=0x60080000",
+        "core": "arduino",
+        "cpu": "cortex-m7",
+        "f_cpu": "480000000L",
+        "mcu": "stm32h747xih6",
+        "variant": "GIGA",
+        "product_line": "STM32H747xx",
+        "hwids": [
+            [
+                "0x2341",
+                "0x0266"
+            ],
+            [
+                "0x2341",
+                "0x0366"
+            ],
+            [
+                "0x2341",
+                "0x0466"
+            ]
+        ]
+    },
+    "connectivity": [
+        "bluetooth",
+        "wifi"
+    ],
+    "debug": {
+        "jlink_device": "STM32H747XI_M7",
+        "openocd_target": "stm32h7x_dual_bank"
+    },
+    "frameworks": [
+        "arduino"
+    ],
+    "name": "Arduino Giga R1 Wifi",
+    "upload": {
+        "_maximum_ram_size": 294248,
+        "_maximum_size": 1048576,
+        "maximum_ram_size": 523624,
+        "maximum_size": 1966080,
+        "protocol": "dfu",
+        "protocols": [
+            "cmsis-dap",
+            "dfu",
+            "jlink",
+            "stlink",
+            "mbed"
+        ],
+        "require_upload_port": true,
+        "use_1200bps_touch": true,
+        "wait_for_upload_port": true,
+        "offset_address": "0x08100000"
+    },
+    "url": "https://docs.arduino.cc/hardware/giga-r1-wifi",
+    "vendor": "Arduino"
+}

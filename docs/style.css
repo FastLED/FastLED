@@ -1,0 +1,15 @@
+img {
+    max-height: 70%;
+    height: auto;
+    width: auto;
+    max-width: 70%;
+    object-fit: contain;
+  }
+
+  svg {
+    max-height: 70%;
+    height: auto;
+    width: auto;
+    max-width: 70%;
+    object-fit: contain;
+  }

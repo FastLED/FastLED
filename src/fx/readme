@@ -1,0 +1,29 @@
+
+# FX Structure
+
+The FX module is an optional component that is not compiled into the core driver by default. 
+
+You can include these modules to achieve advanced visual effects.
+
+While the core driver is optimized to be as lightweight as possible, the rules for the FX directory are more flexible. These effects (FX) are intended for use on more powerful hardware, unlike more constrained platforms such as the Arduino UNO.
+
+As a result, FX components can be "heavyweight," meaning they may include a larger portion of the standard library or even depend on libraries like `Arduino.h`, which the core driver prohibits.
+
+
+## Why the *.hpp files?
+
+*.hpp are somewhere between a standard header and a *.cpp file. While a standard header typically only attempts to declare data layout, functions and
+classes, *.hpp files are typically much more heavy weight and will happy inject global data into your compilation unit. Because of this, *.hpp files should only ever be included once.
+
+
+## Licensing
+
+Everything in this library is under FastLED standard license except the following:
+
+  * Animartrix
+
+Animartrix is free for non commercial use, paid license otherwise.
+
+Optional code modules are tagged as *.hpp.
+
+Happy coding!

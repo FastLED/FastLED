@@ -1,0 +1,64 @@
+name: unit tests
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'test'
+      - 'test.py'
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/**'
+      - 'CMakeLists.txt'
+      - 'test'
+      - 'test.py'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        compiler: ["gcc", "clang"]
+    
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+      
+
+      - name: Install
+        run: ./install
+        shell: bash
+
+      - name: Run Test
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            ./test --clang
+          else
+            ./test
+          fi
+        shell: bash

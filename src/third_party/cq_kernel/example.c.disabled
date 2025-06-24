@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include "fl/stdint.h"
+#include <math.h>
+
+#include "kiss_fftr.h"
+#include "cq_kernel.h"
+
+// Edit these parameters
+#define SAMPLES 512
+#define BANDS 57
+#define SAMPLING_FREQUENCY 11025
+#define MAX_FREQUENCY 4698.3
+#define MIN_FREQUENCY 174.6
+
+#ifdef FIXED_POINT
+#if (FIXED_POINT == 32)
+#warning cq_kernel currently bugged for FIXED_POINT=32
+#define MIN_VAL 0
+#else
+#define MIN_VAL 5000 // Equivalent to 0.15 in Q15
+#endif
+#else
+#define MIN_VAL 0.15
+#endif
+
+void dump_kernels(struct sparse_arr kernels[]);
+
+int main(){
+    // Initialize kiss_fftr_cfg
+    struct cq_kernel_cfg cfg = {
+        .samples = SAMPLES,
+        .bands = BANDS,
+        .fmin = MIN_FREQUENCY,
+        .fmax = MAX_FREQUENCY,
+        .fs = SAMPLING_FREQUENCY,
+        .window_type = HAMMING,
+        .min_val = MIN_VAL
+    };
+
+    cq_kernels_t kernels = generate_kernels(cfg);
+    kernels = reallocate_kernels(kernels, cfg);
+    dump_kernels(kernels);
+
+    return 0;
+}
+
+void dump_kernels(struct sparse_arr kernels[]){
+    remove("K_real.txt");
+    remove("K_imag.txt");
+    remove("K_mag.txt");
+    FILE *real_file = fopen("K_real.txt", "w"),
+         *imag_file = fopen("K_imag.txt", "w"),
+         *mag_file = fopen("K_mag.txt", "w");
+    kiss_fft_cpx K_k[BANDS][SAMPLES/2] = {0};
+    for(int i = 0; i < BANDS; i++){
+        for(int j = 0; j < kernels[i].n_elems; j++){
+            K_k[i][kernels[i].elems[j].n] = kernels[i].elems[j].val;
+        }
+    }
+    for(int i = 0; i < SAMPLES/2; i++){
+        for(int j = 0; j < BANDS; j++){
+            #ifdef FIXED_POINT
+            fprintf(real_file, "%i\t", K_k[j][i].r);
+            fprintf(imag_file, "%i\t", K_k[j][i].i);
+            fprintf(mag_file, "%i\t", _mag(K_k[j][i]));
+            #else
+            fprintf(real_file, "%f\t", K_k[j][i].r);
+            fprintf(imag_file, "%f\t", K_k[j][i].i);
+            fprintf(mag_file, "%f\t", _mag(K_k[j][i]));
+            #endif
+        }
+        fprintf(real_file, "\n");
+        fprintf(imag_file, "\n");
+        fprintf(mag_file, "\n");
+    }
+    fclose(real_file);
+    fclose(imag_file);
+    fclose(mag_file);
+}

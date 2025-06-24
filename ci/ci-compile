@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# cd to the directory of the script
+cd "$(dirname "$0")"
+uv run ci-compile.py "$@"

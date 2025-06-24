@@ -1,0 +1,11 @@
+/**
+FastLED Doxygen Stylesheet
+https://github.com/FastLED/FastLED/
+*/
+
+/** Hide "Detailed UIDescription" sub-header when the
+ *  detailed description is at the top of a page.
+ */
+.contents a#details + h2.groupheader {
+    display:none;
+}

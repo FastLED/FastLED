@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "fastled": {
+      "command": "uv",
+      "args": ["run", "mcp_server.py"],
+      "env": {
+        "PYTHONPATH": "."
+      }
+    }
+  }
+} 
