@@ -1,4 +1,3 @@
-
 #include "fl/sketch_macros.h"
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
@@ -249,6 +248,38 @@ void JsonConsole::writeOutput(const fl::string& message) {
     if (mWriteCallback) {
         mWriteCallback(message.c_str());
     }
+}
+
+void JsonConsole::dump(fl::sstream& out) {
+    out << "=== JsonConsole State Dump ===\n";
+    
+    // Initialization status
+    out << "Initialized: " << (mUpdateEngineState ? "true" : "false") << "\n";
+    
+    // Input buffer state
+    out << "Input Buffer: \"" << mInputBuffer << "\"\n";
+    out << "Input Buffer Length: " << mInputBuffer.size() << "\n";
+    
+    // Component mapping
+    out << "Component Count: " << mComponentNameToId.size() << "\n";
+    
+    if (!mComponentNameToId.empty()) {
+        out << "Component Mappings:\n";
+        // Iterate through the hash map to show all mappings
+        // Use range-based for loop to avoid iterator const key issues
+        for (const auto& pair : mComponentNameToId) {
+            out << "  \"" << pair.first << "\" -> ID " << pair.second << "\n";
+        }
+    } else {
+        out << "No components mapped\n";
+    }
+    
+    // Callback status
+    out << "Available Callback: " << (mAvailableCallback ? "set" : "null") << "\n";
+    out << "Read Callback: " << (mReadCallback ? "set" : "null") << "\n";
+    out << "Write Callback: " << (mWriteCallback ? "set" : "null") << "\n";
+    
+    out << "=== End JsonConsole Dump ===\n";
 }
 
 } // namespace fl

@@ -3,6 +3,7 @@
 #include "fl/function.h"
 #include "fl/str.h"
 #include "fl/hash_map.h"
+#include "fl/sstream.h"
 #include "platforms/shared/ui/json/ui.h"
 
 namespace fl {
@@ -70,6 +71,13 @@ public:
      * @param jsonStr JSON array of component data
      */
     void updateComponentMapping(const char* jsonStr);
+    
+    /**
+     * Dump the current state of the JsonConsole to a string stream
+     * This includes initialization status, component mappings, and input buffer state
+     * @param out The string stream to write the dump information to
+     */
+    void dump(fl::sstream& out);
     
 private:
     // Serial interface callbacks
