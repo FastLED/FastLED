@@ -265,6 +265,23 @@ class TestNoBannedHeaders(unittest.TestCase):
             on_fail=on_fail,
         )
 
+    def test_no_banned_headers_examples(self) -> None:
+        """Searches through the program files to check for banned headers."""
+
+        def on_fail(msg: str) -> None:
+            self.fail(
+                msg + "\n"
+                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+            )
+
+        test_directories = ["examples"]
+
+        _test_no_banned_headers(
+            test_directories=test_directories,
+            banned_headers_list=BANNED_HEADERS_COMMON,
+            on_fail=on_fail,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
