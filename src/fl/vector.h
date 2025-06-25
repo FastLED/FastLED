@@ -363,6 +363,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     HeapVector &operator=(
         const HeapVector<T> &other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
+            mAlloc = other.mAlloc;
             assign(other.begin(), other.end());
         }
         return *this;
