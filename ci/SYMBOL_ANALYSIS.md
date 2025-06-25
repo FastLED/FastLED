@@ -17,20 +17,20 @@ The symbol analysis tool provides comprehensive analysis of compiled ELF files t
 
 ```bash
 cd ci
-python symbol_analysis.py --board uno
-python symbol_analysis.py --board esp32dev
+uv run symbol_analysis.py --board uno
+uv run symbol_analysis.py --board esp32dev
 ```
 
 ### Run analysis on all available platforms
 
 ```bash
-python demo_symbol_analysis.py
+uv run demo_symbol_analysis.py
 ```
 
 ### Use in GitHub Actions
 
 ```bash
-python symbol_analysis_runner.py --board uno --example Blink
+uv run symbol_analysis_runner.py --board uno --example Blink
 ```
 
 ## Files
@@ -199,7 +199,7 @@ cd ci/ci && python esp32_symbol_analysis.py
 
 **New command:**
 ```bash
-cd ci && python symbol_analysis.py --board esp32dev
+cd ci && uv run symbol_analysis.py --board esp32dev
 ```
 
 The new tool provides all the same information plus:
@@ -216,17 +216,17 @@ To add support for a new platform:
 
 1. Ensure the platform builds correctly with PlatformIO
 2. Verify `build_info.json` is generated in `.build/{platform}/`
-3. Run: `python symbol_analysis.py --board {platform}`
+3. Run: `uv run symbol_analysis.py --board {platform}`
 
 ### Batch Analysis
 
 ```bash
 # Analyze all available platforms
-python demo_symbol_analysis.py
+uv run demo_symbol_analysis.py
 
 # Analyze specific platforms in sequence
 for board in uno esp32dev teensy31; do
-    python symbol_analysis.py --board $board
+    uv run symbol_analysis.py --board $board
 done
 ```
 
@@ -260,7 +260,7 @@ analyze_symbols()
 
 To debug issues, run with verbose Python output:
 ```bash
-python -v symbol_analysis.py --board uno
+uv run python -v symbol_analysis.py --board uno
 ```
 
 ## Contributing

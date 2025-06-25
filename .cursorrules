@@ -18,6 +18,8 @@ This project includes a custom MCP server (`mcp_server.py`) that provides tools 
 - Code fingerprinting and change detection
 - Linting and formatting
 - Project information and status
+- **Symbol analysis for binary optimization (all platforms)**
+- Stack trace setup for enhanced debugging
 - **🚨 CRITICAL: `validate_completion` tool for background agents**
 
 To use the MCP server, run: `uv run mcp_server.py`
@@ -42,6 +44,10 @@ To use the MCP server, run: `uv run mcp_server.py`
   - For example (esp32dev): `uv run ci/ci-compile.py esp32dev --examples Blink`
   - For example (esp8266): `uv run ci/ci-compile.py esp01 --examples Blink`
   - For example (teensy31): `uv run ci/ci-compile.py teensy31 --examples Blink`
+- **Symbol Analysis** - Analyze binary size and optimization opportunities:
+  - `cd ci && uv run symbol_analysis.py --board uno` - Analyze UNO platform
+  - `cd ci && uv run symbol_analysis.py --board esp32dev` - Analyze ESP32 platform
+  - `cd ci && uv run demo_symbol_analysis.py` - Analyze all available platforms
 
 ## Development Guidelines
 - Follow existing code style and patterns
@@ -338,3 +344,214 @@ int main() {
 ```
 
 **For Background Agents**: Always run the `setup_stack_traces` MCP tool when setting up a new environment to ensure proper debugging capabilities are available.
+
+## Symbol Analysis for Binary Optimization
+
+The FastLED project includes comprehensive symbol analysis tools to identify optimization opportunities and understand binary size allocation across all supported platforms.
+
+### Overview
+
+Symbol analysis examines compiled ELF files to:
+- **Identify large symbols** that may be optimization targets
+- **Understand memory allocation** across different code sections
+- **Find unused features** that can be eliminated to reduce binary size
+- **Compare symbol sizes** between different builds or platforms
+- **Provide optimization recommendations** based on actual usage patterns
+
+### Supported Platforms
+
+The symbol analysis tools work with **ANY platform** that generates a `build_info.json` file, including:
+
+**Embedded Platforms:**
+- ✅ **UNO (AVR)** - Small 8-bit microcontroller (typically ~3-4KB symbols)
+- ✅ **ESP32DEV (Xtensa)** - WiFi-enabled 32-bit platform (typically ~200-300KB symbols)
+- ✅ **ESP32S3, ESP32C3, ESP32C6, etc.** - All ESP32 variants supported
+
+**ARM Platforms:**
+- ✅ **TEENSY31 (ARM Cortex-M4)** - High-performance 32-bit (typically ~10-15KB symbols)
+- ✅ **TEENSYLC (ARM Cortex-M0+)** - Low-power ARM platform (typically ~8-10KB symbols)
+- ✅ **DIGIX (ARM Cortex-M3)** - Arduino Due compatible (typically ~15-20KB symbols)
+- ✅ **STM32 (ARM Cortex-M3)** - STMicroelectronics platform (typically ~12-18KB symbols)
+
+**And many more!** Any platform with toolchain support and `build_info.json` generation.
+
+### Quick Start
+
+#### 1. Prerequisites
+
+Before running symbol analysis, ensure you have compiled the platform:
+
+```bash
+# Compile platform first (required step)
+uv run ci/ci-compile.py uno --examples Blink
+uv run ci/ci-compile.py esp32dev --examples Blink
+uv run ci/ci-compile.py teensy31 --examples Blink
+```
+
+This generates the required `.build/{platform}/build_info.json` file and ELF binary.
+
+#### 2. Run Symbol Analysis
+
+**Analyze specific platform:**
+```bash
+cd ci
+uv run symbol_analysis.py --board uno
+uv run symbol_analysis.py --board esp32dev
+uv run symbol_analysis.py --board teensy31
+```
+
+**Analyze all available platforms at once:**
+```bash
+cd ci
+uv run demo_symbol_analysis.py
+```
+
+**Using MCP Server (Recommended for Background Agents):**
+```bash
+# Use MCP server tools
+uv run mcp_server.py
+# Then use symbol_analysis tool with board: "uno" or "auto"
+# Or use symbol_analysis tool with run_all_platforms: true
+```
+
+### Analysis Output
+
+Symbol analysis provides detailed reports including:
+
+**Summary Information:**
+- **Total symbols count** and **total size**
+- **Symbol type breakdown** (text, data, bss, etc.)
+- **Platform-specific details** (toolchain, ELF file location)
+
+**Largest Symbols List:**
+- **Top symbols by size** for optimization targeting
+- **Demangled C++ names** for easy identification
+- **Size in bytes** and **percentage of total**
+
+**Optimization Recommendations:**
+- **Feature analysis** - unused features that can be disabled
+- **Size impact estimates** - potential savings from removing features
+- **Platform-specific suggestions** based on symbol patterns
+
+### Example Analysis Results
+
+**UNO Platform (Small embedded):**
+```
+================================================================================
+UNO SYMBOL ANALYSIS REPORT
+================================================================================
+
+SUMMARY:
+  Total symbols: 51
+  Total symbol size: 3767 bytes (3.7 KB)
+
+LARGEST SYMBOLS (sorted by size):
+   1.  1204 bytes - ClocklessController<...>::showPixels(...)
+   2.   572 bytes - CFastLED::show(unsigned char)
+   3.   460 bytes - main
+   4.   204 bytes - CPixelLEDController<...>::show(...)
+```
+
+**ESP32 Platform (Feature-rich):**
+```
+================================================================================
+ESP32DEV SYMBOL ANALYSIS REPORT  
+================================================================================
+
+SUMMARY:
+  Total symbols: 2503
+  Total symbol size: 237092 bytes (231.5 KB)
+
+LARGEST SYMBOLS (sorted by size):
+   1. 12009 bytes - _vfprintf_r
+   2. 11813 bytes - _svfprintf_r
+   3.  8010 bytes - _vfiprintf_r
+   4.  4192 bytes - port_IntStack
+```
+
+### Advanced Features
+
+#### JSON Output
+Save detailed analysis results for programmatic processing:
+```bash
+uv run symbol_analysis.py --board esp32dev --output-json
+# Results saved to: .build/esp32dev_symbol_analysis.json
+```
+
+#### Batch Analysis
+Analyze multiple platforms in sequence:
+```bash
+for board in uno esp32dev teensy31; do
+    uv run symbol_analysis.py --board $board
+done
+```
+
+#### Integration with Build Systems
+The symbol analysis can be integrated into automated build processes:
+```python
+# In your Python build script
+import subprocess
+result = subprocess.run(['uv', 'run', 'symbol_analysis.py', '--board', 'uno'], 
+                       capture_output=True, text=True)
+```
+
+### MCP Server Tools
+
+**For Background Agents**, use the MCP server tools for symbol analysis:
+
+1. **Generic Symbol Analysis** (`symbol_analysis` tool):
+   - Works with **any platform** (UNO, ESP32, Teensy, STM32, etc.)
+   - Auto-detects available platforms from `.build/` directory
+   - Can analyze single platform or all platforms simultaneously
+   - Provides comprehensive usage instructions
+
+2. **ESP32-Specific Analysis** (`esp32_symbol_analysis` tool):
+   - **ESP32 platforms only** with FastLED-focused filtering
+   - Includes feature analysis and optimization recommendations
+   - FastLED-specific symbol identification and grouping
+
+**Usage via MCP:**
+```bash
+# Start MCP server
+uv run mcp_server.py
+
+# Use symbol_analysis tool with parameters:
+# - board: "uno", "esp32dev", or "auto"
+# - run_all_platforms: true/false
+# - output_json: true/false
+```
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **"build_info.json not found"**
+   - **Solution:** Compile the platform first: `uv run ci/ci-compile.py {board} --examples Blink`
+
+2. **"ELF file not found"**
+   - **Solution:** Ensure compilation completed successfully and check `.build/{board}/` directory
+
+3. **"Tool not found"** (nm, c++filt, etc.)
+   - **Solution:** The platform toolchain isn't installed or configured properly
+   - **Check:** Verify PlatformIO platform installation: `uv run pio platform list`
+
+4. **"No symbols found"**
+   - **Solution:** The ELF file may be stripped or compilation failed
+   - **Check:** Verify ELF file exists and has debug symbols
+
+**Debug Mode:**
+```bash
+# Run with verbose Python output for debugging
+uv run python -v symbol_analysis.py --board uno
+```
+
+### Best Practices
+
+1. **Always compile first** before running symbol analysis
+2. **Use consistent examples** (like Blink) for size comparisons
+3. **Run analysis on clean builds** to avoid cached/incremental build artifacts
+4. **Compare results across platforms** to understand feature scaling
+5. **Focus on the largest symbols first** for maximum optimization impact
+6. **Use JSON output for automated processing** and trend analysis
+
+**For Background Agents:** Always use the MCP server `symbol_analysis` tool for consistent results and proper error handling.

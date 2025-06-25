@@ -301,6 +301,35 @@ async def list_tools() -> List[Tool]:
                     },
                 }
             }
+        ),
+        Tool(
+            name="symbol_analysis",
+            description="Run generic symbol analysis for ANY platform (UNO, ESP32, Teensy, STM32, etc.) to identify optimization opportunities. Analyzes ELF files to show all symbols and their sizes without filtering. Works with any platform that has build_info.json.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "board": {
+                        "type": "string",
+                        "description": "Platform/board name (e.g., 'uno', 'esp32dev', 'teensy31', 'digix'). If 'auto', detects all available platforms from .build directory",
+                        "default": "auto"
+                    },
+                    "example": {
+                        "type": "string", 
+                        "description": "Example name that was compiled (for context in reports)",
+                        "default": "Blink"
+                    },
+                    "output_json": {
+                        "type": "boolean",
+                        "description": "Save detailed JSON output to .build/{board}_symbol_analysis.json",
+                        "default": False
+                    },
+                    "run_all_platforms": {
+                        "type": "boolean", 
+                        "description": "If true, runs analysis on all detected platforms",
+                        "default": False
+                    }
+                }
+            }
         )
     ]
 
@@ -337,6 +366,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await validate_completion(arguments, project_root)
         elif name == "esp32_symbol_analysis":
             return await esp32_symbol_analysis(arguments, project_root)
+        elif name == "symbol_analysis":
+            return await symbol_analysis(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -1366,6 +1397,88 @@ async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -
                 content=[TextContent(type="text", text=error_msg)],
                 isError=True
             )
+
+async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Run generic symbol analysis for any platform to identify optimization opportunities."""
+    board = arguments.get("board", "auto")
+    example = arguments.get("example", "Blink")
+    output_json = arguments.get("output_json", False)
+    run_all_platforms = arguments.get("run_all_platforms", False)
+    
+    result_text = "# Generic Symbol Analysis Report\n\n"
+    
+    try:
+        # Change to ci directory and run the generic symbol analysis tool
+        ci_dir = project_root / "ci"
+        if not ci_dir.exists():
+            return CallToolResult(
+                content=[TextContent(type="text", text="CI directory not found")],
+                isError=True
+            )
+        
+        if run_all_platforms:
+            # Run demo script for all platforms
+            result_text += "## Running analysis on ALL available platforms\n\n"
+            cmd = ["uv", "run", "demo_symbol_analysis.py"]
+            
+            try:
+                demo_result = await run_command(cmd, ci_dir)
+                result_text += demo_result
+            except Exception as e:
+                return CallToolResult(
+                    content=[TextContent(type="text", text=f"Error running demo symbol analysis: {str(e)}")],
+                    isError=True
+                )
+        else:
+            # Run for specific board
+            result_text += f"## Symbol Analysis for Platform: {board}\n\n"
+            
+            cmd = ["uv", "run", "symbol_analysis.py", "--board", board]
+            
+            try:
+                analysis_result = await run_command(cmd, ci_dir)
+                result_text += analysis_result
+            except Exception as e:
+                return CallToolResult(
+                    content=[TextContent(type="text", text=f"Error running symbol analysis for {board}: {str(e)}")],
+                    isError=True
+                )
+        
+        # Add usage instructions
+        result_text += "\n## How to Use Symbol Analysis\n\n"
+        result_text += "### Available Commands:\n"
+        result_text += "- `uv run symbol_analysis.py --board uno` - Analyze UNO platform\n"
+        result_text += "- `uv run symbol_analysis.py --board esp32dev` - Analyze ESP32 platform\n"
+        result_text += "- `uv run symbol_analysis.py --board teensy31` - Analyze Teensy platform\n"
+        result_text += "- `uv run demo_symbol_analysis.py` - Analyze all available platforms\n\n"
+        
+        result_text += "### Prerequisites:\n"
+        result_text += "1. Compile platform first: `uv run ci/ci-compile.py {board} --examples Blink`\n"
+        result_text += "2. Ensure .build/{board}/build_info.json exists\n"
+        result_text += "3. Run symbol analysis: `uv run symbol_analysis.py --board {board}`\n\n"
+        
+        result_text += "### Supported Platforms:\n"
+        result_text += "- ✅ UNO (AVR) - Small embedded platform\n"
+        result_text += "- ✅ ESP32DEV (Xtensa) - WiFi-enabled microcontroller\n" 
+        result_text += "- ✅ TEENSY31 (ARM Cortex-M4) - High-performance microcontroller\n"
+        result_text += "- ✅ TEENSYLC (ARM Cortex-M0+) - Low-cost ARM platform\n"
+        result_text += "- ✅ DIGIX (ARM Cortex-M3) - Arduino Due compatible\n"
+        result_text += "- ✅ STM32 (ARM Cortex-M3) - STMicroelectronics platform\n"
+        result_text += "- ✅ And many more! Works with any platform that generates build_info.json\n\n"
+        
+        if output_json:
+            result_text += "### JSON Output\n"
+            result_text += f"Detailed analysis results saved to: `.build/{board}_symbol_analysis.json`\n\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+        
+    except Exception as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Error running symbol analysis: {str(e)}")],
+            isError=True
+        )
 
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""
