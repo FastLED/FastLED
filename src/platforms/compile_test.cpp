@@ -29,10 +29,10 @@ namespace fl {
 static void compile_tests() {
 #if defined(__AVR__)
     avr_compile_tests();
-#elif defined(ESP8266)
-    esp8266_compile_tests();
 #elif defined(ESP32)
     esp32_compile_tests();
+#elif defined(ESP8266)
+    esp8266_compile_tests();
 #elif defined(FASTLED_ARM)
     arm_compile_tests();
 #elif defined(APOLLO3)

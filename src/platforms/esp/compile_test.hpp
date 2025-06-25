@@ -5,6 +5,7 @@
 
 namespace fl {
 
+#ifdef ESP8266
 void esp8266_compile_tests() {
 #if FASTLED_USE_PROGMEM != 0
 #error "FASTLED_USE_PROGMEM should be 0 for ESP8266"
@@ -36,7 +37,9 @@ void esp8266_compile_tests() {
 #error "FASTLED_HAS_MILLIS should be defined for ESP8266"
 #endif
 }
+#endif // ESP8266
 
+#ifdef ESP32
 void esp32_compile_tests() {
 #ifndef ESP32
 #error "ESP32 should be defined for ESP32 platforms"
@@ -99,4 +102,5 @@ void esp32_compile_tests() {
     #endif
 #endif
 }
+#endif // ESP32
 }  // namespace fl
