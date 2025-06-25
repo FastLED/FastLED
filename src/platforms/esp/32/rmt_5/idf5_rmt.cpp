@@ -23,7 +23,7 @@
 
 #define TAG "idf5_rmt.cpp"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode)
@@ -89,7 +89,7 @@ void RmtController5::showPixels() {
     mLedStrip->drawAsync();
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl
 
 #endif  // FASTLED_RMT5
 

@@ -17,7 +17,7 @@
 
 #define AUTO_MEMORY_BLOCK_SIZE 0
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 namespace {  // anonymous namespace
 
@@ -180,7 +180,7 @@ IRmtStrip *IRmtStrip::Create(
     );
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl
 
 #endif  // FASTLED_RMT5
 

@@ -8,7 +8,7 @@
 #include "fl/stdint.h"
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 class IRmtStrip;
 
@@ -45,7 +45,7 @@ private:
     DmaMode mDmaMode;
 };
 
-FASTLED_NAMESPACE_END
+} // namespace fl
 
 
 

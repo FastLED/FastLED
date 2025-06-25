@@ -11,22 +11,22 @@
 #include "idf5_rmt.h"
 #include "fl/namespace.h"
 
-
 FASTLED_NAMESPACE_BEGIN
+
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // -- The actual controller object for ESP32
-    RmtController5 mRMTController;
+    fl::RmtController5 mRMTController;
 
         // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
-    static RmtController5::DmaMode DefaultDmaMode()
+    static fl::RmtController5::DmaMode DefaultDmaMode()
     {
-        return RmtController5::DMA_AUTO;
+        return fl::RmtController5::DMA_AUTO;
     }
 
 public:
