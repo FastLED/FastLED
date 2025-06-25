@@ -189,6 +189,25 @@ def create_build_dir(
         locked_print(f"*** Error setting up board {board_name} ***")
         return False, stdout
     locked_print(f"*** Finished initializing environment for board {board_name} ***")
+
+    # Print the contents of the generated platformio.ini file for debugging
+    platformio_ini_path = builddir / "platformio.ini"
+    if platformio_ini_path.exists():
+        locked_print(
+            f"\n*** Contents of {platformio_ini_path} after initialization ***"
+        )
+        try:
+            with open(platformio_ini_path, "r") as f:
+                ini_contents = f.read()
+                locked_print(ini_contents)
+        except Exception as e:
+            locked_print(f"Error reading {platformio_ini_path}: {e}")
+        locked_print(f"*** End of {platformio_ini_path} contents ***\n")
+    else:
+        locked_print(
+            f"Warning: {platformio_ini_path} was not found after initialization"
+        )
+
     # dumping enviorment variables to help debug.
     # this is the command: pio run --target envdump
     cwd = str(builddir.resolve())
