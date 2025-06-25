@@ -14,8 +14,8 @@ def run_symbol_analysis(board_name: str):
 
     try:
         result = subprocess.run(
-            [sys.executable, "symbol_analysis.py", "--board", board_name],
-            cwd="ci",
+            [sys.executable, "ci/ci/symbol_analysis.py", "--board", board_name],
+            cwd=".",
             capture_output=True,
             text=True,
         )

@@ -1408,21 +1408,13 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
     result_text = "# Generic Symbol Analysis Report\n\n"
     
     try:
-        # Change to ci directory and run the generic symbol analysis tool
-        ci_dir = project_root / "ci"
-        if not ci_dir.exists():
-            return CallToolResult(
-                content=[TextContent(type="text", text="CI directory not found")],
-                isError=True
-            )
-        
         if run_all_platforms:
             # Run demo script for all platforms
             result_text += "## Running analysis on ALL available platforms\n\n"
-            cmd = ["uv", "run", "demo_symbol_analysis.py"]
+            cmd = ["uv", "run", "ci/demo_symbol_analysis.py"]
             
             try:
-                demo_result = await run_command(cmd, ci_dir)
+                demo_result = await run_command(cmd, project_root)
                 result_text += demo_result
             except Exception as e:
                 return CallToolResult(
@@ -1433,10 +1425,10 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
             # Run for specific board
             result_text += f"## Symbol Analysis for Platform: {board}\n\n"
             
-            cmd = ["uv", "run", "symbol_analysis.py", "--board", board]
+            cmd = ["uv", "run", "ci/ci/symbol_analysis.py", "--board", board]
             
             try:
-                analysis_result = await run_command(cmd, ci_dir)
+                analysis_result = await run_command(cmd, project_root)
                 result_text += analysis_result
             except Exception as e:
                 return CallToolResult(
@@ -1447,15 +1439,15 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
         # Add usage instructions
         result_text += "\n## How to Use Symbol Analysis\n\n"
         result_text += "### Available Commands:\n"
-        result_text += "- `uv run symbol_analysis.py --board uno` - Analyze UNO platform\n"
-        result_text += "- `uv run symbol_analysis.py --board esp32dev` - Analyze ESP32 platform\n"
-        result_text += "- `uv run symbol_analysis.py --board teensy31` - Analyze Teensy platform\n"
-        result_text += "- `uv run demo_symbol_analysis.py` - Analyze all available platforms\n\n"
+        result_text += "- `uv run ci/ci/symbol_analysis.py --board uno` - Analyze UNO platform\n"
+        result_text += "- `uv run ci/ci/symbol_analysis.py --board esp32dev` - Analyze ESP32 platform\n"
+        result_text += "- `uv run ci/ci/symbol_analysis.py --board teensy31` - Analyze Teensy platform\n"
+        result_text += "- `uv run ci/demo_symbol_analysis.py` - Analyze all available platforms\n\n"
         
         result_text += "### Prerequisites:\n"
         result_text += "1. Compile platform first: `uv run ci/ci-compile.py {board} --examples Blink`\n"
         result_text += "2. Ensure .build/{board}/build_info.json exists\n"
-        result_text += "3. Run symbol analysis: `uv run symbol_analysis.py --board {board}`\n\n"
+        result_text += "3. Run symbol analysis: `uv run ci/ci/symbol_analysis.py --board {board}`\n\n"
         
         result_text += "### Supported Platforms:\n"
         result_text += "- ✅ UNO (AVR) - Small embedded platform\n"

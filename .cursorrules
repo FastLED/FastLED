@@ -45,9 +45,9 @@ To use the MCP server, run: `uv run mcp_server.py`
   - For example (esp8266): `uv run ci/ci-compile.py esp01 --examples Blink`
   - For example (teensy31): `uv run ci/ci-compile.py teensy31 --examples Blink`
 - **Symbol Analysis** - Analyze binary size and optimization opportunities:
-  - `cd ci && uv run symbol_analysis.py --board uno` - Analyze UNO platform
-  - `cd ci && uv run symbol_analysis.py --board esp32dev` - Analyze ESP32 platform
-  - `cd ci && uv run demo_symbol_analysis.py` - Analyze all available platforms
+  - `uv run ci/ci/symbol_analysis.py --board uno` - Analyze UNO platform
+  - `uv run ci/ci/symbol_analysis.py --board esp32dev` - Analyze ESP32 platform
+  - `uv run ci/demo_symbol_analysis.py` - Analyze all available platforms
 
 ## Development Guidelines
 - Follow existing code style and patterns
@@ -394,16 +394,14 @@ This generates the required `.build/{platform}/build_info.json` file and ELF bin
 
 **Analyze specific platform:**
 ```bash
-cd ci
-uv run symbol_analysis.py --board uno
-uv run symbol_analysis.py --board esp32dev
-uv run symbol_analysis.py --board teensy31
+uv run ci/ci/symbol_analysis.py --board uno
+uv run ci/ci/symbol_analysis.py --board esp32dev
+uv run ci/ci/symbol_analysis.py --board teensy31
 ```
 
 **Analyze all available platforms at once:**
 ```bash
-cd ci
-uv run demo_symbol_analysis.py
+uv run ci/demo_symbol_analysis.py
 ```
 
 **Using MCP Server (Recommended for Background Agents):**
@@ -542,7 +540,7 @@ uv run mcp_server.py
 **Debug Mode:**
 ```bash
 # Run with verbose Python output for debugging
-uv run python -v symbol_analysis.py --board uno
+uv run python -v ci/ci/symbol_analysis.py --board uno
 ```
 
 ### Best Practices
