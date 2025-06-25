@@ -3,6 +3,7 @@ FastLED 3.10.2
   * New LED chipset: SM16824E
     * 3-Wire
     * See also: https://github.com/FastLED/FastLED/issues/1941#issuecomment-2981643952
+  * apollo3_red (stm variant): beta support.
   * HSV -> CRGB default conversion function can now be overriden.
     * If you just want to change it for your sketch you can use this:
       * `#define FASTLED_HSV_CONVERSION_RAINBOW` (default)
