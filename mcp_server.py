@@ -252,7 +252,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "topic": {
                         "type": "string",
-                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings"],
+                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "variable_naming"],
                         "description": "Specific topic to get standards for, or 'all' for complete guide",
                         "default": "all"
                     }
@@ -678,6 +678,50 @@ High-risk files:
 - `src/platforms/wasm/active_strip_data.cpp`
 
 Changing signatures causes runtime errors that are extremely difficult to debug.
+""",
+
+        "variable_naming": """
+# Variable Naming Standards
+
+⚠️ **CRITICAL: DO NOT change variable names unless absolutely necessary**
+
+## Why Avoid Variable Name Changes?
+- **Code Consistency:** Existing variable names maintain consistency across the codebase
+- **Review Complexity:** Unnecessary name changes make code reviews harder to follow
+- **Merge Conflicts:** Gratuitous renaming increases the likelihood of merge conflicts
+- **API Stability:** Public variable names may be part of the API contract
+- **Documentation:** Variable names may be referenced in documentation and examples
+
+## When Variable Name Changes Are Acceptable:
+✅ **Fixing misleading names** that don't match their actual purpose
+✅ **Following established naming conventions** when code is being substantially refactored
+✅ **Resolving naming conflicts** during integration or merging
+✅ **Compliance with coding standards** when specifically required
+✅ **Improving clarity** for genuinely confusing or cryptic names
+
+## What to Avoid:
+❌ Changing names just for personal preference
+❌ "Improving" names that are already clear and consistent
+❌ Mass renaming operations without clear justification
+❌ Style-only changes to established, working variable names
+❌ Renaming in stable, public-facing APIs
+
+## Best Practice:
+**If the existing variable name is clear and follows project conventions, leave it unchanged.**
+Focus your efforts on functional improvements rather than cosmetic naming changes.
+
+## Examples:
+```cpp
+// DON'T change these if they're working fine:
+int ledCount;     // Clear and consistent
+CRGB* ledData;    // Follows FastLED conventions
+uint8_t brightness; // Standard and descriptive
+
+// DO change these if absolutely necessary:
+int x;            // Too generic in complex context
+bool flag;        // Meaningless name
+char* ptr123;     // Confusing and non-descriptive
+```
 """
     }
     
@@ -686,7 +730,8 @@ Changing signatures causes runtime errors that are extremely difficult to debug.
         result += "## 🚨 MOST CRITICAL RULES 🚨\n\n"
         result += "1. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
         result += "2. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
-        result += "3. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n\n"
+        result += "3. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
+        result += "4. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
         
         for section_name, content in standards.items():
             result += content + "\n" + ("="*50) + "\n\n"
