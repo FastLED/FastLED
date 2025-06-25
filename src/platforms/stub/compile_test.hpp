@@ -2,7 +2,8 @@
 
 #include "FastLED.h"
 
-void stub_tests() {
+namespace fl {
+static void stub_compile_tests() {
 #if FASTLED_USE_PROGMEM != 0
 #error "FASTLED_USE_PROGMEM should be 0 for stub platforms"
 #endif
@@ -28,3 +29,4 @@ void stub_tests() {
 #error "digitalPinToPort should be defined for stub platforms"
 #endif
 }
+}  // namespace fl
