@@ -264,6 +264,62 @@ _FL_DEFPIN(36, 1, D);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
+#elif defined(STM32F1) // Fallback for other STM32F1 boards (including hy_tinystm103tb)
+#define MAX_PIN 36
+
+// BETA SUPPORT FOR STM32F103T BU6 - These pin definitions might be wrong.
+// PA0-PA15
+_FL_DEFPIN(0, 0, A);
+_FL_DEFPIN(1, 1, A);
+_FL_DEFPIN(2, 2, A);
+_FL_DEFPIN(3, 3, A);
+_FL_DEFPIN(4, 4, A);
+_FL_DEFPIN(5, 5, A);
+_FL_DEFPIN(6, 6, A);
+_FL_DEFPIN(7, 7, A);
+_FL_DEFPIN(8, 8, A);
+_FL_DEFPIN(9, 9, A);
+_FL_DEFPIN(10, 10, A);
+_FL_DEFPIN(11, 11, A);
+_FL_DEFPIN(12, 12, A);
+_FL_DEFPIN(13, 13, A);
+_FL_DEFPIN(14, 14, A);
+_FL_DEFPIN(15, 15, A);
+
+// PB0-PB15
+_FL_DEFPIN(16, 0, B);
+_FL_DEFPIN(17, 1, B);
+_FL_DEFPIN(18, 2, B);
+_FL_DEFPIN(19, 3, B);
+_FL_DEFPIN(20, 4, B);
+_FL_DEFPIN(21, 5, B);
+_FL_DEFPIN(22, 6, B);
+_FL_DEFPIN(23, 7, B);
+_FL_DEFPIN(24, 8, B);
+_FL_DEFPIN(25, 9, B);
+_FL_DEFPIN(26, 10, B);
+_FL_DEFPIN(27, 11, B);
+_FL_DEFPIN(28, 12, B);
+_FL_DEFPIN(29, 13, B);
+_FL_DEFPIN(30, 14, B);
+_FL_DEFPIN(31, 15, B);
+
+// PC13-PC15
+_FL_DEFPIN(32, 13, C);
+_FL_DEFPIN(33, 14, C);
+_FL_DEFPIN(34, 15, C);
+
+// PD0-PD1 (if available)
+_FL_DEFPIN(35, 0, D);
+_FL_DEFPIN(36, 1, D);
+
+// SPI2 MOSI
+#define SPI_DATA PB_15
+// SPI2 SCK  
+#define SPI_CLOCK PB_13
+
+#define HAS_HARDWARE_PIN_SUPPORT
+
 #endif // STM32F1
 
 FASTLED_NAMESPACE_END
