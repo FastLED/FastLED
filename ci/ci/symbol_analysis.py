@@ -10,6 +10,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+# Import board mapping system
+from ci.boards import get_board
+
 
 def run_command(cmd: str) -> str:
     """Run a command and return stdout"""
@@ -249,8 +252,36 @@ def main():
     with open(build_info_path) as f:
         build_info = json.load(f)
 
-    # Get board info
-    board_info = build_info[board_name]
+    # Get board info using proper board mapping
+    board = get_board(board_name)
+    real_board_name = board.get_real_board_name()
+
+    # Try the real board name first, then fall back to directory name
+    if real_board_name in build_info:
+        board_info = build_info[real_board_name]
+        actual_board_key = real_board_name
+        if real_board_name != board_name:
+            print(
+                f"Note: Using board key '{real_board_name}' from board mapping (directory was '{board_name}')"
+            )
+    elif board_name in build_info:
+        board_info = build_info[board_name]
+        actual_board_key = board_name
+    else:
+        # Try to find the actual board key in the JSON as fallback
+        board_keys = list(build_info.keys())
+        if len(board_keys) == 1:
+            actual_board_key = board_keys[0]
+            board_info = build_info[actual_board_key]
+            print(
+                f"Note: Using only available board key '{actual_board_key}' from build_info.json (expected '{real_board_name}' or '{board_name}')"
+            )
+        else:
+            print(
+                f"Error: Could not find board '{real_board_name}' or '{board_name}' in build_info.json"
+            )
+            print(f"Available board keys: {board_keys}")
+            sys.exit(1)
     nm_path = board_info["aliases"]["nm"]
     cppfilt_path = board_info["aliases"]["c++filt"]
     elf_file = board_info["prog_path"]
@@ -269,8 +300,8 @@ def main():
     # Analyze dependencies
     dependencies = analyze_map_file(map_file)
 
-    # Generate report
-    report = generate_report(board_name, symbols, dependencies)
+    # Generate report using user-friendly board name
+    report = generate_report(board_name.upper(), symbols, dependencies)
 
     # Save detailed data to JSON (sorted by size, largest first)
     # Find the build directory (go up from wherever we are to find .build)

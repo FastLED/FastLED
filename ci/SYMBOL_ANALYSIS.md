@@ -93,6 +93,34 @@ SYMBOL TYPE BREAKDOWN:
   W: 126 symbols, 5209 bytes (5.1 KB)
 ```
 
+### ESP32S3 Platform Results
+
+```
+================================================================================
+ESP32S3 SYMBOL ANALYSIS REPORT
+================================================================================
+
+SUMMARY:
+  Total symbols: 2831
+  Total symbol size: 260710 bytes (254.6 KB)
+
+LARGEST SYMBOLS (all symbols, sorted by size):
+   1.  11309 bytes - _vfprintf_r
+   2.  11118 bytes - _svfprintf_r
+   3.   7337 bytes - _svfiprintf_r
+   4.   7265 bytes - _vfiprintf_r
+   5.   4192 bytes - port_IntStack
+   6.   1164 bytes - printBeforeSetupInfo()
+   7.    828 bytes - fl::RmtController5::loadPixelData(PixelIterator&)
+
+SYMBOL TYPE BREAKDOWN:
+  T: 1416 symbols, 172591 bytes (168.5 KB)
+  t: 429 symbols, 48854 bytes (47.7 KB)
+  d: 529 symbols, 14189 bytes (13.9 KB)
+  D: 72 symbols, 9831 bytes (9.6 KB)
+  W: 122 symbols, 5457 bytes (5.3 KB)
+```
+
 ## Output Files
 
 The tool generates JSON files with complete symbol data:
@@ -136,6 +164,7 @@ The tool automatically detects and works with any platform that has:
 Successfully tested platforms:
 - ✅ **UNO** (AVR) - 51 symbols, 3.7 KB
 - ✅ **ESP32DEV** (Xtensa) - 2503 symbols, 231.5 KB  
+- ✅ **ESP32S3** (Xtensa) - 2831 symbols, 254.6 KB
 - ✅ **TEENSY31** (ARM Cortex-M4) - 238 symbols, 10.9 KB
 - ✅ **TEENSYLC** (ARM Cortex-M0+) - 241 symbols, 9.1 KB
 - ✅ **DIGIX** (ARM Cortex-M3) - 298 symbols, 17.9 KB
