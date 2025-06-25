@@ -87,6 +87,7 @@ def remove_readonly(func, path, _):
 def create_build_dir(
     board: Board,
     defines: list[str],
+    customsdk: str | None,
     no_install_deps: bool,
     extra_packages: list[str],
     build_dir: str | None,
@@ -163,6 +164,8 @@ def create_build_dir(
     if defines:
         build_flags_str = " ".join(f"-D{define}" for define in defines)
         cmd_list.append(f"--project-option=build_flags={build_flags_str}")
+    if board.customsdk:
+        cmd_list.append(f"--project-option=custom_sdkconfig={customsdk}")
     if extra_packages:
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
     if no_install_deps:
