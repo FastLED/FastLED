@@ -18,12 +18,10 @@ uv run mcp_server.py
 """
 
 import asyncio
-import json
-import subprocess
 import sys
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 try:
     from mcp.server import Server
@@ -260,6 +258,25 @@ async def list_tools() -> List[Tool]:
                     }
                 }
             }
+        ),
+        Tool(
+            name="validate_completion",
+            description="🚨 MANDATORY FOR ALL BACKGROUND AGENTS: Validate that all tests pass before indicating completion. This tool MUST be run as the final step before any background agent indicates they are done with their task.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "task_description": {
+                        "type": "string",
+                        "description": "Brief description of the task being completed",
+                        "default": "Code changes"
+                    },
+                    "run_full_test_suite": {
+                        "type": "boolean",
+                        "description": "Run the complete test suite including unit tests and compilation checks",
+                        "default": True
+                    }
+                }
+            }
         )
     ]
 
@@ -292,6 +309,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await setup_stack_traces(arguments, project_root)
         elif name == "coding_standards":
             return await coding_standards(arguments, project_root)
+        elif name == "validate_completion":
+            return await validate_completion(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -430,7 +449,7 @@ def extract_test_cases(file_path: Path, search_pattern: str = "") -> List[str]:
             if not search_pattern or search_pattern.lower() in match.lower():
                 test_cases.append(match)
     
-    except Exception as e:
+    except Exception:
         # Silently skip files that can't be read
         pass
     
@@ -700,7 +719,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             try:
                 with open("/etc/os-release", "r") as f:
                     distro_info = f.read().lower()
-            except:
+            except (OSError, IOError):
                 pass
             
             install_commands = []
@@ -736,7 +755,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             for cmd in install_commands:
                 result_text += f"Running: `{cmd}`\n"
                 try:
-                    install_result = await run_command(cmd.split(), project_root)
+                    _ = await run_command(cmd.split(), project_root)
                     result_text += "✅ Success\n\n"
                 except Exception as e:
                     result_text += f"❌ Error: {e}\n\n"
@@ -748,7 +767,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
         elif system == "darwin":  # macOS
             result_text += "## Installing LibUnwind on macOS\n\n"
             try:
-                install_result = await run_command(["brew", "install", "libunwind"], project_root)
+                _ = await run_command(["brew", "install", "libunwind"], project_root)
                 result_text += "✅ LibUnwind installed via Homebrew\n\n"
             except Exception as e:
                 result_text += f"❌ Error installing libunwind: {e}\n"
@@ -767,9 +786,9 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
             
             try:
                 # Clean and rebuild
-                build_result = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
-                build_result = await run_command(["cmake", "."], tests_dir)
-                build_result = await run_command(["make", "-j4"], tests_dir)
+                _ = await run_command(["rm", "-f", "CMakeCache.txt"], tests_dir)
+                _ = await run_command(["cmake", "."], tests_dir)
+                _ = await run_command(["make", "-j4"], tests_dir)
                 result_text += "✅ FastLED test framework built successfully\n\n"
                 
                 # Test by running a simple unit test to verify stack traces work
@@ -782,7 +801,7 @@ async def setup_stack_traces(arguments: Dict[str, Any], project_root: Path) -> C
                         test_name = first_test.split('/')[-1]
                         result_text += f"Testing with {test_name}...\n"
                         # Just run help to verify the executable works and crash handler is linked
-                        test_result = await run_command([first_test, "--help"], tests_dir)
+                        _ = await run_command([first_test, "--help"], tests_dir)
                         result_text += "✅ Stack trace system is properly integrated with test framework\n\n"
                     else:
                         result_text += "⚠️ No test executables found to verify integration\n\n"
@@ -971,6 +990,67 @@ async def run_specific_command(arguments: Dict[str, Any], project_root: Path) ->
     return CallToolResult(
         content=[TextContent(type="text", text=f"Command: {command}\nOutput:\n{result}")]
     )
+
+async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """🚨 MANDATORY validation step for all background agents before indicating completion."""
+    task_description = arguments.get("task_description", "Code changes")
+    run_full_test_suite = arguments.get("run_full_test_suite", True)
+    
+    result_text = f"# 🚨 COMPLETION VALIDATION FOR: {task_description}\n\n"
+    result_text += "## MANDATORY PRE-COMPLETION CHECK\n\n"
+    result_text += "This tool MUST be run by all background agents before indicating completion.\n"
+    result_text += "Running comprehensive test suite to ensure all changes are working correctly.\n\n"
+    
+    validation_failed = False
+    
+    if run_full_test_suite:
+        result_text += "### Running Full Test Suite: `bash test`\n\n"
+        
+        try:
+            # Run the bash test command as specified in user rules
+            test_result = await run_command(["bash", "test"], project_root)
+            
+            # Check if tests passed by looking for common failure indicators
+            if "FAILED" in test_result or "ERROR" in test_result or "error:" in test_result.lower():
+                validation_failed = True
+                result_text += "❌ **VALIDATION FAILED - TESTS CONTAIN ERRORS**\n\n"
+                result_text += "```\n" + test_result + "\n```\n\n"
+                result_text += "🚨 **BACKGROUND AGENT MUST NOT INDICATE COMPLETION**\n"
+                result_text += "🚨 **PLEASE FIX ALL ERRORS BEFORE COMPLETING THE TASK**\n\n"
+            else:
+                result_text += "✅ **ALL TESTS PASSED**\n\n"
+                result_text += "```\n" + test_result + "\n```\n\n"
+                result_text += "✅ **VALIDATION SUCCESSFUL - SAFE TO INDICATE COMPLETION**\n\n"
+            
+        except Exception as e:
+            validation_failed = True
+            result_text += f"❌ **VALIDATION FAILED - ERROR RUNNING TESTS**\n\n"
+            result_text += f"Error: {str(e)}\n\n"
+            result_text += "🚨 **BACKGROUND AGENT MUST NOT INDICATE COMPLETION**\n"
+            result_text += "🚨 **PLEASE RESOLVE TEST EXECUTION ISSUES BEFORE COMPLETING**\n\n"
+    
+    # Final instructions
+    result_text += "## COMPLETION REQUIREMENTS FOR BACKGROUND AGENTS\n\n"
+    
+    if validation_failed:
+        result_text += "🚫 **DO NOT INDICATE COMPLETION**\n"
+        result_text += "- Tests are failing or could not run\n"
+        result_text += "- Fix all issues and run this validation again\n"
+        result_text += "- Only indicate completion after ALL tests pass\n\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)],
+            isError=True
+        )
+    else:
+        result_text += "✅ **SAFE TO INDICATE COMPLETION**\n"
+        result_text += "- All tests are passing\n"
+        result_text += "- Code changes have been validated\n"
+        result_text += "- Background agent may now indicate task completion\n\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
 
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""

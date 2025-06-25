@@ -30,6 +30,8 @@ Workflow:
 #include "fl/warn.h"
 #include "noise.h"
 #include "fl/array.h"
+#include "fx/2d/wave.h"
+#include "fx/2d/blend.h"
 
 // #include "vec3.h"
 
@@ -64,8 +66,9 @@ UIDescription festivalStickDescription(
     "## Key Features\n"
     "- **19+ turns** with 288 LEDs total\n"
     "- Uses `Corkscrew.toScreenMap()` for accurate web interface visualization\n"
-    "- Multiple render modes: **Noise**, **Position**, and **Fire** effects\n"
-    "- Real-time cylindrical surface mapping\n\n"
+    "- Multiple render modes: **Noise**, **Position**, **Fire**, and **Wave** effects\n"
+    "- Real-time cylindrical surface mapping\n"
+    "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects\n\n"
     "## How It Works\n"
     "1. Draws patterns into a rectangular grid (`frameBuffer`)\n"
     "2. Maps the grid to corkscrew LED positions using `readFrom()`\n"
@@ -91,7 +94,7 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
 string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-string renderModeOptions[] = {"Noise", "Position", "Fire"};
+string renderModeOptions[] = {"Noise", "Position", "Fire", "Wave"};
 
 
 
@@ -161,7 +164,16 @@ UISlider fireScaleXY("Fire Scale", 8, 1, 100, 1);
 UISlider fireSpeedY("Fire SpeedY", 1.3, 1, 6, .1);             
 UISlider fireScaleX("Fire ScaleX", .3, 0.1, 3, .01);           
 UISlider fireInvSpeedZ("Fire Inverse SpeedZ", 20, 1, 100, 1);  
-UINumberField firePalette("Fire Palette", 0, 0, 2);             
+UINumberField firePalette("Fire Palette", 0, 0, 2);
+
+// Wave-related UI controls (cylindrical wave effects)
+UISlider waveSpeed("Wave Speed", 0.16f, 0.0f, 1.0f, 0.01f);
+UISlider waveDampening("Wave Dampening", 6.0f, 0.0f, 20.0f, 0.1f);
+UICheckbox waveHalfDuplex("Wave Half Duplex", true);
+UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
+UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
+UIButton waveTriggerButton("Trigger Wave");
+UINumberField wavePalette("Wave Palette", 0, 0, 2);             
 
 // Fire color palettes (from FireCylinder)
 DEFINE_GRADIENT_PALETTE(firepal){
@@ -185,10 +197,35 @@ DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     255, 255, 255, 255  
 };
 
+// Wave color palettes (for cylindrical wave effects)
+DEFINE_GRADIENT_PALETTE(waveBluepal){
+    0,   0,   0,   0,   // Black (no wave)
+    32,  0,   0,   70,  // Dark blue (low wave)
+    128, 20,  57,  255, // Electric blue (medium wave)
+    255, 255, 255, 255  // White (high wave)
+};
+
+DEFINE_GRADIENT_PALETTE(waveGreenpal){
+    0,   0,   0,   0,   // Black (no wave)
+    8,   128, 64,  64,  // Green with red tint (very low wave)
+    16,  255, 222, 222, // Pinkish red (low wave)
+    64,  255, 255, 255, // White (medium wave)
+    255, 255, 255, 255  // White (high wave)
+};
+
+DEFINE_GRADIENT_PALETTE(waveRainbowpal){
+    0,   255, 0,   0,   // Red (no wave)
+    64,  255, 127, 0,   // Orange (low wave)
+    128, 255, 255, 0,   // Yellow (medium wave)
+    192, 0,   255, 0,   // Green (high wave)
+    255, 0,   0,   255  // Blue (maximum wave)
+};
+
 // Create UIGroup for noise controls using variadic constructor
 // This automatically assigns all specified controls to the "Noise Controls" group
 UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
 UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
+UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette);
 UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
@@ -207,6 +244,10 @@ Corkscrew corkscrew(corkscrewInput);
 // Simple position tracking - one variable for both modes
 static float currentPosition = 0.0f;
 static uint32_t lastUpdateTime = 0;
+
+// Wave effect globals
+static uint32_t nextWaveTrigger = 0;
+static uint32_t lastWaveTriggerTime = 0;
 
 
 
@@ -232,6 +273,10 @@ constexpr uint16_t CORKSCREW_HEIGHT =
 // vector<vec3f> mapCorkScrew = makeCorkScrew(args);
 ScreenMap screenMap;
 Grid<CRGB> frameBuffer;
+
+// Wave effect objects - declared here but initialized in setup()
+WaveFxPtr waveFx;
+Blend2dPtr waveBlend;
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)
@@ -269,6 +314,24 @@ void setup() {
     // Set the corkscrew screen map for the controller
     // This allows the web interface to display the actual corkscrew spiral shape
     controller->setScreenMap(corkscrewScreenMap);
+    
+    // Initialize wave effects for cylindrical surface
+    XYMap xyRect(width, height, false); // Rectangular grid for wave simulation
+    WaveFx::Args waveArgs;
+    waveArgs.factor = SuperSample::SUPER_SAMPLE_2X;  // 2x supersampling for smoother waves
+    waveArgs.half_duplex = true;                     // Only positive waves
+    waveArgs.auto_updates = true;                    // Auto-update simulation
+    waveArgs.speed = 0.16f;                          // Wave propagation speed
+    waveArgs.dampening = 6.0f;                       // Wave energy loss
+    waveArgs.x_cyclical = true;                      // Enable cylindrical wrapping!
+    waveArgs.crgbMap = WaveCrgbGradientMapPtr::New(waveBluepal); // Default color palette
+    
+    // Create wave effect with cylindrical mapping
+    waveFx = NewPtr<WaveFx>(xyRect, waveArgs);
+    
+    // Create blender for wave effects (allows multiple wave layers in future)
+    waveBlend = NewPtr<Blend2d>(xyRect);
+    waveBlend->add(waveFx);
     
     // Demonstrate UIGroup functionality for noise controls
     FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
@@ -541,6 +604,88 @@ void drawFire(uint32_t now) {
     fillFrameBufferFire(now);
 }
 
+// Wave effect helper functions
+CRGBPalette16 getWavePalette() {
+    int paletteIndex = (int)wavePalette.value();
+    switch (paletteIndex) {
+    case 0:
+        return waveBluepal;         // Electric blue waves
+    case 1:
+        return waveGreenpal;        // Green/red waves  
+    case 2:
+        return waveRainbowpal;      // Rainbow waves
+    default:
+        return waveBluepal;         // Default to blue
+    }
+}
+
+void triggerWaveRipple() {
+    // Create a ripple at a random position within the central area
+    float perc = 0.15f; // 15% margin from edges
+    int width = frameBuffer.width();
+    int height = frameBuffer.height();
+    
+    int min_x = perc * width;
+    int max_x = (1 - perc) * width;
+    int min_y = perc * height;
+    int max_y = (1 - perc) * height;
+    
+    int x = random(min_x, max_x);
+    int y = random(min_y, max_y);
+    
+    // Trigger a wave ripple at this position
+    waveFx->setf(x, y, 1.0f);
+    
+    FL_WARN("Wave ripple triggered at (" << x << ", " << y << ")");
+}
+
+void processWaveAutoTrigger(uint32_t now) {
+    // Handle automatic wave triggering
+    if (waveAutoTrigger.value()) {
+        if (now >= nextWaveTrigger) {
+            triggerWaveRipple();
+            
+            // Calculate next trigger time based on speed
+            float speed = 1.0f - waveTriggerSpeed.value();
+            uint32_t min_interval = 500 * speed;   // Minimum 500ms * speed
+            uint32_t max_interval = 3000 * speed;  // Maximum 3000ms * speed
+            
+            // Ensure valid range
+            uint32_t min = MIN(min_interval, max_interval);
+            uint32_t max = MAX(min_interval, max_interval);
+            if (min == max) max += 1;
+            
+            nextWaveTrigger = now + random(min, max);
+        }
+    }
+}
+
+void drawWave(uint32_t now) {
+    // Update wave parameters from UI
+    waveFx->setSpeed(waveSpeed.value());
+    waveFx->setDampening(waveDampening.value());
+    waveFx->setHalfDuplex(waveHalfDuplex.value());
+    waveFx->setXCylindrical(true); // Always keep cylindrical for corkscrew
+    
+    // Update wave color palette
+    CRGBPalette16 currentPalette = getWavePalette();
+    WaveCrgbMapPtr newCrgbMap = WaveCrgbGradientMapPtr::New(currentPalette);
+    waveFx->setCrgbMap(newCrgbMap);
+    
+    // Check if manual trigger button was pressed
+    if (waveTriggerButton.value()) {
+        triggerWaveRipple();
+    }
+    
+    // Handle auto-triggering
+    processWaveAutoTrigger(now);
+    
+    // Draw the wave effect directly to the frame buffer
+    // Create a DrawContext for the wave renderer
+    Fx::DrawContext waveContext(now, frameBuffer.data());
+    waveBlend->draw(waveContext);
+}
+
 void loop() {
     uint32_t now = millis();
     clear(frameBuffer);
@@ -561,6 +706,8 @@ void loop() {
         drawNoise(now);
     } else if (renderModeDropdown.value() == "Fire") {
         drawFire(now);
+    } else if (renderModeDropdown.value() == "Wave") {
+        drawWave(now);
     } else {
         draw(pos);
     }

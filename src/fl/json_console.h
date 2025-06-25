@@ -3,17 +3,21 @@
 #include "fl/function.h"
 #include "fl/str.h"
 #include "fl/hash_map.h"
+#include "fl/sstream.h"
+#include "fl/ptr.h"
 #include "platforms/shared/ui/json/ui.h"
 
 namespace fl {
+
+FASTLED_SMART_PTR(JsonConsole);
 
 /**
  * JsonConsole provides a console interface to interact with JsonUI components.
  * It takes two callbacks for reading and writing to a serial interface (or mock functions for testing).
  * 
  * Usage:
- * - Production: JsonConsole console(Serial.available, Serial.read, Serial.println);
- * - Testing: JsonConsole console(mockAvailable, mockRead, mockPrintln);
+ * - Production: JsonConsolePtr console = JsonConsolePtr::New(Serial.available, Serial.read, Serial.println);
+ * - Testing: JsonConsolePtr console = JsonConsolePtr::New(mockAvailable, mockRead, mockPrintln);
  * 
  * Console commands:
  * - "slider: 80" sets a UISlider named "slider" to value 80
@@ -22,10 +26,10 @@ namespace fl {
  * - If the component identifier can be converted to an integer, it's used as ID
  * - Otherwise, the string key is used to lookup the component by name
  */
-class JsonConsole {
+class JsonConsole : public fl::Referent {
 public:
     // Callback types for serial interface
-    using AvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())
+    using ReadAvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())
     using ReadCallback = fl::function<int()>;             // Returns next byte (like Serial.read())  
     using WriteCallback = fl::function<void(const char*)>; // Writes string (like Serial.println())
 
@@ -35,9 +39,15 @@ public:
      * @param readCallback Function that reads next byte from input
      * @param writeCallback Function that writes output strings
      */
-    JsonConsole(AvailableCallback availableCallback, 
+    JsonConsole(ReadAvailableCallback availableCallback, 
                 ReadCallback readCallback, 
                 WriteCallback writeCallback);
+    
+    /**
+     * Destructor - performs cleanup of internal state
+     * Clears input buffer and component mappings
+     */
+    ~JsonConsole();
     
     /**
      * Initialize the console with the JsonUI system
@@ -71,9 +81,16 @@ public:
      */
     void updateComponentMapping(const char* jsonStr);
     
+    /**
+     * Dump the current state of the JsonConsole to a string stream
+     * This includes initialization status, component mappings, and input buffer state
+     * @param out The string stream to write the dump information to
+     */
+    void dump(fl::sstream& out);
+    
 private:
     // Serial interface callbacks
-    AvailableCallback mAvailableCallback;
+    ReadAvailableCallback mReadAvailableCallback;
     ReadCallback mReadCallback; 
     WriteCallback mWriteCallback;
     

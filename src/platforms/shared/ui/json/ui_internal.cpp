@@ -17,7 +17,7 @@ namespace fl {
 JsonUiInternal::JsonUiInternal(const string &name, UpdateFunction updateFunc,
                            ToJsonFunction toJsonFunc)
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc),
-      mId(nextId()), mGroup(), mMutex() {}
+      mId(nextId()), mGroup(), mMutex(), mHasChanged(false) {}
 
 JsonUiInternal::~JsonUiInternal() {
     const bool functions_exist = mUpdateFunc || mtoJsonFunc;
@@ -63,6 +63,21 @@ bool JsonUiInternal::clearFunctions() {
         UpdateFunction([](const FLArduinoJson::JsonVariantConst &) {});
     mtoJsonFunc = ToJsonFunction([](FLArduinoJson::JsonObject &) {});
     return wasCleared;
+}
+
+bool JsonUiInternal::hasChanged() const {
+    fl::lock_guard<fl::mutex> lock(mMutex);
+    return mHasChanged;
+}
+
+void JsonUiInternal::markChanged() {
+    fl::lock_guard<fl::mutex> lock(mMutex);
+    mHasChanged = true;
+}
+
+void JsonUiInternal::clearChanged() {
+    fl::lock_guard<fl::mutex> lock(mMutex);
+    mHasChanged = false;
 }
 
 int JsonUiInternal::nextId() {

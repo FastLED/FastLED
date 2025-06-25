@@ -151,6 +151,7 @@ class UIButton : public UIElement {
     }
     int clickedCount() const { return mImpl.clickedCount(); }
     operator bool() const { return clicked(); }
+    bool value() const { return clicked(); }
 
     void addRealButton(const Button& pin) {
         mRealButton.reset(new Button(pin));
@@ -436,6 +437,18 @@ class UIDropdown : public UIElement {
         return *this;
     }
     
+    // Add a physical button that will advance to the next option when pressed
+    void addNextButton(int pin) {
+        mNextButton.reset(new Button(pin));
+    }
+    
+    // Advance to the next option (cycles back to first option after last)
+    void nextOption() {
+        int currentIndex = as_int();
+        int nextIndex = (currentIndex + 1) % static_cast<int>(getOptionCount());
+        setSelectedIndex(nextIndex);
+    }
+    
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIElement::setGroup(groupName); 
@@ -481,6 +494,7 @@ class UIDropdown : public UIElement {
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
     Listener mListener;
+    fl::scoped_ptr<Button> mNextButton;
 };
 
 class UIGroup {

@@ -18,6 +18,12 @@
 
 namespace fl {
 
+// Define static const members for npos
+template<size_t SIZE>
+const size_t StrN<SIZE>::npos;
+
+const size_t string::npos;
+
 namespace string_functions {
 
 static void ftoa(float value, char *buffer, int precision = 2) {

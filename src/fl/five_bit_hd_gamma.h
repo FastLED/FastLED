@@ -34,6 +34,8 @@ enum FiveBitGammaCorrectionMode {
 //  }
 //  FASTLED_NAMESPACE_END
 
+// Force push
+
 void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                           uint8_t global_brightness,
                                           CRGB *out_colors,

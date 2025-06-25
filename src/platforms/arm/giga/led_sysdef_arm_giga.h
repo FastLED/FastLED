@@ -3,6 +3,10 @@
 
 #define FASTLED_ARM
 
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 0
+#endif
+
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1
 #endif
@@ -28,4 +32,3 @@ typedef volatile uint32_t RwReg;
 #define F_CPU 480000000
 
 #endif
-

@@ -35,6 +35,7 @@ class JsonNumberFieldImpl {
 
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst &value);
+    void setValueInternal(double value);  // Internal method for UI updates - no change notification
 
     JsonUiInternalPtr mInternal;
     double mValue;

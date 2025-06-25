@@ -22,6 +22,9 @@ class JsonUiManager : fl::EngineEvents::Listener {
     void addComponent(fl::WeakPtr<JsonUiInternal> component);
     void removeComponent(fl::WeakPtr<JsonUiInternal> component);
 
+    // Force immediate processing of any pending updates (for testing)
+    void processPendingUpdates();
+
     // Internal representation.
     void updateUiComponents(const char *jsonStr);
     void executeUiUpdates(const FLArduinoJson::JsonDocument &doc);

@@ -41,9 +41,9 @@ TEST_CASE("JSON parsing and serialization utilities") {
     fl::string jsonBuffer;
     fl::toJson(outputDoc, &jsonBuffer);
     CHECK(!jsonBuffer.empty());
-    CHECK(jsonBuffer.find('r') >= 0); // Check contains "result"
-    CHECK(jsonBuffer.find('s') >= 0); // Check contains "success"  
-    CHECK(jsonBuffer.find('1') >= 0); // Check contains "123"
+    CHECK(jsonBuffer.find('r') != fl::string::npos); // Check contains "result"
+    CHECK(jsonBuffer.find('s') != fl::string::npos); // Check contains "success"  
+    CHECK(jsonBuffer.find('1') != fl::string::npos); // Check contains "123"
 }
 
 TEST_CASE("JSON UI error handling") {
@@ -167,10 +167,10 @@ TEST_CASE("JSON UI Elements Array Serialization - Complete Set") {
     fl::string jsonString;
     fl::toJson(doc, &jsonString);
     CHECK(!jsonString.empty());
-    CHECK(jsonString.find('B') >= 0); // Check for Brightness
-    CHECK(jsonString.find('s') >= 0); // Check for slider
-    CHECK(jsonString.find('c') >= 0); // Check for checkbox
-    CHECK(jsonString.find('d') >= 0); // Check for dropdown
+    CHECK(jsonString.find('B') != fl::string::npos); // Check for Brightness
+    CHECK(jsonString.find('s') != fl::string::npos); // Check for slider
+    CHECK(jsonString.find('c') != fl::string::npos); // Check for checkbox
+    CHECK(jsonString.find('d') != fl::string::npos); // Check for dropdown
 }
 
 TEST_CASE("JSON UI Changes from JavaScript - Round Trip") {
@@ -263,9 +263,9 @@ TEST_CASE("JSON Strip Update - Canvas Map Event") {
     fl::string jsonString;
     fl::toJson(doc, &jsonString);
     CHECK(!jsonString.empty());
-    CHECK(jsonString.find('s') >= 0); // Check for set_canvas_map
-    CHECK(jsonString.find('i') >= 0); // Check for strip_id
-    CHECK(jsonString.find('d') >= 0); // Check for diameter
+    CHECK(jsonString.find('s') != fl::string::npos); // Check for set_canvas_map
+    CHECK(jsonString.find('i') != fl::string::npos); // Check for strip_id
+    CHECK(jsonString.find('d') != fl::string::npos); // Check for diameter
 }
 
 TEST_CASE("JSON Frame Data Structure") {
@@ -343,7 +343,7 @@ TEST_CASE("JSON Audio Data Structure") {
     fl::string jsonString;
     fl::toJson(doc, &jsonString);
     CHECK(!jsonString.empty());
-    CHECK(jsonString.find('a') >= 0); // Check for audio_input_1
+    CHECK(jsonString.find('a') != fl::string::npos); // Check for audio_input_1
 }
 
 TEST_CASE("JSON File Manifest Structure") {
@@ -489,9 +489,9 @@ TEST_CASE("JSON Complete Round-Trip Integration Test") {
     fl::string finalJsonString;
     fl::toJson(finalDoc, &finalJsonString);
     CHECK(!finalJsonString.empty());
-    CHECK(finalJsonString.find('2') >= 0); // Check for 200.5
-    CHECK(finalJsonString.find('f') >= 0); // Check for false
-    CHECK(finalJsonString.find('F') >= 0); // Check for Fire
+    CHECK(finalJsonString.find('2') != fl::string::npos); // Check for 200.5
+    CHECK(finalJsonString.find('f') != fl::string::npos); // Check for false
+    CHECK(finalJsonString.find('F') != fl::string::npos); // Check for Fire
 }
 
 #else
