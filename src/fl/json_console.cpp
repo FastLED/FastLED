@@ -8,6 +8,7 @@
 #include "fl/json.h"
 #include "fl/algorithm.h"
 #include "fl/stdint.h"
+#include "platforms/shared/ui/json/ui.h"
 
 namespace fl {
 
@@ -61,7 +62,10 @@ void JsonConsole::update() {
 }
 
 bool JsonConsole::executeCommand(const fl::string& command) {
+    FL_WARN("JsonConsole::executeCommand called with: '" << command.c_str() << "'");
+    
     if (command.empty()) {
+        FL_WARN("JsonConsole::executeCommand: Command is empty");
         return false;
     }
     
@@ -75,12 +79,16 @@ bool JsonConsole::executeCommand(const fl::string& command) {
         trimmed = trimmed.substr(0, trimmed.size()-1);
     }
     
+    FL_WARN("JsonConsole::executeCommand: Trimmed command: '" << trimmed.c_str() << "'");
+    
     if (trimmed.empty()) {
+        FL_WARN("JsonConsole::executeCommand: Trimmed command is empty");
         return false;
     }
     
     // Handle help command
     if (trimmed == "help") {
+        FL_WARN("JsonConsole::executeCommand: Executing help command");
         writeOutput("Available commands:");
         writeOutput("  <component_name>: <value>  - Set component value by name");
         writeOutput("  <component_id>: <value>    - Set component value by ID");
@@ -91,7 +99,9 @@ bool JsonConsole::executeCommand(const fl::string& command) {
         return true;
     }
     
+    FL_WARN("JsonConsole::executeCommand: Calling parseCommand");
     parseCommand(trimmed);
+    FL_WARN("JsonConsole::executeCommand: parseCommand completed");
     return true;
 }
 
@@ -136,15 +146,23 @@ void JsonConsole::readInputFromSerial() {
 }
 
 void JsonConsole::parseCommand(const fl::string& command) {
+    FL_WARN("JsonConsole::parseCommand: Parsing command '" << command.c_str() << "'");
+    
     // Look for pattern: "name: value"
     int16_t colonPos = command.find(':');
+    FL_WARN("JsonConsole::parseCommand: Colon position: " << colonPos);
+    
     if (colonPos == -1) {
         writeOutput("Error: Command format should be 'name: value'");
         return;
     }
     
-    fl::string name = command.substring(0, static_cast<size_t>(colonPos));
+    // Work around fl::string::substring bug - it includes the end index when it shouldn't
+    fl::string name = command.substring(0, static_cast<size_t>(colonPos - 1));
     fl::string valueStr = command.substring(static_cast<size_t>(colonPos + 1), command.size());
+    
+    FL_WARN("JsonConsole::parseCommand: Raw name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Raw valueStr: '" << valueStr.c_str() << "'");
     
     // Trim whitespace from name and value
     while (!name.empty() && name[name.size()-1] == ' ') {
@@ -153,6 +171,9 @@ void JsonConsole::parseCommand(const fl::string& command) {
     while (!valueStr.empty() && valueStr[0] == ' ') {
         valueStr = valueStr.substring(1, valueStr.size());
     }
+    
+    FL_WARN("JsonConsole::parseCommand: Trimmed name: '" << name.c_str() << "'");
+    FL_WARN("JsonConsole::parseCommand: Trimmed valueStr: '" << valueStr.c_str() << "'");
     
     if (name.empty() || valueStr.empty()) {
         writeOutput("Error: Both name and value are required");
@@ -186,6 +207,12 @@ void JsonConsole::parseCommand(const fl::string& command) {
 }
 
 bool JsonConsole::setSliderValue(const fl::string& name, float value) {
+    FL_WARN("JsonConsole::setSliderValue: Looking for component '" << name.c_str() << "' with value " << value);
+    FL_WARN("JsonConsole: Component mapping size: " << mComponentNameToId.size());
+    for (const auto& pair : mComponentNameToId) {
+        FL_WARN("JsonConsole: Available component: '" << pair.first.c_str() << "' -> ID " << pair.second);
+    }
+    
     int componentId = -1;
     
     // First, try to convert the name to an integer (numeric ID)
@@ -196,6 +223,7 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
     if (endptr != cstr && *endptr == '\0' && parsed >= 0 && parsed <= 2147483647L) {
         // Successfully parsed as a valid integer ID
         componentId = static_cast<int>(parsed);
+        FL_WARN("JsonConsole: Using numeric ID: " << componentId);
     } else {
         // Not a valid integer, try to find component ID by name
         int* componentIdPtr = mComponentNameToId.find_value(name);
@@ -208,10 +236,12 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
         }
         
         if (!componentIdPtr) {
+            FL_WARN("JsonConsole: Component '" << name.c_str() << "' not found in mapping");
             return false; // Component not found
         }
         
         componentId = *componentIdPtr;
+        FL_WARN("JsonConsole: Found component ID: " << componentId);
     }
     
     // Create JSON to update the component
@@ -221,14 +251,22 @@ bool JsonConsole::setSliderValue(const fl::string& name, float value) {
     fl::string idStr;
     idStr += componentId;
     
-    auto componentObj = root[idStr.c_str()].to<FLArduinoJson::JsonObject>();
-    componentObj["value"] = value;
+    // Send the value directly, not wrapped in a "value" object
+    root[idStr.c_str()] = value;
     
     // Convert to string and send to engine
     fl::string jsonStr;
     serializeJson(doc, jsonStr);
     
+    FL_WARN("JsonConsole: Sending JSON to engine: " << jsonStr.c_str());
     mUpdateEngineState(jsonStr.c_str());
+    
+    // Force immediate processing of pending updates (for testing environments)
+    // In normal operation, this happens during the engine loop
+    FL_WARN("JsonConsole: Calling processJsonUiPendingUpdates()");
+    processJsonUiPendingUpdates();
+    
+    FL_WARN("JsonConsole: setSliderValue completed successfully");
     return true;
 }
 

@@ -149,4 +149,14 @@ void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component) {
     }
 }
 
+void processJsonUiPendingUpdates() {
+    // Force immediate processing of any pending UI updates (for testing)
+    auto& manager = getInternalManager();
+    if (manager) {
+        // If we have a manager, ask it to process updates immediately
+        manager->processPendingUpdates();
+    }
+    // If no manager exists, there are no pending updates to process
+}
+
 } // namespace fl

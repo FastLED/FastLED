@@ -44,7 +44,20 @@ void JsonCheckboxImpl::toJson(FLArduinoJson::JsonObject &json) const {
 
 bool JsonCheckboxImpl::value() const { return mValue; }
 
-void JsonCheckboxImpl::setValue(bool value) { mValue = value; }
+void JsonCheckboxImpl::setValue(bool value) { 
+    bool oldValue = mValue;
+    mValue = value; 
+    
+    // If value actually changed, mark this component as changed for polling
+    if (mValue != oldValue) {
+        mInternal->markChanged();
+    }
+}
+
+void JsonCheckboxImpl::setValueInternal(bool value) {
+    // Internal method for updates from JSON UI system - no change notification
+    mValue = value;
+}
 
 const fl::string &JsonCheckboxImpl::groupName() const { return mInternal->groupName(); }
 
@@ -64,7 +77,7 @@ void JsonCheckboxImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
     if (value.is<bool>()) {
         bool newValue = value.as<bool>();
-        setValue(newValue);
+        setValueInternal(newValue);  // Use internal method to avoid change notification
     }
 }
 

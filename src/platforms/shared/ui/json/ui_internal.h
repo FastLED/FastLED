@@ -33,6 +33,11 @@ class JsonUiInternal : public fl::Referent {
     void setGroup(const fl::string &groupName);
     const fl::string &groupName() const;
 
+    // Change tracking for polling (eliminates need for manual notifications)
+    bool hasChanged() const;
+    void markChanged();
+    void clearChanged();
+
     bool clearFunctions();
 
   private:
@@ -43,6 +48,7 @@ class JsonUiInternal : public fl::Referent {
     int mId;
     fl::string mGroup;
     mutable fl::mutex mMutex;
+    mutable bool mHasChanged = false; // Track if component has changed since last poll
 };
 
 } // namespace fl

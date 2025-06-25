@@ -4,17 +4,20 @@
 #include "fl/str.h"
 #include "fl/hash_map.h"
 #include "fl/sstream.h"
+#include "fl/ptr.h"
 #include "platforms/shared/ui/json/ui.h"
 
 namespace fl {
+
+FASTLED_SMART_PTR(JsonConsole);
 
 /**
  * JsonConsole provides a console interface to interact with JsonUI components.
  * It takes two callbacks for reading and writing to a serial interface (or mock functions for testing).
  * 
  * Usage:
- * - Production: JsonConsole console(Serial.available, Serial.read, Serial.println);
- * - Testing: JsonConsole console(mockAvailable, mockRead, mockPrintln);
+ * - Production: JsonConsolePtr console = JsonConsolePtr::New(Serial.available, Serial.read, Serial.println);
+ * - Testing: JsonConsolePtr console = JsonConsolePtr::New(mockAvailable, mockRead, mockPrintln);
  * 
  * Console commands:
  * - "slider: 80" sets a UISlider named "slider" to value 80
@@ -23,7 +26,7 @@ namespace fl {
  * - If the component identifier can be converted to an integer, it's used as ID
  * - Otherwise, the string key is used to lookup the component by name
  */
-class JsonConsole {
+class JsonConsole : public fl::Referent {
 public:
     // Callback types for serial interface
     using ReadAvailableCallback = fl::function<int()>;        // Returns number of bytes available (like Serial.available())

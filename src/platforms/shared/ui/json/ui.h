@@ -39,5 +39,11 @@ void addJsonUiComponent(fl::WeakPtr<JsonUiInternal> component);
  */
 void removeJsonUiComponent(fl::WeakPtr<JsonUiInternal> component);
 
+/**
+ * Force immediate processing of any pending UI updates (for testing).
+ * In normal operation, updates are processed during the engine loop.
+ */
+void processJsonUiPendingUpdates();
+
 
 } // namespace fl

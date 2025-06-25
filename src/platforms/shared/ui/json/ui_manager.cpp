@@ -43,6 +43,15 @@ void JsonUiManager::removeComponent(fl::WeakPtr<JsonUiInternal> component) {
     mComponents.erase(component);
 }
 
+void JsonUiManager::processPendingUpdates() {
+    // Force immediate processing of pending updates (for testing)
+    if (mHasPendingUpdate) {
+        executeUiUpdates(mPendingJsonUpdate);
+        mPendingJsonUpdate.clear();
+        mHasPendingUpdate = false;
+    }
+}
+
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
     fl::lock_guard<fl::mutex> lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
@@ -132,10 +141,34 @@ void JsonUiManager::onEndShowLeds() {
     bool shouldUpdate = false;
     {
         fl::lock_guard<fl::mutex> lock(mMutex);
+        // Check if new components were added
         shouldUpdate = mItemsAdded;
         mItemsAdded = false;
+        
+        // Poll all components for changes (eliminates need for manual notifications)
+        if (!shouldUpdate) {
+            for (auto &componentRef : mComponents) {
+                if (auto component = componentRef.lock()) {
+                    if (component->hasChanged()) {
+                        shouldUpdate = true;
+                        break; // Found at least one change, no need to check more
+                    }
+                }
+            }
+        }
     }
+    
     if (shouldUpdate) {
+        // Clear the changed flags for all components
+        {
+            fl::lock_guard<fl::mutex> lock(mMutex);
+            for (auto &componentRef : mComponents) {
+                if (auto component = componentRef.lock()) {
+                    component->clearChanged();
+                }
+            }
+        }
+        
         FLArduinoJson::JsonDocument doc;
         auto json = doc.to<FLArduinoJson::JsonArray>();
         toJson(json);

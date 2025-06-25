@@ -55,6 +55,22 @@ void JsonNumberFieldImpl::setValue(double value) {
     } else if (value > mMax) {
         value = mMax;
     }
+    double oldValue = mValue;
+    mValue = value;
+    
+    // If value actually changed, mark this component as changed for polling
+    if (!ALMOST_EQUAL_FLOAT(mValue, oldValue)) {
+        mInternal->markChanged();
+    }
+}
+
+void JsonNumberFieldImpl::setValueInternal(double value) {
+    // Internal method for updates from JSON UI system - no change notification
+    if (value < mMin) {
+        value = mMin;
+    } else if (value > mMax) {
+        value = mMax;
+    }
     mValue = value;
 }
 
@@ -84,10 +100,10 @@ void JsonNumberFieldImpl::updateInternal(
     const FLArduinoJson::JsonVariantConst &value) {
     if (value.is<double>()) {
         double newValue = value.as<double>();
-        setValue(newValue);
+        setValueInternal(newValue);  // Use internal method to avoid change notification
     } else if (value.is<int>()) {
         int newValue = value.as<int>();
-        setValue(static_cast<double>(newValue));
+        setValueInternal(static_cast<double>(newValue));  // Use internal method to avoid change notification
     }
 }
 

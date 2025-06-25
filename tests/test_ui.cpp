@@ -284,7 +284,7 @@ TEST_CASE("JsonConsole destructor cleanup") {
         
         // Verify the console has internal state before destruction
         // Use find with char instead of string, and check for simple component indicator
-        bool hasComponents = dump.find('1') != -1; // Look for the ID in the dump
+        bool hasComponents = dump.find('1') != fl::string::npos; // Look for the ID in the dump
         if (!hasComponents) {
             // Component mapping might not work in test environment, that's ok
             // The important thing is that destructor doesn't crash
