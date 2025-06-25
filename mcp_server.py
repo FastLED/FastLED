@@ -103,7 +103,7 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="compile_examples",
-            description="Compile FastLED examples for different platforms",
+            description="Compile FastLED examples for different platforms using 'bash compile <platform> --examples <example>'",
             inputSchema={
                 "type": "object",
                 "properties": {

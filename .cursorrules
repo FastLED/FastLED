@@ -37,7 +37,11 @@ To use the MCP server, run: `uv run mcp_server.py`
 - `uv run test.py TestName` - Run specific C++ test
   - For example: running test_xypath.cpp would be uv run test.py xypath
 - `./lint` - Run code formatting/linting
-- `./compile uno` - Compile for uno
+- `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
+  - For example (uno): `uv run ci/ci-compile.py uno --examples Blink`
+  - For example (esp32dev): `uv run ci/ci-compile.py esp32dev --examples Blink`
+  - For example (esp8266): `uv run ci/ci-compile.py esp01 --examples Blink`
+  - For example (teensy31): `uv run ci/ci-compile.py teensy31 --examples Blink`
 
 ## Development Guidelines
 - Follow existing code style and patterns
@@ -264,7 +268,7 @@ The project uses a comprehensive test suite including:
 - Code quality checks (ruff, clang-format)
 - Example compilation verification
 
-Use `bash test` as specified in user rules for running unit tests. This will also compile for avr for Arduino uno against the blink sketch.
+Use `bash test` as specified in user rules for running unit tests. For compilation tests, use `bash compile <platform> --examples <example>` (e.g., `bash compile uno --examples Blink`).
 
 **🚨 FOR BACKGROUND AGENTS:** Running `bash test` is MANDATORY before indicating completion. Use the MCP server `validate_completion` tool to ensure all tests pass before completing any task.
 
