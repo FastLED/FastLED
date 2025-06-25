@@ -1,0 +1,308 @@
+#!/usr/bin/env python3
+"""
+ESP32 Symbol Analysis Tool
+Analyzes the ESP32 ELF file to identify symbols that can be eliminated for binary size reduction.
+"""
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+
+def run_command(cmd):
+    """Run a command and return stdout"""
+    try:
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command: {cmd}")
+        print(f"Error: {e.stderr}")
+        return ""
+
+
+def demangle_symbol(mangled_name, cppfilt_path):
+    """Demangle a C++ symbol using c++filt"""
+    try:
+        cmd = f'echo "{mangled_name}" | "{cppfilt_path}"'
+        result = subprocess.run(
+            cmd, shell=True, capture_output=True, text=True, check=True
+        )
+        demangled = result.stdout.strip()
+        # If demangling failed, c++filt returns the original name
+        return demangled if demangled != mangled_name else mangled_name
+    except Exception as e:
+        print(f"Error demangling symbol: {mangled_name}")
+        print(f"Error: {e}")
+        return mangled_name
+
+
+def analyze_symbols(elf_file, nm_path, cppfilt_path):
+    """Analyze symbols in ELF file using nm with C++ demangling"""
+    print("Analyzing symbols...")
+
+    # Get all symbols with sizes
+    cmd = f'"{nm_path}" --print-size --size-sort --radix=d "{elf_file}"'
+    output = run_command(cmd)
+
+    symbols = []
+    fastled_symbols = []
+    large_symbols = []
+
+    print("Demangling C++ symbols...")
+
+    for line in output.strip().split("\n"):
+        if not line.strip():
+            continue
+
+        parts = line.split()
+        if len(parts) >= 4:
+            addr = parts[0]
+            size = int(parts[1])
+            symbol_type = parts[2]
+            mangled_name = " ".join(parts[3:])
+
+            # Demangle the symbol name
+            demangled_name = demangle_symbol(mangled_name, cppfilt_path)
+
+            symbol_info = {
+                "address": addr,
+                "size": size,
+                "type": symbol_type,
+                "name": mangled_name,
+                "demangled_name": demangled_name,
+            }
+
+            symbols.append(symbol_info)
+
+            # Identify FastLED-related symbols using demangled names
+            search_text = demangled_name.lower()
+            if any(
+                keyword in search_text
+                for keyword in [
+                    "fastled",
+                    "cfastled",
+                    "crgb",
+                    "hsv",
+                    "pixel",
+                    "controller",
+                    "led",
+                    "rmt",
+                    "strip",
+                    "neopixel",
+                    "ws2812",
+                    "apa102",
+                ]
+            ):
+                fastled_symbols.append(symbol_info)
+
+            # Identify large symbols (>100 bytes)
+            if size > 100:
+                large_symbols.append(symbol_info)
+
+    return symbols, fastled_symbols, large_symbols
+
+
+def analyze_map_file(map_file):
+    """Analyze the map file to understand module dependencies"""
+    print("Analyzing map file...")
+
+    dependencies = {}
+    current_archive = None
+
+    try:
+        with open(map_file, "r") as f:
+            for line in f:
+                line = line.strip()
+
+                # Look for archive member includes
+                if line.startswith(".pio/build/esp32dev/liba4c/libsrc.a("):
+                    # Extract module name
+                    start = line.find("(") + 1
+                    end = line.find(")")
+                    if start > 0 and end > start:
+                        current_archive = line[start:end]
+                        dependencies[current_archive] = []
+
+                elif current_archive and line and not line.startswith(".pio"):
+                    # This line shows what pulled in the module
+                    if "(" in line and ")" in line:
+                        # Extract the symbol that caused the inclusion
+                        symbol_start = line.find("(") + 1
+                        symbol_end = line.find(")")
+                        if symbol_start > 0 and symbol_end > symbol_start:
+                            symbol = line[symbol_start:symbol_end]
+                            dependencies[current_archive].append(symbol)
+                    current_archive = None
+    except FileNotFoundError:
+        print(f"Map file not found: {map_file}")
+        return {}
+
+    return dependencies
+
+
+def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
+    """Generate a comprehensive report"""
+    print("\n" + "=" * 80)
+    print("ESP32 FASTLED SYMBOL ANALYSIS REPORT")
+    print("=" * 80)
+
+    # Summary statistics
+    total_symbols = len(symbols)
+    total_fastled = len(fastled_symbols)
+    fastled_size = sum(s["size"] for s in fastled_symbols)
+
+    print("\nSUMMARY:")
+    print(f"  Total symbols: {total_symbols}")
+    print(f"  FastLED symbols: {total_fastled}")
+    print(f"  Total FastLED size: {fastled_size} bytes ({fastled_size/1024:.1f} KB)")
+
+    # Largest FastLED symbols
+    print("\nLARGEST FASTLED SYMBOLS (potential elimination targets):")
+    fastled_sorted = sorted(fastled_symbols, key=lambda x: x["size"], reverse=True)
+    for i, sym in enumerate(fastled_sorted[:20]):
+        display_name = sym.get("demangled_name", sym["name"])
+        print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
+        if "demangled_name" in sym and sym["demangled_name"] != sym["name"]:
+            print(
+                f"      (mangled: {sym['name'][:80]}{'...' if len(sym['name']) > 80 else ''})"
+            )
+
+    # FastLED modules analysis
+    print("\nFASTLED MODULES PULLED IN:")
+    fastled_modules = [
+        mod
+        for mod in dependencies.keys()
+        if any(kw in mod.lower() for kw in ["fastled", "crgb", "led", "rmt", "strip"])
+    ]
+
+    for module in sorted(fastled_modules):
+        print(f"  {module}:")
+        for symbol in dependencies[module][:5]:  # Show first 5 symbols
+            print(f"    - {symbol}")
+        if len(dependencies[module]) > 5:
+            print(f"    ... and {len(dependencies[module]) - 5} more")
+
+    # Largest overall symbols (non-FastLED)
+    print("\nLARGEST NON-FASTLED SYMBOLS:")
+    non_fastled = [
+        s
+        for s in large_symbols
+        if not any(
+            keyword in s.get("demangled_name", s["name"]).lower()
+            for keyword in ["fastled", "cfastled", "crgb", "hsv"]
+        )
+    ]
+    non_fastled_sorted = sorted(non_fastled, key=lambda x: x["size"], reverse=True)
+
+    for i, sym in enumerate(non_fastled_sorted[:15]):
+        display_name = sym.get("demangled_name", sym["name"])
+        print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
+
+    # Recommendations
+    print("\nRECOMMENDATIONS FOR SIZE REDUCTION:")
+
+    # Identify unused features
+    # unused_features = []
+    feature_patterns = {
+        "JSON functionality": ["json", "Json"],
+        "Audio processing": ["audio", "fft", "Audio"],
+        "2D effects": ["2d", "noise", "matrix"],
+        "Video functionality": ["video", "Video"],
+        "UI components": ["ui", "button", "slider"],
+        "File system": ["file", "File", "fs_"],
+        "Mathematical functions": ["sqrt", "sin", "cos", "math"],
+        "String processing": ["string", "str", "String"],
+    }
+
+    for feature, patterns in feature_patterns.items():
+        feature_symbols = [
+            s
+            for s in fastled_symbols
+            if any(p in s.get("demangled_name", s["name"]) for p in patterns)
+        ]
+        if feature_symbols:
+            total_size = sum(s["size"] for s in feature_symbols)
+            print(f"  - {feature}: {len(feature_symbols)} symbols, {total_size} bytes")
+            if total_size > 1000:  # Only show features with >1KB
+                print(
+                    f"    Consider removing if not needed (could save ~{total_size/1024:.1f} KB)"
+                )
+                # Show a few example symbols
+                for sym in feature_symbols[:3]:
+                    display_name = sym.get("demangled_name", sym["name"])[:60]
+                    print(f"      * {sym['size']} bytes: {display_name}")
+                if len(feature_symbols) > 3:
+                    print(f"      ... and {len(feature_symbols) - 3} more")
+
+    return {
+        "total_symbols": total_symbols,
+        "fastled_symbols": total_fastled,
+        "fastled_size": fastled_size,
+        "largest_fastled": fastled_sorted[:10],
+        "dependencies": fastled_modules,
+    }
+
+
+def main():
+    # Paths from build_info.json (adjust path since we're in ci/ci/)
+    build_info_path = Path("../../.build/esp32dev/build_info.json")
+
+    if not build_info_path.exists():
+        print("Error: build_info.json not found. Please run ESP32 compilation first.")
+        sys.exit(1)
+
+    with open(build_info_path) as f:
+        build_info = json.load(f)
+
+    esp32_info = build_info["esp32dev"]
+    nm_path = esp32_info["aliases"]["nm"]
+    elf_file = esp32_info["prog_path"]
+
+    # Find map file
+    map_file = Path(elf_file).with_suffix(".map")
+
+    print(f"Analyzing ELF file: {elf_file}")
+    print(f"Using nm tool: {nm_path}")
+    print(f"Map file: {map_file}")
+
+    # Analyze symbols
+    cppfilt_path = esp32_info["aliases"]["c++filt"]
+    symbols, fastled_symbols, large_symbols = analyze_symbols(
+        elf_file, nm_path, cppfilt_path
+    )
+
+    # Analyze dependencies
+    dependencies = analyze_map_file(map_file)
+
+    # Generate report
+    report = generate_report(symbols, fastled_symbols, large_symbols, dependencies)
+
+    # Save detailed data to JSON (sorted by size, largest first)
+    output_file = "../../esp32_symbol_analysis.json"
+    detailed_data = {
+        "summary": report,
+        "all_fastled_symbols": sorted(
+            fastled_symbols, key=lambda x: x["size"], reverse=True
+        ),
+        "all_symbols_sorted_by_size": sorted(
+            symbols, key=lambda x: x["size"], reverse=True
+        )[
+            :100
+        ],  # Top 100 largest symbols
+        "dependencies": dependencies,
+        "large_symbols": sorted(large_symbols, key=lambda x: x["size"], reverse=True)[
+            :50
+        ],  # Top 50 largest symbols
+    }
+
+    with open(output_file, "w") as f:
+        json.dump(detailed_data, f, indent=2)
+
+    print(f"\nDetailed analysis saved to: {output_file}")
+    print("You can examine this file to identify specific symbols to eliminate.")
+
+
+if __name__ == "__main__":
+    main()
