@@ -28,7 +28,14 @@
 #endif
 
 // Fast math optimization controls with additional aggressive flags
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__clang__)
+  #define FL_FAST_MATH_BEGIN \
+    _Pragma("clang diagnostic push") \
+    _Pragma("STDC FP_CONTRACT ON")
+
+  #define FL_FAST_MATH_END   _Pragma("clang diagnostic pop")
+
+#elif defined(__GNUC__)
   #define FL_FAST_MATH_BEGIN \
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"fast-math\")") \
@@ -47,7 +54,13 @@
 #endif
 
 // Optimization Level O3
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__clang__)
+  #define FL_OPTIMIZATION_LEVEL_O3_BEGIN \
+    _Pragma("clang diagnostic push")
+
+  #define FL_OPTIMIZATION_LEVEL_O3_END   _Pragma("clang diagnostic pop")
+
+#elif defined(__GNUC__)
   #define FL_OPTIMIZATION_LEVEL_O3_BEGIN \
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"O3\")")
