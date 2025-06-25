@@ -189,7 +189,7 @@ void loop() {
         FASTLED_UNUSED(dbfs);
         // FASTLED_WARN("getDBFS: " << dbfs);
         int32_t max = 0;
-        for (int i = 0; i < sample.pcm().size(); ++i) {
+        for (size_t i = 0; i < sample.pcm().size(); ++i) {
             int32_t x = ABS(sample.pcm()[i]);
             if (x > max) {
                 max = x;
@@ -211,7 +211,7 @@ void loop() {
         if (enableFFT) {
             auto max_x = fftOut.bins_raw.size() - 1;
             FASTLED_UNUSED(max_x);
-            for (int i = 0; i < fftOut.bins_raw.size(); ++i) {
+            for (size_t i = 0; i < fftOut.bins_raw.size(); ++i) {
                 auto x = i;
                 auto v = fftOut.bins_db[i];
                 // Map audio intensity to a position in the heat palette (0-255)
