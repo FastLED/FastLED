@@ -156,9 +156,7 @@ def parse_args():
     parser.add_argument(
         "--defines", type=str, help="Comma-separated list of compiler definitions"
     )
-    parser.add_argument(
-        "--customsdk", type=str, help="custom_sdkconfig project option"
-    )
+    parser.add_argument("--customsdk", type=str, help="custom_sdkconfig project option")
     parser.add_argument(
         "--extra-packages",
         type=str,
