@@ -16,14 +16,20 @@
 #define UI_V2  // Based on a new midi shield with buttons. https://learn.sparkfun.com/tutorials/midi-shield-hookup-guide
 #define UI_DBG
 
-#ifdef __STM32F1__
-// Missing A-type pins, just use digital pins mapped to analog.
-#define PIN_POT_COLOR_SENSOR D3
-#define PIN_POT_VEL_SENSOR D4
-#else
+#if !defined(A3)
+// Apollo3 platform missing A3/A4 definitions, defining with fallback values
+#warning "A3 not defined for platform, using pin 3 as fallback"
+#define A3 3
+#endif
+
+#if !defined(A4)
+#warning "A4 not defined for platform, using pin 4 as fallback"
+#define A4 4
+#endif
+
+
 #define PIN_POT_COLOR_SENSOR A3
 #define PIN_POT_VEL_SENSOR A4
-#endif
 
 #define PIN_VIS_SELECT 2
 #define PIN_COLOR_SELECT 4
