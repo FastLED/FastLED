@@ -246,17 +246,64 @@ def generate_report(symbols, fastled_symbols, large_symbols, dependencies):
 
 
 def main():
-    # Paths from build_info.json (adjust path since we're in ci/ci/)
-    build_info_path = Path("../../.build/esp32dev/build_info.json")
+    # Detect build directory and board - try multiple possible locations
+    possible_build_dirs = [
+        Path("../../.build"),
+        Path("../.build"),
+        Path(".build"),
+        Path("../../build"),
+        Path("../build"),
+        Path("build"),
+    ]
 
-    if not build_info_path.exists():
-        print("Error: build_info.json not found. Please run ESP32 compilation first.")
+    build_dir = None
+    for build_path in possible_build_dirs:
+        if build_path.exists():
+            build_dir = build_path
+            break
+
+    if not build_dir:
+        print("Error: Could not find build directory (.build)")
         sys.exit(1)
+
+    # Find ESP32 board directory
+    esp32_boards = [
+        "esp32dev",
+        "esp32",
+        "esp32s2",
+        "esp32s3",
+        "esp32c3",
+        "esp32c6",
+        "esp32h2",
+        "esp32p4",
+        "esp32c2",
+    ]
+    board_dir = None
+    board_name = None
+
+    for board in esp32_boards:
+        candidate_dir = build_dir / board
+        if candidate_dir.exists():
+            build_info_file = candidate_dir / "build_info.json"
+            if build_info_file.exists():
+                board_dir = candidate_dir
+                board_name = board
+                break
+
+    if not board_dir:
+        print("Error: No ESP32 board with build_info.json found in build directory")
+        print(f"Searched in: {build_dir}")
+        print(f"Looking for boards: {esp32_boards}")
+        sys.exit(1)
+
+    build_info_path = board_dir / "build_info.json"
+    print(f"Found ESP32 build info for {board_name}: {build_info_path}")
 
     with open(build_info_path) as f:
         build_info = json.load(f)
 
-    esp32_info = build_info["esp32dev"]
+    # Use the detected board name instead of hardcoded "esp32dev"
+    esp32_info = build_info[board_name]
     nm_path = esp32_info["aliases"]["nm"]
     elf_file = esp32_info["prog_path"]
 
@@ -280,7 +327,8 @@ def main():
     report = generate_report(symbols, fastled_symbols, large_symbols, dependencies)
 
     # Save detailed data to JSON (sorted by size, largest first)
-    output_file = "../../esp32_symbol_analysis.json"
+    # Use board-specific filename and place it relative to build directory
+    output_file = build_dir / f"{board_name}_symbol_analysis.json"
     detailed_data = {
         "summary": report,
         "all_fastled_symbols": sorted(

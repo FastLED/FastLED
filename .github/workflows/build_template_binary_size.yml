@@ -50,6 +50,12 @@ jobs:
         run: |
           uv run ci/inspect_elf.py --first
 
+      - name: ESP32 Symbol Analysis
+        if: always()
+        continue-on-error: true
+        run: |
+          uv run ci/esp32_symbol_analysis_runner.py --board ${{ inputs.board }} --example Blink --skip-on-failure
+
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
         run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102 ${{ inputs.extra_args }}
 
@@ -64,6 +70,12 @@ jobs:
         continue-on-error: true
         run: |
           uv run ci/inspect_elf.py --first
+
+      - name: ESP32 Symbol Analysis (Apa102)
+        if: always()
+        continue-on-error: true
+        run: |
+          uv run ci/esp32_symbol_analysis_runner.py --board ${{ inputs.board }} --example Apa102 --skip-on-failure
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102 with HD Color Mixing)
         if: inputs.board == 'attiny85'
