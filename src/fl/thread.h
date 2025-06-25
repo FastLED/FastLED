@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef FASTLED_MULTITHREADED
-#if (defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING)) && (defined(__has_include) && __has_include(<pthread.h>))
+#if defined(FASTLED_TESTING) && (defined(__has_include) && __has_include(<pthread.h>))
 #define FASTLED_MULTITHREADED 1
 #else
 #define FASTLED_MULTITHREADED 0
