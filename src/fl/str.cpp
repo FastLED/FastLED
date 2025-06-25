@@ -18,11 +18,11 @@
 
 namespace fl {
 
-// Define static const members for npos
-template<size_t SIZE>
-const size_t StrN<SIZE>::npos;
-
+// Define static const member for npos (only for string class)
 const size_t string::npos;
+
+// Explicit template instantiations for commonly used sizes
+template class StrN<64>;
 
 namespace string_functions {
 

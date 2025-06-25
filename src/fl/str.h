@@ -354,8 +354,7 @@ template <size_t SIZE = 64> class StrN {
         }
     }
 
-    // Standard string npos constant for compatibility
-    static const size_t npos = static_cast<size_t>(-1);
+
 
     // Find single character
     size_t find(const char &value) const {
@@ -364,20 +363,20 @@ template <size_t SIZE = 64> class StrN {
                 return i;
             }
         }
-        return npos;
+        return static_cast<size_t>(-1);
     }
 
     // Find substring (string literal support)
     size_t find(const char* substr) const {
         if (!substr) {
-            return npos;
+            return static_cast<size_t>(-1);
         }
         auto begin = c_str();
         const char* found = strstr(begin, substr);
         if (found) {
             return found - begin;
         }
-        return npos;
+        return static_cast<size_t>(-1);
     }
 
     // Find another string
@@ -432,8 +431,8 @@ template <size_t SIZE = 64> class StrN {
 
 class string : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
-    // Standard string npos constant for compatibility  
-    static const size_t npos = StrN<FASTLED_STR_INLINED_SIZE>::npos;
+    // Standard string npos constant for compatibility
+    static const size_t npos = static_cast<size_t>(-1);
     
     string() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     string(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
