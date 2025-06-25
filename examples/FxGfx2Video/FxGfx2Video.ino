@@ -70,6 +70,9 @@ void write_one_frame(ByteStreamMemoryPtr memoryStream) {
         }
         total_bytes_written += bytes_written;
     }
+    if (total_bytes_written) {
+        FASTLED_DBG("Frame written, total bytes: " << total_bytes_written);
+    }
 }
 
 void setup() {
