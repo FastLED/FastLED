@@ -277,6 +277,30 @@ async def list_tools() -> List[Tool]:
                     }
                 }
             }
+        ),
+        Tool(
+            name="esp32_symbol_analysis",
+            description="Run ESP32 symbol analysis to identify optimization opportunities for binary size reduction. Analyzes ELF files to find large symbols and provides recommendations for eliminating unused code.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "board": {
+                        "type": "string",
+                        "description": "ESP32 board name (e.g., 'esp32dev', 'esp32s3', 'esp32c3'). If not specified, auto-detects from .build directory",
+                        "default": "auto"
+                    },
+                    "example": {
+                        "type": "string",
+                        "description": "Example name that was compiled (for context in reports)",
+                        "default": "Blink"
+                    },
+                    "output_json": {
+                        "type": "boolean",
+                        "description": "Include detailed JSON output in results",
+                        "default": False
+                    },
+                }
+            }
         )
     ]
 
@@ -311,6 +335,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await coding_standards(arguments, project_root)
         elif name == "validate_completion":
             return await validate_completion(arguments, project_root)
+        elif name == "esp32_symbol_analysis":
+            return await esp32_symbol_analysis(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -1096,6 +1122,250 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
         return CallToolResult(
             content=[TextContent(type="text", text=result_text)]
         )
+
+async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Run ESP32 symbol analysis to identify optimization opportunities for binary size reduction."""
+    import json
+    import subprocess
+    from pathlib import Path
+    
+    board = arguments.get("board", "auto")
+    example = arguments.get("example", "Blink")
+    skip_on_failure = arguments.get("skip_on_failure", True)
+    output_json = arguments.get("output_json", False)
+    focus_on_fastled = arguments.get("focus_on_fastled", True)
+    
+    result_text = "# ESP32 Symbol Analysis Report\n\n"
+    
+    try:
+        # Define ESP32 boards
+        esp32_boards = ["esp32dev", "esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c6", "esp32h2", "esp32p4", "esp32c2"]
+        
+        # Find build directory
+        build_dir = project_root / ".build"
+        if not build_dir.exists():
+            return CallToolResult(
+                content=[TextContent(type="text", text="Build directory (.build) not found. Please compile an example first.")],
+                isError=not skip_on_failure
+            )
+        
+        # Auto-detect board if needed
+        if board == "auto":
+            detected_boards = []
+            for esp32_board in esp32_boards:
+                candidate_dir = build_dir / esp32_board
+                if candidate_dir.exists() and (candidate_dir / "build_info.json").exists():
+                    detected_boards.append(esp32_board)
+            
+            if not detected_boards:
+                return CallToolResult(
+                    content=[TextContent(type="text", text="No ESP32 boards with build_info.json found in .build directory")],
+                    isError=not skip_on_failure
+                )
+            
+            board = detected_boards[0]  # Use first detected board
+            if len(detected_boards) > 1:
+                result_text += f"**Multiple ESP32 boards detected: {', '.join(detected_boards)}. Using: {board}**\n\n"
+        
+        # Validate board is ESP32-based
+        if not any(esp32_board in board.lower() for esp32_board in esp32_boards):
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Board '{board}' is not an ESP32-based board")],
+                isError=not skip_on_failure
+            )
+        
+        # Find board directory
+        board_dir = build_dir / board
+        build_info_path = board_dir / "build_info.json"
+        
+        if not build_info_path.exists():
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Build info not found for board '{board}' at {build_info_path}")],
+                isError=not skip_on_failure
+            )
+        
+        # Load build info
+        with open(build_info_path) as f:
+            build_info = json.load(f)
+        
+        esp32_info = build_info[board]
+        nm_path = esp32_info["aliases"]["nm"]
+        cppfilt_path = esp32_info["aliases"]["c++filt"]
+        elf_file = esp32_info["prog_path"]
+        
+        result_text += f"**Board:** {board}\n"
+        result_text += f"**Example:** {example}\n"
+        result_text += f"**ELF File:** {elf_file}\n"
+        result_text += f"**NM Tool:** {nm_path}\n\n"
+        
+        # Check if ELF file exists
+        if not Path(elf_file).exists():
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"ELF file not found: {elf_file}")],
+                isError=not skip_on_failure
+            )
+        
+        result_text += "## Symbol Analysis Results\n\n"
+        
+        # Run nm command to get symbols
+        cmd = [nm_path, "--print-size", "--size-sort", "--radix=d", elf_file]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            nm_output = result.stdout
+        except subprocess.CalledProcessError as e:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"Error running nm command: {e.stderr}")],
+                isError=not skip_on_failure
+            )
+        
+        # Parse symbol data
+        symbols = []
+        fastled_symbols = []
+        large_symbols = []
+        
+        for line in nm_output.strip().split("\n"):
+            if not line.strip():
+                continue
+            
+            parts = line.split()
+            if len(parts) >= 4:
+                try:
+                    addr = parts[0]
+                    size = int(parts[1])
+                    symbol_type = parts[2]
+                    mangled_name = " ".join(parts[3:])
+                    
+                    # Demangle symbol if possible
+                    try:
+                        cmd_demangle = ["echo", mangled_name, "|", cppfilt_path]
+                        demangle_result = subprocess.run(
+                            f'echo "{mangled_name}" | "{cppfilt_path}"',
+                            shell=True, capture_output=True, text=True, check=True
+                        )
+                        demangled_name = demangle_result.stdout.strip()
+                        if demangled_name == mangled_name:
+                            demangled_name = mangled_name  # Demangling failed
+                    except:
+                        demangled_name = mangled_name
+                    
+                    symbol_info = {
+                        "address": addr,
+                        "size": size,
+                        "type": symbol_type,
+                        "name": mangled_name,
+                        "demangled_name": demangled_name
+                    }
+                    
+                    symbols.append(symbol_info)
+                    
+                    # Check if FastLED-related
+                    search_text = demangled_name.lower()
+                    if any(keyword in search_text for keyword in [
+                        "fastled", "cfastled", "crgb", "hsv", "pixel", "controller",
+                        "led", "rmt", "strip", "neopixel", "ws2812", "apa102"
+                    ]):
+                        fastled_symbols.append(symbol_info)
+                    
+                    # Check if large symbol
+                    if size > 100:
+                        large_symbols.append(symbol_info)
+                        
+                except (ValueError, IndexError):
+                    continue  # Skip malformed lines
+        
+        # Generate summary
+        total_symbols = len(symbols)
+        total_fastled = len(fastled_symbols)
+        fastled_size = sum(s["size"] for s in fastled_symbols)
+        
+        result_text += f"**Summary:**\n"
+        result_text += f"- Total symbols: {total_symbols}\n"
+        result_text += f"- FastLED symbols: {total_fastled}\n"
+        result_text += f"- Total FastLED size: {fastled_size} bytes ({fastled_size/1024:.1f} KB)\n\n"
+        
+        if focus_on_fastled and fastled_symbols:
+            result_text += "## Largest FastLED Symbols (Optimization Targets)\n\n"
+            fastled_sorted = sorted(fastled_symbols, key=lambda x: x["size"], reverse=True)
+            
+            for i, sym in enumerate(fastled_sorted[:15]):
+                display_name = sym["demangled_name"][:80]
+                if len(sym["demangled_name"]) > 80:
+                    display_name += "..."
+                result_text += f"{i+1:2d}. **{sym['size']:,} bytes** - `{display_name}`\n"
+            
+            if len(fastled_sorted) > 15:
+                result_text += f"\n... and {len(fastled_sorted) - 15} more FastLED symbols\n"
+        
+        result_text += "\n## Largest Overall Symbols\n\n"
+        all_large = sorted(large_symbols, key=lambda x: x["size"], reverse=True)
+        
+        for i, sym in enumerate(all_large[:10]):
+            display_name = sym["demangled_name"][:80]
+            if len(sym["demangled_name"]) > 80:
+                display_name += "..."
+            result_text += f"{i+1:2d}. **{sym['size']:,} bytes** - `{display_name}`\n"
+        
+        # Feature analysis
+        result_text += "\n## Feature Analysis & Recommendations\n\n"
+        feature_patterns = {
+            "JSON functionality": ["json", "Json"],
+            "Audio processing": ["audio", "fft", "Audio"],
+            "2D effects": ["2d", "noise", "matrix"],
+            "Video functionality": ["video", "Video"],
+            "UI components": ["ui", "button", "slider"],
+            "File system": ["file", "File", "fs_"],
+            "Mathematical functions": ["sqrt", "sin", "cos", "math"],
+            "String processing": ["string", "str", "String"],
+        }
+        
+        for feature, patterns in feature_patterns.items():
+            feature_symbols = [
+                s for s in fastled_symbols
+                if any(p in s["demangled_name"] for p in patterns)
+            ]
+            if feature_symbols:
+                total_size = sum(s["size"] for s in feature_symbols)
+                result_text += f"- **{feature}**: {len(feature_symbols)} symbols, {total_size:,} bytes"
+                if total_size > 1000:
+                    result_text += f" ⚠️ Could save ~{total_size/1024:.1f} KB if removed"
+                result_text += "\n"
+        
+        # Include JSON output if requested
+        if output_json:
+            json_data = {
+                "summary": {
+                    "total_symbols": total_symbols,
+                    "fastled_symbols": total_fastled,
+                    "fastled_size": fastled_size,
+                    "board": board,
+                    "example": example
+                },
+                "largest_fastled": fastled_sorted[:10] if 'fastled_sorted' in locals() else [],
+                "largest_overall": all_large[:10]
+            }
+            result_text += f"\n## JSON Output\n\n```json\n{json.dumps(json_data, indent=2)}\n```\n"
+        
+        result_text += "\n## Next Steps\n\n"
+        result_text += "1. Identify unused features from the analysis above\n"
+        result_text += "2. Use conditional compilation to exclude unused code\n"
+        result_text += "3. Consider splitting large functions into smaller ones\n"
+        result_text += "4. Re-run analysis after optimizations to measure impact\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+        
+    except Exception as e:
+        error_msg = f"Error running ESP32 symbol analysis: {str(e)}"
+        if skip_on_failure:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"{error_msg}\n\n(Skipped due to skip_on_failure=True)")]
+            )
+        else:
+            return CallToolResult(
+                content=[TextContent(type="text", text=error_msg)],
+                isError=True
+            )
 
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""
