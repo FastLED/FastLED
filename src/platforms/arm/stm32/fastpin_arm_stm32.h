@@ -7,7 +7,7 @@
 #else
 
 #ifndef USE_NEW_STM32_PIN_DEFINITIONS
-#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI)
+#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB)
 #define USE_NEW_STM32_PIN_DEFINITIONS
 #endif
 #endif
@@ -21,4 +21,3 @@
 #endif
 
 #endif  // FASTLED_FORCE_SOFTWARE_PINS
-
