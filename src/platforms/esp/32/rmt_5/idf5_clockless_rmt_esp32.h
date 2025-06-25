@@ -18,12 +18,12 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // -- The actual controller object for ESP32
-    RmtController5 mRMTController;
+    fl::RmtController5 mRMTController;
 
         // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
-    static RmtController5::DmaMode DefaultDmaMode()
+    static fl::RmtController5::DmaMode DefaultDmaMode()
     {
         return RmtController5::DMA_AUTO;
     }

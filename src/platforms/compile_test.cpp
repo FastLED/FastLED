@@ -16,7 +16,7 @@ FL_DISABLE_WARNING(unused-parameter)
 #include "esp/compile_test.hpp"
 #elif defined(FASTLED_ARM)
 #include "arm/compile_test.hpp"
-#elif defined(APOLLO3)
+#elif defined(APOLLO3) || defined(ARDUINO_ARCH_APOLLO3)
 #include "apollo3/compile_test.hpp"
 #elif defined(FASTLED_STUB_IMPL)
 #include "stub/compile_test.hpp"
@@ -35,7 +35,7 @@ static void compile_tests() {
     esp8266_compile_tests();
 #elif defined(FASTLED_ARM)
     arm_compile_tests();
-#elif defined(APOLLO3)
+#elif defined(APOLLO3) || defined(ARDUINO_ARCH_APOLLO3)
     apollo3_compile_tests();
 #elif defined(FASTLED_STUB_IMPL)
     stub_compile_tests();
