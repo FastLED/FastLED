@@ -77,5 +77,20 @@ static void arm_compile_tests() {
     #error "NRF52 should have CLOCKLESS_FREQUENCY defined"
     #endif
 #endif
+
+// STM32F1 specific compile-time size validation
+#if defined(STM32F1) || defined(__STM32F1__)
+    // Static assert to ensure we're aware of memory constraints
+    // STM32F103C8 has only 64KB flash and 20KB RAM
+    static_assert(sizeof(void*) == 4, "STM32F1 should be 32-bit platform");
+    
+    // Compile-time check for sketch memory usage awareness
+    #if SKETCH_HAS_LOTS_OF_MEMORY != 0
+        // This helps catch cases where large data structures might be used
+        #pragma message "STM32F1 Warning: Large memory structures may not fit in 20KB RAM"
+    #endif
+    
+
+#endif
 }
 }  // namespace fl
