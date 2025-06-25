@@ -136,6 +136,7 @@ uint8_t getPaletteIndex(uint32_t millis32, int width, int max_width, int height,
     
     // Calculate Z coordinate (time dimension) - controls how the pattern changes over time
     uint16_t z = millis32 / invSpeedZ.as<uint16_t>();
+    FL_UNUSED(z);  // Suppress unused variable warning
 
     // Generate 16-bit Perlin noise using our 4D coordinates (x,y,z,t)
     // The << 8 shifts values left by 8 bits (multiplies by 256) to use the full 16-bit range
