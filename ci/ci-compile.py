@@ -82,7 +82,6 @@ DEFAULT_EXAMPLES = [
     "ColorPalette",
     "ColorTemperature",
     "Corkscrew",
-    "CompileTest",
     "Cylon",
     "DemoReel100",
     "Downscale",
