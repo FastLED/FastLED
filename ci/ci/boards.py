@@ -301,6 +301,25 @@ ESP32S3_RMT51 = Board(
     ],
 )
 
+# Teensy boards
+TEENSY_LC = Board(
+    board_name="teensylc",
+    platform="teensy",
+    framework="arduino",
+)
+
+TEENSY30 = Board(
+    board_name="teensy30",
+    platform="teensy",
+    framework="arduino",
+)
+
+TEENSY31 = Board(
+    board_name="teensy31",
+    platform="teensy",
+    framework="arduino",
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
