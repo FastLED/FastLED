@@ -1,6 +1,20 @@
 #define FASTLED_INTERNAL  
 #include "FastLED.h"
 
+// In the future, one of these might fail, and the user will want
+// to disable the compile tests so that they can continue on their
+// way.
+// If for some reason you are hitting this then use a BUILD define
+// (not an include define) in your build flags section
+// '-DFASTLED_USE_COMPILE_TESTS=0'
+#ifndef FASTLED_USE_COMPILE_TESTS
+#define FASTLED_USE_COMPILE_TESTS 1
+#endif
+
+
+#if FASTLED_USE_COMPILE_TESTS
+
+
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -47,3 +61,5 @@ static void compile_tests() {
 }
 
 FL_DISABLE_WARNING_POP
+
+#endif  // FASTLED_USE_COMPILE_TESTS
