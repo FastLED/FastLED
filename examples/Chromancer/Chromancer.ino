@@ -228,6 +228,7 @@ void setup() {
 
 void loop() {
     unsigned long benchmark = millis();
+    FL_UNUSED(benchmark);
     net_loop();
 
 

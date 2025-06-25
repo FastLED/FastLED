@@ -392,6 +392,8 @@ class Ripple {
     void renderLed(byte ledColors[40][14][3], unsigned long age) {
       int strip = ledAssignments[position[0]][0];
       int led = ledAssignments[position[0]][2] + position[1];
+      FL_UNUSED(strip);
+      FL_UNUSED(led);
 
       int red = ledColors[position[0]][position[1]][0];
       int green = ledColors[position[0]][position[1]][1];
