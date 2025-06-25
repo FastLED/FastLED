@@ -11,7 +11,6 @@
 #include "lib8tion/math8.h"
 
 #include "fl/namespace.h"
-#include "fl/hsv16.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -84,26 +83,6 @@ void CRGB::upscale(const CRGB *src, const fl::XYMap &srcXY, CRGB *dst,
     uint16_t w = srcXY.getWidth();
     uint16_t h = srcXY.getHeight();
     fl::upscale(src, dst, w, h, dstXY);
-}
-
-CRGB CRGB::colorBoost(fl::EaseType saturation_function, fl::EaseType luminance_function) const {
-    fl::HSV16 hsv(*this);
-    return hsv.colorBoost(saturation_function, luminance_function);
-}
-
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, fl::EaseType saturation_function, fl::EaseType luminance_function) {
-    for (size_t i = 0; i < count; i++) {
-        dst[i] = src[i].colorBoost(saturation_function, luminance_function);
-    }
-}
-
-fl::HSV16 CRGB::toHSV16() const {
-    return fl::HSV16(*this);
-}
-
-// Constructor implementation for HSV16 -> CRGB automatic conversion
-CRGB::CRGB(const fl::HSV16& rhs) {
-    *this = rhs.ToRGB();
 }
 
 CRGB &CRGB::nscale8(uint8_t scaledown) {
