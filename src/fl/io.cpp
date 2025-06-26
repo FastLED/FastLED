@@ -18,8 +18,39 @@
 
 namespace fl {
 
+#ifdef FASTLED_TESTING
+// Static storage for injected handlers using lazy initialization to avoid global constructors
+static print_handler_t& get_print_handler() {
+    static print_handler_t handler;
+    return handler;
+}
+
+static println_handler_t& get_println_handler() {
+    static println_handler_t handler;
+    return handler;
+}
+
+static available_handler_t& get_available_handler() {
+    static available_handler_t handler;
+    return handler;
+}
+
+static read_handler_t& get_read_handler() {
+    static read_handler_t handler;
+    return handler;
+}
+#endif
+
 void print(const char* str) {
     if (!str) return;
+
+#ifdef FASTLED_TESTING
+    // Check for injected handler first
+    if (get_print_handler()) {
+        get_print_handler()(str);
+        return;
+    }
+#endif
 
 #ifdef __EMSCRIPTEN__
     print_wasm(str);
@@ -42,6 +73,14 @@ void print(const char* str) {
 void println(const char* str) {
     if (!str) return;
 
+#ifdef FASTLED_TESTING
+    // Check for injected handler first
+    if (get_println_handler()) {
+        get_println_handler()(str);
+        return;
+    }
+#endif
+
 #ifdef __EMSCRIPTEN__
     println_wasm(str);
 #elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
@@ -61,6 +100,13 @@ void println(const char* str) {
 }
 
 int available() {
+#ifdef FASTLED_TESTING
+    // Check for injected handler first
+    if (get_available_handler()) {
+        return get_available_handler()();
+    }
+#endif
+
 #ifdef __EMSCRIPTEN__
     return available_wasm();
 #elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
@@ -80,6 +126,13 @@ int available() {
 }
 
 int read() {
+#ifdef FASTLED_TESTING
+    // Check for injected handler first
+    if (get_read_handler()) {
+        return get_read_handler()();
+    }
+#endif
+
 #ifdef __EMSCRIPTEN__
     return read_wasm();
 #elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
@@ -97,5 +150,51 @@ int read() {
     return read_arduino();
 #endif
 }
+
+#ifdef FASTLED_TESTING
+
+// Inject function handlers for testing
+void inject_print_handler(const print_handler_t& handler) {
+    get_print_handler() = handler;
+}
+
+void inject_println_handler(const println_handler_t& handler) {
+    get_println_handler() = handler;
+}
+
+void inject_available_handler(const available_handler_t& handler) {
+    get_available_handler() = handler;
+}
+
+void inject_read_handler(const read_handler_t& handler) {
+    get_read_handler() = handler;
+}
+
+// Clear all injected handlers (restores default behavior)
+void clear_io_handlers() {
+    get_print_handler() = print_handler_t{};
+    get_println_handler() = println_handler_t{};
+    get_available_handler() = available_handler_t{};
+    get_read_handler() = read_handler_t{};
+}
+
+// Clear individual handlers
+void clear_print_handler() {
+    get_print_handler() = print_handler_t{};
+}
+
+void clear_println_handler() {
+    get_println_handler() = println_handler_t{};
+}
+
+void clear_available_handler() {
+    get_available_handler() = available_handler_t{};
+}
+
+void clear_read_handler() {
+    get_read_handler() = read_handler_t{};
+}
+
+#endif // FASTLED_TESTING
 
 } // namespace fl

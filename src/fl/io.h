@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef FASTLED_TESTING
+#include "fl/function.h"
+#endif
+
 namespace fl {
 
 // Low-level print functions that avoid printf/sprintf dependencies
@@ -22,5 +26,30 @@ int available();
 // Returns the byte value (0-255) if data is available
 // Returns -1 if no data is available
 int read();
+
+#ifdef FASTLED_TESTING
+
+// Testing function handler types
+using print_handler_t = fl::function<void(const char*)>;
+using println_handler_t = fl::function<void(const char*)>;
+using available_handler_t = fl::function<int()>;
+using read_handler_t = fl::function<int()>;
+
+// Inject function handlers for testing
+void inject_print_handler(const print_handler_t& handler);
+void inject_println_handler(const println_handler_t& handler);
+void inject_available_handler(const available_handler_t& handler);
+void inject_read_handler(const read_handler_t& handler);
+
+// Clear all injected handlers (restores default behavior)
+void clear_io_handlers();
+
+// Clear individual handlers
+void clear_print_handler();
+void clear_println_handler();
+void clear_available_handler();
+void clear_read_handler();
+
+#endif // FASTLED_TESTING
 
 } // namespace fl
