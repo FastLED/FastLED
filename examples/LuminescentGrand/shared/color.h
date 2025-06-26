@@ -1,7 +1,9 @@
+
+
 #ifndef COLOR_H_
 #define COLOR_H_
 
-#include "fl/stdint.h"
+#include <stdint.h>
 
 struct Color3i {
   static Color3i Black() { return Color3i(0x0, 0x0, 0x0); }
@@ -15,12 +17,6 @@ struct Color3i {
   Color3i(uint8_t r, uint8_t g, uint8_t b) { Set(r,g,b); }
   Color3i() { Set(0xff, 0xff, 0xff); }
   Color3i(const Color3i& other) { Set(other); }
-  Color3i& operator=(const Color3i& other) {
-    if (this != &other) {
-      Set(other);
-    }
-    return *this;
-  }
 
   void Set(uint8_t r, uint8_t g, uint8_t b) { r_ = r; g_ = g; b_ = b; }
   void Set(const Color3i& c) { Set(c.r_, c.g_, c.b_); }
@@ -71,12 +67,6 @@ struct ColorHSV {
   }
   ColorHSV(const ColorHSV& other) {
     Set(other);
-  }
-  ColorHSV& operator=(const ColorHSV& other) {
-    if (this != &other) {
-      Set(other);
-    }
-    return *this;
   }
   void Set(const ColorHSV& other) {
 	  Set(other.h_, other.s_, other.v_);

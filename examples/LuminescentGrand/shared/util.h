@@ -1,7 +1,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include "fl/stdint.h"
+#include <stdint.h>
 
 #include "./ApproximatingFunction.h"
 #include "./settings.h"

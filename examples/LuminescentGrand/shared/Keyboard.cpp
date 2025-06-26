@@ -1,3 +1,6 @@
+
+
+
 #include <Arduino.h>
 
 #include "./util.h"
@@ -175,8 +178,6 @@ void KeyboardState::HandleControlChange(uint8_t d1, uint8_t d2) {
 }
 
 void KeyboardState::HandleAfterTouchPoly(uint8_t note, uint8_t pressure) { 
-  (void)note;     // Suppress unused parameter warning
-  (void)pressure; // Suppress unused parameter warning
   dprintln("HandleAfterTouchPoly");
 
   dprint("\tnote = ");
@@ -207,3 +208,6 @@ Key* KeyboardState::GetKey(int midi_pitch) {
   uint8_t idx = KeyIndex(midi_pitch);
   return &keys_[idx];
 }
+
+
+
