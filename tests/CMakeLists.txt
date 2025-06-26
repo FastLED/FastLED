@@ -31,12 +31,7 @@ if(CCACHE_FOUND)
     set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
     set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
     # Set ccache options for better performance
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Only set pch_defines sloppiness when using GCC with precompiled headers
-        set(ENV{CCACHE_SLOPPINESS} pch_defines,time_macros)
-    else()
-        set(ENV{CCACHE_SLOPPINESS} time_macros)
-    endif()
+    set(ENV{CCACHE_SLOPPINESS} time_macros)
     set(ENV{CCACHE_COMPRESS} true)
 else()
     message(STATUS "ccache not found. Install ccache for faster incremental builds.")
@@ -325,19 +320,7 @@ target_compile_options(doctest_main PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_options(doctest_main PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
 target_compile_definitions(doctest_main PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
-# Set up precompiled headers for faster compilation (GCC only)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_precompile_headers(doctest_main PRIVATE
-        <vector>
-        <string>
-        <iostream>
-        <algorithm>
-        <cstdint>
-        <cmath>
-        <memory>
-        "doctest.h"
-    )
-endif()
+
 
 # Add Windows debugging libraries for crash handler
 if(WIN32)
@@ -355,11 +338,6 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     target_link_libraries(${TEST_NAME} fastled doctest_main)
-    
-    # Reuse precompiled headers from doctest_main for faster compilation (GCC only)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_precompile_headers(${TEST_NAME} REUSE_FROM doctest_main)
-    endif()
     
     # Set the correct subsystem for Windows
     if(WIN32)
