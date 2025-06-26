@@ -10,8 +10,6 @@
 #include "fl/xymap.h"
 #include "frame.h"
 
-using namespace fl;
-
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb() {

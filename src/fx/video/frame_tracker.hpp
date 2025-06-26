@@ -3,7 +3,7 @@
 namespace fl {
 
 namespace { // anonymous namespace
-long map(long x, long in_min, long in_max, long out_min, long out_max) {
+long linear_map(long x, long in_min, long in_max, long out_min, long out_max) {
     const long run = in_max - in_min;
     if (run == 0) {
         return 0; // AVR returns -1, SAM returns 0
@@ -38,7 +38,7 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
         uint64_t frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
         uint32_t rel_time = microseconds - frame1_start;
         uint32_t frame_duration = frame2_start - frame1_start;
-        uint8_t progress = uint8_t(map(rel_time, 0, frame_duration, 0, 255));
+        uint8_t progress = uint8_t(linear_map(rel_time, 0, frame_duration, 0, 255));
         *amountOfNextFrame = progress;
     }
 }

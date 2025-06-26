@@ -7,8 +7,6 @@
 #include "fl/namespace.h"
 #include "fl/warn.h"
 
-using namespace fl;
-
 namespace fl {
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
