@@ -22,6 +22,7 @@ and removals.
 #include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -31,9 +32,12 @@ namespace fl {
 // use fl::unordered_map;
 // // end using declarations for stl compatibility
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(null-dereference)
 template <typename T> struct EqualTo {
     bool operator()(const T &a, const T &b) const { return a == b; }
 };
+FL_DISABLE_WARNING_POP
 
 // -- HashMap class
 // ------------------------------------------------------------- Begin HashMap
@@ -489,6 +493,9 @@ class HashMap {
         }
     }
 
+    // Rehash the inline buckets without resizing
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(null-dereference)
     void rehash_inline_no_resize() {
         // filter out tombstones and compact
         size_t cap = _buckets.size();
@@ -558,7 +565,7 @@ class HashMap {
                 occupied.set(new_idx);
                 if (new_idx < _size) {
                     // we have to swap the entry at new_idx with tmp
-                    optional<Entry> tmp2 = _buckets[new_idx];
+                    fl::optional<Entry> tmp2 = _buckets[new_idx];
                     _buckets[new_idx] = *tmp.ptr();
                     tmp = tmp2;
                 } else {
@@ -571,9 +578,12 @@ class HashMap {
                 occupied.test(i),
                 "HashMap::rehash_inline_no_resize: invalid occupied at " << i);
             FASTLED_ASSERT(
-                !tmp, "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
+                tmp.empty(), "HashMap::rehash_inline_no_resize: invalid tmp at " << i);
         }
+        // Reset tombstones count since we've cleared all deleted entries
+        _tombstones = 0;
     }
+    FL_DISABLE_WARNING_POP
 
     fl::vector_inlined<Entry, INLINED_COUNT> _buckets;
     size_t _size;

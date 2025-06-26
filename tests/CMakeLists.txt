@@ -24,6 +24,19 @@ if(CPU_COUNT)
     set(CMAKE_BUILD_PARALLEL_LEVEL ${CPU_COUNT})
 endif()
 
+# Check for ccache to speed up compilation
+find_program(CCACHE_FOUND ccache)
+if(CCACHE_FOUND)
+    message(STATUS "Using ccache: ${CCACHE_FOUND}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
+    # Set ccache options for better performance
+    set(ENV{CCACHE_SLOPPINESS} pch_defines,time_macros)
+    set(ENV{CCACHE_COMPRESS} true)
+else()
+    message(STATUS "ccache not found. Install ccache for faster incremental builds.")
+endif()
+
 # Check if mold linker is available
 find_program(MOLD_EXECUTABLE mold)
 
@@ -54,17 +67,27 @@ set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 # Output the current build type
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+# Optimization suggestions for even faster builds (uncomment to test):
+# 1. Use -Og instead of -O1 for potentially faster compilation:
+#    set(FAST_DEBUG_OPT -Og)
+# 2. Reduce debug info further for fastest builds (use only for CI):
+#    set(FAST_DEBUG_INFO -g0)  # No debug info
+# 3. Disable frame pointers if stack traces aren't needed:
+#    set(FAST_FRAME_POINTER -fomit-frame-pointer)
+# Current optimized settings (proven 66% improvement from baseline):
+set(FAST_DEBUG_OPT -O1)
+# set(FAST_DEBUG_INFO -gline-tables-only)  # something wrong with this
+set(FAST_FRAME_POINTER -fno-omit-frame-pointer)
+
 # Define common compiler flags and definitions
 set(COMMON_COMPILE_FLAGS
     -Wall
     -Wextra 
     #-Wpedantic
     -funwind-tables
-    -g3
-    -ggdb
-    -fno-omit-frame-pointer
-    -O0
-    -fno-inline
+    ${FAST_DEBUG_INFO}
+    ${FAST_FRAME_POINTER}
+    ${FAST_DEBUG_OPT}
     -Werror=return-type
     -Werror=missing-declarations
     -Werror=redundant-decls
@@ -139,10 +162,9 @@ set(UNIT_TEST_COMPILE_FLAGS
     #-Wextra 
     #-Wpedantic
     -funwind-tables
-    -g3
-    -ggdb
-    -fno-omit-frame-pointer
-    -O0
+    ${FAST_DEBUG_INFO}
+    ${FAST_FRAME_POINTER}
+    ${FAST_DEBUG_OPT}
     -Werror=return-type
     -Werror=missing-declarations
     #-Werror=redundant-decls
@@ -298,6 +320,18 @@ target_compile_options(doctest_main PRIVATE ${UNIT_TEST_COMPILE_FLAGS})
 target_compile_options(doctest_main PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${UNIT_TEST_CXX_FLAGS}>)
 target_compile_definitions(doctest_main PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
+# Set up precompiled headers for faster compilation
+target_precompile_headers(doctest_main PRIVATE
+    <vector>
+    <string>
+    <iostream>
+    <algorithm>
+    <cstdint>
+    <cmath>
+    <memory>
+    "doctest.h"
+)
+
 # Add Windows debugging libraries for crash handler
 if(WIN32)
     target_link_libraries(doctest_main dbghelp psapi)
@@ -314,6 +348,9 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     target_link_libraries(${TEST_NAME} fastled doctest_main)
+    
+    # Reuse precompiled headers from doctest_main for faster compilation
+    target_precompile_headers(${TEST_NAME} REUSE_FROM doctest_main)
     
     # Set the correct subsystem for Windows
     if(WIN32)

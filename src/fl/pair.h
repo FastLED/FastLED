@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/move.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
 
@@ -8,7 +9,10 @@ template <typename Key, typename Value> struct Pair {
     Key first = Key();
     Value second = Value();
     Pair() = default;
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING(null-dereference)
     Pair(const Key &k, const Value &v) : first(k), second(v) {}
+    FL_DISABLE_WARNING_POP
     
     // Rule of 5: copy constructor, copy assignment, move constructor, move assignment, destructor
     Pair(const Pair &other) = default;

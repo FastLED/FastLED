@@ -53,3 +53,4 @@ temp
 .cache
 ci/ci/scrapers/screenshot
 tests/CMakeFiles
+CMakeCache.txt

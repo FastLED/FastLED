@@ -1,15 +1,20 @@
 #pragma once
 
+#include "fl/warn.h"
+#include "fl/str.h"
+#include "fl/compiler_control.h"
+
 #ifndef FASTLED_ENABLE_JSON
-#ifdef __AVR__
-#define FASTLED_ENABLE_JSON 0
-#else
 #define FASTLED_ENABLE_JSON 1
-#endif
 #endif
 
 #if FASTLED_ENABLE_JSON
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(null-dereference)
 #include "third_party/arduinojson/json.h"
+FL_DISABLE_WARNING_POP
+
 #endif
 
 #if !FASTLED_ENABLE_JSON

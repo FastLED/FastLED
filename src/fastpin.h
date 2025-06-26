@@ -4,6 +4,7 @@
 #define __INC_FASTPIN_H
 
 #include "FastLED.h"
+#include "fl/compiler_control.h"
 
 #include "led_sysdefs.h"
 #include <stddef.h>
@@ -80,9 +81,12 @@ public:
 	inline void setInputPullup() { pinMode(mPin, INPUT_PULLUP); }
 
 	/// Set the pin state to `HIGH`
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING(null-dereference)
 	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
 	/// Set the pin state to `LOW`
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+	FL_DISABLE_WARNING_POP
 
 	/// Toggle the pin twice to create a short pulse
 	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
@@ -170,8 +174,13 @@ public:
 	inline void setInput() { /* TODO: Set pin input */ }
 	inline void setInputPullup() { /* TODO: Set pin input pullup */ }
 
+	/// Set the pin state to `HIGH`
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING(null-dereference)
 	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
+	/// Set the pin state to `LOW`
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+	FL_DISABLE_WARNING_POP
 
 	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
