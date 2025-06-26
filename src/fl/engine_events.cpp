@@ -1,9 +1,10 @@
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
 
-using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
+
+
 
 EngineEvents::Listener::Listener() {}
 
@@ -128,4 +129,4 @@ void EngineEvents::_onCanvasUiSet(CLEDController *strip,
 
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
-FASTLED_NAMESPACE_END
+} // namespace fl
