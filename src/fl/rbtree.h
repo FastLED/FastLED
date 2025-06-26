@@ -7,12 +7,13 @@
 #include "fl/template_magic.h"
 #include "fl/type_traits.h"
 #include "fl/algorithm.h"
+#include "fl/slab_allocator.h"
 
 namespace fl {
 
 // Red-Black Tree implementation
 // This is a self-balancing binary search tree with O(log n) operations
-template <typename Key, typename Value, typename Compare = DefaultLess<Key>>
+template <typename Key, typename Value, typename Compare = DefaultLess<Key>, typename Allocator = allocator_slab<char>>
 class MapRedBlackTree {
 public:
     using key_type = Key;
@@ -25,6 +26,7 @@ public:
     using const_reference = const value_type&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
+    using allocator_type = Allocator;
 
     // Red-Black Tree colors
     enum Color { RED, BLACK };
@@ -44,9 +46,12 @@ private:
             : data(k, v), color(c), left(nullptr), right(nullptr), parent(p) {}
     };
 
+    using NodeAllocator = typename Allocator::template rebind<Node>::other;
+
     Node* root_;
     size_type size_;
     Compare comp_;
+    NodeAllocator alloc_;
 
     // Helper methods
     void rotateLeft(Node* x) {
@@ -238,14 +243,22 @@ private:
         if (node != nullptr) {
             destroyTree(node->left);
             destroyTree(node->right);
-            delete node;
+            alloc_.destroy(node);
+            alloc_.deallocate(node, 1);
         }
     }
 
     Node* copyTree(Node* node, Node* parent = nullptr) {
         if (node == nullptr) return nullptr;
         
-        Node* newNode = new Node(node->data, node->color, parent);
+        Node* newNode = alloc_.allocate(1);
+        if (newNode == nullptr) {
+            // Out of memory - this is a critical error
+            // In embedded systems, we can't recover from this
+            return nullptr;
+        }
+        
+        alloc_.construct(newNode, node->data, node->color, parent);
         newNode->left = copyTree(node->left, newNode);
         newNode->right = copyTree(node->right, newNode);
         return newNode;
@@ -407,11 +420,11 @@ public:
     };
 
     // Constructors and destructor
-    MapRedBlackTree(const Compare& comp = Compare()) 
-        : root_(nullptr), size_(0), comp_(comp) {}
+    MapRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
+        : root_(nullptr), size_(0), comp_(comp), alloc_(alloc) {}
 
     MapRedBlackTree(const MapRedBlackTree& other) 
-        : root_(nullptr), size_(other.size_), comp_(other.comp_) {
+        : root_(nullptr), size_(other.size_), comp_(other.comp_), alloc_(other.alloc_) {
         if (other.root_) {
             root_ = copyTree(other.root_);
         }
@@ -422,6 +435,7 @@ public:
             clear();
             size_ = other.size_;
             comp_ = other.comp_;
+            alloc_ = other.alloc_;
             if (other.root_) {
                 root_ = copyTree(other.root_);
             }
@@ -473,7 +487,14 @@ public:
         }
         
         // Insert new node
-        Node* newNode = new Node(key, Value());
+        Node* newNode = alloc_.allocate(1);
+        if (newNode == nullptr) {
+            // Out of memory - we cannot create the value
+            // This will cause undefined behavior, but it's better than segfault
+            static Value default_value;
+            return default_value;
+        }
+        alloc_.construct(newNode, key, Value());
         
         if (root_ == nullptr) {
             root_ = newNode;
@@ -530,7 +551,12 @@ public:
             return fl::Pair<iterator, bool>(iterator(existing, this), false);
         }
 
-        Node* newNode = new Node(value);
+        Node* newNode = alloc_.allocate(1);
+        if (newNode == nullptr) {
+            // Out of memory - return failed insertion
+            return fl::Pair<iterator, bool>(end(), false);
+        }
+        alloc_.construct(newNode, value);
         
         if (root_ == nullptr) {
             root_ = newNode;
@@ -619,7 +645,8 @@ public:
             y->color = nodeToDelete->color;
         }
 
-        delete nodeToDelete;
+        alloc_.destroy(nodeToDelete);
+        alloc_.deallocate(nodeToDelete, 1);
         --size_;
 
         if (yOriginalColor == BLACK) {
