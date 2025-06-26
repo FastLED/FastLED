@@ -777,14 +777,31 @@ Changing signatures causes runtime errors that are extremely difficult to debug.
 
 🚨 **CRITICAL: DO NOT add new #include "Arduino.h" or #include <Arduino.h> statements**
 
-## Why This is Prohibited:
+## 🚨 DEBUGGING LINKER ERRORS
+**If you encounter weird linker errors after making changes, FIRST check if Arduino.h has been added anywhere:**
+
+### Common Symptoms of Arduino.h-Related Linker Errors:
+- ❌ **Undefined reference errors** for standard functions
+- ❌ **Multiple definition errors** for common symbols
+- ❌ **Conflicting symbol errors** between Arduino and FastLED
+- ❌ **Missing library errors** that were not missing before
+- ❌ **Platform-specific compilation failures** that worked before
+
+### Immediate Debugging Steps:
+1. **🔍 Search for new Arduino.h includes:** `grep -r "Arduino\.h" src/` and check if any new includes were added
+2. **📝 Check recent file changes** for any #include "Arduino.h" or #include <Arduino.h> statements  
+3. **🔄 Remove any new Arduino.h includes** and replace with FastLED platform abstractions
+4. **✅ Rebuild and test** to confirm the linker errors are resolved
+
+### Why Arduino.h Causes Linker Issues:
 - **Path Conflicts:** Arduino.h includes can interfere with FastLED's custom path resolution
+- **Symbol Conflicts:** Arduino.h defines symbols that conflict with FastLED's implementations
 - **Build Issues:** Incorrect Arduino.h includes cause compilation failures across platforms
 - **Dependency Management:** FastLED manages Arduino compatibility through its own abstraction layer
 
 ## What to Avoid:
 ❌ `#include "Arduino.h"`
-❌ `#include <Arduino.h>`
+❌ `#include <Arduino.h"`
 ❌ Adding new Arduino.h includes to existing files
 ❌ Copying Arduino.h includes from other examples
 
@@ -807,6 +824,7 @@ These are pre-approved and should NOT be changed or removed.
 🚨 **NEVER add Arduino.h includes when creating or modifying files**
 🚨 **Always use FastLED's platform abstraction layer instead**
 🚨 **Check existing code patterns before adding platform-specific includes**
+🚨 **When troubleshooting linker errors, ALWAYS check for Arduino.h additions first**
 
 This rule prevents path conflicts and ensures consistent cross-platform compatibility.
 """,
@@ -917,11 +935,12 @@ IMMEDIATELY after Python modifications, not wait until final validation.
         result = "# FastLED C++ Coding Standards\n\n"
         result += "## 🚨 MOST CRITICAL RULES 🚨\n\n"
         result += "1. **NO ARDUINO.H INCLUDES** - Never add new #include \"Arduino.h\" or #include <Arduino.h>\n"
-        result += "2. **PYTHON LINTING MANDATORY** - Run `bash lint` after modifying any *.py files\n"
-        result += "3. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
-        result += "4. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
-        result += "5. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
-        result += "6. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
+        result += "2. **LINKER ERROR DEBUGGING** - If weird linker errors occur, check for Arduino.h additions FIRST\n"
+        result += "3. **PYTHON LINTING MANDATORY** - Run `bash lint` after modifying any *.py files\n"
+        result += "4. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
+        result += "5. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
+        result += "6. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
+        result += "7. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
         
         for section_name, content in standards.items():
             result += content + "\n" + ("="*50) + "\n\n"
