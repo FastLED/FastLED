@@ -3,6 +3,8 @@
 // ESP32 has ESP-IDF logging system, ESP8266 uses Arduino Serial
 #ifdef ESP32
 #include "esp_log.h"
+#else
+#include "Arduino.h"
 #endif
 
 namespace fl {
