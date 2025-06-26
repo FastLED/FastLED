@@ -4,18 +4,16 @@
 #include "fl/stdint.h"
 
 #include "fl/assert.h"
+#include "fl/comparators.h"
 #include "fl/insert_result.h"
 #include "fl/namespace.h"
 #include "fl/pair.h"
 #include "fl/template_magic.h"
 #include "fl/type_traits.h"
 #include "fl/vector.h"
+#include "fl/rbtree.h"
 
 namespace fl {
-
-template <typename T> struct DefaultLess {
-    bool operator()(const T &a, const T &b) const { return a < b; }
-};
 
 // A simple unordered map implementation with a fixed size.
 // The user is responsible for making sure that the inserts
@@ -478,6 +476,9 @@ class SortedHeapMap {
 namespace fl {
 
 template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using fl_map = SortedHeapMap<Key, T, Compare>;
+using fl_map = MapRedBlackTree<Key, T, Compare>;
+
+template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
+using map = MapRedBlackTree<Key, T, Compare>;
 
 } // namespace fl
