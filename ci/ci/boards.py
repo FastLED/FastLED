@@ -320,6 +320,18 @@ TEENSY31 = Board(
     framework="arduino",
 )
 
+TEENSY40 = Board(
+    board_name="teensy40",
+    platform="teensy",
+    framework="arduino",
+)
+
+TEENSY41 = Board(
+    board_name="teensy41",
+    platform="teensy",
+    framework="arduino",
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
