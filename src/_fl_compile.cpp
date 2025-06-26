@@ -1,3 +1,4 @@
+// This file is necessary for avr on platformio, possibly arduino ide too.
 
 // According to this report, all arduino files must be located at one folder.
 // However this is only seen in the avr platforms.
