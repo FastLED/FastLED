@@ -122,10 +122,13 @@ namespace {
 }
 
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-// Global cin instance
+// Global cin instance (stub that conditionally delegates)
 istream cin;
 
-bool istream::readLine() {
+// Global cin_real instance (actual implementation)
+istream_real cin_real;
+
+bool istream_real::readLine() {
     // If we have no more data available and no buffered data, we're at EOF
     if (pos_ >= buffer_len_ && fl::available() == 0) {
         return false;
@@ -147,7 +150,7 @@ bool istream::readLine() {
     return true;
 }
 
-void istream::skipWhitespace() {
+void istream_real::skipWhitespace() {
     while (pos_ < buffer_len_ && 
            (buffer_[pos_] == ' ' || buffer_[pos_] == '\t' || 
             buffer_[pos_] == '\n' || buffer_[pos_] == '\r')) {
@@ -162,7 +165,7 @@ void istream::skipWhitespace() {
     }
 }
 
-bool istream::readToken(string& token) {
+bool istream_real::readToken(string& token) {
     skipWhitespace();
     
     if (pos_ >= buffer_len_ && fl::available() == 0) {
@@ -193,14 +196,14 @@ bool istream::readToken(string& token) {
     return !token.empty();
 }
 
-istream& istream::operator>>(string& str) {
+istream_real& istream_real::operator>>(string& str) {
     if (!readToken(str)) {
         failed_ = true;
     }
     return *this;
 }
 
-istream& istream::operator>>(char& c) {
+istream_real& istream_real::operator>>(char& c) {
     skipWhitespace();
     
     if (pos_ >= buffer_len_ && fl::available() > 0) {
@@ -220,7 +223,7 @@ istream& istream::operator>>(char& c) {
     return *this;
 }
 
-istream& istream::operator>>(int8_t& n) {
+istream_real& istream_real::operator>>(int8_t& n) {
     string token;
     if (readToken(token)) {
         int32_t temp;
@@ -235,7 +238,7 @@ istream& istream::operator>>(int8_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(uint8_t& n) {
+istream_real& istream_real::operator>>(uint8_t& n) {
     string token;
     if (readToken(token)) {
         uint32_t temp;
@@ -250,7 +253,7 @@ istream& istream::operator>>(uint8_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(int16_t& n) {
+istream_real& istream_real::operator>>(int16_t& n) {
     string token;
     if (readToken(token)) {
         int32_t temp;
@@ -265,7 +268,7 @@ istream& istream::operator>>(int16_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(uint16_t& n) {
+istream_real& istream_real::operator>>(uint16_t& n) {
     string token;
     if (readToken(token)) {
         uint32_t temp;
@@ -280,7 +283,7 @@ istream& istream::operator>>(uint16_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(int32_t& n) {
+istream_real& istream_real::operator>>(int32_t& n) {
     string token;
     if (readToken(token)) {
         if (!parse_int32(token.c_str(), n)) {
@@ -292,7 +295,7 @@ istream& istream::operator>>(int32_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(uint32_t& n) {
+istream_real& istream_real::operator>>(uint32_t& n) {
     string token;
     if (readToken(token)) {
         if (!parse_uint32(token.c_str(), n)) {
@@ -304,7 +307,7 @@ istream& istream::operator>>(uint32_t& n) {
     return *this;
 }
 
-istream& istream::operator>>(float& f) {
+istream_real& istream_real::operator>>(float& f) {
     string token;
     if (readToken(token)) {
         // Use the existing toFloat() method
@@ -321,7 +324,7 @@ istream& istream::operator>>(float& f) {
     return *this;
 }
 
-istream& istream::operator>>(double& d) {
+istream_real& istream_real::operator>>(double& d) {
     string token;
     if (readToken(token)) {
         // Use the existing toFloat() method
@@ -340,7 +343,7 @@ istream& istream::operator>>(double& d) {
 
 
 #if FASTLED_STRSTREAM_USES_SIZE_T
-istream& istream::operator>>(size_t& n) {
+istream_real& istream_real::operator>>(size_t& n) {
     string token;
     if (readToken(token)) {
         uint32_t temp;
@@ -356,7 +359,7 @@ istream& istream::operator>>(size_t& n) {
 }
 #endif
 
-istream& istream::getline(string& str) {
+istream_real& istream_real::getline(string& str) {
     str.clear();
     
     // Read from current buffer position to end
@@ -388,7 +391,7 @@ istream& istream::getline(string& str) {
     return *this;
 }
 
-int istream::get() {
+int istream_real::get() {
     if (pos_ >= buffer_len_ && fl::available() > 0) {
         if (!readLine()) {
             return -1;
@@ -403,7 +406,7 @@ int istream::get() {
     return fl::read();
 }
 
-istream& istream::putback(char c) {
+istream_real& istream_real::putback(char c) {
     if (pos_ > 0) {
         pos_--;
         buffer_[pos_] = c;
@@ -421,7 +424,7 @@ istream& istream::putback(char c) {
     return *this;
 }
 
-int istream::peek() {
+int istream_real::peek() {
     if (pos_ >= buffer_len_ && fl::available() > 0) {
         if (!readLine()) {
             return -1;

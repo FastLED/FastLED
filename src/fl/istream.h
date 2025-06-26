@@ -3,6 +3,7 @@
 #include "fl/io.h"
 #include "fl/str.h"
 #include "fl/type_traits.h"
+#include "fl/sketch_macros.h"
 
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
 #if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
@@ -14,7 +15,7 @@
 
 namespace fl {
 
-class istream {
+class istream_real {
 private:
     static const size_t BUFFER_SIZE = 256;
     char buffer_[BUFFER_SIZE];
@@ -32,7 +33,7 @@ private:
     bool readToken(string& token);
     
 public:
-    istream() = default;
+    istream_real() = default;
     
     // Check if stream is in good state
     bool good() const { return !failed_; }
@@ -43,35 +44,233 @@ public:
     void clear() { failed_ = false; }
     
     // Stream input operators
-    istream& operator>>(string& str);
-    istream& operator>>(char& c);
-    istream& operator>>(int8_t& n);
-    istream& operator>>(uint8_t& n);
-    istream& operator>>(int16_t& n);
-    istream& operator>>(uint16_t& n);
-    istream& operator>>(int32_t& n);
-    istream& operator>>(uint32_t& n);
-    istream& operator>>(float& f);
-    istream& operator>>(double& d);
+    istream_real& operator>>(string& str);
+    istream_real& operator>>(char& c);
+    istream_real& operator>>(int8_t& n);
+    istream_real& operator>>(uint8_t& n);
+    istream_real& operator>>(int16_t& n);
+    istream_real& operator>>(uint16_t& n);
+    istream_real& operator>>(int32_t& n);
+    istream_real& operator>>(uint32_t& n);
+    istream_real& operator>>(float& f);
+    istream_real& operator>>(double& d);
     
 #if FASTLED_STRSTREAM_USES_SIZE_T
-    istream& operator>>(size_t& n);
+    istream_real& operator>>(size_t& n);
 #endif
     
     // Get a line from input
-    istream& getline(string& str);
+    istream_real& getline(string& str);
     
     // Get next character
     int get();
     
     // Put back a character
-    istream& putback(char c);
+    istream_real& putback(char c);
     
     // Peek at next character without consuming it
     int peek();
 };
 
-// Global cin instance for input
+// Stub istream class that conditionally delegates to istream_real
+class istream {
+private:
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    istream_real real_stream_;
+#endif
+    
+public:
+    istream() = default;
+    
+    // Check if stream is in good state
+    bool good() const { 
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        return real_stream_.good();
+#else
+        return true; // Always good on memory-constrained platforms
+#endif
+    }
+    
+    bool fail() const { 
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        return real_stream_.fail();
+#else
+        return false; // Never fail on memory-constrained platforms
+#endif
+    }
+    
+    bool eof() const { 
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        return real_stream_.eof();
+#else
+        return true; // Always EOF on memory-constrained platforms
+#endif
+    }
+    
+    // Clear error state
+    void clear() { 
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_.clear();
+#endif
+    }
+    
+    // Stream input operators
+    istream& operator>>(string& str) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> str;
+#else
+        // No-op on memory-constrained platforms
+        str.clear();
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(char& c) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> c;
+#else
+        // No-op on memory-constrained platforms
+        c = '\0';
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(int8_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(uint8_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(int16_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(uint16_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(int32_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(uint32_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(float& f) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> f;
+#else
+        // No-op on memory-constrained platforms
+        f = 0.0f;
+#endif
+        return *this;
+    }
+    
+    istream& operator>>(double& d) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> d;
+#else
+        // No-op on memory-constrained platforms
+        d = 0.0;
+#endif
+        return *this;
+    }
+    
+#if FASTLED_STRSTREAM_USES_SIZE_T
+    istream& operator>>(size_t& n) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_ >> n;
+#else
+        // No-op on memory-constrained platforms
+        n = 0;
+#endif
+        return *this;
+    }
+#endif
+    
+    // Get a line from input
+    istream& getline(string& str) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_.getline(str);
+#else
+        // No-op on memory-constrained platforms
+        str.clear();
+#endif
+        return *this;
+    }
+    
+    // Get next character
+    int get() {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        return real_stream_.get();
+#else
+        // No-op on memory-constrained platforms
+        return -1;
+#endif
+    }
+    
+    // Put back a character
+    istream& putback(char c) {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        real_stream_.putback(c);
+#endif
+        return *this;
+    }
+    
+    // Peek at next character without consuming it
+    int peek() {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+        return real_stream_.peek();
+#else
+        // No-op on memory-constrained platforms
+        return -1;
+#endif
+    }
+};
+
+// Global cin instance for input (now uses the stub)
 extern istream cin;
+
+// Global cin_real instance (actual implementation)
+extern istream_real cin_real;
 
 } // namespace fl
