@@ -1,23 +1,49 @@
 #pragma once
 
+// ESP32 has ESP-IDF logging system, ESP8266 uses Arduino Serial
+#ifdef ESP32
 #include "esp_log.h"
+#endif
 
 namespace fl {
 
-// Helper function for ESP32 native logging
+// Helper function for ESP native logging
+#ifdef ESP32
 static const char* FL_TAG = "FastLED";
+#endif
 
 // Print functions
 inline void print_esp(const char* str) {
     if (!str) return;
-    // ESP32/ESP8266: Use native ESP-IDF logging
+    
+#ifdef ESP32
+    // ESP32: Use native ESP-IDF logging
     // This avoids Arduino Serial dependency and uses ESP's native UART
     ESP_LOGI(FL_TAG, "%s", str);
+#else
+    // ESP8266: Use Arduino Serial (ESP-IDF logging not available)
+    #ifdef ARDUINO_H
+    if (Serial) {
+        Serial.print(str);
+    }
+    #endif
+#endif
 }
 
 inline void println_esp(const char* str) {
     if (!str) return;
+    
+#ifdef ESP32
+    // ESP32: Use native ESP-IDF logging with newline
     ESP_LOGI(FL_TAG, "%s\n", str);
+#else
+    // ESP8266: Use Arduino Serial println
+    #ifdef ARDUINO_H
+    if (Serial) {
+        Serial.println(str);
+    }
+    #endif
+#endif
 }
 
 // Input functions
