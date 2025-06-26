@@ -7,7 +7,7 @@
 #include "fl/xymap.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
-#ifdef __AVR__
+#if defined(__AVR__) || defined(ESP8266)
 #define FASTLED_HAS_ENGINE_EVENTS 0
 #else
 #define FASTLED_HAS_ENGINE_EVENTS 1
