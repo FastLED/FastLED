@@ -72,6 +72,9 @@ public:
     int peek();
 };
 
+// Function to get singleton instance of istream_real (for better linker elimination)
+istream_real& cin_real();
+
 // Stub istream class that conditionally delegates to istream_real
 class istream {
 private:
@@ -269,8 +272,5 @@ public:
 
 // Global cin instance for input (now uses the stub)
 extern istream cin;
-
-// Global cin_real instance (actual implementation)
-extern istream_real cin_real;
 
 } // namespace fl

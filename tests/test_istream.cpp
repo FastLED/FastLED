@@ -27,22 +27,22 @@ TEST_CASE("fl::istream basic instantiation compiles") {
 }
 
 TEST_CASE("fl::cin_real global instance compiles") {
-    // Test that we can use the global fl::cin_real instance
-    fl::istream_real* cin_real_ptr = &fl::cin_real;
+    // Test that we can use the fl::cin_real() function
+    fl::istream_real* cin_real_ptr = &fl::cin_real();
     CHECK(cin_real_ptr != nullptr);
     
-    // Test that we can call methods on cin_real
-    bool cin_real_good = fl::cin_real.good();
-    bool cin_real_fail = fl::cin_real.fail();
-    bool cin_real_eof = fl::cin_real.eof();
-    fl::cin_real.clear();
+    // Test that we can call methods on cin_real()
+    bool cin_real_good = fl::cin_real().good();
+    bool cin_real_fail = fl::cin_real().fail();
+    bool cin_real_eof = fl::cin_real().eof();
+    fl::cin_real().clear();
     
     // Suppress unused variable warnings
     (void)cin_real_good;
     (void)cin_real_fail;
     (void)cin_real_eof;
     
-    CHECK(true); // If we got here, cin_real compiled and is accessible
+    CHECK(true); // If we got here, cin_real() compiled and is accessible
 }
 
 TEST_CASE("fl::istream input operators compile") {

@@ -125,8 +125,13 @@ FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
 // Global cin instance (stub that conditionally delegates)
 istream cin;
 
-// Global cin_real instance (actual implementation)
-istream_real cin_real;
+// Function to get singleton instance of istream_real (for better linker elimination)
+istream_real& cin_real() {
+    // Local static instance - only constructed when first called
+    // This allows the linker to eliminate it if never referenced
+    static istream_real instance;
+    return instance;
+}
 
 bool istream_real::readLine() {
     // If we have no more data available and no buffered data, we're at EOF
