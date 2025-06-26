@@ -119,7 +119,7 @@ TEST_CASE("__builtin_five_bit_hd_gamma_bitshift") {
   for (const auto& data : test_data) {
     CRGB out_color;
     uint8_t out_brightness;
-    __builtin_five_bit_hd_gamma_bitshift(CRGB(data[0][0], data[0][1], data[0][2]), CRGB(255, 255, 255), data[0][3], &out_color, &out_brightness);
+    five_bit_hd_gamma_bitshift(CRGB(data[0][0], data[0][1], data[0][2]), CRGB(255, 255, 255), data[0][3], &out_color, &out_brightness);
     INFO("input  red ", data[0][0], " green ", data[0][1], " blue ", data[0][2], " brightness ", data[0][3]);
     INFO("output red ", out_color.r, " green ", out_color.g, " blue ", out_color.b, " brightness ", out_brightness);
     CHECK_EQ(out_color.r, data[1][0]);
@@ -280,4 +280,3 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
 #endif
 
 }
-

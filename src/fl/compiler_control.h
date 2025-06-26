@@ -40,8 +40,7 @@
     _Pragma("GCC push_options") \
     _Pragma("GCC optimize (\"fast-math\")") \
     _Pragma("GCC optimize (\"tree-vectorize\")") \
-    _Pragma("GCC optimize (\"unroll-loops\")") \
-    _Pragma("STDC FP_CONTRACT ON")
+    _Pragma("GCC optimize (\"unroll-loops\")")
 
   #define FL_FAST_MATH_END   _Pragma("GCC pop_options")
 
