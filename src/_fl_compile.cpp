@@ -11,6 +11,7 @@
 #include "fl/blur.hpp"
 #include "fl/bytestreammemory.hpp"
 #include "fl/colorutils.hpp"
+#include "fl/crgb_hsv16.hpp"
 #include "fl/corkscrew.hpp"
 #include "fl/downscale.hpp"
 #include "fl/ease.hpp"
