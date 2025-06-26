@@ -9,6 +9,10 @@
 """
 FastLED MCP Server - Provides tools for working with the FastLED project
 
+🚨 CRITICAL FOR BACKGROUND AGENTS: When modifying ANY Python files (*.py), 
+you MUST run `bash lint` immediately after making changes and before indicating completion.
+This is a NON-NEGOTIABLE REQUIREMENT to ensure code quality and prevent build failures.
+
 To use this server, make sure you have the MCP library installed:
 pip install mcp
 
@@ -252,7 +256,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "topic": {
                         "type": "string",
-                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "variable_naming"],
+                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "variable_naming", "python_linting"],
                         "description": "Specific topic to get standards for, or 'all' for complete guide",
                         "default": "all"
                     }
@@ -779,16 +783,74 @@ int x;            // Too generic in complex context
 bool flag;        // Meaningless name
 char* ptr123;     // Confusing and non-descriptive
 ```
+""",
+
+        "python_linting": """
+# Python File Modification Standards
+
+🚨 **MANDATORY: Run `bash lint` after modifying any Python files (*.py)**
+
+## Critical Rule for Background Agents:
+**WHENEVER you modify any Python file (*.py), you MUST run `bash lint` before indicating completion.**
+
+## Why This is Required:
+- **Code Quality:** Ensures consistent Python code formatting and style
+- **CI/CD Compatibility:** Prevents linting failures in continuous integration
+- **Team Standards:** Maintains consistent code quality across all Python files
+- **Error Prevention:** Catches syntax errors and style issues early
+
+## What Files This Applies To:
+✅ **All *.py files** in the project
+✅ **test.py** - Main test runner
+✅ **mcp_server.py** - MCP server implementation  
+✅ **ci/ci-compile.py** - CI compilation scripts
+✅ **ci/ci/*.py** - All CI utility scripts
+✅ **Any new Python files** you create
+
+## Required Process:
+1. **Make your Python file changes**
+2. **IMMEDIATELY run:** `bash lint`
+3. **Fix any linting issues** that are reported
+4. **Re-run:** `bash lint` until it passes clean
+5. **Only then indicate completion**
+
+## Example Workflow:
+```bash
+# 1. After modifying any *.py file
+# 2. Run linting (MANDATORY)
+bash lint
+
+# 3. If linting reports issues, fix them and run again
+bash lint
+
+# 4. Only proceed when linting passes with no errors
+```
+
+## What `bash lint` Does:
+- **Ruff formatting and linting** for Python files
+- **clang-format** for C++ files  
+- **Comprehensive style checking** across the codebase
+- **Automatic fixing** of many common issues
+
+## Background Agent Requirements:
+🚨 **FAILURE TO RUN `bash lint` AFTER PYTHON MODIFICATIONS WILL RESULT IN BROKEN BUILDS**
+
+This is a **NON-NEGOTIABLE REQUIREMENT** for all background agents working with Python files.
+
+## Integration with Completion Validation:
+The `validate_completion` tool will run `bash test`, but you should run `bash lint` 
+IMMEDIATELY after Python modifications, not wait until final validation.
 """
     }
     
     if topic == "all":
         result = "# FastLED C++ Coding Standards\n\n"
         result += "## 🚨 MOST CRITICAL RULES 🚨\n\n"
-        result += "1. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
-        result += "2. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
-        result += "3. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
-        result += "4. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
+        result += "1. **PYTHON LINTING MANDATORY** - Run `bash lint` after modifying any *.py files\n"
+        result += "2. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
+        result += "3. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
+        result += "4. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
+        result += "5. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
         
         for section_name, content in standards.items():
             result += content + "\n" + ("="*50) + "\n\n"
