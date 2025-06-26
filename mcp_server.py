@@ -256,7 +256,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "topic": {
                         "type": "string",
-                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "variable_naming", "python_linting"],
+                        "enum": ["all", "exceptions", "std_namespace", "naming", "containers", "debug", "bindings", "arduino_includes", "variable_naming", "python_linting"],
                         "description": "Specific topic to get standards for, or 'all' for complete guide",
                         "default": "all"
                     }
@@ -334,6 +334,35 @@ async def list_tools() -> List[Tool]:
                     }
                 }
             }
+        ),
+        Tool(
+            name="validate_arduino_includes",
+            description="🚨 CRITICAL: Validate that no new Arduino.h includes have been added to the codebase. This tool scans for #include \"Arduino.h\" and #include <Arduino.h> statements and reports any that are not pre-approved.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "directory": {
+                        "type": "string",
+                        "description": "Directory to scan for Arduino.h includes (relative to project root)",
+                        "default": "src"
+                    },
+                    "include_examples": {
+                        "type": "boolean",
+                        "description": "Also scan examples directory for Arduino.h includes",
+                        "default": False
+                    },
+                    "check_dev": {
+                        "type": "boolean", 
+                        "description": "Also scan dev directory for Arduino.h includes",
+                        "default": False
+                    },
+                    "show_approved": {
+                        "type": "boolean",
+                        "description": "Show approved Arduino.h includes marked with '// ok include'",
+                        "default": True
+                    }
+                }
+            }
         )
     ]
 
@@ -372,6 +401,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await esp32_symbol_analysis(arguments, project_root)
         elif name == "symbol_analysis":
             return await symbol_analysis(arguments, project_root)
+        elif name == "validate_arduino_includes":
+            return await validate_arduino_includes(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -741,6 +772,45 @@ High-risk files:
 Changing signatures causes runtime errors that are extremely difficult to debug.
 """,
 
+        "arduino_includes": """
+# Arduino.h Include Standards
+
+🚨 **CRITICAL: DO NOT add new #include "Arduino.h" or #include <Arduino.h> statements**
+
+## Why This is Prohibited:
+- **Path Conflicts:** Arduino.h includes can interfere with FastLED's custom path resolution
+- **Build Issues:** Incorrect Arduino.h includes cause compilation failures across platforms
+- **Dependency Management:** FastLED manages Arduino compatibility through its own abstraction layer
+
+## What to Avoid:
+❌ `#include "Arduino.h"`
+❌ `#include <Arduino.h>`
+❌ Adding new Arduino.h includes to existing files
+❌ Copying Arduino.h includes from other examples
+
+## Approved Alternatives:
+✅ Use existing FastLED platform abstractions in `src/platforms/`
+✅ Include specific FastLED headers that provide Arduino functionality
+✅ Use FastLED's `fl::` namespace equivalents for Arduino functions
+✅ Reference existing Arduino.h includes that are already marked as approved
+
+## Existing Approved Includes:
+Some files already have Arduino.h includes marked with `// ok include` comments.
+These are pre-approved and should NOT be changed or removed.
+
+## If You Need Arduino Functionality:
+1. **Check FastLED abstractions first** - Look in `src/platforms/` for platform-specific implementations
+2. **Use existing patterns** - Find similar functionality in existing FastLED code
+3. **Ask for guidance** - Before adding Arduino.h, consider if there's a FastLED-native approach
+
+## Background Agent Requirements:
+🚨 **NEVER add Arduino.h includes when creating or modifying files**
+🚨 **Always use FastLED's platform abstraction layer instead**
+🚨 **Check existing code patterns before adding platform-specific includes**
+
+This rule prevents path conflicts and ensures consistent cross-platform compatibility.
+""",
+
         "variable_naming": """
 # Variable Naming Standards
 
@@ -846,11 +916,12 @@ IMMEDIATELY after Python modifications, not wait until final validation.
     if topic == "all":
         result = "# FastLED C++ Coding Standards\n\n"
         result += "## 🚨 MOST CRITICAL RULES 🚨\n\n"
-        result += "1. **PYTHON LINTING MANDATORY** - Run `bash lint` after modifying any *.py files\n"
-        result += "2. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
-        result += "3. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
-        result += "4. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
-        result += "5. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
+        result += "1. **NO ARDUINO.H INCLUDES** - Never add new #include \"Arduino.h\" or #include <Arduino.h>\n"
+        result += "2. **PYTHON LINTING MANDATORY** - Run `bash lint` after modifying any *.py files\n"
+        result += "3. **NO TRY-CATCH BLOCKS** - Use return codes, fl::optional, or early returns\n"
+        result += "4. **NO std:: NAMESPACE** - Use fl:: equivalents instead\n"
+        result += "5. **NO WASM BINDING CHANGES** - Extremely dangerous for runtime stability\n"
+        result += "6. **NO UNNECESSARY VARIABLE RENAMING** - Don't change names unless absolutely necessary\n\n"
         
         for section_name, content in standards.items():
             result += content + "\n" + ("="*50) + "\n\n"
@@ -1166,6 +1237,25 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
     result_text += "Running comprehensive test suite to ensure all changes are working correctly.\n\n"
     
     validation_failed = False
+    
+    # First, validate Arduino.h includes
+    result_text += "### Validating Arduino.h Includes\n\n"
+    try:
+        arduino_validation = await validate_arduino_includes(
+            {"directory": "src", "include_examples": False, "check_dev": False, "show_approved": False},
+            project_root
+        )
+        
+        if arduino_validation.isError:
+            validation_failed = True
+            result_text += "❌ **ARDUINO.H VALIDATION FAILED**\n\n"
+            result_text += "New Arduino.h includes detected! This violates FastLED coding standards.\n"
+            result_text += "Please remove Arduino.h includes and use FastLED's platform abstractions instead.\n\n"
+        else:
+            result_text += "✅ **Arduino.h validation passed**\n\n"
+            
+    except Exception as e:
+        result_text += f"⚠️ **Arduino.h validation error:** {str(e)}\n\n"
     
     if run_full_test_suite:
         result_text += "### Running Full Test Suite: `bash test`\n\n"
@@ -1533,6 +1623,144 @@ async def symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> Call
             content=[TextContent(type="text", text=f"Error running symbol analysis: {str(e)}")],
             isError=True
         )
+
+async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Validate that no new Arduino.h includes have been added to the codebase."""
+    directory = arguments.get("directory", "src")
+    include_examples = arguments.get("include_examples", False)
+    check_dev = arguments.get("check_dev", False)
+    show_approved = arguments.get("show_approved", True)
+    
+    result_text = "# Arduino.h Include Validation\n\n"
+    
+    # Define directories to scan
+    scan_dirs = [directory]
+    if include_examples:
+        scan_dirs.append("examples")
+    if check_dev:
+        scan_dirs.append("dev")
+    
+    # Known approved includes (from our grep search)
+    approved_includes = {
+        "src/sensors/digital_pin.hpp": "ok include",
+        "src/third_party/arduinojson/json.hpp": "ok include", 
+        "src/lib8tion.cpp": "ok include",
+        "src/led_sysdefs.h": "ok include",
+        "src/platforms/arm/rp2040/led_sysdefs_arm_rp2040.h": True,
+        # WASM platform includes are specifically for the WASM platform
+        "src/platforms/wasm/led_sysdefs_wasm.h": True,
+        "src/platforms/wasm/clockless.h": True,
+        "src/platforms/wasm/compiler/Arduino.cpp": True,
+        "src/FastLED.h": True,  # References WASM Arduino.h
+    }
+    
+    all_includes = []
+    violations = []
+    approved_count = 0
+    
+    try:
+        for scan_dir in scan_dirs:
+            scan_path = project_root / scan_dir
+            if not scan_path.exists():
+                result_text += f"⚠️ Directory not found: {scan_dir}\n"
+                continue
+                
+            result_text += f"📁 Scanning directory: {scan_dir}\n"
+            
+            # Use ripgrep to find Arduino.h includes
+            try:
+                cmd = ["rg", "--type", "cpp", "--type", "c", r"#include.*Arduino\.h", str(scan_path)]
+                output = await run_command(cmd, project_root)
+                
+                for line in output.strip().split('\n'):
+                    if not line.strip():
+                        continue
+                        
+                    # Parse ripgrep output: filename:line_number:content
+                    parts = line.split(':', 2)
+                    if len(parts) >= 3:
+                        file_path = parts[0]
+                        line_number = parts[1]
+                        content = parts[2].strip()
+                        
+                        # Make path relative to project root
+                        rel_path = str(Path(file_path).relative_to(project_root))
+                        
+                        include_info = {
+                            'file': rel_path,
+                            'line': line_number,
+                            'content': content,
+                            'approved': False
+                        }
+                        
+                        # Check if this is an approved include
+                        if rel_path in approved_includes:
+                            include_info['approved'] = True
+                            approved_count += 1
+                        elif "// ok include" in content:
+                            include_info['approved'] = True
+                            approved_count += 1
+                        elif content.startswith('//') or content.startswith('/*'):
+                            # Commented out includes are not violations
+                            include_info['approved'] = True  
+                            approved_count += 1
+                        else:
+                            violations.append(include_info)
+                        
+                        all_includes.append(include_info)
+                        
+            except Exception as e:
+                result_text += f"⚠️ Error scanning {scan_dir}: {e}\n"
+    
+    except Exception as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Error validating Arduino includes: {e}")],
+            isError=True
+        )
+    
+    # Generate report
+    result_text += f"\n## Summary\n"
+    result_text += f"- **Total Arduino.h includes found:** {len(all_includes)}\n"
+    result_text += f"- **Approved includes:** {approved_count}\n"
+    result_text += f"- **🚨 VIOLATIONS:** {len(violations)}\n\n"
+    
+    if violations:
+        result_text += "## 🚨 CRITICAL VIOLATIONS FOUND 🚨\n\n"
+        result_text += "The following files contain PROHIBITED Arduino.h includes:\n\n"
+        
+        for violation in violations:
+            result_text += f"❌ **{violation['file']}:{violation['line']}**\n"
+            result_text += f"   `{violation['content']}`\n\n"
+        
+        result_text += "## 🚨 IMMEDIATE ACTION REQUIRED 🚨\n\n"
+        result_text += "These Arduino.h includes MUST be removed or replaced with FastLED alternatives:\n\n"
+        result_text += "1. **Remove the Arduino.h include**\n"
+        result_text += "2. **Use FastLED platform abstractions** from `src/platforms/`\n"
+        result_text += "3. **Replace Arduino functions** with `fl::` namespace equivalents\n"
+        result_text += "4. **If absolutely necessary**, mark with `// ok include` and document why\n\n"
+        
+        is_error = True
+    else:
+        result_text += "✅ **NO VIOLATIONS FOUND**\n\n"
+        result_text += "All Arduino.h includes are properly approved or commented out.\n\n"
+        is_error = False
+    
+    if show_approved and approved_count > 0:
+        result_text += "## Approved Arduino.h Includes\n\n"
+        result_text += "These includes are pre-approved and should not be modified:\n\n"
+        
+        for include in all_includes:
+            if include['approved']:
+                result_text += f"✅ {include['file']}:{include['line']}\n"
+                result_text += f"   `{include['content']}`\n\n"
+    
+    result_text += "---\n\n"
+    result_text += "**Remember:** Never add new Arduino.h includes. Use FastLED's platform abstraction layer instead!\n"
+    
+    return CallToolResult(
+        content=[TextContent(type="text", text=result_text)],
+        isError=is_error
+    )
 
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""
