@@ -477,24 +477,10 @@ class SortedHeapMap {
 namespace fl {
 
 // Default map uses slab allocator for better performance
+// Can't use fl::map because it conflicts with Arduino.h's map() function when
+// the user is using `using namespace fl`
 template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using fl_map = MapRedBlackTree<Key, T, Compare>;
+using fl_map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
 
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using map = MapRedBlackTree<Key, T, Compare>;
-
-// Backward compatibility: non-slab version using standard allocator
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using fl_std_map = MapRedBlackTree<Key, T, Compare, allocator<char>>;
-
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using std_map = MapRedBlackTree<Key, T, Compare, allocator<char>>;
-
-// Explicit slab-allocated versions (same as default now)
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using fl_slab_map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
-
-template <typename Key, typename T, typename Compare = fl::DefaultLess<Key>>
-using slab_map = MapRedBlackTree<Key, T, Compare, fl::allocator_slab<char>>;
 
 } // namespace fl
