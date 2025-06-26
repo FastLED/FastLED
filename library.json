@@ -71,6 +71,7 @@
             "+<third_party/**/*.c>",
             "+<fx/**/*.cpp>",
             "+<fl/**/*.cpp>",
+            "+<fl/*.cpp>",
             "+<sensors/**/*.cpp>"
         ],
         "libArchive": false
