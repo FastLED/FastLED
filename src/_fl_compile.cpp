@@ -20,6 +20,9 @@
 #include "fl/str.cpp"
 #include "fl/fill.cpp"
 #include "fl/engine_events.cpp"
+#include "fl/ptr.cpp"
+#include "fl/ui.cpp"
+#include "fl/io.cpp"
 
 // Sensors
 #include "sensors/button.cpp"
