@@ -346,7 +346,7 @@ def create_build_dir(
         try:
             with open(platformio_ini_path, "r") as f:
                 ini_contents = f.read()
-                locked_print(ini_contents)
+                locked_print(f"\n\n{ini_contents}\n\n")
         except Exception as e:
             locked_print(f"Error reading {platformio_ini_path}: {e}")
         locked_print(f"*** End of {platformio_ini_path} contents ***\n")
