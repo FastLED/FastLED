@@ -33,6 +33,7 @@ extern "C" {
 #else
 #include "esp_intr.h"
 #endif
+#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
 // esp include for F_CPU

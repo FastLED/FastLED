@@ -14,6 +14,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "third_party/espressif/led_strip/src/led_strip.h"
+#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 #include "esp_err.h"
 
@@ -61,7 +62,7 @@ led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_mo
     // LED Strip object handle
     led_strip_handle_t led_strip;
     ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
-    ESP_LOGI(TAG, "Created LED strip object with SPI backend");
+    FASTLED_ESP_LOGI(TAG, "Created LED strip object with SPI backend");
     return led_strip;
 }
 
@@ -270,4 +271,3 @@ FASTLED_NAMESPACE_END
 #endif  // FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #endif  // ESP32
-

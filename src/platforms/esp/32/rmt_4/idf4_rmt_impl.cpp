@@ -40,6 +40,7 @@ extern "C"
 #include "freertos/semphr.h"
 #include "soc/rmt_struct.h"
 
+#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
 #ifdef __cplusplus
@@ -66,11 +67,15 @@ extern "C"
 #ifdef FASTLED_ASSERT
 #undef FASTLED_ASSERT
 #endif
+#if FASTLED_ESP32_ENABLE_LOGGING
 #define FASTLED_ASSERT(format, errcode, ...)                                  \
     if (errcode != ESP_OK)                                                    \
     {                                                                         \
         Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); \
     }
+#else
+#define FASTLED_ASSERT(format, errcode, ...) ((void)errcode)
+#endif
 
 
 #if FASTLED_RMT_SERIAL_DEBUG == 1

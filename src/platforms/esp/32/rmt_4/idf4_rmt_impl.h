@@ -36,6 +36,7 @@ extern "C"
 #include "freertos/semphr.h"
 #include "soc/rmt_struct.h"
 
+#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
 #ifdef __cplusplus

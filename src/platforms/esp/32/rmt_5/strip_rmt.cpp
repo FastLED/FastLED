@@ -10,6 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "third_party/espressif/led_strip/src/led_strip.h"
+#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"
@@ -66,7 +67,7 @@ led_strip_handle_t configure_led_with_timings(int pin, uint32_t led_count, bool 
     // LED Strip object handle
     led_strip_handle_t led_strip;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
-    ESP_LOGI(TAG, "Created LED strip object with RMT backend");
+    FASTLED_ESP_LOGI(TAG, "Created LED strip object with RMT backend");
     return led_strip;
 }
 
