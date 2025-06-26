@@ -1,5 +1,3 @@
-
-
 #include "fl/stdint.h"
 
 #include "fl/draw_visitor.h"
@@ -67,3 +65,23 @@ void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
 }
 
 } // namespace fl
+
+// XYRasterSparse_CRGB implementation
+void fl::XYRasterSparse_CRGB::draw(const XYMap &xymap, CRGB *out) {
+    for (const auto &it : mSparseGrid) {
+        auto pt = it.first;
+        if (!xymap.has(pt.x, pt.y)) {
+            continue;
+        }
+        uint32_t index = xymap(pt.x, pt.y);
+        const CRGB &color = it.second;
+        // Only draw non-black pixels (since black represents "no data")
+        if (color.r != 0 || color.g != 0 || color.b != 0) {
+            out[index] = color;
+        }
+    }
+}
+
+void fl::XYRasterSparse_CRGB::draw(Leds *leds) {
+    draw(leds->xymap(), leds->rgb());
+}

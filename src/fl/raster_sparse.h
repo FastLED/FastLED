@@ -1,4 +1,3 @@
-
 #pragma once
 
 /*
@@ -223,6 +222,175 @@ class XYRasterU8Sparse {
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
     HashMap<vec2<int16_t>, uint8_t *, FastHashKey, EqualToKey, kMaxCacheSize>
+        mCache;
+    fl::rect<int16_t> mAbsoluteBounds;
+    bool mAbsoluteBoundsSet = false;
+};
+
+} // namespace fl
+
+namespace fl {
+
+// A raster of CRGB values. This is a sparse raster, meaning that it will
+// only store the values that are set.
+class XYRasterSparse_CRGB {
+  public:
+    XYRasterSparse_CRGB() = default;
+    XYRasterSparse_CRGB(int width, int height) {
+        setBounds(rect<int16_t>(0, 0, width, height));
+    }
+    XYRasterSparse_CRGB(const XYRasterSparse_CRGB &) = default;
+    XYRasterSparse_CRGB &operator=(XYRasterSparse_CRGB &&) = default;
+    XYRasterSparse_CRGB(XYRasterSparse_CRGB &&) = default;
+    XYRasterSparse_CRGB &operator=(XYRasterSparse_CRGB &) = default;
+
+    XYRasterSparse_CRGB &reset() {
+        mSparseGrid.clear();
+        mCache.clear();
+        return *this;
+    }
+
+    XYRasterSparse_CRGB &clear() { return reset(); }
+
+    // Rasterizes point with a CRGB color value
+    void rasterize(const vec2<int16_t> &pt, const CRGB &color) {
+        write(pt, color);
+    }
+
+    void setSize(uint16_t width, uint16_t height) {
+        setBounds(rect<int16_t>(0, 0, width, height));
+    }
+
+    void setBounds(const rect<int16_t> &bounds) {
+        mAbsoluteBounds = bounds;
+        mAbsoluteBoundsSet = true;
+    }
+
+    using iterator = fl::HashMap<vec2<int16_t>, CRGB>::iterator;
+    using const_iterator = fl::HashMap<vec2<int16_t>, CRGB>::const_iterator;
+
+    iterator begin() { return mSparseGrid.begin(); }
+    const_iterator begin() const { return mSparseGrid.begin(); }
+    iterator end() { return mSparseGrid.end(); }
+    const_iterator end() const { return mSparseGrid.end(); }
+    size_t size() const { return mSparseGrid.size(); }
+    bool empty() const { return mSparseGrid.empty(); }
+
+    Pair<bool, CRGB> at(uint16_t x, uint16_t y) const {
+        const CRGB *val = mSparseGrid.find_value(vec2<int16_t>(x, y));
+        if (val != nullptr) {
+            return {true, *val};
+        }
+        return {false, CRGB::Black};
+    }
+
+    rect<int16_t> bounds() const {
+        if (mAbsoluteBoundsSet) {
+            return mAbsoluteBounds;
+        }
+        return bounds_pixels();
+    }
+
+    rect<int16_t> bounds_pixels() const {
+        int min_x = 0;
+        bool min_x_set = false;
+        int min_y = 0;
+        bool min_y_set = false;
+        int max_x = 0;
+        bool max_x_set = false;
+        int max_y = 0;
+        bool max_y_set = false;
+        for (const auto &it : mSparseGrid) {
+            const vec2<int16_t> &pt = it.first;
+            if (!min_x_set || pt.x < min_x) {
+                min_x = pt.x;
+                min_x_set = true;
+            }
+            if (!min_y_set || pt.y < min_y) {
+                min_y = pt.y;
+                min_y_set = true;
+            }
+            if (!max_x_set || pt.x > max_x) {
+                max_x = pt.x;
+                max_x_set = true;
+            }
+            if (!max_y_set || pt.y > max_y) {
+                max_y = pt.y;
+                max_y_set = true;
+            }
+        }
+        return rect<int16_t>(min_x, min_y, max_x + 1, max_y + 1);
+    }
+
+    // Warning! - SLOW.
+    uint16_t width() const { return bounds().width(); }
+    uint16_t height() const { return bounds().height(); }
+
+    void draw(const XYMap &xymap, CRGB *out);
+    void draw(Leds *leds);
+
+    // Inlined, yet customizable drawing access. This will only send you
+    // pixels that are within the bounds of the XYMap.
+    template <typename XYVisitor>
+    void draw(const XYMap &xymap, XYVisitor &visitor) {
+        for (const auto &it : mSparseGrid) {
+            auto pt = it.first;
+            if (!xymap.has(pt.x, pt.y)) {
+                continue;
+            }
+            uint32_t index = xymap(pt.x, pt.y);
+            const CRGB &color = it.second;
+            // Only draw non-black pixels (since black represents "no data")
+            if (color.r != 0 || color.g != 0 || color.b != 0) {
+                visitor.draw(pt, index, color);
+            }
+        }
+    }
+
+    static const int kMaxCacheSize = 8; // Max size for tiny cache.
+
+    void write(const vec2<int16_t> &pt, const CRGB &color) {
+        CRGB **cached = mCache.find_value(pt);
+        if (cached) {
+            CRGB *val = *cached;
+            // For CRGB, we'll replace the existing color (blend could be added later)
+            *val = color;
+            return;
+        }
+        if (mCache.size() <= kMaxCacheSize) {
+            // cache it.
+            CRGB *v = mSparseGrid.find_value(pt);
+            if (v == nullptr) {
+                if (mSparseGrid.needs_rehash()) {
+                    // mSparseGrid is about to rehash, so we need to clear the
+                    // small cache because it shares pointers.
+                    mCache.clear();
+                }
+                mSparseGrid.insert(pt, color);
+                return;
+            }
+            mCache.insert(pt, v);
+            *v = color;
+            return;
+        } else {
+            // overflow, clear cache and write directly.
+            mCache.clear();
+            mSparseGrid.insert(pt, color);
+            return;
+        }
+    }
+
+  private:
+    using Key = vec2<int16_t>;
+    using Value = CRGB;
+    using HashKey = Hash<Key>;
+    using EqualToKey = EqualTo<Key>;
+    using FastHashKey = FastHash<Key>;
+    using HashMapLarge = fl::HashMap<Key, Value, HashKey, EqualToKey,
+                                     FASTLED_HASHMAP_INLINED_COUNT>;
+    HashMapLarge mSparseGrid;
+    // Small cache for the last N writes to help performance.
+    HashMap<vec2<int16_t>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<int16_t> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
