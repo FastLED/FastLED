@@ -274,7 +274,7 @@ void XYPath::drawColor(const CRGB &color, float from, float to, Leds *leds,
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
     rasterize(from, to, steps, raster);
-    raster.draw(color, leds->xymap(), leds->rgb());
+    raster.draw(color, leds);
 }
 
 void XYPath::drawGradient(const Gradient &gradient, float from, float to,
@@ -283,7 +283,7 @@ void XYPath::drawGradient(const Gradient &gradient, float from, float to,
     raster.clear();
     steps = steps > 0 ? steps : calculateSteps(from, to);
     rasterize(from, to, steps, raster);
-    raster.drawGradient(gradient, leds->xymap(), leds->rgb());
+    raster.drawGradient(gradient, leds);
 }
 
 int XYPath::calculateSteps(float from, float to) {

@@ -32,6 +32,7 @@ namespace fl {
 class XYMap;
 class Gradient;
 class Tile2x2_u8;
+class Leds;
 
 // A raster of uint8_t values. This is a sparse raster, meaning that it will
 // only store the values that are set.
@@ -147,8 +148,10 @@ class XYRasterU8Sparse {
     uint16_t height() const { return bounds().height(); }
 
     void draw(const CRGB &color, const XYMap &xymap, CRGB *out);
+    void draw(const CRGB &color, Leds *leds);
 
     void drawGradient(const Gradient &gradient, const XYMap &xymap, CRGB *out);
+    void drawGradient(const Gradient &gradient, Leds *leds);
 
     // Inlined, yet customizable drawing access. This will only send you
     // pixels that are within the bounds of the XYMap.

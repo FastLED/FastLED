@@ -3,6 +3,7 @@
 #include "fl/stdint.h"
 
 #include "fl/draw_visitor.h"
+#include "fl/leds.h"
 #include "fl/raster_sparse.h"
 #include "fl/tile2x2.h"
 
@@ -13,10 +14,18 @@ void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, CRGB *out) {
     draw(xymap, visitor);
 }
 
+void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) {
+    draw(color, leds->xymap(), leds->rgb());
+}
+
 void XYRasterU8Sparse::drawGradient(const Gradient &gradient,
                                     const XYMap &xymap, CRGB *out) {
     XYDrawGradient visitor(gradient, xymap, out);
     draw(xymap, visitor);
+}
+
+void XYRasterU8Sparse::drawGradient(const Gradient &gradient, Leds *leds) {
+    drawGradient(gradient, leds->xymap(), leds->rgb());
 }
 
 void XYRasterU8Sparse::rasterize(const Slice<const Tile2x2_u8> &tiles) {
