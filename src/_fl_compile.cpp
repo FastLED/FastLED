@@ -18,4 +18,5 @@
 #include "fl/blur.cpp"
 #include "fl/colorutils.cpp"
 #include "fl/str.cpp"
+#include "fl/fill.cpp"
 #endif
