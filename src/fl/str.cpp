@@ -9,7 +9,7 @@
 #include "fl/xymap.h"
 #include "fl/tile2x2.h"
 #include "fl/compiler_control.h"
-#include "platforms/shared/ui/json/ui_internal.h"
+// UI dependency moved to separate compilation unit to break dependency chain
 
 #ifdef FASTLED_TESTING
 #include <cstdio> // ok include
@@ -315,9 +315,6 @@ void StringFormatter::appendFloat(const float &val, StrN<64> *dst) {
     dst->write(buf, strlen(buf));
 }
 
-string &string::append(const JsonUiInternal& val) {
-    append(val.name());
-    return *this;
-}
+// JsonUiInternal append implementation moved to str_ui.cpp to break dependency chain
 
 } // namespace fl
