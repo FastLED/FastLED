@@ -9,14 +9,20 @@
 #ifndef FORCE_INCLUDE_FOR_AVR
 #if defined(ARDUINO) && defined(__AVR__)
 #define FORCE_INCLUDE_FOR_AVR 1
-#endif
 #else
 #define FORCE_INCLUDE_FOR_AVR 0
 #endif
+#endif
 
-#ifdef FORCE_INCLUDE_FOR_AVR
+#if FORCE_INCLUDE_FOR_AVR
 #include "fl/blur.cpp"
 #include "fl/colorutils.cpp"
 #include "fl/str.cpp"
 #include "fl/fill.cpp"
+#include "fl/engine_events.cpp"
+
+// Sensors
+#include "sensors/button.cpp"
+#include "sensors/digital_pin.cpp"
+#include "sensors/pir.cpp"
 #endif
