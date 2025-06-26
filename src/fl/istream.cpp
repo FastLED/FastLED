@@ -184,7 +184,9 @@ bool istream::readToken(string& token) {
     while (pos_ < buffer_len_ && 
            buffer_[pos_] != ' ' && buffer_[pos_] != '\t' && 
            buffer_[pos_] != '\n' && buffer_[pos_] != '\r') {
-        token += buffer_[pos_];
+        // Explicitly append as a character string to avoid uint8_t->number conversion
+        char ch[2] = {buffer_[pos_], '\0'};
+        token.append(ch, 1);
         pos_++;
     }
     
@@ -335,6 +337,8 @@ istream& istream::operator>>(double& d) {
     return *this;
 }
 
+
+
 #if FASTLED_STRSTREAM_USES_SIZE_T
 istream& istream::operator>>(size_t& n) {
     string token;
@@ -361,7 +365,9 @@ istream& istream::getline(string& str) {
             pos_++; // Consume the newline
             return *this;
         }
-        str += buffer_[pos_];
+        // Explicitly append as a character string to avoid uint8_t->number conversion
+        char ch[2] = {buffer_[pos_], '\0'};
+        str.append(ch, 1);
         pos_++;
     }
     
@@ -373,7 +379,9 @@ istream& istream::getline(string& str) {
             if (c == -1) break;
             if (c == '\n') break;
             if (c == '\r') continue; // Skip carriage return
-            str += static_cast<char>(c);
+            // Explicitly append as a character string to avoid uint8_t->number conversion
+            char ch[2] = {static_cast<char>(c), '\0'};
+            str.append(ch, 1);
         }
     }
     

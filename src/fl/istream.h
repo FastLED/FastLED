@@ -2,6 +2,7 @@
 
 #include "fl/io.h"
 #include "fl/str.h"
+#include "fl/type_traits.h"
 
 #ifndef FASTLED_STRSTREAM_USES_SIZE_T
 #if defined(__AVR__) || defined(ESP8266) || defined(ESP32)
