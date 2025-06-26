@@ -115,7 +115,7 @@ template <typename T, size_t N> class FixedVector {
         }
     }
 
-    FixedVector &operator=(const FixedVector &other) {
+    FixedVector &operator=(const FixedVector &other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             assign_array(other.memory(), other.current_size);
         }

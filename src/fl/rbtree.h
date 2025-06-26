@@ -274,6 +274,7 @@ public:
         const MapRedBlackTree* tree_;
 
         Node* successor(Node* x) const {
+            if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return tree_->minimum(x->right);
             }
@@ -286,6 +287,7 @@ public:
         }
 
         Node* predecessor(Node* x) const {
+            if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return tree_->maximum(x->left);
             }
@@ -301,8 +303,14 @@ public:
         iterator() : node_(nullptr), tree_(nullptr) {}
         iterator(Node* n, const MapRedBlackTree* t) : node_(n), tree_(t) {}
 
-        value_type& operator*() const { return node_->data; }
-        value_type* operator->() const { return &(node_->data); }
+        value_type& operator*() const { 
+            FASTLED_ASSERT(node_ != nullptr, "MapRedBlackTree::iterator: dereferencing end iterator");
+            return node_->data; 
+        }
+        value_type* operator->() const { 
+            FASTLED_ASSERT(node_ != nullptr, "MapRedBlackTree::iterator: dereferencing end iterator");
+            return &(node_->data); 
+        }
 
         iterator& operator++() {
             if (node_) {
@@ -350,6 +358,7 @@ public:
         const MapRedBlackTree* tree_;
 
         const Node* successor(const Node* x) const {
+            if (x == nullptr) return nullptr;
             if (x->right != nullptr) {
                 return tree_->minimum(x->right);
             }
@@ -362,6 +371,7 @@ public:
         }
 
         const Node* predecessor(const Node* x) const {
+            if (x == nullptr) return nullptr;
             if (x->left != nullptr) {
                 return tree_->maximum(x->left);
             }
@@ -378,8 +388,14 @@ public:
         const_iterator(const Node* n, const MapRedBlackTree* t) : node_(n), tree_(t) {}
         const_iterator(const iterator& it) : node_(it.node_), tree_(it.tree_) {}
 
-        const value_type& operator*() const { return node_->data; }
-        const value_type* operator->() const { return &(node_->data); }
+        const value_type& operator*() const { 
+            FASTLED_ASSERT(node_ != nullptr, "MapRedBlackTree::iterator: dereferencing end iterator");
+            return node_->data; 
+        }
+        const value_type* operator->() const { 
+            FASTLED_ASSERT(node_ != nullptr, "MapRedBlackTree::iterator: dereferencing end iterator");
+            return &(node_->data); 
+        }
 
         const_iterator& operator++() {
             if (node_) {

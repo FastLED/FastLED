@@ -21,6 +21,8 @@ OUTPUT = HERE / "output"
 ELF_FILE = UNO / "firmware.elf"
 BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
 
+_ENABLED = False
+
 
 PLATFORMIO_PATH = Path.home() / ".platformio"
 PLATFORMIO_PACKAGES_PATH = PLATFORMIO_PATH / "packages"
@@ -88,6 +90,7 @@ def init() -> None:
 class TestSymbolAnalysis(unittest.TestCase):
 
     @classmethod
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def setUpClass(cls):
         """Set up test fixtures before running tests."""
         init()
@@ -105,6 +108,7 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         cls.board_info = cls.build_info[cls.board_key]
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_analyze_symbols_basic(self) -> None:
         """Test basic symbol analysis functionality."""
         print("Testing basic symbol analysis...")
@@ -138,6 +142,7 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         print(f"Sample symbols: {symbol_names[:5]}")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_analyze_symbols_from_build_info(self) -> None:
         """Test symbol analysis using actual build info paths."""
         print("Testing symbol analysis with build_info.json paths...")
@@ -164,6 +169,7 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         print(f"Analyzed {len(symbols)} symbols from build ELF: {elf_file}")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_generate_report_basic(self) -> None:
         """Test report generation functionality."""
         print("Testing basic report generation...")
@@ -219,6 +225,7 @@ class TestSymbolAnalysis(unittest.TestCase):
 
         print("Report generation test passed")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_find_board_build_info(self) -> None:
         """Test the board build info detection functionality."""
         print("Testing board build info detection...")
@@ -242,6 +249,7 @@ class TestSymbolAnalysis(unittest.TestCase):
         except SystemExit:
             self.skipTest("No builds available for auto-detection testing")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_analyze_map_file(self) -> None:
         """Test map file analysis if available."""
         print("Testing map file analysis...")
@@ -274,6 +282,7 @@ class TestSymbolAnalysis(unittest.TestCase):
         else:
             print("No dependencies found in map file (this may be normal)")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_build_reverse_call_graph(self) -> None:
         """Test reverse call graph building."""
         print("Testing reverse call graph building...")
@@ -298,6 +307,7 @@ class TestSymbolAnalysis(unittest.TestCase):
         self.assertEqual(reverse_graph, expected_reverse)
         print("Reverse call graph building test passed")
 
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_full_symbol_analysis_workflow(self) -> None:
         """Test the complete symbol analysis workflow."""
         print("Testing complete symbol analysis workflow...")

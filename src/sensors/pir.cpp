@@ -1,4 +1,7 @@
+#ifndef FASTLED_INTERNAL
 #define FASTLED_INTERNAL
+#endif
+    
 #include "FastLED.h"
 
 #include "fastpin.h"
