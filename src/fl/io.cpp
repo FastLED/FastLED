@@ -12,7 +12,11 @@
 #include "platforms/esp/io_esp.h"
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
 #include "platforms/avr/io_avr.h"
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+#elif defined(__MKL26Z64__)
+// Teensy LC has special handling to avoid _write linker issues
+#include "platforms/io_teensy_lc.h"
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
+// All other Teensy platforms use standard implementation
 #include "platforms/io_teensy.h"
 #else
 #include "platforms/io_arduino.h"
@@ -62,8 +66,11 @@ void print(const char* str) {
     print_esp(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     print_avr(str);
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
-    // Use Teensy-specific low-level print functions (avoids printf symbols)
+#elif defined(__MKL26Z64__)
+    // Teensy LC uses special no-op functions to avoid _write linker issues
+    print_teensy_lc(str);
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
+    // All other Teensy platforms use standard implementation
     print_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
@@ -93,8 +100,11 @@ void println(const char* str) {
     println_esp(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     println_avr(str);
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
-    // Use Teensy-specific low-level print functions (avoids printf symbols)
+#elif defined(__MKL26Z64__)
+    // Teensy LC uses special no-op functions to avoid _write linker issues
+    println_teensy_lc(str);
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
+    // All other Teensy platforms use standard implementation
     println_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
@@ -121,8 +131,11 @@ int available() {
     return available_esp();
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     return available_avr();
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
-    // Use Teensy-specific low-level input functions (avoids printf symbols)
+#elif defined(__MKL26Z64__)
+    // Teensy LC uses special no-op functions to avoid _write linker issues
+    return available_teensy_lc();
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
+    // All other Teensy platforms use standard implementation
     return available_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
@@ -149,8 +162,11 @@ int read() {
     return read_esp();
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     return read_avr();
-#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
-    // Use Teensy-specific low-level input functions (avoids printf symbols)
+#elif defined(__MKL26Z64__)
+    // Teensy LC uses special no-op functions to avoid _write linker issues
+    return read_teensy_lc();
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
+    // All other Teensy platforms use standard implementation
     return read_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
