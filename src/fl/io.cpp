@@ -3,17 +3,17 @@
 #include <stddef.h>
 #include "fl/stdint.h"
 
-// Platform-specific print implementations
+// Platform-specific I/O implementations
 #ifdef __EMSCRIPTEN__
-#include "platforms/wasm/print_wasm.h"
+#include "platforms/wasm/io_wasm.h"
 #elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
-#include "platforms/print_native.h"
+#include "platforms/io_native.h"
 #elif defined(ESP32) || defined(ESP8266)
-#include "platforms/esp/print_esp.h"
+#include "platforms/esp/io_esp.h"
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
-#include "platforms/avr/print_avr.h"
+#include "platforms/avr/io_avr.h"
 #else
-#include "platforms/print_arduino.h"
+#include "platforms/io_arduino.h"
 #endif
 
 namespace fl {
@@ -57,6 +57,44 @@ void println(const char* str) {
     // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)  
     // - All other Arduino-compatible platforms
     println_arduino(str);
+#endif
+}
+
+int available() {
+#ifdef __EMSCRIPTEN__
+    return available_wasm();
+#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
+    return available_native();
+#elif defined(ESP32) || defined(ESP8266)
+    return available_esp();
+#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
+    return available_avr();
+#else
+    // Use generic Arduino input for all other platforms including:
+    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
+    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
+    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
+    // - All other Arduino-compatible platforms
+    return available_arduino();
+#endif
+}
+
+int read() {
+#ifdef __EMSCRIPTEN__
+    return read_wasm();
+#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
+    return read_native();
+#elif defined(ESP32) || defined(ESP8266)
+    return read_esp();
+#elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
+    return read_avr();
+#else
+    // Use generic Arduino input for all other platforms including:
+    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
+    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
+    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
+    // - All other Arduino-compatible platforms
+    return read_arduino();
 #endif
 }
 
