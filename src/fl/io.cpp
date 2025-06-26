@@ -12,6 +12,8 @@
 #include "platforms/esp/io_esp.h"
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
 #include "platforms/avr/io_avr.h"
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+#include "platforms/io_teensy.h"
 #else
 #include "platforms/io_arduino.h"
 #endif
@@ -60,10 +62,12 @@ void print(const char* str) {
     print_esp(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     print_avr(str);
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+    // Use Teensy-specific low-level print functions (avoids printf symbols)
+    print_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
     // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
     // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
     // - All other Arduino-compatible platforms
     print_arduino(str);
@@ -89,10 +93,12 @@ void println(const char* str) {
     println_esp(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     println_avr(str);
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+    // Use Teensy-specific low-level print functions (avoids printf symbols)
+    println_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
     // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
     // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)  
     // - All other Arduino-compatible platforms
     println_arduino(str);
@@ -115,10 +121,12 @@ int available() {
     return available_esp();
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     return available_avr();
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+    // Use Teensy-specific low-level input functions (avoids printf symbols)
+    return available_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
     // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
     // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
     // - All other Arduino-compatible platforms
     return available_arduino();
@@ -141,10 +149,12 @@ int read() {
     return read_esp();
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     return read_avr();
+#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__) || defined(__MKL26Z64__)
+    // Use Teensy-specific low-level input functions (avoids printf symbols)
+    return read_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
     // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
-    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
     // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
     // - All other Arduino-compatible platforms
     return read_arduino();
