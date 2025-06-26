@@ -222,6 +222,11 @@ set(COMMON_COMPILE_DEFINITIONS
     _GLIBCXX_DEBUG_PEDANTIC
 )
 
+# Fix for Microsoft STL version check with older Clang versions on Windows
+if(WIN32 AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND COMMON_COMPILE_DEFINITIONS _ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
+endif()
+
 
 # Set output directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/.build/lib)
