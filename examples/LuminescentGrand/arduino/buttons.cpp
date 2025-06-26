@@ -2,6 +2,8 @@
 
 #include "buttons.h"
 
+#define FASTLED_BUTTON_DEBOUNCE_MS 4
+
 // ToggleButton implementation
 ToggleButton::ToggleButton(int pin) : pin_(pin), on_(false), debounce_timestamp_(0), changed_(false) {
   pinMode(pin_, OUTPUT);
@@ -15,7 +17,7 @@ bool ToggleButton::Read() {
 }
 
 void ToggleButton::Update(uint32_t time_now) {
-  if ((time_now - debounce_timestamp_) < 150) {
+  if ((time_now - debounce_timestamp_) < FASTLED_BUTTON_DEBOUNCE_MS) {
     changed_ = false;
     return;
   }
@@ -27,7 +29,7 @@ void ToggleButton::Update(uint32_t time_now) {
     on_ = val;       // Set the new toggle switch value.
     // Protect against debouncing artifacts by putting a 200ms delay from the
     // last time the value changed.
-    if ((time_now - debounce_timestamp_) > 150) {
+    if ((time_now - debounce_timestamp_) > FASTLED_BUTTON_DEBOUNCE_MS) {
       //++curr_val_;     // ... and increment the value.
       debounce_timestamp_ = time_now;
     }
