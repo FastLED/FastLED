@@ -57,10 +57,10 @@ class Leds {
 
 template <size_t W, size_t H> class LedsXY : public Leds {
   public:
-    LedsXY() : Leds(mLeds, XYMap::constructSerpentine(W, H)) {}
+    LedsXY() : Leds(mLedsData, XYMap::constructSerpentine(W, H)) {}
     explicit LedsXY(bool is_serpentine)
-        : Leds(mLeds, is_serpentine ? XYMap::constructSerpentine(W, H)
-                                    : XYMap::constructRectangularGrid(W, H)) {}
+        : Leds(mLedsData, is_serpentine ? XYMap::constructSerpentine(W, H)
+                                        : XYMap::constructRectangularGrid(W, H)) {}
     LedsXY(const LedsXY &) = default;
     LedsXY &operator=(const LedsXY &) = default;
     void setXyMap(const XYMap &xymap) { mXyMap = xymap; }
@@ -70,7 +70,7 @@ template <size_t W, size_t H> class LedsXY : public Leds {
     }
 
   private:
-    CRGB mLeds[W * H] = {};
+    CRGB mLedsData[W * H] = {};
 };
 
 } // namespace fl
