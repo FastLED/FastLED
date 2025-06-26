@@ -76,13 +76,13 @@ FASTLED_SMART_PTR(StringHolder);
 
 class StringFormatter {
   public:
-    static void append(int32_t val, StrN<64> *dst);
+    static void append(int32_t val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
     static bool isSpace(char c) {
         return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
     static float parseFloat(const char *str, size_t len);
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
-    static void appendFloat(const float &val, StrN<64> *dst);
+    static void appendFloat(const float &val, StrN<FASTLED_STR_INLINED_SIZE> *dst);
 };
 
 class StringHolder : public fl::Referent {
@@ -117,7 +117,7 @@ class StringHolder : public fl::Referent {
     size_t mCapacity = 0;
 };
 
-template <size_t SIZE = 64> class StrN {
+template <size_t SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
   protected:
     size_t mLength = 0;
     char mInlineData[SIZE] = {0};
@@ -253,25 +253,25 @@ template <size_t SIZE = 64> class StrN {
     }
 
     size_t write(const uint16_t &n) {
-        StrN<64> dst;
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(n, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
     size_t write(const uint32_t &val) {
-        StrN<64> dst;
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
     size_t write(const int32_t &val) {
-        StrN<64> dst;
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(val, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
     size_t write(const int8_t val) {
-        StrN<64> dst;
+        StrN<FASTLED_STR_INLINED_SIZE> dst;
         StringFormatter::append(int16_t(val),
                                 &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
