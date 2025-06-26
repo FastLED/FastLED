@@ -12,7 +12,7 @@ from ci.locked_print import locked_print
 
 # Board initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
 PARRALLEL_PROJECT_INITIALIZATION = (
-    os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "1") == "1"
+    os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "0") == "1"
 )
 
 
@@ -92,9 +92,15 @@ def concurrent_run(
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(projects)
     # Initialize the build directories for all boards
+    locked_print(
+        f"Initializing build directories for {len(projects)} boards with {parallel_init_workers} parallel workers"
+    )
     with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board: dict[Future, Board] = {}
         for board in projects:
+            locked_print(
+                f"Submitting build directory initialization for board: {board.board_name}"
+            )
             future = executor.submit(
                 create_build_dir,
                 board,
@@ -108,21 +114,44 @@ def concurrent_run(
                 extra_scripts,
             )
             future_to_board[future] = board
+
+        completed_boards = 0
+        failed_boards = 0
         for future in as_completed(future_to_board):
             board = future_to_board[future]
-            success, msg = future.result()
-            if not success:
+            try:
+                success, msg = future.result()
+                if not success:
+                    locked_print(
+                        f"ERROR: Failed to initialize build_dir for board {board.board_name}:\n{msg}"
+                    )
+                    failed_boards += 1
+                    # cancel all other tasks
+                    for f in future_to_board:
+                        if not f.done():
+                            f.cancel()
+                            locked_print(
+                                "Cancelled initialization for remaining boards due to failure"
+                            )
+                    return 1
+                else:
+                    completed_boards += 1
+                    locked_print(
+                        f"SUCCESS: Finished initializing build_dir for board {board.board_name} ({completed_boards}/{len(projects)})"
+                    )
+            except Exception as e:
                 locked_print(
-                    f"Error initializing build_dir for board {board.board_name}:\n{msg}"
+                    f"EXCEPTION: Build directory initialization failed for board {board.board_name}: {e}"
                 )
+                failed_boards += 1
                 # cancel all other tasks
                 for f in future_to_board:
-                    f.cancel()
+                    if not f.done():
+                        f.cancel()
+                        locked_print(
+                            "Cancelled initialization for remaining boards due to exception"
+                        )
                 return 1
-            else:
-                locked_print(
-                    f"Finished initializing build_dir for board {board.board_name}"
-                )
     init_end_time = time.time()
     init_time = (init_end_time - start_time) / 60
     locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")

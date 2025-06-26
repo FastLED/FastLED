@@ -1,5 +1,7 @@
 import json
 import subprocess
+import threading
+import time
 import unittest
 from pathlib import Path
 
@@ -24,23 +26,63 @@ PLATFORMIO_PATH = Path.home() / ".platformio"
 PLATFORMIO_PACKAGES_PATH = PLATFORMIO_PATH / "packages"
 TOOLCHAIN_AVR = PLATFORMIO_PACKAGES_PATH / "toolchain-atmelavr"
 
+# Global lock to prevent multiple threads from running compilation simultaneously
+_compilation_lock = threading.Lock()
+_compilation_done = False
+
 
 def init() -> None:
-    uno_build = PROJECT_ROOT / ".build" / "uno"
-    print(f"Checking for Uno build in: {uno_build}")
-    if not BUILD_INFO_PATH.exists() or not TOOLCHAIN_AVR.exists():
-        print("Uno build not found. Running compilation...")
-        try:
-            subprocess.run(
-                "uv run ci/ci-compile.py uno --examples Blink",
-                shell=True,
-                check=True,
-                cwd=str(PROJECT_ROOT),
-            )
-            print("Compilation completed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error during compilation: {e}")
-            raise
+    global _compilation_done
+
+    # Use lock to ensure only one thread runs compilation
+    with _compilation_lock:
+        if _compilation_done:
+            print("Compilation already completed by another thread, skipping.")
+            return
+
+        uno_build = PROJECT_ROOT / ".build" / "uno"
+        print(
+            f"Thread {threading.current_thread().ident}: Checking for Uno build in: {uno_build}"
+        )
+        print(f"BUILD_INFO_PATH: {BUILD_INFO_PATH}")
+        print(f"TOOLCHAIN_AVR: {TOOLCHAIN_AVR}")
+        print(f"BUILD_INFO_PATH exists: {BUILD_INFO_PATH.exists()}")
+        print(f"TOOLCHAIN_AVR exists: {TOOLCHAIN_AVR.exists()}")
+
+        if not BUILD_INFO_PATH.exists() or not TOOLCHAIN_AVR.exists():
+            print("Uno build not found. Running compilation...")
+            print(f"Working directory: {PROJECT_ROOT}")
+            try:
+                print(
+                    "Starting compilation command: uv run ci/ci-compile.py uno --examples Blink"
+                )
+                start_time = time.time()
+                result = subprocess.run(
+                    "uv run ci/ci-compile.py uno --examples Blink",
+                    shell=True,
+                    check=True,
+                    cwd=str(PROJECT_ROOT),
+                    capture_output=True,
+                    text=True,
+                )
+                end_time = time.time()
+                print(
+                    f"Compilation completed successfully in {end_time - start_time:.2f} seconds."
+                )
+                print(f"STDOUT: {result.stdout}")
+                if result.stderr:
+                    print(f"STDERR: {result.stderr}")
+                _compilation_done = True
+            except subprocess.CalledProcessError as e:
+                print(f"Error during compilation (returncode: {e.returncode}): {e}")
+                if e.stdout:
+                    print(f"STDOUT: {e.stdout}")
+                if e.stderr:
+                    print(f"STDERR: {e.stderr}")
+                raise
+        else:
+            print("Uno build found, skipping compilation.")
+            _compilation_done = True
 
 
 class TestSymbolAnalysis(unittest.TestCase):

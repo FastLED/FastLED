@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+import time
 import warnings
 from pathlib import Path
 
@@ -84,6 +85,101 @@ def remove_readonly(func, path, _):
     func(path)
 
 
+def robust_rmtree(path: Path, max_retries: int = 5, delay: float = 0.1) -> bool:
+    """
+    Robustly remove a directory tree, handling race conditions and concurrent access.
+
+    Args:
+        path: Path to the directory to remove
+        max_retries: Maximum number of retry attempts
+        delay: Delay between retries in seconds
+
+    Returns:
+        True if removal was successful, False otherwise
+    """
+    if not path.exists():
+        locked_print(f"Directory {path} doesn't exist, skipping removal")
+        return True
+
+    for attempt in range(max_retries):
+        try:
+            locked_print(
+                f"Attempting to remove directory {path} (attempt {attempt + 1}/{max_retries})"
+            )
+            shutil.rmtree(path, onerror=remove_readonly)
+            locked_print(f"Successfully removed directory {path}")
+            return True
+        except OSError as e:
+            if attempt == max_retries - 1:
+                locked_print(
+                    f"Failed to remove directory {path} after {max_retries} attempts: {e}"
+                )
+                return False
+
+            # Log the specific error and retry
+            locked_print(
+                f"Failed to remove directory {path} on attempt {attempt + 1}: {e}"
+            )
+
+            # Check if another process removed it
+            if not path.exists():
+                locked_print(f"Directory {path} was removed by another process")
+                return True
+
+            # Wait before retrying
+            time.sleep(delay * (2**attempt))  # Exponential backoff
+
+        except Exception as e:
+            locked_print(f"Unexpected error removing directory {path}: {e}")
+            return False
+
+    return False
+
+
+def safe_file_removal(file_path: Path, max_retries: int = 3) -> bool:
+    """
+    Safely remove a file with retry logic.
+
+    Args:
+        file_path: Path to the file to remove
+        max_retries: Maximum number of retry attempts
+
+    Returns:
+        True if removal was successful, False otherwise
+    """
+    if not file_path.exists():
+        return True
+
+    for attempt in range(max_retries):
+        try:
+            file_path.unlink()
+            locked_print(f"Successfully removed file {file_path}")
+            return True
+        except OSError as e:
+            if attempt == max_retries - 1:
+                locked_print(
+                    f"Failed to remove file {file_path} after {max_retries} attempts: {e}"
+                )
+                return False
+
+            locked_print(
+                f"Failed to remove file {file_path} on attempt {attempt + 1}: {e}"
+            )
+
+            # Check if another process removed it
+            if not file_path.exists():
+                locked_print(f"File {file_path} was removed by another process")
+                return True
+
+            time.sleep(0.1 * (attempt + 1))
+
+        except Exception as e:
+            locked_print(f"Unexpected error removing file {file_path}: {e}")
+            return False
+
+    return False
+
+
 def create_build_dir(
     board: Board,
     defines: list[str],
@@ -96,6 +192,8 @@ def create_build_dir(
     extra_scripts: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
+    import threading
+
     # filter out "web" board because it's not a real board.
     if board.board_name == "web":
         locked_print(f"Skipping web target for board {board.board_name}")
@@ -106,27 +204,72 @@ def create_build_dir(
         defines = list(set(defines))
     board_name = board.board_name
     real_board_name = board.get_real_board_name()
-    locked_print(f"*** Initializing environment for {board_name} ***")
+    thread_id = threading.current_thread().ident
+    locked_print(
+        f"*** [Thread {thread_id}] Initializing environment for {board_name} ***"
+    )
     # builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     build_dir = build_dir or ".build"
     builddir = Path(build_dir) / board_name
-    builddir.mkdir(parents=True, exist_ok=True)
+
+    locked_print(f"[Thread {thread_id}] Creating build directory: {builddir}")
+    try:
+        builddir.mkdir(parents=True, exist_ok=True)
+        locked_print(
+            f"[Thread {thread_id}] Successfully created build directory: {builddir}"
+        )
+    except Exception as e:
+        locked_print(
+            f"[Thread {thread_id}] Error creating build directory {builddir}: {e}"
+        )
+        return False, f"Failed to create build directory: {e}"
     # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
     # recycled build directories for fastled to update. This is a fast operation.
     srcdir = builddir / "lib"
     if srcdir.exists():
-        shutil.rmtree(srcdir, onerror=remove_readonly)
+        locked_print(f"[Thread {thread_id}] Removing existing lib directory: {srcdir}")
+        if not robust_rmtree(srcdir):
+            locked_print(
+                f"[Thread {thread_id}] Warning: Failed to remove lib directory {srcdir}, continuing anyway"
+            )
+
     platformio_ini = builddir / "platformio.ini"
     if platformio_ini.exists():
-        try:
-            platformio_ini.unlink()
-        except OSError as e:
-            locked_print(f"Error removing {platformio_ini}: {e}")
+        locked_print(
+            f"[Thread {thread_id}] Removing existing platformio.ini: {platformio_ini}"
+        )
+        if not safe_file_removal(platformio_ini):
+            locked_print(
+                f"[Thread {thread_id}] Warning: Failed to remove {platformio_ini}, continuing anyway"
+            )
+
     if board_dir:
         dst_dir = builddir / "boards"
+        locked_print(
+            f"[Thread {thread_id}] Processing board directory: {board_dir} -> {dst_dir}"
+        )
+
         if dst_dir.exists():
-            shutil.rmtree(dst_dir)
-        shutil.copytree(str(board_dir), str(builddir / "boards"))
+            locked_print(
+                f"[Thread {thread_id}] Removing existing boards directory: {dst_dir}"
+            )
+            if not robust_rmtree(dst_dir):
+                locked_print(
+                    f"[Thread {thread_id}] Error: Failed to remove boards directory {dst_dir}"
+                )
+                return False, f"Failed to remove existing boards directory {dst_dir}"
+
+        try:
+            locked_print(
+                f"[Thread {thread_id}] Copying board directory: {board_dir} -> {dst_dir}"
+            )
+            shutil.copytree(str(board_dir), str(dst_dir))
+            locked_print(
+                f"[Thread {thread_id}] Successfully copied board directory to {dst_dir}"
+            )
+        except Exception as e:
+            locked_print(f"[Thread {thread_id}] Error copying board directory: {e}")
+            return False, f"Failed to copy board directory: {e}"
     if board.platform_needs_install:
         if board.platform:
             try:
@@ -186,9 +329,13 @@ def create_build_dir(
     stdout = result.stdout
     locked_print(result.stdout)
     if result.returncode != 0:
-        locked_print(f"*** Error setting up board {board_name} ***")
+        locked_print(
+            f"*** [Thread {thread_id}] Error setting up board {board_name} ***"
+        )
         return False, stdout
-    locked_print(f"*** Finished initializing environment for board {board_name} ***")
+    locked_print(
+        f"*** [Thread {thread_id}] Finished initializing environment for board {board_name} ***"
+    )
 
     # Print the contents of the generated platformio.ini file for debugging
     platformio_ini_path = builddir / "platformio.ini"
