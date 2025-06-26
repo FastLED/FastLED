@@ -1,4 +1,3 @@
-
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 #define FASTLED_INTERNAL
@@ -74,6 +73,7 @@ extern "C"
         Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); \
     }
 #else
+// No-op version to avoid pulling in Serial.printf and vfprintf dependencies
 #define FASTLED_ASSERT(format, errcode, ...) ((void)errcode)
 #endif
 
