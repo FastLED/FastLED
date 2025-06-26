@@ -9,8 +9,18 @@ namespace {
 FFT &get_flex_fft() {
     // This is a singleton for the FFT implementation.
     // It is used to avoid creating multiple FFT instances.
+#if defined(__arm__) && defined(TEENSYDUINO)
+    // Teensy platforms have issues with static initialization guard functions
+    // conflicting with the framework, so use a heap-allocated singleton
+    static FFT* gFlexFFT = nullptr;
+    if (!gFlexFFT) {
+        gFlexFFT = new FFT();
+    }
+    return *gFlexFFT;
+#else
     static ThreadLocal<FFT> gFlexFFT;
     return gFlexFFT.access();
+#endif
 }
 
 } // namespace

@@ -8,8 +8,6 @@
 #include "fl/screenmap.h"
 #include "fl/xymap.h"
 
-using namespace fl;
-
 namespace fl {
 
 ScreenMap XYMap::toScreenMap() const {

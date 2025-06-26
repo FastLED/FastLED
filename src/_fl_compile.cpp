@@ -1,68 +1,59 @@
-// This file is necessary for avr on platformio, possibly arduino ide too.
+// This file includes all FastLED implementation files for allsrc build.
+// All .cpp files have been converted to .hpp files to enable header-only builds
+// across all platforms without conditional compilation.
 
-// According to this report, all arduino files must be located at one folder.
-// However this is only seen in the avr platforms.
-//
-// https://community.platformio.org/t/platformio-not-building-all-project-library-files/22606
-// The solution then is to detect AVR + platformio and selectively compile in files
-
-#ifndef FORCE_INCLUDE_FOR_AVR
-#if defined(ARDUINO) && defined(__AVR__)
-#define FORCE_INCLUDE_FOR_AVR 1
-#else
-#define FORCE_INCLUDE_FOR_AVR 0
+// FL library implementation files
+#include "fl/allocator.hpp"
+#if !(defined(__arm__) && defined(TEENSYDUINO))
+// Audio functionality has static initialization conflicts with Teensy framework
+#include "fl/audio.hpp"
 #endif
-#endif
-
-#if FORCE_INCLUDE_FOR_AVR
-#include "fl/allocator.cpp"
-#include "fl/audio.cpp"
-#include "fl/blur.cpp"
-#include "fl/bytestreammemory.cpp"
-#include "fl/colorutils.cpp"
-#include "fl/corkscrew.cpp"
-#include "fl/downscale.cpp"
-#include "fl/ease.cpp"
-#include "fl/engine_events.cpp"
-#include "fl/fft.cpp"
-#include "fl/fft_impl.cpp"
-#include "fl/file_system.cpp"
-#include "fl/fill.cpp"
-#include "fl/gamma.cpp"
-#include "fl/gradient.cpp"
-#include "fl/hsv16.cpp"
-#include "fl/io.cpp"
-#include "fl/istream.cpp"
-#include "fl/json.cpp"
-#include "fl/json_console.cpp"
-#include "fl/leds.cpp"
-#include "fl/line_simplification.cpp"
-#include "fl/noise_woryley.cpp"
-#include "fl/ostream.cpp"
-#include "fl/ptr.cpp"
-#include "fl/raster_sparse.cpp"
-#include "fl/rectangular_draw_buffer.cpp"
-#include "fl/screenmap.cpp"
-#include "fl/sin32.cpp"
-#include "fl/splat.cpp"
-#include "fl/str.cpp"
-#include "fl/strstream.cpp"
-#include "fl/tile2x2.cpp"
-#include "fl/time_alpha.cpp"
-#include "fl/transform.cpp"
-#include "fl/type_traits.cpp"
-#include "fl/ui.cpp"
-#include "fl/upscale.cpp"
-#include "fl/wave_simulation.cpp"
-#include "fl/wave_simulation_real.cpp"
-#include "fl/xmap.cpp"
-#include "fl/xymap.cpp"
-#include "fl/xypath.cpp"
-#include "fl/xypath_impls.cpp"
-#include "fl/xypath_renderer.cpp"
+#include "fl/blur.hpp"
+#include "fl/bytestreammemory.hpp"
+#include "fl/colorutils.hpp"
+#include "fl/corkscrew.hpp"
+#include "fl/downscale.hpp"
+#include "fl/ease.hpp"
+#include "fl/engine_events.hpp"
+#include "fl/fft.hpp"
+#include "fl/fft_impl.hpp"
+#include "fl/file_system.hpp"
+#include "fl/fill.hpp"
+#include "fl/gamma.hpp"
+#include "fl/gradient.hpp"
+#include "fl/hsv16.hpp"
+#include "fl/io.hpp"
+#include "fl/istream.hpp"
+#include "fl/json.hpp"
+#include "fl/json_console.hpp"
+#include "fl/leds.hpp"
+#include "fl/line_simplification.hpp"
+#include "fl/noise_woryley.hpp"
+#include "fl/ostream.hpp"
+#include "fl/ptr.hpp"
+#include "fl/raster_sparse.hpp"
+#include "fl/rectangular_draw_buffer.hpp"
+#include "fl/screenmap.hpp"
+#include "fl/sin32.hpp"
+#include "fl/splat.hpp"
+#include "fl/str.hpp"
+#include "fl/strstream.hpp"
+#include "fl/stub_main.hpp"
+#include "fl/tile2x2.hpp"
+#include "fl/time_alpha.hpp"
+#include "fl/transform.hpp"
+#include "fl/type_traits.hpp"
+#include "fl/ui.hpp"
+#include "fl/upscale.hpp"
+#include "fl/wave_simulation.hpp"
+#include "fl/wave_simulation_real.hpp"
+#include "fl/xmap.hpp"
+#include "fl/xymap.hpp"
+#include "fl/xypath.hpp"
+#include "fl/xypath_impls.hpp"
+#include "fl/xypath_renderer.hpp"
 
 // Sensors
-#include "sensors/button.cpp"
-#include "sensors/digital_pin.cpp"
-#include "sensors/pir.cpp"
-#endif
+#include "sensors/button.hpp"
+#include "sensors/digital_pin.hpp"
+#include "sensors/pir.hpp"

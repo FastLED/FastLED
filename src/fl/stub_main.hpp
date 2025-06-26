@@ -23,7 +23,7 @@ void setup() {}
 void loop() {}
 #endif // FASTLED_STUB_MAIN_INCLUDE_INO
 
-#include <iostream>
+#include <iostream>  // ok include
 
 int main() {
     // Super simple main function that just calls the setup and loop functions.

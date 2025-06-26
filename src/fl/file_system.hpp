@@ -41,8 +41,6 @@ class NullFileHandle : public FileHandle {
     }
 };
 
-using namespace fl;
-
 class NullFileSystem : public FsImpl {
   public:
     NullFileSystem() {
