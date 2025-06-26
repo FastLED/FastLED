@@ -10,12 +10,6 @@
 #include "platforms/print_native.h"
 #elif defined(ESP32) || defined(ESP8266)
 #include "platforms/esp/print_esp.h"
-#elif defined(STM32F1) || defined(STM32F4) || defined(STM32H7) || defined(ARDUINO_GIGA)
-#include "platforms/arm/print_stm32.h"
-#elif defined(__IMXRT1062__) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#include "platforms/arm/print_teensy.h"
-#elif defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(ARDUINO_NRF52_DK)
-#include "platforms/arm/print_nrf52.h"
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
 #include "platforms/avr/print_avr.h"
 #else
@@ -33,15 +27,14 @@ void print(const char* str) {
     print_native(str);
 #elif defined(ESP32) || defined(ESP8266)
     print_esp(str);
-#elif defined(STM32F1) || defined(STM32F4) || defined(STM32H7) || defined(ARDUINO_GIGA)
-    print_stm32(str);
-#elif defined(__IMXRT1062__) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
-    print_teensy(str);
-#elif defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(ARDUINO_NRF52_DK)
-    print_nrf52(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     print_avr(str);
 #else
+    // Use generic Arduino print for all other platforms including:
+    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
+    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
+    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)
+    // - All other Arduino-compatible platforms
     print_arduino(str);
 #endif
 }
@@ -55,15 +48,14 @@ void println(const char* str) {
     println_native(str);
 #elif defined(ESP32) || defined(ESP8266)
     println_esp(str);
-#elif defined(STM32F1) || defined(STM32F4) || defined(STM32H7) || defined(ARDUINO_GIGA)
-    println_stm32(str);
-#elif defined(__IMXRT1062__) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
-    println_teensy(str);
-#elif defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(ARDUINO_NRF52_DK)
-    println_nrf52(str);
 #elif defined(__AVR__) && !defined(ARDUINO_ARCH_MEGAAVR)
     println_avr(str);
 #else
+    // Use generic Arduino print for all other platforms including:
+    // - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)
+    // - Teensy (__IMXRT1062__, __MK20DX128__, __MK20DX256__, __MK64FX512__, __MK66FX1M0__)
+    // - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)  
+    // - All other Arduino-compatible platforms
     println_arduino(str);
 #endif
 }
