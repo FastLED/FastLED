@@ -15,7 +15,7 @@
 #include "esp_memory_utils.h"
 #include "esp_pm.h"
 #include "fl/stdint.h"
-#include <stdio.h> // ok include
+#include "platforms/assert_defs.h"
 #include <string.h>
 // #include "esp_lcd_panel_io_interface.h"
 // #include "esp_lcd_panel_io.h"
@@ -362,7 +362,8 @@ class I2SClocklessLedDriveresp32S3 {
         #pragma GCC diagnostic pop
         #endif
 
-        ESP_ERROR_CHECK(esp_lcd_new_i80_bus(&bus_config, &i80_bus));
+        esp_err_t bus_err = esp_lcd_new_i80_bus(&bus_config, &i80_bus);
+        FASTLED_ASSERT(bus_err == ESP_OK, "Failed to create ESP32 I2S LCD bus");
 
         esp_lcd_panel_io_i80_config_t io_config;
 
@@ -382,8 +383,8 @@ class I2SClocklessLedDriveresp32S3 {
         io_config.user_ctx = this;
 
         io_config.on_color_trans_done = flush_ready;
-        ESP_ERROR_CHECK(
-            esp_lcd_new_panel_io_i80(i80_bus, &io_config, &led_io_handle));
+        esp_err_t panel_err = esp_lcd_new_panel_io_i80(i80_bus, &io_config, &led_io_handle);
+        FASTLED_ASSERT(panel_err == ESP_OK, "Failed to create ESP32 I2S LCD panel IO");
     }
 
     void initled(uint8_t *leds, const int *pins, int numstrip,
@@ -496,7 +497,6 @@ class I2SClocklessLedDriveresp32S3 {
 static bool IRAM_ATTR flush_ready(esp_lcd_panel_io_handle_t panel_io,
                                   esp_lcd_panel_io_event_data_t *edata,
                                   void *user_ctx) {
-    // printf("we're here");
     DRIVER_READY = true;
     isDisplaying = false;
     I2SClocklessLedDriveresp32S3 *cont =

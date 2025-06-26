@@ -1,10 +1,11 @@
 #pragma once
 
-#include "esp_log.h"
+#include "fl/io.h"
+#include "fl/strstream.h"
 
 #define FASTLED_ASSERT(x, MSG)                                                 \
     {                                                                          \
         if (!(x)) {                                                            \
-            ESP_LOGE("#### FastLED", "%s", (fl::StrStream() << MSG).c_str());  \
+            fl::println((fl::StrStream() << "FASTLED ASSERT FAILED: " << MSG).c_str());  \
         }                                                                      \
     }
