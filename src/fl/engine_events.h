@@ -5,13 +5,10 @@
 #include "fl/singleton.h"
 #include "fl/vector.h"
 #include "fl/xymap.h"
+#include "fl/string.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
-#if defined(__AVR__) || defined(ESP8266)
-#define FASTLED_HAS_ENGINE_EVENTS 0
-#else
-#define FASTLED_HAS_ENGINE_EVENTS 1
-#endif
+#define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
 FASTLED_NAMESPACE_BEGIN
