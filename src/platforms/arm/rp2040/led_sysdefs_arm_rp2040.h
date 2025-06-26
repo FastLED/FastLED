@@ -11,7 +11,7 @@
 // Explicitly include Arduino.h here so any framework-specific defines take
 // priority.
 #ifdef ARDUINO
-#include <Arduino.h>
+#include <Arduino.h> // ok include
 #endif
 
 #define FASTLED_ARM

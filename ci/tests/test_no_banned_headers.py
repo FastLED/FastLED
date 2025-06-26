@@ -64,6 +64,9 @@ BANNED_HEADERS_COMMON = [
 
 BANNED_HEADERS_CORE = BANNED_HEADERS_COMMON + BANNED_HEADERS_ESP + ["Arduino.h"]
 
+# Banned headers for platforms directory - specifically checking for Arduino.h
+BANNED_HEADERS_PLATFORMS = ["Arduino.h"]
+
 
 class BannedHeadersChecker(FileContentChecker):
     """Checker class for banned headers."""
@@ -175,6 +178,25 @@ class TestNoBannedHeaders(unittest.TestCase):
         _test_no_banned_headers(
             test_directories=test_directories,
             banned_headers_list=BANNED_HEADERS_COMMON,
+            on_fail=on_fail,
+        )
+
+    def test_no_banned_headers_platforms(self) -> None:
+        """Searches through the platforms directory to check for Arduino.h usage."""
+
+        def on_fail(msg: str) -> None:
+            self.fail(
+                msg + "\n"
+                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+            )
+
+        # Test the platforms directory specifically for Arduino.h
+        test_directories = [
+            os.path.join(SRC_ROOT, "platforms"),
+        ]
+        _test_no_banned_headers(
+            test_directories=test_directories,
+            banned_headers_list=BANNED_HEADERS_PLATFORMS,
             on_fail=on_fail,
         )
 
