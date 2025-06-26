@@ -5,14 +5,7 @@
 
 namespace fl {
 
-struct CRGB16 {
-    uint16_t r;
-    uint16_t g;
-    uint16_t b;
-};
-
-
-inline void gamma16(const CRGB &rgb, CRGB16* rgb16) {
+inline void gamma16(const CRGB &rgb, uint16_t* r16, uint16_t* g16, uint16_t* b16) {
 
     static const uint16_t _gamma_2_8[256] = {
         0,     0,     0,     1,     1,     2,     4,     6,     8,     11,
@@ -42,9 +35,9 @@ inline void gamma16(const CRGB &rgb, CRGB16* rgb16) {
         55978, 56587, 57199, 57816, 58436, 59061, 59690, 60323, 60960, 61601,
         62246, 62896, 63549, 64207, 64869, 65535};
 
-    rgb16->r = _gamma_2_8[rgb.r];
-    rgb16->g = _gamma_2_8[rgb.g];
-    rgb16->b = _gamma_2_8[rgb.b];
+    *r16 = _gamma_2_8[rgb.r];
+    *g16 = _gamma_2_8[rgb.g];
+    *b16 = _gamma_2_8[rgb.b];
 }
 
 

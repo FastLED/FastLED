@@ -89,12 +89,7 @@ extern void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
 inline void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
                                        uint16_t *b16) {
 
-    CRGB16 c16;
-    gamma16(color, &c16);
-    // gamma16(color, r16, g16, b16);
-    *r16 = c16.r;
-    *g16 = c16.g;
-    *b16 = c16.b;
+    gamma16(color, r16, g16, b16);
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
 
