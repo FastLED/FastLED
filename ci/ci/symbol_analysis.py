@@ -599,9 +599,11 @@ def main():
         "--board", help="Board name to analyze (e.g., uno, esp32dev, esp32s3)"
     )
     parser.add_argument(
-        "--enhanced",
-        action="store_true",
-        help="Enable enhanced analysis with function call graph",
+        "--no-enhanced",
+        action="store_false",
+        dest="enhanced",
+        default=True,
+        help="Disable enhanced analysis with function call graph (enhanced is default)",
     )
     parser.add_argument(
         "--show-calls-to",
@@ -800,7 +802,9 @@ def main():
 
     if not enhanced_mode:
         print("This file contains ALL symbols without any filtering or classification.")
-        print("Use --enhanced flag for function call graph analysis.")
+        print(
+            "Enhanced mode with function call graph analysis is enabled by default. Use --no-enhanced to disable."
+        )
     else:
         print("This file contains ALL symbols and complete call graph analysis.")
 
