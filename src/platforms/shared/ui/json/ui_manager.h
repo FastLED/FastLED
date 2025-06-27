@@ -16,7 +16,7 @@ namespace fl {
 class JsonUiManager : fl::EngineEvents::Listener {
   public:
     using Callback = fl::function<void(const char *)>;
-    JsonUiManager(Callback updateJs) : mUpdateJs(updateJs) { fl::EngineEvents::addListener(this); }
+    JsonUiManager(Callback updateJs);
     ~JsonUiManager();
 
     void addComponent(fl::WeakPtr<JsonUiInternal> component);

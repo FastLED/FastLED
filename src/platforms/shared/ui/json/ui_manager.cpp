@@ -15,6 +15,10 @@ namespace fl {
 
 
 // Constructor is inline in header, just add logging to destructor
+JsonUiManager::JsonUiManager(Callback updateJs) : mUpdateJs(updateJs) {
+    fl::EngineEvents::addListener(this);
+}
+
 
 JsonUiManager::~JsonUiManager() {
     // FL_WARN("*** JsonUiManager: DESTRUCTOR CALLED ***");
@@ -32,6 +36,7 @@ JsonUiManager::~JsonUiManager() {
 }
 
 void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
+    FL_WARN("*** JsonUiManager::addComponent ENTRY ***");
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
@@ -59,6 +64,7 @@ void JsonUiManager::processPendingUpdates() {
 }
 
 fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
+    FL_WARN("*** JsonUiManager::getComponents ENTRY ***");
     fl::lock_guard<fl::mutex> lock(mMutex);
     fl::vector<JsonUiInternalPtr> out;
     for (auto &component : mComponents) {
@@ -70,7 +76,7 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() {
 }
 
 void JsonUiManager::updateUiComponents(const char* jsonStr) {
-    // FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
+    FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
     // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
     // FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
     // FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());

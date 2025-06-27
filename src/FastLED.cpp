@@ -1,9 +1,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "fl/singleton.h"
-#ifdef FASTLED_ENABLE_ENGINE_EVENTS
 #include "fl/engine_events.h"
-#endif
 #include "fl/compiler_control.h"
 
 /// @file FastLED.cpp
@@ -106,9 +104,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
-#ifdef FASTLED_ENABLE_ENGINE_EVENTS
 	fl::EngineEvents::onStripAdded(pLed, nLedsOrOffset - nOffset);
-#endif
 	return *pLed;
 }
 
@@ -121,9 +117,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
-#ifdef FASTLED_ENABLE_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
-#endif
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -167,15 +161,11 @@ void CFastLED::show(uint8_t scale) {
 	}
 	countFPS();
 	onEndFrame();
-#ifdef FASTLED_ENABLE_ENGINE_EVENTS
 	fl::EngineEvents::onEndShowLeds();
-#endif
 }
 
 void CFastLED::onEndFrame() {
-#ifdef FASTLED_ENABLE_ENGINE_EVENTS
 	fl::EngineEvents::onEndFrame();
-#endif
 }
 
 int CFastLED::count() {

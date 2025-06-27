@@ -23,13 +23,11 @@ EngineEvents::Listener::~Listener() {
 #endif
 }
 
-EngineEvents *EngineEvents::getInstance() {
 #if FASTLED_HAS_ENGINE_EVENTS
+EngineEvents *EngineEvents::getInstance() {
     return &Singleton<EngineEvents>::instance();
-#else
-    return nullptr; // strip out when engine events are disabled.
-#endif
 }
+#endif
 
 #if FASTLED_HAS_ENGINE_EVENTS
 void EngineEvents::_onPlatformPreLoop() {

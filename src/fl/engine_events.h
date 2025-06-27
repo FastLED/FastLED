@@ -15,6 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 class CLEDController;
 FASTLED_NAMESPACE_END
 
+
 namespace fl {
 
 class EngineEvents {
@@ -134,19 +135,15 @@ class EngineEvents {
         Pair(Listener *listener, int priority)
             : listener(listener), priority(priority) {}
     };
-#if defined(__EMSCRIPTEN__) && 0
-    // Not sure what is going on here, but emscripten seems to have a problem
-    // with FixedVector.
-    typedef fl::vector<Pair> ListenerList;
-#else
+
     typedef fl::vector_inlined<Pair, 16> ListenerList;
-#endif
     ListenerList mListeners;
-#endif
+
 
     static EngineEvents *getInstance();
 
     friend class fl::Singleton<EngineEvents>;
+#endif  // FASTLED_HAS_ENGINE_EVENTS
 };
 
 } // namespace fl
