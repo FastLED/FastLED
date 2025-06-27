@@ -137,6 +137,14 @@ inline void analogWrite(int, int) {}
 inline int digitalRead(int) { return LOW; }
 inline void pinMode(int, int) {}
 
+// Arduino timing functions for WebAssembly
+extern "C" {
+    uint32_t millis();
+    uint32_t micros();
+    void delay(int ms);
+    void delayMicroseconds(int micros);
+}
+
 // avr flash memory macro is disabled.
 #ifdef F
 #undef F
