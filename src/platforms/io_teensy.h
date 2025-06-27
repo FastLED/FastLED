@@ -1,39 +1,58 @@
 #pragma once
 
-namespace fl {
+#ifndef FASTLED_TEENSY_USE_PRINTF
+#ifdef __IMXRT1062__
+#define FASTLED_TEENSY_USE_PRINTF 1
+#else
+#define FASTLED_TEENSY_USE_PRINTF 0
+#endif
+#endif  // !defined(FASTLED_TEENSY_USE_PRINTF)
 
-// Low-level Teensy print functions that avoid ALL Arduino dependencies
-// This uses no-op implementations to prevent "_write" linker issues
-// Users should initialize their own Serial ports if they need actual output
+
+#if FASTLED_TEENSY_USE_PRINTF
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/select.h>
+#include <sys/time.h>
+
+namespace fl {
 
 inline void print_teensy(const char* str) {
     if (!str) return;
-    
-    // No-op implementation to avoid "_write" linker dependencies
-    // Teensy users should use Serial1.print() directly in their sketch for output
-    // This prevents "undefined reference to _write" errors completely
-    (void)str; // Suppress unused parameter warning
+    printf("%s", str);
 }
-
 inline void println_teensy(const char* str) {
     if (!str) return;
-    
-    // No-op implementation to avoid "_write" linker dependencies  
-    // Teensy users should use Serial1.println() directly in their sketch for output
-    (void)str; // Suppress unused parameter warning
+    printf("%s\n", str);
 }
-
-// Input functions - no-op implementations for Teensy
 inline int available_teensy() {
-    // No-op implementation to avoid Arduino dependencies
-    // Teensy users should use Serial1.available() directly in their sketch for input
     return 0;
 }
-
 inline int read_teensy() {
-    // No-op implementation to avoid Arduino dependencies
-    // Teensy users should use Serial1.read() directly in their sketch for input
     return -1;
 }
 
 } // namespace fl
+
+
+#else // !FASTLED_TEENSY_USE_PRINTF
+
+#include "io_null.h"
+
+namespace fl {
+inline void print_teensy(const char* str) {
+    print_null(str);
+}
+inline void println_teensy(const char* str) {
+    println_null(str);
+}
+inline int available_teensy() {
+    return available_null();
+}
+inline int read_teensy() {
+    return read_null();
+}
+} // namespace fl
+
+#endif // !FASTLED_TEENSY_USE_PRINTF
