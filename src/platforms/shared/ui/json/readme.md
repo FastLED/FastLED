@@ -94,11 +94,8 @@ Where `id_XXX` corresponds to component IDs returned by `JsonUiInternal::id()`.
 The JsonUiManager automatically integrates with FastLED's EngineEvents system:
 
 - **onEndShowLeds()**: Triggers JSON export when new components are added
-- **onPlatformPreLoop()**: Processes pending JSON updates from the platform
-
-*todo: make onPlatformPreLoop a setable behavior*
-
-ommunication Protocol
+- **onEndFrame()**: Processes pending JSON updates after the frame is complete
+on Protocol
 
 ### Component Registration (Sketch → Platform)
 

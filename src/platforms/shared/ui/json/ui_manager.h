@@ -35,7 +35,7 @@ class JsonUiManager : fl::EngineEvents::Listener {
     
     typedef fl::FixedSet<fl::WeakPtr<JsonUiInternal>, 64> JsonUIRefSet;
 
-    void onPlatformPreLoop() override;
+    void onEndFrame() override;
 
     void onEndShowLeds() override;
 

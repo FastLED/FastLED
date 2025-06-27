@@ -96,7 +96,7 @@ void JsonUiManager::updateUiComponents(const char* jsonStr) {
     mPendingJsonUpdate = fl::move(doc);
     mHasPendingUpdate = true;
     // FL_WARN("*** AFTER: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
-    // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onPlatformPreLoop()");
+    // FL_WARN("*** BACKEND SET mHasPendingUpdate = true, waiting for onEndFrame()");
 }
 
 void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
@@ -127,17 +127,17 @@ void JsonUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
     }
 }
 
-void JsonUiManager::onPlatformPreLoop() {
+void JsonUiManager::onEndFrame() {
     // Don't re-enable this, it fills the screen with spam.
-    //FL_WARN("*** onPlatformPreLoop CALLED: JsonUiManager=" << this << ", mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
+    //FL_WARN("*** onEndFrame CALLED: JsonUiManager=" << this << ", mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     if (!mHasPendingUpdate) {
         return;
     }
-    // FL_WARN("*** onPlatformPreLoop: Processing pending update");
+    // FL_WARN("*** onEndFrame: Processing pending update");
     executeUiUpdates(mPendingJsonUpdate);
     mPendingJsonUpdate.clear();
     mHasPendingUpdate = false;
-    // FL_WARN("*** onPlatformPreLoop: Update processed and cleared");
+    // FL_WARN("*** onEndFrame: Update processed and cleared");
 }
 
 void JsonUiManager::toJson(FLArduinoJson::JsonArray &json) {
