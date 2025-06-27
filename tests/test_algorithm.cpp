@@ -559,3 +559,221 @@ TEST_CASE("fl::stable_sort with different container types") {
         CHECK_EQ(vec[3], 8);
     }
 }
+
+TEST_CASE("fl::stable_sort edge cases and stress tests") {
+    SUBCASE("Very large array with many duplicates") {
+        fl::vector<int> vec;
+        
+        // Create a pattern: 1,2,3,1,2,3,... for 100 elements
+        for (int i = 0; i < 100; ++i) {
+            vec.push_back((i % 3) + 1);
+        }
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        // Verify all 1's come first (should be ~33 of them)
+        int ones_count = 0;
+        int twos_count = 0;
+        int threes_count = 0;
+        
+        for (size_t i = 0; i < vec.size(); ++i) {
+            if (vec[i] == 1) {
+                ones_count++;
+                // All 1's should come before any 2's or 3's
+                CHECK_LT(i, 34); // Should be in first ~33 positions
+            } else if (vec[i] == 2) {
+                twos_count++;
+                // All 2's should come after 1's but before 3's
+                CHECK_GE(i, 33);
+                CHECK_LT(i, 67);
+            } else if (vec[i] == 3) {
+                threes_count++;
+                // All 3's should come last
+                CHECK_GE(i, 66);
+            }
+        }
+        
+        CHECK_EQ(ones_count, 34);   // 0,3,6,9,... up to 99 = 34 elements
+        CHECK_EQ(twos_count, 33);   // 1,4,7,10,... up to 97 = 33 elements  
+        CHECK_EQ(threes_count, 33); // 2,5,8,11,... up to 98 = 33 elements
+    }
+
+    SUBCASE("Array with all identical elements") {
+        fl::vector<int> vec;
+        for (int i = 0; i < 50; ++i) {
+            vec.push_back(42);
+        }
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        // All elements should remain 42
+        for (size_t i = 0; i < vec.size(); ++i) {
+            CHECK_EQ(vec[i], 42);
+        }
+    }
+
+    SUBCASE("Reverse sorted large array") {
+        fl::vector<int> vec;
+        for (int i = 100; i >= 1; --i) {
+            vec.push_back(i);
+        }
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        // Should be sorted 1,2,3,...,100
+        for (size_t i = 0; i < vec.size(); ++i) {
+            CHECK_EQ(vec[i], static_cast<int>(i + 1));
+        }
+    }
+
+    SUBCASE("Array with extreme values") {
+        fl::vector<int> vec;
+        vec.push_back(2147483647);  // INT_MAX
+        vec.push_back(-2147483648); // INT_MIN  
+        vec.push_back(0);
+        vec.push_back(1);
+        vec.push_back(-1);
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        CHECK_EQ(vec[0], -2147483648);
+        CHECK_EQ(vec[1], -1);
+        CHECK_EQ(vec[2], 0);
+        CHECK_EQ(vec[3], 1);
+        CHECK_EQ(vec[4], 2147483647);
+    }
+}
+
+TEST_CASE("fl::stable_sort with complex objects") {
+    struct Person {
+        fl::string name;
+        int age;
+        int id; // for tracking original order
+        
+        Person() : name(""), age(0), id(0) {}
+        Person(const fl::string& n, int a, int i) : name(n), age(a), id(i) {}
+    };
+
+    SUBCASE("Sort by age, maintain name order for same age") {
+        fl::vector<Person> people;
+        people.push_back(Person("Alice", 25, 0));
+        people.push_back(Person("Bob", 30, 1));
+        people.push_back(Person("Charlie", 25, 2));  // Same age as Alice
+        people.push_back(Person("David", 20, 3));
+        people.push_back(Person("Eve", 30, 4));      // Same age as Bob
+        
+        // Sort by age, stable sort should maintain relative order for same ages
+        fl::stable_sort(people.begin(), people.end(), 
+                       [](const Person& a, const Person& b) {
+                           return a.age < b.age;
+                       });
+        
+        // Verify age order
+        CHECK_EQ(people[0].age, 20);  // David
+        CHECK_EQ(people[1].age, 25);  // Alice (should come before Charlie)
+        CHECK_EQ(people[2].age, 25);  // Charlie  
+        CHECK_EQ(people[3].age, 30);  // Bob (should come before Eve)
+        CHECK_EQ(people[4].age, 30);  // Eve
+        
+        // Verify stability within age groups
+        CHECK_EQ(people[0].id, 3);    // David
+        CHECK_EQ(people[1].id, 0);    // Alice came before Charlie originally
+        CHECK_EQ(people[2].id, 2);    // Charlie
+        CHECK_EQ(people[3].id, 1);    // Bob came before Eve originally  
+        CHECK_EQ(people[4].id, 4);    // Eve
+    }
+}
+
+TEST_CASE("fl::stable_sort algorithm boundaries") {
+    SUBCASE("Test small array threshold (≤32 elements)") {
+        // Test exactly 32 elements (boundary case)
+        fl::vector<int> vec;
+        for (int i = 32; i >= 1; --i) {
+            vec.push_back(i);
+        }
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        for (size_t i = 0; i < vec.size(); ++i) {
+            CHECK_EQ(vec[i], static_cast<int>(i + 1));
+        }
+    }
+
+    SUBCASE("Test large array (>32 elements)") {
+        // Test 33 elements (just over boundary)
+        fl::vector<int> vec;
+        for (int i = 33; i >= 1; --i) {
+            vec.push_back(i);
+        }
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        for (size_t i = 0; i < vec.size(); ++i) {
+            CHECK_EQ(vec[i], static_cast<int>(i + 1));
+        }
+    }
+
+    SUBCASE("Test rotation edge cases") {
+        // Single element rotations
+        fl::vector<int> vec;
+        vec.push_back(2);
+        vec.push_back(1);
+        
+        fl::stable_sort(vec.begin(), vec.end());
+        
+        CHECK_EQ(vec[0], 1);
+        CHECK_EQ(vec[1], 2);
+    }
+}
+
+TEST_CASE("fl::stable_sort vs fl::sort comparison") {
+    struct IndexedValue {
+        int value;
+        int original_index;
+        
+        IndexedValue() : value(0), original_index(0) {}
+        IndexedValue(int v, int idx) : value(v), original_index(idx) {}
+    };
+
+    SUBCASE("Compare stability between sort and stable_sort") {
+        // Create two identical arrays
+        fl::vector<IndexedValue> vec_stable;
+        fl::vector<IndexedValue> vec_unstable;
+        
+        // Add elements with same values but different original indices
+        for (int i = 0; i < 20; ++i) {
+            int value = (i % 5);  // Creates many duplicates: 0,1,2,3,4,0,1,2,3,4,...
+            vec_stable.push_back(IndexedValue(value, i));
+            vec_unstable.push_back(IndexedValue(value, i));
+        }
+        
+        auto comparator = [](const IndexedValue& a, const IndexedValue& b) {
+            return a.value < b.value;
+        };
+        
+        fl::stable_sort(vec_stable.begin(), vec_stable.end(), comparator);
+        fl::sort(vec_unstable.begin(), vec_unstable.end(), comparator);
+        
+        // Both should be sorted by value
+        for (size_t i = 0; i < vec_stable.size(); ++i) {
+            CHECK_EQ(vec_stable[i].value, vec_unstable[i].value);
+        }
+        
+        // stable_sort should preserve relative order of equal elements
+        // Check that for each value group, original indices are in increasing order
+        for (int target_value = 0; target_value < 5; ++target_value) {
+            fl::vector<int> stable_indices;
+            
+            for (size_t i = 0; i < vec_stable.size(); ++i) {
+                if (vec_stable[i].value == target_value) {
+                    stable_indices.push_back(vec_stable[i].original_index);
+                }
+            }
+            
+            // In stable sort, indices should be in original order: 0,5,10,15 for value 0, etc.
+            for (size_t i = 1; i < stable_indices.size(); ++i) {
+                CHECK_LT(stable_indices[i-1], stable_indices[i]);
+            }
+        }
+    }
+}
