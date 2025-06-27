@@ -35,6 +35,12 @@ void JsonUiManager::addComponent(fl::WeakPtr<JsonUiInternal> component) {
     fl::lock_guard<fl::mutex> lock(mMutex);
     mComponents.insert(component);
     mItemsAdded = true;
+    
+    // Mark the component as changed so it gets sent to the frontend initially
+    if (auto ptr = component.lock()) {
+        ptr->markChanged();
+    }
+    
     // FL_WARN("*** COMPONENT REGISTERED: ID " << (component.lock() ? component.lock()->id() : -1) << " (Total: " << mComponents.size() << ")");
 }
 
