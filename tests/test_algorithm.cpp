@@ -6,6 +6,7 @@
 #include "fl/dbg.h"
 #include "fl/vector.h"
 #include "fl/functional.h"
+#include "fl/map.h"
 #include "test.h"
 
 using namespace fl;
@@ -25,6 +26,29 @@ TEST_CASE("reverse an int list") {
     CHECK_EQ(vec[3], 2);
     CHECK_EQ(vec[4], 1);
 }
+
+// This test should NOT compile - trying to sort a map should fail
+// because it would break the tree's internal ordering invariant
+#ifdef COMPILE_ERROR_TEST_MAP_SORT
+TEST_CASE("fl::sort on fl::fl_map should fail to compile") {
+    fl::fl_map<int, fl::string> map;
+    map[3] = "three";
+    map[1] = "one";
+    map[2] = "two";
+
+    // This CORRECTLY produces a compilation error!
+    // ERROR: no match for 'operator+' on map iterators
+    // 
+    // fl::fl_map iterators are bidirectional (not random access)
+    // fl::sort requires random access iterators for:
+    //   - Iterator arithmetic: first + 1, last - first
+    //   - Efficient pivot selection and partitioning
+    //
+    // This prevents users from accidentally corrupting the tree structure
+    // by calling sort on a map, which would break ordering invariants.
+    fl::sort(map.begin(), map.end());
+}
+#endif
 
 TEST_CASE("fl::sort with default comparator") {
     SUBCASE("Sort integers") {
@@ -163,7 +187,7 @@ TEST_CASE("fl::sort with custom comparator") {
     SUBCASE("Sort custom struct by member") {
         struct Point {
             int x, y;
-            Point() : x(0), y(0) {}
+            Point() : x(0), y(0) {}  // Add default constructor
             Point(int x, int y) : x(x), y(y) {}
         };
 
