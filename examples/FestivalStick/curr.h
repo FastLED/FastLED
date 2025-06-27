@@ -97,7 +97,7 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
 string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-string renderModeOptions[] = {"Animartrix", "Noise", "Position", "Fire", "Wave" };
+string renderModeOptions[] = { "Wave", "Animartrix", "Noise", "Position", "Fire" };
 
 
 
