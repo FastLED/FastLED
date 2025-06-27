@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef FASTLED_TEENSY_USE_PRINTF
-#ifdef __IMXRT1062__
+#if defined(__IMXRT1062__) && defined(DEBUG)
 #define FASTLED_TEENSY_USE_PRINTF 1
 #else
 #define FASTLED_TEENSY_USE_PRINTF 0
