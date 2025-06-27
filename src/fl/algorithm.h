@@ -328,58 +328,117 @@ void quicksort_impl(Iterator first, Iterator last, Compare comp) {
     quicksort_impl(pivot + 1, last, comp);
 }
 
-// Merge operation for merge sort (stable sort)
-template <typename Iterator, typename Compare>
-void merge(Iterator first, Iterator middle, Iterator last, Compare comp) {
-    using value_type = typename fl::remove_reference<decltype(*first)>::type;
-    
-    // Calculate sizes
-    auto left_size = middle - first;
-    auto right_size = last - middle;
-    
-    // Create temporary buffer for left half
-    value_type* temp = static_cast<value_type*>(operator new(left_size * sizeof(value_type)));
-    
-    // Copy left half to temporary buffer
-    for (auto i = 0; i < left_size; ++i) {
-        new (temp + i) value_type(fl::move(*(first + i)));
+// Rotate elements in range [first, last) so that middle becomes the new first
+template <typename Iterator>
+void rotate_impl(Iterator first, Iterator middle, Iterator last) {
+    if (first == middle || middle == last) {
+        return;
     }
     
-    Iterator left = first;
-    Iterator right = middle;
-    Iterator result = first;
-    auto temp_left = temp;
-    auto temp_left_end = temp + left_size;
-    
-    // Merge the two halves back
-    while (temp_left != temp_left_end && right != last) {
-        if (!comp(*right, *temp_left)) {  // Use !comp for stability
-            *result = fl::move(*temp_left);
-            ++temp_left;
-        } else {
-            *result = fl::move(*right);
-            ++right;
+    Iterator next = middle;
+    while (first != next) {
+        swap(*first++, *next++);
+        if (next == last) {
+            next = middle;
+        } else if (first == middle) {
+            middle = next;
         }
-        ++result;
     }
-    
-    // Copy remaining elements from left half
-    while (temp_left != temp_left_end) {
-        *result = fl::move(*temp_left);
-        ++temp_left;
-        ++result;
-    }
-    
-    // Right half is already in place, no need to copy
-    
-    // Clean up temporary buffer
-    for (auto i = 0; i < left_size; ++i) {
-        temp[i].~value_type();
-    }
-    operator delete(temp);
 }
 
-// Merge sort implementation (stable)
+// Find the position where value should be inserted in sorted range [first, last)
+template <typename Iterator, typename T, typename Compare>
+Iterator lower_bound_impl(Iterator first, Iterator last, const T& value, Compare comp) {
+    auto count = last - first;
+    while (count > 0) {
+        auto step = count / 2;
+        Iterator it = first + step;
+        if (comp(*it, value)) {
+            first = ++it;
+            count -= step + 1;
+        } else {
+            count = step;
+        }
+    }
+    return first;
+}
+
+// In-place merge operation for merge sort (stable sort)
+template <typename Iterator, typename Compare>
+void merge_inplace(Iterator first, Iterator middle, Iterator last, Compare comp) {
+    // If one of the ranges is empty, nothing to merge
+    if (first == middle || middle == last) {
+        return;
+    }
+    
+    // If arrays are small enough, use insertion-based merge
+    auto left_size = middle - first;
+    auto right_size = last - middle;
+    if (left_size + right_size <= 32) {
+        // Simple insertion-based merge for small arrays
+        Iterator left = first;
+        Iterator right = middle;
+        
+        while (left < middle && right < last) {
+            if (!comp(*right, *left)) {
+                // left element is in correct position
+                ++left;
+            } else {
+                // right element needs to be inserted into left part
+                auto value = fl::move(*right);
+                Iterator shift_end = right;
+                Iterator shift_start = left;
+                
+                // Shift elements to make room
+                while (shift_end > shift_start) {
+                    *shift_end = fl::move(*(shift_end - 1));
+                    --shift_end;
+                }
+                
+                *left = fl::move(value);
+                ++left;
+                ++middle;  // middle has shifted right
+                ++right;
+            }
+        }
+        return;
+    }
+    
+    // For larger arrays, use rotation-based merge
+    if (left_size == 0 || right_size == 0) {
+        return;
+    }
+    
+    if (left_size == 1) {
+        // Find insertion point for the single left element in right array
+        Iterator pos = lower_bound_impl(middle, last, *first, comp);
+        rotate_impl(first, middle, pos);
+        return;
+    }
+    
+    if (right_size == 1) {
+        // Find insertion point for the single right element in left array  
+        Iterator pos = lower_bound_impl(first, middle, *(last - 1), comp);
+        rotate_impl(pos, middle, last);
+        return;
+    }
+    
+    // Divide both arrays and recursively merge
+    Iterator left_mid = first + left_size / 2;
+    Iterator right_mid = lower_bound_impl(middle, last, *left_mid, comp);
+    
+    // Rotate to bring the two middle parts together
+    rotate_impl(left_mid, middle, right_mid);
+    
+    // Update middle position
+    Iterator new_middle = left_mid + (right_mid - middle);
+    
+    // Recursively merge the two parts
+    merge_inplace(first, left_mid, new_middle, comp);
+    merge_inplace(new_middle, right_mid, last, comp);
+}
+
+// Merge sort implementation (stable, in-place)
 template <typename Iterator, typename Compare>
 void mergesort_impl(Iterator first, Iterator last, Compare comp) {
     auto size = last - first;
@@ -391,7 +450,7 @@ void mergesort_impl(Iterator first, Iterator last, Compare comp) {
     Iterator middle = first + size / 2;
     mergesort_impl(first, middle, comp);
     mergesort_impl(middle, last, comp);
-    merge(first, middle, last, comp);
+    merge_inplace(first, middle, last, comp);
 }
 
 } // namespace detail
