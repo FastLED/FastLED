@@ -1,6 +1,17 @@
 #pragma once
 
-#include "fl/io.h"
+// Forward declarations to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
+namespace fl {
+    int available();
+    int read();
+#ifdef FASTLED_TESTING
+    template<typename T> class function;  // Forward declare
+    void clear_io_handlers();
+    void inject_available_handler(const function<int()>& handler);
+    void inject_read_handler(const function<int()>& handler);
+#endif
+}
+
 #include "fl/str.h"
 #include "fl/type_traits.h"
 #include "fl/sketch_macros.h"

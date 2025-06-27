@@ -1,6 +1,10 @@
 #pragma once
 
-#include "fl/io.h"
+// Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
+namespace fl {
+    void print(const char* str);
+}
+
 #include "fl/str.h"
 #include "crgb.h"
 

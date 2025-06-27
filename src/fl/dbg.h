@@ -2,7 +2,12 @@
 
 #include "fl/strstream.h"
 #include "fl/sketch_macros.h"
-#include "fl/io.h"
+
+// Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
+// This prevents ~5KB memory bloat for simple applications
+namespace fl {
+    void println(const char* str);
+}
 
 namespace fl {
 // ".build/src/fl/dbg.h" -> "src/fl/dbg.h"
@@ -29,13 +34,20 @@ inline const char *fastled_file_offset(const char *file) {
 }
 } // namespace fl
 
-// Debug printing is now always enabled and uses fl::println()
+// Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
+#ifndef FASTLED_FORCE_DBG
+// By default, debug printing is disabled to prevent memory bloat in simple applications
+#define FASTLED_HAS_DBG 0
+#define _FASTLED_DGB(X) do { if (false) { fl::println(""); } } while(0)  // No-op that handles << operator
+#else
+// Explicit debug mode enabled - uses fl::println()
 #define FASTLED_HAS_DBG 1
 #define _FASTLED_DGB(X)                                                        \
     fl::println(                                                               \
         (fl::StrStream() << (fl::fastled_file_offset(__FILE__))                \
                          << "(" << __LINE__ << "): " << X)                     \
             .c_str())
+#endif
 
 #define FASTLED_DBG(X) _FASTLED_DGB(X)
 

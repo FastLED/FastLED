@@ -1,11 +1,13 @@
 #pragma once
 
 #ifndef FASTLED_TEENSY_USE_PRINTF
-#if defined(__IMXRT1062__) && defined(DEBUG)
-#define FASTLED_TEENSY_USE_PRINTF 1
-#else
+// DISABLED: printf causes ~5KB memory bloat for simple applications like Blink
+// Users can manually enable with #define FASTLED_TEENSY_USE_PRINTF 1 if needed
+// #if defined(__IMXRT1062__) && defined(DEBUG)
+// #define FASTLED_TEENSY_USE_PRINTF 1
+// #else
 #define FASTLED_TEENSY_USE_PRINTF 0
-#endif
+// #endif
 #endif  // !defined(FASTLED_TEENSY_USE_PRINTF)
 
 

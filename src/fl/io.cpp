@@ -16,7 +16,7 @@
 // Teensy LC has special handling to avoid _write linker issues
 #include "platforms/io_teensy_lc.h"
 #elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-// All other Teensy platforms use standard implementation
+// All other Teensy platforms use lightweight implementation to avoid Serial library bloat
 #include "platforms/io_teensy.h"
 #else
 #include "platforms/io_arduino.h"
@@ -70,7 +70,7 @@ void print(const char* str) {
     // Teensy LC uses special no-op functions to avoid _write linker issues
     print_teensy_lc(str);
 #elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use standard implementation
+    // All other Teensy platforms use lightweight implementation 
     print_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
@@ -104,7 +104,7 @@ void println(const char* str) {
     // Teensy LC uses special no-op functions to avoid _write linker issues
     println_teensy_lc(str);
 #elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use standard implementation
+    // All other Teensy platforms use lightweight implementation
     println_teensy(str);
 #else
     // Use generic Arduino print for all other platforms including:
@@ -135,7 +135,7 @@ int available() {
     // Teensy LC uses special no-op functions to avoid _write linker issues
     return available_teensy_lc();
 #elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use standard implementation
+    // All other Teensy platforms use lightweight implementation
     return available_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
@@ -166,7 +166,7 @@ int read() {
     // Teensy LC uses special no-op functions to avoid _write linker issues
     return read_teensy_lc();
 #elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)
-    // All other Teensy platforms use standard implementation
+    // All other Teensy platforms use lightweight implementation
     return read_teensy();
 #else
     // Use generic Arduino input for all other platforms including:
