@@ -193,6 +193,11 @@ def parse_args():
         action="store_true",
         help="Print the list of supported boards and exit",
     )
+    parser.add_argument(
+        "--symbols",
+        action="store_true",
+        help="Run symbol analysis on compiled output",
+    )
     args, unknown = parser.parse_known_args()
     if unknown:
         warnings.warn(f"Unknown arguments: {unknown}")
@@ -327,6 +332,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         build_flags=BUILD_FLAGS,
         verbose=verbose,
         extra_examples=extra_examples,
+        symbols=args.symbols,
     )
     return out
 

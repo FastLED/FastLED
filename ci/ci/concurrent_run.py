@@ -1,4 +1,5 @@
 import os
+import subprocess
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -45,6 +46,7 @@ class ConcurrentRunArgs:
     build_flags: list[str] | None
     verbose: bool = False
     extra_examples: dict[Board, list[Path]] | None = None
+    symbols: bool = False
 
 
 def concurrent_run(
@@ -187,4 +189,55 @@ def concurrent_run(
         locked_print("\nDone. Errors happened during compilation.")
         locked_print("\n".join(errors))
         return 1
+
+    # Run symbol analysis if requested
+    if args.symbols:
+        locked_print("\nRunning symbol analysis on compiled outputs...")
+        symbol_analysis_errors = []
+
+        for board in projects:
+            try:
+                locked_print(f"Running symbol analysis for board: {board.board_name}")
+
+                # Run the symbol analysis tool for this board
+                cmd = [
+                    "uv",
+                    "run",
+                    "ci/ci/symbol_analysis.py",
+                    "--board",
+                    board.board_name,
+                ]
+
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True, cwd=cwd or os.getcwd()
+                )
+
+                if result.returncode != 0:
+                    error_msg = f"Symbol analysis failed for board {board.board_name}: {result.stderr}"
+                    symbol_analysis_errors.append(error_msg)
+                    locked_print(f"ERROR: {error_msg}")
+                else:
+                    locked_print(
+                        f"Symbol analysis completed for board: {board.board_name}"
+                    )
+                    # Print the symbol analysis output
+                    if result.stdout:
+                        print(result.stdout)
+
+            except Exception as e:
+                error_msg = f"Exception during symbol analysis for board {board.board_name}: {e}"
+                symbol_analysis_errors.append(error_msg)
+                locked_print(f"ERROR: {error_msg}")
+
+        if symbol_analysis_errors:
+            locked_print(
+                f"\nSymbol analysis completed with {len(symbol_analysis_errors)} error(s):"
+            )
+            for error in symbol_analysis_errors:
+                locked_print(f"  - {error}")
+        else:
+            locked_print(
+                f"\nSymbol analysis completed successfully for all {len(projects)} board(s)."
+            )
+
     return 0
