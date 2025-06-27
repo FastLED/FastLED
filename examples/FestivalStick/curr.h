@@ -32,6 +32,8 @@ Workflow:
 #include "fl/array.h"
 #include "fx/2d/wave.h"
 #include "fx/2d/blend.h"
+#include "fx/fx_engine.h"
+#include "fx/2d/animartrix.hpp"
 
 // #include "vec3.h"
 
@@ -66,9 +68,10 @@ UIDescription festivalStickDescription(
     "## Key Features\n"
     "- **19+ turns** with 288 LEDs total\n"
     "- Uses `Corkscrew.toScreenMap()` for accurate web interface visualization\n"
-    "- Multiple render modes: **Noise**, **Position**, **Fire**, and **Wave** effects\n"
+    "- Multiple render modes: **Noise**, **Position**, **Fire**, **Wave**, and **Animartrix** effects\n"
     "- Real-time cylindrical surface mapping\n"
-    "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects\n\n"
+    "- **Wave mode**: Cylindrical 2D wave simulation with ripple effects\n"
+    "- **Animartrix mode**: Advanced 2D animation effects with polar coordinate patterns\n\n"
     "## How It Works\n"
     "1. Draws patterns into a rectangular grid (`frameBuffer`)\n"
     "2. Maps the grid to corkscrew LED positions using `readFrom()`\n"
@@ -94,7 +97,7 @@ UISlider noiseSpeed("Noise Speed", 4, 1, 100, 1);
 
 // UIDropdown examples - noise-related color palette
 string paletteOptions[] = {"Party", "Heat", "Ocean", "Forest", "Rainbow"};
-string renderModeOptions[] = {"Noise", "Position", "Fire", "Wave"};
+string renderModeOptions[] = {"Animartrix", "Noise", "Position", "Fire", "Wave" };
 
 
 
@@ -230,8 +233,12 @@ UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhi
 UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
 
+// Animartrix-related UI controls
+UINumberField animartrixIndex("Animartrix Animation", 5, 0, NUM_ANIMATIONS - 1);
+UISlider animartrixTimeSpeed("Animartrix Time Speed", 1, -10, 10, .1);
+UINumberField animartrixColorOrder("Animartrix Color Order", 0, 0, 5);
 
-
+UIGroup animartrixGroup("Animartrix Controls", animartrixIndex, animartrixTimeSpeed, animartrixColorOrder);
 
 // Color palette for noise
 CRGBPalette16 noisePalette = PartyColors_p;
@@ -277,6 +284,10 @@ Grid<CRGB> frameBuffer;
 // Wave effect objects - declared here but initialized in setup()
 WaveFxPtr waveFx;
 Blend2dPtr waveBlend;
+
+// Animartrix effect objects - declared here but initialized in setup()
+fl::scoped_ptr<Animartrix> animartrix;
+fl::scoped_ptr<FxEngine> fxEngine;
 
 void setup() {
     // Use constexpr dimensions (computed at compile time)
@@ -333,6 +344,12 @@ void setup() {
     waveBlend = NewPtr<Blend2d>(xyRect);
     waveBlend->add(waveFx);
     
+    // Initialize Animartrix effect
+    XYMap animartrixXyMap = XYMap::constructRectangularGrid(width, height, 0);
+    animartrix.reset(new Animartrix(animartrixXyMap, POLAR_WAVES));
+    fxEngine.reset(new FxEngine(width * height));
+    fxEngine->addFx(*animartrix);
+    
     // Demonstrate UIGroup functionality for noise controls
     FL_WARN("Noise UI Group initialized: " << noiseGroup.name());
     FL_WARN("  This group contains noise pattern controls:");
@@ -369,6 +386,22 @@ void setup() {
             if(dropdown.getOption(i) == mode) {
                 FL_WARN("Render mode changed to: " << mode);
             }
+        }
+    });
+    
+    // Add onChange callback for animartrix color order
+    animartrixColorOrder.onChanged([](int value) {
+        EOrder order = RGB;
+        switch(value) {
+            case 0: order = RGB; break;
+            case 1: order = RBG; break;
+            case 2: order = GRB; break;
+            case 3: order = GBR; break;
+            case 4: order = BRG; break;
+            case 5: order = BGR; break;
+        }
+        if (animartrix.get()) {
+            animartrix->setColorOrder(order);
         }
     });
 }
@@ -686,6 +719,21 @@ void drawWave(uint32_t now) {
     waveBlend->draw(waveContext);
 }
 
+void drawAnimartrix(uint32_t now) {
+    // Update animartrix parameters from UI
+    fxEngine->setSpeed(animartrixTimeSpeed.value());
+    
+    // Handle animation index changes
+    static int lastAnimartrixIndex = -1;
+    if (animartrixIndex.value() != lastAnimartrixIndex) {
+        lastAnimartrixIndex = animartrixIndex.value();
+        animartrix->fxSet(animartrixIndex.value());
+    }
+    
+    // Draw the animartrix effect directly to the frame buffer
+    fxEngine->draw(now, frameBuffer.data());
+}
+
 void loop() {
     uint32_t now = millis();
     clear(frameBuffer);
@@ -708,6 +756,8 @@ void loop() {
         drawFire(now);
     } else if (renderModeDropdown.value() == "Wave") {
         drawWave(now);
+    } else if (renderModeDropdown.value() == "Animartrix") {
+        drawAnimartrix(now);
     } else {
         draw(pos);
     }
