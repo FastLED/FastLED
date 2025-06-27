@@ -5,13 +5,13 @@
 // UART register access for direct output
 // Some ATtiny microcontrollers don't have UART hardware at all (only USI)
 #if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || \
-    defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__)
+    defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || defined(__AVR_ATtiny88__)
 // These ATtiny chips have no UART hardware - only USI (Universal Serial Interface)
 // No UART macros defined - UART functions will not be compiled
 #elif defined(__AVR_ATtiny4313__) || defined(__AVR_ATtiny2313__) || defined(__AVR_ATtiny2313A__) || \
       defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
       defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny48__) || \
-      defined(__AVR_ATtiny88__) || defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__) || \
+      defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__) || \
       (defined(UDR) && !defined(UDR0))
 // Use non-numbered register names for ATtiny and single-UART AVRs
 #define UART_UDR UDR
