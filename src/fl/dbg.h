@@ -34,6 +34,10 @@ inline const char *fastled_file_offset(const char *file) {
 }
 } // namespace fl
 
+#if __EMSCRIPTEN__ || !defined(RELEASE)
+#define FASTLED_FORCE_DBG 1
+#endif
+
 // Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
 #ifndef FASTLED_FORCE_DBG
 // By default, debug printing is disabled to prevent memory bloat in simple applications
