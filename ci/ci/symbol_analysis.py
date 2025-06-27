@@ -46,40 +46,163 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
         return mangled_name
 
 
-def analyze_symbols(elf_file: str, nm_path: str, cppfilt_path: str) -> List[Dict]:
-    """Analyze ALL symbols in ELF file using nm with C++ demangling"""
-    print("Analyzing symbols...")
-
-    # Get all symbols with sizes
-    cmd = f'"{nm_path}" --print-size --size-sort --radix=d "{elf_file}"'
-    output = run_command(cmd)
+def analyze_symbols(
+    elf_file: str, nm_path: str, cppfilt_path: str, readelf_path: Optional[str] = None
+) -> List[Dict]:
+    """Analyze ALL symbols in ELF file using both nm and readelf for comprehensive coverage"""
+    print("Analyzing symbols with enhanced coverage...")
 
     symbols = []
-    print("Demangling C++ symbols...")
+    symbols_dict = {}  # To deduplicate by address+name
 
-    for line in output.strip().split("\n"):
-        if not line.strip():
-            continue
+    # Method 1: Use readelf to get ALL symbols (including those without size)
+    if readelf_path:
+        print("Getting all symbols using readelf...")
+        readelf_cmd = f'"{readelf_path}" -s "{elf_file}"'
+        output = run_command(readelf_cmd)
 
-        parts = line.split()
-        if len(parts) >= 4:
-            addr = parts[0]
-            size = int(parts[1])
-            symbol_type = parts[2]
-            mangled_name = " ".join(parts[3:])
+        if output:
+            for line in output.strip().split("\n"):
+                line = line.strip()
+                # Skip header and empty lines
+                if (
+                    not line
+                    or "Num:" in line
+                    or "Symbol table" in line
+                    or line.startswith("--")
+                ):
+                    continue
 
-            # Demangle the symbol name
-            demangled_name = demangle_symbol(mangled_name, cppfilt_path)
+                # Parse readelf output format: Num: Value Size Type Bind Vis Ndx Name
+                parts = line.split()
+                if len(parts) >= 8:
+                    try:
+                        # Skip num (parts[0]) - not needed
+                        addr = parts[1]
+                        size = int(parts[2]) if parts[2].isdigit() else 0
+                        symbol_type = parts[3]
+                        bind = parts[4]
+                        # Skip vis and ndx (parts[5], parts[6]) - not needed
+                        name = " ".join(parts[7:]) if len(parts) > 7 else ""
 
-            symbol_info = {
-                "address": addr,
-                "size": size,
-                "type": symbol_type,
-                "name": mangled_name,
-                "demangled_name": demangled_name,
-            }
+                        # Skip empty names and section symbols
+                        if not name or name.startswith(".") or symbol_type == "SECTION":
+                            continue
 
-            symbols.append(symbol_info)
+                        # Create a unique key for deduplication (use name as primary key since addresses can vary)
+                        key = name.strip()
+
+                        if key not in symbols_dict:
+                            # Demangle the symbol name
+                            demangled_name = demangle_symbol(name, cppfilt_path)
+
+                            symbol_info = {
+                                "address": addr,
+                                "size": size,
+                                "type": symbol_type[0].upper(),  # T, D, B, etc.
+                                "bind": bind,
+                                "name": name,
+                                "demangled_name": demangled_name,
+                                "source": "readelf",
+                            }
+
+                            symbols_dict[key] = symbol_info
+
+                    except (ValueError, IndexError):
+                        continue  # Skip malformed lines
+
+    # Method 2: Use nm with --print-size to get symbols with sizes (for accurate size info)
+    print("Getting sized symbols using nm...")
+    nm_cmd = f'"{nm_path}" --print-size --size-sort --radix=d "{elf_file}"'
+    output = run_command(nm_cmd)
+
+    if output:
+        for line in output.strip().split("\n"):
+            if not line.strip():
+                continue
+
+            parts = line.split()
+            if len(parts) >= 4:
+                try:
+                    addr = parts[0]
+                    size = int(parts[1])
+                    symbol_type = parts[2]
+                    name = " ".join(parts[3:])
+
+                    # Create a unique key for deduplication (use name as primary key)
+                    key = name.strip()
+
+                    # If we already have this symbol from readelf, update with accurate size
+                    if key in symbols_dict:
+                        symbols_dict[key]["size"] = size
+                        symbols_dict[key]["type"] = symbol_type
+                        symbols_dict[key]["source"] = "nm+readelf"
+                    else:
+                        # New symbol not found by readelf
+                        demangled_name = demangle_symbol(name, cppfilt_path)
+
+                        symbol_info = {
+                            "address": addr,
+                            "size": size,
+                            "type": symbol_type,
+                            "name": name,
+                            "demangled_name": demangled_name,
+                            "source": "nm",
+                        }
+
+                        symbols_dict[key] = symbol_info
+
+                except (ValueError, IndexError):
+                    continue  # Skip malformed lines
+
+    # Method 3: Use nm with -a to get all symbols including debugger-only
+    print("Getting additional symbols using nm -a...")
+    nm_all_cmd = f'"{nm_path}" -a --radix=d "{elf_file}"'
+    output = run_command(nm_all_cmd)
+
+    if output:
+        for line in output.strip().split("\n"):
+            if not line.strip():
+                continue
+
+            parts = line.split()
+            if len(parts) >= 3:
+                try:
+                    addr = parts[0]
+                    symbol_type = parts[1]
+                    name = " ".join(parts[2:])
+
+                    # Skip empty names
+                    if not name:
+                        continue
+
+                    # Create a unique key for deduplication (use name as primary key)
+                    key = name.strip()
+
+                    if key not in symbols_dict:
+                        # New symbol not found by other methods
+                        demangled_name = demangle_symbol(name, cppfilt_path)
+
+                        symbol_info = {
+                            "address": addr,
+                            "size": 0,  # nm -a doesn't provide size
+                            "type": symbol_type,
+                            "name": name,
+                            "demangled_name": demangled_name,
+                            "source": "nm-a",
+                        }
+
+                        symbols_dict[key] = symbol_info
+
+                except (ValueError, IndexError):
+                    continue  # Skip malformed lines
+
+    # Convert dict to list
+    symbols = list(symbols_dict.values())
+
+    print(f"Found {len(symbols)} total symbols using enhanced analysis")
+    print(f"  - Symbols with size info: {len([s for s in symbols if s['size'] > 0])}")
+    print(f"  - Symbols without size: {len([s for s in symbols if s['size'] == 0])}")
 
     return symbols
 
@@ -252,20 +375,38 @@ def generate_report(
     # Summary statistics
     total_symbols = len(symbols)
     total_size = sum(s["size"] for s in symbols)
+    symbols_with_size = [s for s in symbols if s["size"] > 0]
+    symbols_without_size = [s for s in symbols if s["size"] == 0]
 
     print("\nSUMMARY:")
     print(f"  Total symbols: {total_symbols}")
-    print(f"  Total symbol size: {total_size} bytes ({total_size/1024:.1f} KB)")
+    print(f"  Symbols with size info: {len(symbols_with_size)}")
+    print(f"  Symbols without size info: {len(symbols_without_size)}")
+    print(
+        f"  Total symbol size: {total_size} bytes ({total_size/1024:.1f} KB) [sized symbols only]"
+    )
 
     if enhanced_mode and call_graph and reverse_call_graph:
         print(f"  Functions with calls: {len(call_graph)}")
         print(f"  Functions called by others: {len(reverse_call_graph)}")
 
+    # Show source breakdown
+    source_stats = {}
+    for sym in symbols:
+        source = sym.get("source", "unknown")
+        if source not in source_stats:
+            source_stats[source] = 0
+        source_stats[source] += 1
+
+    print("\nSYMBOL SOURCES:")
+    for source, count in sorted(source_stats.items()):
+        print(f"  {source}: {count} symbols")
+
     # Largest symbols overall
     print("\nLARGEST SYMBOLS (all symbols, sorted by size):")
     symbols_sorted = sorted(symbols, key=lambda x: x["size"], reverse=True)
 
-    display_count = 20 if enhanced_mode else 30
+    display_count = 30 if enhanced_mode else 50
     for i, sym in enumerate(symbols_sorted[:display_count]):
         display_name = sym.get("demangled_name", sym["name"])
         print(f"  {i+1:2d}. {sym['size']:6d} bytes - {display_name}")
@@ -466,10 +607,18 @@ def main():
         "--show-calls-to",
         help="Show what functions call a specific function (enables enhanced mode)",
     )
+    parser.add_argument(
+        "--basic",
+        action="store_true",
+        help="Use basic nm-only symbol analysis (for backward compatibility). Default is comprehensive analysis with readelf + nm",
+    )
     args = parser.parse_args()
 
     # Enable enhanced mode if show-calls-to is specified
     enhanced_mode = args.enhanced or args.show_calls_to
+
+    # Use comprehensive symbol analysis by default, basic only if requested
+    comprehensive_symbols = not args.basic
 
     # Find build info
     build_info_path, board_name = find_board_build_info(args.board)
@@ -513,19 +662,30 @@ def main():
     cppfilt_path = board_info["aliases"]["c++filt"]
     elf_file = board_info["prog_path"]
 
+    # Get readelf path (derive from nm path if not in aliases)
+    if "readelf" in board_info["aliases"]:
+        readelf_path = board_info["aliases"]["readelf"]
+    else:
+        # Derive readelf path from nm path (replace 'nm' with 'readelf')
+        readelf_path = nm_path.replace("-nm", "-readelf")
+
     # Find map file
     map_file = Path(elf_file).with_suffix(".map")
 
     print(f"Analyzing ELF file: {elf_file}")
     print(f"Using nm tool: {nm_path}")
     print(f"Using c++filt tool: {cppfilt_path}")
+    print(f"Using readelf tool: {readelf_path}")
     if enhanced_mode:
         objdump_path = board_info["aliases"]["objdump"]
         print(f"Using objdump tool: {objdump_path}")
     print(f"Map file: {map_file}")
 
     # Analyze symbols
-    symbols = analyze_symbols(elf_file, nm_path, cppfilt_path)
+    if comprehensive_symbols:
+        symbols = analyze_symbols(elf_file, nm_path, cppfilt_path, readelf_path)
+    else:
+        symbols = analyze_symbols(elf_file, nm_path, cppfilt_path)
 
     # Analyze function calls if enhanced mode
     call_graph = {}
