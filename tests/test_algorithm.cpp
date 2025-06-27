@@ -7,6 +7,7 @@
 #include "fl/vector.h"
 #include "fl/functional.h"
 #include "fl/map.h"
+#include "fl/random.h"
 #include "test.h"
 
 using namespace fl;
@@ -774,6 +775,294 @@ TEST_CASE("fl::stable_sort vs fl::sort comparison") {
             for (size_t i = 1; i < stable_indices.size(); ++i) {
                 CHECK_LT(stable_indices[i-1], stable_indices[i]);
             }
+        }
+    }
+}
+
+TEST_CASE("fl::random basic functionality") {
+    SUBCASE("Default constructor") {
+        fl::random rng;
+        
+        // Should be able to generate numbers
+        uint16_t val1 = rng();
+        uint16_t val2 = rng();
+        
+        // Values should be in valid range
+        CHECK_GE(val1, fl::random::minimum());
+        CHECK_LE(val1, fl::random::maximum());
+        CHECK_GE(val2, fl::random::minimum());
+        CHECK_LE(val2, fl::random::maximum());
+    }
+
+    SUBCASE("Constructor with seed") {
+        fl::random rng1(12345);
+        fl::random rng2(12345);  // Same seed
+        fl::random rng3(54321);  // Different seed
+        
+        // Same seed should produce same sequence
+        uint16_t val1a = rng1();
+        uint16_t val1b = rng1();
+        
+        uint16_t val2a = rng2();
+        uint16_t val2b = rng2();
+        
+        CHECK_EQ(val1a, val2a);
+        CHECK_EQ(val1b, val2b);
+        
+        // Different seed should likely produce different values
+        uint16_t val3a = rng3();
+        CHECK_NE(val1a, val3a);  // Very unlikely to be equal
+    }
+
+    SUBCASE("Range generation with single parameter") {
+        fl::random rng(12345);
+        
+        // Test range [0, 10)
+        for (int i = 0; i < 100; ++i) {
+            uint16_t val = rng(10);
+            CHECK_GE(val, 0);
+            CHECK_LT(val, 10);
+        }
+        
+        // Test range [0, 1) - should always be 0
+        for (int i = 0; i < 10; ++i) {
+            uint16_t val = rng(1);
+            CHECK_EQ(val, 0);
+        }
+    }
+
+    SUBCASE("Range generation with min and max") {
+        fl::random rng(12345);
+        
+        // Test range [5, 15)
+        for (int i = 0; i < 100; ++i) {
+            uint16_t val = rng(5, 15);
+            CHECK_GE(val, 5);
+            CHECK_LT(val, 15);
+        }
+        
+        // Test range [100, 101) - should always be 100
+        for (int i = 0; i < 10; ++i) {
+            uint16_t val = rng(100, 101);
+            CHECK_EQ(val, 100);
+        }
+    }
+
+    SUBCASE("8-bit random generation") {
+        fl::random rng(12345);
+        
+        // Test random8()
+        for (int i = 0; i < 50; ++i) {
+            uint8_t val = rng.random8();
+            CHECK_GE(val, 0);
+            CHECK_LE(val, 255);
+        }
+        
+        // Test random8(n)
+        for (int i = 0; i < 50; ++i) {
+            uint8_t val = rng.random8(50);
+            CHECK_GE(val, 0);
+            CHECK_LT(val, 50);
+        }
+        
+        // Test random8(min, max)
+        for (int i = 0; i < 50; ++i) {
+            uint8_t val = rng.random8(10, 20);
+            CHECK_GE(val, 10);
+            CHECK_LT(val, 20);
+        }
+    }
+
+    SUBCASE("16-bit random generation") {
+        fl::random rng(12345);
+        
+        // Test random16()
+        for (int i = 0; i < 50; ++i) {
+            uint16_t val = rng.random16();
+            CHECK_GE(val, 0);
+            CHECK_LE(val, 65535);
+        }
+        
+        // Test random16(n)
+        for (int i = 0; i < 50; ++i) {
+            uint16_t val = rng.random16(1000);
+            CHECK_GE(val, 0);
+            CHECK_LT(val, 1000);
+        }
+        
+        // Test random16(min, max)
+        for (int i = 0; i < 50; ++i) {
+            uint16_t val = rng.random16(500, 1500);
+            CHECK_GE(val, 500);
+            CHECK_LT(val, 1500);
+        }
+    }
+
+    SUBCASE("Seed management") {
+        fl::random rng;
+        
+        // Set and get seed
+        rng.set_seed(42);
+        CHECK_EQ(rng.get_seed(), 42);
+        
+        // Add entropy
+        rng.add_entropy(100);
+        CHECK_EQ(rng.get_seed(), 142);  // 42 + 100
+    }
+
+    SUBCASE("Static min/max methods") {
+        CHECK_EQ(fl::random::minimum(), 0);
+        CHECK_EQ(fl::random::maximum(), 65535);
+    }
+}
+
+TEST_CASE("fl::random deterministic behavior") {
+    SUBCASE("Same seed produces same sequence") {
+        fl::random rng1(12345);
+        fl::random rng2(12345);
+        
+        fl::vector<uint16_t> seq1;
+        fl::vector<uint16_t> seq2;
+        
+        // Generate same sequence from both generators
+        for (int i = 0; i < 20; ++i) {
+            seq1.push_back(rng1());
+            seq2.push_back(rng2());
+        }
+        
+        // Sequences should be identical
+        for (size_t i = 0; i < seq1.size(); ++i) {
+            CHECK_EQ(seq1[i], seq2[i]);
+        }
+    }
+
+    SUBCASE("Different seeds produce different sequences") {
+        fl::random rng1(12345);
+        fl::random rng2(54321);
+        
+        fl::vector<uint16_t> seq1;
+        fl::vector<uint16_t> seq2;
+        
+        // Generate sequences from both generators
+        for (int i = 0; i < 20; ++i) {
+            seq1.push_back(rng1());
+            seq2.push_back(rng2());
+        }
+        
+        // Sequences should be different (very unlikely to be identical)
+        bool different = false;
+        for (size_t i = 0; i < seq1.size(); ++i) {
+            if (seq1[i] != seq2[i]) {
+                different = true;
+                break;
+            }
+        }
+        CHECK(different);
+    }
+}
+
+TEST_CASE("fl::default_random global instance") {
+    SUBCASE("Global instance is accessible") {
+        // Should be able to use the global instance
+        uint16_t val1 = fl::default_random();
+        uint16_t val2 = fl::default_random();
+        
+        // Values should be in valid range
+        CHECK_GE(val1, fl::random::minimum());
+        CHECK_LE(val1, fl::random::maximum());
+        CHECK_GE(val2, fl::random::minimum());
+        CHECK_LE(val2, fl::random::maximum());
+    }
+
+    SUBCASE("Global instance can be seeded") {
+        fl::default_random.set_seed(12345);
+        CHECK_EQ(fl::default_random.get_seed(), 12345);
+        
+        uint16_t val1 = fl::default_random();
+        
+        // Reset to same seed and verify same value
+        fl::default_random.set_seed(12345);
+        uint16_t val2 = fl::default_random();
+        
+        CHECK_EQ(val1, val2);
+    }
+}
+
+TEST_CASE("fl::shuffle with fl::random") {
+    SUBCASE("Shuffle with explicit fl::random instance") {
+        fl::vector<int> vec;
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+        vec.push_back(4);
+        vec.push_back(5);
+        
+        fl::random rng(12345);
+        fl::shuffle(vec.begin(), vec.end(), rng);
+        
+        // All elements should still be present
+        CHECK_EQ(vec.size(), 5);
+        
+        // Check each original element is still present
+        for (int i = 1; i <= 5; ++i) {
+            bool found = false;
+            for (size_t j = 0; j < vec.size(); ++j) {
+                if (vec[j] == i) {
+                    found = true;
+                    break;
+                }
+            }
+            CHECK(found);
+        }
+    }
+
+    SUBCASE("Deterministic shuffle with same seed") {
+        fl::vector<int> vec1;
+        fl::vector<int> vec2;
+        
+        for (int i = 1; i <= 10; ++i) {
+            vec1.push_back(i);
+            vec2.push_back(i);
+        }
+        
+        fl::random rng1(12345);
+        fl::random rng2(12345);  // Same seed
+        
+        fl::shuffle(vec1.begin(), vec1.end(), rng1);
+        fl::shuffle(vec2.begin(), vec2.end(), rng2);
+        
+        // Same seed should produce same shuffle
+        CHECK_EQ(vec1.size(), vec2.size());
+        for (size_t i = 0; i < vec1.size(); ++i) {
+            CHECK_EQ(vec1[i], vec2[i]);
+        }
+    }
+
+    SUBCASE("Shuffle with global default_random") {
+        fl::vector<int> vec;
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+        vec.push_back(40);
+        vec.push_back(50);
+        
+        // This should use the global default_random instance
+        fl::shuffle(vec.begin(), vec.end());
+        
+        // All elements should still be present
+        CHECK_EQ(vec.size(), 5);
+        
+        // Check each original element is still present
+        int expected[] = {10, 20, 30, 40, 50};
+        for (int i = 0; i < 5; ++i) {
+            bool found = false;
+            for (size_t j = 0; j < vec.size(); ++j) {
+                if (vec[j] == expected[i]) {
+                    found = true;
+                    break;
+                }
+            }
+            CHECK(found);
         }
     }
 }

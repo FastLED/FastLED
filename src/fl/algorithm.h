@@ -2,6 +2,7 @@
 
 #include "fl/type_traits.h"
 #include "fl/move.h"
+#include "fl/random.h"
 
 namespace fl {
 
@@ -489,6 +490,46 @@ void stable_sort(Iterator first, Iterator last) {
     // Use explicit template parameter to avoid C++14 auto in lambda
     typedef typename fl::remove_reference<decltype(*first)>::type value_type;
     stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
+}
+
+// Shuffle function with custom random generator (Fisher-Yates shuffle)
+template <typename Iterator, typename RandomGenerator>
+void shuffle(Iterator first, Iterator last, RandomGenerator& g) {
+    if (first == last) {
+        return;  // Empty range, nothing to shuffle
+    }
+    
+    auto n = last - first;
+    for (auto i = n - 1; i > 0; --i) {
+        // Generate random index from 0 to i (inclusive)
+        auto j = g() % (i + 1);
+        
+        // Swap elements at positions i and j
+        swap(*(first + i), *(first + j));
+    }
+}
+
+// Shuffle function with fl::random instance
+template <typename Iterator>
+void shuffle(Iterator first, Iterator last, random& rng) {
+    if (first == last) {
+        return;  // Empty range, nothing to shuffle
+    }
+    
+    auto n = last - first;
+    for (auto i = n - 1; i > 0; --i) {
+        // Generate random index from 0 to i (inclusive)
+        auto j = rng(static_cast<uint16_t>(i + 1));
+        
+        // Swap elements at positions i and j
+        swap(*(first + i), *(first + j));
+    }
+}
+
+// Shuffle function with default random generator
+template <typename Iterator>
+void shuffle(Iterator first, Iterator last) {
+    shuffle(first, last, default_random);
 }
 
 } // namespace fl
