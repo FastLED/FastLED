@@ -784,8 +784,8 @@ TEST_CASE("fl::random basic functionality") {
         fl::random rng;
         
         // Should be able to generate numbers
-        uint16_t val1 = rng();
-        uint16_t val2 = rng();
+        uint32_t val1 = rng();
+        uint32_t val2 = rng();
         
         // Values should be in valid range
         CHECK_GE(val1, fl::random::minimum());
@@ -800,17 +800,17 @@ TEST_CASE("fl::random basic functionality") {
         fl::random rng3(54321);  // Different seed
         
         // Same seed should produce same sequence
-        uint16_t val1a = rng1();
-        uint16_t val1b = rng1();
+        uint32_t val1a = rng1();
+        uint32_t val1b = rng1();
         
-        uint16_t val2a = rng2();
-        uint16_t val2b = rng2();
+        uint32_t val2a = rng2();
+        uint32_t val2b = rng2();
         
         CHECK_EQ(val1a, val2a);
         CHECK_EQ(val1b, val2b);
         
         // Different seed should likely produce different values
-        uint16_t val3a = rng3();
+        uint32_t val3a = rng3();
         CHECK_NE(val1a, val3a);  // Very unlikely to be equal
     }
 
@@ -819,14 +819,14 @@ TEST_CASE("fl::random basic functionality") {
         
         // Test range [0, 10)
         for (int i = 0; i < 100; ++i) {
-            uint16_t val = rng(10);
+            uint32_t val = rng(10);
             CHECK_GE(val, 0);
             CHECK_LT(val, 10);
         }
         
         // Test range [0, 1) - should always be 0
         for (int i = 0; i < 10; ++i) {
-            uint16_t val = rng(1);
+            uint32_t val = rng(1);
             CHECK_EQ(val, 0);
         }
     }
@@ -836,14 +836,14 @@ TEST_CASE("fl::random basic functionality") {
         
         // Test range [5, 15)
         for (int i = 0; i < 100; ++i) {
-            uint16_t val = rng(5, 15);
+            uint32_t val = rng(5, 15);
             CHECK_GE(val, 5);
             CHECK_LT(val, 15);
         }
         
         // Test range [100, 101) - should always be 100
         for (int i = 0; i < 10; ++i) {
-            uint16_t val = rng(100, 101);
+            uint32_t val = rng(100, 101);
             CHECK_EQ(val, 100);
         }
     }
@@ -912,7 +912,7 @@ TEST_CASE("fl::random basic functionality") {
 
     SUBCASE("Static min/max methods") {
         CHECK_EQ(fl::random::minimum(), 0);
-        CHECK_EQ(fl::random::maximum(), 65535);
+        CHECK_EQ(fl::random::maximum(), 4294967295U);
     }
 }
 
@@ -921,8 +921,8 @@ TEST_CASE("fl::random deterministic behavior") {
         fl::random rng1(12345);
         fl::random rng2(12345);
         
-        fl::vector<uint16_t> seq1;
-        fl::vector<uint16_t> seq2;
+        fl::vector<uint32_t> seq1;
+        fl::vector<uint32_t> seq2;
         
         // Generate same sequence from both generators
         for (int i = 0; i < 20; ++i) {
@@ -940,8 +940,8 @@ TEST_CASE("fl::random deterministic behavior") {
         fl::random rng1(12345);
         fl::random rng2(54321);
         
-        fl::vector<uint16_t> seq1;
-        fl::vector<uint16_t> seq2;
+        fl::vector<uint32_t> seq1;
+        fl::vector<uint32_t> seq2;
         
         // Generate sequences from both generators
         for (int i = 0; i < 20; ++i) {
@@ -964,8 +964,8 @@ TEST_CASE("fl::random deterministic behavior") {
 TEST_CASE("fl::default_random global instance") {
     SUBCASE("Global instance is accessible") {
         // Should be able to use the global instance
-        uint16_t val1 = fl::default_random();
-        uint16_t val2 = fl::default_random();
+        uint32_t val1 = fl::default_random();
+        uint32_t val2 = fl::default_random();
         
         // Values should be in valid range
         CHECK_GE(val1, fl::random::minimum());
@@ -978,11 +978,11 @@ TEST_CASE("fl::default_random global instance") {
         fl::default_random.set_seed(12345);
         CHECK_EQ(fl::default_random.get_seed(), 12345);
         
-        uint16_t val1 = fl::default_random();
+        uint32_t val1 = fl::default_random();
         
         // Reset to same seed and verify same value
         fl::default_random.set_seed(12345);
-        uint16_t val2 = fl::default_random();
+        uint32_t val2 = fl::default_random();
         
         CHECK_EQ(val1, val2);
     }

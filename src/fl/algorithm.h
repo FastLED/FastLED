@@ -519,7 +519,7 @@ void shuffle(Iterator first, Iterator last, random& rng) {
     auto n = last - first;
     for (auto i = n - 1; i > 0; --i) {
         // Generate random index from 0 to i (inclusive)
-        auto j = rng(static_cast<uint16_t>(i + 1));
+        auto j = rng(static_cast<uint32_t>(i + 1));
         
         // Swap elements at positions i and j
         swap(*(first + i), *(first + j));

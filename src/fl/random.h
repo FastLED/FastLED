@@ -21,16 +21,24 @@ private:
     /// The current seed state for this instance
     uint16_t seed_;
 
-    /// Generate next random number using this instance's seed
+    /// Generate next 16-bit random number using this instance's seed
     /// @returns The next 16-bit random number
     uint16_t next_random16() {
         seed_ = APPLY_FASTLED_RAND16_2053(seed_) + FASTLED_RAND16_13849;
         return seed_;
     }
 
+    /// Generate next 32-bit random number using this instance's seed
+    /// @returns The next 32-bit random number
+    uint32_t next_random32() {
+        uint32_t high = next_random16();
+        uint32_t low = next_random16();
+        return (high << 16) | low;
+    }
+
 public:
-    /// The result type for this random generator (16-bit unsigned integer)
-    typedef uint16_t result_type;
+    /// The result type for this random generator (32-bit unsigned integer)
+    typedef uint32_t result_type;
 
     /// Default constructor - uses current global random seed
     random() : seed_(random16_get_seed()) {}
@@ -40,19 +48,19 @@ public:
     explicit random(uint16_t seed) : seed_(seed) {}
 
     /// Generate a random number
-    /// @returns A random 16-bit unsigned integer
+    /// @returns A random 32-bit unsigned integer
     result_type operator()() {
-        return next_random16();
+        return next_random32();
     }
 
     /// Generate a random number in the range [0, n)
     /// @param n The upper bound (exclusive)
     /// @returns A random number from 0 to n-1
     result_type operator()(result_type n) {
-        uint16_t r = next_random16();
-        uint32_t p = (uint32_t)n * (uint32_t)r;
-        r = p >> 16;
-        return r;
+        if (n == 0) return 0;
+        uint32_t r = next_random32();
+        uint64_t p = (uint64_t)n * (uint64_t)r;
+        return (uint32_t)(p >> 32);
     }
 
     /// Generate a random number in the range [min, max)
@@ -90,9 +98,9 @@ public:
     }
 
     /// Get the maximum value this generator can produce
-    /// @returns The maximum value (65535)
+    /// @returns The maximum value (4294967295)
     static constexpr result_type maximum() {
-        return 65535;
+        return 4294967295U;
     }
 
     /// Generate an 8-bit random number
