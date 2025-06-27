@@ -16,6 +16,16 @@
 #define UI_V2  // Based on a new midi shield with buttons. https://learn.sparkfun.com/tutorials/midi-shield-hookup-guide
 #define UI_DBG
 
+
+#ifndef A3
+#define A3 3
+#warning "A3 is not defined, using 3"
+#endif
+#ifndef A4
+#define A4 4
+#warning "A4 is not defined, using 4"
+#endif
+
 #ifdef __STM32F1__
 // Missing A-type pins, just use digital pins mapped to analog.
 #define PIN_POT_COLOR_SENSOR D3
