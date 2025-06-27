@@ -18,6 +18,7 @@ This project includes a custom MCP server (`mcp_server.py`) that provides tools 
 - Code fingerprinting and change detection
 - Linting and formatting
 - Project information and status
+- **Build info analysis for platform-specific defines, compiler flags, and toolchain information**
 - **Symbol analysis for binary optimization (all platforms)**
 - Stack trace setup for enhanced debugging
 - **🚨 CRITICAL: `validate_completion` tool for background agents**
@@ -344,6 +345,205 @@ int main() {
 ```
 
 **For Background Agents**: Always run the `setup_stack_traces` MCP tool when setting up a new environment to ensure proper debugging capabilities are available.
+
+## Platform Build Information Analysis
+
+The FastLED project includes comprehensive tools for analyzing platform-specific build information, including preprocessor defines, compiler flags, and toolchain paths from `build_info.json` files generated during compilation.
+
+### Overview
+
+Platform build information is stored in `.build/{platform}/build_info.json` files that are automatically generated when compiling for any platform. These files contain:
+
+- **Platform Defines** - Preprocessor definitions (`#define` values) specific to each platform
+- **Compiler Information** - Paths, flags, and types for C/C++ compilers
+- **Toolchain Aliases** - Tool paths for gcc, g++, ar, objcopy, nm, etc.
+- **Build Configuration** - Framework, build type, and other settings
+
+### Quick Start
+
+#### 1. Generate Build Information
+
+Before analyzing, ensure you have compiled the platform:
+
+```bash
+# Compile a platform to generate build_info.json
+uv run ci/ci-compile.py uno --examples Blink
+uv run ci/ci-compile.py esp32dev --examples Blink
+```
+
+This creates `.build/{platform}/build_info.json` with all platform information.
+
+#### 2. Analyze Platform Defines
+
+**Get platform-specific preprocessor defines:**
+```bash
+# Command line tool
+python3 ci/ci/build_info_analyzer.py --board uno --show-defines
+
+# Via MCP server
+uv run mcp_server.py
+# Use build_info_analysis tool with: board="uno", show_defines=true
+```
+
+**Example output for UNO:**
+```
+📋 Platform Defines for UNO:
+  PLATFORMIO=60118
+  ARDUINO_AVR_UNO
+  F_CPU=16000000L
+  ARDUINO_ARCH_AVR
+  ARDUINO=10808
+  __AVR_ATmega328P__
+```
+
+**Example output for ESP32:**
+```
+📋 Platform Defines for ESP32DEV:
+  ESP32=ESP32
+  ESP_PLATFORM
+  F_CPU=240000000L
+  ARDUINO_ARCH_ESP32
+  IDF_VER="v5.3.2-174-g083aad99cf-dirty"
+  ARDUINO_ESP32_DEV
+  # ... and 23 more defines
+```
+
+#### 3. Compare Platforms
+
+**Compare defines between platforms:**
+```bash
+# Command line
+python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+
+# Via MCP 
+# Use build_info_analysis tool with: board="uno", compare_with="esp32dev"
+```
+
+Shows differences and commonalities between platform defines.
+
+### Available Tools
+
+#### Command Line Tool
+
+**Basic Usage:**
+```bash
+# List available platforms
+python3 ci/ci/build_info_analyzer.py --list-boards
+
+# Show platform defines
+python3 ci/ci/build_info_analyzer.py --board uno --show-defines
+
+# Show compiler information
+python3 ci/ci/build_info_analyzer.py --board esp32dev --show-compiler
+
+# Show toolchain aliases
+python3 ci/ci/build_info_analyzer.py --board teensy31 --show-toolchain
+
+# Show everything
+python3 ci/ci/build_info_analyzer.py --board digix --show-all
+
+# Compare platforms
+python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+
+# JSON output for automation
+python3 ci/ci/build_info_analyzer.py --board uno --show-defines --json
+```
+
+#### MCP Server Tool
+
+**For Background Agents**, use the MCP server `build_info_analysis` tool:
+
+```bash
+# Start MCP server
+uv run mcp_server.py
+
+# Use build_info_analysis tool with parameters:
+# - board: "uno", "esp32dev", "teensy31", etc. or "list" to see available
+# - show_defines: true/false (default: true)
+# - show_compiler: true/false  
+# - show_toolchain: true/false
+# - show_all: true/false
+# - compare_with: "other_board_name" for comparison
+# - output_json: true/false for programmatic use
+```
+
+### Supported Platforms
+
+The build info analysis works with **ANY platform** that generates a `build_info.json` file:
+
+**Embedded Platforms:**
+- ✅ **UNO (AVR)** - 8-bit microcontroller (6 defines)
+- ✅ **ESP32DEV** - WiFi-enabled 32-bit platform (29 defines)
+- ✅ **ESP32S3, ESP32C3, ESP32C6** - All ESP32 variants
+- ✅ **TEENSY31, TEENSYLC** - ARM Cortex-M platforms
+- ✅ **DIGIX, BLUEPILL** - ARM Cortex-M3 platforms
+- ✅ **STM32, NRF52** - Various ARM platforms
+- ✅ **RPIPICO, RPIPICO2** - Raspberry Pi Pico platforms
+- ✅ **ATTINY85, ATTINY1616** - Small AVR microcontrollers
+
+### Use Cases
+
+#### For Code Development
+
+**Understanding Platform Differences:**
+```bash
+# See what defines are available for conditional compilation
+python3 ci/ci/build_info_analyzer.py --board esp32dev --show-defines
+
+# Compare two platforms to understand differences
+python3 ci/ci/build_info_analyzer.py --compare uno esp32dev
+```
+
+**Compiler and Toolchain Information:**
+```bash
+# Get compiler paths and flags for debugging builds
+python3 ci/ci/build_info_analyzer.py --board teensy31 --show-compiler
+
+# Get toolchain paths for symbol analysis
+python3 ci/ci/build_info_analyzer.py --board digix --show-toolchain
+```
+
+#### For Automation
+
+**JSON output for scripts:**
+```bash
+# Get defines as JSON for processing
+python3 ci/ci/build_info_analyzer.py --board uno --show-defines --json
+
+# Get all build info as JSON
+python3 ci/ci/build_info_analyzer.py --board esp32dev --show-all --json
+```
+
+### Integration with Other Tools
+
+Build info analysis integrates with other FastLED tools:
+
+1. **Symbol Analysis** - Uses build_info.json to find toolchain paths
+2. **Compilation** - Generated automatically during example compilation  
+3. **Testing** - Provides platform context for test results
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **"No boards with build_info.json found"**
+   - **Solution:** Compile a platform first: `uv run ci/ci-compile.py uno --examples Blink`
+
+2. **"Board key not found in build_info.json"**
+   - **Solution:** Check available boards: `python3 ci/ci/build_info_analyzer.py --list-boards`
+
+3. **"Build info not found for platform"**
+   - **Solution:** Ensure the platform compiled successfully and check `.build/{board}/build_info.json` exists
+
+### Best Practices
+
+1. **Always compile first** before analyzing build information
+2. **Use comparison feature** to understand platform differences
+3. **Check defines** when adding platform-specific code
+4. **Use JSON output** for automated processing and CI/CD
+5. **Combine with symbol analysis** for complete platform understanding
+
+**For Background Agents:** Use the MCP server `build_info_analysis` tool for consistent access to platform build information and proper error handling.
 
 ## Symbol Analysis for Binary Optimization
 

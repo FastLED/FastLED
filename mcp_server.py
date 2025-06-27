@@ -307,6 +307,49 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
+            name="build_info_analysis",
+            description="Analyze platform build information from build_info.json files. Extract platform-specific preprocessor defines, compiler flags, toolchain paths, and other build configuration data. Works with any platform that has been compiled (uno, esp32dev, teensy31, etc.).",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "board": {
+                        "type": "string",
+                        "description": "Platform/board name (e.g., 'uno', 'esp32dev', 'teensy31'). Use 'list' to see available boards",
+                        "default": "list"
+                    },
+                    "show_defines": {
+                        "type": "boolean",
+                        "description": "Show platform preprocessor defines (C/C++ #define values)",
+                        "default": True
+                    },
+                    "show_compiler": {
+                        "type": "boolean",
+                        "description": "Show compiler information (paths, flags, types)",
+                        "default": False
+                    },
+                    "show_toolchain": {
+                        "type": "boolean",
+                        "description": "Show toolchain tool aliases (gcc, g++, ar, etc.)",
+                        "default": False
+                    },
+                    "show_all": {
+                        "type": "boolean",
+                        "description": "Show all available build information",
+                        "default": False
+                    },
+                    "compare_with": {
+                        "type": "string",
+                        "description": "Compare platform defines with another board (e.g., 'esp32dev')"
+                    },
+                    "output_json": {
+                        "type": "boolean",
+                        "description": "Output results in JSON format for programmatic use",
+                        "default": False
+                    }
+                }
+            }
+        ),
+        Tool(
             name="symbol_analysis",
             description="Run generic symbol analysis for ANY platform (UNO, ESP32, Teensy, STM32, etc.) to identify optimization opportunities. Analyzes ELF files to show all symbols and their sizes without filtering. Works with any platform that has build_info.json.",
             inputSchema={
@@ -397,6 +440,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await coding_standards(arguments, project_root)
         elif name == "validate_completion":
             return await validate_completion(arguments, project_root)
+        elif name == "build_info_analysis":
+            return await build_info_analysis(arguments, project_root)
         elif name == "esp32_symbol_analysis":
             return await esp32_symbol_analysis(arguments, project_root)
         elif name == "symbol_analysis":
@@ -1324,6 +1369,175 @@ async def validate_completion(arguments: Dict[str, Any], project_root: Path) -> 
         return CallToolResult(
             content=[TextContent(type="text", text=result_text)]
         )
+
+async def build_info_analysis(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Analyze platform build information from build_info.json files."""
+    board = arguments.get("board", "list")
+    show_defines = arguments.get("show_defines", True)
+    show_compiler = arguments.get("show_compiler", False)
+    show_toolchain = arguments.get("show_toolchain", False)
+    show_all = arguments.get("show_all", False)
+    compare_with = arguments.get("compare_with")
+    output_json = arguments.get("output_json", False)
+    
+    # Import our build info analyzer
+    try:
+        import sys
+        sys.path.insert(0, str(project_root / "ci" / "ci"))
+        from build_info_analyzer import BuildInfoAnalyzer
+    except ImportError as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Error importing build_info_analyzer: {e}")],
+            isError=True
+        )
+    
+    analyzer = BuildInfoAnalyzer(str(project_root / ".build"))
+    
+    # Handle board listing
+    if board == "list" or not board:
+        boards = analyzer.list_available_boards()
+        if not boards:
+            result_text = "❌ No boards with build_info.json found in .build directory\n"
+            result_text += "   Try running a compilation first:\n"
+            result_text += "   uv run ci/ci-compile.py uno --examples Blink\n"
+            result_text += "   uv run ci/ci-compile.py esp32dev --examples Blink\n"
+            return CallToolResult(
+                content=[TextContent(type="text", text=result_text)]
+            )
+        
+        result_text = f"📋 Available boards with build_info.json ({len(boards)}):\n"
+        for board_name in boards:
+            result_text += f"  ✅ {board_name}\n"
+        result_text += "\nUsage: Use 'board' parameter with any of these names to analyze platform information.\n"
+        result_text += "Example: board='uno', show_defines=True\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+    
+    # Handle board comparison
+    if compare_with:
+        success, comparison, error = analyzer.compare_defines(board, compare_with)
+        if not success:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ Error: {error}")],
+                isError=True
+            )
+        
+        if output_json:
+            import json
+            result_text = json.dumps(comparison, indent=2)
+        else:
+            board1 = comparison['board1']
+            board2 = comparison['board2']
+            
+            result_text = f"🔍 Platform Defines Comparison:\n"
+            result_text += "=" * 60 + "\n"
+            result_text += f"📊 {board1.upper()} vs {board2.upper()}\n"
+            result_text += f"   {board1}: {comparison['board1_total']} defines\n"
+            result_text += f"   {board2}: {comparison['board2_total']} defines\n"
+            result_text += f"   Common: {comparison['common_count']} defines\n"
+            
+            if comparison['board1_only']:
+                result_text += f"\n🔴 Only in {board1.upper()} ({len(comparison['board1_only'])}):\n"
+                for define in comparison['board1_only']:
+                    result_text += f"  {define}\n"
+            
+            if comparison['board2_only']:
+                result_text += f"\n🔵 Only in {board2.upper()} ({len(comparison['board2_only'])}):\n"
+                for define in comparison['board2_only']:
+                    result_text += f"  {define}\n"
+            
+            if comparison['common']:
+                result_text += f"\n🟢 Common Defines ({len(comparison['common'])}):\n"
+                for define in comparison['common']:
+                    result_text += f"  {define}\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+    
+    # Handle single board analysis
+    result_parts = []
+    
+    if show_defines or show_all:
+        success, defines, error = analyzer.get_platform_defines(board)
+        if not success:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ Error getting defines: {error}")],
+                isError=True
+            )
+        
+        if output_json:
+            import json
+            result_parts.append(json.dumps({"defines": defines}, indent=2))
+        else:
+            result_parts.append(f"📋 Platform Defines for {board.upper()}:")
+            result_parts.append("=" * 50)
+            for define in defines:
+                result_parts.append(f"  {define}")
+            result_parts.append(f"\nTotal: {len(defines)} defines")
+    
+    if show_compiler or show_all:
+        success, compiler_info, error = analyzer.get_compiler_info(board)
+        if not success:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ Error getting compiler info: {error}")],
+                isError=True
+            )
+        
+        if output_json:
+            import json
+            result_parts.append(json.dumps({"compiler": compiler_info}, indent=2))
+        else:
+            result_parts.append(f"\n🔧 Compiler Information for {board.upper()}:")
+            result_parts.append("=" * 50)
+            result_parts.append(f"Compiler Type: {compiler_info.get('compiler_type', 'Unknown')}")
+            result_parts.append(f"Build Type: {compiler_info.get('build_type', 'Unknown')}")
+            result_parts.append(f"C Compiler: {compiler_info.get('cc_path', 'Unknown')}")
+            result_parts.append(f"C++ Compiler: {compiler_info.get('cxx_path', 'Unknown')}")
+            
+            cc_flags = compiler_info.get('cc_flags', [])
+            if cc_flags:
+                result_parts.append(f"\nC Flags ({len(cc_flags)}):")
+                for flag in cc_flags:
+                    result_parts.append(f"  {flag}")
+            
+            cxx_flags = compiler_info.get('cxx_flags', [])
+            if cxx_flags:
+                result_parts.append(f"\nC++ Flags ({len(cxx_flags)}):")
+                for flag in cxx_flags:
+                    result_parts.append(f"  {flag}")
+    
+    if show_toolchain or show_all:
+        success, aliases, error = analyzer.get_toolchain_aliases(board)
+        if not success:
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ Error getting toolchain aliases: {error}")],
+                isError=True
+            )
+        
+        if output_json:
+            import json
+            result_parts.append(json.dumps({"toolchain": aliases}, indent=2))
+        else:
+            result_parts.append(f"\n⚙️  Toolchain Aliases for {board.upper()}:")
+            result_parts.append("=" * 50)
+            for tool, path in aliases.items():
+                if path:
+                    # Show just the tool name from the path for readability
+                    from pathlib import Path as PathLib
+                    tool_name = PathLib(path).name if path else "Not available"
+                    result_parts.append(f"  {tool:10}: {tool_name}")
+                else:
+                    result_parts.append(f"  {tool:10}: Not available")
+    
+    result_text = "\n".join(result_parts)
+    
+    return CallToolResult(
+        content=[TextContent(type="text", text=result_text)]
+    )
+
 
 async def esp32_symbol_analysis(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
     """Run ESP32 symbol analysis to identify optimization opportunities for binary size reduction."""
