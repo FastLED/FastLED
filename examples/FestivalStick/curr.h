@@ -170,8 +170,8 @@ UISlider fireInvSpeedZ("Fire Inverse SpeedZ", 20, 1, 100, 1);
 UINumberField firePalette("Fire Palette", 0, 0, 2);
 
 // Wave-related UI controls (cylindrical wave effects)
-UISlider waveSpeed("Wave Speed", 0.16f, 0.0f, 1.0f, 0.01f);
-UISlider waveDampening("Wave Dampening", 6.0f, 0.0f, 20.0f, 0.1f);
+UISlider waveSpeed("Wave Speed", 0.03f, 0.0f, 1.0f, 0.01f);
+UISlider waveDampening("Wave Dampening", 9.1f, 0.0f, 20.0f, 0.1f);
 UICheckbox waveHalfDuplex("Wave Half Duplex", true);
 UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
 UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
@@ -735,6 +735,7 @@ void drawAnimartrix(uint32_t now) {
 }
 
 void loop() {
+    delay(4);
     uint32_t now = millis();
     clear(frameBuffer);
 
