@@ -8,18 +8,15 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
-#ifndef COMPILE_NOISEPLUSPALETTE
-#if defined(__AVR__)
-// This has grown too large for the AVR to handle.
-#define COMPILE_NOISEPLUSPALETTE 0
-#else
-#define COMPILE_NOISEPLUSPALETTE 1
-#endif
-#endif // COMPILE_NOISEPLUSPALETTE
-
-#if COMPILE_NOISEPLUSPALETTE
-
 #include <FastLED.h>
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Don't compile this for AVR microcontrollers (like Arduino Uno) because they typically 
+// don't have enough memory to handle this complex animation.
+// Instead, we provide empty setup/loop functions so the sketch will compile but do nothing.
+void setup() {}
+void loop() {}
+#else  // For all other platforms with more memory (ESP32, Teensy, etc.)
 #include "fx/2d/noisepalette.h"
 #include "fl/ui.h"
 
@@ -101,7 +98,4 @@ void loop() {
     FastLED.show();
 }
 
-#else
-void setup() {}
-void loop() {}
-#endif // COMPILE_NOISEPLUSPALETTE
+#endif  // End of the non-AVR code section
