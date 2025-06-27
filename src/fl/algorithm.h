@@ -315,60 +315,121 @@ void heap_sort(Iterator first, Iterator last, Compare comp) {
     }
 }
 
-// Introsort implementation
+// Quicksort implementation
 template <typename Iterator, typename Compare>
-void introsort_impl(Iterator first, Iterator last, int depth_limit, Compare comp) {
-    while (last - first > 16) {  // Use insertion sort for small arrays
-        if (depth_limit == 0) {
-            // Too deep, use heapsort
-            heap_sort(first, last, comp);
-            return;
-        }
-        
-        --depth_limit;
-        Iterator pivot = partition(first, last, comp);
-        
-        // Recursively sort the larger partition first to limit stack depth
-        if (pivot - first < last - pivot - 1) {
-            introsort_impl(first, pivot, depth_limit, comp);
-            first = pivot + 1;
-        } else {
-            introsort_impl(pivot + 1, last, depth_limit, comp);
-            last = pivot;
-        }
+void quicksort_impl(Iterator first, Iterator last, Compare comp) {
+    if (last - first <= 16) {  // Use insertion sort for small arrays
+        insertion_sort(first, last, comp);
+        return;
     }
+    
+    Iterator pivot = partition(first, last, comp);
+    quicksort_impl(first, pivot, comp);
+    quicksort_impl(pivot + 1, last, comp);
 }
 
-// Calculate depth limit for introsort
-template <typename Iterator>
-int calculate_depth_limit(Iterator first, Iterator last) {
-    int depth = 0;
-    for (auto n = last - first; n > 1; n >>= 1) {
-        ++depth;
+// Merge operation for merge sort (stable sort)
+template <typename Iterator, typename Compare>
+void merge(Iterator first, Iterator middle, Iterator last, Compare comp) {
+    using value_type = typename fl::remove_reference<decltype(*first)>::type;
+    
+    // Calculate sizes
+    auto left_size = middle - first;
+    auto right_size = last - middle;
+    
+    // Create temporary buffer for left half
+    value_type* temp = static_cast<value_type*>(operator new(left_size * sizeof(value_type)));
+    
+    // Copy left half to temporary buffer
+    for (auto i = 0; i < left_size; ++i) {
+        new (temp + i) value_type(fl::move(*(first + i)));
     }
-    return depth * 2;  // 2 * log2(n)
+    
+    Iterator left = first;
+    Iterator right = middle;
+    Iterator result = first;
+    auto temp_left = temp;
+    auto temp_left_end = temp + left_size;
+    
+    // Merge the two halves back
+    while (temp_left != temp_left_end && right != last) {
+        if (!comp(*right, *temp_left)) {  // Use !comp for stability
+            *result = fl::move(*temp_left);
+            ++temp_left;
+        } else {
+            *result = fl::move(*right);
+            ++right;
+        }
+        ++result;
+    }
+    
+    // Copy remaining elements from left half
+    while (temp_left != temp_left_end) {
+        *result = fl::move(*temp_left);
+        ++temp_left;
+        ++result;
+    }
+    
+    // Right half is already in place, no need to copy
+    
+    // Clean up temporary buffer
+    for (auto i = 0; i < left_size; ++i) {
+        temp[i].~value_type();
+    }
+    operator delete(temp);
+}
+
+// Merge sort implementation (stable)
+template <typename Iterator, typename Compare>
+void mergesort_impl(Iterator first, Iterator last, Compare comp) {
+    auto size = last - first;
+    if (size <= 16) {  // Use insertion sort for small arrays (it's stable)
+        insertion_sort(first, last, comp);
+        return;
+    }
+    
+    Iterator middle = first + size / 2;
+    mergesort_impl(first, middle, comp);
+    mergesort_impl(middle, last, comp);
+    merge(first, middle, last, comp);
 }
 
 } // namespace detail
 
-// Sort function with custom comparator
+// Sort function with custom comparator (using quicksort)
 template <typename Iterator, typename Compare>
 void sort(Iterator first, Iterator last, Compare comp) {
     if (first == last || first + 1 == last) {
         return;  // Already sorted or empty
     }
     
-    int depth_limit = detail::calculate_depth_limit(first, last);
-    detail::introsort_impl(first, last, depth_limit, comp);
-    
-    // Final insertion sort pass for small remaining unsorted regions
-    detail::insertion_sort(first, last, comp);
+    detail::quicksort_impl(first, last, comp);
 }
 
 // Sort function with default comparator
 template <typename Iterator>
 void sort(Iterator first, Iterator last) {
-    sort(first, last, [](const auto& a, const auto& b) { return a < b; });
+    // Use explicit template parameter to avoid C++14 auto in lambda
+    typedef typename fl::remove_reference<decltype(*first)>::type value_type;
+    sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
+}
+
+// Stable sort function with custom comparator (using merge sort)
+template <typename Iterator, typename Compare>
+void stable_sort(Iterator first, Iterator last, Compare comp) {
+    if (first == last || first + 1 == last) {
+        return;  // Already sorted or empty
+    }
+    
+    detail::mergesort_impl(first, last, comp);
+}
+
+// Stable sort function with default comparator
+template <typename Iterator>
+void stable_sort(Iterator first, Iterator last) {
+    // Use explicit template parameter to avoid C++14 auto in lambda
+    typedef typename fl::remove_reference<decltype(*first)>::type value_type;
+    stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
 }
 
 } // namespace fl
