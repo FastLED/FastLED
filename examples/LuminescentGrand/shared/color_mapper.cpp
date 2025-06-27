@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 
 #include "./color_mapper.h"

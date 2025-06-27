@@ -3,7 +3,7 @@
 #ifndef COLOR_H_
 #define COLOR_H_
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 struct Color3i {
   static Color3i Black() { return Color3i(0x0, 0x0, 0x0); }
