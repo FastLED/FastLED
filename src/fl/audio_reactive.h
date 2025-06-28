@@ -1,0 +1,125 @@
+#pragma once
+
+#include "fl/fft.h"
+#include "fl/math.h"
+#include "fl/vector.h"
+#include "fl/stdint.h"
+#include "crgb.h"
+
+// Forward declaration
+class CRGBPalette16;
+
+namespace fl {
+
+// Audio data structure - matches original WLED output
+struct AudioData {
+    float volume = 0.0f;                    // Overall volume level (0-255)
+    float volumeRaw = 0.0f;                 // Raw volume without smoothing
+    float peak = 0.0f;                      // Peak level (0-255) 
+    bool beatDetected = false;              // Beat detection flag
+    float frequencyBins[16] = {0};          // 16 frequency bins (matches WLED NUM_GEQ_CHANNELS)
+    float dominantFrequency = 0.0f;         // Major peak frequency (Hz)
+    float magnitude = 0.0f;                 // FFT magnitude of dominant frequency
+    uint32_t timestamp = 0;                 // millis() when data was captured
+};
+
+struct AudioConfig {
+    uint8_t gain = 128;              // Input gain (0-255)
+    uint8_t sensitivity = 128;       // AGC sensitivity
+    bool agcEnabled = true;          // Auto gain control
+    bool noiseGate = true;           // Noise gate
+    uint8_t attack = 50;             // Attack time (ms)
+    uint8_t decay = 200;             // Decay time (ms)
+    uint16_t sampleRate = 22050;     // Sample rate (Hz)
+    uint8_t scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
+};
+
+class AudioReactive {
+public:
+    AudioReactive();
+    ~AudioReactive();
+    
+    // Setup
+    void begin(const AudioConfig& config = AudioConfig{});
+    void setConfig(const AudioConfig& config);
+    
+    // External audio input interface
+    void addSample(int16_t sample);
+    void addSamples(const int16_t* samples, size_t count);
+    
+    // Non-blocking update - call from loop()
+    void update(uint32_t currentTimeMs);
+    
+    // Data access
+    const AudioData& getData() const;
+    const AudioData& getSmoothedData() const;
+    
+    // Convenience accessors
+    float getVolume() const;
+    float getBass() const;    // Average of bins 0-1
+    float getMid() const;     // Average of bins 6-7 
+    float getTreble() const;  // Average of bins 14-15
+    bool isBeat() const;
+    
+    // Effect helpers
+    uint8_t volumeToScale255() const;
+    CRGB volumeToColor(const CRGBPalette16& palette) const;
+    uint8_t frequencyToScale255(uint8_t binIndex) const;
+
+private:
+    // Internal processing methods
+    void processFFT();
+    void mapFFTBinsToFrequencyChannels();
+    void updateVolumeAndPeak();
+    void detectBeat(uint32_t currentTimeMs);
+    void smoothResults();
+    void applyScaling();
+    void applyGain();
+    
+    // Helper methods
+    float mapFrequencyBin(int fromBin, int toBin);
+    float computeRMS(const fl::vector<int16_t>& samples);
+    
+    // Configuration
+    AudioConfig mConfig;
+    
+    // Sample buffer for FFT processing
+    fl::vector<int16_t> mSampleBuffer;
+    static constexpr size_t MAX_SAMPLES = 1024;
+    static constexpr size_t FFT_SIZE = 512;
+    
+    // FFT processing
+    FFT mFFT;
+    FFTBins mFFTBins;
+    fl::vector<float> mFFTInput;
+    
+    // Audio data  
+    AudioData mCurrentData;
+    AudioData mSmoothedData;
+    
+    // Processing state
+    uint32_t mLastProcessTime = 0;
+    uint32_t mLastBeatTime = 0;
+    static constexpr uint32_t PROCESS_INTERVAL = 20; // ~50Hz update rate
+    static constexpr uint32_t BEAT_COOLDOWN = 100;   // 100ms minimum between beats
+    
+    // Volume tracking for beat detection
+    float mPreviousVolume = 0.0f;
+    float mVolumeThreshold = 10.0f;
+    
+    // Pink noise compensation (from WLED)
+    static constexpr float PINK_NOISE_COMPENSATION[16] = {
+        1.70f, 1.71f, 1.73f, 1.78f, 1.68f, 1.56f, 1.55f, 1.63f,
+        1.79f, 1.62f, 1.80f, 2.06f, 2.47f, 3.35f, 6.83f, 9.55f
+    };
+    
+    // AGC state
+    float mAGCMultiplier = 1.0f;
+    float mMaxSample = 0.0f;
+    float mAverageLevel = 0.0f;
+};
+
+// Global instance
+extern AudioReactive Audio;
+
+} // namespace fl
