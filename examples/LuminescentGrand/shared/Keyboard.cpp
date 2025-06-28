@@ -1,12 +1,10 @@
-
-
-
 #include <Arduino.h>
 
 #include "./util.h"
 #include "./color_mapper.h"
 #include "./Keyboard.h"
 #include "./dprint.h"
+#include "fl/unused.h"
 
 Key::Key() : on_(false), sustained_(false), sustain_pedal_on_(false),
              velocity_(0), idx_(0), event_time_(0) {}
@@ -178,6 +176,9 @@ void KeyboardState::HandleControlChange(uint8_t d1, uint8_t d2) {
 }
 
 void KeyboardState::HandleAfterTouchPoly(uint8_t note, uint8_t pressure) { 
+  FL_UNUSED(note);
+  FL_UNUSED(pressure);
+  
   dprintln("HandleAfterTouchPoly");
 
   dprint("\tnote = ");
@@ -208,6 +209,3 @@ Key* KeyboardState::GetKey(int midi_pitch) {
   uint8_t idx = KeyIndex(midi_pitch);
   return &keys_[idx];
 }
-
-
-

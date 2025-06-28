@@ -1,5 +1,3 @@
-
-
 #ifndef COLOR_H_
 #define COLOR_H_
 
@@ -67,6 +65,12 @@ struct ColorHSV {
   }
   ColorHSV(const ColorHSV& other) {
     Set(other);
+  }
+  ColorHSV& operator=(const ColorHSV& other) {
+    if (this != &other) {
+      Set(other);
+    }
+    return *this;
   }
   void Set(const ColorHSV& other) {
 	  Set(other.h_, other.s_, other.v_);

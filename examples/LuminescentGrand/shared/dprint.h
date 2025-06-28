@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "fl/unused.h"
+
 
 extern bool is_debugging;
 //#define ENABLE_DPRINT
@@ -8,6 +10,6 @@ extern bool is_debugging;
  #define dprint(x) if (is_debugging) { Serial.print(x); }
  #define dprintln(x) if (is_debugging) { Serial.println(x); }
 #else
- #define dprint(x)
- #define dprintln(x)
+ #define dprint(x) FL_UNUSED(x)
+ #define dprintln(x) FL_UNUSED(x)
 #endif
