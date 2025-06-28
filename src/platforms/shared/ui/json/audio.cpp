@@ -1,11 +1,14 @@
+#include "platforms/shared/ui/json/audio.h"
+#include "fl/json.h"
+#include "fl/string.h"
 #include "fl/thread_local.h"
 #include "fl/warn.h"
-#include "platforms/shared/ui/json/audio.h"
-#include "fl/string.h"
 #include "platforms/shared/ui/json/ui.h"
-#include "fl/json.h"
 
 #if FASTLED_ENABLE_JSON
+
+// TODO: Set this explicitly.
+#define DBG_TIMESTAMP 0
 
 using namespace fl;
 
@@ -22,7 +25,7 @@ JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
             static_cast<JsonAudioImpl *>(this)->toJson(json);
         });
     mInternal = JsonUiInternalPtr::New(name, fl::move(updateFunc),
-                                     fl::move(toJsonFunc));
+                                       fl::move(toJsonFunc));
     mUpdater.init(this);
     addJsonUiComponent(mInternal);
 }
@@ -36,9 +39,13 @@ JsonAudioImpl &JsonAudioImpl::Group(const fl::string &name) {
 
 const fl::string &JsonAudioImpl::name() const { return mInternal->name(); }
 
-const fl::string &JsonAudioImpl::groupName() const { return mInternal->groupName(); }
+const fl::string &JsonAudioImpl::groupName() const {
+    return mInternal->groupName();
+}
 
-void JsonAudioImpl::setGroup(const fl::string &groupName) { mInternal->setGroup(groupName); }
+void JsonAudioImpl::setGroup(const fl::string &groupName) {
+    mInternal->setGroup(groupName);
+}
 
 void JsonAudioImpl::Updater::init(JsonAudioImpl *owner) {
     mOwner = owner;
@@ -61,7 +68,9 @@ void JsonAudioImpl::toJson(FLArduinoJson::JsonObject &json) const {
 }
 
 static bool isdigit(char c) { return c >= '0' && c <= '9'; }
-static bool isspace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+static bool isspace(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+}
 
 static void parseJsonStringToInt16Vector(const fl::string &jsonStr,
                                          fl::vector<int16_t> *audioData) {
@@ -118,7 +127,8 @@ static void parseJsonStringToInt16Vector(const fl::string &jsonStr,
     }
 }
 
-void JsonAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value) {
+void JsonAudioImpl::updateInternal(
+    const FLArduinoJson::JsonVariantConst &value) {
     // FASTLED_WARN("Unimplemented jsAudioImpl::updateInternal");
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);
@@ -129,9 +139,10 @@ void JsonAudioImpl::updateInternal(const FLArduinoJson::JsonVariantConst &value)
     // take in the data and break it up into chunks of kJsAudioSamples
     for (int i = 0; i < size; i += kJsAudioSamples) {
         AudioSampleImplPtr sample = NewPtr<AudioSampleImpl>();
-        sample->assign(mAudioDataBuffer.begin() + i,
-                       mAudioDataBuffer.begin() +
-                           MIN(i + kJsAudioSamples, size));
+        auto start = mAudioDataBuffer.begin() + i;
+        auto end = mAudioDataBuffer.begin() + MIN(i + kJsAudioSamples, size);
+        auto timestamp = DBG_TIMESTAMP;
+        sample->assign(start, end, timestamp);
         mAudioSampleImpls.push_back(sample);
         while (mAudioSampleImpls.size() > 10) {
             mAudioSampleImpls.erase(mAudioSampleImpls.begin());

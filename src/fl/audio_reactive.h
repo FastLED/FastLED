@@ -45,7 +45,7 @@ public:
     void setConfig(const AudioConfig& config);
     
     // Process audio sample - this does all the work immediately
-    void processSample(const AudioSample& sample, uint32_t currentTimeMs);
+    void processSample(const AudioSample& sample);
     
     // Optional: update smoothing without new sample data  
     void update(uint32_t currentTimeMs);

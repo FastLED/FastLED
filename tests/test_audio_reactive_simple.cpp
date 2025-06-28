@@ -32,17 +32,24 @@ TEST_CASE("AudioReactive basic functionality") {
         samples.push_back(sample);
     }
     
-    // Create AudioSample from our generated samples
+    // Create AudioSample from our generated samples with timestamp
     AudioSampleImplPtr impl = AudioSampleImplPtr::New();
-    impl->assign(samples.begin(), samples.end());
+    uint32_t testTimestamp = 1234567; // Test timestamp value
+    impl->assign(samples.begin(), samples.end(), testTimestamp);
     AudioSample audioSample(impl);
     
-    // Process the audio sample directly (use a fake timestamp)
-    audio.processSample(audioSample, 1000); // 1 second
+    // Process the audio sample directly (timestamp comes from AudioSample)
+    audio.processSample(audioSample);
     
     // Check that we detected some audio
     const AudioData& processedData = audio.getData();
     CHECK(processedData.volume > 0.0f);
+    
+    // Verify that the timestamp was properly captured from the AudioSample
+    CHECK(processedData.timestamp == testTimestamp);
+    
+    // Verify that the AudioSample correctly stores and returns its timestamp
+    CHECK(audioSample.timestamp() == testTimestamp);
 }
 
 TEST_CASE("AudioReactive convenience functions") {

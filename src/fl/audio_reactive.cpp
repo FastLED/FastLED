@@ -33,10 +33,13 @@ void AudioReactive::setConfig(const AudioConfig& config) {
     mConfig = config;
 }
 
-void AudioReactive::processSample(const AudioSample& sample, uint32_t currentTimeMs) {
+void AudioReactive::processSample(const AudioSample& sample) {
     if (!sample.isValid()) {
         return; // Invalid sample, ignore
     }
+    
+    // Extract timestamp from the AudioSample
+    uint32_t currentTimeMs = sample.timestamp();
     
     // Process the AudioSample immediately - timing is gated by sample availability
     processFFT(sample);

@@ -72,6 +72,13 @@ const AudioSample::VectorPCM &AudioSample::empty() {
 
 float AudioSample::zcf() const { return mImpl->zcf(); }
 
+uint32_t AudioSample::timestamp() const {
+    if (isValid()) {
+        return mImpl->timestamp();
+    }
+    return 0;
+}
+
 float AudioSample::rms() const {
     if (!isValid()) {
         return 0.0f;
