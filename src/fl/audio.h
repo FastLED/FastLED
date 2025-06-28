@@ -35,7 +35,7 @@ class AudioSample {
     float zcf() const;
     float rms() const;
 
-    void fft(FFTBins *out);
+    void fft(FFTBins *out) const;
 
     const_iterator begin() const { return pcm().begin(); }
     const_iterator end() const { return pcm().end(); }

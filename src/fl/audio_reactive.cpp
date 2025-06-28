@@ -34,7 +34,7 @@ void AudioReactive::setConfig(const AudioConfig& config) {
     mConfig = config;
 }
 
-void AudioReactive::processSample(AudioSample& sample, uint32_t currentTimeMs) {
+void AudioReactive::processSample(const AudioSample& sample, uint32_t currentTimeMs) {
     if (!sample.isValid()) {
         return; // Invalid sample, ignore
     }
@@ -66,7 +66,7 @@ void AudioReactive::update(uint32_t currentTimeMs) {
     }
 }
 
-void AudioReactive::processFFT(AudioSample& sample) {
+void AudioReactive::processFFT(const AudioSample& sample) {
     // Get PCM data from AudioSample
     const auto& pcmData = sample.pcm();
     if (pcmData.empty()) return;

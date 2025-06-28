@@ -45,7 +45,7 @@ public:
     void setConfig(const AudioConfig& config);
     
     // Process audio sample - this does all the work immediately
-    void processSample(AudioSample& sample, uint32_t currentTimeMs);
+    void processSample(const AudioSample& sample, uint32_t currentTimeMs);
     
     // Optional: update smoothing and timing without new sample data
     void update(uint32_t currentTimeMs);
@@ -68,7 +68,7 @@ public:
 
 private:
     // Internal processing methods
-    void processFFT(AudioSample& sample);
+    void processFFT(const AudioSample& sample);
     void mapFFTBinsToFrequencyChannels();
     void updateVolumeAndPeak(const AudioSample& sample);
     void detectBeat(uint32_t currentTimeMs);
