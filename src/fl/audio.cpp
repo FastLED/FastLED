@@ -1,6 +1,5 @@
 #include "audio.h"
 #include "fl/thread_local.h"
-#include <vector>
 
 namespace fl {
 
@@ -171,14 +170,9 @@ void SoundLevelMeter::resetFloor() {
     offset_ = 0.0;
 }
 
-template <typename It>
-void AudioSampleImpl::assign(It begin, It end) {
-    mSignedPcm.assign(begin, end);
-    initZeroCrossings();
-}
-
+// Explicit template instantiations for the template function defined in the header
 template void AudioSampleImpl::assign<AudioSample::VectorPCM::const_iterator>(AudioSample::VectorPCM::const_iterator, AudioSample::VectorPCM::const_iterator);
-template void AudioSampleImpl::assign<std::vector<int16_t>::iterator>(std::vector<int16_t>::iterator, std::vector<int16_t>::iterator);
+template void AudioSampleImpl::assign<fl::vector<int16_t>::iterator>(fl::vector<int16_t>::iterator, fl::vector<int16_t>::iterator);
 
 void SoundLevelMeter::processBlock(fl::Slice<const int16_t> samples) {
     processBlock(samples.data(), samples.size());
