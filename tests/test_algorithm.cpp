@@ -779,25 +779,25 @@ TEST_CASE("fl::stable_sort vs fl::sort comparison") {
     }
 }
 
-TEST_CASE("fl::random basic functionality") {
+TEST_CASE("fl::fl_random basic functionality") {
     SUBCASE("Default constructor") {
-        fl::random rng;
+        fl::fl_random rng;
         
         // Should be able to generate numbers
         uint32_t val1 = rng();
         uint32_t val2 = rng();
         
         // Values should be in valid range
-        CHECK_GE(val1, fl::random::minimum());
-        CHECK_LE(val1, fl::random::maximum());
-        CHECK_GE(val2, fl::random::minimum());
-        CHECK_LE(val2, fl::random::maximum());
+        CHECK_GE(val1, fl::fl_random::minimum());
+        CHECK_LE(val1, fl::fl_random::maximum());
+        CHECK_GE(val2, fl::fl_random::minimum());
+        CHECK_LE(val2, fl::fl_random::maximum());
     }
 
     SUBCASE("Constructor with seed") {
-        fl::random rng1(12345);
-        fl::random rng2(12345);  // Same seed
-        fl::random rng3(54321);  // Different seed
+        fl::fl_random rng1(12345);
+        fl::fl_random rng2(12345);  // Same seed
+        fl::fl_random rng3(54321);  // Different seed
         
         // Same seed should produce same sequence
         uint32_t val1a = rng1();
@@ -815,7 +815,7 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("Range generation with single parameter") {
-        fl::random rng(12345);
+        fl::fl_random rng(12345);
         
         // Test range [0, 10)
         for (int i = 0; i < 100; ++i) {
@@ -832,7 +832,7 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("Range generation with min and max") {
-        fl::random rng(12345);
+        fl::fl_random rng(12345);
         
         // Test range [5, 15)
         for (int i = 0; i < 100; ++i) {
@@ -849,7 +849,7 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("8-bit random generation") {
-        fl::random rng(12345);
+        fl::fl_random rng(12345);
         
         // Test random8()
         for (int i = 0; i < 50; ++i) {
@@ -874,7 +874,7 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("16-bit random generation") {
-        fl::random rng(12345);
+        fl::fl_random rng(12345);
         
         // Test random16()
         for (int i = 0; i < 50; ++i) {
@@ -899,7 +899,7 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("Seed management") {
-        fl::random rng;
+        fl::fl_random rng;
         
         // Set and get seed
         rng.set_seed(42);
@@ -911,15 +911,15 @@ TEST_CASE("fl::random basic functionality") {
     }
 
     SUBCASE("Static min/max methods") {
-        CHECK_EQ(fl::random::minimum(), 0);
-        CHECK_EQ(fl::random::maximum(), 4294967295U);
+        CHECK_EQ(fl::fl_random::minimum(), 0);
+        CHECK_EQ(fl::fl_random::maximum(), 4294967295U);
     }
 }
 
-TEST_CASE("fl::random deterministic behavior") {
+TEST_CASE("fl::fl_random deterministic behavior") {
     SUBCASE("Same seed produces same sequence") {
-        fl::random rng1(12345);
-        fl::random rng2(12345);
+        fl::fl_random rng1(12345);
+        fl::fl_random rng2(12345);
         
         fl::vector<uint32_t> seq1;
         fl::vector<uint32_t> seq2;
@@ -937,8 +937,8 @@ TEST_CASE("fl::random deterministic behavior") {
     }
 
     SUBCASE("Different seeds produce different sequences") {
-        fl::random rng1(12345);
-        fl::random rng2(54321);
+        fl::fl_random rng1(12345);
+        fl::fl_random rng2(54321);
         
         fl::vector<uint32_t> seq1;
         fl::vector<uint32_t> seq2;
@@ -968,10 +968,10 @@ TEST_CASE("fl::default_random global instance") {
         uint32_t val2 = fl::default_random();
         
         // Values should be in valid range
-        CHECK_GE(val1, fl::random::minimum());
-        CHECK_LE(val1, fl::random::maximum());
-        CHECK_GE(val2, fl::random::minimum());
-        CHECK_LE(val2, fl::random::maximum());
+        CHECK_GE(val1, fl::fl_random::minimum());
+        CHECK_LE(val1, fl::fl_random::maximum());
+        CHECK_GE(val2, fl::fl_random::minimum());
+        CHECK_LE(val2, fl::fl_random::maximum());
     }
 
     SUBCASE("Global instance can be seeded") {
@@ -988,8 +988,8 @@ TEST_CASE("fl::default_random global instance") {
     }
 }
 
-TEST_CASE("fl::shuffle with fl::random") {
-    SUBCASE("Shuffle with explicit fl::random instance") {
+TEST_CASE("fl::shuffle with fl::fl_random") {
+    SUBCASE("Shuffle with explicit fl::fl_random instance") {
         fl::vector<int> vec;
         vec.push_back(1);
         vec.push_back(2);
@@ -997,7 +997,7 @@ TEST_CASE("fl::shuffle with fl::random") {
         vec.push_back(4);
         vec.push_back(5);
         
-        fl::random rng(12345);
+        fl::fl_random rng(12345);
         fl::shuffle(vec.begin(), vec.end(), rng);
         
         // All elements should still be present
@@ -1025,8 +1025,8 @@ TEST_CASE("fl::shuffle with fl::random") {
             vec2.push_back(i);
         }
         
-        fl::random rng1(12345);
-        fl::random rng2(12345);  // Same seed
+        fl::fl_random rng1(12345);
+        fl::fl_random rng2(12345);  // Same seed
         
         fl::shuffle(vec1.begin(), vec1.end(), rng1);
         fl::shuffle(vec2.begin(), vec2.end(), rng2);

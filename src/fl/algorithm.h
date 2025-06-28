@@ -509,9 +509,9 @@ void shuffle(Iterator first, Iterator last, RandomGenerator& g) {
     }
 }
 
-// Shuffle function with fl::random instance
+// Shuffle function with fl::fl_random instance
 template <typename Iterator>
-void shuffle(Iterator first, Iterator last, random& rng) {
+void shuffle(Iterator first, Iterator last, fl_random& rng) {
     if (first == last) {
         return;  // Empty range, nothing to shuffle
     }

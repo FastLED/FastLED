@@ -12,11 +12,11 @@ namespace fl {
 /// independent of other instances and the global FastLED random state.
 ///
 /// @code
-/// fl::random rng;
+/// fl::fl_random rng;
 /// fl::vector<int> vec = {1, 2, 3, 4, 5};
 /// fl::shuffle(vec.begin(), vec.end(), rng);
 /// @endcode
-class random {
+class fl_random {
 private:
     /// The current seed state for this instance
     uint16_t seed_;
@@ -41,11 +41,11 @@ public:
     typedef uint32_t result_type;
 
     /// Default constructor - uses current global random seed
-    random() : seed_(random16_get_seed()) {}
+    fl_random() : seed_(random16_get_seed()) {}
 
     /// Constructor with explicit seed
     /// @param seed The seed value for the random number generator
-    explicit random(uint16_t seed) : seed_(seed) {}
+    explicit fl_random(uint16_t seed) : seed_(seed) {}
 
     /// Generate a random number
     /// @returns A random 32-bit unsigned integer
@@ -162,6 +162,6 @@ public:
 /// auto value = fl::default_random();
 /// fl::shuffle(vec.begin(), vec.end(), fl::default_random);
 /// @endcode
-extern random default_random;
+extern fl_random default_random;
 
 } // namespace fl 

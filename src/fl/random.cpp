@@ -3,6 +3,6 @@
 namespace fl {
 
 // Global default random number generator instance
-random default_random;
+fl_random default_random;
 
 } // namespace fl 
