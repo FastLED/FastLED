@@ -1,99 +1,125 @@
 #pragma once
 
-
-#if 0 // EXPLICITLY DISABLED
-
-#include "fl/algorithm.h"
+#include "fl/fft.h"
 #include "fl/math.h"
+#include "fl/vector.h"
 #include "fl/stdint.h"
-#include "fl/math_macros.h"
+#include "crgb.h"
+
+// Forward declaration
+class CRGBPalette16;
 
 namespace fl {
 
-/// Tracks a smoothed peak with attack, decay, and output-inertia time-constants.
-/// This is useful for creating smooth audio reactive visualizations that respond
-/// to audio input with configurable rise and fall characteristics.
-class MaxFadeTracker {
-public:
-    /// @param attackTimeSec  τ₁: how quickly to rise toward a new peak (seconds).
-    /// @param decayTimeSec   τ₂: how quickly to decay to 1/e of value (seconds).
-    /// @param outputTimeSec  τ₃: how quickly the returned value follows currentLevel_ (seconds).
-    /// @param sampleRate     audio sample rate (e.g. 44100 or 48000).
-    MaxFadeTracker(float attackTimeSec,
-                   float decayTimeSec,
-                   float outputTimeSec,
-                   float sampleRate)
-        : attackRate_(1.0f / attackTimeSec)
-        , decayRate_(1.0f / decayTimeSec)
-        , outputRate_(1.0f / outputTimeSec)
-        , sampleRate_(sampleRate)
-        , currentLevel_(0.0f)
-        , smoothedOutput_(0.0f)
-    {}
-
-    /// Update attack time constant
-    void setAttackTime(float t) { attackRate_ = 1.0f / t; }
-    
-    /// Update decay time constant
-    void setDecayTime(float t) { decayRate_ = 1.0f / t; }
-    
-    /// Update output smoothing time constant
-    void setOutputTime(float t) { outputRate_ = 1.0f / t; }
-
-    /// Process a block of audio samples and return smoothed peak level [0…1].
-    /// @param samples pointer to int16_t audio samples
-    /// @param length number of samples in the block
-    /// @returns smoothed peak level with attack/decay/output inertia applied
-    float operator()(const int16_t* samples, size_t length) {
-        // 1) Find peak value in this block
-        float peak = 0.0f;
-        for (size_t i = 0; i < length; ++i) {
-            float v = ABS(samples[i]) * (1.0f / 32768.0f);
-            peak = MAX(peak, v);
-        }
-
-        // 2) Calculate time delta for this block
-        float dt = static_cast<float>(length) / sampleRate_;
-
-        // 3) Update currentLevel_ with attack/decay behavior
-        if (peak > currentLevel_) {
-            // Attack: rise toward new peak
-            float riseFactor = 1.0f - std::exp(-attackRate_ * dt);
-            currentLevel_ += (peak - currentLevel_) * riseFactor;
-        } else {
-            // Decay: exponential decay
-            float decayFactor = std::exp(-decayRate_ * dt);
-            currentLevel_ *= decayFactor;
-        }
-
-        // 4) Apply output smoothing/inertia
-        float outFactor = 1.0f - std::exp(-outputRate_ * dt);
-        smoothedOutput_ += (currentLevel_ - smoothedOutput_) * outFactor;
-
-        return smoothedOutput_;
-    }
-
-    /// Get current peak level without processing new samples
-    float getCurrentLevel() const { return currentLevel_; }
-    
-    /// Get current smoothed output level
-    float getSmoothedOutput() const { return smoothedOutput_; }
-
-    /// Reset tracker to initial state
-    void reset() {
-        currentLevel_ = 0.0f;
-        smoothedOutput_ = 0.0f;
-    }
-
-private:
-    float attackRate_;     // = 1/τ₁ (attack time constant)
-    float decayRate_;      // = 1/τ₂ (decay time constant)  
-    float outputRate_;     // = 1/τ₃ (output smoothing time constant)
-    float sampleRate_;     // audio sample rate
-    float currentLevel_;   // instantaneous peak with attack/decay applied
-    float smoothedOutput_; // final output value with inertia
+// Audio data structure - matches original WLED output
+struct AudioData {
+    float volume = 0.0f;                    // Overall volume level (0-255)
+    float volumeRaw = 0.0f;                 // Raw volume without smoothing
+    float peak = 0.0f;                      // Peak level (0-255) 
+    bool beatDetected = false;              // Beat detection flag
+    float frequencyBins[16] = {0};          // 16 frequency bins (matches WLED NUM_GEQ_CHANNELS)
+    float dominantFrequency = 0.0f;         // Major peak frequency (Hz)
+    float magnitude = 0.0f;                 // FFT magnitude of dominant frequency
+    uint32_t timestamp = 0;                 // millis() when data was captured
 };
 
-} // namespace fl
+struct AudioConfig {
+    uint8_t gain = 128;              // Input gain (0-255)
+    uint8_t sensitivity = 128;       // AGC sensitivity
+    bool agcEnabled = true;          // Auto gain control
+    bool noiseGate = true;           // Noise gate
+    uint8_t attack = 50;             // Attack time (ms)
+    uint8_t decay = 200;             // Decay time (ms)
+    uint16_t sampleRate = 22050;     // Sample rate (Hz)
+    uint8_t scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
+};
 
-#endif
+class AudioReactive {
+public:
+    AudioReactive();
+    ~AudioReactive();
+    
+    // Setup
+    void begin(const AudioConfig& config = AudioConfig{});
+    void setConfig(const AudioConfig& config);
+    
+    // External audio input interface
+    void addSample(int16_t sample);
+    void addSamples(const int16_t* samples, size_t count);
+    
+    // Non-blocking update - call from loop()
+    void update(uint32_t currentTimeMs);
+    
+    // Data access
+    const AudioData& getData() const;
+    const AudioData& getSmoothedData() const;
+    
+    // Convenience accessors
+    float getVolume() const;
+    float getBass() const;    // Average of bins 0-1
+    float getMid() const;     // Average of bins 6-7 
+    float getTreble() const;  // Average of bins 14-15
+    bool isBeat() const;
+    
+    // Effect helpers
+    uint8_t volumeToScale255() const;
+    CRGB volumeToColor(const CRGBPalette16& palette) const;
+    uint8_t frequencyToScale255(uint8_t binIndex) const;
+
+private:
+    // Internal processing methods
+    void processFFT();
+    void mapFFTBinsToFrequencyChannels();
+    void updateVolumeAndPeak();
+    void detectBeat(uint32_t currentTimeMs);
+    void smoothResults();
+    void applyScaling();
+    void applyGain();
+    
+    // Helper methods
+    float mapFrequencyBin(int fromBin, int toBin);
+    float computeRMS(const fl::vector<int16_t>& samples);
+    
+    // Configuration
+    AudioConfig mConfig;
+    
+    // Sample buffer for FFT processing
+    fl::vector<int16_t> mSampleBuffer;
+    static constexpr size_t MAX_SAMPLES = 1024;
+    static constexpr size_t FFT_SIZE = 512;
+    
+    // FFT processing
+    FFT mFFT;
+    FFTBins mFFTBins;
+    fl::vector<float> mFFTInput;
+    
+    // Audio data  
+    AudioData mCurrentData;
+    AudioData mSmoothedData;
+    
+    // Processing state
+    uint32_t mLastProcessTime = 0;
+    uint32_t mLastBeatTime = 0;
+    static constexpr uint32_t PROCESS_INTERVAL = 20; // ~50Hz update rate
+    static constexpr uint32_t BEAT_COOLDOWN = 100;   // 100ms minimum between beats
+    
+    // Volume tracking for beat detection
+    float mPreviousVolume = 0.0f;
+    float mVolumeThreshold = 10.0f;
+    
+    // Pink noise compensation (from WLED)
+    static constexpr float PINK_NOISE_COMPENSATION[16] = {
+        1.70f, 1.71f, 1.73f, 1.78f, 1.68f, 1.56f, 1.55f, 1.63f,
+        1.79f, 1.62f, 1.80f, 2.06f, 2.47f, 3.35f, 6.83f, 9.55f
+    };
+    
+    // AGC state
+    float mAGCMultiplier = 1.0f;
+    float mMaxSample = 0.0f;
+    float mAverageLevel = 0.0f;
+};
+
+// Global instance
+extern AudioReactive Audio;
+
+} // namespace fl
