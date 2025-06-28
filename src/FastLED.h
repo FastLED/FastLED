@@ -388,6 +388,21 @@ public:
 	void addListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::addListener(listener); }
 	void removeListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::removeListener(listener); }
 
+	/// @name Manual Engine Events
+	/// When FASTLED_MANUAL_ENGINE_EVENTS is defined, these methods allow manual control of engine events.
+	/// When FASTLED_MANUAL_ENGINE_EVENTS is not defined, these events are triggered automatically by show().
+	/// @{
+	
+	/// Manually trigger the begin frame event
+	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
+	void onBeginFrame() { fl::EngineEvents::onBeginFrame(); }
+	
+	/// Manually trigger the end show LEDs event
+	/// @note This is called automatically by show() unless FASTLED_MANUAL_ENGINE_EVENTS is defined
+	void onEndShowLeds() { fl::EngineEvents::onEndShowLeds(); }
+	
+	/// @} Manual Engine Events
+
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds()
 	/// variations). The first is with 3 arguments, in which case the arguments are the controller, a pointer to

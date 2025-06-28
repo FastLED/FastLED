@@ -117,7 +117,9 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
+#ifndef FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
+#endif
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -161,7 +163,9 @@ void CFastLED::show(uint8_t scale) {
 	}
 	countFPS();
 	onEndFrame();
+#ifndef FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onEndShowLeds();
+#endif
 }
 
 void CFastLED::onEndFrame() {
