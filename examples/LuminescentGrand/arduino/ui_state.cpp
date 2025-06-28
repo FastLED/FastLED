@@ -1,5 +1,3 @@
-
-
 #include "../shared/defs.h"
 
 
@@ -9,6 +7,7 @@
 #include "./ui_state.h"
 #include "shared/Painter.h"
 #include "fl/dbg.h"
+#include "fl/unused.h"
 
 #include <Arduino.h>
 
@@ -59,6 +58,8 @@ void ui_init() {
 
 
 ui_state ui_update(uint32_t now_ms, uint32_t delta_ms) {
+  FL_UNUSED(delta_ms);
+  
   ui_state out;
   vis_selector.Update(now_ms);
   color_selector.Update();

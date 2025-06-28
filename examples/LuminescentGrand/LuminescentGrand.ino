@@ -1,4 +1,3 @@
-
 /// This is a work in progress showcasing a complex MIDI keyboard
 /// visualizer.
 /// To run this compiler use
@@ -75,6 +74,7 @@ KeyboardState keyboard;
 //  midi_note - Value between 21-108 which maps to the keyboard keys.
 //  velocity - Value between 0-127
 void HandleNoteOn(byte channel, byte midi_note, byte velocity) {
+  FL_UNUSED(channel);
   FASTLED_DBG("HandleNoteOn: midi_note = " << int(midi_note) << ", velocity = " << int(velocity));
   keyboard.HandleNoteOn(midi_note, velocity, color_selector.curr_val(), millis());
 }
@@ -86,6 +86,7 @@ void HandleNoteOn(byte channel, byte midi_note, byte velocity) {
 //  midi_note - Value between 21-108 which maps to the keyboard keys.
 //  velocity - Value between 0-127
 void HandleNoteOff(byte channel, byte midi_note, byte velocity) {
+  FL_UNUSED(channel);
   FASTLED_DBG("HandleNoteOn: midi_note = " << int(midi_note) << ", velocity = " << int(velocity));
   keyboard.HandleNoteOff(midi_note, velocity, millis());
 }
@@ -95,6 +96,7 @@ void HandleNoteOff(byte channel, byte midi_note, byte velocity) {
 // have this functionality. Right now the only thing it does is
 // print out that the key was pressed.
 void HandleAfterTouchPoly(byte channel, byte note, byte pressure) { 
+  FL_UNUSED(channel);
   keyboard.HandleAfterTouchPoly(note, pressure);
 }
 
@@ -102,10 +104,13 @@ void HandleAfterTouchPoly(byte channel, byte note, byte pressure) {
 /////////////////////////////////////////////////////////
 // Detects whether the foot pedal has been touched.
 void HandleControlChange(byte channel, byte d1, byte d2) {
+  FL_UNUSED(channel);
   keyboard.HandleControlChange(d1, d2);
 }
 
 void HandleAfterTouchChannel(byte channel, byte pressure) {
+  FL_UNUSED(channel);
+  FL_UNUSED(pressure);
   #if 0  // Disabled for now.
   if (0 == pressure) {
     for (int i = 0; i < kNumKeys; ++i) {
