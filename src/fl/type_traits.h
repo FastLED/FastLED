@@ -643,12 +643,12 @@ template <typename T> struct has_member_swap {
 // primary template: dispatch on has_member_swap<T>::value
 template <typename T, bool = has_member_swap<T>::value> struct swap_impl;
 
-// POD case
+// POD case - now using move semantics for better performance
 template <typename T> struct swap_impl<T, false> {
     static void apply(T &a, T &b) {
-        T tmp = a;
-        a = b;
-        b = tmp;
+        T tmp = fl::move(a);
+        a = fl::move(b);
+        b = fl::move(tmp);
     }
 };
 
@@ -665,8 +665,7 @@ template <typename T> void swap(T &a, T &b) {
 }
 
 template <typename T> void swap_by_copy(T &a, T &b) {
-    // if T is a POD, use use a simple data copy swap.
-    // if T is not a POD, use the T::Swap method.
+    // Force copy semantics (for cases where move might not be safe)
     T tmp = a;
     a = b;
     b = tmp;
