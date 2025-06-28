@@ -4,9 +4,13 @@
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
-#elif __has_include(<SD.h>)
+#define FASTLED_HAS_SDCARD 1
+#elif __has_include(<SD.h>) && __has_include(<fs.h>)
 // Include Arduino SD card implementation when SD library is available
 #include "platforms/fs_sdcard_arduino.hpp"
+#define FASTLED_HAS_SDCARD 1
+#else
+#define FASTLED_HAS_SDCARD 0
 #endif
 
 #include "fl/json.h"
@@ -183,7 +187,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 } // namespace fl
 
 namespace fl {
-#if !__has_include(<SD.h>) || !__has_include(<fs.h>)
+#if !FASTLED_HAS_SDCARD
 // Weak fallback implementation when SD library is not available
 __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
     FASTLED_UNUSED(cs_pin);
