@@ -3,6 +3,7 @@
 #include "fl/string.h"
 #include "fl/thread_local.h"
 #include "fl/warn.h"
+#include "fl/thread_local.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #if FASTLED_ENABLE_JSON
@@ -11,6 +12,12 @@
 using namespace fl;
 
 namespace fl {
+namespace {
+    fl::string& scratchBuffer() {
+        static fl::ThreadLocal<fl::string> buffer;
+        return buffer.access();
+    }
+}
 
 JsonAudioImpl::JsonAudioImpl(const fl::string &name) {
     auto updateFunc = JsonUiInternal::UpdateFunction(
@@ -151,7 +158,7 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
         // Use JSON parser to extract samples array as string, then parse manually
         auto samplesVar = obj["samples"];
         if (fl::getJsonType(samplesVar) == fl::JSON_ARRAY) {
-            fl::string samplesStr;
+            fl::string& samplesStr = scratchBuffer();
             serializeJson(samplesVar, samplesStr);
             parsePcmSamplesString(samplesStr, &buffer.samples);
         }
