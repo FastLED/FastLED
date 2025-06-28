@@ -183,7 +183,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 } // namespace fl
 
 namespace fl {
-#if !__has_include(<SD.h>)
+#if !__has_include(<SD.h>) || !__has_include(<fs.h>)
 // Weak fallback implementation when SD library is not available
 __attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
     FASTLED_UNUSED(cs_pin);
