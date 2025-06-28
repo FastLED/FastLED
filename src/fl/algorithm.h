@@ -529,7 +529,7 @@ void shuffle(Iterator first, Iterator last, fl_random& rng) {
 // Shuffle function with default random generator
 template <typename Iterator>
 void shuffle(Iterator first, Iterator last) {
-    shuffle(first, last, default_random);
+    shuffle(first, last, default_random());
 }
 
 } // namespace fl

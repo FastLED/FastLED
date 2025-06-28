@@ -964,8 +964,8 @@ TEST_CASE("fl::fl_random deterministic behavior") {
 TEST_CASE("fl::default_random global instance") {
     SUBCASE("Global instance is accessible") {
         // Should be able to use the global instance
-        uint32_t val1 = fl::default_random();
-        uint32_t val2 = fl::default_random();
+        uint32_t val1 = fl::default_random()();
+        uint32_t val2 = fl::default_random()();
         
         // Values should be in valid range
         CHECK_GE(val1, fl::fl_random::minimum());
@@ -975,14 +975,14 @@ TEST_CASE("fl::default_random global instance") {
     }
 
     SUBCASE("Global instance can be seeded") {
-        fl::default_random.set_seed(12345);
-        CHECK_EQ(fl::default_random.get_seed(), 12345);
+        fl::default_random().set_seed(12345);
+        CHECK_EQ(fl::default_random().get_seed(), 12345);
         
-        uint32_t val1 = fl::default_random();
+        uint32_t val1 = fl::default_random()();
         
         // Reset to same seed and verify same value
-        fl::default_random.set_seed(12345);
-        uint32_t val2 = fl::default_random();
+        fl::default_random().set_seed(12345);
+        uint32_t val2 = fl::default_random()();
         
         CHECK_EQ(val1, val2);
     }

@@ -159,9 +159,9 @@ public:
 ///
 /// @code
 /// // Using the global instance
-/// auto value = fl::default_random();
-/// fl::shuffle(vec.begin(), vec.end(), fl::default_random);
+/// auto value = fl::default_random()();
+/// fl::shuffle(vec.begin(), vec.end(), fl::default_random());
 /// @endcode
-extern fl_random default_random;
+fl_random& default_random();
 
 } // namespace fl 
