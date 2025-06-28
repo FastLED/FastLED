@@ -4,6 +4,7 @@
 #include "fl/math.h"
 #include "fl/vector.h"
 #include "fl/stdint.h"
+#include "fl/audio.h"
 #include "crgb.h"
 
 // Forward declaration
@@ -44,8 +45,7 @@ public:
     void setConfig(const AudioConfig& config);
     
     // External audio input interface
-    void addSample(int16_t sample);
-    void addSamples(const int16_t* samples, size_t count);
+    void addSample(const AudioSample& sample);
     
     // Non-blocking update - call from loop()
     void update(uint32_t currentTimeMs);

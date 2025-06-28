@@ -40,23 +40,24 @@ void AudioReactive::setConfig(const AudioConfig& config) {
     mConfig = config;
 }
 
-void AudioReactive::addSample(int16_t sample) {
-    mSampleBuffer.push_back(sample);
+void AudioReactive::addSample(const AudioSample& sample) {
+    if (!sample.isValid()) {
+        return; // Invalid sample, ignore
+    }
+    
+    // Get the PCM data from the AudioSample
+    const auto& pcmData = sample.pcm();
+    
+    // Add all PCM samples from the AudioSample
+    for (int16_t pcmSample : pcmData) {
+        mSampleBuffer.push_back(pcmSample);
+    }
     
     // Keep buffer from growing too large
     if (mSampleBuffer.size() > MAX_SAMPLES) {
         // Remove older samples, keep newer ones
         size_t toRemove = mSampleBuffer.size() - MAX_SAMPLES;
         mSampleBuffer.erase(mSampleBuffer.begin(), mSampleBuffer.begin() + toRemove);
-    }
-}
-
-void AudioReactive::addSamples(const int16_t* samples, size_t count) {
-    if (!samples || count == 0) return;
-    
-    // Add all samples to buffer
-    for (size_t i = 0; i < count; ++i) {
-        addSample(samples[i]);
     }
 }
 
