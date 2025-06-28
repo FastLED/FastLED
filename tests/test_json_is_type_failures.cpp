@@ -214,6 +214,63 @@ TEST_CASE("JSON is<T>() method - testing all primitive types") {
         CHECK(doc["null"].isNull());
         CHECK_FALSE(doc["test"].isNull());
     }
+    
+    SUBCASE("Testing fl::getJsonType() as alternative to is<T>()") {
+        // Test the pattern shown in the user's code
+        const char* jsonStr = R"({
+            "timestamp": 1234567890,
+            "array": [1, 2, 3],
+            "object": {"key": "value"},
+            "string": "hello",
+            "float": 3.14,
+            "bool": true,
+            "null": null
+        })";
+        
+        fl::JsonDocument doc;
+        fl::string error;
+        bool result = fl::parseJson(jsonStr, &doc, &error);
+        REQUIRE(result);
+        REQUIRE(error.empty());
+        
+        // Test getJsonType for various types
+        auto timestampVar = doc["timestamp"];
+        CHECK(fl::getJsonType(timestampVar) == fl::JSON_INTEGER);
+        CHECK(timestampVar.as<uint32_t>() == 1234567890);
+        
+        auto arrayVar = doc["array"];
+        CHECK(fl::getJsonType(arrayVar) == fl::JSON_ARRAY);
+        
+        auto objectVar = doc["object"];
+        CHECK(fl::getJsonType(objectVar) == fl::JSON_OBJECT);
+        
+        auto stringVar = doc["string"];
+        CHECK(fl::getJsonType(stringVar) == fl::JSON_STRING);
+        
+        auto floatVar = doc["float"];
+        CHECK(fl::getJsonType(floatVar) == fl::JSON_FLOAT);
+        
+        auto boolVar = doc["bool"];
+        CHECK(fl::getJsonType(boolVar) == fl::JSON_BOOLEAN);
+        
+        auto nullVar = doc["null"];
+        CHECK(fl::getJsonType(nullVar) == fl::JSON_NULL);
+        
+        // Test that getJsonType works where is<T>() might have issues
+        // For example, distinguishing between integer types
+        doc["small_int"] = 42;
+        doc["large_int"] = 2147483647;
+        doc["uint_val"] = 4294967295U;
+        
+        CHECK(fl::getJsonType(doc["small_int"]) == fl::JSON_INTEGER);
+        CHECK(fl::getJsonType(doc["large_int"]) == fl::JSON_INTEGER);
+        CHECK(fl::getJsonType(doc["uint_val"]) == fl::JSON_INTEGER);
+        
+        // All integer types return JSON_INTEGER regardless of size
+        CHECK(doc["small_int"].as<int>() == 42);
+        CHECK(doc["large_int"].as<int>() == 2147483647);
+        CHECK(doc["uint_val"].as<uint32_t>() == 4294967295U);
+    }
 }
 
 #else
