@@ -431,7 +431,7 @@ export class JsonUiManager {
           const buffers = window.audioData.audioBuffers[element.id];
           
           if (buffers && buffers.length > 0) {
-            // Send the array of objects with samples and timestamps
+            // Send the array of objects with samples and timestamps (relative to audio file start)
             // Format: [{"samples": [1,2,3...], "timestamp": 123456}, ...]
             changes[id] = buffers;
             hasChanges = true;

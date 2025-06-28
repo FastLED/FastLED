@@ -10,6 +10,16 @@
 const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
 
 /**
+ * TIMESTAMP IMPLEMENTATION:
+ * Audio sample timestamps are relative to the start of the audio file, not absolute time.
+ * Priority order:
+ * 1. audioElement.currentTime - Preferred: gives playback position in audio file (seconds → milliseconds)
+ * 2. audioContext.currentTime - Fallback: high-precision audio context time (seconds → milliseconds)  
+ * 3. performance.now() - Final fallback: high-resolution system time relative to page load
+ * This ensures consistent timing that's meaningful for audio synchronization.
+ */
+
+/**
  * Audio Manager class to handle audio processing and UI
  */
 export class AudioManager {
@@ -152,7 +162,38 @@ export class AudioManager {
    */
   storeAudioSamples(sampleBuffer, audioId) {
     const bufferCopy = new Int16Array(sampleBuffer);
-    const timestamp = Date.now(); // Capture timestamp when sample becomes valid
+    
+    // Get timestamp relative to start of audio file (preferred method)
+    let timestamp = 0;
+    
+    // Try to get the audio element for this ID to use its currentTime
+    const audioContext = window.audioData.audioContexts[audioId];
+    const audioElement = document.querySelector(`#audio-${audioId}`);
+    
+    if (audioElement && !audioElement.paused && audioElement.currentTime >= 0) {
+      // Use audio element's currentTime (seconds) converted to milliseconds
+      // This gives us time relative to the start of the audio file
+      timestamp = Math.floor(audioElement.currentTime * 1000);
+    } else if (audioContext && audioContext.currentTime >= 0) {
+      // Fallback to AudioContext.currentTime (high-resolution audio time)
+      // This is relative to when the audio context was created
+      timestamp = Math.floor(audioContext.currentTime * 1000);
+    } else {
+      // Final fallback: use performance.now() for high-resolution system time
+      // This is relative to when the page loaded (better than Date.now())
+      timestamp = Math.floor(performance.now());
+    }
+    
+    // Debug logging (sample ~1% of audio blocks to avoid console spam)
+    if (Math.random() < 0.01) {
+      const timestampSource = audioElement && !audioElement.paused && audioElement.currentTime >= 0 
+        ? 'audioElement.currentTime' 
+        : audioContext && audioContext.currentTime >= 0 
+        ? 'audioContext.currentTime' 
+        : 'performance.now()';
+      console.log(`Audio timestamp for ${audioId}: ${timestamp}ms (source: ${timestampSource})`);
+    }
+    
     window.audioData.audioBuffers[audioId].push({
       samples: Array.from(bufferCopy),
       timestamp: timestamp
