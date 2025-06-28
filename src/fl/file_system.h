@@ -2,7 +2,6 @@
 
 // Note, fs.h breaks ESPAsyncWebServer so we use file_system.h instead.
 
-#include <stddef.h>
 #include "fl/stdint.h"
 
 #include "fl/namespace.h"

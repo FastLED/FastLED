@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+
 #include "fl/stdint.h"
 // This file must not be in the fl namespace, it must be in the global
 // namespace.

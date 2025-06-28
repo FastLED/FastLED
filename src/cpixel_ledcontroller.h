@@ -3,8 +3,6 @@
 /// @file cpixel_ledcontroller.h
 /// defines the templated version of the CLEDController class
 
-#include <stddef.h>
-
 #include "FastLED.h"
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
@@ -71,4 +69,3 @@ public:
 
 
 FASTLED_NAMESPACE_END
-

@@ -1,7 +1,7 @@
 #include "istream.h"
 #include "fl/math.h"
 #include "fl/compiler_control.h"
-#include <stddef.h>
+//#include <stddef.h>
 // <cstdlib> not available on AVR platforms like Arduino UNO
 // We implement custom integer parsing functions instead
 

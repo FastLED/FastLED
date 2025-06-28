@@ -7,7 +7,6 @@
 #include "fl/compiler_control.h"
 
 #include "led_sysdefs.h"
-#include <stddef.h>
 #include "fl/unused.h"
 
 #pragma GCC diagnostic push

@@ -9,7 +9,6 @@
 // infact everything it touches. PixelIterator is concrete and doesn't have these
 // problems. See PixelController::as_iterator() for how to create a PixelIterator.
 
-#include <stddef.h>
 
 #include "lib8tion/intmap.h"
 
@@ -605,4 +604,3 @@ struct PixelController {
 
 
 FASTLED_NAMESPACE_END
-

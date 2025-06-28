@@ -1,6 +1,5 @@
 #include "io.h"
 
-#include <stddef.h>
 #include "fl/stdint.h"
 
 // Platform-specific I/O implementations

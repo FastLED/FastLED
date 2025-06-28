@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+
 #include "fl/namespace.h"
 
 // Define if initializer_list is available

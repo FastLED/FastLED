@@ -58,6 +58,7 @@ BANNED_HEADERS_COMMON = [
     "cuchar",
     "cstdint",
     "stdint.h",
+    "stddef.h",
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
 ]
