@@ -22,7 +22,6 @@ void AudioReactive::begin(const AudioConfig& config) {
     // Reset state
     mCurrentData = AudioData{};
     mSmoothedData = AudioData{};
-    mLastProcessTime = 0;
     mLastBeatTime = 0;
     mPreviousVolume = 0.0f;
     mAGCMultiplier = 1.0f;
@@ -39,31 +38,22 @@ void AudioReactive::processSample(const AudioSample& sample, uint32_t currentTim
         return; // Invalid sample, ignore
     }
     
-    // Only process if enough time has passed
-    if (currentTimeMs - mLastProcessTime >= PROCESS_INTERVAL) {
-        // Process the AudioSample directly
-        processFFT(sample);
-        updateVolumeAndPeak(sample);
-        detectBeat(currentTimeMs);
-        applyGain();
-        applyScaling();
-        smoothResults();
-        
-        mCurrentData.timestamp = currentTimeMs;
-        mLastProcessTime = currentTimeMs;
-    }
+    // Process the AudioSample immediately - timing is gated by sample availability
+    processFFT(sample);
+    updateVolumeAndPeak(sample);
+    detectBeat(currentTimeMs);
+    applyGain();
+    applyScaling();
+    smoothResults();
+    
+    mCurrentData.timestamp = currentTimeMs;
 }
 
 void AudioReactive::update(uint32_t currentTimeMs) {
-    // This method now only handles timing-based updates without new sample data
-    // The main processing happens in processSample()
-    
-    // Just apply smoothing if enough time has passed
-    if (currentTimeMs - mLastProcessTime >= PROCESS_INTERVAL) {
-        smoothResults();
-        mCurrentData.timestamp = currentTimeMs;
-        mLastProcessTime = currentTimeMs;
-    }
+    // This method handles updates without new sample data
+    // Just apply smoothing and update timestamp
+    smoothResults();
+    mCurrentData.timestamp = currentTimeMs;
 }
 
 void AudioReactive::processFFT(const AudioSample& sample) {
@@ -157,17 +147,34 @@ void AudioReactive::updateVolumeAndPeak(const AudioSample& sample) {
     
     // Update AGC tracking
     if (mConfig.agcEnabled) {
-        // Simple AGC - track maximum level
+        // AGC with attack/decay behavior
+        float agcAttackRate = mConfig.attack / 255.0f * 0.2f + 0.01f;  // 0.01 to 0.21
+        float agcDecayRate = mConfig.decay / 255.0f * 0.05f + 0.001f;  // 0.001 to 0.051
+        
+        // Track maximum level with attack/decay
         if (maxSample > mMaxSample) {
-            mMaxSample = maxSample;
+            // Rising - use attack rate (faster response)
+            mMaxSample = mMaxSample * (1.0f - agcAttackRate) + maxSample * agcAttackRate;
         } else {
-            mMaxSample *= 0.999f; // Slow decay
+            // Falling - use decay rate (slower response)
+            mMaxSample = mMaxSample * (1.0f - agcDecayRate) + maxSample * agcDecayRate;
         }
         
-        // Update AGC multiplier
+        // Update AGC multiplier with proper bounds
         if (mMaxSample > 1000.0f) {
             float targetLevel = 16384.0f; // Half of full scale
-            mAGCMultiplier = targetLevel / mMaxSample;
+            float newMultiplier = targetLevel / mMaxSample;
+            
+            // Smooth AGC multiplier changes using attack/decay
+            if (newMultiplier > mAGCMultiplier) {
+                // Increasing gain - use attack rate
+                mAGCMultiplier = mAGCMultiplier * (1.0f - agcAttackRate) + newMultiplier * agcAttackRate;
+            } else {
+                // Decreasing gain - use decay rate  
+                mAGCMultiplier = mAGCMultiplier * (1.0f - agcDecayRate) + newMultiplier * agcDecayRate;
+            }
+            
+            // Clamp multiplier to reasonable bounds
             mAGCMultiplier = (mAGCMultiplier < 0.1f) ? 0.1f : ((mAGCMultiplier > 10.0f) ? 10.0f : mAGCMultiplier);
         }
     }
@@ -192,8 +199,17 @@ void AudioReactive::detectBeat(uint32_t currentTimeMs) {
         mCurrentData.beatDetected = false;
     }
     
-    // Update previous volume for next comparison
-    mPreviousVolume = currentVolume * 0.8f + mPreviousVolume * 0.2f; // Smooth
+    // Update previous volume for next comparison using attack/decay
+    float beatAttackRate = mConfig.attack / 255.0f * 0.5f + 0.1f;   // 0.1 to 0.6
+    float beatDecayRate = mConfig.decay / 255.0f * 0.3f + 0.05f;    // 0.05 to 0.35
+    
+    if (currentVolume > mPreviousVolume) {
+        // Rising volume - use attack rate (faster tracking)
+        mPreviousVolume = mPreviousVolume * (1.0f - beatAttackRate) + currentVolume * beatAttackRate;
+    } else {
+        // Falling volume - use decay rate (slower tracking)
+        mPreviousVolume = mPreviousVolume * (1.0f - beatDecayRate) + currentVolume * beatDecayRate;
+    }
 }
 
 void AudioReactive::applyGain() {
@@ -257,19 +273,52 @@ void AudioReactive::applyScaling() {
 }
 
 void AudioReactive::smoothResults() {
-    // Simple smoothing between current and smoothed data
-    const float smoothingFactor = 0.8f;
+    // Attack/decay smoothing - different rates for rising vs falling values
+    // Convert attack/decay times to smoothing factors
+    // Shorter times = less smoothing (faster response)
+    float attackFactor = 1.0f - (mConfig.attack / 255.0f * 0.9f);  // Range: 0.1 to 1.0
+    float decayFactor = 1.0f - (mConfig.decay / 255.0f * 0.95f);   // Range: 0.05 to 1.0
     
-    mSmoothedData.volume = mSmoothedData.volume * smoothingFactor + 
-                          mCurrentData.volume * (1.0f - smoothingFactor);
-    mSmoothedData.volumeRaw = mSmoothedData.volumeRaw * smoothingFactor + 
-                             mCurrentData.volumeRaw * (1.0f - smoothingFactor);
-    mSmoothedData.peak = mSmoothedData.peak * smoothingFactor + 
-                        mCurrentData.peak * (1.0f - smoothingFactor);
+    // Apply attack/decay smoothing to volume
+    if (mCurrentData.volume > mSmoothedData.volume) {
+        // Rising - use attack time (faster response)
+        mSmoothedData.volume = mSmoothedData.volume * (1.0f - attackFactor) + 
+                              mCurrentData.volume * attackFactor;
+    } else {
+        // Falling - use decay time (slower response)
+        mSmoothedData.volume = mSmoothedData.volume * (1.0f - decayFactor) + 
+                              mCurrentData.volume * decayFactor;
+    }
     
+    // Apply attack/decay smoothing to volumeRaw
+    if (mCurrentData.volumeRaw > mSmoothedData.volumeRaw) {
+        mSmoothedData.volumeRaw = mSmoothedData.volumeRaw * (1.0f - attackFactor) + 
+                                 mCurrentData.volumeRaw * attackFactor;
+    } else {
+        mSmoothedData.volumeRaw = mSmoothedData.volumeRaw * (1.0f - decayFactor) + 
+                                 mCurrentData.volumeRaw * decayFactor;
+    }
+    
+    // Apply attack/decay smoothing to peak
+    if (mCurrentData.peak > mSmoothedData.peak) {
+        mSmoothedData.peak = mSmoothedData.peak * (1.0f - attackFactor) + 
+                            mCurrentData.peak * attackFactor;
+    } else {
+        mSmoothedData.peak = mSmoothedData.peak * (1.0f - decayFactor) + 
+                            mCurrentData.peak * decayFactor;
+    }
+    
+    // Apply attack/decay smoothing to frequency bins
     for (int i = 0; i < 16; ++i) {
-        mSmoothedData.frequencyBins[i] = mSmoothedData.frequencyBins[i] * smoothingFactor + 
-                                        mCurrentData.frequencyBins[i] * (1.0f - smoothingFactor);
+        if (mCurrentData.frequencyBins[i] > mSmoothedData.frequencyBins[i]) {
+            // Rising - use attack time
+            mSmoothedData.frequencyBins[i] = mSmoothedData.frequencyBins[i] * (1.0f - attackFactor) + 
+                                            mCurrentData.frequencyBins[i] * attackFactor;
+        } else {
+            // Falling - use decay time  
+            mSmoothedData.frequencyBins[i] = mSmoothedData.frequencyBins[i] * (1.0f - decayFactor) + 
+                                            mCurrentData.frequencyBins[i] * decayFactor;
+        }
     }
     
     // Copy non-smoothed values

@@ -29,8 +29,8 @@ struct AudioConfig {
     uint8_t sensitivity = 128;       // AGC sensitivity
     bool agcEnabled = true;          // Auto gain control
     bool noiseGate = true;           // Noise gate
-    uint8_t attack = 50;             // Attack time (ms)
-    uint8_t decay = 200;             // Decay time (ms)
+    uint8_t attack = 50;             // Attack time (ms) - how fast to respond to increases
+    uint8_t decay = 200;             // Decay time (ms) - how slow to respond to decreases
     uint16_t sampleRate = 22050;     // Sample rate (Hz)
     uint8_t scalingMode = 3;         // 0=none, 1=log, 2=linear, 3=sqrt
 };
@@ -47,7 +47,7 @@ public:
     // Process audio sample - this does all the work immediately
     void processSample(const AudioSample& sample, uint32_t currentTimeMs);
     
-    // Optional: update smoothing and timing without new sample data
+    // Optional: update smoothing without new sample data  
     void update(uint32_t currentTimeMs);
     
     // Data access
@@ -91,10 +91,8 @@ private:
     AudioData mCurrentData;
     AudioData mSmoothedData;
     
-    // Processing state
-    uint32_t mLastProcessTime = 0;
+    // Processing state  
     uint32_t mLastBeatTime = 0;
-    static constexpr uint32_t PROCESS_INTERVAL = 20; // ~50Hz update rate
     static constexpr uint32_t BEAT_COOLDOWN = 100;   // 100ms minimum between beats
     
     // Volume tracking for beat detection
