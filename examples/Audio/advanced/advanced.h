@@ -5,14 +5,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-// Check if platform has enough memory for audio processing
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-void setup() {
-    Serial.begin(115200);
-    Serial.println("This example requires a platform with more memory (ESP32, Teensy, etc.)");
-}
-void loop() {}
-#else
+
 
 #include "fl/ui.h"
 #include "fl/audio.h"
@@ -516,5 +509,3 @@ void loop() {
     delay(1);
     #endif
 }
-
-#endif  // SKETCH_HAS_LOTS_OF_MEMORY
