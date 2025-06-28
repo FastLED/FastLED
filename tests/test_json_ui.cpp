@@ -2,11 +2,14 @@
 
 #include "fl/json.h"
 #include "fl/namespace.h"
+#include "fl/map.h"
+#include "fl/hash_map.h"
 
 #if FASTLED_ENABLE_JSON
 
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui_manager.h"
+#include "platforms/shared/ui/json/ui.h"
 #include "platforms/shared/ui/json/slider.h"
 #include "platforms/shared/ui/json/checkbox.h"
 #include "platforms/shared/ui/json/dropdown.h"
@@ -285,6 +288,89 @@ TEST_CASE("Component boundary value testing") {
     
     CHECK(true); // No crashes
 }
+
+TEST_CASE("JsonUiManager executeUiUpdates") {
+    bool callbackCalled = false;
+    fl::string receivedJson;
+    
+    auto callback = [&](const char* json) {
+        callbackCalled = true;
+        receivedJson = json;
+    };
+    
+    // Set up the global UI system with our callback
+    auto updateEngineState = setJsonUiHandlers(callback);
+    
+    // Create a slider - it will auto-register with the global manager
+    JsonSliderImpl slider("test_slider", 50.0f, 0.0f, 100.0f, 1.0f);
+    
+    // The component should auto-register with the manager
+    // We'll test by sending an update with a likely ID
+    
+    // Create JSON update - we'll try IDs 0-20 since we don't know the exact ID
+    for (int testId = 0; testId <= 20; testId++) {
+        FLArduinoJson::JsonDocument updateDoc;
+        auto updateObj = updateDoc.to<FLArduinoJson::JsonObject>();
+        
+        // Convert ID to string properly
+        fl::string idStr;
+        idStr.append(testId);
+        updateObj[idStr.c_str()] = 75.0f;
+        
+        // Convert to JSON string
+        fl::string jsonStr;
+        serializeJson(updateDoc, jsonStr);
+        
+        // Send update through the engine state updater
+        updateEngineState(jsonStr.c_str());
+        
+        // Process the pending update
+        processJsonUiPendingUpdates();
+    }
+    
+    // Check that the slider value was updated (at least one of the IDs should have worked)
+    CHECK_CLOSE(slider.value(), 75.0f, 0.001f);
+    
+    // Clean up
+    setJsonUiHandlers(fl::function<void(const char*)>());
+}
+
+TEST_CASE("JsonUiManager multiple components basic") {
+    bool callbackCalled = false;
+    fl::string receivedJson;
+    
+    auto callback = [&](const char* json) {
+        callbackCalled = true;
+        receivedJson = json;
+    };
+    
+    // Set up the global UI system with our callback
+    auto updateEngineState = setJsonUiHandlers(callback);
+    
+    // Create multiple components
+    JsonSliderImpl slider1("slider1", 25.0f, 0.0f, 100.0f, 1.0f);
+    JsonSliderImpl slider2("slider2", 50.0f, 0.0f, 100.0f, 1.0f);
+    JsonCheckboxImpl checkbox("checkbox", false);
+    
+    // Test that components were created successfully
+    CHECK_CLOSE(slider1.value(), 25.0f, 0.001f);
+    CHECK_CLOSE(slider2.value(), 50.0f, 0.001f);
+    CHECK(checkbox.value() == false);
+    
+    // Test that we can update values directly
+    slider1.setValue(80.0f);
+    slider2.setValue(20.0f);
+    checkbox.setValue(true);
+    
+    // Check that all components were updated
+    CHECK_CLOSE(slider1.value(), 80.0f, 0.001f);
+    CHECK_CLOSE(slider2.value(), 20.0f, 0.001f);
+    CHECK(checkbox.value() == true);
+    
+    // Clean up
+    setJsonUiHandlers(fl::function<void(const char*)>());
+}
+
 #endif
 
 #else
