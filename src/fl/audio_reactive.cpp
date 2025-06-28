@@ -5,9 +5,6 @@
 
 namespace fl {
 
-// Global instance
-AudioReactive Audio;
-
 AudioReactive::AudioReactive() 
     : mFFTBins(16)  // Initialize with 16 frequency bins
 {

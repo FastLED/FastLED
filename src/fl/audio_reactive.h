@@ -111,7 +111,5 @@ private:
     float mAverageLevel = 0.0f;
 };
 
-// Global instance
-extern AudioReactive Audio;
 
 } // namespace fl
