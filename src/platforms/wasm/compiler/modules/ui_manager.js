@@ -426,26 +426,23 @@ export class JsonUiManager {
       } else if (element.tagName === 'SELECT') {
         currentValue = parseInt(element.value);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
-        // Handle audio input - get all accumulated sample blocks
+        // Handle audio input - get all accumulated sample blocks with timestamps
         if (window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples) {
           const buffers = window.audioData.audioBuffers[element.id];
           
           if (buffers && buffers.length > 0) {
-            // Concatenate all accumulated sample blocks into one flat array
-            const allSamples = [].concat(...buffers);
+            // Send the array of objects with samples and timestamps
+            // Format: [{"samples": [1,2,3...], "timestamp": 123456}, ...]
+            changes[id] = buffers;
+            hasChanges = true;
             
             // Log some stats about the accumulated audio data
             // if (Math.random() < 0.1) {
             //   console.log(`Audio data for ${id}:`);
             //   console.log(`  Blocks: ${buffers.length}`);
-            //   console.log(`  Total samples: ${allSamples.length}`);
-            //   console.log(`  First 5 samples: ${allSamples.slice(0, 5)}`);
-            //   console.log(`  Last 5 samples: ${allSamples.slice(-5)}`);
+            //   console.log(`  Total samples: ${buffers.reduce((sum, b) => sum + b.samples.length, 0)}`);
+            //   console.log(`  Timestamp range: ${buffers[0]?.timestamp} - ${buffers[buffers.length-1]?.timestamp}`);
             // }
-            
-            // Always include audio samples in changes when audio is active
-            changes[id] = allSamples;
-            hasChanges = true;
             
             // Clear the buffer after sending samples
             window.audioData.audioBuffers[element.id] = [];
@@ -454,9 +451,6 @@ export class JsonUiManager {
             continue; // Skip the comparison below for audio
           }
         }
-        
-        // If we reach here, either no samples are available or they've already been sent
-        // Don't add to changes object, so we don't spam with empty arrays
       } else {
         currentValue = parseFloat(element.value);
       }

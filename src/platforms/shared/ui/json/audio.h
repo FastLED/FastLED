@@ -44,7 +44,6 @@ class JsonAudioImpl {
     JsonUiInternalPtr mInternal;
     fl::vector<AudioSampleImplPtr> mAudioSampleImpls;
     fl::string mSerializeBuffer;
-    fl::vector<int16_t> mAudioDataBuffer;
 };
 
 } // namespace fl

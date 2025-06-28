@@ -152,7 +152,11 @@ export class AudioManager {
    */
   storeAudioSamples(sampleBuffer, audioId) {
     const bufferCopy = new Int16Array(sampleBuffer);
-    window.audioData.audioBuffers[audioId].push(Array.from(bufferCopy));
+    const timestamp = Date.now(); // Capture timestamp when sample becomes valid
+    window.audioData.audioBuffers[audioId].push({
+      samples: Array.from(bufferCopy),
+      timestamp: timestamp
+    });
     window.audioData.hasActiveSamples = true;
   }
   
