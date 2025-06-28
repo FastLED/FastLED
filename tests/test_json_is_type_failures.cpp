@@ -34,95 +34,84 @@ TEST_CASE("JSON is<T>() method - testing all primitive types") {
         fl::JsonDocument doc;
         fl::string error;
         bool result = fl::parseJson(jsonStr, &doc, &error);
-        CHECK(result);
-        CHECK(error.empty());
+        REQUIRE(result);
+        REQUIRE(error.empty());
         
         // Test null value
-        FL_WARN("=== Testing null value ===");
         auto null_val = doc["null_value"];
-        FL_WARN("null_val.isNull(): " << null_val.isNull());
+        CHECK(null_val.isNull());
+        // Note: nullptr_t test would fail to compile
         
         // Test boolean values
-        FL_WARN("\n=== Testing boolean values ===");
         auto bool_true = doc["bool_true"];
         auto bool_false = doc["bool_false"];
-        FL_WARN("bool_true.is<bool>(): " << bool_true.is<bool>());
-        FL_WARN("bool_false.is<bool>(): " << bool_false.is<bool>());
+        CHECK(bool_true.is<bool>());
+        CHECK(bool_false.is<bool>());
+        CHECK(bool_true.as<bool>() == true);
+        CHECK(bool_false.as<bool>() == false);
         
         // Test integer types
-        FL_WARN("\n=== Testing integer types ===");
         auto int_val = doc["int_positive"];
-        FL_WARN("int_val value: " << int_val.as<int>());
-        FL_WARN("int_val.is<int>(): " << int_val.is<int>());
-        FL_WARN("int_val.is<short>(): " << int_val.is<short>());
-        FL_WARN("int_val.is<long>(): " << int_val.is<long>());
-        FL_WARN("int_val.is<long long>(): " << int_val.is<long long>());
-        FL_WARN("int_val.is<signed char>(): " << int_val.is<signed char>());
-        FL_WARN("int_val.is<char>(): NOT SUPPORTED - ArduinoJson doesn't support char type");
+        CHECK(int_val.as<int>() == 42);
+        CHECK(int_val.is<int>());
+        CHECK(int_val.is<short>());
+        CHECK(int_val.is<long>());
+        CHECK(int_val.is<long long>());
+        CHECK(int_val.is<signed char>());
+        // Note: char type is not supported by ArduinoJson
         
         // Test unsigned integer types
-        FL_WARN("\n=== Testing unsigned integer types ===");
-        FL_WARN("int_val.is<unsigned int>(): " << int_val.is<unsigned int>());
-        FL_WARN("int_val.is<unsigned short>(): " << int_val.is<unsigned short>());
-        FL_WARN("int_val.is<unsigned long>(): " << int_val.is<unsigned long>());
-        FL_WARN("int_val.is<unsigned long long>(): " << int_val.is<unsigned long long>());
-        FL_WARN("int_val.is<unsigned char>(): " << int_val.is<unsigned char>());
+        CHECK(int_val.is<unsigned int>());
+        CHECK(int_val.is<unsigned short>());
+        CHECK(int_val.is<unsigned long>());
+        CHECK(int_val.is<unsigned long long>());
+        CHECK(int_val.is<unsigned char>());
         
         // Test with actual unsigned value
         auto uint_val = doc["uint_value"];
-        FL_WARN("\nuint_val value: " << uint_val.as<unsigned int>());
-        FL_WARN("uint_val.is<unsigned int>(): " << uint_val.is<unsigned int>());
-        FL_WARN("uint_val.is<unsigned long>(): " << uint_val.is<unsigned long>());
+        CHECK(uint_val.is<unsigned int>());
+        CHECK(uint_val.is<unsigned long>());
         
         // Test floating point types
-        FL_WARN("\n=== Testing floating point types ===");
         auto float_val = doc["float_value"];
         auto double_val = doc["double_value"];
-        FL_WARN("float_val.is<float>(): " << float_val.is<float>());
-        FL_WARN("float_val.is<double>(): " << float_val.is<double>());
-        FL_WARN("double_val.is<float>(): " << double_val.is<float>());
-        FL_WARN("double_val.is<double>(): " << double_val.is<double>());
+        CHECK(float_val.is<float>());
+        CHECK(float_val.is<double>());
+        CHECK(double_val.is<float>());
+        CHECK(double_val.is<double>());
         
         // Test string types
-        FL_WARN("\n=== Testing string types ===");
         auto string_val = doc["string_value"];
-        FL_WARN("string_val.is<const char*>(): " << string_val.is<const char*>());
-        FL_WARN("string_val.is<char*>(): NOT SUPPORTED - ArduinoJson requires const char*");
-        FL_WARN("string_val.is<FLArduinoJson::JsonString>(): " << string_val.is<FLArduinoJson::JsonString>());
-        
-        // Test with fl::string - this will fail to compile
-        FL_WARN("string_val.is<fl::string>(): NOT SUPPORTED - custom string types not supported");
+        CHECK(string_val.is<const char*>());
+        // Note: char* is not supported by ArduinoJson, must use const char*
+        CHECK(string_val.is<FLArduinoJson::JsonString>());
         
         // Test array types
-        FL_WARN("\n=== Testing array types ===");
         auto array_val = doc["array_value"];
-        FL_WARN("array_val.is<FLArduinoJson::JsonArray>(): " << array_val.is<FLArduinoJson::JsonArray>());
-        FL_WARN("array_val.is<FLArduinoJson::JsonArrayConst>(): " << array_val.is<FLArduinoJson::JsonArrayConst>());
+        CHECK(array_val.is<FLArduinoJson::JsonArray>());
+        CHECK(array_val.is<FLArduinoJson::JsonArrayConst>());
         
         // Test object types
-        FL_WARN("\n=== Testing object types ===");
         auto object_val = doc["object_value"];
-        FL_WARN("object_val.is<FLArduinoJson::JsonObject>(): " << object_val.is<FLArduinoJson::JsonObject>());
-        FL_WARN("object_val.is<FLArduinoJson::JsonObjectConst>(): " << object_val.is<FLArduinoJson::JsonObjectConst>());
+        CHECK(object_val.is<FLArduinoJson::JsonObject>());
+        CHECK(object_val.is<FLArduinoJson::JsonObjectConst>());
         
         // Test edge cases
-        FL_WARN("\n=== Testing edge cases ===");
         auto large_int = doc["large_int"];
         auto small_int = doc["small_int"];
-        FL_WARN("large_int.is<int>(): " << large_int.is<int>());
-        FL_WARN("large_int.is<long>(): " << large_int.is<long>());
-        FL_WARN("small_int.is<int>(): " << small_int.is<int>());
-        FL_WARN("small_int.is<long>(): " << small_int.is<long>());
+        CHECK(large_int.is<int>());
+        CHECK(large_int.is<long>());
+        CHECK(small_int.is<int>());
+        CHECK(small_int.is<long>());
         
-        // Test type mixing
-        FL_WARN("\n=== Testing type mixing (should be false) ===");
-        FL_WARN("int_val.is<bool>(): " << int_val.is<bool>());
-        FL_WARN("int_val.is<const char*>(): " << int_val.is<const char*>());
-        FL_WARN("int_val.is<FLArduinoJson::JsonArray>(): " << int_val.is<FLArduinoJson::JsonArray>());
-        FL_WARN("string_val.is<int>(): " << string_val.is<int>());
-        FL_WARN("string_val.is<bool>(): " << string_val.is<bool>());
-        FL_WARN("bool_true.is<int>(): " << bool_true.is<int>());
-        FL_WARN("array_val.is<FLArduinoJson::JsonObject>(): " << array_val.is<FLArduinoJson::JsonObject>());
+        // Test type mixing (should be false)
+        CHECK_FALSE(int_val.is<bool>());
+        CHECK_FALSE(int_val.is<const char*>());
+        CHECK_FALSE(int_val.is<FLArduinoJson::JsonArray>());
+        CHECK_FALSE(string_val.is<int>());
+        CHECK_FALSE(string_val.is<bool>());
+        CHECK_FALSE(bool_true.is<int>());
+        CHECK_FALSE(array_val.is<FLArduinoJson::JsonObject>());
     }
     
     SUBCASE("Testing with directly created values") {
@@ -136,16 +125,14 @@ TEST_CASE("JSON is<T>() method - testing all primitive types") {
         doc["direct_double"] = 3.14159;
         doc["direct_bool"] = true;
         doc["direct_string"] = "test string";
-        doc["direct_cstring"] = "c string";
         
-        FL_WARN("\n=== Testing directly created values ===");
-        FL_WARN("direct_int.is<int>(): " << doc["direct_int"].is<int>());
-        FL_WARN("direct_uint.is<unsigned int>(): " << doc["direct_uint"].is<unsigned int>());
-        FL_WARN("direct_long.is<long>(): " << doc["direct_long"].is<long>());
-        FL_WARN("direct_float.is<float>(): " << doc["direct_float"].is<float>());
-        FL_WARN("direct_double.is<double>(): " << doc["direct_double"].is<double>());
-        FL_WARN("direct_bool.is<bool>(): " << doc["direct_bool"].is<bool>());
-        FL_WARN("direct_string.is<const char*>(): " << doc["direct_string"].is<const char*>());
+        CHECK(doc["direct_int"].is<int>());
+        CHECK(doc["direct_uint"].is<unsigned int>());
+        CHECK(doc["direct_long"].is<long>());
+        CHECK(doc["direct_float"].is<float>());
+        CHECK(doc["direct_double"].is<double>());
+        CHECK(doc["direct_bool"].is<bool>());
+        CHECK(doc["direct_string"].is<const char*>());
     }
     
     SUBCASE("Testing problematic types") {
@@ -162,28 +149,27 @@ TEST_CASE("JSON is<T>() method - testing all primitive types") {
         doc["uint32"] = uint32_t(4294967295U);
         doc["uint64"] = uint64_t(18446744073709551615ULL);
         
-        FL_WARN("\n=== Testing sized integer types ===");
-        FL_WARN("int8.is<int8_t>(): " << doc["int8"].is<int8_t>());
-        FL_WARN("int16.is<int16_t>(): " << doc["int16"].is<int16_t>());
-        FL_WARN("int32.is<int32_t>(): " << doc["int32"].is<int32_t>());
-        FL_WARN("int64.is<int64_t>(): " << doc["int64"].is<int64_t>());
+        // Test sized integer types
+        CHECK(doc["int8"].is<int8_t>());
+        CHECK(doc["int16"].is<int16_t>());
+        CHECK(doc["int32"].is<int32_t>());
+        CHECK(doc["int64"].is<int64_t>());
         
-        FL_WARN("uint8.is<uint8_t>(): " << doc["uint8"].is<uint8_t>());
-        FL_WARN("uint16.is<uint16_t>(): " << doc["uint16"].is<uint16_t>());
-        FL_WARN("uint32.is<uint32_t>(): " << doc["uint32"].is<uint32_t>());
-        FL_WARN("uint64.is<uint64_t>(): " << doc["uint64"].is<uint64_t>());
+        CHECK(doc["uint8"].is<uint8_t>());
+        CHECK(doc["uint16"].is<uint16_t>());
+        CHECK(doc["uint32"].is<uint32_t>());
+        CHECK(doc["uint64"].is<uint64_t>());
         
         // Also test if they match the standard types
-        FL_WARN("\n=== Testing sized types against standard types ===");
-        FL_WARN("int8.is<signed char>(): " << doc["int8"].is<signed char>());
-        FL_WARN("int16.is<short>(): " << doc["int16"].is<short>());
-        FL_WARN("int32.is<int>(): " << doc["int32"].is<int>());
-        FL_WARN("int64.is<long long>(): " << doc["int64"].is<long long>());
+        CHECK(doc["int8"].is<signed char>());
+        CHECK(doc["int16"].is<short>());
+        CHECK(doc["int32"].is<int>());
+        CHECK(doc["int64"].is<long long>());
         
-        FL_WARN("uint8.is<unsigned char>(): " << doc["uint8"].is<unsigned char>());
-        FL_WARN("uint16.is<unsigned short>(): " << doc["uint16"].is<unsigned short>());
-        FL_WARN("uint32.is<unsigned int>(): " << doc["uint32"].is<unsigned int>());
-        FL_WARN("uint64.is<unsigned long long>(): " << doc["uint64"].is<unsigned long long>());
+        CHECK(doc["uint8"].is<unsigned char>());
+        CHECK(doc["uint16"].is<unsigned short>());
+        CHECK(doc["uint32"].is<unsigned int>());
+        CHECK(doc["uint64"].is<unsigned long long>());
     }
     
     SUBCASE("Testing enum types") {
@@ -193,30 +179,40 @@ TEST_CASE("JSON is<T>() method - testing all primitive types") {
         doc["enum_val"] = VALUE_A;
         doc["enum_class_val"] = 1;  // Store as int
         
-        FL_WARN("\n=== Testing enum types ===");
-        FL_WARN("enum_val.is<TestEnum>(): " << doc["enum_val"].is<TestEnum>());
-        FL_WARN("enum_val.is<int>(): " << doc["enum_val"].is<int>());
-        FL_WARN("enum_class_val stored as int: " << doc["enum_class_val"].as<int>());
-        FL_WARN("enum types: NOT SUPPORTED - enums must be converted to/from int");
+        // Enums are treated as integers internally
+        CHECK(doc["enum_val"].is<TestEnum>());
+        CHECK(doc["enum_val"].is<int>());
+        CHECK(doc["enum_class_val"].as<int>() == 1);
     }
     
-    SUBCASE("Summary of findings") {
-        FL_WARN("\n=== SUMMARY OF FINDINGS ===");
-        FL_WARN("The following types are explicitly supported by ArduinoJson's is<T>():");
-        FL_WARN("- Basic types: bool");
-        FL_WARN("- Signed integers: int, long, long long, signed char");
-        FL_WARN("- Unsigned integers: unsigned int, unsigned long, unsigned long long, unsigned char");
-        FL_WARN("- Fixed-size integers: int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t");
-        FL_WARN("- Floating point: float, double");
-        FL_WARN("- Strings: const char*, JsonString");
-        FL_WARN("- Containers: JsonArray, JsonArrayConst, JsonObject, JsonObjectConst");
-        FL_WARN("\nTypes that are NOT supported by is<T>():");
-        FL_WARN("- char (must use signed char or unsigned char)");
-        FL_WARN("- char* (must use const char*)");
-        FL_WARN("- Custom string types: fl::string, std::string");
-        FL_WARN("- Enum types (must convert to/from integers)");
-        FL_WARN("- User-defined types");
-        FL_WARN("- nullptr_t (use isNull() method instead)");
+    SUBCASE("Testing specific failure cases") {
+        // This subcase documents types that would fail to compile if used with is<T>()
+        // We can't actually test these because they cause compilation errors
+        
+        // Types that fail to compile with is<T>():
+        // - char (must use signed char or unsigned char)
+        // - char* (must use const char*)
+        // - fl::string (custom string types not supported)
+        // - std::string (custom string types not supported)
+        // - nullptr_t (use isNull() method instead)
+        // - User-defined types
+        
+        // Instead, let's verify the alternatives work
+        fl::JsonDocument doc;
+        doc["test"] = "hello";
+        
+        // Verify const char* works instead of char*
+        CHECK(doc["test"].is<const char*>());
+        
+        // Verify signed/unsigned char work instead of char
+        doc["byte"] = 65;
+        CHECK(doc["byte"].is<signed char>());
+        CHECK(doc["byte"].is<unsigned char>());
+        
+        // Verify isNull() works for null checking
+        doc["null"] = nullptr;
+        CHECK(doc["null"].isNull());
+        CHECK_FALSE(doc["test"].isNull());
     }
 }
 
