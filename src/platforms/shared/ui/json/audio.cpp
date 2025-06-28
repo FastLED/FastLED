@@ -75,123 +75,91 @@ struct AudioBuffer {
     uint32_t timestamp;
 };
 
-static void parseJsonStringToAudioBuffers(const fl::string &jsonStr,
-                                         fl::vector<AudioBuffer> *audioBuffers) {
-    audioBuffers->clear();
+// Fast manual parsing of PCM data from a samples array string
+// Input: samples string like "[1,2,3,-4,5]"
+// Output: fills the samples vector
+static void parsePcmSamplesString(const fl::string &samplesStr, fl::vector<int16_t> *samples) {
+    samples->clear();
     
-    // Parse the JSON string manually to extract audio buffer objects
-    // Expected format: [{"samples": [1,2,3...], "timestamp": 123456}, ...]
+    size_t i = 0, n = samplesStr.size();
     
-    size_t i = 0, n = jsonStr.size();
-    // find the opening '['
-    while (i < n && jsonStr[i] != '[')
+    // Find opening '['
+    while (i < n && samplesStr[i] != '[')
         ++i;
-    if (i == n)
-        return; // no array found
-    ++i;        // skip '['
-
-    while (i < n) {
-        // skip whitespace
-        while (i < n && isspace(jsonStr[i]))
+    if (i == n) return; // no array found
+    ++i; // skip '['
+    
+    while (i < n && samplesStr[i] != ']') {
+        // Skip whitespace
+        while (i < n && isspace(samplesStr[i]))
             ++i;
-        // check for closing ']'
-        if (i < n && jsonStr[i] == ']')
-            break;
+        if (i >= n || samplesStr[i] == ']') break;
         
-        // look for object start '{'
-        if (i < n && jsonStr[i] == '{') {
-            AudioBuffer buffer;
-            ++i; // skip '{'
-            
-            // Parse object contents - look for "samples" and "timestamp"
-            while (i < n && jsonStr[i] != '}') {
-                // skip whitespace
-                while (i < n && isspace(jsonStr[i]))
-                    ++i;
-                
-                // look for "samples" or "timestamp"
-                if (i + 8 < n && 
-                    jsonStr[i] == '"' && jsonStr[i+1] == 's' && jsonStr[i+2] == 'a' && 
-                    jsonStr[i+3] == 'm' && jsonStr[i+4] == 'p' && jsonStr[i+5] == 'l' && 
-                    jsonStr[i+6] == 'e' && jsonStr[i+7] == 's' && jsonStr[i+8] == '"') {
-                    i += 9;
-                    // skip whitespace and ':'
-                    while (i < n && (isspace(jsonStr[i]) || jsonStr[i] == ':'))
-                        ++i;
-                    // parse array of samples manually for performance
-                    if (i < n && jsonStr[i] == '[') {
-                        ++i; // skip '['
-                        while (i < n && jsonStr[i] != ']') {
-                            // skip whitespace
-                            while (i < n && isspace(jsonStr[i]))
-                                ++i;
-                            if (i < n && jsonStr[i] == ']') break;
-                            
-                            // parse number
-                            bool negative = false;
-                            if (jsonStr[i] == '-') {
-                                negative = true;
-                                ++i;
-                            } else if (jsonStr[i] == '+') {
-                                ++i;
-                            }
-                            
-                            int value = 0;
-                            bool hasDigits = false;
-                            while (i < n && isdigit(static_cast<unsigned char>(jsonStr[i]))) {
-                                hasDigits = true;
-                                value = value * 10 + (jsonStr[i] - '0');
-                                ++i;
-                            }
-                            if (hasDigits) {
-                                if (negative) value = -value;
-                                buffer.samples.push_back(static_cast<int16_t>(value));
-                            }
-                            
-                            // skip whitespace and comma
-                            while (i < n && (isspace(jsonStr[i]) || jsonStr[i] == ','))
-                                ++i;
-                        }
-                        if (i < n && jsonStr[i] == ']') ++i; // skip ']'
-                    }
-                } else if (i + 10 < n && 
-                    jsonStr[i] == '"' && jsonStr[i+1] == 't' && jsonStr[i+2] == 'i' && 
-                    jsonStr[i+3] == 'm' && jsonStr[i+4] == 'e' && jsonStr[i+5] == 's' && 
-                    jsonStr[i+6] == 't' && jsonStr[i+7] == 'a' && jsonStr[i+8] == 'm' && 
-                    jsonStr[i+9] == 'p' && jsonStr[i+10] == '"') {
-                    i += 11;
-                    // skip whitespace and ':'
-                    while (i < n && (isspace(jsonStr[i]) || jsonStr[i] == ':'))
-                        ++i;
-                    // parse timestamp number
-                    uint32_t timestamp = 0;
-                    while (i < n && isdigit(static_cast<unsigned char>(jsonStr[i]))) {
-                        timestamp = timestamp * 10 + (jsonStr[i] - '0');
-                        ++i;
-                    }
-                    buffer.timestamp = timestamp;
-                } else {
-                    // skip unknown property
-                    ++i;
-                }
-                
-                // skip whitespace and comma
-                while (i < n && (isspace(jsonStr[i]) || jsonStr[i] == ','))
-                    ++i;
-            }
-            if (i < n && jsonStr[i] == '}') ++i; // skip '}'
-            
-            // Add buffer if it has samples
-            if (!buffer.samples.empty()) {
-                audioBuffers->push_back(fl::move(buffer));
-            }
-        } else {
-            ++i; // skip unknown character
+        // Parse number
+        bool negative = false;
+        if (samplesStr[i] == '-') {
+            negative = true;
+            ++i;
+        } else if (samplesStr[i] == '+') {
+            ++i;
         }
         
-        // skip whitespace and comma
-        while (i < n && (isspace(jsonStr[i]) || jsonStr[i] == ','))
+        int value = 0;
+        bool hasDigits = false;
+        while (i < n && isdigit(static_cast<unsigned char>(samplesStr[i]))) {
+            hasDigits = true;
+            value = value * 10 + (samplesStr[i] - '0');
             ++i;
+        }
+        
+        if (hasDigits) {
+            if (negative) value = -value;
+            samples->push_back(static_cast<int16_t>(value));
+        }
+        
+        // Skip whitespace and comma
+        while (i < n && (isspace(samplesStr[i]) || samplesStr[i] == ','))
+            ++i;
+    }
+}
+
+static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonValue,
+                                    fl::vector<AudioBuffer> *audioBuffers) {
+    audioBuffers->clear();
+    
+    // Use JSON parser to extract array of audio buffer objects
+    if (!jsonValue.is<FLArduinoJson::JsonArrayConst>()) {
+        return;
+    }
+    
+    FLArduinoJson::JsonArrayConst array = jsonValue.as<FLArduinoJson::JsonArrayConst>();
+    
+    for (FLArduinoJson::JsonVariantConst item : array) {
+        if (!item.is<FLArduinoJson::JsonObjectConst>()) {
+            continue;
+        }
+        
+        FLArduinoJson::JsonObjectConst obj = item.as<FLArduinoJson::JsonObjectConst>();
+        AudioBuffer buffer;
+        
+        // Use JSON parser to extract timestamp using proper type checking
+        auto timestampVar = obj["timestamp"];
+        if (fl::getJsonType(timestampVar) == fl::JSON_INTEGER) {
+            buffer.timestamp = timestampVar.as<uint32_t>();
+        }
+        
+        // Use JSON parser to extract samples array as string, then parse manually
+        auto samplesVar = obj["samples"];
+        if (fl::getJsonType(samplesVar) == fl::JSON_ARRAY) {
+            fl::string samplesStr;
+            serializeJson(samplesVar, samplesStr);
+            parsePcmSamplesString(samplesStr, &buffer.samples);
+        }
+        
+        // Add buffer if it has samples
+        if (!buffer.samples.empty()) {
+            audioBuffers->push_back(fl::move(buffer));
+        }
     }
 }
 
@@ -201,9 +169,9 @@ void JsonAudioImpl::updateInternal(
     mSerializeBuffer.clear();
     serializeJson(value, mSerializeBuffer);
     
-    // Parse audio buffers with timestamps
+    // Parse audio buffers with timestamps using hybrid JSON/manual parsing
     fl::vector<AudioBuffer> audioBuffers;
-    parseJsonStringToAudioBuffers(mSerializeBuffer, &audioBuffers);
+    parseJsonToAudioBuffers(value, &audioBuffers);
     
     // Convert each audio buffer to AudioSample objects
     for (const auto& buffer : audioBuffers) {
