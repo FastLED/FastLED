@@ -159,6 +159,7 @@ static void parseJsonToAudioBuffers(const FLArduinoJson::JsonVariantConst &jsonV
         auto samplesVar = obj["samples"];
         if (fl::getJsonType(samplesVar) == fl::JSON_ARRAY) {
             fl::string& samplesStr = scratchBuffer();
+            samplesStr.clear();
             serializeJson(samplesVar, samplesStr);
             parsePcmSamplesString(samplesStr, &buffer.samples);
         }
