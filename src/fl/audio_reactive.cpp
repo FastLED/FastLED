@@ -11,19 +11,13 @@ AudioReactive Audio;
 AudioReactive::AudioReactive() 
     : mFFTBins(16)  // Initialize with 16 frequency bins
 {
-    mSampleBuffer.reserve(MAX_SAMPLES);
-    mFFTInput.reserve(FFT_SIZE);
+    // No internal buffers needed
 }
 
 AudioReactive::~AudioReactive() = default;
 
 void AudioReactive::begin(const AudioConfig& config) {
     setConfig(config);
-    
-    // Initialize buffers
-    mSampleBuffer.clear();
-    mFFTInput.clear();
-    mFFTInput.resize(FFT_SIZE, 0.0f);
     
     // Reset state
     mCurrentData = AudioData{};
@@ -40,68 +34,45 @@ void AudioReactive::setConfig(const AudioConfig& config) {
     mConfig = config;
 }
 
-void AudioReactive::addSample(const AudioSample& sample) {
+void AudioReactive::processSample(AudioSample& sample, uint32_t currentTimeMs) {
     if (!sample.isValid()) {
         return; // Invalid sample, ignore
     }
     
-    // Get the PCM data from the AudioSample
-    const auto& pcmData = sample.pcm();
-    
-    // Add all PCM samples from the AudioSample
-    for (int16_t pcmSample : pcmData) {
-        mSampleBuffer.push_back(pcmSample);
-    }
-    
-    // Keep buffer from growing too large
-    if (mSampleBuffer.size() > MAX_SAMPLES) {
-        // Remove older samples, keep newer ones
-        size_t toRemove = mSampleBuffer.size() - MAX_SAMPLES;
-        mSampleBuffer.erase(mSampleBuffer.begin(), mSampleBuffer.begin() + toRemove);
+    // Only process if enough time has passed
+    if (currentTimeMs - mLastProcessTime >= PROCESS_INTERVAL) {
+        // Process the AudioSample directly
+        processFFT(sample);
+        updateVolumeAndPeak(sample);
+        detectBeat(currentTimeMs);
+        applyGain();
+        applyScaling();
+        smoothResults();
+        
+        mCurrentData.timestamp = currentTimeMs;
+        mLastProcessTime = currentTimeMs;
     }
 }
 
 void AudioReactive::update(uint32_t currentTimeMs) {
-    // Only process FFT periodically (~50Hz update rate)
+    // This method now only handles timing-based updates without new sample data
+    // The main processing happens in processSample()
+    
+    // Just apply smoothing if enough time has passed
     if (currentTimeMs - mLastProcessTime >= PROCESS_INTERVAL) {
-        if (mSampleBuffer.size() >= FFT_SIZE) {
-            processFFT();
-            updateVolumeAndPeak();
-            detectBeat(currentTimeMs);
-            applyGain();
-            applyScaling();
-            smoothResults();
-            
-            mCurrentData.timestamp = currentTimeMs;
-            mLastProcessTime = currentTimeMs;
-        }
+        smoothResults();
+        mCurrentData.timestamp = currentTimeMs;
+        mLastProcessTime = currentTimeMs;
     }
 }
 
-void AudioReactive::processFFT() {
-    if (mSampleBuffer.size() < FFT_SIZE) return;
+void AudioReactive::processFFT(AudioSample& sample) {
+    // Get PCM data from AudioSample
+    const auto& pcmData = sample.pcm();
+    if (pcmData.empty()) return;
     
-    // Copy latest samples to FFT input buffer
-    size_t startIdx = mSampleBuffer.size() - FFT_SIZE;
-    for (size_t i = 0; i < FFT_SIZE; ++i) {
-        mFFTInput[i] = static_cast<float>(mSampleBuffer[startIdx + i]);
-    }
-    
-    // Run FFT using FastLED's FFT implementation
-    FFT_Args args;
-    args.samples = FFT_SIZE;
-    args.bands = 16;  // 16 frequency bins
-    args.fmin = 43.0f;     // Minimum frequency (matches WLED)
-    args.fmax = 9259.0f;   // Maximum frequency (matches WLED)
-    args.sample_rate = static_cast<float>(mConfig.sampleRate);
-    
-    // Convert int16 samples to slice for FFT
-    fl::Slice<const int16_t> sampleSlice(
-        mSampleBuffer.data() + startIdx, 
-        FFT_SIZE
-    );
-    
-    mFFT.run(sampleSlice, &mFFTBins, args);
+    // Use AudioSample's built-in FFT capability
+    sample.fft(&mFFTBins);
     
     // Map FFT bins to frequency channels using WLED-compatible mapping
     mapFFTBinsToFrequencyChannels();
@@ -157,30 +128,25 @@ void AudioReactive::mapFFTBinsToFrequencyChannels() {
     mCurrentData.magnitude = maxMagnitude;
 }
 
-void AudioReactive::updateVolumeAndPeak() {
-    if (mSampleBuffer.empty()) {
+void AudioReactive::updateVolumeAndPeak(const AudioSample& sample) {
+    // Get PCM data from AudioSample
+    const auto& pcmData = sample.pcm();
+    if (pcmData.empty()) {
         mCurrentData.volume = 0.0f;
         mCurrentData.volumeRaw = 0.0f;
         mCurrentData.peak = 0.0f;
         return;
     }
     
-    // Calculate RMS volume from recent samples
-    size_t numSamples = (mSampleBuffer.size() < 512) ? mSampleBuffer.size() : 512;
-    size_t startIdx = mSampleBuffer.size() - numSamples;
+    // Use AudioSample's built-in RMS calculation
+    float rms = sample.rms();
     
-    float sumSquares = 0.0f;
+    // Calculate peak from PCM data
     float maxSample = 0.0f;
-    
-    for (size_t i = startIdx; i < mSampleBuffer.size(); ++i) {
-        float sample = static_cast<float>(mSampleBuffer[i]);
-        sumSquares += sample * sample;
-        float absSample = (sample < 0) ? -sample : sample;
+    for (int16_t pcmSample : pcmData) {
+        float absSample = (pcmSample < 0) ? -pcmSample : pcmSample;
         maxSample = (maxSample > absSample) ? maxSample : absSample;
     }
-    
-    // RMS calculation
-    float rms = sqrtf(sumSquares / numSamples);
     
     // Scale to 0-255 range (approximately)
     mCurrentData.volumeRaw = rms / 128.0f;  // Rough scaling

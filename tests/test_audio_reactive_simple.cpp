@@ -36,10 +36,9 @@ TEST_CASE("AudioReactive basic functionality") {
     AudioSampleImplPtr impl = AudioSampleImplPtr::New();
     impl->assign(samples.begin(), samples.end());
     AudioSample audioSample(impl);
-    audio.addSample(audioSample);
     
-    // Process the audio (use a fake timestamp)
-    audio.update(1000); // 1 second
+    // Process the audio sample directly (use a fake timestamp)
+    audio.processSample(audioSample, 1000); // 1 second
     
     // Check that we detected some audio
     const AudioData& processedData = audio.getData();

@@ -44,10 +44,10 @@ public:
     void begin(const AudioConfig& config = AudioConfig{});
     void setConfig(const AudioConfig& config);
     
-    // External audio input interface
-    void addSample(const AudioSample& sample);
+    // Process audio sample - this does all the work immediately
+    void processSample(AudioSample& sample, uint32_t currentTimeMs);
     
-    // Non-blocking update - call from loop()
+    // Optional: update smoothing and timing without new sample data
     void update(uint32_t currentTimeMs);
     
     // Data access
@@ -68,9 +68,9 @@ public:
 
 private:
     // Internal processing methods
-    void processFFT();
+    void processFFT(AudioSample& sample);
     void mapFFTBinsToFrequencyChannels();
-    void updateVolumeAndPeak();
+    void updateVolumeAndPeak(const AudioSample& sample);
     void detectBeat(uint32_t currentTimeMs);
     void smoothResults();
     void applyScaling();
@@ -83,15 +83,9 @@ private:
     // Configuration
     AudioConfig mConfig;
     
-    // Sample buffer for FFT processing
-    fl::vector<int16_t> mSampleBuffer;
-    static constexpr size_t MAX_SAMPLES = 1024;
-    static constexpr size_t FFT_SIZE = 512;
-    
     // FFT processing
     FFT mFFT;
     FFTBins mFFTBins;
-    fl::vector<float> mFFTInput;
     
     // Audio data  
     AudioData mCurrentData;
