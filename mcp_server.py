@@ -468,38 +468,37 @@ async def run_tests(arguments: Dict[str, Any], project_root: Path) -> CallToolRe
     clean = arguments.get("clean", False)
     verbose = arguments.get("verbose", False)
     
-    cmd = ["uv", "run", "test.py"]
-    
-    if test_type == "cpp":
-        cmd.append("--cpp")
-    
-    if specific_test and test_type == "specific":
-        cmd.extend(["--cpp", specific_test])
-    
-    if use_clang:
-        cmd.append("--clang")
-    
-    if clean:
-        cmd.append("--clean")
-        
-    if verbose:
-        cmd.append("--verbose")
-    
-    # For individual TEST_CASE execution, we need to use a different approach
+    # Use bash test format as per user directive
     if test_case and specific_test:
-        # Run the specific test executable with doctest filtering
-        test_executable = f"tests/.build/bin/test_{specific_test}"
-        cmd = [test_executable, f"--test-case={test_case}"]
+        # For individual TEST_CASE, we still need to use bash test with the test name
+        # The bash test script handles the details
+        cmd = ["bash", "test", specific_test]
+        context = f"Running test: bash test {specific_test}\n"
+        if test_case:
+            context += f"Note: To run specific TEST_CASE '{test_case}', the test framework will need to support filtering\n"
+    elif specific_test and test_type == "specific":
+        # Use bash test format for specific tests
+        cmd = ["bash", "test", specific_test]
+        context = f"Running specific test: bash test {specific_test}\n"
+    else:
+        # For all tests or cpp tests, use the original format
+        cmd = ["uv", "run", "test.py"]
+        
+        if test_type == "cpp":
+            cmd.append("--cpp")
+        
+        if use_clang:
+            cmd.append("--clang")
+        
+        if clean:
+            cmd.append("--clean")
+            
         if verbose:
             cmd.append("--verbose")
+            
+        context = f"Command executed: {' '.join(cmd)}\n"
     
     result = await run_command(cmd, project_root)
-    
-    # Add helpful context about what was run
-    context = f"Command executed: {' '.join(cmd)}\n"
-    if test_case:
-        context += f"Running specific TEST_CASE: {test_case} from test_{specific_test}\n"
-    context += "\n"
     
     return CallToolResult(
         content=[TextContent(type="text", text=context + result)]
@@ -558,13 +557,14 @@ async def list_test_cases(arguments: Dict[str, Any], project_root: Path) -> Call
     
     # Add usage instructions
     result_text += "Usage Examples:\n"
-    result_text += "• Run specific test file: uv run test.py --cpp algorithm\n"
+    result_text += "• Run specific test file: bash test algorithm\n"
     result_text += "• Run with verbose output: uv run test.py --cpp algorithm --verbose\n"
     if test_cases:
         first_test = list(test_cases.keys())[0]
         if test_cases[first_test]:
             first_case = test_cases[first_test][0]
-            result_text += f"• Run specific TEST_CASE: ./tests/.build/bin/test_{first_test} --test-case='{first_case}'\n"
+            result_text += f"• Run specific test: bash test {first_test}\n"
+            result_text += f"  (Note: Individual TEST_CASE execution requires test framework support)\n"
     
     return CallToolResult(
         content=[TextContent(type="text", text=result_text)]
@@ -608,40 +608,46 @@ FastLED uses the **doctest** framework for C++ unit testing. Tests are organized
 
 ## Running Tests
 
+### 🚨 CRITICAL: Always Use `bash test` Format
+
+**✅ CORRECT Format:**
+```bash
+bash test                      # Run all tests
+bash test <test_name>         # Run specific test
+```
+
+**❌ INCORRECT Format:**
+```bash
+./.build/bin/test_<name>.exe  # DO NOT run executables directly
+./tests/.build/bin/test_*     # DO NOT use this format
+```
+
 ### 1. Run All Tests
 ```bash
-uv run test.py
-# or using the user rule:
 bash test
 ```
 
-### 2. Run Only C++ Tests
+### 2. Run Specific Test File
 ```bash
-uv run test.py --cpp
+bash test <test_name>
 ```
+Example: `bash test algorithm` (runs `test_algorithm.cpp`)
+Example: `bash test audio_json_parsing` (runs `test_audio_json_parsing.cpp`)
 
-### 3. Run Specific Test File
+### 3. Alternative: Using test.py directly
+For advanced options, you can also use:
 ```bash
-uv run test.py --cpp <test_name>
+uv run test.py              # Run all tests
+uv run test.py --cpp        # Run only C++ tests
+uv run test.py --cpp <name> # Run specific test file
 ```
-Example: `uv run test.py --cpp algorithm` (runs `test_algorithm.cpp`)
 
 ### 4. Run with Verbose Output
 ```bash
 uv run test.py --cpp <test_name> --verbose
 ```
 
-### 5. Run Specific TEST_CASE
-First compile the tests, then run the executable with doctest filters:
-```bash
-# Compile tests first
-uv run test.py --cpp <test_name>
-
-# Run specific TEST_CASE
-./tests/.build/bin/test_<test_name> --test-case="TEST_CASE_NAME"
-```
-
-### 6. Using MCP Server Tools
+### 5. Using MCP Server Tools
 ```bash
 # Start MCP server
 uv run mcp_server.py
@@ -656,12 +662,14 @@ uv run mcp_server.py
 
 ### Debug a Specific Algorithm Test
 ```bash
-# List available TEST_CASEs in algorithm tests
-# (use MCP list_test_cases tool with test_file: "algorithm")
+# Run algorithm tests
+bash test algorithm
 
-# Run specific TEST_CASE with verbose output
+# Or with verbose output
 uv run test.py --cpp algorithm --verbose
 
+# List available TEST_CASEs in algorithm tests
+# (use MCP list_test_cases tool with test_file: "algorithm")
 ```
 
 ### Test Development Workflow
@@ -671,19 +679,7 @@ uv run test.py --cpp easing --clean --verbose
 
 # Check for specific TEST_CASE patterns
 # (use MCP list_test_cases tool with search_pattern)
-
-# Run failed tests only
-cd tests/.build && ctest --rerun-failed
 ```
-
-## Doctest Command Line Options
-When running test executables directly, you can use doctest options:
-- `--test-case=<name>`: Run specific TEST_CASE
-- `--test-case-exclude=<name>`: Exclude specific TEST_CASE
-- `--subcase=<name>`: Run specific SUBCASE
-- `--list-test-cases`: List all TEST_CASEs in the executable
-- `--verbose`: Show detailed output
-- `--success`: Show successful assertions too
 
 ## Common Test File Names
 - `test_algorithm.cpp`: Algorithm utilities
@@ -692,17 +688,26 @@ When running test executables directly, you can use doctest options:
 - `test_math.cpp`: Mathematical functions
 - `test_vector.cpp`: Vector container tests
 - `test_fx.cpp`: Effects framework tests
+- `test_audio_json_parsing.cpp`: Audio JSON parsing tests
 
 ## Tips
-1. **Use `--verbose`** to see detailed test output and assertions
-2. **Use `--clean`** when testing after code changes
-3. **List TEST_CASEs first** to see what's available before running
-4. **Individual TEST_CASE execution** is useful for debugging specific functionality
+1. **Always use `bash test <name>`** format for running specific tests
+2. **Use `--verbose`** to see detailed test output and assertions
+3. **Use `--clean`** when testing after code changes
+4. **List TEST_CASEs first** to see what's available before running
 5. **Check test output carefully** - doctest provides detailed failure information
 
 ## Environment Setup
-- Have UV in your environment.
-- uv run tests.py, don't try and run the test manually, go through this entry point.
+- Have UV in your environment
+- Use `bash test` or `uv run test.py` - don't try to run test executables manually
+- The test infrastructure handles platform differences and proper execution
+
+## Why Use `bash test`?
+The `bash test` wrapper:
+- Handles platform differences automatically
+- Sets up the proper environment
+- Manages test execution across different systems
+- Provides consistent behavior regardless of OS
 """
     
     return CallToolResult(

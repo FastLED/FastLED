@@ -275,6 +275,20 @@ The project uses a comprehensive test suite including:
 - Code quality checks (ruff, clang-format)
 - Example compilation verification
 
+### Test Execution Format
+**🚨 CRITICAL: Always use the correct test execution format:**
+- ✅ **CORRECT**: `bash test <test_name>` (e.g., `bash test audio_json_parsing`)
+- ❌ **INCORRECT**: `./.build/bin/test_<test_name>.exe`
+- ❌ **INCORRECT**: Running executables directly
+
+**Examples:**
+- `bash test` - Run all tests
+- `bash test audio_json_parsing` - Run specific test
+- `bash test xypath` - Run test_xypath.cpp
+- `bash compile uno --examples Blink` - Compile examples
+
+**Why:** The `bash test` wrapper handles platform differences, environment setup, and proper test execution across all supported systems.
+
 Use `bash test` as specified in user rules for running unit tests. For compilation tests, use `bash compile <platform> --examples <example>` (e.g., `bash compile uno --examples Blink`).
 
 **🚨 FOR BACKGROUND AGENTS:** Running `bash test` is MANDATORY before indicating completion. Use the MCP server `validate_completion` tool to ensure all tests pass before completing any task.
@@ -527,7 +541,7 @@ Build info analysis integrates with other FastLED tools:
 **Common Issues:**
 
 1. **"No boards with build_info.json found"**
-   - **Solution:** Compile a platform first: `uv run ci/ci-compile.py uno --examples Blink`
+   - **Solution:** Compile a platform first: `uv run ci/ci-compile.py {board} --examples Blink`
 
 2. **"Board key not found in build_info.json"**
    - **Solution:** Check available boards: `python3 ci/ci/build_info_analyzer.py --list-boards`
