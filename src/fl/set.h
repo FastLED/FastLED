@@ -56,6 +56,18 @@ template <typename Key, size_t N> class FixedSet {
         return false;
     }
 
+    // Move version of insert
+    bool insert(Key &&key) {
+        if (data.size() < N) {
+            auto it = find(key);
+            if (it == end()) {
+                data.push_back(fl::move(key));
+                return true;
+            }
+        }
+        return false;
+    }
+
     bool erase(const Key &key) {
         auto it = find(key);
         if (it != end()) {

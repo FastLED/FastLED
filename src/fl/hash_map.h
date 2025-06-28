@@ -231,6 +231,35 @@ class HashMap {
         }
     }
 
+    // Move version of insert
+    void insert(Key &&key, T &&value) {
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            // if half the buckets are tombstones, rehash inline to prevent
+            // memory spill over into the heap.
+            if (_tombstones > _size) {
+                rehash_inline_no_resize();
+            } else {
+                rehash(_buckets.size() * 2);
+            }
+        }
+        size_t idx;
+        bool is_new;
+        fl::pair<size_t, bool> p = find_slot(key);
+        idx = p.first;
+        is_new = p.second;
+        if (is_new) {
+            _buckets[idx].key = fl::move(key);
+            _buckets[idx].value = fl::move(value);
+            mark_occupied(idx);
+            ++_size;
+        } else {
+            FASTLED_ASSERT(idx != npos, "HashMap::insert: invalid index at "
+                                            << idx << " which is " << npos);
+            _buckets[idx].value = fl::move(value);
+        }
+    }
+
     // remove key; returns true if removed
     bool remove(const Key &key) {
         auto idx = find_index(key);
@@ -489,7 +518,7 @@ class HashMap {
 
         for (size_t i = 0; i < old.size(); i++) {
             if (old_occupied.test(i))
-                insert(old[i].key, old[i].value);
+                insert(fl::move(old[i].key), fl::move(old[i].value));
         }
     }
 

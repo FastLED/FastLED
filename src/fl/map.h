@@ -147,6 +147,29 @@ template <typename Key, typename Value, size_t N> class FixedMap {
         return {false, end()};
     }
 
+    // Move version of insert
+    Pair<bool, iterator> insert(Key &&key, Value &&value,
+                                InsertResult *result = nullptr) {
+        iterator it = find(key);
+        if (it != end()) {
+            if (result) {
+                *result = InsertResult::kExists;
+            }
+            return {false, it};
+        }
+        if (data.size() < N) {
+            data.push_back(PairKV(fl::move(key), fl::move(value)));
+            if (result) {
+                *result = InsertResult::kInserted;
+            }
+            return {true, data.end() - 1};
+        }
+        if (result) {
+            *result = InsertResult::kMaxSize;
+        }
+        return {false, end()};
+    }
+
     bool update(const Key &key, const Value &value,
                 bool insert_if_missing = true) {
         iterator it = find(key);
@@ -155,6 +178,19 @@ template <typename Key, typename Value, size_t N> class FixedMap {
             return true;
         } else if (insert_if_missing) {
             return insert(key, value).first;
+        }
+        return false;
+    }
+
+    // Move version of update
+    bool update(const Key &key, Value &&value,
+                bool insert_if_missing = true) {
+        iterator it = find(key);
+        if (it != end()) {
+            it->second = fl::move(value);
+            return true;
+        } else if (insert_if_missing) {
+            return insert(key, fl::move(value)).first;
         }
         return false;
     }
@@ -328,8 +364,21 @@ class SortedHeapMap {
         return fl::Pair<iterator, bool>(it, success);
     }
 
+    // Move version of insert
+    fl::Pair<iterator, bool> insert(value_type&& value) {
+        InsertResult result;
+        bool success = data.insert(fl::move(value), &result);
+        iterator it = success ? data.find(value) : data.end();
+        return fl::Pair<iterator, bool>(it, success);
+    }
+
     bool insert(const Key &key, const Value &value, InsertResult *result = nullptr) {
         return data.insert(value_type(key, value), result);
+    }
+
+    // Move version of insert with key and value
+    bool insert(Key &&key, Value &&value, InsertResult *result = nullptr) {
+        return data.insert(value_type(fl::move(key), fl::move(value)), result);
     }
 
     template<class... Args>
@@ -435,6 +484,14 @@ class SortedHeapMap {
         if (!insert(key, value)) {
             iterator it = find(key);
             it->second = value;
+        }
+    }
+
+    // Move version of update
+    void update(const Key &key, Value &&value) {
+        if (!insert(key, fl::move(value))) {
+            iterator it = find(key);
+            it->second = fl::move(value);
         }
     }
 

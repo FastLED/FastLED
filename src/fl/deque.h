@@ -42,7 +42,7 @@ private:
         // Copy existing elements to new buffer in linear order
         for (size_t i = 0; i < mSize; ++i) {
             size_t old_idx = (mFront + i) % mCapacity;
-            mAlloc.construct(&new_data[i], mData[old_idx]);
+            mAlloc.construct(&new_data[i], fl::move(mData[old_idx]));
             mAlloc.destroy(&mData[old_idx]);
         }
 
@@ -302,10 +302,24 @@ public:
         ++mSize;
     }
 
+    void push_back(T&& value) {
+        ensure_capacity(mSize + 1);
+        size_t back_index = get_index(mSize);
+        mAlloc.construct(&mData[back_index], fl::move(value));
+        ++mSize;
+    }
+
     void push_front(const T& value) {
         ensure_capacity(mSize + 1);
         mFront = (mFront - 1 + mCapacity) % mCapacity;
         mAlloc.construct(&mData[mFront], value);
+        ++mSize;
+    }
+
+    void push_front(T&& value) {
+        ensure_capacity(mSize + 1);
+        mFront = (mFront - 1 + mCapacity) % mCapacity;
+        mAlloc.construct(&mData[mFront], fl::move(value));
         ++mSize;
     }
 

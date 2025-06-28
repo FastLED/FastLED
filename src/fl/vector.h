@@ -163,6 +163,15 @@ template <typename T, size_t N> class FixedVector {
         }
     }
 
+    // Move version of push_back
+    void push_back(T &&value) {
+        if (current_size < N) {
+            void *mem = &memory()[current_size];
+            new (mem) T(fl::move(value));
+            ++current_size;
+        }
+    }
+
     void reserve(size_t n) {
         if (n > N) {
             // This is a no-op for fixed size vectors
@@ -205,8 +214,7 @@ template <typename T, size_t N> class FixedVector {
             pos->~T();
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
-                new (p)
-                    T(*(p + 1)); // Use copy constructor instead of std::move
+                new (p) T(fl::move(*(p + 1))); // Use move constructor
                 (p + 1)->~T();
             }
             --current_size;
@@ -242,30 +250,38 @@ template <typename T, size_t N> class FixedVector {
 
     bool insert(iterator pos, const T &value) {
         if (current_size < N) {
-            // shift all elements to the right
-            // for (iterator p = end(); p != pos; --p) {
-            //     new (p) T(*(p - 1)); // Use copy constructor instead of
-            //     std::move (p - 1)->~T();
-            // }
-            // new (pos) T(value);
             // shift all element from pos to end to the right
             for (iterator p = end(); p != pos; --p) {
-                // LOOKS LIKE THERE ARE BUGS AROUND THIS INSERT FUNCTION.
-                // I'VE TRIED TO UPGRADE THE CODE TO USE TEMPORARIES BUT
-                // IT SEEMS TO NOT WORK. IT COULD POSSIBLY DO WITH ALIGNMENT
-                // OF THE DATA. THIS IMPL HAS ISSUES WITH THE NEW PLACE
-                // OPERATION.
-                T temp = *(p - 1);
+                T temp = fl::move(*(p - 1));
                 (p)->~T(); // Destroy the current element
                 // Clear the memory
                 void *vp = static_cast<void *>(p);
                 memset(vp, 0, sizeof(T));
-                new (p) T(temp); // Use copy constructor instead of std::move
-                //(p - 1)->~T();
+                new (p) T(fl::move(temp)); // Use move constructor
             }
             ++current_size;
             // now insert the new value
             new (pos) T(value);
+            return true;
+        }
+        return false;
+    }
+
+    // Move version of insert
+    bool insert(iterator pos, T &&value) {
+        if (current_size < N) {
+            // shift all element from pos to end to the right
+            for (iterator p = end(); p != pos; --p) {
+                T temp = fl::move(*(p - 1));
+                (p)->~T(); // Destroy the current element
+                // Clear the memory
+                void *vp = static_cast<void *>(p);
+                memset(vp, 0, sizeof(T));
+                new (p) T(fl::move(temp)); // Use move constructor
+            }
+            ++current_size;
+            // now insert the new value
+            new (pos) T(fl::move(value));
             return true;
         }
         return false;
@@ -404,9 +420,9 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
             
             T* new_array = mAlloc.allocate(new_capacity);
             
-            // Copy existing elements to new array
+            // Move existing elements to new array
             for (size_t i = 0; i < mSize; ++i) {
-                mAlloc.construct(&new_array[i], mArray[i]);
+                mAlloc.construct(&new_array[i], fl::move(mArray[i]));
             }
             
             // Clean up old array
@@ -448,9 +464,9 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
             // Need to allocate more space
             T* new_array = mAlloc.allocate(n);
             
-            // Copy existing elements
+            // Move existing elements
             for (size_t i = 0; i < mSize; ++i) {
-                mAlloc.construct(&new_array[i], mArray[i]);
+                mAlloc.construct(&new_array[i], fl::move(mArray[i]));
             }
             
             // Initialize new elements with value
@@ -523,6 +539,15 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         }
     }
 
+    // Move version of push_back
+    void push_back(T &&value) {
+        ensure_size(mSize + 1);
+        if (mSize < mCapacity) {
+            mAlloc.construct(&mArray[mSize], fl::move(value));
+            ++mSize;
+        }
+    }
+
     void pop_back() {
         if (mSize > 0) {
             --mSize;
@@ -591,10 +616,10 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
             return false;
         }
         if (out_value) {
-            *out_value = *pos;
+            *out_value = fl::move(*pos);
         }
         while (pos != end() - 1) {
-            *pos = *(pos + 1);
+            *pos = fl::move(*(pos + 1));
             ++pos;
         }
         back() = T();
@@ -617,9 +642,7 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
     }
 
     void swap(iterator a, iterator b) {
-        T temp = *a;
-        *a = *b;
-        *b = temp;
+        fl::swap(*a, *b);
     }
 
     bool full() const { return mSize >= mCapacity; }
@@ -639,22 +662,20 @@ template <typename T, typename Allocator = fl::allocator<T>> class HeapVector {
         return true;
     }
 
-    // void assign(const T* values, size_t count) {
-    //     clear();
-    //     if (!mArray) {
-    //         mArray.reset(new T[count]);
-    //     }
-    //     mCapacity = count;
-    //     assign(values, values + count);
-    // }
-
-    // void assign(size_t new_cap, const T &value) {
-    //     clear();
-    //     reserve(new_cap);
-    //     while (size() < new_cap) {
-    //         push_back(value);
-    //     }
-    // }
+    // Move version of insert
+    bool insert(iterator pos, T &&value) {
+        // push back and swap into place.
+        size_t target_idx = pos - begin();
+        push_back(fl::move(value));
+        auto last = end() - 1;
+        for (size_t curr_idx = last - begin(); curr_idx > target_idx;
+             --curr_idx) {
+            auto first = begin() + curr_idx - 1;
+            auto second = begin() + curr_idx;
+            swap(first, second);
+        }
+        return true;
+    }
 
     // 2) the iterator‐range overload, only enabled when InputIt is *not*
     // integral
@@ -1003,20 +1024,40 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
 
     // Add an element
     void push_back(const T &value) {
-        if (!mUsingHeap) {
-            if (mFixed.size() < INLINED_SIZE) {
-                mFixed.push_back(value);
-                return;
+        if (mUsingHeap || mFixed.size() == INLINED_SIZE) {
+            if (!mUsingHeap && mFixed.size() == INLINED_SIZE) {
+                // transfer
+                mHeap.clear();
+                mHeap.reserve(INLINED_SIZE + 1);
+                for (auto &v : mFixed) {
+                    mHeap.push_back(fl::move(v));
+                }
+                mFixed.clear();
+                mUsingHeap = true;
             }
-            // overflow: move inline data into heap
-            mHeap.reserve(INLINED_SIZE * 2);
+            mHeap.push_back(value);
+        } else {
+                mFixed.push_back(value);
+        }
+            }
+
+    // Move version of push_back
+    void push_back(T &&value) {
+        if (mUsingHeap || mFixed.size() == INLINED_SIZE) {
+            if (!mUsingHeap && mFixed.size() == INLINED_SIZE) {
+                // transfer
+                mHeap.clear();
+                mHeap.reserve(INLINED_SIZE + 1);
             for (auto &v : mFixed) {
-                mHeap.push_back(v);
+                    mHeap.push_back(fl::move(v));
             }
             mFixed.clear();
             mUsingHeap = true;
         }
-        mHeap.push_back(value);
+            mHeap.push_back(fl::move(value));
+        } else {
+            mFixed.push_back(fl::move(value));
+        }
     }
 
     // Remove last element
@@ -1076,6 +1117,30 @@ template <typename T, size_t INLINED_SIZE> class InlinedVector {
         }
         mFixed.clear();
         return mHeap.insert(mHeap.begin() + idx, value);
+    }
+
+    // Move version of insert
+    bool insert(iterator pos, T &&value) {
+        if (mUsingHeap) {
+            // return insert(pos, value);
+            return mHeap.insert(pos, fl::move(value));
+        }
+
+        if (mFixed.size() < INLINED_SIZE) {
+            return mFixed.insert(pos, fl::move(value));
+        }
+
+        // size_t diff = pos - mFixed.begin();
+        // make safe for data that grows down
+        size_t idx = mFixed.end() - pos;
+
+        // overflow: move inline data into heap
+        mHeap.reserve(INLINED_SIZE * 2);
+        for (auto &v : mFixed) {
+            mHeap.push_back(v);
+        }
+        mFixed.clear();
+        return mHeap.insert(mHeap.begin() + idx, fl::move(value));
     }
 
     // Iterators
