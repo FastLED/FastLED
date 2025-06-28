@@ -8,6 +8,7 @@
  * Configuration constants
  */
 const AUDIO_SAMPLE_BLOCK_SIZE = 512;  // Matches i2s read size on esp32c3
+const AUDIO_STACK_BUFFER_THRESHOLD = 5;  // Use stack storage for < 5 buffers, heap for >= 5
 
 /**
  * TIMESTAMP IMPLEMENTATION:
@@ -39,7 +40,7 @@ export class AudioManager {
       window.audioData = {
         audioContexts: {},  // Store audio contexts by ID
         audioSamples: {},   // Store current audio samples by ID
-        audioBuffers: {},   // Store accumulated audio buffers by ID
+        audioBuffers: {},   // Store optimized audio buffer storage by ID
         hasActiveSamples: false
       };
     }
@@ -106,7 +107,7 @@ export class AudioManager {
   storeAudioReferences(audioId, components) {
     window.audioData.audioContexts[audioId] = components.audioContext;
     window.audioData.audioSamples[audioId] = components.sampleBuffer;
-    window.audioData.audioBuffers[audioId] = [];
+    window.audioData.audioBuffers[audioId] = new AudioBufferStorage(audioId);
   }
   
   /**
@@ -183,7 +184,7 @@ export class AudioManager {
       // This is relative to when the page loaded (better than Date.now())
       timestamp = Math.floor(performance.now());
     }
-    
+
     // Debug logging (sample ~1% of audio blocks to avoid console spam)
     if (Math.random() < 0.01) {
       const timestampSource = audioElement && !audioElement.paused && audioElement.currentTime >= 0 
@@ -193,12 +194,14 @@ export class AudioManager {
         : 'performance.now()';
       console.log(`Audio timestamp for ${audioId}: ${timestamp}ms (source: ${timestampSource})`);
     }
-    
-    window.audioData.audioBuffers[audioId].push({
-      samples: Array.from(bufferCopy),
-      timestamp: timestamp
-    });
+
+    // Use optimized buffer storage system
+    const bufferStorage = window.audioData.audioBuffers[audioId];
+    const prevBufferCount = bufferStorage.getBufferCount();
+    bufferStorage.addSamples(bufferCopy, timestamp);
     window.audioData.hasActiveSamples = true;
+
+
   }
   
   /**
@@ -344,16 +347,32 @@ export class AudioManager {
   }
   
   /**
-   * Clean up any previous audio context
+   * Clean up any previous audio context and buffer storage
    * @param {string} inputId - The ID of the audio input
    */
   cleanupPreviousAudioContext(inputId) {
+    // Clean up audio context
     if (window.audioData?.audioContexts?.[inputId]) {
       try {
         window.audioData.audioContexts[inputId].close();
       } catch (e) {
         console.warn('Error closing previous audio context:', e);
       }
+      delete window.audioData.audioContexts[inputId];
+    }
+    
+    // Clean up buffer storage with proper memory cleanup
+    if (window.audioData?.audioBuffers?.[inputId]) {
+      const bufferStorage = window.audioData.audioBuffers[inputId];
+      const stats = bufferStorage.getStats();
+      //console.log(`*** Cleaning up audio ${inputId}: ${stats.bufferCount} blocks, ${stats.memoryEstimateKB.toFixed(1)}KB freed ***`);
+      bufferStorage.clear();
+      delete window.audioData.audioBuffers[inputId];
+    }
+    
+    // Clean up sample references
+    if (window.audioData?.audioSamples?.[inputId]) {
+      delete window.audioData.audioSamples[inputId];
     }
   }
   
@@ -428,3 +447,212 @@ const audioManager = new AudioManager();
 window.setupAudioAnalysis = function(audioElement) {
   return audioManager.setupAudioAnalysis(audioElement);
 };
+
+/**
+ * Get audio buffer statistics for all active audio inputs (debugging)
+ * @returns {Object} Statistics for all audio buffers
+ */
+window.getAudioBufferStats = function() {
+  if (!window.audioData || !window.audioData.audioBuffers) {
+    return { error: 'No audio data available' };
+  }
+  
+  const stats = {};
+  for (const [audioId, bufferStorage] of Object.entries(window.audioData.audioBuffers)) {
+    if (bufferStorage && typeof bufferStorage.getStats === 'function') {
+      stats[audioId] = bufferStorage.getStats();
+    }
+  }
+  
+  // Calculate totals
+  const totals = Object.values(stats).reduce((acc, stat) => ({
+    totalBufferCount: acc.totalBufferCount + stat.bufferCount,
+    totalSamples: acc.totalSamples + stat.totalSamples,
+    totalMemoryKB: acc.totalMemoryKB + stat.memoryEstimateKB,
+    stackCount: acc.stackCount + (stat.storageType === 'stack' ? 1 : 0),
+    heapCount: acc.heapCount + (stat.storageType === 'heap' ? 1 : 0)
+  }), { totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, stackCount: 0, heapCount: 0 });
+  
+  return {
+    individual: stats,
+    totals: totals,
+    optimization: {
+      stackThreshold: AUDIO_STACK_BUFFER_THRESHOLD,
+      description: `Uses efficient Int16Array storage for <${AUDIO_STACK_BUFFER_THRESHOLD} buffers, heap storage for >=${AUDIO_STACK_BUFFER_THRESHOLD} buffers`
+    }
+  };
+};
+
+/**
+ * Audio Buffer Storage Manager
+ * Optimizes memory usage by using stack-based storage for small buffer counts
+ * and heap-based storage for larger accumulations
+ */
+class AudioBufferStorage {
+  constructor(audioId) {
+    this.audioId = audioId;
+    this.stackBuffers = [];  // Efficient storage for small counts (< 5)
+    this.heapBuffer = null;  // Consolidated storage for large counts (>= 5)
+    this.isUsingHeap = false;
+    this.totalSamples = 0;
+  }
+
+  /**
+   * Add audio samples to the buffer using optimal storage strategy
+   * @param {Int16Array} sampleBuffer - Raw audio samples
+   * @param {number} timestamp - Sample timestamp
+   */
+  addSamples(sampleBuffer, timestamp) {
+    const currentBufferCount = this.getBufferCount();
+    
+    if (currentBufferCount < AUDIO_STACK_BUFFER_THRESHOLD && !this.isUsingHeap) {
+      // Use stack-based storage for small counts - keep as Int16Array for efficiency
+      this.stackBuffers.push({
+        samples: new Int16Array(sampleBuffer), // Keep as typed array
+        timestamp: timestamp,
+        length: sampleBuffer.length
+      });
+      this.totalSamples += sampleBuffer.length;
+    } else {
+      // Transition to or use heap-based storage for large counts
+      this._transitionToHeapStorage();
+      this._addToHeapStorage(sampleBuffer, timestamp);
+    }
+    
+    // Debug logging for storage transitions
+    if (currentBufferCount === AUDIO_STACK_BUFFER_THRESHOLD - 1 && !this.isUsingHeap) {
+      console.log(`*** Audio ${this.audioId}: Transitioning to heap storage at ${AUDIO_STACK_BUFFER_THRESHOLD} buffers ***`);
+    }
+  }
+
+  /**
+   * Get all buffered samples in the format expected by the backend
+   * @returns {Array} Array of sample objects with timestamp
+   */
+  getAllSamples() {
+    if (!this.isUsingHeap) {
+      // Return stack buffers, converting Int16Array to regular array for JSON serialization
+      return this.stackBuffers.map(buffer => ({
+        samples: Array.from(buffer.samples),
+        timestamp: buffer.timestamp
+      }));
+    } else {
+      // Return heap buffer data
+      return this.heapBuffer.chunks.map(chunk => ({
+        samples: chunk.samples,
+        timestamp: chunk.timestamp
+      }));
+    }
+  }
+
+  /**
+   * Get the current number of buffered blocks
+   * @returns {number} Number of audio blocks
+   */
+  getBufferCount() {
+    return this.isUsingHeap ? this.heapBuffer.chunks.length : this.stackBuffers.length;
+  }
+
+  /**
+   * Get total number of samples across all buffers
+   * @returns {number} Total sample count
+   */
+  getTotalSamples() {
+    return this.totalSamples;
+  }
+
+  /**
+   * Clear all buffered data with proper cleanup
+   */
+  clear() {
+    // Clean up stack buffers
+    if (this.stackBuffers.length > 0) {
+      // Set to null to help garbage collection of Int16Arrays
+      this.stackBuffers.forEach(buffer => {
+        buffer.samples = null;
+      });
+      this.stackBuffers = [];
+    }
+    
+    // Clean up heap buffer
+    if (this.heapBuffer) {
+      this.heapBuffer.chunks.forEach(chunk => {
+        chunk.samples = null;
+      });
+      this.heapBuffer = null;
+    }
+    
+    this.isUsingHeap = false;
+    this.totalSamples = 0;
+  }
+
+  /**
+   * Get storage statistics for debugging
+   * @returns {Object} Storage statistics
+   */
+  getStats() {
+    return {
+      bufferCount: this.getBufferCount(),
+      totalSamples: this.totalSamples,
+      storageType: this.isUsingHeap ? 'heap' : 'stack',
+      memoryEstimateKB: this._estimateMemoryUsage()
+    };
+  }
+
+  /**
+   * Transition from stack-based to heap-based storage
+   * @private
+   */
+  _transitionToHeapStorage() {
+    if (this.isUsingHeap) return;
+
+    // Create heap storage structure
+    this.heapBuffer = {
+      chunks: [],
+      totalLength: 0
+    };
+
+    // Move existing stack buffers to heap storage
+    this.stackBuffers.forEach(stackBuffer => {
+      this.heapBuffer.chunks.push({
+        samples: Array.from(stackBuffer.samples), // Convert to regular array for heap storage
+        timestamp: stackBuffer.timestamp
+      });
+      this.heapBuffer.totalLength += stackBuffer.length;
+      // Clear the stack buffer reference
+      stackBuffer.samples = null;
+    });
+
+    // Clear stack storage
+    this.stackBuffers = [];
+    this.isUsingHeap = true;
+  }
+
+  /**
+   * Add samples to heap storage
+   * @private
+   */
+  _addToHeapStorage(sampleBuffer, timestamp) {
+    const samplesArray = Array.from(sampleBuffer);
+    this.heapBuffer.chunks.push({
+      samples: samplesArray,
+      timestamp: timestamp
+    });
+    this.heapBuffer.totalLength += sampleBuffer.length;
+    this.totalSamples += sampleBuffer.length;
+  }
+
+  /**
+   * Estimate memory usage in KB
+   * @private
+   */
+  _estimateMemoryUsage() {
+    if (!this.isUsingHeap) {
+      // Stack storage: Int16Array = 2 bytes per sample + object overhead
+      return ((this.totalSamples * 2) + (this.stackBuffers.length * 50)) / 1024;
+    } else {
+      // Heap storage: Regular array = ~8 bytes per sample + object overhead  
+      return ((this.totalSamples * 8) + (this.heapBuffer.chunks.length * 50)) / 1024;
+    }
+  }
+}

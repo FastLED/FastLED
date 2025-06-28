@@ -428,24 +428,20 @@ export class JsonUiManager {
       } else if (element.type === 'file' && element.accept === 'audio/*') {
         // Handle audio input - get all accumulated sample blocks with timestamps
         if (window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples) {
-          const buffers = window.audioData.audioBuffers[element.id];
+          const bufferStorage = window.audioData.audioBuffers[element.id];
           
-          if (buffers && buffers.length > 0) {
-            // Send the array of objects with samples and timestamps (relative to audio file start)
-            // Format: [{"samples": [1,2,3...], "timestamp": 123456}, ...]
-            changes[id] = buffers;
+          if (bufferStorage && bufferStorage.getBufferCount() > 0) {
+            // Get all samples using the optimized storage system
+            const samples = bufferStorage.getAllSamples();
+            changes[id] = samples;
             hasChanges = true;
             
-            // Log some stats about the accumulated audio data
-            // if (Math.random() < 0.1) {
-            //   console.log(`Audio data for ${id}:`);
-            //   console.log(`  Blocks: ${buffers.length}`);
-            //   console.log(`  Total samples: ${buffers.reduce((sum, b) => sum + b.samples.length, 0)}`);
-            //   console.log(`  Timestamp range: ${buffers[0]?.timestamp} - ${buffers[buffers.length-1]?.timestamp}`);
-            // }
+            // Log stats about the accumulated audio data including storage optimization info
+            const stats = bufferStorage.getStats();
+            console.log(`*** Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${stats.memoryEstimateKB.toFixed(1)}KB ***`);
             
-            // Clear the buffer after sending samples
-            window.audioData.audioBuffers[element.id] = [];
+            // Clear the buffer with proper cleanup after sending samples
+            bufferStorage.clear();
             window.audioData.hasActiveSamples = false;
             
             continue; // Skip the comparison below for audio
