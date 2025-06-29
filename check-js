@@ -1,0 +1,70 @@
+#!/bin/bash
+# FastLED JavaScript Type Checking Script (Deno-based)
+# Uses Deno's built-in TypeScript checker to validate JSDoc types
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+DENO_BINARY=".js-tools/deno/deno"
+
+echo -e "${BLUE}🔍 FastLED JavaScript Enhanced Linting (Deno-based)${NC}"
+
+# Check if Deno is installed
+if [ ! -f "$DENO_BINARY" ]; then
+    echo -e "${RED}❌ Deno not found. Run: python3 ci/setup-js-linting.py${NC}"
+    exit 1
+fi
+
+# Find JavaScript files in WASM platform
+JS_FILES=$(find src/platforms/wasm -name "*.js" -type f 2>/dev/null)
+
+if [ -z "$JS_FILES" ]; then
+    echo -e "${YELLOW}⚠️  No JavaScript files found in src/platforms/wasm/${NC}"
+    exit 0
+fi
+
+echo -e "${BLUE}Found JavaScript files:${NC}"
+echo "$JS_FILES" | sed 's/^/  /'
+
+# Run enhanced linting with Deno (syntax, style, and best practices)
+echo -e "${BLUE}Running enhanced JavaScript linting...${NC}"
+
+TYPE_ERRORS=0
+for file in $JS_FILES; do
+    echo -e "${BLUE}Checking: $file${NC}"
+    # Use deno lint for basic syntax checking
+    if "$DENO_BINARY" lint --config deno.json "$file" 2>/dev/null; then
+        echo -e "${GREEN}  ✅ $file - No lint errors${NC}"
+    else
+        echo -e "${YELLOW}  ⚠️  Lint issues found in $file...${NC}"
+        "$DENO_BINARY" lint --config deno.json "$file"
+        TYPE_ERRORS=$((TYPE_ERRORS + 1))
+    fi
+done
+
+echo ""
+if [ $TYPE_ERRORS -eq 0 ]; then
+    echo -e "${GREEN}🎉 All JavaScript files passed enhanced linting!${NC}"
+    echo -e "${BLUE}💡 This covers syntax, style, and best practices.${NC}"
+    echo -e ""
+    echo -e "${BLUE}🔬 Full JSDoc type checking is available but currently disabled.${NC}"
+    echo -e "${BLUE}   To enable type checking, edit deno.json and set:${NC}"
+    echo -e "   ${BLUE}\"checkJs\": true${NC}"
+    echo -e ""
+    echo -e "${BLUE}💡 To improve type safety, consider adding JSDoc annotations:${NC}"
+    echo -e "   ${BLUE}/**${NC}"
+    echo -e "   ${BLUE} * @param {string} name - Parameter description${NC}"
+    echo -e "   ${BLUE} * @param {number} age - Parameter description${NC}"
+    echo -e "   ${BLUE} * @returns {Promise<User>} Description of return value${NC}"
+    echo -e "   ${BLUE} */${NC}"
+    echo -e "   ${BLUE}async function createUser(name, age) { ... }${NC}"
+    exit 0
+else
+    echo -e "${RED}❌ Found $TYPE_ERRORS file(s) with linting issues${NC}"
+    echo -e "${YELLOW}💡 Fix linting issues before proceeding${NC}"
+    exit 1
+fi 

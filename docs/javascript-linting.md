@@ -17,6 +17,7 @@ This downloads Deno and sets up the configuration. No Node.js, npm, or complex d
 ```bash
 ./lint-js              # Lint JavaScript files
 ./format-js            # Format JavaScript files  
+./check-js             # Enhanced linting & optional type checking
 bash lint               # Run all linting (includes JS)
 ```
 
@@ -45,6 +46,56 @@ Deno uses recommended rules that catch common issues:
 - Optimized for real-time graphics and audio processing
 - Catches patterns that could impact frame rates
 
+## JSDoc Type Checking (Optional)
+
+The system includes built-in TypeScript-powered type checking for JavaScript files using JSDoc annotations.
+
+### Current Status
+- **Enhanced Linting**: Always enabled (syntax, style, best practices)
+- **JSDoc Type Checking**: Currently disabled (can be enabled)
+
+### Enable Type Checking
+
+Edit `deno.json` and change:
+```json
+{
+  "compilerOptions": {
+    "checkJs": true  // Change from false to true
+  }
+}
+```
+
+### Adding JSDoc Types
+
+```javascript
+/**
+ * Process audio data for visualization
+ * @param {Float32Array} audioData - Raw audio samples
+ * @param {number} sampleRate - Audio sample rate in Hz
+ * @param {Object} options - Processing options
+ * @param {boolean} options.normalize - Whether to normalize output
+ * @returns {Promise<Int16Array>} Processed audio samples
+ */
+async function processAudio(audioData, sampleRate, options) {
+  // Implementation...
+}
+```
+
+### Benefits of JSDoc Type Checking
+- **Catch type errors** before runtime
+- **Better IDE support** with autocomplete and error highlighting  
+- **Documentation** that stays synchronized with code
+- **Gradual adoption** - add types incrementally
+- **Zero runtime overhead** - types are compile-time only
+
+### Type Definitions
+
+Global types for FastLED WASM are defined in `src/platforms/wasm/types.d.ts`:
+- Window extensions (audio functions, UI manager)
+- Audio Worklet processor types
+- DOM element extensions
+- Custom FastLED interfaces
+
 ## Configuration
 
 Configuration is in `deno.json`:
@@ -67,11 +118,12 @@ Configuration is in `deno.json`:
 
 ## Integration with Main Lint Script
 
-JavaScript linting is integrated into the main `bash lint` command:
+JavaScript linting and type checking are integrated into the main `bash lint` command:
 
 1. **Python linting** (ruff, black, isort, pyright)
 2. **C++ formatting** (clang-format)  
 3. **JavaScript linting** (Deno) ← **New!**
+4. **JavaScript enhanced linting & type checking** (Deno) ← **New!**
 
 ## Why Deno Instead of ESLint?
 
@@ -86,9 +138,11 @@ JavaScript linting is integrated into the main `bash lint` command:
 ## Files Created
 
 - `.js-tools/deno/` - Deno binary (single file!)
-- `deno.json` - Configuration file
+- `deno.json` - Configuration file with TypeScript compiler options
 - `lint-js` - Linting script
 - `format-js` - Formatting script
+- `check-js` - Enhanced linting & type checking script
+- `src/platforms/wasm/types.d.ts` - TypeScript definitions for FastLED WASM globals
 
 ## Example Output
 

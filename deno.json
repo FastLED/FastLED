@@ -1,4 +1,23 @@
 {
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitThis": false,
+    "suppressExcessPropertyErrors": true,
+    "skipLibCheck": true,
+    "lib": ["dom", "dom.asynciterable", "es2022", "webworker"]
+  },
   "lint": {
     "rules": {
       "tags": [

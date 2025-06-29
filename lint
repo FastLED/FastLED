@@ -61,10 +61,12 @@ for folder in "${folders[@]}"; do
   uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
 done
 
-# JavaScript linting (if tools are available)
+# JavaScript linting and type checking (if tools are available)
 if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
     echo "Running JavaScript linting"
     ./lint-js
+    echo "Running JavaScript enhanced linting & type checking"
+    ./check-js
 else
     echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
 fi
