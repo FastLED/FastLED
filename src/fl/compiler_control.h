@@ -70,8 +70,8 @@
   #define FL_OPTIMIZATION_LEVEL_O3_END   /* nothing */
 #endif
 
-
-
+// 6/29/2025 - Differences in all src vs individual compilation was 35 to 39 seconds.
+//#define FASTLED_ALL_SRC 1
 
 // All Source Build Control
 // When FASTLED_ALL_SRC is enabled, all source is compiled into a single translation unit
