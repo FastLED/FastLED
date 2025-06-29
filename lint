@@ -28,7 +28,13 @@ cat > .vscode/launch.json << 'EOL'
 }
 EOL
 
-# Linting the Python code.
+echo "🚀 Running FastLED Comprehensive Linting Suite"
+echo "=============================================="
+
+# Python linting
+echo ""
+echo "📝 PYTHON LINTING"
+echo "------------------"
 echo "Running ruff check"
 uv run ruff check --fix test.py
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
@@ -44,7 +50,10 @@ uv run pyright ci
 
 export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
-# Linting the C++ code.
+# C++ linting
+echo ""
+echo "🔧 C++ LINTING"
+echo "---------------"
 folders=(
     #"src/lib8tion"
     #"src/platforms/stub"
@@ -61,14 +70,31 @@ for folder in "${folders[@]}"; do
   uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
 done
 
-# JavaScript linting and type checking (if tools are available)
+# JavaScript linting and enhanced checking
+echo ""
+echo "🌐 JAVASCRIPT LINTING & TYPE CHECKING"
+echo "--------------------------------------"
+
 if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
     echo "Running JavaScript linting"
     ./lint-js
+    
     echo "Running JavaScript enhanced linting & type checking"
     ./check-js
+    
+    # Run JavaScript enhancement analysis for additional insights
+    if [ -f "scripts/enhance-js-typing.py" ]; then
+        echo "Running JavaScript enhancement analysis"
+        python3 scripts/enhance-js-typing.py --approach summary 2>/dev/null || echo "  ℹ️  Enhancement analysis completed (some warnings expected)"
+    fi
 else
     echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
 fi
 
+echo ""
 echo "🎉 All linting completed!"
+echo "========================="
+echo ""
+echo "💡 FOR AI AGENTS:"
+echo "  - FOREGROUND AGENTS: Use 'bash lint' for all linting tasks"
+echo "  - BACKGROUND AGENTS: Can use individual scripts for fine-grained control"

@@ -118,6 +118,53 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
   - `uv run ci/ci/symbol_analysis.py --board esp32dev` - Analyze ESP32 platform
   - `uv run ci/demo_symbol_analysis.py` - Analyze all available platforms
 
+## 🤖 AI AGENT LINTING GUIDELINES
+
+### FOREGROUND AGENTS (Interactive Development)
+**🚨 ALWAYS USE `bash lint` - DO NOT RUN INDIVIDUAL LINTING SCRIPTS**
+
+- **✅ CORRECT:** `bash lint`
+- **❌ FORBIDDEN:** `./lint-js`, `./check-js`, `python3 scripts/enhance-js-typing.py`
+- **❌ FORBIDDEN:** `uv run ruff check`, `uv run black`, individual tools
+
+**WHY:** `bash lint` provides:
+- **Comprehensive coverage** - Python, C++, JavaScript, and enhancement analysis
+- **Consistent workflow** - Single command for all linting needs  
+- **Proper sequencing** - Runs tools in the correct order with dependencies
+- **Clear output** - Organized sections showing what's being checked
+- **Agent guidance** - Shows proper usage for AI agents
+
+### BACKGROUND AGENTS (Automated/CI Environments)
+**CAN USE FINE-GRAINED LINTING FOR SPECIFIC NEEDS**
+
+Background agents may use individual linting scripts when needed:
+- `./lint-js` - JavaScript-only linting
+- `./check-js` - JavaScript type checking
+- `python3 scripts/enhance-js-typing.py` - JavaScript enhancement analysis
+- `uv run ruff check` - Python linting only
+- MCP server `lint_code` tool - Programmatic access
+
+**BUT STILL PREFER `bash lint` FOR COMPREHENSIVE CHECKING**
+
+### Linting Script Integration
+
+The `bash lint` command now includes:
+1. **📝 Python Linting** - ruff, black, isort, pyright
+2. **🔧 C++ Linting** - clang-format (when enabled)
+3. **🌐 JavaScript Linting** - Deno lint, format check, type checking
+4. **🔍 JavaScript Enhancement** - Analysis and recommendations
+5. **💡 AI Agent Guidance** - Clear instructions for proper usage
+
+### When to Use Individual Scripts
+
+**FOREGROUND AGENTS:** Never. Always use `bash lint`.
+
+**BACKGROUND AGENTS:** Only when:
+- **Debugging specific issues** with one language/tool
+- **Testing incremental changes** to linting configuration
+- **Running targeted analysis** for specific files
+- **Integrating with automated workflows** via MCP server
+
 ## Development Guidelines
 - Follow existing code style and patterns
 - Run tests before committing changes

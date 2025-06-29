@@ -207,19 +207,25 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="lint_code",
-            description="Run code formatting and linting tools",
+            description="Run comprehensive code formatting and linting. For FOREGROUND agents, this runs `bash lint` for complete coverage. For BACKGROUND agents, can run specific tools for fine-grained control.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "tool": {
                         "type": "string",
-                        "enum": ["ruff", "clang-format", "all"],
-                        "description": "Linting tool to run",
-                        "default": "all"
+                        "enum": ["bash_lint", "ruff", "javascript", "all"],
+                        "description": "Linting approach: 'bash_lint' (recommended for foreground), 'ruff' (Python only), 'javascript' (JS only), 'all' (comprehensive via bash lint)",
+                        "default": "bash_lint"
+                    },
+                    "agent_type": {
+                        "type": "string",
+                        "enum": ["foreground", "background"],
+                        "description": "Agent type - foreground agents should use bash_lint, background agents can use specific tools",
+                        "default": "foreground"
                     },
                     "fix": {
                         "type": "boolean",
-                        "description": "Automatically fix issues where possible",
+                        "description": "Automatically fix issues where possible (only applies to specific tools, not bash_lint)",
                         "default": False
                     }
                 }
@@ -1062,10 +1068,16 @@ bash lint
 ```
 
 ## What `bash lint` Does:
-- **Ruff formatting and linting** for Python files
-- **clang-format** for C++ files  
-- **Comprehensive style checking** across the codebase
-- **Automatic fixing** of many common issues
+- **📝 Python Linting** - ruff, black, isort, pyright
+- **🔧 C++ Linting** - clang-format (when enabled)
+- **🌐 JavaScript Linting** - Deno lint, format check, type checking
+- **🔍 JavaScript Enhancement** - Analysis and recommendations
+- **💡 AI Agent Guidance** - Clear instructions for proper usage
+
+## AI Agent Linting Rules:
+- **FOREGROUND AGENTS:** Always use `bash lint` - never run individual linting scripts
+- **BACKGROUND AGENTS:** Prefer `bash lint` but can use individual scripts for specific needs
+- **MCP Server:** Use `lint_code` tool with `agent_type` parameter for guidance
 
 ## Background Agent Requirements:
 🚨 **FAILURE TO RUN `bash lint` AFTER PYTHON MODIFICATIONS WILL RESULT IN BROKEN BUILDS**
@@ -1291,25 +1303,67 @@ async def code_fingerprint(arguments: Dict[str, Any], project_root: Path) -> Cal
     )
 
 async def lint_code(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
-    """Run code linting tools."""
-    tool = arguments.get("tool", "all")
+    """Run code linting tools with agent-appropriate guidance."""
+    tool = arguments.get("tool", "bash_lint")
+    agent_type = arguments.get("agent_type", "foreground")
     fix = arguments.get("fix", False)
     
     results = []
     
-    if tool in ["ruff", "all"]:
+    # Provide guidance based on agent type
+    if agent_type == "foreground" and tool != "bash_lint":
+        guidance = "⚠️  FOREGROUND AGENT GUIDANCE:\n"
+        guidance += "For comprehensive linting, foreground agents should use 'bash_lint' tool option.\n"
+        guidance += "This ensures all linting (Python, C++, JavaScript) runs in proper sequence.\n\n"
+        results.append(guidance)
+    
+    # Handle different tool options
+    if tool == "bash_lint" or tool == "all":
+        # Use the comprehensive bash lint script
+        lint_script = project_root / "lint"
+        if lint_script.exists():
+            result = await run_command(["bash", "lint"], project_root)
+            results.append(f"🚀 Comprehensive Linting Results (bash lint):\n{result}")
+        else:
+            return CallToolResult(
+                content=[TextContent(type="text", text="❌ bash lint script not found")],
+                isError=True
+            )
+    
+    elif tool == "ruff":
+        # Python-only linting for background agents
         cmd = ["uv", "run", "ruff", "check"]
         if fix:
             cmd.append("--fix")
         result = await run_command(cmd, project_root)
-        results.append(f"Ruff results:\n{result}")
+        results.append(f"📝 Python Linting (ruff):\n{result}")
+        
+        if agent_type == "background":
+            results.append("\n💡 Background Agent: Consider running 'bash_lint' for comprehensive coverage.")
     
-    if tool in ["clang-format", "all"]:
-        # Check if there's a lint script
-        lint_script = project_root / "lint"
-        if lint_script.exists():
-            result = await run_command(["./lint"], project_root)
-            results.append(f"Lint script results:\n{result}")
+    elif tool == "javascript":
+        # JavaScript-only linting for background agents
+        lint_js_script = project_root / "lint-js"
+        check_js_script = project_root / "check-js"
+        
+        if lint_js_script.exists():
+            result = await run_command(["./lint-js"], project_root)
+            results.append(f"🌐 JavaScript Linting:\n{result}")
+            
+            if check_js_script.exists():
+                result = await run_command(["./check-js"], project_root)
+                results.append(f"🔍 JavaScript Type Checking:\n{result}")
+        else:
+            results.append("❌ JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py")
+        
+        if agent_type == "background":
+            results.append("\n💡 Background Agent: Consider running 'bash_lint' for comprehensive coverage.")
+    
+    # Add final guidance
+    if agent_type == "foreground":
+        results.append("\n💡 FOREGROUND AGENT: Always prefer 'bash_lint' for complete linting coverage.")
+    else:
+        results.append("\n💡 BACKGROUND AGENT: Fine-grained linting available, but 'bash_lint' recommended for comprehensive checking.")
     
     return CallToolResult(
         content=[TextContent(type="text", text="\n\n".join(results))]
