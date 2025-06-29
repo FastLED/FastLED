@@ -6,6 +6,7 @@ Provides statistics and can verify inclusion in the all-source build.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Dict, List, Set
 
@@ -15,6 +16,13 @@ SRC_ROOT = PROJECT_ROOT / "src"
 FL_DIR = SRC_ROOT / "fl"
 FX_DIR = SRC_ROOT / "fx"
 ALL_SOURCE_BUILD_FILE = SRC_ROOT / "fastled_compile.cpp"
+
+# Detect if running in CI/test environment for ASCII-only output
+USE_ASCII_ONLY = (
+    os.environ.get("FASTLED_CI_NO_INTERACTIVE") == "true"
+    or os.environ.get("GITHUB_ACTIONS") == "true"
+    or os.environ.get("CI") == "true"
+)
 
 
 def collect_files_by_type(directory: Path) -> Dict[str, List[Path]]:
@@ -151,17 +159,21 @@ def print_inclusion_report(
     print("\nALL-SOURCE BUILD INCLUSION STATUS:")
     print("=" * 50)
 
-    print(f"✅ Included in all-source build: {len(included_files)}")
+    # Use ASCII or Unicode symbols based on environment
+    check_symbol = "[+]" if USE_ASCII_ONLY else "✅"
+    cross_symbol = "[-]" if USE_ASCII_ONLY else "❌"
+
+    print(f"{check_symbol} Included in all-source build: {len(included_files)}")
     if included_files:
         for file_path in sorted(included_files):
             rel_path = Path(file_path).relative_to(SRC_ROOT)
-            print(f"   ✅ {rel_path}")
+            print(f"   {check_symbol} {rel_path}")
 
-    print(f"\n❌ Missing from all-source build: {len(missing_files)}")
+    print(f"\n{cross_symbol} Missing from all-source build: {len(missing_files)}")
     if missing_files:
         for file_path in sorted(missing_files):
             rel_path = Path(file_path).relative_to(SRC_ROOT)
-            print(f"   ❌ {rel_path}")
+            print(f"   {cross_symbol} {rel_path}")
 
 
 def generate_summary_report(
@@ -210,7 +222,12 @@ def print_summary_report(summary: Dict):
     print("IMPLEMENTATION FILES SUMMARY REPORT")
     print("=" * 80)
 
-    print(f"\n📁 FL DIRECTORY ({FL_DIR.relative_to(PROJECT_ROOT)}):")
+    # Use ASCII or Unicode symbols based on environment
+    folder_symbol = "[DIR]" if USE_ASCII_ONLY else "📁"
+    chart_symbol = "[STATS]" if USE_ASCII_ONLY else "📊"
+    ratio_symbol = "[RATIO]" if USE_ASCII_ONLY else "📈"
+
+    print(f"\n{folder_symbol} FL DIRECTORY ({FL_DIR.relative_to(PROJECT_ROOT)}):")
     print(
         f"   Header files (.hpp):           {summary['fl_directory']['hpp_files']:3d}"
     )
@@ -221,7 +238,7 @@ def print_summary_report(summary: Dict):
         f"   Total files:                   {summary['fl_directory']['total_files']:3d}"
     )
 
-    print(f"\n📁 FX DIRECTORY ({FX_DIR.relative_to(PROJECT_ROOT)}):")
+    print(f"\n{folder_symbol} FX DIRECTORY ({FX_DIR.relative_to(PROJECT_ROOT)}):")
     print(
         f"   Header files (.hpp):           {summary['fx_directory']['hpp_files']:3d}"
     )
@@ -232,7 +249,7 @@ def print_summary_report(summary: Dict):
         f"   Total files:                   {summary['fx_directory']['total_files']:3d}"
     )
 
-    print("\n📊 TOTALS:")
+    print(f"\n{chart_symbol} TOTALS:")
     print(f"   Header files (.hpp):           {summary['totals']['hpp_files']:3d}")
     print(
         f"   Implementation files (.cpp.hpp): {summary['totals']['cpp_hpp_files']:3d}"
@@ -245,7 +262,7 @@ def print_summary_report(summary: Dict):
 
     if total_hpp > 0:
         impl_ratio = (total_cpp_hpp / total_hpp) * 100
-        print("\n📈 IMPLEMENTATION RATIO:")
+        print(f"\n{ratio_symbol} IMPLEMENTATION RATIO:")
         print(f"   Implementation files per header: {impl_ratio:.1f}%")
         print(f"   ({total_cpp_hpp} .cpp.hpp files for {total_hpp} .hpp files)")
 
@@ -263,8 +280,18 @@ def main():
     )
     parser.add_argument("--json", action="store_true", help="Output summary as JSON")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--ascii-only",
+        action="store_true",
+        help="Use ASCII-only output (no Unicode emoji)",
+    )
 
     args = parser.parse_args()
+
+    # Override USE_ASCII_ONLY if command line flag is set
+    global USE_ASCII_ONLY
+    if args.ascii_only:
+        USE_ASCII_ONLY = True
 
     # Collect files from both directories
     print("Scanning implementation files...")
@@ -273,6 +300,11 @@ def main():
 
     # Generate summary
     summary = generate_summary_report(fl_files, fx_files)
+
+    # Define symbols once for all output modes
+    search_symbol = "[SEARCH]" if USE_ASCII_ONLY else "🔍"
+    stats_symbol = "[STATS]" if USE_ASCII_ONLY else "📊"
+    config_symbol = "[CONFIG]" if USE_ASCII_ONLY else "🔧"
 
     # Output based on requested format
     if args.json:
@@ -318,10 +350,10 @@ def main():
         fl_inclusion = check_inclusion_in_all_source_build(fl_files, FL_DIR)
         fx_inclusion = check_inclusion_in_all_source_build(fx_files, FX_DIR)
 
-        print("\n🔍 FL DIRECTORY INCLUSION:")
+        print(f"\n{search_symbol} FL DIRECTORY INCLUSION:")
         print_inclusion_report(fl_inclusion, FL_DIR)
 
-        print("\n🔍 FX DIRECTORY INCLUSION:")
+        print(f"\n{search_symbol} FX DIRECTORY INCLUSION:")
         print_inclusion_report(fx_inclusion, FX_DIR)
 
         # Overall inclusion statistics
@@ -338,13 +370,13 @@ def main():
         total_impl_files = len(all_cpp_hpp_files)
         if total_impl_files > 0:
             inclusion_percentage = (included_count / total_impl_files) * 100
-            print("\n📊 OVERALL INCLUSION STATISTICS:")
+            print(f"\n{stats_symbol} OVERALL INCLUSION STATISTICS:")
             print(f"   Total .cpp.hpp files found:     {total_impl_files}")
             print(f"   Included in all-source build:   {included_count}")
             print(f"   Inclusion percentage:           {inclusion_percentage:.1f}%")
 
     if args.verbose:
-        print("\n🔧 CONFIGURATION:")
+        print(f"\n{config_symbol} CONFIGURATION:")
         print(f"   Project root: {PROJECT_ROOT}")
         print(f"   FL directory: {FL_DIR}")
         print(f"   FX directory: {FX_DIR}")
