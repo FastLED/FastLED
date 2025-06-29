@@ -949,9 +949,10 @@ FASTLED_NAMESPACE_END
 // Leds has a CRGB block and an XYMap
 #include "fl/leds.h"
 
-#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIGroup.
+#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIHelp, UIGroup.
 using fl::UITitle;
 using fl::UIDescription;
+using fl::UIHelp;
 using fl::UIButton;  // These names are unique enough that we don't need to namespace them
 using fl::UICheckbox;
 using fl::UINumberField;
@@ -959,8 +960,15 @@ using fl::UISlider;
 using fl::UIDropdown;
 using fl::UIGroup;
 using fl::XYMap;
+
+// Common fl:: type aliases for global namespace convenience
+template<typename T> using fl_vector = fl::vector<T>;
+template<typename Key, typename Value, typename Compare = fl::DefaultLess<Key>> using fl_map = fl::fl_map<Key, Value, Compare>;
+using fl_string = fl::string;
+
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)
+#define FASTLED_HELP(text) fl::UIHelp g_help(text)
 
 
 #endif // FASTLED_INTERNAL && !FASTLED_LEAN_AND_MEAN

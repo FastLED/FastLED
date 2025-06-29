@@ -273,88 +273,297 @@ function setDescription(descData) {
 }
 
 function createHelp(element) {
-  const helpDiv = document.createElement('div');
-  helpDiv.className = 'ui-help';
-  helpDiv.id = `help-${element.id}`;
+  const helpContainer = document.createElement('div');
+  helpContainer.className = 'ui-help-container';
+  helpContainer.id = `help-${element.id}`;
   
-  // Convert markdown to HTML
-  const htmlContent = markdownToHtml(element.markdownContent);
-  helpDiv.innerHTML = htmlContent;
+  // Create help button
+  const helpButton = document.createElement('button');
+  helpButton.className = 'ui-help-button';
+  helpButton.textContent = '?';
+  helpButton.setAttribute('type', 'button');
+  helpButton.setAttribute('aria-label', 'Help');
   
-  // Add some basic styling
-  helpDiv.style.cssText = `
-    margin: 10px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 5px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.6;
-  `;
+  // Prepare content for tooltip and popup
+  const markdownContent = element.markdownContent || '';
+  const tooltipText = markdownContent.length > 200 
+    ? markdownContent.substring(0, 200).trim() + '...' 
+    : markdownContent;
   
-  // Style the rendered HTML elements
-  const style = document.createElement('style');
-  style.textContent = `
-    .ui-help h1, .ui-help h2, .ui-help h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      color: #343a40;
-    }
-    .ui-help h1 { font-size: 1.5em; }
-    .ui-help h2 { font-size: 1.3em; }
-    .ui-help h3 { font-size: 1.1em; }
-    .ui-help p {
-      margin: 10px 0;
-      color: #495057;
-    }
-    .ui-help ul, .ui-help ol {
-      padding-left: 20px;
-      margin: 10px 0;
-    }
-    .ui-help li {
-      margin: 5px 0;
-      color: #495057;
-    }
-    .ui-help code {
-      background-color: #e9ecef;
-      padding: 2px 4px;
-      border-radius: 3px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-    }
-    .ui-help pre {
-      background-color: #f1f3f4;
-      padding: 10px;
-      border-radius: 3px;
-      overflow-x: auto;
-      margin: 10px 0;
-    }
-    .ui-help pre code {
-      background-color: transparent;
-      padding: 0;
-    }
-    .ui-help a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .ui-help a:hover {
-      text-decoration: underline;
-    }
-    .ui-help strong {
-      font-weight: 600;
-    }
-    .ui-help em {
-      font-style: italic;
-    }
-  `;
+  // Convert markdown to HTML for popup
+  const htmlContent = markdownToHtml(markdownContent);
   
-  // Append the style to document head if it doesn't exist
+  // Create tooltip
+  const tooltip = document.createElement('div');
+  tooltip.className = 'ui-help-tooltip';
+  tooltip.textContent = tooltipText;
+  
+  // Add event listeners for tooltip
+  helpButton.addEventListener('mouseenter', () => {
+    if (tooltipText.trim()) {
+      tooltip.style.visibility = 'visible';
+      tooltip.style.opacity = '1';
+    }
+  });
+  
+  helpButton.addEventListener('mouseleave', () => {
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.opacity = '0';
+  });
+  
+  // Add event listener for popup
+  helpButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showHelpPopup(htmlContent);
+  });
+  
+  // Assemble the help container
+  helpContainer.appendChild(helpButton);
+  helpContainer.appendChild(tooltip);
+  
+  // Add styles if not already present
   if (!document.querySelector('#ui-help-styles')) {
+    const style = document.createElement('style');
     style.id = 'ui-help-styles';
+    style.textContent = `
+      .ui-help-container {
+        position: relative;
+        display: inline-block;
+        margin: 5px;
+      }
+      
+      .ui-help-button {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+      }
+      
+      .ui-help-button:hover {
+        background-color: #5a6268;
+      }
+      
+      .ui-help-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: pre-wrap;
+        max-width: 300px;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        margin-bottom: 5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+      
+      .ui-help-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: #333;
+      }
+      
+      .ui-help-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      
+      .ui-help-popup-content {
+        background-color: #2d3748;
+        color: #e2e8f0;
+        border-radius: 8px;
+        max-width: 90%;
+        max-height: 90%;
+        overflow-y: auto;
+        padding: 24px;
+        position: relative;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.6;
+      }
+      
+      .ui-help-popup-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        color: #a0aec0;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+      }
+      
+      .ui-help-popup-close:hover {
+        color: #e2e8f0;
+      }
+      
+      .ui-help-popup-content h1,
+      .ui-help-popup-content h2,
+      .ui-help-popup-content h3 {
+        color: #f7fafc;
+        margin-top: 0;
+        margin-bottom: 16px;
+      }
+      
+      .ui-help-popup-content h1 { font-size: 1.875rem; }
+      .ui-help-popup-content h2 { font-size: 1.5rem; }
+      .ui-help-popup-content h3 { font-size: 1.25rem; }
+      
+      .ui-help-popup-content p {
+        margin: 16px 0;
+        color: #cbd5e0;
+      }
+      
+      .ui-help-popup-content ul,
+      .ui-help-popup-content ol {
+        padding-left: 24px;
+        margin: 16px 0;
+      }
+      
+      .ui-help-popup-content li {
+        margin: 8px 0;
+        color: #cbd5e0;
+      }
+      
+      .ui-help-popup-content code {
+        background-color: #4a5568;
+        color: #f7fafc;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+        font-size: 0.875rem;
+      }
+      
+      .ui-help-popup-content pre {
+        background-color: #1a202c;
+        color: #f7fafc;
+        padding: 16px;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 16px 0;
+        border: 1px solid #4a5568;
+      }
+      
+      .ui-help-popup-content pre code {
+        background-color: transparent;
+        padding: 0;
+        color: inherit;
+      }
+      
+      .ui-help-popup-content a {
+        color: #63b3ed;
+        text-decoration: none;
+      }
+      
+      .ui-help-popup-content a:hover {
+        color: #90cdf4;
+        text-decoration: underline;
+      }
+      
+      .ui-help-popup-content strong {
+        color: #f7fafc;
+        font-weight: 600;
+      }
+      
+      .ui-help-popup-content em {
+        color: #e2e8f0;
+        font-style: italic;
+      }
+      
+      .ui-help-popup-content blockquote {
+        border-left: 4px solid #4a5568;
+        margin: 16px 0;
+        padding-left: 16px;
+        color: #a0aec0;
+        font-style: italic;
+      }
+    `;
     document.head.appendChild(style);
   }
   
-  return helpDiv;
+  return helpContainer;
+}
+
+function showHelpPopup(htmlContent) {
+  // Remove any existing popup
+  const existingPopup = document.querySelector('.ui-help-popup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+  
+  // Create popup
+  const popup = document.createElement('div');
+  popup.className = 'ui-help-popup';
+  
+  const popupContent = document.createElement('div');
+  popupContent.className = 'ui-help-popup-content';
+  
+  const closeButton = document.createElement('button');
+  closeButton.className = 'ui-help-popup-close';
+  closeButton.innerHTML = '&times;';
+  closeButton.setAttribute('aria-label', 'Close help');
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.innerHTML = htmlContent;
+  
+  popupContent.appendChild(closeButton);
+  popupContent.appendChild(contentDiv);
+  popup.appendChild(popupContent);
+  
+  // Add event listeners
+  closeButton.addEventListener('click', () => {
+    popup.remove();
+  });
+  
+  popup.addEventListener('click', (e) => {
+    if (e.target === popup) {
+      popup.remove();
+    }
+  });
+  
+  // Handle escape key
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      popup.remove();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+  
+  // Add to DOM
+  document.body.appendChild(popup);
 }
 
 
