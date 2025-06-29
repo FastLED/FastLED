@@ -1,14 +1,8 @@
 /**
- * FastLED Graphics Manager - 2D WebGL Renderer
+ * FastLED Graphics Manager Module
  *
- * Provides fast 2D rendering of LED layouts using WebGL for optimal performance.
- * This renderer is optimized for dense LED grids and high frame rates.
- *
- * Key features:
- * - WebGL-based texture rendering for performance
- * - Power-of-2 texture allocation for compatibility
- * - Pixel-perfect LED positioning and sizing
- * - Automatic canvas and texture management
+ * High-performance 2D graphics rendering system for FastLED WebAssembly applications.
+ * Uses WebGL for hardware-accelerated pixel rendering and supports real-time LED strip visualization.
  *
  * @module GraphicsManager
  */
@@ -21,6 +15,20 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-continue */
+
+/**
+ * @typedef {Object} StripData
+ * @property {number} strip_id - Unique identifier for the LED strip
+ * @property {Uint8Array} pixel_data - Raw pixel data (RGB values)
+ * @property {number} length - Number of LEDs in the strip
+ */
+
+/**
+ * @typedef {Object} ScreenMapData
+ * @property {Object<string, Array<{x: number, y: number}>>} strips - Strip coordinates mapping
+ * @property {[number, number]} absMin - Absolute minimum coordinates [x, y]
+ * @property {[number, number]} absMax - Absolute maximum coordinates [x, y]
+ */
 
 /**
  * Creates and injects WebGL shaders into the document head
@@ -63,44 +71,90 @@ function createShaders() {
 }
 
 /**
- * Fast 2D Graphics Manager using WebGL for LED rendering
- * Optimized for dense LED grids and high frame rates
+ * WebGL-based 2D graphics manager for FastLED visualization
+ * Provides hardware-accelerated rendering of LED strips using WebGL shaders
  */
 export class GraphicsManager {
   /**
    * Creates a new GraphicsManager instance
-   * @param {Object} graphicsArgs - Configuration arguments
-   * @param {string} graphicsArgs.canvasId - ID of the HTML canvas element to render to
+   * @param {string} canvasId - HTML canvas element ID for rendering
+   * @param {ScreenMapData} screenMap - Screen coordinate mapping data
+   * @param {Object} [args={}] - Additional configuration options
+   * @param {boolean} [args.usePixelatedRendering=true] - Whether to use pixelated rendering
    */
-  constructor(graphicsArgs) {
-    const { canvasId } = graphicsArgs;
-
-    /** @type {string} HTML canvas element ID */
+  constructor(canvasId, screenMap, args = {}) {
+    /** @type {string} */
     this.canvasId = canvasId;
 
-    /** @type {WebGLRenderingContext|null} WebGL rendering context */
+    /** @type {HTMLCanvasElement|null} */
+    this.canvas = null;
+
+    /** @type {WebGLRenderingContext|null} */
     this.gl = null;
 
-    /** @type {WebGLProgram|null} Compiled shader program */
+    /** @type {WebGLProgram|null} */
     this.program = null;
 
-    /** @type {WebGLBuffer|null} Vertex position buffer */
+    /** @type {WebGLBuffer|null} */
     this.positionBuffer = null;
 
-    /** @type {WebGLBuffer|null} Texture coordinate buffer */
+    /** @type {WebGLBuffer|null} */
     this.texCoordBuffer = null;
 
-    /** @type {WebGLTexture|null} Main rendering texture */
+    /** @type {WebGLTexture|null} */
     this.texture = null;
 
-    /** @type {number} Current texture width (power of 2) */
+    /** @type {Uint8Array|null} */
+    this.texData = null;
+
+    /** @type {ScreenMapData} */
+    this.screenMap = screenMap;
+
+    /** @type {Object} */
+    this.args = args;
+
+    /** @type {number} */
     this.texWidth = 0;
 
-    /** @type {number} Current texture height (power of 2) */
+    /** @type {number} */
     this.texHeight = 0;
 
-    /** @type {Uint8Array|null} Texture data buffer (RGB) */
-    this.texData = null;
+    this.initialize();
+  }
+
+  /**
+   * Initializes the WebGL context and sets up rendering resources
+   * @returns {boolean} True if initialization was successful
+   */
+  initialize() {
+    this.canvas = document.getElementById(this.canvasId);
+    if (!this.canvas) {
+      console.error(`Canvas with id ${this.canvasId} not found`);
+      return false;
+    }
+
+    this.gl = this.canvas.getContext('webgl');
+    if (!this.gl) {
+      console.error('WebGL not supported');
+      return false;
+    }
+
+    return this.setupWebGL();
+  }
+
+  /**
+   * Updates the display with new frame data from FastLED
+   * @param {StripData[]} frameData - Array of LED strip data to render
+   */
+  updateDisplay(frameData) {
+    if (!this.gl || !this.canvas) {
+      console.warn('Graphics manager not properly initialized');
+      return;
+    }
+
+    this.clearTexture();
+    this.processFrameData(frameData);
+    this.render();
   }
 
   /**
