@@ -5,7 +5,6 @@ set -e
 # Unset VIRTUAL_ENV to avoid warnings about mismatched paths
 unset VIRTUAL_ENV
 
-
 # Overwrite .vscode/launch.json if it's different
 cat > .vscode/launch.json << 'EOL'
 {
@@ -29,36 +28,18 @@ cat > .vscode/launch.json << 'EOL'
 }
 EOL
 
-
-
-
-# # Function to handle ESLint output in the background
-# run_eslint() {
-#     eslint_output_file="eslint_output.log"
-#     eslint src/platforms/wasm/compiler/*.js src/platforms/wasm/compiler/modules/*.js &> "$eslint_output_file" &
-#     eslint_pid=$!
-# }
-
-# # Start ESLint in the background if available
-# if command -v eslint &> /dev/null; then
-#     echo "Running eslint in the background"
-#     run_eslint
-# else
-#     echo "ESLint not found, skipping JavaScript linting"
-# fi
-
 # Linting the Python code.
 echo "Running ruff check"
 uv run ruff check --fix test.py
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run ruff check --fix dev/dev.py
-echo Running black
+echo "Running black"
 uv run black ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run black dev/dev.py
-uv run echo Running isort
+echo "Running isort"
 uv run isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 uv run isort --profile black dev/dev.py
-uv run echo Running pyright ci
+echo "Running pyright ci"
 uv run pyright ci
 
 export CLANG_FORMAT_STYLE="{SortIncludes: false}"
@@ -80,11 +61,12 @@ for folder in "${folders[@]}"; do
   uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
 done
 
-# # Wait for ESLint to finish and output its results
-# if [ -n "$eslint_pid" ]; then
-#     echo "Waiting for ESLint to complete..."
-#     wait "$eslint_pid"
-#     echo "ESLint output:"
-#     cat "$eslint_output_file"
-#     rm "$eslint_output_file"
+# JavaScript linting (if tools are available)
+# if [ -f "./lint-js" ] && [ -f ".js-tools/deno/deno" ]; then
+#     echo "Running JavaScript linting"
+#     ./lint-js
+# else
+#     echo "⚠️  JavaScript linting tools not found. Run: python3 ci/setup-js-linting.py"
 # fi
+
+echo "🎉 All linting completed!"

@@ -1,0 +1,29 @@
+{
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ],
+      "exclude": [
+        "no-unused-vars",
+        "no-console"
+      ]
+    },
+    "include": [
+      "src/platforms/wasm/"
+    ],
+    "exclude": []
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": [
+      "src/platforms/wasm/"
+    ],
+    "exclude": []
+  }
+}

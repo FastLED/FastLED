@@ -1,12 +1,12 @@
-/* eslint-disable no-console */
+ 
 /* eslint-disable import/prefer-default-export */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable max-len */
-/* eslint-disable guard-for-in */
-/* eslint-disable camelcase */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-plusplus */
-/* eslint-disable no-continue */
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 /* eslint-disable import/extensions */
 
 import { JsonUiManager } from './modules/ui_manager.js';
@@ -28,7 +28,7 @@ const receivedCanvas = false;
 const screenMap = {
   strips: {},
   absMin: [0, 0],
-  absMax: [0, 0],
+  absMax: [0, 0]
 };
 let canvasId;
 let uiControlsId;
@@ -49,7 +49,7 @@ async function _loadFastLED(options) { // eslint-disable-line no-unused-vars
 
 export async function loadFastLED(options) {
   // This will be overridden by through the initialization.
-  return await _loadFastLED(options); // eslint-disable-line no-return-await
+  return await _loadFastLED(options);  
 }
 
 const EPOCH = new Date().getTime();
@@ -60,7 +60,7 @@ function getTimeSinceEpoc() {
   return outSec.toFixed(1);
 }
 // Will be overridden during initialization.
-let print = function () { }; // eslint-disable-line func-names
+let print = function () { };  
 
 const prev_console = console;
 
@@ -120,7 +120,7 @@ function customPrintFunction(...args) {
 // to always go to the console. If we hijack it then startup errors become
 // extremely difficult to debug.
 
-console = {}; // eslint-disable-line no-global-assign
+console = {};  
 console.log = log;
 console.warn = warn;
 console.error = _prev_error;
@@ -131,7 +131,7 @@ function jsAppendFileRaw(moduleInstance, path_cstr, data_cbytes, len_int) {
     'jsAppendFile',
     'number', // return value
     ['number', 'number', 'number'], // argument types, not sure why numbers works.
-    [path_cstr, data_cbytes, len_int],
+    [path_cstr, data_cbytes, len_int]
   );
 }
 
@@ -163,7 +163,7 @@ function minMax(x_array, y_array) {
 function partition(filesJson, immediateExtensions) {
   const immediateFiles = [];
   const streamingFiles = [];
-  filesJson.map((file) => { // eslint-disable-line array-callback-return
+  filesJson.map((file) => {  
     for (const ext of immediateExtensions) {
       const pathLower = file.path.toLowerCase();
       if (pathLower.endsWith(ext.toLowerCase())) {
@@ -179,11 +179,11 @@ function partition(filesJson, immediateExtensions) {
 function getFileManifestJson(filesJson, frame_rate) {
   const trimmedFilesJson = filesJson.map((file) => ({
     path: file.path,
-    size: file.size,
+    size: file.size
   }));
   const options = {
     files: trimmedFilesJson,
-    frameRate: frame_rate,
+    frameRate: frame_rate
   };
   return options;
 }
@@ -270,14 +270,14 @@ function FastLED_onStripUpdate(jsonData) {
       map,
       min,
       max,
-      diameter: diameter,
+      diameter: diameter
     };
     console.log('Screen map updated:', screenMap);
     // iterate through all the screenMaps and get the absolute min and max
     const absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     const absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
     let setAtLeastOnce = false;
-    for (const stripId in screenMap.strips) { // eslint-disable-line no-shadow
+    for (const stripId in screenMap.strips) {  
       console.log('Processing strip ID', stripId);
       const id = Number.parseInt(stripId, 10);
       const stripData = screenMap.strips[id];
@@ -360,7 +360,7 @@ function FastLED_onFrame(frameData, uiUpdateCallback) {
     // New experiment try to run anyway.
     // return;
   }
-  frameData.screenMap = screenMap; // eslint-disable-line no-param-reassign
+  frameData.screenMap = screenMap;  
   updateCanvas(frameData);
 }
 
@@ -384,9 +384,9 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 
       console.log(`File fetched: ${file.path}, size: ${file.size}`);
 
-      while (true) { // eslint-disable-line no-constant-condition
-        const { value, done } = await reader.read(); // eslint-disable-line no-await-in-loop
-        if (done) break;
+      while (true) {  
+        const { value, done } = await reader.read();  
+        if (done) {break;}
         // Allocate and copy chunk data
         jsAppendFileUint8(moduleInstance, file.path, value);
       }
@@ -395,7 +395,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     }
   };
 
-  const fetchAllFiles = async (filesJson, onComplete) => { // eslint-disable-line no-shadow
+  const fetchAllFiles = async (filesJson, onComplete) => {  
     const promises = filesJson.map(async (file) => {
       await processFile(file);
     });
@@ -427,7 +427,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
     const streamingFilesPromise = fetchAllFiles(streamingFiles, () => {
       console.log('All streaming files downloaded to FastLED.');
     });
-    const delay = new Promise((r) => setTimeout(r, 250)); // eslint-disable-line no-promise-executor-return
+    const delay = new Promise((r) => setTimeout(r, 250));  
     // Wait for either the time delay or the streaming files to be processed, whichever
     // happens first.
     await Promise.any([delay, streamingFilesPromise]);
@@ -441,7 +441,7 @@ async function fastledLoadSetupLoop(extern_setup, extern_loop, frame_rate, modul
 async function onModuleLoaded(fastLedLoader) {
   // Unpack the module functions and send them to the fastledLoadSetupLoop function
 
-  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) { // eslint-disable-line no-shadow
+  function __fastledLoadSetupLoop(moduleInstance, frameRate, filesJson) {  
     const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
     if (!exports_exist) {
       console.error('FastLED setup or loop functions are not available.');
@@ -525,7 +525,7 @@ async function localLoadFastLed(options) {
     console.log('Container ID:', containerId);
     graphicsArgs = {
       canvasId,
-      threeJsModules,
+      threeJsModules
     };
     await onModuleLoaded(fastLedLoader);
   } catch (error) {
@@ -533,4 +533,4 @@ async function localLoadFastLed(options) {
     debugger; // eslint-disable-line no-debugger
   }
 }
-_loadFastLED = localLoadFastLed; // eslint-disable-line no-func-assign
+_loadFastLED = localLoadFastLed;  
