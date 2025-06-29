@@ -161,7 +161,7 @@ void clearDisplay() {
 }
 
 // Visualization: Spectrum Bars
-void drawSpectrumBars(FFTBins* fft, float peak) {
+void drawSpectrumBars(FFTBins* fft, float /* peak */) {
     clearDisplay();
     CRGBPalette16 palette = getCurrentPalette();
     
@@ -209,7 +209,7 @@ void drawSpectrumBars(FFTBins* fft, float peak) {
 }
 
 // Visualization: Radial Spectrum
-void drawRadialSpectrum(FFTBins* fft, float peak) {
+void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
     clearDisplay();
     CRGBPalette16 palette = getCurrentPalette();
     
@@ -242,8 +242,8 @@ void drawRadialSpectrum(FFTBins* fft, float peak) {
     }
 }
 
-// Visualization: Waveform
-void drawWaveform(const Slice<const int16_t>& pcm, float peak) {
+// Visualization: Logarithmic Waveform (prevents saturation)
+void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
     clearDisplay();
     CRGBPalette16 palette = getCurrentPalette();
     
@@ -254,22 +254,61 @@ void drawWaveform(const Slice<const int16_t>& pcm, float peak) {
         int sampleIndex = x * samplesPerPixel;
         if (sampleIndex >= pcm.size()) break;
         
-        float sample = float(pcm[sampleIndex]) / 32768.0f;
-        sample *= audioGain.value() * autoGainValue * 2.0f;
+        // Get the raw sample value
+        float sample = float(pcm[sampleIndex]) / 32768.0f;  // Normalize to -1.0 to 1.0
         
-        int amplitude = abs(sample * HEIGHT / 2);
-        amplitude = MIN(amplitude, HEIGHT / 2);
+        // Apply logarithmic scaling to prevent saturation
+        float absSample = fabs(sample);
+        float logAmplitude = 0.0f;
         
-        uint8_t colorIndex = fl::map_range<int, uint8_t>(amplitude, 0, HEIGHT/2, 0, 255);
+        if (absSample > 0.001f) {  // Avoid log(0)
+            // Logarithmic compression: log10(1 + gain * sample)
+            float scaledSample = absSample * audioGain.value() * autoGainValue;
+            logAmplitude = log10f(1.0f + scaledSample * 9.0f) / log10f(10.0f);  // Normalize to 0-1
+        }
+        
+        // Apply smooth sensitivity curve
+        logAmplitude = powf(logAmplitude, 0.7f);  // Gamma correction for better visual response
+        
+        // Calculate amplitude in pixels
+        int amplitude = int(logAmplitude * (HEIGHT / 2));
+        amplitude = fl::clamp(amplitude, 0, HEIGHT / 2);
+        
+        // Preserve the sign for proper waveform display
+        if (sample < 0) amplitude = -amplitude;
+        
+        // Color mapping based on amplitude intensity
+        uint8_t colorIndex = fl::map_range<int, uint8_t>(abs(amplitude), 0, HEIGHT/2, 40, 255);
         CRGB color = ColorFromPalette(palette, colorIndex + hue);
         
-        // Draw vertical line
-        for (int y = -amplitude; y <= amplitude; y++) {
-            int plotY = centerY + y;
-            if (plotY >= 0 && plotY < HEIGHT) {
-                int ledIndex = xyMap(x, plotY);
-                if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
-                    leds[ledIndex] = color;
+        // Apply brightness scaling for low amplitudes
+        if (abs(amplitude) < HEIGHT / 4) {
+            color.fadeToBlackBy(128 - (abs(amplitude) * 512 / HEIGHT));
+        }
+        
+        // Draw vertical line from center
+        if (amplitude == 0) {
+            // Draw center point for zero amplitude
+            int ledIndex = xyMap(x, centerY);
+            if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
+                leds[ledIndex] = color.fadeToBlackBy(200);
+            }
+        } else {
+            // Draw line from center to amplitude
+            int startY = (amplitude > 0) ? centerY : centerY + amplitude;
+            int endY = (amplitude > 0) ? centerY + amplitude : centerY;
+            
+            for (int y = startY; y <= endY; y++) {
+                if (y >= 0 && y < HEIGHT) {
+                    int ledIndex = xyMap(x, y);
+                    if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
+                        // Fade edges for smoother appearance
+                        CRGB pixelColor = color;
+                        if (y == startY || y == endY) {
+                            pixelColor.fadeToBlackBy(100);
+                        }
+                        leds[ledIndex] = pixelColor;
+                    }
                 }
             }
         }

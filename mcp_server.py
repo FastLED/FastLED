@@ -24,6 +24,10 @@ uv run mcp_server.py
 import asyncio
 import sys
 import re
+import subprocess
+import shutil
+import tempfile
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -379,6 +383,45 @@ async def list_tools() -> List[Tool]:
             }
         ),
         Tool(
+            name="run_fastled_web_compiler",
+            description="🌐 FOR FOREGROUND AGENTS ONLY: Run FastLED web compiler with playwright console.log capture. Compiles Arduino sketch to WASM and opens browser with automated testing. BACKGROUND AGENTS MUST NOT USE THIS TOOL.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "example_path": {
+                        "type": "string",
+                        "description": "Path to example directory (e.g., 'examples/Audio', 'examples/Blink')",
+                        "default": "examples/Audio"
+                    },
+                    "capture_duration": {
+                        "type": "integer",
+                        "description": "Duration in seconds to capture console.log output",
+                        "default": 30
+                    },
+                    "headless": {
+                        "type": "boolean",
+                        "description": "Run browser in headless mode",
+                        "default": False
+                    },
+                    "port": {
+                        "type": "integer",
+                        "description": "Port for web server (0 for auto-detection)",
+                        "default": 0
+                    },
+                    "docker_check": {
+                        "type": "boolean",
+                        "description": "Check if Docker is available for faster compilation",
+                        "default": True
+                    },
+                    "save_screenshot": {
+                        "type": "boolean",
+                        "description": "Save screenshot of the running visualization",
+                        "default": True
+                    }
+                }
+            }
+        ),
+        Tool(
             name="validate_arduino_includes",
             description="🚨 CRITICAL: Validate that no new Arduino.h includes have been added to the codebase. This tool scans for #include \"Arduino.h\" and #include <Arduino.h> statements and reports any that are not pre-approved.",
             inputSchema={
@@ -446,6 +489,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> CallToolResult:
             return await esp32_symbol_analysis(arguments, project_root)
         elif name == "symbol_analysis":
             return await symbol_analysis(arguments, project_root)
+        elif name == "run_fastled_web_compiler":
+            return await run_fastled_web_compiler(arguments, project_root)
         elif name == "validate_arduino_includes":
             return await validate_arduino_includes(arguments, project_root)
         else:
@@ -1999,6 +2044,266 @@ async def validate_arduino_includes(arguments: Dict[str, Any], project_root: Pat
         content=[TextContent(type="text", text=result_text)],
         isError=is_error
     )
+
+async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Run FastLED web compiler with playwright console.log capture."""
+    
+    # Check if this is a background agent and refuse to run
+    import os
+    if os.environ.get('FASTLED_CI_NO_INTERACTIVE') == 'true' or os.environ.get('CI') == 'true':
+        return CallToolResult(
+            content=[TextContent(type="text", text="🚫 FastLED Web Compiler is disabled for background agents. This tool is only available for foreground agents with interactive environments.")],
+            isError=True
+        )
+    
+    example_path = arguments.get("example_path", "examples/Audio")
+    capture_duration = arguments.get("capture_duration", 30)
+    headless = arguments.get("headless", False)
+    port = arguments.get("port", 0)
+    docker_check = arguments.get("docker_check", True)
+    save_screenshot = arguments.get("save_screenshot", True)
+    
+    # Check prerequisites
+    result_text = "🌐 FastLED Web Compiler with Console.log Capture\n"
+    result_text += "=" * 50 + "\n\n"
+    
+    # Check if fastled command is available
+    if not shutil.which("fastled"):
+        return CallToolResult(
+            content=[TextContent(type="text", text="❌ FastLED command not found. Please install with: pip install fastled")],
+            isError=True
+        )
+    
+    result_text += "✅ FastLED command found\n"
+    
+    # Check if Docker is available (optional)
+    docker_available = shutil.which("docker") is not None
+    if docker_check:
+        if docker_available:
+            result_text += "✅ Docker available (faster compilation)\n"
+        else:
+            result_text += "⚠️  Docker not available (slower compilation)\n"
+    
+    # Check if playwright is available
+    try:
+        from playwright.async_api import async_playwright
+        result_text += "✅ Playwright available\n"
+    except ImportError:
+        return CallToolResult(
+            content=[TextContent(type="text", text="❌ Playwright not found. Please install with: pip install playwright")],
+            isError=True
+        )
+    
+    # Validate example path
+    example_dir = project_root / example_path
+    if not example_dir.exists():
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"❌ Example directory not found: {example_path}")],
+            isError=True
+        )
+    
+    result_text += f"✅ Example directory found: {example_path}\n\n"
+    
+    # Install playwright browsers
+    result_text += "📦 Installing Playwright browsers...\n"
+    try:
+        install_result = subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium"],
+            capture_output=True, text=True, cwd=project_root
+        )
+        if install_result.returncode != 0:
+            result_text += f"⚠️  Playwright browser installation warning: {install_result.stderr}\n"
+        else:
+            result_text += "✅ Playwright browsers installed\n"
+    except Exception as e:
+        result_text += f"⚠️  Playwright browser installation error: {e}\n"
+    
+    # Run fastled compiler
+    result_text += f"\n🔧 Compiling {example_path} with FastLED...\n"
+    
+    try:
+        # Change to example directory
+        original_cwd = Path.cwd()
+        os.chdir(example_dir)
+        
+        # Run fastled command
+        compile_result = subprocess.run(
+            ["fastled", "--just-compile", "."],
+            capture_output=True, text=True, timeout=300  # 5 minute timeout
+        )
+        
+        if compile_result.returncode != 0:
+            os.chdir(original_cwd)
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ FastLED compilation failed:\n{compile_result.stderr}")],
+                isError=True
+            )
+        
+        result_text += "✅ FastLED compilation successful\n"
+        result_text += f"Compilation output:\n{compile_result.stdout}\n\n"
+        
+        # Check for generated files
+        fastled_js_dir = example_dir / "fastled_js"
+        if not fastled_js_dir.exists():
+            os.chdir(original_cwd)
+            return CallToolResult(
+                content=[TextContent(type="text", text="❌ FastLED output directory not found: fastled_js")],
+                isError=True
+            )
+        
+        required_files = ["fastled.js", "fastled.wasm", "index.html"]
+        missing_files = [f for f in required_files if not (fastled_js_dir / f).exists()]
+        if missing_files:
+            os.chdir(original_cwd)
+            return CallToolResult(
+                content=[TextContent(type="text", text=f"❌ Missing required files: {missing_files}")],
+                isError=True
+            )
+        
+        result_text += f"✅ All required files generated in {fastled_js_dir}\n\n"
+        
+        # Start HTTP server and playwright
+        result_text += "🌐 Starting web server and browser automation...\n"
+        
+        # Use Python's built-in HTTP server
+        import http.server
+        import socketserver
+        from threading import Thread
+        import socket
+        
+        # Find available port
+        if port == 0:
+            sock = socket.socket()
+            sock.bind(('', 0))
+            port = sock.getsockname()[1]
+            sock.close()
+        
+        # Start HTTP server in thread
+        os.chdir(fastled_js_dir)
+        handler = http.server.SimpleHTTPRequestHandler
+        httpd = socketserver.TCPServer(("", port), handler)
+        server_thread = Thread(target=httpd.serve_forever)
+        server_thread.daemon = True
+        server_thread.start()
+        
+        result_text += f"✅ HTTP server started on port {port}\n"
+        
+        # Run playwright automation
+        console_logs = []
+        error_logs = []
+        
+        async def run_playwright():
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=headless)
+                page = await browser.new_page()
+                
+                # Setup console log capture
+                def handle_console(msg):
+                    timestamp = time.strftime("%H:%M:%S")
+                    log_entry = f"[{timestamp}] {msg.type}: {msg.text}"
+                    console_logs.append(log_entry)
+                    if msg.type in ["error", "warning"]:
+                        error_logs.append(log_entry)
+                
+                page.on("console", handle_console)
+                
+                # Setup error handlers
+                page.on("pageerror", lambda err: error_logs.append(f"Page Error: {err}"))
+                
+                try:
+                    # Navigate to the page
+                    await page.goto(f"http://localhost:{port}", timeout=30000)
+                    
+                    # Wait for FastLED to initialize
+                    await page.evaluate("""
+                        window.frameCallCount = 0;
+                        window.consoleLogCount = 0;
+                        globalThis.FastLED_onFrame = (jsonStr) => {
+                            console.log('FastLED_onFrame called:', jsonStr);
+                            window.frameCallCount++;
+                        };
+                    """)
+                    
+                    # Wait for page to load and run
+                    await page.wait_for_timeout(5000)
+                    
+                    # Check if FastLED initialized
+                    frame_count = await page.evaluate("window.frameCallCount || 0")
+                    
+                    # Capture for specified duration
+                    await page.wait_for_timeout(capture_duration * 1000)
+                    
+                    # Take screenshot if requested
+                    screenshot_path = None
+                    if save_screenshot:
+                        screenshot_path = fastled_js_dir / f"fastled_capture_{int(time.time())}.png"
+                        await page.screenshot(path=str(screenshot_path))
+                    
+                    return frame_count, screenshot_path
+                    
+                finally:
+                    await browser.close()
+        
+        # Run the playwright automation
+        frame_count, screenshot_path = await run_playwright()
+        
+        # Stop HTTP server
+        httpd.shutdown()
+        
+        # Generate report
+        result_text += f"\n📊 Capture Results ({capture_duration}s):\n"
+        result_text += f"   • FastLED_onFrame calls: {frame_count}\n"
+        result_text += f"   • Console log entries: {len(console_logs)}\n"
+        result_text += f"   • Error/Warning logs: {len(error_logs)}\n"
+        
+        if screenshot_path:
+            result_text += f"   • Screenshot saved: {screenshot_path.name}\n"
+        
+        result_text += "\n📋 Console Logs:\n"
+        result_text += "-" * 40 + "\n"
+        
+        if console_logs:
+            for log in console_logs[-20:]:  # Show last 20 logs
+                result_text += f"{log}\n"
+            if len(console_logs) > 20:
+                result_text += f"... ({len(console_logs) - 20} more logs)\n"
+        else:
+            result_text += "No console logs captured\n"
+        
+        if error_logs:
+            result_text += "\n❌ Errors/Warnings:\n"
+            result_text += "-" * 40 + "\n"
+            for error in error_logs:
+                result_text += f"{error}\n"
+        
+        result_text += "\n✅ FastLED web compiler execution completed successfully!\n"
+        
+        # Analysis
+        if frame_count > 0:
+            result_text += f"\n🎯 Analysis: FastLED is running correctly ({frame_count} frames rendered)\n"
+        else:
+            result_text += "\n⚠️  Analysis: FastLED may not be initializing properly (no frames detected)\n"
+        
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+        
+    except subprocess.TimeoutExpired:
+        return CallToolResult(
+            content=[TextContent(type="text", text="❌ FastLED compilation timed out (5 minutes)")],
+            isError=True
+        )
+    except Exception as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"❌ Error running FastLED web compiler: {str(e)}")],
+            isError=True
+        )
+    finally:
+        # Restore original directory
+        try:
+            os.chdir(original_cwd)
+        except:
+            pass
 
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""

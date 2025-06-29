@@ -21,7 +21,7 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
-#define SIMPLE_EXAMPLE
+// #define SIMPLE_EXAMPLE
 
 
 #include <FastLED.h>
