@@ -9,6 +9,11 @@
 """
 FastLED MCP Server - Provides tools for working with the FastLED project
 
+🚨 CRITICAL FOR ALL AGENTS (FOREGROUND & BACKGROUND): Before concluding that your work is done,
+the AI shall read the cursor rules again to find out what to do before task is considered complete.
+This ensures you have the latest coding standards, testing requirements, and completion validation rules.
+This is MANDATORY for both foreground and background agents.
+
 🚨 CRITICAL FOR BACKGROUND AGENTS: When modifying ANY Python files (*.py), 
 you MUST run `bash lint` immediately after making changes and before indicating completion.
 This is a NON-NEGOTIABLE REQUIREMENT to ensure code quality and prevent build failures.
@@ -867,7 +872,7 @@ High-risk files:
 Changing signatures causes runtime errors that are extremely difficult to debug.
 """,
 
-        "arduino_includes": """
+        "arduino_includes": r"""
 # Arduino.h Include Standards
 
 🚨 **CRITICAL: DO NOT add new #include "Arduino.h" or #include <Arduino.h> statements**

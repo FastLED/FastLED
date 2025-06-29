@@ -124,6 +124,17 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 - Use the MCP server tools for common tasks
 - Check examples when making API changes
 
+## 🚨 CRITICAL REQUIREMENTS FOR ALL AGENTS (FOREGROUND & BACKGROUND) 🚨
+
+### MANDATORY MEMORY REFRESH BEFORE COMPLETION
+**🚨 ALL AGENTS MUST REFRESH THEIR MEMORY BEFORE CONCLUDING WORK:**
+
+- **The AI shall read the cursor rules again to find out what to do before task is considered complete**
+  - This is MANDATORY for both foreground and background agents
+  - Reading the cursor rules refreshes your memory about the latest project rules, coding standards, and requirements
+  - This ensures you have current information about testing procedures, validation tools, and completion requirements
+  - Do NOT indicate your work is "done" until you have refreshed your memory by reading the cursor rules
+
 ## 🚨 CRITICAL REQUIREMENTS FOR BACKGROUND AGENTS 🚨
 
 ### MANDATORY PRE-COMPLETION VALIDATION
