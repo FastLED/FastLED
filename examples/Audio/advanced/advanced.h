@@ -90,14 +90,14 @@ uint8_t fireBuffer[WIDTH][HEIGHT] = {0};
 // Get current color palette
 CRGBPalette16 getCurrentPalette() {
     switch(colorPalette.as_int()) {
-        case 0: return RainbowColors_p;
-        case 1: return HeatColors_p;
-        case 2: return OceanColors_p;
-        case 3: return ForestColors_p;
-        case 4: return PartyColors_p;
-        case 5: return LavaColors_p;
-        case 6: return CloudColors_p;
-        default: return RainbowColors_p;
+        case 0: return CRGBPalette16(RainbowColors_p);
+        case 1: return CRGBPalette16(HeatColors_p);
+        case 2: return CRGBPalette16(OceanColors_p);
+        case 3: return CRGBPalette16(ForestColors_p);
+        case 4: return CRGBPalette16(PartyColors_p);
+        case 5: return CRGBPalette16(LavaColors_p);
+        case 6: return CRGBPalette16(CloudColors_p);
+        default: return CRGBPalette16(RainbowColors_p);
     }
 }
 

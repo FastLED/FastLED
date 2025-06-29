@@ -359,7 +359,7 @@ function createHelp(element) {
         color: white;
         padding: 8px 12px;
         border-radius: 4px;
-        font-size: 12px;
+        font-size: 16px;
         white-space: pre-wrap;
         max-width: 300px;
         z-index: 10001;
